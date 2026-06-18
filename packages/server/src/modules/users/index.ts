@@ -405,6 +405,17 @@ export default Router()
       return response;
     })
   )
+  // Returns [{id, name}] for all users — minimal data needed to label charts and
+  // filters. Accessible to any logged-in role; actual rights are not included.
+  .get(
+    "/simplified",
+    asyncRouteHandler<{ id: string; name: string }[]>(
+      async (request: IRequest) => {
+        const users = await User.findAllUsers(request.db.connection);
+        return users.map((u) => ({ id: u.id, name: u.name }));
+      }
+    )
+  )
   /**
    * @openapi
    * /users/{userId}:

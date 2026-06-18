@@ -127,6 +127,14 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
+  const FolderIcon = empty
+    ? open
+      ? FaRegFolderOpen
+      : FaRegFolder
+    : open
+      ? FaFolderOpen
+      : FaFolder;
+
   return (
     <StyledFolderWrapper
       key={bookmarkFolder.id}
@@ -143,21 +151,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
       >
         <StyledFolderWrapperOpenArea>
           <StyledIconWrap>
-            {(() => {
-              if (open) {
-                if (empty) {
-                  return <FaRegFolderOpen />;
-                } else {
-                  return <FaFolderOpen />;
-                }
-              } else {
-                if (empty) {
-                  return <FaRegFolder />;
-                } else {
-                  return <FaFolder />;
-                }
-              }
-            })()}
+            <FolderIcon />
           </StyledIconWrap>
           <StyledFolderHeaderText>{bookmarkFolder.name}</StyledFolderHeaderText>
         </StyledFolderWrapperOpenArea>

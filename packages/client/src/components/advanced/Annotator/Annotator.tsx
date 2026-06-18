@@ -14,7 +14,14 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, AsymmetricalAnchor, EditMode, editModeDisplayLabel, Tag, WarningType } from "@inkvisitor/annotator/src/lib";
+import {
+  Annotator,
+  AsymmetricalAnchor,
+  EditMode,
+  editModeDisplayLabel,
+  Tag,
+  WarningType,
+} from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -44,7 +51,7 @@ import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
-import { AnnotatorWarningsPanel } from "./AnnotatorWarningsPanel";
+import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -93,6 +100,15 @@ interface TextAnnotatorProps {
   userData?: IResponseUser;
   disableCreate?: boolean;
 
+  /**
+   * When false the document is read-only: text editing, adding/removing
+   * anchors, batch replace and the annotate menu are disabled (search,
+   * highlight and navigation stay). Editors get this when the loaded Resource
+   * is not assigned to them. Defaults to true (callers that don't gate are
+   * already restricted upstream). The server still enforces the same rule.
+   */
+  canEditDocument?: boolean;
+
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
 
@@ -130,6 +146,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  canEditDocument = true,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -173,6 +190,7 @@ export const TextAnnotator = ({
   }, [annotatorMode]);
 
   const resetAnnotator = () => {
+    annotatorRef.current?.destroy();
     annotatorLoadedForDocIdRef.current = undefined;
     setAnnotator(null);
     forwardAnnotator(undefined);
@@ -206,10 +224,10 @@ export const TextAnnotator = ({
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
       queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) =>
-        old ? { ...old, ...variables.doc } : old
+        old ? { ...old, ...variables.doc } : old,
       );
     },
-    [queryClient]
+    [queryClient],
   );
 
   const updateDocumentMutation = useMutation({
@@ -220,6 +238,8 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
     onSettled: () => {
       setIsSaving(false);
@@ -234,6 +254,8 @@ export const TextAnnotator = ({
       mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
     onSettled: () => {
       setIsSaving(false);
@@ -246,12 +268,27 @@ export const TextAnnotator = ({
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
+  // Issue #3108 — a selection drag (including dragging a highlight handle) can end
+  // with the pointer released OUTSIDE the canvas, where the canvas onMouseUp never
+  // fires and isSelectingText would stay stuck true (keeping the anchor menu hidden
+  // and the pending selection uncommitted). Reset it on any document mouseup.
+  useEffect(() => {
+    const onDocumentMouseUp = () => setIsSelectingText(false);
+    document.addEventListener("mouseup", onDocumentMouseUp);
+    return () => document.removeEventListener("mouseup", onDocumentMouseUp);
+  }, []);
+
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
   const warningsPanelRef = useRef<HTMLDivElement>(null);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
+
+  const handleAnnotatorModeClick = useCallback((mode: EditMode) => {
+    setAnnotatorMode(mode);
+    mainCanvas.current?.focus({ preventScroll: true });
+  }, []);
 
   const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
     const a = annotatorRef.current;
@@ -350,7 +387,7 @@ export const TextAnnotator = ({
     }
   }, [annotatorMode]);
 
-  const handleCreateStatement = (
+  const handleCreateStatement = async (
     text: string = "",
     statementId: string,
     // start index of selected text
@@ -361,22 +398,22 @@ export const TextAnnotator = ({
       detail: string;
       territoryId: string;
       language: EntityEnums.Language;
-    }
-  ) => {
+    },
+  ): Promise<void> => {
     if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
       // filter only Statements
       const statementAnchors = Array.from(
         new Map(
-          collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor])
-        ).values()
+          collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor]),
+        ).values(),
       );
       const territoryStatements = territory?.statements || [];
 
       const statementIds = new Set(territoryStatements.map((s) => s.id));
       // filter only anchors that are in the statement list
       const statementAnchorsInList = statementAnchors.filter((anchor) =>
-        statementIds.has(anchor.anchor)
+        statementIds.has(anchor.anchor),
       );
 
       // Find the last statement anchor with start index before the given startIndex
@@ -390,7 +427,7 @@ export const TextAnnotator = ({
       // see the order of the previous start index statement in the statement list and put the new statement after it
       const lastIndexBeforeHighlight =
         territoryStatements.findIndex(
-          (statement) => statement.id === lastAnchorBeforeIndex?.anchor
+          (statement) => statement.id === lastAnchorBeforeIndex?.anchor,
         ) ?? -1;
       const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, territoryStatements);
 
@@ -407,9 +444,9 @@ export const TextAnnotator = ({
             detail,
             territoryId,
             statementId,
-            newOrder
+            newOrder,
           );
-          statementCreateMutation?.mutate(newStatement);
+          await statementCreateMutation?.mutateAsync(newStatement);
         } else {
           const newStatement: IStatement = CStatement(
             localStorage.getItem("userrole") as UserEnums.Role,
@@ -418,9 +455,9 @@ export const TextAnnotator = ({
             "",
             territory.id,
             statementId,
-            newOrder
+            newOrder,
           );
-          statementCreateMutation?.mutate(newStatement);
+          await statementCreateMutation?.mutateAsync(newStatement);
         }
       }
     }
@@ -504,10 +541,10 @@ export const TextAnnotator = ({
         () => {
           if (document.visibilityState === "hidden") endMenuDrag();
         },
-        opts
+        opts,
       );
     },
-    [endMenuDrag]
+    [endMenuDrag],
   );
 
   const handleMenuDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
@@ -545,7 +582,7 @@ export const TextAnnotator = ({
     (e: React.PointerEvent<HTMLDivElement>) => {
       endMenuDrag(e.nativeEvent);
     },
-    [endMenuDrag]
+    [endMenuDrag],
   );
 
   /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
@@ -570,7 +607,7 @@ export const TextAnnotator = ({
   // quiet does not trigger a toast notification
   const handleSaveNewContent = async (
     quiet: boolean,
-    skipRefresh: boolean = false
+    skipRefresh: boolean = false,
   ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
@@ -624,10 +661,13 @@ export const TextAnnotator = ({
       const data = entities.data ?? [];
 
       setStoredEntities(
-        data.reduce((acc, entity) => {
-          acc[entity.id] = entity;
-          return acc;
-        }, {} as Record<string, IEntity>)
+        data.reduce(
+          (acc, entity) => {
+            acc[entity.id] = entity;
+            return acc;
+          },
+          {} as Record<string, IEntity>,
+        ),
       );
 
       return data;
@@ -642,7 +682,7 @@ export const TextAnnotator = ({
         ? {
             elvl: elvl,
           }
-        : {}
+        : {},
     );
     await handleSaveNewContent(true);
     handleRefreshEntityAndStatement(entityId);
@@ -755,7 +795,7 @@ export const TextAnnotator = ({
               dataDocument,
             },
             hlEntities,
-            theme
+            theme,
           );
         }
       });
@@ -770,26 +810,29 @@ export const TextAnnotator = ({
       annotator.draw();
     };
 
-    // Same text as props — keep instance, refresh styling / callbacks only.
-    if (annotator && currentContent === newContent) {
-      reuseExistingInstance();
-      return;
-    }
-
-    // Props lag behind the live canvas (e.g. after anchor + save before cache/refetch catches up).
-    // Do not rebuild from stale dataDocument — sync cache from annotator and keep the instance.
-    if (
-      annotator &&
-      currentContent !== undefined &&
-      documentId &&
-      dataDocument?.id === documentId &&
-      annotatorLoadedForDocIdRef.current === documentId
-    ) {
-      queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
-        if (!old || old.id !== documentId) return old;
-        return { ...old, content: currentContent };
-      });
-      reuseExistingInstance(currentContent);
+    // The Annotator is rebuilt ONLY when the document it was created for changes.
+    // Theme, line-number toggles, highlight-entity changes, and props catching up
+    // to live canvas edits all update the existing instance in place — never a
+    // rebuild — so the constructor runs once per document instead of on every
+    // render (which recreated the canvas and snapped scroll back to the top) (#3092).
+    if (annotator && annotatorLoadedForDocIdRef.current === documentId) {
+      // Props lag behind the live canvas (e.g. after anchor + save before the
+      // refetch lands): keep the live instance and sync the query cache instead
+      // of rebuilding from the stale dataDocument.
+      if (
+        currentContent !== undefined &&
+        currentContent !== newContent &&
+        documentId &&
+        dataDocument?.id === documentId
+      ) {
+        queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
+          if (!old || old.id !== documentId) return old;
+          return { ...old, content: currentContent };
+        });
+        reuseExistingInstance(currentContent);
+      } else {
+        reuseExistingInstance();
+      }
       return;
     }
 
@@ -798,7 +841,7 @@ export const TextAnnotator = ({
     const newAnnotator = new Annotator(
       mainCanvas?.current,
       dataDocument?.content ?? "no text",
-      RATIO
+      RATIO,
     );
 
     applyCanvasTheme(newAnnotator);
@@ -824,7 +867,7 @@ export const TextAnnotator = ({
             dataDocument,
           },
           hlEntities,
-          theme
+          theme,
         );
       }
     });
@@ -869,9 +912,9 @@ export const TextAnnotator = ({
 
     setAnnotator(newAnnotator);
     forwardAnnotator(newAnnotator);
-    if (documentId) {
-      annotatorLoadedForDocIdRef.current = documentId;
-    }
+    // Record the document this instance was built for (including `undefined` for
+    // the no-document placeholder) so the reuse gate above never rebuilds it.
+    annotatorLoadedForDocIdRef.current = documentId;
   };
 
   useEffect(() => {
@@ -879,6 +922,14 @@ export const TextAnnotator = ({
       refreshAnnotator();
     }
   }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
+
+  // Tear down an annotator instance when it is replaced or on unmount, so its
+  // caret-blink interval and document listeners don't leak (#3092).
+  useEffect(() => {
+    return () => {
+      annotator?.destroy();
+    };
+  }, [annotator]);
 
   // Measure the warnings panel so the canvas can give up exactly its height.
   useEffect(() => {
@@ -934,14 +985,19 @@ export const TextAnnotator = ({
       detail: string;
       territoryId: string;
       language: EntityEnums.Language;
-    }
+    },
   ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
-      await handleAddAnchor(newStatementId, elvl);
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
-      handleCreateStatement(
+      // Create the statement entity BEFORE saving the document with its anchor.
+      // The document's preprocess only indexes anchors whose entity already
+      // exists in the DB (findReferencedEntityIds / buildAnchorsTree). If the
+      // document is saved first, the new statement's id is dropped from the
+      // document's entityIds/anchors tree and the anchor stays invisible (in
+      // usedInDocuments) until the document is preprocessed again.
+      await handleCreateStatement(
         validatedText,
         newStatementId,
         selectionStartIndex,
@@ -952,8 +1008,9 @@ export const TextAnnotator = ({
               territoryId: entityCreateModalProps.territoryId,
               language: entityCreateModalProps.language,
             }
-          : undefined
+          : undefined,
       );
+      await handleAddAnchor(newStatementId, elvl);
     }
   };
 
@@ -971,16 +1028,8 @@ export const TextAnnotator = ({
   // Unlink a broken (asymmetrical) anchor from the warnings panel (#2601).
   // removeAsymmetricalAnchor re-parses, redraws and re-runs the warning checks,
   // so the panel updates itself via the onWarning subscription.
-  const onRemoveAsymmetricalAnchor = (
-    tagName: string,
-    position: number,
-    segmentIndex: number
-  ) => {
-    const removed = annotator?.removeAsymmetricalAnchor(
-      tagName,
-      position,
-      segmentIndex
-    );
+  const onRemoveAsymmetricalAnchor = (tagName: string, position: number, segmentIndex: number) => {
+    const removed = annotator?.removeAsymmetricalAnchor(tagName, position, segmentIndex);
     if (removed) {
       handleSaveNewContent(true, true);
       handleRefreshEntityAndStatement(tagName);
@@ -992,7 +1041,7 @@ export const TextAnnotator = ({
   const onScrollToAsymmetricalAnchor = (
     tagName: string,
     position: number,
-    segmentIndex: number
+    segmentIndex: number,
   ) => {
     if (!annotator) {
       return;
@@ -1006,6 +1055,11 @@ export const TextAnnotator = ({
     }
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
+
+  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // document) the selection menu still appears, but only as a minimal,
+  // view-only variant: clipboard + anchors in selection, no create/edit.
+  const isMenuReadOnly = !canEditDocument;
 
   const isMenuDisplayed = useMemo<boolean>(() => {
     return (
@@ -1162,16 +1216,16 @@ export const TextAnnotator = ({
         setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
         isCaseSensitiveMode={isCaseSensitiveMode}
         setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+        canEdit={canEditDocument}
       />
 
       <div
         ref={warningsPanelRef}
         style={{
-          paddingBottom:
-            !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
+          paddingBottom: !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
         }}
       >
-        <AnnotatorWarningsPanel
+        <AnnotatorWarningsModal
           anchors={asymmetricalAnchors}
           onUnlink={onRemoveAsymmetricalAnchor}
           onScrollTo={onScrollToAsymmetricalAnchor}
@@ -1187,6 +1241,24 @@ export const TextAnnotator = ({
           width,
           position: "relative",
           paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
+        }}
+        onKeyDownCapture={(e) => {
+          // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
+          // Intercept in capture phase so the canvas's own onkeydown never fires.
+          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+            const isEditingKey =
+              (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
+              e.key === "Backspace" ||
+              e.key === "Delete" ||
+              e.key === "Enter" ||
+              e.key === "Tab" ||
+              ((e.ctrlKey || e.metaKey) && ["v", "x", "z", "Z", "y", "Y"].includes(e.key));
+            if (isEditingKey) {
+              e.stopPropagation();
+              e.preventDefault();
+              return;
+            }
+          }
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
@@ -1229,10 +1301,11 @@ export const TextAnnotator = ({
                       onAnchorAdd={handleAddAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
-                      onRemoveAnchor={onRemoveAnchor}
-                      onUpdateAnchor={onUpdateAnchor}
+                      onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
+                      onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
+                      readonly={isMenuReadOnly}
                       isTextInsideThisT={selectedAnchors.some(
-                        (anchor) => anchor.getTagName() === thisTerritoryEntityId
+                        (anchor) => anchor.getTagName() === thisTerritoryEntityId,
                       )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
@@ -1243,7 +1316,7 @@ export const TextAnnotator = ({
                       }
                       hasParentT={hasParentT}
                       territory={territory}
-                      disableCreate={disableCreate}
+                      disableCreate={disableCreate || isMenuReadOnly}
                       isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
                     />
                   )}
@@ -1341,10 +1414,8 @@ export const TextAnnotator = ({
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
               color="success"
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              onClick={() => {
-                setAnnotatorMode(EditMode.HIGHLIGHT);
-              }}
-              tooltipLabel="highlight (activate syntax highlighting mode)"
+              onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
+              tooltipLabel="anchor entities"
               tooltipPosition="top"
             />
             <Button
@@ -1359,10 +1430,8 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               inverted={annotatorMode !== EditMode.SEMI}
-              onClick={() => {
-                setAnnotatorMode(EditMode.SEMI);
-              }}
-              tooltipLabel="text edit (activate semi mode)"
+              onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
+              tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
               tooltipPosition="top"
             />
             <Button
@@ -1377,45 +1446,45 @@ export const TextAnnotator = ({
               color="success"
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               inverted={annotatorMode !== EditMode.RAW}
-              onClick={() => {
-                setAnnotatorMode(EditMode.RAW);
-              }}
-              tooltipLabel="XML (activate edit mode)"
+              onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
+              tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
               tooltipPosition="top"
             />
           </ButtonGroup>
 
-          <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-            <Button
-              label="discard"
-              color="greyer"
-              inverted
-              icon={<FaTrash />}
-              disabled={
-                !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
-              }
-              onClick={() => {
-                if (dataDocument?.content) {
-                  annotator?.updateText(dataDocument?.content);
-                  setLocalTextContent(dataDocument.content);
-                }
-              }}
-            />
-            <span style={{ display: "flex", position: "relative" }}>
+          {canEditDocument && (
+            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
               <Button
-                label="save"
-                color="info"
-                icon={<FaRegSave size={14} />}
+                label="discard"
+                color="greyer"
+                inverted
+                icon={<FaTrash />}
                 disabled={
                   !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }
                 onClick={() => {
-                  handleSaveNewContent(false);
+                  if (dataDocument?.content) {
+                    annotator?.updateText(dataDocument?.content);
+                    setLocalTextContent(dataDocument.content);
+                  }
                 }}
               />
-              <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
-            </span>
-          </ButtonGroup>
+              <span style={{ display: "flex", position: "relative" }}>
+                <Button
+                  label="save"
+                  color="info"
+                  icon={<FaRegSave size={14} />}
+                  disabled={
+                    !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
+                  }
+                  onClick={() => {
+                    handleSaveNewContent(false);
+                  }}
+                />
+                <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
+              </span>
+            </ButtonGroup>
+          )}
         </StyledAnnotatorButtons>
       </div>
 

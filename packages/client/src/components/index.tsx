@@ -4,6 +4,7 @@ import { Button } from "./basic/Button/Button";
 import { ButtonGroup, ButtonGroups } from "./basic/ButtonGroup/ButtonGroup";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Cloud } from "./basic/Cloud/Cloud";
+import { DatePicker } from "./basic/DatePicker/DatePicker";
 import { BaseDropdown } from "./basic/BaseDropdown/BaseDropdown";
 import { Dropzone } from "./basic/Dropzone/Dropzone";
 import { Header } from "./basic/Header/Header";
@@ -14,6 +15,7 @@ import { Input } from "./basic/Input/Input";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Loader } from "./basic/Loader/Loader";
 import { Message } from "./basic/Message/Message";
+import { WarningIcon } from "./basic/Message/WarningIcon";
 import {
   Modal,
   ModalCard,
@@ -54,6 +56,7 @@ export {
   ContactOwnerFooting,
   Cloud,
   CustomScrollbar,
+  DatePicker,
   Dropzone,
   ErrorBoundary,
   Header,
@@ -82,6 +85,7 @@ export {
   TemplateActionModal,
   Timestamp,
   Toast,
+  WarningIcon,
   ToastWithLink,
   Tooltip,
   TypeBar,

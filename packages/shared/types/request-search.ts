@@ -16,6 +16,8 @@ export interface IRequestSearch {
   usedTemplate?: string;
   status?: EntityEnums.Status;
   createdDate?: Date;
+  createdAfter?: Date;
+  createdBefore?: Date;
   updatedDate?: Date;
   updatedAfter?: Date;
   updatedBefore?: Date;
@@ -47,6 +49,8 @@ export class RequestSearch {
   usedTemplate?: string;
   status?: EntityEnums.Status;
   createdDate?: Date;
+  createdAfter?: Date;
+  createdBefore?: Date;
   updatedDate?: Date;
   updatedAfter?: Date;
   updatedBefore?: Date;
@@ -65,6 +69,14 @@ export class RequestSearch {
 
     if (requestData.createdDate) {
       this.createdDate = new Date(requestData.createdDate || "");
+    }
+
+    if (requestData.createdAfter) {
+      this.createdAfter = new Date(requestData.createdAfter || "");
+    }
+
+    if (requestData.createdBefore) {
+      this.createdBefore = new Date(requestData.createdBefore || "");
     }
 
     if (requestData.updatedDate) {
@@ -151,6 +163,18 @@ export class RequestSearch {
       return new BadParams("createdDate needs to be a date");
     }
     if (
+      this.createdAfter !== undefined &&
+      this.createdAfter.constructor.name !== "Date"
+    ) {
+      return new BadParams("createdAfter needs to be a date");
+    }
+    if (
+      this.createdBefore !== undefined &&
+      this.createdBefore.constructor.name !== "Date"
+    ) {
+      return new BadParams("createdBefore needs to be a date");
+    }
+    if (
       this.updatedDate !== undefined &&
       this.updatedDate.constructor.name !== "Date"
     ) {
@@ -189,6 +213,8 @@ export class RequestSearch {
       !this.updatedBy &&
       !this.language &&
       !this.createdDate &&
+      !this.createdAfter &&
+      !this.createdBefore &&
       !this.updatedDate &&
       !this.updatedAfter &&
       !this.updatedBefore &&

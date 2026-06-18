@@ -18,6 +18,7 @@ import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
+  SUGGESTER_ROW_HEIGHT,
 } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementListBoxStyles";
@@ -58,7 +59,13 @@ interface StatementListTextAnnotator {
   selectedDocumentError: Error | null;
 
   showStatementList: boolean;
+  // Territory write right - also drives the header suggester row visibility,
+  // so when false the annotator reclaims that row's height.
   userCanEdit: boolean;
+  // Editor/admin/owner may load any Resource to view + search.
+  canSelectResource: boolean;
+  // Whether the loaded document may be edited (anchors/text/replace/annotate).
+  canEditDocument: boolean;
   userData?: IResponseUser;
 
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -92,13 +99,18 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   selectedDocumentError,
   showStatementList,
   userCanEdit,
+  canSelectResource,
+  canEditDocument,
   userData,
 
   onStatementAnchorHover,
 }) => {
   const annotatorHeight = useMemo<number>(() => {
-    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT;
-  }, [contentHeight]);
+    // The header suggester row only renders for users with write rights; when
+    // it is absent (editors without write rights, viewers) reclaim its height.
+    const reclaimedSuggesterRow = userCanEdit ? 0 : SUGGESTER_ROW_HEIGHT;
+    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT + reclaimedSuggesterRow;
+  }, [contentHeight, userCanEdit]);
 
   const annotatorWidth = useMemo<number>(() => {
     return showStatementList ? contentWidth - COLLAPSED_TABLE_WIDTH : contentWidth;
@@ -194,7 +206,8 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
           territoryId={territoryId}
           resources={resources || []}
           showStatementList={showStatementList}
-          userCanEdit={userCanEdit}
+          canSelectResource={canSelectResource}
+          canEditDocument={canEditDocument}
           annotatorWidthTooNarrow={annotatorWidthTooNarrow}
           contentWidth={contentWidth}
           setHlEntities={setHlEntities}
@@ -245,6 +258,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               dataDocumentError={selectedDocumentError}
               showStatementList={showStatementList}
               userData={userData}
+              canEditDocument={canEditDocument}
               territoryId={territoryId}
               onStatementAnchorHover={onStatementAnchorHover}
               hideWarningChip

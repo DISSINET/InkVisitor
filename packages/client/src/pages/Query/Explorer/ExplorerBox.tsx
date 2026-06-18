@@ -3,8 +3,17 @@ import React from "react";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
+import { ExplorerStats } from "./ExplorerStats/ExplorerStats";
+import ExplorerControlBar from "./ExplorerControlBar";
+import { ExplorerTableBatchActionModal } from "./ExplorerTable/ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import { ExploreAction } from "./state";
+import { useExplorerControls } from "./useExplorerControls";
 import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
+import { useInvalidateExplorerQuery } from "../useQueryData";
+import ExplorerTableIdsFilter from "./ExplorerTable/ExplorerTableIdsFilter";
+
+/** Height reserved for the shared control bar above the view content. */
+const CONTROL_BAR_HEIGHT = 50;
 
 interface ExplorerBoxProps {
   state: Explore.IExplore;
@@ -21,6 +30,9 @@ interface ExplorerBoxProps {
 
   isDetailOpen: boolean;
   detailPanelWidth: number;
+
+  /** When false only read-only batch actions (open, copy, export) are offered. */
+  canBatchEdit?: boolean;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -36,29 +48,112 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   onOpenEntitiesInDetail,
   isDetailOpen,
   detailPanelWidth,
+  canBatchEdit = false,
 }) => {
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
+  const isStats = state.view.mode === Explore.EViewMode.Stats;
+  const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
+
+  const controls = useExplorerControls({
+    data,
+    getCachedEntity,
+    onExport,
+    onOpenEntitiesInDetail,
+  });
+  const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
+
+  const contentHeight = Math.max(0, height - CONTROL_BAR_HEIGHT);
+
   return (
     <>
-      <ExplorerTable
-        state={state}
-        dispatch={dispatch}
-        data={data}
-        isQueryFetching={isQueryFetching}
-        queryError={queryError}
-        height={height}
-        onExport={onExport}
-        stableSignature={stableSignature}
-        getCachedEntity={getCachedEntity}
-        onOpenEntityInDetail={onOpenEntityInDetail}
-        onOpenEntitiesInDetail={onOpenEntitiesInDetail}
-      />
+      <div style={{ display: "flex", flexDirection: "column", height }}>
+        <ExplorerControlBar
+          mode={state.view.mode}
+          filters={state.filters}
+          dispatch={dispatch}
+          isQueryFetching={isQueryFetching}
+          selection={
+            isStats
+              ? undefined
+              : {
+                  selectedCount: controls.selectedEntityIds.length,
+                  isAllCurrentSelected: controls.isAllCurrentSelected,
+                  hasPartialSelection: controls.hasPartialSelection,
+                  rowsTotal: controls.total,
+                  onAllRowsSelect: controls.handleAllRowsSelect,
+                  setRowLastClicked: controls.setRowLastClicked,
+                  batchActionSelected: controls.batchActionSelected,
+                  setBatchActionSelected: controls.setBatchActionSelected,
+                  onApplyBatchAction: controls.handleApplyBatchAction,
+                  canBatchEdit,
+                }
+          }
+          newColumn={
+            isStats
+              ? undefined
+              : {
+                  isNewColumnOpen: controls.isNewColumnOpen,
+                  setIsNewColumnOpen: controls.setIsNewColumnOpen,
+                }
+          }
+        />
+
+        <div style={{ flex: 1, minHeight: 0 }}>
+          {state.view.mode === Explore.EViewMode.Stats ? (
+            <ExplorerStats
+              stats={state.view.stats}
+              dispatch={dispatch}
+              values={data?.stats}
+              total={data?.total}
+              isFetching={isQueryFetching}
+              height={contentHeight}
+            />
+          ) : (
+            <ExplorerTable
+              state={state}
+              dispatch={dispatch}
+              data={data}
+              isQueryFetching={isQueryFetching}
+              queryError={queryError}
+              height={contentHeight}
+              getCachedEntity={getCachedEntity}
+              onOpenEntityInDetail={onOpenEntityInDetail}
+              selectedEntityIdsSet={controls.selectedEntityIdsSet}
+              rowLastClicked={controls.rowLastClicked}
+              getEntityIdAtRow={controls.getEntityIdAtRow}
+              onRowSelect={controls.handleRowSelect}
+              isNewColumnOpen={controls.isNewColumnOpen}
+              setIsNewColumnOpen={controls.setIsNewColumnOpen}
+            />
+          )}
+        </div>
+      </div>
+
+      <ExplorerTableIdsFilter filters={state.filters} dispatch={dispatch} />
+
       <FloatingSearchContainer
         rightInset={floatingSearchRightInset}
         filters={state.filters}
         exploreDispatch={dispatch}
       />
+
+      {controls.isBatchModalOpen && (
+        <ExplorerTableBatchActionModal
+          batchAction={controls.batchActionSelected}
+          selectedEntityIds={controls.selectedEntityIds}
+          columns={columns}
+          onClose={() => controls.setIsBatchModalOpen(false)}
+          onExport={(selectedColumnIds) => {
+            controls.handleExport(selectedColumnIds);
+            controls.setIsBatchModalOpen(false);
+          }}
+          onApplyAction={() => {
+            controls.setIsBatchModalOpen(false);
+            invalidateExplorerQuery();
+          }}
+        />
+      )}
     </>
   );
 };

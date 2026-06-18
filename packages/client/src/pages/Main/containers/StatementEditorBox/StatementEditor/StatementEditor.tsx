@@ -154,7 +154,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const handleAskForTemplateApply = (templateOptionToApply: string) => {
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
-        (template: IEntity) => template.id === templateOptionToApply
+        (template: IEntity) => template.id === templateOptionToApply,
       );
 
       if (templateThatIsGoingToBeApplied) {
@@ -179,7 +179,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       const templates = res.data ?? [];
       templates.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
+        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1,
       );
       return templates;
     },
@@ -320,7 +320,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             }
           });
         });
-      }
+      },
     );
 
     handleDataAttributeChange(newStatementData);
@@ -357,7 +357,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     propId: string,
     changes: Partial<IProp>,
     instantUpdate?: boolean,
-    languageCheck?: boolean
+    languageCheck?: boolean,
   ) => {
     if (propId) {
       const isTypeOrValueChange =
@@ -388,7 +388,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               changes.type.elvl = EntityEnums.Elvl.Inferential;
               applyPropChanges(propId, changes, instantUpdate);
               toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property type slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`
+                `The language of the entity (${entityLanguage}) assigned to the property type slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`,
               );
             }
           }
@@ -402,7 +402,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               changes.value.elvl = EntityEnums.Elvl.Inferential;
               applyPropChanges(propId, changes, instantUpdate);
               toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property value slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`
+                `The language of the entity (${entityLanguage}) assigned to the property value slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`,
               );
             }
           }
@@ -442,7 +442,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             });
           });
         });
-      }
+      },
     );
 
     handleDataAttributeChange(newStatementData, instantUpdate);
@@ -459,7 +459,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           // 2nd level
           actant.props.forEach((prop1, pi1) => {
             actant.props[pi1].children = actant.props[pi1].children.filter(
-              (childProp) => childProp.id != propId
+              (childProp) => childProp.id != propId,
             );
 
             // 3rd level
@@ -469,7 +469,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               ].children.filter((childProp) => childProp.id != propId);
             });
           });
-        }
+        },
       );
 
       handleDataAttributeChange(newStatementData);
@@ -480,7 +480,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     propId: string,
     actants: T[],
     oldIndex: number,
-    newIndex: number
+    newIndex: number,
   ): T[] => {
     for (let actant of actants) {
       for (let prop of actant.props) {
@@ -547,7 +547,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       const valencyWarnings = statement.warnings.filter((w) => valencyErrorTypes.includes(w.type));
 
       const valencyWarningActions = statement.data.actions.filter((a) =>
-        valencyWarnings.some((w) => w.position?.entityId === a.actionId)
+        valencyWarnings.some((w) => w.position?.entityId === a.actionId),
       );
 
       if (valencyWarningActions.length > 0) {
@@ -558,7 +558,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const preSuggestions = useMemo(
     () => territoryData && Object.values(territoryData.entities),
-    [territoryData]
+    [territoryData],
   );
 
   const { scrollToAnchor } = useAnnotator();
@@ -627,7 +627,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                               ? [newValue, ...statement.labels.slice(1)]
                               : [],
                           },
-                          true
+                          true,
                         );
                       }}
                     />
@@ -697,7 +697,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           )}
 
           <StyledEditorPreSection>
-            <StyledEditorContentLabel>Document Anchors</StyledEditorContentLabel>
+            <StyledEditorContentLabel>Statement Anchors</StyledEditorContentLabel>
             <StyledEditorAnchorSectionContent>
               {statement.usedInDocuments.length > 0 ? (
                 statement.usedInDocuments.map((documentAnchor, dai) => (
@@ -714,7 +714,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                           onClick={() => {
                             scrollToStatementAnchor(
                               documentAnchor.parentTerritoryId,
-                              documentAnchor.anchorIndex
+                              documentAnchor.anchorIndex,
                             );
                           }}
                         />
@@ -837,6 +837,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
                 preSuggestions={preSuggestions}
+                alwaysShowCreateModal
               />
             )}
           </StyledEditorSectionContent>
@@ -891,6 +892,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryParentId={statementTerritoryId}
                 isInsideStatement
                 preSuggestions={preSuggestions}
+                alwaysShowCreateModal
               />
             )}
           </StyledEditorSectionContent>
@@ -927,6 +929,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               entityId={statement.id}
               userCanEdit={userCanEdit}
               editorWidthTooNarrow={editorWidthTooNarrow}
+              alwaysShowCreateModal
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -980,6 +983,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
                 preSuggestions={preSuggestions}
+                alwaysShowCreateModal
               />
             )}
           </StyledEditorSectionContent>

@@ -4,7 +4,7 @@ import Highlighter, {
   IAbsCoordinates,
   IRelativeCoordinates,
 } from "./Highlighter";
-import Text from "./Text";
+import Text, { CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
 import { HighlightMode } from "./constants";
 
@@ -26,6 +26,18 @@ export default class Cursor
   yLine: number;
   /** Desired column for vertical movement; null = follow xLine. Reset on any horizontal move/edit/click. */
   goalColumn: number | null = null;
+
+  /**
+   * Phase 3 offset model (additive; not yet wired into navigation). Canonical
+   * caret/selection state as raw document offsets (indices into `Text.value`):
+   * `head` is the moving caret, `anchor` the fixed selection end. Collapsed
+   * selection ⇔ `anchor === head`. `xLine`/`yLine` are derived from these.
+   */
+  anchor: number = 0;
+  head: number = 0;
+  /** Affinity for `head`/`anchor` at a soft-wrap boundary (see {@link CaretAffinity}). */
+  headAffinity: CaretAffinity = CaretAffinity.DOWNSTREAM;
+  anchorAffinity: CaretAffinity = CaretAffinity.DOWNSTREAM;
 
   selectDirection?: DIRECTION;
 
@@ -78,6 +90,216 @@ export default class Cursor
     this.xLine = lineX;
     this.yLine = lineY;
     this.goalColumn = null;
+  }
+
+  /**
+   * Phase 3 offset model — derive the cached visual caret (`xLine`/`yLine`) and
+   * the selection's visual endpoints from the canonical `head`/`anchor` offsets.
+   * Selection is collapsed (start/end cleared) when `anchor === head`. The draw
+   * pipeline keeps reading `xLine`/`yLine`, so this is the bridge that keeps the
+   * visual state in sync after any offset mutation.
+   */
+  syncVisualFromOffset(text: Text) {
+    const headVisual = text.visualFromOffset(this.head, this.headAffinity);
+    if (headVisual) {
+      this.xLine = headVisual.xLine;
+      this.yLine = headVisual.yLine;
+    }
+
+    if (this.anchor === this.head) {
+      this.selectStart = undefined;
+      this.selectEnd = undefined;
+    } else {
+      const anchorVisual = text.visualFromOffset(
+        this.anchor,
+        this.anchorAffinity
+      );
+      if (anchorVisual && headVisual) {
+        this.selectStart = {
+          xLine: anchorVisual.xLine,
+          yLine: anchorVisual.yLine,
+        };
+        this.selectEnd = { xLine: headVisual.xLine, yLine: headVisual.yLine };
+      }
+    }
+
+    this.setTrueSelectionDirection();
+  }
+
+  /**
+   * Phase 3 offset model — place a COLLAPSED caret at a raw document offset and
+   * derive the visual position. Clears any selection (anchor === head) and the
+   * goal column. The canonical way to position the caret after an edit: the
+   * post-edit offset is known exactly, and deriving the visual from it is always
+   * in bounds (replaces `move()` + `fixOutOfBounds`).
+   */
+  moveToOffset(
+    text: Text,
+    offset: number,
+    affinity: CaretAffinity = CaretAffinity.DOWNSTREAM
+  ) {
+    this.head = offset;
+    this.anchor = offset;
+    this.headAffinity = affinity;
+    this.anchorAffinity = affinity;
+    this.goalColumn = null;
+    this.syncVisualFromOffset(text);
+  }
+
+  /**
+   * Phase 3 offset model — reconcile the canonical `head`/`anchor` offsets with
+   * the current VISUAL caret + selection. Needed because `setPosition`,
+   * `setMode` and mouse handlers set `xLine`/`yLine` (and `selectStart`/`End`)
+   * without touching the offsets, so they can be stale at the start of a key.
+   * `head` follows the caret; `anchor` follows the non-caret selection end (or
+   * collapses to `head` when there is no active selection).
+   */
+  reconcileOffsetsFromVisual(text: Text) {
+    if (this.xLine < 0 || this.yLine < 0) {
+      return;
+    }
+    const headInfo = text.offsetWithAffinityFromVisual(this.xLine, this.yLine);
+    if (headInfo.offset < 0) {
+      return;
+    }
+    this.head = headInfo.offset;
+    this.headAffinity = headInfo.affinity;
+
+    if (this.selectStart && this.selectEnd && this.isSelected()) {
+      const caretAtStart =
+        this.xLine === this.selectStart.xLine &&
+        this.yLine === this.selectStart.yLine;
+      const anchorPt = caretAtStart ? this.selectEnd : this.selectStart;
+      const anchorInfo = text.offsetWithAffinityFromVisual(
+        anchorPt.xLine,
+        anchorPt.yLine
+      );
+      this.anchor = anchorInfo.offset;
+      this.anchorAffinity = anchorInfo.affinity;
+    } else {
+      this.anchor = this.head;
+      this.anchorAffinity = this.headAffinity;
+    }
+  }
+
+  /**
+   * Phase 3 offset model — derive `head` (and `anchor` unless `keepAnchor`) from
+   * the current visual caret. Used at the boundary while navigation still
+   * mutates `xLine`/`yLine` directly (before Tasks 3.2–3.5 migrate them).
+   * Out-of-bounds visual coords leave the offsets unchanged.
+   */
+  syncOffsetFromVisual(text: Text, keepAnchor: boolean = false) {
+    const { offset, affinity } = text.offsetWithAffinityFromVisual(
+      this.xLine,
+      this.yLine
+    );
+    if (offset < 0) {
+      return;
+    }
+    this.head = offset;
+    this.headAffinity = affinity;
+    if (!keepAnchor) {
+      this.anchor = offset;
+      this.anchorAffinity = affinity;
+    }
+  }
+
+  /**
+   * Issue #3108 — compare two absolute visual positions in document order.
+   * Returns <0 if `a` is before `b`, 0 if equal, >0 if `a` is after `b`.
+   */
+  private static compareVisual(
+    a: IAbsCoordinates,
+    b: IAbsCoordinates
+  ): number {
+    if (a.yLine !== b.yLine) {
+      return a.yLine - b.yLine;
+    }
+    return a.xLine - b.xLine;
+  }
+
+  /**
+   * Issue #3108 — move ONE selection boundary (the start or end drag handle) to a
+   * new visual position while keeping the other boundary fixed. Enforces a minimum
+   * of one VISIBLE character selected and prevents the dragged boundary from
+   * crossing (reversing past) the fixed one. `which` refers to the document-ordered
+   * start or end of the current selection. The canonical offset model is kept in
+   * sync with `head` tracking the moving boundary and `anchor` the fixed one.
+   *
+   * The min-1-char clamp is computed in VISIBLE-column space (stepVisualLeft/Right)
+   * so it holds across soft-wrap boundaries and skips hidden tag markup in
+   * HIGHLIGHT/SEMI mode, where adjacent visible columns map to non-adjacent offsets.
+   */
+  dragBoundary(
+    text: Text,
+    which: "start" | "end",
+    xLine: number,
+    yLine: number
+  ): void {
+    const [start, end] = this.getAbsBounds();
+    if (!start || !end) {
+      return;
+    }
+
+    const requested = text.clampVisual(xLine, yLine);
+
+    let movingPt: IAbsCoordinates;
+    let fixedPt: IAbsCoordinates;
+
+    if (which === "start") {
+      fixedPt = end;
+      // Max start = one visible column left of the end → keeps >= 1 char selected.
+      const maxStart = text.stepVisualLeft(end.xLine, end.yLine);
+      movingPt =
+        Cursor.compareVisual(requested, maxStart) <= 0 ? requested : maxStart;
+      this.selectStart = movingPt;
+      this.selectEnd = fixedPt;
+    } else {
+      fixedPt = start;
+      // Min end = one visible column right of the start → keeps >= 1 char selected.
+      const minEnd = text.stepVisualRight(start.xLine, start.yLine);
+      movingPt =
+        Cursor.compareVisual(requested, minEnd) >= 0 ? requested : minEnd;
+      this.selectStart = fixedPt;
+      this.selectEnd = movingPt;
+    }
+
+    this.xLine = movingPt.xLine;
+    this.yLine = movingPt.yLine;
+
+    const headInfo = text.offsetWithAffinityFromVisual(
+      movingPt.xLine,
+      movingPt.yLine
+    );
+    const anchorInfo = text.offsetWithAffinityFromVisual(
+      fixedPt.xLine,
+      fixedPt.yLine
+    );
+    this.head = headInfo.offset;
+    this.headAffinity = headInfo.affinity;
+    this.anchor = anchorInfo.offset;
+    this.anchorAffinity = anchorInfo.affinity;
+    this.goalColumn = null;
+
+    this.setTrueSelectionDirection();
+  }
+
+  /**
+   * Issue #3108 — set the selection to an explicit raw-offset span (used while
+   * dragging the whole highlight). Offsets are clamped into the document and the
+   * span is oriented forward (anchor = start, head = end); the visual endpoints
+   * are derived via {@link syncVisualFromOffset}.
+   */
+  setSpanByOffsets(text: Text, startOffset: number, endOffset: number): void {
+    const max = text.value.length;
+    const s = Math.max(0, Math.min(startOffset, max));
+    const e = Math.max(0, Math.min(endOffset, max));
+    this.anchor = Math.min(s, e);
+    this.head = Math.max(s, e);
+    this.anchorAffinity = CaretAffinity.DOWNSTREAM;
+    this.headAffinity = CaretAffinity.DOWNSTREAM;
+    this.goalColumn = null;
+    this.syncVisualFromOffset(text);
   }
 
   /**
@@ -140,6 +362,15 @@ export default class Cursor
       (this.selectStart.xLine !== this.selectEnd.xLine ||
         this.selectStart.yLine !== this.selectEnd.yLine)
     );
+  }
+
+  /**
+   * Whether a collapsed caret is currently shown: the cursor is placed (not the
+   * initial -1/-1 sentinel) and there is no active selection. Used to gate the
+   * blink timer so it stays idle when there is nothing to blink (#3092).
+   */
+  hasCaret(): boolean {
+    return !this.isSelected() && !(this.xLine === -1 && this.yLine === -1);
   }
 
   /**
@@ -229,35 +460,6 @@ export default class Cursor
   }
 
   /**
-   * fixOutOfBounds moves the cursor to the next line if the current line is too short
-   * @param viewport
-   * @param text
-   */
-  fixOutOfBounds(viewport: Viewport, text: Text) {
-    let line = undefined;
-    do {
-      line = text.getCurrentLine(viewport, this);
-      if (line === null) {
-        this.reset();
-        return;
-      }
-
-      if (line.length < this.xLine) {
-        this.yLine++;
-        this.xLine = this.xLine - line.length;
-      }
-    } while (!line || line.length < this.xLine);
-  }
-
-  /**
-   * move the cursor to start of the next line
-   */
-  moveToNewline() {
-    this.xLine = 0;
-    this.yLine += 1;
-  }
-
-  /**
    * draw places cursor and optionally highlighted area into the canvas
    * @param ctx
    * @param viewport
@@ -280,9 +482,14 @@ export default class Cursor
     const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
 
     if (!this.isSelected()) {
-      // Draw caret at viewport-relative row (cursor stores absolute position)
+      // Draw caret at viewport-relative row (cursor stores absolute position),
+      // unless the blink is in its hidden phase (#3092).
       const relY = this.yLine - viewport.lineStart;
-      if (relY >= 0 && relY <= viewport.noLines) {
+      if (
+        drawingOptions.caretVisible !== false &&
+        relY >= 0 &&
+        relY <= viewport.noLines
+      ) {
         this.drawLine(ctx, relY, this.xLine, this.xLine, {
           ...drawingOptions,
           color: this.style.selectorColor,

@@ -46,8 +46,6 @@ export default Router()
   .get(
     "/:territoryId",
     asyncRouteHandler<IResponseTerritory>(async (request: IRequest<{territoryId: string}, any, {preload: string, warnings: string}>) => {
-      const startTime = performance.now();
-      
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -75,17 +73,12 @@ export default Router()
       const response = new ResponseTerritory(territory);
       await response.prepare(request, request.query.preload === "1", request.query.warnings === "1");
 
-      const endTime = performance.now();
-      console.log(`Territory GET /:territoryId execution time: ${endTime - startTime}ms`);
-
       return response;
     })
   )
   .get(
     "/:territoryId/statements",
     asyncRouteHandler<IResponseStatement[]>(async (request: IRequest<{territoryId: string}>) => {
-      const startTime = performance.now();
-      
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -112,9 +105,6 @@ export default Router()
  
       const response = new ResponseTerritory(territory);
       const statements = await response.prepareStatements(request, true, true);
-
-      const endTime = performance.now();
-      console.log(`Territory GET /:territoryId/statements execution time: ${endTime - startTime}ms`);
 
       return statements;
     })

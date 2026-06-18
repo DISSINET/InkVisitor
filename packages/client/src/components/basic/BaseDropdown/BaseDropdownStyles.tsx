@@ -88,6 +88,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     color: ${({ theme }) => theme.color["primary"]};
     vertical-align: middle;
   }
+  .react-select__placeholder {
+    color: ${({ theme }) => theme.color["gray"][500]};
+  }
   .react-select__multi-value {
     background-color: ${({ theme, entityDropdown }) =>
       entityDropdown ? theme.color["white"] : theme.color["invertedBg"]["primary"]};
@@ -102,6 +105,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__clear-indicator {
     padding: 0.2rem;
+    color: ${({ theme }) => theme.color["primary"]};
   }
   .react-select__indicator-separator {
     display: none;

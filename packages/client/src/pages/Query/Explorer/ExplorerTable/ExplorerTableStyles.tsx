@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { FLOATING_SEARCH_COLLAPSED_SIZE } from "../../FloatingSearchContainer/FloatingSearchContainerStyles";
 
 interface StyledTableWrapper {
   // $height: number;
@@ -98,6 +99,14 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   background-color: ${({ theme }) => theme.color["gray"][200]};
   z-index: 20;
 `;
+
+export const StyledControlGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  flex-shrink: 0;
+`;
 export const StyledTableFooter = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-bottom: 0.2rem;
@@ -159,10 +168,10 @@ export const StyledLabelFilterCheckboxWrapper = styled.div`
 export const StyledExploreFilters = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 2rem;
+  gap: 1rem;
   flex: 1;
   min-width: 10rem;
-  max-width: 60%;
+  max-width: 75%;
   margin: 0 3rem;
 `;
 
@@ -178,4 +187,198 @@ export const StyledIdsFilterHint = styled.span`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["gray"][600]};
   white-space: nowrap;
+`;
+
+export const StyledChipInputBox = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 0.4rem;
+  // grow with content, then scroll within the (height-bounded) panel
+  flex: 1 1 auto;
+  min-height: 6rem;
+  overflow-y: auto;
+  padding: 0.3rem 0.5rem;
+  cursor: text;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  &:focus-within {
+    border-color: ${({ theme }) => theme.color["info"]};
+  }
+`;
+
+export const StyledIdsFloatingRoot = styled.div`
+  position: absolute;
+  right: 2rem;
+  bottom: calc(2rem + ${FLOATING_SEARCH_COLLAPSED_SIZE}px + 1.5rem);
+  z-index: 161;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+`;
+
+export const StyledIdsToggleWrapper = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.color.invertedBg["info"]};
+  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  transition: box-shadow 0.2s;
+  &:hover {
+    box-shadow: ${({ theme }) => theme.boxShadow.normal};
+  }
+`;
+
+export const StyledIdsToggleButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color["info"]};
+  background: transparent;
+`;
+
+export const StyledIdsToggleClear = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["info"]};
+  cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
+
+export const StyledIdsCountBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.color["info"]};
+  color: ${({ theme }) => theme.color["white"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledIdsPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 30rem;
+  max-width: calc(100vw - 4rem);
+  min-height: 0;
+  padding: 0.75rem;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background-color: ${({ theme }) => theme.color["invertedBg"]["info"]};
+  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  overflow: hidden;
+`;
+
+export const StyledIdsPanelHeader = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+export const StyledIdsPanelTitle = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color["primary"]};
+`;
+
+export const StyledIdsPanelFooter = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+export const StyledUuidChip = styled.span<{ $selected?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.1rem 0.2rem 0.1rem 0.5rem;
+  font-family: monospace;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme, $selected }) => ($selected ? theme.color["white"] : theme.color["primary"])};
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["info"] : theme.color["gray"][200]};
+  border-width: ${({ theme }) => theme.borderWidth[1]};
+  border-style: solid;
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.color["info"] : theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  white-space: nowrap;
+`;
+
+export const StyledUuidChipRemove = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.color["gray"][600]};
+  cursor: pointer;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
+
+export const StyledChipTextInput = styled.input<{ $invalid?: boolean }>`
+  flex: 1;
+  min-width: 8rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0.2rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ $invalid }) => ($invalid ? 700 : "inherit")};
+  color: ${({ theme, $invalid }) => ($invalid ? theme.color["danger"] : theme.color["primary"])};
+  text-decoration: ${({ $invalid }) => ($invalid ? "underline wavy" : "none")};
+  text-decoration-color: ${({ theme, $invalid }) =>
+    $invalid ? theme.color["danger"] : "transparent"};
+  text-decoration-skip-ink: none;
+  &::placeholder {
+    color: ${({ theme }) => theme.color["gray"][500]};
+    font-weight: inherit;
+    text-decoration: none;
+  }
+`;
+
+export const StyledClearAllButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
 `;

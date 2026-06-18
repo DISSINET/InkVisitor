@@ -10,6 +10,9 @@ export interface IResponseUser
   bookmarks: IResponseBookmarkFolder[];
   storedTerritories: IResponseStoredTerritory[];
   territoryRights: IResponseStoredTerritory[];
+  // Resolved Resource entities the user is assigned to annotate (rights with
+  // mode === Annotate). Mirrors territoryRights.
+  resourceRights: IResponseUserResourceRight[];
 }
 
 export interface UserOptions {
@@ -20,4 +23,8 @@ export interface UserOptions {
 
 export interface IResponseStoredTerritory {
   territory: IResponseEntity;
+}
+
+export interface IResponseUserResourceRight {
+  resource: IResponseEntity;
 }

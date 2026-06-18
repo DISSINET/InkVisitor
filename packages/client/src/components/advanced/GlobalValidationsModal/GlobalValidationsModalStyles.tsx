@@ -15,15 +15,17 @@ export const StyledGridSectionHeading = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-top: 1rem;
 `;
-interface StyledGridFormLabel {
-  $disabled: boolean;
-  ref: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
-}
-export const StyledGridFormLabel = styled.div<StyledGridFormLabel>`
-  display: grid;
+
+export const StyledGridFormLabel = styled.div`
+  display: flex;
   justify-content: end;
   align-items: center;
-  color: ${({ theme, $disabled }) => ($disabled ? theme.color["grey"] : "")};
+  gap: 0.4rem;
+`;
+export const StyledGridFormLabelContent = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 `;
 export const StyledValidationList = styled.div`
   display: flex;
@@ -37,19 +39,20 @@ export const StyledBlockSeparator = styled.div`
 `;
 interface StyledToggleWrap {
   $active: boolean;
-  $disabled: boolean;
 }
 export const StyledToggleWrap = styled.div<StyledToggleWrap>`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${({ theme, $active, $disabled }) =>
-    $disabled
-      ? theme.color["grey"]
-      : $active
-      ? theme.color["info"]
-      : theme.color["danger"]};
-  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  color: ${({ theme, $active }) => ($active ? theme.color["info"] : theme.color["danger"])};
+  cursor: pointer;
+`;
+
+export const StyledDetailRowControls = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledSectionHeader = styled.div`

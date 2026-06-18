@@ -89,12 +89,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     queryKey: ["users"],
     queryFn: async () => {
       const res = await api.usersGetMore({});
-      return (res.data ?? []).sort((a, b) => (a.id > b.id ? 1 : -1));
+      return res.data ?? [];
     },
     enabled: api.isLoggedIn(),
+    select: (data) => [...data].sort((a, b) => (a.id > b.id ? 1 : -1)),
   });
-
-  const [localUsers, setLocalUsers] = useState<IResponseUser[]>([]);
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
@@ -106,10 +105,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     return b.active ? 1 : -1;
   };
 
-  useEffect(() => {
-    if (users) {
-      setLocalUsers(users.sort(userComparator));
+  const localUsers = useMemo(() => {
+    if (!users) {
+      return [];
     }
+    return [...users].sort(userComparator);
   }, [users]);
 
   const removingUser = useMemo(() => {
@@ -132,7 +132,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       const password =
         typeof body.data === "string" && body.data.length > 0
           ? body.data
-          : message.match(/'([^']+)'/)?.[1] ?? "";
+          : (message.match(/'([^']+)'/)?.[1] ?? "");
 
       toast.info(message, {
         autoClose: 6000,
@@ -174,6 +174,30 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const removeRightFromUser = (user: IResponseUser, territoryId: string) => {
     const newRights: IUserRight[] = [
       ...user.rights.filter((right) => right.territory !== territoryId),
+    ];
+    userMutation.mutate({ id: user.id, rights: newRights });
+  };
+
+  // Resource (annotate) assignments reuse the rights array with mode === Annotate,
+  // where the `territory` field carries the Resource entity id.
+  const isAnnotateRight = (right: IUserRight, resourceId?: string) =>
+    right.mode === UserEnums.RoleMode.Annotate &&
+    (resourceId === undefined || right.territory === resourceId);
+
+  const addResourceRightToUser = (user: IResponseUser, resourceId: string) => {
+    const newRights: IUserRight[] = [
+      ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
+    ];
+    newRights.push({
+      territory: resourceId,
+      mode: UserEnums.RoleMode.Annotate,
+    });
+    userMutation.mutate({ id: user.id, rights: newRights });
+  };
+
+  const removeResourceRightFromUser = (user: IResponseUser, resourceId: string) => {
+    const newRights: IUserRight[] = [
+      ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
     ];
     userMutation.mutate({ id: user.id, rights: newRights });
   };
@@ -344,7 +368,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
-                          (t) => t.territory.id === right.territory
+                          (t) => t.territory.id === right.territory,
                         );
 
                         return territoryActant && territoryActant.territory ? (
@@ -420,7 +444,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       {writeTerritories.length && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
-                            (t) => t.territory.id === right.territory
+                            (t) => t.territory.id === right.territory,
                           );
 
                           return territoryActant && territoryActant.territory ? (
@@ -447,6 +471,80 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                                 noBorder
                                 onClick={() => {
                                   removeRightFromUser(row.original, right.territory);
+                                }}
+                              />
+                            </StyledTerritoryListItemMissing>
+                          );
+                        })
+                      ) : (
+                        <div />
+                      )}
+                    </StyledTerritoryList>
+                  </React.Fragment>
+                ) : (
+                  <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>
+                )
+              ) : (
+                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
+              )}
+            </StyledTerritoryColumn>
+          );
+        },
+      },
+      {
+        Header: "Annotate documents",
+        id: "resources-annotate",
+        Cell: ({ row }: CellType) => {
+          const { rights, resourceRights, role: userRole } = row.original;
+
+          const annotateRights = rights.filter((r: IUserRight) => isAnnotateRight(r));
+
+          return (
+            <StyledTerritoryColumn>
+              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
+                userRole === UserEnums.Role.Editor ? (
+                  <React.Fragment>
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      disableCreate
+                      onSelected={(newSelectedId: string) => {
+                        addResourceRightToUser(row.original, newSelectedId);
+                      }}
+                      categoryTypes={[EntityEnums.Class.Resource]}
+                      placeholder={"assign a resource"}
+                      excludedActantIds={annotateRights.map((r) => r.territory)}
+                    />
+                    <StyledTerritoryList>
+                      {annotateRights.length > 0 && resourceRights ? (
+                        annotateRights.map((right: IUserRight) => {
+                          const resourceActant = resourceRights.find(
+                            (r) => r.resource.id === right.territory,
+                          );
+
+                          return resourceActant && resourceActant.resource ? (
+                            <StyledTerritoryListItem key={right.territory}>
+                              <EntityTag
+                                entity={resourceActant.resource}
+                                unlinkButton={{
+                                  onClick: () => {
+                                    removeResourceRightFromUser(row.original, right.territory);
+                                  },
+                                  tooltipLabel: "remove resource from rights",
+                                }}
+                                disableDoubleClick
+                              />
+                            </StyledTerritoryListItem>
+                          ) : (
+                            <StyledTerritoryListItemMissing key={right.territory}>
+                              <div>invalid R {right.territory}</div>
+                              <Button
+                                key="d"
+                                tooltipLabel="remove invalid resource"
+                                icon={<FaTrashAlt />}
+                                color="danger"
+                                noBorder
+                                onClick={() => {
+                                  removeResourceRightFromUser(row.original, right.territory);
                                 }}
                               />
                             </StyledTerritoryListItemMissing>
@@ -533,7 +631,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                         onSuccess: () => {
                           toast.success("User marked as verified");
                         },
-                      }
+                      },
                     );
                   }}
                 />
@@ -555,7 +653,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       onSuccess: () => {
                         scheduleRowFlash(userId, nextActive ? "activate" : "deactivate");
                       },
-                    }
+                    },
                   );
                 }}
               />
@@ -564,7 +662,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash]
+    [canVerifyManually, scheduleRowFlash],
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } =

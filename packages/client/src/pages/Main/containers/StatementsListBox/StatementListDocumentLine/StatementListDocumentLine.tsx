@@ -24,7 +24,7 @@ import {
 import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
 import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
-import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsPanel";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -42,7 +42,10 @@ interface StatementListDocumentLine {
   resources: IEntity[];
   // is list non empty
   showStatementList: boolean;
-  userCanEdit: boolean;
+  // Editor/admin/owner may load any Resource (show the resource suggester).
+  canSelectResource: boolean;
+  // Whether the loaded document may be edited/exported by this user.
+  canEditDocument: boolean;
   annotatorWidthTooNarrow: boolean;
 
   // highlight
@@ -65,7 +68,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   territoryId,
   resources,
   showStatementList,
-  userCanEdit,
+  canSelectResource,
+  canEditDocument,
   annotatorWidthTooNarrow,
 
   contentWidth,
@@ -83,16 +87,16 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.7 : contentWidth / 2.5;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.9 : contentWidth / 2.6;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
   const highlightDropdownLimitSelectedItems = useMemo(
     () =>
       Math.floor(
-        (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) / HIGHLIGHT_SELECTED_ITEM_WIDTH
+        (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) / HIGHLIGHT_SELECTED_ITEM_WIDTH,
       ),
-    [highlightDropdownWidth]
+    [highlightDropdownWidth],
   );
 
   return (
@@ -117,21 +121,21 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                     toast.warning("Resource does not have a document");
                   }
                 }}
-                isHidden={!userCanEdit}
+                isHidden={!canSelectResource}
               />
             )}
             {selectedResource && (
               <div
                 style={{
                   display: "flex",
-                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "15.5rem",
+                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "13.5rem",
                 }}
               >
                 <EntityTag
                   fullWidth
                   entity={selectedResource}
                   button={
-                    selectedDocument && (
+                    selectedDocument && canEditDocument ? (
                       <Button
                         inverted
                         color="info"
@@ -142,7 +146,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                         tooltipLabel="export document"
                         tooltipPosition="top"
                       />
-                    )
+                    ) : undefined
                   }
                   unlinkButton={{
                     onClick: () => {
@@ -170,7 +174,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
           <StyledDocumentTitleContainer
             style={{
-              maxWidth: annotatorWidthTooNarrow ? "9.5rem" : "14.5rem",
+              maxWidth: annotatorWidthTooNarrow ? "8rem" : "12.5rem",
               minWidth: "2rem",
             }}
           >
@@ -180,19 +184,26 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             <Loader show={selectedDocumentIsFetching} size={16} />
           </StyledDocumentTitleContainer>
 
-          {warningCount > 0 && onOpenWarnings && (
-            <span
-              style={{
-                display: "inline-flex",
-                flexShrink: 0,
-                // Left gap comes from DocumentTitle's own 0.6rem right margin;
-                // match it on the right so the chip is evenly spaced.
-                marginRight: "0.6rem",
-              }}
-            >
-              <WarningsChip count={warningCount} onClick={onOpenWarnings} />
-            </span>
-          )}
+          {/* Orphaned-anchor warnings are only actionable by someone who may
+              edit the document, so the chip only shows for an assigned
+              resource's loaded document that actually has warnings. */}
+          {warningCount > 0 &&
+            onOpenWarnings &&
+            canEditDocument &&
+            selectedResource !== false &&
+            selectedResource?.data?.documentId && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  flexShrink: 0,
+                  // Left gap comes from DocumentTitle's own 0.6rem right margin;
+                  // match it on the right so the chip is evenly spaced.
+                  marginRight: "0.6rem",
+                }}
+              >
+                <WarningsChip count={warningCount} onClick={onOpenWarnings} />
+              </span>
+            )}
 
           {!selectedDocumentIsFetching &&
             selectedResource !== false &&

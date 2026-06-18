@@ -1,7 +1,7 @@
 {
   "name": "inkvisitor-monorepo",
   "private": true,
-  "version": "1.5.1.1",
+  "version": "1.5.2",
   "packageManager": "pnpm@11.1.2",
   "engines": {
     "node": "^22.13.1",

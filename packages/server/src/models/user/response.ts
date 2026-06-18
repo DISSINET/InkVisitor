@@ -6,6 +6,7 @@ import {
   IResponseBookmarkFolder,
   IResponseStoredTerritory,
   IResponseUser,
+  IResponseUserResourceRight,
   IStoredTerritory,
   IUser,
   IUserOptions,
@@ -19,7 +20,6 @@ export class ResponseUser implements IResponseUser {
   id: string;
   email: string;
   name: string;
-  password?: string;
   role: UserEnums.Role;
   options: IUserOptions;
   rights: IUserRight[];
@@ -34,12 +34,12 @@ export class ResponseUser implements IResponseUser {
   bookmarks: IResponseBookmarkFolder[];
   storedTerritories: IResponseStoredTerritory[];
   territoryRights: IResponseStoredTerritory[];
+  resourceRights: IResponseUserResourceRight[];
 
   constructor(user: IUser) {
     this.id = user.id;
     this.email = user.email;
     this.name = user.name;
-    this.password = user.password;
     this.role = user.role;
     this.options = user.options;
     this.rights = user.rights;
@@ -52,6 +52,7 @@ export class ResponseUser implements IResponseUser {
     this.bookmarks = [];
     this.storedTerritories = [];
     this.territoryRights = [];
+    this.resourceRights = [];
   }
 
   async unwindBookmarks(req: IRequest): Promise<void> {
@@ -96,12 +97,23 @@ export class ResponseUser implements IResponseUser {
 
   async unwindRights(req: IRequest): Promise<void> {
     for (const right of this.rights) {
-      const territoryFromRights: IResponseStoredTerritory = {
-        territory: {
-          ...(await findEntityById(req.db, right.territory)),
-        },
-      };
-      this.territoryRights.push(territoryFromRights);
+      // Annotate rights reuse the `territory` field to store a Resource id;
+      // resolve them into resourceRights instead of territoryRights.
+      if (right.mode === UserEnums.RoleMode.Annotate) {
+        const resourceFromRights: IResponseUserResourceRight = {
+          resource: {
+            ...(await findEntityById(req.db, right.territory)),
+          },
+        };
+        this.resourceRights.push(resourceFromRights);
+      } else {
+        const territoryFromRights: IResponseStoredTerritory = {
+          territory: {
+            ...(await findEntityById(req.db, right.territory)),
+          },
+        };
+        this.territoryRights.push(territoryFromRights);
+      }
     }
   }
 

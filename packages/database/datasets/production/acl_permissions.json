@@ -13,6 +13,7 @@
 {"controller": "documents", "id": "24f1f25c-1355-44b1-8519-3d9e23bcf571", "method": "DELETE", "roles": ["*"], "route": ""},
 {"controller": "entities", "id": "27010acb-d576-4804-a5b8-68acf2f80262", "method": "DELETE", "roles": ["*"], "route": ":entityId"},
 {"controller": "entities", "id": "2ba798eb-3998-4ae0-9a49-2b0aad1b30ca", "method": "POST", "roles": ["*"], "route": ""},
+{"controller": "entities", "id": "e3b0c442-98fc-1c14-9afb-4c8996fb9242", "method": "POST", "roles": ["*"], "route": "batch"},
 {"controller": "users", "id": "2c84b8ba-0911-4c62-8af5-02040240c282", "method": "DELETE", "roles": ["admin"], "route": ":userId"},
 {"controller": "users", "id": "2cedeb20-8742-4e7c-a6bb-438a0a9f52aa", "method": "POST", "public": true, "roles": [], "route": "signin"},
 {"controller": "users", "id": "33b93c28-cc97-4ef1-8803-54ed76a9a15c", "method": "PUT", "roles": ["*"], "route": ":userId"},

@@ -4,6 +4,7 @@
 {"id": "validation_ANA", "value": true},
 {"id": "validation_AVAL", "value": true},
 {"id": "validation_AVU", "value": true},
+{"id": "validation_DM", "value": true},
 {"id": "validation_IELVL", "value": true},
 {"id": "validation_ISYNC", "value": true},
 {"id": "validation_LM", "value": true},

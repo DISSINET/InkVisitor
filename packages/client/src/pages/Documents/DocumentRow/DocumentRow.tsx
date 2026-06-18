@@ -1,22 +1,12 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
-import {
-  UseMutationResult,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useResizeObserver, useTheme } from "hooks";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { FaDownload, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import { EntityColors } from "types";
@@ -33,6 +23,9 @@ import {
 interface DocumentRow {
   document: IDocument;
   resource: IResponseEntity | false;
+  // Owner/Admin always; Editor only when this document's Resource is assigned.
+  // When false the row is view-only (no export/edit/delete/resource changes).
+  canManage: boolean;
   handleDocumentEdit: (id: string) => void;
   handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
@@ -52,6 +45,7 @@ interface DocumentRow {
 export const DocumentRow: React.FC<DocumentRow> = ({
   document,
   resource,
+  canManage,
   handleDocumentEdit,
   handleDocumentExport,
   setDocToDelete,
@@ -66,13 +60,9 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   const countTotal = useMemo(() => {
     let total = 0;
     Object.keys(document.entityIds).forEach((key) => {
-      const classEntities =
-        document.entityIds[key as keyof typeof document.entityIds];
+      const classEntities = document.entityIds[key as keyof typeof document.entityIds];
 
-      const classNo =
-        classEntities && Array.isArray(classEntities)
-          ? classEntities.length
-          : 0;
+      const classNo = classEntities && Array.isArray(classEntities) ? classEntities.length : 0;
       total += classNo;
     });
     return total;
@@ -113,13 +103,12 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     },
   });
 
-  const { ref: titleRef, width: titleWidth = 0 } =
-    useResizeObserver<HTMLDivElement>();
+  const { ref: titleRef, width: titleWidth = 0 } = useResizeObserver<HTMLDivElement>();
 
   return (
     <StyledDocumentRow>
-      <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
-        {editMode ? (
+      <StyledTitleWrap ref={titleRef} onClick={canManage ? setEditMode : undefined}>
+        {canManage && editMode ? (
           <Input
             value={localTitle}
             onChangeFn={(value: string) => setLocalTitle(value)}
@@ -138,22 +127,25 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             icon={<FaDownload />}
             color="primary"
             inverted
-            tooltipLabel="export document"
+            disabled={!canManage}
+            tooltipLabel={canManage ? "export document" : "you are not assigned to this resource"}
             onClick={() => handleDocumentExport(document.id)}
           />
+          {/* TODO: allow all users to open document on BE */}
           <Button
             icon={<RiFileEditFill />}
             color="warning"
             inverted
             onClick={() => handleDocumentEdit(document.id)}
-            tooltipLabel="edit document"
+            tooltipLabel={"open document"}
           />
           <Button
             icon={<FaTrash />}
             color="danger"
             inverted
+            disabled={!canManage}
             onClick={() => setDocToDelete(document.id)}
-            tooltipLabel="remove document"
+            tooltipLabel={canManage ? "remove document" : "you are not assigned to this resource"}
           />
         </ButtonGroup>
       </StyledActionsCell>
@@ -162,20 +154,24 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         {resource ? (
           <EntityTag
             entity={resource}
-            unlinkButton={{
-              onClick: () => removeResourceMutation.mutate(resource.id),
-            }}
+            unlinkButton={
+              canManage
+                ? {
+                    onClick: () => removeResourceMutation.mutate(resource.id),
+                  }
+                : undefined
+            }
             fullWidth
             disableDoubleClick
           />
-        ) : (
+        ) : canManage ? (
           <EntitySuggester
             inputWidth={93}
             placeholder="add resource"
             categoryTypes={[EntityEnums.Class.Resource]}
             onSelected={(id: string) => updateResourceMutation.mutate(id)}
           />
-        )}
+        ) : null}
       </StyledReference>
       <StyledCount>
         {countTotal} anchors
@@ -184,15 +180,13 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             return document.entityIds[eClass]?.length;
           })
           .map((eClass) => {
-            const entityClass =
-              EntityColors[eClass as keyof typeof EntityColors];
+            const entityClass = EntityColors[eClass as keyof typeof EntityColors];
 
             const classColorName = entityClass?.color;
 
             const classColor =
-              (theme.color[
-                classColorName as keyof typeof theme.color
-              ] as string) ?? theme.color.primary;
+              (theme.color[classColorName as keyof typeof theme.color] as string) ??
+              theme.color.primary;
 
             const count = document.entityIds[eClass]?.length || 0;
 

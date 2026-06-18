@@ -58,8 +58,8 @@ export const StyledInput = styled.input<IValueStyle>`
     $suggester
       ? theme.color["primary"]
       : $borderColor
-      ? theme.color[$borderColor]
-      : theme.color["gray"]["400"]};
+        ? theme.color[$borderColor]
+        : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme }) => theme.space[2]};
 
@@ -86,6 +86,9 @@ export const StyledInput = styled.input<IValueStyle>`
   }
   &::placeholder {
     font-size: 1.1rem;
+    color: ${({ theme }) => theme.color["gray"][500]};
+    font-weight: inherit;
+    text-decoration: none;
   }
 
   /* Theming for native datetime picker icon */

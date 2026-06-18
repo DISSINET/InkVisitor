@@ -37,6 +37,34 @@ describe("Audit.createDeletionAudit", function () {
     });
   });
 
+  describe("entity scope with snapshot", () => {
+    const db = new Db();
+    const entityId = `entity-${Math.random().toString()}`;
+    const userId = `user-${Math.random().toString()}`;
+    const snapshot = { id: entityId, class: "P", labels: ["snapshot"] };
+
+    beforeAll(async () => {
+      await db.initDb();
+      await Audit.createDeletionAudit(
+        db.connection,
+        entityId,
+        userId,
+        AuditScope.Entity,
+        snapshot
+      );
+    });
+
+    afterAll(async () => await clean(db));
+
+    it("stores the provided entity snapshot so it can be restored", async () => {
+      const audits = await Audit.getLastNForEntity(db.connection, entityId, 10);
+
+      expect(audits).toHaveLength(1);
+      expect(audits[0].type).toBe(EventType.DELETE);
+      expect(audits[0].changes).toEqual(snapshot);
+    });
+  });
+
   describe("document scope", () => {
     const db = new Db();
     const documentId = `document-${Math.random().toString()}`;

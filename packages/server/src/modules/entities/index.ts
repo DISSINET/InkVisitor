@@ -31,12 +31,14 @@ import {
   BadParams,
   CustomError,
   EntityDoesNotExist,
+  IInvalidDeleteErrorData,
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
 } from "@inkvisitor/shared/types/errors";
 import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
@@ -313,8 +315,28 @@ export default Router()
           throw new AuditDoesNotExist("cannot restore entity - audit does not exist", entityId);
         }
 
+        // The deletion audit carries the full snapshot of the deleted entity.
+        // Entities deleted before snapshots were stored have empty changes, so
+        // fall back to the create audit, whose changes always hold the full
+        // entity (create requests submit the whole entity).
+        let snapshot = audit.changes as Partial<IEntity>;
+        if (!snapshot || !snapshot.class) {
+          const createAudit = await Audit.getFirstForEntity(
+            request.db.connection,
+            entityId
+          );
+          if (createAudit && (createAudit.changes as Partial<IEntity>)?.class) {
+            snapshot = createAudit.changes as Partial<IEntity>;
+          }
+        }
+        if (!snapshot || !snapshot.class) {
+          throw new ModelNotValidError(
+            "cannot restore entity - no snapshot available to restore from"
+          );
+        }
+
         const restoration = getEntityClass({
-          ...audit.changes,
+          ...snapshot,
         } as Partial<IEntity>);
         if (!restoration.isValid()) {
           throw new ModelNotValidError("");
@@ -334,7 +356,7 @@ export default Router()
         return {
           result: true,
           message: "Entity restored",
-          data: audit.changes,
+          data: snapshot,
         };
       }
     )
@@ -501,7 +523,7 @@ export default Router()
               `Cannot be deleted while linked to relations (${
                 relIds[0] + (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
               })`
-            ).withData(linkIds);
+            ).withData<IInvalidDeleteErrorData>({ type: "entity", ids: linkIds });
             continue;
           }
 
@@ -512,7 +534,10 @@ export default Router()
               `Cannot be deleted while anchored to documents (${
                 docs[0].id + (docs.length > 1 ? " + " + (docs.length - 1) + " others" : "")
               })`
-            ).withData(docs.map((d) => d.id));
+            ).withData<IInvalidDeleteErrorData>({
+              type: "document",
+              ids: docs.map((d) => d.id),
+            });
             continue;
           }
 
@@ -531,9 +556,12 @@ export default Router()
           const usedBy = await model.getUsedByEntity(req.db.connection);
           if (usedBy.length) {
             out.result = false;
-            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(
-              usedBy.map((e) => e.id)
-            );
+            out.data[entity.id] = new InvalidDeleteError(
+              `Referenced by other entities`
+            ).withData<IInvalidDeleteErrorData>({
+              type: "entity",
+              ids: usedBy.map((e) => e.id),
+            });
             dependencyMap[entity.id] = usedBy.map((e) => e.id);
             continue;
           }
@@ -545,7 +573,8 @@ export default Router()
           for (const entityId of Object.keys(dependencyMap)) {
             if (dependencyMap[entityId].length === 0) {
               try {
-                const model = getEntityClass(existing.find((e) => e.id === entityId));
+                const deletedEntity = existing.find((e) => e.id === entityId);
+                const model = getEntityClass(deletedEntity);
                 if ((await model.delete(req.db.connection)).deleted !== 1) {
                   throw new InternalServerError(`cannot delete entity ${entityId}`);
                 }
@@ -554,7 +583,9 @@ export default Router()
                   req.db.connection,
                   entityId,
                   req.getUserOrFail().id,
-                  AuditScope.Entity
+                  AuditScope.Entity,
+                  // store the full entity snapshot so it can be restored later
+                  deletedEntity ? { ...deletedEntity } : {}
                 );
                 removeDependency(entityId);
                 removedCount++;
@@ -620,9 +651,9 @@ export default Router()
 
       const entity = getEntityClass({ ...entityData });
 
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
+      // Read-only detail view is consistent with the unrestricted base
+      // GET /:entityId. Territory/statement-level access for mutations is
+      // enforced via entity.right in the response (write/admin vs read-only).
 
       const response = new ResponseEntityDetail(entity);
 
@@ -741,9 +772,12 @@ export default Router()
 
       const entity = getEntityClass({ ...entityData });
 
-      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
-      }
+      // The tooltip is a read-only lightweight preview, equivalent in
+      // sensitivity to the base GET /:entityId which has no canBeViewedByUser
+      // gate. Removing the check keeps the two endpoints consistent and lets
+      // all logged-in users (Editors, Viewers) see statement tooltips in the
+      // Explorer where they may encounter statements from territories they are
+      // not directly assigned to.
 
       const response = new ResponseTooltip(entity);
 
@@ -758,6 +792,23 @@ export default Router()
       const querySearch = new QuerySearch(request.body.query, request.body.explore);
 
       await querySearch.run(request.db.connection);
+
+      // Stats view: aggregate audit stats over the whole filtered subset and
+      // skip the per-row column computation / pagination entirely.
+      if (request.body.explore.view.mode === Explore.EViewMode.Stats) {
+        const stats = await querySearch.getStats(request.db.connection);
+        const entityIds = querySearch.results?.items ?? [];
+
+        return {
+          query: request.body.query,
+          entityIds,
+          entities: [],
+          explore: querySearch.explore,
+          total: entityIds.length,
+          stats,
+        };
+      }
+
       const results = await querySearch.getResults(request.db.connection);
 
       const entityIds = querySearch.results?.items ?? [];
@@ -804,7 +855,10 @@ export default Router()
         })
         .join("\n");
 
-      const tsvHeader = "result \t" + explore.columns.map((c) => c.name).join("\t");
+      const exportColumns =
+        explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
+      const tsvHeader =
+        "result \t" + exportColumns.map((c) => c.name).join("\t");
 
       return { tsvText: tsvHeader + "\n" + tsvBodyRows };
     })

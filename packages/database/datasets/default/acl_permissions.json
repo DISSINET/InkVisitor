@@ -187,6 +187,12 @@
   },
   {
     "controller": "entities",
+    "route": "batch",
+    "method": "POST",
+    "roles": ["*"]
+  },
+  {
+    "controller": "entities",
     "route": ":entityId",
     "method": "PUT",
     "roles": ["*"]

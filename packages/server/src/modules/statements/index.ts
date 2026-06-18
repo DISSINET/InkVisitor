@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { r as rethink, RDatum } from "rethinkdb-ts";
-import { findEntityById } from "@service/shorthands";
+import { entityCacheKey, findEntityById } from "@service/shorthands";
+import { cache } from "@service/ttlCache";
 import {
   BadParams,
   PermissionDeniedError,
@@ -73,9 +74,10 @@ export default Router()
 
       const statementModel = new Statement({ ...statementData });
 
-      if (!statementModel.canBeViewedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("statement cannot be accessed");
-      }
+      // canBeViewedByUser is intentionally not enforced here: the Explorer
+      // surfaces statements from all territories and the detail box must be
+      // able to read them. Mutation rights are still controlled via
+      // statement.right in the response (write/admin vs read-only).
 
       const response = new ResponseStatement(statementData);
       await response.prepare(request);
@@ -440,6 +442,12 @@ export default Router()
               })
           )
           .run(request.db.connection);
+
+        // Bulk path bypassed Entity.update, so invalidate the entity cache
+        // for each reordered row manually.
+        for (const u of updatesPayload) {
+          cache.delete(entityCacheKey(u.id));
+        }
       }
 
       return {

@@ -11,6 +11,17 @@ export const StyledTableContainer = styled.div<StyledTableContainer>`
   overflow: auto;
   border: 1px solid ${({ theme }) => theme.color.gray[200]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
+  color: ${({ theme }) => theme.color.gray[900]};
+`;
+
+export const StyledEmptyState = styled.div<StyledTableContainer>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ $width }) => $width}px;
+  height: ${({ $height }) => $height}px;
+  color: ${({ theme }) => theme.color.gray[500]};
+  font-size: ${({ theme }) => theme.fontSize.base};
 `;
 
 interface StyledTable {

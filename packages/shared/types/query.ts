@@ -1,5 +1,6 @@
 import { EntityEnums, RelationEnums } from "../enums";
 import { IRequestSearchRootValidity } from "./request-search";
+import { IStatsAggregationParams } from "./stats";
 
 export namespace Query {
   export interface INode {
@@ -896,20 +897,39 @@ export namespace Query {
 
 export namespace Explore {
   export interface IExplore {
-    view: IView; // information about the presentation form
-    columns: IExploreColumn[];
+    view: IView; // presentation form + its mode-specific config (columns / stats)
     filters: IExploreSearchFilter[];
     sort: IExploreColumnSort | undefined;
     limit: number;
     offset: number;
   }
 
-  export enum EViewMode {
-    Table = "table",
+  // IView is a discriminated union on `mode`: each presentation mode carries its
+  // own config (Table -> columns, Stats -> stats params). Add new modes (e.g.
+  // Graph) as further arms.
+  export type IView = IExploreTableView | IExploreStatsView;
+
+  export interface IExploreTableView {
+    mode: EViewMode.Table;
+    columns: IExploreColumn[];
   }
 
-  export interface IView {
-    mode: EViewMode;
+  export interface IExploreStatsView {
+    mode: EViewMode.Stats;
+    stats: IExploreStatsParams;
+  }
+
+  /**
+   * Stats config for the Explorer stats view. Aliases the shared aggregation
+   * params so it stays in sync with the global stats request (IRequestStats);
+   * the audit subset is already determined by the query + filters, so the
+   * IRequestStats `filter` block is intentionally not part of this.
+   */
+  export type IExploreStatsParams = IStatsAggregationParams;
+
+  export enum EViewMode {
+    Table = "table",
+    Stats = "stats",
   }
 
   export enum SearchOption {
@@ -957,7 +977,8 @@ export namespace Explore {
   }
   interface IExploreCreatedAtFilter {
     type: SearchOption.CreatedAt;
-    createdAt: string;
+    createdAfter?: string;
+    createdBefore?: string;
   }
   interface IExploreUpdatedAtFilter {
     type: SearchOption.UpdatedAt;

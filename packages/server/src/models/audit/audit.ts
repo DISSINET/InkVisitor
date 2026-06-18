@@ -169,25 +169,28 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
-   * Records the single, minimal audit written when an entity or document is
-   * deleted: a deletion marker with empty changes, typed per scope via
-   * deletionEventType.
+   * Records the single audit written when an entity or document is deleted,
+   * typed per scope via deletionEventType. The optional snapshot holds the full
+   * data of the deleted model so it can later be restored (see the entity
+   * restore route); when omitted it defaults to empty changes.
    * @param db rethinkdb Connection
    * @param modelId id of the deleted entity/document
    * @param userId id of the user performing the deletion
    * @param scope audit scope (entity or document)
+   * @param snapshot full snapshot of the deleted model (used for restore)
    */
   static async createDeletionAudit(
     db: Connection | undefined,
     modelId: string,
     userId: string,
-    scope: AuditScope
+    scope: AuditScope,
+    snapshot: object = {}
   ): Promise<void> {
     await new Audit({
       modelId,
       auditScope: scope,
       user: userId,
-      changes: {},
+      changes: snapshot,
       type: Audit.deletionEventType(scope),
     }).save(db);
   }
@@ -442,6 +445,58 @@ export default class Audit implements IAudit, IDbModel {
       }
 
       withValidDate.push(lastAudit);
+    }
+
+    return withValidDate;
+  }
+
+  /**
+   * Retrieves Audit entries that are first entries for respective entity, where the
+   * creation (first audit) falls within the optional [after, before] datetime range
+   * (inclusive).
+   */
+  static async getByCreatedInRange(
+    db: Connection,
+    after?: Date,
+    before?: Date,
+  ): Promise<Audit[]> {
+    let query = rethink
+      .table(Audit.table)
+      .filter(rethink.row("auditScope").eq(AuditScope.Entity));
+
+    if (after) {
+      query = query.filter(rethink.row("date").ge(after));
+    }
+    if (before) {
+      query = query.filter(rethink.row("date").le(before));
+    }
+
+    const result = await query.run(db);
+    const audits = result.map((data) => new Audit(data)) as Audit[];
+    const entityIds = [
+      ...new Set(
+        audits
+          .map((audit) => audit.modelId)
+          .filter((modelId): modelId is string => Boolean(modelId)),
+      ),
+    ];
+
+    const withValidDate: Audit[] = [];
+    for (const entityId of entityIds) {
+      const firstAudit = await Audit.getFirstForEntity(db, entityId);
+      if (!firstAudit) {
+        continue;
+      }
+
+      const firstDate = firstAudit.date;
+      if (after && firstDate < after) {
+        continue;
+      }
+      if (before && firstDate > before) {
+        continue;
+      }
+
+      withValidDate.push(firstAudit);
     }
 
     return withValidDate;

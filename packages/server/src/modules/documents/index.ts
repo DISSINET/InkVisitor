@@ -3,7 +3,9 @@ import Audit from "@models/audit/audit";
 import { ResponseDocumentAudit } from "@models/audit/response";
 import Document from "@models/document/document";
 import { AnchorsNode } from "@models/document/anchors";
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import Resource from "@models/resource/resource";
+import User from "@models/user/user";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IDocumentMeta,
@@ -21,9 +23,30 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
+import { Connection, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
+
+/**
+ * Whether the user may edit/delete/export the given document. Owner/Admin
+ * always can; Viewer never. An Editor may manage a document only when assigned
+ * (in Manage Users) the Resource that links to it via data.documentId.
+ */
+async function userCanManageDocument(
+  conn: Connection,
+  documentId: string,
+  user: User
+): Promise<boolean> {
+  if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+    return true;
+  }
+  if (user.role !== UserEnums.Role.Editor) {
+    return false;
+  }
+  const resource = await Resource.findByDocumentId(conn, documentId);
+  return !!resource && user.hasAnnotateRightForResource(resource.id);
+}
 
 export default Router()
   /**
@@ -55,21 +78,36 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IDocumentMeta[]>(async (request: IRequest) => {
-      const docs = await Document.getAll(request.db.connection);
+      // Metadata-only fetch. `content` and `anchors` are dropped at the
+      // DB so they never cross the wire to Node (anchors trees can run
+      // into MBs per doc); the list consumers only use id / title /
+      // entityIds / dates. Full content and anchor tree are served by
+      // GET /documents/:id when actually needed.
+      //
+      // Every write path runs Document.preprocess before saving, so
+      // anchors and entityIds are persisted on each row. We don't
+      // recompute them on read - documents pre-dating preprocess must
+      // be re-saved (any edit triggers it) to populate the fields.
+      const docs = (await rethink
+        .table(Document.table)
+        .orderBy(rethink.asc("createdAt"))
+        .without("content", "anchors")
+        .run(request.db.connection)) as IDocument[];
 
-      const docResponses: IDocumentMeta[] = [];
-      for (const d of docs) {
+      return docs.map((d) => {
         const document = new Document(d);
-        if (!document.anchors || document.anchors.length === 0) {
-          await document.preprocess(request.db.connection);
-        }
-
-        // @ts-ignore 
+        // @ts-ignore content/anchors are part of IDocument but trimmed from the list response
         delete document.content;
-        docResponses.push(document);
-      }
-
-      return docResponses;
+        document.anchors = [];
+        // Legacy compatibility: rows not re-saved since preprocess-on-write
+        // (#2643) may store entityIds in an old shape (flat string[] or an
+        // object missing class keys such as `T`). Dev masked this by
+        // re-running preprocess on every read; we instead normalize the
+        // shape here so the client never reads entityIds.T as undefined and
+        // crashes. No-op for current rows; re-saving a legacy doc fixes it.
+        document.entityIds = Document.normalizeEntityIds(document.entityIds);
+        return document;
+      });
     })
   )
   .get(
@@ -137,6 +175,16 @@ export default Router()
 
     if (!document) {
       throw DocumentDoesNotExist.forId(id);
+    }
+
+    if (
+      !(await userCanManageDocument(
+        request.db.connection,
+        id,
+        request.getUserOrFail()
+      ))
+    ) {
+      throw new PermissionDeniedError("document cannot be exported");
     }
 
     const openingTagRegex = createOpeningTagRegex();
@@ -340,7 +388,13 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      if (!model.canBeEditedByUser(request.getUserOrFail())) {
+      if (
+        !(await userCanManageDocument(
+          request.db.connection,
+          documentId,
+          request.getUserOrFail()
+        ))
+      ) {
         throw new PermissionDeniedError("document cannot be saved");
       }
 
@@ -425,7 +479,13 @@ export default Router()
         throw DocumentDoesNotExist.forId(id);
       }
 
-      if (!existing.canBeDeletedByUser(request.getUserOrFail())) {
+      if (
+        !(await userCanManageDocument(
+          request.db.connection,
+          id,
+          request.getUserOrFail()
+        ))
+      ) {
         throw new PermissionDeniedError(
           "document cannot be deleted by current user"
         );
@@ -473,6 +533,16 @@ export default Router()
           throw DocumentDoesNotExist.forId(id);
         }
 
+        if (
+          !(await userCanManageDocument(
+            request.db.connection,
+            id,
+            request.getUserOrFail()
+          ))
+        ) {
+          throw new PermissionDeniedError("document cannot be edited");
+        }
+
         const entityIds: string[] | string = request.query.entityIds;
         existing.removeAnchors(
           typeof entityIds === "object" ? entityIds : [entityIds]
@@ -516,6 +586,16 @@ export default Router()
         );
         if (!existing) {
           throw DocumentDoesNotExist.forId(id);
+        }
+
+        if (
+          !(await userCanManageDocument(
+            request.db.connection,
+            id,
+            request.getUserOrFail()
+          ))
+        ) {
+          throw new PermissionDeniedError("document cannot be edited");
         }
 
         existing.removeAnchor(entityId, anchorIndex);

@@ -16,6 +16,8 @@ export type AnnotatorAnchorGridRowData = {
   entities: Record<string, IEntity | false>;
   onRemoveAnchor?: (anchor: Tag) => void;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
+  /** View-only: render anchors without unlink/elvl controls. */
+  readonly?: boolean;
 };
 
 export type AnnotatorAnchorGridRowProps = {
@@ -26,7 +28,7 @@ export type AnnotatorAnchorGridRowProps = {
 
 export const AnnotatorAnchorGridRow = React.memo(
   ({ index, style, data }: AnnotatorAnchorGridRowProps) => {
-    const { items, entities, onRemoveAnchor, onUpdateAnchor } = data;
+    const { items, entities, onRemoveAnchor, onUpdateAnchor, readonly } = data;
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
 
@@ -41,19 +43,27 @@ export const AnnotatorAnchorGridRow = React.memo(
       return (
         <EntityTag
           fullWidth
-          unlinkButton={{
-            onClick: () => {
-              onRemoveAnchor?.(item.anchor);
-            },
-          }}
+          unlinkButton={
+            readonly
+              ? false
+              : {
+                  onClick: () => {
+                    onRemoveAnchor?.(item.anchor);
+                  },
+                }
+          }
           entity={entity}
           elvlButtonGroup={
-            <ElvlButtonGroup
-              value={item.anchor.attributes.elvl as EntityEnums.Elvl}
-              onChange={(elvl) => {
-                onUpdateAnchor?.(item.anchor, elvl);
-              }}
-            />
+            readonly ? (
+              false
+            ) : (
+              <ElvlButtonGroup
+                value={item.anchor.attributes.elvl as EntityEnums.Elvl}
+                onChange={(elvl) => {
+                  onUpdateAnchor?.(item.anchor, elvl);
+                }}
+              />
+            )
           }
         />
       );

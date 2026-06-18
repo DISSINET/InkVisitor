@@ -29,13 +29,15 @@ const rowDeactivateFlash = keyframes`
 export const ROW_FLASH_DELAY_MS = 200;
 export const ROW_FLASH_DURATION_MS = 1750;
 /** Clear React flash state shortly after CSS animation ends */
-export const ROW_FLASH_CLEAR_AFTER_MS =
-  ROW_FLASH_DELAY_MS + ROW_FLASH_DURATION_MS + 120;
+export const ROW_FLASH_CLEAR_AFTER_MS = ROW_FLASH_DELAY_MS + ROW_FLASH_DURATION_MS + 120;
 
 export const StyledTableWrapper = styled.div`
   position: relative;
-  display: flex;
+  display: block;
   width: 100%;
+  /* Bound the height so the table body scrolls and the header can stick.
+     Offset accounts for the page header (~7rem) plus the utils bar below. */
+  max-height: calc(100vh - 11rem);
   overflow: auto;
 `;
 
@@ -47,9 +49,6 @@ export const StyledTable = styled.table`
 `;
 export const StyledTHead = styled.thead`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  border-style: solid;
-  border-color: ${({ theme }) => theme.color["gray"][400]};
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["gray"][700]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -61,6 +60,15 @@ export const StyledTh = styled.th`
   padding-bottom: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["info"]};
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
+  /* Keep the header visible while the body scrolls. Borders are recreated with
+     box-shadow because border-collapse drops borders on sticky cells. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  box-shadow:
+    inset 0 1px 0 ${({ theme }) => theme.color["gray"][400]},
+    inset 0 -1px 0 ${({ theme }) => theme.color["gray"][400]};
 `;
 
 export type UserListRowFlash = "activate" | "deactivate" | false;
@@ -77,8 +85,8 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOwner
       ? theme.color["invertedBg"]["primary"]
       : $isAdmin
-      ? theme.color["invertedBg"]["info"]
-      : theme.color["white"]};
+        ? theme.color["invertedBg"]["info"]
+        : theme.color["white"]};
   color: ${({ theme, $isOwner }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
@@ -87,14 +95,14 @@ export const StyledTr = styled.tr<StyledTr>`
   ${({ $flash }) =>
     $flash === "activate" &&
     css`
-      animation: ${rowActivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
-        ${ROW_FLASH_DELAY_MS}ms forwards;
+      animation: ${rowActivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out ${ROW_FLASH_DELAY_MS}ms
+        forwards;
     `}
   ${({ $flash }) =>
     $flash === "deactivate" &&
     css`
-      animation: ${rowDeactivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out
-        ${ROW_FLASH_DELAY_MS}ms forwards;
+      animation: ${rowDeactivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out ${ROW_FLASH_DELAY_MS}ms
+        forwards;
     `}
 
   td:first-child {
@@ -155,11 +163,7 @@ interface StyledUserNameColumn {
 }
 export const StyledUserNameColumn = styled.div<StyledUserNameColumn>`
   color: ${({ theme, $active, $verified }) =>
-    !$verified
-      ? theme.color.warning
-      : $active
-      ? theme.color.black
-      : theme.color.grey};
+    !$verified ? theme.color.warning : $active ? theme.color.black : theme.color.grey};
   display: inline-flex;
   width: 100%;
 `;

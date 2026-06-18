@@ -3,20 +3,27 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Box, Button, Panel } from "components";
+import { Box, Button, ButtonGroup, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
-import { BiRefresh } from "react-icons/bi";
+import { BiBarChartAlt2, BiRefresh, BiTable } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
+import { useUserQuery } from "hooks/react-query";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
-import { exploreReducer, exploreStateInitial } from "./Explorer/state";
+import {
+  defaultExploreStatsParams,
+  ExploreActionType,
+  exploreReducer,
+  exploreStateInitial,
+} from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes } from "./Query/utils";
@@ -30,10 +37,15 @@ import {
 } from "./types";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildStableSignature, isEdgeValid } from "./utils";
-interface QueryPage {}
-export const QueryPage: React.FC<QueryPage> = ({}) => {
+interface QueryPage { }
+export const QueryPage: React.FC<QueryPage> = ({ }) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
+
+  const { data: userData } = useUserQuery(true);
+  const canBatchEdit =
+    userData?.role === UserEnums.Role.Owner ||
+    userData?.role === UserEnums.Role.Admin;
   const {
     selectedDetailId,
     detailIdArray,
@@ -89,6 +101,30 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const [exploreState, exploreStateDispatch] = useReducer(exploreReducer, exploreStateInitial);
 
+  // Explorer view mode (Table / Stats) toggle, surfaced as Box header buttons.
+  // Preserve the inactive view's config so toggling does not lose columns / stats.
+  const lastColumnsRef = useRef<Explore.IExploreColumn[]>([]);
+  const lastStatsRef = useRef<Explore.IExploreStatsParams>(defaultExploreStatsParams);
+  useEffect(() => {
+    if (exploreState.view.mode === Explore.EViewMode.Table) {
+      lastColumnsRef.current = exploreState.view.columns;
+    } else {
+      lastStatsRef.current = exploreState.view.stats;
+    }
+  }, [exploreState.view]);
+
+  const setExploreViewMode = (mode: Explore.EViewMode) => {
+    if (mode === exploreState.view.mode) {
+      return;
+    }
+    const nextView: Explore.IView =
+      mode === Explore.EViewMode.Stats
+        ? { mode: Explore.EViewMode.Stats, stats: lastStatsRef.current }
+        : { mode: Explore.EViewMode.Table, columns: lastColumnsRef.current };
+    exploreStateDispatch({ type: ExploreActionType.setViewMode, payload: nextView });
+  };
+  const isStatsView = exploreState.view.mode === Explore.EViewMode.Stats;
+
   const queryClient = useQueryClient();
 
   const handleInvalidateQuery = () => {
@@ -104,14 +140,18 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   const handleExport = (rowIndices: number[], selectedColumnIds?: string[]) => {
     toast.success("Exporting data...");
-    const exportExplore = selectedColumnIds
-      ? {
+    const exportExplore =
+      selectedColumnIds && exploreState.view.mode === Explore.EViewMode.Table
+        ? {
           ...exploreState,
-          columns: exploreState.columns.filter((c: Explore.IExploreColumn) =>
-            selectedColumnIds.includes(c.id),
-          ),
+          view: {
+            ...exploreState.view,
+            columns: exploreState.view.columns.filter(
+              (c: Explore.IExploreColumn) => selectedColumnIds.includes(c.id),
+            ),
+          },
         }
-      : exploreState;
+        : exploreState;
     api.queryExport(queryState, exportExplore, rowIndices);
   };
 
@@ -186,7 +226,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     if (isExplorerAtMaxHeight) {
       const restoredHeight =
         savedExplorerSeparatorYRef.current !== null &&
-        savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+          savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
           ? savedExplorerSeparatorYRef.current
           : getDefaultSeparatorYPosition();
       setExplorerBoxMaximized(false);
@@ -436,6 +476,22 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
               buttons={[
+                <ButtonGroup key="explorer-view-mode" $noMarginRight style={{ marginRight: "0.6rem" }}>
+                  <Button
+                    tooltipLabel="table view"
+                    label="table"
+                    inverted={isStatsView}
+                    icon={<BiTable />}
+                    onClick={() => setExploreViewMode(Explore.EViewMode.Table)}
+                  />
+                  <Button
+                    tooltipLabel="stats view"
+                    label="stats"
+                    inverted={!isStatsView}
+                    icon={<BiBarChartAlt2 />}
+                    onClick={() => setExploreViewMode(Explore.EViewMode.Stats)}
+                  />
+                </ButtonGroup>,
                 <Button
                   key="refresh queries"
                   tooltipLabel="refresh data"
@@ -482,6 +538,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 onOpenEntitiesInDetail={openEntitiesInDetail}
                 isDetailOpen={isDetailOpen}
                 detailPanelWidth={detailPanelWidth}
+                canBatchEdit={canBatchEdit}
               />
             </Box>
           </>

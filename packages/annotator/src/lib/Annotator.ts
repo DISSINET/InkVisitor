@@ -1,9 +1,13 @@
 import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
+import History, { HistorySnapshot } from "./History";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import { CaretBlink } from "./CaretBlink";
+import { SettingsOverlay } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition } from "./Text";
+import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
 import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
@@ -14,6 +18,9 @@ import {
   HOVER_DEBOUNCE_MS,
   LINE_HEIGHT,
   SELECTION_EDGE_SCROLL_SPEED,
+  SELECTION_HANDLE_BAR_WIDTH_PX,
+  SELECTION_HANDLE_GRAB_CHAR_FACTOR,
+  SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
 } from "./constants";
 
@@ -39,6 +46,11 @@ export const wrapTokenRegex = /(<[^>]+>)|(\s+)|([\w']+)|([^\s\w'<]+|<)/g;
 export const createSpecificOpeningTagRegex = (tagName: string) =>
   new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, "g");
 
+/** One live annotator per host element — a new constructor tears down the previous (#3092). */
+const canvasHosts = new WeakMap<HTMLCanvasElement, Annotator>();
+const scrollerHosts = new WeakMap<HTMLDivElement, Annotator>();
+const linesHosts = new WeakMap<HTMLCanvasElement, Annotator>();
+
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
   segmentIndex: number;
@@ -55,12 +67,23 @@ export interface HighlightSchema {
   };
 }
 
+/** localStorage key for persisted user settings (caret width, colors, FPS). */
+const SETTINGS_STORAGE_KEY = "inkvisitor.annotator.settings";
+
+interface PersistedSettings {
+  caretWidth?: number;
+  highlightColor?: string;
+  showFps?: boolean;
+}
+
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
   color?: string; // override
+  caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
 }
 
 export interface Selected {
@@ -99,11 +122,28 @@ export class Annotator {
   viewport: Viewport;
   cursor: Cursor;
   hoverHighlighter: Highlighter; // For statement list hover interaction
+  hoverRegions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
+  hoverTagName: string | null = null; // Tag name last passed to highlightAnchorByTag; recomputed on resize.
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
   keys: Keys;
   warnings: Warnings;
+  contextMenu: ContextMenu = new ContextMenu();
+  settingsOverlay: SettingsOverlay = new SettingsOverlay();
+
+  /** Blinks the collapsed text caret at 1Hz; repaints via draw() (#3092). */
+  private readonly caretBlink: CaretBlink;
+
+  private deferredInitTimeout?: ReturnType<typeof setTimeout>;
+
+  private destroyed = false;
+
+  /** Whether the main canvas currently has keyboard focus. */
+  private canvasFocused = false;
+
+  /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
+  history: History = new History();
 
   annotatedPosition: SegmentPosition | null = null;
 
@@ -116,6 +156,42 @@ export class Annotator {
   private lastSelectPointer: { cx: number; cy: number } | null = null;
 
   private selectionScrollRaf: number = 0;
+
+  /**
+   * Reusable scratch cursor for pointerToVisual, which runs in the mousemove /
+   * edge-scroll hot path. Avoids a per-event Cursor allocation. Never read for
+   * its selection state — only xLine/yLine after setPositionFromCanvasOffsets.
+   */
+  private readonly scratchCursor: Cursor = new Cursor(this.ratio, 0, 0);
+
+  /**
+   * Issue #3108 — active selection-handle drag. `start`/`end` resize one boundary
+   * (keeping the other fixed, min 1 char, no crossing); `span` slides the whole
+   * highlight (preserving its length). `null` when no handle drag is in progress.
+   */
+  private dragHandle: "start" | "end" | "span" | null = null;
+  /** Whether the pointer actually moved during the current handle drag. */
+  private handleDragMoved = false;
+  /** Captured offsets at the start of a whole-span drag (raw indices into Text.value). */
+  private spanDragState: {
+    startOff: number;
+    endOff: number;
+    grabOff: number;
+  } | null = null;
+
+  /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
+  private caretWidth = 1;
+
+  /**
+   * User-chosen selection highlight color (`#rrggbb`), or undefined to defer to
+   * the host theme set via setSelectStyle. When set it wins over the theme.
+   */
+  private highlightColor: string | undefined = undefined;
+
+  /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
+  private showFps = false;
+  private lastFrameTime = 0;
+  private fps = 0;
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
@@ -134,6 +210,12 @@ export class Annotator {
 
   private readonly boundOnMouseMove = (e: MouseEvent) => this.onMouseMove(e);
 
+  private readonly boundOnContextMenu = (e: MouseEvent) =>
+    this.onContextMenu(e);
+
+  private readonly boundOnMouseDoubleClick = (e: MouseEvent) =>
+    this.onMouseDoubleClick(e);
+
   private readonly boundOnCanvasMouseLeave = () => {
     if (this.hoverDebounceTimeout) {
       clearTimeout(this.hoverDebounceTimeout);
@@ -141,6 +223,39 @@ export class Annotator {
     }
     this.onAnchorHoverCb?.([]);
     this.onAnchorTagHoverCb?.(null, null);
+    // Don't strand a resize/move cursor when leaving the canvas (#3108). Keep it
+    // while a drag is in progress (the pointer is allowed to leave the canvas).
+    if (!this.dragHandle) {
+      this.element.style.cursor = "";
+    }
+  };
+
+  private readonly boundOnCanvasFocus = () => {
+    this.canvasFocused = true;
+    this.caretBlink.reset();
+    this.draw();
+  };
+
+  private readonly boundOnCanvasBlur = () => {
+    this.canvasFocused = false;
+    this.draw();
+  };
+
+  /** Issue #3108 — document-level move while dragging a selection handle. */
+  private readonly onDocumentHandleMove = (e: MouseEvent) => {
+    if (!this.dragHandle) {
+      return;
+    }
+    this.handleDragMoved = true;
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+    this.applyHandleDrag(e.clientX, e.clientY);
+    this.draw();
+    this.ensureSelectionEdgeScrollRunning();
+  };
+
+  /** Issue #3108 — document-level release that finalizes a selection-handle drag. */
+  private readonly onDocumentHandleUp = (e: MouseEvent) => {
+    this.endHandleDrag(e);
   };
 
   constructor(
@@ -148,7 +263,16 @@ export class Annotator {
     inputText: string,
     ratio: number = 1
   ) {
+    canvasHosts.get(element)?.destroy();
+
     this.element = element;
+
+    this.caretBlink = new CaretBlink(() => {
+      if (!this.destroyed) {
+        this.draw();
+      }
+    });
+
     const ctx = this.element.getContext("2d");
     if (!ctx) {
       throw new Error("Cannot get 2d context");
@@ -200,20 +324,28 @@ export class Annotator {
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
-    this.element.addEventListener(
-      "dblclick",
-      this.onMouseDoubleClick.bind(this)
-    );
+    this.element.addEventListener("dblclick", this.boundOnMouseDoubleClick);
     this.element.addEventListener("mousemove", this.boundOnMouseMove);
     this.element.addEventListener("mouseleave", this.boundOnCanvasMouseLeave);
+    this.element.addEventListener("contextmenu", this.boundOnContextMenu);
+    this.element.addEventListener("focus", this.boundOnCanvasFocus);
+    this.element.addEventListener("blur", this.boundOnCanvasBlur);
 
     this.clickCount = 0;
 
     this.previousRenderViewportLineStart = 0;
 
+    canvasHosts.set(element, this);
+
+    this.loadSettings();
+
     this.draw();
 
-    setTimeout(() => {
+    this.deferredInitTimeout = setTimeout(() => {
+      this.deferredInitTimeout = undefined;
+      if (this.destroyed) {
+        return;
+      }
       this.resize();
       this.runWarningChecks();
     });
@@ -232,6 +364,14 @@ export class Annotator {
       opacity: this.selectOpacity,
       selectorColor: selectorColor,
     } as CursorStyle;
+
+    // A user-chosen highlight color (persisted) takes precedence over the theme.
+    if (this.highlightColor !== undefined) {
+      this.cursor.style = {
+        ...this.cursor.style,
+        color: this.highlightColor,
+      };
+    }
   }
 
   /**
@@ -409,6 +549,20 @@ export class Annotator {
       return;
     }
 
+    this.hoverTagName = tagName;
+    if (!this.refreshHoverHighlightRegions()) {
+      this.clearHoverHighlight();
+      return;
+    }
+    this.draw();
+  }
+
+  private refreshHoverHighlightRegions(): boolean {
+    const tagName = this.hoverTagName;
+    if (!tagName) {
+      return false;
+    }
+
     // Find all opening tags with this tag name across all segments
     const matchingTags: Tag[] = [];
     for (const segment of this.text.segments) {
@@ -419,16 +573,15 @@ export class Annotator {
     }
 
     if (matchingTags.length === 0) {
-      this.clearHoverHighlight();
-      return;
+      return false;
     }
 
-    // For each opening tag, pair with the correct closing tag (depth-aware), same as
-    // detectAndEmitAnchorHover. Raw content span: [openEnd, closeStart) — see Tag docs in Text.
-    let minStartLine = Infinity;
-    let minStartChar = Infinity;
-    let maxEndLine = -Infinity;
-    let maxEndExclusiveChar = -Infinity;
+    // Collect one highlight region per anchor occurrence. Merging them into a
+    // single min→max bounding span would visually connect anchors of the same
+    // statement that are not adjacent (#3017). Pair each opening tag with the
+    // correct closing tag (depth-aware), same as detectAndEmitAnchorHover. Raw
+    // content span: [openEnd, closeStart) — see Tag docs in Text.
+    const regions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
 
     for (const openTag of matchingTags) {
       const match = this.findMatchingClosingTag(openTag);
@@ -462,45 +615,29 @@ export class Annotator {
       const startLine = startSeg.lineStart + startSegPos.lineIndex;
       const startChar = startSegPos.charInLineIndex;
       const endLine = lastSeg.lineStart + lastSegPos.lineIndex;
+      // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
       const endExclusiveChar = lastSegPos.charInLineIndex + 1;
 
-      if (
-        startLine < minStartLine ||
-        (startLine === minStartLine && startChar < minStartChar)
-      ) {
-        minStartLine = startLine;
-        minStartChar = startChar;
-      }
-      if (
-        endLine > maxEndLine ||
-        (endLine === maxEndLine && endExclusiveChar > maxEndExclusiveChar)
-      ) {
-        maxEndLine = endLine;
-        maxEndExclusiveChar = endExclusiveChar;
-      }
+      regions.push({
+        start: { xLine: startChar, yLine: startLine },
+        end: { xLine: endExclusiveChar, yLine: endLine },
+      });
     }
 
-    // Highlighter uses exclusive end xLine on the last line (see Highlighter.draw).
-    if (minStartLine === Infinity || maxEndLine === -Infinity) {
-      this.clearHoverHighlight();
-      return;
+    if (regions.length === 0) {
+      return false;
     }
 
-    this.hoverHighlighter.selectStart = {
-      xLine: minStartChar,
-      yLine: minStartLine,
-    };
-    this.hoverHighlighter.selectEnd = {
-      xLine: maxEndExclusiveChar,
-      yLine: maxEndLine,
-    };
-    this.draw();
+    this.hoverRegions = regions;
+    return true;
   }
 
   /**
    * Clears the hover highlight (for statement list hover interaction).
    */
   clearHoverHighlight() {
+    this.hoverTagName = null;
+    this.hoverRegions = [];
     this.hoverHighlighter.reset();
     this.draw();
   }
@@ -713,6 +850,9 @@ export class Annotator {
 
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
+    // Line reflow changes visual line/char indices; capture canonical offsets first.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
@@ -722,6 +862,12 @@ export class Annotator {
 
     this.viewport.updateLineEnd(noLinesViewport);
     this.text.updateCharsAtLine(charsAtLine);
+
+    this.cursor.syncVisualFromOffset(this.text);
+
+    if (this.hoverTagName) {
+      this.refreshHoverHighlightRegions();
+    }
 
     // this function tries to keep the same relative position of the text even its not perfect
     // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
@@ -740,6 +886,10 @@ export class Annotator {
         (this.viewport.noLines / this.scrollExtentLineCount()) * 100
       )
     );
+
+    if (this.settingsOverlay.isOpen) {
+      this.settingsOverlay.reposition(this.element);
+    }
 
     this.draw();
   }
@@ -878,7 +1028,307 @@ export class Annotator {
       }
     }
 
+    // First pointer event starts a (collapsed) selection → set both offsets;
+    // subsequent drag events move only head (keep the click anchor fixed).
+    const wasSelecting = this.cursor.isSelecting();
     this.cursor.selectArea();
+    this.cursor.syncOffsetFromVisual(this.text, wasSelecting);
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Issue #3108 — drag the highlight span via start/end handles or by its middle.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Selection drag handles are only meaningful in HIGHLIGHT mode (where the host
+   * uses the selection to anchor entities) and only when there is a real (≥1 char)
+   * selection.
+   */
+  private selectionHandlesActive(): boolean {
+    return (
+      this.text.mode === EditMode.HIGHLIGHT && this.cursor.isSelected()
+    );
+  }
+
+  /**
+   * The two absolute visual boundary points (document-ordered start, end) where
+   * the handles sit, or null when handles should not be shown.
+   */
+  private selectionHandlePoints():
+    | { start: IAbsCoordinates; end: IAbsCoordinates }
+    | null {
+    if (!this.selectionHandlesActive()) {
+      return null;
+    }
+    const [start, end] = this.cursor.getAbsBounds();
+    if (!start || !end) {
+      return null;
+    }
+    return { start, end };
+  }
+
+  /**
+   * Maps client coordinates to an absolute visual position WITHOUT mutating the
+   * cursor (unlike applyPointerToCursor). Clamps into the document like a normal
+   * click would.
+   */
+  private pointerToVisual(
+    clientX: number,
+    clientY: number
+  ): IAbsCoordinates {
+    const rect = this.element.getBoundingClientRect();
+    const { ox, oy } = this.clientCoordsToCanvasOffsets(clientX, clientY, rect);
+    const tmp = this.scratchCursor;
+    tmp.ratio = this.ratio; // ratio can change at runtime (DPR / zoom)
+    tmp.setPositionFromCanvasOffsets(
+      ox,
+      oy,
+      this.lineHeight,
+      this.charWidth,
+      this.viewport.scrollOffsetY,
+      this.viewport.lineStart
+    );
+    return this.text.clampVisual(tmp.xLine, tmp.yLine);
+  }
+
+  /**
+   * Hit-test the pointer against the selection handles. Returns the boundary the
+   * pointer is grabbing ("start"/"end"), "span" when inside the highlight (move
+   * the whole span), or null when neither. Works in canvas backing-store (device)
+   * pixels so it lines up with the drawn handles regardless of devicePixelRatio.
+   */
+  private hitTestSelectionHandle(
+    clientX: number,
+    clientY: number
+  ): "start" | "end" | "span" | null {
+    const points = this.selectionHandlePoints();
+    if (!points) {
+      return null;
+    }
+
+    const rect = this.element.getBoundingClientRect();
+    const bufX = (clientX - rect.left) * this.ratio;
+    const bufY = (clientY - rect.top) * this.ratio;
+
+    const tolX = this.charWidth * SELECTION_HANDLE_GRAB_CHAR_FACTOR;
+    const knob = SELECTION_HANDLE_KNOB_RADIUS_PX * this.ratio;
+
+    const boundaries: ["start" | "end", IAbsCoordinates][] = [
+      ["start", points.start],
+      ["end", points.end],
+    ];
+    for (const [which, pt] of boundaries) {
+      const relLine = pt.yLine - this.viewport.lineStart;
+      const cx = pt.xLine * this.charWidth;
+      // Screen (untranslated) band for this line: content is drawn translated by
+      // -scrollOffsetY, so subtract it here to match the pointer's buffer Y.
+      const cyTop = relLine * this.lineHeight - this.viewport.scrollOffsetY;
+      const cyBottom = cyTop + this.lineHeight;
+      if (
+        bufX >= cx - tolX &&
+        bufX <= cx + tolX &&
+        bufY >= cyTop - knob &&
+        bufY <= cyBottom + knob
+      ) {
+        return which;
+      }
+    }
+
+    // Not on a handle — is the pointer inside the highlighted span? (move it)
+    if (this.isPointerInsideSelection(clientX, clientY)) {
+      return "span";
+    }
+    return null;
+  }
+
+  /** True when the pointer maps to a position strictly inside the selection. */
+  private isPointerInsideSelection(clientX: number, clientY: number): boolean {
+    const points = this.selectionHandlePoints();
+    if (!points) {
+      return false;
+    }
+    const startOff = this.text.offsetFromVisual(
+      points.start.xLine,
+      points.start.yLine
+    );
+    const endOff = this.text.offsetFromVisual(
+      points.end.xLine,
+      points.end.yLine
+    );
+    if (startOff < 0 || endOff < 0) {
+      return false;
+    }
+    const pt = this.pointerToVisual(clientX, clientY);
+    const off = this.text.offsetFromVisual(pt.xLine, pt.yLine);
+    return off > startOff && off < endOff;
+  }
+
+  /**
+   * Begin a selection-handle drag (start/end boundary resize, or whole-span move).
+   * Bypasses the normal selection path entirely so the existing selection is not
+   * collapsed before we move it.
+   */
+  private startHandleDrag(
+    mode: "start" | "end" | "span",
+    e: MouseEvent
+  ): void {
+    this.dragHandle = mode;
+    this.handleDragMoved = false;
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+
+    if (mode === "span") {
+      const points = this.selectionHandlePoints();
+      const pt = this.pointerToVisual(e.clientX, e.clientY);
+      const grabOff = this.text.offsetFromVisual(pt.xLine, pt.yLine);
+      if (points && grabOff >= 0) {
+        const startOff = this.text.offsetFromVisual(
+          points.start.xLine,
+          points.start.yLine
+        );
+        const endOff = this.text.offsetFromVisual(
+          points.end.xLine,
+          points.end.yLine
+        );
+        this.spanDragState = { startOff, endOff, grabOff };
+      } else {
+        this.spanDragState = null;
+      }
+    } else {
+      this.spanDragState = null;
+    }
+
+    document.addEventListener("mousemove", this.onDocumentHandleMove);
+    document.addEventListener("mouseup", this.onDocumentHandleUp);
+  }
+
+  /** Apply the current pointer to the in-progress handle drag. */
+  private applyHandleDrag(clientX: number, clientY: number): void {
+    if (!this.dragHandle) {
+      return;
+    }
+    const pt = this.pointerToVisual(clientX, clientY);
+
+    if (this.dragHandle === "span") {
+      if (!this.spanDragState) {
+        return;
+      }
+      const curOff = this.text.offsetFromVisual(pt.xLine, pt.yLine);
+      if (curOff < 0) {
+        return;
+      }
+      const { startOff, endOff, grabOff } = this.spanDragState;
+      const len = endOff - startOff;
+      const maxStart = Math.max(0, this.text.value.length - len);
+      let newStart = startOff + (curOff - grabOff);
+      newStart = Math.max(0, Math.min(newStart, maxStart));
+      this.cursor.setSpanByOffsets(this.text, newStart, newStart + len);
+    } else {
+      this.cursor.dragBoundary(this.text, this.dragHandle, pt.xLine, pt.yLine);
+    }
+  }
+
+  /** Finalize a selection-handle drag and tear down its listeners. */
+  private endHandleDrag(e: MouseEvent): void {
+    if (!this.dragHandle) {
+      return;
+    }
+    const mode = this.dragHandle;
+    const moved = this.handleDragMoved;
+
+    // Apply the final pointer BEFORE clearing dragHandle (applyHandleDrag early-
+    // returns once dragHandle is null), so a gap between the last move and the
+    // release isn't dropped.
+    if (moved) {
+      this.applyHandleDrag(e.clientX, e.clientY);
+    } else if (mode === "span") {
+      // A click (no drag) inside the highlight behaves like a normal click:
+      // collapse the selection to a caret at that point.
+      this.applyPointerToCursor(e.clientX, e.clientY);
+      this.cursor.endSelection();
+    }
+    // A stationary click directly on a boundary handle leaves the selection as-is.
+
+    document.removeEventListener("mousemove", this.onDocumentHandleMove);
+    document.removeEventListener("mouseup", this.onDocumentHandleUp);
+    this.cancelSelectionEdgeScroll();
+    this.lastSelectPointer = null;
+    this.dragHandle = null;
+    this.spanDragState = null;
+    this.handleDragMoved = false;
+
+    this.draw();
+  }
+
+  /** Issue #3108 — reflect handle hover with a resize/move cursor. */
+  private updateHandleHoverCursor(e: MouseEvent): void {
+    if (this.cursor.isSelecting()) {
+      // A normal drag-select owns the cursor; don't fight it.
+      return;
+    }
+    let next = "";
+    if (this.selectionHandlesActive()) {
+      const hit = this.hitTestSelectionHandle(e.clientX, e.clientY);
+      if (hit === "start" || hit === "end") {
+        next = "ew-resize";
+      } else if (hit === "span") {
+        next = "move";
+      }
+    }
+    if (this.element.style.cursor !== next) {
+      this.element.style.cursor = next;
+    }
+  }
+
+  /**
+   * Issue #3108 — draw the two selection handles (a vertical bar plus a round knob
+   * at the start/end boundary) in the same color as the highlight. Called from
+   * inside draw()'s translated context, so Y uses viewport-relative line coords
+   * (the ctx is already translated by -scrollOffsetY).
+   */
+  private drawSelectionHandles(): void {
+    const points = this.selectionHandlePoints();
+    if (!points) {
+      return;
+    }
+
+    const color = this.cursor.style.color || "black";
+    const barW = Math.max(SELECTION_HANDLE_BAR_WIDTH_PX * this.ratio, 1);
+    const knob = Math.max(SELECTION_HANDLE_KNOB_RADIUS_PX * this.ratio, 2);
+    const maxRelLine = this.viewport.noLines;
+
+    this.ctx.save();
+    // SELECT-mode drawLine leaves a non-default composite op / alpha; reset so the
+    // handle paints at full opacity in its true color.
+    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.globalAlpha = 1;
+    this.ctx.fillStyle = color;
+
+    const boundaries: ["start" | "end", IAbsCoordinates][] = [
+      ["start", points.start],
+      ["end", points.end],
+    ];
+    for (const [which, pt] of boundaries) {
+      const relLine = pt.yLine - this.viewport.lineStart;
+      if (relLine < 0 || relLine > maxRelLine) {
+        // Boundary scrolled out of view — skip so the knob doesn't paint over the
+        // gutter or partial rows.
+        continue;
+      }
+      const x = pt.xLine * this.charWidth;
+      const yTop = relLine * this.lineHeight;
+      const yBottom = yTop + this.lineHeight;
+
+      this.ctx.fillRect(x - barW / 2, yTop, barW, this.lineHeight);
+
+      // Knob at the top for the start handle, bottom for the end handle — the
+      // familiar "pinch" look and avoids the two knobs colliding on short spans.
+      const knobY = which === "start" ? yTop : yBottom;
+      this.ctx.beginPath();
+      this.ctx.arc(x, knobY, knob, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    this.ctx.restore();
   }
 
   private cancelSelectionEdgeScroll() {
@@ -890,7 +1340,10 @@ export class Annotator {
 
   private readonly tickSelectionEdgeScroll = () => {
     this.selectionScrollRaf = 0;
-    if (!this.cursor.isSelecting() || !this.lastSelectPointer) {
+    if (
+      (!this.cursor.isSelecting() && !this.dragHandle) ||
+      !this.lastSelectPointer
+    ) {
       return;
     }
 
@@ -926,16 +1379,24 @@ export class Annotator {
       this.viewport.scrollOffsetY !== scrollOffBefore;
 
     if (scrolled) {
-      this.applyPointerToCursor(
-        this.lastSelectPointer.cx,
-        this.lastSelectPointer.cy
-      );
+      if (this.dragHandle) {
+        this.handleDragMoved = true;
+        this.applyHandleDrag(
+          this.lastSelectPointer.cx,
+          this.lastSelectPointer.cy
+        );
+      } else {
+        this.applyPointerToCursor(
+          this.lastSelectPointer.cx,
+          this.lastSelectPointer.cy
+        );
+      }
       this.draw();
     }
 
     const inZone = inTopZone || inBottomZone;
     if (
-      this.cursor.isSelecting() &&
+      (this.cursor.isSelecting() || this.dragHandle) &&
       this.lastSelectPointer &&
       inZone &&
       scrolled
@@ -947,7 +1408,10 @@ export class Annotator {
   };
 
   private ensureSelectionEdgeScrollRunning() {
-    if (!this.lastSelectPointer || !this.cursor.isSelecting()) {
+    if (
+      !this.lastSelectPointer ||
+      (!this.cursor.isSelecting() && !this.dragHandle)
+    ) {
       return;
     }
     if (this.selectionScrollRaf) {
@@ -993,6 +1457,27 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
+    // Only the primary (left) button drives text selection. A non-primary
+    // mousedown — notably the right button, which fires just before the
+    // `contextmenu` event — must leave the current selection untouched so the
+    // context menu opens over the existing highlight instead of collapsing it
+    // (#3092).
+    if (e.button !== 0) {
+      return;
+    }
+
+    // Issue #3108 — if the press lands on a selection handle (or inside the
+    // highlight), drag that instead of starting a brand-new selection. Done
+    // before applyPointerToCursor, which would otherwise collapse the selection.
+    if (this.selectionHandlesActive()) {
+      const hit = this.hitTestSelectionHandle(e.clientX, e.clientY);
+      if (hit) {
+        this.startHandleDrag(hit, e);
+        return;
+      }
+    }
+
+    this.caretBlink.reset(); // solid caret immediately on click (#3092)
     this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
     this.applyPointerToCursor(e.clientX, e.clientY);
 
@@ -1016,6 +1501,68 @@ export class Annotator {
     this.endSelectInteraction(e);
   }
 
+  /** Whether the blinking caret is currently in its visible phase (#3092). */
+  isCaretVisible(): boolean {
+    return this.caretBlink.isVisible();
+  }
+
+  /**
+   * Force the caret solid and restart its blink phase. Called on user activity
+   * (clicks, keystrokes) so the caret never lands mid-"off" right as it moves.
+   */
+  resetCaretBlink(): void {
+    this.caretBlink.reset();
+  }
+
+  /**
+   * Tear down timers and document-level listeners. Hosts must call this when the
+   * annotator is unmounted, otherwise the caret-blink interval keeps repainting
+   * a detached canvas (#3092).
+   */
+  destroy(): void {
+    if (this.destroyed) {
+      return;
+    }
+    this.destroyed = true;
+
+    if (canvasHosts.get(this.element) === this) {
+      canvasHosts.delete(this.element);
+    }
+    if (this.scroller && scrollerHosts.get(this.scroller.element) === this) {
+      scrollerHosts.delete(this.scroller.element);
+    }
+    if (this.lines && linesHosts.get(this.lines.element) === this) {
+      linesHosts.delete(this.lines.element);
+    }
+
+    this.caretBlink.destroy();
+    if (this.deferredInitTimeout !== undefined) {
+      clearTimeout(this.deferredInitTimeout);
+      this.deferredInitTimeout = undefined;
+    }
+    this.cancelSelectionEdgeScroll();
+    if (this.hoverDebounceTimeout) {
+      clearTimeout(this.hoverDebounceTimeout);
+      this.hoverDebounceTimeout = undefined;
+    }
+    document.removeEventListener("mousemove", this.onDocumentSelectMove);
+    document.removeEventListener("mouseup", this.onDocumentSelectUp);
+
+    this.element.onwheel = null;
+    this.element.onmousedown = null;
+    this.element.onkeydown = null;
+    this.element.removeEventListener("dblclick", this.boundOnMouseDoubleClick);
+    this.element.removeEventListener("mousemove", this.boundOnMouseMove);
+    this.element.removeEventListener("mouseleave", this.boundOnCanvasMouseLeave);
+    this.element.removeEventListener("contextmenu", this.boundOnContextMenu);
+    this.element.removeEventListener("focus", this.boundOnCanvasFocus);
+    this.element.removeEventListener("blur", this.boundOnCanvasBlur);
+
+    this.onScrollCb = undefined;
+    this.scroller = undefined;
+    this.lines = undefined;
+  }
+
   /**
    * onMouseMove is handler for moving mouse-event
    * @param e
@@ -1025,10 +1572,17 @@ export class Annotator {
       this.onDocumentSelectMove(e);
     }
 
+    // Issue #3108 — resize/move cursor feedback over selection handles. Done
+    // synchronously (not in the hover debounce below) so it never feels laggy.
+    if (!this.dragHandle) {
+      this.updateHandleHoverCursor(e);
+    }
+
     // Part 2 of #2835: Detect anchors at hover position
     if (
       (this.onAnchorHoverCb || this.onAnchorTagHoverCb) &&
-      !this.cursor.isSelecting()
+      !this.cursor.isSelecting() &&
+      !this.dragHandle
     ) {
       // Clear existing debounce timeout
       if (this.hoverDebounceTimeout) {
@@ -1044,6 +1598,7 @@ export class Annotator {
   }
 
   onMouseDoubleClick(e: MouseEvent) {
+    this.caretBlink.reset(); // solid caret immediately on double-click (#3092)
     this.cursor.setPositionFromEvent(
       e,
       this.lineHeight,
@@ -1077,7 +1632,94 @@ export class Annotator {
     };
     this.cursor.xLine = this.cursor.selectEnd.xLine;
     this.cursor.selectDirection = DIRECTION.FORWARD;
+    // Canonical offsets: anchor = word start, head = word end (caret).
+    this.cursor.anchor = this.text.offsetFromVisual(
+      this.cursor.selectStart.xLine,
+      this.cursor.selectStart.yLine
+    );
+    this.cursor.head = this.text.offsetFromVisual(
+      this.cursor.selectEnd.xLine,
+      this.cursor.selectEnd.yLine
+    );
     this.draw();
+  }
+
+  /**
+   * onContextMenu opens the right-click context menu at the pointer.
+   * @param e
+   */
+  onContextMenu(e: MouseEvent) {
+    e.preventDefault();
+    this.contextMenu.open(e.clientX, e.clientY, this.buildContextMenuItems());
+  }
+
+  /** Whether a non-empty text highlight/selection is active. */
+  isHighlighting(): boolean {
+    return this.cursor.isSelected();
+  }
+
+  /** Context-menu entries. For now just a toggle for the debug FPS counter. */
+  private buildContextMenuItems(): ContextMenuItem[] {
+    const items: ContextMenuItem[] = [];
+
+    if (this.isHighlighting()) {
+      items.push({
+        label: "Copy",
+        onClick: () => this.onCopyText(),
+      });
+    }
+
+    items.push({
+      label: "Paste",
+      onClick: () => this.onPasteText(),
+    });
+
+    items.push({ separator: true });
+    items.push(
+      {
+        label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
+        onClick: () => this.setShowFps(!this.showFps),
+      },
+      { separator: true },
+      { label: "Options…", onClick: () => this.openSettings() }
+    );
+
+    return items;
+  }
+
+  /** Open the settings overlay with the current options. */
+  private openSettings(): void {
+    this.settingsOverlay.open(
+      [
+        {
+          type: "segmented",
+          label: "Cursor size",
+          options: [
+            { label: "1px", value: 1 },
+            { label: "2px", value: 2 },
+            { label: "3px", value: 3 },
+          ],
+          value: this.caretWidth,
+          onChange: (px) => this.setCaretWidth(px),
+        },
+        {
+          type: "color",
+          label: "Highlight color",
+          value: this.getHighlightColor(),
+          onChange: (hex) => this.setHighlightColor(hex),
+        },
+      ],
+      this.element,
+      [
+        {
+          label: "Reset to defaults",
+          onClick: () => {
+            this.resetSettings();
+            this.openSettings(); // re-render so controls show the defaults
+          },
+        },
+      ]
+    );
   }
 
   /**
@@ -1098,12 +1740,17 @@ export class Annotator {
   }
 
   addLines(canvasElement: HTMLCanvasElement): void {
+    const prev = linesHosts.get(canvasElement);
+    if (prev && prev !== this) {
+      prev.destroy();
+    }
     this.lines = new Lines(
       canvasElement,
       this.ratio,
       this.lineHeight,
       this.charWidth
     );
+    linesHosts.set(canvasElement, this);
   }
 
   getAnnotations(
@@ -1347,6 +1994,10 @@ export class Annotator {
    * @param e
    */
   addScroller(scrollerDiv: HTMLDivElement) {
+    const prev = scrollerHosts.get(scrollerDiv);
+    if (prev && prev !== this) {
+      prev.destroy();
+    }
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
@@ -1373,6 +2024,7 @@ export class Annotator {
 
     const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
+    scrollerHosts.set(scrollerDiv, this);
   }
 
   /**
@@ -1429,6 +2081,13 @@ export class Annotator {
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    if (this.destroyed) {
+      return;
+    }
+    if (this.showFps) {
+      this.updateFps();
+    }
+
     this.syncLineNumbersCanvasToMain();
 
     this.ctx.reset();
@@ -1454,25 +2113,44 @@ export class Annotator {
 
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
 
+    // Blink only while a collapsed caret is shown and the canvas is focused.
+    this.caretBlink.sync(this.cursor.hasCaret() && this.canvasFocused);
+
     if (textSegment) {
       const line = this.text.getLineFromPosition(textSegment);
       if (this.cursor.xLine > line.length) {
-        this.cursor.fixOutOfBounds(this.viewport, this.text);
+        // Offset-model navigation/editing keeps the caret in bounds; this is a
+        // defensive clamp for a caret set visually (setPosition) without a sync,
+        // replacing the legacy fixOutOfBounds line-flow repair.
+        this.cursor.xLine = line.length;
       }
 
       this.cursor.draw(this.ctx, this.viewport, this.text, {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        caretWidth: this.caretWidth * this.ratio,
+        caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
       });
     }
 
-    // Draw hover highlight for statement list interaction (#2835)
-    this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
-      lineHeight: this.lineHeight,
-      charWidth: this.charWidth,
-      charsAtLine: this.text.charsAtLine,
-    });
+    // Draw hover highlights for statement list interaction (#2835). Each anchor
+    // occurrence is drawn as its own region so multiple anchors of the same
+    // statement are not connected into one continuous span (#3017). The single
+    // hoverHighlighter is reused so its configured style is preserved.
+    for (const region of this.hoverRegions) {
+      this.hoverHighlighter.selectStart = region.start;
+      this.hoverHighlighter.selectEnd = region.end;
+      this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
+        lineHeight: this.lineHeight,
+        charWidth: this.charWidth,
+        charsAtLine: this.text.charsAtLine,
+      });
+    }
+    // Clear the per-region bounds so the highlighter isn't left holding the last
+    // region's selectStart/selectEnd between draws (style is preserved). reset()
+    // only nulls the bounds, not the configured style.
+    this.hoverHighlighter.reset();
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
@@ -1580,6 +2258,10 @@ export class Annotator {
       }
     }
 
+    // Issue #3108 — draw the draggable handles on top of the selection. Inside
+    // the translated context (so use viewport-relative line coords, no scroll term).
+    this.drawSelectionHandles();
+
     this.ctx.restore();
 
     if (this.scroller) {
@@ -1602,6 +2284,182 @@ export class Annotator {
       this.onScrollCb?.(thisRenderVieportLineStart);
       this.previousRenderViewportLineStart = thisRenderVieportLineStart;
     }
+
+    if (this.showFps) {
+      this.drawFpsCounter();
+    }
+  }
+
+  /** Current collapsed-caret width in CSS px. */
+  getCaretWidth(): number {
+    return this.caretWidth;
+  }
+
+  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. */
+  setCaretWidth(px: number): void {
+    this.caretWidth = Math.max(1, px);
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Load persisted settings from localStorage and apply them to the fields
+   * (without redrawing — the constructor draws once afterwards). Safe to call
+   * when storage is unavailable or holds malformed data.
+   */
+  private loadSettings(): void {
+    let parsed: PersistedSettings | null = null;
+    try {
+      const raw =
+        typeof localStorage !== "undefined" &&
+        localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (raw) {
+        parsed = JSON.parse(raw) as PersistedSettings;
+      }
+    } catch {
+      return; // storage blocked or corrupt — fall back to defaults
+    }
+    if (!parsed) {
+      return;
+    }
+
+    if (typeof parsed.caretWidth === "number") {
+      this.caretWidth = Math.max(1, parsed.caretWidth);
+    }
+    if (typeof parsed.highlightColor === "string") {
+      this.highlightColor = parsed.highlightColor;
+      this.cursor.style = { ...this.cursor.style, color: this.highlightColor };
+    }
+    if (typeof parsed.showFps === "boolean") {
+      this.showFps = parsed.showFps;
+    }
+  }
+
+  /** Reset all persisted settings to their defaults, clear storage, and redraw. */
+  resetSettings(): void {
+    this.caretWidth = 1;
+    this.highlightColor = undefined;
+    // Revert the highlight color to the host theme color (last setSelectStyle).
+    this.cursor.style = { ...this.cursor.style, color: this.selectColor };
+    this.showFps = false;
+    this.lastFrameTime = 0;
+    this.fps = 0;
+
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem(SETTINGS_STORAGE_KEY);
+      }
+    } catch {
+      // ignore storage errors
+    }
+
+    this.draw();
+  }
+
+  /** Persist the current settings to localStorage (best-effort). */
+  private saveSettings(): void {
+    try {
+      if (typeof localStorage === "undefined") {
+        return;
+      }
+      const data: PersistedSettings = {
+        caretWidth: this.caretWidth,
+        highlightColor: this.highlightColor,
+        showFps: this.showFps,
+      };
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      // storage full or blocked — settings just won't persist this session
+    }
+  }
+
+  /**
+   * Current selection highlight color as a `#rrggbb` hex string. When the user
+   * hasn't picked one, this reflects the effective (theme) color so the picker
+   * shows the real default rather than black.
+   */
+  getHighlightColor(): string {
+    return (
+      this.highlightColor ??
+      this.cssColorToHex(this.cursor.style.color as string)
+    );
+  }
+
+  /**
+   * Normalize any CSS color (named/rgb/hex) to `#rrggbb` using the canvas, which
+   * a native color input requires. Falls back to black for non-opaque colors.
+   */
+  private cssColorToHex(color: string): string {
+    try {
+      const prev = this.ctx.fillStyle;
+      this.ctx.fillStyle = color;
+      const normalized = this.ctx.fillStyle;
+      this.ctx.fillStyle = prev;
+      if (typeof normalized === "string" && normalized.startsWith("#")) {
+        return normalized;
+      }
+    } catch {
+      // ignore and fall through to default
+    }
+    return "#000000";
+  }
+
+  /** Set the selection highlight color (`#rrggbb`) and redraw. */
+  setHighlightColor(hex: string): void {
+    this.highlightColor = hex;
+    this.cursor.style = { ...this.cursor.style, color: hex };
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Toggle the debug FPS counter in the top-left corner. Disabled by default.
+   */
+  setShowFps(show: boolean): void {
+    this.showFps = show;
+    this.lastFrameTime = 0;
+    this.fps = 0;
+    this.saveSettings();
+    this.draw();
+  }
+
+  /**
+   * Update the smoothed FPS from the interval between draw() calls. This is an
+   * on-demand renderer (no rAF loop), so the value reflects redraw frequency
+   * during activity and dips after idle gaps.
+   */
+  private updateFps() {
+    const now =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+    if (this.lastFrameTime > 0) {
+      const dt = now - this.lastFrameTime;
+      if (dt > 0) {
+        const instantaneous = 1000 / dt;
+        // Exponential moving average smooths jitter between on-demand redraws.
+        this.fps =
+          this.fps === 0
+            ? instantaneous
+            : this.fps * 0.8 + instantaneous * 0.2;
+      }
+    }
+    this.lastFrameTime = now;
+  }
+
+  /** Draw the debug FPS counter in the top-left corner (screen space). */
+  private drawFpsCounter() {
+    const text = `${Math.round(this.fps)} FPS`;
+    const pad = 4 * this.ratio;
+    const fontSize = 11 * this.ratio;
+
+    this.ctx.save();
+    this.ctx.font = `${fontSize}px ${DEFAULT_FONT}`;
+    this.ctx.textBaseline = "top";
+    const textW = this.ctx.measureText(text).width;
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    this.ctx.fillRect(0, 0, textW + pad * 2, fontSize + pad * 2);
+    this.ctx.fillStyle = "#0f0";
+    this.ctx.fillText(text, pad, pad);
+    this.ctx.restore();
   }
 
   /**
@@ -1609,6 +2467,9 @@ export class Annotator {
    * @param mode
    */
   setMode(mode: EditMode) {
+    // A mode switch ends any in-progress typing run for undo coalescing.
+    this.history.endCoalescing();
+
     let absIndex: number | null = null;
     if (this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
       const segPos = this.text.cursorToIndex(this.viewport, this.cursor);
@@ -1647,14 +2508,14 @@ export class Annotator {
       if (segPos !== null) {
         const coords = this.text.positionToCursor(this.viewport, segPos);
         if (coords !== null) {
+          // Re-derive the caret's visual position in the new mode so its
+          // document position is preserved across the switch. Deliberately do
+          // NOT scroll the viewport to the caret here: switching edit modes
+          // keeps the reader on the same content (the viewport was just
+          // restored above, per #2904). Snapping to an off-screen caret —
+          // one the user had scrolled away from — would defeat that.
           const absY = this.viewport.lineStart + coords.yLine;
           this.cursor.setPosition(coords.xLine, absY);
-          if (
-            absY < this.viewport.lineStart ||
-            absY > this.viewport.lineEnd - 1
-          ) {
-            this.viewport.scrollTo(absY, this.scrollExtentLineCount());
-          }
         }
       }
     }
@@ -2032,24 +2893,129 @@ export class Annotator {
     }
   }
 
+  // ===== Phase 4 (#3086): undo/redo =====
+
+  /** Capture the live editor state (raw value + canonical caret/selection offsets). */
+  captureSnapshot(): HistorySnapshot {
+    return {
+      value: this.text.value,
+      anchor: this.cursor.anchor,
+      head: this.cursor.head,
+      anchorAffinity: this.cursor.anchorAffinity,
+      headAffinity: this.cursor.headAffinity,
+    };
+  }
+
+  /**
+   * Restore a snapshot: reload the document string, reparse/rewrap, set the
+   * caret/selection offsets and derive the visual caret, scroll it into view,
+   * fire onTextChangeCb (when the value changed and editing is allowed) and draw.
+   */
+  private restoreSnapshot(snap: HistorySnapshot): void {
+    const changed = this.text.value !== snap.value;
+
+    this.text.value = snap.value;
+    this.text.prepareSegments();
+    this.text.calculateLines();
+
+    this.cursor.anchor = snap.anchor;
+    this.cursor.head = snap.head;
+    this.cursor.anchorAffinity = snap.anchorAffinity;
+    this.cursor.headAffinity = snap.headAffinity;
+    this.cursor.syncVisualFromOffset(this.text);
+
+    this.keys.scrollCursorIntoView();
+    this.runWarningChecks();
+
+    if (
+      changed &&
+      this.text.mode !== EditMode.HIGHLIGHT &&
+      this.onTextChangeCb
+    ) {
+      this.onTextChangeCb(this.text.value);
+    }
+    this.draw();
+  }
+
+  /**
+   * Record the pre-mutation state on the undo stack. `coalesce` is true only for
+   * a single-character typing insert, so a contiguous typing run becomes one
+   * undo step; every other op is discrete. The post-edit caret offset is read
+   * from the (already-updated) cursor for contiguity tracking.
+   */
+  recordHistory(before: HistorySnapshot, coalesce: boolean): void {
+    this.history.record(before, coalesce, this.cursor.head);
+  }
+
+  canUndo(): boolean {
+    return this.history.canUndo();
+  }
+
+  canRedo(): boolean {
+    return this.history.canRedo();
+  }
+
+  /** Restore the previous document state, if any. */
+  undo(): void {
+    // Editing is disabled in HIGHLIGHT mode; undo would mutate the document
+    // while restoreSnapshot suppresses onTextChangeCb, silently desyncing the
+    // editor from the host app. Leave the stack untouched.
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
+    const target = this.history.undo(this.captureSnapshot());
+    if (target === null) {
+      return;
+    }
+    this.restoreSnapshot(target);
+  }
+
+  /** Re-apply the most recently undone document state, if any. */
+  redo(): void {
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
+    const target = this.history.redo(this.captureSnapshot());
+    if (target === null) {
+      return;
+    }
+    this.restoreSnapshot(target);
+  }
+
   onCopyText() {
-    window.navigator.clipboard.writeText(this.lastSelectedText?.text || "");
+    const area = this.cursor.getSelectedArea();
+    const text = area
+      ? this.text.getRangeText(area[0], area[1])
+      : this.lastSelectedText?.text || "";
+    window.navigator.clipboard.writeText(text);
   }
 
   onPasteText() {
     window.navigator.clipboard
       .readText()
       .then((clipText: string) => {
+        // Snapshot the pre-paste state for undo (a paste is one discrete step).
+        this.cursor.reconcileOffsetsFromVisual(this.text);
+        const before = this.captureSnapshot();
         const area = this.cursor.getSelectedArea();
         if (area) {
           this.text.deleteRangeText(area[0], area[1]);
           this.cursor.reset();
           this.cursor.setPosition(area[0].xLine, area[0].yLine);
         }
+        // Place the caret at insert-offset + length via the offset model. Unlike
+        // move(len, 0) — which only shifts xLine and mishandles pasted newlines —
+        // this lands correctly for multi-line text and stays in bounds.
+        const insertOffset = this.text.offsetFromVisual(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
         this.text.insertText(this.viewport, this.cursor, clipText);
-        this.cursor.move(clipText.length, 0);
-        this.cursor.fixOutOfBounds(this.viewport, this.text);
-        this.cursor.goalColumn = null;
+        const pasteAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+        this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
+        if (this.text.value !== before.value) {
+          this.recordHistory(before, false);
+        }
         this.keys.scrollCursorIntoView();
 
         this.runWarningChecks();
@@ -2061,16 +3027,26 @@ export class Annotator {
   }
 
   onReplaceText(text: string) {
+    // Snapshot the pre-replace state for undo (replace is one discrete step).
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+    const before = this.captureSnapshot();
     const area = this.cursor.getSelectedArea();
     if (area) {
       this.text.deleteRangeText(area[0], area[1]);
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
+    // See onPasteText: offset-based caret placement handles multi-line text.
+    const insertOffset = this.text.offsetFromVisual(
+      this.cursor.xLine,
+      this.cursor.yLine
+    );
     this.text.insertText(this.viewport, this.cursor, text);
-    this.cursor.move(text.length, 0);
-    this.cursor.fixOutOfBounds(this.viewport, this.text);
-    this.cursor.goalColumn = null;
+    const insertAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
+    this.cursor.moveToOffset(this.text, insertAt + text.length);
+    if (this.text.value !== before.value) {
+      this.recordHistory(before, false);
+    }
     this.keys.scrollCursorIntoView();
 
     this.runWarningChecks();

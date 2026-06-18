@@ -17,6 +17,7 @@
   { "id": "validation_MAEE", "value": true },
   { "id": "validation_PSM", "value": true },
   { "id": "validation_LM", "value": true },
+  { "id": "validation_DM", "value": true },
   { "id": "validation_VETM", "value": true },
   { "id": "validation_TVEP", "value": true },
   { "id": "validation_TVEPT", "value": true },

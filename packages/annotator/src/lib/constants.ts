@@ -34,3 +34,18 @@ export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
 
 /** Debounce delay in milliseconds for mousemove events (hover interactions). */
 export const HOVER_DEBOUNCE_MS = 50;
+
+/**
+ * Issue #3108 — selection drag handles. All values are in CSS px and scaled by the
+ * device-pixel ratio at draw/hit-test time.
+ */
+/** Width of the vertical bar drawn at each selection boundary. */
+export const SELECTION_HANDLE_BAR_WIDTH_PX = 2;
+/** Radius of the round knob drawn at the top (start) / bottom (end) of each bar. */
+export const SELECTION_HANDLE_KNOB_RADIUS_PX = 4.5;
+/**
+ * Horizontal grab tolerance on each side of a boundary, in multiples of one
+ * character width. ~1 char each side ("whole char before and after") keeps the
+ * handle comfortably catchable on a monospace grid.
+ */
+export const SELECTION_HANDLE_GRAB_CHAR_FACTOR = 1;

@@ -1,8 +1,6 @@
 import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
 import { SearchEnums } from "@inkvisitor/shared/enums";
-import {
-  IRequestSearch,
-} from "@inkvisitor/shared/types/request-search";
+import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { Button, ButtonGroup } from "components";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
@@ -20,25 +18,7 @@ import {
   StyledPillLabel,
   StyledPillsContainer,
 } from "../EntitySearchBoxStyles";
-import { FOURTH_PANEL_MIN_WIDTH } from "Theme/constants";
-import { useAppSelector } from "redux/hooks";
 
-/** Shown on Query page floating panel — excluded from Main search advanced-options picker. */
-const queryPageOnlyAdvancedOptions: SearchEnums.AdvancedOption[] = [
-  SearchEnums.AdvancedOption.CreatedAt,
-  SearchEnums.AdvancedOption.UpdatedAt,
-  SearchEnums.AdvancedOption.CreatedBy,
-  SearchEnums.AdvancedOption.UpdatedBy,
-  SearchEnums.AdvancedOption.EditedBy,
-  SearchEnums.AdvancedOption.RootValidity,
-];
-
-export const mainPageAdvancedSearchOptions: SearchEnums.AdvancedOption[] =
-  SearchEnums.AdvancedOptions.filter(
-    (option) => !queryPageOnlyAdvancedOptions.includes(option)
-  );
-
-const advancedOptions = mainPageAdvancedSearchOptions;
 interface EntitySearchAdvancedOptions {
   expandedOptions: SearchEnums.AdvancedOption[];
   setExpandedOptions: (options: SearchEnums.AdvancedOption[]) => void;
@@ -137,7 +117,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
           return false;
       }
     },
-    [searchData]
+    [searchData],
   );
 
   const renderBatchButtons = useCallback(() => {
@@ -151,10 +131,10 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
           icon={<CgPlayListAdd size={20} />}
           size={ButtonSize.Small}
           onClick={() => {
-            setExpandedOptions([...advancedOptions]);
+            setExpandedOptions([...SearchEnums.AdvancedOptions]);
           }}
           tooltipLabel="Add All"
-          disabled={expandedOptions.length === advancedOptions.length}
+          disabled={expandedOptions.length === SearchEnums.AdvancedOptions.length}
         />
         {/* <Button
           inverted
@@ -214,7 +194,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
             style={{
               ...PillsFloatingStyles,
               zIndex: 1000,
-              maxWidth: "250px",
+              maxWidth: "200px",
               pointerEvents: "auto",
             }}
             onMouseEnter={handlePillsMouseEnter}
@@ -229,7 +209,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
               <StyledFloatingContainer>
                 <StyledFloatingContainerTitle>Select active filters</StyledFloatingContainerTitle>
                 <StyledPillsContainer>
-                  {advancedOptions.map((option) => {
+                  {SearchEnums.AdvancedOptions.map((option) => {
                     const isSelected = expandedOptions.includes(option);
                     return (
                       <StyledPill
@@ -258,7 +238,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
                     size={ButtonSize.Small}
                     onClick={() => {
                       setExpandedOptions(
-                        expandedOptions.filter((option) => hasValueForOption(option))
+                        expandedOptions.filter((option) => hasValueForOption(option)),
                       );
                     }}
                     tooltipLabel="Clear empty filters"

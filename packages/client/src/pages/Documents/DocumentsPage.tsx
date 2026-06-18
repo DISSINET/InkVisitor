@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
+import { useUserQuery } from "hooks/react-query";
 import React, { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import { DocumentsTableHeader } from "./DocumentsTableHeader";
@@ -23,6 +24,30 @@ import { DocumentSortField, DocumentSortState, DocumentWithResource } from "./ty
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
+
+  // Editors may only export/edit/delete documents whose linked Resource is
+  // assigned to them (Manage Users). Owner/Admin manage everything; for an
+  // Editor everything else is view-only (#2/#3).
+  const { data: userData } = useUserQuery(true);
+  const isAdminOrOwner =
+    userData?.role === UserEnums.Role.Owner ||
+    userData?.role === UserEnums.Role.Admin;
+  const assignedResourceIds = useMemo(
+    () => userData?.resourceRights?.map((r) => r.resource.id) ?? [],
+    [userData]
+  );
+  const canManageDocument = useCallback(
+    (resourceId: string | false): boolean => {
+      if (isAdminOrOwner) {
+        return true;
+      }
+      if (userData?.role !== UserEnums.Role.Editor) {
+        return false;
+      }
+      return resourceId !== false && assignedResourceIds.includes(resourceId);
+    },
+    [isAdminOrOwner, userData, assignedResourceIds]
+  );
 
   const {
     data: documents,
@@ -148,6 +173,16 @@ export const DocumentsPage: React.FC = ({}) => {
 
   const [editedDocumentId, setEditedDocumentId] = useState<string | false>(false);
 
+  const editedDocumentCanEdit = useMemo(() => {
+    if (!editedDocumentId) {
+      return false;
+    }
+    const editedResource = documentsWithResources.find(
+      (d) => d.document.id === editedDocumentId
+    )?.resource;
+    return canManageDocument(editedResource ? editedResource.id : false);
+  }, [editedDocumentId, documentsWithResources, canManageDocument]);
+
   const handleDocumentEdit = (id: string) => {
     setEditedDocumentId(id);
   };
@@ -188,6 +223,7 @@ export const DocumentsPage: React.FC = ({}) => {
                       key={documentId}
                       document={documentWithResource.document}
                       resource={documentWithResource.resource}
+                      canManage={canManageDocument(documentWithResource.resource ? documentWithResource.resource.id : false)}
                       handleDocumentEdit={handleDocumentEdit}
                       handleDocumentExport={handleDocumentExport}
                       setDocToDelete={setDocToDelete}
@@ -200,17 +236,19 @@ export const DocumentsPage: React.FC = ({}) => {
                 })}
               </StyledGrid>
             </StyledGridScrollArea>
-            <StyledInputWrap onClick={() => inputRef.current?.click()}>
-              Upload document
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".txt,.xml"
-                title="x"
-                onChange={handleFileChange}
-                hidden
-              />
-            </StyledInputWrap>
+            {isAdminOrOwner && (
+              <StyledInputWrap onClick={() => inputRef.current?.click()}>
+                Upload document
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".txt,.xml"
+                  title="x"
+                  onChange={handleFileChange}
+                  hidden
+                />
+              </StyledInputWrap>
+            )}
 
             <Loader show={resourcesIsFetching} size={50} />
           </StyledBackground>
@@ -218,7 +256,11 @@ export const DocumentsPage: React.FC = ({}) => {
       </StyledContent>
 
       {editedDocumentId && (
-        <DocumentModalEdit documentId={editedDocumentId} onClose={handleModalClose} />
+        <DocumentModalEdit
+          documentId={editedDocumentId}
+          canEdit={editedDocumentCanEdit}
+          onClose={handleModalClose}
+        />
       )}
       {exportedDocumentId && exportedDocument && (
         <DocumentModalExport document={exportedDocument} onClose={handleModalClose} />

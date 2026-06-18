@@ -15,6 +15,7 @@ import {
   setCachedBaseIds,
 } from "./query-base-cache";
 import { getRowIdsFilter } from "./explore-ids-filter";
+import { aggregateAuditStats } from "@models/stats/aggregate";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
@@ -36,8 +37,11 @@ export default class QuerySearch {
       this.explore.offset = 0;
     }
 
-    if (!this.explore.columns) {
-      this.explore.columns = [];
+    if (
+      this.explore.view.mode === Explore.EViewMode.Table &&
+      !this.explore.view.columns
+    ) {
+      this.explore.view.columns = [];
     }
     this.results = null;
 
@@ -92,6 +96,11 @@ export default class QuerySearch {
     const filteredIds = this.results.filter(this.explore);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
 
+    const columns =
+      this.explore.view.mode === Explore.EViewMode.Table
+        ? this.explore.view.columns
+        : [];
+
     const out: IResponseQueryEntity[] = [];
 
     for (const entity of filtered) {
@@ -101,16 +110,34 @@ export default class QuerySearch {
         out.push({
           rowI,
           entity,
-          columnData: await this.results!.columns(
-            db,
-            entity,
-            this.explore.columns
-          ),
+          columnData: await this.results!.columns(db, entity, columns),
         });
       }
     }
 
     return out;
+  }
+
+  /**
+   * Aggregates audit stats over the entire filtered result set (the explore
+   * offset/limit pagination is intentionally ignored - stats cover the whole
+   * result, not a single page). Only meaningful when the view mode is Stats;
+   * returns {} otherwise. Must be called after run().
+   */
+  async getStats(
+    db: Connection
+  ): Promise<Record<string, Record<string, number>>> {
+    if (!this.results) {
+      return {};
+    }
+    if (this.explore.view.mode !== Explore.EViewMode.Stats) {
+      return {};
+    }
+
+    await this.results.applyExploreFilters(db, this.explore);
+    const entityIds = this.results.items ?? [];
+
+    return aggregateAuditStats(db, this.explore.view.stats, { entityIds });
   }
 
   /**

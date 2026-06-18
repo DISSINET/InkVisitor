@@ -94,13 +94,76 @@ class Acl {
       return permissionDeniedErr;
     }
 
-    // allow editors with assigned rights to fetch users for filters (editedBy/updatedBy)
+    // allow editors with assigned territory rights to fetch users for filters
+    // (editedBy/updatedBy). Resource-annotate rights don't count here.
     if (
       controller === "users" &&
       route === "" &&
       method === HttpMethods.Get &&
       user?.role === UserEnums.Role.Editor &&
-      (user.rights?.length || 0) > 0
+      (user.rights?.filter((r) => r.mode !== UserEnums.RoleMode.Annotate)
+        .length || 0) > 0
+    ) {
+      return null;
+    }
+
+    // The simplified user list (GET /users/simplified) returns only {id, name}
+    // and is needed by any logged-in user for stats charts and explorer filters.
+    if (
+      controller === "users" &&
+      route === "simplified" &&
+      method === HttpMethods.Get
+    ) {
+      return null;
+    }
+
+    // Stats queries (POST /stats, POST /stats/materialized) are read-only
+    // aggregations that any logged-in user may access.
+    if (controller === "stats") {
+      return null;
+    }
+
+    // Documents are governed by the route handlers, not the ACL table: any
+    // logged-in user may GET (view) any document, while update/delete/export/
+    // removeAnchor are gated per-resource inside the handlers
+    // (userCanManageDocument: Owner/Admin, or Editor assigned to the linked
+    // Resource). This also avoids the auto-created roles:[] permission that the
+    // ACL layer persists for routes lacking an explicit entry.
+    if (controller === "documents") {
+      return null;
+    }
+
+    // The entities batch read (POST /entities/batch) is the bulk equivalent of
+    // the public GET /entities/:entityId; it backs e.g. fetching the entities
+    // behind a document's anchors. Allow it for any logged-in user (it has no
+    // seeded ACL entry, so it would otherwise be auto-denied to non-admins).
+    if (
+      controller === "entities" &&
+      route === "batch" &&
+      method === HttpMethods.Post
+    ) {
+      return null;
+    }
+
+    // The Explorer / Query page query endpoints have no seeded ACL entry either.
+    // Any logged-in user may execute read-only entity queries; mutations are
+    // still governed by the individual entity endpoints.
+    if (
+      controller === "entities" &&
+      (route === "query" || route === "query-export") &&
+      method === HttpMethods.Post
+    ) {
+      return null;
+    }
+
+    // GET /entities/:entityId/tooltip and GET /entities/:entityId/detail have
+    // no seeded ACL entries. Both are read-only companions to the public
+    // GET /entities/:entityId. Any logged-in user may call them; entity-level
+    // access is handled inside each handler.
+    if (
+      controller === "entities" &&
+      (route.endsWith("/tooltip") || route.endsWith("/detail")) &&
+      method === HttpMethods.Get
     ) {
       return null;
     }

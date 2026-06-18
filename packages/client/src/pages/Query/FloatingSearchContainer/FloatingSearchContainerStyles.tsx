@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
-export const FLOATING_SEARCH_EXPANDED_WIDTH = 270;
+export const FLOATING_SEARCH_EXPANDED_WIDTH = 255;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 interface StyledFloatingRootProps {
@@ -15,7 +15,7 @@ export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
   z-index: 160;
 `;
 
-export const StyledCollapsedButton = styled.button`
+export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`
   position: absolute;
   right: 2rem;
   bottom: 2rem;
@@ -27,9 +27,12 @@ export const StyledCollapsedButton = styled.button`
   border: none;
   border-radius: 50%;
   cursor: pointer;
+  z-index: 162;
   color: ${({ theme }) => theme.color.primary};
-  background-color: ${({ theme }) => theme.color.blue[100]};
-  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  background-color: ${({ theme, $isActive }) =>
+    $isActive ? theme.color.blue[150] : theme.color.blue[100]};
+  box-shadow: ${({ theme, $isActive }) =>
+    $isActive ? theme.boxShadow.normal : theme.boxShadow.high};
   transition:
     background-color 0.2s,
     box-shadow 0.2s;

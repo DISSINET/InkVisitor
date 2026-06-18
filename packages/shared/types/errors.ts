@@ -34,7 +34,7 @@ export class CustomError extends Error {
     return this.loggable;
   }
 
-  withData(data: any): CustomError {
+  withData<T = any>(data: T): CustomError {
     this.data = data;
     return this;
   }
@@ -317,6 +317,23 @@ class InvalidDeleteError extends CustomError {
   public static title = "Invalid delete";
   public static message = "Model cannot be deleted";
   loggable = true;
+}
+
+/**
+ * Discriminates what kind of resource blocks an entity deletion, so the client
+ * can tell whether the ids carried in InvalidDeleteError.data point to entities
+ * or to documents (which are not entities and cannot be opened in entity detail).
+ */
+export type InvalidDeleteConflictType = "entity" | "document";
+
+/**
+ * Shape carried by InvalidDeleteError.withData() when an entity cannot be
+ * deleted because it is still referenced. `ids` are entity ids when
+ * type === "entity" and document ids when type === "document".
+ */
+export interface IInvalidDeleteErrorData {
+  type: InvalidDeleteConflictType;
+  ids: string[];
 }
 
 /**

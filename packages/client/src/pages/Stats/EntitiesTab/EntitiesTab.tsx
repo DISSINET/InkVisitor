@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaTimes } from "react-icons/fa";
+import { FaCalendarPlus, FaTimes, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
@@ -22,10 +22,9 @@ import {
   applyUserThreshold,
   areStatsRequestsEqual,
   datePickerToIso,
-  isoToDatePicker,
+  isoToDatetimePicker,
 } from "../utils";
-import { StatsChart } from "./StatsChart/StatsChart";
-import { StatsTable } from "./StatsTable/StatsTable";
+import { StatsChart, StatsTable } from "components/advanced";
 import { useUserQuery } from "hooks/react-query";
 
 export const EntitiesTab: React.FC = () => {
@@ -160,7 +159,7 @@ export const EntitiesTab: React.FC = () => {
                     dispatch({
                       type: "dateFromUpdate",
                       payload: new Date(
-                        new Date().setFullYear(new Date().getFullYear() - 5)
+                        new Date().setFullYear(new Date().getFullYear() - 5),
                       ).toISOString(),
                     });
                   }}
@@ -174,17 +173,20 @@ export const EntitiesTab: React.FC = () => {
             ) : (
               <StyledDateInputWrapper>
                 <Input
-                  type="date"
-                  value={isoToDatePicker(state.dateFrom)}
+                  type="datetime-local"
+                  width={150}
+                  value={isoToDatetimePicker(state.dateFrom)}
                   onChangeFn={(value) =>
                     dispatch({
                       type: "dateFromUpdate",
-                      payload: datePickerToIso(value),
+                      payload: value
+                        ? datePickerToIso(value)
+                        : new Date("2000-01-01").toISOString(),
                     })
                   }
                 />
                 <Button
-                  icon={<FaTimes />}
+                  icon={<FaUndo />}
                   onClick={() => {
                     dispatch({
                       type: "showDateFromRangePickerUpdate",
@@ -232,17 +234,18 @@ export const EntitiesTab: React.FC = () => {
             ) : (
               <StyledDateInputWrapper>
                 <Input
-                  type="date"
-                  value={isoToDatePicker(state.dateTo)}
+                  type="datetime-local"
+                  width={150}
+                  value={isoToDatetimePicker(state.dateTo)}
                   onChangeFn={(value) =>
                     dispatch({
                       type: "dateToUpdate",
-                      payload: datePickerToIso(value),
+                      payload: value ? datePickerToIso(value) : new Date().toISOString(),
                     })
                   }
                 />
                 <Button
-                  icon={<FaTimes />}
+                  icon={<FaUndo />}
                   onClick={() => {
                     dispatch({
                       type: "showDateToRangePickerUpdate",
@@ -324,7 +327,7 @@ export const EntitiesTab: React.FC = () => {
                   const num = Number(value);
                   const safe = Math.min(
                     USER_THRESHOLD_MAX,
-                    Math.max(0, Number.isFinite(num) ? num : 0)
+                    Math.max(0, Number.isFinite(num) ? num : 0),
                   );
                   setUsersIgnoreBelowValue(safe);
                 }}
@@ -350,7 +353,6 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={chartHeight ? Math.max(0, chartHeight) : 0}
                 width={chartWidth ? Math.max(0, chartWidth - 50) : 0}
-                request={queryStatsRequest}
               />
             </StyledResultsChart>
             <StyledResultsTable ref={tableRef}>
@@ -358,7 +360,6 @@ export const EntitiesTab: React.FC = () => {
                 data={data}
                 height={tableHeight ? Math.max(0, tableHeight) : 0}
                 width={tableWidth ? Math.max(0, tableWidth - 50) : 0}
-                request={queryStatsRequest}
               />
             </StyledResultsTable>
           </>

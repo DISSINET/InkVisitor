@@ -8,6 +8,7 @@
   { "id": "validation_ISYNC", "value": true },
   { "id": "validation_ISYNCAEE", "value": true },
   { "id": "validation_LM", "value": true },
+  { "id": "validation_DM", "value": true },
   { "id": "validation_MA", "value": true },
   { "id": "validation_MAEE", "value": true },
   { "id": "validation_MVAL", "value": true },
