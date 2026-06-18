@@ -153,7 +153,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
     return (
       <StyledStatsLayout $height={height}>
         <StyledEmptyMessage>
-          Run the search to see statistics for the matching entities.
+          Run the search to see statistics for the matching entities. (Enter)
         </StyledEmptyMessage>
       </StyledStatsLayout>
     );
