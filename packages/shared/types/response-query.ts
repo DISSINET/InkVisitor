@@ -24,4 +24,10 @@ export interface IResponseQuery {
    * dateBucket -> aggregationKey -> count.
    */
   stats?: Record<string, Record<string, number>>;
+  /**
+   * Cap on the number of entities the Stats view aggregates audits over, present
+   * only in the Stats view. When `total` exceeds it, the stats cover just the
+   * first `statsEntityLimit` entities and the client surfaces a warning.
+   */
+  statsEntityLimit?: number;
 }

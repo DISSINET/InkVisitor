@@ -45,11 +45,19 @@ function timeBucketFor(timeUnit: TimeUnit): (doc: RDatum) => RDatum {
  * the bridge that turns a query-filtered entity subset into "stats over that
  * subset". An empty list yields an empty result.
  *
+ * `fromDate`/`toDate` are optional: when both are set the scan is narrowed with
+ * the `date` index `between`; when omitted (e.g. the Explorer stats view, which
+ * has no time filter) the `between` is skipped entirely and all dates are
+ * counted.
+ *
  * @returns values map: dateBucket -> aggregationKey -> count
  */
 export async function aggregateAuditStats(
   db: Connection,
-  params: IStatsAggregationParams,
+  params: Omit<IStatsAggregationParams, "fromDate" | "toDate"> & {
+    fromDate?: number;
+    toDate?: number;
+  },
   opts?: { entityIds?: string[] }
 ): Promise<Record<string, Record<string, number>>> {
   const { fromDate, toDate, timeUnit, aggregateBy, eventType } = params;
@@ -62,12 +70,19 @@ export async function aggregateAuditStats(
 
   const timeBucket = timeBucketFor(timeUnit);
 
-  let query = rethink
-    .table(Audit.table)
-    .between(new Date(fromDate), new Date(toDate), { index: "date" })
-    .filter((doc: RDatum) =>
-      rethink.expr(expandEventTypesForStats(eventType)).contains(doc("type"))
-    );
+  const matchesEventType = (doc: RDatum) =>
+    rethink.expr(expandEventTypesForStats(eventType)).contains(doc("type"));
+
+  // Narrow with the `date` index only when a window is given; otherwise scan all
+  // dates. Both branches end in .filter() so `query` keeps one consistent type
+  // for the entityIds reassignment below.
+  let query =
+    fromDate !== undefined && toDate !== undefined
+      ? rethink
+          .table(Audit.table)
+          .between(new Date(fromDate), new Date(toDate), { index: "date" })
+          .filter(matchesEventType)
+      : rethink.table(Audit.table).filter(matchesEventType);
 
   if (entityIds) {
     query = query.filter((doc: RDatum) =>

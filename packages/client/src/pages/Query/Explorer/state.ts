@@ -3,10 +3,12 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 
-/** Default stats config when the Explorer is switched to the Stats view mode. */
+/**
+ * Default stats config when the Explorer is switched to the Stats view mode.
+ * No date window: the Explorer has no time filter, so fromDate/toDate are left
+ * unset and the server aggregates audits across all dates.
+ */
 export const defaultExploreStatsParams: Explore.IExploreStatsParams = {
-  fromDate: new Date("2000-01-01").getTime(),
-  toDate: new Date().getTime(),
   timeUnit: TimeUnit.MONTH,
   eventType: [EventType.CREATE, EventType.EDIT, EventType.DELETE],
   aggregateBy: Aggregation.USER,

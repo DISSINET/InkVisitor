@@ -43,7 +43,10 @@ import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
-import { EventType } from "@inkvisitor/shared/types/stats";
+import {
+  EventType,
+  EXPLORE_STATS_ENTITY_LIMIT,
+} from "@inkvisitor/shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
@@ -806,6 +809,7 @@ export default Router()
           explore: querySearch.explore,
           total: entityIds.length,
           stats,
+          statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
         };
       }
 
