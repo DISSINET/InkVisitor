@@ -438,7 +438,7 @@ export enum DetailBoxState {
   FullHeight = "fullHeight",
 }
 
-export enum AnnotatorBoxState {
+export enum EditorBoxState {
   Minimized = "minimized",
   Normal = "normal",
   FullHeight = "fullHeight",

@@ -19,7 +19,8 @@ import { StyledAnchorText } from "./EntityDetailUsedInDocumentsTableStyles";
 import { useSearchParams } from "hooks";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
-import { DetailBoxState } from "types";
+import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { DetailBoxState, EditorBoxState } from "types";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import useAnnotator from "hooks/useAnnotator";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -61,8 +62,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     },
   });
 
-  const { setTerritoryId, setAnnotatorOpened, setStatementId, territoryId } =
-    useSearchParams();
+  const { setTerritoryId, setStatementId, territoryId } = useSearchParams();
   const dispatch = useAppDispatch();
 
   const { scrollToAnchor } = useAnnotator();
@@ -110,7 +110,9 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       dispatch(setStatementListOpened(true));
                       dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }
-                    setAnnotatorOpened(true);
+                    // annotator is always visible; un-maximize editor so it
+                    // doesn't cover it before scrolling to the anchor.
+                    dispatch(setEditorBoxState(EditorBoxState.Normal));
 
                     setTimeout(() => {
                       scrollToAnchor(entityId, row.original.anchorIndex);

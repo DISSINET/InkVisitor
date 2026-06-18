@@ -38,10 +38,10 @@ import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
-import { setAnnotatorBoxState } from "redux/features/layout/mainPage/annotatorBoxStateSlice";
+import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { AnnotatorBoxState, DetailBoxState, classesEditorActants, classesEditorTags } from "types";
+import { EditorBoxState, DetailBoxState, classesEditorActants, classesEditorTags } from "types";
 import { deepCopy, getEntityLabel, getShortLabelByLetterCount, searchTree } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -104,7 +104,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setTerritoryId,
     appendDetailId,
     appendMultipleDetailIds,
-    setAnnotatorOpened,
   } = useSearchParams();
 
   const queryClient = useQueryClient();
@@ -576,10 +575,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       timeout = 2000;
     }
     dispatch(setDetailBoxState(DetailBoxState.Normal));
-    // Make sure the (now separate) annotator box is open and not collapsed so
-    // the scroll-to-anchor is visible.
-    dispatch(setAnnotatorBoxState(AnnotatorBoxState.Normal));
-    setAnnotatorOpened(true);
+    // Annotator is the always-visible primary box; un-maximize the editor so it
+    // doesn't cover the annotator, keeping the scroll-to-anchor target visible.
+    dispatch(setEditorBoxState(EditorBoxState.Normal));
     if (parentTerritoryId.length && territoryId !== parentTerritoryId) {
       setTerritoryId(parentTerritoryId);
     }

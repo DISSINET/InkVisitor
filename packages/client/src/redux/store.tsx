@@ -31,7 +31,7 @@ import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpand
 import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
 import selectedResourceIdSlice from "./features/statementAnnotator/selectedResourceIdSlice";
 import hoveredStatementIdSlice from "./features/statementAnnotator/hoveredStatementIdSlice";
-import annotatorBoxStateSlice from "./features/layout/mainPage/annotatorBoxStateSlice";
+import editorBoxStateSlice from "./features/layout/mainPage/editorBoxStateSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -81,7 +81,7 @@ const store: Store = configureStore({
         secondPanelRealWidth: secondPanelRealWidthSlice,
         thirdPanelRealWidth: thirdPanelRealWidthSlice,
         detailBoxState: detailBoxStateSlice,
-        annotatorBoxState: annotatorBoxStateSlice,
+        editorBoxState: editorBoxStateSlice,
       }),
     }),
   },
