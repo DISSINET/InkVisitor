@@ -609,10 +609,11 @@ export default class Entity implements IEntity, IDbModel {
         const traverse = (nodes: AnchorsNode[], parentT?: string) => {
           for (const node of nodes) {
             if (node.anchor === this.id) {
-              const { content, ...documentMeta } = docData;
-
+              // docData is already IDocumentMeta (content dropped at the
+              // findByEntityId query), so it can be used as the response
+              // document directly.
               out.push({
-                document: documentMeta,
+                document: docData,
                 anchorText: node.getShortContent(),
                 resourceId: resource?.id || "",
                 parentTerritoryId: parentT || "",

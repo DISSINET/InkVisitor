@@ -10,7 +10,8 @@ export namespace DbEnums {
     AuditDateTypeUser = "date_type_user",
     EntityUsedTemplate = "usedTemplate",
     PropsRecursive = "props.recursive",
-    RelationsEntityIds = "entityIds"
+    RelationsEntityIds = "entityIds",
+    DocumentEntityIds = "entityIds"
   }
 
   export const EntityIdReferenceIndexes = [
