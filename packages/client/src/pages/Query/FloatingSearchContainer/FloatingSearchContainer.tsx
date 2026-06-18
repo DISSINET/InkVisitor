@@ -374,7 +374,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
             $left={expandedPagePosition.x}
             $top={expandedPagePosition.y}
           >
-            <StyledExpandedPanel ref={expandedPanelRef}>
+            <StyledExpandedPanel ref={expandedPanelRef} data-floating-search="true">
               <StyledExpandedHeader>
                 <StyledDragHandle
                   onPointerDown={handleDragPointerDown}
