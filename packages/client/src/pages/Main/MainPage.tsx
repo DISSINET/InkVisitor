@@ -425,11 +425,25 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const handleMaximizeEditorBox = () => {
+    if (!editorOpened) {
+      setEditorOpened(true);
+      dispatch(setEditorBoxState(EditorBoxState.Normal));
+      return;
+    }
     if (editorBoxState === EditorBoxState.Normal) {
       dispatch(setEditorBoxState(EditorBoxState.FullHeight));
     } else {
       dispatch(setEditorBoxState(EditorBoxState.Normal));
     }
+  };
+
+  const getEditorMaximizeBtnTooltip = () => {
+    if (!editorOpened) {
+      return "open editor box";
+    }
+    return editorBoxState === EditorBoxState.FullHeight
+      ? "restore editor box"
+      : "maximize editor box";
   };
 
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
@@ -962,36 +976,33 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getEditorBoxHeight()}
           label="Editor"
           isExpanded={thirdPanelExpanded}
-          onHeaderClick={() => {
-            if (!editorOpened) {
-              setEditorOpened(true);
-            }
-          }}
+          onHeaderClick={handleMaximizeEditorBox}
+          disableHeaderClick={editorOpened && editorBoxState === EditorBoxState.FullHeight}
           buttons={[
             <Button
               key="maximize-editor"
               inverted
-              tooltipLabel={
-                editorBoxState === EditorBoxState.FullHeight
-                  ? "restore editor box"
-                  : "maximize editor box"
-              }
+              tooltipLabel={getEditorMaximizeBtnTooltip()}
               icon={
-                editorBoxState === EditorBoxState.FullHeight ? (
-                  <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                ) : (
+                editorOpened && editorBoxState === EditorBoxState.Normal ? (
                   <BsSquareFill />
+                ) : (
+                  <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
                 )
               }
               onClick={handleMaximizeEditorBox}
             />,
-            <Button
-              key="hide-editor"
-              inverted
-              tooltipLabel={editorOpened ? "hide editor" : "show editor"}
-              icon={editorOpened ? <BiHide /> : <BiShow />}
-              onClick={() => setEditorOpened(!editorOpened)}
-            />,
+            <>
+              {editorOpened && (
+                <Button
+                  key="hide-editor"
+                  inverted
+                  tooltipLabel="minimize editor box"
+                  icon={<BiHide />}
+                  onClick={() => setEditorOpened(false)}
+                />
+              )}
+            </>,
             thirdPanelButton(),
           ]}
         >
