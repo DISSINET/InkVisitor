@@ -11,6 +11,8 @@ interface UseQueryDataParams {
   exploreState: Explore.IExplore;
   stableSignature: string;
   queryStateValidity: QueryValidity;
+  /** Only fire when this matches stableSignature (i.e. user explicitly ran the search). */
+  committedSignature: string | null;
 }
 
 interface UseQueryDataReturn {
@@ -47,6 +49,7 @@ export const useQueryData = ({
   exploreState,
   stableSignature,
   queryStateValidity,
+  committedSignature,
 }: UseQueryDataParams): UseQueryDataReturn => {
   const queryClient = useQueryClient();
 
@@ -177,7 +180,11 @@ export const useQueryData = ({
     initialData: getInitialData,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
-    enabled: queryStateValidity.isValid && api.isLoggedIn() && !isRequestEmpty,
+    enabled:
+      queryStateValidity.isValid &&
+      api.isLoggedIn() &&
+      !isRequestEmpty &&
+      committedSignature === stableSignature,
   });
 
   const prevSignatureRef = useRef(stableSignature);

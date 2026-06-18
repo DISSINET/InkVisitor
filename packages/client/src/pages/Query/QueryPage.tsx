@@ -7,7 +7,7 @@ import { Box, Button, ButtonGroup, Panel } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
-import { BiBarChartAlt2, BiRefresh, BiTable } from "react-icons/bi";
+import { BiBarChartAlt2, BiRefresh, BiSearch, BiTable } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
@@ -140,6 +140,30 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     () => isQueryRequestEmpty(queryState, exploreState),
     [queryState, exploreState],
   );
+
+  // Only fire the API query when the user explicitly submits via Run Search or Enter.
+  const [committedSignature, setCommittedSignature] = useState<string | null>(null);
+
+  const handleRunSearch = useCallback(() => {
+    setCommittedSignature(stableSignature);
+  }, [stableSignature]);
+
+  // Global Enter shortcut: run search unless focus is in a text input, textarea,
+  // or select (e.g. Suggester, react-select dropdown).
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+      handleRunSearch();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [handleRunSearch]);
+
+  // True when the user has criteria set but hasn't run the search yet (or has
+  // changed the query since the last run).
+  const isSearchPending = !isRequestEmpty && committedSignature !== stableSignature;
 
   const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
@@ -290,6 +314,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     exploreState,
     stableSignature,
     queryStateValidity,
+    committedSignature,
   });
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
@@ -459,6 +484,14 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
                 <Button
+                  key="run-search"
+                  tooltipLabel="run search (Enter)"
+                  label="run search"
+                  icon={<BiSearch />}
+                  disabled={!isSearchPending}
+                  onClick={handleRunSearch}
+                />,
+                <Button
                   key="toggle-query-left-panel"
                   inverted
                   tooltipLabel="collapse left panel"
@@ -541,6 +574,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 data={queryData}
                 isQueryFetching={queryIsFetching}
                 isRequestEmpty={isRequestEmpty}
+                isSearchPending={isSearchPending}
                 queryError={queryError}
                 onExport={handleExport}
                 stableSignature={stableSignature}

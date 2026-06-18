@@ -19,11 +19,7 @@ import { CMetaProp } from "constructors";
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
-import {
-  StyledBody,
-  StyledEmptyMessage,
-  StyledTableWrapper,
-} from "./ExplorerTableStyles";
+import { StyledBody, StyledEmptyMessage, StyledTableWrapper } from "./ExplorerTableStyles";
 
 import ExploreTableHeader from "./ExploreTableHeader";
 import {
@@ -54,6 +50,8 @@ interface ExplorerTable {
   isQueryFetching: boolean;
   /** True when no search criteria are set, so no query is fired. */
   isRequestEmpty: boolean;
+  /** True when criteria are set but the search has not been run yet. */
+  isSearchPending?: boolean;
   queryError: Error | null;
   height: number;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
@@ -74,6 +72,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   data,
   isQueryFetching,
   isRequestEmpty,
+  isSearchPending = false,
   getCachedEntity,
   height: heightBox,
   onOpenEntityInDetail,
@@ -101,8 +100,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] as string[] };
 
   const { limit, offset } = state;
-  const columns =
-    state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
+  const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const [total, setTotal] = useState(0);
 
@@ -449,8 +447,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           >
             {isRequestEmpty ? (
               <StyledEmptyMessage>
-                Create a query or add a search filter first to see the matching
-                entities.
+                Create a query or add a search filter first to see the matching entities.
+              </StyledEmptyMessage>
+            ) : isSearchPending ? (
+              <StyledEmptyMessage>
+                Run the search to see matching entities. (Enter)
               </StyledEmptyMessage>
             ) : (
               <List
