@@ -19,7 +19,11 @@ import { CMetaProp } from "constructors";
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
-import { StyledBody, StyledTableWrapper } from "./ExplorerTableStyles";
+import {
+  StyledBody,
+  StyledEmptyMessage,
+  StyledTableWrapper,
+} from "./ExplorerTableStyles";
 
 import ExploreTableHeader from "./ExploreTableHeader";
 import {
@@ -48,6 +52,8 @@ interface ExplorerTable {
   dispatch: React.Dispatch<ExploreAction>;
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
+  /** True when no search criteria are set, so no query is fired. */
+  isRequestEmpty: boolean;
   queryError: Error | null;
   height: number;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
@@ -67,6 +73,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   dispatch,
   data,
   isQueryFetching,
+  isRequestEmpty,
   getCachedEntity,
   height: heightBox,
   onOpenEntityInDetail,
@@ -440,17 +447,24 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               height: heightTableBody,
             }}
           >
-            <List
-              style={{
-                overflowX: "hidden",
-              }}
-              rowCount={total}
-              rowHeight={getRowHeight}
-              overscanCount={OVERSCAN_ROWS}
-              onRowsRendered={handleRowsRendered}
-              rowProps={stableEmptyRowProps}
-              rowComponent={renderRow}
-            />
+            {isRequestEmpty ? (
+              <StyledEmptyMessage>
+                Create a query or add a search filter first to see the matching
+                entities.
+              </StyledEmptyMessage>
+            ) : (
+              <List
+                style={{
+                  overflowX: "hidden",
+                }}
+                rowCount={total}
+                rowHeight={getRowHeight}
+                overscanCount={OVERSCAN_ROWS}
+                onRowsRendered={handleRowsRendered}
+                rowProps={stableEmptyRowProps}
+                rowComponent={renderRow}
+              />
+            )}
           </StyledBody>
         </div>
       </div>
