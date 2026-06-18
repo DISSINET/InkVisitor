@@ -37,15 +37,14 @@ import {
 } from "./types";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildStableSignature, isEdgeValid } from "./utils";
-interface QueryPage { }
-export const QueryPage: React.FC<QueryPage> = ({ }) => {
+interface QueryPage {}
+export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
   const { data: userData } = useUserQuery(true);
   const canBatchEdit =
-    userData?.role === UserEnums.Role.Owner ||
-    userData?.role === UserEnums.Role.Admin;
+    userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin;
   const {
     selectedDetailId,
     detailIdArray,
@@ -143,14 +142,14 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
     const exportExplore =
       selectedColumnIds && exploreState.view.mode === Explore.EViewMode.Table
         ? {
-          ...exploreState,
-          view: {
-            ...exploreState.view,
-            columns: exploreState.view.columns.filter(
-              (c: Explore.IExploreColumn) => selectedColumnIds.includes(c.id),
-            ),
-          },
-        }
+            ...exploreState,
+            view: {
+              ...exploreState.view,
+              columns: exploreState.view.columns.filter((c: Explore.IExploreColumn) =>
+                selectedColumnIds.includes(c.id),
+              ),
+            },
+          }
         : exploreState;
     api.queryExport(queryState, exportExplore, rowIndices);
   };
@@ -226,7 +225,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
     if (isExplorerAtMaxHeight) {
       const restoredHeight =
         savedExplorerSeparatorYRef.current !== null &&
-          savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
+        savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
           ? savedExplorerSeparatorYRef.current
           : getDefaultSeparatorYPosition();
       setExplorerBoxMaximized(false);
@@ -449,7 +448,7 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
               noFrame
               borderColor="white"
               height={querySeparatorYPosition}
-              label="Search"
+              label="Query Builder"
               onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
                 <Button
@@ -476,7 +475,11 @@ export const QueryPage: React.FC<QueryPage> = ({ }) => {
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
               buttons={[
-                <ButtonGroup key="explorer-view-mode" $noMarginRight style={{ marginRight: "0.6rem" }}>
+                <ButtonGroup
+                  key="explorer-view-mode"
+                  $noMarginRight
+                  style={{ marginRight: "0.6rem" }}
+                >
                   <Button
                     tooltipLabel="table view"
                     label="table"
