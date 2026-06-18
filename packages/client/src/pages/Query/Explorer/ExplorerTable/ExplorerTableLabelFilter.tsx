@@ -48,7 +48,7 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
   }, [debouncedLabel, appliedLabel, useRegex, dispatchFilter]);
 
   return (
-    <StyledLabelFilter>
+    <StyledLabelFilter data-run-on-enter="true">
       <Input
         width="full"
         placeholder={
