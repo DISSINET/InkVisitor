@@ -125,6 +125,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               dispatch={dispatch}
               data={data}
               isQueryFetching={isQueryFetching}
+              isRequestEmpty={isRequestEmpty}
               queryError={queryError}
               height={contentHeight}
               getCachedEntity={getCachedEntity}
