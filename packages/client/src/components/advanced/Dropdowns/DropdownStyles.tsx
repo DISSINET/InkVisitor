@@ -17,6 +17,7 @@ interface StyledEntityMultiValue {
   $color?: keyof ThemeColor;
 }
 export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
+  height: 1.8rem;
   padding: 0.2rem 0.2rem 0.2rem;
   padding-left: 0.3rem;
   border-left-style: solid;

@@ -57,6 +57,8 @@ interface BaseDropdown {
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
   loading?: boolean;
+  // for minified version of entity multi dropdown
+  minified?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -88,6 +90,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   closeMenuOnSelect = true,
   shortLabel = false,
   loading = false,
+  minified = false,
 }) => {
   const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
@@ -175,6 +178,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           loggerId={loggerId}
           limitSelectedItems={limitSelectedItems}
           shortLabel={shortLabel}
+          minified={minified}
         />
         {loading && <Loader show size={7} loaderStyle="beat" />}
       </StyledSelectWrapper>
