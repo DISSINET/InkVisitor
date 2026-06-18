@@ -109,7 +109,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
     // The header suggester row only renders for users with write rights; when
     // it is absent (editors without write rights, viewers) reclaim its height.
     const reclaimedSuggesterRow = userCanEdit ? 0 : SUGGESTER_ROW_HEIGHT;
-    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT + reclaimedSuggesterRow;
+    return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT + reclaimedSuggesterRow;
   }, [contentHeight, userCanEdit]);
 
   const annotatorWidth = useMemo<number>(() => {
@@ -152,10 +152,10 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
       if (annotator && selectedDocument && shouldScroll) {
         const isStatementInDocument = Boolean(
           statementId &&
-            selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(statementId)
+          selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(statementId),
         );
         const isStatementInTerritory = territory?.statements?.some(
-          (statement) => statement.id === statementId
+          (statement) => statement.id === statementId,
         );
 
         const scrollToStatement = isStatementInDocument && isStatementInTerritory;
