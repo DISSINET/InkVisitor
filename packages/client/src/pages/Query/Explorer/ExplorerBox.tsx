@@ -106,6 +106,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               dispatch={dispatch}
               values={data?.stats}
               total={data?.total}
+              statsEntityLimit={data?.statsEntityLimit}
               isFetching={isQueryFetching}
               height={contentHeight}
             />

@@ -16,6 +16,7 @@ import {
 } from "./query-base-cache";
 import { getRowIdsFilter } from "./explore-ids-filter";
 import { aggregateAuditStats } from "@models/stats/aggregate";
+import { EXPLORE_STATS_ENTITY_LIMIT } from "@inkvisitor/shared/types/stats";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
@@ -119,10 +120,14 @@ export default class QuerySearch {
   }
 
   /**
-   * Aggregates audit stats over the entire filtered result set (the explore
+   * Aggregates audit stats over the filtered result set (the explore
    * offset/limit pagination is intentionally ignored - stats cover the whole
    * result, not a single page). Only meaningful when the view mode is Stats;
    * returns {} otherwise. Must be called after run().
+   *
+   * The entity list is capped at EXPLORE_STATS_ENTITY_LIMIT before it reaches
+   * the audit query: an unbounded id list flooded the db connection pool. The
+   * caller compares the full result `total` against the limit to warn the user.
    */
   async getStats(
     db: Connection
@@ -135,7 +140,10 @@ export default class QuerySearch {
     }
 
     await this.results.applyExploreFilters(db, this.explore);
-    const entityIds = this.results.items ?? [];
+    const entityIds = (this.results.items ?? []).slice(
+      0,
+      EXPLORE_STATS_ENTITY_LIMIT
+    );
 
     return aggregateAuditStats(db, this.explore.view.stats, { entityIds });
   }

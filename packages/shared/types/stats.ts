@@ -22,6 +22,14 @@ export enum Aggregation {
 }
 
 /**
+ * Upper bound on the number of entities whose audits are aggregated for the
+ * Explorer stats view. The filtered result can be huge; passing the whole id
+ * list into the audit query floods the db connection pool, so the explorer caps
+ * it and tells the user when the cap was hit.
+ */
+export const EXPLORE_STATS_ENTITY_LIMIT = 100;
+
+/**
  * Core temporal-aggregation params shared by the global stats request
  * (IRequestStats) and the Explorer stats view (Explore.IExploreStatsParams), so
  * both stay in sync and feed the same `aggregateAuditStats` server logic.

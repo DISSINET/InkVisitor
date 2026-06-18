@@ -920,12 +920,21 @@ export namespace Explore {
   }
 
   /**
-   * Stats config for the Explorer stats view. Aliases the shared aggregation
-   * params so it stays in sync with the global stats request (IRequestStats);
-   * the audit subset is already determined by the query + filters, so the
-   * IRequestStats `filter` block is intentionally not part of this.
+   * Stats config for the Explorer stats view. Reuses the shared aggregation
+   * params (so timeUnit / eventType / aggregateBy stay in sync with the global
+   * stats request, IRequestStats), but the audit subset is already determined by
+   * the query + filters, so the IRequestStats `filter` block is intentionally
+   * not part of this. The date window is also dropped here: the explorer has no
+   * time filter, and omitting fromDate/toDate lets the server skip the audit
+   * `between` scan entirely.
    */
-  export type IExploreStatsParams = IStatsAggregationParams;
+  export type IExploreStatsParams = Omit<
+    IStatsAggregationParams,
+    "fromDate" | "toDate"
+  > & {
+    fromDate?: number;
+    toDate?: number;
+  };
 
   export enum EViewMode {
     Table = "table",
