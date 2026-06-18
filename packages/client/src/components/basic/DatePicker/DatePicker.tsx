@@ -256,7 +256,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     whileElementsMounted: autoUpdate,
   });
 
-  const click = useClick(context);
+  const click = useClick(context, { keyboardHandlers: false });
   const dismiss = useDismiss(context);
   const role = useRole(context, { role: "dialog" });
   const { getReferenceProps, getFloatingProps } = useInteractions([

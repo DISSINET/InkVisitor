@@ -103,14 +103,8 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
     [searchData],
   );
 
-  const handleFormKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.target as HTMLInputElement).type === "datetime-local") {
-      e.preventDefault();
-    }
-  };
-
   return (
-    <StyledForm onKeyDown={handleFormKeyDown}>
+    <StyledForm>
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.Status}</StyledRowHeader>
         <StyledRowControl>
