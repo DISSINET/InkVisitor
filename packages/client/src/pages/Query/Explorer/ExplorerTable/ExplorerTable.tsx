@@ -453,6 +453,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               <StyledEmptyMessage>
                 Run the search to see matching entities. (Enter)
               </StyledEmptyMessage>
+            ) : !isQueryFetching && total === 0 ? (
+              <StyledEmptyMessage>No results found.</StyledEmptyMessage>
             ) : (
               <List
                 style={{
