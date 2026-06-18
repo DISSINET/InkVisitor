@@ -1,30 +1,31 @@
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
-import { Button, IconWithTooltip, Loader } from "components";
+import { Button, IconWithTooltip, Loader, Modal, ModalContent, ModalHeader } from "components";
 import Dropdown, {
   DocumentModalExport,
   DocumentTitle,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback, useMemo, useState } from "react";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
+import React, { useMemo, useState } from "react";
 import { FaDownload, FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
+import { toast } from "react-toastify";
+import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 import {
   StyledAnnotatorMenuBar,
+  StyledDocumentLine,
   StyledDocumentTitleContainer,
   StyledEntityContainer,
   StyledHighlightContainer,
   StyledNoDocumentMessage,
   StyledSearchNavigation,
-  StyledDocumentLine,
 } from "../StatementsListBox/StatementListBoxStyles";
 import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
-import { toast } from "react-toastify";
-import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
-import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
+import { StyledWarningsListHeader } from "./AnnotatorBoxStyles";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -81,9 +82,10 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   onOpenWarnings,
 }) => {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
+  const [showHighlightModal, setShowHighlightModal] = useState<boolean>(false);
 
   const isUndersized = useMemo(() => {
-    return contentWidth < SECOND_PANEL_MIN_WIDTH;
+    return contentWidth < ANNOTATOR_UNDERSIZED_BREAKPOINT;
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
@@ -244,14 +246,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         {/* Class selector - HIGHLIGHT */}
         {selectedResource !== false && selectedResource?.data?.documentId && (
           <StyledHighlightContainer>
-            {/* this condition helps initial render in firefox */}
-            {contentWidth > 0 && (
+            {contentWidth > 0 && !isUndersized && (
               <>
-                {!isUndersized && (
-                  <StyledInfoText style={{ textWrap: "nowrap" }}>
-                    <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
-                  </StyledInfoText>
-                )}
+                <StyledInfoText style={{ textWrap: "nowrap" }}>
+                  <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
+                </StyledInfoText>
                 <Dropdown.Multi.Entity
                   shortLabel
                   options={entitiesDict}
@@ -267,6 +266,13 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 />
               </>
             )}
+            {isUndersized && (
+              <Button
+                icon={<FaHighlighter />}
+                tooltipLabel="Highlight settings"
+                onClick={() => setShowHighlightModal(true)}
+              />
+            )}
           </StyledHighlightContainer>
         )}
       </StyledDocumentLine>
@@ -277,6 +283,32 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
           onClose={() => setShowExportModal(false)}
         />
       )}
+
+      <Modal
+        showModal={showHighlightModal}
+        onClose={() => setShowHighlightModal(false)}
+        width="auto"
+      >
+        <ModalHeader
+          icon={<FaHighlighter />}
+          title="Highlight settings"
+          onClose={() => setShowHighlightModal(false)}
+        />
+        <ModalContent column>
+          <StyledWarningsListHeader>Choose entity classes to highlight</StyledWarningsListHeader>
+          <Dropdown.Multi.Entity
+            options={entitiesDict}
+            disableEmpty
+            isClearable
+            disableAny
+            closeMenuOnSelect={false}
+            onChange={setHlEntities}
+            value={hlEntities}
+            noOptionsMessage="No entity classes to highlight"
+            width={300}
+          />
+        </ModalContent>
+      </Modal>
     </>
   );
 };
