@@ -23,7 +23,7 @@ import {
 } from "../StatementsListBox/StatementListBoxStyles";
 import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import { toast } from "react-toastify";
-import { ANNOTATOR_UNDERSIZED_BREAKPOINT, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
+import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
@@ -83,22 +83,19 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
 
   const isUndersized = useMemo(() => {
-    return contentWidth < ANNOTATOR_UNDERSIZED_BREAKPOINT;
+    return contentWidth < SECOND_PANEL_MIN_WIDTH;
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
     const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.9 : contentWidth / 2.6;
-    return baseWidth;
-  }, [contentWidth, annotatorWidthTooNarrow]);
+    return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
+  }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
   const highlightDropdownLimitSelectedItems = useMemo(
     () =>
-      isUndersized
-        ? 1
-        : Math.floor(
-            (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) /
-              HIGHLIGHT_SELECTED_ITEM_WIDTH,
-          ),
+      Math.floor(
+        (highlightDropdownWidth - HIGHLIGHT_DROPDOWN_CHROME_WIDTH) / HIGHLIGHT_SELECTED_ITEM_WIDTH,
+      ),
     [highlightDropdownWidth],
   );
 
@@ -267,7 +264,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                   noOptionsMessage="No entity classes to highlight"
                   width={highlightDropdownWidth}
                   limitSelectedItems={highlightDropdownLimitSelectedItems}
-                  minified={isUndersized}
                 />
               </>
             )}

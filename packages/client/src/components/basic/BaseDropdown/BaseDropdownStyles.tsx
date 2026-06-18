@@ -33,7 +33,6 @@ export interface StyledSelect {
   loggerId?: string;
   limitSelectedItems?: number;
   shortLabel?: boolean;
-  minified?: boolean;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;

@@ -35,7 +35,6 @@ interface EntityMultiDropdown<T = string> {
   loggerId?: string;
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
-  minified?: boolean;
 }
 export const EntityMultiDropdown = <T extends string>({
   width,
@@ -56,7 +55,6 @@ export const EntityMultiDropdown = <T extends string>({
   loggerId,
   closeMenuOnSelect = true,
   shortLabel = false,
-  minified = false,
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
@@ -151,7 +149,6 @@ export const EntityMultiDropdown = <T extends string>({
       limitSelectedItems={limitSelectedItems}
       closeMenuOnSelect={closeMenuOnSelect}
       shortLabel={shortLabel}
-      minified={minified}
     />
   );
 };
@@ -163,7 +160,6 @@ const ValueContainer = ({
     selectProps: StyledSelect;
   }): React.ReactElement => {
   const theme = useTheme();
-  const minified = props.selectProps?.minified;
 
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
@@ -197,8 +193,7 @@ const ValueContainer = ({
                   color: theme.color.primary,
                 }}
               >
-                {/* +{displayRemainingCount} {minified ? "" : "more"} */}+{displayRemainingCount}{" "}
-                more
+                +{displayRemainingCount} more
               </div>,
             ]
           : []),
@@ -212,12 +207,11 @@ const ValueContainer = ({
 
 const MultiValue = (props: any): React.ReactElement => {
   const shortLabel = props.selectProps?.shortLabel;
-  const minified = props.selectProps?.minified;
 
   return (
     <components.MultiValue {...props}>
       <StyledEntityMultiValue $color={EntityColors[props.data.value]?.color ?? "transparent"}>
-        {!minified && <> {shortLabel ? props.data.value : props.data.label}</>}
+        {shortLabel ? props.data.value : props.data.label}
       </StyledEntityMultiValue>
     </components.MultiValue>
   );
