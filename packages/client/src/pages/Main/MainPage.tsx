@@ -882,6 +882,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           setSeparatorXPosition={(xPosition) => {
             handleCenterSeparatorXPositionChange(xPosition);
           }}
+          onMaxWidthReached={() => {
+            if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + 10) {
+              handleSearchSeparatorXPositionChange(mainPageSearchSeparatorXPosition + 10);
+            }
+          }}
           onMinWidthReached={() => {
             if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
               handleTreeSeparatorXPositionChange(mainPageTreeSeparatorXPosition - 10);
