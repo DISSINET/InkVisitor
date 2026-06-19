@@ -6,6 +6,7 @@ import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpand
 import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
+import secondPanelExpandedSlice from "./features/layout/mainPage/secondPanelExpandedSlice";
 import secondPanelRealWidthSlice from "./features/layout/mainPage/secondPanelRealWidthSlice";
 import thirdPanelRealWidthSlice from "./features/layout/mainPage/thirdPanelRealWidthSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
@@ -74,6 +75,7 @@ const store: Store = configureStore({
         panelWidths: panelWidthsSlice,
         panelWidthsPercent: panelWidthsPercentSlice,
         firstPanelExpanded: firstPanelExpandedSlice,
+        secondPanelExpanded: secondPanelExpandedSlice,
         thirdPanelExpanded: thirdPanelExpandedSlice,
         fourthPanelExpanded: fourthPanelExpandedSlice,
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
