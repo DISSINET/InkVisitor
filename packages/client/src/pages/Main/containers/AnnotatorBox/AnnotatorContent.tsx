@@ -26,7 +26,7 @@ import StatementListDocumentLine from "./AnnotatorDocumentLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
-  territoryId: string;
+  territoryId?: string;
   territory?: IResponseTerritory;
   statementId: string;
   statementCreateMutation: UseMutationResult<
@@ -127,7 +127,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   const [warningAnchorCount, setWarningAnchorCount] = useState(0);
 
   const activeTHasAnchor = useMemo<boolean>(() => {
-    if (selectedDocument) {
+    if (selectedDocument && territoryId) {
       return selectedDocument?.entityIds.T.includes(territoryId);
     }
     return false;

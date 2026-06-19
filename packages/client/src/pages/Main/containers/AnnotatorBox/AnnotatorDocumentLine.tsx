@@ -39,7 +39,7 @@ interface StatementListDocumentLine {
   selectedDocument?: IDocument;
   activeTHasAnchor: boolean;
   annotator?: any;
-  territoryId: string;
+  territoryId?: string;
   resources: IEntity[];
   // is list non empty
   showStatementList: boolean;

@@ -313,10 +313,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     }
   };
 
-  if (!territoryId) {
-    return null;
-  }
-
   return (
     <StatementListTextAnnotator
       contentHeight={height}
