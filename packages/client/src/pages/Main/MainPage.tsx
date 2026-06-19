@@ -33,24 +33,22 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   BOX_SPLIT_OFFSET,
   COLLAPSED_PANEL_WIDTH,
-  EXTRA_SMALL_SCREEN_LIMIT,
   FIRST_PANEL_MIN_WIDTH,
   FOURTH_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   heightHeader,
   hiddenBoxHeight,
-  INIT_PERCENT_PANEL_WIDTHS,
-  INIT_PERCENT_PANEL_WIDTHS_EXTRA_SMALL_SCREEN,
-  INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN,
-  INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN,
-  LARGE_SCREEN_LIMIT,
   MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
   MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
   MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
   SECOND_PANEL_MIN_WIDTH,
-  SMALL_SCREEN_LIMIT,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
+import {
+  arePanelWidthsUndersized,
+  getInitPercentPanelWidths,
+  panelWidthsFromSeparators,
+} from "utils/layoutUtils";
 import { DetailBoxState, EditorBoxState } from "types";
 import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
@@ -843,22 +841,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const handleLayoutInit = () => {
-    // calculate panel widths based on screen width
-    const initPercentPanelWidths =
-      layoutWidth > LARGE_SCREEN_LIMIT
-        ? INIT_PERCENT_PANEL_WIDTHS_LARGE_SCREEN
-        : layoutWidth < EXTRA_SMALL_SCREEN_LIMIT
-          ? INIT_PERCENT_PANEL_WIDTHS_EXTRA_SMALL_SCREEN
-          : layoutWidth < SMALL_SCREEN_LIMIT
-            ? INIT_PERCENT_PANEL_WIDTHS_SMALL_SCREEN
-            : INIT_PERCENT_PANEL_WIDTHS;
-
-    const initPanelWidthsPx = initPercentPanelWidths.map((percentWidth) =>
+    const initPercentPanelWidths = getInitPercentPanelWidths(layoutWidth);
+    const initPanelWidthsPx = initPercentPanelWidths.map((percentWidth: number) =>
       floorNumberToOneDecimal(percentWidth * onePercentOfLayoutWidth),
     );
     dispatch(setPanelWidths(initPanelWidthsPx));
     dispatch(setPanelWidthsPercent(initPercentPanelWidths));
-    // set all separators to redux and local storage
     setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
     localStorage.setItem(
       "mainPageTreeSeparatorXPosition",
@@ -988,21 +976,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
           // first layout INIT
           handleLayoutInit();
         } else {
-          const isSomethingUndersized =
-            Number(localStorageTreeSeparatorXPosition) * onePercentOfLayoutWidth <
-              FIRST_PANEL_MIN_WIDTH ||
-            (Number(localStorageCenterSeparatorXPosition) -
-              Number(localStorageTreeSeparatorXPosition)) *
-              onePercentOfLayoutWidth <
-              SECOND_PANEL_MIN_WIDTH ||
-            (Number(localStorageSearchSeparatorXPosition) -
-              Number(localStorageCenterSeparatorXPosition)) *
-              onePercentOfLayoutWidth <
-              THIRD_PANEL_MIN_WIDTH ||
-            (layoutWidth - Number(localStorageSearchSeparatorXPosition)) * onePercentOfLayoutWidth <
-              FOURTH_PANEL_MIN_WIDTH;
+          const savedWidths = panelWidthsFromSeparators(
+            Number(localStorageTreeSeparatorXPosition),
+            Number(localStorageCenterSeparatorXPosition),
+            Number(localStorageSearchSeparatorXPosition),
+            layoutWidth,
+          );
 
-          if (isSomethingUndersized) {
+          if (arePanelWidthsUndersized(savedWidths)) {
             // something is undersized
             console.log("something is undersized");
             handleLayoutInit();
