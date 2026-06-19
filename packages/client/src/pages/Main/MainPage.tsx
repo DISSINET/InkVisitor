@@ -245,8 +245,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const reverseThirdPanelIcon =
-    (!firstPanelExpanded && !secondPanelExpanded);
+  const reverseThirdPanelIcon = !secondPanelExpanded;
 
   const thirdPanelButton = () => (
     <Button
@@ -770,14 +769,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch,
   ]);
 
+  const firstPanelWidth = useMemo(() => {
+    if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
+    if (secondPanelExpanded || thirdPanelExpanded || fourthPanelExpanded) {
+      return panelWidths[0];
+    }
+    return layoutWidth - 3 * COLLAPSED_PANEL_WIDTH;
+  }, [firstPanelExpanded, secondPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, layoutWidth]);
+
   const fourthPanelWidth = useMemo(() => {
     if (!fourthPanelExpanded) return COLLAPSED_PANEL_WIDTH;
-    const panel1 = firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH;
-    return layoutWidth - panel1 - secondPanelWidth - thirdPanelWidth;
+    return layoutWidth - firstPanelWidth - secondPanelWidth - thirdPanelWidth;
   }, [
     fourthPanelExpanded,
-    firstPanelExpanded,
-    panelWidths,
+    firstPanelWidth,
     secondPanelWidth,
     thirdPanelWidth,
     layoutWidth,
@@ -875,7 +880,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
     <>
       <ScrollHandler />
       {/* TREE SEPARATOR */}
-      {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
+      {mainPageTreeSeparatorXPosition > 0 &&
+        firstPanelExpanded &&
+        (secondPanelExpanded || thirdPanelExpanded || fourthPanelExpanded) && (
         <LayoutSeparatorVertical
           leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
           leftSideMaxWidth={
@@ -995,7 +1002,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* FIRST PANEL */}
-      <Panel width={firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH}>
+      <Panel width={firstPanelWidth}>
         <Box
           height={contentHeight}
           label="Territories"
