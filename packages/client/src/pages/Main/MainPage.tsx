@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree, IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Box, Button, ButtonGroup, Panel } from "components";
+import { Box, Button, ButtonGroup, Loader, Panel } from "components";
 import { EntityCreateModal, LayoutSeparatorVertical } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -114,6 +114,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
     (state) => state.layout.mainPage.thirdPanelRealWidth,
   );
   const [lastState, setLastState] = useState(DetailBoxState.Normal);
+
+  const annotatorVisible =
+    thirdPanelExpanded && !(editorOpened && editorBoxState === EditorBoxState.FullHeight);
+  const [showAnnotatorContent, setShowAnnotatorContent] = useState(false);
+  useEffect(() => {
+    if (annotatorVisible) {
+      const timer = setTimeout(() => {
+        setShowAnnotatorContent(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setShowAnnotatorContent(false);
+    }
+  }, [annotatorVisible]);
 
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
@@ -1153,10 +1167,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={thirdPanelExpanded}
           buttons={[thirdPanelButton()]}
         >
-          <MemoizedAnnotatorBox
-            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
-            width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
-          />
+          {showAnnotatorContent ? (
+            <MemoizedAnnotatorBox
+              height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
+              width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
+            />
+          ) : (
+            annotatorVisible && <Loader show />
+          )}
         </Box>
 
         <Box
