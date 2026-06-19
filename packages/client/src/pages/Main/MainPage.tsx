@@ -8,7 +8,7 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
@@ -975,7 +975,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     fourthPanelExpanded,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (layoutWidth > 0) {
       if (isFirstRender.current || !panelWidths.length) {
         // This is either initial load or coming from different page
