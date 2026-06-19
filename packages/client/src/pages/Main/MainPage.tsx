@@ -184,7 +184,70 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
 
   const toggleSecondPanel = () => {
-    dispatch(setSecondPanelExpanded(!secondPanelExpanded));
+    if (secondPanelExpanded) {
+      dispatch(setSecondPanelExpanded(false));
+    } else {
+      dispatch(setSecondPanelExpanded(true));
+
+      let newTreePos = mainPageTreeSeparatorXPosition;
+      let newCenterPos = mainPageCenterSeparatorXPosition;
+      let newSearchPos = mainPageSearchSeparatorXPosition;
+      let needsUpdate = false;
+
+      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+        newCenterPos = newTreePos + SECOND_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+      }
+
+      if (thirdPanelExpanded && newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+        newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+
+        if (fourthPanelExpanded && layoutWidth - newSearchPos < FOURTH_PANEL_MIN_WIDTH) {
+          newSearchPos = layoutWidth - FOURTH_PANEL_MIN_WIDTH;
+          newCenterPos = newSearchPos - THIRD_PANEL_MIN_WIDTH;
+
+          if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+            newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+          }
+        }
+      }
+
+      if (needsUpdate) {
+        if (newTreePos !== mainPageTreeSeparatorXPosition) {
+          setMainPageTreeSeparatorXPosition(newTreePos);
+          localStorage.setItem(
+            "mainPageTreeSeparatorXPosition",
+            floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        if (newCenterPos !== mainPageCenterSeparatorXPosition) {
+          setMainPageCenterSeparatorXPosition(newCenterPos);
+          localStorage.setItem(
+            "mainPageCenterSeparatorXPosition",
+            floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        if (newSearchPos !== mainPageSearchSeparatorXPosition) {
+          setMainPageSearchSeparatorXPosition(newSearchPos);
+          localStorage.setItem(
+            "mainPageSearchSeparatorXPosition",
+            floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        dispatch(
+          setPanelWidths([
+            newTreePos,
+            floorNumberToOneDecimal(newCenterPos - newTreePos),
+            floorNumberToOneDecimal(newSearchPos - newCenterPos),
+            layoutWidth - newSearchPos,
+          ]),
+        );
+      }
+    }
   };
 
   const secondPanelButton = () => (
@@ -862,28 +925,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
   }, [fourthPanelExpanded, firstPanelWidth, secondPanelWidth, thirdPanelWidth, layoutWidth]);
 
   // double check for errors after opening the panel and recalculating sizes
-  useEffect(() => {
-    if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
-      const isUndersized =
-        (firstPanelExpanded && firstPanelWidth < FIRST_PANEL_MIN_WIDTH) ||
-        (secondPanelExpanded && secondPanelWidth < SECOND_PANEL_MIN_WIDTH) ||
-        (thirdPanelExpanded && thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) ||
-        (fourthPanelExpanded && fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH);
+  // useEffect(() => {
+  //   if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
+  //     const isUndersized =
+  //       (firstPanelExpanded && firstPanelWidth < FIRST_PANEL_MIN_WIDTH) ||
+  //       (secondPanelExpanded && secondPanelWidth < SECOND_PANEL_MIN_WIDTH) ||
+  //       (thirdPanelExpanded && thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) ||
+  //       (fourthPanelExpanded && fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH);
 
-      if (isUndersized) {
-        handleLayoutInit();
-      }
-    }
-  }, [
-    firstPanelWidth,
-    secondPanelWidth,
-    thirdPanelWidth,
-    fourthPanelWidth,
-    firstPanelExpanded,
-    secondPanelExpanded,
-    thirdPanelExpanded,
-    fourthPanelExpanded,
-  ]);
+  //     if (isUndersized) {
+  //       handleLayoutInit();
+  //     }
+  //   }
+  // }, [
+  //   firstPanelWidth,
+  //   secondPanelWidth,
+  //   thirdPanelWidth,
+  //   fourthPanelWidth,
+  //   firstPanelExpanded,
+  //   secondPanelExpanded,
+  //   thirdPanelExpanded,
+  //   fourthPanelExpanded,
+  // ]);
 
   useEffect(() => {
     if (layoutWidth > 0) {
