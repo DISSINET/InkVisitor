@@ -694,7 +694,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const isFirstRender = useRef(true);
 
-  // postponing the dispatch so the panel resizing happens before the rerender which minifies the content
   const debouncedSetSecondPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setSecondPanelRealWidth(width));
   }, 0);
@@ -723,7 +722,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setThirdPanelRealWidth(width));
-  }, 400);
+  }, 0);
 
   const thirdPanelWidth = useMemo(() => {
     let width = !thirdPanelExpanded

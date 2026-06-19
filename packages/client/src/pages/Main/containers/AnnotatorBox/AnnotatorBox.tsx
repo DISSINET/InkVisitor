@@ -18,12 +18,12 @@ import { setHoveredStatementId } from "redux/features/statementAnnotator/hovered
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListTextAnnotator } from "./AnnotatorContent";
 
-interface AnnotatorBoxProps {
+interface AnnotatorBox {
   height: number;
   width: number;
 }
 
-export const AnnotatorBox: React.FC<AnnotatorBoxProps> = ({ height, width }) => {
+export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const { territoryId, statementId } = useSearchParams();
