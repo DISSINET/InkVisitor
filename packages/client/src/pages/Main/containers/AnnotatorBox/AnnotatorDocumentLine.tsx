@@ -130,7 +130,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               <div
                 style={{
                   display: "flex",
-                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "13.5rem",
+                  maxWidth: annotatorWidthTooNarrow ? "12rem" : "13.5rem",
                 }}
               >
                 <EntityTag
@@ -176,12 +176,12 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
           <StyledDocumentTitleContainer
             style={{
-              maxWidth: annotatorWidthTooNarrow ? "8rem" : "12.5rem",
+              maxWidth: annotatorWidthTooNarrow ? "12.5rem" : "12.5rem",
               minWidth: "2rem",
             }}
           >
             {selectedDocument && (
-              <DocumentTitle title={selectedDocument.title} width={isUndersized ? 70 : "full"} />
+              <DocumentTitle title={selectedDocument.title} width={isUndersized ? 100 : "full"} />
             )}
             <Loader show={selectedDocumentIsFetching} size={16} />
           </StyledDocumentTitleContainer>

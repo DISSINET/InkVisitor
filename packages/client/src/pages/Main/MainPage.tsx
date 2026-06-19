@@ -958,19 +958,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
       {/* THIRD PANEL */}
       <Panel width={thirdPanelWidth}>
-        {territoryId && (
-          <Box
-            borderColor="white"
-            height={getAnnotatorBoxHeight()}
-            label="Annotator"
-            isExpanded={thirdPanelExpanded}
-          >
-            <MemoizedAnnotatorBox
-              height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
-              width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
-            />
-          </Box>
-        )}
+        <Box
+          borderColor="white"
+          height={getAnnotatorBoxHeight()}
+          label="Annotator"
+          isExpanded={thirdPanelExpanded}
+          buttons={[thirdPanelButton()]}
+        >
+          <MemoizedAnnotatorBox
+            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
+            width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
+          />
+        </Box>
+
         <Box
           borderColor="white"
           height={getEditorBoxHeight()}
@@ -979,21 +979,27 @@ const MainPage: React.FC<MainPage> = ({}) => {
           onHeaderClick={handleMaximizeEditorBox}
           disableHeaderClick={editorOpened && editorBoxState === EditorBoxState.FullHeight}
           buttons={[
-            <Button
-              key="maximize-editor"
-              inverted
-              tooltipLabel={getEditorMaximizeBtnTooltip()}
-              icon={
-                editorOpened && editorBoxState === EditorBoxState.Normal ? (
-                  <BsSquareFill />
-                ) : (
-                  <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                )
-              }
-              onClick={handleMaximizeEditorBox}
-            />,
             <>
-              {editorOpened && (
+              {thirdPanelExpanded && (
+                <>
+                  <Button
+                    key="maximize-editor"
+                    inverted
+                    tooltipLabel={getEditorMaximizeBtnTooltip()}
+                    icon={
+                      editorOpened && editorBoxState === EditorBoxState.Normal ? (
+                        <BsSquareFill />
+                      ) : (
+                        <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                      )
+                    }
+                    onClick={handleMaximizeEditorBox}
+                  />
+                </>
+              )}
+            </>,
+            <>
+              {thirdPanelExpanded && editorOpened && (
                 <Button
                   key="hide-editor"
                   inverted
