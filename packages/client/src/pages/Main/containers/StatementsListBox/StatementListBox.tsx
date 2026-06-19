@@ -40,7 +40,6 @@ import {
   StyledContentWrapper,
   StyledEmptyState,
   StyledInfoWrapper,
-  StyledLoaderWrap,
   StyledStatementListBox,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
@@ -812,14 +811,9 @@ export const StatementListBox: React.FC = () => {
                 </StyledTableWrapper>
               </CustomScrollbar>
 
-              {statementListTableIsLoading &&
-                tableWidth > 0 &&
-                contentHeight > 0 &&
-                enableStatementListLoader && (
-                  <StyledLoaderWrap $width={tableWidth + 4} $height={contentHeight + 4}>
-                    <Loader show size={50} />
-                  </StyledLoaderWrap>
-                )}
+              {statementListTableIsLoading && enableStatementListLoader && (
+                <Loader show size={50} />
+              )}
             </StyledContentWrapper>
           )}
 
