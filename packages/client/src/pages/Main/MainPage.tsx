@@ -245,11 +245,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
+  const reverseThirdPanelIcon =
+    (!firstPanelExpanded && !secondPanelExpanded);
+
   const thirdPanelButton = () => (
     <Button
       onClick={toggleThirdPanel}
       inverted
-      icon={thirdPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      icon={
+        reverseThirdPanelIcon
+          ? thirdPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
+          : thirdPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />
+      }
     />
   );
 
@@ -269,12 +276,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
+  const reverseFourthPanelIcon =
+    (!firstPanelExpanded && !secondPanelExpanded && !thirdPanelExpanded);
+
   const hideFourthPanelButton = () => (
     <Button
       key="hide"
       onClick={toggleFourthPanel}
       inverted
-      icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      icon={
+        reverseFourthPanelIcon
+          ? fourthPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
+          : fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />
+      }
     />
   );
 
