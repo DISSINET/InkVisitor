@@ -924,6 +924,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
           onMinWidthReached={() => {
             if (panelWidths[1] > SECOND_PANEL_MIN_WIDTH + 10) {
               handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition - 10);
+            } else if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
+              const newCenterPos = mainPageCenterSeparatorXPosition - 10;
+              const newTreePos = mainPageTreeSeparatorXPosition - 10;
+
+              setMainPageCenterSeparatorXPosition(newCenterPos);
+              localStorage.setItem(
+                "mainPageCenterSeparatorXPosition",
+                floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
+              );
+              setMainPageTreeSeparatorXPosition(newTreePos);
+              localStorage.setItem(
+                "mainPageTreeSeparatorXPosition",
+                floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
+              );
+
+              dispatch(
+                setPanelWidths([
+                  newTreePos,
+                  floorNumberToOneDecimal(newCenterPos - newTreePos),
+                  floorNumberToOneDecimal(mainPageSearchSeparatorXPosition - newCenterPos),
+                  panelWidths[3],
+                ]),
+              );
             }
           }}
         />
