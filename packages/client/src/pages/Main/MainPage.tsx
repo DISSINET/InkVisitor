@@ -186,6 +186,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setThirdPanelExpanded(false));
     } else {
       dispatch(setThirdPanelExpanded(true));
+      queryClient.invalidateQueries({ queryKey: ["document"] });
 
       let newTreePos = mainPageTreeSeparatorXPosition;
       let newSearchPos = mainPageSearchSeparatorXPosition;
