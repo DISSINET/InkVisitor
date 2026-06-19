@@ -601,16 +601,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const getStatementListBoxHeight = () => {
     if (!detailIdArray.length) {
       return contentHeight;
-    } else {
-      switch (detailBoxState) {
-        case DetailBoxState.FullHeight:
-          return hiddenBoxHeight;
-        case DetailBoxState.Normal:
-          return contentHeight / 2 + 20;
-        case DetailBoxState.Minimized:
-          return contentHeight - hiddenBoxHeight;
-      }
     }
+    return contentHeight - (getDetailBoxHeight() ?? 0);
   };
 
   useEffect(() => {
@@ -684,17 +676,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     if (!statementId) {
       return contentHeight;
     }
-    if (!editorOpened) {
-      return contentHeight - hiddenBoxHeight;
-    }
-    switch (editorBoxState) {
-      case EditorBoxState.FullHeight:
-        return hiddenBoxHeight;
-      case EditorBoxState.Normal:
-        return contentHeight / 2 + 20;
-      case EditorBoxState.Minimized:
-        return contentHeight - hiddenBoxHeight;
-    }
+    return contentHeight - (getEditorBoxHeight() ?? 0);
   };
 
   const handleMaximizeEditorBox = () => {
