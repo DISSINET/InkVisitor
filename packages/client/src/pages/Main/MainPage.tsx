@@ -211,9 +211,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
         needsUpdate = true;
       }
 
-      if (newSearchPos - mainPageCenterSeparatorXPosition < THIRD_PANEL_MIN_WIDTH) {
-        newSearchPos = mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH;
+      let newCenterPos = mainPageCenterSeparatorXPosition;
+
+      if (newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+        newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
         needsUpdate = true;
+
+        if (layoutWidth - newSearchPos < FOURTH_PANEL_MIN_WIDTH) {
+          newSearchPos = layoutWidth - FOURTH_PANEL_MIN_WIDTH;
+          newCenterPos = newSearchPos - THIRD_PANEL_MIN_WIDTH;
+
+          if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+            newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+          }
+        }
       }
 
       if (needsUpdate) {
@@ -222,6 +233,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
           localStorage.setItem(
             "mainPageTreeSeparatorXPosition",
             floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        if (newCenterPos !== mainPageCenterSeparatorXPosition) {
+          setMainPageCenterSeparatorXPosition(newCenterPos);
+          localStorage.setItem(
+            "mainPageCenterSeparatorXPosition",
+            floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
           );
         }
 
@@ -236,8 +255,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
         dispatch(
           setPanelWidths([
             newTreePos,
-            floorNumberToOneDecimal(mainPageCenterSeparatorXPosition - newTreePos),
-            floorNumberToOneDecimal(newSearchPos - mainPageCenterSeparatorXPosition),
+            floorNumberToOneDecimal(newCenterPos - newTreePos),
+            floorNumberToOneDecimal(newSearchPos - newCenterPos),
             floorNumberToOneDecimal(layoutWidth - newSearchPos),
           ]),
         );
