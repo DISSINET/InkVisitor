@@ -742,6 +742,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch,
   ]);
 
+  const fourthPanelWidth = useMemo(() => {
+    if (!fourthPanelExpanded) return COLLAPSED_PANEL_WIDTH;
+    const panel1 = firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH;
+    return layoutWidth - panel1 - secondPanelWidth - thirdPanelWidth;
+  }, [
+    fourthPanelExpanded,
+    firstPanelExpanded,
+    panelWidths,
+    secondPanelWidth,
+    thirdPanelWidth,
+    layoutWidth,
+  ]);
+
   useEffect(() => {
     if (layoutWidth > 0) {
       if (isFirstRender.current || !panelWidths.length) {
@@ -911,7 +924,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* SEARCH SEPARATOR */}
-      {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && (
+      {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && thirdPanelExpanded && (
         <LayoutSeparatorVertical
           leftSideMinWidth={
             mainPageCenterSeparatorXPosition +
@@ -1192,7 +1205,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* FOURTH PANEL */}
-      <Panel width={fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH}>
+      <Panel width={fourthPanelWidth}>
         <Box
           height={getFourthPanelBoxHeight("search")}
           label="Search"
