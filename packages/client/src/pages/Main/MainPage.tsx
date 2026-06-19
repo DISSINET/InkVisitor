@@ -31,6 +31,7 @@ import { setDisableStatementListScroll } from "redux/features/statementList/disa
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
+  BOX_SPLIT_OFFSET,
   COLLAPSED_PANEL_WIDTH,
   EXTRA_SMALL_SCREEN_LIMIT,
   FIRST_PANEL_MIN_WIDTH,
@@ -641,7 +642,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       case DetailBoxState.FullHeight:
         return contentHeight - hiddenBoxHeight;
       case DetailBoxState.Normal:
-        return contentHeight / 2 + 20;
+        return contentHeight / 2 + BOX_SPLIT_OFFSET;
       case DetailBoxState.Minimized:
         return hiddenBoxHeight + 22;
     }
@@ -666,7 +667,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       case EditorBoxState.FullHeight:
         return contentHeight - hiddenBoxHeight;
       case EditorBoxState.Normal:
-        return contentHeight / 2 + 20;
+        return contentHeight / 2 + BOX_SPLIT_OFFSET;
       case EditorBoxState.Minimized:
         return hiddenBoxHeight;
     }

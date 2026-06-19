@@ -52,6 +52,9 @@ export const ANNOTATOR_SELECTOR_HEIGHT = 27;
 export const SUGGESTER_ROW_HEIGHT = 31;
 
 // BOXES
+// Offset for the vertical split between top/bottom boxes in a panel.
+// Positive = bottom box taller, negative = top box taller.
+export const BOX_SPLIT_OFFSET = 18;
 export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {
   search: 40,
