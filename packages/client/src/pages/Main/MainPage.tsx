@@ -852,6 +852,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
           onMaxWidthReached={() => {
             if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + 10) {
               handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
+            } else if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + 10) {
+              const newCenterPos = mainPageCenterSeparatorXPosition + 10;
+              const newSearchPos = mainPageSearchSeparatorXPosition + 10;
+
+              setMainPageCenterSeparatorXPosition(newCenterPos);
+              localStorage.setItem(
+                "mainPageCenterSeparatorXPosition",
+                floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
+              );
+              setMainPageSearchSeparatorXPosition(newSearchPos);
+              localStorage.setItem(
+                "mainPageSearchSeparatorXPosition",
+                floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
+              );
+
+              dispatch(
+                setPanelWidths([
+                  panelWidths[0],
+                  floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
+                  floorNumberToOneDecimal(newSearchPos - newCenterPos),
+                  layoutWidth - newSearchPos,
+                ]),
+              );
             }
           }}
         />
