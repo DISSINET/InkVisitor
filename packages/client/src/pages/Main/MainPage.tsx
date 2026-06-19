@@ -197,9 +197,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       const panel3Space = thirdPanelExpanded
         ? Math.max(newSearchPos - newCenterPos, THIRD_PANEL_MIN_WIDTH)
         : COLLAPSED_PANEL_WIDTH;
-      const panel4Space = fourthPanelExpanded
-        ? FOURTH_PANEL_MIN_WIDTH
-        : COLLAPSED_PANEL_WIDTH;
+      const panel4Space = fourthPanelExpanded ? FOURTH_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH;
 
       // max center position: leave room for panels to the right
       const maxCenterPos = layoutWidth - panel3Space - panel4Space;
@@ -940,28 +938,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
   }, [fourthPanelExpanded, firstPanelWidth, secondPanelWidth, thirdPanelWidth, layoutWidth]);
 
   // double check for errors after opening the panel and recalculating sizes
-  // useEffect(() => {
-  //   if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
-  //     const isUndersized =
-  //       (firstPanelExpanded && firstPanelWidth < FIRST_PANEL_MIN_WIDTH) ||
-  //       (secondPanelExpanded && secondPanelWidth < SECOND_PANEL_MIN_WIDTH) ||
-  //       (thirdPanelExpanded && thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) ||
-  //       (fourthPanelExpanded && fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH);
+  useEffect(() => {
+    if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
+      const isUndersized =
+        (firstPanelExpanded && firstPanelWidth < FIRST_PANEL_MIN_WIDTH) ||
+        (secondPanelExpanded && secondPanelWidth < SECOND_PANEL_MIN_WIDTH) ||
+        (thirdPanelExpanded && thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) ||
+        (fourthPanelExpanded && fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH);
 
-  //     if (isUndersized) {
-  //       handleLayoutInit();
-  //     }
-  //   }
-  // }, [
-  //   firstPanelWidth,
-  //   secondPanelWidth,
-  //   thirdPanelWidth,
-  //   fourthPanelWidth,
-  //   firstPanelExpanded,
-  //   secondPanelExpanded,
-  //   thirdPanelExpanded,
-  //   fourthPanelExpanded,
-  // ]);
+      if (isUndersized) {
+        handleLayoutInit();
+      }
+    }
+  }, [
+    firstPanelWidth,
+    secondPanelWidth,
+    thirdPanelWidth,
+    fourthPanelWidth,
+    firstPanelExpanded,
+    secondPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+  ]);
 
   useEffect(() => {
     if (layoutWidth > 0) {
@@ -1062,7 +1060,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
             leftSideMaxWidth={
               secondPanelExpanded
-                ? (thirdPanelExpanded || fourthPanelExpanded)
+                ? thirdPanelExpanded || fourthPanelExpanded
                   ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
                   : layoutWidth - 2 * COLLAPSED_PANEL_WIDTH - SECOND_PANEL_MIN_WIDTH
                 : thirdPanelExpanded
