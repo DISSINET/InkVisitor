@@ -120,12 +120,42 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setFirstPanelExpanded(false));
     } else {
       dispatch(setFirstPanelExpanded(true));
-      if (
-        mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition <
-        SECOND_PANEL_MIN_WIDTH
-      ) {
-        handleCenterSeparatorXPositionChange(
-          mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH,
+
+      let newCenterPos = mainPageCenterSeparatorXPosition;
+      let newSearchPos = mainPageSearchSeparatorXPosition;
+      let needsUpdate = false;
+
+      if (newCenterPos - mainPageTreeSeparatorXPosition < SECOND_PANEL_MIN_WIDTH) {
+        newCenterPos = mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+
+        if (newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+          newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
+        }
+      }
+
+      if (needsUpdate) {
+        setMainPageCenterSeparatorXPosition(newCenterPos);
+        localStorage.setItem(
+          "mainPageCenterSeparatorXPosition",
+          floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
+        );
+
+        if (newSearchPos !== mainPageSearchSeparatorXPosition) {
+          setMainPageSearchSeparatorXPosition(newSearchPos);
+          localStorage.setItem(
+            "mainPageSearchSeparatorXPosition",
+            floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        dispatch(
+          setPanelWidths([
+            panelWidths[0],
+            floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
+            floorNumberToOneDecimal(newSearchPos - newCenterPos),
+            layoutWidth - newSearchPos,
+          ]),
         );
       }
     }
@@ -156,20 +186,45 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setThirdPanelExpanded(false));
     } else {
       dispatch(setThirdPanelExpanded(true));
-      if (
-        mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition <
-        SECOND_PANEL_MIN_WIDTH
-      ) {
-        handleTreeSeparatorXPositionChange(
-          mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH,
-        );
+
+      let newTreePos = mainPageTreeSeparatorXPosition;
+      let newSearchPos = mainPageSearchSeparatorXPosition;
+      let needsUpdate = false;
+
+      if (mainPageCenterSeparatorXPosition - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+        newTreePos = mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH;
+        needsUpdate = true;
       }
-      if (
-        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
-        THIRD_PANEL_MIN_WIDTH
-      ) {
-        handleSearchSeparatorXPositionChange(
-          mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH,
+
+      if (newSearchPos - mainPageCenterSeparatorXPosition < THIRD_PANEL_MIN_WIDTH) {
+        newSearchPos = mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        if (newTreePos !== mainPageTreeSeparatorXPosition) {
+          setMainPageTreeSeparatorXPosition(newTreePos);
+          localStorage.setItem(
+            "mainPageTreeSeparatorXPosition",
+            floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        if (newSearchPos !== mainPageSearchSeparatorXPosition) {
+          setMainPageSearchSeparatorXPosition(newSearchPos);
+          localStorage.setItem(
+            "mainPageSearchSeparatorXPosition",
+            floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        dispatch(
+          setPanelWidths([
+            newTreePos,
+            floorNumberToOneDecimal(mainPageCenterSeparatorXPosition - newTreePos),
+            floorNumberToOneDecimal(newSearchPos - mainPageCenterSeparatorXPosition),
+            layoutWidth - newSearchPos,
+          ]),
         );
       }
     }
