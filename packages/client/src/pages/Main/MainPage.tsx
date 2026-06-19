@@ -223,7 +223,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             newTreePos,
             floorNumberToOneDecimal(mainPageCenterSeparatorXPosition - newTreePos),
             floorNumberToOneDecimal(newSearchPos - mainPageCenterSeparatorXPosition),
-            layoutWidth - newSearchPos,
+            floorNumberToOneDecimal(layoutWidth - newSearchPos),
           ]),
         );
       }
@@ -630,7 +630,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           panelWidths[0],
           panelWidths[1],
           floorNumberToOneDecimal(xPosition - mainPageCenterSeparatorXPosition),
-          layoutWidth - xPosition,
+          floorNumberToOneDecimal(layoutWidth - xPosition),
         ]),
       );
     }
