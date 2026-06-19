@@ -120,6 +120,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setFirstPanelExpanded(false));
     } else {
       dispatch(setFirstPanelExpanded(true));
+      if (
+        mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition <
+        SECOND_PANEL_MIN_WIDTH
+      ) {
+        handleCenterSeparatorXPositionChange(
+          mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH,
+        );
+      }
     }
   };
 
@@ -784,7 +792,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {/* CENTER SEPARATOR */}
       {mainPageCenterSeparatorXPosition > 0 && secondPanelExpanded && thirdPanelExpanded && (
         <LayoutSeparatorVertical
-          leftSideMinWidth={mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH}
+          leftSideMinWidth={
+            (firstPanelExpanded ? mainPageTreeSeparatorXPosition : COLLAPSED_PANEL_WIDTH) +
+            SECOND_PANEL_MIN_WIDTH
+          }
           leftSideMaxWidth={
             fourthPanelExpanded
               ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
