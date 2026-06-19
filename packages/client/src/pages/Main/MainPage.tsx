@@ -69,6 +69,7 @@ interface MainPage {}
 const MainPage: React.FC<MainPage> = ({}) => {
   const {
     territoryId,
+    statementId,
     detailIdArray,
     clearAllDetailIds,
     selectedDetailId,
@@ -673,6 +674,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const getAnnotatorBoxHeight = () => {
+    if (!statementId) {
+      return contentHeight;
+    }
     if (!editorOpened) {
       return contentHeight - hiddenBoxHeight;
     }
@@ -1385,6 +1389,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           )}
         </Box>
 
+        {statementId && (
         <Box
           borderColor="white"
           height={getEditorBoxHeight()}
@@ -1428,6 +1433,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         >
           <MemoizedStatementEditorBox />
         </Box>
+        )}
       </Panel>
 
       {/* FOURTH PANEL */}
