@@ -271,9 +271,17 @@ const MainPage: React.FC<MainPage> = ({}) => {
       onClick={toggleThirdPanel}
       inverted
       icon={
-        reverseThirdPanelIcon
-          ? thirdPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
-          : thirdPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />
+        reverseThirdPanelIcon ? (
+          thirdPanelExpanded ? (
+            <RiMenuFoldFill />
+          ) : (
+            <RiMenuUnfoldFill />
+          )
+        ) : thirdPanelExpanded ? (
+          <RiMenuUnfoldFill />
+        ) : (
+          <RiMenuFoldFill />
+        )
       }
     />
   );
@@ -293,10 +301,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         needsUpdate = true;
       }
 
-      if (
-        mainPageSearchSeparatorXPosition - newCenterPos <
-        THIRD_PANEL_MIN_WIDTH
-      ) {
+      if (mainPageSearchSeparatorXPosition - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
         newCenterPos = mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH;
         needsUpdate = true;
 
@@ -334,8 +339,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
-  const reverseFourthPanelIcon =
-    (!firstPanelExpanded && !secondPanelExpanded && !thirdPanelExpanded);
+  const reverseFourthPanelIcon = !firstPanelExpanded && !secondPanelExpanded && !thirdPanelExpanded;
 
   const hideFourthPanelButton = () => (
     <Button
@@ -343,9 +347,17 @@ const MainPage: React.FC<MainPage> = ({}) => {
       onClick={toggleFourthPanel}
       inverted
       icon={
-        reverseFourthPanelIcon
-          ? fourthPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />
-          : fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />
+        reverseFourthPanelIcon ? (
+          fourthPanelExpanded ? (
+            <RiMenuFoldFill />
+          ) : (
+            <RiMenuUnfoldFill />
+          )
+        ) : fourthPanelExpanded ? (
+          <RiMenuUnfoldFill />
+        ) : (
+          <RiMenuFoldFill />
+        )
       }
     />
   );
@@ -835,17 +847,42 @@ const MainPage: React.FC<MainPage> = ({}) => {
       return panelWidths[0];
     }
     return layoutWidth - 3 * COLLAPSED_PANEL_WIDTH;
-  }, [firstPanelExpanded, secondPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, layoutWidth]);
+  }, [
+    firstPanelExpanded,
+    secondPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    layoutWidth,
+  ]);
 
   const fourthPanelWidth = useMemo(() => {
     if (!fourthPanelExpanded) return COLLAPSED_PANEL_WIDTH;
     return layoutWidth - firstPanelWidth - secondPanelWidth - thirdPanelWidth;
+  }, [fourthPanelExpanded, firstPanelWidth, secondPanelWidth, thirdPanelWidth, layoutWidth]);
+
+  // double check for errors after opening the panel and recalculating sizes
+  useEffect(() => {
+    if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
+      const isUndersized =
+        (firstPanelExpanded && firstPanelWidth < FIRST_PANEL_MIN_WIDTH) ||
+        (secondPanelExpanded && secondPanelWidth < SECOND_PANEL_MIN_WIDTH) ||
+        (thirdPanelExpanded && thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) ||
+        (fourthPanelExpanded && fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH);
+
+      if (isUndersized) {
+        handleLayoutInit();
+      }
+    }
   }, [
-    fourthPanelExpanded,
     firstPanelWidth,
     secondPanelWidth,
     thirdPanelWidth,
-    layoutWidth,
+    fourthPanelWidth,
+    firstPanelExpanded,
+    secondPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
   ]);
 
   useEffect(() => {
@@ -943,91 +980,89 @@ const MainPage: React.FC<MainPage> = ({}) => {
       {mainPageTreeSeparatorXPosition > 0 &&
         firstPanelExpanded &&
         (secondPanelExpanded || thirdPanelExpanded || fourthPanelExpanded) && (
-        <LayoutSeparatorVertical
-          leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
-          leftSideMaxWidth={
-            secondPanelExpanded
-              ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
-              : thirdPanelExpanded
-                ? mainPageSearchSeparatorXPosition -
-                  THIRD_PANEL_MIN_WIDTH -
-                  COLLAPSED_PANEL_WIDTH
-                : layoutWidth -
-                  (fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH) -
-                  COLLAPSED_PANEL_WIDTH -
-                  COLLAPSED_PANEL_WIDTH
-          }
-          separatorXPosition={mainPageTreeSeparatorXPosition}
-          setSeparatorXPosition={(xPosition) => {
-            handleTreeSeparatorXPositionChange(xPosition);
-          }}
-          onMaxWidthReached={() => {
-            if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + 10) {
-              handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
-            } else if (fourthPanelWidth > FOURTH_PANEL_MIN_WIDTH + 10) {
-              if (!thirdPanelExpanded) {
-                handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
-              } else {
-                const newCenterPos = mainPageCenterSeparatorXPosition + 10;
-                const newSearchPos = mainPageSearchSeparatorXPosition + 10;
-
-                setMainPageCenterSeparatorXPosition(newCenterPos);
-                localStorage.setItem(
-                  "mainPageCenterSeparatorXPosition",
-                  floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
-                );
-                setMainPageSearchSeparatorXPosition(newSearchPos);
-                localStorage.setItem(
-                  "mainPageSearchSeparatorXPosition",
-                  floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
-                );
-
-                dispatch(
-                  setPanelWidths([
-                    panelWidths[0],
-                    floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
-                    floorNumberToOneDecimal(newSearchPos - newCenterPos),
-                    layoutWidth - newSearchPos,
-                  ]),
-                );
-              }
+          <LayoutSeparatorVertical
+            leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
+            leftSideMaxWidth={
+              secondPanelExpanded
+                ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+                : thirdPanelExpanded
+                  ? mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH - COLLAPSED_PANEL_WIDTH
+                  : layoutWidth -
+                    (fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH) -
+                    COLLAPSED_PANEL_WIDTH -
+                    COLLAPSED_PANEL_WIDTH
             }
-          }}
-        />
-      )}
+            separatorXPosition={mainPageTreeSeparatorXPosition}
+            setSeparatorXPosition={(xPosition) => {
+              handleTreeSeparatorXPositionChange(xPosition);
+            }}
+            onMaxWidthReached={() => {
+              if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + 10) {
+                handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
+              } else if (fourthPanelWidth > FOURTH_PANEL_MIN_WIDTH + 10) {
+                if (!thirdPanelExpanded) {
+                  handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
+                } else {
+                  const newCenterPos = mainPageCenterSeparatorXPosition + 10;
+                  const newSearchPos = mainPageSearchSeparatorXPosition + 10;
+
+                  setMainPageCenterSeparatorXPosition(newCenterPos);
+                  localStorage.setItem(
+                    "mainPageCenterSeparatorXPosition",
+                    floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
+                  );
+                  setMainPageSearchSeparatorXPosition(newSearchPos);
+                  localStorage.setItem(
+                    "mainPageSearchSeparatorXPosition",
+                    floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
+                  );
+
+                  dispatch(
+                    setPanelWidths([
+                      panelWidths[0],
+                      floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
+                      floorNumberToOneDecimal(newSearchPos - newCenterPos),
+                      layoutWidth - newSearchPos,
+                    ]),
+                  );
+                }
+              }
+            }}
+          />
+        )}
 
       {/* CENTER SEPARATOR */}
       {mainPageCenterSeparatorXPosition > 0 &&
         secondPanelExpanded &&
         (thirdPanelExpanded || fourthPanelExpanded) && (
-        <LayoutSeparatorVertical
-          leftSideMinWidth={
-            (firstPanelExpanded ? mainPageTreeSeparatorXPosition : COLLAPSED_PANEL_WIDTH) +
-            SECOND_PANEL_MIN_WIDTH
-          }
-          leftSideMaxWidth={
-            thirdPanelExpanded
-              ? fourthPanelExpanded
-                ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
-                : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
-              : layoutWidth - COLLAPSED_PANEL_WIDTH - FOURTH_PANEL_MIN_WIDTH
-          }
-          separatorXPosition={mainPageCenterSeparatorXPosition}
-          setSeparatorXPosition={(xPosition) => {
-            handleCenterSeparatorXPositionChange(xPosition);
-          }}
-          onMaxWidthReached={() => {
-            if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + 10) {
-              handleSearchSeparatorXPositionChange(mainPageSearchSeparatorXPosition + 10);
+          <LayoutSeparatorVertical
+            leftSideMinWidth={
+              (firstPanelExpanded ? mainPageTreeSeparatorXPosition : COLLAPSED_PANEL_WIDTH) +
+              SECOND_PANEL_MIN_WIDTH
             }
-          }}
-          onMinWidthReached={() => {
-            if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
-              handleTreeSeparatorXPositionChange(mainPageTreeSeparatorXPosition - 10);
+            leftSideMaxWidth={
+              thirdPanelExpanded
+                ? fourthPanelExpanded
+                  ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+                  : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
+                : layoutWidth - COLLAPSED_PANEL_WIDTH - FOURTH_PANEL_MIN_WIDTH
             }
-          }}
-        />
-      )}
+            separatorXPosition={mainPageCenterSeparatorXPosition}
+            setSeparatorXPosition={(xPosition) => {
+              handleCenterSeparatorXPositionChange(xPosition);
+            }}
+            onMaxWidthReached={() => {
+              if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + 10) {
+                handleSearchSeparatorXPositionChange(mainPageSearchSeparatorXPosition + 10);
+              }
+            }}
+            onMinWidthReached={() => {
+              if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
+                handleTreeSeparatorXPositionChange(mainPageTreeSeparatorXPosition - 10);
+              }
+            }}
+          />
+        )}
 
       {/* SEARCH SEPARATOR */}
       {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && thirdPanelExpanded && (
@@ -1035,8 +1070,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           leftSideMinWidth={
             (secondPanelExpanded
               ? mainPageCenterSeparatorXPosition
-              : (firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH) + COLLAPSED_PANEL_WIDTH
-            ) + (thirdPanelExpanded ? THIRD_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH)
+              : (firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH) +
+                COLLAPSED_PANEL_WIDTH) +
+            (thirdPanelExpanded ? THIRD_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH)
           }
           leftSideMaxWidth={layoutWidth - FOURTH_PANEL_MIN_WIDTH}
           separatorXPosition={mainPageSearchSeparatorXPosition}
