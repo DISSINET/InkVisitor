@@ -5,7 +5,7 @@ import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
 import { EntityCreateModal, LayoutSeparatorVertical } from "components/advanced";
 import { CStatement } from "constructors";
-import { useDebouncedCallback, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -694,13 +694,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const isFirstRender = useRef(true);
 
-  const debouncedSetSecondPanelWidth = useDebouncedCallback((width: number) => {
-    dispatch(setSecondPanelRealWidth(width));
-  }, 0);
-
   const secondPanelWidth = useMemo(() => {
     if (!secondPanelExpanded) {
-      debouncedSetSecondPanelWidth(COLLAPSED_PANEL_WIDTH);
+      dispatch(setSecondPanelRealWidth(COLLAPSED_PANEL_WIDTH));
       return COLLAPSED_PANEL_WIDTH;
     }
     const width =
@@ -709,7 +705,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
       (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
       (!fourthPanelExpanded && !thirdPanelExpanded ? panelWidths[3] - COLLAPSED_PANEL_WIDTH : 0);
-    debouncedSetSecondPanelWidth(width);
+    dispatch(setSecondPanelRealWidth(width));
     return width;
   }, [
     secondPanelExpanded,
@@ -719,10 +715,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     panelWidths,
     dispatch,
   ]);
-
-  const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
-    dispatch(setThirdPanelRealWidth(width));
-  }, 0);
 
   const thirdPanelWidth = useMemo(() => {
     let width = !thirdPanelExpanded
@@ -738,7 +730,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       width += secondPanelBaseWidth - COLLAPSED_PANEL_WIDTH;
     }
 
-    debouncedSetThirdPanelWidth(width);
+    dispatch(setThirdPanelRealWidth(width));
     return width;
   }, [
     secondPanelExpanded,
@@ -746,7 +738,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     thirdPanelExpanded,
     fourthPanelExpanded,
     panelWidths,
-    debouncedSetThirdPanelWidth,
+    dispatch,
   ]);
 
   useEffect(() => {
