@@ -18,6 +18,7 @@ import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
@@ -91,6 +92,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.firstPanelExpanded,
   );
+  const secondPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelExpanded,
+  );
   const thirdPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelExpanded,
   );
@@ -124,6 +128,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
       onClick={toggleFirstPanel}
       inverted
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
+    />
+  );
+
+  const toggleSecondPanel = () => {
+    dispatch(setSecondPanelExpanded(!secondPanelExpanded));
+  };
+
+  const secondPanelButton = () => (
+    <Button
+      onClick={toggleSecondPanel}
+      inverted
+      icon={secondPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
 
@@ -613,6 +629,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
   }, 0);
 
   const secondPanelWidth = useMemo(() => {
+    if (!secondPanelExpanded) {
+      debouncedSetSecondPanelWidth(COLLAPSED_PANEL_WIDTH);
+      return COLLAPSED_PANEL_WIDTH;
+    }
     const width =
       (firstPanelExpanded
         ? panelWidths[1]
@@ -621,22 +641,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
       (!fourthPanelExpanded && !thirdPanelExpanded ? panelWidths[3] - COLLAPSED_PANEL_WIDTH : 0);
     debouncedSetSecondPanelWidth(width);
     return width;
-  }, [firstPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, dispatch]);
+  }, [secondPanelExpanded, firstPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, dispatch]);
 
   const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setThirdPanelRealWidth(width));
   }, 400);
 
   const thirdPanelWidth = useMemo(() => {
-    const width = !thirdPanelExpanded
+    let width = !thirdPanelExpanded
       ? COLLAPSED_PANEL_WIDTH
       : fourthPanelExpanded
         ? panelWidths[2]
         : panelWidths[2] + panelWidths[3] - COLLAPSED_PANEL_WIDTH;
 
+    if (!secondPanelExpanded && thirdPanelExpanded) {
+      const secondPanelBaseWidth = firstPanelExpanded
+        ? panelWidths[1]
+        : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH;
+      width += secondPanelBaseWidth - COLLAPSED_PANEL_WIDTH;
+    }
+
     debouncedSetThirdPanelWidth(width);
     return width;
-  }, [thirdPanelExpanded, fourthPanelExpanded, panelWidths, debouncedSetThirdPanelWidth]);
+  }, [secondPanelExpanded, firstPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, debouncedSetThirdPanelWidth]);
 
   useEffect(() => {
     if (layoutWidth > 0) {
@@ -730,7 +757,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     <>
       <ScrollHandler />
       {/* TREE SEPARATOR */}
-      {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
+      {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && secondPanelExpanded && (
         <LayoutSeparatorVertical
           leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
           leftSideMaxWidth={
@@ -755,7 +782,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* CENTER SEPARATOR */}
-      {mainPageCenterSeparatorXPosition > 0 && thirdPanelExpanded && (
+      {mainPageCenterSeparatorXPosition > 0 && secondPanelExpanded && thirdPanelExpanded && (
         <LayoutSeparatorVertical
           leftSideMinWidth={mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH}
           leftSideMaxWidth={
@@ -809,137 +836,149 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
       {/* SECOND PANEL */}
       <Panel width={secondPanelWidth}>
-        <Box
-          label="Statements"
-          borderColor="white"
-          height={getStatementListBoxHeight()}
-          onHeaderClick={() => {
-            if (detailBoxState === DetailBoxState.FullHeight) {
-              dispatch(setDetailBoxState(DetailBoxState.Normal));
-            }
-          }}
-          disableHeaderClick={detailBoxState !== DetailBoxState.FullHeight}
-          buttons={[
-            <>
-              {territoryId && (
-                <ButtonGroup style={{ marginRight: "0.5rem" }}>
-                  <Button
-                    color="info"
-                    icon={<FaDiagramNext style={{ transform: "rotate(180deg)" }} />}
-                    tooltipLabel="go to previous territory"
-                    onClick={() => {
-                      if (previousTerritoryId) {
-                        setTerritoryId(previousTerritoryId);
-                        if (!statementListOpened) {
-                          dispatch(setDetailBoxState(DetailBoxState.Normal));
-                        }
-                      }
-                    }}
-                    disabled={!previousTerritoryId}
-                  />
-                  <Button
-                    color="info"
-                    icon={<FaDiagramNext />}
-                    tooltipLabel="go to next territory"
-                    onClick={() => {
-                      if (nextTerritoryId) {
-                        setTerritoryId(nextTerritoryId);
-                        if (!statementListOpened) {
-                          dispatch(setDetailBoxState(DetailBoxState.Normal));
-                        }
-                      }
-                    }}
-                    disabled={!nextTerritoryId}
-                  />
-                </ButtonGroup>
-              )}
-              {/* Admin / Owner / Editor with writer rights */}
-              {hasWriteRightsToSelectedTerritory && territoryId && (
-                <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
-                  <Button
-                    key="add"
-                    icon={<FaPlus />}
-                    tooltipLabel="add new statement at the end of the list"
-                    color="primary"
-                    label="statement"
-                    onClick={() => {
-                      if (user) {
-                        addStatementAtTheEndMutation.mutate(
-                          CStatement(userRole, user.options, "", "", territoryId),
-                        );
-                        if (detailBoxState === DetailBoxState.FullHeight) {
-                          dispatch(setDetailBoxState(DetailBoxState.Normal));
-                        }
-                      }
-                    }}
-                  />
-                </ButtonGroup>
-              )}
-            </>,
-            statementListOpened &&
-              territoryId &&
-              refreshBoxButton(["territory", "statement", "user"], false),
-          ]}
-        >
-          <MemoizedStatementListBox />
-        </Box>
-        {(selectedDetailId || detailIdArray.length > 0) && (
-          <Box
-            label="Detail"
-            borderColor="white"
-            onHeaderClick={handleMaximizeDetailBox}
-            disableHeaderClick={detailBoxState === DetailBoxState.FullHeight}
-            height={getDetailBoxHeight()}
-            // Scroll is disabled because of the tabs and is handled inside the EntityDetail component
-            disableScroll
-            buttons={[
-              <>
-                {userRole !== UserEnums.Role.Viewer && (
-                  <Button
-                    icon={<FaPlus />}
-                    label="entity"
-                    onClick={() => setShowEntityCreateModal(true)}
-                    tooltipLabel="create new entity"
-                  />
-                )}
-              </>,
-              // refreshBoxButton(["entity", "user"], false),
-              <Button
-                dataTestId="maximize-detail-box"
-                inverted
-                tooltipLabel={getMaximizeBtnTooltip()}
-                icon={
-                  detailBoxState === DetailBoxState.Normal ? (
-                    <BsSquareFill />
-                  ) : (
-                    <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                  )
-                }
-                onClick={handleMaximizeDetailBox}
-              />,
-              <>
-                {detailBoxState !== DetailBoxState.Minimized && (
-                  <Button
-                    tooltipLabel={"minimize detail box"}
-                    inverted
-                    icon={<BiHide />}
-                    onClick={handleMinimizeDetailBox}
-                  />
-                )}
-              </>,
-              <Button
-                inverted
-                tooltipLabel="close all tabs"
-                icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
-                onClick={() => {
-                  clearAllDetailIds();
+        {secondPanelExpanded ? (
+          <>
+            <Box
+              label="Statements"
+              borderColor="white"
+              height={getStatementListBoxHeight()}
+              onHeaderClick={() => {
+                if (detailBoxState === DetailBoxState.FullHeight) {
                   dispatch(setDetailBoxState(DetailBoxState.Normal));
-                }}
-              />,
-            ]}
-          >
-            <MemoizedEntityDetailBox />
-          </Box>
+                }
+              }}
+              disableHeaderClick={detailBoxState !== DetailBoxState.FullHeight}
+              buttons={[
+                <>
+                  {territoryId && (
+                    <ButtonGroup style={{ marginRight: "0.5rem" }}>
+                      <Button
+                        color="info"
+                        icon={<FaDiagramNext style={{ transform: "rotate(180deg)" }} />}
+                        tooltipLabel="go to previous territory"
+                        onClick={() => {
+                          if (previousTerritoryId) {
+                            setTerritoryId(previousTerritoryId);
+                            if (!statementListOpened) {
+                              dispatch(setDetailBoxState(DetailBoxState.Normal));
+                            }
+                          }
+                        }}
+                        disabled={!previousTerritoryId}
+                      />
+                      <Button
+                        color="info"
+                        icon={<FaDiagramNext />}
+                        tooltipLabel="go to next territory"
+                        onClick={() => {
+                          if (nextTerritoryId) {
+                            setTerritoryId(nextTerritoryId);
+                            if (!statementListOpened) {
+                              dispatch(setDetailBoxState(DetailBoxState.Normal));
+                            }
+                          }
+                        }}
+                        disabled={!nextTerritoryId}
+                      />
+                    </ButtonGroup>
+                  )}
+                  {/* Admin / Owner / Editor with writer rights */}
+                  {hasWriteRightsToSelectedTerritory && territoryId && (
+                    <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                      <Button
+                        key="add"
+                        icon={<FaPlus />}
+                        tooltipLabel="add new statement at the end of the list"
+                        color="primary"
+                        label="statement"
+                        onClick={() => {
+                          if (user) {
+                            addStatementAtTheEndMutation.mutate(
+                              CStatement(userRole, user.options, "", "", territoryId),
+                            );
+                            if (detailBoxState === DetailBoxState.FullHeight) {
+                              dispatch(setDetailBoxState(DetailBoxState.Normal));
+                            }
+                          }
+                        }}
+                      />
+                    </ButtonGroup>
+                  )}
+                </>,
+                statementListOpened &&
+                  territoryId &&
+                  refreshBoxButton(["territory", "statement", "user"], false),
+                secondPanelButton(),
+              ]}
+            >
+              <MemoizedStatementListBox />
+            </Box>
+            {(selectedDetailId || detailIdArray.length > 0) && (
+              <Box
+                label="Detail"
+                borderColor="white"
+                onHeaderClick={handleMaximizeDetailBox}
+                disableHeaderClick={detailBoxState === DetailBoxState.FullHeight}
+                height={getDetailBoxHeight()}
+                disableScroll
+                buttons={[
+                  <>
+                    {userRole !== UserEnums.Role.Viewer && (
+                      <Button
+                        icon={<FaPlus />}
+                        label="entity"
+                        onClick={() => setShowEntityCreateModal(true)}
+                        tooltipLabel="create new entity"
+                      />
+                    )}
+                  </>,
+                  <Button
+                    dataTestId="maximize-detail-box"
+                    inverted
+                    tooltipLabel={getMaximizeBtnTooltip()}
+                    icon={
+                      detailBoxState === DetailBoxState.Normal ? (
+                        <BsSquareFill />
+                      ) : (
+                        <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                      )
+                    }
+                    onClick={handleMaximizeDetailBox}
+                  />,
+                  <>
+                    {detailBoxState !== DetailBoxState.Minimized && (
+                      <Button
+                        tooltipLabel={"minimize detail box"}
+                        inverted
+                        icon={<BiHide />}
+                        onClick={handleMinimizeDetailBox}
+                      />
+                    )}
+                  </>,
+                  <Button
+                    inverted
+                    tooltipLabel="close all tabs"
+                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                    onClick={() => {
+                      clearAllDetailIds();
+                      dispatch(setDetailBoxState(DetailBoxState.Normal));
+                    }}
+                  />,
+                ]}
+              >
+                <MemoizedEntityDetailBox />
+              </Box>
+            )}
+          </>
+        ) : (
+          <Box
+            height={contentHeight}
+            label="Statements"
+            borderColor="white"
+            isExpanded={false}
+            buttons={[secondPanelButton()]}
+            onHeaderClick={toggleSecondPanel}
+          />
         )}
         {showEntityCreateModal && (
           <EntityCreateModal
