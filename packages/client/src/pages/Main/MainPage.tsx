@@ -264,12 +264,52 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(setFourthPanelExpanded(false));
     } else {
       dispatch(setFourthPanelExpanded(true));
+
+      let newCenterPos = mainPageCenterSeparatorXPosition;
+      let newTreePos = mainPageTreeSeparatorXPosition;
+      let needsUpdate = false;
+
+      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+        newCenterPos = newTreePos + SECOND_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+      }
+
       if (
-        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
+        mainPageSearchSeparatorXPosition - newCenterPos <
         THIRD_PANEL_MIN_WIDTH
       ) {
-        handleCenterSeparatorXPositionChange(
-          mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH,
+        newCenterPos = mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+
+        if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+          newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+        }
+      }
+
+      if (needsUpdate) {
+        if (newCenterPos !== mainPageCenterSeparatorXPosition) {
+          setMainPageCenterSeparatorXPosition(newCenterPos);
+          localStorage.setItem(
+            "mainPageCenterSeparatorXPosition",
+            floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        if (newTreePos !== mainPageTreeSeparatorXPosition) {
+          setMainPageTreeSeparatorXPosition(newTreePos);
+          localStorage.setItem(
+            "mainPageTreeSeparatorXPosition",
+            floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
+          );
+        }
+
+        dispatch(
+          setPanelWidths([
+            newTreePos,
+            floorNumberToOneDecimal(newCenterPos - newTreePos),
+            floorNumberToOneDecimal(mainPageSearchSeparatorXPosition - newCenterPos),
+            layoutWidth - mainPageSearchSeparatorXPosition,
+          ]),
         );
       }
     }
