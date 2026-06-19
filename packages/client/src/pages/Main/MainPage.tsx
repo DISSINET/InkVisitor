@@ -14,7 +14,7 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { VscCloseAll } from "react-icons/vsc";
+import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
@@ -1397,49 +1397,59 @@ const MainPage: React.FC<MainPage> = ({}) => {
         </Box>
 
         {statementId && (
-        <Box
-          borderColor="white"
-          height={getEditorBoxHeight()}
-          label="Editor"
-          isExpanded={thirdPanelExpanded}
-          onHeaderClick={handleMaximizeEditorBox}
-          disableHeaderClick={editorOpened && editorBoxState === EditorBoxState.FullHeight}
-          buttons={[
-            <>
-              {thirdPanelExpanded && (
-                <>
+          <Box
+            borderColor="white"
+            height={getEditorBoxHeight()}
+            label="Editor"
+            isExpanded={thirdPanelExpanded}
+            onHeaderClick={handleMaximizeEditorBox}
+            disableHeaderClick={editorOpened && editorBoxState === EditorBoxState.FullHeight}
+            buttons={[
+              <>
+                {thirdPanelExpanded && (
+                  <>
+                    <Button
+                      key="maximize-editor"
+                      inverted
+                      tooltipLabel={getEditorMaximizeBtnTooltip()}
+                      icon={
+                        editorOpened && editorBoxState === EditorBoxState.Normal ? (
+                          <BsSquareFill />
+                        ) : (
+                          <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                        )
+                      }
+                      onClick={handleMaximizeEditorBox}
+                    />
+                  </>
+                )}
+              </>,
+              <>
+                {thirdPanelExpanded && editorOpened && (
                   <Button
-                    key="maximize-editor"
+                    key="hide-editor"
                     inverted
-                    tooltipLabel={getEditorMaximizeBtnTooltip()}
-                    icon={
-                      editorOpened && editorBoxState === EditorBoxState.Normal ? (
-                        <BsSquareFill />
-                      ) : (
-                        <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                      )
-                    }
-                    onClick={handleMaximizeEditorBox}
+                    tooltipLabel="minimize editor box"
+                    icon={<BiHide />}
+                    onClick={() => setEditorOpened(false)}
                   />
-                </>
-              )}
-            </>,
-            <>
-              {thirdPanelExpanded && editorOpened && (
-                <Button
-                  key="hide-editor"
-                  inverted
-                  tooltipLabel="minimize editor box"
-                  icon={<BiHide />}
-                  onClick={() => setEditorOpened(false)}
-                />
-              )}
-            </>,
-            thirdPanelButton(),
-          ]}
-        >
-          <MemoizedStatementEditorBox />
-        </Box>
+                )}
+              </>,
+              <Button
+                key="close-editor"
+                inverted
+                tooltipLabel="close editor box"
+                icon={<VscClose style={{ transform: "scale(1.3)" }} />}
+                onClick={() => {
+                  setStatementId("");
+                  dispatch(setEditorBoxState(EditorBoxState.Normal));
+                }}
+              />,
+              thirdPanelButton(),
+            ]}
+          >
+            <MemoizedStatementEditorBox />
+          </Box>
         )}
       </Panel>
 
