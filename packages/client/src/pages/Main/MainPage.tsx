@@ -116,6 +116,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const [lastState, setLastState] = useState(DetailBoxState.Normal);
 
+  useEffect(() => {
+    if (statementId && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
+      setEditorOpened(true);
+      dispatch(setEditorBoxState(EditorBoxState.Normal));
+    }
+  }, [statementId]);
+
   const annotatorVisible =
     thirdPanelExpanded && !(editorOpened && editorBoxState === EditorBoxState.FullHeight);
   const [showAnnotatorContent, setShowAnnotatorContent] = useState(false);
