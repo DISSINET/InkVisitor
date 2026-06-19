@@ -194,23 +194,38 @@ const MainPage: React.FC<MainPage> = ({}) => {
       let newSearchPos = mainPageSearchSeparatorXPosition;
       let needsUpdate = false;
 
-      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-        newCenterPos = newTreePos + SECOND_PANEL_MIN_WIDTH;
+      const panel3Space = thirdPanelExpanded
+        ? Math.max(newSearchPos - newCenterPos, THIRD_PANEL_MIN_WIDTH)
+        : COLLAPSED_PANEL_WIDTH;
+      const panel4Space = fourthPanelExpanded
+        ? FOURTH_PANEL_MIN_WIDTH
+        : COLLAPSED_PANEL_WIDTH;
+
+      // max center position: leave room for panels to the right
+      const maxCenterPos = layoutWidth - panel3Space - panel4Space;
+
+      if (newCenterPos > maxCenterPos) {
+        newCenterPos = maxCenterPos;
         needsUpdate = true;
       }
 
+      // ensure second panel min width
+      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+        newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+        needsUpdate = true;
+      }
+
+      // clamp tree position
+      if (newTreePos < FIRST_PANEL_MIN_WIDTH) {
+        newTreePos = FIRST_PANEL_MIN_WIDTH;
+        newCenterPos = Math.max(newCenterPos, newTreePos + SECOND_PANEL_MIN_WIDTH);
+        needsUpdate = true;
+      }
+
+      // adjust search separator if third panel needs room
       if (thirdPanelExpanded && newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
         newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
         needsUpdate = true;
-
-        if (fourthPanelExpanded && layoutWidth - newSearchPos < FOURTH_PANEL_MIN_WIDTH) {
-          newSearchPos = layoutWidth - FOURTH_PANEL_MIN_WIDTH;
-          newCenterPos = newSearchPos - THIRD_PANEL_MIN_WIDTH;
-
-          if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-            newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
-          }
-        }
       }
 
       if (needsUpdate) {
