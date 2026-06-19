@@ -164,6 +164,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
           mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH,
         );
       }
+      if (
+        mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition <
+        THIRD_PANEL_MIN_WIDTH
+      ) {
+        handleSearchSeparatorXPositionChange(
+          mainPageCenterSeparatorXPosition + THIRD_PANEL_MIN_WIDTH,
+        );
+      }
     }
   };
 
@@ -649,7 +657,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
       (!fourthPanelExpanded && !thirdPanelExpanded ? panelWidths[3] - COLLAPSED_PANEL_WIDTH : 0);
     debouncedSetSecondPanelWidth(width);
     return width;
-  }, [secondPanelExpanded, firstPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, dispatch]);
+  }, [
+    secondPanelExpanded,
+    firstPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    dispatch,
+  ]);
 
   const debouncedSetThirdPanelWidth = useDebouncedCallback((width: number) => {
     dispatch(setThirdPanelRealWidth(width));
@@ -671,7 +686,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
     debouncedSetThirdPanelWidth(width);
     return width;
-  }, [secondPanelExpanded, firstPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, panelWidths, debouncedSetThirdPanelWidth]);
+  }, [
+    secondPanelExpanded,
+    firstPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    panelWidths,
+    debouncedSetThirdPanelWidth,
+  ]);
 
   useEffect(() => {
     if (layoutWidth > 0) {
@@ -765,7 +787,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     <>
       <ScrollHandler />
       {/* TREE SEPARATOR */}
-      {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && secondPanelExpanded && (
+      {mainPageTreeSeparatorXPosition > 0 && firstPanelExpanded && (
         <LayoutSeparatorVertical
           leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
           leftSideMaxWidth={
