@@ -219,7 +219,7 @@ export const TextAnnotatorMenu = ({
             Create Anchors
           </StyledAnnotatorItemTitle>
           {/* Active Territory */}
-          {canCreateActiveTAnchor && onCreateActiveTAnchor && (
+          {activeTerritoryId && canCreateActiveTAnchor && onCreateActiveTAnchor && (
             <StyledAnnotatorItemContent>
               <StyledAnnotatorItemContentLine>
                 <Button
@@ -301,6 +301,7 @@ export const TextAnnotatorMenu = ({
             </StyledAnnotatorItemContentLine>
           </StyledAnnotatorItemContent>
           {/* Territory Sibling or Child */}
+          {activeTerritoryId && (
           <StyledAnnotatorItemContent>
             <StyledAnnotatorItemContentLine>
               {onCreateTerritory && (
@@ -363,6 +364,7 @@ export const TextAnnotatorMenu = ({
               )}
             </StyledAnnotatorItemContentLine>
           </StyledAnnotatorItemContent>
+          )}
         </StyledAnnotatorItem>
       )}
       <StyledAnnotatorItem>

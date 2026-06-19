@@ -181,7 +181,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
           performScroll = true;
         }
 
-        if (performScroll) {
+        if (performScroll && scrollToId) {
           annotator.scrollToAnchor(scrollToId);
         }
 
