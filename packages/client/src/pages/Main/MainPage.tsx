@@ -1047,7 +1047,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
             leftSideMinWidth={FIRST_PANEL_MIN_WIDTH}
             leftSideMaxWidth={
               secondPanelExpanded
-                ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+                ? (thirdPanelExpanded || fourthPanelExpanded)
+                  ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+                  : layoutWidth - 2 * COLLAPSED_PANEL_WIDTH - SECOND_PANEL_MIN_WIDTH
                 : thirdPanelExpanded
                   ? mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH - COLLAPSED_PANEL_WIDTH
                   : layoutWidth -
