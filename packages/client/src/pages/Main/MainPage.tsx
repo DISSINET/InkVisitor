@@ -731,8 +731,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
       (firstPanelExpanded
         ? panelWidths[1]
         : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
-      (thirdPanelExpanded ? 0 : panelWidths[2] - COLLAPSED_PANEL_WIDTH) +
-      (!fourthPanelExpanded && !thirdPanelExpanded ? panelWidths[3] - COLLAPSED_PANEL_WIDTH : 0);
+      (!thirdPanelExpanded && !fourthPanelExpanded
+        ? panelWidths[2] + panelWidths[3] - 2 * COLLAPSED_PANEL_WIDTH
+        : 0);
     dispatch(setSecondPanelRealWidth(width));
     return width;
   }, [
@@ -930,16 +931,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
       )}
 
       {/* CENTER SEPARATOR */}
-      {mainPageCenterSeparatorXPosition > 0 && secondPanelExpanded && thirdPanelExpanded && (
+      {mainPageCenterSeparatorXPosition > 0 &&
+        secondPanelExpanded &&
+        (thirdPanelExpanded || fourthPanelExpanded) && (
         <LayoutSeparatorVertical
           leftSideMinWidth={
             (firstPanelExpanded ? mainPageTreeSeparatorXPosition : COLLAPSED_PANEL_WIDTH) +
             SECOND_PANEL_MIN_WIDTH
           }
           leftSideMaxWidth={
-            fourthPanelExpanded
-              ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
-              : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
+            thirdPanelExpanded
+              ? fourthPanelExpanded
+                ? layoutWidth - panelWidths[3] - THIRD_PANEL_MIN_WIDTH
+                : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - COLLAPSED_PANEL_WIDTH - FOURTH_PANEL_MIN_WIDTH
           }
           separatorXPosition={mainPageCenterSeparatorXPosition}
           setSeparatorXPosition={(xPosition) => {
