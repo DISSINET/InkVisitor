@@ -778,6 +778,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const handleCenterSeparatorXPositionChange = (xPosition: number) => {
     if (mainPageCenterSeparatorXPosition !== xPosition) {
+      const secondPanelWidth = xPosition - panelWidths[0];
+      const thirdPanelWidth = layoutWidth - panelWidths[3] - xPosition;
+
+      if (secondPanelWidth < SECOND_PANEL_MIN_WIDTH || thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) {
+        toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
+      }
+
       setMainPageCenterSeparatorXPosition(xPosition);
 
       const separatorXPercentPosition = floorNumberToOneDecimal(
@@ -791,8 +798,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
       dispatch(
         setPanelWidths([
           panelWidths[0],
-          floorNumberToOneDecimal(xPosition - panelWidths[0]),
-          floorNumberToOneDecimal(layoutWidth - panelWidths[3] - xPosition),
+          floorNumberToOneDecimal(secondPanelWidth),
+          floorNumberToOneDecimal(thirdPanelWidth),
           panelWidths[3],
         ]),
       );
@@ -801,6 +808,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const handleSearchSeparatorXPositionChange = (xPosition: number) => {
     if (mainPageSearchSeparatorXPosition !== xPosition) {
+      const thirdPanelWidth = xPosition - mainPageCenterSeparatorXPosition;
+      const fourthPanelWidth = layoutWidth - xPosition;
+
+      if (thirdPanelWidth < THIRD_PANEL_MIN_WIDTH || fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH) {
+        toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
+      }
+
       setMainPageSearchSeparatorXPosition(xPosition);
 
       const separatorXPercentPosition = floorNumberToOneDecimal(
@@ -815,8 +829,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
         setPanelWidths([
           panelWidths[0],
           panelWidths[1],
-          floorNumberToOneDecimal(xPosition - mainPageCenterSeparatorXPosition),
-          floorNumberToOneDecimal(layoutWidth - xPosition),
+          floorNumberToOneDecimal(thirdPanelWidth),
+          floorNumberToOneDecimal(fourthPanelWidth),
         ]),
       );
     }
