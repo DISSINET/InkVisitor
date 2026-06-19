@@ -753,7 +753,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     const flooredXPosition = floorNumberToOneDecimal(xPosition);
     const clampedXPosition = Math.max(flooredXPosition, FIRST_PANEL_MIN_WIDTH);
 
-    if (flooredXPosition < FIRST_PANEL_MIN_WIDTH) {
+    if (firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded && flooredXPosition < FIRST_PANEL_MIN_WIDTH) {
       toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
     }
 
@@ -781,7 +781,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       const secondPanelWidth = xPosition - panelWidths[0];
       const thirdPanelWidth = layoutWidth - panelWidths[3] - xPosition;
 
-      if (secondPanelWidth < SECOND_PANEL_MIN_WIDTH || thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) {
+      if (
+        firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded &&
+        (secondPanelWidth < SECOND_PANEL_MIN_WIDTH || thirdPanelWidth < THIRD_PANEL_MIN_WIDTH)
+      ) {
         toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
       }
 
@@ -811,7 +814,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       const thirdPanelWidth = xPosition - mainPageCenterSeparatorXPosition;
       const fourthPanelWidth = layoutWidth - xPosition;
 
-      if (thirdPanelWidth < THIRD_PANEL_MIN_WIDTH || fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH) {
+      if (
+        firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded &&
+        (thirdPanelWidth < THIRD_PANEL_MIN_WIDTH || fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH)
+      ) {
         toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
       }
 
