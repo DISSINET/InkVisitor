@@ -25,7 +25,11 @@ import {
   StyledSearchNavigation,
 } from "../StatementsListBox/StatementListBoxStyles";
 import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
-import { StyledWarningsListHeader } from "./AnnotatorBoxStyles";
+import {
+  StyledDocumentContainer,
+  StyledWarningsListHeader,
+  StyledWarningWrapper,
+} from "./AnnotatorBoxStyles";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -104,12 +108,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   return (
     <>
       <StyledDocumentLine $marginLeft={showStatementList}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        <StyledDocumentContainer>
           <StyledEntityContainer>
             {!selectedResource && (
               <EntitySuggester
@@ -161,19 +160,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             )}
           </StyledEntityContainer>
 
-          {/* {selectedDocument && (
-            <Button
-              inverted
-              color="info"
-              icon={<FaDownload size={11} />}
-              onClick={() => {
-                setShowExportModal(true);
-              }}
-              tooltipLabel="export document"
-              tooltipPosition="top"
-            />
-          )} */}
-
           <StyledDocumentTitleContainer
             style={{
               maxWidth: annotatorWidthTooNarrow ? "12.5rem" : "12.5rem",
@@ -181,7 +167,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             }}
           >
             {selectedDocument && (
-              <DocumentTitle title={selectedDocument.title} width={isUndersized ? 100 : "full"} />
+              <DocumentTitle
+                title={selectedDocument.title}
+                width={isUndersized ? 100 : "full"}
+                noMargin
+              />
             )}
             <Loader show={selectedDocumentIsFetching} size={16} />
           </StyledDocumentTitleContainer>
@@ -194,17 +184,9 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             canEditDocument &&
             selectedResource !== false &&
             selectedResource?.data?.documentId && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  flexShrink: 0,
-                  // Left gap comes from DocumentTitle's own 0.6rem right margin;
-                  // match it on the right so the chip is evenly spaced.
-                  marginRight: "0.6rem",
-                }}
-              >
+              <StyledWarningWrapper>
                 <WarningsChip count={warningCount} onClick={onOpenWarnings} />
-              </span>
+              </StyledWarningWrapper>
             )}
 
           {!selectedDocumentIsFetching &&
@@ -241,7 +223,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               )}
             </StyledAnnotatorMenuBar>
           )}
-        </div>
+        </StyledDocumentContainer>
 
         {/* Class selector - HIGHLIGHT */}
         {selectedResource !== false && selectedResource?.data?.documentId && (
