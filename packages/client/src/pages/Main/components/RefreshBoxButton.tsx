@@ -23,23 +23,14 @@ export const RefreshBoxButton: React.FC<RefreshBoxButton> = ({ queriesToRefresh,
       icon={<BiRefresh />}
       onClick={async () => {
         const uid = localStorage.getItem("userid");
-        for (const queryToRefresh of queriesToRefresh) {
-          if (queryToRefresh === "user" && uid) {
-            await queryClient.invalidateQueries({ queryKey: ["user", uid] });
-            await queryClient.refetchQueries({
-              queryKey: ["user", uid],
-              type: "active",
-            });
-          } else {
-            await queryClient.invalidateQueries({
-              queryKey: [queryToRefresh],
-            });
-            await queryClient.refetchQueries({
-              queryKey: [queryToRefresh],
-              type: "active",
-            });
-          }
-        }
+        await Promise.all(
+          queriesToRefresh.map(async (queryToRefresh) => {
+            const queryKey =
+              queryToRefresh === "user" && uid ? ["user", uid] : [queryToRefresh];
+            await queryClient.invalidateQueries({ queryKey });
+            await queryClient.refetchQueries({ queryKey, type: "active" });
+          })
+        );
       }}
     />
   );

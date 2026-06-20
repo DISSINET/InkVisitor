@@ -165,9 +165,9 @@ export function useVerticalSeparators() {
   };
 
   const handleSeparatorLayoutInit = () => {
-    let secondPanel = mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
-    let thirdPanel = mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition;
-    let fourthPanel = layoutWidth - mainPageSearchSeparatorXPosition;
+    const secondPanel = mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
+    const thirdPanel = mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition;
+    const fourthPanel = layoutWidth - mainPageSearchSeparatorXPosition;
 
     const tempPanelWidths = [mainPageTreeSeparatorXPosition, secondPanel, thirdPanel, fourthPanel];
 
