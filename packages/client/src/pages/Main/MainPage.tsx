@@ -122,6 +122,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [statementId]);
 
+  const prevEditorBoxStateRef = useRef(editorBoxState);
+  useEffect(() => {
+    const wasFullHeight = prevEditorBoxStateRef.current === EditorBoxState.FullHeight;
+    prevEditorBoxStateRef.current = editorBoxState;
+
+    if (wasFullHeight && editorBoxState !== EditorBoxState.FullHeight) {
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+    }
+  }, [editorBoxState, queryClient]);
+
+  useEffect(() => {
+    if (thirdPanelExpanded && editorBoxState !== EditorBoxState.FullHeight) {
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+    }
+  }, [thirdPanelExpanded]);
+
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
       dispatch(setFirstPanelExpanded(false));
