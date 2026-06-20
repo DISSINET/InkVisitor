@@ -13,7 +13,7 @@ import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
+import { BiHide } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
@@ -21,7 +21,8 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
-import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
+import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
+import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
 import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
@@ -127,79 +128,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
     }
   }, [thirdPanelExpanded]);
-
-  const handleHideFourthPanelBoxButtonClick = (
-    boxToHide: FourthPanelBoxes,
-    isThisBoxHidden: boolean,
-  ) => {
-    if (isThisBoxHidden) {
-      const newObject = {
-        ...fourthPanelBoxesOpened,
-        [boxToHide]: true,
-      };
-      dispatch(setFourthPanelBoxesOpened(newObject));
-    } else {
-      const newObject = {
-        ...fourthPanelBoxesOpened,
-        [boxToHide]: false,
-      };
-      dispatch(setFourthPanelBoxesOpened(newObject));
-    }
-  };
-
-  // hide one of the boxes in fourth panel
-  const hideFourthPanelBoxButton = (boxToHide: FourthPanelBoxes) => {
-    const isThisBoxHidden = !fourthPanelBoxesOpened[boxToHide];
-    return (
-      <>
-        {fourthPanelExpanded && (
-          <Button
-            key={boxToHide}
-            inverted
-            icon={isThisBoxHidden ? <BiShow /> : <BiHide />}
-            onClick={() => handleHideFourthPanelBoxButtonClick(boxToHide, isThisBoxHidden)}
-          />
-        )}
-      </>
-    );
-  };
-
-  const refreshBoxButton = (queriesToRefresh: string[], isThisBoxHidden: boolean) => {
-    return isThisBoxHidden ? (
-      <></>
-    ) : (
-      <>
-        {queriesToRefresh.length > 0 ? (
-          <Button
-            key="refresh queries"
-            tooltipLabel="refresh data"
-            inverted
-            icon={<BiRefresh />}
-            onClick={async () => {
-              const uid = localStorage.getItem("userid");
-              for (const queryToRefresh of queriesToRefresh) {
-                if (queryToRefresh === "user" && uid) {
-                  await queryClient.invalidateQueries({ queryKey: ["user", uid] });
-                  await queryClient.refetchQueries({
-                    queryKey: ["user", uid],
-                    type: "active",
-                  });
-                } else {
-                  await queryClient.invalidateQueries({
-                    queryKey: [queryToRefresh],
-                  });
-                  await queryClient.refetchQueries({
-                    queryKey: [queryToRefresh],
-                    type: "active",
-                  });
-                }
-              }
-            }}
-          />
-        ) : null}
-      </>
-    );
-  };
 
   const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
     const onePercentOfLayoutHeight = contentHeight / 100;
@@ -654,7 +582,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Territories"
           isExpanded={firstPanelExpanded}
           buttons={[
-            refreshBoxButton(["tree", "territory", "user"], !firstPanelExpanded),
+            <RefreshBoxButton queriesToRefresh={["tree", "territory", "user"]} isHidden={!firstPanelExpanded} />,
             firstPanelButton(),
           ]}
           noFrame
@@ -737,7 +665,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 </>,
                 statementListOpened &&
                   territoryId &&
-                  refreshBoxButton(["territory", "statement", "user"], false),
+                  <RefreshBoxButton queriesToRefresh={["territory", "statement", "user"]} isHidden={false} />,
                 secondPanelButton(),
               ]}
             >
@@ -909,8 +837,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            refreshBoxButton(["search-templates", "search"], !fourthPanelExpanded),
-            hideFourthPanelBoxButton("search"),
+            <RefreshBoxButton queriesToRefresh={["search-templates", "search"]} isHidden={!fourthPanelExpanded} />,
+            <ToggleFourthPanelBoxButton boxToHide="search" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -924,8 +852,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
-            hideFourthPanelBoxButton("bookmarks"),
+            <RefreshBoxButton queriesToRefresh={["bookmarks"]} isHidden={!fourthPanelExpanded} />,
+            <ToggleFourthPanelBoxButton boxToHide="bookmarks" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -939,8 +867,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            refreshBoxButton(["templates"], !fourthPanelExpanded),
-            hideFourthPanelBoxButton("templates"),
+            <RefreshBoxButton queriesToRefresh={["templates"]} isHidden={!fourthPanelExpanded} />,
+            <ToggleFourthPanelBoxButton boxToHide="templates" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
