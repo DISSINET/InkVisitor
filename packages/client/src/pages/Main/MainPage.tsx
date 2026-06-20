@@ -12,17 +12,15 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
-import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
-import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -38,17 +36,9 @@ import {
   fourthPanelBoxesHeightThirds,
   heightHeader,
   hiddenBoxHeight,
-  MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
-  MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION,
-  MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION,
   SECOND_PANEL_MIN_WIDTH,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
-import {
-  arePanelWidthsUndersized,
-  getInitPercentPanelWidths,
-  panelWidthsFromSeparators,
-} from "utils/layoutUtils";
 import { DetailBoxState, EditorBoxState } from "types";
 import { floorNumberToOneDecimal, searchTree } from "utils/utils";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
@@ -60,6 +50,7 @@ import { MemoizedStatementListBox } from "./containers/StatementsListBox/Stateme
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { useLayoutSeparators } from "./hooks/useLayoutSeparators";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
@@ -437,50 +428,23 @@ const MainPage: React.FC<MainPage> = ({}) => {
       : "maximize editor box";
   };
 
-  const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
-
-  // TREE SEPARATOR STATE
-  const localStorageTreeSeparatorXPosition = localStorage.getItem("mainPageTreeSeparatorXPosition");
-  const [mainPageTreeSeparatorXPosition, setMainPageTreeSeparatorXPosition] = useState<number>(
-    localStorageTreeSeparatorXPosition
-      ? Number(localStorageTreeSeparatorXPosition) * onePercentOfLayoutWidth
-      : MAIN_PAGE_TREE_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
-  );
-
-  // CENTER SEPARATOR STATE
-  const localStorageCenterSeparatorXPosition = localStorage.getItem(
-    "mainPageCenterSeparatorXPosition",
-  );
-  const [mainPageCenterSeparatorXPosition, setMainPageCenterSeparatorXPosition] = useState<number>(
-    localStorageCenterSeparatorXPosition
-      ? Number(localStorageCenterSeparatorXPosition) * onePercentOfLayoutWidth
-      : MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
-  );
-
-  // SEARCH SEPARATOR STATE
-  const localStorageSearchSeparatorXPosition = localStorage.getItem(
-    "mainPageSearchSeparatorXPosition",
-  );
-  const [mainPageSearchSeparatorXPosition, setMainPageSearchSeparatorXPosition] = useState<number>(
-    localStorageSearchSeparatorXPosition
-      ? Number(localStorageSearchSeparatorXPosition) * onePercentOfLayoutWidth
-      : MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
-  );
+  const {
+    treeSeparator,
+    centerSeparator,
+    searchSeparator,
+    onePercentOfLayoutWidth,
+    isFirstRender,
+    handleTreeSeparatorXPositionChange,
+    handleCenterSeparatorXPositionChange,
+    handleSearchSeparatorXPositionChange,
+    handleLayoutInit,
+  } = useLayoutSeparators();
 
   const { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel } =
     usePanelToggles({
-      treeSeparator: {
-        position: mainPageTreeSeparatorXPosition,
-        setPosition: setMainPageTreeSeparatorXPosition,
-      },
-      centerSeparator: {
-        position: mainPageCenterSeparatorXPosition,
-        setPosition: setMainPageCenterSeparatorXPosition,
-      },
-      searchSeparator: {
-        position: mainPageSearchSeparatorXPosition,
-        setPosition: setMainPageSearchSeparatorXPosition,
-      },
+      treeSeparator,
+      centerSeparator,
+      searchSeparator,
       onePercentOfLayoutWidth,
     });
 
@@ -544,159 +508,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       }
     />
   );
-
-  const handleTreeSeparatorXPositionChange = (xPosition: number) => {
-    const flooredXPosition = floorNumberToOneDecimal(xPosition);
-    const clampedXPosition = Math.max(flooredXPosition, FIRST_PANEL_MIN_WIDTH);
-
-    if (
-      firstPanelExpanded &&
-      secondPanelExpanded &&
-      thirdPanelExpanded &&
-      fourthPanelExpanded &&
-      flooredXPosition < FIRST_PANEL_MIN_WIDTH
-    ) {
-      toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
-    }
-
-    if (mainPageTreeSeparatorXPosition !== clampedXPosition) {
-      setMainPageTreeSeparatorXPosition(clampedXPosition);
-
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        clampedXPosition / onePercentOfLayoutWidth,
-      );
-      localStorage.setItem("mainPageTreeSeparatorXPosition", separatorXPercentPosition.toString());
-
-      dispatch(
-        setPanelWidths([
-          clampedXPosition,
-          floorNumberToOneDecimal(mainPageCenterSeparatorXPosition - clampedXPosition),
-          panelWidths[2],
-          panelWidths[3],
-        ]),
-      );
-    }
-  };
-
-  const handleCenterSeparatorXPositionChange = (xPosition: number) => {
-    if (mainPageCenterSeparatorXPosition !== xPosition) {
-      const secondPanelWidth = xPosition - panelWidths[0];
-      const thirdPanelWidth = layoutWidth - panelWidths[3] - xPosition;
-
-      if (
-        firstPanelExpanded &&
-        secondPanelExpanded &&
-        thirdPanelExpanded &&
-        fourthPanelExpanded &&
-        (secondPanelWidth < SECOND_PANEL_MIN_WIDTH || thirdPanelWidth < THIRD_PANEL_MIN_WIDTH)
-      ) {
-        toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
-      }
-
-      setMainPageCenterSeparatorXPosition(xPosition);
-
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfLayoutWidth,
-      );
-      localStorage.setItem(
-        "mainPageCenterSeparatorXPosition",
-        separatorXPercentPosition.toString(),
-      );
-
-      dispatch(
-        setPanelWidths([
-          panelWidths[0],
-          floorNumberToOneDecimal(secondPanelWidth),
-          floorNumberToOneDecimal(thirdPanelWidth),
-          panelWidths[3],
-        ]),
-      );
-    }
-  };
-
-  const handleSearchSeparatorXPositionChange = (xPosition: number) => {
-    if (mainPageSearchSeparatorXPosition !== xPosition) {
-      const thirdPanelWidth = xPosition - mainPageCenterSeparatorXPosition;
-      const fourthPanelWidth = layoutWidth - xPosition;
-
-      if (
-        firstPanelExpanded &&
-        secondPanelExpanded &&
-        thirdPanelExpanded &&
-        fourthPanelExpanded &&
-        (thirdPanelWidth < THIRD_PANEL_MIN_WIDTH || fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH)
-      ) {
-        toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
-      }
-
-      setMainPageSearchSeparatorXPosition(xPosition);
-
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfLayoutWidth,
-      );
-      localStorage.setItem(
-        "mainPageSearchSeparatorXPosition",
-        separatorXPercentPosition.toString(),
-      );
-
-      dispatch(
-        setPanelWidths([
-          panelWidths[0],
-          panelWidths[1],
-          floorNumberToOneDecimal(thirdPanelWidth),
-          floorNumberToOneDecimal(fourthPanelWidth),
-        ]),
-      );
-    }
-  };
-
-  const handleSeparatorLayoutInit = () => {
-    let secondPanel = mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
-    let thirdPanel = mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition;
-    let fourthPanel = layoutWidth - mainPageSearchSeparatorXPosition;
-
-    const tempPanelWidths = [mainPageTreeSeparatorXPosition, secondPanel, thirdPanel, fourthPanel];
-
-    dispatch(setPanelWidths(tempPanelWidths.map((pW) => floorNumberToOneDecimal(pW))));
-    dispatch(
-      setPanelWidthsPercent(
-        tempPanelWidths.map((panelWidth) =>
-          floorNumberToOneDecimal(panelWidth / onePercentOfLayoutWidth),
-        ),
-      ),
-    );
-  };
-
-  const handleLayoutInit = () => {
-    const initPercentPanelWidths = getInitPercentPanelWidths(layoutWidth);
-    const initPanelWidthsPx = initPercentPanelWidths.map((percentWidth: number) =>
-      floorNumberToOneDecimal(percentWidth * onePercentOfLayoutWidth),
-    );
-    dispatch(setPanelWidths(initPanelWidthsPx));
-    dispatch(setPanelWidthsPercent(initPercentPanelWidths));
-    setMainPageTreeSeparatorXPosition(initPanelWidthsPx[0]);
-    localStorage.setItem(
-      "mainPageTreeSeparatorXPosition",
-      (initPanelWidthsPx[0] / onePercentOfLayoutWidth).toString(),
-    );
-    setMainPageCenterSeparatorXPosition(initPanelWidthsPx[0] + initPanelWidthsPx[1]);
-    localStorage.setItem(
-      "mainPageCenterSeparatorXPosition",
-      ((initPanelWidthsPx[0] + initPanelWidthsPx[1]) / onePercentOfLayoutWidth).toString(),
-    );
-    setMainPageSearchSeparatorXPosition(
-      initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2],
-    );
-    localStorage.setItem(
-      "mainPageSearchSeparatorXPosition",
-      (
-        (initPanelWidthsPx[0] + initPanelWidthsPx[1] + initPanelWidthsPx[2]) /
-        onePercentOfLayoutWidth
-      ).toString(),
-    );
-  };
-
-  const isFirstRender = useRef(true);
 
   const secondPanelWidth = useMemo(() => {
     if (!secondPanelExpanded) {
@@ -793,48 +604,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     fourthPanelExpanded,
   ]);
 
-  useLayoutEffect(() => {
-    if (layoutWidth > 0) {
-      if (isFirstRender.current || !panelWidths.length) {
-        // This is either initial load or coming from different page
-        if (
-          !localStorageCenterSeparatorXPosition ||
-          !localStorageTreeSeparatorXPosition ||
-          !localStorageSearchSeparatorXPosition
-        ) {
-          console.log("first layout init");
-          // first layout INIT
-          handleLayoutInit();
-        } else {
-          const savedWidths = panelWidthsFromSeparators(
-            Number(localStorageTreeSeparatorXPosition),
-            Number(localStorageCenterSeparatorXPosition),
-            Number(localStorageSearchSeparatorXPosition),
-            layoutWidth,
-          );
-
-          if (arePanelWidthsUndersized(savedWidths)) {
-            // something is undersized
-            console.log("something is undersized");
-            handleLayoutInit();
-          } else {
-            // layout init with saved separator - coming from different page
-            console.log(
-              "page reload / coming from different page - separator determines panel widths",
-            );
-            handleSeparatorLayoutInit();
-          }
-        }
-
-        isFirstRender.current = false;
-      } else {
-        // change of layout width (different monitor / change of zoom)
-        console.log("layout width changed");
-        handleLayoutInit();
-      }
-    }
-  }, [layoutWidth]);
-
   const treeData: IResponseTree | undefined = queryClient.getQueryData(["tree"]);
 
   const selectedTerritoryPath = useAppSelector(
@@ -878,7 +647,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     <>
       <ScrollHandler />
       {/* TREE SEPARATOR */}
-      {mainPageTreeSeparatorXPosition > 0 &&
+      {treeSeparator.position > 0 &&
         firstPanelExpanded &&
         (secondPanelExpanded || thirdPanelExpanded || fourthPanelExpanded) && (
           <LayoutSeparatorVertical
@@ -886,37 +655,37 @@ const MainPage: React.FC<MainPage> = ({}) => {
             leftSideMaxWidth={
               secondPanelExpanded
                 ? thirdPanelExpanded || fourthPanelExpanded
-                  ? mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH
+                  ? centerSeparator.position - SECOND_PANEL_MIN_WIDTH
                   : layoutWidth - 2 * COLLAPSED_PANEL_WIDTH - SECOND_PANEL_MIN_WIDTH
                 : thirdPanelExpanded
-                  ? mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH - COLLAPSED_PANEL_WIDTH
+                  ? searchSeparator.position - THIRD_PANEL_MIN_WIDTH - COLLAPSED_PANEL_WIDTH
                   : layoutWidth -
                     (fourthPanelExpanded ? panelWidths[3] : COLLAPSED_PANEL_WIDTH) -
                     COLLAPSED_PANEL_WIDTH -
                     COLLAPSED_PANEL_WIDTH
             }
-            separatorXPosition={mainPageTreeSeparatorXPosition}
+            separatorXPosition={treeSeparator.position}
             setSeparatorXPosition={(xPosition) => {
               handleTreeSeparatorXPositionChange(xPosition);
             }}
             onMaxWidthReached={(overflow) => {
               if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + overflow) {
-                handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + overflow);
+                handleCenterSeparatorXPositionChange(centerSeparator.position + overflow);
               } else if (fourthPanelWidth > FOURTH_PANEL_MIN_WIDTH + overflow) {
                 if (!thirdPanelExpanded) {
-                  handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + overflow);
+                  handleCenterSeparatorXPositionChange(centerSeparator.position + overflow);
                 } else {
-                  const newCenterPos = mainPageCenterSeparatorXPosition + overflow;
-                  const newSearchPos = mainPageSearchSeparatorXPosition + overflow;
+                  const newCenterPos = centerSeparator.position + overflow;
+                  const newSearchPos = searchSeparator.position + overflow;
 
-                  setMainPageCenterSeparatorXPosition(newCenterPos);
+                  centerSeparator.setPosition(newCenterPos);
                   localStorage.setItem(
-                    "mainPageCenterSeparatorXPosition",
+                    "centerSeparator.position",
                     floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
                   );
-                  setMainPageSearchSeparatorXPosition(newSearchPos);
+                  searchSeparator.setPosition(newSearchPos);
                   localStorage.setItem(
-                    "mainPageSearchSeparatorXPosition",
+                    "searchSeparator.position",
                     floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
                   );
 
@@ -935,12 +704,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
         )}
 
       {/* CENTER SEPARATOR */}
-      {mainPageCenterSeparatorXPosition > 0 &&
+      {centerSeparator.position > 0 &&
         secondPanelExpanded &&
         (thirdPanelExpanded || fourthPanelExpanded) && (
           <LayoutSeparatorVertical
             leftSideMinWidth={
-              (firstPanelExpanded ? mainPageTreeSeparatorXPosition : COLLAPSED_PANEL_WIDTH) +
+              (firstPanelExpanded ? treeSeparator.position : COLLAPSED_PANEL_WIDTH) +
               SECOND_PANEL_MIN_WIDTH
             }
             leftSideMaxWidth={
@@ -950,53 +719,53 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
                 : layoutWidth - COLLAPSED_PANEL_WIDTH - FOURTH_PANEL_MIN_WIDTH
             }
-            separatorXPosition={mainPageCenterSeparatorXPosition}
+            separatorXPosition={centerSeparator.position}
             setSeparatorXPosition={(xPosition) => {
               handleCenterSeparatorXPositionChange(xPosition);
             }}
             onMaxWidthReached={(overflow) => {
               if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + overflow) {
-                handleSearchSeparatorXPositionChange(mainPageSearchSeparatorXPosition + overflow);
+                handleSearchSeparatorXPositionChange(searchSeparator.position + overflow);
               }
             }}
             onMinWidthReached={(overflow) => {
               if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + overflow) {
-                handleTreeSeparatorXPositionChange(mainPageTreeSeparatorXPosition - overflow);
+                handleTreeSeparatorXPositionChange(treeSeparator.position - overflow);
               }
             }}
           />
         )}
 
       {/* SEARCH SEPARATOR */}
-      {mainPageSearchSeparatorXPosition > 0 && fourthPanelExpanded && thirdPanelExpanded && (
+      {searchSeparator.position > 0 && fourthPanelExpanded && thirdPanelExpanded && (
         <LayoutSeparatorVertical
           leftSideMinWidth={
             (secondPanelExpanded
-              ? mainPageCenterSeparatorXPosition
+              ? centerSeparator.position
               : (firstPanelExpanded ? panelWidths[0] : COLLAPSED_PANEL_WIDTH) +
                 COLLAPSED_PANEL_WIDTH) +
             (thirdPanelExpanded ? THIRD_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH)
           }
           leftSideMaxWidth={layoutWidth - FOURTH_PANEL_MIN_WIDTH}
-          separatorXPosition={mainPageSearchSeparatorXPosition}
+          separatorXPosition={searchSeparator.position}
           setSeparatorXPosition={(xPosition) => {
             handleSearchSeparatorXPositionChange(xPosition);
           }}
           onMinWidthReached={(overflow) => {
             if (panelWidths[1] > SECOND_PANEL_MIN_WIDTH + overflow) {
-              handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition - overflow);
+              handleCenterSeparatorXPositionChange(centerSeparator.position - overflow);
             } else if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + overflow) {
-              const newCenterPos = mainPageCenterSeparatorXPosition - overflow;
-              const newTreePos = mainPageTreeSeparatorXPosition - overflow;
+              const newCenterPos = centerSeparator.position - overflow;
+              const newTreePos = treeSeparator.position - overflow;
 
-              setMainPageCenterSeparatorXPosition(newCenterPos);
+              centerSeparator.setPosition(newCenterPos);
               localStorage.setItem(
-                "mainPageCenterSeparatorXPosition",
+                "centerSeparator.position",
                 floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
               );
-              setMainPageTreeSeparatorXPosition(newTreePos);
+              treeSeparator.setPosition(newTreePos);
               localStorage.setItem(
-                "mainPageTreeSeparatorXPosition",
+                "treeSeparator.position",
                 floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
               );
 
@@ -1004,7 +773,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 setPanelWidths([
                   newTreePos,
                   floorNumberToOneDecimal(newCenterPos - newTreePos),
-                  floorNumberToOneDecimal(mainPageSearchSeparatorXPosition - newCenterPos),
+                  floorNumberToOneDecimal(searchSeparator.position - newCenterPos),
                   panelWidths[3],
                 ]),
               );
