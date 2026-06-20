@@ -19,7 +19,7 @@ import {
 } from "utils/layoutUtils";
 import { floorNumberToOneDecimal } from "utils/utils";
 
-export function useLayoutSeparators() {
+export function useVerticalSeparators() {
   const dispatch = useAppDispatch();
 
   const layoutWidth = useAppSelector((state) => state.layout.layoutWidth);

@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree, IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Box, Button, ButtonGroup, Loader, Panel } from "components";
+import { Box, Button, ButtonGroup, Panel } from "components";
 import {
   EntityCreateModal,
   LayoutSeparatorHorizontal,
@@ -20,16 +20,15 @@ import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
-import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
-  BOX_SPLIT_OFFSET,
   COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
   FOURTH_PANEL_MIN_WIDTH,
@@ -49,8 +48,8 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
-import { useLayoutSeparators } from "./hooks/useLayoutSeparators";
+import { useBoxLayout } from "./hooks/useBoxLayout";
+import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
@@ -105,8 +104,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const thirdPanelRealWidth: number = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelRealWidth,
   );
-  const [lastState, setLastState] = useState(DetailBoxState.Normal);
-
   useEffect(() => {
     if (statementId && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
       setEditorOpened(true);
@@ -282,151 +279,26 @@ const MainPage: React.FC<MainPage> = ({}) => {
     );
   }, [user, territoryId]);
 
-  // DETAIL HORIZONTAL SEPARATOR STATE
-  const [detailSeparatorY, setDetailSeparatorY] = useState<number>(() => {
-    const saved = localStorage.getItem("detailSeparatorYPercent");
-    return saved ? (Number(saved) * contentHeight) / 100 : contentHeight / 2 - BOX_SPLIT_OFFSET;
+  const {
+    detailSeparatorY,
+    editorSeparatorY,
+    handleDetailSeparatorYChange,
+    handleEditorSeparatorYChange,
+    getStatementListBoxHeight,
+    getDetailBoxHeight,
+    getEditorBoxHeight,
+    getAnnotatorBoxHeight,
+    handleMaximizeDetailBox,
+    handleMinimizeDetailBox,
+    handleMaximizeEditorBox,
+    getMaximizeBtnTooltip,
+    getEditorMaximizeBtnTooltip,
+  } = useBoxLayout({
+    detailIdArrayLength: detailIdArray.length,
+    statementId,
+    editorOpened,
+    setEditorOpened,
   });
-
-  // EDITOR HORIZONTAL SEPARATOR STATE
-  const [editorSeparatorY, setEditorSeparatorY] = useState<number>(() => {
-    const saved = localStorage.getItem("editorSeparatorYPercent");
-    return saved ? (Number(saved) * contentHeight) / 100 : contentHeight / 2 - BOX_SPLIT_OFFSET;
-  });
-
-  useEffect(() => {
-    const savedDetail = localStorage.getItem("detailSeparatorYPercent");
-    const savedEditor = localStorage.getItem("editorSeparatorYPercent");
-    setDetailSeparatorY(
-      savedDetail
-        ? (Number(savedDetail) * contentHeight) / 100
-        : contentHeight / 2 - BOX_SPLIT_OFFSET,
-    );
-    setEditorSeparatorY(
-      savedEditor
-        ? (Number(savedEditor) * contentHeight) / 100
-        : contentHeight / 2 - BOX_SPLIT_OFFSET,
-    );
-  }, [contentHeight]);
-
-  const handleDetailSeparatorYChange = (yPosition: number) => {
-    setDetailSeparatorY(yPosition);
-    localStorage.setItem(
-      "detailSeparatorYPercent",
-      floorNumberToOneDecimal((yPosition / contentHeight) * 100).toString(),
-    );
-  };
-
-  const handleEditorSeparatorYChange = (yPosition: number) => {
-    setEditorSeparatorY(yPosition);
-    localStorage.setItem(
-      "editorSeparatorYPercent",
-      floorNumberToOneDecimal((yPosition / contentHeight) * 100).toString(),
-    );
-  };
-
-  const getStatementListBoxHeight = () => {
-    if (!detailIdArray.length) {
-      return contentHeight;
-    }
-    return contentHeight - (getDetailBoxHeight() ?? 0);
-  };
-
-  useEffect(() => {
-    if (detailIdArray.length > 0) {
-      if (detailBoxState === DetailBoxState.FullHeight) {
-        if (statementListOpened) {
-          dispatch(setStatementListOpened(false));
-        }
-      } else {
-        if (!statementListOpened) {
-          dispatch(setStatementListOpened(true));
-        }
-      }
-    }
-  }, [detailBoxState, statementListOpened, detailIdArray]);
-
-  const handleMaximizeDetailBox = () => {
-    if (detailBoxState === DetailBoxState.Normal) {
-      dispatch(setDetailBoxState(DetailBoxState.FullHeight));
-    } else {
-      dispatch(setDetailBoxState(DetailBoxState.Normal));
-    }
-  };
-
-  const handleMinimizeDetailBox = () => {
-    if (detailBoxState === DetailBoxState.Minimized) {
-      dispatch(setDetailBoxState(lastState));
-    } else {
-      setLastState(detailBoxState);
-      dispatch(setDetailBoxState(DetailBoxState.Minimized));
-    }
-  };
-
-  const getDetailBoxHeight = () => {
-    switch (detailBoxState) {
-      case DetailBoxState.FullHeight:
-        return contentHeight - hiddenBoxHeight;
-      case DetailBoxState.Normal:
-        return contentHeight - detailSeparatorY;
-      case DetailBoxState.Minimized:
-        return hiddenBoxHeight + 22;
-    }
-  };
-
-  const getMaximizeBtnTooltip = () => {
-    switch (detailBoxState) {
-      case DetailBoxState.FullHeight:
-        return "shrink detail box";
-      case DetailBoxState.Normal:
-        return "maximize detail box";
-      case DetailBoxState.Minimized:
-        return "open detail box";
-    }
-  };
-
-  const getEditorBoxHeight = () => {
-    if (!editorOpened) {
-      return hiddenBoxHeight;
-    }
-    switch (editorBoxState) {
-      case EditorBoxState.FullHeight:
-        return contentHeight - hiddenBoxHeight;
-      case EditorBoxState.Normal:
-        return contentHeight - editorSeparatorY;
-      case EditorBoxState.Minimized:
-        return hiddenBoxHeight;
-    }
-  };
-
-  const getAnnotatorBoxHeight = () => {
-    if (!statementId) {
-      return contentHeight;
-    }
-    return contentHeight - (getEditorBoxHeight() ?? 0);
-  };
-
-  const handleMaximizeEditorBox = () => {
-    if (!editorOpened) {
-      setEditorOpened(true);
-      dispatch(setEditorBoxState(EditorBoxState.Normal));
-      return;
-    }
-    if (editorBoxState === EditorBoxState.Normal) {
-      dispatch(setEditorBoxState(EditorBoxState.FullHeight));
-    } else {
-      dispatch(setEditorBoxState(EditorBoxState.Normal));
-    }
-  };
-
-  const getEditorMaximizeBtnTooltip = () => {
-    if (!editorOpened) {
-      return "open editor box";
-    }
-    return editorBoxState === EditorBoxState.FullHeight
-      ? "shrink editor box"
-      : "maximize editor box";
-  };
 
   const {
     treeSeparator,
@@ -438,7 +310,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     handleCenterSeparatorXPositionChange,
     handleSearchSeparatorXPositionChange,
     handleLayoutInit,
-  } = useLayoutSeparators();
+  } = useVerticalSeparators();
 
   const { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel } =
     usePanelToggles({
