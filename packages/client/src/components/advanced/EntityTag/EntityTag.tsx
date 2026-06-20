@@ -9,6 +9,7 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } f
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState, DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
 import {
@@ -261,6 +262,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           }
           if (!disableDoubleClick) {
             appendDetailId(entity.id);
+            dispatch(setSecondPanelExpanded(true));
             if (detailBoxState === DetailBoxState.Minimized) {
               dispatch(setDetailBoxState(DetailBoxState.Normal));
             }
