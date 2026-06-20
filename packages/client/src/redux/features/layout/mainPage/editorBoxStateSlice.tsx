@@ -1,9 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { EditorBoxState } from "types";
 
-const initialState: EditorBoxState = localStorage.getItem("editorBoxState")
-  ? (localStorage.getItem("editorBoxState") as EditorBoxState)
-  : EditorBoxState.Normal;
+const storedEditorBoxState = localStorage.getItem("editorBoxState");
+const initialState: EditorBoxState =
+  storedEditorBoxState &&
+  Object.values(EditorBoxState).includes(storedEditorBoxState as EditorBoxState)
+    ? (storedEditorBoxState as EditorBoxState)
+    : EditorBoxState.Normal;
 
 const editorBoxStateSlice = createSlice({
   name: "editorBoxState",
