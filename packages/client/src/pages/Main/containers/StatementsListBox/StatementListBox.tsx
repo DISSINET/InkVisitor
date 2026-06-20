@@ -420,6 +420,12 @@ export const StatementListBox: React.FC = () => {
       setSelectedRows([]);
       setTerritoryId(data.newTerritoryId);
     },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      toast.error("Error moving statements");
+      setSelectedRows([]);
+    },
   });
 
   const duplicateStatementsMutation = useMutation({

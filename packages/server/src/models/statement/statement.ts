@@ -382,7 +382,8 @@ class Statement extends Entity implements IStatement {
    */
   async update(
     db: Connection | undefined,
-    updateData: Record<string, unknown>
+    updateData: Record<string, unknown>,
+    skipTreeCache = false
   ): Promise<WriteResult> {
     if (
       updateData["data"] &&
@@ -406,7 +407,9 @@ class Statement extends Entity implements IStatement {
 
     const result = await super.update(db, updateData);
 
-    await treeCache.initialize();
+    if (!skipTreeCache) {
+      await treeCache.initialize();
+    }
 
     return result;
   }
