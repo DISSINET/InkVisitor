@@ -1,9 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DetailBoxState } from "types";
 
-const initialState: DetailBoxState = localStorage.getItem("detailBoxState")
-  ? (localStorage.getItem("detailBoxState") as DetailBoxState)
-  : DetailBoxState.Normal;
+const storedDetailBoxState = localStorage.getItem("detailBoxState");
+const initialState: DetailBoxState =
+  storedDetailBoxState &&
+  Object.values(DetailBoxState).includes(storedDetailBoxState as DetailBoxState)
+    ? (storedDetailBoxState as DetailBoxState)
+    : DetailBoxState.Normal;
 
 const detailBoxStateSlice = createSlice({
   name: "detailBoxState",

@@ -9,8 +9,8 @@ interface LayoutSeparatorVertical {
   // set custom one related to specific page
   separatorXPosition: number;
   setSeparatorXPosition: (xPosition: number) => void;
-  onMaxWidthReached?: () => void;
-  onMinWidthReached?: () => void;
+  onMaxWidthReached?: (overflow: number) => void;
+  onMinWidthReached?: (overflow: number) => void;
 }
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   leftSideMinWidth,
@@ -59,13 +59,12 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
         );
         setLeftWidth(clampedWidth);
 
-        // Notify parent when max width is reached
-        if (clampedWidth === leftSideMaxWidth && onMaxWidthReached) {
-          onMaxWidthReached();
+        // Notify parent with overflow so adjacent panels resize proportionally
+        if (clampedWidth === leftSideMaxWidth && newLeftWidth > leftSideMaxWidth && onMaxWidthReached) {
+          onMaxWidthReached(newLeftWidth - leftSideMaxWidth);
         }
-        // Notify parent when min width is reached
-        if (clampedWidth === leftSideMinWidth && onMinWidthReached) {
-          onMinWidthReached();
+        if (clampedWidth === leftSideMinWidth && newLeftWidth < leftSideMinWidth && onMinWidthReached) {
+          onMinWidthReached(leftSideMinWidth - newLeftWidth);
         }
       }
     },

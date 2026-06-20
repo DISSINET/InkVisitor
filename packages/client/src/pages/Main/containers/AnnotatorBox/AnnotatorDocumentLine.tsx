@@ -1,30 +1,35 @@
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
-import { Button, IconWithTooltip, Loader } from "components";
+import { Button, IconWithTooltip, Loader, Modal, ModalContent, ModalHeader } from "components";
 import Dropdown, {
   DocumentModalExport,
   DocumentTitle,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useCallback, useMemo, useState } from "react";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
+import React, { useMemo, useState } from "react";
 import { FaDownload, FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
+import { toast } from "react-toastify";
+import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 import {
   StyledAnnotatorMenuBar,
+  StyledDocumentLine,
   StyledDocumentTitleContainer,
   StyledEntityContainer,
   StyledHighlightContainer,
   StyledNoDocumentMessage,
   StyledSearchNavigation,
-  StyledDocumentLine,
-} from "../StatementListBoxStyles";
-import { StyledInfoText } from "../StatementListHeader/StatementListHeaderStyles";
-import { toast } from "react-toastify";
-import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
-import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
+} from "../StatementsListBox/StatementListBoxStyles";
+import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
+import {
+  StyledDocumentContainer,
+  StyledWarningsListHeader,
+  StyledWarningWrapper,
+} from "./AnnotatorBoxStyles";
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -38,7 +43,7 @@ interface StatementListDocumentLine {
   selectedDocument?: IDocument;
   activeTHasAnchor: boolean;
   annotator?: any;
-  territoryId: string;
+  territoryId?: string;
   resources: IEntity[];
   // is list non empty
   showStatementList: boolean;
@@ -81,13 +86,14 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   onOpenWarnings,
 }) => {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
+  const [showHighlightModal, setShowHighlightModal] = useState<boolean>(false);
 
   const isUndersized = useMemo(() => {
-    return contentWidth < SECOND_PANEL_MIN_WIDTH;
+    return contentWidth < ANNOTATOR_UNDERSIZED_BREAKPOINT;
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.9 : contentWidth / 2.6;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.6;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
@@ -102,12 +108,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   return (
     <>
       <StyledDocumentLine $marginLeft={showStatementList}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        <StyledDocumentContainer>
           <StyledEntityContainer>
             {!selectedResource && (
               <EntitySuggester
@@ -128,7 +129,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               <div
                 style={{
                   display: "flex",
-                  maxWidth: annotatorWidthTooNarrow ? "10rem" : "13.5rem",
+                  maxWidth: annotatorWidthTooNarrow ? "11.5rem" : "13.5rem",
                 }}
               >
                 <EntityTag
@@ -159,29 +160,25 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             )}
           </StyledEntityContainer>
 
-          {/* {selectedDocument && (
-            <Button
-              inverted
-              color="info"
-              icon={<FaDownload size={11} />}
-              onClick={() => {
-                setShowExportModal(true);
-              }}
-              tooltipLabel="export document"
-              tooltipPosition="top"
-            />
-          )} */}
-
           <StyledDocumentTitleContainer
             style={{
-              maxWidth: annotatorWidthTooNarrow ? "8rem" : "12.5rem",
+              maxWidth: annotatorWidthTooNarrow ? "11.5rem" : "12.5rem",
               minWidth: "2rem",
             }}
           >
-            {selectedDocument && (
-              <DocumentTitle title={selectedDocument.title} width={isUndersized ? 70 : "full"} />
+            {selectedDocument && !selectedDocumentIsFetching && (
+              <DocumentTitle
+                title={selectedDocument.title}
+                width={annotatorWidthTooNarrow ? 80 : "full"}
+                noMargin
+              />
             )}
-            <Loader show={selectedDocumentIsFetching} size={16} />
+            {selectedDocumentIsFetching && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                <Loader show size={16} />
+                <StyledInfoText>Loading document</StyledInfoText>
+              </div>
+            )}
           </StyledDocumentTitleContainer>
 
           {/* Orphaned-anchor warnings are only actionable by someone who may
@@ -192,17 +189,9 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             canEditDocument &&
             selectedResource !== false &&
             selectedResource?.data?.documentId && (
-              <span
-                style={{
-                  display: "inline-flex",
-                  flexShrink: 0,
-                  // Left gap comes from DocumentTitle's own 0.6rem right margin;
-                  // match it on the right so the chip is evenly spaced.
-                  marginRight: "0.6rem",
-                }}
-              >
+              <StyledWarningWrapper>
                 <WarningsChip count={warningCount} onClick={onOpenWarnings} />
-              </span>
+              </StyledWarningWrapper>
             )}
 
           {!selectedDocumentIsFetching &&
@@ -214,44 +203,43 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledNoDocumentMessage>
             )}
 
-          {selectedResource !== false && selectedResource?.data?.documentId && (
-            <StyledAnnotatorMenuBar>
-              {activeTHasAnchor ? (
-                <Button
-                  label=""
-                  iconRight={
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <TbAnchor />
-                      <FaLongArrowAltRight />
-                    </div>
-                  }
-                  tooltipLabel="locate anchor"
-                  inverted
-                  onClick={() => {
-                    annotator?.scrollToAnchor(territoryId);
-                  }}
-                  color="warning"
-                />
-              ) : (
-                <StyledSearchNavigation>
-                  <TbAnchorOff title="no anchor for T" />
-                </StyledSearchNavigation>
-              )}
-            </StyledAnnotatorMenuBar>
-          )}
-        </div>
+          {!selectedDocumentIsFetching &&
+            selectedResource !== false &&
+            selectedResource?.data?.documentId && (
+              <StyledAnnotatorMenuBar>
+                {activeTHasAnchor ? (
+                  <Button
+                    label=""
+                    iconRight={
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <TbAnchor />
+                        <FaLongArrowAltRight />
+                      </div>
+                    }
+                    tooltipLabel="locate anchor"
+                    inverted
+                    onClick={() => {
+                      annotator?.scrollToAnchor(territoryId);
+                    }}
+                    color="warning"
+                  />
+                ) : (
+                  <StyledSearchNavigation>
+                    <TbAnchorOff title="no anchor for T" />
+                  </StyledSearchNavigation>
+                )}
+              </StyledAnnotatorMenuBar>
+            )}
+        </StyledDocumentContainer>
 
         {/* Class selector - HIGHLIGHT */}
         {selectedResource !== false && selectedResource?.data?.documentId && (
           <StyledHighlightContainer>
-            {/* this condition helps initial render in firefox */}
-            {contentWidth > 0 && (
+            {contentWidth > 0 && !isUndersized && (
               <>
-                {!isUndersized && (
-                  <StyledInfoText style={{ textWrap: "nowrap" }}>
-                    <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
-                  </StyledInfoText>
-                )}
+                <StyledInfoText style={{ textWrap: "nowrap" }}>
+                  <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
+                </StyledInfoText>
                 <Dropdown.Multi.Entity
                   shortLabel
                   options={entitiesDict}
@@ -267,6 +255,13 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                 />
               </>
             )}
+            {isUndersized && (
+              <Button
+                icon={<FaHighlighter />}
+                tooltipLabel="Highlight settings"
+                onClick={() => setShowHighlightModal(true)}
+              />
+            )}
           </StyledHighlightContainer>
         )}
       </StyledDocumentLine>
@@ -277,6 +272,32 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
           onClose={() => setShowExportModal(false)}
         />
       )}
+
+      <Modal
+        showModal={showHighlightModal}
+        onClose={() => setShowHighlightModal(false)}
+        width="auto"
+      >
+        <ModalHeader
+          icon={<FaHighlighter />}
+          title="Highlight settings"
+          onClose={() => setShowHighlightModal(false)}
+        />
+        <ModalContent column>
+          <StyledWarningsListHeader>Choose entity classes to highlight</StyledWarningsListHeader>
+          <Dropdown.Multi.Entity
+            options={entitiesDict}
+            disableEmpty
+            isClearable
+            disableAny
+            closeMenuOnSelect={false}
+            onChange={setHlEntities}
+            value={hlEntities}
+            noOptionsMessage="No entity classes to highlight"
+            width={300}
+          />
+        </ModalContent>
+      </Modal>
     </>
   );
 };

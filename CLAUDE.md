@@ -8,3 +8,8 @@
 - Write commit messages in the normal style of the repo; reference the relevant
   GitHub issue number (e.g. `(#3001)`) when applicable.
 - Only commit or push when explicitly asked.
+
+## Code style
+
+- Do not delete commented-out code. It may be kept intentionally for reference or future use.
+- Name React component interfaces the same as the component, not with a `Props` suffix.

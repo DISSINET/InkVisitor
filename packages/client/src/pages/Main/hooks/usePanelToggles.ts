@@ -1,0 +1,296 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
+import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
+import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
+import {
+  COLLAPSED_PANEL_WIDTH,
+  FIRST_PANEL_MIN_WIDTH,
+  FOURTH_PANEL_MIN_WIDTH,
+  SECOND_PANEL_MIN_WIDTH,
+  THIRD_PANEL_MIN_WIDTH,
+} from "Theme/constants";
+import { floorNumberToOneDecimal } from "utils/utils";
+
+interface SeparatorState {
+  position: number;
+  setPosition: (x: number) => void;
+}
+
+interface UsePanelTogglesParams {
+  treeSeparator: SeparatorState;
+  centerSeparator: SeparatorState;
+  searchSeparator: SeparatorState;
+  onePercentOfLayoutWidth: number;
+}
+
+export function usePanelToggles({
+  treeSeparator,
+  centerSeparator,
+  searchSeparator,
+  onePercentOfLayoutWidth,
+}: UsePanelTogglesParams) {
+  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
+
+  const layoutWidth = useAppSelector((state) => state.layout.layoutWidth);
+  const panelWidths = useAppSelector((state) => state.layout.mainPage.panelWidths);
+  const firstPanelExpanded = useAppSelector((state) => state.layout.mainPage.firstPanelExpanded);
+  const secondPanelExpanded = useAppSelector((state) => state.layout.mainPage.secondPanelExpanded);
+  const thirdPanelExpanded = useAppSelector((state) => state.layout.mainPage.thirdPanelExpanded);
+  const fourthPanelExpanded = useAppSelector((state) => state.layout.mainPage.fourthPanelExpanded);
+
+  const persistSeparator = (key: string, position: number) => {
+    localStorage.setItem(
+      key,
+      floorNumberToOneDecimal(position / onePercentOfLayoutWidth).toString(),
+    );
+  };
+
+  const updateSeparator = (
+    separator: SeparatorState,
+    key: string,
+    currentPos: number,
+    newPos: number,
+  ) => {
+    if (newPos !== currentPos) {
+      separator.setPosition(newPos);
+      persistSeparator(key, newPos);
+    }
+  };
+
+  const toggleFirstPanel = () => {
+    if (firstPanelExpanded) {
+      dispatch(setFirstPanelExpanded(false));
+      return;
+    }
+
+    dispatch(setFirstPanelExpanded(true));
+
+    let newCenterPos = centerSeparator.position;
+    let newSearchPos = searchSeparator.position;
+    let needsUpdate = false;
+
+    if (newCenterPos - treeSeparator.position < SECOND_PANEL_MIN_WIDTH) {
+      newCenterPos = treeSeparator.position + SECOND_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+
+      if (newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+        newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
+      }
+    }
+
+    if (needsUpdate) {
+      centerSeparator.setPosition(newCenterPos);
+      persistSeparator("mainPageCenterSeparatorXPosition", newCenterPos);
+
+      updateSeparator(
+        searchSeparator,
+        "mainPageSearchSeparatorXPosition",
+        searchSeparator.position,
+        newSearchPos,
+      );
+
+      dispatch(
+        setPanelWidths([
+          panelWidths[0],
+          floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
+          floorNumberToOneDecimal(newSearchPos - newCenterPos),
+          layoutWidth - newSearchPos,
+        ]),
+      );
+    }
+  };
+
+  const toggleSecondPanel = () => {
+    if (secondPanelExpanded) {
+      dispatch(setSecondPanelExpanded(false));
+      return;
+    }
+
+    dispatch(setSecondPanelExpanded(true));
+
+    let newTreePos = treeSeparator.position;
+    let newCenterPos = centerSeparator.position;
+    let newSearchPos = searchSeparator.position;
+    let needsUpdate = false;
+
+    const panel3Space = thirdPanelExpanded
+      ? Math.max(newSearchPos - newCenterPos, THIRD_PANEL_MIN_WIDTH)
+      : COLLAPSED_PANEL_WIDTH;
+    const panel4Space = fourthPanelExpanded ? FOURTH_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH;
+
+    const maxCenterPos = layoutWidth - panel3Space - panel4Space;
+
+    if (newCenterPos > maxCenterPos) {
+      newCenterPos = maxCenterPos;
+      needsUpdate = true;
+    }
+
+    if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+      newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+    }
+
+    if (newTreePos < FIRST_PANEL_MIN_WIDTH) {
+      newTreePos = FIRST_PANEL_MIN_WIDTH;
+      newCenterPos = Math.max(newCenterPos, newTreePos + SECOND_PANEL_MIN_WIDTH);
+      needsUpdate = true;
+    }
+
+    if (thirdPanelExpanded && newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+      newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      updateSeparator(
+        treeSeparator,
+        "mainPageTreeSeparatorXPosition",
+        treeSeparator.position,
+        newTreePos,
+      );
+      updateSeparator(
+        centerSeparator,
+        "mainPageCenterSeparatorXPosition",
+        centerSeparator.position,
+        newCenterPos,
+      );
+      updateSeparator(
+        searchSeparator,
+        "mainPageSearchSeparatorXPosition",
+        searchSeparator.position,
+        newSearchPos,
+      );
+
+      dispatch(
+        setPanelWidths([
+          newTreePos,
+          floorNumberToOneDecimal(newCenterPos - newTreePos),
+          floorNumberToOneDecimal(newSearchPos - newCenterPos),
+          layoutWidth - newSearchPos,
+        ]),
+      );
+    }
+  };
+
+  const toggleThirdPanel = () => {
+    if (thirdPanelExpanded) {
+      dispatch(setThirdPanelExpanded(false));
+      return;
+    }
+
+    dispatch(setThirdPanelExpanded(true));
+    queryClient.invalidateQueries({ queryKey: ["document"] });
+
+    let newTreePos = treeSeparator.position;
+    let newSearchPos = searchSeparator.position;
+    let needsUpdate = false;
+
+    if (centerSeparator.position - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+      newTreePos = centerSeparator.position - SECOND_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+    }
+
+    let newCenterPos = centerSeparator.position;
+
+    if (newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+      newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+
+      if (layoutWidth - newSearchPos < FOURTH_PANEL_MIN_WIDTH) {
+        newSearchPos = layoutWidth - FOURTH_PANEL_MIN_WIDTH;
+        newCenterPos = newSearchPos - THIRD_PANEL_MIN_WIDTH;
+
+        if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+          newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+        }
+      }
+    }
+
+    if (needsUpdate) {
+      updateSeparator(
+        treeSeparator,
+        "mainPageTreeSeparatorXPosition",
+        treeSeparator.position,
+        newTreePos,
+      );
+      updateSeparator(
+        centerSeparator,
+        "mainPageCenterSeparatorXPosition",
+        centerSeparator.position,
+        newCenterPos,
+      );
+      updateSeparator(
+        searchSeparator,
+        "mainPageSearchSeparatorXPosition",
+        searchSeparator.position,
+        newSearchPos,
+      );
+
+      dispatch(
+        setPanelWidths([
+          newTreePos,
+          floorNumberToOneDecimal(newCenterPos - newTreePos),
+          floorNumberToOneDecimal(newSearchPos - newCenterPos),
+          floorNumberToOneDecimal(layoutWidth - newSearchPos),
+        ]),
+      );
+    }
+  };
+
+  const toggleFourthPanel = () => {
+    if (fourthPanelExpanded) {
+      dispatch(setFourthPanelExpanded(false));
+      return;
+    }
+
+    dispatch(setFourthPanelExpanded(true));
+
+    let newCenterPos = centerSeparator.position;
+    let newTreePos = treeSeparator.position;
+    let needsUpdate = false;
+
+    if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+      newCenterPos = newTreePos + SECOND_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+    }
+
+    if (searchSeparator.position - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
+      newCenterPos = searchSeparator.position - THIRD_PANEL_MIN_WIDTH;
+      needsUpdate = true;
+
+      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
+        newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
+      }
+    }
+
+    if (needsUpdate) {
+      updateSeparator(
+        centerSeparator,
+        "mainPageCenterSeparatorXPosition",
+        centerSeparator.position,
+        newCenterPos,
+      );
+      updateSeparator(
+        treeSeparator,
+        "mainPageTreeSeparatorXPosition",
+        treeSeparator.position,
+        newTreePos,
+      );
+
+      dispatch(
+        setPanelWidths([
+          newTreePos,
+          floorNumberToOneDecimal(newCenterPos - newTreePos),
+          floorNumberToOneDecimal(searchSeparator.position - newCenterPos),
+          layoutWidth - searchSeparator.position,
+        ]),
+      );
+    }
+  };
+
+  return { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel };
+}

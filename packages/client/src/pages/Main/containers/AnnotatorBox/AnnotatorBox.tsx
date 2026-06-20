@@ -1,0 +1,311 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import {
+  IDocument,
+  IResponseEntity,
+  IResponseStatement,
+  IResponseTerritory,
+  IStatement,
+} from "@inkvisitor/shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "api";
+import { useSearchParams } from "hooks";
+import useAnnotator from "hooks/useAnnotator";
+import { useUserQuery } from "hooks/react-query";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { setSelectedResourceId } from "redux/features/statementAnnotator/selectedResourceIdSlice";
+import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { StatementListTextAnnotator } from "./AnnotatorContent";
+
+interface AnnotatorBox {
+  height: number;
+  width: number;
+}
+
+export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
+  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
+  const { territoryId, statementId } = useSearchParams();
+  const { data: userData } = useUserQuery();
+
+  const selectedTerritoryPath: string[] = useAppSelector(
+    (state) => state.territoryTree.selectedTerritoryPath,
+  );
+  const selectedResourceId = useAppSelector((state) => state.statementAnnotator.selectedResourceId);
+
+  const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
+    EntityEnums.Class.Action,
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Concept,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Value,
+    EntityEnums.Class.Territory,
+  ]);
+
+  const [annotator, setAnnotatorState] = useState<Annotator | undefined>(undefined);
+  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] = useState<number | null>(
+    null,
+  );
+
+  const { setAnnotator: setSingletonAnnotator } = useAnnotator();
+  useEffect(() => {
+    setSingletonAnnotator((annotator as any) ?? null);
+  }, [annotator, setSingletonAnnotator]);
+
+  // Reset scroll position when territory changes
+  useEffect(() => {
+    setStoredAnnotatorScrollPosition(null);
+  }, [territoryId]);
+
+  // Territory entity (same query key as StatementListBox — shared cache)
+  const statementListOpened: boolean = useAppSelector(
+    (state) => state.layout.mainPage.statementListOpened,
+  );
+  const { data: territory } = useQuery({
+    queryKey: ["territory", "statement-list", territoryId, statementListOpened],
+    queryFn: async () => {
+      const res = await api.territoryGet(territoryId);
+      return res.data;
+    },
+    enabled: !!territoryId && api.isLoggedIn(),
+  });
+
+  const { data: resources } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
+      const res = await api.entitiesSearch({ resourceHasDocument: true });
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const { data: documents } = useQuery<IDocument[]>({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const [isInitialized, setIsInitialized] = useState(false);
+  // Set once the user manually picks a resource so auto-load stops overriding it.
+  const userPickedRef = useRef(false);
+
+  // On territory change: reset selection once, and let auto-load run again.
+  useEffect(() => {
+    setIsInitialized(false);
+    userPickedRef.current = false;
+    dispatch(setSelectedResourceId(false));
+  }, [territoryId, dispatch]);
+
+  // Auto-load the resource whose document anchors this territory (or an ancestor).
+  // Only ever SETS a found resource (latching on success); when nothing is found
+  // it neither dispatches nor latches, so it retries as resources / documents /
+  // the territory path arrive — without overriding a manual selection.
+  useEffect(() => {
+    if (!resources || !documents || isInitialized || userPickedRef.current) {
+      return;
+    }
+
+    let resourceWithAnchor = resources.find((resource) => {
+      if (!resource.data.documentId) return false;
+      const document = documents.find((d) => d.id === resource.data.documentId);
+      return document?.entityIds.T.includes(territoryId) ?? false;
+    });
+
+    if (!resourceWithAnchor) {
+      for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+        const territoryInPath = selectedTerritoryPath[i];
+        resourceWithAnchor = resources.find((resource) => {
+          if (!resource.data.documentId) return false;
+          const document = documents.find((d) => d.id === resource.data.documentId);
+          return document?.entityIds.T.includes(territoryInPath) ?? false;
+        });
+        if (resourceWithAnchor) break;
+      }
+    }
+
+    if (resourceWithAnchor) {
+      dispatch(setSelectedResourceId(resourceWithAnchor.id));
+      setIsInitialized(true);
+    }
+  }, [resources, documents, isInitialized, territoryId, selectedTerritoryPath, dispatch]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources.find((r) => r.id === selectedResourceId) ?? false;
+    }
+    return false;
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | undefined>(() => {
+    return selectedResource ? selectedResource.data.documentId : undefined;
+  }, [selectedResource]);
+
+  const {
+    data: selectedDocument,
+    error: selectedDocumentError,
+    isFetching: selectedDocumentIsFetching,
+  } = useQuery({
+    queryKey: ["document", selectedDocumentId],
+    queryFn: async () => {
+      if (selectedDocumentId) {
+        const res = await api.documentGet(selectedDocumentId);
+        return res.data ?? undefined;
+      }
+      return undefined;
+    },
+    enabled: api.isLoggedIn() && !!selectedDocumentId,
+  });
+
+  const statementCreateMutation = useMutation({
+    mutationFn: async (newStatement: IStatement) => await api.entityCreate(newStatement),
+    onMutate: async (newStatement: IStatement) => {
+      await queryClient.cancelQueries({
+        queryKey: ["territory", "statement-list", territoryId],
+      });
+      await queryClient.cancelQueries({
+        queryKey: ["document", selectedDocumentId],
+      });
+      const previousTerritory = queryClient.getQueryData<IResponseTerritory>([
+        "territory",
+        "statement-list",
+        territoryId,
+        statementListOpened,
+      ]);
+      const previousDocument = queryClient.getQueryData<IDocument | undefined>([
+        "document",
+        selectedDocumentId,
+      ]);
+      if (previousTerritory && newStatement.data.territory) {
+        const optimisticStatement: IResponseStatement = {
+          ...newStatement,
+          entities: {},
+          usedInDocuments: [],
+          warnings: [],
+          right: previousTerritory.right,
+        };
+        const updatedStatements = [...previousTerritory.statements];
+        const order = newStatement.data.territory.order;
+        const insertIndex = updatedStatements.findIndex(
+          (s) => (s.data.territory?.order ?? 0) > order,
+        );
+        if (insertIndex === -1) updatedStatements.push(optimisticStatement);
+        else updatedStatements.splice(insertIndex, 0, optimisticStatement);
+        queryClient.setQueryData<IResponseTerritory>(
+          ["territory", "statement-list", territoryId, statementListOpened],
+          { ...previousTerritory, statements: updatedStatements },
+        );
+      }
+      if (previousDocument && selectedDocumentId) {
+        const sId = newStatement.id;
+        const currentStatementIds = previousDocument.entityIds[EntityEnums.Class.Statement] || [];
+        if (!currentStatementIds.includes(sId)) {
+          queryClient.setQueryData<IDocument>(["document", selectedDocumentId], {
+            ...previousDocument,
+            entityIds: {
+              ...previousDocument.entityIds,
+              [EntityEnums.Class.Statement]: [...currentStatementIds, sId],
+            },
+          });
+        }
+      }
+      return { previousTerritory, previousDocument };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousTerritory) {
+        queryClient.setQueryData<IResponseTerritory>(
+          ["territory", "statement-list", territoryId, statementListOpened],
+          context.previousTerritory,
+        );
+      }
+      if (context?.previousDocument) {
+        queryClient.setQueryData<IDocument | undefined>(
+          ["document", selectedDocumentId],
+          context.previousDocument,
+        );
+      }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["territory", "statement-list", territoryId],
+      });
+      if (selectedDocumentId) {
+        queryClient.invalidateQueries({
+          queryKey: ["document", selectedDocumentId],
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["anchorEntities"] });
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+    },
+  });
+
+  // permission gating (mirrors the old StatementListBox computation)
+  const userCanEdit = useMemo(() => territory?.right !== UserEnums.RoleMode.Read, [territory]);
+  const canSelectResource = useMemo(
+    () => userCanEdit || userData?.role === UserEnums.Role.Editor,
+    [userCanEdit, userData?.role],
+  );
+  const canEditDocument = useMemo(() => {
+    if (userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin) {
+      return true;
+    }
+    if (userData?.role !== UserEnums.Role.Editor || !selectedResource) {
+      return false;
+    }
+    const assignedResourceIds = userData.resourceRights?.map((r) => r.resource.id) ?? [];
+    return assignedResourceIds.includes(selectedResource.id);
+  }, [userData, selectedResource]);
+
+  const handleStatementAnchorHover = (id: string | null) => {
+    if (id && territory?.statements?.some((s) => s.id === id)) {
+      dispatch(setHoveredStatementId(id));
+    } else {
+      dispatch(setHoveredStatementId(null));
+    }
+  };
+
+  return (
+    <StatementListTextAnnotator
+      contentHeight={height}
+      contentWidth={width}
+      territoryId={territoryId}
+      territory={territory}
+      statementId={statementId}
+      storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
+      setStoredAnnotatorScrollPosition={setStoredAnnotatorScrollPosition}
+      hlEntities={hlEntities}
+      setHlEntities={setHlEntities}
+      statementCreateMutation={statementCreateMutation}
+      annotator={annotator}
+      setAnnotator={setAnnotatorState}
+      selectedDocumentId={selectedDocumentId}
+      selectedDocument={selectedDocument}
+      selectedDocumentIsFetching={selectedDocumentIsFetching}
+      selectedDocumentError={selectedDocumentError}
+      selectedResource={selectedResource}
+      resources={resources}
+      setSelectedResourceId={(id) => {
+        userPickedRef.current = true;
+        setIsInitialized(true);
+        dispatch(setSelectedResourceId(id));
+      }}
+      showStatementList={false}
+      userCanEdit={userCanEdit}
+      canSelectResource={canSelectResource}
+      canEditDocument={canEditDocument}
+      userData={userData}
+      onStatementAnchorHover={handleStatementAnchorHover}
+    />
+  );
+};
+
+export const MemoizedAnnotatorBox = React.memo(AnnotatorBox);

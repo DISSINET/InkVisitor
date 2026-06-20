@@ -125,13 +125,16 @@ export interface IPage {
     | "backups"
     | "customize"
     | "stats"
-    | "explorer";
+    | "explorer"
+    | "reset-layout";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
   admin?: boolean;
   owner?: boolean;
   icon?: React.ReactElement;
+  mainPageOnly?: boolean;
+  onClick?: () => void;
 }
 
 export interface Node {
@@ -433,6 +436,12 @@ export enum ButtonSize {
 }
 
 export enum DetailBoxState {
+  Minimized = "minimized",
+  Normal = "normal",
+  FullHeight = "fullHeight",
+}
+
+export enum EditorBoxState {
   Minimized = "minimized",
   Normal = "normal",
   FullHeight = "fullHeight",

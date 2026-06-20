@@ -1190,6 +1190,7 @@ export const TextAnnotator = ({
   return (
     <>
       <AnnotatorSearchLine
+        contentWidth={width}
         showStatementList={showStatementList ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

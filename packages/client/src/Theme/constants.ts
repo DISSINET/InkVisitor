@@ -18,7 +18,7 @@ export const layoutWidthBreakpoint = 1400;
 export const COLLAPSED_PANEL_WIDTH = 31;
 export const FIRST_PANEL_MIN_WIDTH = 100;
 export const SECOND_PANEL_MIN_WIDTH = 420;
-export const THIRD_PANEL_MIN_WIDTH = 300;
+export const THIRD_PANEL_MIN_WIDTH = 320;
 export const FOURTH_PANEL_MIN_WIDTH = 180;
 // % PERCENT PANEL WIDTHS for 1440px
 export const INIT_PERCENT_PANEL_WIDTHS = [10, 41, 34, 15];
@@ -39,7 +39,8 @@ export const MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION =
   INIT_PERCENT_PANEL_WIDTHS[0] + INIT_PERCENT_PANEL_WIDTHS[1] + INIT_PERCENT_PANEL_WIDTHS[2];
 
 // breakpoint for annotator width too small
-export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 560;
+export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 580;
+export const ANNOTATOR_UNDERSIZED_BREAKPOINT = 490;
 // breakpoint for editor width too small
 export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
 // height of class selector for highlight in annotator
@@ -51,6 +52,9 @@ export const ANNOTATOR_SELECTOR_HEIGHT = 27;
 export const SUGGESTER_ROW_HEIGHT = 31;
 
 // BOXES
+// Offset for the vertical split between top/bottom boxes in a panel.
+// Positive = bottom box taller, negative = top box taller.
+export const BOX_SPLIT_OFFSET = 18;
 export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {
   search: 40,

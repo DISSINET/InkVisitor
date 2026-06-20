@@ -3,10 +3,11 @@ import styled from "styled-components";
 export const StyledDocumentTag = styled.div<{
   $size: "sm" | "md" | "lg";
   $width: number | "full";
+  $noMargin: boolean;
 }>`
   display: flex;
   flex-shrink: 1;
-  margin: 0 0.6rem;
+  margin: ${({ $noMargin }) => ($noMargin ? 0 : "0 0.6rem")};
   background-color: ${({ theme }) => theme.color["blue"][400]};
   padding: ${({ theme, $size }) =>
     $size === "sm"

@@ -9,6 +9,7 @@ export const StyledStatementListBox = styled.div`
 `;
 
 export const StyledContentWrapper = styled.div`
+  position: relative;
   display: flex;
   height: 100%;
   overflow: hidden;
@@ -25,18 +26,6 @@ export const StyledDots = styled.p`
   cursor: default;
 `;
 
-interface StyledLoaderWrap {
-  $width: number;
-  $height: number;
-}
-export const StyledLoaderWrap = styled.div<StyledLoaderWrap>`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  width: ${({ $width }) => `${$width / 10}rem`};
-  height: ${({ $height }) => `${$height / 10}rem`};
-`;
 
 export const StyledSelectorCell = styled.div`
   cursor: pointer;

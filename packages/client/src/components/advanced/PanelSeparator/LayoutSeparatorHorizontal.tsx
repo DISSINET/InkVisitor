@@ -10,6 +10,7 @@ interface LayoutSeparatorHorizontal {
   separatorYPosition: number;
   setSeparatorYPosition: (yPosition: number) => void;
   width?: number;
+  left?: number;
   onMaxHeightReached?: () => void;
   onMinHeightReached?: () => void;
 }
@@ -19,6 +20,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   separatorYPosition,
   setSeparatorYPosition,
   width,
+  left,
   onMaxHeightReached,
   onMinHeightReached,
 }) => {
@@ -32,6 +34,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   const animatedHorizontalSeparator = useSpring({
     top: `${(topPosition - 3) / 10}rem`,
     ...(width !== undefined && { width: `${width / 10}rem` }),
+    ...(left !== undefined && { left: `${left / 10}rem` }),
     config: springConfig.separatorYPosition,
   });
 
