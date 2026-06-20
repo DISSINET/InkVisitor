@@ -871,26 +871,25 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const secondPanelWidth = useMemo(() => {
     if (!secondPanelExpanded) {
-      dispatch(setSecondPanelRealWidth(COLLAPSED_PANEL_WIDTH));
       return COLLAPSED_PANEL_WIDTH;
     }
-    const width =
-      (firstPanelExpanded
+    return (firstPanelExpanded
         ? panelWidths[1]
         : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
       (!thirdPanelExpanded && !fourthPanelExpanded
         ? panelWidths[2] + panelWidths[3] - 2 * COLLAPSED_PANEL_WIDTH
         : 0);
-    dispatch(setSecondPanelRealWidth(width));
-    return width;
   }, [
     secondPanelExpanded,
     firstPanelExpanded,
     thirdPanelExpanded,
     fourthPanelExpanded,
     panelWidths,
-    dispatch,
   ]);
+
+  useEffect(() => {
+    dispatch(setSecondPanelRealWidth(secondPanelWidth));
+  }, [secondPanelWidth, dispatch]);
 
   const thirdPanelWidth = useMemo(() => {
     let width = !thirdPanelExpanded
@@ -906,7 +905,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       width += secondPanelBaseWidth - COLLAPSED_PANEL_WIDTH;
     }
 
-    dispatch(setThirdPanelRealWidth(width));
     return width;
   }, [
     secondPanelExpanded,
@@ -914,8 +912,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
     thirdPanelExpanded,
     fourthPanelExpanded,
     panelWidths,
-    dispatch,
   ]);
+
+  useEffect(() => {
+    dispatch(setThirdPanelRealWidth(thirdPanelWidth));
+  }, [thirdPanelWidth, dispatch]);
 
   const firstPanelWidth = useMemo(() => {
     if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
