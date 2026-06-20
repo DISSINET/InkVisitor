@@ -1084,15 +1084,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
             setSeparatorXPosition={(xPosition) => {
               handleTreeSeparatorXPositionChange(xPosition);
             }}
-            onMaxWidthReached={() => {
-              if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + 10) {
-                handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
-              } else if (fourthPanelWidth > FOURTH_PANEL_MIN_WIDTH + 10) {
+            onMaxWidthReached={(overflow) => {
+              if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + overflow) {
+                handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + overflow);
+              } else if (fourthPanelWidth > FOURTH_PANEL_MIN_WIDTH + overflow) {
                 if (!thirdPanelExpanded) {
-                  handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + 10);
+                  handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition + overflow);
                 } else {
-                  const newCenterPos = mainPageCenterSeparatorXPosition + 10;
-                  const newSearchPos = mainPageSearchSeparatorXPosition + 10;
+                  const newCenterPos = mainPageCenterSeparatorXPosition + overflow;
+                  const newSearchPos = mainPageSearchSeparatorXPosition + overflow;
 
                   setMainPageCenterSeparatorXPosition(newCenterPos);
                   localStorage.setItem(
@@ -1139,14 +1139,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
             setSeparatorXPosition={(xPosition) => {
               handleCenterSeparatorXPositionChange(xPosition);
             }}
-            onMaxWidthReached={() => {
-              if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + 10) {
-                handleSearchSeparatorXPositionChange(mainPageSearchSeparatorXPosition + 10);
+            onMaxWidthReached={(overflow) => {
+              if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + overflow) {
+                handleSearchSeparatorXPositionChange(mainPageSearchSeparatorXPosition + overflow);
               }
             }}
-            onMinWidthReached={() => {
-              if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
-                handleTreeSeparatorXPositionChange(mainPageTreeSeparatorXPosition - 10);
+            onMinWidthReached={(overflow) => {
+              if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + overflow) {
+                handleTreeSeparatorXPositionChange(mainPageTreeSeparatorXPosition - overflow);
               }
             }}
           />
@@ -1167,12 +1167,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           setSeparatorXPosition={(xPosition) => {
             handleSearchSeparatorXPositionChange(xPosition);
           }}
-          onMinWidthReached={() => {
-            if (panelWidths[1] > SECOND_PANEL_MIN_WIDTH + 10) {
-              handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition - 10);
-            } else if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + 10) {
-              const newCenterPos = mainPageCenterSeparatorXPosition - 10;
-              const newTreePos = mainPageTreeSeparatorXPosition - 10;
+          onMinWidthReached={(overflow) => {
+            if (panelWidths[1] > SECOND_PANEL_MIN_WIDTH + overflow) {
+              handleCenterSeparatorXPositionChange(mainPageCenterSeparatorXPosition - overflow);
+            } else if (panelWidths[0] > FIRST_PANEL_MIN_WIDTH + overflow) {
+              const newCenterPos = mainPageCenterSeparatorXPosition - overflow;
+              const newTreePos = mainPageTreeSeparatorXPosition - overflow;
 
               setMainPageCenterSeparatorXPosition(newCenterPos);
               localStorage.setItem(
