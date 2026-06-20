@@ -13,6 +13,7 @@ import {
   FaRegChartBar,
   FaUsers,
 } from "react-icons/fa";
+import { RiLayoutMasonryLine } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
@@ -179,6 +180,34 @@ export const Menu: React.FC<Menu> = ({
                   }}
                 />
               ))}
+            {location.pathname === "/" && (
+              <>
+                <hr />
+                <MenuItem
+                  label="Reset layout"
+                  icon={<RiLayoutMasonryLine />}
+                  onClick={() => {
+                    const layoutKeys = [
+                      "mainPageTreeSeparatorXPosition",
+                      "mainPageCenterSeparatorXPosition",
+                      "mainPageSearchSeparatorXPosition",
+                      "detailSeparatorYPercent",
+                      "editorSeparatorYPercent",
+                      "firstPanelExpanded",
+                      "secondPanelExpanded",
+                      "thirdPanelExpanded",
+                      "fourthPanelExpanded",
+                      "fourthPanelBoxesOpened",
+                      "detailBoxState",
+                      "editorBoxState",
+                      "statementListOpened",
+                    ];
+                    layoutKeys.forEach((key) => localStorage.removeItem(key));
+                    window.location.reload();
+                  }}
+                />
+              </>
+            )}
             <hr />
             <MenuItem
               label="Log out"

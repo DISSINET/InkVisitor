@@ -606,17 +606,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // DETAIL HORIZONTAL SEPARATOR STATE
   const [detailSeparatorY, setDetailSeparatorY] = useState<number>(() => {
     const saved = localStorage.getItem("detailSeparatorYPercent");
-    return saved
-      ? Number(saved) * contentHeight / 100
-      : contentHeight / 2 - BOX_SPLIT_OFFSET;
+    return saved ? (Number(saved) * contentHeight) / 100 : contentHeight / 2 - BOX_SPLIT_OFFSET;
   });
 
   // EDITOR HORIZONTAL SEPARATOR STATE
   const [editorSeparatorY, setEditorSeparatorY] = useState<number>(() => {
     const saved = localStorage.getItem("editorSeparatorYPercent");
-    return saved
-      ? Number(saved) * contentHeight / 100
-      : contentHeight / 2 - BOX_SPLIT_OFFSET;
+    return saved ? (Number(saved) * contentHeight) / 100 : contentHeight / 2 - BOX_SPLIT_OFFSET;
   });
 
   useEffect(() => {
@@ -624,12 +620,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
     const savedEditor = localStorage.getItem("editorSeparatorYPercent");
     setDetailSeparatorY(
       savedDetail
-        ? Number(savedDetail) * contentHeight / 100
+        ? (Number(savedDetail) * contentHeight) / 100
         : contentHeight / 2 - BOX_SPLIT_OFFSET,
     );
     setEditorSeparatorY(
       savedEditor
-        ? Number(savedEditor) * contentHeight / 100
+        ? (Number(savedEditor) * contentHeight) / 100
         : contentHeight / 2 - BOX_SPLIT_OFFSET,
     );
   }, [contentHeight]);
@@ -638,7 +634,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     setDetailSeparatorY(yPosition);
     localStorage.setItem(
       "detailSeparatorYPercent",
-      floorNumberToOneDecimal(yPosition / contentHeight * 100).toString(),
+      floorNumberToOneDecimal((yPosition / contentHeight) * 100).toString(),
     );
   };
 
@@ -646,7 +642,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     setEditorSeparatorY(yPosition);
     localStorage.setItem(
       "editorSeparatorYPercent",
-      floorNumberToOneDecimal(yPosition / contentHeight * 100).toString(),
+      floorNumberToOneDecimal((yPosition / contentHeight) * 100).toString(),
     );
   };
 
@@ -940,12 +936,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
     if (!secondPanelExpanded) {
       return COLLAPSED_PANEL_WIDTH;
     }
-    return (firstPanelExpanded
+    return (
+      (firstPanelExpanded
         ? panelWidths[1]
         : panelWidths[1] + panelWidths[0] - COLLAPSED_PANEL_WIDTH) +
       (!thirdPanelExpanded && !fourthPanelExpanded
         ? panelWidths[2] + panelWidths[3] - 2 * COLLAPSED_PANEL_WIDTH
-        : 0);
+        : 0)
+    );
   }, [
     secondPanelExpanded,
     firstPanelExpanded,
@@ -1510,16 +1508,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />
                 )}
               </>,
-              <Button
-                key="close-editor"
-                inverted
-                tooltipLabel="close editor box"
-                icon={<VscClose style={{ transform: "scale(1.3)" }} />}
-                onClick={() => {
-                  setStatementId("");
-                  dispatch(setEditorBoxState(EditorBoxState.Normal));
-                }}
-              />,
+              <>
+                {thirdPanelExpanded && (
+                  <Button
+                    key="close-editor"
+                    inverted
+                    tooltipLabel="close editor box"
+                    icon={<VscClose style={{ transform: "scale(1.3)" }} />}
+                    onClick={() => {
+                      setStatementId("");
+                      dispatch(setEditorBoxState(EditorBoxState.Normal));
+                    }}
+                  />
+                )}
+              </>,
               thirdPanelButton(),
             ]}
           >
