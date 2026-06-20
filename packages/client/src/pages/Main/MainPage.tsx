@@ -3,7 +3,11 @@ import { IResponseTree, IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, ButtonGroup, Loader, Panel } from "components";
-import { EntityCreateModal, LayoutSeparatorVertical } from "components/advanced";
+import {
+  EntityCreateModal,
+  LayoutSeparatorHorizontal,
+  LayoutSeparatorVertical,
+} from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
@@ -599,6 +603,53 @@ const MainPage: React.FC<MainPage> = ({}) => {
     );
   }, [user, territoryId]);
 
+  // DETAIL HORIZONTAL SEPARATOR STATE
+  const [detailSeparatorY, setDetailSeparatorY] = useState<number>(() => {
+    const saved = localStorage.getItem("detailSeparatorYPercent");
+    return saved
+      ? Number(saved) * contentHeight / 100
+      : contentHeight / 2 - BOX_SPLIT_OFFSET;
+  });
+
+  // EDITOR HORIZONTAL SEPARATOR STATE
+  const [editorSeparatorY, setEditorSeparatorY] = useState<number>(() => {
+    const saved = localStorage.getItem("editorSeparatorYPercent");
+    return saved
+      ? Number(saved) * contentHeight / 100
+      : contentHeight / 2 - BOX_SPLIT_OFFSET;
+  });
+
+  useEffect(() => {
+    const savedDetail = localStorage.getItem("detailSeparatorYPercent");
+    const savedEditor = localStorage.getItem("editorSeparatorYPercent");
+    setDetailSeparatorY(
+      savedDetail
+        ? Number(savedDetail) * contentHeight / 100
+        : contentHeight / 2 - BOX_SPLIT_OFFSET,
+    );
+    setEditorSeparatorY(
+      savedEditor
+        ? Number(savedEditor) * contentHeight / 100
+        : contentHeight / 2 - BOX_SPLIT_OFFSET,
+    );
+  }, [contentHeight]);
+
+  const handleDetailSeparatorYChange = (yPosition: number) => {
+    setDetailSeparatorY(yPosition);
+    localStorage.setItem(
+      "detailSeparatorYPercent",
+      floorNumberToOneDecimal(yPosition / contentHeight * 100).toString(),
+    );
+  };
+
+  const handleEditorSeparatorYChange = (yPosition: number) => {
+    setEditorSeparatorY(yPosition);
+    localStorage.setItem(
+      "editorSeparatorYPercent",
+      floorNumberToOneDecimal(yPosition / contentHeight * 100).toString(),
+    );
+  };
+
   const getStatementListBoxHeight = () => {
     if (!detailIdArray.length) {
       return contentHeight;
@@ -642,7 +693,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       case DetailBoxState.FullHeight:
         return contentHeight - hiddenBoxHeight;
       case DetailBoxState.Normal:
-        return contentHeight / 2 + BOX_SPLIT_OFFSET;
+        return contentHeight - detailSeparatorY;
       case DetailBoxState.Minimized:
         return hiddenBoxHeight + 22;
     }
@@ -667,7 +718,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       case EditorBoxState.FullHeight:
         return contentHeight - hiddenBoxHeight;
       case EditorBoxState.Normal:
-        return contentHeight / 2 + BOX_SPLIT_OFFSET;
+        return contentHeight - editorSeparatorY;
       case EditorBoxState.Minimized:
         return hiddenBoxHeight;
     }
@@ -1197,6 +1248,35 @@ const MainPage: React.FC<MainPage> = ({}) => {
           }}
         />
       )}
+
+      {/* DETAIL HORIZONTAL SEPARATOR (second panel) */}
+      {secondPanelExpanded &&
+        detailIdArray.length > 0 &&
+        detailBoxState === DetailBoxState.Normal && (
+          <LayoutSeparatorHorizontal
+            topPositionMin={hiddenBoxHeight * 2}
+            topPositionMax={contentHeight - hiddenBoxHeight * 2}
+            separatorYPosition={detailSeparatorY}
+            setSeparatorYPosition={handleDetailSeparatorYChange}
+            width={secondPanelWidth}
+            left={firstPanelWidth}
+          />
+        )}
+
+      {/* EDITOR HORIZONTAL SEPARATOR (third panel) */}
+      {thirdPanelExpanded &&
+        statementId &&
+        editorOpened &&
+        editorBoxState === EditorBoxState.Normal && (
+          <LayoutSeparatorHorizontal
+            topPositionMin={hiddenBoxHeight * 2}
+            topPositionMax={contentHeight - hiddenBoxHeight * 2}
+            separatorYPosition={editorSeparatorY}
+            setSeparatorYPosition={handleEditorSeparatorYChange}
+            width={thirdPanelWidth}
+            left={firstPanelWidth + secondPanelWidth}
+          />
+        )}
 
       {/* FIRST PANEL */}
       <Panel width={firstPanelWidth}>
