@@ -17,8 +17,24 @@ import { RiLayoutMasonryLine } from "react-icons/ri";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
-import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
+import { StyledMenuDivider, StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
 import { CiSettings } from "react-icons/ci";
+
+const LAYOUT_KEYS = [
+  "mainPageTreeSeparatorXPosition",
+  "mainPageCenterSeparatorXPosition",
+  "mainPageSearchSeparatorXPosition",
+  "detailSeparatorYPercent",
+  "editorSeparatorYPercent",
+  "firstPanelExpanded",
+  "secondPanelExpanded",
+  "thirdPanelExpanded",
+  "fourthPanelExpanded",
+  "fourthPanelBoxesOpened",
+  "detailBoxState",
+  "editorBoxState",
+  "statementListOpened",
+];
 
 interface Menu {
   userRole: string;
@@ -34,21 +50,17 @@ export const Menu: React.FC<Menu> = ({
   handleLogOut,
   setUserCustomizationOpen,
 }) => {
-  const pages: IPage[] = [
-    {
-      id: "main",
-      label: "Main",
-      color: "info",
-      href: "/",
-      admin: false,
-      icon: <FaBookOpen />,
-    },
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+
+  const navPages: IPage[] = [
+    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen /> },
     {
       id: "explorer",
       label: "Explorer",
       color: "info",
       href: "/explorer",
-      admin: false,
       icon: <FaSearchengin />,
     },
     {
@@ -56,25 +68,18 @@ export const Menu: React.FC<Menu> = ({
       label: "Statistics",
       color: "info",
       href: "/stats",
-      admin: false,
       icon: <FaRegChartBar size={18} />,
     },
-    // {
-    //   id: "acl",
-    //   label: "Acl",
-    //   color: "info",
-    //   href: "/acl",
-    //   admin: true,
-    //   icon: <FaKey />,
-    // },
     {
       id: "documents",
       label: "Documents",
       color: "info",
       href: "/documents",
-      admin: false,
       icon: <CgFileDocument size={18} />,
     },
+  ];
+
+  const adminPages: IPage[] = [
     {
       id: "users",
       label: "Manage Users",
@@ -92,32 +97,78 @@ export const Menu: React.FC<Menu> = ({
       owner: true,
       icon: <FaDatabase size={16} />,
     },
+    // {
+    //   id: "acl",
+    //   label: "Acl",
+    //   color: "info",
+    //   href: "/acl",
+    //   admin: true,
+    //   icon: <FaKey />,
+    // },
+  ];
+
+  const settingsPages: IPage[] = [
+    { id: "about", label: "About", color: "info", href: "/about", icon: <FaInfo /> },
+    {
+      id: "reset-layout",
+      label: "Reset layout",
+      color: "info",
+      href: false,
+      mainPageOnly: true,
+      icon: <RiLayoutMasonryLine />,
+      onClick: () => {
+        LAYOUT_KEYS.forEach((key) => localStorage.removeItem(key));
+        window.location.reload();
+      },
+    },
     {
       id: "customize",
       label: "Customize",
       color: "info",
       href: false,
-      admin: false,
       icon: <CiSettings size={18} />,
-    },
-    {
-      id: "about",
-      label: "About",
-      color: "info",
-      href: "/about",
-      admin: false,
-      icon: <FaInfo />,
+      onClick: () => setUserCustomizationOpen(true),
     },
   ];
 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const filterByRole = (pages: IPage[]) =>
+    pages.filter((p) => {
+      if (p.mainPageOnly && location.pathname !== "/") return false;
+      if (p.owner) return userRole === UserEnums.Role.Owner;
+      if (p.admin) return userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner;
+      return true;
+    });
+
+  const handlePageClick = (page: IPage) => {
+    if (page.onClick) {
+      page.onClick();
+    } else if (page.id === "main") {
+      navigate({ pathname: "/", hash: tempLocation ? tempLocation : "" });
+      setTempLocation(false);
+    } else if (page.href) {
+      navigate({ pathname: page.href });
+      if (location.pathname === "/") {
+        setTempLocation(location.hash);
+      }
+    }
+  };
+
+  const renderPages = (pages: IPage[]) =>
+    filterByRole(pages).map((page) => (
+      <MenuItem
+        key={page.id}
+        label={page.label}
+        icon={page.icon}
+        onClick={() => handlePageClick(page)}
+      />
+    ));
 
   const rotateMenuIcon = useSpring({
     transform: menuOpen ? "rotate(90deg)" : "rotate(0deg)",
     config: config.stiff,
   });
+
+  const filteredAdminPages = filterByRole(adminPages);
 
   return (
     <div
@@ -143,72 +194,19 @@ export const Menu: React.FC<Menu> = ({
       {menuOpen && (
         <StyledMenuGroupWrapper>
           <StyledMenuGroup>
-            {pages
-              .filter((p) => {
-                if (p.owner) {
-                  return userRole === UserEnums.Role.Owner;
-                }
-                if (p.admin) {
-                  return userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner;
-                }
-                return true;
-              })
-              .map((page, key) => (
-                <MenuItem
-                  key={key}
-                  label={page.label}
-                  icon={page.icon}
-                  onClick={() => {
-                    if (!page.href) {
-                      if (page.id === "customize") {
-                        setUserCustomizationOpen(true);
-                      }
-                    } else if (page.id === "main") {
-                      navigate({
-                        pathname: "/",
-                        hash: tempLocation ? tempLocation : "",
-                      });
-                      setTempLocation(false);
-                    } else {
-                      navigate({
-                        pathname: page.href,
-                      });
-                      if (location.pathname === "/") {
-                        setTempLocation(location.hash);
-                      }
-                    }
-                  }}
-                />
-              ))}
-            {location.pathname === "/" && (
+            {renderPages(navPages)}
+
+            {filteredAdminPages.length > 0 && (
               <>
-                <hr />
-                <MenuItem
-                  label="Reset layout"
-                  icon={<RiLayoutMasonryLine />}
-                  onClick={() => {
-                    const layoutKeys = [
-                      "mainPageTreeSeparatorXPosition",
-                      "mainPageCenterSeparatorXPosition",
-                      "mainPageSearchSeparatorXPosition",
-                      "detailSeparatorYPercent",
-                      "editorSeparatorYPercent",
-                      "firstPanelExpanded",
-                      "secondPanelExpanded",
-                      "thirdPanelExpanded",
-                      "fourthPanelExpanded",
-                      "fourthPanelBoxesOpened",
-                      "detailBoxState",
-                      "editorBoxState",
-                      "statementListOpened",
-                    ];
-                    layoutKeys.forEach((key) => localStorage.removeItem(key));
-                    window.location.reload();
-                  }}
-                />
+                <StyledMenuDivider />
+                {renderPages(adminPages)}
               </>
             )}
-            <hr />
+
+            <StyledMenuDivider />
+            {renderPages(settingsPages)}
+
+            <StyledMenuDivider />
             <MenuItem
               label="Log out"
               icon={<BiLogOut />}

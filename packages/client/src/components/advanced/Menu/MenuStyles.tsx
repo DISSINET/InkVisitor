@@ -1,5 +1,4 @@
 import { animated } from "@react-spring/web";
-import { GrDocumentText } from "react-icons/gr";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
@@ -30,4 +29,9 @@ export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
     margin-right: ${({ theme }) => theme.space[2]};
     vertical-align: middle;
   }
+`;
+
+export const StyledMenuDivider = styled.div`
+  height: 1px;
+  background-color: ${({ theme }) => theme.color["primary"]};
 `;

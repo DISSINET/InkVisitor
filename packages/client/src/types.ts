@@ -125,13 +125,16 @@ export interface IPage {
     | "backups"
     | "customize"
     | "stats"
-    | "explorer";
+    | "explorer"
+    | "reset-layout";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
   admin?: boolean;
   owner?: boolean;
   icon?: React.ReactElement;
+  mainPageOnly?: boolean;
+  onClick?: () => void;
 }
 
 export interface Node {
