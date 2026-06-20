@@ -37,11 +37,14 @@ export function panelWidthsFromSeparators(
   ];
 }
 
-export function arePanelWidthsUndersized(widths: number[]): boolean {
+export function arePanelWidthsUndersized(
+  widths: number[],
+  expanded: boolean[] = [true, true, true, true],
+): boolean {
   return (
-    widths[0] < FIRST_PANEL_MIN_WIDTH ||
-    widths[1] < SECOND_PANEL_MIN_WIDTH ||
-    widths[2] < THIRD_PANEL_MIN_WIDTH ||
-    widths[3] < FOURTH_PANEL_MIN_WIDTH
+    (expanded[0] && widths[0] < FIRST_PANEL_MIN_WIDTH) ||
+    (expanded[1] && widths[1] < SECOND_PANEL_MIN_WIDTH) ||
+    (expanded[2] && widths[2] < THIRD_PANEL_MIN_WIDTH) ||
+    (expanded[3] && widths[3] < FOURTH_PANEL_MIN_WIDTH)
   );
 }
