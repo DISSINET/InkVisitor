@@ -166,14 +166,19 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               minWidth: "2rem",
             }}
           >
-            {selectedDocument && (
+            {selectedDocument && !selectedDocumentIsFetching && (
               <DocumentTitle
                 title={selectedDocument.title}
                 width={isUndersized ? 100 : "full"}
                 noMargin
               />
             )}
-            <Loader show={selectedDocumentIsFetching} size={16} />
+            {selectedDocumentIsFetching && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                <Loader show size={16} />
+                <StyledInfoText>Loading document</StyledInfoText>
+              </div>
+            )}
           </StyledDocumentTitleContainer>
 
           {/* Orphaned-anchor warnings are only actionable by someone who may
@@ -198,31 +203,33 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledNoDocumentMessage>
             )}
 
-          {selectedResource !== false && selectedResource?.data?.documentId && (
-            <StyledAnnotatorMenuBar>
-              {activeTHasAnchor ? (
-                <Button
-                  label=""
-                  iconRight={
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <TbAnchor />
-                      <FaLongArrowAltRight />
-                    </div>
-                  }
-                  tooltipLabel="locate anchor"
-                  inverted
-                  onClick={() => {
-                    annotator?.scrollToAnchor(territoryId);
-                  }}
-                  color="warning"
-                />
-              ) : (
-                <StyledSearchNavigation>
-                  <TbAnchorOff title="no anchor for T" />
-                </StyledSearchNavigation>
-              )}
-            </StyledAnnotatorMenuBar>
-          )}
+          {!selectedDocumentIsFetching &&
+            selectedResource !== false &&
+            selectedResource?.data?.documentId && (
+              <StyledAnnotatorMenuBar>
+                {activeTHasAnchor ? (
+                  <Button
+                    label=""
+                    iconRight={
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <TbAnchor />
+                        <FaLongArrowAltRight />
+                      </div>
+                    }
+                    tooltipLabel="locate anchor"
+                    inverted
+                    onClick={() => {
+                      annotator?.scrollToAnchor(territoryId);
+                    }}
+                    color="warning"
+                  />
+                ) : (
+                  <StyledSearchNavigation>
+                    <TbAnchorOff title="no anchor for T" />
+                  </StyledSearchNavigation>
+                )}
+              </StyledAnnotatorMenuBar>
+            )}
         </StyledDocumentContainer>
 
         {/* Class selector - HIGHLIGHT */}
