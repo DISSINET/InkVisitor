@@ -102,8 +102,10 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     setIsInitialized(false);
   }, [territoryId]);
 
+  // Auto-load the resource whose document anchors this territory (or an ancestor).
   useEffect(() => {
     if (resources && documents && !isInitialized) {
+      console.log("documents", documents);
       let resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find((d) => d.id === resource.data.documentId);
@@ -114,7 +116,9 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
         return false;
       });
 
-      if (!resourceWithAnchor) {
+      const pathReady = selectedTerritoryPath.includes(territoryId);
+
+      if (!resourceWithAnchor && pathReady) {
         for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
           const territoryInPath = selectedTerritoryPath[i];
           resourceWithAnchor = resources.find((resource) => {
@@ -130,7 +134,11 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
         }
       }
 
-      dispatch(setSelectedResourceId(resourceWithAnchor ? resourceWithAnchor.id : false));
+      if (resourceWithAnchor) {
+        dispatch(setSelectedResourceId(resourceWithAnchor ? resourceWithAnchor.id : false));
+      } else {
+        dispatch(setSelectedResourceId(false));
+      }
       setIsInitialized(true);
     }
   }, [resources, documents, isInitialized, territoryId, selectedTerritoryPath, dispatch]);
