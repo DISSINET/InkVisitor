@@ -21,15 +21,11 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
-import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
-import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
-import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
-import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
@@ -64,6 +60,7 @@ import { MemoizedStatementListBox } from "./containers/StatementsListBox/Stateme
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { usePanelToggles } from "./hooks/usePanelToggles";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -141,315 +138,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
       queryClient.invalidateQueries({ queryKey: ["document"] });
     }
   }, [thirdPanelExpanded]);
-
-  const toggleFirstPanel = () => {
-    if (firstPanelExpanded) {
-      dispatch(setFirstPanelExpanded(false));
-    } else {
-      dispatch(setFirstPanelExpanded(true));
-
-      let newCenterPos = mainPageCenterSeparatorXPosition;
-      let newSearchPos = mainPageSearchSeparatorXPosition;
-      let needsUpdate = false;
-
-      if (newCenterPos - mainPageTreeSeparatorXPosition < SECOND_PANEL_MIN_WIDTH) {
-        newCenterPos = mainPageTreeSeparatorXPosition + SECOND_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-
-        if (newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
-          newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
-        }
-      }
-
-      if (needsUpdate) {
-        setMainPageCenterSeparatorXPosition(newCenterPos);
-        localStorage.setItem(
-          "mainPageCenterSeparatorXPosition",
-          floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
-        );
-
-        if (newSearchPos !== mainPageSearchSeparatorXPosition) {
-          setMainPageSearchSeparatorXPosition(newSearchPos);
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        dispatch(
-          setPanelWidths([
-            panelWidths[0],
-            floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
-            floorNumberToOneDecimal(newSearchPos - newCenterPos),
-            layoutWidth - newSearchPos,
-          ]),
-        );
-      }
-    }
-  };
-
-  const firstPanelButton = () => (
-    <Button
-      onClick={toggleFirstPanel}
-      inverted
-      icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
-    />
-  );
-
-  const toggleSecondPanel = () => {
-    if (secondPanelExpanded) {
-      dispatch(setSecondPanelExpanded(false));
-    } else {
-      dispatch(setSecondPanelExpanded(true));
-
-      let newTreePos = mainPageTreeSeparatorXPosition;
-      let newCenterPos = mainPageCenterSeparatorXPosition;
-      let newSearchPos = mainPageSearchSeparatorXPosition;
-      let needsUpdate = false;
-
-      const panel3Space = thirdPanelExpanded
-        ? Math.max(newSearchPos - newCenterPos, THIRD_PANEL_MIN_WIDTH)
-        : COLLAPSED_PANEL_WIDTH;
-      const panel4Space = fourthPanelExpanded ? FOURTH_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH;
-
-      // max center position: leave room for panels to the right
-      const maxCenterPos = layoutWidth - panel3Space - panel4Space;
-
-      if (newCenterPos > maxCenterPos) {
-        newCenterPos = maxCenterPos;
-        needsUpdate = true;
-      }
-
-      // ensure second panel min width
-      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-        newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-      }
-
-      // clamp tree position
-      if (newTreePos < FIRST_PANEL_MIN_WIDTH) {
-        newTreePos = FIRST_PANEL_MIN_WIDTH;
-        newCenterPos = Math.max(newCenterPos, newTreePos + SECOND_PANEL_MIN_WIDTH);
-        needsUpdate = true;
-      }
-
-      // adjust search separator if third panel needs room
-      if (thirdPanelExpanded && newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
-        newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-      }
-
-      if (needsUpdate) {
-        if (newTreePos !== mainPageTreeSeparatorXPosition) {
-          setMainPageTreeSeparatorXPosition(newTreePos);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        if (newCenterPos !== mainPageCenterSeparatorXPosition) {
-          setMainPageCenterSeparatorXPosition(newCenterPos);
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        if (newSearchPos !== mainPageSearchSeparatorXPosition) {
-          setMainPageSearchSeparatorXPosition(newSearchPos);
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        dispatch(
-          setPanelWidths([
-            newTreePos,
-            floorNumberToOneDecimal(newCenterPos - newTreePos),
-            floorNumberToOneDecimal(newSearchPos - newCenterPos),
-            layoutWidth - newSearchPos,
-          ]),
-        );
-      }
-    }
-  };
-
-  const secondPanelButton = () => (
-    <Button
-      onClick={toggleSecondPanel}
-      inverted
-      icon={secondPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
-    />
-  );
-
-  const toggleThirdPanel = () => {
-    if (thirdPanelExpanded) {
-      dispatch(setThirdPanelExpanded(false));
-    } else {
-      dispatch(setThirdPanelExpanded(true));
-      queryClient.invalidateQueries({ queryKey: ["document"] });
-
-      let newTreePos = mainPageTreeSeparatorXPosition;
-      let newSearchPos = mainPageSearchSeparatorXPosition;
-      let needsUpdate = false;
-
-      if (mainPageCenterSeparatorXPosition - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-        newTreePos = mainPageCenterSeparatorXPosition - SECOND_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-      }
-
-      let newCenterPos = mainPageCenterSeparatorXPosition;
-
-      if (newSearchPos - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
-        newSearchPos = newCenterPos + THIRD_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-
-        if (layoutWidth - newSearchPos < FOURTH_PANEL_MIN_WIDTH) {
-          newSearchPos = layoutWidth - FOURTH_PANEL_MIN_WIDTH;
-          newCenterPos = newSearchPos - THIRD_PANEL_MIN_WIDTH;
-
-          if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-            newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
-          }
-        }
-      }
-
-      if (needsUpdate) {
-        if (newTreePos !== mainPageTreeSeparatorXPosition) {
-          setMainPageTreeSeparatorXPosition(newTreePos);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        if (newCenterPos !== mainPageCenterSeparatorXPosition) {
-          setMainPageCenterSeparatorXPosition(newCenterPos);
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        if (newSearchPos !== mainPageSearchSeparatorXPosition) {
-          setMainPageSearchSeparatorXPosition(newSearchPos);
-          localStorage.setItem(
-            "mainPageSearchSeparatorXPosition",
-            floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        dispatch(
-          setPanelWidths([
-            newTreePos,
-            floorNumberToOneDecimal(newCenterPos - newTreePos),
-            floorNumberToOneDecimal(newSearchPos - newCenterPos),
-            floorNumberToOneDecimal(layoutWidth - newSearchPos),
-          ]),
-        );
-      }
-    }
-  };
-
-  const reverseThirdPanelIcon = !secondPanelExpanded;
-
-  const thirdPanelButton = () => (
-    <Button
-      onClick={toggleThirdPanel}
-      inverted
-      icon={
-        reverseThirdPanelIcon ? (
-          thirdPanelExpanded ? (
-            <RiMenuFoldFill />
-          ) : (
-            <RiMenuUnfoldFill />
-          )
-        ) : thirdPanelExpanded ? (
-          <RiMenuUnfoldFill />
-        ) : (
-          <RiMenuFoldFill />
-        )
-      }
-    />
-  );
-
-  const toggleFourthPanel = () => {
-    if (fourthPanelExpanded) {
-      dispatch(setFourthPanelExpanded(false));
-    } else {
-      dispatch(setFourthPanelExpanded(true));
-
-      let newCenterPos = mainPageCenterSeparatorXPosition;
-      let newTreePos = mainPageTreeSeparatorXPosition;
-      let needsUpdate = false;
-
-      if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-        newCenterPos = newTreePos + SECOND_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-      }
-
-      if (mainPageSearchSeparatorXPosition - newCenterPos < THIRD_PANEL_MIN_WIDTH) {
-        newCenterPos = mainPageSearchSeparatorXPosition - THIRD_PANEL_MIN_WIDTH;
-        needsUpdate = true;
-
-        if (newCenterPos - newTreePos < SECOND_PANEL_MIN_WIDTH) {
-          newTreePos = newCenterPos - SECOND_PANEL_MIN_WIDTH;
-        }
-      }
-
-      if (needsUpdate) {
-        if (newCenterPos !== mainPageCenterSeparatorXPosition) {
-          setMainPageCenterSeparatorXPosition(newCenterPos);
-          localStorage.setItem(
-            "mainPageCenterSeparatorXPosition",
-            floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        if (newTreePos !== mainPageTreeSeparatorXPosition) {
-          setMainPageTreeSeparatorXPosition(newTreePos);
-          localStorage.setItem(
-            "mainPageTreeSeparatorXPosition",
-            floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
-          );
-        }
-
-        dispatch(
-          setPanelWidths([
-            newTreePos,
-            floorNumberToOneDecimal(newCenterPos - newTreePos),
-            floorNumberToOneDecimal(mainPageSearchSeparatorXPosition - newCenterPos),
-            layoutWidth - mainPageSearchSeparatorXPosition,
-          ]),
-        );
-      }
-    }
-  };
-
-  const reverseFourthPanelIcon = !firstPanelExpanded && !secondPanelExpanded && !thirdPanelExpanded;
-
-  const hideFourthPanelButton = () => (
-    <Button
-      key="hide"
-      onClick={toggleFourthPanel}
-      inverted
-      icon={
-        reverseFourthPanelIcon ? (
-          fourthPanelExpanded ? (
-            <RiMenuFoldFill />
-          ) : (
-            <RiMenuUnfoldFill />
-          )
-        ) : fourthPanelExpanded ? (
-          <RiMenuUnfoldFill />
-        ) : (
-          <RiMenuFoldFill />
-        )
-      }
-    />
-  );
 
   const handleHideFourthPanelBoxButtonClick = (
     boxToHide: FourthPanelBoxes,
@@ -777,6 +465,84 @@ const MainPage: React.FC<MainPage> = ({}) => {
     localStorageSearchSeparatorXPosition
       ? Number(localStorageSearchSeparatorXPosition) * onePercentOfLayoutWidth
       : MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
+  );
+
+  const { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel } =
+    usePanelToggles({
+      treeSeparator: {
+        position: mainPageTreeSeparatorXPosition,
+        setPosition: setMainPageTreeSeparatorXPosition,
+      },
+      centerSeparator: {
+        position: mainPageCenterSeparatorXPosition,
+        setPosition: setMainPageCenterSeparatorXPosition,
+      },
+      searchSeparator: {
+        position: mainPageSearchSeparatorXPosition,
+        setPosition: setMainPageSearchSeparatorXPosition,
+      },
+      onePercentOfLayoutWidth,
+    });
+
+  const firstPanelButton = () => (
+    <Button
+      onClick={toggleFirstPanel}
+      inverted
+      icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
+    />
+  );
+
+  const secondPanelButton = () => (
+    <Button
+      onClick={toggleSecondPanel}
+      inverted
+      icon={secondPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
+    />
+  );
+
+  const reverseThirdPanelIcon = !secondPanelExpanded;
+
+  const thirdPanelButton = () => (
+    <Button
+      onClick={toggleThirdPanel}
+      inverted
+      icon={
+        reverseThirdPanelIcon ? (
+          thirdPanelExpanded ? (
+            <RiMenuFoldFill />
+          ) : (
+            <RiMenuUnfoldFill />
+          )
+        ) : thirdPanelExpanded ? (
+          <RiMenuUnfoldFill />
+        ) : (
+          <RiMenuFoldFill />
+        )
+      }
+    />
+  );
+
+  const reverseFourthPanelIcon = !firstPanelExpanded && !secondPanelExpanded && !thirdPanelExpanded;
+
+  const hideFourthPanelButton = () => (
+    <Button
+      key="hide"
+      onClick={toggleFourthPanel}
+      inverted
+      icon={
+        reverseFourthPanelIcon ? (
+          fourthPanelExpanded ? (
+            <RiMenuFoldFill />
+          ) : (
+            <RiMenuUnfoldFill />
+          )
+        ) : fourthPanelExpanded ? (
+          <RiMenuUnfoldFill />
+        ) : (
+          <RiMenuFoldFill />
+        )
+      }
+    />
   );
 
   const handleTreeSeparatorXPositionChange = (xPosition: number) => {
@@ -1476,7 +1242,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             label="Editor"
             isExpanded={thirdPanelExpanded}
             onHeaderClick={handleMaximizeEditorBox}
-            disableHeaderClick={editorOpened && editorBoxState === EditorBoxState.FullHeight}
+            disableHeaderClick
             buttons={[
               <>
                 {thirdPanelExpanded && (
