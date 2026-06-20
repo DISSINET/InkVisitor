@@ -12,4 +12,4 @@
 ## Code style
 
 - Do not delete commented-out code. It may be kept intentionally for reference or future use.
-- Do not add Props to the tsx component interface name
+- Name React component interfaces the same as the component, not with a `Props` suffix.
