@@ -33,5 +33,6 @@ export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
 
 export const StyledMenuDivider = styled.div`
   height: 1px;
-  background-color: ${({ theme }) => theme.color["primary"]};
+  background-color: ${({ theme }) => theme.color.primary};
+  opacity: 0.7;
 `;
