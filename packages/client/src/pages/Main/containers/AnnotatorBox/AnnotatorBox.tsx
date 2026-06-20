@@ -12,7 +12,7 @@ import api from "api";
 import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import { useUserQuery } from "hooks/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { setSelectedResourceId } from "redux/features/statementAnnotator/selectedResourceIdSlice";
 import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -96,46 +96,46 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   });
 
   const [isInitialized, setIsInitialized] = useState(false);
+  // Set once the user manually picks a resource so auto-load stops overriding it.
+  const userPickedRef = useRef(false);
 
+  // On territory change: reset selection once, and let auto-load run again.
   useEffect(() => {
     setIsInitialized(false);
-  }, [territoryId]);
+    userPickedRef.current = false;
+    dispatch(setSelectedResourceId(false));
+  }, [territoryId, dispatch]);
 
   // Auto-load the resource whose document anchors this territory (or an ancestor).
+  // Only ever SETS a found resource (latching on success); when nothing is found
+  // it neither dispatches nor latches, so it retries as resources / documents /
+  // the territory path arrive — without overriding a manual selection.
   useEffect(() => {
-    if (resources && documents && !isInitialized) {
-      let resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
+    if (!resources || !documents || isInitialized || userPickedRef.current) {
+      return;
+    }
+
+    let resourceWithAnchor = resources.find((resource) => {
+      if (!resource.data.documentId) return false;
+      const document = documents.find((d) => d.id === resource.data.documentId);
+      return document?.entityIds.T.includes(territoryId) ?? false;
+    });
+
+    if (!resourceWithAnchor) {
+      for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
+        const territoryInPath = selectedTerritoryPath[i];
+        resourceWithAnchor = resources.find((resource) => {
+          if (!resource.data.documentId) return false;
           const document = documents.find((d) => d.id === resource.data.documentId);
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      if (!resourceWithAnchor) {
-        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-          const territoryInPath = selectedTerritoryPath[i];
-          resourceWithAnchor = resources.find((resource) => {
-            if (resource.data.documentId) {
-              const document = documents.find((d) => d.id === resource.data.documentId);
-              if (document) {
-                return document.entityIds.T.includes(territoryInPath);
-              }
-            }
-            return false;
-          });
-          if (resourceWithAnchor) break;
-        }
+          return document?.entityIds.T.includes(territoryInPath) ?? false;
+        });
+        if (resourceWithAnchor) break;
       }
+    }
 
-      if (resourceWithAnchor) {
-        dispatch(setSelectedResourceId(resourceWithAnchor.id));
-        setIsInitialized(true);
-      } else {
-        dispatch(setSelectedResourceId(false));
-      }
+    if (resourceWithAnchor) {
+      dispatch(setSelectedResourceId(resourceWithAnchor.id));
+      setIsInitialized(true);
     }
   }, [resources, documents, isInitialized, territoryId, selectedTerritoryPath, dispatch]);
 
@@ -293,7 +293,11 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       selectedDocumentError={selectedDocumentError}
       selectedResource={selectedResource}
       resources={resources}
-      setSelectedResourceId={(id) => dispatch(setSelectedResourceId(id))}
+      setSelectedResourceId={(id) => {
+        userPickedRef.current = true;
+        setIsInitialized(true);
+        dispatch(setSelectedResourceId(id));
+      }}
       showStatementList={false}
       userCanEdit={userCanEdit}
       canSelectResource={canSelectResource}
