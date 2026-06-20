@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IResponseTree, IStatement } from "@inkvisitor/shared/types";
+import { IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, ButtonGroup, Panel } from "components";
@@ -39,7 +39,7 @@ import {
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import { DetailBoxState, EditorBoxState } from "types";
-import { floorNumberToOneDecimal, searchTree } from "utils/utils";
+import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
@@ -51,6 +51,7 @@ import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/Territor
 import { useBoxLayout } from "./hooks/useBoxLayout";
 import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
 import { usePanelToggles } from "./hooks/usePanelToggles";
+import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -476,44 +477,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     fourthPanelExpanded,
   ]);
 
-  const treeData: IResponseTree | undefined = queryClient.getQueryData(["tree"]);
-
-  const selectedTerritoryPath = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath,
-  );
-
-  // Get sibling territories at the same level
-  const siblingTerritories = useMemo(() => {
-    const parentId = selectedTerritoryPath[selectedTerritoryPath.length - 1];
-    if (treeData) {
-      const parentTerritory = searchTree(treeData, parentId);
-      if (parentTerritory) {
-        return parentTerritory.children.map((child) => child.territory.id);
-      }
-    }
-    return [];
-  }, [selectedTerritoryPath, treeData]);
-
-  // Get previous and next territory IDs
-  const previousTerritoryId = useMemo(() => {
-    if (!territoryId || siblingTerritories.length === 0) return null;
-
-    const currentIndex = siblingTerritories.indexOf(territoryId);
-    if (currentIndex > 0) {
-      return siblingTerritories[currentIndex - 1];
-    }
-    return null;
-  }, [territoryId, siblingTerritories]);
-
-  const nextTerritoryId = useMemo(() => {
-    if (!territoryId || siblingTerritories.length === 0) return null;
-
-    const currentIndex = siblingTerritories.indexOf(territoryId);
-    if (currentIndex < siblingTerritories.length - 1) {
-      return siblingTerritories[currentIndex + 1];
-    }
-    return null;
-  }, [territoryId, siblingTerritories]);
+  const { previousTerritoryId, nextTerritoryId } = useTerritoryNavigation(territoryId);
 
   return (
     <>
@@ -552,12 +516,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
                   centerSeparator.setPosition(newCenterPos);
                   localStorage.setItem(
-                    "centerSeparator.position",
+                    "mainPageCenterSeparatorXPosition",
                     floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
                   );
                   searchSeparator.setPosition(newSearchPos);
                   localStorage.setItem(
-                    "searchSeparator.position",
+                    "mainPageSearchSeparatorXPosition",
                     floorNumberToOneDecimal(newSearchPos / onePercentOfLayoutWidth).toString(),
                   );
 
@@ -632,12 +596,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
               centerSeparator.setPosition(newCenterPos);
               localStorage.setItem(
-                "centerSeparator.position",
+                "mainPageCenterSeparatorXPosition",
                 floorNumberToOneDecimal(newCenterPos / onePercentOfLayoutWidth).toString(),
               );
               treeSeparator.setPosition(newTreePos);
               localStorage.setItem(
-                "treeSeparator.position",
+                "mainPageTreeSeparatorXPosition",
                 floorNumberToOneDecimal(newTreePos / onePercentOfLayoutWidth).toString(),
               );
 
