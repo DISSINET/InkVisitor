@@ -165,11 +165,23 @@ export function useVerticalSeparators() {
   };
 
   const handleSeparatorLayoutInit = () => {
-    const secondPanel = mainPageCenterSeparatorXPosition - mainPageTreeSeparatorXPosition;
-    const thirdPanel = mainPageSearchSeparatorXPosition - mainPageCenterSeparatorXPosition;
-    const fourthPanel = layoutWidth - mainPageSearchSeparatorXPosition;
+    const treePos =
+      Number(localStorageTreeSeparatorXPosition) * onePercentOfLayoutWidth;
+    const centerPos =
+      Number(localStorageCenterSeparatorXPosition) * onePercentOfLayoutWidth;
+    const searchPos =
+      Number(localStorageSearchSeparatorXPosition) * onePercentOfLayoutWidth;
 
-    const tempPanelWidths = [mainPageTreeSeparatorXPosition, secondPanel, thirdPanel, fourthPanel];
+    setMainPageTreeSeparatorXPosition(treePos);
+    setMainPageCenterSeparatorXPosition(centerPos);
+    setMainPageSearchSeparatorXPosition(searchPos);
+
+    const tempPanelWidths = [
+      treePos,
+      centerPos - treePos,
+      searchPos - centerPos,
+      layoutWidth - searchPos,
+    ];
 
     dispatch(setPanelWidths(tempPanelWidths.map((pW) => floorNumberToOneDecimal(pW))));
     dispatch(
@@ -255,8 +267,15 @@ export function useVerticalSeparators() {
         isFirstRender.current = false;
       } else {
         // change of layout width (different monitor / change of zoom)
-        console.log("layout width changed");
-        handleLayoutInit();
+        if (
+          localStorageTreeSeparatorXPosition &&
+          localStorageCenterSeparatorXPosition &&
+          localStorageSearchSeparatorXPosition
+        ) {
+          handleSeparatorLayoutInit();
+        } else {
+          handleLayoutInit();
+        }
       }
     }
   }, [layoutWidth]);

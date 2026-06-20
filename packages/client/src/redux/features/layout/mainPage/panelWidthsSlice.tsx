@@ -27,7 +27,13 @@ function computeInitialPanelWidths(): number[] {
     const widths = panelWidthsFromSeparators(
       Number(treeSep), Number(centerSep), Number(searchSep), layoutWidth,
     );
-    if (!arePanelWidthsUndersized(widths)) {
+    const expanded = [
+      localStorage.getItem("firstPanelExpanded") !== "false",
+      localStorage.getItem("secondPanelExpanded") !== "false",
+      localStorage.getItem("thirdPanelExpanded") !== "false",
+      localStorage.getItem("fourthPanelExpanded") !== "false",
+    ];
+    if (!arePanelWidthsUndersized(widths, expanded)) {
       return widths.map(floorNumberToOneDecimal);
     }
   }
