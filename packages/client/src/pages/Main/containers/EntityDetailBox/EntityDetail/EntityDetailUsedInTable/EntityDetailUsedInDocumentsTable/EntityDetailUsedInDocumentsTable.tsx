@@ -20,6 +20,7 @@ import { useSearchParams } from "hooks";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { DetailBoxState, EditorBoxState } from "types";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import useAnnotator from "hooks/useAnnotator";
@@ -110,8 +111,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
                       dispatch(setStatementListOpened(true));
                       dispatch(setDetailBoxState(DetailBoxState.Normal));
                     }
-                    // annotator is always visible; un-maximize editor so it
-                    // doesn't cover it before scrolling to the anchor.
+                    dispatch(setThirdPanelExpanded(true));
                     dispatch(setEditorBoxState(EditorBoxState.Normal));
 
                     setTimeout(() => {

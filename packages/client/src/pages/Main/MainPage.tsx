@@ -122,20 +122,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [statementId]);
 
-  const annotatorVisible =
-    thirdPanelExpanded && !(editorOpened && editorBoxState === EditorBoxState.FullHeight);
-  const [showAnnotatorContent, setShowAnnotatorContent] = useState(false);
-  useEffect(() => {
-    if (annotatorVisible) {
-      const timer = setTimeout(() => {
-        setShowAnnotatorContent(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    } else {
-      setShowAnnotatorContent(false);
-    }
-  }, [annotatorVisible]);
-
   const toggleFirstPanel = () => {
     if (firstPanelExpanded) {
       dispatch(setFirstPanelExpanded(false));
@@ -734,7 +720,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
     const flooredXPosition = floorNumberToOneDecimal(xPosition);
     const clampedXPosition = Math.max(flooredXPosition, FIRST_PANEL_MIN_WIDTH);
 
-    if (firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded && flooredXPosition < FIRST_PANEL_MIN_WIDTH) {
+    if (
+      firstPanelExpanded &&
+      secondPanelExpanded &&
+      thirdPanelExpanded &&
+      fourthPanelExpanded &&
+      flooredXPosition < FIRST_PANEL_MIN_WIDTH
+    ) {
       toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
     }
 
@@ -763,7 +755,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       const thirdPanelWidth = layoutWidth - panelWidths[3] - xPosition;
 
       if (
-        firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded &&
+        firstPanelExpanded &&
+        secondPanelExpanded &&
+        thirdPanelExpanded &&
+        fourthPanelExpanded &&
         (secondPanelWidth < SECOND_PANEL_MIN_WIDTH || thirdPanelWidth < THIRD_PANEL_MIN_WIDTH)
       ) {
         toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
@@ -796,7 +791,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
       const fourthPanelWidth = layoutWidth - xPosition;
 
       if (
-        firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded &&
+        firstPanelExpanded &&
+        secondPanelExpanded &&
+        thirdPanelExpanded &&
+        fourthPanelExpanded &&
         (thirdPanelWidth < THIRD_PANEL_MIN_WIDTH || fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH)
       ) {
         toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
@@ -1370,14 +1368,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={thirdPanelExpanded}
           buttons={[thirdPanelButton()]}
         >
-          {showAnnotatorContent ? (
-            <MemoizedAnnotatorBox
-              height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
-              width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
-            />
-          ) : (
-            annotatorVisible && <Loader show />
-          )}
+          <MemoizedAnnotatorBox
+            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
+            width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
+          />
         </Box>
 
         {statementId && (

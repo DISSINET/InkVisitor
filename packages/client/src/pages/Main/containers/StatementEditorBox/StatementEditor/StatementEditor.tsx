@@ -39,6 +39,7 @@ import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { EditorBoxState, DetailBoxState, classesEditorActants, classesEditorTags } from "types";
@@ -575,8 +576,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       timeout = 2000;
     }
     dispatch(setDetailBoxState(DetailBoxState.Normal));
-    // Annotator is the always-visible primary box; un-maximize the editor so it
-    // doesn't cover the annotator, keeping the scroll-to-anchor target visible.
+    dispatch(setThirdPanelExpanded(true));
     dispatch(setEditorBoxState(EditorBoxState.Normal));
     if (parentTerritoryId.length && territoryId !== parentTerritoryId) {
       setTerritoryId(parentTerritoryId);
