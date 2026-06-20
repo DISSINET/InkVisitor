@@ -93,7 +93,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 2.9 : contentWidth / 2.6;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.6;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
@@ -129,7 +129,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               <div
                 style={{
                   display: "flex",
-                  maxWidth: annotatorWidthTooNarrow ? "12rem" : "13.5rem",
+                  maxWidth: annotatorWidthTooNarrow ? "11.5rem" : "13.5rem",
                 }}
               >
                 <EntityTag
@@ -162,14 +162,14 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
 
           <StyledDocumentTitleContainer
             style={{
-              maxWidth: annotatorWidthTooNarrow ? "12.5rem" : "12.5rem",
+              maxWidth: annotatorWidthTooNarrow ? "11.5rem" : "12.5rem",
               minWidth: "2rem",
             }}
           >
             {selectedDocument && !selectedDocumentIsFetching && (
               <DocumentTitle
                 title={selectedDocument.title}
-                width={isUndersized ? 100 : "full"}
+                width={annotatorWidthTooNarrow ? 80 : "full"}
                 noMargin
               />
             )}

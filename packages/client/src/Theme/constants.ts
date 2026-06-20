@@ -39,8 +39,8 @@ export const MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION =
   INIT_PERCENT_PANEL_WIDTHS[0] + INIT_PERCENT_PANEL_WIDTHS[1] + INIT_PERCENT_PANEL_WIDTHS[2];
 
 // breakpoint for annotator width too small
-export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 560;
-export const ANNOTATOR_UNDERSIZED_BREAKPOINT = 430;
+export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 580;
+export const ANNOTATOR_UNDERSIZED_BREAKPOINT = 490;
 // breakpoint for editor width too small
 export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
 // height of class selector for highlight in annotator
