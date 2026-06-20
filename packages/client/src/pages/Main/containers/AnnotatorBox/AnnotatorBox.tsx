@@ -98,50 +98,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   // Auto-load the resource whose document anchors this territory (or an ancestor).
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const loadDefaultResource = () => {
-    if (resources && documents && !isInitialized) {
-      // First try to find resource with document containing territoryId
-      let resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find((d) => d.id === resource.data.documentId);
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      // If not found, try each territory in the path in reverse order
-      if (!resourceWithAnchor) {
-        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-          const territoryInPath = selectedTerritoryPath[i];
-          resourceWithAnchor = resources.find((resource) => {
-            if (resource.data.documentId) {
-              const document = documents.find((d) => d.id === resource.data.documentId);
-              if (document) {
-                return document.entityIds.T.includes(territoryInPath);
-              }
-            }
-            return false;
-          });
-          if (resourceWithAnchor) break;
-        }
-      }
-
-      if (resourceWithAnchor) {
-        dispatch(setSelectedResourceId(resourceWithAnchor.id));
-      } else {
-        dispatch(setSelectedResourceId(false));
-      }
-
-      setIsInitialized(true);
-    }
-  };
-
-  useEffect(() => {
-    loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
-
   useEffect(() => {
     setIsInitialized(false);
   }, [territoryId]);
