@@ -3,6 +3,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IRequest } from "src/custom_typings/request";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import Relation from "./relation";
+import Identification from "./identification";
 import { Connection } from "rethinkdb-ts";
 import { EntityTooltip } from "@inkvisitor/shared/types";
 
@@ -256,4 +257,90 @@ export const copyRelations = async (
     await relation.save(request.db.connection);
     await relation.afterSave(request);
   }
+};
+
+/**
+ * Pure tree-walk: collects every entity id referenced by a list of
+ * identification connections (including their transitive `subtrees`) into `acc`.
+ * Extracted so it can be unit-tested without a DB connection.
+ * @param connections forward identification connection trees
+ * @param acc set accumulating the collected entity ids
+ * @returns the (mutated) accumulator set
+ */
+export const collectIdsFromIdentificationConnections = (
+  connections: RelationTypes.IConnection<RelationTypes.IIdentification>[],
+  acc: Set<string> = new Set<string>()
+): Set<string> => {
+  for (const connection of connections) {
+    for (const id of connection.entityIds) {
+      acc.add(id);
+    }
+    if (connection.subtrees && connection.subtrees.length) {
+      collectIdsFromIdentificationConnections(connection.subtrees, acc);
+    }
+  }
+  return acc;
+};
+
+/**
+ * Returns the set of entity ids considered "equivalent" to the input entities,
+ * used by the "include equivalents" search option (#2969). Equivalence covers:
+ *  - SYN (Synonym): the full synonym cloud. Clouds are merged at save time, so a
+ *    single batched lookup already yields the transitive set.
+ *  - AEE (ActionEventEquivalent): single hop, both directions (Action<->Concept),
+ *    not transitive.
+ *  - IDE (Identification): mirrors the detail-view traversal - direct
+ *    identifications of any certainty, followed transitively only through
+ *    `Certain` ones (depth-capped).
+ * The original input ids are removed from the result.
+ * @param conn db connection
+ * @param entityIds source entity ids to expand
+ * @returns unique equivalent entity ids, excluding the inputs
+ */
+export const getEquivalentEntityIds = async (
+  conn: Connection,
+  entityIds: string[]
+): Promise<string[]> => {
+  const result = new Set<string>();
+
+  if (!entityIds.length) {
+    return [];
+  }
+
+  // SYN (full transitive cloud) and AEE (single hop, both directions): batched,
+  // just flatten the related ids
+  for (const type of [
+    RelationEnums.Type.Synonym,
+    RelationEnums.Type.ActionEventEquivalent,
+  ]) {
+    const relations = await Relation.findForEntities(conn, entityIds, type);
+    for (const relation of relations) {
+      for (const id of relation.entityIds) {
+        result.add(id);
+      }
+    }
+  }
+
+  // IDE - per-entity transitive traversal (mirrors detail view), run in parallel
+  const identificationTrees = await Promise.all(
+    entityIds.map((entityId) =>
+      Identification.getIdentificationForwardConnections(
+        conn,
+        entityId,
+        MAX_NEST_LVL,
+        1,
+        []
+      )
+    )
+  );
+  for (const tree of identificationTrees) {
+    collectIdsFromIdentificationConnections(tree, result);
+  }
+
+  // never return the inputs themselves
+  for (const id of entityIds) {
+    result.delete(id);
+  }
+
+  return [...result];
 };

@@ -27,6 +27,7 @@ export interface IRequestSearch {
   haveReferenceTo?: string;
   isRootInvalid?: IRequestSearchRootValidity;
   editedBy?: string;
+  includeEquivalents?: boolean;
 }
 
 export enum IRequestSearchRootValidity {
@@ -60,6 +61,7 @@ export class RequestSearch {
   haveReferenceTo?: string;
   isRootInvalid?: IRequestSearchRootValidity;
   editedBy?: string;
+  includeEquivalents?: boolean;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -118,6 +120,10 @@ export class RequestSearch {
     this.createdBy = requestData.createdBy ?? undefined;
     this.updatedBy = requestData.updatedBy ?? undefined;
     this.editedBy = requestData.editedBy ?? undefined;
+    // GET query params arrive as strings, so "false" must not be coerced to true
+    this.includeEquivalents =
+      requestData.includeEquivalents === true ||
+      (requestData.includeEquivalents as unknown) === "true";
   }
 
   /**

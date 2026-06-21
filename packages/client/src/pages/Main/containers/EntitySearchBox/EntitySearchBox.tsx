@@ -21,6 +21,10 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
+import {
+  includeEquivalentsStorageKey,
+  setIncludeEquivalents,
+} from "redux/features/entitySearch/includeEquivalentsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
@@ -112,6 +116,9 @@ export const EntitySearchBox: React.FC = () => {
 
   const dispatch = useAppDispatch();
   const expandedOptions = useAppSelector((state) => state.entitySearch.expandedOptions);
+  const includeEquivalents = useAppSelector(
+    (state) => state.entitySearch.includeEquivalents,
+  );
 
   const {
     status,
@@ -120,7 +127,10 @@ export const EntitySearchBox: React.FC = () => {
     isFetching,
     isPending,
   } = useQuery({
-    queryKey: ["search", { searchData: JSON.stringify(debouncedValues) }],
+    queryKey: [
+      "search",
+      { searchData: JSON.stringify(debouncedValues), includeEquivalents },
+    ],
     queryFn: async () => {
       // if (debouncedValues.usedTemplate === "Any") {
       //   const { usedTemplate, ...filters } = debouncedValues;
@@ -136,6 +146,7 @@ export const EntitySearchBox: React.FC = () => {
       const res = await api.entitiesSearch({
         ...debouncedValues,
         labelOrId: labelWithWildCard,
+        includeEquivalents: includeEquivalents || undefined,
       });
       return res.data;
     },
@@ -366,6 +377,11 @@ export const EntitySearchBox: React.FC = () => {
             searchData={searchData}
             setSearchData={setSearchData}
             isUndersized={isUndersized}
+            includeEquivalents={includeEquivalents}
+            onToggleIncludeEquivalents={(value: boolean) => {
+              localStorage.setItem(includeEquivalentsStorageKey, String(value));
+              dispatch(setIncludeEquivalents(value));
+            }}
           />
 
           {/* ADVANCED OPTIONS */}

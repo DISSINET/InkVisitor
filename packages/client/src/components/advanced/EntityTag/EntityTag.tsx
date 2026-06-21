@@ -20,10 +20,12 @@ import {
 import {
   StyledEntityTag,
   StyledEntityTagWrap,
+  StyledEquivalentBadge,
   StyledFaStar,
   StyledLabel,
   StyledLabelWrap,
   StyledStarWrap,
+  StyledTagComponentWrap,
 } from "./EntityTagStyles";
 import useDragDrop from "./useDragDrop";
 
@@ -56,6 +58,8 @@ interface EntityTag {
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
   /** When set, replaces the default double-click behavior (open in detail). */
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
+  /** Marks the tag as surfaced via "include equivalents" (SYN/IDE/AEE). */
+  isEquivalent?: boolean;
 }
 
 const EntityTagComponent: React.FC<EntityTag> = ({
@@ -81,6 +85,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   unlinkButton,
   customTooltipAttributes,
   onDoubleClick: onDoubleClickOverride,
+  isEquivalent = false,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -145,14 +150,21 @@ const EntityTagComponent: React.FC<EntityTag> = ({
 
   const tagComponent = useMemo(() => {
     return (
-      <StyledEntityTag
-        $color={EntityColors[entity.class].color}
-        $isTemplate={entity.isTemplate ?? false}
-      >
-        {entity.class}
-      </StyledEntityTag>
+      <StyledTagComponentWrap>
+        <StyledEntityTag
+          $color={EntityColors[entity.class].color}
+          $isTemplate={entity.isTemplate ?? false}
+        >
+          {entity.class}
+        </StyledEntityTag>
+        {isEquivalent && (
+          <StyledEquivalentBadge title="Surfaced via 'include equivalents' (SYN / IDE / AEE)">
+            eq
+          </StyledEquivalentBadge>
+        )}
+      </StyledTagComponentWrap>
     );
-  }, [entity]);
+  }, [entity, isEquivalent]);
 
   const labelComponent = useMemo(() => {
     return (
@@ -292,6 +304,7 @@ function areEntityTagsEqual(
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isFavorited !== next.isFavorited) return false;
+  if (prev.isEquivalent !== next.isEquivalent) return false;
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;

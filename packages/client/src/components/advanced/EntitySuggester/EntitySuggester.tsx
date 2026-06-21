@@ -25,6 +25,7 @@ import {
 import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 import { useUserQuery } from "hooks/react-query";
+import { useAppSelector } from "redux/hooks";
 
 interface EntitySuggesterProps {
   categoryTypes?: EntityEnums.Class[];
@@ -134,6 +135,10 @@ const EntitySuggesterFull: React.FC<
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
+  // global "include equivalents" search setting - applies to every suggester
+  const includeEquivalents = useAppSelector(
+    (state) => state.entitySearch.includeEquivalents,
+  );
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
   >();
@@ -184,7 +189,13 @@ const EntitySuggesterFull: React.FC<
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery({
-    queryKey: ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
+    queryKey: [
+      "suggestion",
+      debouncedTyped,
+      selectedCategory,
+      excludedEntityClasses,
+      includeEquivalents,
+    ],
     queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
         labelOrId: debouncedTyped + wildCardChar,
@@ -193,6 +204,7 @@ const EntitySuggesterFull: React.FC<
             ? undefined
             : (selectedCategory as EntityEnums.Class),
         excluded: excludedEntityClasses.length ? excludedEntityClasses : undefined,
+        includeEquivalents: includeEquivalents || undefined,
       });
 
       return filterSuggestions(resSuggestions.data ?? []);

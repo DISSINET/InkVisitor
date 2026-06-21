@@ -38,6 +38,10 @@ export class ResponseEntity extends Entity implements IResponseEntity {
 
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
+  // true when this entity was mixed into search results via "include equivalents"
+  // (SYN/IDE/AEE) rather than matching the query directly (#2969)
+  isEquivalent?: boolean;
+
   constructor(entity: Entity) {
     super({});
 

@@ -1,5 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, IResponseEntity } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { FaLink, FaPlusSquare } from "react-icons/fa";
@@ -119,7 +119,12 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag>
         <StyledTagWrapper>
-          <EntityTag fullWidth entity={entity} tooltipPosition="right" />
+          <EntityTag
+            fullWidth
+            entity={entity}
+            isEquivalent={(entity as IResponseEntity).isEquivalent}
+            tooltipPosition="right"
+          />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>
       <StyledSuggestionLineIcons>{icons}</StyledSuggestionLineIcons>
