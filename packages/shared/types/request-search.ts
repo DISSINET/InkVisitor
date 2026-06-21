@@ -28,6 +28,7 @@ export interface IRequestSearch {
   isRootInvalid?: IRequestSearchRootValidity;
   editedBy?: string;
   includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 }
 
 export enum IRequestSearchRootValidity {
@@ -62,6 +63,7 @@ export class RequestSearch {
   isRootInvalid?: IRequestSearchRootValidity;
   editedBy?: string;
   includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -124,6 +126,9 @@ export class RequestSearch {
     this.includeEquivalents =
       requestData.includeEquivalents === true ||
       (requestData.includeEquivalents as unknown) === "true";
+    this.includeSubordinates =
+      requestData.includeSubordinates === true ||
+      (requestData.includeSubordinates as unknown) === "true";
   }
 
   /**

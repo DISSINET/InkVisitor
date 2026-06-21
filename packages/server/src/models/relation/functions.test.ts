@@ -7,6 +7,7 @@ import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import {
   collectIdsFromIdentificationConnections,
   getEquivalentEntityIds,
+  getSubordinateEntityIds,
 } from "./functions";
 
 describe("collectIdsFromIdentificationConnections", () => {
@@ -139,5 +140,75 @@ describe("getEquivalentEntityIds", () => {
   test("never returns the input ids themselves", async () => {
     const result = await getEquivalentEntityIds(db.connection, ["c1", "c2"]);
     expect(result).toEqual(["c3"]);
+  });
+});
+
+describe("getSubordinateEntityIds", () => {
+  const db = new Db();
+
+  const saveRelation = async (
+    id: string,
+    type: RelationEnums.Type,
+    entityIds: [string, string]
+  ): Promise<void> => {
+    const relation = getRelationClass({ id, type, entityIds } as RelationTypes.IRelation);
+    await relation.save(db.connection);
+  };
+
+  beforeAll(async () => {
+    await db.initDb();
+    await deleteRelations(db);
+
+    // SCL chain: gala -SCL-> apple -SCL-> fruit (entityIds[0]=subclass, [1]=superclass)
+    await saveRelation("scl-1", RelationEnums.Type.Superclass, ["apple", "fruit"]);
+    await saveRelation("scl-2", RelationEnums.Type.Superclass, ["gala", "apple"]);
+    // SOE: child -SOE-> parent (entityIds[0]=subordinate, [1]=superordinate)
+    await saveRelation("soe-1", RelationEnums.Type.SuperordinateEntity, ["soe-child", "soe-parent"]);
+    // HOL: part -HOL-> whole (entityIds[0]=meronym, [1]=holonym)
+    await saveRelation("hol-1", RelationEnums.Type.Holonym, ["hol-part", "hol-whole"]);
+  }, 60000);
+
+  afterAll(async () => {
+    await deleteRelations(db);
+    await db.close();
+  }, 60000);
+
+  test("empty input returns empty", async () => {
+    expect(await getSubordinateEntityIds(db.connection, [])).toEqual([]);
+  });
+
+  test("SCL: collects subclasses transitively (all levels)", async () => {
+    const result = await getSubordinateEntityIds(db.connection, ["fruit"]);
+    expect(result.sort()).toEqual(["apple", "gala"]);
+  });
+
+  test("SOE: collects subordinate entities", async () => {
+    expect(await getSubordinateEntityIds(db.connection, ["soe-parent"])).toEqual([
+      "soe-child",
+    ]);
+  });
+
+  test("HOL: collects meronyms (parts of the whole)", async () => {
+    expect(await getSubordinateEntityIds(db.connection, ["hol-whole"])).toEqual([
+      "hol-part",
+    ]);
+  });
+
+  test("does not collect upward (a subclass has no subordinates here)", async () => {
+    expect(await getSubordinateEntityIds(db.connection, ["gala"])).toEqual([]);
+  });
+
+  test("batched across types, inputs excluded", async () => {
+    const result = await getSubordinateEntityIds(db.connection, [
+      "fruit",
+      "soe-parent",
+      "hol-whole",
+    ]);
+    expect(result.sort()).toEqual([
+      "apple",
+      "gala",
+      "hol-part",
+      "soe-child",
+    ]);
   });
 });

@@ -146,10 +146,13 @@ export const StyledFloatingActions = styled.div`
   right: 0.8rem;
 `;
 
-// global search setting shown inside the advanced-options popover, separated
-// from the per-search filter pills above it
+// global search settings shown inside the advanced-options popover, separated
+// from the per-search filter pills above them
 export const StyledFloatingSetting = styled.div`
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
   padding-top: ${({ theme }) => theme.space[2]};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
 `;

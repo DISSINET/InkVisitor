@@ -1,13 +1,28 @@
 import { getRelationClass } from "@models/factory";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IRequest } from "src/custom_typings/request";
-import { Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { getEntitiesByIds } from "@service/shorthands";
+import Territory from "@models/territory/territory";
 import Relation from "./relation";
 import Identification from "./identification";
 import { Connection } from "rethinkdb-ts";
 import { EntityTooltip } from "@inkvisitor/shared/types";
 
 const MAX_NEST_LVL = 3;
+
+// inverse direction of these relations yields "subordinate" entities: inverse
+// SuperordinateEntity = subordinates, inverse Superclass = subclasses, inverse
+// Holonym = meronyms. For all three the parent/whole is entityIds[1] and the
+// subordinate is entityIds[0].
+const SUBORDINATE_RELATION_TYPES: RelationEnums.Type[] = [
+  RelationEnums.Type.SuperordinateEntity,
+  RelationEnums.Type.Superclass,
+  RelationEnums.Type.Holonym,
+];
+
+// safety bound on how many subordinates a single expansion collects
+const SUBORDINATE_MAX_NODES = 1000;
 
 /**
  * recursively search for action event trees
@@ -343,4 +358,75 @@ export const getEquivalentEntityIds = async (
   }
 
   return [...result];
+};
+
+/**
+ * Returns the set of entity ids considered "subordinate" to the input entities,
+ * used by the "include subordinates" search option (#2969). Subordinates are the
+ * inverse/downward direction, followed to all levels:
+ *  - inverse SCL (Superclass): subclasses
+ *  - inverse SOE (SuperordinateEntity): subordinate entities
+ *  - inverse HOL (Holonym): meronyms
+ *  - child Territories (all levels) when an input is a Territory
+ * The relation traversal is a batched, cycle-safe BFS bounded by
+ * SUBORDINATE_MAX_NODES; the input ids are removed from the result.
+ * @param conn db connection
+ * @param entityIds source entity ids to expand
+ * @returns unique subordinate entity ids, excluding the inputs
+ */
+export const getSubordinateEntityIds = async (
+  conn: Connection,
+  entityIds: string[]
+): Promise<string[]> => {
+  if (!entityIds.length) {
+    return [];
+  }
+
+  const visited = new Set<string>(entityIds); // guards against cycles / re-visits
+  const collected = new Set<string>(); // subordinates only (inputs excluded)
+
+  // inverse SCL/SOE/HOL, all levels, batched one query per type per BFS level
+  let frontier = [...new Set(entityIds)];
+  while (frontier.length && collected.size < SUBORDINATE_MAX_NODES) {
+    const relationsPerType = await Promise.all(
+      SUBORDINATE_RELATION_TYPES.map((type) =>
+        Relation.findForEntities(conn, frontier, type, 1)
+      )
+    );
+
+    const next: string[] = [];
+    for (const relations of relationsPerType) {
+      for (const relation of relations) {
+        const subordinateId = relation.entityIds[0];
+        if (!visited.has(subordinateId)) {
+          visited.add(subordinateId);
+          collected.add(subordinateId);
+          next.push(subordinateId);
+        }
+      }
+    }
+    frontier = next;
+  }
+
+  // child territories (all levels) of any input that is itself a Territory
+  const inputEntities = await getEntitiesByIds<IEntity>(conn, entityIds);
+  for (const entity of inputEntities) {
+    if (entity.class !== EntityEnums.Class.Territory) {
+      continue;
+    }
+    const childs = Object.values(
+      await new Territory({ id: entity.id }).findChilds(conn, true)
+    );
+    for (const child of childs) {
+      if (collected.size >= SUBORDINATE_MAX_NODES) {
+        break;
+      }
+      if (child.id && !visited.has(child.id)) {
+        visited.add(child.id);
+        collected.add(child.id);
+      }
+    }
+  }
+
+  return [...collected];
 };

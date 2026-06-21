@@ -135,9 +135,12 @@ const EntitySuggesterFull: React.FC<
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
-  // global "include equivalents" search setting - applies to every suggester
+  // global expansion search settings - apply to every suggester
   const includeEquivalents = useAppSelector(
     (state) => state.entitySearch.includeEquivalents,
+  );
+  const includeSubordinates = useAppSelector(
+    (state) => state.entitySearch.includeSubordinates,
   );
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
@@ -195,6 +198,7 @@ const EntitySuggesterFull: React.FC<
       selectedCategory,
       excludedEntityClasses,
       includeEquivalents,
+      includeSubordinates,
     ],
     queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
@@ -205,6 +209,7 @@ const EntitySuggesterFull: React.FC<
             : (selectedCategory as EntityEnums.Class),
         excluded: excludedEntityClasses.length ? excludedEntityClasses : undefined,
         includeEquivalents: includeEquivalents || undefined,
+        includeSubordinates: includeSubordinates || undefined,
       });
 
       return filterSuggestions(resSuggestions.data ?? []);

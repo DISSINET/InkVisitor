@@ -25,6 +25,10 @@ import {
   includeEquivalentsStorageKey,
   setIncludeEquivalents,
 } from "redux/features/entitySearch/includeEquivalentsSlice";
+import {
+  includeSubordinatesStorageKey,
+  setIncludeSubordinates,
+} from "redux/features/entitySearch/includeSubordinatesSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
@@ -119,6 +123,9 @@ export const EntitySearchBox: React.FC = () => {
   const includeEquivalents = useAppSelector(
     (state) => state.entitySearch.includeEquivalents,
   );
+  const includeSubordinates = useAppSelector(
+    (state) => state.entitySearch.includeSubordinates,
+  );
 
   const {
     status,
@@ -129,7 +136,11 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery({
     queryKey: [
       "search",
-      { searchData: JSON.stringify(debouncedValues), includeEquivalents },
+      {
+        searchData: JSON.stringify(debouncedValues),
+        includeEquivalents,
+        includeSubordinates,
+      },
     ],
     queryFn: async () => {
       // if (debouncedValues.usedTemplate === "Any") {
@@ -147,6 +158,7 @@ export const EntitySearchBox: React.FC = () => {
         ...debouncedValues,
         labelOrId: labelWithWildCard,
         includeEquivalents: includeEquivalents || undefined,
+        includeSubordinates: includeSubordinates || undefined,
       });
       return res.data;
     },
@@ -381,6 +393,11 @@ export const EntitySearchBox: React.FC = () => {
             onToggleIncludeEquivalents={(value: boolean) => {
               localStorage.setItem(includeEquivalentsStorageKey, String(value));
               dispatch(setIncludeEquivalents(value));
+            }}
+            includeSubordinates={includeSubordinates}
+            onToggleIncludeSubordinates={(value: boolean) => {
+              localStorage.setItem(includeSubordinatesStorageKey, String(value));
+              dispatch(setIncludeSubordinates(value));
             }}
           />
 

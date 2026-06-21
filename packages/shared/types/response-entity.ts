@@ -9,7 +9,9 @@ export interface IResponseEntity extends IEntity {
   // usedCount?: number;
   // usedIn?: IStatement[];
   right?: UserEnums.RoleMode;
-  // set by search when the entity was surfaced via the "include equivalents"
-  // option (SYN/IDE/AEE) rather than matching the query directly (#2969)
+  // set by search when the entity was surfaced via an expansion option rather
+  // than matching the query directly (#2969): "include equivalents" (SYN/IDE/AEE)
+  // or "include subordinates" (inverse SCL/SOE/HOL + child territories)
   isEquivalent?: boolean;
+  isSubordinate?: boolean;
 }

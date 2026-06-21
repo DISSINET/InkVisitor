@@ -17,7 +17,10 @@ import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-sea
 import { Setting } from "@models/setting/setting";
 import { ISetting } from "@inkvisitor/shared/types/settings";
 import Relation from "@models/relation/relation";
-import { getEquivalentEntityIds } from "@models/relation/functions";
+import {
+  getEquivalentEntityIds,
+  getSubordinateEntityIds,
+} from "@models/relation/functions";
 
 /**
  * Statement.getEntitiesIds() appends territory lineage (ancestors toward root) for other features.
@@ -572,71 +575,91 @@ export class ResponseSearch {
   request: RequestSearch;
 
   /**
-   * Upper bound on how many base matches are expanded into equivalents when
-   * `includeEquivalents` is set. SYN/AEE are batched and cheap, but IDE does a
-   * per-entity transitive traversal, so we cap the input. When there are more
+   * Upper bound on how many base matches are expanded. The related-id lookups do
+   * per-entity transitive traversal, so the input is capped; when there are more
    * base matches, only the first ones (as returned by the query) are expanded.
    */
-  static EQUIVALENTS_EXPANSION_CAP = 100;
+  static EXPANSION_CAP = 100;
 
   constructor(request: RequestSearch) {
     this.request = request;
   }
 
   /**
-   * Mixes "equivalent" entities (SYN/IDE/AEE, see getEquivalentEntityIds) of the
-   * base matches into the result set for the "include equivalents" option
-   * (#2969). Equivalents are only kept if they satisfy every non-label condition
-   * of the original request - this is enforced by re-running the search for the
-   * equivalent ids with the label condition dropped and all other conditions
-   * reapplied. Returns the base entities followed by the new equivalents, deduped.
+   * Mixes entities surfaced by the expansion options - "include equivalents"
+   * (SYN/IDE/AEE) and/or "include subordinates" (inverse SCL/SOE/HOL + child
+   * territories) - into the base result set (#2969). For each enabled option the
+   * related ids of the base matches are collected and the search is re-run for
+   * those ids with the label dropped but every other condition reapplied, so
+   * expanded entities are only kept if they meet the other conditions. Returns
+   * the merged (deduped) entities plus the id sets that came in via each option,
+   * used to mark them in the response.
    * @param conn db connection
    * @param request original search request
    * @param baseEntities entities matched by the original (label) search
    */
-  static async addEquivalents(
+  static async expandResults(
     conn: Connection,
     request: RequestSearch,
     baseEntities: IEntity[]
-  ): Promise<IEntity[]> {
-    const baseIds = new Set(baseEntities.map((e) => e.id));
+  ): Promise<{
+    entities: IEntity[];
+    equivalentIds: Set<string>;
+    subordinateIds: Set<string>;
+  }> {
     const idsToExpand = baseEntities
-      .slice(0, ResponseSearch.EQUIVALENTS_EXPANSION_CAP)
+      .slice(0, ResponseSearch.EXPANSION_CAP)
       .map((e) => e.id);
+    const seen = new Set(baseEntities.map((e) => e.id));
+    const entities = [...baseEntities];
+    const equivalentIds = new Set<string>();
+    const subordinateIds = new Set<string>();
 
-    const equivalentIds = (
-      await getEquivalentEntityIds(conn, idsToExpand)
-    ).filter((id) => !baseIds.has(id));
-
-    if (!equivalentIds.length) {
-      return baseEntities;
+    const expansions: Array<
+      [(c: Connection, ids: string[]) => Promise<string[]>, Set<string>]
+    > = [];
+    if (request.includeEquivalents) {
+      expansions.push([getEquivalentEntityIds, equivalentIds]);
+    }
+    if (request.includeSubordinates) {
+      expansions.push([getSubordinateEntityIds, subordinateIds]);
     }
 
-    // Reapply every condition except the label match: start from a primary-index
-    // lookup of the equivalent ids, force filterUsed so fromRequest layers the
-    // remaining conditions (class/status/territory/cooccurrence/audit...) on top
-    // as intersecting filters.
-    const equivalentsRequest = new RequestSearch({
-      ...request,
-      label: undefined,
-      labelOrId: undefined,
-      entityIds: undefined,
-      includeEquivalents: false,
-    });
-    const equivalentsQuery = new SearchQuery(conn);
-    equivalentsQuery.whereEntityIds(equivalentIds);
-    equivalentsQuery.filterUsed = true;
-    await equivalentsQuery.fromRequest(equivalentsRequest);
-    const equivalentEntities = await equivalentsQuery.do();
+    for (const [getRelatedIds, target] of expansions) {
+      const relatedIds = (await getRelatedIds(conn, idsToExpand)).filter(
+        (id) => !seen.has(id)
+      );
+      if (!relatedIds.length) {
+        continue;
+      }
 
-    const merged = [...baseEntities];
-    for (const entity of equivalentEntities) {
-      if (!baseIds.has(entity.id)) {
-        baseIds.add(entity.id);
-        merged.push(entity);
+      // Reapply every condition except the label match: start from a
+      // primary-index lookup of the related ids, force filterUsed so fromRequest
+      // layers the remaining conditions (class/status/territory/cooccurrence/
+      // audit...) on top as intersecting filters.
+      const expansionRequest = new RequestSearch({
+        ...request,
+        label: undefined,
+        labelOrId: undefined,
+        entityIds: undefined,
+        includeEquivalents: false,
+        includeSubordinates: false,
+      });
+      const query = new SearchQuery(conn);
+      query.whereEntityIds(relatedIds);
+      query.filterUsed = true;
+      await query.fromRequest(expansionRequest);
+
+      for (const entity of await query.do()) {
+        if (!seen.has(entity.id)) {
+          seen.add(entity.id);
+          target.add(entity.id);
+          entities.push(entity);
+        }
       }
     }
-    return merged;
+
+    return { entities, equivalentIds, subordinateIds };
   }
 
   /**
@@ -742,16 +765,20 @@ export class ResponseSearch {
     await query.fromRequest(this.request);
     let entities = await query.do();
 
-    // ids that matched the query directly - everything added afterwards is an
-    // equivalent (SYN/IDE/AEE) and gets flagged for the UI
-    let baseMatchIds: Set<string> | undefined;
-    if (this.request.includeEquivalents && entities.length) {
-      baseMatchIds = new Set(entities.map((e) => e.id));
-      entities = await ResponseSearch.addEquivalents(
-        httpRequest.db.connection,
-        this.request,
-        entities
-      );
+    // mix in equivalents/subordinates of the direct matches (#2969); the
+    // returned id sets flag which results were added by each option
+    let equivalentIds: Set<string> | undefined;
+    let subordinateIds: Set<string> | undefined;
+    if (
+      (this.request.includeEquivalents || this.request.includeSubordinates) &&
+      entities.length
+    ) {
+      ({ entities, equivalentIds, subordinateIds } =
+        await ResponseSearch.expandResults(
+          httpRequest.db.connection,
+          this.request,
+          entities
+        ));
     }
 
     entities = await ResponseSearch.filterEntitiesByRootValidity(
@@ -771,8 +798,10 @@ export class ResponseSearch {
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
-      if (baseMatchIds && !baseMatchIds.has(entityData.id)) {
+      if (equivalentIds?.has(entityData.id)) {
         response.isEquivalent = true;
+      } else if (subordinateIds?.has(entityData.id)) {
+        response.isSubordinate = true;
       }
       out.push(response);
     }

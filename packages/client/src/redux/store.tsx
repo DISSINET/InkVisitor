@@ -30,6 +30,7 @@ import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
 import includeEquivalentsSlice from "./features/entitySearch/includeEquivalentsSlice";
+import includeSubordinatesSlice from "./features/entitySearch/includeSubordinatesSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -39,6 +40,7 @@ const store: Store = configureStore({
     entitySearch: combineReducers({
       expandedOptions: expandedOptionsSlice,
       includeEquivalents: includeEquivalentsSlice,
+      includeSubordinates: includeSubordinatesSlice,
     }),
     draggedEntity: draggedEntitySlice,
     territoryTree: combineReducers({

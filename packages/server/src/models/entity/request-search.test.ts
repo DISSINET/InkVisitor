@@ -32,3 +32,23 @@ describe("RequestSearch.includeEquivalents coercion", () => {
     expect(new RequestSearch({}).includeEquivalents).toBe(false);
   });
 });
+
+describe("RequestSearch.includeSubordinates coercion", () => {
+  test('string "false" (GET query param) must NOT become true', () => {
+    expect(
+      new RequestSearch({ includeSubordinates: "false" as unknown as boolean })
+        .includeSubordinates
+    ).toBe(false);
+  });
+
+  test('string "true" becomes true', () => {
+    expect(
+      new RequestSearch({ includeSubordinates: "true" as unknown as boolean })
+        .includeSubordinates
+    ).toBe(true);
+  });
+
+  test("omitted defaults to false", () => {
+    expect(new RequestSearch({}).includeSubordinates).toBe(false);
+  });
+});

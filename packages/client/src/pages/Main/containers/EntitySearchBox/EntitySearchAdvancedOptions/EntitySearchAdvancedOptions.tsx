@@ -28,6 +28,8 @@ interface EntitySearchAdvancedOptions {
   isUndersized: boolean;
   includeEquivalents: boolean;
   onToggleIncludeEquivalents: (value: boolean) => void;
+  includeSubordinates: boolean;
+  onToggleIncludeSubordinates: (value: boolean) => void;
 }
 export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> = ({
   expandedOptions,
@@ -37,6 +39,8 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
   isUndersized,
   includeEquivalents,
   onToggleIncludeEquivalents,
+  includeSubordinates,
+  onToggleIncludeSubordinates,
 }) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
@@ -240,6 +244,13 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
                     tooltipLabel="include equivalents"
                     tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the matches - applies to all suggesters and search results."
                     onChangeFn={onToggleIncludeEquivalents}
+                  />
+                  <Checkbox
+                    value={includeSubordinates}
+                    label="include subordinates"
+                    tooltipLabel="include subordinates"
+                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the matches - applies to all suggesters and search results."
+                    onChangeFn={onToggleIncludeSubordinates}
                   />
                 </StyledFloatingSetting>
                 <StyledFloatingActions>

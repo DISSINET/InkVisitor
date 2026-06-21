@@ -34,8 +34,9 @@ export const StyledTagComponentWrap = styled.div`
   flex-shrink: 0;
 `;
 
-// small corner marker shown when an entity was surfaced via "include equivalents"
-export const StyledEquivalentBadge = styled.div`
+// small corner marker shown when an entity was surfaced via an expansion option
+// ("include equivalents" -> "eq", "include subordinates" -> "sub")
+export const StyledExpansionBadge = styled.div`
   position: absolute;
   top: 0;
   left: 0;

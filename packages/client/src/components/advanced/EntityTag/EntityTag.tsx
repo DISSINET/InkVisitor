@@ -20,7 +20,7 @@ import {
 import {
   StyledEntityTag,
   StyledEntityTagWrap,
-  StyledEquivalentBadge,
+  StyledExpansionBadge,
   StyledFaStar,
   StyledLabel,
   StyledLabelWrap,
@@ -28,6 +28,20 @@ import {
   StyledTagComponentWrap,
 } from "./EntityTagStyles";
 import useDragDrop from "./useDragDrop";
+
+// marker shown on the class glyph when a search surfaced this entity via an
+// expansion option rather than a direct match (#2969)
+const EXPANSION_MARK = {
+  equivalent: {
+    label: "eq",
+    tooltip: "Surfaced via 'include equivalents' (SYN / IDE / AEE)",
+  },
+  subordinate: {
+    label: "sub",
+    tooltip:
+      "Surfaced via 'include subordinates' (subclass / subordinate / meronym / child T)",
+  },
+} as const;
 
 export interface UnlinkButton {
   onClick: () => void;
@@ -60,6 +74,8 @@ interface EntityTag {
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
   /** Marks the tag as surfaced via "include equivalents" (SYN/IDE/AEE). */
   isEquivalent?: boolean;
+  /** Marks the tag as surfaced via "include subordinates" (inverse SCL/SOE/HOL + child T). */
+  isSubordinate?: boolean;
 }
 
 const EntityTagComponent: React.FC<EntityTag> = ({
@@ -86,6 +102,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   customTooltipAttributes,
   onDoubleClick: onDoubleClickOverride,
   isEquivalent = false,
+  isSubordinate = false,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -149,6 +166,11 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   }, []);
 
   const tagComponent = useMemo(() => {
+    const mark = isEquivalent
+      ? EXPANSION_MARK.equivalent
+      : isSubordinate
+        ? EXPANSION_MARK.subordinate
+        : undefined;
     return (
       <StyledTagComponentWrap>
         <StyledEntityTag
@@ -157,14 +179,14 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         >
           {entity.class}
         </StyledEntityTag>
-        {isEquivalent && (
-          <StyledEquivalentBadge title="Surfaced via 'include equivalents' (SYN / IDE / AEE)">
-            eq
-          </StyledEquivalentBadge>
+        {mark && (
+          <StyledExpansionBadge title={mark.tooltip}>
+            {mark.label}
+          </StyledExpansionBadge>
         )}
       </StyledTagComponentWrap>
     );
-  }, [entity, isEquivalent]);
+  }, [entity, isEquivalent, isSubordinate]);
 
   const labelComponent = useMemo(() => {
     return (
@@ -305,6 +327,7 @@ function areEntityTagsEqual(
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isFavorited !== next.isFavorited) return false;
   if (prev.isEquivalent !== next.isEquivalent) return false;
+  if (prev.isSubordinate !== next.isSubordinate) return false;
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;

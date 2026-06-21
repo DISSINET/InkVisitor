@@ -123,6 +123,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             fullWidth
             entity={entity}
             isEquivalent={(entity as IResponseEntity).isEquivalent}
+            isSubordinate={(entity as IResponseEntity).isSubordinate}
             tooltipPosition="right"
           />
         </StyledTagWrapper>

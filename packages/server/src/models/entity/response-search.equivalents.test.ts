@@ -9,14 +9,14 @@ import Entity from "./entity";
 import { ResponseSearch } from "./response-search";
 
 /**
- * Verifies clause-(b) of #2969: ResponseSearch.addEquivalents mixes equivalents
+ * Verifies #2969 ResponseSearch.expandResults: mixes equivalents/subordinates
  * into the results, but only when they satisfy the other (non-label) conditions
- * of the request - exercised here with a class filter.
+ * of the request - exercised here via the equivalents path with a class filter.
  *
  * Kept in a standalone file (not response-search.test.ts) to avoid the
  * pre-existing broken `entity.test` import there.
  */
-describe("ResponseSearch.addEquivalents", () => {
+describe("ResponseSearch.expandResults", () => {
   const db = new Db();
 
   // c1 (base) is synonym-clouded with c2 (Concept) and a1 (Action). Only c2 is a
@@ -49,41 +49,55 @@ describe("ResponseSearch.addEquivalents", () => {
     await db.close();
   }, 60000);
 
-  test("mixes equivalents in when no other condition constrains them", async () => {
-    const merged = await ResponseSearch.addEquivalents(
+  test("mixes equivalents in and flags them when no other condition constrains them", async () => {
+    const { entities, equivalentIds } = await ResponseSearch.expandResults(
       db.connection,
-      new RequestSearch({}),
+      new RequestSearch({ includeEquivalents: true }),
       [c1]
     );
-    expect(merged.map((e) => e.id).sort()).toEqual([
+    expect(entities.map((e) => e.id).sort()).toEqual([
       "rs-eq-a1",
       "rs-eq-c1",
       "rs-eq-c2",
     ]);
+    // the added entities (not the base c1) are flagged as equivalents
+    expect([...equivalentIds].sort()).toEqual(["rs-eq-a1", "rs-eq-c2"]);
   });
 
   test("drops equivalents that fail the class condition", async () => {
-    const merged = await ResponseSearch.addEquivalents(
+    const { entities } = await ResponseSearch.expandResults(
       db.connection,
-      new RequestSearch({ class: EntityEnums.Class.Concept }),
+      new RequestSearch({ class: EntityEnums.Class.Concept, includeEquivalents: true }),
       [c1]
     );
     // a1 (Action) must be excluded; c2 (Concept) kept
-    expect(merged.map((e) => e.id).sort()).toEqual(["rs-eq-c1", "rs-eq-c2"]);
+    expect(entities.map((e) => e.id).sort()).toEqual(["rs-eq-c1", "rs-eq-c2"]);
   });
 
   test("keeps base entities and dedups", async () => {
-    const merged = await ResponseSearch.addEquivalents(
+    const { entities } = await ResponseSearch.expandResults(
       db.connection,
-      new RequestSearch({}),
+      new RequestSearch({ includeEquivalents: true }),
       [c1, c2]
     );
     // c2 already in base must not be duplicated; a1 added
-    expect(merged.length).toBe(3);
-    expect(merged.map((e) => e.id).sort()).toEqual([
+    expect(entities.length).toBe(3);
+    expect(entities.map((e) => e.id).sort()).toEqual([
       "rs-eq-a1",
       "rs-eq-c1",
       "rs-eq-c2",
     ]);
+  });
+
+  test("no expansion flags when neither option is enabled", async () => {
+    const { entities, equivalentIds, subordinateIds } =
+      await ResponseSearch.expandResults(
+        db.connection,
+        new RequestSearch({}),
+        [c1]
+      );
+    expect(entities.map((e) => e.id)).toEqual(["rs-eq-c1"]);
+    expect(equivalentIds.size).toBe(0);
+    expect(subordinateIds.size).toBe(0);
   });
 });
