@@ -94,6 +94,54 @@ describe("query builder offers the in-statement actant-role edges (statement cha
   });
 });
 
+describe("query builder offers the any-position in-statement edge (I_IS:) for co-occurrence", () => {
+  it("a Statement source node can select I_IS:", () => {
+    expect(
+      selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))
+    ).toContain(Query.EdgeType["I_IS:"]);
+  });
+
+  it("I_IS: exposes an entity target param (any class) so the co-occurring entity can be picked", () => {
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["I_IS:"]];
+    expect(params.entityId).toBeTruthy();
+    expect(params.entityId.allowedClasses).toEqual([]);
+    // index-keyed by entity id, not class: no class picker is offered
+    expect(params.entityClass).toBeFalsy();
+  });
+
+  it("source must be a Statement; any target entity is valid", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["I_IS:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["I_IS:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(false);
+  });
+
+  it("stays valid once an actual entity is picked (entityClasses cleared)", () => {
+    const pickedEntity: Query.INode = {
+      id: "target",
+      type: Query.NodeType.E,
+      operator: Query.NodeOperator.And,
+      params: { entityClasses: [], entityId: "some-entity-id" },
+      edges: [],
+    };
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["I_IS:"], pickedEntity)
+      ).valid
+    ).toBe(true);
+  });
+});
+
 describe("query builder offers the 'used in statements under T' edge (EUT:)", () => {
   it("any source node (e.g. Person, Object) can select EUT:", () => {
     for (const cls of [

@@ -125,7 +125,9 @@ export namespace Query {
     },
 
     "IS:": {},
-    "I_IS:": {},
+    "I_IS:": {
+      entityId: { allowedClasses: [] },
+    },
     "IS:A": {},
     "I_IS:A": {},
     "IS:S": {},

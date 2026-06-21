@@ -585,6 +585,73 @@ export class EdgeStatementHasActant2 extends SearchEdge {
   }
 }
 
+/**
+ * I_IS: ("S has: in any position"). Emits STATEMENTS that reference the target
+ * entity anywhere - as an action, an actant, a tag, or the direct territory (the
+ * StatementEntities index), or as an in-statement prop type/value recursing to
+ * lvl3 (the StatementDataProps index). Maps to the statement's own id, keeping
+ * the subset invariant that positive matching and negation rely on.
+ *
+ * Unlike its position-specific siblings (I_IS:S / I_IS:A1 / I_IS:A2), which read
+ * a single actant position by scanning q, this is index-backed: the union of the
+ * two entity-keyed statement indexes is intersected back into q. Co-occurrence of
+ * several entities is expressed by AND-combining one I_IS: edge per entity under
+ * a single Statement source node - each edge narrows the set to statements that
+ * also reference that entity.
+ *
+ * Coverage matches the established getCoOccurrentEntityIds semantics (actions,
+ * actants, tags, direct territory) plus in-statement prop type/value. Reference
+ * resource/value and actant classifications/identifications have no shared "used
+ * anywhere" index and are intentionally out of scope. With no target the edge
+ * matches nothing (membership "in a statement" is only meaningful relative to a
+ * specific entity).
+ */
+function runStatementHasEntityEdge(
+  q: RStream,
+  targetId: string | undefined
+): RStream {
+  const statementIds: RDatum = targetId
+    ? (r
+        .table(Entity.table)
+        .getAll(targetId, { index: DbEnums.Indexes.StatementEntities })
+        .union(
+          r
+            .table(Entity.table)
+            .getAll(targetId, {
+              index: DbEnums.Indexes.StatementDataProps,
+            }) as unknown as RStream
+        )
+        .filter(function (e: RDatum<IEntity>) {
+          return e("class").eq(EntityEnums.Class.Statement);
+        })
+        .map(function (e: RDatum<IEntity>) {
+          return e("id");
+        })
+        .distinct() as unknown as RDatum).coerceTo("array")
+    : r.expr([] as string[]);
+
+  return statementIds.do(function (ids: RDatum) {
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return ids.contains(e("id"));
+      })
+      .map(function (e: RDatum<IEntity>) {
+        return e("id");
+      });
+  }) as unknown as RStream;
+}
+
+export class EdgeStatementHasEntity extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_IS:"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementHasEntityEdge(q, this.node.params.entityId);
+  }
+}
+
 /** type+value entityIds across a props array, recursing children to lvl3. */
 function collectPropEntityIds(propsExpr: RDatum): RDatum {
   return collectStatementPropIds(propsExpr, "type").add(
@@ -791,6 +858,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeIsStatementPropValue(data);
     case Query.EdgeType["I_SC"]:
       return new EdgeIsStatementClassification(data);
+    case Query.EdgeType["I_IS:"]:
+      return new EdgeStatementHasEntity(data);
     case Query.EdgeType["I_IS:S"]:
       return new EdgeStatementHasSubject(data);
     case Query.EdgeType["I_IS:A1"]:
