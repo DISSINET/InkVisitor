@@ -475,6 +475,116 @@ export class EdgeIsStatementClassification extends SearchEdge {
   }
 }
 
+/**
+ * Shared run for the inverse in-statement actant-role edges
+ * (I_IS:S / I_IS:A1 / I_IS:A2). Keeps only statements, and matches those that
+ * have an actant in one of `positions` whose referenced entity satisfies the
+ * edge target:
+ *  - a specific target entity id (`targetId`), or
+ *  - any entity whose class is in `targetClasses` (e.g. Statement -> the actant
+ *    is a substatement, i.e. a "statement chain"), or
+ *  - with neither, any actant present in those positions.
+ * Maps to the statement's own id, preserving the subset invariant that positive
+ * matching and negation both rely on. A dangling actant entityId (no such
+ * entity) is null-safe and simply fails the class condition.
+ */
+function runStatementHasActantEdge(
+  q: RStream,
+  positions: EntityEnums.Position[],
+  targetId: string | undefined,
+  targetClasses: EntityEnums.Class[]
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return e("class").eq(EntityEnums.Class.Statement);
+    })
+    .filter(function (e: RDatum<IEntity>) {
+      const actantIds = e("data")("actants")
+        .filter(function (a: RDatum) {
+          return r.expr(positions).contains(a("position"));
+        })
+        .map(function (a: RDatum) {
+          return a("entityId");
+        });
+
+      if (targetId) {
+        return actantIds.contains(targetId);
+      }
+
+      if (targetClasses.length) {
+        return actantIds
+          .filter(function (id: RDatum) {
+            return r
+              .table(Entity.table)
+              .get(id)
+              .default(null)
+              .do(function (ent: RDatum) {
+                return r.branch(
+                  ent,
+                  r.expr(targetClasses).contains(ent("class")),
+                  false
+                );
+              });
+          })
+          .count()
+          .gt(0);
+      }
+
+      return actantIds.count().gt(0);
+    })
+    .map(function (e) {
+      return e("id");
+    });
+}
+
+export class EdgeStatementHasSubject extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_IS:S"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementHasActantEdge(
+      q,
+      [EntityEnums.Position.Subject],
+      this.node.params.entityId,
+      this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+export class EdgeStatementHasActant1 extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_IS:A1"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementHasActantEdge(
+      q,
+      [EntityEnums.Position.Actant1],
+      this.node.params.entityId,
+      this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+export class EdgeStatementHasActant2 extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_IS:A2"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementHasActantEdge(
+      q,
+      [EntityEnums.Position.Actant2],
+      this.node.params.entityId,
+      this.node.params.entityClasses ?? []
+    );
+  }
+}
+
 export class EdgeHasReferenceResource extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -565,6 +675,12 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeIsStatementPropValue(data);
     case Query.EdgeType["I_SC"]:
       return new EdgeIsStatementClassification(data);
+    case Query.EdgeType["I_IS:S"]:
+      return new EdgeStatementHasSubject(data);
+    case Query.EdgeType["I_IS:A1"]:
+      return new EdgeStatementHasActant1(data);
+    case Query.EdgeType["I_IS:A2"]:
+      return new EdgeStatementHasActant2(data);
     case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:

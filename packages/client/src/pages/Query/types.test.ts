@@ -52,6 +52,48 @@ describe("query builder offers the inverse in-statement edges", () => {
   });
 });
 
+describe("query builder offers the in-statement actant-role edges (statement chains)", () => {
+  it("a Statement source node can select I_IS:S / I_IS:A1 / I_IS:A2", () => {
+    const selectable = selectableEdgeTypes(
+      sourceNode([EntityEnums.Class.Statement])
+    );
+    expect(selectable).toEqual(
+      expect.arrayContaining([
+        Query.EdgeType["I_IS:S"],
+        Query.EdgeType["I_IS:A1"],
+        Query.EdgeType["I_IS:A2"],
+      ])
+    );
+  });
+
+  it("each role edge exposes target class + entity params (so the actant can be constrained to Statement)", () => {
+    for (const type of [
+      Query.EdgeType["I_IS:S"],
+      Query.EdgeType["I_IS:A1"],
+      Query.EdgeType["I_IS:A2"],
+    ]) {
+      expect(Query.EdgeTypeTargetNodeParams[type].entityClass).toBeTruthy();
+      expect(Query.EdgeTypeTargetNodeParams[type].entityId).toBeTruthy();
+    }
+  });
+
+  it("source must be a Statement; a Statement target is valid", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["I_IS:S"], sourceNode([EntityEnums.Class.Statement]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["I_IS:S"], sourceNode([EntityEnums.Class.Statement]))
+      ).valid
+    ).toBe(false);
+  });
+});
+
 describe("query builder offers the superordinate (R:SOE) edge", () => {
   it("a Location source node can select R:SOE", () => {
     const selectable = selectableEdgeTypes(
