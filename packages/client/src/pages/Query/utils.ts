@@ -167,6 +167,12 @@ export const isNodeValid = (node: Query.INode, rule: Query.EdgeRule): boolean =>
   if (rule.params.entityClass === undefined || rule.params.entityClass.length === 0) {
     return true;
   }
+  // a concrete picked entity already fixes the node's class - the entity picker
+  // enforced the allowed classes at selection time, and picking clears
+  // entityClasses to [] (see updateNodeEntityId), so fall back to trusting it
+  if (node.params.entityId !== undefined) {
+    return true;
+  }
   if (node.params.entityClasses === undefined || node.params.entityClasses.length === 0) {
     return false;
   }
