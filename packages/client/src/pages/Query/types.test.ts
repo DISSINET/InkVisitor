@@ -94,6 +94,63 @@ describe("query builder offers the in-statement actant-role edges (statement cha
   });
 });
 
+describe("query builder offers the 'used in statements under T' edge (EUT:)", () => {
+  it("any source node (e.g. Person, Object) can select EUT:", () => {
+    for (const cls of [
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Object,
+      EntityEnums.Class.Concept,
+    ]) {
+      expect(selectableEdgeTypes(sourceNode([cls]))).toContain(
+        Query.EdgeType["EUT:"]
+      );
+    }
+  });
+
+  it("I_SUT: exposes a Territory entity target param so the territory can be picked", () => {
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["EUT:"]];
+    expect(params.entityId).toBeTruthy();
+    expect(params.entityId.allowedClasses).toEqual([
+      EntityEnums.Class.Territory,
+    ]);
+  });
+
+  it("source may be any entity; the target must be a Territory", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EUT:"], sourceNode([EntityEnums.Class.Territory]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EUT:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(false);
+  });
+
+  it("stays valid once an actual Territory entity is picked (entityClasses cleared)", () => {
+    // the runtime state after picking a target entity: entityId set,
+    // entityClasses reset to [] (updateNodeEntityId). The query must remain
+    // executable rather than being gated invalid.
+    const pickedTerritory: Query.INode = {
+      id: "target",
+      type: Query.NodeType.E,
+      operator: Query.NodeOperator.And,
+      params: { entityClasses: [], entityId: "some-territory-id" },
+      edges: [],
+    };
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EUT:"], pickedTerritory)
+      ).valid
+    ).toBe(true);
+  });
+});
+
 describe("query builder offers the superordinate (R:SOE) edge", () => {
   it("a Location source node can select R:SOE", () => {
     const selectable = selectableEdgeTypes(

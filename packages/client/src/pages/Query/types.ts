@@ -36,6 +36,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:SCL"],
   Query.EdgeType["R:SOE"],
   Query.EdgeType["SUT:"],
+  // EUT: match any entity USED in statements directly under the target
+  // Territory (server: EdgeUsedUnderTerritory in edge.ts)
+  Query.EdgeType["EUT:"],
 ];
 
 export type QueryValidity = {
