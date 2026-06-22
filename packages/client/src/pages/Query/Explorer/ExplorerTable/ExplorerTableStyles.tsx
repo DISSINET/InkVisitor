@@ -38,10 +38,11 @@ export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
   height: ${({ theme }) => theme.space[12]};
-  background-color: ${({ theme }) => theme.color["success"]};
-  color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["explorerHeader"]};
+  color: ${({ theme }) => theme.color["headerTextColor"]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
 export const StyledBody = styled.div``;

@@ -52,6 +52,7 @@ const darkTheme = {
     primaryRGBA: "rgba(246,246,255,1)",
     primaryRGBA0: "rgba(246,246,255,0)",
     success: "#9eaad7",
+    explorerHeader: "#091034",
     warning: "#e5d088",
     danger: "#ee8fa4",
     info: "#cbbdff",

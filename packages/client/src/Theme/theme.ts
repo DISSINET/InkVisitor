@@ -83,6 +83,7 @@ const theme = {
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 
+    explorerHeader: "#6174C2",
     headerTextColor: " #fff",
     muni: "#091034", // muni primary color
     staging: "#911111",

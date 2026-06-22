@@ -47,7 +47,7 @@ const ExploreTableHeader: React.FC<{
                 noBorder
                 noBackground
                 inverted
-                icon={<CgClose color={theme.color.white} />}
+                icon={<CgClose color={theme.color.headerTextColor} />}
                 onClick={() => onRemoveColumn(column.id)}
                 tooltipLabel="remove column"
               />
