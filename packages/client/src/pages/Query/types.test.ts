@@ -1,7 +1,7 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { edgeTypesImplemented } from "./types";
+import { edgeTypesImplemented } from "./constants";
 import { findValidEdgeTypesForSourceNode, isEdgeValid, getSuperordinateEntityAllowedClasses } from "./utils";
 
 const sourceNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({

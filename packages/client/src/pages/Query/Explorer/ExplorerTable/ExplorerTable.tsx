@@ -21,13 +21,13 @@ import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledEmptyMessage, StyledTableWrapper } from "./ExplorerTableStyles";
 
-import ExploreTableHeader from "./ExploreTableHeader";
+import ExploreTableHeader from "./Header/ExploreTableHeader";
 import {
   HEIGHT_ROW_DEFAULT,
   WIDTH_COLUMN_DEFAULT,
   WIDTH_COLUMN_EUC,
   WIDTH_COLUMN_FIRST,
-} from "./types";
+} from "./constants";
 
 const OVERSCAN_ROWS = 10;
 

@@ -9,7 +9,7 @@ import {
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import { MdClose } from "react-icons/md";
-import { ExploreAction, ExploreActionType } from "../state";
+import { ExploreAction, ExploreActionType } from "../../state";
 import {
   StyledChipInputBox,
   StyledChipTextInput,
@@ -26,7 +26,7 @@ import {
   StyledIdsToggleWrapper,
   StyledUuidChip,
   StyledUuidChipRemove,
-} from "./ExplorerTableStyles";
+} from "../ExplorerTableStyles";
 
 interface ExplorerTableIdsFilterProps {
   filters: Explore.IExploreSearchFilter[];

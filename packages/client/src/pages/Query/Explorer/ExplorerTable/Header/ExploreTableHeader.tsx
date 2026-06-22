@@ -5,8 +5,8 @@ import React from "react";
 import { CgClose } from "react-icons/cg";
 import { MdOutlineEdit } from "react-icons/md";
 import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
-import { StyledHeader } from "./ExplorerTableStyles";
-import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
+import { StyledHeader } from "../ExplorerTableStyles";
+import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "../constants";
 
 const ExploreTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];

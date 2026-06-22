@@ -18,8 +18,8 @@ import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
-import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/ExplorerTableIdsFilter";
-import ExplorerTableLabelFilter from "./Explorer/ExplorerTable/ExplorerTableLabelFilter";
+import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableIdsFilter";
+import ExplorerTableLabelFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableLabelFilter";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import {
   defaultExploreStatsParams,
@@ -31,14 +31,16 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import {
+  QueryValidity,
+  QueryValidityProblem,
+} from "./types";
+import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
   QUERY_RIGHT_PANEL_MIN_WIDTH,
   QUERY_BUILDER_MIN_HEIGHT,
   QUERY_SEARCH_PANEL_MIN_HEIGHT,
-  QueryValidity,
-  QueryValidityProblem,
-} from "./types";
+} from "./constants";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
 interface ExplorerPage {}

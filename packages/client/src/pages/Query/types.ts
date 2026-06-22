@@ -1,17 +1,17 @@
 import { Query } from "@inkvisitor/shared/types";
 
-export const QUERY_GRID_WIDTH = 400;
-export const QUERY_GRID_HEIGHT = 50;
-
-export const QUERY_LEFT_PANEL_MIN_WIDTH = 410;
-export const QUERY_RIGHT_PANEL_MIN_WIDTH = 450;
-export const QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION = 60;
-export const QUERY_SEARCH_PANEL_MIN_HEIGHT = 34;
-export const QUERY_BUILDER_MIN_HEIGHT = 150;
-
 export type INodeItem = Query.INode & {
   gridX: number;
   gridY: number;
+};
+
+export type QueryValidity = {
+  isValid: boolean;
+  problems: QueryValidityProblem[];
+};
+export type QueryValidityProblem = {
+  source: string;
+  text: string;
 };
 
 export const edgeTypesImplemented: Query.EdgeType[] = [
@@ -32,12 +32,3 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:SOE"],
   Query.EdgeType["SUT:"],
 ];
-
-export type QueryValidity = {
-  isValid: boolean;
-  problems: QueryValidityProblem[];
-};
-export type QueryValidityProblem = {
-  source: string;
-  text: string;
-};
