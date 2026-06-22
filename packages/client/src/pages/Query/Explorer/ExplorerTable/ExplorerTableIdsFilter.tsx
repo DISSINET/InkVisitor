@@ -212,13 +212,20 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     const measure = () => {
       const button = buttonRef.current;
       const parent = (rootRef.current?.offsetParent as HTMLElement | null) ?? null;
-      if (!button) {
+      if (!button || !parent) {
         return;
       }
-      const buttonRect = button.getBoundingClientRect();
-      const parentTop = parent ? parent.getBoundingClientRect().top : 0;
-      const available = buttonRect.top - parentTop - PANEL_BOTTOM_GAP - PANEL_TOP_MARGIN;
-      setMaxPanelHeight(Math.max(PANEL_MIN_HEIGHT, available));
+      const parentHeight = parent.getBoundingClientRect().height;
+      const side = parentHeight < 310;
+      setUseSideLayout(side);
+      if (!side) {
+        const buttonRect = button.getBoundingClientRect();
+        const parentTop = parent.getBoundingClientRect().top;
+        const available = buttonRect.top - parentTop - PANEL_BOTTOM_GAP - PANEL_TOP_MARGIN;
+        setMaxPanelHeight(Math.max(PANEL_MIN_HEIGHT, available));
+      } else {
+        setMaxPanelHeight(undefined);
+      }
     };
     measure();
     window.addEventListener("resize", measure);
@@ -244,13 +251,19 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     <StyledIdsFloatingRoot ref={rootRef}>
       {isOpen && (
         <StyledIdsPanel
-          style={{
-            position: "absolute",
-            top: 0,
-            right: "100%",
-            marginRight: "0.5rem",
-            ...(maxPanelHeight ? { maxHeight: maxPanelHeight } : {}),
-          }}
+          style={
+            useSideLayout
+              ? {
+                  position: "absolute",
+                  top: 0,
+                  right: "100%",
+                  marginRight: "0.5rem",
+                  maxHeight: PANEL_MIN_HEIGHT,
+                }
+              : maxPanelHeight
+                ? { maxHeight: maxPanelHeight }
+                : undefined
+          }
           data-run-on-enter="true"
         >
           <StyledIdsPanelHeader>
