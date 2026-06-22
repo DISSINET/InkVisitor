@@ -4,7 +4,7 @@ import { BatchAction } from "../types";
 import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";
 import { BatchActionAddReference } from "./BatchActionAddReference";
 import { BatchActionAddRelation } from "./BatchActionAddRelation";
-import { BatchActionExportCsv } from "./BatchActionExportCsv";
+import { BatchActionExportCsv } from "./BatchActionExportTsv";
 
 interface ExplorerTableBatchActionModalProps {
   batchAction: BatchAction;
