@@ -41,8 +41,8 @@ import {
 } from "./types";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
-interface QueryPage {}
-export const QueryPage: React.FC<QueryPage> = ({}) => {
+interface ExplorerPage {}
+export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
