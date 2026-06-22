@@ -36,6 +36,7 @@ import { defaultPing } from "Theme/constants";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
 import {
   EntitiesDeleteErrorResponse,
   EntitiesDeleteSuccessResponse,
@@ -88,6 +89,15 @@ const parseJwt = (token: string) => {
     return false;
   }
 };
+
+/**
+ * Diagnostic capture of the intermittent "Server returned HTML instead of JSON"
+ * response. Shared between the api interceptor (writer, see captureHtmlResponse)
+ * and the PageHeader UI (reader). The event lets the header react instantly in the
+ * same tab, where the native "storage" event does not fire.
+ */
+export const HTML_CAPTURE_STORAGE_KEY = "inkvisitor:htmlResponseCaptures";
+export const HTML_CAPTURE_EVENT = "inkvisitor:html-capture";
 
 class Api {
   private baseUrl: string;
@@ -181,8 +191,82 @@ class Api {
     // each request to api will be by default authorized
     this.connection.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${this.token}`;
+      // Per-request correlation id. Lets us match a client-observed bad response
+      // (see rejectIfNonJsonApiBody) against front-proxy / server access logs and
+      // confirm whether the request ever reached Node at all.
+      if (!config.headers["x-inkvisitor-request-id"]) {
+        config.headers["x-inkvisitor-request-id"] = uuidv4();
+      }
       return config;
     });
+  }
+
+  /**
+   * Diagnostics for the intermittent "Server returned HTML instead of JSON".
+   * The bug is not reproducible, so we capture the offending response the moment
+   * it is detected. The header fingerprint (server/via/x-cache/cf-ray/...) tells us
+   * WHICH layer produced the HTML, and `containsAppConfigMarker` distinguishes our
+   * own index.html (served by the SPA fallback) from a foreign proxy/CDN page.
+   *
+   * Records go to the console AND a capped localStorage ring buffer so an occurrence
+   * can be inspected after the fact, even if the console was not open:
+   *   JSON.parse(localStorage.getItem("inkvisitor:htmlResponseCaptures"))
+   * Must never throw — logging cannot be allowed to break the interceptor.
+   */
+  private captureHtmlResponse(response: AxiosResponse): void {
+    try {
+      const data = typeof response.data === "string" ? response.data : "";
+      const headers: Record<string, any> =
+        response.headers && typeof (response.headers as any).toJSON === "function"
+          ? (response.headers as any).toJSON()
+          : { ...(response.headers as any) };
+
+      const record = {
+        ts: new Date().toISOString(),
+        requestId: (response.config?.headers as any)?.["x-inkvisitor-request-id"],
+        method: response.config?.method,
+        url: (response.config?.baseURL || "") + (response.config?.url || ""),
+        finalUrl: (response.request as any)?.responseURL,
+        status: response.status,
+        statusText: response.statusText,
+        contentType: headers["content-type"] ?? headers["Content-Type"],
+        // header fingerprint — identifies the layer that produced the HTML
+        server: headers["server"],
+        via: headers["via"],
+        xCache: headers["x-cache"],
+        age: headers["age"],
+        cfRay: headers["cf-ray"],
+        xVercelCache: headers["x-vercel-cache"],
+        xServedBy: headers["x-served-by"],
+        allHeaders: headers,
+        // our SPA fallback injects `window.appConfig`; a foreign page won't have it
+        containsAppConfigMarker: data.includes("window.appConfig"),
+        bodyPrefix: data.slice(0, 200),
+      };
+
+      // eslint-disable-next-line no-console
+      console.error(
+        "[html-instead-of-json] non-JSON API response captured:",
+        record
+      );
+
+      try {
+        const prev = JSON.parse(
+          localStorage.getItem(HTML_CAPTURE_STORAGE_KEY) || "[]"
+        );
+        prev.push(record);
+        localStorage.setItem(
+          HTML_CAPTURE_STORAGE_KEY,
+          JSON.stringify(prev.slice(-20))
+        );
+        // notify the header (same-tab; native "storage" event only fires cross-tab)
+        window.dispatchEvent(new Event(HTML_CAPTURE_EVENT));
+      } catch {
+        // localStorage unavailable / quota exceeded — console.error still fired
+      }
+    } catch {
+      // capture must never break the response interceptor
+    }
   }
 
   /**
@@ -212,6 +296,7 @@ class Api {
       lowerHead.startsWith("<body") ||
       lowerHead.startsWith("<div")
     ) {
+      this.captureHtmlResponse(response);
       toast.error(
         <div>
           Server returned HTML instead of JSON
