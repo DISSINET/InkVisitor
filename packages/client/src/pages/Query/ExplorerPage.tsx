@@ -544,14 +544,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
               />
-              <ExplorerTableIdsFilter
-                filters={exploreState.filters}
-                dispatch={exploreStateDispatch}
-              />
-              <FloatingSearchContainer
-                filters={exploreState.filters}
-                exploreDispatch={exploreStateDispatch}
-              />
+              {!isExplorerAtMaxHeight && (
+                <>
+                  <ExplorerTableIdsFilter
+                    filters={exploreState.filters}
+                    dispatch={exploreStateDispatch}
+                  />
+                  <FloatingSearchContainer
+                    filters={exploreState.filters}
+                    exploreDispatch={exploreStateDispatch}
+                  />
+                </>
+              )}
             </Box>
             <Box
               noFrame
