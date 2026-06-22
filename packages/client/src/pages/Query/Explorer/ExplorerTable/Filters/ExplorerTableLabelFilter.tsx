@@ -3,8 +3,8 @@ import { Checkbox, Input } from "components";
 import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
 import { LuRegex } from "react-icons/lu";
-import { ExploreAction, ExploreActionType } from "../state";
-import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "./ExplorerTableStyles";
+import { ExploreAction, ExploreActionType } from "../../state";
+import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "../ExplorerTableStyles";
 
 const LABEL_FILTER_DEBOUNCE_MS = 500;
 

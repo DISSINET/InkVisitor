@@ -12,12 +12,9 @@ import Dropdown from "components/advanced";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ThemeContext } from "styled-components";
 import { ExploreAction } from "./state";
-import ExplorerTableLabelFilter from "./ExplorerTable/ExplorerTableLabelFilter";
-import ExplorerTableIdsFilter from "./ExplorerTable/ExplorerTableIdsFilter";
 import {
   StyledCounter,
   StyledControlGroup,
-  StyledExploreFilters,
   StyledTableControl,
 } from "./ExplorerTable/ExplorerTableStyles";
 import { BatchAction, batchOptions, restrictedBatchActions } from "./ExplorerTable/types";
@@ -141,10 +138,7 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
         <span />
       )}
 
-      <StyledExploreFilters>
-        <ExplorerTableLabelFilter filters={filters} dispatch={dispatch} />
-        <ExplorerTableIdsFilter filters={filters} dispatch={dispatch} />
-      </StyledExploreFilters>
+      <span />
 
       <StyledControlGroup>
         {isTable && newColumn && (

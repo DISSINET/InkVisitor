@@ -4,7 +4,7 @@ import { BatchAction } from "../types";
 import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";
 import { BatchActionAddReference } from "./BatchActionAddReference";
 import { BatchActionAddRelation } from "./BatchActionAddRelation";
-import { BatchActionExportCsv } from "./BatchActionExportCsv";
+import { BatchActionExportCsv } from "./BatchActionExportTsv";
 
 interface ExplorerTableBatchActionModalProps {
   batchAction: BatchAction;
@@ -15,9 +15,7 @@ interface ExplorerTableBatchActionModalProps {
   onApplyAction: () => void;
 }
 
-export const ExplorerTableBatchActionModal: React.FC<
-  ExplorerTableBatchActionModalProps
-> = ({
+export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionModalProps> = ({
   batchAction,
   selectedEntityIds,
   columns,
@@ -27,7 +25,7 @@ export const ExplorerTableBatchActionModal: React.FC<
 }) => {
   const renderContent = () => {
     switch (batchAction) {
-      case BatchAction.export_csv:
+      case BatchAction.export_tsv:
         return (
           <BatchActionExportCsv
             selectedEntityIds={selectedEntityIds}

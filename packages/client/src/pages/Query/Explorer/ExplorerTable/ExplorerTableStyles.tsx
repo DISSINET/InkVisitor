@@ -38,10 +38,11 @@ export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
   height: ${({ theme }) => theme.space[12]};
-  background-color: ${({ theme }) => theme.color["success"]};
-  color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["explorerHeader"]};
+  color: ${({ theme }) => theme.color["headerTextColor"]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
 export const StyledBody = styled.div``;
@@ -163,6 +164,8 @@ export const StyledLabelFilter = styled.div`
   align-items: center;
   gap: 0.2rem;
   width: 100%;
+  margin: 0 0.5rem;
+  max-width: 40rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`
@@ -388,4 +391,102 @@ export const StyledClearAllButton = styled.button`
   &:hover {
     color: ${({ theme }) => theme.color["danger"]};
   }
+`;
+
+export const StyledCellValue = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+`;
+
+export const StyledEditableCellValue = styled(StyledCellValue)`
+  cursor: text;
+  width: 100%;
+  min-height: 1.4em;
+`;
+
+export const StyledEditableInput = styled.input`
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["black"]};
+  caret-color: ${({ theme }) => theme.color["black"]};
+  width: 100%;
+  padding: 0;
+`;
+
+export const StyledAltLabelsWrap = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  align-items: center;
+`;
+
+export const StyledAltLabelChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+  background-color: ${({ theme }) => theme.color.gray[100]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
+export const StyledAltLabelRemove = styled.button`
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  opacity: 0.5;
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+export const StyledAltLabelAddInput = styled.input<{ $hasValue: boolean }>`
+  border: none;
+  outline: none;
+  background: transparent;
+  width: ${({ $hasValue }) => ($hasValue ? "5rem" : "1.5rem")};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  padding: 0.1rem;
+`;
+
+export const StyledRowInner = styled.div`
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+`;
+
+export const StyledEntityTagWrap = styled.span`
+  display: inline-flex;
+  overflow: hidden;
+`;
+
+export const StyledCellContent = styled.div`
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  gap: 0.25rem;
+  width: 100%;
+`;
+
+export const StyledCellArrayWrap = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 `;

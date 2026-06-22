@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Tooltip } from "components";
-import { renderExploreColumnParamValue } from "./ExploreColumnParamValueRenderers";
+import { renderExploreColumnParamValue } from "../ExplorerTableNewColumnPanel/ExploreColumnParamValueRenderers";
 import {
   StyledTooltipRow,
   StyledTooltipLabel,
@@ -71,7 +71,13 @@ export const ExploreTableHeaderTooltip: React.FC<
         ref={setReferenceElement}
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
-        style={{ cursor: "help" }}
+        style={{
+          cursor: "help",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+          minWidth: 0,
+        }}
       >
         {children}
       </span>

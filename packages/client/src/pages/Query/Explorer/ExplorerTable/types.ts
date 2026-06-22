@@ -1,7 +1,7 @@
 export enum BatchAction {
   open_in_detail = "open_in_detail",
   copy_uuids = "copy_uuids",
-  export_csv = "export_csv",
+  export_tsv = "export_tsv",
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
   add_relation = "add_relation",
@@ -15,7 +15,7 @@ export type BatchOption = {
 export const batchOptions: BatchOption[] = [
   { value: BatchAction.open_in_detail, label: "open in detail" },
   { value: BatchAction.copy_uuids, label: "copy UUIDs to clipboard" },
-  { value: BatchAction.export_csv, label: "export as csv" },
+  { value: BatchAction.export_tsv, label: "export as tsv" },
   { value: BatchAction.add_metaprop, label: "add new metaproperty" },
   { value: BatchAction.add_reference, label: "add new reference" },
   { value: BatchAction.add_relation, label: "add new relation" },
@@ -23,13 +23,22 @@ export const batchOptions: BatchOption[] = [
 
 /** Batch actions restricted to Admin and Owner roles. */
 export const restrictedBatchActions = new Set<BatchAction>([
-  BatchAction.export_csv,
+  BatchAction.export_tsv,
   BatchAction.add_metaprop,
   BatchAction.add_reference,
   BatchAction.add_relation,
 ]);
 
-export const WIDTH_COLUMN_FIRST = 280;
-export const WIDTH_COLUMN_DEFAULT = 400;
-export const WIDTH_COLUMN_EUC = 210;
-export const HEIGHT_ROW_DEFAULT = 38;
+import { Explore } from "@inkvisitor/shared/types/query";
+
+export const narrowColumnTypes = new Set([
+  Explore.EExploreColumnType.EST,
+  Explore.EExploreColumnType.ELA,
+  Explore.EExploreColumnType.EPOS,
+]);
+
+export const smallColumnTypes = new Set([
+  Explore.EExploreColumnType.EUC,
+  Explore.EExploreColumnType.ELI,
+]);
+
