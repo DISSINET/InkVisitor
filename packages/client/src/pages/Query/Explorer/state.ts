@@ -21,23 +21,24 @@ const exploreStateInitial: Explore.IExplore = {
       // only show in development mode
       process.env.NODE_ENV === "development"
         ? [
-          // {
-          //   id: "1",
-          //   name: "Sex",
-          //   type: Explore.EExploreColumnType.EPV,
-          //   editable: true,
-          //   params: {
-          //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
-          //   },
-          // },
-          ...RelationEnums.AllTypes.map((relationType, index) => ({
-            id: String(index + 2),
-            name: relationType,
-            params: { relationType },
-            editable: true,
-            type: Explore.EExploreColumnType.ER,
-          })),
-        ]
+            // {
+            //   id: "1",
+            //   name: "Sex",
+            //   type: Explore.EExploreColumnType.EPV,
+            //   editable: true,
+            //   params: {
+            //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+            //   },
+            // },
+            // all relations for testing
+            // ...RelationEnums.AllTypes.map((relationType, index) => ({
+            //   id: String(index + 2),
+            //   name: relationType,
+            //   params: { relationType },
+            //   editable: true,
+            //   type: Explore.EExploreColumnType.ER,
+            // })),
+          ]
         : [],
   },
   sort: undefined,
@@ -105,9 +106,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         ...state,
         view: {
           ...state.view,
-          columns: state.view.columns.filter(
-            (column) => column.id !== removedColumnId,
-          ),
+          columns: state.view.columns.filter((column) => column.id !== removedColumnId),
         },
       };
     }
@@ -189,13 +188,13 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const filters: Explore.IExploreSearchFilter[] =
         trimmedLabel.length > 0
           ? [
-            ...otherFilters,
-            {
-              type: Explore.SearchOption.Label,
-              label: trimmedLabel,
-              useRegex: nextUseRegex,
-            },
-          ]
+              ...otherFilters,
+              {
+                type: Explore.SearchOption.Label,
+                label: trimmedLabel,
+                useRegex: nextUseRegex,
+              },
+            ]
           : otherFilters;
 
       return {
@@ -211,12 +210,12 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       const filters: Explore.IExploreSearchFilter[] =
         ids.length > 0
           ? [
-            ...otherFilters,
-            {
-              type: Explore.SearchOption.UUIDs,
-              ids,
-            },
-          ]
+              ...otherFilters,
+              {
+                type: Explore.SearchOption.UUIDs,
+                ids,
+              },
+            ]
           : otherFilters;
 
       return {
@@ -259,9 +258,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         createdAfter?: Date;
         createdBefore?: Date;
       };
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.SearchOption.CreatedAt,
-      );
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.CreatedAt);
       if (!createdAfter && !createdBefore) {
         return {
           ...state,
@@ -286,9 +283,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         updatedAfter?: Date;
         updatedBefore?: Date;
       };
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.SearchOption.UpdatedAt,
-      );
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.UpdatedAt);
       if (!updatedAfter && !updatedBefore) {
         return {
           ...state,
@@ -334,9 +329,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
 
     case ExploreActionType.setEditedByFilter: {
       const { editedBy } = action.payload as { editedBy?: string };
-      const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.SearchOption.EditedBy,
-      );
+      const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.EditedBy);
       return {
         ...state,
         filters: editedBy
@@ -357,10 +350,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         ...state,
         filters:
           rootValidity && rootValidity !== IRequestSearchRootValidity.Any
-            ? [
-              ...otherFilters,
-              { type: Explore.SearchOption.RootValidity, rootValidity },
-            ]
+            ? [...otherFilters, { type: Explore.SearchOption.RootValidity, rootValidity }]
             : otherFilters,
         offset: 0,
       };
