@@ -1,12 +1,5 @@
 import { Explore } from "@inkvisitor/shared/types/query";
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
+import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { useTheme } from "hooks";
 import React, { useMemo, useState } from "react";
 import {
@@ -40,15 +33,11 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
   onExport,
   onClose,
 }) => {
-  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
-    columns.map((c) => c.id)
-  );
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(columns.map((c) => c.id));
 
   const handleToggleColumn = (columnId: string) => {
     setSelectedColumnIds((prev) =>
-      prev.includes(columnId)
-        ? prev.filter((id) => id !== columnId)
-        : [...prev, columnId]
+      prev.includes(columnId) ? prev.filter((id) => id !== columnId) : [...prev, columnId],
     );
   };
 
@@ -73,38 +62,23 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
     checked ? (
       <MdOutlineCheckBox size={checkboxSize} color={theme.color.primary} />
     ) : (
-      <MdOutlineCheckBoxOutlineBlank
-        size={checkboxSize}
-        color={theme.color.primary}
-      />
+      <MdOutlineCheckBoxOutlineBlank size={checkboxSize} color={theme.color.primary} />
     );
 
   const renderSelectAllIcon = () => {
     if (isAllSelected) {
-      return (
-        <MdOutlineCheckBox size={checkboxSize} color={theme.color.primary} />
-      );
+      return <MdOutlineCheckBox size={checkboxSize} color={theme.color.primary} />;
     }
     if (isSomeSelected) {
-      return (
-        <MdOutlineIndeterminateCheckBox
-          size={checkboxSize}
-          color={theme.color.primary}
-        />
-      );
+      return <MdOutlineIndeterminateCheckBox size={checkboxSize} color={theme.color.primary} />;
     }
-    return (
-      <MdOutlineCheckBoxOutlineBlank
-        size={checkboxSize}
-        color={theme.color.primary}
-      />
-    );
+    return <MdOutlineCheckBoxOutlineBlank size={checkboxSize} color={theme.color.primary} />;
   };
 
   return (
     <Modal showModal onClose={onClose} width="fat">
       <ModalHeader
-        title={`Export as CSV (${selectedEntityIds.length} entities)`}
+        title={`Export as TSV (${selectedEntityIds.length} entities)`}
         onClose={onClose}
       />
       <ModalContent column enableScroll>
@@ -122,14 +96,9 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
             {columns.map((column) => {
               const isSelected = selectedColumnIds.includes(column.id);
               return (
-                <StyledSelectColumn
-                  key={column.id}
-                  onClick={() => handleToggleColumn(column.id)}
-                >
+                <StyledSelectColumn key={column.id} onClick={() => handleToggleColumn(column.id)}>
                   {renderCheckboxIcon(isSelected)}
-                  <StyledSelectColumnLabel>
-                    {column.name}
-                  </StyledSelectColumnLabel>
+                  <StyledSelectColumnLabel>{column.name}</StyledSelectColumnLabel>
                 </StyledSelectColumn>
               );
             })}

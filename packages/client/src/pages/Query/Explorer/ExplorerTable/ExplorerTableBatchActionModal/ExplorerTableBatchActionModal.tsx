@@ -15,9 +15,7 @@ interface ExplorerTableBatchActionModalProps {
   onApplyAction: () => void;
 }
 
-export const ExplorerTableBatchActionModal: React.FC<
-  ExplorerTableBatchActionModalProps
-> = ({
+export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionModalProps> = ({
   batchAction,
   selectedEntityIds,
   columns,
@@ -27,7 +25,7 @@ export const ExplorerTableBatchActionModal: React.FC<
 }) => {
   const renderContent = () => {
     switch (batchAction) {
-      case BatchAction.export_csv:
+      case BatchAction.export_tsv:
         return (
           <BatchActionExportCsv
             selectedEntityIds={selectedEntityIds}
