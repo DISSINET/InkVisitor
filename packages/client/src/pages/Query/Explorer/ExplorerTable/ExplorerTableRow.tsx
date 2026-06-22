@@ -3,10 +3,16 @@ import React from "react";
 import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import {
+  entityStatusDict,
+  languageDict,
+  conceptPartOfSpeechDict,
+  actionPartOfSpeechDict,
+} from "@inkvisitor/shared/dictionaries";
 import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
@@ -79,6 +85,73 @@ const EditableCellValue: React.FC<{
     >
       {value || " "}
     </StyledCellValue>
+  );
+};
+
+const EditableAltLabels: React.FC<{
+  entity: IEntity;
+  onSave: (labels: string[]) => void;
+}> = ({ entity, onSave }) => {
+  const [newLabel, setNewLabel] = React.useState("");
+  const theme = useTheme();
+  const altLabels = (entity.labels ?? []).slice(1);
+
+  return (
+    <div data-no-row-click="true" style={{ display: "flex", flexWrap: "wrap", gap: "0.2rem", alignItems: "center" }}>
+      {altLabels.map((label, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.15rem",
+            padding: "0.1rem 0.3rem",
+            borderRadius: "0.2rem",
+            backgroundColor: theme.color.gray[100],
+            fontSize: theme.fontSize.xs,
+            color: theme.color.black,
+          }}
+        >
+          {label}
+          <button
+            type="button"
+            onClick={() => onSave(entity.labels.filter((_, idx) => idx !== i + 1))}
+            style={{
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              padding: 0,
+              lineHeight: 1,
+              fontSize: theme.fontSize.xs,
+              color: theme.color.black,
+              opacity: 0.5,
+            }}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      <input
+        value={newLabel}
+        onChange={(e) => setNewLabel(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && newLabel.trim()) {
+            onSave([...entity.labels, newLabel.trim()]);
+            setNewLabel("");
+          }
+        }}
+        placeholder="+"
+        style={{
+          border: "none",
+          outline: "none",
+          background: "transparent",
+          width: newLabel ? "5rem" : "1.5rem",
+          fontSize: theme.fontSize.xs,
+          color: theme.color.black,
+          padding: "0.1rem",
+        }}
+      />
+    </div>
   );
 };
 
@@ -291,18 +364,108 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           />
         );
       } else {
-        if (column.editable && column.type === Explore.EExploreColumnType.ELI) {
-          return (
-            <EditableCellValue
-              value={cellValue as string}
-              onSave={(newValue) => {
-                updateEntityMutation.mutate({
-                  entityId: recordEntity.id,
-                  changes: { legacyId: newValue },
-                });
-              }}
-            />
-          );
+        if (column.editable) {
+          if (column.type === Explore.EExploreColumnType.ELI) {
+            return (
+              <EditableCellValue
+                value={cellValue as string}
+                onSave={(newValue) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { legacyId: newValue },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EDET) {
+            return (
+              <EditableCellValue
+                value={cellValue as string}
+                onSave={(newValue) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { detail: newValue },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EST) {
+            return (
+              <Dropdown.Single.Basic
+                width={140}
+                value={recordEntity.status}
+                options={entityStatusDict}
+                onChange={(v) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { status: v },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.ELA) {
+            return (
+              <Dropdown.Single.Basic
+                width={140}
+                value={recordEntity.language}
+                options={languageDict}
+                onChange={(v) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { language: v || EntityEnums.Language.Empty },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EAL) {
+            return (
+              <EditableAltLabels
+                entity={recordEntity}
+                onSave={(labels) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { labels },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EPOS) {
+            if (recordEntity.class === EntityEnums.Class.Concept) {
+              return (
+                <Dropdown.Single.Basic
+                  width={140}
+                  value={(recordEntity.data as any)?.pos}
+                  options={conceptPartOfSpeechDict}
+                  onChange={(v) => {
+                    updateEntityMutation.mutate({
+                      entityId: recordEntity.id,
+                      changes: { data: { ...recordEntity.data, pos: v } },
+                    });
+                  }}
+                />
+              );
+            }
+            if (recordEntity.class === EntityEnums.Class.Action) {
+              return (
+                <Dropdown.Single.Basic
+                  width={140}
+                  value={(recordEntity.data as any)?.pos}
+                  options={actionPartOfSpeechDict}
+                  onChange={(v) => {
+                    updateEntityMutation.mutate({
+                      entityId: recordEntity.id,
+                      changes: { data: { ...recordEntity.data, pos: v } },
+                    });
+                  }}
+                />
+              );
+            }
+          }
         }
         return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }

@@ -395,4 +395,9 @@ export const StyledClearAllButton = styled.button`
 export const StyledCellValue = styled.span`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
 `;
