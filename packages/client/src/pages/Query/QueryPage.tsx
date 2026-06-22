@@ -19,6 +19,7 @@ import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/ExplorerTableIdsFilter";
+import ExplorerTableLabelFilter from "./Explorer/ExplorerTable/ExplorerTableLabelFilter";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import {
   defaultExploreStatsParams,
@@ -498,6 +499,9 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               label="Query Builder"
               disableHeaderClick
               onHeaderClick={toggleExplorerBoxMaximized}
+              headerComponent={
+                <ExplorerTableLabelFilter filters={exploreState.filters} dispatch={exploreStateDispatch} />
+              }
               buttons={[
                 <Button
                   key="run-search"
