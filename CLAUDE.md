@@ -13,3 +13,8 @@
 
 - Do not delete commented-out code. It may be kept intentionally for reference or future use.
 - Name React component interfaces the same as the component, not with a `Props` suffix.
+- Always use styled-components instead of inline `style={}` props. Prefer creating
+  new styled components in the corresponding `*Styles.tsx` file.
+- Always use theme values for colors (including black text: `theme.color["black"]`),
+  font sizes, spacing, etc. Never hardcode color values — the app supports dark mode
+  and hardcoded colors break it.

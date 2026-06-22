@@ -17,11 +17,24 @@ import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
-import { useTheme } from "hooks";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./ExplorerCellOverflow";
-import { StyledCellValue, StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
+import {
+  StyledAltLabelAddInput,
+  StyledAltLabelChip,
+  StyledAltLabelRemove,
+  StyledAltLabelsWrap,
+  StyledCellArrayWrap,
+  StyledCellContent,
+  StyledCellValue,
+  StyledCheckboxWrapper,
+  StyledEditableCellValue,
+  StyledEditableInput,
+  StyledEntityTagWrap,
+  StyledFocusedCircle,
+  StyledRowInner,
+} from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
 
 const EditableCellValue: React.FC<{
@@ -44,7 +57,7 @@ const EditableCellValue: React.FC<{
 
   if (editing) {
     return (
-      <input
+      <StyledEditableInput
         ref={inputRef}
         data-no-row-click="true"
         value={draft}
@@ -63,28 +76,17 @@ const EditableCellValue: React.FC<{
             setEditing(false);
           }
         }}
-        style={{
-          border: "none",
-          outline: "none",
-          background: "transparent",
-          font: "inherit",
-          fontSize: "1.4rem",
-          color: "inherit",
-          width: "100%",
-          padding: 0,
-        }}
       />
     );
   }
 
   return (
-    <StyledCellValue
+    <StyledEditableCellValue
       data-no-row-click="true"
       onClick={() => setEditing(true)}
-      style={{ cursor: "text" }}
     >
       {value || " "}
-    </StyledCellValue>
+    </StyledEditableCellValue>
   );
 };
 
@@ -93,45 +95,23 @@ const EditableAltLabels: React.FC<{
   onSave: (labels: string[]) => void;
 }> = ({ entity, onSave }) => {
   const [newLabel, setNewLabel] = React.useState("");
-  const theme = useTheme();
   const altLabels = (entity.labels ?? []).slice(1);
 
   return (
-    <div data-no-row-click="true" style={{ display: "flex", flexWrap: "wrap", gap: "0.2rem", alignItems: "center" }}>
+    <StyledAltLabelsWrap data-no-row-click="true">
       {altLabels.map((label, i) => (
-        <span
-          key={i}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.15rem",
-            padding: "0.1rem 0.3rem",
-            borderRadius: "0.2rem",
-            backgroundColor: theme.color.gray[100],
-            fontSize: theme.fontSize.xs,
-            color: theme.color.black,
-          }}
-        >
+        <StyledAltLabelChip key={i}>
           {label}
-          <button
+          <StyledAltLabelRemove
             type="button"
             onClick={() => onSave(entity.labels.filter((_, idx) => idx !== i + 1))}
-            style={{
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              padding: 0,
-              lineHeight: 1,
-              fontSize: theme.fontSize.xs,
-              color: theme.color.black,
-              opacity: 0.5,
-            }}
           >
             ×
-          </button>
-        </span>
+          </StyledAltLabelRemove>
+        </StyledAltLabelChip>
       ))}
-      <input
+      <StyledAltLabelAddInput
+        $hasValue={!!newLabel}
         value={newLabel}
         onChange={(e) => setNewLabel(e.target.value)}
         onKeyDown={(e) => {
@@ -141,17 +121,8 @@ const EditableAltLabels: React.FC<{
           }
         }}
         placeholder="+"
-        style={{
-          border: "none",
-          outline: "none",
-          background: "transparent",
-          width: newLabel ? "5rem" : "1.5rem",
-          fontSize: theme.fontSize.xs,
-          color: theme.color.black,
-          padding: "0.1rem",
-        }}
       />
-    </div>
+    </StyledAltLabelsWrap>
   );
 };
 
@@ -186,8 +157,6 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isLastClicked = false,
   onOpenEntityInDetail,
 }) => {
-  const theme = useTheme();
-
   const handleCheckboxClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -481,7 +450,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
         return (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+          <StyledCellArrayWrap>
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
@@ -496,7 +465,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             {cellData.length > CELL_DISPLAY_LIMIT && (
               <ExplorerCellOverflow hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)} />
             )}
-          </div>
+          </StyledCellArrayWrap>
         );
       } else {
         return renderCellValue(cellData, recordEntity, column);
@@ -564,10 +533,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   );
 
   return (
-    <div
+    <StyledRowInner
       className="qt-row-inner"
       onClick={handleRowClick}
-      style={{ display: "flex", width: "100%", minHeight: "100%" }}
     >
       <div
         className="qt-col"
@@ -582,19 +550,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           {isSelected ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}
         </StyledCheckboxWrapper>
 
-        <span
-          data-no-row-click="true"
-          style={{
-            display: "inline-flex",
-            overflow: "hidden",
-          }}
-        >
+        <StyledEntityTagWrap data-no-row-click="true">
           <EntityTag
             entity={rowEntity}
             fullWidth
             onDoubleClick={rowEntity ? handleOpenEntityInDetail(rowEntity) : undefined}
           />
-        </span>
+        </StyledEntityTagWrap>
       </div>
 
       {columns.map((column, key) => {
@@ -615,24 +577,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               maxWidth: WIDTH_COLUMN_DEFAULT,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "start",
-                alignItems: "center",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                gap: "0.25rem",
-              }}
-            >
+            <StyledCellContent>
               {renderCell(rowEntity, columnData[column.id], column)}
               {renderEditSection(rowEntity, column)}
-            </div>
+            </StyledCellContent>
           </div>
         );
       })}
-    </div>
+    </StyledRowInner>
   );
 };
 
