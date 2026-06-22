@@ -240,6 +240,11 @@ export default class Results<T extends { id: string }> {
           out[column.id] = entities;
           break;
         }
+        // Entity Legacy ID
+        case Explore.EExploreColumnType.ELI: {
+          out[column.id] = entity.legacyId || "";
+          break;
+        }
       }
     }
 

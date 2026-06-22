@@ -389,3 +389,8 @@ export const StyledClearAllButton = styled.button`
     color: ${({ theme }) => theme.color["danger"]};
   }
 `;
+
+export const StyledCellValue = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["black"]};
+`;

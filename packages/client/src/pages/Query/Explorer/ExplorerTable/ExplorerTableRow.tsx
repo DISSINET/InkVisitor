@@ -11,10 +11,11 @@ import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
+import { useTheme } from "hooks";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./ExplorerCellOverflow";
-import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
+import { StyledCellValue, StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
 
 interface ExplorerTableRowProps {
@@ -48,6 +49,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isLastClicked = false,
   onOpenEntityInDetail,
 }) => {
+  const theme = useTheme();
+
   const handleCheckboxClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -224,11 +227,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           />
         );
       } else {
-        return (
-          <div>
-            <span>{cellValue as string}</span>
-          </div>
-        );
+        return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }
     },
     [handleUnlinkEntity, handleOpenEntityInDetail],
@@ -365,7 +364,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             className="qt-col"
             style={{
               width:
-                column.type === Explore.EExploreColumnType.EUC
+                column.type === Explore.EExploreColumnType.EUC ||
+                column.type === Explore.EExploreColumnType.ELI
                   ? WIDTH_COLUMN_EUC
                   : WIDTH_COLUMN_DEFAULT,
               minWidth: WIDTH_COLUMN_EUC,

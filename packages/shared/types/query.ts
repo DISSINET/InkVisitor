@@ -1038,6 +1038,7 @@ export namespace Explore {
     EUE = "EUE", // Edited by
     EUEN = "EUEN", // Number of edits
     EDC = "EDC", // Creation date
+    ELI = "ELI", // Entity Legacy ID
   }
 
   /** Param value types - determines which form control to render */
@@ -1081,6 +1082,7 @@ export namespace Explore {
     [EExploreColumnType.EUE]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EUEN]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EDC]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ELI]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1174,6 +1176,12 @@ export namespace Explore {
       label: "Creation date",
       description: "Shows when this entity was created.",
       isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.ELI]: {
+      label: "Legacy ID",
+      description: "Shows the legacy identifier of this entity, if available.",
+      isDisabled: false,
       params: {},
     },
   };

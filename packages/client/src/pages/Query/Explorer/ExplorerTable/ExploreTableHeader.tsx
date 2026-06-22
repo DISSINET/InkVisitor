@@ -33,7 +33,8 @@ const ExploreTableHeader: React.FC<{
             className="qt-col qt-col-header"
             style={{
               width:
-                column.type === Explore.EExploreColumnType.EUC
+                column.type === Explore.EExploreColumnType.EUC ||
+                column.type === Explore.EExploreColumnType.ELI
                   ? WIDTH_COLUMN_EUC
                   : WIDTH_COLUMN_DEFAULT,
               minWidth: WIDTH_COLUMN_EUC,

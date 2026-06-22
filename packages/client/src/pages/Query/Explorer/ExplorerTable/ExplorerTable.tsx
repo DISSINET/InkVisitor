@@ -265,8 +265,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     return (
       columns.length * WIDTH_COLUMN_DEFAULT +
       WIDTH_COLUMN_FIRST -
-      columns.filter((column) => column.type === Explore.EExploreColumnType.EUC).length *
-        (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
+      columns.filter(
+        (column) =>
+          column.type === Explore.EExploreColumnType.EUC ||
+          column.type === Explore.EExploreColumnType.ELI
+      ).length * (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
     );
   }, [columns]);
 
