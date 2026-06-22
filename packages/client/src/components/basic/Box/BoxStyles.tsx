@@ -47,9 +47,9 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
 export const StyledLabel = styled(animated.div)`
-  display: flex;
+  display: block;
   min-width: 0;
-  max-width: 100%;
+  flex-shrink: 1;
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;

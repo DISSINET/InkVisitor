@@ -163,6 +163,8 @@ export const StyledLabelFilter = styled.div`
   align-items: center;
   gap: 0.2rem;
   width: 100%;
+  margin: 0 0.5rem;
+  max-width: 40rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`
