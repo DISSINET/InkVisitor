@@ -60,7 +60,7 @@ interface StyledHeaderComponentWrap {
 }
 export const StyledHeaderComponentWrap = styled.div<StyledHeaderComponentWrap>`
   display: flex;
-  justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-end" : "center")};
+  justify-content: center;
   align-items: center;
   width: ${({ $isExpanded }) => ($isExpanded ? "auto" : "100%")};
   flex-grow: ${({ $flexGrow }) => ($flexGrow ? 1 : 0)};
