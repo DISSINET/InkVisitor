@@ -18,6 +18,70 @@ import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./ExplorerCellOverflow
 import { StyledCellValue, StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
 
+const EditableCellValue: React.FC<{
+  value: string;
+  onSave: (value: string) => void;
+}> = ({ value, onSave }) => {
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(value);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+    }
+  }, [editing]);
+
+  React.useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        data-no-row-click="true"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          setEditing(false);
+          if (draft !== value) {
+            onSave(draft);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            (e.target as HTMLInputElement).blur();
+          } else if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
+        }}
+        style={{
+          border: "none",
+          outline: "none",
+          background: "transparent",
+          font: "inherit",
+          fontSize: "1.4rem",
+          color: "inherit",
+          width: "100%",
+          padding: 0,
+        }}
+      />
+    );
+  }
+
+  return (
+    <StyledCellValue
+      data-no-row-click="true"
+      onClick={() => setEditing(true)}
+      style={{ cursor: "text" }}
+    >
+      {value || " "}
+    </StyledCellValue>
+  );
+};
+
 interface ExplorerTableRowProps {
   rowId: number;
   rowItem: IResponseQueryEntity;
@@ -227,10 +291,23 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           />
         );
       } else {
+        if (column.editable && column.type === Explore.EExploreColumnType.ELI) {
+          return (
+            <EditableCellValue
+              value={cellValue as string}
+              onSave={(newValue) => {
+                updateEntityMutation.mutate({
+                  entityId: recordEntity.id,
+                  changes: { legacyId: newValue },
+                });
+              }}
+            />
+          );
+        }
         return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }
     },
-    [handleUnlinkEntity, handleOpenEntityInDetail],
+    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation],
   );
 
   const renderCell = React.useCallback(
