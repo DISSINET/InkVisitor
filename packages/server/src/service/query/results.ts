@@ -2,6 +2,7 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -243,6 +244,38 @@ export default class Results<T extends { id: string }> {
         // Entity Legacy ID
         case Explore.EExploreColumnType.ELI: {
           out[column.id] = entity.legacyId || "";
+          break;
+        }
+        // Entity Status
+        case Explore.EExploreColumnType.EST: {
+          const statusKey = Object.entries(EntityEnums.Status).find(
+            ([, v]) => v === entity.status
+          );
+          out[column.id] = statusKey ? statusKey[0] : "";
+          break;
+        }
+        // Entity Label Language
+        case Explore.EExploreColumnType.ELA: {
+          const langKey = Object.entries(EntityEnums.Language).find(
+            ([, v]) => v === entity.language
+          );
+          out[column.id] = langKey ? langKey[0] : "";
+          break;
+        }
+        // Entity Alt Labels
+        case Explore.EExploreColumnType.EAL: {
+          out[column.id] = (entity.labels ?? []).slice(1).join(", ");
+          break;
+        }
+        // Entity Part of Speech
+        case Explore.EExploreColumnType.EPOS: {
+          const pos = (entity.data as any)?.pos;
+          out[column.id] = pos || "";
+          break;
+        }
+        // Entity Detail
+        case Explore.EExploreColumnType.EDET: {
+          out[column.id] = entity.detail || "";
           break;
         }
       }

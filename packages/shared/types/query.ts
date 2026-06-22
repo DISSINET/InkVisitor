@@ -1039,6 +1039,11 @@ export namespace Explore {
     EUEN = "EUEN", // Number of edits
     EDC = "EDC", // Creation date
     ELI = "ELI", // Entity Legacy ID
+    EST = "EST", // Entity Status
+    ELA = "ELA", // Entity Label Language
+    EAL = "EAL", // Entity Alt Labels
+    EPOS = "EPOS", // Entity Part of Speech
+    EDET = "EDET", // Entity Detail
   }
 
   /** Param value types - determines which form control to render */
@@ -1083,6 +1088,11 @@ export namespace Explore {
     [EExploreColumnType.EUEN]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EDC]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.ELI]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EST]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ELA]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EAL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EPOS]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EDET]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1181,6 +1191,36 @@ export namespace Explore {
     [EExploreColumnType.ELI]: {
       label: "Legacy ID",
       description: "Shows the legacy identifier of this entity, if available.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EST]: {
+      label: "Status",
+      description: "Shows the approval status of this entity (e.g. pending, approved).",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ELA]: {
+      label: "Label language",
+      description: "Shows the language assigned to this entity's label.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EAL]: {
+      label: "Alt labels",
+      description: "Shows alternative labels of this entity (all labels beyond the first).",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EPOS]: {
+      label: "Part of speech",
+      description: "Shows the part of speech for Concept and Action entities.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EDET]: {
+      label: "Detail",
+      description: "Shows the detail/description field of this entity.",
       isDisabled: false,
       params: {},
     },

@@ -34,7 +34,10 @@ const ExploreTableHeader: React.FC<{
             style={{
               width:
                 column.type === Explore.EExploreColumnType.EUC ||
-                column.type === Explore.EExploreColumnType.ELI
+                column.type === Explore.EExploreColumnType.ELI ||
+                column.type === Explore.EExploreColumnType.EST ||
+                column.type === Explore.EExploreColumnType.ELA ||
+                column.type === Explore.EExploreColumnType.EPOS
                   ? WIDTH_COLUMN_EUC
                   : WIDTH_COLUMN_DEFAULT,
               minWidth: WIDTH_COLUMN_EUC,
