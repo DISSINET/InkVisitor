@@ -114,6 +114,11 @@ class Api {
   private lastError: any = null;
   private errorTimeout: any;
 
+  // URLs that recently returned HTML instead of JSON — subsequent requests
+  // to these paths get cache-busting headers so stale proxy/browser cache
+  // doesn't keep serving the bad response after the server recovers.
+  private poisonedPaths = new Set<string>();
+
   constructor() {
     this.baseUrl = process.env.APIURL || window.location.origin;
     this.apiUrl = this.baseUrl + "/api/v1";
@@ -197,6 +202,16 @@ class Api {
       if (!config.headers["x-inkvisitor-request-id"]) {
         config.headers["x-inkvisitor-request-id"] = uuidv4();
       }
+
+      // Bust browser/proxy cache for URLs that previously returned HTML
+      const path = config.url || "";
+      if (this.poisonedPaths.has(path)) {
+        config.headers["Cache-Control"] = "no-cache";
+        config.headers["Pragma"] = "no-cache";
+        const separator = path.includes("?") ? "&" : "?";
+        config.url = `${path}${separator}_cb=${Date.now()}`;
+      }
+
       return config;
     });
   }
@@ -281,6 +296,7 @@ class Api {
     }
 
     if (typeof response.data !== "string") {
+      this.poisonedPaths.delete(response.config?.url || "");
       return response;
     }
 
@@ -297,6 +313,7 @@ class Api {
       lowerHead.startsWith("<div")
     ) {
       this.captureHtmlResponse(response);
+      this.poisonedPaths.add(response.config?.url || "");
       toast.error(
         <div>
           Server returned HTML instead of JSON
