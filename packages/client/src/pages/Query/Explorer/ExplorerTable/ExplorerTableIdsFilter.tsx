@@ -204,9 +204,6 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     }
   }, [appliedIds, draft, isOpen]);
 
-  // Bound the panel height to the floating container's positioned ancestor (the
-  // explorer area), so a long list of UUIDs scrolls inside the page instead of
-  // overflowing past the top of the page content.
   useLayoutEffect(() => {
     if (!isOpen) {
       return;

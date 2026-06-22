@@ -18,6 +18,8 @@ import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
+import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/ExplorerTableIdsFilter";
+import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import {
   defaultExploreStatsParams,
   ExploreActionType,
@@ -31,6 +33,7 @@ import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
   QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QUERY_BUILDER_MIN_HEIGHT,
   QUERY_SEARCH_PANEL_MIN_HEIGHT,
   QueryValidity,
   QueryValidityProblem,
@@ -466,7 +469,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       {queryLeftPanelExpanded && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           width={leftPanelWidth}
-          topPositionMin={QUERY_SEARCH_PANEL_MIN_HEIGHT}
+          topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
@@ -519,6 +522,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
+              />
+              <ExplorerTableIdsFilter filters={exploreState.filters} dispatch={exploreStateDispatch} />
+              <FloatingSearchContainer
+                filters={exploreState.filters}
+                exploreDispatch={exploreStateDispatch}
               />
             </Box>
             <Box
@@ -593,8 +601,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
-                isDetailOpen={isDetailOpen}
-                detailPanelWidth={detailPanelWidth}
                 canBatchEdit={canBatchEdit}
               />
             </Box>

@@ -8,9 +8,7 @@ import ExplorerControlBar from "./ExplorerControlBar";
 import { ExplorerTableBatchActionModal } from "./ExplorerTable/ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import { ExploreAction } from "./state";
 import { useExplorerControls } from "./useExplorerControls";
-import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
 import { useInvalidateExplorerQuery } from "../useQueryData";
-import ExplorerTableIdsFilter from "./ExplorerTable/ExplorerTableIdsFilter";
 
 /** Height reserved for the shared control bar above the view content. */
 const CONTROL_BAR_HEIGHT = 50;
@@ -32,9 +30,6 @@ interface ExplorerBoxProps {
   onOpenEntityInDetail?: (entityId: string) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
 
-  isDetailOpen: boolean;
-  detailPanelWidth: number;
-
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
 }
@@ -52,12 +47,8 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   getCachedEntity,
   onOpenEntityInDetail,
   onOpenEntitiesInDetail,
-  isDetailOpen,
-  detailPanelWidth,
   canBatchEdit = false,
 }) => {
-  const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
-
   const isStats = state.view.mode === Explore.EViewMode.Stats;
   // Stats view with no search criteria: show only the prompt, hiding the control
   // bar (label / uuid filters) so nothing competes with the message.
@@ -145,14 +136,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           )}
         </div>
       </div>
-
-      <ExplorerTableIdsFilter filters={state.filters} dispatch={dispatch} />
-
-      <FloatingSearchContainer
-        rightInset={floatingSearchRightInset}
-        filters={state.filters}
-        exploreDispatch={dispatch}
-      />
 
       {controls.isBatchModalOpen && (
         <ExplorerTableBatchActionModal

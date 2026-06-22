@@ -7,6 +7,7 @@ export const QUERY_LEFT_PANEL_MIN_WIDTH = 600;
 export const QUERY_RIGHT_PANEL_MIN_WIDTH = 450;
 export const QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION = 60;
 export const QUERY_SEARCH_PANEL_MIN_HEIGHT = 34;
+export const QUERY_BUILDER_MIN_HEIGHT = 150;
 
 export type INodeItem = Query.INode & {
   gridX: number;

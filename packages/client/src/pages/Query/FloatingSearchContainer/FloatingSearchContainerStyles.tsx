@@ -12,7 +12,7 @@ export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
   position: absolute;
   left: ${({ $left }) => $left}px;
   top: ${({ $top }) => $top}px;
-  z-index: 160;
+  z-index: 164;
 `;
 
 export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`
