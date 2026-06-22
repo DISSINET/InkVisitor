@@ -2,8 +2,7 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { EntityEnums } from "@inkvisitor/shared/enums";
-import { conceptPartOfSpeechDict, actionPartOfSpeechDict } from "@inkvisitor/shared/dictionaries";
+import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
 import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -249,18 +248,14 @@ export default class Results<T extends { id: string }> {
         }
         // Entity Status
         case Explore.EExploreColumnType.EST: {
-          const statusKey = Object.entries(EntityEnums.Status).find(
-            ([, v]) => v === entity.status
-          );
-          out[column.id] = statusKey ? statusKey[0] : "";
+          const statusLabel = entityStatusDict.find((d) => d.value === entity.status)?.label;
+          out[column.id] = statusLabel || "";
           break;
         }
         // Entity Label Language
         case Explore.EExploreColumnType.ELA: {
-          const langKey = Object.entries(EntityEnums.Language).find(
-            ([, v]) => v === entity.language
-          );
-          out[column.id] = langKey ? langKey[0] : "";
+          const langLabel = languageDict.find((d) => d.value === entity.language)?.label;
+          out[column.id] = langLabel || "";
           break;
         }
         // Entity Alt Labels
