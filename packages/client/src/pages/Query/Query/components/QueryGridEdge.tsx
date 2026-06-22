@@ -5,10 +5,9 @@ import { QueryAction, QueryActionType } from "../state";
 import {
   edgeTypesImplemented,
   INodeItem,
-  QUERY_GRID_HEIGHT,
-  QUERY_GRID_WIDTH,
   QueryValidityProblem,
 } from "../../types";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
 import { findValidEdgeTypesForSourceNode } from "pages/Query/utils";

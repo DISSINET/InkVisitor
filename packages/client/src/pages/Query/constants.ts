@@ -1,5 +1,3 @@
-import { Query } from "@inkvisitor/shared/types";
-
 export const QUERY_GRID_WIDTH = 400;
 export const QUERY_GRID_HEIGHT = 50;
 

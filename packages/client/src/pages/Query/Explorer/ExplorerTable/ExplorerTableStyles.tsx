@@ -481,6 +481,7 @@ export const StyledCellContent = styled.div`
   white-space: nowrap;
   text-overflow: ellipsis;
   gap: 0.25rem;
+  width: 100%;
 `;
 
 export const StyledCellArrayWrap = styled.div`
