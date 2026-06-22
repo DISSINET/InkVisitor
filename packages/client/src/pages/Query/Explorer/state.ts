@@ -38,6 +38,27 @@ const exploreStateInitial: Explore.IExplore = {
             //   editable: true,
             //   type: Explore.EExploreColumnType.ER,
             // })),
+            {
+              id: "dev-est",
+              name: "Status",
+              type: Explore.EExploreColumnType.EST,
+              editable: true,
+              params: {},
+            },
+            {
+              id: "dev-ela",
+              name: "Label language",
+              type: Explore.EExploreColumnType.ELA,
+              editable: true,
+              params: {},
+            },
+            {
+              id: "dev-epos",
+              name: "Part of speech",
+              type: Explore.EExploreColumnType.EPOS,
+              editable: true,
+              params: {},
+            },
           ]
         : [],
   },

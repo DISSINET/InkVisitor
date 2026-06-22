@@ -22,12 +22,8 @@ import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerT
 import { StyledBody, StyledEmptyMessage, StyledTableWrapper } from "./ExplorerTableStyles";
 
 import ExploreTableHeader from "./Header/ExploreTableHeader";
-import {
-  HEIGHT_ROW_DEFAULT,
-  WIDTH_COLUMN_DEFAULT,
-  WIDTH_COLUMN_EUC,
-  WIDTH_COLUMN_FIRST,
-} from "./constants";
+import { HEIGHT_ROW_DEFAULT, WIDTH_COLUMN_FIRST } from "./constants";
+import { getColumnWidth } from "./utils";
 
 const OVERSCAN_ROWS = 10;
 
@@ -260,19 +256,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [dispatch],
   );
 
-  // created by columns are smaller than the default columns, subtract the difference
   const widthTable = useMemo(() => {
     return (
-      columns.length * WIDTH_COLUMN_DEFAULT +
-      WIDTH_COLUMN_FIRST -
-      columns.filter(
-        (column) =>
-          column.type === Explore.EExploreColumnType.EUC ||
-          column.type === Explore.EExploreColumnType.ELI ||
-          column.type === Explore.EExploreColumnType.EST ||
-          column.type === Explore.EExploreColumnType.ELA ||
-          column.type === Explore.EExploreColumnType.EPOS
-      ).length * (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
+      WIDTH_COLUMN_FIRST +
+      columns.reduce((sum, col) => sum + getColumnWidth(col.type), 0)
     );
   }, [columns]);
 

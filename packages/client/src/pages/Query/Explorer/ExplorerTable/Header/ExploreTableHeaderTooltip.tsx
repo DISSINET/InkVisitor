@@ -71,7 +71,13 @@ export const ExploreTableHeaderTooltip: React.FC<
         ref={setReferenceElement}
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
-        style={{ cursor: "help" }}
+        style={{
+          cursor: "help",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+          minWidth: 0,
+        }}
       >
         {children}
       </span>

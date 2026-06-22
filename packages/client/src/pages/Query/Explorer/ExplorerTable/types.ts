@@ -29,3 +29,16 @@ export const restrictedBatchActions = new Set<BatchAction>([
   BatchAction.add_relation,
 ]);
 
+import { Explore } from "@inkvisitor/shared/types/query";
+
+export const narrowColumnTypes = new Set([
+  Explore.EExploreColumnType.EST,
+  Explore.EExploreColumnType.ELA,
+  Explore.EExploreColumnType.EPOS,
+]);
+
+export const smallColumnTypes = new Set([
+  Explore.EExploreColumnType.EUC,
+  Explore.EExploreColumnType.ELI,
+]);
+

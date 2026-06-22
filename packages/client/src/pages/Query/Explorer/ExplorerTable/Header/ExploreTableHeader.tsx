@@ -6,7 +6,8 @@ import { CgClose } from "react-icons/cg";
 import { MdOutlineEdit } from "react-icons/md";
 import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
 import { StyledHeader } from "../ExplorerTableStyles";
-import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "../constants";
+import { WIDTH_COLUMN_FIRST } from "../constants";
+import { getColumnWidth } from "../utils";
 
 const ExploreTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];
@@ -32,16 +33,9 @@ const ExploreTableHeader: React.FC<{
             key={key}
             className="qt-col qt-col-header"
             style={{
-              width:
-                column.type === Explore.EExploreColumnType.EUC ||
-                column.type === Explore.EExploreColumnType.ELI ||
-                column.type === Explore.EExploreColumnType.EST ||
-                column.type === Explore.EExploreColumnType.ELA ||
-                column.type === Explore.EExploreColumnType.EPOS
-                  ? WIDTH_COLUMN_EUC
-                  : WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_EUC,
-              maxWidth: WIDTH_COLUMN_DEFAULT,
+              width: getColumnWidth(column.type),
+              minWidth: getColumnWidth(column.type),
+              maxWidth: getColumnWidth(column.type),
               display: "flex",
               alignItems: "center",
             }}
