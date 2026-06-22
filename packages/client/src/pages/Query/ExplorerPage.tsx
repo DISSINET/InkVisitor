@@ -260,8 +260,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorYPosition / onePercentOfLastContentHeight,
     );
-    setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
-    localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
+    const newY = Math.max(
+      QUERY_BUILDER_MIN_HEIGHT,
+      Math.min(
+        separatorXPercentPosition * onePercentOfContentHeight,
+        contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT,
+      ),
+    );
+    setQuerySeparatorYPosition(newY);
+    localStorage.setItem("querySeparatorYPosition", floorNumberToOneDecimal(newY / onePercentOfContentHeight).toString());
     setCurrentContentHeight(contentHeight);
   }, [contentHeight, explorerBoxMaximized]);
 
@@ -314,8 +321,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorXPosition / onePercentOfLastLayoutWidth,
     );
-    setQuerySeparatorXPosition(separatorXPercentPosition * onePercentOfLayoutWidth);
-    localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
+    const newX = Math.max(
+      QUERY_LEFT_PANEL_MIN_WIDTH,
+      Math.min(
+        separatorXPercentPosition * onePercentOfLayoutWidth,
+        layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
+      ),
+    );
+    setQuerySeparatorXPosition(newX);
+    localStorage.setItem("querySeparatorXPosition", floorNumberToOneDecimal(newX / onePercentOfLayoutWidth).toString());
     setCurrentLayoutWidth(layoutWidth);
   }, [layoutWidth]);
 
