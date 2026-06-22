@@ -413,7 +413,7 @@ export const StyledEditableInput = styled.input`
   outline: none;
   background: transparent;
   font: inherit;
-  font-size: 1.4rem;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["black"]};
   caret-color: ${({ theme }) => theme.color["black"]};
   width: 100%;
