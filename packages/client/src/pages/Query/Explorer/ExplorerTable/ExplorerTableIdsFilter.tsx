@@ -55,6 +55,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   const [isOpen, setIsOpen] = useState(false);
   const [allSelected, setAllSelected] = useState(false);
   const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
+  const [useSideLayout, setUseSideLayout] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipBoxRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -242,7 +243,16 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   return (
     <StyledIdsFloatingRoot ref={rootRef}>
       {isOpen && (
-        <StyledIdsPanel style={maxPanelHeight ? { maxHeight: maxPanelHeight } : undefined} data-run-on-enter="true">
+        <StyledIdsPanel
+          style={{
+            position: "absolute",
+            top: 0,
+            right: "100%",
+            marginRight: "0.5rem",
+            ...(maxPanelHeight ? { maxHeight: maxPanelHeight } : {}),
+          }}
+          data-run-on-enter="true"
+        >
           <StyledIdsPanelHeader>
             <StyledIdsPanelTitle>Entity UUIDs</StyledIdsPanelTitle>
             <StyledUuidChipRemove

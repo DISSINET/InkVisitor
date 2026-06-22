@@ -496,6 +496,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               borderColor="white"
               height={querySeparatorYPosition}
               label="Query Builder"
+              disableHeaderClick
               onHeaderClick={toggleExplorerBoxMaximized}
               buttons={[
                 <Button
@@ -523,7 +524,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
               />
-              <ExplorerTableIdsFilter filters={exploreState.filters} dispatch={exploreStateDispatch} />
+              <ExplorerTableIdsFilter
+                filters={exploreState.filters}
+                dispatch={exploreStateDispatch}
+              />
               <FloatingSearchContainer
                 filters={exploreState.filters}
                 exploreDispatch={exploreStateDispatch}
