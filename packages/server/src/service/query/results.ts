@@ -3,6 +3,7 @@ import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { conceptPartOfSpeechDict, actionPartOfSpeechDict } from "@inkvisitor/shared/dictionaries";
 import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -270,7 +271,9 @@ export default class Results<T extends { id: string }> {
         // Entity Part of Speech
         case Explore.EExploreColumnType.EPOS: {
           const pos = (entity.data as any)?.pos;
-          out[column.id] = pos || "";
+          const posDict = [...conceptPartOfSpeechDict, ...actionPartOfSpeechDict];
+          const posLabel = posDict.find((d) => d.value === pos)?.label;
+          out[column.id] = posLabel || pos || "";
           break;
         }
         // Entity Detail
