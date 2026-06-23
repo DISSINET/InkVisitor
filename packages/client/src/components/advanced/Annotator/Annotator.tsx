@@ -257,6 +257,14 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
+    onError: () => {
+      // The instant anchor save failed, so the cache was never merged and now
+      // trails the live canvas. Surface the failure (otherwise silent in quiet
+      // mode) and refetch so the canvas reconciles to true server state instead
+      // of a later dep change clobbering it with stale content.
+      toast.error("Failed to save document changes");
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+    },
     onSettled: () => {
       setIsSaving(false);
       setIsSavingWithoutRefresh(false);
