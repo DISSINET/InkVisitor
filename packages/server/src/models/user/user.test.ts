@@ -238,7 +238,7 @@ describe("models/user", function () {
       const user1After = await User.findUserById(db.connection, user1.id);
       expect(user1After).toBeFalsy();
 
-      const thrashedUser1 = await User.findUserByLogin(db.connection, user1.email, false)
+      const thrashedUser1 = await User.findUserByLogin(db, user1.email, false)
       expect(thrashedUser1).not.toBeNull();
       expect(thrashedUser1!.deletedAt).toBeTruthy();
     });

@@ -745,6 +745,7 @@ describe("models/statement", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
+      treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
     });
 
@@ -895,6 +896,7 @@ describe("models/statement", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
+      treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
     });
 
@@ -1131,6 +1133,7 @@ describe("models/statement", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
+      treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
     });
 

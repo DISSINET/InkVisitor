@@ -56,7 +56,7 @@ describe("Users create", function () {
         .expect(successfulGenericResponse)
         .expect(200);
 
-      const createdUser = await User.findUserByLogin(db, email);
+      const createdUser = await User.findUserByLogin(db, email, false);
       expect(createdUser).toBeTruthy();
       expect(createdUser?.active).toEqual(true);
     });
