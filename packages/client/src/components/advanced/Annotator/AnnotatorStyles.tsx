@@ -195,6 +195,18 @@ export const StyledInfoText = styled.div`
   margin: ${({ theme }) => theme.space[4]};
 `;
 
+export const StyledStatementSubsection = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: ${({ theme }) => theme.color.blue["200"]};
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  margin-left: ${({ theme }) => theme.space["-2"]};
+  margin-top: ${({ theme }) => theme.space[1]};
+  max-width: 100%;
+`;
+
 export const StyledStatementTargetSelector = styled.div`
   display: flex;
   flex-direction: column;

@@ -34,6 +34,7 @@ import {
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
+  StyledStatementSubsection,
   StyledStatementTargetInfo,
   StyledStatementTargetList,
   StyledStatementTargetOption,
@@ -284,10 +285,10 @@ export const TextAnnotatorMenu = ({
           {/* New Statement */}
           <StyledAnnotatorItemContent>
             {onCreateStatement && (
-              <>
+              <StyledStatementSubsection>
                 {showStatementTargetSelector && (
                   <StyledStatementTargetSelector>
-                    <StyledStatementTargetTitle>create S in subT</StyledStatementTargetTitle>
+                    <StyledStatementTargetTitle>create S in T</StyledStatementTargetTitle>
                     <StyledStatementTargetList>
                       {statementTargetOptions.map((optionId) => {
                         const optionEntity =
@@ -341,7 +342,7 @@ export const TextAnnotatorMenu = ({
                     }}
                   />
                 </StyledAnnotatorItemContentLine>
-              </>
+              </StyledStatementSubsection>
             )}
           </StyledAnnotatorItemContent>
           {/* Entity Suggester */}
