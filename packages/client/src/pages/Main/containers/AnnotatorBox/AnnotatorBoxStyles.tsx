@@ -22,9 +22,12 @@ export const StyledWarningWrapper = styled.div`
 export const StyledLoadingDocument = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
   position: relative;
-  padding: 0 0.25rem;
+  padding: 0.25rem 1rem;
+  border-radius: 2rem;
+  overflow: hidden;
+  width: 100%;
 `;
 
 export const StyledHighlightTooltipTitle = styled.div`
@@ -50,10 +53,8 @@ export const StyledHighlightTooltipDot = styled.span<{ $entityClass: string }>`
 `;
 
 export const StyledInfoText = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
-  align-items: center;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   color: ${({ theme }) => theme.color["info"]};
-  margin-left: 0.3rem;
 `;
