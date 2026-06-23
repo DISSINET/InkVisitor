@@ -99,8 +99,10 @@ describe("models/response-search", function () {
 
         const query = new SearchQuery(db.connection);
         await query.fromRequest(req);
-        expect(req.entityIds).toEqual(
-          st1a.getEntitiesIds().concat(st2a.getEntitiesIds())
+        // Result order across sub-territories is not guaranteed by the query;
+        // compare as an unordered id set.
+        expect([...req.entityIds].sort()).toEqual(
+          st1a.getEntitiesIds().concat(st2a.getEntitiesIds()).sort()
         );
       });
     });
