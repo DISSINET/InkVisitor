@@ -13,6 +13,30 @@ import Statement, { StatementActant, StatementAction } from "./statement";
 import { prepareStatement } from "./statement.test";
 import Territory from "@models/territory/territory";
 import { ISetting } from "@inkvisitor/shared/types/settings";
+import treeCache from "@service/treeCache";
+
+// getWarnings now first runs the territory-based validations, which resolve the
+// statement's territory lineage from the (global) tree cache. The unit tests
+// below only exercise the action/actant structural warnings, so we register a
+// minimal root territory in the tree cache and point the statements at it; the
+// T-based pass then resolves to an empty lineage and contributes no warnings.
+const ROOT_TERRITORY_ID = "root";
+
+const seedTreeCacheRoot = () => {
+  treeCache.tree.idMap[ROOT_TERRITORY_ID] = {
+    territory: new Territory({ id: ROOT_TERRITORY_ID }) as any,
+    statementsCount: 0,
+    lvl: 0,
+    children: [],
+    path: [],
+    empty: true,
+    right: undefined as any,
+  } as any;
+};
+
+const attachRootTerritory = (response: ResponseStatement) => {
+  response.data.territory = { territoryId: ROOT_TERRITORY_ID, order: 0 } as any;
+};
 
 // Statement warnings are now gated behind validation settings; these tests
 // assert the structural warnings fire, so they run with every validation
@@ -50,6 +74,10 @@ class MockResponse extends ResponseStatement {
   addActant(actant: IEntity, position: EntityEnums.Position) {
     this.data.actants.push(
       new StatementActant({
+        // Mirror the actant entity id onto the StatementActant id so that
+        // actant-specific warnings (which now reference position.actantId)
+        // can be matched back to the originating actant in the assertions.
+        id: actant.id,
         entityId: actant.id,
         position,
       })
@@ -63,17 +91,33 @@ describe("models/statement/response", function () {
   describe("test ResponseStatement.getWarnings", function () {
     const db = new Db();
     const request = newMockRequest(db);
+
+    beforeAll(async () => {
+      seedTreeCacheRoot();
+      // getWarnings -> getTValidationWarnings issues real DB reads through
+      // req.db.connection, so the mock request needs a live connection.
+      await db.initDb();
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
     test("not prepared entity should thrown an error", async () => {
       const [, statement] = prepareStatement();
       const response = new ResponseStatement(statement);
+      attachRootTerritory(response);
 
-      const warning = await response.getWarnings(request, allValidationsEnabled);
-
-      expect(() => warning).toThrowError(InternalServerError);
+      // getWarnings throws while resolving warnings for the (not preloaded)
+      // action entity via getEntity.
+      await expect(
+        response.getWarnings(request, allValidationsEnabled)
+      ).rejects.toThrowError(InternalServerError);
     });
 
     test("no action", async () => {
       const response = MockResponse.new();
+      attachRootTerritory(response);
 
       const warnings = await response.getWarnings(request, allValidationsEnabled);
       expect(warnings.find((w) => w.type === WarningTypeEnums.NA)).toBeTruthy();
@@ -134,7 +178,7 @@ describe("models/statement/response", function () {
             ws.find(
               (w) =>
                 w.type === WarningTypeEnums.WA &&
-                w.position?.entityId === location.id
+                w.position?.actantId === location.id
             )
           ).toBeTruthy();
         });
@@ -190,14 +234,14 @@ describe("models/statement/response", function () {
             ws.filter(
               (w) =>
                 w.type === WarningTypeEnums.ANA &&
-                w.position?.entityId === act1.id
+                w.position?.actantId === act1.id
             )
           ).toHaveLength(1);
           expect(
             ws.filter(
               (w) =>
                 w.type === WarningTypeEnums.ANA &&
-                w.position?.entityId === act2.id
+                w.position?.actantId === act2.id
             )
           ).toHaveLength(1);
           expect(ws).toHaveLength(2);
@@ -282,7 +326,7 @@ describe("models/statement/response", function () {
             ws.filter(
               (w) =>
                 w.type === WarningTypeEnums.WA &&
-                w.position?.entityId === grp1.id
+                w.position?.actantId === grp1.id
             )
           ).toHaveLength(1);
           expect(ws).toHaveLength(1);
@@ -406,7 +450,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position?.entityId === group.id
+                  w.position?.actantId === group.id
               )
             ).toBeTruthy();
           });
@@ -435,7 +479,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position?.entityId === group.id
+                  w.position?.actantId === group.id
               )
             ).toBeTruthy();
           });

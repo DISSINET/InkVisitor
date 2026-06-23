@@ -4,7 +4,9 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import SuperordinateEntity from "./superordinate-entity";
 
 describe("test SuperordinateEntity.validateEntities", function () {
-  test("allows LOGESVB - LOGESVB", () => {
+  // SuperordinateEntity same-class patterns no longer include [Being, Being];
+  // the only Being-related pattern in RelationRules is the combined [Object, Being].
+  test("allows LOGESV - LOGESV", () => {
     const relation = new SuperordinateEntity({ entityIds: ["1", "2"] });
     relation.entities = [
       new Entity({ id: "1", class: EntityEnums.Class.Location }),
@@ -49,14 +51,6 @@ describe("test SuperordinateEntity.validateEntities", function () {
     relation.entities = [
       new Entity({ id: "1", class: EntityEnums.Class.Value }),
       new Entity({ id: "2", class: EntityEnums.Class.Value }),
-    ];
-
-    result = relation.validateEntities();
-    expect(result).toBeNull();
-
-    relation.entities = [
-      new Entity({ id: "1", class: EntityEnums.Class.Being }),
-      new Entity({ id: "2", class: EntityEnums.Class.Being }),
     ];
 
     result = relation.validateEntities();

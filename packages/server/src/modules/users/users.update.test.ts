@@ -69,7 +69,7 @@ describe("Users update", function () {
   describe("ok data", () => {
     it("should return a 200 code with successful response", async () => {
       await request(app)
-        .put(`${apiPath}/users/update/1`)
+        .put(`${apiPath}/users/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .send({ email: `admin${Math.random()}@admin.com` })
         .expect("Content-Type", /json/)

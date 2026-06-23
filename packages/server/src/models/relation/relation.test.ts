@@ -156,8 +156,11 @@ describe("test Relation.beforeSave", function () {
 
 describe("test Relation.validateEntities", function () {
   test("missing preloaded entities", () => {
+    // validateEntities -> validateEntitiesData -> getPreloadedEntity now throws
+    // an InternalServerError synchronously when entities are not preloaded
+    // (rather than returning it).
     const relation = new Relation({ entityIds: ["1", "2"] });
-    expect(relation.validateEntities()).toBeInstanceOf(InternalServerError);
+    expect(() => relation.validateEntities()).toThrow(InternalServerError);
   });
 
   test("test synonym (success)", () => {

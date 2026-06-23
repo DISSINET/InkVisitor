@@ -13,35 +13,40 @@ import app from "../../server";
 import { prepareStatement } from "@models/statement/statement.test";
 import { pool } from "@middlewares/db";
 
-describe("Entities search (requests)", function () {
-  afterAll(async () => {
-    await pool.end();
-  });
+// The search endpoint was redesigned: it is now `GET /entities/` taking the
+// search params as query string (was `POST /entities/search` with a JSON body).
+// Co-occurrence search (find entities appearing together in a statement) moved
+// from the single `entityId` param to `cooccurrenceId`. The response is now a
+// list of full IResponseEntity objects, so result items expose `id` (not the
+// former `entityId`).
 
+describe("Entities search (requests)", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
       await request(app)
-        .post(`${apiPath}/entities/search`)
+        .get(`${apiPath}/entities`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
-  describe("invalid request data(only class)", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+  describe("valid request data (only class)", () => {
+    // Previously class without a label was rejected with BadParams. Class alone
+    // is now a valid search, so this should succeed with a 200 list response.
+    it("should return a 200 code with successful response", async () => {
       await request(app)
-        .post(`${apiPath}/entities/search`)
-        .send({ class: EntityEnums.Class.Concept })
+        .get(`${apiPath}/entities`)
+        .query({ class: EntityEnums.Class.Concept })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+        .expect(200);
     });
   });
   describe("invalid class data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
       await request(app)
-        .post(`${apiPath}/entities/search`)
-        .send({ class: "something", label: "mnop" })
+        .get(`${apiPath}/entities`)
+        .query({ class: "something", label: "mnop" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
@@ -70,6 +75,7 @@ describe("Entities search (params)", function () {
     const [, action] = prepareEntity();
     action.labels = ["action"];
     action.id = `${action.labels[0]}-${action.id}`;
+    action.class = EntityEnums.Class.Action;
 
     const [statementId, statement] = prepareStatement();
     statement.labels = ["statement"];
@@ -102,22 +108,22 @@ describe("Entities search (params)", function () {
     describe("search only class + by existing label", () => {
       it("should return a 200 code with successful response", async () => {
         await request(app)
-          .post(`${apiPath}/entities/search`)
-          .send({ class: entity.class, label: entity.labels[0] })
+          .get(`${apiPath}/entities`)
+          .query({ class: entity.class, label: entity.labels[0] })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
-            expect(res.body[0].entityId).toEqual(entity.id);
+            expect(res.body[0].id).toEqual(entity.id);
           });
       });
     });
 
     describe("search only by non-existing label", () => {
-      it("should return a 400 code with successful response for invalid label", async () => {
+      it("should return a 200 code with empty response for invalid label", async () => {
         await request(app)
-          .post(`${apiPath}/entities/search`)
-          .send({ label: entity.labels[0] + "xxxx" })
+          .get(`${apiPath}/entities`)
+          .query({ label: entity.labels[0] + "xxxx" })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
@@ -130,17 +136,17 @@ describe("Entities search (params)", function () {
     describe("search only by class + existing entity in statement", () => {
       it("should return a 200 code with successful response", async () => {
         await request(app)
-          .post(`${apiPath}/entities/search`)
-          .send({
+          .get(`${apiPath}/entities`)
+          .query({
             class: linkedEntity.class,
-            entityId: entity.id,
+            cooccurrenceId: entity.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
             expect(res.body).toHaveLength(1);
-            expect(res.body[0].entityId).toEqual(linkedEntity.id);
+            expect(res.body[0].id).toEqual(linkedEntity.id);
           });
       });
     });
@@ -148,9 +154,9 @@ describe("Entities search (params)", function () {
     describe("search only by non-existing entity in statement", () => {
       it("should return a 200 code with successful response", async () => {
         await request(app)
-          .post(`${apiPath}/entities/search`)
-          .send({
-            entityId: entity.id + "xxx", // does not exist
+          .get(`${apiPath}/entities`)
+          .query({
+            cooccurrenceId: entity.id + "xxx", // does not exist
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -164,17 +170,17 @@ describe("Entities search (params)", function () {
     describe("search only by class + existing action in statement", () => {
       it("should return a 200 code with successful response", async () => {
         await request(app)
-          .post(`${apiPath}/entities/search`)
-          .send({
+          .get(`${apiPath}/entities`)
+          .query({
             class: linkedEntity.class,
-            entityId: action.id,
+            cooccurrenceId: action.id,
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200)
           .expect((res: Response) => {
             expect(res.body).toHaveLength(1);
-            expect(res.body[0].entityId).toEqual(linkedEntity.id);
+            expect(res.body[0].id).toEqual(linkedEntity.id);
           });
       });
     });
@@ -182,9 +188,9 @@ describe("Entities search (params)", function () {
     describe("search only by non-existing action in statement", () => {
       it("should return a 200 code with empty response", async () => {
         await request(app)
-          .post(`${apiPath}/entities/search`)
-          .send({
-            entityId: action.id + "xxx", // does not exist
+          .get(`${apiPath}/entities`)
+          .query({
+            cooccurrenceId: action.id + "xxx", // does not exist
           })
           .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
@@ -199,17 +205,17 @@ describe("Entities search (params)", function () {
       describe("using entity id", () => {
         it("should return a 200 code with successful response", async () => {
           await request(app)
-            .post(`${apiPath}/entities/search`)
-            .send({
+            .get(`${apiPath}/entities`)
+            .query({
               class: linkedEntity.class,
-              entityId: entity.id,
+              cooccurrenceId: entity.id,
               label: linkedEntity.labels[0],
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
-              expect(res.body[0].entityId).toEqual(linkedEntity.id);
+              expect(res.body[0].id).toEqual(linkedEntity.id);
             });
         });
       });
@@ -217,17 +223,17 @@ describe("Entities search (params)", function () {
       describe("using action id", () => {
         it("should return a 200 code with successful response", async () => {
           await request(app)
-            .post(`${apiPath}/entities/search`)
-            .send({
+            .get(`${apiPath}/entities`)
+            .query({
               class: linkedEntity.class,
-              entityId: action.id,
+              cooccurrenceId: action.id,
               label: linkedEntity.labels[0],
             })
             .set("authorization", "Bearer " + supertestConfig.token)
             .expect("Content-Type", /json/)
             .expect(200)
             .expect((res: Response) => {
-              expect(res.body[0].entityId).toEqual(linkedEntity.id);
+              expect(res.body[0].id).toEqual(linkedEntity.id);
             });
         });
       });
@@ -237,10 +243,10 @@ describe("Entities search (params)", function () {
       describe("using entity id", () => {
         it("should return a 200 code with empty response", async () => {
           await request(app)
-            .post(`${apiPath}/entities/search`)
-            .send({
+            .get(`${apiPath}/entities`)
+            .query({
               class: linkedEntity.class,
-              entityId: action.id,
+              cooccurrenceId: action.id,
               label: linkedEntity.labels[0] + "xxxx",
             })
             .set("authorization", "Bearer " + supertestConfig.token)
@@ -255,10 +261,10 @@ describe("Entities search (params)", function () {
       describe("using action id", () => {
         it("should return a 200 code with empty response", async () => {
           await request(app)
-            .post(`${apiPath}/entities/search`)
-            .send({
+            .get(`${apiPath}/entities`)
+            .query({
               class: linkedEntity.class,
-              entityId: action.id,
+              cooccurrenceId: action.id,
               label: linkedEntity.labels[0] + "xxxx", // does not exist
             })
             .set("authorization", "Bearer " + supertestConfig.token)

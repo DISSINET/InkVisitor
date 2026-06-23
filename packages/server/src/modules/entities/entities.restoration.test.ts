@@ -67,7 +67,11 @@ describe("Entities restoration", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
-        .expect(successfulGenericResponse);
+        // The restore endpoint now returns a message plus the restored entity in
+        // `data`, so the body is no longer strictly equal to { result: true }.
+        .expect((res) => {
+          expect(res.body.result).toEqual(true);
+        });
 
       const restored = await findEntityById(db.connection, validAudit.modelId);
       expect(restored).toBeTruthy();

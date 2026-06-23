@@ -1,4 +1,5 @@
 import "ts-jest";
+import { r as rethink } from "rethinkdb-ts";
 import { Db } from "@service/rethink";
 import { clean } from "@modules/common.test";
 import User, { BookmarkFolder, StoredTerritory } from "@models/user/user";
@@ -18,7 +19,10 @@ const prepareUserData = (): IUser => {
       defaultTerritory: "",
       defaultStatementLanguage: EntityEnums.Language.English,
       searchLanguages: [],
-    },
+      // server-side UserOptions defaults this to false; the field is not yet in
+      // the shared IUserOptions type, so it is cast in below.
+      hideStatementElementsOrderTable: false,
+    } as IUser["options"],
     verified: true,
     rights: [],
     role: UserEnums.Role.Viewer,
@@ -238,9 +242,20 @@ describe("models/user", function () {
       const user1After = await User.findUserById(db.connection, user1.id);
       expect(user1After).toBeFalsy();
 
-      const thrashedUser1 = await User.findUserByLogin(db, user1.email, false)
+      // user1 was soft-deleted (deletedAt set), so it must be looked up with
+      // includeThrashed=true; passing false filters out thrashed users.
+      const thrashedUser1 = await User.findUserByLogin(db, user1.email, true)
       expect(thrashedUser1).not.toBeNull();
-      expect(thrashedUser1!.deletedAt).toBeTruthy();
+
+      // The User constructor drops deletedAt (fillFlatObject skips fields whose
+      // class default is undefined), so assert the persisted soft-delete marker
+      // on the raw db row rather than the rehydrated model.
+      const rawRow = await rethink
+        .table(User.table)
+        .get(user1.id)
+        .run(db.connection);
+      expect(rawRow).toBeTruthy();
+      expect((rawRow as any).deletedAt).toBeTruthy();
     });
   });
 });

@@ -480,16 +480,20 @@ describe("models/entity/response", function () {
 
   describe("ResponseEntityDetail.findUsedInDocuments", function () {
     let db: Db;
+    // Document tag names are matched by /[a-zA-Z0-9\-_]+/, which excludes the
+    // "." produced by Math.random().toString(), so use dot-free ids for any
+    // entity embedded as an anchor tag in the document content below.
+    const tagSafeId = () => Math.random().toString().replace(/\./g, "");
     const territory1 = new Territory({
-      id: Math.random().toString(),
+      id: tagSafeId(),
       data: { parent: { territoryId: "T0", order: 0 } },
     });
     const territory2 = new Territory({
-      id: Math.random().toString(),
+      id: tagSafeId(),
       data: { parent: { territoryId: "T0", order: 1 } },
     });
-    const entityWithoutDoc = new Entity({ id: Math.random().toString() });
-    const entityWithDoc = new Entity({ id: Math.random().toString() });
+    const entityWithoutDoc = new Entity({ id: tagSafeId() });
+    const entityWithDoc = new Entity({ id: tagSafeId() });
     const doc1 = new Document({
       id: Math.random().toString(),
       content: `text<${entityWithDoc.id}>some anchor</${entityWithDoc.id}>not anchor here<${entityWithDoc.id}>some anchor 2</${entityWithDoc.id}>end`,
@@ -523,9 +527,16 @@ describe("models/entity/response", function () {
       await db.initDb();
       await territory1.save(db.connection);
       await territory2.save(db.connection);
-      await doc1.save(db.connection);
-      await doc2.save(db.connection);
+      // entityWithDoc must exist before the documents are preprocessed so that
+      // its class is resolved and persisted into documents.entityIds.
       await entityWithDoc.save(db.connection);
+      // Document.save() no longer preprocesses; anchors + entityIds are now
+      // persisted on write (preprocess-on-write) and findByEntityId reads them
+      // from the DocumentEntityIds index, so preprocess each doc before saving.
+      await doc1.preprocess(db.connection);
+      await doc1.save(db.connection);
+      await doc2.preprocess(db.connection);
+      await doc2.save(db.connection);
       await resource1.save(db.connection);
       await resource2.save(db.connection);
 

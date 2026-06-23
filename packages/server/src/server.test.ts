@@ -28,8 +28,13 @@ describe("Test unauthorized request", function () {
   });
 
   it("should return an unauthorizedError wrapped in IResponeGeneric response", async () => {
+    // A request with no Authorization header falls back to the dev
+    // TEST_JWT_TOKEN (validateJwt.getToken), so it would authenticate as admin
+    // and hit a 400 instead. Send a present-but-bogus bearer token to exercise
+    // the unauthorized path (mirrors src/test/harness.smoke.test.ts).
     await request(app)
       .get(`${apiPath}/users/122322`)
+      .set("authorization", "Bearer not-a-real-token")
       .expect(unauthorizedError.statusCode())
       .expect(testErroneousResponse.bind(undefined, unauthorizedError));
   });
