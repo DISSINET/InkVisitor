@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { EntityColors } from "types";
 
 export const StyledWarningsListHeader = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
@@ -37,11 +38,14 @@ export const StyledHighlightTooltipRow = styled.span`
   gap: 0.4rem;
 `;
 
-export const StyledHighlightTooltipDot = styled.span<{ $color: string }>`
+export const StyledHighlightTooltipDot = styled.span<{ $entityClass: string }>`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: ${({ $color }) => $color};
+  background-color: ${({ theme, $entityClass }) =>
+    EntityColors[$entityClass]
+      ? (theme.color[EntityColors[$entityClass].color] as string)
+      : "transparent"};
   flex-shrink: 0;
 `;
 

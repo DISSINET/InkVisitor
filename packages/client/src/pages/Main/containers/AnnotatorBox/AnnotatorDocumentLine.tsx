@@ -10,7 +10,6 @@ import Dropdown, {
 } from "components/advanced";
 import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 import React, { useMemo, useState } from "react";
-import { useTheme } from "styled-components";
 import { FaDownload, FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
@@ -37,21 +36,18 @@ import {
 } from "./AnnotatorBoxStyles";
 
 const HighlightTooltipContent: React.FC<{ hlEntities: EntityEnums.Class[] }> = ({ hlEntities }) => {
-  const theme = useTheme();
-  const selected = entitiesDict.filter((e) => hlEntities.includes(e.value));
+  const selectedEntityClasses = entitiesDict.filter((e) => hlEntities.includes(e.value));
 
-  if (selected.length === 0) {
+  if (selectedEntityClasses.length === 0) {
     return <StyledHighlightTooltipTitle>No highlights</StyledHighlightTooltipTitle>;
   }
 
   return (
     <>
       <StyledHighlightTooltipTitle>Highlight</StyledHighlightTooltipTitle>
-      {selected.map((e) => (
+      {selectedEntityClasses.map((e) => (
         <StyledHighlightTooltipRow key={e.value}>
-          <StyledHighlightTooltipDot
-            $color={theme.color[`entity${e.value}` as keyof typeof theme.color] as string}
-          />
+          <StyledHighlightTooltipDot $entityClass={e.value} />
           {e.label}
         </StyledHighlightTooltipRow>
       ))}
