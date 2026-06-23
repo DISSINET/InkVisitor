@@ -101,7 +101,7 @@ describe("models/response-search", function () {
         await query.fromRequest(req);
         // Result order across sub-territories is not guaranteed by the query;
         // compare as an unordered id set.
-        expect([...req.entityIds].sort()).toEqual(
+        expect([...(req.entityIds ?? [])].sort()).toEqual(
           st1a.getEntitiesIds().concat(st2a.getEntitiesIds()).sort()
         );
       });
