@@ -17,3 +17,20 @@ export const StyledWarningWrapper = styled.div`
   display: inline-flex;
   flex-shrink: 0;
 `;
+
+export const StyledLoadingDocument = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  position: relative;
+  padding: 0 0.25rem;
+`;
+
+export const StyledInfoText = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["info"]};
+  margin-left: 0.3rem;
+`;
