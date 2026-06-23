@@ -414,7 +414,7 @@ describe("models/statement", function () {
 
     describe("one territory", () => {
       it("should return empty array", async () => {
-        const territory = new Territory({});
+        const territory = new Territory({ id: `root-${Math.random()}` });
         await territory.save(db.connection);
 
         const statements = await Statement.getLinkedEntities(
@@ -427,7 +427,7 @@ describe("models/statement", function () {
 
     describe("one territory, one unlinked statement", () => {
       it("should return empty array", async () => {
-        const territory = new Territory({});
+        const territory = new Territory({ id: `root-${Math.random()}` });
         await territory.save(db.connection);
 
         const statement = new Statement({
@@ -447,7 +447,7 @@ describe("models/statement", function () {
 
     describe("one territory, one linked statement via actants field", () => {
       it("should return empty array", async () => {
-        const territory = new Territory({});
+        const territory = new Territory({ id: `root-${Math.random()}` });
         await territory.save(db.connection);
 
         const statement = new Statement(
@@ -470,7 +470,7 @@ describe("models/statement", function () {
 
     describe("one territory, one linked statement via tags field", () => {
       it("should return empty array", async () => {
-        const territory = new Territory({});
+        const territory = new Territory({ id: `root-${Math.random()}` });
         await territory.save(db.connection);
 
         const statement = new Statement(
@@ -489,7 +489,7 @@ describe("models/statement", function () {
 
     describe("one territory, one linked statement via territory.id field", () => {
       it("should return empty array", async () => {
-        const territory = new Territory({});
+        const territory = new Territory({ id: `root-${Math.random()}` });
         await territory.save(db.connection);
 
         const statement = new Statement(

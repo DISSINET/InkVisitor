@@ -1,5 +1,6 @@
 import "ts-jest";
 import { ResponseStats } from "./response";
+import { IRequestStats } from "@inkvisitor/shared/types/request-stats";
 import Acl from "@middlewares/acl";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
@@ -9,7 +10,9 @@ import { newMockRequest } from "@modules/common.test";
 describe("test ResponseStats.prepare", function () {
   describe("empty test", () => {
     const db = new Db();
-    const response = new ResponseStats();
+    // Constructor only reads the IStatsAggregationParams fields (all defaulted);
+    // the required `filter` is unused here, so an empty params object is fine.
+    const response = new ResponseStats({} as unknown as IRequestStats);
     const request = newMockRequest(db);
 
     beforeAll(async () => {
