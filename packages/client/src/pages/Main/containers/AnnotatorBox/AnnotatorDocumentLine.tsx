@@ -98,6 +98,13 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
+  const highlightTooltip = useMemo(() => {
+    const labels = entitiesDict.filter((e) => hlEntities.includes(e.value)).map((e) => e.label);
+    if (labels.length === 0) return "No highlights";
+    if (labels.length === entitiesDict.length) return "All classes highlighted";
+    return `Highlighted Entity classes: ${labels.join(", ")}`;
+  }, [hlEntities]);
+
   const highlightDropdownLimitSelectedItems = useMemo(
     () =>
       Math.floor(
@@ -195,7 +202,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledWarningWrapper>
             )}
 
-          {!selectedDocument && !selectedDocumentIsFetching &&
+          {!selectedDocument &&
+            !selectedDocumentIsFetching &&
             selectedResource !== false &&
             selectedResource.data.documentId === undefined && (
               <StyledNoDocumentMessage>
@@ -204,32 +212,31 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledNoDocumentMessage>
             )}
 
-          {selectedResource !== false &&
-            selectedResource?.data?.documentId && (
-              <StyledAnnotatorMenuBar>
-                {activeTHasAnchor ? (
-                  <Button
-                    label=""
-                    iconRight={
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <TbAnchor />
-                        <FaLongArrowAltRight />
-                      </div>
-                    }
-                    tooltipLabel="locate anchor"
-                    inverted
-                    onClick={() => {
-                      annotator?.scrollToAnchor(territoryId);
-                    }}
-                    color="warning"
-                  />
-                ) : (
-                  <StyledSearchNavigation>
-                    <TbAnchorOff title="no anchor for T" />
-                  </StyledSearchNavigation>
-                )}
-              </StyledAnnotatorMenuBar>
-            )}
+          {selectedResource !== false && selectedResource?.data?.documentId && (
+            <StyledAnnotatorMenuBar>
+              {activeTHasAnchor ? (
+                <Button
+                  label=""
+                  iconRight={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <TbAnchor />
+                      <FaLongArrowAltRight />
+                    </div>
+                  }
+                  tooltipLabel="locate anchor"
+                  inverted
+                  onClick={() => {
+                    annotator?.scrollToAnchor(territoryId);
+                  }}
+                  color="warning"
+                />
+              ) : (
+                <StyledSearchNavigation>
+                  <TbAnchorOff title="no anchor for T" />
+                </StyledSearchNavigation>
+              )}
+            </StyledAnnotatorMenuBar>
+          )}
         </StyledDocumentContainer>
 
         {/* Class selector - HIGHLIGHT */}
@@ -258,7 +265,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             {isUndersized && (
               <Button
                 icon={<FaHighlighter />}
-                tooltipLabel="Highlight settings"
+                tooltipLabel={highlightTooltip}
                 onClick={() => setShowHighlightModal(true)}
               />
             )}
