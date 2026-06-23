@@ -167,17 +167,17 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               minWidth: "2rem",
             }}
           >
-            {selectedDocument && !selectedDocumentIsFetching && (
+            {selectedDocument && (
               <DocumentTitle
                 title={selectedDocument.title}
                 width={annotatorWidthTooNarrow ? 80 : "full"}
                 noMargin
               />
             )}
-            {selectedDocumentIsFetching && (
+            {selectedDocumentIsFetching && !selectedDocument && (
               <StyledLoadingDocument>
                 <Loader show size={16} />
-                <StyledInfoText>Loading document</StyledInfoText>
+                <StyledInfoText>Loading</StyledInfoText>
               </StyledLoadingDocument>
             )}
           </StyledDocumentTitleContainer>
