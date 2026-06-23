@@ -33,7 +33,7 @@ function computeInitialPanelWidths(): number[] {
       localStorage.getItem("thirdPanelExpanded") !== "false",
       localStorage.getItem("fourthPanelExpanded") !== "false",
     ];
-    if (!arePanelWidthsUndersized(widths, expanded)) {
+    if (!arePanelWidthsUndersized(widths, expanded, layoutWidth)) {
       return widths.map(floorNumberToOneDecimal);
     }
   }
