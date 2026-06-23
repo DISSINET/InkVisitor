@@ -45,7 +45,10 @@ export const StyledSuggesterButton = styled.div`
 `;
 
 export const StyledSuggesterList = styled.div`
-  z-index: 160;
+  /* Rendered in a #page-content portal that forms no stacking context, so this
+     competes at the body level with the modal wrap (z 500). Match the other
+     floating portal menus (Tooltip, DatePicker) so the dropdown clears modals. */
+  z-index: 10000;
 `;
 interface StyledRelativePosition {
   $width?: number;
