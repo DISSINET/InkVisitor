@@ -41,7 +41,7 @@ const HighlightTooltipContent: React.FC<{ hlEntities: EntityEnums.Class[] }> = (
   const selected = entitiesDict.filter((e) => hlEntities.includes(e.value));
 
   if (selected.length === 0) {
-    return <span>No highlights</span>;
+    return <StyledHighlightTooltipTitle>No highlights</StyledHighlightTooltipTitle>;
   }
 
   return (
