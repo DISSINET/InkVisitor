@@ -10,7 +10,7 @@ export const StyledMenuGroupWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
   padding-top: 2.7rem;
 
-  z-index: 500;
+  z-index: 10001;
   min-width: 200px;
 `;
 
