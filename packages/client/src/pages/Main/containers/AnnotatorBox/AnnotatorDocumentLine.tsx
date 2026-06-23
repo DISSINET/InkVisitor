@@ -27,6 +27,7 @@ import {
 import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import {
   StyledDocumentContainer,
+  StyledLoadingDocument,
   StyledWarningsListHeader,
   StyledWarningWrapper,
 } from "./AnnotatorBoxStyles";
@@ -174,10 +175,10 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               />
             )}
             {selectedDocumentIsFetching && (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                <Loader show size={16} />
+              <StyledLoadingDocument>
+                <Loader show size={14} />
                 <StyledInfoText>Loading document</StyledInfoText>
-              </div>
+              </StyledLoadingDocument>
             )}
           </StyledDocumentTitleContainer>
 

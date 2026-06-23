@@ -17,3 +17,11 @@ export const StyledWarningWrapper = styled.div`
   display: inline-flex;
   flex-shrink: 0;
 `;
+
+export const StyledLoadingDocument = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  position: relative;
+  padding: 0 0.25rem;
+`;

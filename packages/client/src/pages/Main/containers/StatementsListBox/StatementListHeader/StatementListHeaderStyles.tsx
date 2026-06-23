@@ -26,7 +26,7 @@ export const StyledMoveToParent = styled(animated.div)`
 `;
 
 export const StyledInfoText = styled.div`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
   align-items: center;
