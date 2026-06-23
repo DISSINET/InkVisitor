@@ -365,9 +365,11 @@ describe("models/entity/response", function () {
       });
 
       it("should have 2 idems in linkedEntitiesIds map", function () {
-        expect(Object.keys(responseEmpty.linkedEntitiesIds)).toEqual([
-          statementId,
-        ]);
+        // populateInStatementsRelations now also tracks the actant & relation
+        // entity ids (both === id here) alongside the statement id
+        expect(Object.keys(responseEmpty.linkedEntitiesIds).sort()).toEqual(
+          [statementId, id].sort()
+        );
       });
 
       it("should have expected classification & identification", function () {
@@ -443,9 +445,11 @@ describe("models/entity/response", function () {
       });
 
       it("should have filled linkedEntitiesIds map", function () {
-        expect(Object.keys(responseEmpty.linkedEntitiesIds)).toEqual([
-          statementId,
-        ]);
+        // populateInStatementsRelations now also tracks the actant entity id
+        // ("1") and the relation entity id (id) alongside the statement id
+        expect(Object.keys(responseEmpty.linkedEntitiesIds).sort()).toEqual(
+          [statementId, "1", id].sort()
+        );
       });
 
       it("should have expected classification & identification", function () {

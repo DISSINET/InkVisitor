@@ -9,10 +9,6 @@ import { pool } from "@middlewares/db";
 import { testErroneousResponse } from "@modules/common.test";
 
 describe("Test unknown route", function () {
-  afterAll(async () => {
-    await pool.end();
-  });
-
   it("should return an unknownRouteError wrapped in IResponeGeneric response", async () => {
     await request(app)
       .get(`${apiPath}/random/get`)

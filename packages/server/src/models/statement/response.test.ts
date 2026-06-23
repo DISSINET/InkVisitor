@@ -9,7 +9,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import "ts-jest";
 import { ResponseStatement } from "./response";
-import Statement, { StatementActant } from "./statement";
+import Statement, { StatementActant, StatementAction } from "./statement";
 import { prepareStatement } from "./statement.test";
 import Territory from "@models/territory/territory";
 import { ISetting } from "@inkvisitor/shared/types/settings";
@@ -43,7 +43,7 @@ class MockResponse extends ResponseStatement {
       action.data.entities[pos] = map[key];
     }
 
-    // this.data.actions.push(new StatementAction({ actionId: action.id }));
+    this.data.actions.push(new StatementAction({ actionId: action.id }));
     this.entities[action.id] = action;
   }
 

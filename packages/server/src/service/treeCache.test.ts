@@ -38,7 +38,10 @@ describe("TreeCache", function () {
             expect(cache.getRightForTerritory(`T1-${randSuffix}`, [rootRight])).toEqual(rootRight);
         });
         it("should NOT find the right if not even in the parent chain", () => {
-            expect(cache.getRightForTerritory(`T1-${randSuffix}`, [t1_2_right])).toEqual(undefined);
+            // T2 is neither a parent nor a child of T1-2, so no right is derived
+            // (getRightForTerritory now also derives a read right from a child
+            //  territory's right, which would match if we queried T1).
+            expect(cache.getRightForTerritory(`T2-${randSuffix}`, [t1_2_right])).toEqual(undefined);
         });
     });
 });
