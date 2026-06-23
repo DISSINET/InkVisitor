@@ -28,6 +28,7 @@ import {
   IEntity,
   IResponseEntity,
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IResponseUser,
   IStatement,
@@ -47,7 +48,11 @@ import {
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
-import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
+import {
+  collectStatementAnchors,
+  getLeafTerritoryAnchorsAtIndex,
+  getStatementOrderByIndex,
+} from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
@@ -157,7 +162,8 @@ export const TextAnnotator = ({
   const queryClient = useQueryClient();
   const theme = useTheme();
 
-  const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
+  const { appendDetailId, statementId, selectedDetailId, setTerritoryId } =
+    useSearchParams();
 
   const { annotator, setAnnotator } = useAnnotator();
 
@@ -399,6 +405,9 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     },
+    // target subT chosen in the anchor menu (New Statement button path).
+    // The EntitySuggester path carries its target via entityCreateModalProps.territoryId.
+    targetTerritoryId?: string,
   ): Promise<void> => {
     if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
@@ -408,9 +417,26 @@ export const TextAnnotator = ({
           collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor]),
         ).values(),
       );
-      const territoryStatements = territory?.statements || [];
 
-      const statementIds = new Set(territoryStatements.map((s) => s.id));
+      // the subT the new Statement should land in: an explicitly chosen target
+      // (suggester via modal props, or the New Statement button) wins over the
+      // active subT opened in the Statement list / Territory tree.
+      const effectiveTerritoryId =
+        entityCreateModalProps?.territoryId ?? targetTerritoryId ?? territory?.id;
+
+      if (!effectiveTerritoryId) {
+        return;
+      }
+
+      // statements of the target subT, used to compute the new Statement's order
+      // by text index. The active subT already has them loaded; a different subT
+      // is fetched on demand.
+      const targetStatements: IResponseStatement[] =
+        effectiveTerritoryId === territory?.id
+          ? territory?.statements || []
+          : (await api.territoryGetStatements(effectiveTerritoryId)).data ?? [];
+
+      const statementIds = new Set(targetStatements.map((s) => s.id));
       // filter only anchors that are in the statement list
       const statementAnchorsInList = statementAnchors.filter((anchor) =>
         statementIds.has(anchor.anchor),
@@ -426,12 +452,12 @@ export const TextAnnotator = ({
 
       // see the order of the previous start index statement in the statement list and put the new statement after it
       const lastIndexBeforeHighlight =
-        territoryStatements.findIndex(
+        targetStatements.findIndex(
           (statement) => statement.id === lastAnchorBeforeIndex?.anchor,
         ) ?? -1;
-      const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, territoryStatements);
+      const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, targetStatements);
 
-      if (userData && territory && statementCreateMutation) {
+      if (userData && statementCreateMutation) {
         if (entityCreateModalProps) {
           const { label, detail, territoryId, language } = entityCreateModalProps;
           const newStatement: IStatement = CStatement(
@@ -453,11 +479,17 @@ export const TextAnnotator = ({
             userData.options,
             text,
             "",
-            territory.id,
+            effectiveTerritoryId,
             statementId,
             newOrder,
           );
           await statementCreateMutation?.mutateAsync(newStatement);
+        }
+
+        // when the Statement was created in a subT other than the active one,
+        // open that subT so the user sees where it landed
+        if (effectiveTerritoryId !== territory?.id) {
+          setTerritoryId(effectiveTerritoryId);
         }
       }
     }
@@ -986,6 +1018,8 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     },
+    // target subT chosen in the New Statement section of the anchor menu
+    targetTerritoryId?: string,
   ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
@@ -1009,10 +1043,24 @@ export const TextAnnotator = ({
               language: entityCreateModalProps.language,
             }
           : undefined,
+        targetTerritoryId,
       );
       await handleAddAnchor(newStatementId, elvl);
     }
   };
+
+  // leaf subTs (Territory anchors) the current selection sits inside, deepest
+  // first. Multiple Ts can share one full-text, so the cursor may be inside
+  // several. Used to let the user target the proper subT for the new Statement.
+  const annotatorPositionSubTAnchorIds = useMemo(() => {
+    if (!dataDocument || selectionStartIndex === -1) {
+      return [];
+    }
+    return getLeafTerritoryAnchorsAtIndex(
+      dataDocument.anchors,
+      selectionStartIndex,
+    ).map((anchor) => anchor.anchor);
+  }, [dataDocument, selectionStartIndex]);
 
   const onRemoveAnchor = (anchor: Tag) => {
     annotator?.removeAnchorFromSelection(anchor);
@@ -1302,6 +1350,7 @@ export const TextAnnotator = ({
                       onAnchorAdd={handleAddAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
+                      annotatorPositionSubTIds={annotatorPositionSubTAnchorIds}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       readonly={isMenuReadOnly}

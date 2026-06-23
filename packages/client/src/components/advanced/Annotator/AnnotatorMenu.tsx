@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { List } from "react-window";
 
 import { Tag } from "@inkvisitor/annotator/src/lib";
@@ -9,12 +9,7 @@ import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
-import {
-  FaBolt,
-  FaClipboard,
-  FaExclamationTriangle,
-  FaPlus,
-} from "react-icons/fa";
+import { FaBolt, FaClipboard, FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
@@ -39,6 +34,12 @@ import {
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
+  StyledStatementTargetInfo,
+  StyledStatementTargetList,
+  StyledStatementTargetOption,
+  StyledStatementTargetRadio,
+  StyledStatementTargetSelector,
+  StyledStatementTargetTitle,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
@@ -56,11 +57,18 @@ interface TextAnnotatorMenuProps {
       detail: string;
       territoryId: string;
       language: EntityEnums.Language;
-    }
+    },
+    targetTerritoryId?: string,
   ) => void;
+  /**
+   * Leaf subTs (Territory anchors) the current selection sits inside, deepest
+   * first. Lets the user target the proper subT for the new Statement instead
+   * of always using the active subT.
+   */
+  annotatorPositionSubTIds: string[];
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
-    elvl: EntityEnums.Elvl
+    elvl: EntityEnums.Elvl,
   ) => void;
   onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
@@ -88,6 +96,7 @@ export const TextAnnotatorMenu = ({
   entities,
   onAnchorAdd,
   onCreateStatement = undefined,
+  annotatorPositionSubTIds,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
@@ -110,8 +119,7 @@ export const TextAnnotatorMenu = ({
   const { setStatementId } = useSearchParams();
 
   const tryCloseMenu = useCallback(() => {
-    const isModalOpen =
-      document.querySelector('[data-attribute-modal="true"]') !== null;
+    const isModalOpen = document.querySelector('[data-attribute-modal="true"]') !== null;
     if (!isModalOpen) {
       onEscapePressed();
     }
@@ -120,17 +128,48 @@ export const TextAnnotatorMenu = ({
   useKeypress("Escape", tryCloseMenu);
   useKeypress("Enter", tryCloseMenu, undefined, true);
 
-  const [activeTerritoryElvl, setActiveTerritoryElvl] =
-    useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
-  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(
-    EntityEnums.Elvl.Textual
+  const [activeTerritoryElvl, setActiveTerritoryElvl] = useState<EntityEnums.Elvl>(
+    EntityEnums.Elvl.Textual,
   );
-  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(
-    EntityEnums.Elvl.Textual
+  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+
+  // target subT for the new Statement. Options = the active subT plus the leaf
+  // subTs the selection sits inside (per the Annotator position). The selector
+  // only matters when those differ; default is the deepest leaf subT.
+  const statementTargetOptions = useMemo(() => {
+    const ids: string[] = [];
+    annotatorPositionSubTIds.forEach((id) => {
+      if (id && !ids.includes(id)) ids.push(id);
+    });
+    if (activeTerritoryId && !ids.includes(activeTerritoryId)) {
+      ids.push(activeTerritoryId);
+    }
+    return ids;
+  }, [annotatorPositionSubTIds, activeTerritoryId]);
+
+  // show the selector only when the position-based leaf subTs add something
+  // beyond the active subT
+  const showStatementTargetSelector = useMemo(
+    () => annotatorPositionSubTIds.some((id) => id && id !== activeTerritoryId),
+    [annotatorPositionSubTIds, activeTerritoryId],
   );
-  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(
-    EntityEnums.Elvl.Textual
+
+  const defaultStatementTargetId = annotatorPositionSubTIds[0] ?? activeTerritoryId;
+
+  const [selectedStatementTargetId, setSelectedStatementTargetId] = useState<string | undefined>(
+    defaultStatementTargetId,
   );
+
+  // reset to the deepest leaf whenever the selection (and thus the candidate
+  // subTs) changes
+  useEffect(() => {
+    setSelectedStatementTargetId(defaultStatementTargetId);
+  }, [defaultStatementTargetId]);
+
+  const selectedStatementTargetEntity =
+    (selectedStatementTargetId ? entities[selectedStatementTargetId] : false) || territory;
 
   const someAnchorsWithoutElvl = useMemo(
     () =>
@@ -138,9 +177,9 @@ export const TextAnnotatorMenu = ({
         (anchor) =>
           anchor.attributes.elvl === undefined ||
           anchor.attributes.elvl === null ||
-          anchor.attributes.elvl === ""
+          anchor.attributes.elvl === "",
       ),
-    [anchors]
+    [anchors],
   );
 
   const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
@@ -162,7 +201,7 @@ export const TextAnnotatorMenu = ({
       onUpdateAnchor,
       readonly,
     }),
-    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor, readonly]
+    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor, readonly],
   );
 
   return (
@@ -245,24 +284,64 @@ export const TextAnnotatorMenu = ({
           {/* New Statement */}
           <StyledAnnotatorItemContent>
             {onCreateStatement && (
-              <StyledAnnotatorItemContentLine>
-                <Button
-                  label="New Statement"
-                  tooltipLabel="Create new Statement from selection"
-                  icon={<TbAnchor size={15} />}
-                  color="primary"
-                  onClick={() => {
-                    onCreateStatement(statementElvl);
-                  }}
-                />
-                <ElvlButtonGroup
-                  border
-                  value={statementElvl}
-                  onChange={(statementElvl) => {
-                    setStatementElvl(statementElvl);
-                  }}
-                />
-              </StyledAnnotatorItemContentLine>
+              <>
+                {showStatementTargetSelector && (
+                  <StyledStatementTargetSelector>
+                    <StyledStatementTargetTitle>create S in subT</StyledStatementTargetTitle>
+                    <StyledStatementTargetList>
+                      {statementTargetOptions.map((optionId) => {
+                        const optionEntity =
+                          entities[optionId] ||
+                          (optionId === activeTerritoryId ? territory : undefined);
+                        if (!optionEntity) {
+                          return null;
+                        }
+                        const isSelected = optionId === selectedStatementTargetId;
+                        return (
+                          <StyledStatementTargetOption
+                            key={optionId}
+                            $isSelected={isSelected}
+                            onClick={() => setSelectedStatementTargetId(optionId)}
+                          >
+                            <StyledStatementTargetRadio $isSelected={isSelected} />
+                            <EntityTag
+                              fullWidth
+                              disableCopyToClipboard
+                              entity={optionEntity}
+                              disableDoubleClick
+                              disableDrag
+                            />
+                          </StyledStatementTargetOption>
+                        );
+                      })}
+                    </StyledStatementTargetList>
+                  </StyledStatementTargetSelector>
+                )}
+
+                {annotatorPositionSubTIds.length === 0 && (
+                  <StyledStatementTargetInfo>
+                    selection is not within any subT — S will be created in the active T
+                  </StyledStatementTargetInfo>
+                )}
+                <StyledAnnotatorItemContentLine>
+                  <Button
+                    label="New Statement"
+                    tooltipLabel="Create new Statement from selection"
+                    icon={<TbAnchor size={15} />}
+                    color="primary"
+                    onClick={() => {
+                      onCreateStatement(statementElvl, undefined, selectedStatementTargetId);
+                    }}
+                  />
+                  <ElvlButtonGroup
+                    border
+                    value={statementElvl}
+                    onChange={(statementElvl) => {
+                      setStatementElvl(statementElvl);
+                    }}
+                  />
+                </StyledAnnotatorItemContentLine>
+              </>
             )}
           </StyledAnnotatorItemContent>
           {/* Entity Suggester */}
@@ -276,7 +355,7 @@ export const TextAnnotatorMenu = ({
                 }}
                 inputWidth={200}
                 openDetailOnCreate
-                parentTerritory={territory}
+                parentTerritory={selectedStatementTargetEntity || territory}
                 onEntityCreateMutationSuccess={(entity) => {
                   if (entity.class === EntityEnums.Class.Statement) {
                     queryClient.invalidateQueries({
@@ -286,8 +365,7 @@ export const TextAnnotatorMenu = ({
                   }
                 }}
                 onCreateStatement={(entityCreateModalProps) =>
-                  onCreateStatement &&
-                  onCreateStatement(suggesterElvl, entityCreateModalProps)
+                  onCreateStatement && onCreateStatement(suggesterElvl, entityCreateModalProps)
                 }
                 disableCleanTypedAfterCreate
               />
@@ -302,68 +380,66 @@ export const TextAnnotatorMenu = ({
           </StyledAnnotatorItemContent>
           {/* Territory Sibling or Child */}
           {activeTerritoryId && (
-          <StyledAnnotatorItemContent>
-            <StyledAnnotatorItemContentLine>
-              {onCreateTerritory && (
-                <StyledTerritorySubsection>
-                  <StyledTerritorySubsectionTitle>
-                    territory
-                  </StyledTerritorySubsectionTitle>
-                  <Button
-                    icon={
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M2 3.75C2 2.784 2.784 2 3.75 2h8.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 7H5v2.5A1.5 1.5 0 0 0 6.5 11H8v-.25C8 9.784 8.784 9 9.75 9h2.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 14h-2.5A1.75 1.75 0 0 1 8 12.25V12H6.5A2.5 2.5 0 0 1 4 9.5V7h-.25A1.75 1.75 0 0 1 2 5.25zm7 8.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75zM12.25 6a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75z"
-                        />
-                      </svg>
-                    }
-                    color={isTextInsideThisT ? "greyer" : "primary"}
-                    onClick={() => {
-                      onCreateTerritory("sibling-T", territoryElvl);
-                    }}
-                    label="Sibling"
-                    tooltipLabel="Create new sibling territory anchor"
-                  />
-                  {hasParentT && (
+            <StyledAnnotatorItemContent>
+              <StyledAnnotatorItemContentLine>
+                {onCreateTerritory && (
+                  <StyledTerritorySubsection>
+                    <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
                     <Button
                       icon={
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="14"
                           height="14"
-                          viewBox="0 0 32 32"
+                          viewBox="0 0 16 16"
                         >
                           <path
                             fill="currentColor"
-                            d="M28 12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11v4H9a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H9v-4h14v4h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-3v-4a2 2 0 0 0-2-2h-6v-4ZM12 28H4v-4h8Zm16 0h-8v-4h8ZM4 4h24v6H4Z"
+                            d="M2 3.75C2 2.784 2.784 2 3.75 2h8.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 7H5v2.5A1.5 1.5 0 0 0 6.5 11H8v-.25C8 9.784 8.784 9 9.75 9h2.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 14h-2.5A1.75 1.75 0 0 1 8 12.25V12H6.5A2.5 2.5 0 0 1 4 9.5V7h-.25A1.75 1.75 0 0 1 2 5.25zm7 8.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75zM12.25 6a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75z"
                           />
                         </svg>
                       }
-                      color={isTextInsideThisT ? "primary" : "greyer"}
+                      color={isTextInsideThisT ? "greyer" : "primary"}
                       onClick={() => {
-                        onCreateTerritory("child-T", territoryElvl);
+                        onCreateTerritory("sibling-T", territoryElvl);
                       }}
-                      label="Child"
-                      tooltipLabel="Create new child territory anchor"
+                      label="Sibling"
+                      tooltipLabel="Create new sibling territory anchor"
                     />
-                  )}
-                  <ElvlButtonGroup
-                    border
-                    value={territoryElvl}
-                    onChange={(territoryElvl) => {
-                      setTerritoryElvl(territoryElvl);
-                    }}
-                  />
-                </StyledTerritorySubsection>
-              )}
-            </StyledAnnotatorItemContentLine>
-          </StyledAnnotatorItemContent>
+                    {hasParentT && (
+                      <Button
+                        icon={
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 32 32"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M28 12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11v4H9a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H9v-4h14v4h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-3v-4a2 2 0 0 0-2-2h-6v-4ZM12 28H4v-4h8Zm16 0h-8v-4h8ZM4 4h24v6H4Z"
+                            />
+                          </svg>
+                        }
+                        color={isTextInsideThisT ? "primary" : "greyer"}
+                        onClick={() => {
+                          onCreateTerritory("child-T", territoryElvl);
+                        }}
+                        label="Child"
+                        tooltipLabel="Create new child territory anchor"
+                      />
+                    )}
+                    <ElvlButtonGroup
+                      border
+                      value={territoryElvl}
+                      onChange={(territoryElvl) => {
+                        setTerritoryElvl(territoryElvl);
+                      }}
+                    />
+                  </StyledTerritorySubsection>
+                )}
+              </StyledAnnotatorItemContentLine>
+            </StyledAnnotatorItemContent>
           )}
         </StyledAnnotatorItem>
       )}
@@ -384,16 +460,12 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorItemContent>
           <StyledAnnotatorAnchorListWrap>
             {anchors.length === 0 && (
-              <StyledAnnotatorNoAnchors>
-                no anchors in selection
-              </StyledAnnotatorNoAnchors>
+              <StyledAnnotatorNoAnchors>no anchors in selection</StyledAnnotatorNoAnchors>
             )}
             {resolvedAnchors.length > 0 && (
               <List
                 rowProps={{ data: anchorGridRowData }}
-                rowCount={Math.ceil(
-                  resolvedAnchors.length / ANCHOR_GRID_COLUMNS
-                )}
+                rowCount={Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS)}
                 rowHeight={ANCHOR_GRID_ROW_HEIGHT}
                 overscanCount={8}
                 style={{ maxHeight: "13rem", width: "100%" }}

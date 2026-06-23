@@ -46,6 +46,7 @@ interface EntityTag {
   disableTooltip?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
+  disableCopyToClipboard?: boolean;
   tooltipPosition?: Placement;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
@@ -71,6 +72,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   disableTooltip = false,
   disableDrag = false,
   disableDoubleClick = false,
+  disableCopyToClipboard = false,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -99,8 +101,10 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     if (!clickedOnce) return;
 
     const timeout = setTimeout(() => {
-      navigator.clipboard.writeText(entityLabel);
-      toast.info(`label [${getShortLabelByLetterCount(entityLabel, 200)}] copied to clipboard`);
+      if (!disableCopyToClipboard) {
+        navigator.clipboard.writeText(entityLabel);
+        toast.info(`label [${getShortLabelByLetterCount(entityLabel, 200)}] copied to clipboard`);
+      }
       setClickedOnce(false);
     }, 500);
 

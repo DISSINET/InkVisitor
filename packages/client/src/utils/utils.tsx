@@ -439,6 +439,59 @@ export const collectStatementAnchors = (
   }, []);
 };
 
+// collect all Territory anchors whose span contains the given text index.
+// Territory anchors segment the full-text, so these are the subTs the cursor
+// currently sits inside (a position can be inside several when subTs overlap
+// or nest, since multiple Ts can share one full-text).
+export const collectTerritoryAnchorsAtIndex = (
+  anchors: IAnchorsNode[],
+  index: number
+): IAnchorsNode[] => {
+  return anchors.reduce((acc: IAnchorsNode[], anchor) => {
+    if (
+      anchor.class === EntityEnums.Class.Territory &&
+      anchor.indexStart <= index &&
+      index <= anchor.indexEnd
+    ) {
+      acc.push(anchor);
+    }
+    if (anchor.children) {
+      acc.push(...collectTerritoryAnchorsAtIndex(anchor.children, index));
+    }
+    return acc;
+  }, []);
+};
+
+// reduce the Territory anchors at an index to the lowest-level (leaf) ones:
+// a candidate is kept only when no other candidate's span is strictly inside
+// it. Result is sorted deepest first (smallest span; ties broken by larger
+// indexStart, then original order).
+export const getLeafTerritoryAnchorsAtIndex = (
+  anchors: IAnchorsNode[],
+  index: number
+): IAnchorsNode[] => {
+  const candidates = collectTerritoryAnchorsAtIndex(anchors, index);
+
+  const leaves = candidates.filter(
+    (candidate) =>
+      !candidates.some(
+        (other) =>
+          other !== candidate &&
+          other.indexStart >= candidate.indexStart &&
+          other.indexEnd <= candidate.indexEnd &&
+          (other.indexStart !== candidate.indexStart ||
+            other.indexEnd !== candidate.indexEnd)
+      )
+  );
+
+  return leaves.sort((a, b) => {
+    const spanA = a.indexEnd - a.indexStart;
+    const spanB = b.indexEnd - b.indexStart;
+    if (spanA !== spanB) return spanA - spanB;
+    return b.indexStart - a.indexStart;
+  });
+};
+
 export const getStatementOrderByIndex = (
   index: number,
   statements: IResponseStatement[]

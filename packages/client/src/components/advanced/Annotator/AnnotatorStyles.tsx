@@ -195,6 +195,54 @@ export const StyledInfoText = styled.div`
   margin: ${({ theme }) => theme.space[4]};
 `;
 
+export const StyledStatementTargetSelector = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledStatementTargetTitle = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  color: ${({ theme }) => theme.color.gray["700"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-variant-caps: small-caps;
+`;
+
+export const StyledStatementTargetList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledStatementTargetOption = styled.div<{ $isSelected: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  cursor: pointer;
+  padding: ${({ theme }) => theme.space[1]};
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  border: ${({ theme, $isSelected }) =>
+    `1px solid ${$isSelected ? theme.color.primary : "transparent"}`};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.blue["200"] : "transparent"};
+`;
+
+export const StyledStatementTargetRadio = styled.div<{ $isSelected: boolean }>`
+  flex-shrink: 0;
+  width: ${({ theme }) => theme.space[3]};
+  height: ${({ theme }) => theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  border: ${({ theme }) => `2px solid ${theme.color.primary}`};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.primary : "transparent"};
+`;
+
+export const StyledStatementTargetInfo = styled.div`
+  color: ${({ theme }) => theme.color.gray["600"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: italic;
+`;
+
 interface StyledDisplayModeButtonIconWrapper {
   $annotatorWidthTooNarrow?: boolean;
 }

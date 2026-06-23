@@ -3,7 +3,9 @@ import { IResponseEntity, IResponseTree } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import {
   collectStatementAnchors,
+  collectTerritoryAnchorsAtIndex,
   collectTerritoryChildren,
+  getLeafTerritoryAnchorsAtIndex,
   computeDifferences,
   deepCopy,
   floorNumberToOneDecimal,
@@ -203,6 +205,95 @@ describe("collectStatementAnchors", () => {
     expect(collectStatementAnchors(anchors).map((a) => a.anchor)).toEqual([
       "S1",
       "S2",
+    ]);
+  });
+});
+
+// nested + overlapping Territory anchors sharing one full-text
+const territoryAnchorTree = [
+  {
+    anchor: "Touter",
+    class: EntityEnums.Class.Territory,
+    indexStart: 0,
+    indexEnd: 100,
+    children: [
+      {
+        anchor: "Tinner",
+        class: EntityEnums.Class.Territory,
+        indexStart: 10,
+        indexEnd: 50,
+        children: [
+          { anchor: "S1", class: EntityEnums.Class.Statement, indexStart: 20, indexEnd: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    anchor: "Tother",
+    class: EntityEnums.Class.Territory,
+    indexStart: 40,
+    indexEnd: 120,
+    children: [],
+  },
+] as unknown as IAnchorsNode[];
+
+describe("collectTerritoryAnchorsAtIndex", () => {
+  it("collects all Territory anchors whose span contains the index", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 45)
+        .map((a) => a.anchor)
+        .sort()
+    ).toEqual(["Tinner", "Tother", "Touter"]);
+  });
+
+  it("ignores non-Territory anchors", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 22).map((a) => a.anchor)
+    ).not.toContain("S1");
+  });
+
+  it("returns only the outer T when index is outside inner/other spans", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 5).map((a) => a.anchor)
+    ).toEqual(["Touter"]);
+  });
+
+  it("returns empty when index is in no Territory span", () => {
+    expect(collectTerritoryAnchorsAtIndex(territoryAnchorTree, 200)).toEqual([]);
+  });
+
+  it("treats span bounds as inclusive", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 100).map((a) => a.anchor)
+    ).toContain("Touter");
+  });
+});
+
+describe("getLeafTerritoryAnchorsAtIndex", () => {
+  it("drops Ts that contain another candidate, keeping leaves, deepest (smallest span) first", () => {
+    expect(
+      getLeafTerritoryAnchorsAtIndex(territoryAnchorTree, 45).map((a) => a.anchor)
+    ).toEqual(["Tinner", "Tother"]);
+  });
+
+  it("returns the single containing T when no nesting applies", () => {
+    expect(
+      getLeafTerritoryAnchorsAtIndex(territoryAnchorTree, 5).map((a) => a.anchor)
+    ).toEqual(["Touter"]);
+  });
+
+  it("returns empty when index is in no Territory span", () => {
+    expect(getLeafTerritoryAnchorsAtIndex(territoryAnchorTree, 200)).toEqual([]);
+  });
+
+  it("breaks span ties by larger indexStart first", () => {
+    const tied = [
+      { anchor: "Ta", class: EntityEnums.Class.Territory, indexStart: 0, indexEnd: 10, children: [] },
+      { anchor: "Tb", class: EntityEnums.Class.Territory, indexStart: 3, indexEnd: 13, children: [] },
+    ] as unknown as IAnchorsNode[];
+    expect(getLeafTerritoryAnchorsAtIndex(tied, 5).map((a) => a.anchor)).toEqual([
+      "Tb",
+      "Ta",
     ]);
   });
 });
