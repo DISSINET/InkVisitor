@@ -10,6 +10,7 @@ import Dropdown, {
 } from "components/advanced";
 import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 import React, { useMemo, useState } from "react";
+import { useTheme } from "styled-components";
 import { FaDownload, FaHighlighter, FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
@@ -31,6 +32,39 @@ import {
   StyledWarningsListHeader,
   StyledWarningWrapper,
 } from "./AnnotatorBoxStyles";
+
+const HighlightTooltipContent: React.FC<{ hlEntities: EntityEnums.Class[] }> = ({ hlEntities }) => {
+  const theme = useTheme();
+  const selected = entitiesDict.filter((e) => hlEntities.includes(e.value));
+
+  if (selected.length === 0) {
+    return <span>No highlights</span>;
+  }
+
+  return (
+    <>
+      <div style={{ marginBottom: "0.5rem" }}>
+        <b>Highlight</b>
+      </div>
+      {selected.map((e) => (
+        <span key={e.value} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              backgroundColor: theme.color[
+                `entity${e.value}` as keyof typeof theme.color
+              ] as string,
+              flexShrink: 0,
+            }}
+          />
+          {e.label}
+        </span>
+      ))}
+    </>
+  );
+};
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -97,13 +131,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
     const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.6;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
-
-  const highlightTooltip = useMemo(() => {
-    const labels = entitiesDict.filter((e) => hlEntities.includes(e.value)).map((e) => e.label);
-    if (labels.length === 0) return "No highlights";
-    if (labels.length === entitiesDict.length) return "All classes highlighted";
-    return `Highlighted Entity classes: ${labels.join(", ")}`;
-  }, [hlEntities]);
 
   const highlightDropdownLimitSelectedItems = useMemo(
     () =>
@@ -265,7 +292,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             {isUndersized && (
               <Button
                 icon={<FaHighlighter />}
-                tooltipLabel={highlightTooltip}
+                tooltipContent={<HighlightTooltipContent hlEntities={hlEntities} />}
                 onClick={() => setShowHighlightModal(true)}
               />
             )}
