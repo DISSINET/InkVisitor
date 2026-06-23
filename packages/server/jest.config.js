@@ -53,6 +53,9 @@ module.exports = {
   globalTeardown: "<rootDir>/src/test/globalTeardown.ts",
   // Runs in each worker before any test module is imported; mints TEST_JWT_TOKEN.
   setupFiles: ["<rootDir>/src/test/setup.ts"],
+  // Per-file isolation: empties the mutable entity tables before each test file
+  // so suites never inherit each other's leftover rows.
+  setupFilesAfterEnv: ["<rootDir>/src/test/isolate.ts"],
   // Hung pool acquires wait on the 10s pool timeout; cap the whole test well
   // above that so a stuck DB call fails loudly instead of hanging the run.
   testTimeout: 30000,
