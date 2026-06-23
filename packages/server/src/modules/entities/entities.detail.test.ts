@@ -5,6 +5,7 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
+import { deleteEntities } from "@service/shorthands";
 import Statement, {
   StatementData,
   StatementTerritory,
@@ -49,7 +50,10 @@ describe("Entities detail", function () {
 
       // The detail response builds territory-based warnings for non-template
       // entities and needs a populated tree cache with a single root territory;
-      // the cache is not initialized in NODE_ENV=test, so seed it here.
+      // the cache is not initialized in NODE_ENV=test, so seed it here. Wipe
+      // first so leftover territories from other suites can't make createTree()
+      // throw TerritoriesBrokenError.
+      await deleteEntities(db);
       const rootTerritory = new Territory({ id: `root-${Math.random()}` });
       await rootTerritory.save(db.connection);
       treeCache.db = db.connection;
