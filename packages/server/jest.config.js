@@ -43,25 +43,94 @@ const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   }
 );
 
-module.exports = {
+// Pure-unit test files: they pass with NO database reachable (tested
+// empirically by running them with the DB port refused). They run in the fast
+// "unit" project below, which skips globalSetup/teardown and the per-file DB
+// isolation entirely, so they need neither RethinkDB nor a serial run.
+// Keep this list in sync when adding a DB-free test; the "integration" project
+// runs everything NOT listed here. A misplaced file fails loudly: a real unit
+// test left here that needs a DB will fail the DB-free unit run, and an
+// integration test added here will too.
+const UNIT_TEST_PATHS = [
+  "src/common/functions.test.ts",
+  "src/models/action/action.test.ts",
+  "src/models/audit/audit.test.ts",
+  "src/models/backup/backup.test.ts",
+  "src/models/common.test.ts",
+  "src/models/document/anchors.audit.test.ts",
+  "src/models/document/anchors.tagdiff.test.ts",
+  "src/models/document/anchors.test.ts",
+  "src/models/entity/response-search-root-validity.test.ts",
+  "src/models/factory.test.ts",
+  "src/models/relation/classification.test.ts",
+  "src/models/relation/implication.test.ts",
+  "src/models/relation/path.test.ts",
+  "src/models/relation/related.test.ts",
+  "src/models/relation/superordinate-entity.test.ts",
+  "src/models/statement/PositionRules.test.ts",
+  // No-op own test; its DB-touching exports are only used as helpers elsewhere.
+  "src/modules/common.test.ts",
+  // Mocks rethinkdb-ts (jest.mock) - evaluateEdges runs against an in-memory proxy.
+  "src/service/query/nesting.test.ts",
+  "src/models/stats/event-type-fold.test.ts",
+  "src/models/stats/hybrid-stats.test.ts",
+  "src/models/stats/stats-aggregator.test.ts",
+  "src/service/mutex.test.ts",
+  "src/service/query/explore-ids-filter.test.ts",
+  "src/service/query/explore-label-filter.test.ts",
+  "src/service/query/explore-to-request-search.test.ts",
+  "src/service/query/query-base-cache.test.ts",
+  "src/service/query/results.test.ts",
+  "src/service/query/superordinate-edge.test.ts",
+  "src/service/ttlCache.test.ts",
+];
+
+// Options shared by both projects. Project configs do NOT inherit from the
+// root, so each project spreads this.
+const base = {
   preset: "ts-jest",
   testEnvironment: "node",
   moduleNameMapper: paths,
-  // Build a fresh, uniquely-provisioned ephemeral test DB once per run and drop
-  // it afterwards, so tests never touch real data. See src/test/.
-  globalSetup: "<rootDir>/src/test/globalSetup.ts",
-  globalTeardown: "<rootDir>/src/test/globalTeardown.ts",
-  // Runs in each worker before any test module is imported; mints TEST_JWT_TOKEN.
-  setupFiles: ["<rootDir>/src/test/setup.ts"],
-  // Per-file isolation: empties the mutable entity tables before each test file
-  // so suites never inherit each other's leftover rows.
-  setupFilesAfterEnv: ["<rootDir>/src/test/isolate.ts"],
   // Hung pool acquires wait on the 10s pool timeout; cap the whole test well
   // above that so a stuck DB call fails loudly instead of hanging the run.
   testTimeout: 30000,
-  // TEMPORARY (remove once connection leaks are fixed in Phase 3): several
+};
+
+module.exports = {
+  // TEMPORARY (remove once connection leaks are fixed): several integration
   // suites leak DB connections (hand-rolled `new Db()` instances and a
   // module-level pool that isn't always closed), which keeps Jest workers alive
-  // after tests finish.
+  // after tests finish. Global option - applies across projects.
   forceExit: true,
+  projects: [
+    {
+      ...base,
+      displayName: "unit",
+      // DB-free: no globalSetup, no per-file isolation. Safe to parallelize
+      // (no shared DB), and runnable without RethinkDB - e.g. `jest
+      // --selectProjects unit`.
+      testMatch: UNIT_TEST_PATHS.map((p) => `<rootDir>/${p}`),
+    },
+    {
+      ...base,
+      displayName: "integration",
+      // Everything not in the unit list. Needs RethinkDB and a serial run
+      // (`--runInBand`) because the workers share one ephemeral test DB.
+      testMatch: ["<rootDir>/src/**/*.test.ts"],
+      testPathIgnorePatterns: [
+        "/node_modules/",
+        "/build/",
+        ...UNIT_TEST_PATHS.map((p) => p.replace(/\./g, "\\.") + "$"),
+      ],
+      // Build a fresh, uniquely-provisioned ephemeral test DB once per run and
+      // drop it afterwards, so tests never touch real data. See src/test/.
+      globalSetup: "<rootDir>/src/test/globalSetup.ts",
+      globalTeardown: "<rootDir>/src/test/globalTeardown.ts",
+      // Runs in each worker before any test module is imported; mints TEST_JWT_TOKEN.
+      setupFiles: ["<rootDir>/src/test/setup.ts"],
+      // Per-file isolation: restores the globalSetup baseline before each file
+      // so suites never inherit each other's leftover rows.
+      setupFilesAfterEnv: ["<rootDir>/src/test/isolate.ts"],
+    },
+  ],
 };
