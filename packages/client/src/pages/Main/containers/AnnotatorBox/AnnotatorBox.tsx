@@ -17,6 +17,7 @@ import { setSelectedResourceId } from "redux/features/statementAnnotator/selecte
 import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListTextAnnotator } from "./AnnotatorContent";
+import { resolveAnnotatorResourceId } from "./resolveAnnotatorResourceId";
 
 interface AnnotatorBox {
   height: number;
@@ -95,50 +96,45 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     enabled: api.isLoggedIn(),
   });
 
-  const [isInitialized, setIsInitialized] = useState(false);
   // Set once the user manually picks a resource so auto-load stops overriding it.
   const userPickedRef = useRef(false);
 
   // On territory change: let auto-load re-evaluate which resource to use.
-  // Don't clear selectedResourceId — if auto-load resolves to the same resource,
-  // the annotator stays alive instead of unmounting and remounting (#3092 follow-up).
   useEffect(() => {
-    setIsInitialized(false);
     userPickedRef.current = false;
-  }, [territoryId, dispatch]);
+  }, [territoryId]);
 
-  // Auto-load the resource whose document anchors this territory (or an ancestor).
-  // Only ever SETS a found resource (latching on success); when nothing is found
-  // it neither dispatches nor latches, so it retries as resources / documents /
-  // the territory path arrive — without overriding a manual selection.
+  // Reconcile selectedResourceId with the resource whose document anchors this
+  // territory (or an ancestor). SETS when one is found and CLEARS (false) when
+  // none is — so switching to a territory without a document drops the stale
+  // resource, document and warnings. Re-selecting the same id is a no-op, so the
+  // annotator stays alive across territory switches that keep the same resource
+  // instead of unmounting and remounting (#3092 follow-up). Skipped while the
+  // user has manually picked a resource, until the next territory change resets
+  // userPickedRef. Reruns as resources / documents / the territory path arrive.
   useEffect(() => {
-    if (!resources || !documents || isInitialized || userPickedRef.current) {
+    if (!resources || !documents || userPickedRef.current) {
       return;
     }
 
-    let resourceWithAnchor = resources.find((resource) => {
-      if (!resource.data.documentId) return false;
-      const document = documents.find((d) => d.id === resource.data.documentId);
-      return document?.entityIds.T.includes(territoryId) ?? false;
-    });
+    const resolvedId = resolveAnnotatorResourceId(
+      territoryId,
+      selectedTerritoryPath,
+      resources,
+      documents,
+    );
 
-    if (!resourceWithAnchor) {
-      for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-        const territoryInPath = selectedTerritoryPath[i];
-        resourceWithAnchor = resources.find((resource) => {
-          if (!resource.data.documentId) return false;
-          const document = documents.find((d) => d.id === resource.data.documentId);
-          return document?.entityIds.T.includes(territoryInPath) ?? false;
-        });
-        if (resourceWithAnchor) break;
-      }
+    if (resolvedId !== selectedResourceId) {
+      dispatch(setSelectedResourceId(resolvedId));
     }
-
-    if (resourceWithAnchor) {
-      dispatch(setSelectedResourceId(resourceWithAnchor.id));
-      setIsInitialized(true);
-    }
-  }, [resources, documents, isInitialized, territoryId, selectedTerritoryPath, dispatch]);
+  }, [
+    resources,
+    documents,
+    territoryId,
+    selectedTerritoryPath,
+    selectedResourceId,
+    dispatch,
+  ]);
 
   const selectedResource = useMemo<IResponseEntity | false>(() => {
     if (selectedResourceId && resources) {
@@ -306,7 +302,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       resources={resources}
       setSelectedResourceId={(id) => {
         userPickedRef.current = true;
-        setIsInitialized(true);
         dispatch(setSelectedResourceId(id));
       }}
       showStatementList={false}
