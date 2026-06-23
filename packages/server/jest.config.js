@@ -29,13 +29,17 @@ const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   (prev, curr) => {
     // alias prefix without the trailing "/*" (handles multi-segment names like "@inkvisitor/shared")
     const prefix = curr.replace(/\/\*$/, "");
-    prev[`${prefix}/(.*)`] = `<rootDir>/${tsconfig.compilerOptions.paths[
+    // Anchor with ^ so the alias only matches imports that START with it - matching
+    // TypeScript's path semantics. Without the anchor, "src/(.*)" matches ANY
+    // request containing "src/" (e.g. a dependency's own "./src/index"), which
+    // silently remaps foreign modules into our src/ tree.
+    prev[`^${prefix}/(.*)$`] = `<rootDir>/${tsconfig.compilerOptions.paths[
       curr
     ][0].replace("*", "$1")}`;
     return prev;
   },
   {
-    uuid: require.resolve("uuid"),
+    "^uuid$": require.resolve("uuid"),
   }
 );
 
