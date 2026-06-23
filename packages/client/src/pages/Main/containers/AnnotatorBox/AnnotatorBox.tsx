@@ -99,11 +99,12 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   // Set once the user manually picks a resource so auto-load stops overriding it.
   const userPickedRef = useRef(false);
 
-  // On territory change: reset selection once, and let auto-load run again.
+  // On territory change: let auto-load re-evaluate which resource to use.
+  // Don't clear selectedResourceId — if auto-load resolves to the same resource,
+  // the annotator stays alive instead of unmounting and remounting (#3092 follow-up).
   useEffect(() => {
     setIsInitialized(false);
     userPickedRef.current = false;
-    dispatch(setSelectedResourceId(false));
   }, [territoryId, dispatch]);
 
   // Auto-load the resource whose document anchors this territory (or an ancestor).
@@ -149,6 +150,16 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   const selectedDocumentId = useMemo<string | undefined>(() => {
     return selectedResource ? selectedResource.data.documentId : undefined;
   }, [selectedResource]);
+
+  // Refetch the active document when territory changes so anchors are fresh.
+  // Uses a ref to only fire on actual territory change, not on other dep updates.
+  const prevTerritoryIdForRefetchRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (prevTerritoryIdForRefetchRef.current !== territoryId && selectedDocumentId) {
+      queryClient.invalidateQueries({ queryKey: ["document", selectedDocumentId] });
+    }
+    prevTerritoryIdForRefetchRef.current = territoryId;
+  }, [territoryId, selectedDocumentId, queryClient]);
 
   const {
     data: selectedDocument,

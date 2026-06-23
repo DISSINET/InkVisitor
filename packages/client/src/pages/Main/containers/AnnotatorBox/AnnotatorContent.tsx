@@ -191,7 +191,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
         lastScrolledAnnotatorRef.current = annotator;
       }
     }
-  }, [selectedDocument, statementId, annotator, territory]);
+  }, [selectedDocument, statementId, annotator, territory, territoryId]);
 
   return (
     <>
