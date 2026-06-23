@@ -195,7 +195,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledWarningWrapper>
             )}
 
-          {!selectedDocumentIsFetching &&
+          {!selectedDocument && !selectedDocumentIsFetching &&
             selectedResource !== false &&
             selectedResource.data.documentId === undefined && (
               <StyledNoDocumentMessage>
@@ -204,8 +204,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledNoDocumentMessage>
             )}
 
-          {!selectedDocumentIsFetching &&
-            selectedResource !== false &&
+          {selectedResource !== false &&
             selectedResource?.data?.documentId && (
               <StyledAnnotatorMenuBar>
                 {activeTHasAnchor ? (
