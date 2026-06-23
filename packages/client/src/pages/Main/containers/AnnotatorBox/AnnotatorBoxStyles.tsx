@@ -26,6 +26,25 @@ export const StyledLoadingDocument = styled.div`
   padding: 0 0.25rem;
 `;
 
+export const StyledHighlightTooltipTitle = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+`;
+
+export const StyledHighlightTooltipRow = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+`;
+
+export const StyledHighlightTooltipDot = styled.span<{ $color: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ $color }) => $color};
+  flex-shrink: 0;
+`;
+
 export const StyledInfoText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};

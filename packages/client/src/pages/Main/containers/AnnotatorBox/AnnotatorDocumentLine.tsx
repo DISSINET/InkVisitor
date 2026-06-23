@@ -27,6 +27,9 @@ import {
 } from "../StatementsListBox/StatementListBoxStyles";
 import {
   StyledDocumentContainer,
+  StyledHighlightTooltipDot,
+  StyledHighlightTooltipRow,
+  StyledHighlightTooltipTitle,
   StyledInfoText,
   StyledLoadingDocument,
   StyledWarningsListHeader,
@@ -43,24 +46,14 @@ const HighlightTooltipContent: React.FC<{ hlEntities: EntityEnums.Class[] }> = (
 
   return (
     <>
-      <div style={{ marginBottom: "0.5rem" }}>
-        <b>Highlight</b>
-      </div>
+      <StyledHighlightTooltipTitle>Highlight</StyledHighlightTooltipTitle>
       {selected.map((e) => (
-        <span key={e.value} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: theme.color[
-                `entity${e.value}` as keyof typeof theme.color
-              ] as string,
-              flexShrink: 0,
-            }}
+        <StyledHighlightTooltipRow key={e.value}>
+          <StyledHighlightTooltipDot
+            $color={theme.color[`entity${e.value}` as keyof typeof theme.color] as string}
           />
           {e.label}
-        </span>
+        </StyledHighlightTooltipRow>
       ))}
     </>
   );
