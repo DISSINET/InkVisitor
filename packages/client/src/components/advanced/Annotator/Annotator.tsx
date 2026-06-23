@@ -816,20 +816,26 @@ export const TextAnnotator = ({
     // rebuild — so the constructor runs once per document instead of on every
     // render (which recreated the canvas and snapped scroll back to the top) (#3092).
     if (annotator && annotatorLoadedForDocIdRef.current === documentId) {
-      // Props lag behind the live canvas (e.g. after anchor + save before the
-      // refetch lands): keep the live instance and sync the query cache instead
-      // of rebuilding from the stale dataDocument.
       if (
         currentContent !== undefined &&
         currentContent !== newContent &&
         documentId &&
         dataDocument?.id === documentId
       ) {
-        queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
-          if (!old || old.id !== documentId) return old;
-          return { ...old, content: currentContent };
-        });
-        reuseExistingInstance(currentContent);
+        if (isChangeMade) {
+          // Local edit in progress — keep the live canvas and sync the query
+          // cache so the save won't clobber local changes with the stale fetch.
+          queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
+            if (!old || old.id !== documentId) return old;
+            return { ...old, content: currentContent };
+          });
+          reuseExistingInstance(currentContent);
+        } else {
+          // Server content is newer (e.g. another user added anchors) — update
+          // the annotator's text in place, preserving scroll position.
+          annotator.updateText(newContent);
+          reuseExistingInstance(newContent);
+        }
       } else {
         reuseExistingInstance();
       }
