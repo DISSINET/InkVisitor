@@ -54,7 +54,7 @@ export const StyledHighlightTooltipDot = styled.span<{ $entityClass: string }>`
 
 export const StyledInfoText = styled.div`
   display: flex;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: 1.3rem;
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   color: ${({ theme }) => theme.color["info"]};
 `;
