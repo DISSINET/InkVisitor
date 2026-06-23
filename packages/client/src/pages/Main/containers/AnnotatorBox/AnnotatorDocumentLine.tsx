@@ -268,7 +268,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                   options={entitiesDict}
                   disableEmpty
                   isClearable
-                  disableAny
                   closeMenuOnSelect={false}
                   onChange={setHlEntities}
                   value={hlEntities}
@@ -312,7 +311,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             options={entitiesDict}
             disableEmpty
             isClearable
-            disableAny
             closeMenuOnSelect={false}
             onChange={setHlEntities}
             value={hlEntities}
