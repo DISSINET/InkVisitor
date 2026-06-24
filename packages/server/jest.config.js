@@ -135,9 +135,13 @@ module.exports = {
       // Runs in each worker before any test module is imported; mints TEST_JWT_TOKEN.
       // (Re-list SILENCE_CONSOLE: this array overrides the one from `base`.)
       setupFiles: [SILENCE_CONSOLE, "<rootDir>/src/test/setup.ts"],
-      // Per-file isolation: restores the globalSetup baseline before each file
-      // so suites never inherit each other's leftover rows.
-      setupFilesAfterEnv: ["<rootDir>/src/test/isolate.ts"],
+      // retry.ts: retry the irreducible transport flake (integration only).
+      // isolate.ts: restore the globalSetup baseline before each file so suites
+      // never inherit each other's leftover rows.
+      setupFilesAfterEnv: [
+        "<rootDir>/src/test/retry.ts",
+        "<rootDir>/src/test/isolate.ts",
+      ],
     },
   ],
 };
