@@ -87,13 +87,15 @@ const UNIT_TEST_PATHS = [
 
 // Options shared by both projects. Project configs do NOT inherit from the
 // root, so each project spreads this.
+// Silences noisy app console.log/info/debug during tests (keeps warn/error).
+// Set TEST_LOG=1 to opt back in.
+const SILENCE_CONSOLE = "<rootDir>/src/test/silenceConsole.ts";
+
 const base = {
   preset: "ts-jest",
   testEnvironment: "node",
   moduleNameMapper: paths,
-  // Hung pool acquires wait on the 10s pool timeout; cap the whole test well
-  // above that so a stuck DB call fails loudly instead of hanging the run.
-  testTimeout: 30000,
+  setupFiles: [SILENCE_CONSOLE],
 };
 
 module.exports = {
@@ -102,6 +104,10 @@ module.exports = {
   // module-level pool that isn't always closed), which keeps Jest workers alive
   // after tests finish. Global option - applies across projects.
   forceExit: true,
+  // Hung pool acquires wait on the 10s pool timeout; cap the whole test well
+  // above that so a stuck DB call fails loudly instead of hanging the run.
+  // Must live at the top level - jest rejects it inside a `projects` entry.
+  testTimeout: 30000,
   projects: [
     {
       ...base,
@@ -127,7 +133,8 @@ module.exports = {
       globalSetup: "<rootDir>/src/test/globalSetup.ts",
       globalTeardown: "<rootDir>/src/test/globalTeardown.ts",
       // Runs in each worker before any test module is imported; mints TEST_JWT_TOKEN.
-      setupFiles: ["<rootDir>/src/test/setup.ts"],
+      // (Re-list SILENCE_CONSOLE: this array overrides the one from `base`.)
+      setupFiles: [SILENCE_CONSOLE, "<rootDir>/src/test/setup.ts"],
       // Per-file isolation: restores the globalSetup baseline before each file
       // so suites never inherit each other's leftover rows.
       setupFilesAfterEnv: ["<rootDir>/src/test/isolate.ts"],
