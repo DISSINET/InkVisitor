@@ -87,7 +87,7 @@ const darkTheme = {
     statsChartCursor: "rgba(246, 246, 255, 0.08)", // gentle primary tint for hovered column
 
     pageBg: "#283040",
-    menuHover: "#2A3550",
+    menuHover: "#222A40",
     closeBtnBackground: "rgba(200, 200, 200, 0.1)",
 
     staging: "#911111",
