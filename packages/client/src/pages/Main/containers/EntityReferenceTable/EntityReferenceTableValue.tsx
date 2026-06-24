@@ -96,6 +96,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
           territoryParentId={territoryParentId}
           initTyped={initValueTyped}
           autoFocus={autoFocus}
+          autoFocusInput={autoFocus}
           disabled={disabled}
         />
       )}

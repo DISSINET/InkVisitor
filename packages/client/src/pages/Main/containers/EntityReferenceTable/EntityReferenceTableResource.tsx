@@ -89,6 +89,7 @@ export const EntityReferenceTableResource: React.FC<
           disabled={disabled}
           initTyped={initResourceTyped}
           autoFocus={autoFocus}
+          autoFocusInput={autoFocus}
         />
       )}
     </StyledGridValue>

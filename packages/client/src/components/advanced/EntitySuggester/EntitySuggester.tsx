@@ -66,6 +66,7 @@ interface EntitySuggesterProps {
 
   disableEnter?: boolean;
   autoFocus?: boolean;
+  autoFocusInput?: boolean;
 
   initTyped?: string;
   initCategory?: EntityEnums.Class;
@@ -118,6 +119,7 @@ const EntitySuggesterFull: React.FC<
   disableButtons = false,
   disableEnter = false,
   autoFocus,
+  autoFocusInput,
 
   initTyped,
   initCategory,
@@ -466,6 +468,7 @@ const EntitySuggesterFull: React.FC<
         territoryParentId={territoryParentId}
         userOptions={user.options}
         autoFocus={autoFocus}
+        autoFocusInput={autoFocusInput}
         disabled={disabled}
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
