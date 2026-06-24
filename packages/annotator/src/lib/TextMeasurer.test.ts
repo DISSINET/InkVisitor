@@ -167,3 +167,18 @@ describe("pixelXToColumn (midpoint bias replicates Math.floor(x/charWidth + 0.5)
     expect(pixelXToColumn(prefix, 21)).toBe(2); // right half of 'W'
   });
 });
+
+describe("columnToPixelX ↔ pixelXToColumn round-trip (the hit-test⇄draw invariant)", () => {
+  // Clicking exactly where a caret/column is DRAWN must resolve back to that
+  // column — this is what lets the proportional flag be enabled without the
+  // caret landing off its drawn position. Covers uniform + wide-glyph layouts.
+  test.each([
+    [[0, 10, 20, 30], "monospace"],
+    [[0, 10, 30, 40], "wide glyph"],
+    [[0, 7, 12, 33, 40], "mixed widths"],
+  ])("draw->click returns the same column (%s)", (prefix) => {
+    for (let col = 0; col < prefix.length; col++) {
+      expect(pixelXToColumn(prefix, columnToPixelX(prefix, col))).toBe(col);
+    }
+  });
+});

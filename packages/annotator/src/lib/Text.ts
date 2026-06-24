@@ -404,12 +404,18 @@ class Text {
     this.calculateLines();
   }
 
-  /** Prefix-width table for an absolute visual line, or undefined (monospace). */
+  /**
+   * Prefix-width table for an absolute visual line, or undefined (monospace).
+   * The line is clamped into `[0, noLines-1]` so a hit-test for a click past the
+   * document edge resolves against the nearest line (draw always passes a valid
+   * line, so the clamp is a no-op there).
+   */
   private prefixForLine(absLine: number): number[] | undefined {
+    const clamped = Math.max(0, Math.min(absLine, Math.max(0, this.noLines - 1)));
     const segment = this.segments.find(
-      (s) => s.lineStart <= absLine && s.lineEndExclusive > absLine
+      (s) => s.lineStart <= clamped && s.lineEndExclusive > clamped
     );
-    return segment?.linePrefixes[absLine - segment.lineStart];
+    return segment?.linePrefixes[clamped - segment.lineStart];
   }
 
   /**
@@ -431,6 +437,22 @@ class Text {
   pixelWidthOfLine(absLine: number): number {
     const prefix = this.prefixForLine(absLine);
     return prefix ? prefixPixelWidthOfLine(prefix) : 0;
+  }
+
+  /**
+   * Phase 5 — measured width (device px) of the cell at column `col` on line
+   * `absLine`, used for drag-handle grab tolerance. At/after the line end (and
+   * for col<0) it falls back to the nearest real cell so the tolerance never
+   * collapses to 0. Returns 0 on the monospace path (no prefix table).
+   */
+  glyphWidthAt(absLine: number, col: number): number {
+    const prefix = this.prefixForLine(absLine);
+    if (!prefix || prefix.length < 2) {
+      return 0;
+    }
+    const lastCell = prefix.length - 2; // index of the last [c, c+1] cell
+    const c = Math.max(0, Math.min(col, lastCell));
+    return prefix[c + 1] - prefix[c];
   }
 
   /**

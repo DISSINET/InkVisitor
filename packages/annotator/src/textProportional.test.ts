@@ -118,6 +118,23 @@ describe("Text proportional wrapping (P5.2)", () => {
     expect(t.segments[0].lines).toEqual(["f", "f"]);
   });
 
+  test("glyphWidthAt returns the cell width at a column (for drag-handle tolerance)", () => {
+    const t = new Text("aWb", 100, proportional); // prefix [0,10,30,40]
+    expect(t.glyphWidthAt(0, 0)).toBe(10); // 'a'
+    expect(t.glyphWidthAt(0, 1)).toBe(20); // 'W'
+    expect(t.glyphWidthAt(0, 2)).toBe(10); // 'b'
+  });
+
+  test("glyphWidthAt at/after the line end falls back to the last cell width", () => {
+    const t = new Text("aWb", 100, proportional);
+    expect(t.glyphWidthAt(0, 3)).toBe(10); // line end -> last glyph 'b'
+  });
+
+  test("glyphWidthAt returns 0 on the monospace path (no measurer)", () => {
+    const t = new Text("abc", 100);
+    expect(t.glyphWidthAt(0, 1)).toBe(0);
+  });
+
   test("multi-code-unit graphemes are code-unit columns (documented limitation — §5.9)", () => {
     // The annotator's column model is UTF-16 code-unit based (xLine === .length),
     // so the prefix table has one entry per code unit. '👍' is 2 code units -> 3

@@ -311,7 +311,8 @@ export default class Cursor
     lineHeight: number,
     charWidth: number,
     scrollOffsetY: number = 0,
-    viewportLineStart: number = 0
+    viewportLineStart: number = 0,
+    pixelXToColumn?: (absLine: number, deviceX: number) => number
   ) {
     this.setPositionFromCanvasOffsets(
       evt.offsetX,
@@ -319,12 +320,18 @@ export default class Cursor
       lineHeight,
       charWidth,
       scrollOffsetY,
-      viewportLineStart
+      viewportLineStart,
+      pixelXToColumn
     );
   }
 
   /**
    * Same as setPositionFromEvent but with explicit canvas offsets (e.g. from client coords).
+   *
+   * Phase 5 — when `pixelXToColumn` is supplied (proportional), the column is
+   * resolved from the prefix table of the clicked line via measured widths, so
+   * `yLine` is computed first and `offsetX` is scaled CSS→device px (× ratio) to
+   * match the device-px prefix table. Without it, the legacy `xToCharI` is used.
    */
   setPositionFromCanvasOffsets(
     offsetX: number,
@@ -332,14 +339,17 @@ export default class Cursor
     lineHeight: number,
     charWidth: number,
     scrollOffsetY: number = 0,
-    viewportLineStart: number = 0
+    viewportLineStart: number = 0,
+    pixelXToColumn?: (absLine: number, deviceX: number) => number
   ) {
-    this.xLine = this.xToCharI(offsetX, charWidth);
     const relY = Math.max(
       0,
       Math.floor((offsetY * this.ratio + scrollOffsetY) / lineHeight)
     );
     this.yLine = viewportLineStart + relY;
+    this.xLine = pixelXToColumn
+      ? pixelXToColumn(this.yLine, Math.max(offsetX, 0) * this.ratio)
+      : this.xToCharI(offsetX, charWidth);
     this.goalColumn = null;
   }
 

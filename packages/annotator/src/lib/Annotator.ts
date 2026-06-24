@@ -118,15 +118,15 @@ export class Annotator {
 
   charWidth: number = 0;
   /**
-   * Phase 5 feature flag (default off). When on, text layout + DRAW use measured
+   * Phase 5 feature flag (default off). When on, text layout, draw (caret/
+   * selection rects), wrapping, mouse hit-test, and drag handles use measured
    * proportional widths via a CanvasMeasurer instead of the monospace grid.
    *
-   * NOT YET USER-SHIPPABLE. Only Feature A (P5.0/P5.1/P5.3 — rendering) is done.
-   * Hit-test (P5.4) is still monospace: `Highlighter.xToCharI` divides by
-   * `charWidth`. With the flag on, selection/caret rects draw at measured x but
-   * clicks resolve to monospace columns, so the caret lands visibly off the
-   * selection edge. Do not enable for users until P5.4 (proportional hit-test)
-   * lands. See PROPORTIONAL_TEXT_PLAN.md §P5.4.
+   * NOT YET USER-SHIPPABLE. Features A–C done (P5.0/P5.1/P5.3 render, P5.2 wrap,
+   * P5.4 hit-test, P5.5 rects, P5.7 handles). REMAINING gap: goal-column (P5.6)
+   * still tracks a CHARACTER count, so vertical Up/Down can drift on lines of
+   * varying width. Don't enable for users until Feature D (P5.6) lands and the
+   * default is flipped (P5.10). See PROPORTIONAL_TEXT_PLAN.md.
    */
   proportional: boolean = false;
   lineHeight: number = LINE_HEIGHT;
@@ -739,7 +739,8 @@ export class Annotator {
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
-      this.viewport.lineStart
+      this.viewport.lineStart,
+      this.proportionalHitTest()
     );
 
     // Clamp to valid line range
@@ -807,7 +808,8 @@ export class Annotator {
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
-      this.viewport.lineStart
+      this.viewport.lineStart,
+      this.proportionalHitTest()
     );
 
     tempCursor.yLine = Math.max(
@@ -1005,6 +1007,44 @@ export class Annotator {
   }
 
   /**
+   * Phase 5 — the proportional pixel→column resolver for mouse hit-testing
+   * (device px → caret column on a given line), or undefined when monospace
+   * (so the legacy `xToCharI` is used). Mirror of {@link drawColumnToPixelX}.
+   */
+  private proportionalHitTest():
+    | ((absLine: number, deviceX: number) => number)
+    | undefined {
+    return this.proportional
+      ? (absLine, deviceX) => this.text.pixelXToColumn(absLine, deviceX)
+      : undefined;
+  }
+
+  /**
+   * Phase 5 (#3108) — device-px x of a selection-handle boundary point.
+   * Proportional uses measured offsets; monospace keeps `col * charWidth`.
+   */
+  private handleX(pt: IAbsCoordinates): number {
+    return this.proportional
+      ? this.text.columnToPixelX(pt.yLine, pt.xLine)
+      : pt.xLine * this.charWidth;
+  }
+
+  /**
+   * Phase 5 (#3108) — horizontal grab tolerance at a handle. Proportional scales
+   * with the glyph width at the boundary column (so wide glyphs get a wider grab
+   * zone), clamped to ≥1px; monospace keeps `charWidth * factor`.
+   */
+  private handleToleranceX(pt: IAbsCoordinates): number {
+    return this.proportional
+      ? Math.max(
+          1,
+          this.text.glyphWidthAt(pt.yLine, pt.xLine) *
+            SELECTION_HANDLE_GRAB_CHAR_FACTOR
+        )
+      : this.charWidth * SELECTION_HANDLE_GRAB_CHAR_FACTOR;
+  }
+
+  /**
    * setCharWidth sets the initial size for characters
    * This is true for monospace font
    * @param txt
@@ -1066,7 +1106,8 @@ export class Annotator {
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
-      this.viewport.lineStart
+      this.viewport.lineStart,
+      this.proportionalHitTest()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -1138,7 +1179,8 @@ export class Annotator {
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
-      this.viewport.lineStart
+      this.viewport.lineStart,
+      this.proportionalHitTest()
     );
     return this.text.clampVisual(tmp.xLine, tmp.yLine);
   }
@@ -1162,7 +1204,6 @@ export class Annotator {
     const bufX = (clientX - rect.left) * this.ratio;
     const bufY = (clientY - rect.top) * this.ratio;
 
-    const tolX = this.charWidth * SELECTION_HANDLE_GRAB_CHAR_FACTOR;
     const knob = SELECTION_HANDLE_KNOB_RADIUS_PX * this.ratio;
 
     const boundaries: ["start" | "end", IAbsCoordinates][] = [
@@ -1171,7 +1212,8 @@ export class Annotator {
     ];
     for (const [which, pt] of boundaries) {
       const relLine = pt.yLine - this.viewport.lineStart;
-      const cx = pt.xLine * this.charWidth;
+      const cx = this.handleX(pt);
+      const tolX = this.handleToleranceX(pt);
       // Screen (untranslated) band for this line: content is drawn translated by
       // -scrollOffsetY, so subtract it here to match the pointer's buffer Y.
       const cyTop = relLine * this.lineHeight - this.viewport.scrollOffsetY;
@@ -1366,7 +1408,7 @@ export class Annotator {
         // gutter or partial rows.
         continue;
       }
-      const x = pt.xLine * this.charWidth;
+      const x = this.handleX(pt);
       const yTop = relLine * this.lineHeight;
       const yBottom = yTop + this.lineHeight;
 
@@ -1656,7 +1698,8 @@ export class Annotator {
       this.lineHeight,
       this.charWidth,
       this.viewport.scrollOffsetY,
-      this.viewport.lineStart
+      this.viewport.lineStart,
+      this.proportionalHitTest()
     );
     this.cursor.yLine = Math.max(
       0,
