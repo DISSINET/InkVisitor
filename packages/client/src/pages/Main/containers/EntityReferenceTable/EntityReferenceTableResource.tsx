@@ -22,6 +22,7 @@ interface EntityReferenceTableResource {
   openDetailOnCreate?: boolean;
 
   initResourceTyped?: string;
+  autoFocus?: boolean;
   editorWidthTooNarrow: boolean;
 
   disabled?: boolean;
@@ -38,6 +39,7 @@ export const EntityReferenceTableResource: React.FC<
   openDetailOnCreate,
 
   initResourceTyped,
+  autoFocus,
   editorWidthTooNarrow,
 
   disabled,
@@ -86,6 +88,7 @@ export const EntityReferenceTableResource: React.FC<
           territoryParentId={territoryParentId}
           disabled={disabled}
           initTyped={initResourceTyped}
+          autoFocus={autoFocus}
         />
       )}
     </StyledGridValue>
