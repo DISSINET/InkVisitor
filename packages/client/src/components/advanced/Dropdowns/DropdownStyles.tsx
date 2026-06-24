@@ -71,12 +71,12 @@ export const StyledUserOptionLabel = styled.div`
 `;
 
 export const StyledUserMultiValue = styled.div`
-  display: inline-flex;
+  display: flex;
   align-items: center;
   min-width: 0;
-  max-width: 12rem;
+  max-width: 100%;
   gap: ${({ theme }) => theme.space[1]};
-  padding: 0.1rem 0.2rem;
+  padding: 1px 0.2rem;
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.color["black"]};
 `;
@@ -91,4 +91,10 @@ export const StyledUserMultiValueLabel = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+export const StyledUserMoreBadge = styled.div`
+  flex-basis: 100%;
+  padding: 1px 0.3rem;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color["primary"]};
 `;

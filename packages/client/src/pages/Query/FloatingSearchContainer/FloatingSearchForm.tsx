@@ -318,6 +318,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
         <StyledRowControl>
           <Dropdown.Multi.User
             width="full"
+            limitSelectedItems={2}
             options={userMultiOptions}
             value={searchData.editedBy ?? []}
             onChange={(values) => {

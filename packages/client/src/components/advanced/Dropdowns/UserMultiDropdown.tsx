@@ -1,12 +1,12 @@
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
-import { useTheme } from "hooks";
 import React from "react";
 import { FaCheckSquare, FaRegSquare, FaRegUser } from "react-icons/fa";
 import { components, OptionProps, ValueContainerProps } from "react-select";
 import {
   StyledOptionIconWrap,
+  StyledUserMoreBadge,
   StyledUserMultiValue,
   StyledUserMultiValueIcon,
   StyledUserMultiValueLabel,
@@ -83,8 +83,6 @@ const ValueContainer = ({
 }: { children: any } & ValueContainerProps<any, any, any> & {
     selectProps: StyledSelect;
   }): React.ReactElement => {
-  const theme = useTheme();
-
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
 
@@ -92,30 +90,21 @@ const ValueContainer = ({
     const renderedChildren = children[0];
 
     const limit = props.selectProps.limitSelectedItems;
-    // Show limited number of users and add ellipsis if there are more
+    // Show limited number of users; the rest collapse into a "+X more" badge,
+    // which wraps onto a new line below the visible chips
     const remainingCount = limit ? renderedChildren.length - limit : 0;
 
-    // If there's only 1 remaining, show it instead of "+1 more"
-    // Only show "+X more" when there are 2 or more remaining
-    const visibleChildren = limit
-      ? renderedChildren.slice(0, remainingCount === 1 ? limit + 1 : limit)
-      : renderedChildren;
-    const displayRemainingCount = remainingCount > 1 ? remainingCount : 0;
+    const visibleChildren = limit ? renderedChildren.slice(0, limit) : renderedChildren;
+    const displayRemainingCount = remainingCount > 0 ? remainingCount : 0;
 
     toBeRendered = [
       [
         ...visibleChildren,
         ...(displayRemainingCount > 0
           ? [
-              <div
-                key="ellipsis"
-                style={{
-                  padding: "0.2rem 0.2rem 0.2rem 0.3rem",
-                  color: theme.color.primary,
-                }}
-              >
+              <StyledUserMoreBadge key="more-badge">
                 +{displayRemainingCount} more
-              </div>,
+              </StyledUserMoreBadge>,
             ]
           : []),
       ],

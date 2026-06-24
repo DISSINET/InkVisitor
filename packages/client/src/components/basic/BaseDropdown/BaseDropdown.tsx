@@ -67,7 +67,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   width,
   hideSelectedOptions = false,
   noDropDownIndicator = false,
-  placeholder = "select..",
+  placeholder = "select",
   noOptionsMessage = "no option selected",
   isClearable = false,
   isMulti = false,

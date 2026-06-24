@@ -46,9 +46,12 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    min-height: ${({ theme }) => theme.space[10]};
+    min-height: ${({ theme, userDropdown }) =>
+      userDropdown ? theme.space[8] : theme.space[10]};
     // only for one row multi entity dropdown to avoid glitches during resizing
-    height: ${({ limitSelectedItems }) => (limitSelectedItems ? "27px" : "")};
+    // user dropdown is allowed to wrap and grow vertically
+    height: ${({ limitSelectedItems, userDropdown }) =>
+      limitSelectedItems && !userDropdown ? "27px" : ""};
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>
@@ -74,7 +77,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border-width: 1px;
   }
   .react-select__value-container {
-    height: 100%;
+    height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
+    align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
+    row-gap: ${({ userDropdown }) => (userDropdown ? "2px" : "")};
     padding: 0;
     margin: 0;
     width: ${({ width }) => getWidth(width)};
@@ -97,6 +102,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       entityDropdown ? theme.color["white"] : theme.color["invertedBg"]["primary"]};
     color: ${({ theme }) => theme.color["gray"][700]};
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
+    min-width: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    max-width: ${({ userDropdown }) => (userDropdown ? "100%" : "")};
+    margin: ${({ userDropdown }) => (userDropdown ? "0" : "")};
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
@@ -113,9 +121,12 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__multi-value__label {
     color: ${({ theme }) => theme.color["black"]};
-    padding: ${({ entityDropdown }) => (entityDropdown ? "0" : "0.2rem")};
+    padding: ${({ entityDropdown, userDropdown }) =>
+      entityDropdown || userDropdown ? "0" : "0.2rem"};
     font-weight: ${({ entityDropdown }) => (entityDropdown ? "bold" : "")};
     border-radius: 1px;
+    min-width: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    max-width: ${({ userDropdown }) => (userDropdown ? "100%" : "")};
   }
   .react-select__multi-value__remove {
     padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
