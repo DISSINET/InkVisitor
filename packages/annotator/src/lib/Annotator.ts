@@ -119,15 +119,16 @@ export class Annotator {
 
   charWidth: number = 0;
   /**
-   * Phase 5 feature flag (default off). When on, text layout, draw (caret/
-   * selection rects), wrapping, mouse hit-test, and drag handles use measured
-   * proportional widths via a CanvasMeasurer instead of the monospace grid.
+   * Phase 5 feature flag (default off). When on, the rendered font switches to a
+   * proportional family and text layout, draw (caret/selection rects), wrapping,
+   * mouse hit-test, drag handles, and vertical goal-column all use measured glyph
+   * widths via a CanvasMeasurer instead of the monospace grid.
    *
-   * NOT YET USER-SHIPPABLE. Features A–C done (P5.0/P5.1/P5.3 render, P5.2 wrap,
-   * P5.4 hit-test, P5.5 rects, P5.7 handles). REMAINING gap: goal-column (P5.6)
-   * still tracks a CHARACTER count, so vertical Up/Down can drift on lines of
-   * varying width. Don't enable for users until Feature D (P5.6) lands and the
-   * default is flipped (P5.10). See PROPORTIONAL_TEXT_PLAN.md.
+   * Functionally complete: Features A–D landed (P5.0–P5.7 + P5.6 goal-column),
+   * verified by the proportional test suites. Exposed to users as an OPT-IN
+   * (the client's font toggle calls {@link setProportional}); the annotator
+   * default stays monospace. Flipping the default ON for everyone (P5.10) is the
+   * one deliberately-not-done step. See PROPORTIONAL_TEXT_PLAN.md.
    */
   proportional: boolean = false;
   lineHeight: number = LINE_HEIGHT;

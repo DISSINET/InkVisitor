@@ -389,7 +389,11 @@ class Text {
    */
   setMeasurer(measurer?: TextMeasurer, maxPixelWidth?: number) {
     this.measurer = measurer;
-    if (maxPixelWidth !== undefined) {
+    // Clear the budget when leaving proportional mode (state hygiene — it is
+    // only read while a measurer is set), otherwise update it when provided.
+    if (!measurer) {
+      this.maxPixelWidth = undefined;
+    } else if (maxPixelWidth !== undefined) {
       this.maxPixelWidth = maxPixelWidth;
     }
     this.calculateLines();

@@ -176,7 +176,10 @@ export const TextAnnotator = ({
 
   // Push the preference into the live annotator (and persist it). Runs when the
   // toggle flips or a new annotator instance mounts. The annotator stays on the
-  // monospace grid by default; this is the only place the client enables it.
+  // monospace grid by default; this effect is the only place the client calls
+  // setProportional. The `!==` guard skips the redundant re-apply (a full
+  // re-wrap + draw) on every document (re)mount when the state already matches —
+  // i.e. the common default-monospace case pays nothing.
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -186,7 +189,9 @@ export const TextAnnotator = ({
     } catch {
       // ignore storage failures (e.g. private mode)
     }
-    annotator?.setProportional(useProportionalFont, '"Roboto", sans-serif');
+    if (annotator && annotator.proportional !== useProportionalFont) {
+      annotator.setProportional(useProportionalFont, '"Roboto", sans-serif');
+    }
   }, [useProportionalFont, annotator]);
 
   const isChangeMade = useMemo<boolean>(() => {
