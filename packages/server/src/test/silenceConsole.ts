@@ -1,13 +1,15 @@
 /**
- * Jest setupFiles hook (runs once per worker, before any test module).
+ * Jest setupFiles hook (runs once per test file, before any test module).
  *
- * The app logs freely at runtime - the dev-mode Mailer, password-reset
- * notices, the bootstrap "SECRET set to ..." line, etc. During a test run that
- * output buries the actual test report. Silence console.log/info/debug here so
- * the report stays readable; console.warn and console.error are left intact so
- * genuine problems still surface.
+ * The app logs freely at runtime - the dev-mode Mailer, password-reset notices,
+ * the bootstrap "SECRET set to ..." line, and the error middleware which
+ * console.error's every thrown error. Many suites deliberately exercise error
+ * paths (invalid params, not-found, bad credentials), so that middleware output
+ * is *expected* noise that otherwise buries the test report.
  *
- * Set TEST_LOG=1 to opt back in (e.g. when debugging a specific test).
+ * Silence the console during tests so the report stays readable. Set TEST_LOG=1
+ * to restore all output (e.g. when debugging a specific test) - jest still shows
+ * assertion failures and stack traces regardless.
  */
 if (!process.env.TEST_LOG) {
   const noop = (): void => undefined;
@@ -17,4 +19,8 @@ if (!process.env.TEST_LOG) {
   console.info = noop;
   // eslint-disable-next-line no-console
   console.debug = noop;
+  // eslint-disable-next-line no-console
+  console.warn = noop;
+  // eslint-disable-next-line no-console
+  console.error = noop;
 }
