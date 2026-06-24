@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.0 + P5.1 unit tests.
+ * Proportional text unit tests.
  *
  * The measurement seam and the per-line prefix-width table are the foundation
  * proportional layout plugs into. These are pure units (no canvas, no Annotator)

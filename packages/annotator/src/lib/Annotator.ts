@@ -3,7 +3,7 @@ import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import History, { HistorySnapshot } from "./History";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
 import { CaretBlink } from "./CaretBlink";
-import { SettingsOverlay } from "./SettingsOverlay";
+import { SettingsOverlay, SettingControl } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
@@ -76,6 +76,9 @@ interface PersistedSettings {
   caretWidth?: number;
   highlightColor?: string;
   showFps?: boolean;
+  proportional?: boolean;
+  fontFamily?: string;
+  fontSize?: number;
 }
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
@@ -87,7 +90,7 @@ export interface DrawingOptions {
   caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
-   * Phase 5 — proportional column→pixel resolver. When present (and the caller
+   * Proportional column→pixel resolver. When present (and the caller
    * passes the absolute visual line), draw uses measured widths instead of
    * `col * charWidth`. Absent on the monospace path.
    */
@@ -109,8 +112,13 @@ export class Annotator {
   // cached canvas contex
   ctx: CanvasRenderingContext2D;
 
-  // TODO: different font, different sizes
   font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
+  /** Logical font size in CSS px (device px = `fontSize * ratio`). */
+  fontSize: number = DEFAULT_FONT_SIZE;
+  /** Font family used in proportional mode (monospace mode is always DEFAULT_FONT). */
+  proportionalFontFamily: string = PROPORTIONAL_FONT;
+  /** Font-family options for the Options-modal dropdown (supplied by the host). */
+  fontFamilyOptions: { label: string; value: string }[] = [];
 
   fontColor: string = "black";
   bgColor: string = "white";
@@ -119,16 +127,15 @@ export class Annotator {
 
   charWidth: number = 0;
   /**
-   * Phase 5 feature flag (default off). When on, the rendered font switches to a
-   * proportional family and text layout, draw (caret/selection rects), wrapping,
-   * mouse hit-test, drag handles, and vertical goal-column all use measured glyph
-   * widths via a CanvasMeasurer instead of the monospace grid.
+   * Proportional feature flag (default off). When on, the rendered font switches
+   * to a proportional family and text layout, draw (caret/selection rects),
+   * wrapping, mouse hit-test, drag handles, and vertical goal-column all use
+   * measured glyph widths via a CanvasMeasurer instead of the monospace grid.
    *
-   * Functionally complete: Features A–D landed (P5.0–P5.7 + P5.6 goal-column),
-   * verified by the proportional test suites. Exposed to users as an OPT-IN
-   * (the client's font toggle calls {@link setProportional}); the annotator
-   * default stays monospace. Flipping the default ON for everyone (P5.10) is the
-   * one deliberately-not-done step. See PROPORTIONAL_TEXT_PLAN.md.
+   * Functionally complete, verified by the proportional test suites. Exposed to
+   * users as an OPT-IN (the client's font toggle calls {@link setProportional});
+   * the annotator default stays monospace. Flipping the default ON for everyone
+   * is the one deliberately-not-done step.
    */
   proportional: boolean = false;
   lineHeight: number = LINE_HEIGHT;
@@ -163,7 +170,7 @@ export class Annotator {
   /** Whether the main canvas currently has keyboard focus. */
   private canvasFocused = false;
 
-  /** Phase 4 (#3086) — bounded undo/redo stack of document snapshots. */
+  /** Bounded undo/redo stack of document snapshots (#3086). */
   history: History = new History();
 
   annotatedPosition: SegmentPosition | null = null;
@@ -300,9 +307,9 @@ export class Annotator {
     }
 
     this.ratio = ratio;
-    this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${DEFAULT_FONT}`;
+    this.font = this.composeFont();
 
-    this.lineHeight = LINE_HEIGHT * this.ratio;
+    this.lineHeight = this.lineHeightForSize(this.fontSize);
 
     this.ctx = ctx;
     this.width =
@@ -884,7 +891,7 @@ export class Annotator {
       extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
 
     this.viewport.updateLineEnd(noLinesViewport);
-    // Phase 5 — keep the proportional wrap budget in sync with the new width
+    // Keep the proportional wrap budget in sync with the new width
     // before the re-wrap (updateCharsAtLine triggers calculateLines once).
     if (this.proportional) {
       this.text.maxPixelWidth = this.width;
@@ -981,7 +988,7 @@ export class Annotator {
   }
 
   /**
-   * Phase 5 — toggle proportional text. When enabled, the rendered font switches
+   * Toggle proportional text. When enabled, the rendered font switches
    * to `fontFamily` (the application's proportional font; falls back to
    * {@link PROPORTIONAL_FONT}) and a CanvasMeasurer drives the Text prefix-width
    * tables, so layout, draw, hit-test, selection, drag handles and goal-column
@@ -992,27 +999,101 @@ export class Annotator {
    * @param on - enable proportional text
    * @param fontFamily - CSS font-family for proportional mode (e.g. the app font)
    */
-  setProportional(on: boolean, fontFamily?: string) {
-    this.proportional = on;
-    const family = on ? fontFamily ?? PROPORTIONAL_FONT : DEFAULT_FONT;
-    this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${family}`;
-    // Refresh the average advance width for the new font (used by the monospace
-    // fallback paths and charsAtLine); proportional layout itself uses the
-    // measurer below. The gutter font follows this.font on the next draw().
-    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
-    // Keep the monospace char budget in step with the (possibly font-changed)
-    // charWidth so toggling back to monospace re-wraps exactly as before, even
-    // after a resize occurred while proportional.
-    this.text.charsAtLine = Math.floor(this.width / this.charWidth);
-    this.text.setMeasurer(
-      on ? new CanvasMeasurer(this.ctx, this.font) : undefined,
-      on ? this.width : undefined
-    );
-    this.draw();
+  /** Compose the canvas font string from the current size, ratio, and mode. */
+  private composeFont(): string {
+    const family = this.proportional ? this.proportionalFontFamily : DEFAULT_FONT;
+    return `${this.fontSize * this.ratio}px ${family}`;
+  }
+
+  /** Line height (device px) scaled with the font size off the LINE_HEIGHT base. */
+  private lineHeightForSize(size: number): number {
+    return LINE_HEIGHT * (size / DEFAULT_FONT_SIZE) * this.ratio;
   }
 
   /**
-   * Phase 5 — the proportional column→pixel resolver to put on DrawingOptions,
+   * Re-derive everything that depends on the font (string, line height, average
+   * char width, char budget, viewport rows, measurer) after a font/mode change,
+   * preserving the caret through the re-wrap, then redraw. Shared by
+   * {@link setProportional}, {@link setFontFamily}, {@link setFontSize}.
+   */
+  private applyFontChange(redraw = true): void {
+    // Capture canonical offsets before the re-wrap; restore the visual caret after.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+
+    this.font = this.composeFont();
+    this.lineHeight = this.lineHeightForSize(this.fontSize);
+    // Average advance width for the new font (monospace fallback + charsAtLine).
+    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
+    // Keep the monospace char budget in step with charWidth so toggling back to
+    // monospace re-wraps exactly as before (even after a resize while on).
+    this.text.charsAtLine = Math.floor(this.width / this.charWidth);
+    // Line height changed → recompute how many rows the viewport fits.
+    this.viewport.updateLineEnd(this.viewportFullRowCount() + 1);
+    if (this.lines) {
+      this.lines.lineHeight = this.lineHeight;
+    }
+    // Rebuild (or clear) the prefix tables for the new font; recalculates lines.
+    this.text.setMeasurer(
+      this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
+      this.proportional ? this.width : undefined
+    );
+
+    this.cursor.syncVisualFromOffset(this.text);
+    if (redraw) {
+      this.draw();
+    }
+  }
+
+  /**
+   * Toggle proportional text. When enabled, the rendered font switches
+   * to the proportional family ({@link proportionalFontFamily}, optionally
+   * overridden by `fontFamily`) and layout/draw/hit-test/handles/goal-column use
+   * measured glyph widths; when disabled, the monospace font + grid are restored.
+   * A proportional font requires proportional layout (and vice-versa), so they
+   * switch together. The choice is persisted.
+   */
+  setProportional(on: boolean, fontFamily?: string) {
+    this.proportional = on;
+    if (fontFamily !== undefined) {
+      this.proportionalFontFamily = fontFamily;
+    }
+    this.applyFontChange();
+    this.saveSettings();
+  }
+
+  /** Set the proportional font family (applied immediately when proportional). Persisted. */
+  setFontFamily(fontFamily: string) {
+    this.proportionalFontFamily = fontFamily;
+    this.applyFontChange();
+    this.saveSettings();
+  }
+
+  /** Set the logical font size in CSS px; scales line height. Persisted. */
+  setFontSize(px: number) {
+    this.fontSize = Math.max(1, px);
+    this.applyFontChange();
+    this.saveSettings();
+  }
+
+  /**
+   * Host-supplied font-family options shown in the Options-modal dropdown. When
+   * the user hasn't chosen a family yet (still the built-in fallback), default to
+   * the first option so the picker shows a valid value matching the host font.
+   */
+  setFontFamilyOptions(options: { label: string; value: string }[]) {
+    this.fontFamilyOptions = options;
+    if (options.length > 0 && this.proportionalFontFamily === PROPORTIONAL_FONT) {
+      this.proportionalFontFamily = options[0].value;
+      // If proportional is already active, the rendered font + measurer were
+      // built from the old (fallback) family — rebuild them for the new default.
+      if (this.proportional) {
+        this.applyFontChange();
+      }
+    }
+  }
+
+  /**
+   * The proportional column→pixel resolver to put on DrawingOptions,
    * or undefined when monospace (so draw keeps using `col * charWidth`).
    */
   private drawColumnToPixelX():
@@ -1024,7 +1105,7 @@ export class Annotator {
   }
 
   /**
-   * Phase 5 — the proportional pixel→column resolver for mouse hit-testing
+   * The proportional pixel→column resolver for mouse hit-testing
    * (device px → caret column on a given line), or undefined when monospace
    * (so the legacy `xToCharI` is used). Mirror of {@link drawColumnToPixelX}.
    */
@@ -1037,7 +1118,7 @@ export class Annotator {
   }
 
   /**
-   * Phase 5 (#3108) — device-px x of a selection-handle boundary point.
+   * Device-px x of a selection-handle boundary point (#3108).
    * Proportional uses measured offsets; monospace keeps `col * charWidth`.
    */
   private handleX(pt: IAbsCoordinates): number {
@@ -1047,7 +1128,7 @@ export class Annotator {
   }
 
   /**
-   * Phase 5 (#3108) — horizontal grab tolerance at a handle. Proportional scales
+   * Horizontal grab tolerance at a handle (#3108). Proportional scales
    * with the glyph width at the boundary column (so wide glyphs get a wider grab
    * zone), clamped to ≥1px; monospace keeps `charWidth * factor`.
    */
@@ -1801,37 +1882,69 @@ export class Annotator {
 
   /** Open the settings overlay with the current options. */
   private openSettings(): void {
-    this.settingsOverlay.open(
-      [
-        {
-          type: "segmented",
-          label: "Cursor size",
-          options: [
-            { label: "1px", value: 1 },
-            { label: "2px", value: 2 },
-            { label: "3px", value: 3 },
-          ],
-          value: this.caretWidth,
-          onChange: (px) => this.setCaretWidth(px),
-        },
-        {
-          type: "color",
-          label: "Highlight color",
-          value: this.getHighlightColor(),
-          onChange: (hex) => this.setHighlightColor(hex),
-        },
+    const settings: SettingControl[] = [
+      {
+        type: "segmented",
+        label: "Cursor size",
+        options: [
+          { label: "1px", value: 1 },
+          { label: "2px", value: 2 },
+          { label: "3px", value: 3 },
+        ],
+        value: this.caretWidth,
+        onChange: (px) => this.setCaretWidth(px),
+      },
+      {
+        type: "color",
+        label: "Highlight color",
+        value: this.getHighlightColor(),
+        onChange: (hex) => this.setHighlightColor(hex),
+      },
+      {
+        type: "segmented",
+        label: "Font",
+        options: [
+          { label: "Proportional", value: 1 },
+          { label: "Monospace", value: 0 },
+        ],
+        value: this.proportional ? 1 : 0,
+        onChange: (v) => this.setProportional(v === 1),
+      },
+    ];
+
+    // Family picker only when the host supplied options (it's the proportional
+    // typeface; monospace always uses the built-in monospace font).
+    if (this.fontFamilyOptions.length > 0) {
+      settings.push({
+        type: "select",
+        label: "Font family",
+        options: this.fontFamilyOptions,
+        value: this.proportionalFontFamily,
+        onChange: (family) => this.setFontFamily(family),
+      });
+    }
+
+    settings.push({
+      type: "segmented",
+      label: "Font size",
+      options: [
+        { label: "11", value: 11 },
+        { label: "13", value: 13 },
+        { label: "15", value: 15 },
       ],
-      this.element,
-      [
-        {
-          label: "Reset to defaults",
-          onClick: () => {
-            this.resetSettings();
-            this.openSettings(); // re-render so controls show the defaults
-          },
+      value: this.fontSize,
+      onChange: (px) => this.setFontSize(px),
+    });
+
+    this.settingsOverlay.open(settings, this.element, [
+      {
+        label: "Reset to defaults",
+        onClick: () => {
+          this.resetSettings();
+          this.openSettings(); // re-render so controls show the defaults
         },
-      ]
-    );
+      },
+    ]);
   }
 
   /**
@@ -2448,6 +2561,25 @@ export class Annotator {
     if (typeof parsed.showFps === "boolean") {
       this.showFps = parsed.showFps;
     }
+
+    // Font settings (#2487). Set the fields first, then re-derive font/layout
+    // once (no redraw — the constructor draws right after loadSettings).
+    let fontChanged = false;
+    if (typeof parsed.fontSize === "number") {
+      this.fontSize = Math.max(1, parsed.fontSize);
+      fontChanged = true;
+    }
+    if (typeof parsed.fontFamily === "string") {
+      this.proportionalFontFamily = parsed.fontFamily;
+      fontChanged = true;
+    }
+    if (typeof parsed.proportional === "boolean") {
+      this.proportional = parsed.proportional;
+      fontChanged = true;
+    }
+    if (fontChanged) {
+      this.applyFontChange(false);
+    }
   }
 
   /** Reset all persisted settings to their defaults, clear storage, and redraw. */
@@ -2459,6 +2591,10 @@ export class Annotator {
     this.showFps = false;
     this.lastFrameTime = 0;
     this.fps = 0;
+    // Font settings back to defaults (#2487).
+    this.proportional = false;
+    this.fontSize = DEFAULT_FONT_SIZE;
+    this.proportionalFontFamily = PROPORTIONAL_FONT;
 
     try {
       if (typeof localStorage !== "undefined") {
@@ -2468,7 +2604,8 @@ export class Annotator {
       // ignore storage errors
     }
 
-    this.draw();
+    // Re-derive font/layout to the monospace defaults and redraw.
+    this.applyFontChange();
   }
 
   /** Persist the current settings to localStorage (best-effort). */
@@ -2481,6 +2618,9 @@ export class Annotator {
         caretWidth: this.caretWidth,
         highlightColor: this.highlightColor,
         showFps: this.showFps,
+        proportional: this.proportional,
+        fontFamily: this.proportionalFontFamily,
+        fontSize: this.fontSize,
       };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
     } catch {
@@ -3008,7 +3148,7 @@ export class Annotator {
     }
   }
 
-  // ===== Phase 4 (#3086): undo/redo =====
+  // ===== undo/redo (#3086) =====
 
   /** Capture the live editor state (raw value + canonical caret/selection offsets). */
   captureSnapshot(): HistorySnapshot {

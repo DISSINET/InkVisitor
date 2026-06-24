@@ -42,7 +42,7 @@ export interface AnnotatorCallbacks {
   width: number;
   charWidth: number;
   /**
-   * Phase 5 — proportional text flag. When true, vertical Up/Down remember the
+   * Proportional text flag. When true, vertical Up/Down remember the
    * caret's pixel x (goal-column resolved via the prefix table); when false,
    * legacy char-column goal behavior applies.
    */
@@ -52,7 +52,7 @@ export interface AnnotatorCallbacks {
   text: Text;
   element: HTMLCanvasElement;
   scrollExtentLineCount(): number;
-  // Phase 4 (#3086) — undo/redo
+  // undo/redo (#3086)
   captureSnapshot(): HistorySnapshot;
   recordHistory(before: HistorySnapshot, coalesce: boolean): void;
   undo(): void;
@@ -76,7 +76,7 @@ export default class Keys {
   }
 
   /**
-   * Phase 3 — after a navigation handler has moved the visual caret, make the
+   * After a navigation handler has moved the visual caret, make the
    * canonical `head` offset follow it and either EXTEND the selection (shift:
    * `anchor` stays fixed, selectStart/End are derived from anchor/head) or
    * COLLAPSE it (anchor = head, selection cleared). Replaces the visual-anchor
@@ -369,7 +369,7 @@ export default class Keys {
 
     // Preserve the desired column across vertical moves (goal column): clamp to
     // this line for the move, but remember the original column to restore later.
-    // Phase 5: in proportional mode the goal is a remembered PIXEL x, resolved to
+    // In proportional mode the goal is a remembered PIXEL x, resolved to
     // the nearest column on each line (captured once, alongside goalColumn).
     if (this.cursor.goalColumn === null) {
       this.cursor.goalColumn = originalXLine;
@@ -454,7 +454,7 @@ export default class Keys {
     }
 
     // Preserve the desired column across vertical moves (goal column).
-    // Phase 5: proportional remembers a pixel x (see onArrowUp).
+    // Proportional mode remembers a pixel x (see onArrowUp).
     if (this.cursor.goalColumn === null) {
       this.cursor.goalColumn = originalXLine;
       this.cursor.goalPixelX = this.annotator.proportional

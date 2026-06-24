@@ -27,7 +27,7 @@ export default class Cursor
   /** Desired column for vertical movement; null = follow xLine. Reset on any horizontal move/edit/click. */
   goalColumn: number | null = null;
   /**
-   * Phase 5 — desired PIXEL x for vertical movement in proportional mode,
+   * Desired PIXEL x for vertical movement in proportional mode,
    * resolved to the nearest column on each target line via `pixelXToColumn`.
    *
    * Captured in the CAPTURE block of Keys.onArrowUp/onArrowDown, guarded by
@@ -42,8 +42,7 @@ export default class Cursor
   goalPixelX: number | null = null;
 
   /**
-   * Phase 3 offset model (additive; not yet wired into navigation). Canonical
-   * caret/selection state as raw document offsets (indices into `Text.value`):
+   * Canonical caret/selection state as raw document offsets (indices into `Text.value`):
    * `head` is the moving caret, `anchor` the fixed selection end. Collapsed
    * selection ⇔ `anchor === head`. `xLine`/`yLine` are derived from these.
    */
@@ -107,7 +106,7 @@ export default class Cursor
   }
 
   /**
-   * Phase 3 offset model — derive the cached visual caret (`xLine`/`yLine`) and
+   * Derive the cached visual caret (`xLine`/`yLine`) and
    * the selection's visual endpoints from the canonical `head`/`anchor` offsets.
    * Selection is collapsed (start/end cleared) when `anchor === head`. The draw
    * pipeline keeps reading `xLine`/`yLine`, so this is the bridge that keeps the
@@ -141,7 +140,7 @@ export default class Cursor
   }
 
   /**
-   * Phase 3 offset model — place a COLLAPSED caret at a raw document offset and
+   * Place a COLLAPSED caret at a raw document offset and
    * derive the visual position. Clears any selection (anchor === head) and the
    * goal column. The canonical way to position the caret after an edit: the
    * post-edit offset is known exactly, and deriving the visual from it is always
@@ -161,7 +160,7 @@ export default class Cursor
   }
 
   /**
-   * Phase 3 offset model — reconcile the canonical `head`/`anchor` offsets with
+   * Reconcile the canonical `head`/`anchor` offsets with
    * the current VISUAL caret + selection. Needed because `setPosition`,
    * `setMode` and mouse handlers set `xLine`/`yLine` (and `selectStart`/`End`)
    * without touching the offsets, so they can be stale at the start of a key.
@@ -197,9 +196,9 @@ export default class Cursor
   }
 
   /**
-   * Phase 3 offset model — derive `head` (and `anchor` unless `keepAnchor`) from
+   * Derive `head` (and `anchor` unless `keepAnchor`) from
    * the current visual caret. Used at the boundary while navigation still
-   * mutates `xLine`/`yLine` directly (before Tasks 3.2–3.5 migrate them).
+   * mutates `xLine`/`yLine` directly.
    * Out-of-bounds visual coords leave the offsets unchanged.
    */
   syncOffsetFromVisual(text: Text, keepAnchor: boolean = false) {
@@ -342,7 +341,7 @@ export default class Cursor
   /**
    * Same as setPositionFromEvent but with explicit canvas offsets (e.g. from client coords).
    *
-   * Phase 5 — when `pixelXToColumn` is supplied (proportional), the column is
+   * When `pixelXToColumn` is supplied (proportional), the column is
    * resolved from the prefix table of the clicked line via measured widths, so
    * `yLine` is computed first and `offsetX` is scaled CSS→device px (× ratio) to
    * match the device-px prefix table. Without it, the legacy `xToCharI` is used.

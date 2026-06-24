@@ -108,7 +108,7 @@ export default class Highlighter {
   ) {
     const { charWidth, lineHeight, color: colorOverride, columnToPixelX } =
       options;
-    // Phase 5 — proportional uses measured widths keyed by the ABSOLUTE line;
+    // Proportional uses measured widths keyed by the ABSOLUTE line;
     // monospace (no resolver / no absLine) keeps the exact `col * charWidth` grid.
     const toPx =
       columnToPixelX && absLine !== undefined

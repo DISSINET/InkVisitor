@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.4 hit-test.
+ * Proportional text hit-test.
  *
  * setPositionFromCanvasOffsets maps a canvas click to a caret column. Monospace
  * keeps the legacy `xToCharI` (x / charWidth). Proportional resolves the column

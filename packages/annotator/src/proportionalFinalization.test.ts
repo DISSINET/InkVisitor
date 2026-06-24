@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.8 (gutter) + P5.11 (soft-wrap affinity).
+ * Proportional text: gutter + soft-wrap affinity.
  *
  * Verify-only / characterization locks (no behavior change): they confirm two
  * correctness properties of the proportional path and pin them against regressions.
@@ -13,8 +13,8 @@ const proportional: TextMeasurer = {
   measure: (t) => [...t].reduce((s, c) => s + (c === "W" ? 20 : 10), 0),
 };
 
-// ── P5.11 — soft-wrap caret affinity under proportional ──────────────────────
-describe("P5.11 — proportional soft-wrap caret affinity", () => {
+// ── soft-wrap caret affinity under proportional ──────────────────────
+describe("proportional soft-wrap caret affinity", () => {
   test("UPSTREAM affinity at a wrap boundary draws at the line's pixel right edge; DOWNSTREAM at the next line's start", () => {
     // 'abcdef' at 10px/char, 30px budget -> visual lines 'abc','def'.
     const t = new Text("abcdef", 999, proportional, 30);
@@ -40,8 +40,8 @@ describe("P5.11 — proportional soft-wrap caret affinity", () => {
   });
 });
 
-// ── P5.8 — line-number gutter is independent of proportional ─────────────────
-describe("P5.8 — gutter is charWidth/proportional-independent", () => {
+// ── line-number gutter is independent of proportional ─────────────────
+describe("gutter is charWidth/proportional-independent", () => {
   const mkLines = (lineHeight: number, charWidth: number) => {
     const calls: { s: string; x: number; y: number }[] = [];
     const ctx = {

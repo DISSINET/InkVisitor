@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.1 wiring into Text.
+ * Proportional text wiring into Text.
  *
  * Text owns one prefix-width table per visual line, built in `calculateLines`
  * from an injected measurer. The table is built ONLY when a measurer is present
@@ -53,7 +53,7 @@ describe("Text proportional prefix tables", () => {
   });
 
   test("resolves wrapped visual lines within one segment", () => {
-    // P5.2: with a measurer, wrapping is by PIXEL budget (maxPixelWidth), not
+    // With a measurer, wrapping is by PIXEL budget (maxPixelWidth), not
     // charsAtLine. 30px / 10px-per-char -> 'abc','def'.
     const t = new Text("abcdef", 999, new MonospaceMeasurer(10), 30);
     expect(t.columnToPixelX(1, 3)).toBe(30);
@@ -69,7 +69,7 @@ describe("Text proportional prefix tables", () => {
   });
 });
 
-describe("Text proportional wrapping (P5.2)", () => {
+describe("Text proportional wrapping", () => {
   test("wraps by measured pixel width, not character count", () => {
     // 30px budget, each char 10px -> 3 chars per visual line
     const t = new Text("abcdef", 999, proportional, 30);
@@ -135,10 +135,10 @@ describe("Text proportional wrapping (P5.2)", () => {
     expect(t.glyphWidthAt(0, 1)).toBe(0);
   });
 
-  test("multi-code-unit graphemes are code-unit columns (documented limitation — §5.9)", () => {
+  test("multi-code-unit graphemes are code-unit columns (documented limitation)", () => {
     // The annotator's column model is UTF-16 code-unit based (xLine === .length),
     // so the prefix table has one entry per code unit. '👍' is 2 code units -> 3
-    // entries. Proper grapheme handling is deferred to §5.9 (Intl.Segmenter/pretext).
+    // entries. Proper grapheme handling is deferred (Intl.Segmenter/pretext).
     const t = new Text("👍", 999, proportional);
     expect(t.segments[0].linePrefixes[0].length).toBe("👍".length + 1);
   });

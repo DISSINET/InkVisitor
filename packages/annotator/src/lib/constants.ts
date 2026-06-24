@@ -23,7 +23,7 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**
- * Phase 5 — fallback font family used when proportional mode is enabled without
+ * Fallback font family used when proportional mode is enabled without
  * an explicit family. The client passes the application's own font so the
  * annotator matches it (#2487); this generic keeps the annotator standalone.
  */

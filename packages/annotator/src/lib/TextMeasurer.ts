@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — measurement seam + per-line prefix-width table.
+ * Measurement seam + per-line prefix-width table for proportional text.
  *
  * The annotator's monospace coordinate system bakes "1 char = `charWidth` px"
  * into draw and hit-test. To support proportional fonts we replace that single
@@ -8,7 +8,7 @@
  * can be mocked in tests).
  *
  * These are pure helpers — no Annotator/Text coupling. `Text` owns one prefix
- * array per visual line and converts at the draw/hit-test boundaries (P5.3/P5.4).
+ * array per visual line and converts at the draw/hit-test boundaries.
  */
 
 /** Reports the rendered pixel width of a string in the current font. */
@@ -18,7 +18,7 @@ export interface TextMeasurer {
 
 /**
  * Legacy monospace measurer: width = char count × `charWidth`. With this
- * measurer every Phase-5 conversion reproduces the old `* charWidth` grid
+ * measurer every conversion reproduces the old `* charWidth` grid
  * exactly, which is what keeps the `proportional` flag's off-path identical.
  */
 export class MonospaceMeasurer implements TextMeasurer {
@@ -31,7 +31,7 @@ export class MonospaceMeasurer implements TextMeasurer {
 
 /**
  * Proportional measurer backed by a canvas 2D context. Caches per-string widths
- * so repeated measurement during layout stays cheap (see §6 performance notes).
+ * so repeated measurement during layout stays cheap.
  */
 export class CanvasMeasurer implements TextMeasurer {
   private readonly cache = new Map<string, number>();
@@ -65,7 +65,7 @@ export class CanvasMeasurer implements TextMeasurer {
  * Built per UTF-16 CODE UNIT (additive, O(n) measure calls) so it is monotonic
  * and exact for monospace. The wrap loop ({@link additiveWidth}) uses the same
  * per-code-unit basis so line breaks agree with these offsets. Two consequences,
- * both deferred to the §5.9 (Intl.Segmenter/pretext) work: (1) within-token
+ * both deferred to the Intl.Segmenter/pretext work: (1) within-token
  * kerning is ignored (per-char sum, not whole-string), within tolerance for the
  * proportional fonts in scope; (2) a multi-code-unit grapheme (surrogate pair,
  * combining mark) is measured in parts, matching the annotator's code-unit
@@ -93,7 +93,7 @@ export function buildPrefixWidths(
  * Like buildPrefixWidths, this iterates code units, so a multi-code-unit
  * grapheme (surrogate pair, combining mark) is measured in parts — consistent
  * with the annotator's code-unit column model. Proper grapheme segmentation is
- * deferred to the §5.9 (Intl.Segmenter/pretext) work.
+ * deferred to the Intl.Segmenter/pretext work.
  */
 export function additiveWidth(text: string, measurer: TextMeasurer): number {
   let width = 0;

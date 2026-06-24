@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.0 flag wiring on the Annotator.
+ * Proportional text — flag wiring on the Annotator.
  *
  * The `proportional` flag (default off) installs a CanvasMeasurer on the Text so
  * prefix-width tables are built; turning it off returns to the monospace grid.
@@ -15,6 +15,10 @@ const mk = (text: string): Annotator => {
   document.body.appendChild(c);
   return new Annotator(c, text);
 };
+
+// setProportional persists to localStorage; isolate tests from each other.
+beforeEach(() => localStorage.clear());
+afterEach(() => localStorage.clear());
 
 describe("Annotator proportional flag", () => {
   test("defaults to monospace: no prefix tables built", () => {

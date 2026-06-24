@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.6 goal-column.
+ * Proportional text goal-column.
  *
  * Vertical Up/Down should keep the caret under the same *visual* position. With
  * monospace that's a character column; with proportional fonts it must be a
@@ -34,13 +34,17 @@ const mock: TextMeasurer = {
     [...t].reduce((s, ch) => s + (ch === "W" ? 30 : ch === "i" ? 5 : 10), 0),
 };
 
+// setProportional persists to localStorage; isolate tests from each other.
+beforeEach(() => localStorage.clear());
+afterEach(() => localStorage.clear());
+
 // proportional flag on + a deterministic non-uniform measurer (wide budget => no wrap).
 const proportional = (a: Annotator) => {
   a.setProportional(true);
   a.text.setMeasurer(mock, 99999);
 };
 
-describe("proportional goal-column (P5.6)", () => {
+describe("proportional goal-column", () => {
   test("vertical move preserves the caret PIXEL x, not the char column", () => {
     const a = mk("iiii\nWW");
     proportional(a);

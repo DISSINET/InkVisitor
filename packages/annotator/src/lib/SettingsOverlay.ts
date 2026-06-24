@@ -28,7 +28,17 @@ export interface ColorSetting {
   onChange: (hex: string) => void;
 }
 
-export type SettingControl = SegmentedSetting | ColorSetting;
+/** A single-choice dropdown (`<select>`), e.g. font family. String-valued. */
+export interface SelectSetting {
+  type: "select";
+  label: string;
+  options: { label: string; value: string }[];
+  /** Currently-selected value (must match one of `options[].value`). */
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export type SettingControl = SegmentedSetting | ColorSetting | SelectSetting;
 
 /** A button rendered in the overlay footer (e.g. "Reset to defaults"). */
 export interface FooterAction {
@@ -112,6 +122,8 @@ export class SettingsOverlay {
         body.appendChild(
           setting.type === "color"
             ? this.buildColor(setting)
+            : setting.type === "select"
+            ? this.buildSelect(setting)
             : this.buildSegmented(setting)
         );
       }
@@ -262,6 +274,36 @@ export class SettingsOverlay {
     input.addEventListener("input", () => setting.onChange(input.value));
 
     row.appendChild(input);
+    return row;
+  }
+
+  /** Render a labelled dropdown; choosing an option fires onChange. */
+  private buildSelect(setting: SelectSetting): HTMLDivElement {
+    const { row } = this.buildRow(setting.label);
+
+    const select = document.createElement("select");
+    Object.assign(select.style, {
+      padding: "4px 8px",
+      border: "1px solid #c0c0c0",
+      borderRadius: "4px",
+      background: "#ffffff",
+      color: "#222",
+      cursor: "pointer",
+    } as Partial<CSSStyleDeclaration>);
+
+    for (const opt of setting.options) {
+      const option = document.createElement("option");
+      option.value = opt.value;
+      option.textContent = opt.label;
+      select.appendChild(option);
+    }
+    select.value = setting.value;
+
+    // Keep interactions inside the control from dismissing the backdrop.
+    select.addEventListener("mousedown", (e) => e.stopPropagation());
+    select.addEventListener("change", () => setting.onChange(select.value));
+
+    row.appendChild(select);
     return row;
   }
 

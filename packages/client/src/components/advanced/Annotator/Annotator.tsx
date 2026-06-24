@@ -10,7 +10,7 @@ import {
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaFont, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -163,36 +163,6 @@ export const TextAnnotator = ({
 
   const [annotatorMode, setAnnotatorMode] = useState<EditMode>(EditMode.HIGHLIGHT);
   const [localTextContent, setLocalTextContent] = useState<string>("");
-
-  // #2487 — opt-in: render the annotator with the application's proportional
-  // font (and measured layout) instead of the monospace grid. Persisted locally.
-  const [useProportionalFont, setUseProportionalFont] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem("inkvisitor.annotator.proportionalFont") === "true";
-    } catch {
-      return false;
-    }
-  });
-
-  // Push the preference into the live annotator (and persist it). Runs when the
-  // toggle flips or a new annotator instance mounts. The annotator stays on the
-  // monospace grid by default; this effect is the only place the client calls
-  // setProportional. The `!==` guard skips the redundant re-apply (a full
-  // re-wrap + draw) on every document (re)mount when the state already matches —
-  // i.e. the common default-monospace case pays nothing.
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "inkvisitor.annotator.proportionalFont",
-        String(useProportionalFont),
-      );
-    } catch {
-      // ignore storage failures (e.g. private mode)
-    }
-    if (annotator && annotator.proportional !== useProportionalFont) {
-      annotator.setProportional(useProportionalFont, '"Roboto", sans-serif');
-    }
-  }, [useProportionalFont, annotator]);
 
   const isChangeMade = useMemo<boolean>(() => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
@@ -806,6 +776,14 @@ export const TextAnnotator = ({
         color: theme.color.entityS,
         opacity: 0.25,
       });
+      // #2487 — font families offered in the annotator's Options modal (the
+      // proportional-font picker). The annotator owns the choice + persistence;
+      // the app just supplies the candidates, defaulting to the application font.
+      a.setFontFamilyOptions([
+        { label: "Sans (app)", value: '"Roboto", sans-serif' },
+        { label: "System", value: "system-ui, sans-serif" },
+        { label: "Serif", value: "Georgia, serif" },
+      ]);
     };
 
     // Check if the document content has actually changed
@@ -1478,30 +1456,6 @@ export const TextAnnotator = ({
               inverted={annotatorMode !== EditMode.RAW}
               onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
               tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
-              tooltipPosition="top"
-            />
-          </ButtonGroup>
-
-          <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-            <Button
-              icon={
-                <StyledDisplayModeButtonIconWrapper
-                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                >
-                  <FaFont size={11} />
-                </StyledDisplayModeButtonIconWrapper>
-              }
-              label={
-                !annotatorWidthTooNarrow
-                  ? useProportionalFont
-                    ? "proportional"
-                    : "monospace"
-                  : ""
-              }
-              color="success"
-              inverted={!useProportionalFont}
-              onClick={() => setUseProportionalFont((v) => !v)}
-              tooltipLabel="toggle proportional (application) font vs monospace"
               tooltipPosition="top"
             />
           </ButtonGroup>

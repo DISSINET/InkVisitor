@@ -18,7 +18,7 @@ import {
 
 /**
  * Caret affinity at a soft-wrap boundary, where a single document offset maps to
- * two visual positions (Phase 3 offset model):
+ * two visual positions:
  * - `UPSTREAM`   — render at the END of the wrapped visual line.
  * - `DOWNSTREAM` — render at the START of the following visual line.
  * Irrelevant for any offset that is not a soft-wrap boundary.
@@ -229,7 +229,7 @@ export class Segment {
   closingTags: Tag[] = [];
   lines: string[] = [];
   /**
-   * Phase 5 — per-line cumulative pixel offsets, parallel to {@link lines}.
+   * Per-line cumulative pixel offsets, parallel to {@link lines}.
    * `linePrefixes[i][c]` is the pixel x of column `c` on visual line `i`.
    * Empty unless a proportional measurer is active (monospace path is untouched).
    */
@@ -345,14 +345,14 @@ class Text {
   charsAtLine: number;
   noLines: number;
   /**
-   * Phase 5 — when set, {@link calculateLines} wraps by measured pixel width and
+   * When set, {@link calculateLines} wraps by measured pixel width and
    * builds per-line prefix-width tables, and the column↔pixel converters use
    * measured widths. When absent the annotator stays on the legacy monospace
    * grid (wrap by {@link charsAtLine}; `col * charWidth`).
    */
   measurer?: TextMeasurer;
   /**
-   * Phase 5 — wrap budget in device pixels, used instead of {@link charsAtLine}
+   * Wrap budget in device pixels, used instead of {@link charsAtLine}
    * when a {@link measurer} is active. Undefined means "no width limit".
    */
   maxPixelWidth?: number;
@@ -362,9 +362,9 @@ class Text {
    *
    * @param value - The raw text content
    * @param charsAtLine - Maximum characters per line (monospace wrap budget)
-   * @param measurer - Optional proportional measurer (Phase 5). When omitted the
+   * @param measurer - Optional proportional measurer. When omitted the
    *   monospace grid is used and no prefix tables are built.
-   * @param maxPixelWidth - Proportional wrap budget in device px (Phase 5).
+   * @param maxPixelWidth - Proportional wrap budget in device px.
    */
   constructor(
     value: string,
@@ -383,7 +383,7 @@ class Text {
   }
 
   /**
-   * Phase 5 — swap the proportional measurer (or clear it to return to the
+   * Swap the proportional measurer (or clear it to return to the
    * monospace grid) and rebuild lines/prefix tables. Pass `maxPixelWidth` to
    * update the proportional wrap budget at the same time.
    */
@@ -400,7 +400,7 @@ class Text {
   }
 
   /**
-   * Phase 5 — update the proportional wrap budget (device px) and re-wrap.
+   * Update the proportional wrap budget (device px) and re-wrap.
    * Used on resize; no-op effect on the monospace path.
    */
   updateMaxPixelWidth(maxPixelWidth: number) {
@@ -423,7 +423,7 @@ class Text {
   }
 
   /**
-   * Phase 5 — pixel x of column `col` on absolute visual line `absLine`.
+   * Pixel x of column `col` on absolute visual line `absLine`.
    * Returns 0 when no prefix table exists (only used in proportional mode).
    */
   columnToPixelX(absLine: number, col: number): number {
@@ -431,20 +431,20 @@ class Text {
     return prefix ? prefixColumnToPixelX(prefix, col) : 0;
   }
 
-  /** Phase 5 — nearest column for a pixel x on absolute visual line `absLine`. */
+  /** Nearest column for a pixel x on absolute visual line `absLine`. */
   pixelXToColumn(absLine: number, x: number): number {
     const prefix = this.prefixForLine(absLine);
     return prefix ? prefixPixelXToColumn(prefix, x) : 0;
   }
 
-  /** Phase 5 — pixel right edge of absolute visual line `absLine`. */
+  /** Pixel right edge of absolute visual line `absLine`. */
   pixelWidthOfLine(absLine: number): number {
     const prefix = this.prefixForLine(absLine);
     return prefix ? prefixPixelWidthOfLine(prefix) : 0;
   }
 
   /**
-   * Phase 5 — measured width (device px) of the cell at column `col` on line
+   * Measured width (device px) of the cell at column `col` on line
    * `absLine`, used for drag-handle grab tolerance. At/after the line end (and
    * for col<0) it falls back to the nearest real cell so the tolerance never
    * collapses to 0. Returns 0 on the monospace path (no prefix table).
@@ -544,7 +544,7 @@ class Text {
   calculateLines(): void {
     const time1 = performance.now();
 
-    // Phase 5 — width basis for wrapping. Monospace: 1 code unit = 1 unit,
+    // Width basis for wrapping. Monospace: 1 code unit = 1 unit,
     // budget = charsAtLine (byte-identical to the legacy loop). Proportional:
     // measured pixels via `additiveWidth` (per code unit — the SAME basis as the
     // prefix table), budget = maxPixelWidth, so line breaks agree with the
@@ -562,7 +562,7 @@ class Text {
     // Largest code-unit count of `s` whose measured width fits `budget`.
     // Monospace reduces to min(len, budget) — i.e. the legacy `maxLen - used`.
     // Iterates code units (s[n]) like the prefix table; grapheme-aware splitting
-    // is deferred to §5.9.
+    // is deferred.
     const charsThatFit = (s: string, budget: number): number => {
       if (!measurer) {
         return Math.max(0, Math.min(s.length, budget));
@@ -724,7 +724,7 @@ class Text {
         segment.lines = [""];
       }
 
-      // Phase 5 — build the per-line prefix-width tables (proportional only).
+      // Build the per-line prefix-width tables (proportional only).
       // Left empty on the monospace path so draw/hit-test keep using charWidth.
       segment.linePrefixes = measurer
         ? segment.lines.map((line) => buildPrefixWidths(line, measurer))
@@ -989,7 +989,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — raw document offset (index into {@link value}) to
+   * Raw document offset (index into {@link value}) to
    * ABSOLUTE visual coordinates (`yLine` is an absolute line index, not
    * viewport-relative). The offset is clamped into `[0, value.length]`. The
    * returned `xLine` is the visual column in the current edit mode (tags are
@@ -1030,7 +1030,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — ABSOLUTE visual coordinates to a raw document offset.
+   * ABSOLUTE visual coordinates to a raw document offset.
    * Returns `-1` when the line index is out of bounds (uses the non-clamping
    * {@link getSegmentPositionOrNull}). Inverse of {@link visualFromOffset}.
    */
@@ -1040,7 +1040,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — one VISIBLE column to the right of an absolute visual
+   * One VISIBLE column to the right of an absolute visual
    * position, crossing visual line boundaries. Works in every mode (a "visible
    * column" is a parsed column in HIGHLIGHT/SEMI, a raw column in RAW); the
    * caller converts the result back to a raw offset, which skips hidden markup.
@@ -1062,7 +1062,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — one VISIBLE column to the left of an absolute visual
+   * One VISIBLE column to the left of an absolute visual
    * position, crossing visual line boundaries. At document start it is unchanged.
    */
   stepVisualLeft(
@@ -1080,7 +1080,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — is `offset` a soft-wrap boundary, i.e. the start of a
+   * Is `offset` a soft-wrap boundary, i.e. the start of a
    * continuation visual line WITHIN a segment (not a hard `\n` boundary, which
    * begins a new segment at lineIndex 0)? Such offsets have two visual caret
    * positions distinguished by {@link CaretAffinity}.
@@ -1095,7 +1095,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — ABSOLUTE visual coordinates to a document offset PLUS
+   * ABSOLUTE visual coordinates to a document offset PLUS
    * the affinity that visual position implies: the end of a wrapped (non-last)
    * visual line is UPSTREAM, everything else DOWNSTREAM. Inverse companion of
    * {@link visualFromOffset} that recovers the affinity bit lost by a bare offset.
@@ -1125,7 +1125,7 @@ class Text {
    * Non-clamping variant of {@link getSegmentPosition}: returns `null` when
    * `absLineIndex` falls outside `[0, noLines - 1]` instead of clamping it into
    * range. Use this when a `null` return is meant to signal "invalid position"
-   * (the offset-model code in Phase 3 relies on this); the clamping variant
+   * (the offset-model code relies on this); the clamping variant
    * stays for existing callers that depend on the old behavior.
    *
    * @param absLineIndex - The absolute line index

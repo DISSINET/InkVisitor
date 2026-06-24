@@ -1,5 +1,5 @@
 /**
- * Phase 5 (proportional text) — P5.3 caret/rect x via the prefix table.
+ * Proportional text — caret/rect x via the prefix table.
  *
  * `Highlighter.drawLine` is the single chokepoint that turns column ranges into
  * pixel rects (caret, selection, highlight). Monospace stays `col * charWidth`;
