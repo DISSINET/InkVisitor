@@ -37,7 +37,7 @@ export class ContextMenu {
       position: "fixed",
       left: `${clientX}px`,
       top: `${clientY}px`,
-      zIndex: "10000",
+      zIndex: "200",
       minWidth: "160px",
       padding: "4px 0",
       background: "#ffffff",
