@@ -14,6 +14,7 @@ import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
+  PROPORTIONAL_FONT,
   EditMode,
   HighlightMode,
   HOVER_DEBOUNCE_MS,
@@ -979,14 +980,29 @@ export class Annotator {
   }
 
   /**
-   * Phase 5 — toggle proportional text. When enabled, a CanvasMeasurer (real
-   * font metrics) drives the Text prefix-width tables so DRAW (caret/selection
-   * rects) uses measured widths; when disabled, the legacy monospace grid is
-   * restored. NOTE: hit-test is still monospace (P5.4 pending) — see the
-   * `proportional` field doc for why this flag is not user-shippable yet.
+   * Phase 5 — toggle proportional text. When enabled, the rendered font switches
+   * to `fontFamily` (the application's proportional font; falls back to
+   * {@link PROPORTIONAL_FONT}) and a CanvasMeasurer drives the Text prefix-width
+   * tables, so layout, draw, hit-test, selection, drag handles and goal-column
+   * all use measured glyph widths. When disabled, the monospace font + grid are
+   * restored. A proportional font requires proportional layout (and vice-versa),
+   * so the two are switched together here.
+   *
+   * @param on - enable proportional text
+   * @param fontFamily - CSS font-family for proportional mode (e.g. the app font)
    */
-  setProportional(on: boolean) {
+  setProportional(on: boolean, fontFamily?: string) {
     this.proportional = on;
+    const family = on ? fontFamily ?? PROPORTIONAL_FONT : DEFAULT_FONT;
+    this.font = `${DEFAULT_FONT_SIZE * this.ratio}px ${family}`;
+    // Refresh the average advance width for the new font (used by the monospace
+    // fallback paths and charsAtLine); proportional layout itself uses the
+    // measurer below. The gutter font follows this.font on the next draw().
+    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
+    // Keep the monospace char budget in step with the (possibly font-changed)
+    // charWidth so toggling back to monospace re-wraps exactly as before, even
+    // after a resize occurred while proportional.
+    this.text.charsAtLine = Math.floor(this.width / this.charWidth);
     this.text.setMeasurer(
       on ? new CanvasMeasurer(this.ctx, this.font) : undefined,
       on ? this.width : undefined

@@ -44,4 +44,25 @@ describe("Annotator proportional flag", () => {
     a.setProportional(true);
     expect(a.text.maxPixelWidth).toBe(a.width);
   });
+
+  test("setProportional(true, family) switches the rendered font to that family", () => {
+    const a = mk("abc");
+    a.setProportional(true, "Inter, sans-serif");
+    expect(a.font).toContain("Inter, sans-serif");
+    expect(a.font).not.toContain("Roboto Mono");
+  });
+
+  test("setProportional(true) without a family falls back to a proportional font", () => {
+    const a = mk("abc");
+    a.setProportional(true);
+    expect(a.font).toContain("sans-serif");
+    expect(a.font).not.toContain("Roboto Mono");
+  });
+
+  test("setProportional(false) restores the monospace font", () => {
+    const a = mk("abc");
+    a.setProportional(true, "Inter");
+    a.setProportional(false);
+    expect(a.font).toContain("Roboto Mono");
+  });
 });

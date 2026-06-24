@@ -22,6 +22,12 @@ export const LINE_HEIGHT = 23;
 export const VIEWPORT_END_BUFFER_ROWS = 3;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
+/**
+ * Phase 5 — fallback font family used when proportional mode is enabled without
+ * an explicit family. The client passes the application's own font so the
+ * annotator matches it (#2487); this generic keeps the annotator standalone.
+ */
+export const PROPORTIONAL_FONT = "sans-serif";
 
 /** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
