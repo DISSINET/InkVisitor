@@ -46,8 +46,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    min-height: ${({ theme, userDropdown }) =>
-      userDropdown ? theme.space[8] : theme.space[10]};
+    min-height: ${({ theme, userDropdown }) => (userDropdown ? theme.space[6] : theme.space[10])};
     // only for one row multi entity dropdown to avoid glitches during resizing
     // user dropdown is allowed to wrap and grow vertically
     height: ${({ limitSelectedItems, userDropdown }) =>
@@ -79,8 +78,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__value-container {
     height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
     align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
-    row-gap: ${({ userDropdown }) => (userDropdown ? "2px" : "")};
-    padding: 0;
+    row-gap: ${({ userDropdown }) => (userDropdown ? "3px" : "")};
+    padding: ${({ userDropdown }) => (userDropdown ? "2px 0.3rem" : "0")};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
   }
@@ -108,13 +107,18 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
+    padding: ${({ userDropdown }) => (userDropdown ? "0" : "")};
     svg {
       height: 18;
+      ${({ userDropdown }) => (userDropdown ? "width: 14px; height: 14px;" : "")}
     }
   }
   .react-select__clear-indicator {
-    padding: 0.2rem;
+    padding: ${({ userDropdown }) => (userDropdown ? "0" : "0.2rem")};
     color: ${({ theme }) => theme.color["primary"]};
+    svg {
+      ${({ userDropdown }) => (userDropdown ? "width: 14px; height: 14px;" : "")}
+    }
   }
   .react-select__indicator-separator {
     display: none;

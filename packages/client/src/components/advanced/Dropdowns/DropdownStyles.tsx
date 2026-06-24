@@ -77,7 +77,7 @@ export const StyledUserMultiValue = styled.div`
   max-width: 100%;
   gap: ${({ theme }) => theme.space[1]};
   padding: 1px 0.2rem;
-  font-size: ${({ theme }) => theme.fontSize.sm};
+  font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color["black"]};
 `;
 export const StyledUserMultiValueIcon = styled.span`
@@ -93,7 +93,9 @@ export const StyledUserMultiValueLabel = styled.span`
   text-overflow: ellipsis;
 `;
 export const StyledUserMoreBadge = styled.div`
-  flex-basis: 100%;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   padding: 1px 0.3rem;
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color["primary"]};
