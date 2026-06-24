@@ -123,6 +123,7 @@ const theme = {
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
     menuHover: "#CCD5F4",
+    pageBg: "#edf2f7",
     menuShadow: "rgba(0, 0, 0, 0.3)",
 
     closeBtnBackground: "rgba(130, 130, 130, 0.1)",

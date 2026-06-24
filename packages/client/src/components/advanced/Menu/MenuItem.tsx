@@ -1,5 +1,5 @@
 import { config, useSpring } from "@react-spring/web";
-import { InvertedBgColor, ThemeColor } from "Theme/theme";
+import { InvertedBgColor } from "Theme/theme";
 import { useTheme } from "hooks";
 import React, { useState } from "react";
 import { StyledIcon, StyledMenuItem } from "./MenuStyles";
