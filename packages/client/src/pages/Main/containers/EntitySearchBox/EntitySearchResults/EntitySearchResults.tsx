@@ -60,8 +60,6 @@ const Row: React.FC<Row> = ({ data, index, style }) => {
       <StyledResultItem>
         <EntityTag
           entity={entity}
-          isEquivalent={entity.isEquivalent}
-          isSubordinate={entity.isSubordinate}
           tooltipPosition="left"
           fullWidth
           button={

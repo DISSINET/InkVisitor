@@ -57,6 +57,26 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
+  // Page-level expansion options for the whole Explorer query (#2969): mix the
+  // result entities with their equivalents (SYN/IDE/AEE) and/or subordinates
+  // (inverse SCL/SOE/HOL + child territories). Persisted across sessions.
+  const includeSubordinatesStorageKey = "queryIncludeSubordinates";
+  const includeEquivalentsStorageKey = "queryIncludeEquivalents";
+  const [includeSubordinates, setIncludeSubordinates] = useState(
+    () => localStorage.getItem(includeSubordinatesStorageKey) === "true",
+  );
+  const [includeEquivalents, setIncludeEquivalents] = useState(
+    () => localStorage.getItem(includeEquivalentsStorageKey) === "true",
+  );
+  const handleToggleIncludeSubordinates = useCallback((value: boolean) => {
+    localStorage.setItem(includeSubordinatesStorageKey, String(value));
+    setIncludeSubordinates(value);
+  }, []);
+  const handleToggleIncludeEquivalents = useCallback((value: boolean) => {
+    localStorage.setItem(includeEquivalentsStorageKey, String(value));
+    setIncludeEquivalents(value);
+  }, []);
+
   /**
    * Collects all problems with the query state
    */
@@ -511,6 +531,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
+                includeEquivalents={includeEquivalents}
+                includeSubordinates={includeSubordinates}
               />
             </Box>
             <Box
@@ -588,6 +610,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 isDetailOpen={isDetailOpen}
                 detailPanelWidth={detailPanelWidth}
                 canBatchEdit={canBatchEdit}
+                includeSubordinates={includeSubordinates}
+                includeEquivalents={includeEquivalents}
+                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
               />
             </Box>
           </>

@@ -25,7 +25,6 @@ import {
 import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 import { useUserQuery } from "hooks/react-query";
-import { useAppSelector } from "redux/hooks";
 
 interface EntitySuggesterProps {
   categoryTypes?: EntityEnums.Class[];
@@ -79,6 +78,13 @@ interface EntitySuggesterProps {
   isHidden?: boolean;
   disableCleanTypedAfterCreate?: boolean;
   onEmptyAddButtonClick?: () => void;
+
+  // opt-in expansion of the suggestions with related entities (#2969), surfaced
+  // (badged) in the dropdown so they can be picked directly. Off by default, so
+  // suggesters elsewhere are unaffected; only opted-in instances (the Explorer
+  // node-edge picker) expand.
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 }
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
@@ -132,16 +138,11 @@ const EntitySuggesterFull: React.FC<
   onConsumeExternalDrop,
   disableCleanTypedAfterCreate = false,
   onEmptyAddButtonClick,
+  includeEquivalents = false,
+  includeSubordinates = false,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
-  // global expansion search settings - apply to every suggester
-  const includeEquivalents = useAppSelector(
-    (state) => state.entitySearch.includeEquivalents,
-  );
-  const includeSubordinates = useAppSelector(
-    (state) => state.entitySearch.includeSubordinates,
-  );
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
   >();

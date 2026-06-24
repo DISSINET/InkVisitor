@@ -37,6 +37,12 @@ interface ExplorerBoxProps {
 
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
+
+  // page-level expansion options (#2969), rendered inside the floating search popup
+  includeSubordinates: boolean;
+  includeEquivalents: boolean;
+  onToggleIncludeSubordinates: (value: boolean) => void;
+  onToggleIncludeEquivalents: (value: boolean) => void;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -55,6 +61,10 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   isDetailOpen,
   detailPanelWidth,
   canBatchEdit = false,
+  includeSubordinates,
+  includeEquivalents,
+  onToggleIncludeSubordinates,
+  onToggleIncludeEquivalents,
 }) => {
   const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
 
@@ -152,6 +162,10 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
         rightInset={floatingSearchRightInset}
         filters={state.filters}
         exploreDispatch={dispatch}
+        includeSubordinates={includeSubordinates}
+        includeEquivalents={includeEquivalents}
+        onToggleIncludeSubordinates={onToggleIncludeSubordinates}
+        onToggleIncludeEquivalents={onToggleIncludeEquivalents}
       />
 
       {controls.isBatchModalOpen && (

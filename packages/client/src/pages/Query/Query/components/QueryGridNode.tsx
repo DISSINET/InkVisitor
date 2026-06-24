@@ -30,6 +30,10 @@ interface QueryGridNodeProps {
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
+  // page-level expansion options (#2969): the node-edge entity picker surfaces
+  // subordinates/equivalents (badged) so they can be picked directly
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -40,6 +44,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   problems,
   isRoot = false,
   onOpenEntityInDetail,
+  includeEquivalents = false,
+  includeSubordinates = false,
 }) => {
   const theme = useTheme();
   const isValid = problems.length === 0;
@@ -240,6 +246,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     categoryTypes={entityIdCategoryTypes}
                     placeholder="entity"
                     disableCreate
+                    includeEquivalents={includeEquivalents}
+                    includeSubordinates={includeSubordinates}
                     disabled={isRelationEntityPickerDisabled}
                     initCategory={
                       node.params.entityClasses?.[0] ??

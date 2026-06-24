@@ -1,7 +1,7 @@
 import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
 import { SearchEnums } from "@inkvisitor/shared/enums";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
-import { Button, ButtonGroup, Checkbox } from "components";
+import { Button, ButtonGroup } from "components";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CgOptions, CgPlayListAdd, CgPlayListRemove } from "react-icons/cg";
 import { LuListTodo } from "react-icons/lu";
@@ -14,7 +14,6 @@ import {
   StyledFloatingActions,
   StyledFloatingContainer,
   StyledFloatingContainerTitle,
-  StyledFloatingSetting,
   StyledPill,
   StyledPillLabel,
   StyledPillsContainer,
@@ -26,10 +25,6 @@ interface EntitySearchAdvancedOptions {
   searchData: IRequestSearch;
   setSearchData: (data: IRequestSearch) => void;
   isUndersized: boolean;
-  includeEquivalents: boolean;
-  onToggleIncludeEquivalents: (value: boolean) => void;
-  includeSubordinates: boolean;
-  onToggleIncludeSubordinates: (value: boolean) => void;
 }
 export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> = ({
   expandedOptions,
@@ -37,10 +32,6 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
   searchData,
   setSearchData,
   isUndersized,
-  includeEquivalents,
-  onToggleIncludeEquivalents,
-  includeSubordinates,
-  onToggleIncludeSubordinates,
 }) => {
   const [showPillsMenu, setShowPillsMenu] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
@@ -237,22 +228,6 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
                     );
                   })}
                 </StyledPillsContainer>
-                <StyledFloatingSetting>
-                  <Checkbox
-                    value={includeEquivalents}
-                    label="include equivalents"
-                    tooltipLabel="include equivalents"
-                    tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the matches - applies to all suggesters and search results."
-                    onChangeFn={onToggleIncludeEquivalents}
-                  />
-                  <Checkbox
-                    value={includeSubordinates}
-                    label="include subordinates"
-                    tooltipLabel="include subordinates"
-                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the matches - applies to all suggesters and search results."
-                    onChangeFn={onToggleIncludeSubordinates}
-                  />
-                </StyledFloatingSetting>
                 <StyledFloatingActions>
                   <Button
                     inverted
