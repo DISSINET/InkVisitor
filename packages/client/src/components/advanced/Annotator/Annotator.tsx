@@ -779,7 +779,7 @@ export const TextAnnotator = ({
     const applyCanvasTheme = (a: Annotator) => {
       a.fontColor = theme.color.black;
       a.bgColor = "transparent";
-      a.setSelectStyle("turquoise", 0.8, theme.color.black);
+      a.setSelectStyle("rgb(122, 209, 255)", 0.8, theme.color.black);
       a.setHoverHighlightStyle({
         color: theme.color.entityS,
         opacity: 0.25,
