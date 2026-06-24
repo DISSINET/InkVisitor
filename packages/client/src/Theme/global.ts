@@ -79,8 +79,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       color: ${({ theme }) => theme.color["black"]};
       background-color: ${({ theme }) => theme.color["white"]};
       &:hover {
-        background-color: ${({ theme }) =>
-          theme.color["invertedBg"]["primary"]};
+        background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
       }
     }
     .react-select__option--is-focused {
@@ -97,6 +96,13 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       padding-left: 0;
     }
     .react-select__option--is-selected {
+    }
+  }
+
+  .react-select__user-dropdown {
+    .react-select__option {
+      min-height: unset;
+      padding: 2px 6px;
     }
   }
 `;

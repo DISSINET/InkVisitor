@@ -45,6 +45,12 @@ export const StyledEntityOptionClass = styled.div`
   width: 1.5rem;
 `;
 
+export const StyledUserOptionRow = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 2.5rem;
+`;
 export const StyledUserOptionIconWrap = styled.div`
   display: flex;
   justify-content: center;
@@ -53,16 +59,22 @@ export const StyledUserOptionIconWrap = styled.div`
   color: ${({ theme }) => theme.color["info"]};
 `;
 export const StyledUserOptionLabel = styled.div`
-  display: flex;
-  align-items: center;
+  flex: 1;
+  min-width: 0;
+  display: block;
   padding-left: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.color["black"]};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const StyledUserMultiValue = styled.div`
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  max-width: 12rem;
   gap: ${({ theme }) => theme.space[1]};
   padding: 0.1rem 0.2rem;
   font-size: ${({ theme }) => theme.fontSize.sm};
@@ -71,5 +83,12 @@ export const StyledUserMultiValue = styled.div`
 export const StyledUserMultiValueIcon = styled.span`
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   color: ${({ theme }) => theme.color["info"]};
+`;
+export const StyledUserMultiValueLabel = styled.span`
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;

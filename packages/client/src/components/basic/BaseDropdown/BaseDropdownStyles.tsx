@@ -27,6 +27,7 @@ export interface StyledSelect {
   suggester?: boolean;
   isMulti: boolean;
   entityDropdown?: boolean;
+  userDropdown?: boolean;
   attributeDropdown?: boolean;
   wildCardChar?: boolean;
   icon?: React.ReactNode;

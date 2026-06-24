@@ -7,11 +7,12 @@ import { FaCheckSquare, FaRegSquare, FaRegUser } from "react-icons/fa";
 import { components, OptionProps, ValueContainerProps } from "react-select";
 import {
   StyledOptionIconWrap,
-  StyledOptionRow,
   StyledUserMultiValue,
   StyledUserMultiValueIcon,
+  StyledUserMultiValueLabel,
   StyledUserOptionIconWrap,
   StyledUserOptionLabel,
+  StyledUserOptionRow,
 } from "./DropdownStyles";
 
 interface UserMultiDropdown {
@@ -50,6 +51,7 @@ export const UserMultiDropdown = ({
 }: UserMultiDropdown) => {
   return (
     <BaseDropdown
+      userDropdown
       width={width}
       isMulti
       isClearable={isClearable}
@@ -131,7 +133,7 @@ const MultiValue = (props: any): React.ReactElement => {
         <StyledUserMultiValueIcon>
           <FaRegUser size={12} />
         </StyledUserMultiValueIcon>
-        {props.data.label}
+        <StyledUserMultiValueLabel>{props.data.label}</StyledUserMultiValueLabel>
       </StyledUserMultiValue>
     </components.MultiValue>
   );
@@ -140,7 +142,7 @@ const MultiValue = (props: any): React.ReactElement => {
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   return (
     <components.Option {...props}>
-      <StyledOptionRow>
+      <StyledUserOptionRow>
         <StyledOptionIconWrap>
           {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
         </StyledOptionIconWrap>
@@ -148,7 +150,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
           <FaRegUser size={14} />
         </StyledUserOptionIconWrap>
         <StyledUserOptionLabel>{props.label}</StyledUserOptionLabel>
-      </StyledOptionRow>
+      </StyledUserOptionRow>
     </components.Option>
   );
 };
