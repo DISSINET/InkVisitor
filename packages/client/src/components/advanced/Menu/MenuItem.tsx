@@ -17,9 +17,12 @@ export const MenuItem: React.FC<MenuItem> = ({ label, icon, color = "primary", o
 
   const selectedColor = theme.color[color] as string;
 
+  const hoverBg =
+    color === "danger" ? theme.color.invertedBg.danger : theme.color.invertedBg.info;
+
   const animatedBackground = useSpring({
-    color: isHovered ? theme.color.white : selectedColor,
-    backgroundColor: isHovered ? selectedColor : theme.color.white,
+    color: isHovered ? selectedColor : (theme.color.black as string),
+    backgroundColor: isHovered ? hoverBg : theme.color.white,
     config: config.stiff,
   });
 

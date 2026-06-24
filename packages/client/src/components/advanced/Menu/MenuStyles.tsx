@@ -1,32 +1,31 @@
 import { animated } from "@react-spring/web";
 import styled from "styled-components";
-import { heightHeader } from "Theme/constants";
 
 export const StyledMenuGroupWrapper = styled.div`
   position: absolute;
-  top: ${(heightHeader - 36) / 10}rem;
-  right: ${({ theme }) => theme.space[1]};
-
-  margin-top: ${({ theme }) => theme.space[1]};
-  padding-top: 2.7rem;
+  top: 100%;
+  right: 0;
+  padding-top: ${({ theme }) => theme.space[4]};
 
   z-index: 10001;
   min-width: 20rem;
 `;
 
 export const StyledMenuGroup = styled.div`
-  border: ${({ theme }) => "3px solid " + theme.color["primary"]};
-
-  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color.menuShadow};
-  border-radius: ${({ theme }) => theme.space[2]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color.gray[400]};
+  box-shadow: 0 4px 12px ${({ theme }) => theme.color.menuShadow};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  overflow: hidden;
 `;
 
 interface StyledMenuItem {}
 export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
-  height: 3.7rem;
+  height: 3.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
   svg {
     vertical-align: middle;
   }
@@ -42,6 +41,5 @@ export const StyledIcon = styled.div`
 
 export const StyledMenuDivider = styled.div`
   height: 1px;
-  background-color: ${({ theme }) => theme.color.primary};
-  opacity: 0.7;
+  background-color: ${({ theme }) => theme.color.gray[300]};
 `;

@@ -174,6 +174,7 @@ export const Menu: React.FC<Menu> = ({
   return (
     <div
       id="#hover-me"
+      style={{ position: "relative" }}
       onClick={() => setMenuOpen(!menuOpen)}
       onMouseLeave={() => setMenuOpen(false)}
       onMouseEnter={() => setMenuOpen(true)}
