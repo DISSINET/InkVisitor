@@ -1,5 +1,5 @@
 import { config, useSpring } from "@react-spring/web";
-import { ThemeColor } from "Theme/theme";
+import { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { useTheme } from "hooks";
 import React, { useState } from "react";
 import { StyledIcon, StyledMenuItem } from "./MenuStyles";
@@ -7,17 +7,16 @@ import { StyledIcon, StyledMenuItem } from "./MenuStyles";
 interface MenuItem {
   label: string;
   icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
-  color?: keyof ThemeColor;
+  color?: keyof InvertedBgColor;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
-export const MenuItem: React.FC<MenuItem> = ({ label, icon, color = "primary", onClick }) => {
+export const MenuItem: React.FC<MenuItem> = ({ label, icon, color, onClick }) => {
   const theme = useTheme();
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const hoverColor = color === "danger" ? theme.color.danger : theme.color.black;
-  const hoverBg =
-    color === "danger" ? theme.color.invertedBg.danger : theme.color.menuHover;
+  const hoverColor = color ? theme.color[color] : theme.color.black;
+  const hoverBg = color ? theme.color.invertedBg[color] : theme.color.menuHover;
 
   const animatedBackground = useSpring({
     color: isHovered ? hoverColor : theme.color.black,
