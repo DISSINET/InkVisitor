@@ -7,6 +7,13 @@ import {
   tagRemovalRegex,
   wrapTokenRegex,
 } from "./Annotator";
+import {
+  TextMeasurer,
+  buildPrefixWidths,
+  columnToPixelX as prefixColumnToPixelX,
+  pixelXToColumn as prefixPixelXToColumn,
+  pixelWidthOfLine as prefixPixelWidthOfLine,
+} from "./TextMeasurer";
 
 /**
  * Caret affinity at a soft-wrap boundary, where a single document offset maps to
@@ -220,6 +227,12 @@ export class Segment {
   openingTags: Tag[] = [];
   closingTags: Tag[] = [];
   lines: string[] = [];
+  /**
+   * Phase 5 — per-line cumulative pixel offsets, parallel to {@link lines}.
+   * `linePrefixes[i][c]` is the pixel x of column `c` on visual line `i`.
+   * Empty unless a proportional measurer is active (monospace path is untouched).
+   */
+  linePrefixes: number[][] = [];
   segmentIndex: number = -1; // index of this segment in the text
 
   /**
@@ -330,20 +343,67 @@ class Text {
   value: string;
   charsAtLine: number;
   noLines: number;
+  /**
+   * Phase 5 — when set, {@link calculateLines} builds per-line prefix-width
+   * tables and the column↔pixel converters use measured widths. When absent the
+   * annotator stays on the legacy monospace grid (`col * charWidth`).
+   */
+  measurer?: TextMeasurer;
 
   /**
    * Creates a new Text instance from raw text content.
    *
    * @param value - The raw text content
    * @param charsAtLine - Maximum characters per line for text wrapping
+   * @param measurer - Optional proportional measurer (Phase 5). When omitted the
+   *   monospace grid is used and no prefix tables are built.
    */
-  constructor(value: string, charsAtLine: number) {
+  constructor(value: string, charsAtLine: number, measurer?: TextMeasurer) {
     this.value = value;
     this.segments = [];
     this.prepareSegments();
     this.charsAtLine = charsAtLine;
+    this.measurer = measurer;
     this.noLines = 0;
     this.calculateLines();
+  }
+
+  /**
+   * Phase 5 — swap the proportional measurer (or clear it to return to the
+   * monospace grid) and rebuild the prefix tables.
+   */
+  setMeasurer(measurer?: TextMeasurer) {
+    this.measurer = measurer;
+    this.calculateLines();
+  }
+
+  /** Prefix-width table for an absolute visual line, or undefined (monospace). */
+  private prefixForLine(absLine: number): number[] | undefined {
+    const segment = this.segments.find(
+      (s) => s.lineStart <= absLine && s.lineEndExclusive > absLine
+    );
+    return segment?.linePrefixes[absLine - segment.lineStart];
+  }
+
+  /**
+   * Phase 5 — pixel x of column `col` on absolute visual line `absLine`.
+   * Returns 0 when no prefix table exists (only used in proportional mode).
+   */
+  columnToPixelX(absLine: number, col: number): number {
+    const prefix = this.prefixForLine(absLine);
+    return prefix ? prefixColumnToPixelX(prefix, col) : 0;
+  }
+
+  /** Phase 5 — nearest column for a pixel x on absolute visual line `absLine`. */
+  pixelXToColumn(absLine: number, x: number): number {
+    const prefix = this.prefixForLine(absLine);
+    return prefix ? prefixPixelXToColumn(prefix, x) : 0;
+  }
+
+  /** Phase 5 — pixel right edge of absolute visual line `absLine`. */
+  pixelWidthOfLine(absLine: number): number {
+    const prefix = this.prefixForLine(absLine);
+    return prefix ? prefixPixelWidthOfLine(prefix) : 0;
   }
 
   /**
@@ -570,6 +630,13 @@ class Text {
       if (!segment.lines.length) {
         segment.lines = [""];
       }
+
+      // Phase 5 — build the per-line prefix-width tables (proportional only).
+      // Left empty on the monospace path so draw/hit-test keep using charWidth.
+      const measurer = this.measurer;
+      segment.linePrefixes = measurer
+        ? segment.lines.map((line) => buildPrefixWidths(line, measurer))
+        : [];
     }
 
     this.noLines = this.segments.reduce<number>(

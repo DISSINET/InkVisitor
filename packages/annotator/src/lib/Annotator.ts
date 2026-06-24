@@ -8,6 +8,7 @@ import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
+import { CanvasMeasurer } from "./TextMeasurer";
 import Viewport from "./Viewport";
 import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
@@ -84,6 +85,12 @@ export interface DrawingOptions {
   color?: string; // override
   caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
+  /**
+   * Phase 5 — proportional column→pixel resolver. When present (and the caller
+   * passes the absolute visual line), draw uses measured widths instead of
+   * `col * charWidth`. Absent on the monospace path.
+   */
+  columnToPixelX?: (absLine: number, col: number) => number;
 }
 
 export interface Selected {
@@ -110,6 +117,18 @@ export class Annotator {
   selectOpacity: number = 0.5;
 
   charWidth: number = 0;
+  /**
+   * Phase 5 feature flag (default off). When on, text layout + DRAW use measured
+   * proportional widths via a CanvasMeasurer instead of the monospace grid.
+   *
+   * NOT YET USER-SHIPPABLE. Only Feature A (P5.0/P5.1/P5.3 — rendering) is done.
+   * Hit-test (P5.4) is still monospace: `Highlighter.xToCharI` divides by
+   * `charWidth`. With the flag on, selection/caret rects draw at measured x but
+   * clicks resolve to monospace columns, so the caret lands visibly off the
+   * selection edge. Do not enable for users until P5.4 (proportional hit-test)
+   * lands. See PROPORTIONAL_TEXT_PLAN.md §P5.4.
+   */
+  proportional: boolean = false;
   lineHeight: number = LINE_HEIGHT;
 
   inputText: string = "";
@@ -950,6 +969,33 @@ export class Annotator {
     cb: (tag: Tag | null, position: { x: number; y: number } | null) => void
   ) {
     this.onAnchorTagHoverCb = cb;
+  }
+
+  /**
+   * Phase 5 — toggle proportional text. When enabled, a CanvasMeasurer (real
+   * font metrics) drives the Text prefix-width tables so DRAW (caret/selection
+   * rects) uses measured widths; when disabled, the legacy monospace grid is
+   * restored. NOTE: hit-test is still monospace (P5.4 pending) — see the
+   * `proportional` field doc for why this flag is not user-shippable yet.
+   */
+  setProportional(on: boolean) {
+    this.proportional = on;
+    this.text.setMeasurer(
+      on ? new CanvasMeasurer(this.ctx, this.font) : undefined
+    );
+    this.draw();
+  }
+
+  /**
+   * Phase 5 — the proportional column→pixel resolver to put on DrawingOptions,
+   * or undefined when monospace (so draw keeps using `col * charWidth`).
+   */
+  private drawColumnToPixelX():
+    | ((absLine: number, col: number) => number)
+    | undefined {
+    return this.proportional
+      ? (absLine, col) => this.text.columnToPixelX(absLine, col)
+      : undefined;
   }
 
   /**
@@ -2131,6 +2177,7 @@ export class Annotator {
         charsAtLine: this.text.charsAtLine,
         caretWidth: this.caretWidth * this.ratio,
         caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
+        columnToPixelX: this.drawColumnToPixelX(),
       });
     }
 
@@ -2145,6 +2192,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        columnToPixelX: this.drawColumnToPixelX(),
       });
     }
     // Clear the per-region bounds so the highlighter isn't left holding the last
@@ -2254,6 +2302,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          columnToPixelX: this.drawColumnToPixelX(),
         });
       }
     }

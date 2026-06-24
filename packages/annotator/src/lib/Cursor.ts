@@ -490,10 +490,17 @@ export default class Cursor
         relY >= 0 &&
         relY <= viewport.noLines
       ) {
-        this.drawLine(ctx, relY, this.xLine, this.xLine, {
-          ...drawingOptions,
-          color: this.style.selectorColor,
-        });
+        this.drawLine(
+          ctx,
+          relY,
+          this.xLine,
+          this.xLine,
+          {
+            ...drawingOptions,
+            color: this.style.selectorColor,
+          },
+          this.yLine
+        );
       }
     } else if (hStart && hEnd) {
       // selection active, iterate over displayed lines
@@ -529,7 +536,14 @@ export default class Cursor
 
       // draw selections or cursor
       for (const row of rowsToDraw) {
-        this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
+        this.drawLine(
+          ctx,
+          row.rowI,
+          row.start,
+          row.end,
+          drawingOptions,
+          viewport.lineStart + row.rowI
+        );
       }
     }
 
