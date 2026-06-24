@@ -301,8 +301,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               storedTerritories={storedTerritories}
               updateUserMutation={updateUserMutation}
               isFavorited={isFavorited}
-              isExpanded={isExpanded}
-              showPagination={showPagination}
+              hasPaginatedChildren={childTerritories.length > 10 && lvl >= 1}
               childTerritories={childTerritories}
             />
           </StyledTerritoryTagWrap>

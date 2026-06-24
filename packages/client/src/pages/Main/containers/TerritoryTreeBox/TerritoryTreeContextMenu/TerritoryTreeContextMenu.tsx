@@ -27,8 +27,7 @@ interface TerritoryTreeContextMenu {
   storedTerritories: string[];
   updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
   isFavorited?: boolean;
-  isExpanded?: boolean;
-  showPagination?: boolean;
+  hasPaginatedChildren?: boolean;
   childTerritories?: IExtendedResponseTree[];
 }
 export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
@@ -40,8 +39,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
   storedTerritories,
   updateUserMutation,
   isFavorited,
-  isExpanded,
-  showPagination,
+  hasPaginatedChildren,
   childTerritories,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -49,7 +47,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
   const [showSubmit, setShowSubmit] = useState(false);
   const [showReorder, setShowReorder] = useState(false);
 
-  const canReorder = isExpanded && showPagination && childTerritories && childTerritories.length > 1;
+  const canReorder = hasPaginatedChildren && childTerritories && childTerritories.length > 1;
 
   const animatedMount = useSpring({
     opacity: showMenu ? 1 : 0,
