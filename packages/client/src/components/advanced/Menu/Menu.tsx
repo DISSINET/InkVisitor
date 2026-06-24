@@ -55,7 +55,7 @@ export const Menu: React.FC<Menu> = ({
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   const navPages: IPage[] = [
-    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen /> },
+    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen size={15} /> },
     {
       id: "explorer",
       label: "Explorer",
