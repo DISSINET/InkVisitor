@@ -13,6 +13,7 @@ interface IValueStyle {
   $autocomplete?: string;
   $fullHeight?: boolean;
   $iconCount?: number;
+  $roundCorners?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -49,6 +50,7 @@ export const StyledInput = styled.input<IValueStyle>`
   height: ${({ $fullHeight, theme }) => ($fullHeight ? "100%" : theme.space[10])};
   text-align: left;
   border-style: solid;
+  border-radius: ${({ $roundCorners, theme }) => ($roundCorners ? theme.borderRadius.xs : "0")};
   color: ${({ $inverted, theme }) => ($inverted ? theme.color["white"] : theme.color["primary"])};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};

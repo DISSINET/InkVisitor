@@ -58,6 +58,7 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         value={inputValue}
         onChangeFn={setInputValue}
         clearable
+        roundCorners
       />
       <StyledLabelFilterCheckboxWrapper>
         <Checkbox

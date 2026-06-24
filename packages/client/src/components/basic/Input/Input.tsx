@@ -29,7 +29,7 @@ interface Input {
   onEnterPressFn?: () => void;
   onEscapePressFn?: () => void;
   onFocus?: (
-    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => void;
   onBlur?: () => void;
   placeholder?: string;
@@ -42,6 +42,7 @@ interface Input {
   noBorder?: boolean;
   fullHeightTextArea?: boolean;
   fontSizeTextArea?: keyof ThemeFontSize;
+  roundCorners?: boolean;
 
   autocomplete?: string;
   required?: boolean;
@@ -83,6 +84,7 @@ export const Input: React.FC<Input> = ({
 
   fullHeightTextArea = false,
   fontSizeTextArea = "xs",
+  roundCorners = false,
 
   autocomplete = "",
   required = false,
@@ -114,6 +116,7 @@ export const Input: React.FC<Input> = ({
       {(type === "text" || type === "password") && (
         <div style={{ position: "relative", width: "100%", display: "flex" }}>
           <StyledInput
+            $roundCorners={roundCorners}
             ref={inputRef}
             disabled={disabled}
             type={type}
