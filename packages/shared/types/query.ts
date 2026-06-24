@@ -1004,7 +1004,8 @@ export namespace Explore {
   }
   interface IExploreEditedByFilter {
     type: SearchOption.EditedBy;
-    editedBy: string;
+    // OR semantics - matches entities edited by any of the listed users
+    editedBy: string[];
   }
   interface IExploreRootValidityFilter {
     type: SearchOption.RootValidity;

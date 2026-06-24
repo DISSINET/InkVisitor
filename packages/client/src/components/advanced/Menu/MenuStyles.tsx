@@ -40,8 +40,7 @@ export const StyledMenuItem = styled.div<StyledMenuItem>`
     background-color 0.2s ease;
 
   &:hover {
-    color: ${({ theme, $color }) =>
-      $color ? theme.color[$color] : theme.color.black};
+    color: ${({ theme, $color }) => ($color ? theme.color[$color] : theme.color.black)};
     background-color: ${({ theme, $color }) =>
       $color ? theme.color.invertedBg[$color] : theme.color.menuHover};
   }
@@ -52,7 +51,7 @@ export const StyledMenuItem = styled.div<StyledMenuItem>`
 `;
 
 export const StyledIcon = styled.div`
-  width: 3.5rem;
+  width: 3.4rem;
   margin-left: 0.1rem;
   display: flex;
   justify-content: center;

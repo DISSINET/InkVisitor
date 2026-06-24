@@ -59,3 +59,17 @@ export const StyledUserOptionLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize.sm};
   color: ${({ theme }) => theme.color["black"]};
 `;
+
+export const StyledUserMultiValue = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: 0.1rem 0.2rem;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+export const StyledUserMultiValueIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["info"]};
+`;

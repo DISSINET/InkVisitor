@@ -1,28 +1,24 @@
-import { UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { BaseDropdown } from "components";
 import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import { useTheme } from "hooks";
 import React from "react";
-import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
+import { FaCheckSquare, FaRegSquare, FaRegUser } from "react-icons/fa";
 import { components, OptionProps, ValueContainerProps } from "react-select";
-import { getUserIcon } from "utils/iconUtils";
-import { UserTag } from "../UserTag/UserTag";
-import { UserTagSize } from "../UserTag/utils";
 import {
   StyledOptionIconWrap,
   StyledOptionRow,
+  StyledUserMultiValue,
+  StyledUserMultiValueIcon,
   StyledUserOptionIconWrap,
   StyledUserOptionLabel,
 } from "./DropdownStyles";
-
-export type UserDropdownItem = DropdownItem & { role?: UserEnums.Role };
 
 interface UserMultiDropdown {
   width?: number | "full";
   value: string[];
   onChange: (value: string[]) => void;
-  options: UserDropdownItem[];
+  options: DropdownItem[];
   placeholder?: string;
   noOptionsMessage?: string;
 
@@ -131,13 +127,17 @@ const ValueContainer = ({
 const MultiValue = (props: any): React.ReactElement => {
   return (
     <components.MultiValue {...props}>
-      <UserTag userId={props.data.value} variant="transparent" />
+      <StyledUserMultiValue>
+        <StyledUserMultiValueIcon>
+          <FaRegUser size={12} />
+        </StyledUserMultiValueIcon>
+        {props.data.label}
+      </StyledUserMultiValue>
     </components.MultiValue>
   );
 };
 
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  const role: UserEnums.Role = props.data.role ?? UserEnums.Role.Viewer;
   return (
     <components.Option {...props}>
       <StyledOptionRow>
@@ -145,7 +145,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
           {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
         </StyledOptionIconWrap>
         <StyledUserOptionIconWrap>
-          {getUserIcon(role, UserTagSize.Small)}
+          <FaRegUser size={14} />
         </StyledUserOptionIconWrap>
         <StyledUserOptionLabel>{props.label}</StyledUserOptionLabel>
       </StyledOptionRow>
