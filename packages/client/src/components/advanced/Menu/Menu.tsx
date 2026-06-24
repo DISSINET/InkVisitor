@@ -1,5 +1,5 @@
-import { animated, config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@inkvisitor/shared/enums";
+import { animated, config, useSpring } from "@react-spring/web";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
@@ -9,16 +9,16 @@ import {
   FaBookOpen,
   FaDatabase,
   FaInfo,
-  FaSearchengin,
   FaRegChartBar,
+  FaSearchengin,
   FaUsers,
 } from "react-icons/fa";
 import { RiLayoutMasonryLine } from "react-icons/ri";
+import { TbSettings } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuDivider, StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
-import { CiSettings } from "react-icons/ci";
 
 const LAYOUT_KEYS = [
   "mainPageTreeSeparatorXPosition",
@@ -61,7 +61,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Explorer",
       color: "info",
       href: "/explorer",
-      icon: <FaSearchengin />,
+      icon: <FaSearchengin size={18} />,
     },
     {
       id: "stats",
@@ -75,7 +75,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Documents",
       color: "info",
       href: "/documents",
-      icon: <CgFileDocument size={18} />,
+      icon: <CgFileDocument size={19} />,
     },
   ];
 
@@ -85,7 +85,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Customize",
       color: "info",
       href: false,
-      icon: <CiSettings size={20} />,
+      icon: <TbSettings size={20} />,
       onClick: () => setUserCustomizationOpen(true),
     },
     {
@@ -94,7 +94,7 @@ export const Menu: React.FC<Menu> = ({
       color: "info",
       href: "/users",
       admin: true,
-      icon: <FaUsers />,
+      icon: <FaUsers size={18} />,
     },
     {
       id: "reset-layout",
@@ -102,7 +102,7 @@ export const Menu: React.FC<Menu> = ({
       color: "info",
       href: false,
       mainPageOnly: true,
-      icon: <RiLayoutMasonryLine />,
+      icon: <RiLayoutMasonryLine size={18} />,
       onClick: () => {
         LAYOUT_KEYS.forEach((key) => localStorage.removeItem(key));
         window.location.reload();
@@ -128,7 +128,7 @@ export const Menu: React.FC<Menu> = ({
       owner: true,
       icon: <FaDatabase size={16} />,
     },
-    { id: "about", label: "About", color: "info", href: "/about", icon: <FaInfo /> },
+    { id: "about", label: "About", color: "info", href: "/about", icon: <FaInfo size={16} /> },
   ];
 
   const filterByRole = (pages: IPage[]) =>
@@ -214,7 +214,7 @@ export const Menu: React.FC<Menu> = ({
             <StyledMenuDivider />
             <MenuItem
               label="Log out"
-              icon={<BiLogOut />}
+              icon={<BiLogOut size={18} />}
               color="danger"
               onClick={() => handleLogOut()}
             />

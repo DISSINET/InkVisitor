@@ -2,7 +2,7 @@ import { config, useSpring } from "@react-spring/web";
 import { ThemeColor } from "Theme/theme";
 import { useTheme } from "hooks";
 import React, { useState } from "react";
-import { StyledMenuItem } from "./MenuStyles";
+import { StyledIcon, StyledMenuItem } from "./MenuStyles";
 
 interface MenuItem {
   label: string;
@@ -10,12 +10,7 @@ interface MenuItem {
   color?: keyof ThemeColor;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
-export const MenuItem: React.FC<MenuItem> = ({
-  label,
-  icon,
-  color = "primary",
-  onClick,
-}) => {
+export const MenuItem: React.FC<MenuItem> = ({ label, icon, color = "primary", onClick }) => {
   const theme = useTheme();
 
   const [isHovered, setIsHovered] = useState(false);
@@ -35,7 +30,7 @@ export const MenuItem: React.FC<MenuItem> = ({
       onMouseOut={() => setIsHovered(false)}
       onClick={onClick}
     >
-      {icon || null}
+      <StyledIcon>{icon || null}</StyledIcon>
       {label}
     </StyledMenuItem>
   );

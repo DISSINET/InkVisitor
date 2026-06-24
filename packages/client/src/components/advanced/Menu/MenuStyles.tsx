@@ -11,7 +11,7 @@ export const StyledMenuGroupWrapper = styled.div`
   padding-top: 2.7rem;
 
   z-index: 10001;
-  min-width: 200px;
+  min-width: 20rem;
 `;
 
 export const StyledMenuGroup = styled.div`
@@ -23,12 +23,21 @@ export const StyledMenuGroup = styled.div`
 
 interface StyledMenuItem {}
 export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
-  padding: ${({ theme }) => theme.space[3]};
+  height: 3.7rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
   svg {
-    margin-right: ${({ theme }) => theme.space[2]};
     vertical-align: middle;
   }
+`;
+
+export const StyledIcon = styled.div`
+  width: 3.5rem;
+  margin-left: 0.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const StyledMenuDivider = styled.div`
