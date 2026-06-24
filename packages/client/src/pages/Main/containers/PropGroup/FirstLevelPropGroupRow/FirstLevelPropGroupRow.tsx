@@ -42,6 +42,8 @@ interface FirstLevelPropGroupRow {
   alwaysShowCreateModal?: boolean;
   initTypeTyped?: string;
   initValueTyped?: string;
+  autoFocusType?: boolean;
+  autoFocusValue?: boolean;
 }
 export const FirstLevelPropGroupRow: React.FC<FirstLevelPropGroupRow> = ({
   prop1,
@@ -70,6 +72,8 @@ export const FirstLevelPropGroupRow: React.FC<FirstLevelPropGroupRow> = ({
   alwaysShowCreateModal,
   initTypeTyped,
   initValueTyped,
+  autoFocusType,
+  autoFocusValue,
 }) => {
   useEffect(() => {
     setInitTypeTyped("");
@@ -107,6 +111,8 @@ export const FirstLevelPropGroupRow: React.FC<FirstLevelPropGroupRow> = ({
         alwaysShowCreateModal={alwaysShowCreateModal}
         initTypeTyped={isLast ? initTypeTyped : undefined}
         initValueTyped={isLast ? initValueTyped : undefined}
+        autoFocusType={isLast ? autoFocusType : undefined}
+        autoFocusValue={isLast ? autoFocusValue : undefined}
       />
     </React.Fragment>
   );

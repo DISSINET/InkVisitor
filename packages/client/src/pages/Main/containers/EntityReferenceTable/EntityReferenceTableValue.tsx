@@ -23,6 +23,7 @@ interface EntityReferenceTableValue {
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
   initValueTyped?: string;
+  autoFocus?: boolean;
   editorWidthTooNarrow: boolean;
 
   disabled?: boolean;
@@ -37,6 +38,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
   alwaysShowCreateModal,
   openDetailOnCreate,
   initValueTyped,
+  autoFocus,
   editorWidthTooNarrow,
 
   disabled,
@@ -93,7 +95,8 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           initTyped={initValueTyped}
-          // autoFocus={initValueTyped !== undefined}
+          autoFocus={autoFocus}
+          autoFocusInput={autoFocus}
           disabled={disabled}
         />
       )}

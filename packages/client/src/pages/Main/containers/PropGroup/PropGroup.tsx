@@ -103,6 +103,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   );
   const [initTypeTyped, setInitTypeTyped] = useState("");
   const [initValueTyped, setInitValueTyped] = useState("");
+  const [autoFocusField, setAutoFocusField] = useState<false | "type" | "value">(false);
 
   useEffect(() => {
     if (fieldToUpdate === "type") {
@@ -115,6 +116,9 @@ export const PropGroup: React.FC<PropGroup> = ({
       setInitTypeTyped("");
       setTempValueTyped("");
       setFieldToUpdate(false);
+    }
+    if (autoFocusField) {
+      setTimeout(() => setAutoFocusField(false), 0);
     }
   }, [props]);
 
@@ -156,6 +160,8 @@ export const PropGroup: React.FC<PropGroup> = ({
           alwaysShowCreateModal={alwaysShowCreateModal}
           // initTypeTyped={isLast ? initTypeTyped : undefined}
           // initValueTyped={isLast ? initValueTyped : undefined}
+          autoFocusType={isLast && autoFocusField === "type"}
+          autoFocusValue={isLast && autoFocusField === "value"}
         />
         {/* 2nd level */}
         <SecondLevelPropGroup
@@ -288,6 +294,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             onSelected={(newSelectedId) => {
               if (addPropWithEntityId) {
                 addPropWithEntityId({ typeEntityId: newSelectedId });
+                setAutoFocusField("value");
                 if (tempValueTyped.length) {
                   setFieldToUpdate("value");
                 }
@@ -310,8 +317,8 @@ export const PropGroup: React.FC<PropGroup> = ({
             territoryActants={[]}
             onSelected={(newSelectedId: string) => {
               if (addPropWithEntityId) {
-                addPropWithEntityId &&
-                  addPropWithEntityId({ valueEntityId: newSelectedId });
+                addPropWithEntityId({ valueEntityId: newSelectedId });
+                setAutoFocusField("type");
                 if (tempTypeTyped.length) {
                   setFieldToUpdate("type");
                 }

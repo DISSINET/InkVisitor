@@ -67,6 +67,8 @@ interface PropGroupRow {
 
   initTypeTyped?: string;
   initValueTyped?: string;
+  autoFocusType?: boolean;
+  autoFocusValue?: boolean;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -95,6 +97,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
 
   initTypeTyped,
   initValueTyped,
+  autoFocusType,
+  autoFocusValue,
 }) => {
   const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
   const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
@@ -211,6 +215,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 userCanEdit={userCanEdit}
                 alwaysShowCreateModal={alwaysShowCreateModal}
                 initTypeTyped={initTypeTyped}
+                autoFocus={autoFocusType}
               />
             </StyledBorderLeft>
           </StyledPropLineColumn>
@@ -228,6 +233,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               alwaysShowCreateModal={alwaysShowCreateModal}
               initValueTyped={initValueTyped}
+              autoFocus={autoFocusValue}
             />
           </StyledPropLineColumn>
           <StyledPropLineColumn style={{ paddingRight: "0.5rem" }}>
