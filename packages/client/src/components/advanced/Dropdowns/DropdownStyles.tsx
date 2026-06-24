@@ -44,3 +44,18 @@ export const StyledEntityOptionClass = styled.div`
   align-items: center;
   width: 1.5rem;
 `;
+
+export const StyledUserOptionIconWrap = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.8rem;
+  color: ${({ theme }) => theme.color["info"]};
+`;
+export const StyledUserOptionLabel = styled.div`
+  display: flex;
+  align-items: center;
+  padding-left: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color["black"]};
+`;

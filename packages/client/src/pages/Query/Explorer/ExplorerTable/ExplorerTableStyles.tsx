@@ -104,7 +104,6 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
-  background-color: ${({ theme }) => theme.color["gray"][200]};
   z-index: 20;
 `;
 
