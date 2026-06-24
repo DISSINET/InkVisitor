@@ -117,9 +117,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                 {!isRootTerritory && (
                   <Button
                     key="favorites"
-                    tooltipLabel={
-                      isFavorited ? "remove from favorites" : "add to favorites"
-                    }
+                    tooltipLabel={isFavorited ? "remove from favorites" : "add to favorites"}
                     tooltipPosition="top"
                     icon={<FaStar size={14} />}
                     color={isFavorited ? "grey" : "warning"}
@@ -158,7 +156,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipLabel="reorder children"
                     tooltipPosition="top"
                     icon={<TbArrowsSort size={14} />}
-                    color="info"
+                    color="success"
                     onClick={() => {
                       setShowReorder(true);
                       setShowMenu(false);
@@ -197,9 +195,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
         <EntityCreateModal
           closeModal={() => setShowCreate(false)}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
-          onMutationSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: ["tree"] })
-          }
+          onMutationSuccess={() => queryClient.invalidateQueries({ queryKey: ["tree"] })}
           parentTerritory={territoryActant}
         />
       )}

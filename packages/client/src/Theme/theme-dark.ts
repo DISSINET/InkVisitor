@@ -33,7 +33,7 @@ const darkTheme = {
     },
     invertedBg: {
       plain: "#2d3748",
-      danger: "#661313",
+      danger: "#3D1A1A",
       info: "#1e1d3d",
       success: "#1d1d4a",
       primary: "#0b3a59",

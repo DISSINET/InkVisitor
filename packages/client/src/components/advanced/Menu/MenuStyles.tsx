@@ -1,4 +1,4 @@
-import { animated } from "@react-spring/web";
+import { InvertedBgColor } from "Theme/theme";
 import styled from "styled-components";
 
 export const StyledMenuGroupWrapper = styled.div`
@@ -23,14 +23,29 @@ export const StyledMenuGroup = styled.div`
   padding: 0.6rem;
 `;
 
-interface StyledMenuItem {}
-export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
+interface StyledMenuItem {
+  $color?: keyof InvertedBgColor;
+}
+export const StyledMenuItem = styled.div<StyledMenuItem>`
   height: 3.3rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   border-radius: 0.5rem;
+  color: ${({ theme }) => theme.color.black};
+  background-color: ${({ theme }) => theme.color.white};
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+
+  &:hover {
+    color: ${({ theme, $color }) =>
+      $color ? theme.color[$color] : theme.color.black};
+    background-color: ${({ theme, $color }) =>
+      $color ? theme.color.invertedBg[$color] : theme.color.menuHover};
+  }
+
   svg {
     vertical-align: middle;
   }
