@@ -53,7 +53,9 @@ describe("Text proportional prefix tables", () => {
   });
 
   test("resolves wrapped visual lines within one segment", () => {
-    const t = new Text("abcdef", 3, new MonospaceMeasurer(10)); // 'abc','def'
+    // P5.2: with a measurer, wrapping is by PIXEL budget (maxPixelWidth), not
+    // charsAtLine. 30px / 10px-per-char -> 'abc','def'.
+    const t = new Text("abcdef", 999, new MonospaceMeasurer(10), 30);
     expect(t.columnToPixelX(1, 3)).toBe(30);
     expect(t.pixelWidthOfLine(1)).toBe(30);
   });
@@ -64,5 +66,63 @@ describe("Text proportional prefix tables", () => {
     expect(t.segments[0].linePrefixes).toEqual([]);
     t.setMeasurer(proportional);
     expect(t.segments[0].linePrefixes).toEqual([[0, 10, 30, 40]]);
+  });
+});
+
+describe("Text proportional wrapping (P5.2)", () => {
+  test("wraps by measured pixel width, not character count", () => {
+    // 30px budget, each char 10px -> 3 chars per visual line
+    const t = new Text("abcdef", 999, proportional, 30);
+    expect(t.segments[0].lines).toEqual(["abc", "def"]);
+  });
+
+  test("a wide glyph causes an earlier wrap", () => {
+    // 'W'=20, others 10; budget 30. 'a'(10)+'W'(20)=30 fits, 'b' overflows.
+    const t = new Text("aWb", 999, proportional, 30);
+    expect(t.segments[0].lines).toEqual(["aW", "b"]);
+  });
+
+  test("ultra-narrow budget still advances at least one char per line", () => {
+    // single char (10px) wider than the 5px budget -> 1 char/line, no infinite loop
+    const t = new Text("abc", 999, proportional, 5);
+    expect(t.segments[0].lines).toEqual(["a", "b", "c"]);
+  });
+
+  test("prefix tables match the proportionally wrapped lines", () => {
+    const t = new Text("abcdef", 999, proportional, 30);
+    expect(t.segments[0].linePrefixes).toEqual([
+      [0, 10, 20, 30],
+      [0, 10, 20, 30],
+    ]);
+  });
+
+  test("monospace path (no measurer) still wraps by charsAtLine", () => {
+    const t = new Text("abcdef", 3);
+    expect(t.segments[0].lines).toEqual(["abc", "def"]);
+  });
+
+  test("respects whitespace break opportunities under a pixel budget", () => {
+    // "ab cd" budget 30: 'ab'(20)+space(10)=30 fits, 'cd' breaks to next line.
+    const t = new Text("ab cd", 999, proportional, 30);
+    expect(t.segments[0].lines).toEqual(["ab ", "cd"]);
+  });
+
+  test("wrapping uses the per-character additive basis, consistent with the prefix table", () => {
+    // 'ff' is a 15px ligature measured whole, but 20px per-char. Wrapping must use
+    // the per-char basis (the prefix table's basis) so caret/selection x agree with
+    // where lines break. Budget 18: additive 20 > 18 -> must wrap to 'f','f'.
+    const kerning: TextMeasurer = {
+      measure: (t: string) => (t === "ff" ? 15 : [...t].length * 10),
+    };
+    const t = new Text("ff", 999, kerning, 18);
+    expect(t.segments[0].lines).toEqual(["f", "f"]);
+  });
+
+  test("multi-code-unit graphemes are code-unit columns (documented limitation — §5.9)", () => {
+    // The annotator's column model is UTF-16 code-unit based (xLine === .length),
+    // so the prefix table has one entry per code unit. '👍' is 2 code units -> 3
+    // entries. Proper grapheme handling is deferred to §5.9 (Intl.Segmenter/pretext).
+    const t = new Text("👍", 999, proportional);
+    expect(t.segments[0].linePrefixes[0].length).toBe("👍".length + 1);
   });
 });

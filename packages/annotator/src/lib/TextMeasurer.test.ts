@@ -9,6 +9,7 @@ import {
   MonospaceMeasurer,
   CanvasMeasurer,
   buildPrefixWidths,
+  additiveWidth,
   columnToPixelX,
   pixelXToColumn,
   pixelWidthOfLine,
@@ -68,6 +69,25 @@ describe("CanvasMeasurer", () => {
     m.clearCache();
     m.measure("hi");
     expect(calls).toEqual(["hi", "hi"]);
+  });
+});
+
+describe("additiveWidth (wrap budget shares the prefix-table basis)", () => {
+  test("sums per-character widths", () => {
+    expect(additiveWidth("aWb", proportional())).toBe(40);
+    expect(additiveWidth("", proportional())).toBe(0);
+  });
+
+  test("uses the per-character basis, not whole-string kerning/ligatures", () => {
+    // 'ff' measured as a whole is a 15px ligature, but per-char it's 20px.
+    const kerning: TextMeasurer = {
+      measure: (t) => (t === "ff" ? 15 : [...t].length * 10),
+    };
+    expect(additiveWidth("ff", kerning)).toBe(20);
+    // ...and it equals the prefix table's line width, so wrap and draw agree.
+    expect(additiveWidth("ff", kerning)).toBe(
+      pixelWidthOfLine(buildPrefixWidths("ff", kerning))
+    );
   });
 });
 

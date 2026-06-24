@@ -10,6 +10,7 @@ import {
 import {
   TextMeasurer,
   buildPrefixWidths,
+  additiveWidth,
   columnToPixelX as prefixColumnToPixelX,
   pixelXToColumn as prefixPixelXToColumn,
   pixelWidthOfLine as prefixPixelWidthOfLine,
@@ -344,36 +345,62 @@ class Text {
   charsAtLine: number;
   noLines: number;
   /**
-   * Phase 5 — when set, {@link calculateLines} builds per-line prefix-width
-   * tables and the column↔pixel converters use measured widths. When absent the
-   * annotator stays on the legacy monospace grid (`col * charWidth`).
+   * Phase 5 — when set, {@link calculateLines} wraps by measured pixel width and
+   * builds per-line prefix-width tables, and the column↔pixel converters use
+   * measured widths. When absent the annotator stays on the legacy monospace
+   * grid (wrap by {@link charsAtLine}; `col * charWidth`).
    */
   measurer?: TextMeasurer;
+  /**
+   * Phase 5 — wrap budget in device pixels, used instead of {@link charsAtLine}
+   * when a {@link measurer} is active. Undefined means "no width limit".
+   */
+  maxPixelWidth?: number;
 
   /**
    * Creates a new Text instance from raw text content.
    *
    * @param value - The raw text content
-   * @param charsAtLine - Maximum characters per line for text wrapping
+   * @param charsAtLine - Maximum characters per line (monospace wrap budget)
    * @param measurer - Optional proportional measurer (Phase 5). When omitted the
    *   monospace grid is used and no prefix tables are built.
+   * @param maxPixelWidth - Proportional wrap budget in device px (Phase 5).
    */
-  constructor(value: string, charsAtLine: number, measurer?: TextMeasurer) {
+  constructor(
+    value: string,
+    charsAtLine: number,
+    measurer?: TextMeasurer,
+    maxPixelWidth?: number
+  ) {
     this.value = value;
     this.segments = [];
     this.prepareSegments();
     this.charsAtLine = charsAtLine;
     this.measurer = measurer;
+    this.maxPixelWidth = maxPixelWidth;
     this.noLines = 0;
     this.calculateLines();
   }
 
   /**
    * Phase 5 — swap the proportional measurer (or clear it to return to the
-   * monospace grid) and rebuild the prefix tables.
+   * monospace grid) and rebuild lines/prefix tables. Pass `maxPixelWidth` to
+   * update the proportional wrap budget at the same time.
    */
-  setMeasurer(measurer?: TextMeasurer) {
+  setMeasurer(measurer?: TextMeasurer, maxPixelWidth?: number) {
     this.measurer = measurer;
+    if (maxPixelWidth !== undefined) {
+      this.maxPixelWidth = maxPixelWidth;
+    }
+    this.calculateLines();
+  }
+
+  /**
+   * Phase 5 — update the proportional wrap budget (device px) and re-wrap.
+   * Used on resize; no-op effect on the monospace path.
+   */
+  updateMaxPixelWidth(maxPixelWidth: number) {
+    this.maxPixelWidth = maxPixelWidth;
     this.calculateLines();
   }
 
@@ -490,6 +517,41 @@ class Text {
    */
   calculateLines(): void {
     const time1 = performance.now();
+
+    // Phase 5 — width basis for wrapping. Monospace: 1 code unit = 1 unit,
+    // budget = charsAtLine (byte-identical to the legacy loop). Proportional:
+    // measured pixels via `additiveWidth` (per code unit — the SAME basis as the
+    // prefix table), budget = maxPixelWidth, so line breaks agree with the
+    // caret/selection x-offsets the prefix table produces (within-token kerning
+    // is ignored; grapheme handling deferred — see TextMeasurer.additiveWidth).
+    // `widthOf`/`maxWidth`/`charsThatFit` are the only difference between the two
+    // modes; everything else is shared.
+    const measurer = this.measurer;
+    const widthOf = measurer
+      ? (s: string) => additiveWidth(s, measurer)
+      : (s: string) => s.length;
+    const maxWidth = measurer
+      ? Math.max(1, this.maxPixelWidth ?? Infinity)
+      : Math.max(1, this.charsAtLine);
+    // Largest code-unit count of `s` whose measured width fits `budget`.
+    // Monospace reduces to min(len, budget) — i.e. the legacy `maxLen - used`.
+    // Iterates code units (s[n]) like the prefix table; grapheme-aware splitting
+    // is deferred to §5.9.
+    const charsThatFit = (s: string, budget: number): number => {
+      if (!measurer) {
+        return Math.max(0, Math.min(s.length, budget));
+      }
+      let acc = 0;
+      let n = 0;
+      while (n < s.length) {
+        const w = measurer.measure(s[n]);
+        if (acc + w > budget) break;
+        acc += w;
+        n++;
+      }
+      return n;
+    };
+
     for (
       let segmentIndex = 0;
       segmentIndex < this.segments.length;
@@ -523,9 +585,8 @@ class Text {
       // is only allowed next to whitespace; a word together with the
       // punctuation glued to it ("ds.") is therefore one unbreakable unit that
       // wraps to the next line as a whole rather than letting the punctuation
-      // (and the caret after it) spill past charsAtLine. A unit longer than the
+      // (and the caret after it) spill past the budget. A unit longer than the
       // whole line is broken character-wise so nothing ever exceeds the width.
-      const maxLen = Math.max(1, this.charsAtLine);
 
       // Atomic tokens: tags (<...>) must never be split; word, punctuation and
       // whitespace runs are kept separate so we can find break opportunities.
@@ -573,13 +634,13 @@ class Text {
       };
       const appendStr = (s: string) => {
         currentLine.push(s);
-        currentLineLength += s.length;
+        currentLineLength += widthOf(s);
       };
 
       for (let ci = 0; ci < cells.length; ci++) {
         const cell = cells[ci];
 
-        if (currentLineLength + cell.text.length <= maxLen) {
+        if (currentLineLength + widthOf(cell.text) <= maxWidth) {
           appendStr(cell.text);
           continue;
         }
@@ -593,7 +654,7 @@ class Text {
           continue;
         }
 
-        if (cell.text.length <= maxLen) {
+        if (widthOf(cell.text) <= maxWidth) {
           // Move the whole unit down to a fresh line.
           if (currentLineLength > 0) pushLine();
           appendStr(cell.text);
@@ -604,14 +665,20 @@ class Text {
         // fits on a line, but a tag longer than the line is still broken — with
         // no horizontal scroll, an unsplit over-long tag would run off the edge.
         for (const part of cell.parts) {
-          if (part.atomic && part.text.length <= maxLen) {
-            if (currentLineLength > 0 && currentLineLength + part.text.length > maxLen)
+          if (part.atomic && widthOf(part.text) <= maxWidth) {
+            if (
+              currentLineLength > 0 &&
+              currentLineLength + widthOf(part.text) > maxWidth
+            )
               pushLine();
             appendStr(part.text);
           } else {
             let s = part.text;
-            while (currentLineLength + s.length > maxLen) {
-              const take = maxLen - currentLineLength;
+            while (currentLineLength + widthOf(s) > maxWidth) {
+              // Chars that still fit the remaining budget; force at least one on
+              // an empty line so an over-wide glyph can't loop forever (#narrow).
+              const fit = charsThatFit(s, maxWidth - currentLineLength);
+              const take = currentLineLength === 0 ? Math.max(1, fit) : fit;
               if (take > 0) {
                 appendStr(s.slice(0, take));
                 s = s.slice(take);
@@ -633,7 +700,6 @@ class Text {
 
       // Phase 5 — build the per-line prefix-width tables (proportional only).
       // Left empty on the monospace path so draw/hit-test keep using charWidth.
-      const measurer = this.measurer;
       segment.linePrefixes = measurer
         ? segment.lines.map((line) => buildPrefixWidths(line, measurer))
         : [];

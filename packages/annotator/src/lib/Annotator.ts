@@ -880,6 +880,11 @@ export class Annotator {
       extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
 
     this.viewport.updateLineEnd(noLinesViewport);
+    // Phase 5 — keep the proportional wrap budget in sync with the new width
+    // before the re-wrap (updateCharsAtLine triggers calculateLines once).
+    if (this.proportional) {
+      this.text.maxPixelWidth = this.width;
+    }
     this.text.updateCharsAtLine(charsAtLine);
 
     this.cursor.syncVisualFromOffset(this.text);
@@ -981,7 +986,8 @@ export class Annotator {
   setProportional(on: boolean) {
     this.proportional = on;
     this.text.setMeasurer(
-      on ? new CanvasMeasurer(this.ctx, this.font) : undefined
+      on ? new CanvasMeasurer(this.ctx, this.font) : undefined,
+      on ? this.width : undefined
     );
     this.draw();
   }

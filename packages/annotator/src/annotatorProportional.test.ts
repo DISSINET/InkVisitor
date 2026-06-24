@@ -38,4 +38,10 @@ describe("Annotator proportional flag", () => {
     expect(a.proportional).toBe(false);
     expect(a.text.segments[0].linePrefixes).toEqual([]);
   });
+
+  test("setProportional(true) sets the pixel wrap budget from the viewport width", () => {
+    const a = mk("abc");
+    a.setProportional(true);
+    expect(a.text.maxPixelWidth).toBe(a.width);
+  });
 });

@@ -62,10 +62,14 @@ export class CanvasMeasurer implements TextMeasurer {
  * Cumulative pixel offsets for one visual line. `prefix[c]` is the pixel x of
  * column `c`; `prefix[0] === 0` and `prefix.length === line.length + 1`.
  *
- * Built per-character (additive, O(n) measure calls) so it is monotonic and
- * exact for monospace. The wrap loop will populate the same shape from token
- * widths in P5.2; the kerning gap of per-char vs whole-line measurement is
- * within tolerance and only affects proportional fonts.
+ * Built per UTF-16 CODE UNIT (additive, O(n) measure calls) so it is monotonic
+ * and exact for monospace. The wrap loop ({@link additiveWidth}) uses the same
+ * per-code-unit basis so line breaks agree with these offsets. Two consequences,
+ * both deferred to the §5.9 (Intl.Segmenter/pretext) work: (1) within-token
+ * kerning is ignored (per-char sum, not whole-string), within tolerance for the
+ * proportional fonts in scope; (2) a multi-code-unit grapheme (surrogate pair,
+ * combining mark) is measured in parts, matching the annotator's code-unit
+ * column model — its parts' widths won't sum to the rendered grapheme width.
  */
 export function buildPrefixWidths(
   line: string,
@@ -77,6 +81,26 @@ export function buildPrefixWidths(
     prefix[c + 1] = prefix[c] + measurer.measure(line[c]);
   }
   return prefix;
+}
+
+/**
+ * Total width of `text` summed PER UTF-16 CODE UNIT — the exact basis
+ * {@link buildPrefixWidths} uses. Wrapping must use this (not a whole-string
+ * `measure(text)`) so line-break decisions agree with the prefix table's column
+ * offsets; otherwise a kerned/ligated token would break at a different width
+ * than its caret/selection rects are drawn (within-token kerning is ignored).
+ *
+ * Like buildPrefixWidths, this iterates code units, so a multi-code-unit
+ * grapheme (surrogate pair, combining mark) is measured in parts — consistent
+ * with the annotator's code-unit column model. Proper grapheme segmentation is
+ * deferred to the §5.9 (Intl.Segmenter/pretext) work.
+ */
+export function additiveWidth(text: string, measurer: TextMeasurer): number {
+  let width = 0;
+  for (let c = 0; c < text.length; c++) {
+    width += measurer.measure(text[c]);
+  }
+  return width;
 }
 
 /** Pixel x of column `col`, clamped into the table. */
