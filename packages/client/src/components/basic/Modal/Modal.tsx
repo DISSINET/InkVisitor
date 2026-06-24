@@ -29,6 +29,8 @@ interface Modal {
   showModal: boolean;
   disableBgClick?: boolean;
   width?: "full" | "fat" | "normal" | "auto" | number;
+  // to combine with auto width
+  maxWidth?: number;
   disableEscapeClose?: boolean;
   disableBackground?: boolean;
   isLoading?: boolean;
@@ -42,6 +44,7 @@ export const Modal: FC<Modal> = ({
   showModal,
   disableBgClick = false,
   width = "normal",
+  maxWidth = undefined,
   disableEscapeClose = false,
   disableBackground = false,
   isLoading = false,
@@ -73,6 +76,7 @@ export const Modal: FC<Modal> = ({
               <ModalCard
                 animatedMount={animatedMount}
                 width={width}
+                maxWidth={maxWidth}
                 isLoading={isLoading}
                 fullHeight={fullHeight}
               >
@@ -94,6 +98,7 @@ export const Modal: FC<Modal> = ({
 interface ModalCard {
   children?: ReactNode;
   width: "full" | "fat" | "normal" | "auto" | number;
+  maxWidth?: number;
   animatedMount: any;
   isLoading?: boolean;
   fullHeight: boolean;
@@ -101,12 +106,13 @@ interface ModalCard {
 export const ModalCard: FC<ModalCard> = ({
   children,
   width,
+  maxWidth,
   animatedMount,
   isLoading,
   fullHeight,
 }) => {
   return (
-    <StyledCard style={animatedMount} width={width} $fullHeight={fullHeight}>
+    <StyledCard style={animatedMount} width={width} $maxWidth={maxWidth} $fullHeight={fullHeight}>
       {children}
       <Loader show={isLoading} size={36} />
     </StyledCard>
