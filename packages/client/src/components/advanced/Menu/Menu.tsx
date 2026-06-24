@@ -1,5 +1,5 @@
-import { animated, config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@inkvisitor/shared/enums";
+import { animated, config, useSpring } from "@react-spring/web";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
@@ -9,16 +9,16 @@ import {
   FaBookOpen,
   FaDatabase,
   FaInfo,
-  FaSearchengin,
   FaRegChartBar,
+  FaSearchengin,
   FaUsers,
 } from "react-icons/fa";
 import { RiLayoutMasonryLine } from "react-icons/ri";
+import { TbSettings } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuDivider, StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
-import { CiSettings } from "react-icons/ci";
 
 const LAYOUT_KEYS = [
   "mainPageTreeSeparatorXPosition",
@@ -55,13 +55,13 @@ export const Menu: React.FC<Menu> = ({
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   const navPages: IPage[] = [
-    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen /> },
+    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen size={15} /> },
     {
       id: "explorer",
       label: "Explorer",
       color: "info",
       href: "/explorer",
-      icon: <FaSearchengin />,
+      icon: <FaSearchengin size={18} />,
     },
     {
       id: "stats",
@@ -75,27 +75,38 @@ export const Menu: React.FC<Menu> = ({
       label: "Documents",
       color: "info",
       href: "/documents",
-      icon: <CgFileDocument size={18} />,
+      icon: <CgFileDocument size={19} />,
     },
   ];
 
-  const adminPages: IPage[] = [
+  const settingsPages: IPage[] = [
+    {
+      id: "customize",
+      label: "Customize",
+      color: "info",
+      href: false,
+      icon: <TbSettings size={20} />,
+      onClick: () => setUserCustomizationOpen(true),
+    },
     {
       id: "users",
-      label: "Manage Users",
+      label: "Users",
       color: "info",
       href: "/users",
       admin: true,
-      icon: <FaUsers />,
+      icon: <FaUsers size={18} />,
     },
     {
-      id: "backups",
-      label: "Backups",
+      id: "reset-layout",
+      label: "Reset Layout",
       color: "info",
-      href: "/backups",
-      admin: true,
-      owner: true,
-      icon: <FaDatabase size={16} />,
+      href: false,
+      mainPageOnly: true,
+      icon: <RiLayoutMasonryLine size={18} />,
+      onClick: () => {
+        LAYOUT_KEYS.forEach((key) => localStorage.removeItem(key));
+        window.location.reload();
+      },
     },
     // {
     //   id: "acl",
@@ -107,28 +118,17 @@ export const Menu: React.FC<Menu> = ({
     // },
   ];
 
-  const settingsPages: IPage[] = [
-    { id: "about", label: "About", color: "info", href: "/about", icon: <FaInfo /> },
+  const toolsPages: IPage[] = [
     {
-      id: "reset-layout",
-      label: "Reset layout",
+      id: "backups",
+      label: "Backups",
       color: "info",
-      href: false,
-      mainPageOnly: true,
-      icon: <RiLayoutMasonryLine />,
-      onClick: () => {
-        LAYOUT_KEYS.forEach((key) => localStorage.removeItem(key));
-        window.location.reload();
-      },
+      href: "/backups",
+      admin: true,
+      owner: true,
+      icon: <FaDatabase size={16} />,
     },
-    {
-      id: "customize",
-      label: "Customize",
-      color: "info",
-      href: false,
-      icon: <CiSettings size={18} />,
-      onClick: () => setUserCustomizationOpen(true),
-    },
+    { id: "about", label: "About", color: "info", href: "/about", icon: <FaInfo size={16} /> },
   ];
 
   const filterByRole = (pages: IPage[]) =>
@@ -168,11 +168,13 @@ export const Menu: React.FC<Menu> = ({
     config: config.stiff,
   });
 
-  const filteredAdminPages = filterByRole(adminPages);
+  const filteredSettingsPages = filterByRole(settingsPages);
+  const filteredToolsPages = filterByRole(toolsPages);
 
   return (
     <div
       id="#hover-me"
+      style={{ position: "relative" }}
       onClick={() => setMenuOpen(!menuOpen)}
       onMouseLeave={() => setMenuOpen(false)}
       onMouseEnter={() => setMenuOpen(true)}
@@ -196,20 +198,24 @@ export const Menu: React.FC<Menu> = ({
           <StyledMenuGroup>
             {renderPages(navPages)}
 
-            {filteredAdminPages.length > 0 && (
+            {filteredSettingsPages.length > 0 && (
               <>
                 <StyledMenuDivider />
-                {renderPages(adminPages)}
+                {renderPages(settingsPages)}
+              </>
+            )}
+
+            {filteredToolsPages.length > 0 && (
+              <>
+                <StyledMenuDivider />
+                {renderPages(toolsPages)}
               </>
             )}
 
             <StyledMenuDivider />
-            {renderPages(settingsPages)}
-
-            <StyledMenuDivider />
             <MenuItem
               label="Log out"
-              icon={<BiLogOut />}
+              icon={<BiLogOut size={18} />}
               color="danger"
               onClick={() => handleLogOut()}
             />

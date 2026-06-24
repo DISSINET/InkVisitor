@@ -1,30 +1,26 @@
 import { config, useSpring } from "@react-spring/web";
-import { ThemeColor } from "Theme/theme";
+import { InvertedBgColor } from "Theme/theme";
 import { useTheme } from "hooks";
 import React, { useState } from "react";
-import { StyledMenuItem } from "./MenuStyles";
+import { StyledIcon, StyledMenuItem } from "./MenuStyles";
 
 interface MenuItem {
   label: string;
   icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
-  color?: keyof ThemeColor;
+  color?: keyof InvertedBgColor;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
-export const MenuItem: React.FC<MenuItem> = ({
-  label,
-  icon,
-  color = "primary",
-  onClick,
-}) => {
+export const MenuItem: React.FC<MenuItem> = ({ label, icon, color, onClick }) => {
   const theme = useTheme();
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const selectedColor = theme.color[color] as string;
+  const hoverColor = color ? theme.color[color] : theme.color.black;
+  const hoverBg = color ? theme.color.invertedBg[color] : theme.color.menuHover;
 
   const animatedBackground = useSpring({
-    color: isHovered ? theme.color.white : selectedColor,
-    backgroundColor: isHovered ? selectedColor : theme.color.white,
+    color: isHovered ? hoverColor : theme.color.black,
+    backgroundColor: isHovered ? hoverBg : theme.color.white,
     config: config.stiff,
   });
 
@@ -35,7 +31,7 @@ export const MenuItem: React.FC<MenuItem> = ({
       onMouseOut={() => setIsHovered(false)}
       onClick={onClick}
     >
-      {icon || null}
+      <StyledIcon>{icon || null}</StyledIcon>
       {label}
     </StyledMenuItem>
   );

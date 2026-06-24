@@ -49,17 +49,13 @@ export class SettingsOverlay {
    * replaced. When `anchor` is given the backdrop covers only that element's
    * box (e.g. the canvas) instead of the whole viewport.
    */
-  open(
-    settings: SettingControl[] = [],
-    anchor?: HTMLElement,
-    footer: FooterAction[] = []
-  ): void {
+  open(settings: SettingControl[] = [], anchor?: HTMLElement, footer: FooterAction[] = []): void {
     this.close();
 
     const backdrop = document.createElement("div");
     Object.assign(backdrop.style, {
       position: "fixed",
-      zIndex: "10001",
+      zIndex: "10",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -110,9 +106,7 @@ export class SettingsOverlay {
     } else {
       for (const setting of settings) {
         body.appendChild(
-          setting.type === "color"
-            ? this.buildColor(setting)
-            : this.buildSegmented(setting)
+          setting.type === "color" ? this.buildColor(setting) : this.buildSegmented(setting)
         );
       }
     }
