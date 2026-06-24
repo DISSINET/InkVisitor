@@ -122,6 +122,7 @@ const theme = {
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
+    menuHover: "#CCD5F4",
     menuShadow: "rgba(0, 0, 0, 0.3)",
 
     closeBtnBackground: "rgba(130, 130, 130, 0.1)",
