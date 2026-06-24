@@ -79,23 +79,34 @@ export const Menu: React.FC<Menu> = ({
     },
   ];
 
-  const adminPages: IPage[] = [
+  const settingsPages: IPage[] = [
+    {
+      id: "customize",
+      label: "Customize",
+      color: "info",
+      href: false,
+      icon: <CiSettings size={20} />,
+      onClick: () => setUserCustomizationOpen(true),
+    },
     {
       id: "users",
-      label: "Manage Users",
+      label: "Users",
       color: "info",
       href: "/users",
       admin: true,
       icon: <FaUsers />,
     },
     {
-      id: "backups",
-      label: "Backups",
+      id: "reset-layout",
+      label: "Reset Layout",
       color: "info",
-      href: "/backups",
-      admin: true,
-      owner: true,
-      icon: <FaDatabase size={16} />,
+      href: false,
+      mainPageOnly: true,
+      icon: <RiLayoutMasonryLine />,
+      onClick: () => {
+        LAYOUT_KEYS.forEach((key) => localStorage.removeItem(key));
+        window.location.reload();
+      },
     },
     // {
     //   id: "acl",
@@ -107,28 +118,17 @@ export const Menu: React.FC<Menu> = ({
     // },
   ];
 
-  const settingsPages: IPage[] = [
+  const toolsPages: IPage[] = [
+    {
+      id: "backups",
+      label: "Backups",
+      color: "info",
+      href: "/backups",
+      admin: true,
+      owner: true,
+      icon: <FaDatabase size={16} />,
+    },
     { id: "about", label: "About", color: "info", href: "/about", icon: <FaInfo /> },
-    {
-      id: "reset-layout",
-      label: "Reset layout",
-      color: "info",
-      href: false,
-      mainPageOnly: true,
-      icon: <RiLayoutMasonryLine />,
-      onClick: () => {
-        LAYOUT_KEYS.forEach((key) => localStorage.removeItem(key));
-        window.location.reload();
-      },
-    },
-    {
-      id: "customize",
-      label: "Customize",
-      color: "info",
-      href: false,
-      icon: <CiSettings size={18} />,
-      onClick: () => setUserCustomizationOpen(true),
-    },
   ];
 
   const filterByRole = (pages: IPage[]) =>
@@ -168,7 +168,8 @@ export const Menu: React.FC<Menu> = ({
     config: config.stiff,
   });
 
-  const filteredAdminPages = filterByRole(adminPages);
+  const filteredSettingsPages = filterByRole(settingsPages);
+  const filteredToolsPages = filterByRole(toolsPages);
 
   return (
     <div
@@ -196,15 +197,19 @@ export const Menu: React.FC<Menu> = ({
           <StyledMenuGroup>
             {renderPages(navPages)}
 
-            {filteredAdminPages.length > 0 && (
+            {filteredSettingsPages.length > 0 && (
               <>
                 <StyledMenuDivider />
-                {renderPages(adminPages)}
+                {renderPages(settingsPages)}
               </>
             )}
 
-            <StyledMenuDivider />
-            {renderPages(settingsPages)}
+            {filteredToolsPages.length > 0 && (
+              <>
+                <StyledMenuDivider />
+                {renderPages(toolsPages)}
+              </>
+            )}
 
             <StyledMenuDivider />
             <MenuItem
