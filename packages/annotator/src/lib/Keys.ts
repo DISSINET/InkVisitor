@@ -41,6 +41,12 @@ export interface AnnotatorCallbacks {
   resetCaretBlink(): void;
   width: number;
   charWidth: number;
+  /**
+   * Phase 5 — proportional text flag. When true, vertical Up/Down remember the
+   * caret's pixel x (goal-column resolved via the prefix table); when false,
+   * legacy char-column goal behavior applies.
+   */
+  proportional: boolean;
   cursor: Cursor;
   viewport: Viewport;
   text: Text;
@@ -363,11 +369,19 @@ export default class Keys {
 
     // Preserve the desired column across vertical moves (goal column): clamp to
     // this line for the move, but remember the original column to restore later.
+    // Phase 5: in proportional mode the goal is a remembered PIXEL x, resolved to
+    // the nearest column on each line (captured once, alongside goalColumn).
     if (this.cursor.goalColumn === null) {
       this.cursor.goalColumn = originalXLine;
+      this.cursor.goalPixelX = this.annotator.proportional
+        ? this.text.columnToPixelX(originalAbsYline, originalXLine)
+        : null;
     }
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-    this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
+    this.cursor.xLine =
+      this.annotator.proportional && this.cursor.goalPixelX !== null
+        ? this.text.pixelXToColumn(this.cursor.yLine, this.cursor.goalPixelX)
+        : Math.min(this.cursor.goalColumn, line.length);
 
     this.finishCaretMove(!!shiftKey);
     this.scrollCursorIntoView();
@@ -440,8 +454,12 @@ export default class Keys {
     }
 
     // Preserve the desired column across vertical moves (goal column).
+    // Phase 5: proportional remembers a pixel x (see onArrowUp).
     if (this.cursor.goalColumn === null) {
       this.cursor.goalColumn = originalXLine;
+      this.cursor.goalPixelX = this.annotator.proportional
+        ? this.text.columnToPixelX(originalAbsYline, originalXLine)
+        : null;
     }
 
     this.cursor.move(0, 1);
@@ -453,7 +471,10 @@ export default class Keys {
       this.cursor.yLine = Math.max(0, this.text.noLines - 1);
       this.cursor.xLine = line.length;
     } else {
-      this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
+      this.cursor.xLine =
+        this.annotator.proportional && this.cursor.goalPixelX !== null
+          ? this.text.pixelXToColumn(this.cursor.yLine, this.cursor.goalPixelX)
+          : Math.min(this.cursor.goalColumn, line.length);
     }
 
     this.finishCaretMove(!!shiftKey);

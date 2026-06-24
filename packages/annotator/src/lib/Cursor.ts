@@ -26,6 +26,20 @@ export default class Cursor
   yLine: number;
   /** Desired column for vertical movement; null = follow xLine. Reset on any horizontal move/edit/click. */
   goalColumn: number | null = null;
+  /**
+   * Phase 5 — desired PIXEL x for vertical movement in proportional mode,
+   * resolved to the nearest column on each target line via `pixelXToColumn`.
+   *
+   * Captured in the CAPTURE block of Keys.onArrowUp/onArrowDown, guarded by
+   * `goalColumn === null`, so it is always re-derived (before the USE in the same
+   * handler) whenever the goal was cleared. It therefore persists across
+   * consecutive vertical moves AND across horizontal moves (which, by design, do
+   * not clear the goal), and is only stale if the text layout changes mid-goal —
+   * acceptable, since edits clear the goal. Null/ignored on the monospace path;
+   * the USE guard (`proportional && goalPixelX !== null`) keeps it safe if the
+   * flag is toggled, falling back to the char-count {@link goalColumn}.
+   */
+  goalPixelX: number | null = null;
 
   /**
    * Phase 3 offset model (additive; not yet wired into navigation). Canonical
