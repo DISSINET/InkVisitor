@@ -32,6 +32,7 @@ export const UserSingleDropdown = ({
 }: UserSingleDropdown) => {
   return (
     <BaseDropdown
+      userDropdown
       width={width}
       value={options.find((o) => o.value === value)}
       onChange={(selected) => onChange(selected[0].value)}
@@ -42,7 +43,7 @@ export const UserSingleDropdown = ({
       loggerId={loggerId}
       customComponents={{
         Option,
-        SingleValue,
+        SingleValue: SingleValue as typeof components.SingleValue,
       }}
     />
   );

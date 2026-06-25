@@ -78,7 +78,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__value-container {
     height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
     align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
-    row-gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
+    gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
     padding: ${({ userDropdown }) => (userDropdown ? "0.2rem 0.2rem" : "0")};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
@@ -95,6 +95,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__placeholder {
     color: ${({ theme }) => theme.color["gray"][500]};
+    margin-left: ${({ theme }) => theme.space[2]};
   }
   .react-select__multi-value {
     background-color: ${({ theme, entityDropdown }) =>
