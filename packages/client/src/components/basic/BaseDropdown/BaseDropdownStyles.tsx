@@ -78,8 +78,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__value-container {
     height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
     align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
-    row-gap: ${({ userDropdown }) => (userDropdown ? "2px" : "")};
-    padding: ${({ userDropdown }) => (userDropdown ? "2px 0.3rem" : "0")};
+    row-gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
+    padding: ${({ userDropdown }) => (userDropdown ? "0.2rem 0.2rem" : "0")};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
   }
@@ -110,15 +110,11 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     padding: ${({ userDropdown }) => (userDropdown ? "0" : "")};
     svg {
       height: 18;
-      ${({ userDropdown }) => (userDropdown ? "width: 14px; height: 14px;" : "")}
     }
   }
   .react-select__clear-indicator {
     padding: ${({ userDropdown }) => (userDropdown ? "0" : "0.2rem")};
     color: ${({ theme }) => theme.color["primary"]};
-    svg {
-      ${({ userDropdown }) => (userDropdown ? "width: 14px; height: 14px;" : "")}
-    }
   }
   .react-select__indicator-separator {
     display: none;
