@@ -46,7 +46,6 @@ export const Label = styled.span<{ $labelSpaceNoWrap: boolean }>`
   white-space: ${({ $labelSpaceNoWrap }) => ($labelSpaceNoWrap ? "nowrap" : "normal")};
 `;
 export const StyledInput = styled.input<IValueStyle>`
-  /* height: ${({ theme }) => theme.space[10]}; */
   height: ${({ $fullHeight, theme }) => ($fullHeight ? "100%" : theme.space[10])};
   text-align: left;
   border-style: solid;
