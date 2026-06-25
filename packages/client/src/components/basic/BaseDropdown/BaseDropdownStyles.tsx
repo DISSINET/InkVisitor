@@ -78,7 +78,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__value-container {
     height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
     align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
-    row-gap: ${({ userDropdown }) => (userDropdown ? "3px" : "")};
+    row-gap: ${({ userDropdown }) => (userDropdown ? "1px" : "")};
     padding: ${({ userDropdown }) => (userDropdown ? "2px 0.3rem" : "0")};
     margin: 0;
     width: ${({ width }) => getWidth(width)};

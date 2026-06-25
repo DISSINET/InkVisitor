@@ -51,8 +51,7 @@ export const StyledMenuItem = styled.div<StyledMenuItem>`
 `;
 
 export const StyledIcon = styled.div`
-  width: 3.4rem;
-  margin-left: 0.1rem;
+  width: 3.3rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -61,5 +60,5 @@ export const StyledIcon = styled.div`
 export const StyledMenuDivider = styled.div`
   height: 1px;
   background-color: ${({ theme }) => theme.color.gray[300]};
-  margin: 0.3rem 0;
+  margin: 0.35rem 0;
 `;
