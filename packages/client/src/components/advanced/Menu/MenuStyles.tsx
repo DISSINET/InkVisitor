@@ -14,13 +14,13 @@ export const StyledMenuGroupWrapper = styled.div`
 export const StyledMenuGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.1rem;
   background-color: ${({ theme }) => theme.color["white"]};
   border: 1px solid ${({ theme }) => theme.color.gray[400]};
   box-shadow: 0 4px 12px ${({ theme }) => theme.color.menuShadow};
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   overflow: hidden;
-  padding: 0.6rem;
+  padding: 0.5rem;
 `;
 
 interface StyledMenuItem {
