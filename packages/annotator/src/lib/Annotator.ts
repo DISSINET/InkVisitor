@@ -2606,7 +2606,12 @@ export class Annotator {
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
-    this.proportionalFontFamily = PROPORTIONAL_FONT;
+    // Default to the first host-supplied option (e.g. "Sans (app)") so the
+    // picker shows a valid value; fall back to the generic when none supplied.
+    this.proportionalFontFamily =
+      this.fontFamilyOptions.length > 0
+        ? this.fontFamilyOptions[0].value
+        : PROPORTIONAL_FONT;
 
     try {
       if (typeof localStorage !== "undefined") {
