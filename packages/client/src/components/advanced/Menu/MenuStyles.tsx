@@ -57,6 +57,10 @@ export const StyledIcon = styled.div`
   align-items: center;
 `;
 
+export const StyledMenuItemLabel = styled.span`
+  padding-top: 1px;
+`;
+
 export const StyledMenuDivider = styled.div`
   height: 1px;
   background-color: ${({ theme }) => theme.color.gray[300]};
