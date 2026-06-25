@@ -51,7 +51,7 @@ export const StyledMenuItem = styled.div<StyledMenuItem>`
 `;
 
 export const StyledIcon = styled.div`
-  width: 3.2rem;
+  width: 3.4rem;
   display: flex;
   justify-content: center;
   align-items: center;
