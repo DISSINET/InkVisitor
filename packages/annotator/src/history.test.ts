@@ -1,6 +1,6 @@
 /**
- * Phase 4 (#3086) — undo/redo history. The History holds full document
- * snapshots ({ value, anchor, head, affinities }) — trivial because the Phase 3
+ * Undo/redo history (#3086). The History holds full document
+ * snapshots ({ value, anchor, head, affinities }) — trivial because the
  * offset model made the caret a pair of raw offsets. Coalescing merges only a
  * contiguous run of single-character typing into one undo step; everything else
  * is a discrete step.
