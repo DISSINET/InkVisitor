@@ -44,7 +44,7 @@ export class ContextMenu {
       border: "1px solid #d0d0d0",
       borderRadius: "4px",
       boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-      font: '13px "Roboto Mono", monospace',
+      font: '13px "Roboto", sans-serif',
       color: "#222",
       userSelect: "none",
     } as Partial<CSSStyleDeclaration>);

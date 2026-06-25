@@ -97,7 +97,7 @@ export class SettingsOverlay {
       border: "1px solid #d0d0d0",
       borderRadius: "6px",
       boxShadow: "0 6px 24px rgba(0, 0, 0, 0.25)",
-      font: '13px "Roboto Mono", monospace',
+      font: '13px "Roboto", sans-serif',
       color: "#222",
     } as Partial<CSSStyleDeclaration>);
     // Clicks inside the box must not fall through to the backdrop dismiss.
