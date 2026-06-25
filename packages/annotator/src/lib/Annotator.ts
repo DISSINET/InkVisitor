@@ -130,6 +130,9 @@ export class Annotator {
   set menuColors(c: MenuColors) {
     this._menuColors = c;
     this.contextMenu.colors = c;
+    if (this.settingsOverlay.isOpen) {
+      this.openSettings();
+    }
   }
   selectColor: string = "rgba(0, 0, 0)";
   selectOpacity: number = 0.5;
