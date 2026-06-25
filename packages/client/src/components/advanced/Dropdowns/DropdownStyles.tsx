@@ -51,6 +51,11 @@ export const StyledUserOptionRow = styled.div`
   width: 100%;
   height: 2.5rem;
 `;
+export const StyledUserSingleValueRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
 export const StyledUserOptionIconWrap = styled.div`
   display: flex;
   justify-content: center;

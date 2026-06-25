@@ -276,7 +276,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.CreatedBy}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
+          <Dropdown.Single.User
             width="full"
             options={userOptions}
             value={searchData.createdBy ?? ""}
@@ -296,7 +296,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.UpdatedBy}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
+          <Dropdown.Single.User
             width="full"
             options={userOptions}
             value={searchData.updatedBy ?? ""}
