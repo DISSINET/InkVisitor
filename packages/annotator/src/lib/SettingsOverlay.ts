@@ -50,6 +50,12 @@ export interface FooterAction {
 
 export class SettingsOverlay {
   private backdrop: HTMLDivElement | null = null;
+  /** Canvas the backdrop is anchored to; followed each frame while open. */
+  private anchor: HTMLElement | null = null;
+  /** Pending requestAnimationFrame id for the anchor-follow loop. */
+  private followRaf: number | null = null;
+  /** Last anchor rect applied, so the follow loop only writes on change. */
+  private lastRect: { left: number; top: number; width: number; height: number } | null = null;
 
   /** Whether the overlay is currently shown. */
   get isOpen(): boolean {
@@ -77,15 +83,10 @@ export class SettingsOverlay {
       background: "rgba(0, 0, 0, 0.35)",
     } as Partial<CSSStyleDeclaration>);
 
+    this.anchor = anchor ?? null;
     if (anchor) {
-      const rect = anchor.getBoundingClientRect();
-      Object.assign(backdrop.style, {
-        left: `${rect.left}px`,
-        top: `${rect.top}px`,
-        width: `${rect.width}px`,
-        height: `${rect.height}px`,
-        overflow: "hidden",
-      } as Partial<CSSStyleDeclaration>);
+      (backdrop.style as Partial<CSSStyleDeclaration>).overflow = "hidden";
+      this.applyAnchorRect(backdrop, anchor);
     } else {
       (backdrop.style as Partial<CSSStyleDeclaration>).inset = "0";
     }
@@ -142,7 +143,47 @@ export class SettingsOverlay {
     document.body.appendChild(backdrop);
     this.backdrop = backdrop;
 
+    // Follow the anchor every frame so the backdrop tracks the canvas while a
+    // panel spring-animates (the canvas drifts after the one-shot resize event).
+    if (this.anchor) {
+      this.startFollow();
+    }
+
     document.addEventListener("keydown", this.onKeyDown, true);
+  }
+
+  /** Apply the anchor's current viewport rect to the backdrop, caching it. */
+  private applyAnchorRect(backdrop: HTMLDivElement, anchor: HTMLElement): void {
+    const rect = anchor.getBoundingClientRect();
+    if (
+      this.lastRect &&
+      this.lastRect.left === rect.left &&
+      this.lastRect.top === rect.top &&
+      this.lastRect.width === rect.width &&
+      this.lastRect.height === rect.height
+    ) {
+      return;
+    }
+    this.lastRect = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+    Object.assign(backdrop.style, {
+      left: `${rect.left}px`,
+      top: `${rect.top}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+    } as Partial<CSSStyleDeclaration>);
+  }
+
+  /** Re-read the anchor rect each animation frame until the overlay closes. */
+  private startFollow(): void {
+    const tick = () => {
+      if (!this.backdrop || !this.anchor) {
+        this.followRaf = null;
+        return;
+      }
+      this.applyAnchorRect(this.backdrop, this.anchor);
+      this.followRaf = requestAnimationFrame(tick);
+    };
+    this.followRaf = requestAnimationFrame(tick);
   }
 
   /** Remove the overlay and detach listeners. Safe to call when already closed. */
@@ -150,25 +191,26 @@ export class SettingsOverlay {
     if (!this.backdrop) {
       return;
     }
+    if (this.followRaf !== null) {
+      cancelAnimationFrame(this.followRaf);
+      this.followRaf = null;
+    }
+    this.anchor = null;
+    this.lastRect = null;
     this.backdrop.remove();
     this.backdrop = null;
     document.removeEventListener("keydown", this.onKeyDown, true);
   }
 
   /**
-   *  Re-anchor the backdrop to the canvas after a resize. No-op when closed.
+   *  Re-anchor the backdrop to the canvas. No-op when closed. Kept for callers
+   *  that drive a resize explicitly; the per-frame follow loop covers the rest.
    */
   reposition(anchor: HTMLElement): void {
     if (!this.backdrop) {
       return;
     }
-    const rect = anchor.getBoundingClientRect();
-    Object.assign(this.backdrop.style, {
-      left: `${rect.left}px`,
-      top: `${rect.top}px`,
-      width: `${rect.width}px`,
-      height: `${rect.height}px`,
-    } as Partial<CSSStyleDeclaration>);
+    this.applyAnchorRect(this.backdrop, anchor);
   }
 
   private buildHeader(): HTMLDivElement {
