@@ -55,7 +55,7 @@ export const Menu: React.FC<Menu> = ({
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   const navPages: IPage[] = [
-    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen size={15} /> },
+    { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen size={16} /> },
     {
       id: "explorer",
       label: "Explorer",
@@ -75,7 +75,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Documents",
       color: "info",
       href: "/documents",
-      icon: <CgFileDocument size={19} />,
+      icon: <CgFileDocument size={18} />,
     },
   ];
 
@@ -85,7 +85,7 @@ export const Menu: React.FC<Menu> = ({
       label: "Customize",
       color: "info",
       href: false,
-      icon: <TbSettings size={20} />,
+      icon: <TbSettings size={19} />,
       onClick: () => setUserCustomizationOpen(true),
     },
     {

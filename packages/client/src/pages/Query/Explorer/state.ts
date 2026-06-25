@@ -349,11 +349,11 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
     }
 
     case ExploreActionType.setEditedByFilter: {
-      const { editedBy } = action.payload as { editedBy?: string };
+      const { editedBy } = action.payload as { editedBy?: string[] };
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.EditedBy);
       return {
         ...state,
-        filters: editedBy
+        filters: editedBy?.length
           ? [...otherFilters, { type: Explore.SearchOption.EditedBy, editedBy }]
           : otherFilters,
         offset: 0,

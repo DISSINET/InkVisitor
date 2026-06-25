@@ -228,9 +228,9 @@ const theme = {
   },
   borderRadius: {
     none: "0",
-    xs: "0.25rem",
+    xs: "0.3rem",
     sm: "0.5rem",
-    default: "0.75rem",
+    default: "0.8rem",
     md: "1rem",
     lg: "1.5rem",
     full: "9999px",
