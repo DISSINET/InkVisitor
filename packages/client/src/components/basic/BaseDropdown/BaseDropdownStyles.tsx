@@ -46,7 +46,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    min-height: ${({ theme, userDropdown }) => (userDropdown ? theme.space[6] : theme.space[10])};
+    min-height: ${({ theme }) => theme.space[10]};
     // only for one row multi entity dropdown to avoid glitches during resizing
     // user dropdown is allowed to wrap and grow vertically
     height: ${({ limitSelectedItems, userDropdown }) =>
