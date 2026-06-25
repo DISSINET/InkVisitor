@@ -250,10 +250,22 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     const parentTId = this.data.territory?.territoryId as string;
     const lineageTIds = [parentTId, ...treeCache.tree.idMap[parentTId].path];
-    const territoryEs = await getEntitiesByIds<ITerritory>(
-      req.db.connection,
-      lineageTIds
+    // The tree cache already holds full Territory entities (including
+    // data.validations) and is rebuilt synchronously on every territory write
+    // (Territory.save/update/delete -> treeCache.initialize). On a
+    // single-instance deployment it is therefore always current, so we can read
+    // the lineage territories straight from memory and skip a per-statement DB
+    // round-trip. Falls back to the DB if any id is missing from the cache (e.g.
+    // NODE_ENV=test, where the cache is not initialized). Only .id and
+    // .data.validations are read downstream, both present on the cached
+    // Territory instances. Cross-ancestor warning order may differ from the DB
+    // path, but getAll(...) never guaranteed an order to begin with.
+    const cachedLineage = lineageTIds.map(
+      (tid) => treeCache.tree.idMap[tid]?.territory as ITerritory | undefined
     );
+    const territoryEs: ITerritory[] = cachedLineage.every((t) => t)
+      ? (cachedLineage as ITerritory[])
+      : await getEntitiesByIds<ITerritory>(req.db.connection, lineageTIds);
 
     // The per-entity loop below exists only to evaluate territory validations
     // (getTBasedWarnings) against each referenced entity. If no ancestor
