@@ -333,6 +333,7 @@ export class SettingsOverlay {
       background: this.colors.bg,
       color: this.colors.text,
       cursor: "pointer",
+      outline: "none",
     } as Partial<CSSStyleDeclaration>);
 
     for (const opt of setting.options) {
