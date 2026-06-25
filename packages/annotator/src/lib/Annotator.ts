@@ -1920,12 +1920,16 @@ export class Annotator {
           { label: "Monospace", value: 0 },
         ],
         value: this.proportional ? 1 : 0,
-        onChange: (v) => this.setProportional(v === 1),
+        onChange: (v) => {
+          this.setProportional(v === 1);
+          this.openSettings(); // re-render so the family picker enables/disables
+        },
       },
     ];
 
     // Family picker only when the host supplied options (it's the proportional
-    // typeface; monospace always uses the built-in monospace font).
+    // typeface; monospace always uses the built-in monospace font, so the picker
+    // is disabled until proportional is selected).
     if (this.fontFamilyOptions.length > 0) {
       settings.push({
         type: "select",
@@ -1933,6 +1937,7 @@ export class Annotator {
         options: this.fontFamilyOptions,
         value: this.proportionalFontFamily,
         onChange: (family) => this.setFontFamily(family),
+        disabled: !this.proportional,
       });
     }
 

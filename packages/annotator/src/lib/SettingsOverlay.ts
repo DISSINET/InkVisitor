@@ -38,6 +38,8 @@ export interface SelectSetting {
   /** Currently-selected value (must match one of `options[].value`). */
   value: string;
   onChange: (value: string) => void;
+  /** Greyed-out, non-interactive when true (e.g. family picker in monospace). */
+  disabled?: boolean;
 }
 
 export type SettingControl = SegmentedSetting | ColorSetting | SelectSetting;
@@ -323,18 +325,23 @@ export class SettingsOverlay {
 
   /** Render a labelled dropdown; choosing an option fires onChange. */
   private buildSelect(setting: SelectSetting): HTMLDivElement {
-    const { row } = this.buildRow(setting.label);
+    const { row, label } = this.buildRow(setting.label);
 
     const select = document.createElement("select");
+    select.disabled = setting.disabled ?? false;
     Object.assign(select.style, {
       padding: "4px 8px",
       border: `1px solid ${this.colors.border}`,
       borderRadius: "4px",
       background: this.colors.bg,
-      color: this.colors.text,
-      cursor: "pointer",
+      color: setting.disabled ? this.colors.disabled : this.colors.text,
+      cursor: setting.disabled ? "default" : "pointer",
       outline: "none",
     } as Partial<CSSStyleDeclaration>);
+
+    if (setting.disabled) {
+      label.style.color = this.colors.disabled;
+    }
 
     for (const opt of setting.options) {
       const option = document.createElement("option");
