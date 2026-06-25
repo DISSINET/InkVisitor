@@ -255,13 +255,33 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       lineageTIds
     );
 
+    // The per-entity loop below exists only to evaluate territory validations
+    // (getTBasedWarnings) against each referenced entity. If no ancestor
+    // territory in the lineage defines an active validation, that evaluation
+    // can only return [], so every per-entity relation/entity round-trip is
+    // dead work - and it dominates the territory detail endpoint's latency on
+    // projects without active validations. Detect it once and skip the
+    // expensive lookups. The condition mirrors the active filter inside
+    // Entity.getTBasedWarnings (active !== false).
+    const hasActiveValidations = territoryEs.some((t) =>
+      t.data.validations?.some((v) => v.active !== false)
+    );
+
     // prepare entities
     for (const ei in allEntities) {
       const entityId = allEntities[ei];
       if (entityId) {
+        // obtainEntity is kept even when there are no validations: it has the
+        // side effect of populating this.entities (notably the statement's own
+        // id) which is part of the serialized response. Only the relation /
+        // entity fetches that feed getTBasedWarnings are skipped below.
         const entityData = await this.obtainEntity(entityId, req);
 
         if (entityData?.id === entityId) {
+          if (!hasActiveValidations) {
+            continue;
+          }
+
           const entity = new Entity(entityData);
 
           const classificationRels =
