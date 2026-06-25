@@ -214,8 +214,9 @@ export const StyledChipInputBox = styled.div`
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][400]};
-  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
-  &:focus-within {
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  &:focus-within,
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
 `;
