@@ -59,7 +59,10 @@ export class SettingsOverlay {
    * replaced. When `anchor` is given the backdrop covers only that element's
    * box (e.g. the canvas) instead of the whole viewport.
    */
-  open(settings: SettingControl[] = [], anchor?: HTMLElement, footer: FooterAction[] = []): void {
+  private accentColor: string = "#324185";
+
+  open(settings: SettingControl[] = [], anchor?: HTMLElement, footer: FooterAction[] = [], accentColor?: string): void {
+    if (accentColor) this.accentColor = accentColor;
     this.close();
 
     const backdrop = document.createElement("div");
@@ -322,7 +325,7 @@ export class SettingsOverlay {
       for (const seg of segments) {
         const active = seg.value === selected;
         Object.assign(seg.el.style, {
-          background: active ? "#1971c2" : "#ffffff",
+          background: active ? this.accentColor : "#ffffff",
           color: active ? "#ffffff" : "#222",
         } as Partial<CSSStyleDeclaration>);
       }

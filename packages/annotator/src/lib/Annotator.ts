@@ -122,6 +122,7 @@ export class Annotator {
 
   fontColor: string = "black";
   bgColor: string = "white";
+  accentColor: string = "#324185";
   selectColor: string = "rgba(0, 0, 0)";
   selectOpacity: number = 0.5;
 
@@ -1944,7 +1945,7 @@ export class Annotator {
           this.openSettings(); // re-render so controls show the defaults
         },
       },
-    ]);
+    ], this.accentColor);
   }
 
   /**
