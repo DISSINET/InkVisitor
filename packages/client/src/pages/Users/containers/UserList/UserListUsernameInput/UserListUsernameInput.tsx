@@ -42,9 +42,7 @@ export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
           } else if (localUsername.length > 20) {
             toast.warning("Maximum length of username is 20 characters");
             setLocalUsername(name);
-          } else if (
-            usernameList?.filter((u) => u !== name).includes(localUsername)
-          ) {
+          } else if (usernameList?.filter((u) => u !== name).includes(localUsername)) {
             toast.warning("Username already in use");
             setLocalUsername(name);
           } else {
@@ -58,6 +56,7 @@ export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
       onChangeFn={(value) => {
         setLocalUsername(value);
       }}
+      roundCorners
     />
   );
 };
