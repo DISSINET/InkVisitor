@@ -187,7 +187,12 @@ export default class Keys {
       });
       const after = this.cursor.getAbsolutePosition();
 
+      // Capture the caret's landing offset (the left edge of the deletion) BEFORE the edit
+      const caretOffset = this.text.offsetFromVisual(after.xLine, after.yLine);
       this.text.deleteRangeText(before, after);
+      if (caretOffset >= 0) {
+        this.cursor.moveToOffset(this.text, caretOffset);
+      }
     }
   }
 
@@ -227,9 +232,16 @@ export default class Keys {
       });
       const after = this.cursor.getAbsolutePosition();
 
+      // Caret stays at before (the left edge). Capture its offset before the
+      // edit and re-derive the visual position afterwards
+      const caretOffset = this.text.offsetFromVisual(before.xLine, before.yLine);
       this.text.deleteRangeText(before, after);
-      this.cursor.xLine = before.xLine;
-      this.cursor.yLine = before.yLine;
+      if (caretOffset >= 0) {
+        this.cursor.moveToOffset(this.text, caretOffset);
+      } else {
+        this.cursor.xLine = before.xLine;
+        this.cursor.yLine = before.yLine;
+      }
     }
   }
 
