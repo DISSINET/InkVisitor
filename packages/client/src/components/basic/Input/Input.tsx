@@ -9,6 +9,7 @@ import {
   StyledWrapper,
   StyledActionButtonGroup,
   StyledActionButton,
+  StyledIconWrapper,
 } from "./InputStyles";
 import { IconWithTooltip } from "components";
 import { DatePicker } from "../DatePicker/DatePicker";
@@ -57,6 +58,8 @@ interface Input {
 
   /** Optional ref to focus the underlying input (e.g. for Cmd+F / Ctrl+F) */
   inputRef?: React.RefObject<HTMLInputElement | null>;
+
+  icon?: React.ReactNode;
 }
 
 export const Input: React.FC<Input> = ({
@@ -95,6 +98,7 @@ export const Input: React.FC<Input> = ({
   min,
   max,
   inputRef,
+  icon,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -126,6 +130,7 @@ export const Input: React.FC<Input> = ({
             className="value"
             placeholder={placeholder}
             value={displayValue}
+            $icon={icon}
             onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setDisplayValue(e.currentTarget.value);
@@ -170,6 +175,8 @@ export const Input: React.FC<Input> = ({
             required={required}
             $iconCount={clearable && displayValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
           />
+
+          {icon && <StyledIconWrapper>{icon}</StyledIconWrapper>}
 
           {displayValue.length > 0 && clearable && (
             <StyledClearableInputButton>
