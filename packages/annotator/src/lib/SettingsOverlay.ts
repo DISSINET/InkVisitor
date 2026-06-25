@@ -1,3 +1,5 @@
+import { MenuColors, LIGHT_MENU_COLORS } from "./constants";
+
 /**
  * Modal settings overlay for the annotator.
  *
@@ -59,10 +61,10 @@ export class SettingsOverlay {
    * replaced. When `anchor` is given the backdrop covers only that element's
    * box (e.g. the canvas) instead of the whole viewport.
    */
-  private accentColor: string = "#324185";
+  private colors: MenuColors = LIGHT_MENU_COLORS;
 
-  open(settings: SettingControl[] = [], anchor?: HTMLElement, footer: FooterAction[] = [], accentColor?: string): void {
-    if (accentColor) this.accentColor = accentColor;
+  open(settings: SettingControl[] = [], anchor?: HTMLElement, footer: FooterAction[] = [], colors?: MenuColors): void {
+    if (colors) this.colors = colors;
     this.close();
 
     const backdrop = document.createElement("div");
@@ -93,12 +95,12 @@ export class SettingsOverlay {
       maxWidth: "90%",
       maxHeight: "90%",
       overflow: "auto",
-      background: "#ffffff",
-      border: "1px solid #d0d0d0",
+      background: this.colors.bg,
+      border: `1px solid ${this.colors.border}`,
       borderRadius: "6px",
       boxShadow: "0 6px 24px rgba(0, 0, 0, 0.25)",
       font: '13px "Roboto", sans-serif',
-      color: "#222",
+      color: this.colors.text,
     } as Partial<CSSStyleDeclaration>);
     // Clicks inside the box must not fall through to the backdrop dismiss.
     box.addEventListener("mousedown", (e) => e.stopPropagation());
@@ -115,7 +117,7 @@ export class SettingsOverlay {
 
     if (settings.length === 0) {
       body.textContent = "No settings yet.";
-      (body.style as Partial<CSSStyleDeclaration>).color = "#888";
+      (body.style as Partial<CSSStyleDeclaration>).color = this.colors.disabled;
     } else {
       for (const setting of settings) {
         body.appendChild(
@@ -176,7 +178,7 @@ export class SettingsOverlay {
       alignItems: "center",
       justifyContent: "space-between",
       padding: "10px 14px",
-      borderBottom: "1px solid #e0e0e0",
+      borderBottom: `1px solid ${this.colors.separator}`,
       fontWeight: "bold",
     } as Partial<CSSStyleDeclaration>);
 
@@ -210,7 +212,7 @@ export class SettingsOverlay {
       justifyContent: "flex-end",
       gap: "8px",
       padding: "10px 14px",
-      borderTop: "1px solid #e0e0e0",
+      borderTop: `1px solid ${this.colors.separator}`,
     } as Partial<CSSStyleDeclaration>);
 
     for (const action of actions) {
@@ -220,9 +222,10 @@ export class SettingsOverlay {
       Object.assign(btn.style, {
         font: "inherit",
         padding: "5px 12px",
-        border: "1px solid #c0c0c0",
+        border: `1px solid ${this.colors.border}`,
         borderRadius: "4px",
-        background: "#f5f5f5",
+        background: this.colors.buttonBg,
+        color: this.colors.text,
         cursor: "pointer",
       } as Partial<CSSStyleDeclaration>);
       btn.addEventListener("mousedown", (e) => {
@@ -263,7 +266,7 @@ export class SettingsOverlay {
       width: "40px",
       height: "24px",
       padding: "0",
-      border: "1px solid #c0c0c0",
+      border: `1px solid ${this.colors.border}`,
       borderRadius: "4px",
       cursor: "pointer",
       background: "none",
@@ -283,10 +286,10 @@ export class SettingsOverlay {
     const select = document.createElement("select");
     Object.assign(select.style, {
       padding: "4px 8px",
-      border: "1px solid #c0c0c0",
+      border: `1px solid ${this.colors.border}`,
       borderRadius: "4px",
-      background: "#ffffff",
-      color: "#222",
+      background: this.colors.bg,
+      color: this.colors.text,
       cursor: "pointer",
     } as Partial<CSSStyleDeclaration>);
 
@@ -313,7 +316,7 @@ export class SettingsOverlay {
     const group = document.createElement("div");
     Object.assign(group.style, {
       display: "inline-flex",
-      border: "1px solid #c0c0c0",
+      border: `1px solid ${this.colors.border}`,
       borderRadius: "4px",
       overflow: "hidden",
     } as Partial<CSSStyleDeclaration>);
@@ -325,8 +328,8 @@ export class SettingsOverlay {
       for (const seg of segments) {
         const active = seg.value === selected;
         Object.assign(seg.el.style, {
-          background: active ? this.accentColor : "#ffffff",
-          color: active ? "#ffffff" : "#222",
+          background: active ? this.colors.accent : this.colors.bg,
+          color: active ? this.colors.accentText : this.colors.text,
         } as Partial<CSSStyleDeclaration>);
       }
     };
@@ -337,7 +340,7 @@ export class SettingsOverlay {
       Object.assign(seg.style, {
         padding: "4px 12px",
         cursor: "pointer",
-        borderLeft: segments.length ? "1px solid #c0c0c0" : "none",
+        borderLeft: segments.length ? `1px solid ${this.colors.border}` : "none",
       } as Partial<CSSStyleDeclaration>);
       seg.addEventListener("mousedown", (e) => {
         e.preventDefault();

@@ -779,7 +779,17 @@ export const TextAnnotator = ({
     const applyCanvasTheme = (a: Annotator) => {
       a.fontColor = theme.color.black;
       a.bgColor = "transparent";
-      a.accentColor = theme.color.blue[400];
+      a.menuColors = {
+        bg: theme.color.white,
+        text: theme.color.black,
+        border: theme.color.gray[400],
+        hover: theme.color.menuHover,
+        accent: theme.color.blue[400],
+        accentText: "#ffffff",
+        separator: theme.color.gray[300],
+        disabled: theme.color.gray[500],
+        buttonBg: theme.color.gray[200],
+      };
       a.setSelectStyle("rgb(122, 209, 255)", 0.8, theme.color.black);
       a.setHoverHighlightStyle({
         color: theme.color.entityS,

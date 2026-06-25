@@ -24,6 +24,8 @@ import {
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
+  LIGHT_MENU_COLORS,
+  MenuColors,
 } from "./constants";
 
 // Updated regex to properly handle tags with attributes
@@ -122,7 +124,13 @@ export class Annotator {
 
   fontColor: string = "black";
   bgColor: string = "white";
-  accentColor: string = "#324185";
+
+  private _menuColors: MenuColors = LIGHT_MENU_COLORS;
+  get menuColors(): MenuColors { return this._menuColors; }
+  set menuColors(c: MenuColors) {
+    this._menuColors = c;
+    this.contextMenu.colors = c;
+  }
   selectColor: string = "rgba(0, 0, 0)";
   selectOpacity: number = 0.5;
 
@@ -1945,7 +1953,7 @@ export class Annotator {
           this.openSettings(); // re-render so controls show the defaults
         },
       },
-    ], this.accentColor);
+    ], this.menuColors);
   }
 
   /**
