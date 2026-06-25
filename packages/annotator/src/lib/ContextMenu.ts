@@ -39,10 +39,10 @@ export class ContextMenu {
       top: `${clientY}px`,
       zIndex: "200",
       minWidth: "160px",
-      padding: "4px 0",
+      padding: "4px",
       background: "#ffffff",
       border: "1px solid #d0d0d0",
-      borderRadius: "4px",
+      borderRadius: "8px",
       boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
       font: '13px "Roboto", sans-serif',
       color: "#222",
@@ -68,11 +68,13 @@ export class ContextMenu {
         cursor: item.disabled ? "default" : "pointer",
         color: item.disabled ? "#aaa" : "inherit",
         whiteSpace: "nowrap",
+        borderRadius: "4px",
+        transition: "background-color 0.2s ease",
       } as Partial<CSSStyleDeclaration>);
 
       if (!item.disabled) {
         row.addEventListener("mouseenter", () => {
-          row.style.background = "#f0f0f0";
+          row.style.background = "#CCD5F4";
         });
         row.addEventListener("mouseleave", () => {
           row.style.background = "transparent";
