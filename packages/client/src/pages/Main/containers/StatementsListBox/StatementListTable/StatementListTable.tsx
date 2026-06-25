@@ -1,4 +1,3 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -97,7 +96,6 @@ interface StatementListTable {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
-  annotator?: Annotator;
   isLoading: boolean;
   annotatorHoveredStatementId?: string | null;
 }
@@ -116,7 +114,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   selectedRows,
   setSelectedRows,
   displayMode,
-  annotator,
   isLoading,
   annotatorHoveredStatementId = null,
 }) => {
@@ -544,7 +541,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     (rowId: string) => {
       handleRowClick(rowId);
     },
-    [handleRowClick, annotator]
+    [handleRowClick]
   );
 
   return (
@@ -589,7 +586,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 isAnnotatorHovered={
                   annotatorHoveredStatementId === row.original.id
                 }
-                annotator={annotator}
               />
             );
           })}

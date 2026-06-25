@@ -18,6 +18,9 @@ import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
+import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableIdsFilter";
+import ExplorerTableLabelFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableLabelFilter";
+import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import {
   defaultExploreStatsParams,
   ExploreActionType,
@@ -28,17 +31,20 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import {
-  QUERY_LEFT_PANEL_MIN_WIDTH,
-  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
-  QUERY_RIGHT_PANEL_MIN_WIDTH,
-  QUERY_SEARCH_PANEL_MIN_HEIGHT,
   QueryValidity,
   QueryValidityProblem,
 } from "./types";
+import {
+  QUERY_LEFT_PANEL_MIN_WIDTH,
+  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
+  QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QUERY_BUILDER_MIN_HEIGHT,
+  QUERY_SEARCH_PANEL_MIN_HEIGHT,
+} from "./constants";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
-import { buildStableSignature, isEdgeValid } from "./utils";
-interface QueryPage {}
-export const QueryPage: React.FC<QueryPage> = ({}) => {
+import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
+interface ExplorerPage {}
+export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
@@ -134,6 +140,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     return buildStableSignature(queryState as any, exploreState as any);
   }, [queryState, exploreState]);
 
+  const searchSignature = useMemo(() => {
+    return buildSearchSignature(queryState as any, exploreState as any);
+  }, [queryState, exploreState]);
+
   // No search criteria yet -> the query is not fired (see useQueryData); the
   // explorer views use this to prompt the user instead of showing empty results.
   const isRequestEmpty = useMemo(
@@ -141,12 +151,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     [queryState, exploreState],
   );
 
-  // Only fire the API query when the user explicitly submits via Run Search or Enter.
-  const [committedSignature, setCommittedSignature] = useState<string | null>(null);
+  // Only fire the API query when the user explicitly submits via Run Search or
+  // Enter. View-only changes (adding/removing columns, switching view mode) do
+  // not require an explicit submit — they match the committed search signature
+  // and re-fetch automatically because the cache key (stableSignature) changes.
+  const [committedSearchSignature, setCommittedSearchSignature] = useState<string | null>(null);
 
   const handleRunSearch = useCallback(() => {
-    setCommittedSignature(stableSignature);
-  }, [stableSignature]);
+    setCommittedSearchSignature(searchSignature);
+  }, [searchSignature]);
 
   // Global Enter shortcut: run search unless focus is in a text input, textarea,
   // or select — except when that input lives inside a container marked with
@@ -167,7 +180,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   // True when the user has criteria set but hasn't run the search yet (or has
   // changed the query since the last run).
-  const isSearchPending = !isRequestEmpty && committedSignature !== stableSignature;
+  const isSearchPending = !isRequestEmpty && committedSearchSignature !== searchSignature;
 
   const onePercentOfContentHeight = useMemo(() => contentHeight / 100, [contentHeight]);
   const onePercentOfLayoutWidth = useMemo(() => layoutWidth / 100, [layoutWidth]);
@@ -249,8 +262,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorYPosition / onePercentOfLastContentHeight,
     );
-    setQuerySeparatorYPosition(separatorXPercentPosition * onePercentOfContentHeight);
-    localStorage.setItem("querySeparatorYPosition", separatorXPercentPosition.toString());
+    const newY = Math.max(
+      QUERY_BUILDER_MIN_HEIGHT,
+      Math.min(
+        separatorXPercentPosition * onePercentOfContentHeight,
+        contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT,
+      ),
+    );
+    setQuerySeparatorYPosition(newY);
+    localStorage.setItem("querySeparatorYPosition", floorNumberToOneDecimal(newY / onePercentOfContentHeight).toString());
     setCurrentContentHeight(contentHeight);
   }, [contentHeight, explorerBoxMaximized]);
 
@@ -303,8 +323,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     const separatorXPercentPosition = floorNumberToOneDecimal(
       querySeparatorXPosition / onePercentOfLastLayoutWidth,
     );
-    setQuerySeparatorXPosition(separatorXPercentPosition * onePercentOfLayoutWidth);
-    localStorage.setItem("querySeparatorXPosition", separatorXPercentPosition.toString());
+    const newX = Math.max(
+      QUERY_LEFT_PANEL_MIN_WIDTH,
+      Math.min(
+        separatorXPercentPosition * onePercentOfLayoutWidth,
+        layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
+      ),
+    );
+    setQuerySeparatorXPosition(newX);
+    localStorage.setItem("querySeparatorXPosition", floorNumberToOneDecimal(newX / onePercentOfLayoutWidth).toString());
     setCurrentLayoutWidth(layoutWidth);
   }, [layoutWidth]);
 
@@ -317,8 +344,9 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     queryState,
     exploreState,
     stableSignature,
+    searchSignature,
     queryStateValidity,
-    committedSignature,
+    committedSearchSignature,
   });
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
@@ -458,7 +486,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       {queryLeftPanelExpanded && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           width={leftPanelWidth}
-          topPositionMin={QUERY_SEARCH_PANEL_MIN_HEIGHT}
+          topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
@@ -485,7 +513,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
               borderColor="white"
               height={querySeparatorYPosition}
               label="Query Builder"
+              disableHeaderClick
               onHeaderClick={toggleExplorerBoxMaximized}
+              headerComponent={
+                <ExplorerTableLabelFilter filters={exploreState.filters} dispatch={exploreStateDispatch} />
+              }
               buttons={[
                 <Button
                   key="run-search"
@@ -511,6 +543,17 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
+              />
+              {!isExplorerAtMaxHeight && (
+                <ExplorerTableIdsFilter
+                  filters={exploreState.filters}
+                  dispatch={exploreStateDispatch}
+                />
+              )}
+              <FloatingSearchContainer
+                filters={exploreState.filters}
+                exploreDispatch={exploreStateDispatch}
+                hideButton={isExplorerAtMaxHeight}
               />
             </Box>
             <Box
@@ -585,8 +628,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
-                isDetailOpen={isDetailOpen}
-                detailPanelWidth={detailPanelWidth}
                 canBatchEdit={canBatchEdit}
               />
             </Box>

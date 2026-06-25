@@ -5,10 +5,22 @@ const initObject = {
   bookmarks: true,
   templates: true,
 };
-const storageObject = localStorage.getItem("fourthPanelBoxesOpened");
-const initialState: { [key: string]: boolean } = storageObject
-  ? JSON.parse(storageObject)
-  : initObject;
+
+function parseStoredBoxes(): { [key: string]: boolean } {
+  const raw = localStorage.getItem("fourthPanelBoxesOpened");
+  if (!raw) return initObject;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // corrupted localStorage
+  }
+  return initObject;
+}
+
+const initialState: { [key: string]: boolean } = parseStoredBoxes();
 
 const fourthPanelBoxesOpenedSlice = createSlice({
   name: "fourthPanelBoxesOpened",

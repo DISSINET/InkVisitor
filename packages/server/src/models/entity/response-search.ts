@@ -497,25 +497,22 @@ export class SearchQuery {
       );
     }
 
-    if (req.editedBy) {
-      const updatedBy = await Audit.getByUpdatedBy(
-        this.connection,
-        req.editedBy as string
-      );
-      const createdBy = await Audit.getByCreatedBy(
-        this.connection,
-        req.editedBy as string
-      );
+    if (req.editedBy?.length) {
+      // OR semantics - union of entities edited (created or updated) by any of the listed users
+      const auditEntityIdsSet = new Set<string>();
+      for (const userId of req.editedBy) {
+        const updatedBy = await Audit.getByUpdatedBy(this.connection, userId);
+        const createdBy = await Audit.getByCreatedBy(this.connection, userId);
 
-      const auditEntityIds = updatedBy
-        .concat(createdBy)
-        .filter((a) => a.auditScope === AuditScope.Entity)
-        .map((a) => a.modelId);
+        updatedBy
+          .concat(createdBy)
+          .filter((a) => a.auditScope === AuditScope.Entity)
+          .forEach((a) => auditEntityIdsSet.add(a.modelId));
+      }
 
       if (!req.entityIds) {
-        req.entityIds = auditEntityIds;
+        req.entityIds = Array.from(auditEntityIdsSet);
       } else {
-        const auditEntityIdsSet = new Set(auditEntityIds);
         req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
       }
     }

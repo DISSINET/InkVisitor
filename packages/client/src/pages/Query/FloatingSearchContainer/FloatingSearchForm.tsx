@@ -88,8 +88,21 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
     );
   }, [users]);
 
+  const userMultiOptions = useMemo(() => {
+    return (
+      users
+        ?.filter((user) => user?.id && user?.name)
+        .map((user) => ({
+          label: user.name,
+          value: user.id,
+        })) ?? []
+    );
+  }, [users]);
+
   const handleChange = useCallback(
-    (changes: { [key: string]: string | undefined | Date | IRequestSearchRootValidity }) => {
+    (changes: {
+      [key: string]: string | string[] | undefined | Date | IRequestSearchRootValidity;
+    }) => {
       const newSearch = { ...searchData, ...changes };
 
       Object.keys(changes).forEach((changeKey) => {
@@ -263,7 +276,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.CreatedBy}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
+          <Dropdown.Single.User
             width="full"
             options={userOptions}
             value={searchData.createdBy ?? ""}
@@ -283,7 +296,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.UpdatedBy}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
+          <Dropdown.Single.User
             width="full"
             options={userOptions}
             value={searchData.updatedBy ?? ""}
@@ -303,16 +316,19 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       <StyledRow>
         <StyledRowHeader>{Explore.SearchOption.EditedBy}</StyledRowHeader>
         <StyledRowControl>
-          <Dropdown.Single.Basic
+          <Dropdown.Multi.User
             width="full"
-            options={userOptions}
-            value={searchData.editedBy ?? ""}
-            onChange={(value) => {
-              handleChange({ editedBy: value || undefined });
+            limitSelectedItems={2}
+            placeholder="any"
+            options={userMultiOptions}
+            value={searchData.editedBy ?? []}
+            onChange={(values) => {
+              const editedBy = values.length > 0 ? values : undefined;
+              handleChange({ editedBy });
               dispatch({
                 type: ExploreActionType.setEditedByFilter,
                 payload: {
-                  editedBy: value || undefined,
+                  editedBy,
                 },
               });
             }}

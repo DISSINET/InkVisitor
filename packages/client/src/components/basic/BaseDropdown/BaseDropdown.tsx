@@ -41,6 +41,7 @@ interface BaseDropdown {
   // dropdown type settings
   isMulti?: boolean;
   entityDropdown?: boolean;
+  userDropdown?: boolean;
   attributeDropdown?: boolean;
   //
   disableTyping?: boolean;
@@ -66,8 +67,8 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   width,
   hideSelectedOptions = false,
   noDropDownIndicator = false,
-  placeholder = "select..",
-  noOptionsMessage = "no option selected",
+  placeholder = "Select",
+  noOptionsMessage = "No option selected",
   isClearable = false,
   isMulti = false,
   disabled = false,
@@ -81,6 +82,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   tooltipLabel,
   tooltipPosition = "top",
   entityDropdown = false,
+  userDropdown = false,
   attributeDropdown,
 
   loggerId,
@@ -128,6 +130,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
+          userDropdown={userDropdown}
           wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
           className="react-select-container"
           classNamePrefix="react-select"
@@ -277,12 +280,18 @@ const Control = ({
 };
 
 const MenuPortal: typeof components.MenuPortal = (props: any & { selectProps: StyledSelect }) => {
-  const { entityDropdown } = props.selectProps;
+  const { entityDropdown, userDropdown } = props.selectProps;
 
   return (
     <components.MenuPortal
       {...props}
-      className={entityDropdown ? "react-select__entity-dropdown" : ""}
+      className={
+        entityDropdown
+          ? "react-select__entity-dropdown"
+          : userDropdown
+            ? "react-select__user-dropdown"
+            : ""
+      }
     />
   );
 };

@@ -38,6 +38,7 @@ interface FloatingSearchContainer {
   rightInset?: number;
   filters: Explore.IExploreSearchFilter[];
   exploreDispatch: React.Dispatch<ExploreAction>;
+  hideButton?: boolean;
 }
 
 const getPageContentRect = (): DOMRect => {
@@ -150,6 +151,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   rightInset = 0,
   filters,
   exploreDispatch,
+  hideButton = false,
 }) => {
   const rightInsetRef = useRef(rightInset);
   rightInsetRef.current = rightInset;
@@ -359,15 +361,17 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
 
   return (
     <>
-      <StyledCollapsedButton
-        type="button"
-        $isActive={isExpanded}
-        onClick={handleToggle}
-        aria-label={isExpanded ? "Close search panel" : "Open search panel"}
-        aria-expanded={isExpanded}
-      >
-        <BiSearch size={22} />
-      </StyledCollapsedButton>
+      {!hideButton && (
+        <StyledCollapsedButton
+          type="button"
+          $isActive={isExpanded}
+          onClick={handleToggle}
+          aria-label={isExpanded ? "Close search panel" : "Open search panel"}
+          aria-expanded={isExpanded}
+        >
+          <BiSearch size={22} />
+        </StyledCollapsedButton>
+      )}
       {isExpanded && (
         <FloatingPortal id="page-content">
           <StyledFloatingRoot

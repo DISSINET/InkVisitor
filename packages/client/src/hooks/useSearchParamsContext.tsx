@@ -30,8 +30,8 @@ const INITIAL_CONTEXT = {
   cleanAllParams: UNINITIALISED,
   setLogoutState: UNINITIALISED,
 
-  annotatorOpened: false,
-  setAnnotatorOpened: UNINITIALISED,
+  editorOpened: true,
+  setEditorOpened: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
@@ -49,8 +49,8 @@ interface SearchParamsContext {
   cleanAllParams: () => void;
   setLogoutState: (isLoggingOut: boolean) => void;
 
-  annotatorOpened: boolean;
-  setAnnotatorOpened: (opened: boolean) => void;
+  editorOpened: boolean;
+  setEditorOpened: (opened: boolean) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -112,8 +112,10 @@ export const SearchParamsProvider = ({
     }
   };
 
-  const [annotatorOpened, setAnnotatorOpened] = useState<boolean>(
-    "annotatorOpened" in parsedParams ? true : false
+  // Editor is open by default; the URL only records the non-default (closed)
+  // state via the `editorClosed` token.
+  const [editorOpened, setEditorOpened] = useState<boolean>(
+    "editorClosed" in parsedParams ? false : true
   );
 
   const [disablePush, setDisablePush] = useState(false);
@@ -152,7 +154,7 @@ export const SearchParamsProvider = ({
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
-    setTimeout(() => setSelectedDetailId(id), 100);
+    setSelectedDetailId(id);
   };
 
   const appendMultipleDetailIds = (ids: string[], maxCount: number = maxTabCount) => {
@@ -180,7 +182,7 @@ export const SearchParamsProvider = ({
     }
 
     setDetailId(newDetailIdArray.join(arrJoinChar));
-    setTimeout(() => setSelectedDetailId(ids[0]), 100);
+    setSelectedDetailId(ids[0]);
   };
 
   const replaceDetailIds = (ids: string[]) => {
@@ -228,11 +230,11 @@ export const SearchParamsProvider = ({
       !isHandlingLocationChangeRef.current
     ) {
       const hashString = params.toString();
-      // Remove the = symbol for annotatorOpened parameter
+      // Remove the = symbol for editorClosed parameter
       const cleanHash = hashString
-        .replace(/annotatorOpened=&/g, "annotatorOpened&")
-        .replace(/&annotatorOpened=/g, "&annotatorOpened")
-        .replace(/^annotatorOpened=$/g, "annotatorOpened");
+        .replace(/editorClosed=&/g, "editorClosed&")
+        .replace(/&editorClosed=/g, "&editorClosed")
+        .replace(/^editorClosed=$/g, "editorClosed");
       navigate({
         hash: cleanHash,
       });
@@ -243,7 +245,7 @@ export const SearchParamsProvider = ({
     clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
-    setAnnotatorOpened(false);
+    setEditorOpened(true);
   };
 
   const setLogoutState = (isLoggingOut: boolean) => {
@@ -270,13 +272,13 @@ export const SearchParamsProvider = ({
         : params.delete("selectedDetail");
       detailId ? params.set("detail", detailId) : params.delete("detail");
 
-      annotatorOpened
-        ? params.set("annotatorOpened", "")
-        : params.delete("annotatorOpened");
+      editorOpened
+        ? params.delete("editorClosed")
+        : params.set("editorClosed", "");
 
       handleHistoryPush();
     }
-  }, [territoryId, statementId, selectedDetailId, detailId, annotatorOpened]);
+  }, [territoryId, statementId, selectedDetailId, detailId, editorOpened]);
 
   const handleLocationChange = (location: any) => {
     try {
@@ -299,8 +301,8 @@ export const SearchParamsProvider = ({
         ? setDetailId(parsedParamsTemp.detail)
         : setDetailId("");
 
-      // Handle annotatorOpened parameter
-      setAnnotatorOpened("annotatorOpened" in parsedParamsTemp);
+      // Handle editorClosed parameter (editor open unless explicitly closed)
+      setEditorOpened(!("editorClosed" in parsedParamsTemp));
     } catch (error) {
       console.error("Error parsing location hash:", error);
     }
@@ -337,8 +339,8 @@ export const SearchParamsProvider = ({
         cleanAllParams,
         setLogoutState,
 
-        annotatorOpened,
-        setAnnotatorOpened,
+        editorOpened,
+        setEditorOpened,
       }}
     >
       {children}

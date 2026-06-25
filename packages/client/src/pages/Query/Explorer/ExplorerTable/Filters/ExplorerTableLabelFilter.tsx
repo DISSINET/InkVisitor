@@ -2,9 +2,9 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { Checkbox, Input } from "components";
 import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
-import { LuRegex } from "react-icons/lu";
-import { ExploreAction, ExploreActionType } from "../state";
-import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "./ExplorerTableStyles";
+import { LuRegex, LuSearch } from "react-icons/lu";
+import { ExploreAction, ExploreActionType } from "../../state";
+import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "../ExplorerTableStyles";
 
 const LABEL_FILTER_DEBOUNCE_MS = 500;
 
@@ -58,6 +58,8 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         value={inputValue}
         onChangeFn={setInputValue}
         clearable
+        roundCorners
+        icon={<LuSearch size={14} />}
       />
       <StyledLabelFilterCheckboxWrapper>
         <Checkbox

@@ -20,6 +20,7 @@ import {
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
 import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
+import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 
 interface AnnotatorSearchLine {
   searchTerm: string;
@@ -36,6 +37,7 @@ interface AnnotatorSearchLine {
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   isSearchAllowed: boolean;
   annotatorWidthTooNarrow: boolean;
+  contentWidth: number;
   showStatementList: boolean;
   annotator: Annotator | null;
   documentId?: string;
@@ -76,6 +78,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   searchActiveOccurence,
   isSearchAllowed,
   annotatorWidthTooNarrow,
+  contentWidth,
   setSearchActiveOccurence,
   showStatementList,
   annotator,
@@ -144,9 +147,14 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
 
   const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
   const [isReplacingAll, setIsReplacingAll] = useState<boolean>(false);
+
   const replaceSection = useMemo<boolean>(() => {
     return annotatorMode !== EditMode.HIGHLIGHT;
   }, [annotatorMode]);
+
+  const isUndersized = useMemo(() => {
+    return contentWidth < ANNOTATOR_UNDERSIZED_BREAKPOINT;
+  }, [contentWidth]);
 
   const [replaceWith, setReplaceWith] = useState<string>("");
 
@@ -485,11 +493,11 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                   )}
                   {!entityToAnchor ? (
                     <EntitySuggester
-                      placeholder="select entity"
+                      placeholder={isUndersized ? "entity" : "select entity"}
                       onPicked={(entity) => {
                         setEntityToAnchor(entity);
                       }}
-                      inputWidth={annotatorWidthTooNarrow ? 70 : 100}
+                      inputWidth={isUndersized ? 50 : annotatorWidthTooNarrow ? 70 : 100}
                     />
                   ) : (
                     <EntityTag

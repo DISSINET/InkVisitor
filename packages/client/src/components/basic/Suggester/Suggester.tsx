@@ -76,6 +76,7 @@ interface Suggester {
   territoryParentId?: string;
   userOptions?: IUserOptions;
   autoFocus?: boolean;
+  autoFocusInput?: boolean;
   disableEnter?: boolean;
   disableWildCard?: boolean;
 
@@ -120,6 +121,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   userOptions,
   autoFocus,
+  autoFocusInput,
   disableEnter,
   disableWildCard,
 
@@ -364,7 +366,7 @@ export const Suggester: React.FC<Suggester> = ({
             disableTyping
             suggester
             disabled={disabled}
-            autoFocus={categories.length > 1 && autoFocus}
+            autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
           <TypeBar entityLetter={category} />
 
@@ -394,7 +396,7 @@ export const Suggester: React.FC<Suggester> = ({
                 setSelected(-1);
               }}
               onEnterPressFn={handleEnterPress}
-              autoFocus={categories.length === 1 && autoFocus}
+              autoFocus={(categories.length === 1 || autoFocusInput) && autoFocus}
               disabled={disabled}
               fullHeight
               clearable

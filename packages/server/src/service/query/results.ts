@@ -2,6 +2,7 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
+import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
 import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -238,6 +239,41 @@ export default class Results<T extends { id: string }> {
 
           const entities = await Entity.findEntitiesByIds(db, entityIds);
           out[column.id] = entities;
+          break;
+        }
+        // Entity Legacy ID
+        case Explore.EExploreColumnType.ELI: {
+          out[column.id] = entity.legacyId || "";
+          break;
+        }
+        // Entity Status
+        case Explore.EExploreColumnType.EST: {
+          const statusLabel = entityStatusDict.find((d) => d.value === entity.status)?.label;
+          out[column.id] = statusLabel || "";
+          break;
+        }
+        // Entity Label Language
+        case Explore.EExploreColumnType.ELA: {
+          const langLabel = languageDict.find((d) => d.value === entity.language)?.label;
+          out[column.id] = langLabel || "";
+          break;
+        }
+        // Entity Alt Labels
+        case Explore.EExploreColumnType.EAL: {
+          out[column.id] = (entity.labels ?? []).slice(1).join(", ");
+          break;
+        }
+        // Entity Part of Speech
+        case Explore.EExploreColumnType.EPOS: {
+          const pos = (entity.data as any)?.pos;
+          const posDict = [...conceptPartOfSpeechDict, ...actionPartOfSpeechDict];
+          const posLabel = posDict.find((d) => d.value === pos)?.label;
+          out[column.id] = posLabel || pos || "";
+          break;
+        }
+        // Entity Detail
+        case Explore.EExploreColumnType.EDET: {
+          out[column.id] = entity.detail || "";
           break;
         }
       }

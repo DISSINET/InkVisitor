@@ -59,7 +59,7 @@ export const exploreFiltersToRequestSearch = (
         }
         break;
       case Explore.SearchOption.EditedBy:
-        if (filter.editedBy) {
+        if (filter.editedBy?.length) {
           data.editedBy = filter.editedBy;
           hasAny = true;
         }

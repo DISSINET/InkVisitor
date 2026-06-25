@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
-export const FLOATING_SEARCH_EXPANDED_WIDTH = 255;
+export const FLOATING_SEARCH_EXPANDED_WIDTH = 280;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 interface StyledFloatingRootProps {
@@ -12,7 +12,7 @@ export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
   position: absolute;
   left: ${({ $left }) => $left}px;
   top: ${({ $top }) => $top}px;
-  z-index: 160;
+  z-index: 164;
 `;
 
 export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`

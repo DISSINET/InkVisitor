@@ -5,8 +5,9 @@ import React from "react";
 import { CgClose } from "react-icons/cg";
 import { MdOutlineEdit } from "react-icons/md";
 import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
-import { StyledHeader } from "./ExplorerTableStyles";
-import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
+import { StyledHeader } from "../ExplorerTableStyles";
+import { WIDTH_COLUMN_FIRST } from "../constants";
+import { getColumnWidth } from "../utils";
 
 const ExploreTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];
@@ -32,12 +33,9 @@ const ExploreTableHeader: React.FC<{
             key={key}
             className="qt-col qt-col-header"
             style={{
-              width:
-                column.type === Explore.EExploreColumnType.EUC
-                  ? WIDTH_COLUMN_EUC
-                  : WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_EUC,
-              maxWidth: WIDTH_COLUMN_DEFAULT,
+              width: getColumnWidth(column.type),
+              minWidth: getColumnWidth(column.type),
+              maxWidth: getColumnWidth(column.type),
               display: "flex",
               alignItems: "center",
             }}
@@ -49,7 +47,7 @@ const ExploreTableHeader: React.FC<{
                 noBorder
                 noBackground
                 inverted
-                icon={<CgClose color={theme.color.white} />}
+                icon={<CgClose color={theme.color.headerTextColor} />}
                 onClick={() => onRemoveColumn(column.id)}
                 tooltipLabel="remove column"
               />

@@ -35,6 +35,7 @@ interface PropGroupRowType {
   openDetailOnCreate: boolean;
   alwaysShowCreateModal?: boolean;
   initTypeTyped?: string;
+  autoFocus?: boolean;
 }
 export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   propTypeEntity,
@@ -50,6 +51,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   alwaysShowCreateModal,
 
   initTypeTyped,
+  autoFocus,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -154,6 +156,8 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             isHidden={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
             initTyped={initTypeTyped}
+            autoFocus={autoFocus}
+            autoFocusInput={autoFocus}
           />
         )}
       </StyledTagGrid>

@@ -1,4 +1,4 @@
-import { autoUpdate, FloatingPortal, offset, useFloating } from "@floating-ui/react";
+import { autoUpdate, flip, FloatingPortal, offset, useFloating } from "@floating-ui/react";
 import { SearchEnums } from "@inkvisitor/shared/enums";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { Button, ButtonGroup } from "components";
@@ -95,7 +95,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
   const { refs: PillsRefs, floatingStyles: PillsFloatingStyles } = useFloating({
     placement: "left",
     whileElementsMounted: autoUpdate,
-    middleware: [offset({ mainAxis: 4 })],
+    middleware: [offset({ mainAxis: 4 }), flip({ fallbackPlacements: ["bottom"] })],
   });
 
   const hasValueForOption = useCallback(

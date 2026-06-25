@@ -27,6 +27,7 @@ export interface StyledSelect {
   suggester?: boolean;
   isMulti: boolean;
   entityDropdown?: boolean;
+  userDropdown?: boolean;
   attributeDropdown?: boolean;
   wildCardChar?: boolean;
   icon?: React.ReactNode;
@@ -47,7 +48,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
     // only for one row multi entity dropdown to avoid glitches during resizing
-    height: ${({ limitSelectedItems }) => (limitSelectedItems ? "27px" : "")};
+    // user dropdown is allowed to wrap and grow vertically
+    height: ${({ limitSelectedItems, userDropdown }) =>
+      limitSelectedItems && !userDropdown ? "27px" : ""};
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>
@@ -73,8 +76,10 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border-width: 1px;
   }
   .react-select__value-container {
-    height: 100%;
-    padding: 0;
+    height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
+    align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
+    gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
+    padding: ${({ userDropdown }) => (userDropdown ? "0.2rem 0.2rem" : "0")};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
   }
@@ -90,21 +95,26 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__placeholder {
     color: ${({ theme }) => theme.color["gray"][500]};
+    margin-left: ${({ theme }) => theme.space[2]};
   }
   .react-select__multi-value {
     background-color: ${({ theme, entityDropdown }) =>
       entityDropdown ? theme.color["white"] : theme.color["invertedBg"]["primary"]};
     color: ${({ theme }) => theme.color["gray"][700]};
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
+    min-width: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    max-width: ${({ userDropdown }) => (userDropdown ? "100%" : "")};
+    margin: ${({ userDropdown }) => (userDropdown ? "0" : "")};
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
+    padding: ${({ userDropdown }) => (userDropdown ? "0" : "")};
     svg {
       height: 18;
     }
   }
   .react-select__clear-indicator {
-    padding: 0.2rem;
+    padding: ${({ userDropdown }) => (userDropdown ? "0" : "0.2rem")};
     color: ${({ theme }) => theme.color["primary"]};
   }
   .react-select__indicator-separator {
@@ -112,9 +122,12 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__multi-value__label {
     color: ${({ theme }) => theme.color["black"]};
-    padding: ${({ entityDropdown }) => (entityDropdown ? "0" : "0.2rem")};
+    padding: ${({ entityDropdown, userDropdown }) =>
+      entityDropdown || userDropdown ? "0" : "0.2rem"};
     font-weight: ${({ entityDropdown }) => (entityDropdown ? "bold" : "")};
     border-radius: 1px;
+    min-width: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    max-width: ${({ userDropdown }) => (userDropdown ? "100%" : "")};
   }
   .react-select__multi-value__remove {
     padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
@@ -122,6 +135,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__input-container {
     color: ${({ theme }) => theme.color["black"]};
+    ${({ userDropdown }) => (userDropdown ? "margin: 0; padding: 0; line-height: 1;" : "")}
   }
   // portal menu style is in global stylesheet
 `;

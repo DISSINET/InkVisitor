@@ -862,7 +862,7 @@ export default Router()
       const exportColumns =
         explore.view.mode === Explore.EViewMode.Table ? explore.view.columns : [];
       const tsvHeader =
-        "result \t" + exportColumns.map((c) => c.name).join("\t");
+        "result\t" + exportColumns.map((c) => c.name).join("\t");
 
       return { tsvText: tsvHeader + "\n" + tsvBodyRows };
     })

@@ -2,7 +2,11 @@ import { Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
 import { edgeTypesImplemented } from "./types";
-import { findValidEdgeTypesForSourceNode, isEdgeValid, getSuperordinateEntityAllowedClasses } from "./utils";
+import {
+  findValidEdgeTypesForSourceNode,
+  isEdgeValid,
+  getSuperordinateEntityAllowedClasses,
+} from "./utils";
 
 const sourceNode = (entityClasses: EntityEnums.Class[]): Query.INode => ({
   id: "root",
@@ -23,21 +27,17 @@ const edge = (type: Query.EdgeType, target: Query.INode): Query.IEdge => ({
 // mirrors QueryGridEdge's dropdown: an option is selectable (not disabled) when
 // it is valid for the source node AND present in edgeTypesImplemented
 const selectableEdgeTypes = (node: Query.INode): Query.EdgeType[] =>
-  findValidEdgeTypesForSourceNode(node).filter((t) =>
-    edgeTypesImplemented.includes(t)
-  );
+  findValidEdgeTypesForSourceNode(node).filter((t) => edgeTypesImplemented.includes(t));
 
 describe("query builder offers the inverse in-statement edges", () => {
   it("a Person source node can select I_SP:V / I_SP:T / I_SC", () => {
-    const selectable = selectableEdgeTypes(
-      sourceNode([EntityEnums.Class.Person])
-    );
+    const selectable = selectableEdgeTypes(sourceNode([EntityEnums.Class.Person]));
     expect(selectable).toEqual(
       expect.arrayContaining([
         Query.EdgeType["I_SP:V"],
         Query.EdgeType["I_SP:T"],
         Query.EdgeType["I_SC"],
-      ])
+      ]),
     );
   });
 
@@ -54,9 +54,7 @@ describe("query builder offers the inverse in-statement edges", () => {
 
 describe("query builder offers the superordinate (R:SOE) edge", () => {
   it("a Location source node can select R:SOE", () => {
-    const selectable = selectableEdgeTypes(
-      sourceNode([EntityEnums.Class.Location])
-    );
+    const selectable = selectableEdgeTypes(sourceNode([EntityEnums.Class.Location]));
     expect(selectable).toContain(Query.EdgeType["R:SOE"]);
   });
 
@@ -67,38 +65,29 @@ describe("query builder offers the superordinate (R:SOE) edge", () => {
 
 describe("superordinate entity target class filtering", () => {
   it("Location root offers Location as target class", () => {
-    expect(
-      getSuperordinateEntityAllowedClasses([EntityEnums.Class.Location])
-    ).toEqual([EntityEnums.Class.Location]);
+    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Location])).toEqual([
+      EntityEnums.Class.Location,
+    ]);
   });
 
   it("Statement root offers Statement and Event as target classes", () => {
-    expect(
-      getSuperordinateEntityAllowedClasses([EntityEnums.Class.Statement])
-    ).toEqual(
-      expect.arrayContaining([
-        EntityEnums.Class.Statement,
-        EntityEnums.Class.Event,
-      ])
+    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Statement])).toEqual(
+      expect.arrayContaining([EntityEnums.Class.Statement, EntityEnums.Class.Event]),
     );
   });
 
   it("Object root offers Object, Person, and Being as target classes", () => {
-    expect(
-      getSuperordinateEntityAllowedClasses([EntityEnums.Class.Object])
-    ).toEqual(
+    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Object])).toEqual(
       expect.arrayContaining([
         EntityEnums.Class.Object,
         EntityEnums.Class.Person,
         EntityEnums.Class.Being,
-      ])
+      ]),
     );
   });
 
   it("Person-only root offers no target classes", () => {
-    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Person])).toEqual(
-      []
-    );
+    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Person])).toEqual([]);
   });
 });
 
@@ -107,15 +96,13 @@ describe("superordinate entity target class filtering", () => {
 // ./utils), so these rules are exercised here.
 describe("inverse in-statement edge validity rules", () => {
   it("a Person source node is valid for I_SP:T / I_SP:V / I_SC", () => {
-    const valid = findValidEdgeTypesForSourceNode(
-      sourceNode([EntityEnums.Class.Person])
-    );
+    const valid = findValidEdgeTypesForSourceNode(sourceNode([EntityEnums.Class.Person]));
     expect(valid).toEqual(
       expect.arrayContaining([
         Query.EdgeType["I_SP:T"],
         Query.EdgeType["I_SP:V"],
         Query.EdgeType["I_SC"],
-      ])
+      ]),
     );
   });
 
@@ -123,15 +110,15 @@ describe("inverse in-statement edge validity rules", () => {
     expect(
       isEdgeValid(
         sourceNode([EntityEnums.Class.Person]),
-        edge(Query.EdgeType["I_SP:T"], sourceNode([EntityEnums.Class.Concept]))
-      ).valid
+        edge(Query.EdgeType["I_SP:T"], sourceNode([EntityEnums.Class.Concept])),
+      ).valid,
     ).toBe(true);
 
     expect(
       isEdgeValid(
         sourceNode([EntityEnums.Class.Person]),
-        edge(Query.EdgeType["I_SP:T"], sourceNode([EntityEnums.Class.Person]))
-      ).valid
+        edge(Query.EdgeType["I_SP:T"], sourceNode([EntityEnums.Class.Person])),
+      ).valid,
     ).toBe(false);
   });
 
@@ -139,8 +126,8 @@ describe("inverse in-statement edge validity rules", () => {
     expect(
       isEdgeValid(
         sourceNode([EntityEnums.Class.Person]),
-        edge(Query.EdgeType["I_SC"], sourceNode([EntityEnums.Class.Concept]))
-      ).valid
+        edge(Query.EdgeType["I_SC"], sourceNode([EntityEnums.Class.Concept])),
+      ).valid,
     ).toBe(true);
   });
 });

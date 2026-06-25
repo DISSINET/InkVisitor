@@ -22,7 +22,6 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
   border-bottom-width: ${({ theme, $lastSection = false }) =>
     $lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
   border-bottom-style: solid;
   width: 100%;
 `;

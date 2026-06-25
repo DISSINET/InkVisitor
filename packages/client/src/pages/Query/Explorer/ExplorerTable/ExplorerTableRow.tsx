@@ -3,19 +3,129 @@ import React from "react";
 import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import {
+  entityStatusDict,
+  languageDict,
+  conceptPartOfSpeechDict,
+  actionPartOfSpeechDict,
+} from "@inkvisitor/shared/dictionaries";
 import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { EntitySuggester, EntityTag, UserTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { UserTagSize } from "components/advanced/UserTag/utils";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
-import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./ExplorerCellOverflow";
-import { StyledCheckboxWrapper, StyledFocusedCircle } from "./ExplorerTableStyles";
-import { WIDTH_COLUMN_DEFAULT, WIDTH_COLUMN_EUC, WIDTH_COLUMN_FIRST } from "./types";
+import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
+import {
+  StyledAltLabelAddInput,
+  StyledAltLabelChip,
+  StyledAltLabelRemove,
+  StyledAltLabelsWrap,
+  StyledCellArrayWrap,
+  StyledCellContent,
+  StyledCellValue,
+  StyledCheckboxWrapper,
+  StyledEditableCellValue,
+  StyledEditableInput,
+  StyledEntityTagWrap,
+  StyledFocusedCircle,
+  StyledRowInner,
+} from "./ExplorerTableStyles";
+import { WIDTH_COLUMN_FIRST } from "./constants";
+import { getColumnWidth } from "./utils";
+
+const EditableCellValue: React.FC<{
+  value: string;
+  onSave: (value: string) => void;
+}> = ({ value, onSave }) => {
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(value);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+    }
+  }, [editing]);
+
+  React.useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  if (editing) {
+    return (
+      <StyledEditableInput
+        ref={inputRef}
+        data-no-row-click="true"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          setEditing(false);
+          if (draft !== value) {
+            onSave(draft);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            (e.target as HTMLInputElement).blur();
+          } else if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
+        }}
+      />
+    );
+  }
+
+  return (
+    <StyledEditableCellValue
+      data-no-row-click="true"
+      onClick={() => setEditing(true)}
+    >
+      {value || " "}
+    </StyledEditableCellValue>
+  );
+};
+
+const EditableAltLabels: React.FC<{
+  entity: IEntity;
+  onSave: (labels: string[]) => void;
+}> = ({ entity, onSave }) => {
+  const [newLabel, setNewLabel] = React.useState("");
+  const altLabels = (entity.labels ?? []).slice(1);
+
+  return (
+    <StyledAltLabelsWrap data-no-row-click="true">
+      {altLabels.map((label, i) => (
+        <StyledAltLabelChip key={i}>
+          {label}
+          <StyledAltLabelRemove
+            type="button"
+            onClick={() => onSave(entity.labels.filter((_, idx) => idx !== i + 1))}
+          >
+            ×
+          </StyledAltLabelRemove>
+        </StyledAltLabelChip>
+      ))}
+      <StyledAltLabelAddInput
+        $hasValue={!!newLabel}
+        value={newLabel}
+        onChange={(e) => setNewLabel(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && newLabel.trim()) {
+            onSave([...entity.labels, newLabel.trim()]);
+            setNewLabel("");
+          }
+        }}
+        placeholder="+"
+      />
+    </StyledAltLabelsWrap>
+  );
+};
 
 interface ExplorerTableRowProps {
   rowId: number;
@@ -224,14 +334,113 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           />
         );
       } else {
-        return (
-          <div>
-            <span>{cellValue as string}</span>
-          </div>
-        );
+        if (column.editable) {
+          if (column.type === Explore.EExploreColumnType.ELI) {
+            return (
+              <EditableCellValue
+                value={cellValue as string}
+                onSave={(newValue) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { legacyId: newValue },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EDET) {
+            return (
+              <EditableCellValue
+                value={cellValue as string}
+                onSave={(newValue) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { detail: newValue },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EST) {
+            return (
+              <Dropdown.Single.Basic
+                width={140}
+                value={recordEntity.status}
+                options={entityStatusDict}
+                onChange={(v) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { status: v },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.ELA) {
+            return (
+              <Dropdown.Single.Basic
+                width={140}
+                value={recordEntity.language}
+                options={languageDict}
+                onChange={(v) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { language: v || EntityEnums.Language.Empty },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EAL) {
+            return (
+              <EditableAltLabels
+                entity={recordEntity}
+                onSave={(labels) => {
+                  updateEntityMutation.mutate({
+                    entityId: recordEntity.id,
+                    changes: { labels },
+                  });
+                }}
+              />
+            );
+          }
+          if (column.type === Explore.EExploreColumnType.EPOS) {
+            if (recordEntity.class === EntityEnums.Class.Concept) {
+              return (
+                <Dropdown.Single.Basic
+                  width={140}
+                  value={(recordEntity.data as any)?.pos}
+                  options={conceptPartOfSpeechDict}
+                  onChange={(v) => {
+                    updateEntityMutation.mutate({
+                      entityId: recordEntity.id,
+                      changes: { data: { ...recordEntity.data, pos: v } },
+                    });
+                  }}
+                />
+              );
+            }
+            if (recordEntity.class === EntityEnums.Class.Action) {
+              return (
+                <Dropdown.Single.Basic
+                  width={140}
+                  value={(recordEntity.data as any)?.pos}
+                  options={actionPartOfSpeechDict}
+                  onChange={(v) => {
+                    updateEntityMutation.mutate({
+                      entityId: recordEntity.id,
+                      changes: { data: { ...recordEntity.data, pos: v } },
+                    });
+                  }}
+                />
+              );
+            }
+          }
+        }
+        return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }
     },
-    [handleUnlinkEntity, handleOpenEntityInDetail],
+    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation],
   );
 
   const renderCell = React.useCallback(
@@ -242,7 +451,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
         return (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
+          <StyledCellArrayWrap>
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
@@ -257,7 +466,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             {cellData.length > CELL_DISPLAY_LIMIT && (
               <ExplorerCellOverflow hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)} />
             )}
-          </div>
+          </StyledCellArrayWrap>
         );
       } else {
         return renderCellValue(cellData, recordEntity, column);
@@ -325,10 +534,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   );
 
   return (
-    <div
+    <StyledRowInner
       className="qt-row-inner"
       onClick={handleRowClick}
-      style={{ display: "flex", width: "100%", minHeight: "100%" }}
     >
       <div
         className="qt-col"
@@ -343,19 +551,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           {isSelected ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}
         </StyledCheckboxWrapper>
 
-        <span
-          data-no-row-click="true"
-          style={{
-            display: "inline-flex",
-            overflow: "hidden",
-          }}
-        >
+        <StyledEntityTagWrap data-no-row-click="true">
           <EntityTag
             entity={rowEntity}
             fullWidth
             onDoubleClick={rowEntity ? handleOpenEntityInDetail(rowEntity) : undefined}
           />
-        </span>
+        </StyledEntityTagWrap>
       </div>
 
       {columns.map((column, key) => {
@@ -364,32 +566,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             key={key}
             className="qt-col"
             style={{
-              width:
-                column.type === Explore.EExploreColumnType.EUC
-                  ? WIDTH_COLUMN_EUC
-                  : WIDTH_COLUMN_DEFAULT,
-              minWidth: WIDTH_COLUMN_EUC,
-              maxWidth: WIDTH_COLUMN_DEFAULT,
+              width: getColumnWidth(column.type),
+              minWidth: getColumnWidth(column.type),
+              maxWidth: getColumnWidth(column.type),
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "start",
-                alignItems: "center",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                gap: "0.25rem",
-              }}
-            >
+            <StyledCellContent>
               {renderCell(rowEntity, columnData[column.id], column)}
               {renderEditSection(rowEntity, column)}
-            </div>
+            </StyledCellContent>
           </div>
         );
       })}
-    </div>
+    </StyledRowInner>
   );
 };
 
