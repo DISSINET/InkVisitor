@@ -78,7 +78,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__value-container {
     height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
     align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
-    row-gap: ${({ userDropdown }) => (userDropdown ? "1px" : "")};
+    row-gap: ${({ userDropdown }) => (userDropdown ? "2px" : "")};
     padding: ${({ userDropdown }) => (userDropdown ? "2px 0.3rem" : "0")};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
@@ -138,6 +138,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__input-container {
     color: ${({ theme }) => theme.color["black"]};
+    ${({ userDropdown }) => (userDropdown ? "margin: 0; padding: 0; line-height: 1;" : "")}
   }
   // portal menu style is in global stylesheet
 `;
