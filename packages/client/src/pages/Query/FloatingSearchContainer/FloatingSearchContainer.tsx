@@ -44,6 +44,7 @@ interface FloatingSearchContainer {
   includeEquivalents: boolean;
   onToggleIncludeSubordinates: (value: boolean) => void;
   onToggleIncludeEquivalents: (value: boolean) => void;
+  hideButton?: boolean;
 }
 
 const getPageContentRect = (): DOMRect => {
@@ -160,6 +161,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   includeEquivalents,
   onToggleIncludeSubordinates,
   onToggleIncludeEquivalents,
+  hideButton = false,
 }) => {
   const rightInsetRef = useRef(rightInset);
   rightInsetRef.current = rightInset;
@@ -369,21 +371,20 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
 
   return (
     <>
-      <StyledCollapsedButton
-        type="button"
-        $isActive={isExpanded}
-        onClick={handleToggle}
-        aria-label={isExpanded ? "Close search panel" : "Open search panel"}
-        aria-expanded={isExpanded}
-      >
-        <BiSearch size={22} />
-      </StyledCollapsedButton>
+      {!hideButton && (
+        <StyledCollapsedButton
+          type="button"
+          $isActive={isExpanded}
+          onClick={handleToggle}
+          aria-label={isExpanded ? "Close search panel" : "Open search panel"}
+          aria-expanded={isExpanded}
+        >
+          <BiSearch size={22} />
+        </StyledCollapsedButton>
+      )}
       {isExpanded && (
         <FloatingPortal id="page-content">
-          <StyledFloatingRoot
-            $left={expandedPagePosition.x}
-            $top={expandedPagePosition.y}
-          >
+          <StyledFloatingRoot $left={expandedPagePosition.x} $top={expandedPagePosition.y}>
             <StyledExpandedPanel ref={expandedPanelRef} data-run-on-enter="true">
               <StyledExpandedHeader>
                 <StyledDragHandle

@@ -12,6 +12,7 @@ import { CronService } from "@service/cron";
 import { startDbStatsEmitter } from "@service/dbStats";
 import { startCacheInvalidators } from "@service/changefeedInvalidator";
 import { assertRequiredIndexes } from "@service/assertRequiredIndexes";
+import Document from "@models/document/document";
 
 (async () => {
   const db = new Db();
@@ -20,6 +21,11 @@ import { assertRequiredIndexes } from "@service/assertRequiredIndexes";
   // Fail-fast if a required secondary index is missing rather than 500ing
   // on the first entity-detail / territory-statements request.
   await assertRequiredIndexes(db.connection);
+
+  const backfilled = await Document.backfillEntityIds(db.connection);
+  if (backfilled > 0) {
+    console.log(`[startup] backfilled entityIds for ${backfilled} documents`);
+  }
 
   await prepareTreeCache(db.connection);
 

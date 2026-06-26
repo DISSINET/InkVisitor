@@ -1,4 +1,5 @@
 import { PingColor } from "Theme/theme";
+import { AiOutlineWarning } from "react-icons/ai";
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
 
@@ -124,6 +125,65 @@ export const StyledStatsHeading = styled.div`
   &:first-child {
     margin-top: 0;
   }
+`;
+
+/* --- "HTML instead of JSON" diagnostic capture indicator + popup --- */
+export const StyledHtmlCaptureWrap = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+`;
+
+export const StyledHtmlCaptureIcon = styled(AiOutlineWarning)`
+  cursor: pointer;
+  color: ${({ theme }) => theme.color["warning"]};
+  vertical-align: middle;
+`;
+
+export const StyledHtmlCapturePanel = styled.div`
+  position: absolute;
+  top: 1.6rem;
+  left: 0;
+  z-index: 100;
+  width: 26rem;
+  max-width: 80vw;
+  padding: 0.6rem 0.75rem;
+  background-color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color["black"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: 0.25rem;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+  font-size: 0.8rem;
+  line-height: 1.4;
+`;
+
+export const StyledHtmlCaptureText = styled.div`
+  margin-bottom: 0.5rem;
+  & strong {
+    font-weight: bold;
+  }
+`;
+
+export const StyledHtmlCapturePre = styled.pre`
+  margin: 0 0 0.5rem 0;
+  padding: 0.4rem 0.5rem;
+  max-height: 16rem;
+  overflow: auto;
+  background-color: ${({ theme }) => theme.color["gray"][200]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: 0.2rem;
+  font-family: monospace;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+`;
+
+export const StyledHtmlCaptureActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 `;
 
 export const StyledStatsRow = styled.div`

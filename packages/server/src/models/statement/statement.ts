@@ -356,7 +356,10 @@ class Statement extends Entity implements IStatement {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
+  async save(
+    db: Connection | undefined,
+    skipTreeCache = false
+  ): Promise<boolean> {
     const siblings = await this.findTerritorySiblings(db);
     if (this.data.territory) {
       this.data.territory.order = determineOrder(
@@ -366,7 +369,7 @@ class Statement extends Entity implements IStatement {
     }
 
     const result = await super.save(db);
-    if (result) {
+    if (result && !skipTreeCache) {
       await treeCache.initialize();
     }
 
@@ -382,8 +385,17 @@ class Statement extends Entity implements IStatement {
    */
   async update(
     db: Connection | undefined,
-    updateData: Record<string, unknown>
+    updateData: Record<string, unknown>,
+    skipTreeCache = false
   ): Promise<WriteResult> {
+    // The territory tree only tracks per-territory statement counts (and the
+    // derived `empty` flag), so a statement update changes the tree only when
+    // it moves the statement to another territory. A move always carries a
+    // territoryId in the patch; plain content edits (text/props/actants/tags),
+    // reference edits and in-place reorders (order only) do not, so they must
+    // not pay the full ~150ms tree rebuild.
+    const movesTerritory = !!(updateData["data"] as any)?.territory?.territoryId;
+
     if (
       updateData["data"] &&
       (updateData["data"] as any).territory &&
@@ -406,7 +418,9 @@ class Statement extends Entity implements IStatement {
 
     const result = await super.update(db, updateData);
 
-    await treeCache.initialize();
+    if (!skipTreeCache && movesTerritory) {
+      await treeCache.initialize();
+    }
 
     return result;
   }

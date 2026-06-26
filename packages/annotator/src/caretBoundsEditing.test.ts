@@ -1,5 +1,5 @@
 /**
- * Phase 3 pivot (P2) — offset-based editing keeps the caret/selection in bounds.
+ * Offset-based editing keeps the caret/selection in bounds.
  *
  * Two bounds bugs the fuzz (caretBoundsFuzz) surfaced, reproduced minimally:
  *  1. Enter on the last visual line of a wrapped segment: the old blind

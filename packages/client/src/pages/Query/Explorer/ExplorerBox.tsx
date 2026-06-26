@@ -8,9 +8,7 @@ import ExplorerControlBar from "./ExplorerControlBar";
 import { ExplorerTableBatchActionModal } from "./ExplorerTable/ExplorerTableBatchActionModal/ExplorerTableBatchActionModal";
 import { ExploreAction } from "./state";
 import { useExplorerControls } from "./useExplorerControls";
-import { FloatingSearchContainer } from "../FloatingSearchContainer/FloatingSearchContainer";
 import { useInvalidateExplorerQuery } from "../useQueryData";
-import ExplorerTableIdsFilter from "./ExplorerTable/ExplorerTableIdsFilter";
 
 /** Height reserved for the shared control bar above the view content. */
 const CONTROL_BAR_HEIGHT = 50;
@@ -32,17 +30,8 @@ interface ExplorerBoxProps {
   onOpenEntityInDetail?: (entityId: string) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
 
-  isDetailOpen: boolean;
-  detailPanelWidth: number;
-
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
-
-  // page-level expansion options (#2969), rendered inside the floating search popup
-  includeSubordinates: boolean;
-  includeEquivalents: boolean;
-  onToggleIncludeSubordinates: (value: boolean) => void;
-  onToggleIncludeEquivalents: (value: boolean) => void;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
@@ -58,16 +47,8 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   getCachedEntity,
   onOpenEntityInDetail,
   onOpenEntitiesInDetail,
-  isDetailOpen,
-  detailPanelWidth,
   canBatchEdit = false,
-  includeSubordinates,
-  includeEquivalents,
-  onToggleIncludeSubordinates,
-  onToggleIncludeEquivalents,
 }) => {
-  const floatingSearchRightInset = isDetailOpen ? detailPanelWidth : 0;
-
   const isStats = state.view.mode === Explore.EViewMode.Stats;
   // Stats view with no search criteria: show only the prompt, hiding the control
   // bar (label / uuid filters) so nothing competes with the message.
@@ -88,36 +69,36 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     <>
       <div style={{ display: "flex", flexDirection: "column", height }}>
         {!isStatsEmpty && (
-        <ExplorerControlBar
-          mode={state.view.mode}
-          filters={state.filters}
-          dispatch={dispatch}
-          isQueryFetching={isQueryFetching}
-          selection={
-            isStats
-              ? undefined
-              : {
-                  selectedCount: controls.selectedEntityIds.length,
-                  isAllCurrentSelected: controls.isAllCurrentSelected,
-                  hasPartialSelection: controls.hasPartialSelection,
-                  rowsTotal: controls.total,
-                  onAllRowsSelect: controls.handleAllRowsSelect,
-                  setRowLastClicked: controls.setRowLastClicked,
-                  batchActionSelected: controls.batchActionSelected,
-                  setBatchActionSelected: controls.setBatchActionSelected,
-                  onApplyBatchAction: controls.handleApplyBatchAction,
-                  canBatchEdit,
-                }
-          }
-          newColumn={
-            isStats
-              ? undefined
-              : {
-                  isNewColumnOpen: controls.isNewColumnOpen,
-                  setIsNewColumnOpen: controls.setIsNewColumnOpen,
-                }
-          }
-        />
+          <ExplorerControlBar
+            mode={state.view.mode}
+            filters={state.filters}
+            dispatch={dispatch}
+            isQueryFetching={isQueryFetching}
+            selection={
+              isStats
+                ? undefined
+                : {
+                    selectedCount: controls.selectedEntityIds.length,
+                    isAllCurrentSelected: controls.isAllCurrentSelected,
+                    hasPartialSelection: controls.hasPartialSelection,
+                    rowsTotal: controls.total,
+                    onAllRowsSelect: controls.handleAllRowsSelect,
+                    setRowLastClicked: controls.setRowLastClicked,
+                    batchActionSelected: controls.batchActionSelected,
+                    setBatchActionSelected: controls.setBatchActionSelected,
+                    onApplyBatchAction: controls.handleApplyBatchAction,
+                    canBatchEdit,
+                  }
+            }
+            newColumn={
+              isStats
+                ? undefined
+                : {
+                    isNewColumnOpen: controls.isNewColumnOpen,
+                    setIsNewColumnOpen: controls.setIsNewColumnOpen,
+                  }
+            }
+          />
         )}
 
         <div style={{ flex: 1, minHeight: 0 }}>
@@ -155,18 +136,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           )}
         </div>
       </div>
-
-      <ExplorerTableIdsFilter filters={state.filters} dispatch={dispatch} />
-
-      <FloatingSearchContainer
-        rightInset={floatingSearchRightInset}
-        filters={state.filters}
-        exploreDispatch={dispatch}
-        includeSubordinates={includeSubordinates}
-        includeEquivalents={includeEquivalents}
-        onToggleIncludeSubordinates={onToggleIncludeSubordinates}
-        onToggleIncludeEquivalents={onToggleIncludeEquivalents}
-      />
 
       {controls.isBatchModalOpen && (
         <ExplorerTableBatchActionModal

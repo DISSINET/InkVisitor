@@ -34,6 +34,9 @@ interface EntityReferenceTableRow {
   initValueTyped?: string;
   onClearAfterInitTyped: () => void;
 
+  autoFocusResource?: boolean;
+  autoFocusValue?: boolean;
+
   userCanEdit: boolean;
   disabled?: boolean;
 }
@@ -58,6 +61,9 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   initResourceTyped,
   initValueTyped,
   onClearAfterInitTyped,
+
+  autoFocusResource,
+  autoFocusValue,
 
   userCanEdit,
   disabled,
@@ -122,6 +128,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           openDetailOnCreate={openDetailOnCreate}
           alwaysShowCreateModal={alwaysShowCreateModal}
           initResourceTyped={initResourceTyped}
+          autoFocus={autoFocusResource}
           editorWidthTooNarrow={editorWidthTooNarrow}
           disabled={disabled}
         />
@@ -135,6 +142,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           openDetailOnCreate={openDetailOnCreate}
           territoryParentId={territoryParentId}
           initValueTyped={initValueTyped}
+          autoFocus={autoFocusValue}
           editorWidthTooNarrow={editorWidthTooNarrow}
           disabled={disabled}
         />

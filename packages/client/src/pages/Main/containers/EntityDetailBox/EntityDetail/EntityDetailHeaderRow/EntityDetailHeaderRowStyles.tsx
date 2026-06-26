@@ -18,10 +18,7 @@ export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   padding-bottom: ${({ theme }) => theme.space[2]};
   padding-right: ${({ theme }) => theme.space[6]};
   padding-left: 2rem;
-  padding-left: ${({ $widthTooNarrow }) =>
-    $widthTooNarrow ? "2rem" : "10.9rem"};
-  background: ${({ theme }) => theme.color["gray"][200]};
-  box-shadow: 4px 7px 5px -8px rgba(0, 0, 0, 0.5);
+  padding-left: ${({ $widthTooNarrow }) => ($widthTooNarrow ? "2rem" : "10.9rem")};
   z-index: 10;
 `;
 export const StyledTagWrap = styled.div`

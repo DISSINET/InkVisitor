@@ -6,6 +6,7 @@ import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpand
 import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
+import secondPanelExpandedSlice from "./features/layout/mainPage/secondPanelExpandedSlice";
 import secondPanelRealWidthSlice from "./features/layout/mainPage/secondPanelRealWidthSlice";
 import thirdPanelRealWidthSlice from "./features/layout/mainPage/thirdPanelRealWidthSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
@@ -29,6 +30,9 @@ import detailBoxStateSlice from "./features/layout/mainPage/detailBoxStateSlice"
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import thirdPanelExpandedSlice from "./features/layout/mainPage/thirdPanelExpandedSlice";
 import expandedOptionsSlice from "./features/entitySearch/expandedOptionsSlice";
+import selectedResourceIdSlice from "./features/statementAnnotator/selectedResourceIdSlice";
+import hoveredStatementIdSlice from "./features/statementAnnotator/hoveredStatementIdSlice";
+import editorBoxStateSlice from "./features/layout/mainPage/editorBoxStateSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -52,6 +56,10 @@ const store: Store = configureStore({
       disableStatementListScroll: disableStatementListScrollSlice,
       isLoading: isLoadingSlice,
     }),
+    statementAnnotator: combineReducers({
+      selectedResourceId: selectedResourceIdSlice,
+      hoveredStatementId: hoveredStatementIdSlice,
+    }),
     statementEditor: combineReducers({
       showWarnings: showWarningsSlice,
     }),
@@ -67,6 +75,7 @@ const store: Store = configureStore({
         panelWidths: panelWidthsSlice,
         panelWidthsPercent: panelWidthsPercentSlice,
         firstPanelExpanded: firstPanelExpandedSlice,
+        secondPanelExpanded: secondPanelExpandedSlice,
         thirdPanelExpanded: thirdPanelExpandedSlice,
         fourthPanelExpanded: fourthPanelExpandedSlice,
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
@@ -74,6 +83,7 @@ const store: Store = configureStore({
         secondPanelRealWidth: secondPanelRealWidthSlice,
         thirdPanelRealWidth: thirdPanelRealWidthSlice,
         detailBoxState: detailBoxStateSlice,
+        editorBoxState: editorBoxStateSlice,
       }),
     }),
   },

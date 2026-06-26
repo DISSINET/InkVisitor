@@ -15,5 +15,5 @@ export const StyledPageContent = styled.div`
   overflow: hidden;
   display: flex;
   position: relative;
-  background-color: ${({ theme }) => theme.color["gray"]["200"]};
+  background-color: ${({ theme }) => theme.color.pageBg};
 `;

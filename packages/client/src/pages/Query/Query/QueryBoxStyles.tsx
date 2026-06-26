@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../types";
+import { INodeItem } from "../types";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
 
 interface StyledQueryBoxProps {
   $gridWeight: number;

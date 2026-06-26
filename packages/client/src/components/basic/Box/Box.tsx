@@ -43,9 +43,7 @@ export const Box: React.FC<Box> = ({
   disableScroll = false,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
-  const [showContentLabel, setShowContentLabel] = useState<boolean>(
-    !isExpanded
-  );
+  const [showContentLabel, setShowContentLabel] = useState<boolean>(!isExpanded);
 
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
@@ -72,16 +70,12 @@ export const Box: React.FC<Box> = ({
         $isExpanded={isExpanded}
         $color={color}
         $noFrame={noFrame}
-        $hasHeaderClick={
-          onHeaderClick !== undefined && !disableHeaderClick && isExpanded
-        }
+        $hasHeaderClick={onHeaderClick !== undefined && !disableHeaderClick && isExpanded}
         onClick={() => !disableHeaderClick && onHeaderClick && onHeaderClick()}
       >
-        {!hideContent && isExpanded && (
-          <StyledLabel style={animatedExpand}>{label}</StyledLabel>
-        )}
+        {!hideContent && isExpanded && <StyledLabel style={animatedExpand}>{label}</StyledLabel>}
         {headerComponent && (
-          <StyledHeaderComponentWrap $isExpanded={isExpanded}>
+          <StyledHeaderComponentWrap $isExpanded={isExpanded} $flexGrow>
             {headerComponent}
           </StyledHeaderComponentWrap>
         )}

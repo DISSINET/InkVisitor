@@ -1,6 +1,6 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { IEntity, IResponseStatement, IStatement } from "@inkvisitor/shared/types";
 import { useSearchParams, useTheme } from "hooks";
+import { highlightAnchorByTag, clearHoverHighlight } from "hooks/useAnnotator";
 import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
@@ -46,7 +46,6 @@ interface StatementListRow {
   isSelected: boolean;
   displayMode: StatementListDisplayMode;
   isAnnotatorHovered?: boolean;
-  annotator?: Annotator;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -60,7 +59,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   isSelected,
   displayMode,
   isAnnotatorHovered = false,
-  annotator,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -132,15 +130,12 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           e.stopPropagation();
         }}
         onMouseEnter={() => {
-          if (
-            displayMode === StatementListDisplayMode.TEXT &&
-            annotator
-          ) {
-            annotator.highlightAnchorByTag(row.original.id);
-          }
+          // No-op when no annotator is mounted; highlights the matching anchor
+          // in the (now separate) AnnotatorBox when one is.
+          highlightAnchorByTag(row.original.id);
         }}
         onMouseLeave={() => {
-          annotator?.clearHoverHighlight();
+          clearHoverHighlight();
         }}
         // for scrollTo fn
         id={`statement${row.original.id}`}

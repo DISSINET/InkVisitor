@@ -257,6 +257,14 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
+    onError: () => {
+      // The instant anchor save failed, so the cache was never merged and now
+      // trails the live canvas. Surface the failure (otherwise silent in quiet
+      // mode) and refetch so the canvas reconciles to true server state instead
+      // of a later dep change clobbering it with stale content.
+      toast.error("Failed to save document changes");
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+    },
     onSettled: () => {
       setIsSaving(false);
       setIsSavingWithoutRefresh(false);
@@ -771,11 +779,30 @@ export const TextAnnotator = ({
     const applyCanvasTheme = (a: Annotator) => {
       a.fontColor = theme.color.black;
       a.bgColor = "transparent";
-      a.setSelectStyle("turquoise", 0.8, theme.color.black);
+      a.menuColors = {
+        bg: theme.color.white,
+        text: theme.color.black,
+        border: theme.color.gray[400],
+        hover: theme.color.menuHover,
+        accent: theme.color.blue[400],
+        accentText: "#ffffff",
+        separator: theme.color.gray[300],
+        disabled: theme.color.gray[500],
+        buttonBg: theme.color.gray[200],
+      };
+      a.setSelectStyle("rgb(122, 209, 255)", 0.8, theme.color.black);
       a.setHoverHighlightStyle({
         color: theme.color.entityS,
         opacity: 0.25,
       });
+      // #2487 — font families offered in the annotator's Options modal (the
+      // proportional-font picker). The annotator owns the choice + persistence;
+      // the app just supplies the candidates, defaulting to the application font.
+      a.setFontFamilyOptions([
+        { label: "Sans (app)", value: '"Roboto", sans-serif' },
+        { label: "System", value: "system-ui, sans-serif" },
+        { label: "Serif", value: "Georgia, serif" },
+      ]);
     };
 
     // Check if the document content has actually changed
@@ -816,20 +843,26 @@ export const TextAnnotator = ({
     // rebuild — so the constructor runs once per document instead of on every
     // render (which recreated the canvas and snapped scroll back to the top) (#3092).
     if (annotator && annotatorLoadedForDocIdRef.current === documentId) {
-      // Props lag behind the live canvas (e.g. after anchor + save before the
-      // refetch lands): keep the live instance and sync the query cache instead
-      // of rebuilding from the stale dataDocument.
       if (
         currentContent !== undefined &&
         currentContent !== newContent &&
         documentId &&
         dataDocument?.id === documentId
       ) {
-        queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
-          if (!old || old.id !== documentId) return old;
-          return { ...old, content: currentContent };
-        });
-        reuseExistingInstance(currentContent);
+        if (isChangeMade) {
+          // Local edit in progress — keep the live canvas and sync the query
+          // cache so the save won't clobber local changes with the stale fetch.
+          queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
+            if (!old || old.id !== documentId) return old;
+            return { ...old, content: currentContent };
+          });
+          reuseExistingInstance(currentContent);
+        } else {
+          // Server content is newer (e.g. another user added anchors) — update
+          // the annotator's text in place, preserving scroll position.
+          annotator.updateText(newContent);
+          reuseExistingInstance(newContent);
+        }
       } else {
         reuseExistingInstance();
       }
@@ -1190,6 +1223,7 @@ export const TextAnnotator = ({
   return (
     <>
       <AnnotatorSearchLine
+        contentWidth={width}
         showStatementList={showStatementList ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

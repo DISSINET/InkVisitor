@@ -9,6 +9,8 @@ import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
 import { EntitySingleDropdown } from "./Dropdowns/EntitySingleDropdown";
+import { UserMultiDropdown } from "./Dropdowns/UserMultiDropdown";
+import { UserSingleDropdown } from "./Dropdowns/UserSingleDropdown";
 import { EmptyEntityTag } from "./EntityTag/EmptyEntityTag";
 import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
@@ -41,10 +43,12 @@ const Dropdown = {
   Single: {
     Basic: BasicDropdown,
     Entity: EntitySingleDropdown,
+    User: UserSingleDropdown,
   },
   Multi: {
     Attribute: AttributeMultiDropdown,
     Entity: EntityMultiDropdown,
+    User: UserMultiDropdown,
   },
 };
 export default Dropdown;

@@ -2,11 +2,7 @@ import styled from "styled-components";
 import { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonSize } from "types";
 
-const getRadius = (
-  $radiusLeft?: boolean,
-  $radiusRight?: boolean,
-  $shape?: "square" | "circle"
-) => {
+const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean, $shape?: "square" | "circle") => {
   if ($shape === "circle") {
     return "50%";
   }
@@ -114,23 +110,18 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     return "";
   }};
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
-  font-weight: ${({ $disabled, $textRegular }) =>
-    $disabled ? 400 : $textRegular ? 500 : 900};
+  font-weight: ${({ $disabled, $textRegular }) => ($disabled ? 400 : $textRegular ? 500 : 900)};
   padding: ${({ $iconButton, $size, $noPadding, $shape }) =>
     $noPadding || $shape
       ? "0"
-      : `${getVerticalMargin($size)} ${getHorizontalMargin(
-          $size,
-          $iconButton
-        )}`};
+      : `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
   border-color: ${({ theme, $disabled, $color, $borderColor }) =>
-    $disabled
-      ? theme.color["gray"][400]
-      : theme.color[$borderColor ?? $color]};
+    $disabled ? theme.color["gray"][400] : theme.color[$borderColor ?? $color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
   border-style: solid;
   border-radius: ${({ $radiusLeft, $radiusRight, $shape }) =>
     getRadius($radiusLeft, $radiusRight, $shape)};
+  /* border-radius: ${({ theme }) => theme.borderRadius.xs}; */
   color: ${({ theme, $disabled, $color, $inverted, $textColor }) => {
     if ($disabled) {
       return theme.color["gray"][500];
@@ -159,7 +150,11 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
 
-  transition: border-color 0.2s, color 0.2s, background-color 0.2s, opacity 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background-color 0.2s,
+    opacity 0.2s;
   &:focus {
     outline: 0;
   }

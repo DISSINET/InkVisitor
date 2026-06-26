@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useDebounce, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
@@ -41,6 +42,15 @@ const initFilterSettings: ITerritoryFilter = {
 export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.firstPanelExpanded
+  );
+  const secondPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelExpanded
+  );
+  const thirdPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelExpanded
+  );
+  const fourthPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded
   );
 
   const queryClient = useQueryClient();
@@ -201,7 +211,16 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeFilterOpen: boolean = useAppSelector((state) => state.territoryTree.filterOpen);
 
-  const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
+  const basePanelWidth = useSelector(selectPanelWidth(0));
+  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
+
+  const treeWidth = useMemo(() => {
+    if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
+    if (!secondPanelExpanded && !thirdPanelExpanded && !fourthPanelExpanded) {
+      return layoutWidth - 3 * COLLAPSED_PANEL_WIDTH;
+    }
+    return basePanelWidth;
+  }, [firstPanelExpanded, secondPanelExpanded, thirdPanelExpanded, fourthPanelExpanded, layoutWidth, basePanelWidth]);
 
   const treeWidthTooNarrow = treeWidth < 140;
 

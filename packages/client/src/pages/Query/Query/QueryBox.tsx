@@ -1,7 +1,8 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
-import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH, QueryValidity } from "../types";
+import { INodeItem, QueryValidity } from "../types";
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
 import { StyledQueryBox } from "./QueryBoxStyles";

@@ -21,12 +21,12 @@ import {
   SUGGESTER_ROW_HEIGHT,
 } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
-import { StyledEmptyState } from "../StatementListBoxStyles";
-import StatementListDocumentLine from "../StatementListDocumentLine/StatementListDocumentLine";
+import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
+import StatementListDocumentLine from "./AnnotatorDocumentLine";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
-  territoryId: string;
+  territoryId?: string;
   territory?: IResponseTerritory;
   statementId: string;
   statementCreateMutation: UseMutationResult<
@@ -51,7 +51,7 @@ interface StatementListTextAnnotator {
   selectedDocument?: IDocument;
   selectedResource: IResponseEntity | false;
   resources?: IResponseEntity[];
-  setSelectedResourceId: React.Dispatch<React.SetStateAction<string | false>>;
+  setSelectedResourceId: (id: string | false) => void;
 
   // useQuery for selectedDocument
   selectedDocumentId?: string;
@@ -109,7 +109,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
     // The header suggester row only renders for users with write rights; when
     // it is absent (editors without write rights, viewers) reclaim its height.
     const reclaimedSuggesterRow = userCanEdit ? 0 : SUGGESTER_ROW_HEIGHT;
-    return contentHeight - 70 - ANNOTATOR_SELECTOR_HEIGHT + reclaimedSuggesterRow;
+    return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT + reclaimedSuggesterRow;
   }, [contentHeight, userCanEdit]);
 
   const annotatorWidth = useMemo<number>(() => {
@@ -126,8 +126,13 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   const [warningsModalOpen, setWarningsModalOpen] = useState(false);
   const [warningAnchorCount, setWarningAnchorCount] = useState(0);
 
+  useEffect(() => {
+    setWarningAnchorCount(0);
+    setWarningsModalOpen(false);
+  }, [selectedDocumentId]);
+
   const activeTHasAnchor = useMemo<boolean>(() => {
-    if (selectedDocument) {
+    if (selectedDocument && territoryId) {
       return selectedDocument?.entityIds.T.includes(territoryId);
     }
     return false;
@@ -152,10 +157,10 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
       if (annotator && selectedDocument && shouldScroll) {
         const isStatementInDocument = Boolean(
           statementId &&
-            selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(statementId)
+          selectedDocument.entityIds[EntityEnums.Class.Statement]?.includes(statementId),
         );
         const isStatementInTerritory = territory?.statements?.some(
-          (statement) => statement.id === statementId
+          (statement) => statement.id === statementId,
         );
 
         const scrollToStatement = isStatementInDocument && isStatementInTerritory;
@@ -181,7 +186,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
           performScroll = true;
         }
 
-        if (performScroll) {
+        if (performScroll && scrollToId) {
           annotator.scrollToAnchor(scrollToId);
         }
 
@@ -191,7 +196,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
         lastScrolledAnnotatorRef.current = annotator;
       }
     }
-  }, [selectedDocument, statementId, annotator, territory]);
+  }, [selectedDocument, statementId, annotator, territory, territoryId]);
 
   return (
     <>

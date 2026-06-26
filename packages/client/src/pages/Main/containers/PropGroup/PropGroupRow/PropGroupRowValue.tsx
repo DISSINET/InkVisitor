@@ -36,6 +36,7 @@ interface PropGroupRowValue {
   alwaysShowCreateModal?: boolean;
 
   initValueTyped?: string;
+  autoFocus?: boolean;
 }
 export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   propValueEntity,
@@ -51,6 +52,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   alwaysShowCreateModal,
 
   initValueTyped,
+  autoFocus,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -145,7 +147,8 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                 true
               );
             }}
-            // autoFocus={prop.type.entityId !== ""}
+            autoFocus={autoFocus}
+            autoFocusInput={autoFocus}
             placeholder="value"
             openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropValue}

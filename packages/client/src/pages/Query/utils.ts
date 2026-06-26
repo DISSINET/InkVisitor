@@ -308,6 +308,24 @@ const normalizeExplore = (exploreState: Jsonish): Jsonish => {
   return rest;
 };
 
+const normalizeExploreForSearch = (exploreState: Jsonish): Jsonish => {
+  if (!exploreState || typeof exploreState !== "object" || Array.isArray(exploreState)) {
+    return exploreState;
+  }
+  const e = exploreState as Record<string, unknown>;
+  const { offset: _o, limit: _l, view: _v, ...rest } = e;
+  return rest;
+};
+
+export const buildSearchSignature = (queryState: Jsonish, exploreState: Jsonish): string => {
+  const normalizedExplore = normalizeExploreForSearch(exploreState);
+  const stableString = stableStringify({
+    query: queryState,
+    explore: normalizedExplore,
+  });
+  return hashString(stableString);
+};
+
 const stableStringify = (value: Jsonish): string => {
   return JSON.stringify(value, replacer, 0);
 };
