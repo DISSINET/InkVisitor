@@ -83,7 +83,7 @@ export const StyledTextListItem = styled.li`
     content: "";
     position: absolute;
     left: 0;
-    top: ${({ theme }) => theme.space[4]};
+    top: 1.65rem;
     width: ${({ theme }) => theme.space[2]};
     height: ${({ theme }) => theme.borderWidth[2]};
     background-color: ${({ theme }) => theme.color["success"]};
@@ -96,12 +96,15 @@ export const StyledLink = styled.span`
   display: inline;
   margin-left: ${({ theme }) => theme.space[1]};
   a {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
     color: ${({ theme }) => theme.color["success"]};
     font-weight: ${({ theme }) => theme.fontWeight["bold"]};
     text-decoration: none;
     svg {
       margin-right: ${({ theme }) => theme.space[1]};
-      vertical-align: -0.1em;
+      flex-shrink: 0;
     }
     &:hover {
       text-decoration: underline;
