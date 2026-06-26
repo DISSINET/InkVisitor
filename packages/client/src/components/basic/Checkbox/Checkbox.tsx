@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-} from "react-icons/md";
+import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { Tooltip } from "components";
 import {
   StyledCheckbox,
@@ -10,11 +7,7 @@ import {
   StyledIconOnlyCheckbox,
   StyledLabel,
 } from "./CheckboxStyles";
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 
 interface Checkbox {
   value: boolean;
@@ -42,9 +35,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   onClickFn = () => {},
 }) => {
   const [checked, setChecked] = useState(value);
-  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
-    null
-  );
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
@@ -70,6 +61,7 @@ export const Checkbox: React.FC<Checkbox> = ({
       )}
       {!iconOnly && (
         <StyledCheckbox
+          ref={setReferenceElement}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
@@ -93,10 +85,7 @@ export const Checkbox: React.FC<Checkbox> = ({
             )}
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel
-              ref={setReferenceElement}
-              onClick={() => setChecked(!checked)}
-            >
+            <StyledLabel onClick={() => setChecked(!checked)}>
               {label}
               {icon}
             </StyledLabel>
