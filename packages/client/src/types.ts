@@ -438,6 +438,7 @@ export enum ButtonSize {
 export type ButtonShape =
   | "sharp"
   | "square"
+  | "square-sharp"
   | "circle"
   | "rounded-sm"
   | "rounded-md"

@@ -2,11 +2,7 @@ import styled from "styled-components";
 import theme, { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonShape, ButtonSize } from "types";
 
-const getRadius = (
-  $radiusLeft?: boolean,
-  $radiusRight?: boolean,
-  $shape?: ButtonShape,
-) => {
+const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean, $shape?: ButtonShape) => {
   if ($shape === "sharp") {
     return "0";
   } else if ($shape === "circle") {
@@ -19,6 +15,8 @@ const getRadius = (
     return "7px 0 0 7px";
   } else if ($radiusRight) {
     return "0 7px 7px 0";
+  } else if ($shape === "square-sharp") {
+    return "0";
   } else if ($shape) {
     return theme.borderRadius[$shape as keyof typeof theme.borderRadius];
   } else {

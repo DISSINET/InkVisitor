@@ -15,23 +15,14 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-} from "react-icons/md";
+import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
-import {
-  CellProps,
-  Column,
-  useExpanded,
-  useRowSelect,
-  useTable,
-} from "react-table";
+import { CellProps, Column, useExpanded, useRowSelect, useTable } from "react-table";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListDisplayMode, StatementOrderCorrection } from "types";
+import { ButtonSize, StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
@@ -87,9 +78,7 @@ interface StatementListTable {
     string,
     unknown
   >;
-  setStatementToDelete: React.Dispatch<
-    React.SetStateAction<IStatement | undefined>
-  >;
+  setStatementToDelete: React.Dispatch<React.SetStateAction<IStatement | undefined>>;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
 
@@ -119,12 +108,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, statementId, setStatementId } = useSearchParams();
-  const rowsExpanded: string[] = useAppSelector(
-    (state) => state.statementList.rowsExpanded
-  );
-  const lastClickedIndex: number = useAppSelector(
-    (state) => state.statementList.lastClickedIndex
-  );
+  const rowsExpanded: string[] = useAppSelector((state) => state.statementList.rowsExpanded);
+  const lastClickedIndex: number = useAppSelector((state) => state.statementList.lastClickedIndex);
 
   const [statementsLocal, setStatementsLocal] = useState<
     (IResponseStatement & { orderCorrection?: StatementOrderCorrection })[]
@@ -144,30 +129,19 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   const handleRowSelect = (rowId: string) => {
     if (selectedRows.includes(rowId)) {
-      setSelectedRows(
-        selectedRows.filter((selectedRow) => selectedRow !== rowId)
-      );
+      setSelectedRows(selectedRows.filter((selectedRow) => selectedRow !== rowId));
     } else {
       setSelectedRows([...selectedRows, rowId]);
     }
   };
 
-  const handleSelection = (
-    lastClickedIndex: number,
-    rowIndex: number
-  ): string[] => {
+  const handleSelection = (lastClickedIndex: number, rowIndex: number): string[] => {
     let selectedStatements: IResponseStatement[] = [];
     if (lastClickedIndex < rowIndex) {
-      selectedStatements = statementsLocal.slice(
-        lastClickedIndex,
-        rowIndex + 1
-      );
+      selectedStatements = statementsLocal.slice(lastClickedIndex, rowIndex + 1);
     } else {
       // is bigger than - oposite direction of selection
-      selectedStatements = statementsLocal.slice(
-        rowIndex,
-        lastClickedIndex + 1
-      );
+      selectedStatements = statementsLocal.slice(rowIndex, lastClickedIndex + 1);
     }
     return selectedStatements.map((statement) => statement.id);
   };
@@ -194,19 +168,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   style={{ zIndex: 2 }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (
-                      e.shiftKey &&
-                      lastClickedIndex !== -1 &&
-                      lastClickedIndex !== row.index
-                    ) {
+                    if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== row.index) {
                       // unset all between
-                      const mappedIds = handleSelection(
-                        lastClickedIndex,
-                        row.index
-                      );
-                      const filteredIds = selectedRows.filter(
-                        (id) => !mappedIds.includes(id)
-                      );
+                      const mappedIds = handleSelection(lastClickedIndex, row.index);
+                      const filteredIds = selectedRows.filter((id) => !mappedIds.includes(id));
                       setSelectedRows(filteredIds);
                     } else {
                       handleRowSelect(row.id);
@@ -220,19 +185,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   style={{ zIndex: 2 }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (
-                      e.shiftKey &&
-                      lastClickedIndex !== -1 &&
-                      lastClickedIndex !== row.index
-                    ) {
+                    if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== row.index) {
                       // set all between
-                      const mappedIds = handleSelection(
-                        lastClickedIndex,
-                        row.index
-                      );
-                      setSelectedRows([
-                        ...new Set(selectedRows.concat(mappedIds)),
-                      ]);
+                      const mappedIds = handleSelection(lastClickedIndex, row.index);
+                      setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
                     } else {
                       handleRowSelect(row.id);
                     }
@@ -267,20 +223,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 .filter((a: any) => a.position === "s")
                 .map((a: any) => a.entityId)
             : [];
-          const subjectObjects = subjectIds.map(
-            (actantId: string) => entities[actantId]
-          );
+          const subjectObjects = subjectIds.map((actantId: string) => entities[actantId]);
           const definedSubjects = subjectObjects.filter((s) => s !== undefined);
 
-          return (
-            <>
-              {definedSubjects ? (
-                <TagGroup definedEntities={definedSubjects} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
+          return <>{definedSubjects ? <TagGroup definedEntities={definedSubjects} /> : <div />}</>;
         },
       },
       {
@@ -290,20 +236,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const actionIds = row.original.data?.actions
             ? row.original.data.actions.map((a) => a.actionId)
             : [];
-          const actionObjects = actionIds.map(
-            (actionId: string) => entities[actionId]
-          );
+          const actionObjects = actionIds.map((actionId: string) => entities[actionId]);
           const definedActions = actionObjects.filter((a) => a !== undefined);
 
-          return (
-            <>
-              {definedActions ? (
-                <TagGroup definedEntities={definedActions} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
+          return <>{definedActions ? <TagGroup definedEntities={definedActions} /> : <div />}</>;
         },
       },
       {
@@ -311,13 +247,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "Objects",
         Cell: ({ row }: CellType) => {
           const actantIds = row.original.data?.actants
-            ? row.original.data.actants
-                .filter((a) => a.position !== "s")
-                .map((a) => a.entityId)
+            ? row.original.data.actants.filter((a) => a.position !== "s").map((a) => a.entityId)
             : [];
-          const actantObjects: IEntity[] = actantIds.map(
-            (actantId: string) => entities[actantId]
-          );
+          const actantObjects: IEntity[] = actantIds.map((actantId: string) => entities[actantId]);
           const definedObjects = actantObjects.filter((o) => o !== undefined);
 
           return (
@@ -409,6 +341,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                       setStatementToDelete(row.original);
                       setShowSubmit(true);
                     }}
+                    shape="square-sharp"
+                    size={ButtonSize.Small}
                   />,
                   <Button
                     key="d"
@@ -418,6 +352,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     onClick={() => {
                       cloneStatementMutation.mutate(row.original.id);
                     }}
+                    shape="square-sharp"
+                    size={ButtonSize.Small}
                   />,
                   <Button
                     key="add-up"
@@ -432,6 +368,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     onClick={() => {
                       addStatementAtCertainIndex(row.index);
                     }}
+                    shape="square-sharp"
                   />,
                   <Button
                     key="add-down"
@@ -446,6 +383,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     onClick={() => {
                       addStatementAtCertainIndex(row.index + 1);
                     }}
+                    shape="square-sharp"
                   />,
                 ]}
               />
@@ -479,7 +417,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
     },
     useExpanded,
-    useRowSelect
+    useRowSelect,
   );
 
   useEffect(() => {
@@ -499,7 +437,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           [dragIndex, 1],
           [hoverIndex, 0, prevStatementsLocal[dragIndex]],
         ],
-      })
+      }),
     );
   }, []);
 
@@ -509,7 +447,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
       if (thisOrder !== statements[index].data.territory?.order) {
         let allOrders: number[] = statements.map((s) =>
-          s.data.territory ? s.data.territory.order : 0
+          s.data.territory ? s.data.territory.order : 0,
         );
         allOrders.sort((a, b) => (a && b ? (a > b ? 1 : -1) : 0));
 
@@ -541,15 +479,12 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     (rowId: string) => {
       handleRowClick(rowId);
     },
-    [handleRowClick]
+    [handleRowClick],
   );
 
   return (
     <>
-      <StyledTable
-        {...getTableProps()}
-        $isListMode={displayMode === StatementListDisplayMode.LIST}
-      >
+      <StyledTable {...getTableProps()} $isListMode={displayMode === StatementListDisplayMode.LIST}>
         <StyledTHead>
           {headerGroups.map((headerGroup, key) => (
             <tr {...headerGroup.getHeaderGroupProps()} key={key}>
@@ -560,7 +495,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   </StyledTh>
                 ) : (
                   <th key={key}></th>
-                )
+                ),
               )}
               {displayMode !== StatementListDisplayMode.TEXT && (
                 <StyledTh style={{ width: "50px" }} key={"expander"}></StyledTh>
@@ -583,9 +518,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 entities={entities}
                 isSelected={selectedRows.includes(row.original.id)}
                 displayMode={displayMode}
-                isAnnotatorHovered={
-                  annotatorHoveredStatementId === row.original.id
-                }
+                isAnnotatorHovered={annotatorHoveredStatementId === row.original.id}
               />
             );
           })}
