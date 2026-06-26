@@ -319,6 +319,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                 setSearchTerm(newText);
               }}
               changeOnType
+              clearable={!annotatorWidthTooNarrow}
               width={annotatorWidthTooNarrow ? 200 : 230}
               minWidth={140}
               inputRef={searchInputRef}
