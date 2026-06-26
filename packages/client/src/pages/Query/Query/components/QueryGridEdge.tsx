@@ -76,12 +76,9 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           {/* this edge's own branch: upper spine (junction) + horizontal to the
               node, in this edge's colour - red/dashed when negative */}
           <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
-            <line x1={20} x2={20} y1={0} y2={QUERY_GRID_HEIGHT / 2} strokeLinecap="round" />
-            <line
-              x1={20}
-              x2={QUERY_GRID_WIDTH}
-              y1={QUERY_GRID_HEIGHT / 2}
-              y2={QUERY_GRID_HEIGHT / 2}
+            <path
+              d={`M 20 0 L 20 ${QUERY_GRID_HEIGHT / 2 - 8} Q 20 ${QUERY_GRID_HEIGHT / 2} 28 ${QUERY_GRID_HEIGHT / 2} L ${QUERY_GRID_WIDTH} ${QUERY_GRID_HEIGHT / 2}`}
+              fill="none"
               strokeLinecap="round"
             />
           </g>
