@@ -13,6 +13,10 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme, $noBorder }) =>
     $noBorder ? "none" : theme.boxShadow["subtle"]};
+  /* border-collapse ignores border-radius, so clip the corners instead */
+  border-radius: ${({ theme, $noBorder }) =>
+    $noBorder ? 0 : theme.borderRadius["input"]};
+  overflow: hidden;
 `;
 interface StyledTHead {
   $noBorder: boolean;
