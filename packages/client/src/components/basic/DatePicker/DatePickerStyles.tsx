@@ -49,6 +49,7 @@ export const StyledTrigger = styled.div<StyledTrigger>`
       : $borderColor
         ? theme.color[$borderColor]
         : theme.color["gray"]["400"]};
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
   padding: 0 ${({ theme }) => theme.space[2]};
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   transition: border-color 0.12s ease;
