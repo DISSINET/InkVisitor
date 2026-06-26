@@ -1,7 +1,15 @@
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
-import { Button, IconWithTooltip, Loader, Modal, ModalContent, ModalHeader } from "components";
+import {
+  Button,
+  IconButton,
+  IconWithTooltip,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalHeader,
+} from "components";
 import Dropdown, {
   DocumentModalExport,
   DocumentTitle,
@@ -278,7 +286,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </>
             )}
             {isUndersized && (
-              <Button
+              <IconButton
+                inverted={false}
                 icon={<FaHighlighter />}
                 tooltipContent={<HighlightTooltipContent hlEntities={hlEntities} />}
                 onClick={() => setShowHighlightModal(true)}

@@ -2,7 +2,7 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Checkbox, IconWithTooltip, Input, Loader } from "components";
+import { Button, Checkbox, IconButton, IconWithTooltip, Input, Loader } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
 import React, { useMemo, useRef, useState } from "react";
@@ -526,12 +526,9 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       position: "relative",
                     }}
                   >
-                    <Button
-                      shape="circle"
+                    <IconButton
                       color="info"
-                      inverted
                       tooltipLabel="replace one occurence"
-                      noBackground
                       icon={<LuReplace size={12} />}
                       onClick={replaceOccurence}
                       disabled={
@@ -550,12 +547,9 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       position: "relative",
                     }}
                   >
-                    <Button
-                      shape="circle"
+                    <IconButton
                       color="info"
-                      inverted
                       tooltipLabel="replace all occurences"
-                      noBackground
                       icon={<LuReplaceAll size={12} />}
                       onClick={replaceAllOccurences}
                       disabled={
