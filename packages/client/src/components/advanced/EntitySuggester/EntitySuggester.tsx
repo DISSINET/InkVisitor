@@ -221,7 +221,7 @@ const EntitySuggesterFull: React.FC<
           userRole !== UserEnums.Role.Admin &&
           userRole !== UserEnums.Role.Owner
             ? s.right === UserEnums.RoleMode.Write
-            : s
+            : s,
         )
         .filter((s) => (excludedActantIds.length ? !excludedActantIds.includes(s.id) : s))
         .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
@@ -234,7 +234,7 @@ const EntitySuggesterFull: React.FC<
               s.isTemplate &&
               isInsideStatement &&
               isInsideTemplate
-            )
+            ),
         )
         .filter((s) => categoryTypes.includes(s.class))
         .map((entity: IEntity) => {
@@ -303,7 +303,7 @@ const EntitySuggesterFull: React.FC<
         },
         newCreated.entityClass,
         newCreated.label,
-        newCreated.detail
+        newCreated.detail,
       );
       entityCreateMutation.mutate(newEntity);
     }
@@ -311,29 +311,29 @@ const EntitySuggesterFull: React.FC<
 
   const [showAddTerritoryModal, setShowAddTerritoryModal] = useState(false);
   const [tempTemplateToInstantiate, setTempTemplateToInstantiate] = useState<ITerritory | false>(
-    false
+    false,
   );
 
   const instantiateTerritory = async (
     territoryToInst: ITerritory,
-    territoryParentId?: string
+    territoryParentId?: string,
   ): Promise<IEntity | false> => {
     return await InstTemplate(
       territoryToInst,
       localStorage.getItem("userrole") as UserEnums.Role,
-      territoryParentId
+      territoryParentId,
     );
   };
 
   const handleInstantiateTemplate = async (
-    templateToDuplicate: IEntity | IStatement | ITerritory
+    templateToDuplicate: IEntity | IStatement | ITerritory,
   ) => {
     let newEntity: IEntity | false;
     if (templateToDuplicate.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
         newEntity = await instantiateTerritory(
           templateToDuplicate as ITerritory,
-          territoryParentId
+          territoryParentId,
         );
       } else {
         setTempTemplateToInstantiate(templateToDuplicate as ITerritory);
@@ -343,7 +343,7 @@ const EntitySuggesterFull: React.FC<
     } else {
       newEntity = await InstTemplate(
         templateToDuplicate,
-        localStorage.getItem("userrole") as UserEnums.Role
+        localStorage.getItem("userrole") as UserEnums.Role,
       );
     }
     if (newEntity) {
@@ -417,7 +417,7 @@ const EntitySuggesterFull: React.FC<
 
     if (excludedEntityClasses.length) {
       filteredSuggestions = filteredSuggestions.filter(
-        (entity) => !excludedEntityClasses.includes(entity.class)
+        (entity) => !excludedEntityClasses.includes(entity.class),
       );
     }
 
@@ -487,7 +487,7 @@ const EntitySuggesterFull: React.FC<
             setShowAddTerritoryModal(false);
             const newEntity = await instantiateTerritory(
               tempTemplateToInstantiate as ITerritory,
-              territoryId
+              territoryId,
             );
             if (newEntity) {
               onSelected(newEntity.id);
@@ -623,8 +623,7 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
           tooltipLabel="Open suggester"
           icon={<LuScanSearch color="black" />}
           color="gray"
-          radiusLeft
-          radiusRight
+          shape="rounded-lg"
           size={ButtonSize.Medium}
           // inverted
           noBorder

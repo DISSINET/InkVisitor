@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import theme, { InvertedBgColor, ThemeColor } from "Theme/theme";
-import { ButtonSize } from "types";
+import { ButtonShape, ButtonSize } from "types";
 
 const getRadius = (
   $radiusLeft?: boolean,
   $radiusRight?: boolean,
-  $shape?: "sharp" | "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full",
+  $shape?: ButtonShape,
 ) => {
   if ($shape === "sharp") {
     return "0";
@@ -77,7 +77,7 @@ interface IButtonStyle {
   $noPadding?: boolean;
   $fullHeight?: boolean;
 
-  $shape?: "sharp" | "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  $shape?: ButtonShape;
   $size: ButtonSize;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({

@@ -106,8 +106,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const thirdPanelRealWidth: number = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelRealWidth,
   );
+  const prevStatementIdRef = useRef(statementId);
   useEffect(() => {
-    if (statementId && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
+    const isNewStatement = prevStatementIdRef.current !== statementId;
+    prevStatementIdRef.current = statementId;
+
+    if (statementId && isNewStatement && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
       setEditorOpened(true);
       dispatch(setEditorBoxState(EditorBoxState.Normal));
     }

@@ -3,7 +3,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
 import React, { KeyboardEvent, MouseEventHandler, ReactElement, useState } from "react";
-import { ButtonSize } from "types";
+import { ButtonShape, ButtonSize } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 interface ButtonProps {
@@ -34,7 +34,7 @@ interface ButtonProps {
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
   noPadding?: boolean;
-  shape?: "sharp" | "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  shape?: ButtonShape;
 }
 
 export const Button: React.FC<ButtonProps> = ({

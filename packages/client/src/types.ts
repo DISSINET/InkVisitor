@@ -435,6 +435,16 @@ export enum ButtonSize {
   ExtraLarge = "XL",
 }
 
+export type ButtonShape =
+  | "sharp"
+  | "square"
+  | "circle"
+  | "rounded-sm"
+  | "rounded-md"
+  | "rounded-lg"
+  | "rounded-xl"
+  | "rounded-full";
+
 export enum DetailBoxState {
   Minimized = "minimized",
   Normal = "normal",

@@ -115,6 +115,7 @@ export const StyledSearchResults = styled.div<StyledSearchResults>`
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
   flex-wrap: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "wrap" : "nowrap")};
+  min-width: 4rem;
   margin: 0 0.2rem;
 `;
 
