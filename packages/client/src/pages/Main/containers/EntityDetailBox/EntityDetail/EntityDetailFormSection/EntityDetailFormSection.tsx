@@ -199,7 +199,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                       setSelectedEntityType(selectedOption);
                       setShowTypeSubmit(true);
                     }}
-                    width={200}
+                    width="full"
                     disableTyping
                   />
                 </StyledRelativePosition>

@@ -349,14 +349,21 @@ export const EntitySearchBox: React.FC = () => {
                 changeOnType
                 onChangeFn={(value: string) => handleChange({ labelOrId: value })}
                 clearable
+                rightContent={
+                  <>
+                    {userRole !== UserEnums.Role.Viewer && (
+                      <Button
+                        tooltipLabel="create entity"
+                        icon={<FaPlus />}
+                        onClick={() => setShowEntityCreateModal(true)}
+                        noBackground
+                        noBorder
+                        inverted
+                      />
+                    )}
+                  </>
+                }
               />
-              {userRole !== UserEnums.Role.Viewer && (
-                <Button
-                  tooltipLabel="create entity"
-                  icon={<FaPlus />}
-                  onClick={() => setShowEntityCreateModal(true)}
-                />
-              )}
             </div>
           </StyledRow>
 

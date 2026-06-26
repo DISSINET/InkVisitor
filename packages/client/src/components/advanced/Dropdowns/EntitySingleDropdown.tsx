@@ -67,17 +67,14 @@ export const EntitySingleDropdown = <T extends string>({
       autoFocus={autoFocus}
       loggerId={loggerId}
       customComponents={{
-        Option: (props: any) => (
-          <Option {...props} disableTooltip={disableTooltip} />
-        ),
+        Option: (props: any) => <Option {...props} disableTooltip={disableTooltip} />,
       }}
     />
   );
 
   // The suggester renders its own TypeBar inside the grouped layout, so skip it
   // here to avoid duplicates.
-  const typeBarVisible =
-    showTypeBar && !suggester && !!EntityColors[value as string];
+  const typeBarVisible = showTypeBar && !suggester && !!EntityColors[value as string];
 
   if (!typeBarVisible) {
     return dropdown;
@@ -86,7 +83,7 @@ export const EntitySingleDropdown = <T extends string>({
   return (
     <StyledEntityDropdownWrap $fullWidth={width === "full"}>
       {dropdown}
-      <TypeBar entityLetter={value as keyof typeof EntityColors} noMargin />
+      <TypeBar entityLetter={value as keyof typeof EntityColors} noMargin width={4} />
     </StyledEntityDropdownWrap>
   );
 };
@@ -96,8 +93,7 @@ const Option = ({
   ...props
 }: OptionProps<any> & { disableTooltip?: boolean }): React.ReactElement => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
 
   return (
     <components.Option {...props}>
@@ -113,11 +109,7 @@ const Option = ({
         props.data.value !== EntityEnums.Extension.Any &&
         props.data.value !== "" && (
           <Tooltip
-            label={
-              entitiesDictKeys[
-                props.data.value as keyof typeof entitiesDictKeys
-              ]?.label
-            }
+            label={entitiesDictKeys[props.data.value as keyof typeof entitiesDictKeys]?.label}
             visible={showTooltip}
             referenceElement={referenceElement}
             position="left"
