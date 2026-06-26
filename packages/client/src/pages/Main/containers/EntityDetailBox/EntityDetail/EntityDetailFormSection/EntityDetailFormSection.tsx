@@ -134,7 +134,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           ? [rootTerritoryId, entity.data.parent.territoryId]
           : [rootTerritoryId]
         : [],
-    [entity.class, entity.data.parent?.territoryId]
+    [entity.class, entity.data.parent?.territoryId],
   );
 
   const queryClient = useQueryClient();
@@ -322,10 +322,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         placeholder="move"
                         disableTemplatesAccept
                         filterEditorRights
-                        inputWidth={
-                          80
-                          // selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
-                        }
+                        inputWidth={"full"}
                         disableCreate
                         categoryTypes={[EntityEnums.Class.Territory]}
                         onPicked={(selectedEntity) => {
@@ -338,7 +335,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                             icon={<TbHomeMove size={14} />}
                             onClick={() => setShowTActionModal(true)}
                             tooltipLabel="move current territory"
-                            shape="sharp"
+                            noBackground
+                            noBorder
+                            inverted
                           />
                         }
                       />

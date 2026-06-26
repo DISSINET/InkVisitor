@@ -12,32 +12,39 @@ export const StyledSuggester = styled.div<StyledSuggester>`
   display: ${({ $fullWidth }) => ($fullWidth ? "flex" : "inline-flex")};
 
   margin-top: ${({ $marginTop }) => ($marginTop ? space2 : 0)};
-
-  input[type="text"] {
-    border-width: ${({ $isFocused }) => ($isFocused ? "2px" : "1px")};
-  }
-  .react-select__control {
-    border-width: ${({ $isFocused }) =>
-      $isFocused ? "2px !important" : "1px"};
-  }
 `;
 
 interface Column {}
 interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
+  $isFocused?: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
+  position: relative;
   display: flex;
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
   height: 2.5rem;
-  /* Round the whole suggester as a single group; inner segments stay square and
-     are clipped to the rounded shape so it matches the buttons/inputs/dropdowns. */
+  /* The whole suggester reads as a single rounded, bordered group. Inner segments
+     are borderless and clipped to the rounded shape; the hover/focus highlight
+     lives here on the outer (visible) edge. */
+  background-color: ${({ theme }) => theme.color["white"]};
+  border-style: solid;
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.color["gray"]["400"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
-  input[type="text"] {
-    border-left-width: 0;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.color.info};
+  }
+
+  /* Neutralize inner element borders; the TypeBar and the trailing button divider
+     provide the internal separators. */
+  input[type="text"],
+  .react-select__control {
+    border-color: transparent !important;
   }
   select {
     border-right-width: 0;

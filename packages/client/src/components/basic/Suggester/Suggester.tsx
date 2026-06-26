@@ -356,6 +356,7 @@ export const Suggester: React.FC<Suggester> = ({
           ref={dropRef}
           $hasButton={!disableCreate}
           $isOver={isOver}
+          $isFocused={isFocused}
         >
           <Dropdown.Single.Entity
             value={category}
@@ -376,7 +377,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
-          <TypeBar entityLetter={category} />
+          <TypeBar entityLetter={category} noMargin />
 
           <div
             ref={(node) => {
@@ -410,27 +411,25 @@ export const Suggester: React.FC<Suggester> = ({
               fullHeight
               clearable
               rightContent={
-                !disableCreate || button ? (
-                  <>
-                    {!disableCreate && (
-                      <IconButton
-                        icon={<FaPlus />}
-                        tooltipLabel="create new entity"
-                        color="primary"
-                        noBackground
-                        noBorder
-                        onClick={() => {
-                          handleAddBtnClick();
-                        }}
-                        disabled={disabled}
-                      />
-                    )}
-                    {button}
-                  </>
+                !disableCreate ? (
+                  <IconButton
+                    icon={<FaPlus />}
+                    tooltipLabel="create new entity"
+                    color="primary"
+                    noBackground
+                    noBorder
+                    onClick={() => {
+                      handleAddBtnClick();
+                    }}
+                    disabled={disabled}
+                  />
                 ) : undefined
               }
             />
           </div>
+
+          {/* External action button as a flush trailing segment (e.g. move territory) */}
+          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
