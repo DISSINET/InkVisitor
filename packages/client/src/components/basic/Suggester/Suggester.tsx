@@ -1,20 +1,9 @@
-import {
-  FloatingPortal,
-  autoUpdate,
-  flip,
-  useFloating,
-} from "@floating-ui/react";
+import { FloatingPortal, autoUpdate, flip, useFloating } from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
-import {
-  IconButton,
-  Input,
-  Loader,
-  TemplateActionModal,
-  TypeBar,
-} from "components";
+import { IconButton, Input, Loader, TemplateActionModal, TypeBar } from "components";
 import Dropdown from "components/advanced";
 import { useTheme } from "hooks";
 import useKeypress from "hooks/useKeyPress";
@@ -39,10 +28,7 @@ import {
   StyledSuggesterList,
   SuggesterHidden,
 } from "./SuggesterStyles";
-import {
-  SuggestionRowEntityRow,
-  SuggestionRowEntityItemData,
-} from "./SuggestionRow/SuggestionRow";
+import { SuggestionRowEntityRow, SuggestionRowEntityItemData } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
   marginTop?: boolean;
@@ -61,9 +47,7 @@ interface Suggester {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (
-    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
-  ) => void;
+  onChangeCategory: (selectedOption: EntityEnums.Class | EntityEnums.Extension.Any) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -139,16 +123,14 @@ export const Suggester: React.FC<Suggester> = ({
   const [isHovered, setIsHovered] = useState(false);
 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
-    false
-  );
+  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(false);
 
   useKeypress(
     "Escape",
     () => {
       if (!showCreateModal && isFocused) onCancel();
     },
-    [showCreateModal, isFocused]
+    [showCreateModal, isFocused],
   );
 
   const inputRef = useRef<HTMLDivElement>(null);
@@ -360,11 +342,7 @@ export const Suggester: React.FC<Suggester> = ({
         >
           <Dropdown.Single.Entity
             value={category}
-            options={
-              disableWildCard
-                ? [...categories]
-                : [dropdownWildCard, ...categories]
-            }
+            options={disableWildCard ? [...categories] : [dropdownWildCard, ...categories]}
             onChange={onChangeCategory}
             width={36}
             onFocus={() => {
@@ -377,7 +355,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
-          <TypeBar entityLetter={category} noMargin />
+          <TypeBar entityLetter={category} noMargin width={4} />
 
           <div
             ref={(node) => {
@@ -460,8 +438,7 @@ export const Suggester: React.FC<Suggester> = ({
                   </StyledRelativePosition>
                   <SuggesterKeyPress
                     onArrowDown={() => {
-                      if (selected < suggestions.length - 1)
-                        setSelected(selected + 1);
+                      if (selected < suggestions.length - 1) setSelected(selected + 1);
                     }}
                     onArrowUp={() => {
                       if (selected > -1) setSelected(selected - 1);
@@ -480,8 +457,7 @@ export const Suggester: React.FC<Suggester> = ({
                   </StyledRelativePosition>
                   <SuggesterKeyPress
                     onArrowDown={() => {
-                      if (selected < preSuggestions.length - 1)
-                        setSelected(selected + 1);
+                      if (selected < preSuggestions.length - 1) setSelected(selected + 1);
                     }}
                     onArrowUp={() => {
                       if (selected > -1) setSelected(selected - 1);
