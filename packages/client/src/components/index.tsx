@@ -1,6 +1,7 @@
 import { AttributeIcon } from "./basic/AttributeIcon/AttributeIcon";
 import { Box } from "./basic/Box/Box";
 import { Button } from "./basic/Button/Button";
+import { IconButton } from "./basic/Button/IconButton";
 import { ButtonGroup, ButtonGroups, SwitchGroup } from "./basic/ButtonGroup/ButtonGroup";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Cloud } from "./basic/Cloud/Cloud";
@@ -60,6 +61,7 @@ export {
   Dropzone,
   ErrorBoundary,
   Header,
+  IconButton,
   IconButtonGroup,
   IconFont,
   IconWithTooltip,

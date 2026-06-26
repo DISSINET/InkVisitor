@@ -1,10 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Box, Button, ButtonGroup, Panel, SwitchGroup } from "components";
+import { Box, Button, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { BiBarChartAlt2, BiRefresh, BiSearch, BiTable } from "react-icons/bi";
@@ -12,35 +14,33 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
-import { useUserQuery } from "hooks/react-query";
-import { UserEnums } from "@inkvisitor/shared/enums";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
+import {
+  QUERY_BUILDER_MIN_HEIGHT,
+  QUERY_LEFT_PANEL_MIN_WIDTH,
+  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
+  QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QUERY_SEARCH_PANEL_MIN_HEIGHT,
+} from "./constants";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableIdsFilter";
 import ExplorerTableLabelFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableLabelFilter";
-import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import {
   defaultExploreStatsParams,
   ExploreActionType,
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
+import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
-import {
-  QUERY_LEFT_PANEL_MIN_WIDTH,
-  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
-  QUERY_RIGHT_PANEL_MIN_WIDTH,
-  QUERY_BUILDER_MIN_HEIGHT,
-  QUERY_SEARCH_PANEL_MIN_HEIGHT,
-} from "./constants";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
-import { ButtonSize } from "types";
+
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
@@ -534,9 +534,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
                 />,
-                <Button
+                <IconButton
                   key="toggle-query-left-panel"
-                  inverted
                   tooltipLabel="collapse left panel"
                   icon={<RiMenuFoldFill />}
                   onClick={toggleQueryLeftPanel}
@@ -568,36 +567,42 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               borderColor="white"
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
-              buttons={[
-                <SwitchGroup key="explorer-view-mode">
+              headerComponent={
+                <SwitchGroup key="explorer-view-mode" style={{ marginRight: "2rem" }}>
                   <Button
                     tooltipLabel="table view"
                     label="table"
+                    shape="rounded-sm"
+                    noBorder
                     inverted={isStatsView}
+                    noBackground={isStatsView}
+                    color={isStatsView ? "greyer" : "primary"}
                     icon={<BiTable />}
                     onClick={() => setExploreViewMode(Explore.EViewMode.Table)}
                   />
                   <Button
                     tooltipLabel="stats view"
                     label="stats"
+                    shape="rounded-sm"
+                    noBorder
                     inverted={!isStatsView}
+                    noBackground={!isStatsView}
+                    color={!isStatsView ? "greyer" : "primary"}
                     icon={<BiBarChartAlt2 />}
                     onClick={() => setExploreViewMode(Explore.EViewMode.Stats)}
                   />
-                </SwitchGroup>,
-                <Button
+                </SwitchGroup>
+              }
+              buttons={[
+                <IconButton
                   key="refresh queries"
                   tooltipLabel="refresh data"
-                  inverted
                   icon={<BiRefresh />}
                   onClick={handleInvalidateQuery}
-                  shape="square"
-                  size={ButtonSize.Small}
                 />,
-                <Button
+                <IconButton
                   key="maximize-explorer-box"
                   dataTestId="maximize-explorer-box"
-                  inverted
                   tooltipLabel={
                     isExplorerAtMaxHeight ? "restore half height" : "maximize explorer box"
                   }
@@ -609,17 +614,12 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     )
                   }
                   onClick={toggleExplorerBoxMaximized}
-                  shape="square"
-                  size={ButtonSize.Small}
                 />,
-                <Button
+                <IconButton
                   key="toggle-query-left-panel"
-                  inverted
                   tooltipLabel="collapse left panel"
                   icon={<RiMenuFoldFill />}
                   onClick={toggleQueryLeftPanel}
-                  shape="square"
-                  size={ButtonSize.Small}
                 />,
               ]}
             >
@@ -650,9 +650,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             isExpanded={false}
             onHeaderClick={toggleQueryLeftPanel}
             buttons={[
-              <Button
+              <IconButton
                 key="toggle-query-left-panel"
-                inverted
                 tooltipLabel="expand query panel"
                 icon={<RiMenuUnfoldFill />}
                 onClick={toggleQueryLeftPanel}
@@ -673,17 +672,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             buttons={[
               <>
                 {queryDetailPanelExpanded && (
-                  <Button
-                    inverted
+                  <IconButton
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={clearAllDetailIds}
                   />
                 )}
               </>,
-              <Button
+              <IconButton
                 key="toggle-query-detail-panel"
-                inverted
                 tooltipLabel={
                   queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"
                 }

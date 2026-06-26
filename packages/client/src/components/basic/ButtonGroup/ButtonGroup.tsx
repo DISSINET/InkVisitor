@@ -17,7 +17,7 @@ export const ButtonGroup = styled.div.attrs({
   margin-bottom: ${({ $marginBottom, theme }) => ($marginBottom ? theme.space[2] : "")};
   > button:not(:last-child),
   > span:not(:last-child) {
-    margin-right: ${({ $noMarginRight }) => ($noMarginRight ? 0 : "0.6rem")};
+    margin-right: ${({ $noMarginRight }) => ($noMarginRight ? 0 : "0.5rem")};
   }
 `;
 
@@ -28,7 +28,7 @@ export const SwitchGroup = styled.div<SwitchGroup>`
   display: inline-flex;
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   align-items: center;
-  gap: 0;
+  gap: 0.15rem;
   padding: 0.25rem;
   background-color: ${({ theme }) => theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
