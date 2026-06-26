@@ -2,11 +2,7 @@ import { Checkbox } from "components";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
-import {
-  edgeTypesImplemented,
-  INodeItem,
-  QueryValidityProblem,
-} from "../../types";
+import { edgeTypesImplemented, INodeItem, QueryValidityProblem } from "../../types";
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
@@ -132,7 +128,9 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             // a negative edge tints its own box red; this is scoped to the edge
             // itself (its level), not its target node or deeper edges
             backgroundColor: lineColor,
+            borderRadius: theme.borderRadius["default"],
             padding: theme.space[1],
+            paddingLeft: theme.space[2],
             marginTop: 10,
           }}
         >

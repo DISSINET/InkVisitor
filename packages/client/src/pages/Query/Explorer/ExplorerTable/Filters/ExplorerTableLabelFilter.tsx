@@ -60,20 +60,22 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         clearable
         roundCorners
         icon={<LuSearch size={14} />}
+        rightContent={
+          <StyledLabelFilterCheckboxWrapper>
+            <Checkbox
+              iconOnly
+              value={useRegex}
+              onChangeFn={(checked: boolean) => {
+                setUseRegex(checked);
+                dispatchFilter(inputValue, checked);
+              }}
+              icon={<LuRegex size={14} />}
+              tooltipLabel="regex mode"
+              tooltipPosition="top"
+            />
+          </StyledLabelFilterCheckboxWrapper>
+        }
       />
-      <StyledLabelFilterCheckboxWrapper>
-        <Checkbox
-          iconOnly
-          value={useRegex}
-          onChangeFn={(checked: boolean) => {
-            setUseRegex(checked);
-            dispatchFilter(inputValue, checked);
-          }}
-          icon={<LuRegex size={14} />}
-          tooltipLabel="regex mode"
-          tooltipPosition="top"
-        />
-      </StyledLabelFilterCheckboxWrapper>
     </StyledLabelFilter>
   );
 };
