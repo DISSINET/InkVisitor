@@ -1,5 +1,5 @@
 import theme, { ThemeColor, ThemeFontSize } from "Theme/theme";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MdCancel, MdCheck, MdClose } from "react-icons/md";
 import {
   Label,
@@ -10,9 +10,11 @@ import {
   StyledActionButtonGroup,
   StyledActionButton,
   StyledIconWrapper,
+  StyledRightContent,
 } from "./InputStyles";
-import { IconWithTooltip } from "components";
+import { IconWithTooltip, Tooltip } from "components";
 import { DatePicker } from "../DatePicker/DatePicker";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 
 interface Input {
   label?: string;
@@ -60,6 +62,9 @@ interface Input {
   inputRef?: React.RefObject<HTMLInputElement | null>;
 
   icon?: React.ReactNode;
+  rightContent?: React.ReactNode;
+  tooltipLabel?: string;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
 }
 
 export const Input: React.FC<Input> = ({
@@ -87,7 +92,7 @@ export const Input: React.FC<Input> = ({
 
   fullHeightTextArea = false,
   fontSizeTextArea = "xs",
-  roundCorners = false,
+  roundCorners = true,
 
   autocomplete = "",
   required = false,
@@ -99,11 +104,36 @@ export const Input: React.FC<Input> = ({
   max,
   inputRef,
   icon,
+  rightContent,
+  tooltipLabel,
+  tooltipPosition = "top",
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
     setDisplayValue(value);
   }, [value]);
+
+  // Measure rightContent so the input reserves matching right padding (its width
+  // is dynamic, e.g. a variable number of icon checkboxes) and the clearable
+  // button can be offset to sit left of it.
+  const rightContentRef = useRef<HTMLDivElement>(null);
+  const [rightContentWidth, setRightContentWidth] = useState(0);
+  useEffect(() => {
+    if (!rightContentRef.current) {
+      setRightContentWidth(0);
+      return;
+    }
+    const el = rightContentRef.current;
+    const observer = new ResizeObserver(() => {
+      setRightContentWidth(el.offsetWidth);
+    });
+    observer.observe(el);
+    setRightContentWidth(el.offsetWidth);
+    return () => observer.disconnect();
+  }, [rightContent]);
+
+  const [tooltipReferenceEl, setTooltipReferenceEl] = useState<HTMLDivElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <StyledWrapper
@@ -118,7 +148,12 @@ export const Input: React.FC<Input> = ({
         </Label>
       )}
       {(type === "text" || type === "password") && (
-        <div style={{ position: "relative", width: "100%", display: "flex" }}>
+        <div
+          ref={setTooltipReferenceEl}
+          style={{ position: "relative", width: "100%", display: "flex" }}
+          onMouseEnter={() => tooltipLabel && setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
           <StyledInput
             $roundCorners={roundCorners}
             ref={inputRef}
@@ -161,7 +196,10 @@ export const Input: React.FC<Input> = ({
                   return;
               }
             }}
-            onFocus={(event: React.FocusEvent<HTMLInputElement>) => onFocus(event)}
+            onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
+              setShowTooltip(false);
+              onFocus(event);
+            }}
             onBlur={() => {
               if (displayValue !== value && !changeOnType) {
                 onChangeFn(displayValue);
@@ -174,12 +212,26 @@ export const Input: React.FC<Input> = ({
             $autocomplete={autocomplete}
             required={required}
             $iconCount={clearable && displayValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
+            $rightPadding={
+              rightContentWidth
+                ? rightContentWidth + 2 + (clearable && displayValue.length > 0 ? 18 : 0)
+                : undefined
+            }
           />
 
           {icon && <StyledIconWrapper>{icon}</StyledIconWrapper>}
 
+          {rightContent && (
+            <StyledRightContent
+              ref={rightContentRef}
+              $showDivider={clearable && displayValue.length > 0}
+            >
+              {rightContent}
+            </StyledRightContent>
+          )}
+
           {displayValue.length > 0 && clearable && (
-            <StyledClearableInputButton>
+            <StyledClearableInputButton $rightOffset={rightContentWidth}>
               <MdCancel
                 size={15}
                 onClick={() => {
@@ -231,6 +283,15 @@ export const Input: React.FC<Input> = ({
               )}
             </StyledActionButtonGroup>
           )}
+
+          {tooltipLabel && (
+            <Tooltip
+              label={tooltipLabel}
+              visible={showTooltip}
+              referenceElement={tooltipReferenceEl}
+              position={tooltipPosition}
+            />
+          )}
         </div>
       )}
       {type === "textarea" && (
@@ -262,6 +323,7 @@ export const Input: React.FC<Input> = ({
           $suggester={suggester}
           $fontSizeTextArea={fontSizeTextArea}
           $borderColor={borderColor}
+          $roundCorners={roundCorners}
         />
       )}
       {(type === "datetime-local" || type === "date") && (

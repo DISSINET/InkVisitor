@@ -34,6 +34,7 @@ export interface StyledSelect {
   loggerId?: string;
   limitSelectedItems?: number;
   shortLabel?: boolean;
+  roundCorners?: boolean;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
@@ -56,7 +57,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border-color: ${({ theme, suggester }) =>
       suggester ? theme.color["black"] : theme.color["gray"]["400"]};
     border-right: ${({ suggester }) => (suggester ? "none" : "")};
-    border-radius: 0;
+    border-radius: ${({ theme, roundCorners }) =>
+      roundCorners ? theme.borderRadius["input"] : "0"};
     background-color: ${({ theme, entityDropdown, suggester }) =>
       entityDropdown && suggester ? theme.color["gray"][200] : theme.color["white"]};
     &:hover {

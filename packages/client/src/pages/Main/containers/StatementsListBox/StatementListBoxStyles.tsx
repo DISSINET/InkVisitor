@@ -26,7 +26,6 @@ export const StyledDots = styled.p`
   cursor: default;
 `;
 
-
 export const StyledSelectorCell = styled.div`
   cursor: pointer;
   margin: -0.5em 0em;
@@ -77,16 +76,14 @@ export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
-  margin-left: ${({ $marginLeft }) =>
-    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ $marginLeft }) => ($marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0")};
 `;
 
 export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
-  margin-left: ${({ $marginLeft }) =>
-    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ $marginLeft }) => ($marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0")};
   justify-content: center;
   height: 3rem;
 `;
@@ -105,11 +102,6 @@ export const StyledSearchContainer = styled.div`
   user-select: none;
 `;
 
-export const StyledSearchIcon = styled.div`
-  display: flex;
-  flex-shrink: 0;
-`;
-
 interface StyledSearchResults {
   $annotatorWidthTooNarrow?: boolean;
 }
@@ -122,8 +114,7 @@ export const StyledSearchResults = styled.div<StyledSearchResults>`
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
-  flex-wrap: ${({ $annotatorWidthTooNarrow }) =>
-    $annotatorWidthTooNarrow ? "wrap" : "nowrap"};
+  flex-wrap: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "wrap" : "nowrap")};
   margin: 0 0.2rem;
 `;
 

@@ -15,6 +15,7 @@ interface IValueStyle {
   $iconCount?: number;
   $roundCorners?: boolean;
   $icon?: React.ReactNode;
+  $rightPadding?: number;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -65,7 +66,9 @@ export const StyledInput = styled.input<IValueStyle>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme, $icon }) => ($icon ? "2.4rem" : theme.space[2])};
 
-  padding-right: ${({ theme, $iconCount }) => {
+  padding-right: ${({ theme, $iconCount, $rightPadding }) => {
+    // Explicit pixel padding (e.g. measured rightContent width) wins.
+    if ($rightPadding) return `${$rightPadding}px`;
     if (!$iconCount) return theme.space[1];
     // 1 icon = space[7], 2 icons = space[10]
     return $iconCount === 1 ? theme.space[7] : theme.space[14];
@@ -145,6 +148,7 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
+  border-radius: ${({ $roundCorners, theme }) => ($roundCorners ? theme.borderRadius.input : "0")};
 
   &:focus {
     outline: 0;
@@ -156,10 +160,12 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   }
 `;
 
-interface StyledClearableInputButton {}
+interface StyledClearableInputButton {
+  $rightOffset?: number;
+}
 export const StyledClearableInputButton = styled.div<StyledClearableInputButton>`
   position: absolute;
-  right: 0.25rem;
+  right: ${({ $rightOffset }) => ($rightOffset ? `${$rightOffset + 7}px` : "0.25rem")};
   display: flex;
   cursor: pointer;
   top: 50%;
@@ -211,4 +217,17 @@ export const StyledIconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.color["gray"][500]};
+`;
+
+export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
+  position: absolute;
+  right: 0.25rem;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding-left: ${({ $showDivider }) => ($showDivider ? "0.3rem" : "0")};
+  border-left: ${({ theme, $showDivider }) =>
+    $showDivider ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
 `;

@@ -13,14 +13,13 @@ import { LuCaseSensitive, LuRegex, LuReplace, LuReplaceAll, LuWholeWord } from "
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
+import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 import {
   StyledSearchContainer,
-  StyledSearchIcon,
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
 import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
-import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 
 interface AnnotatorSearchLine {
   searchTerm: string;
@@ -314,86 +313,82 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
       {isSearchAllowed && (
         <>
           <StyledSearchContainer>
-            <StyledSearchIcon>
-              <IconWithTooltip
-                icon={<BiSearch size={18} color={theme.color.info} />}
-                tooltipLabel="ctrl + f to search"
-                tooltipPosition="left"
-              />
-            </StyledSearchIcon>
-
             <Input
               value={searchTerm}
               onChangeFn={(newText: string) => {
                 setSearchTerm(newText);
               }}
               changeOnType
-              width={annotatorWidthTooNarrow ? 100 : 130}
-              minWidth={50}
+              width={annotatorWidthTooNarrow ? 200 : 230}
+              minWidth={140}
               inputRef={searchInputRef}
-              clearable
+              roundCorners
+              icon={<BiSearch />}
+              placeholder="search"
+              tooltipLabel="ctrl+f to search"
+              rightContent={
+                <StyledCheckboxWrapper>
+                  <Checkbox
+                    iconOnly
+                    value={isCaseSensitiveMode}
+                    onChangeFn={(checked: boolean) => {
+                      setIsCaseSensitiveMode(checked);
+                    }}
+                    onClickFn={() => {
+                      searchInputRef.current?.focus();
+                    }}
+                    icon={<LuCaseSensitive size={16} />}
+                    tooltipLabel="case sensitive mode"
+                    tooltipPosition="top"
+                  />
+                  {annotatorMode === EditMode.HIGHLIGHT && (
+                    <Checkbox
+                      iconOnly
+                      value={isExtendToWholeWordMode}
+                      onChangeFn={(checked: boolean) => {
+                        setIsExtendToWholeWordMode(checked);
+                      }}
+                      onClickFn={() => {
+                        searchInputRef.current?.focus();
+                      }}
+                      icon={<FaExpand size={12} />}
+                      tooltipLabel="extend to whole word(s)"
+                      tooltipPosition="top"
+                    />
+                  )}
+
+                  {annotatorMode !== EditMode.HIGHLIGHT && (
+                    <Checkbox
+                      iconOnly
+                      value={isWholeWordOnlyMode}
+                      onChangeFn={(checked: boolean) => {
+                        setIsWholeWordOnlyMode(checked);
+                      }}
+                      onClickFn={() => {
+                        searchInputRef.current?.focus();
+                      }}
+                      icon={<LuWholeWord size={16} />}
+                      tooltipLabel="whole word only"
+                      tooltipPosition="top"
+                    />
+                  )}
+
+                  <Checkbox
+                    iconOnly
+                    value={isRegexMode}
+                    onChangeFn={(checked: boolean) => {
+                      setIsRegexMode(checked);
+                    }}
+                    onClickFn={() => {
+                      searchInputRef.current?.focus();
+                    }}
+                    icon={<LuRegex size={14} />}
+                    tooltipLabel="regex mode"
+                    tooltipPosition="top"
+                  />
+                </StyledCheckboxWrapper>
+              }
             />
-
-            <StyledCheckboxWrapper>
-              <Checkbox
-                iconOnly
-                value={isCaseSensitiveMode}
-                onChangeFn={(checked: boolean) => {
-                  setIsCaseSensitiveMode(checked);
-                }}
-                onClickFn={() => {
-                  searchInputRef.current?.focus();
-                }}
-                icon={<LuCaseSensitive size={16} />}
-                tooltipLabel="case sensitive mode"
-                tooltipPosition="top"
-              />
-              {annotatorMode === EditMode.HIGHLIGHT && (
-                <Checkbox
-                  iconOnly
-                  value={isExtendToWholeWordMode}
-                  onChangeFn={(checked: boolean) => {
-                    setIsExtendToWholeWordMode(checked);
-                  }}
-                  onClickFn={() => {
-                    searchInputRef.current?.focus();
-                  }}
-                  icon={<FaExpand size={12} />}
-                  tooltipLabel="extend to whole word(s)"
-                  tooltipPosition="top"
-                />
-              )}
-
-              {annotatorMode !== EditMode.HIGHLIGHT && (
-                <Checkbox
-                  iconOnly
-                  value={isWholeWordOnlyMode}
-                  onChangeFn={(checked: boolean) => {
-                    setIsWholeWordOnlyMode(checked);
-                  }}
-                  onClickFn={() => {
-                    searchInputRef.current?.focus();
-                  }}
-                  icon={<LuWholeWord size={16} />}
-                  tooltipLabel="whole word only"
-                  tooltipPosition="top"
-                />
-              )}
-
-              <Checkbox
-                iconOnly
-                value={isRegexMode}
-                onChangeFn={(checked: boolean) => {
-                  setIsRegexMode(checked);
-                }}
-                onClickFn={() => {
-                  searchInputRef.current?.focus();
-                }}
-                icon={<LuRegex size={14} />}
-                tooltipLabel="regex mode"
-                tooltipPosition="top"
-              />
-            </StyledCheckboxWrapper>
 
             {searchOccurences !== null && (
               <StyledSearchResults $annotatorWidthTooNarrow={annotatorWidthTooNarrow}>

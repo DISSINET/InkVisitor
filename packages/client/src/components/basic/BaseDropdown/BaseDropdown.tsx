@@ -58,6 +58,7 @@ interface BaseDropdown {
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
   loading?: boolean;
+  roundCorners?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -90,6 +91,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   closeMenuOnSelect = true,
   shortLabel = false,
   loading = false,
+  roundCorners = true,
 }) => {
   const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
@@ -130,6 +132,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
+          roundCorners={roundCorners}
           userDropdown={userDropdown}
           wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
           className="react-select-container"
