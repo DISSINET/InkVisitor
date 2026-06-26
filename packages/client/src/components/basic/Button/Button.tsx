@@ -1,17 +1,8 @@
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
-import React, {
-  KeyboardEvent,
-  MouseEventHandler,
-  ReactElement,
-  useState,
-} from "react";
+import React, { KeyboardEvent, MouseEventHandler, ReactElement, useState } from "react";
 import { ButtonSize } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
@@ -43,12 +34,12 @@ interface ButtonProps {
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
   noPadding?: boolean;
-  shape?: "square" | "circle";
+  shape?: "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
 }
 
 export const Button: React.FC<ButtonProps> = ({
   size = ButtonSize.Small,
-  shape = undefined,
+  shape = "rounded-sm",
   tooltipLabel,
   tooltipContent,
   label = "",
@@ -75,8 +66,7 @@ export const Button: React.FC<ButtonProps> = ({
   dataTestId,
   noPadding = false,
 }) => {
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLButtonElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
