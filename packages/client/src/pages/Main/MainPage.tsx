@@ -741,14 +741,26 @@ const MainPage: React.FC<MainPage> = ({}) => {
             )}
           </>
         ) : (
-          <Box
-            height={contentHeight}
-            label="Statements"
-            borderColor="white"
-            isExpanded={false}
-            buttons={[secondPanelButton()]}
-            onHeaderClick={toggleSecondPanel}
-          />
+          <>
+            <Box
+              height={getStatementListBoxHeight()}
+              label="Statements"
+              borderColor="white"
+              isExpanded={false}
+              buttons={[secondPanelButton()]}
+              onHeaderClick={toggleSecondPanel}
+            />
+            {(selectedDetailId || detailIdArray.length > 0) && (
+              <Box
+                height={getDetailBoxHeight()}
+                label="Detail"
+                borderColor="white"
+                isExpanded={false}
+                buttons={[secondPanelButton()]}
+                onHeaderClick={toggleSecondPanel}
+              />
+            )}
+          </>
         )}
         {showEntityCreateModal && (
           <EntityCreateModal
