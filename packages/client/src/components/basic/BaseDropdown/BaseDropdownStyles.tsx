@@ -87,6 +87,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__single-value {
     font-size: ${({ theme }) => theme.fontSize["xs"]};
+    font-weight: ${({ theme, entityDropdown }) =>
+      entityDropdown ? theme.fontWeight["bold"] : ""};
     top: 50%;
     margin-left: ${({ theme, entityDropdown, wildCardChar }) =>
       entityDropdown && !wildCardChar ? theme.space[3] : theme.space[2]};

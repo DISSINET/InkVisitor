@@ -31,9 +31,9 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
      lives here on the outer (visible) edge. */
   background-color: ${({ theme }) => theme.color["white"]};
   border-style: solid;
-  border-width: 1px;
+  border-width: ${({ $isFocused }) => ($isFocused ? "1px" : "1px")};
   border-color: ${({ theme, $isFocused }) =>
-    $isFocused ? theme.color.info : theme.color["gray"]["400"]};
+    $isFocused ? theme.color.info : theme.color["gray"]["500"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 

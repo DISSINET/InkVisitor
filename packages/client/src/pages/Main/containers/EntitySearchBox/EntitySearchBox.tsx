@@ -385,7 +385,6 @@ export const EntitySearchBox: React.FC = () => {
                       });
                     }}
                   />
-                  <TypeBar entityLetter={classOption} />
                 </div>
               </StyledRow>
             )}

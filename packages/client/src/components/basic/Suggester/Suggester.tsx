@@ -355,7 +355,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
-          <TypeBar entityLetter={category} noMargin width={4} />
+          <TypeBar entityLetter={category} noMargin />
 
           <div
             ref={(node) => {
