@@ -5,9 +5,11 @@ import { ButtonSize } from "types";
 const getRadius = (
   $radiusLeft?: boolean,
   $radiusRight?: boolean,
-  $shape?: "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full",
+  $shape?: "sharp" | "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full",
 ) => {
-  if ($shape === "circle") {
+  if ($shape === "sharp") {
+    return "0";
+  } else if ($shape === "circle") {
     return "50%";
   } else if ($shape === "square") {
     return theme.borderRadius["rounded-sm"];
@@ -75,7 +77,7 @@ interface IButtonStyle {
   $noPadding?: boolean;
   $fullHeight?: boolean;
 
-  $shape?: "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  $shape?: "sharp" | "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
   $size: ButtonSize;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({

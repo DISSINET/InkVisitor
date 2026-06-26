@@ -34,7 +34,7 @@ interface ButtonProps {
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
   noPadding?: boolean;
-  shape?: "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
+  shape?: "sharp" | "square" | "circle" | "rounded-sm" | "rounded-md" | "rounded-lg" | "rounded-full";
 }
 
 export const Button: React.FC<ButtonProps> = ({

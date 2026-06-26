@@ -3,9 +3,10 @@ import { Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
+import { StatsChart, StatsTable } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaTimes, FaUndo } from "react-icons/fa";
+import { FaCalendarPlus, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
@@ -24,21 +25,10 @@ import {
   datePickerToIso,
   isoToDatetimePicker,
 } from "../utils";
-import { StatsChart, StatsTable } from "components/advanced";
-import { useUserQuery } from "hooks/react-query";
 
 export const EntitiesTab: React.FC = () => {
   const [state, dispatch] = useReducer(statsReducer, undefined, createEntitiesTabState);
   const [filterDebounceEnabled, setFilterDebounceEnabled] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const fetchStats = useCallback(async (request: IRequestStats, useMaterialized: boolean) => {
-    const response = useMaterialized
-      ? await api.statsMaterializedGet(request)
-      : await api.statsGet(request);
-    return response.data;
-  }, []);
 
   const {
     ref: chartRef,
