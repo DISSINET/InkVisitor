@@ -8,7 +8,7 @@ export const StyledWrapper = styled.div<StyledWrapper>`
   height: ${({ theme, $border }) => ($border ? theme.space[8] : theme.space[8])};
   border: ${({ theme, $border }) =>
     $border ? `${theme.borderWidth[1]} solid ${theme.color["grey"]}` : ""};
-  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   overflow: ${({ $border }) => ($border ? "hidden" : "")};
   background-color: ${({ theme }) => theme.color["white"]};
 `;
