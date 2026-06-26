@@ -33,7 +33,7 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   border-style: solid;
   border-width: ${({ $isFocused }) => ($isFocused ? "1px" : "1px")};
   border-color: ${({ theme, $isFocused }) =>
-    $isFocused ? theme.color.info : theme.color["gray"]["500"]};
+    $isFocused ? theme.color.info : theme.color["gray"]["600"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 
