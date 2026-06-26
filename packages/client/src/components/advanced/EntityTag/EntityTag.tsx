@@ -140,6 +140,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         color={unlinkButton.color ? unlinkButton.color : "plain"}
         inverted
         onClick={unlinkButton.onClick}
+        shape="sharp"
       />
     );
   }, []);

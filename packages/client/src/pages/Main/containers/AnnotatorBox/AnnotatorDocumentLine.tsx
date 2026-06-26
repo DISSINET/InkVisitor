@@ -178,6 +178,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                         }}
                         tooltipLabel="export document"
                         tooltipPosition="top"
+                        shape="sharp"
                       />
                     ) : undefined
                   }

@@ -650,7 +650,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   )}
                   {/* Admin / Owner / Editor with writer rights */}
                   {hasWriteRightsToSelectedTerritory && territoryId && (
-                    <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "1rem" }}>
+                    <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                       <Button
                         key="add"
                         icon={<FaPlus />}
@@ -691,7 +691,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 height={getDetailBoxHeight()}
                 disableScroll
                 buttons={[
-                  <div style={{ marginRight: "1rem" }}>
+                  <>
                     {userRole !== UserEnums.Role.Viewer && (
                       <Button
                         icon={<FaPlus />}
@@ -700,7 +700,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                         tooltipLabel="create new entity"
                       />
                     )}
-                  </div>,
+                  </>,
                   <IconButton
                     dataTestId="maximize-detail-box"
                     tooltipLabel={getMaximizeBtnTooltip()}

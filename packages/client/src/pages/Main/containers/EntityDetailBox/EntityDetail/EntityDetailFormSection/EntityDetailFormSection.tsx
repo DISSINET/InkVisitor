@@ -338,6 +338,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                             icon={<TbHomeMove size={14} />}
                             onClick={() => setShowTActionModal(true)}
                             tooltipLabel="move current territory"
+                            shape="sharp"
                           />
                         }
                       />

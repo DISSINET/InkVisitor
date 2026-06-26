@@ -68,6 +68,7 @@ const Row: React.FC<Row> = ({ data, index, style }) => {
                 tooltipLabel="open statement in editor"
                 color="plain"
                 inverted
+                shape="sharp"
                 icon={<FaEdit />}
                 onClick={() => setStatementId(entity.id)}
               />
