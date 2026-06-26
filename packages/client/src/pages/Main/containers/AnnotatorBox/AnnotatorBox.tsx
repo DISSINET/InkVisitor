@@ -87,7 +87,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     enabled: api.isLoggedIn(),
   });
 
-  const { data: documents } = useQuery<IDocument[]>({
+  const { data: documents } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
       const res = await api.documentsGet({});
@@ -127,14 +127,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     if (resolvedId !== selectedResourceId) {
       dispatch(setSelectedResourceId(resolvedId));
     }
-  }, [
-    resources,
-    documents,
-    territoryId,
-    selectedTerritoryPath,
-    selectedResourceId,
-    dispatch,
-  ]);
+  }, [resources, documents, territoryId, selectedTerritoryPath, selectedResourceId, dispatch]);
 
   const selectedResource = useMemo<IResponseEntity | false>(() => {
     if (selectedResourceId && resources) {

@@ -40,7 +40,7 @@ const changeSectionConfig: Record<ChangeSectionKey, { label: string }> = {
 
 const hiddenChangeSectionKeys = new Set<string>(HIDDEN_DOCUMENT_CHANGE_SECTIONS);
 const changeSectionKeys = (Object.keys(changeSectionConfig) as ChangeSectionKey[]).filter(
-  (key) => !hiddenChangeSectionKeys.has(key)
+  (key) => !hiddenChangeSectionKeys.has(key),
 );
 
 const getSectionLabel = (sectionKey: ChangeSectionKey): string => {
@@ -48,7 +48,7 @@ const getSectionLabel = (sectionKey: ChangeSectionKey): string => {
 };
 
 const getChangeSections = (
-  changes: object
+  changes: object,
 ): Array<{ key: ChangeSectionKey; label: string; anchors: string[] }> => {
   const parsed = changes as Partial<IDocumentAuditAnchorChanges>;
   return changeSectionKeys
@@ -66,7 +66,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
   const sections = useMemo(() => getChangeSections(changes), [changes]);
   const anchorIds = useMemo(
     () => Array.from(new Set(sections.flatMap((section) => section.anchors))),
-    [sections]
+    [sections],
   );
 
   const entityQueries = useQueries({
@@ -90,7 +90,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
         }
         return acc;
       }, {}),
-    [anchorIds, entityQueries]
+    [anchorIds, entityQueries],
   );
 
   if (sections.length === 0) {
@@ -169,9 +169,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
     if (!selectedDocument?.value || !resources) {
       return undefined;
     }
-    return resources.find(
-      (resource) => resource.data.documentId === selectedDocument.value
-    );
+    return resources.find((resource) => resource.data.documentId === selectedDocument.value);
   }, [resources, selectedDocument?.value]);
 
   const documentOptions: DropdownItem[] = useMemo(() => {
@@ -182,7 +180,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
     }));
   }, [dataDocuments]);
 
-  const { data: dataAudits, isLoading: isLoadingAudit } = useQuery<IResponseAudit>({
+  const { data: dataAudits, isLoading: isLoadingAudit } = useQuery({
     queryKey: ["auditByDocument", selectedDocument?.value],
     queryFn: async () => {
       const res = await api.auditGetByDocument(selectedDocument!.value as string, 1000);
@@ -217,7 +215,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
         ),
       },
     ],
-    []
+    [],
   );
 
   const auditTableData: IAudit[] = useMemo(() => {
@@ -246,12 +244,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
             {selectedDocument && (
               <StyledDocumentResourceWrap>
                 {selectedResource ? (
-                  <EntityTag
-                    entity={selectedResource}
-                    disableDoubleClick
-                    disableDrag
-                    fullWidth
-                  />
+                  <EntityTag entity={selectedResource} disableDoubleClick disableDrag fullWidth />
                 ) : (
                   !isLoadingResources && <EmptyEntityTag label="resource" />
                 )}

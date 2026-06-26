@@ -1,8 +1,9 @@
 import { userRoleDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
+import { useUsersGetMoreQuery } from "hooks/react-query";
 import { Button, ButtonGroup, Loader, Submit } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { UserTagSize } from "components/advanced/UserTag/utils";
@@ -85,15 +86,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
-  const { data: users, isFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await api.usersGetMore({});
-      return res.data ?? [];
-    },
-    enabled: api.isLoggedIn(),
-    select: (data) => [...data].sort((a, b) => (a.id > b.id ? 1 : -1)),
-  });
+  const { data: users, isFetching } = useUsersGetMoreQuery();
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
