@@ -23,19 +23,25 @@ export const ButtonGroup = styled.div.attrs({
 
 interface SwitchGroup {
   $column?: boolean;
+  $bgColor?: string;
+  $border?: boolean;
 }
 export const SwitchGroup = styled.div<SwitchGroup>`
   display: inline-flex;
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
-  align-items: center;
+  align-items: stretch;
   gap: 0.15rem;
   padding: 0.25rem;
-  background-color: ${({ theme }) => theme.color["gray"][300]};
+  background-color: ${({ theme, $bgColor }) => $bgColor ?? theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   overflow: hidden;
+  border: ${({ theme, $border }) =>
+    $border ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
 
   > button {
     margin: 0;
+    display: flex;
+    align-items: center;
   }
 `;
 
