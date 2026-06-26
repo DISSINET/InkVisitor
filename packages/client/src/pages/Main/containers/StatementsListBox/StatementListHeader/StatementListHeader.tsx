@@ -1,6 +1,7 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
+  DropdownItem,
   IEntity,
   IReference,
   IResponseGeneric,
@@ -10,9 +11,8 @@ import {
   ITerritory,
   Relation,
 } from "@inkvisitor/shared/types";
-import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
-import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
 import Dropdown, {
@@ -21,6 +21,7 @@ import Dropdown, {
   TerritoryActionModal,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
+import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { FaArrowDownShortWide } from "react-icons/fa6";
@@ -51,8 +52,6 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { DropdownItem } from "@inkvisitor/shared/types";
-import { useUserQuery } from "hooks/react-query";
 
 interface StatementListHeader {
   territory?: IResponseTerritory;
@@ -282,7 +281,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   }, [treeData, territoryId]);
 
   const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
+    (state) => state.territoryTree.selectedTerritoryPath,
   );
 
   const handleSelectAll = (checked: boolean) =>
@@ -346,7 +345,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   }, [territoryId, selectedTerritoryPath.join(","), territory?.labels, favoritedTerritoryIds]);
 
   const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
-    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
+    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0,
   );
 
   const oldParentTerritory = territory?.data.parent
@@ -460,6 +459,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                       icon={<TbHomeMove size={14} />}
                       onClick={() => setShowTActionModal(true)}
                       tooltipLabel="move current territory"
+                      noBackground
+                      noBorder
+                      inverted
                     />
                   }
                 />

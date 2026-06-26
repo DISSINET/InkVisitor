@@ -32,18 +32,17 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
   height: 2.5rem;
+  /* Round the whole suggester as a single group; inner segments stay square and
+     are clipped to the rounded shape so it matches the buttons/inputs/dropdowns. */
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
+  overflow: hidden;
   input[type="text"] {
     border-left-width: 0;
-    border-right-width: ${({ $hasButton }) => ($hasButton ? 0 : "")};
   }
   select {
     border-right-width: 0;
   }
 `;
-export const StyledSuggesterButton = styled.div`
-  border: 1px solid ${({ theme }) => theme.color["primary"]};
-`;
-
 export const StyledSuggesterList = styled.div`
   /* Rendered in a #page-content portal that forms no stacking context, so this
      competes at the body level with the modal wrap (z 500). Match the other

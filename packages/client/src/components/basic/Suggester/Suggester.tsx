@@ -9,7 +9,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
 import {
-  Button,
+  IconButton,
   Input,
   Loader,
   TemplateActionModal,
@@ -36,7 +36,6 @@ import {
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
-  StyledSuggesterButton,
   StyledSuggesterList,
   SuggesterHidden,
 } from "./SuggesterStyles";
@@ -336,6 +335,15 @@ export const Suggester: React.FC<Suggester> = ({
     return <SuggesterHidden />;
   }
 
+  // The create button now lives inside the input (as rightContent) instead of a
+  // separate trailing segment. Reserve its footprint in the input width so the
+  // typing area stays as roomy as before and the suggester keeps its overall size.
+  const CREATE_BUTTON_WIDTH = 25;
+  const effectiveInputWidth =
+    typeof inputWidth === "number" && !disableCreate
+      ? inputWidth + CREATE_BUTTON_WIDTH
+      : inputWidth;
+
   return (
     // div is necessary for flex to work and render the clear button properly
     <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
@@ -386,7 +394,8 @@ export const Suggester: React.FC<Suggester> = ({
               placeholder={placeholder}
               suggester
               changeOnType
-              width={inputWidth}
+              width={effectiveInputWidth}
+              roundCorners={false}
               onFocus={() => {
                 setIsFocused(true);
               }}
@@ -400,25 +409,28 @@ export const Suggester: React.FC<Suggester> = ({
               disabled={disabled}
               fullHeight
               clearable
+              rightContent={
+                !disableCreate || button ? (
+                  <>
+                    {!disableCreate && (
+                      <IconButton
+                        icon={<FaPlus />}
+                        tooltipLabel="create new entity"
+                        color="primary"
+                        noBackground
+                        noBorder
+                        onClick={() => {
+                          handleAddBtnClick();
+                        }}
+                        disabled={disabled}
+                      />
+                    )}
+                    {button}
+                  </>
+                ) : undefined
+              }
             />
           </div>
-
-          {!disableCreate && (
-            <StyledSuggesterButton>
-              <Button
-                icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-                tooltipLabel="create new entity"
-                color="primary"
-                inverted={selected !== -1}
-                onClick={() => {
-                  handleAddBtnClick();
-                }}
-                disabled={disabled}
-                fullHeight
-              />
-            </StyledSuggesterButton>
-          )}
-          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
