@@ -7,23 +7,19 @@ export const StyledTable = styled.table<StyledTable>`
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
-  border-width: ${({ theme, $noBorder }) =>
-    $noBorder ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
-  box-shadow: ${({ theme, $noBorder }) =>
-    $noBorder ? "none" : theme.boxShadow["subtle"]};
+  box-shadow: ${({ theme, $noBorder }) => ($noBorder ? "none" : theme.boxShadow["subtle"])};
   /* border-collapse ignores border-radius, so clip the corners instead */
-  border-radius: ${({ theme, $noBorder }) =>
-    $noBorder ? 0 : theme.borderRadius["input"]};
+  border-radius: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderRadius["input"])};
   overflow: hidden;
 `;
 interface StyledTHead {
   $noBorder: boolean;
 }
 export const StyledTHead = styled.thead<StyledTHead>`
-  border-width: ${({ theme, $noBorder }) =>
-    $noBorder ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   background: ${({ theme }) => theme.color["gray"][100]};
@@ -65,8 +61,7 @@ export const StyledTr = styled.tr<StyledTr>`
   cursor: ${({ $hasOnClick }) => ($hasOnClick ? "pointer" : "")};
 
   &:hover {
-    background-color: ${({ theme, $noBorder }) =>
-      $noBorder ? "" : theme.color["gray"][100]};
+    background-color: ${({ theme, $noBorder }) => ($noBorder ? "" : theme.color["gray"][100])};
   }
   td:not(:nth-child(${({ $fullWidthColumn }) => $fullWidthColumn})) {
     width: ${({ $fullWidthColumn }) => ($fullWidthColumn > 0 ? "1%" : "")};
@@ -93,10 +88,11 @@ export const StyledHeading = styled.div`
 export const StyledPagination = styled.div`
   display: flex;
   margin-left: auto;
+  gap: 0.1rem;
 `;
 export const StyledPageNumber = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  margin: ${({ theme }) => `0 ${theme.space[2]}`};
+  margin: ${({ theme }) => `0 ${theme.space[1]}`};
   display: flex;
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
