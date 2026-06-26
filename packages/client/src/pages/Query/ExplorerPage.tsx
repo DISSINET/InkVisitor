@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Box, Button, ButtonGroup, Panel } from "components";
+import { Box, Button, ButtonGroup, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
@@ -30,10 +30,7 @@ import {
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
-import {
-  QueryValidity,
-  QueryValidityProblem,
-} from "./types";
+import { QueryValidity, QueryValidityProblem } from "./types";
 import {
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
@@ -43,6 +40,7 @@ import {
 } from "./constants";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
+import { ButtonSize } from "types";
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
@@ -270,7 +268,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       ),
     );
     setQuerySeparatorYPosition(newY);
-    localStorage.setItem("querySeparatorYPosition", floorNumberToOneDecimal(newY / onePercentOfContentHeight).toString());
+    localStorage.setItem(
+      "querySeparatorYPosition",
+      floorNumberToOneDecimal(newY / onePercentOfContentHeight).toString(),
+    );
     setCurrentContentHeight(contentHeight);
   }, [contentHeight, explorerBoxMaximized]);
 
@@ -331,7 +332,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       ),
     );
     setQuerySeparatorXPosition(newX);
-    localStorage.setItem("querySeparatorXPosition", floorNumberToOneDecimal(newX / onePercentOfLayoutWidth).toString());
+    localStorage.setItem(
+      "querySeparatorXPosition",
+      floorNumberToOneDecimal(newX / onePercentOfLayoutWidth).toString(),
+    );
     setCurrentLayoutWidth(layoutWidth);
   }, [layoutWidth]);
 
@@ -516,7 +520,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               disableHeaderClick
               onHeaderClick={toggleExplorerBoxMaximized}
               headerComponent={
-                <ExplorerTableLabelFilter filters={exploreState.filters} dispatch={exploreStateDispatch} />
+                <ExplorerTableLabelFilter
+                  filters={exploreState.filters}
+                  dispatch={exploreStateDispatch}
+                />
               }
               buttons={[
                 <Button
@@ -562,11 +569,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
               buttons={[
-                <ButtonGroup
-                  key="explorer-view-mode"
-                  $noMarginRight
-                  style={{ marginRight: "0.6rem" }}
-                >
+                <SwitchGroup key="explorer-view-mode">
                   <Button
                     tooltipLabel="table view"
                     label="table"
@@ -581,13 +584,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     icon={<BiBarChartAlt2 />}
                     onClick={() => setExploreViewMode(Explore.EViewMode.Stats)}
                   />
-                </ButtonGroup>,
+                </SwitchGroup>,
                 <Button
                   key="refresh queries"
                   tooltipLabel="refresh data"
                   inverted
                   icon={<BiRefresh />}
                   onClick={handleInvalidateQuery}
+                  shape="square"
+                  size={ButtonSize.Small}
                 />,
                 <Button
                   key="maximize-explorer-box"
@@ -604,6 +609,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     )
                   }
                   onClick={toggleExplorerBoxMaximized}
+                  shape="square"
+                  size={ButtonSize.Small}
                 />,
                 <Button
                   key="toggle-query-left-panel"
@@ -611,6 +618,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   tooltipLabel="collapse left panel"
                   icon={<RiMenuFoldFill />}
                   onClick={toggleQueryLeftPanel}
+                  shape="square"
+                  size={ButtonSize.Small}
                 />,
               ]}
             >

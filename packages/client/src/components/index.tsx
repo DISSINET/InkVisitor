@@ -1,7 +1,7 @@
 import { AttributeIcon } from "./basic/AttributeIcon/AttributeIcon";
 import { Box } from "./basic/Box/Box";
 import { Button } from "./basic/Button/Button";
-import { ButtonGroup, ButtonGroups } from "./basic/ButtonGroup/ButtonGroup";
+import { ButtonGroup, ButtonGroups, SwitchGroup } from "./basic/ButtonGroup/ButtonGroup";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Cloud } from "./basic/Cloud/Cloud";
 import { DatePicker } from "./basic/DatePicker/DatePicker";
@@ -78,6 +78,7 @@ export {
   MultiInput,
   Panel,
   Submit,
+  SwitchGroup,
   Suggester,
   Table,
   Tag,

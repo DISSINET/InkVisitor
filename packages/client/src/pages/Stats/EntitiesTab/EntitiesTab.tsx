@@ -2,7 +2,7 @@ import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
 import { Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
+import { Button, ButtonGroup, Input, Loader, SwitchGroup, Timestamp } from "components";
 import { StatsChart, StatsTable } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
@@ -256,56 +256,68 @@ export const EntitiesTab: React.FC = () => {
         <StyledFieldGroup style={{ marginBottom: "1rem" }}>
           <StyledField>
             <StyledFieldLabel>Time Unit</StyledFieldLabel>
-            <ButtonGroup $noMarginRight>
+            <SwitchGroup>
               {Object.values(TimeUnit).map((unit) => (
                 <Button
                   key={unit}
                   label={String(unit)}
+                  shape="rounded-sm"
+                  noBorder
                   onClick={() => {
                     dispatch({
                       type: "timeUnitUpdate",
                       payload: unit as TimeUnit,
                     });
                   }}
-                  color={state.timeUnit === unit ? "primary" : "grey"}
+                  color={state.timeUnit === unit ? "primary" : "greyer"}
+                  inverted={state.timeUnit !== unit}
+                  noBackground={state.timeUnit !== unit}
                 />
               ))}
-            </ButtonGroup>
+            </SwitchGroup>
           </StyledField>
 
           <StyledField>
             <StyledFieldLabel>Event type</StyledFieldLabel>
-            <ButtonGroup $noMarginRight>
+            <SwitchGroup>
               {VISIBLE_EVENT_TYPES.map((eventType) => (
                 <Button
                   key={eventType}
                   label={String(eventType)}
+                  shape="rounded-sm"
+                  noBorder
                   onClick={() => {
                     dispatch({
                       type: "eventTypeUpdate",
                       payload: eventType,
                     });
                   }}
-                  color={state.eventType.includes(eventType) ? "primary" : "grey"}
+                  color={state.eventType.includes(eventType) ? "primary" : "greyer"}
+                  inverted={!state.eventType.includes(eventType)}
+                  noBackground={!state.eventType.includes(eventType)}
                 />
               ))}
-            </ButtonGroup>
+            </SwitchGroup>
           </StyledField>
 
           <StyledField>
             <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-            <ButtonGroup $noMarginRight>
+            <SwitchGroup>
               {Object.values(Aggregation).map((agg) => (
                 <Button
                   key={agg}
                   label={String(agg)}
+                  shape="rounded-sm"
+                  noBorder
                   onClick={() => {
                     dispatch({ type: "aggregateUpdate", payload: agg });
                   }}
-                  color={state.aggregate === agg ? "primary" : "grey"}
+                  color={state.aggregate === agg ? "primary" : "greyer"}
+                  inverted={state.aggregate !== agg}
+                  noBackground={state.aggregate !== agg}
                 />
               ))}
-            </ButtonGroup>
+            </SwitchGroup>
           </StyledField>
           {state.aggregate === Aggregation.USER && (
             <StyledField>
