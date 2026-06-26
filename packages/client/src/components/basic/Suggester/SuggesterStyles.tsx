@@ -1,5 +1,6 @@
 import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
+import { ThemeColor } from "Theme/theme";
 import { space2 } from "Theme/theme-space-shortcut";
 
 interface StyledSuggester {
@@ -19,6 +20,8 @@ interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
   $isFocused?: boolean;
+  // selected entity-class colour; tints the hover/focus ring
+  $accentColor: keyof ThemeColor;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   position: relative;
@@ -32,13 +35,13 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   background-color: ${({ theme }) => theme.color["white"]};
   border-style: solid;
   border-width: ${({ $isFocused }) => ($isFocused ? "1px" : "1px")};
-  border-color: ${({ theme, $isFocused }) =>
-    $isFocused ? theme.color.info : theme.color["gray"]["600"]};
+  border-color: ${({ $isFocused, $accentColor, theme }) =>
+    $isFocused ? $accentColor : theme.color["gray"]["600"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 
   &:hover {
-    border-color: ${({ theme }) => theme.color.info};
+    border-color: ${({ $accentColor }) => $accentColor};
   }
 
   /* Neutralize inner element borders; the TypeBar and the trailing button divider

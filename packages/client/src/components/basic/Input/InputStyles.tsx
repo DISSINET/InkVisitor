@@ -64,7 +64,8 @@ export const StyledInput = styled.input<IValueStyle>`
         ? theme.color[$borderColor]
         : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  padding-left: ${({ theme, $icon }) => ($icon ? "2.4rem" : theme.space[2])};
+  padding-left: ${({ theme, $icon, $suggester }) =>
+    $icon ? "2.4rem" : $suggester ? "0.1rem" : theme.space[2]};
 
   padding-right: ${({ theme, $iconCount, $rightPadding }) => {
     // Explicit pixel padding (e.g. measured rightContent width) wins.

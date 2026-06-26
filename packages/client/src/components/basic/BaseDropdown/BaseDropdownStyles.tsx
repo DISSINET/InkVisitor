@@ -59,8 +59,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border-right: ${({ suggester }) => (suggester ? "none" : "")};
     border-radius: ${({ theme, roundCorners, suggester }) =>
       suggester ? "0" : roundCorners ? theme.borderRadius["input"] : "0"};
-    background-color: ${({ theme, entityDropdown, suggester }) =>
-      entityDropdown && suggester ? theme.color["gray"][200] : theme.color["white"]};
+    /* In the suggester the class box merges with the input into one white field;
+       the entity-class colour band (TypeBar) carries the class identity. */
+    background-color: ${({ theme }) => theme.color["white"]};
     &:hover {
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1px;
@@ -89,8 +90,14 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     font-size: ${({ theme }) => theme.fontSize["xs"]};
     font-weight: inherit;
     top: 50%;
-    margin-left: ${({ theme, entityDropdown, wildCardChar }) =>
-      entityDropdown && !wildCardChar ? theme.space[3] : theme.space[2]};
+    margin-left: ${({ theme, entityDropdown, wildCardChar, suggester }) =>
+      suggester
+        ? theme.space[4]
+        : entityDropdown && !wildCardChar
+          ? theme.space[3]
+          : theme.space[2]};
+    /* nudge the class letter up to sit optically centered in the suggester */
+    transform: ${({ suggester }) => (suggester ? "translateY(-1px)" : "none")};
     margin-top: 1px;
 
     color: ${({ theme }) => theme.color["primary"]};
@@ -111,7 +118,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
-    padding: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    /* suggester: drop the chevron padding so it sits tight to the letter/input */
+    padding: ${({ userDropdown, suggester }) => (userDropdown || suggester ? "0" : "")};
     svg {
       height: 18;
     }

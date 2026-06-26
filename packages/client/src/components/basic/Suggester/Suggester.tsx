@@ -13,6 +13,7 @@ import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { List, ListProps } from "react-window";
 import {
+  EntityColors,
   EntityDragItem,
   EntitySingleDropdownItem,
   EntitySuggestion,
@@ -313,6 +314,13 @@ export const Suggester: React.FC<Suggester> = ({
 
   const theme = useTheme();
 
+  // Entity class drives the control's identity: the selected class colour tints
+  // the focus/hover ring and the create button, so the whole suggester announces
+  // which class you are searching/creating. Falls back to info for the wildcard.
+  const entityColorKey = EntityColors[category]?.color;
+  const accentColorKey = entityColorKey && entityColorKey !== "white" ? entityColorKey : "info";
+  const accentColor = theme.color[accentColorKey as keyof ThemeColor];
+
   if (isHidden) {
     return <SuggesterHidden />;
   }
@@ -339,12 +347,13 @@ export const Suggester: React.FC<Suggester> = ({
           $hasButton={!disableCreate}
           $isOver={isOver}
           $isFocused={isFocused}
+          $accentColor={accentColor}
         >
           <Dropdown.Single.Entity
             value={category}
             options={disableWildCard ? [...categories] : [dropdownWildCard, ...categories]}
             onChange={onChangeCategory}
-            width={36}
+            width={34}
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);
@@ -355,7 +364,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
-          <TypeBar entityLetter={category} noMargin />
+          <TypeBar entityLetter={category} noMargin width={6} />
 
           <div
             ref={(node) => {
@@ -393,7 +402,7 @@ export const Suggester: React.FC<Suggester> = ({
                   <IconButton
                     icon={<FaPlus />}
                     tooltipLabel="create new entity"
-                    color="primary"
+                    color={accentColorKey}
                     noBackground
                     noBorder
                     onClick={() => {
