@@ -661,10 +661,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
                 canBatchEdit={canBatchEdit}
-                includeSubordinates={includeSubordinates}
-                includeEquivalents={includeEquivalents}
-                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
-                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
               />
             </Box>
           </>
