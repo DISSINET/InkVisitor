@@ -391,7 +391,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
               }
             />
 
-            {searchOccurences !== null && (
+            {searchOccurences !== null ? (
               <StyledSearchResults $annotatorWidthTooNarrow={annotatorWidthTooNarrow}>
                 {searchOccurences.length === 0 ? (
                   <div style={{ marginLeft: "0.2rem" }}>no results</div>
@@ -431,6 +431,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                   </>
                 )}
               </StyledSearchResults>
+            ) : (
+              <div style={{ width: "4rem" }} />
             )}
           </StyledSearchContainer>
 
