@@ -90,15 +90,15 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     font-size: ${({ theme }) => theme.fontSize["xs"]};
     font-weight: inherit;
     top: 50%;
+    transform: translateY(-13%);
+    margin-top: 0;
+    margin-bottom: 0;
     margin-left: ${({ theme, entityDropdown, wildCardChar, suggester }) =>
       suggester
         ? theme.space[4]
         : entityDropdown && !wildCardChar
           ? theme.space[3]
           : theme.space[2]};
-    /* nudge the class letter up to sit optically centered in the suggester */
-    transform: ${({ suggester }) => (suggester ? "translateY(-1px)" : "none")};
-    margin-top: 1px;
 
     color: ${({ theme }) => theme.color["primary"]};
     vertical-align: middle;

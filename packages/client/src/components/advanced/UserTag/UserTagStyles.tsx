@@ -69,7 +69,7 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  padding: 0 ${({ theme }) => theme.space[3]} 0 ${({ theme }) => theme.space[2]};
+  padding: 0 ${({ theme }) => theme.space[2]};
   /* divider line between the role icon and the name */
   border-left: 1px solid ${({ $borderColor }) => $borderColor};
   /* transparent: the pill (StyledUserTagWrap .tag) already paints the field */

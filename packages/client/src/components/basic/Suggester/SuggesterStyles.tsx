@@ -30,9 +30,9 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   height: 2.5rem;
   background-color: ${({ theme }) => theme.color["white"]};
   border-style: solid;
-  border-width: ${({ $isFocused }) => ($isFocused ? "2px" : "1px")};
+  border-width: 2px;
   border-color: ${({ $isFocused, $accentColor, theme }) =>
-    $isFocused ? String(theme.color[$accentColor]) : theme.color["gray"]["600"]};
+    $isFocused ? String(theme.color[$accentColor]) : theme.color["gray"]["500"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 

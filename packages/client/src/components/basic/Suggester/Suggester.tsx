@@ -1,4 +1,4 @@
-import { FloatingPortal, autoUpdate, flip, useFloating } from "@floating-ui/react";
+import { FloatingPortal, autoUpdate, flip, offset, useFloating } from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { List, ListProps } from "react-window";
+import { List } from "react-window";
 import {
   EntityColors,
   EntityDragItem,
@@ -30,7 +30,7 @@ import {
   StyledSuggesterList,
   SuggesterHidden,
 } from "./SuggesterStyles";
-import { SuggestionRowEntityRow, SuggestionRowEntityItemData } from "./SuggestionRow/SuggestionRow";
+import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
   marginTop?: boolean;
@@ -310,7 +310,7 @@ export const Suggester: React.FC<Suggester> = ({
   const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [flip({ padding: 10 })],
+    middleware: [offset(2), flip({ padding: 10 })],
   });
 
   const theme = useTheme();
