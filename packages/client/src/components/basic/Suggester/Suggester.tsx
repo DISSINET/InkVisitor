@@ -310,7 +310,7 @@ export const Suggester: React.FC<Suggester> = ({
   const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [offset(2), flip({ padding: 10 })],
+    middleware: [offset(4), flip({ padding: 10 })],
   });
 
   const theme = useTheme();
@@ -459,7 +459,7 @@ export const Suggester: React.FC<Suggester> = ({
               ) : null}
 
               {/* PRE-SUGGESTIONS */}
-              {preSuggestions?.length && typed.length === 0 ? (
+              {preSuggestions && preSuggestions.length > 0 && typed.length === 0 ? (
                 <>
                   <StyledRelativePosition $width={resultWidth}>
                     {renderEntitySuggestions(preSuggestions)}
