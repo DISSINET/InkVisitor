@@ -125,7 +125,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.6;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.9;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 

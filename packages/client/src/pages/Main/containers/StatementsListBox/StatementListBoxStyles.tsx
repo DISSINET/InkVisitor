@@ -71,9 +71,8 @@ export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   align-items: center;
   justify-content: space-between;
   height: 3rem;
-  padding: 0rem 0.5rem;
+  padding: 0rem 0.2rem;
   margin-bottom: 0.2rem;
-  padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
   margin-left: ${({ $marginLeft }) => ($marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0")};

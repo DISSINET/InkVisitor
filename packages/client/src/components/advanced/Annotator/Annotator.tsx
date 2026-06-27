@@ -1435,7 +1435,7 @@ export const TextAnnotator = ({
         </StyledCanvasWrapper>
 
         <StyledAnnotatorButtons>
-          <SwitchGroup $bgColor={theme.color.invertedBg.success} style={{ marginTop: "0.25rem" }}>
+          <SwitchGroup $bgColor={theme.color.success} style={{ marginTop: "0.25rem" }}>
             <Button
               key={EditMode.HIGHLIGHT}
               icon={
@@ -1449,7 +1449,7 @@ export const TextAnnotator = ({
               color="success"
               shape="rounded-sm"
               noBorder
-              inverted={annotatorMode !== EditMode.HIGHLIGHT}
+              inverted={annotatorMode === EditMode.HIGHLIGHT}
               noBackground={annotatorMode !== EditMode.HIGHLIGHT}
               onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
               tooltipLabel="anchor entities"
@@ -1467,7 +1467,7 @@ export const TextAnnotator = ({
               color="success"
               shape="rounded-sm"
               noBorder
-              inverted={annotatorMode !== EditMode.SEMI}
+              inverted={annotatorMode === EditMode.SEMI}
               noBackground={annotatorMode !== EditMode.SEMI}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
@@ -1486,7 +1486,7 @@ export const TextAnnotator = ({
               color="success"
               shape="rounded-sm"
               noBorder
-              inverted={annotatorMode !== EditMode.RAW}
+              inverted={annotatorMode === EditMode.RAW}
               noBackground={annotatorMode !== EditMode.RAW}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
