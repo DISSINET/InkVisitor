@@ -151,8 +151,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   // portal menu style is in global stylesheet
 `;
 
-export const StyledFaChevronDown = styled(FaChevronDown)`
-  margin-right: 4px;
+export const StyledFaChevronDown = styled(FaChevronDown)<{ suggester?: boolean }>`
+  margin-right: ${({ suggester }) => (suggester ? "2px" : "4px")};
 `;
 
 export const StyledValueIconWrap = styled.div`

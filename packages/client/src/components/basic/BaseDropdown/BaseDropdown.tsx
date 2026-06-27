@@ -260,10 +260,10 @@ const MultiValue = (
   );
 };
 
-const DropdownIndicator = (props: DropdownIndicatorProps) => {
+const DropdownIndicator = (props: DropdownIndicatorProps & { selectProps: StyledSelect }) => {
   return (
     <components.DropdownIndicator {...props}>
-      <StyledFaChevronDown size={9} />
+      <StyledFaChevronDown size={9} suggester={props.selectProps.suggester ?? false} />
     </components.DropdownIndicator>
   );
 };
