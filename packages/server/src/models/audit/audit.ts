@@ -157,6 +157,32 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Combines Audit constructor and save method to immediately create & persist a
+   * relation-scoped audit. The type is one of the RELATION_* event types and
+   * changes holds the relation snapshot.
+   * @param req IRequest
+   * @param relationId id of the affected relation
+   * @param changes snapshot of the relation data
+   * @param type RELATION_CREATE | RELATION_EDIT | RELATION_DELETE
+   * @returns Promise<boolean>
+   */
+  static async createNewForRelation(
+    req: IRequest,
+    relationId: string,
+    changes: object,
+    type: EventType
+  ): Promise<boolean> {
+    const entry = new Audit({
+      modelId: relationId,
+      auditScope: AuditScope.Relation,
+      user: req.getUserOrFail().id,
+      changes,
+      type,
+    });
+    return entry.save(req.db.connection);
+  }
+
+  /**
    * Resolves the deletion event type for an audit scope. Document deletions are
    * recorded as anchor removals (their anchors disappear with them), entity
    * deletions as plain deletions. Both fold into the matching edit type in the
