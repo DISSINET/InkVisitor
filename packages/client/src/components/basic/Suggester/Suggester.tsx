@@ -354,7 +354,7 @@ export const Suggester: React.FC<Suggester> = ({
             value={category}
             options={disableWildCard ? [...categories] : [dropdownWildCard, ...categories]}
             onChange={onChangeCategory}
-            width={categories.length > 1 ? 34 : 26}
+            width={categories.length > 1 ? 33 : 26}
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);

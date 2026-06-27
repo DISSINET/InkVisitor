@@ -152,7 +152,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
 `;
 
 export const StyledFaChevronDown = styled(FaChevronDown)<{ suggester?: boolean }>`
-  margin-right: 0.4rem;
+  /* margin-right: 0.4rem; */
+  margin-right: ${({ suggester }) => (suggester ? "0.3rem" : "0.4rem")};
 `;
 
 export const StyledValueIconWrap = styled.div`
