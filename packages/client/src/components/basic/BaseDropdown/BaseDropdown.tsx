@@ -122,7 +122,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
       >
         <StyledSelect
           // menuIsOpen={loggerId === ""}
-          suggester={suggester}
+          $suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
           onBlur={onBlur}
@@ -263,7 +263,7 @@ const MultiValue = (
 const DropdownIndicator = (props: DropdownIndicatorProps & { selectProps: StyledSelect }) => {
   return (
     <components.DropdownIndicator {...props}>
-      <StyledFaChevronDown size={9} suggester={props.selectProps.suggester ?? false} />
+      <StyledFaChevronDown size={9} $suggester={props.selectProps.$suggester ?? false} />
     </components.DropdownIndicator>
   );
 };

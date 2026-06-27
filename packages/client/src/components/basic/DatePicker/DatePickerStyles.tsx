@@ -52,6 +52,10 @@ export const StyledTrigger = styled.div<StyledTrigger>`
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   padding: 0 ${({ theme }) => theme.space[2]};
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  box-shadow: ${({ theme, $open }) =>
+    $open
+      ? `inset 0 0 0 ${theme.borderWidth[1]} ${theme.color["info"]}`
+      : "none"};
   transition: border-color 0.12s ease;
 
   &:hover {
@@ -61,6 +65,7 @@ export const StyledTrigger = styled.div<StyledTrigger>`
   &:focus-visible {
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
+    box-shadow: inset 0 0 0 ${({ theme }) => theme.borderWidth[1]} ${({ theme }) => theme.color["info"]};
   }
 `;
 
