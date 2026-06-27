@@ -179,16 +179,30 @@ export default class Keys {
     } else {
       // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
+      const beforeOffset = this.text.offsetFromVisual(before.xLine, before.yLine);
       this.onArrowLeft({
         ctrlKey: ctrlKey || altKey,
         shiftKey,
         altKey: false,
         metaKey: false,
       });
-      const after = this.cursor.getAbsolutePosition();
+      let after = this.cursor.getAbsolutePosition();
+      let caretOffset = this.text.offsetFromVisual(after.xLine, after.yLine);
+
+      // Soft-wrap boundary: the start of a continuation line and the end of the
+      // previous line are the SAME offset, so arrow-left can move the caret
+      // visually without moving the offset
+      if (
+        beforeOffset >= 0 &&
+        caretOffset === beforeOffset &&
+        (after.xLine !== before.xLine || after.yLine !== before.yLine)
+      ) {
+        const next = this.text.stepVisualLeft(after.xLine, after.yLine);
+        after = { xLine: next.xLine, yLine: next.yLine };
+        caretOffset = this.text.offsetFromVisual(after.xLine, after.yLine);
+      }
 
       // Capture the caret's landing offset (the left edge of the deletion) BEFORE the edit
-      const caretOffset = this.text.offsetFromVisual(after.xLine, after.yLine);
       this.text.deleteRangeText(before, after);
       if (caretOffset >= 0) {
         this.cursor.moveToOffset(this.text, caretOffset);

@@ -85,6 +85,27 @@ describe("caret follows the word across a re-wrap (#3145)", () => {
     );
   });
 
+  test("BACKSPACE at the start of a wrapped line deletes the boundary space", () => {
+    const a = setup("aaaa bbbbb ccccc");
+    expect(a.text.getLine(0)).toBe("aaaa bbbbb ");
+    expect(a.text.getLine(1)).toBe("ccccc");
+
+    // caret at column 0 of the wrapped line (start of "ccccc")
+    a.cursor.setPosition(0, 1);
+
+    keyDown(a, "Backspace");
+
+    // like a normal editor: backspace removes the space before the caret,
+    // merging the words — it must NOT be a silent no-op
+    expect(a.text.value).toBe("aaaa bbbbbccccc");
+    expect(a.cursor.yLine).toBe(1);
+    expect(a.cursor.xLine).toBe(5);
+
+    expect(a.text.offsetFromVisual(a.cursor.xLine, a.cursor.yLine)).toBe(
+      a.cursor.head
+    );
+  });
+
   test("SPACE at wrap boundary: caret follows the split tail down to line 1", () => {
     const a = setup("aaaaaacccc"); // single 10-char token filling line 0
     expect(a.text.getLine(0)).toBe("aaaaaacccc");

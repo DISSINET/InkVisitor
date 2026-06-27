@@ -525,11 +525,27 @@ class Text {
         }
 
         if (cell.space) {
-          // Keep an inter-word space trailing on the current line (the next
-          // content breaks to the margin); a trailing space at the very end
-          // gets its own line so the caret after it stays on screen.
-          if (ci >= lastContentIdx && currentLineLength > 0) pushLine();
-          appendStr(cell.text);
+          if (ci >= lastContentIdx) {
+            // Trailing whitespace after the last content: give it its own line
+            // so the caret typed at a full line end stays on screen.
+            if (currentLineLength > 0) pushLine();
+            appendStr(cell.text);
+            continue;
+          }
+          // Inter-word whitespace that doesn't fit: keep exactly ONE wrap-space
+          // trailing on the current line (standard soft-wrap — a single space is
+          // allowed to overflow the width by one), then break and carry any EXTRA
+          // whitespace to the start of the next visual line so it stays visible
+          // instead of piling up off-screen past the margin (#3145 follow-up:
+          // typing a space at the start of a wrapped word).
+          const fit = Math.max(0, maxLen - currentLineLength);
+          const keep = Math.min(cell.text.length, fit + 1);
+          appendStr(cell.text.slice(0, keep));
+          const rest = cell.text.slice(keep);
+          if (rest.length > 0) {
+            pushLine();
+            appendStr(rest);
+          }
           continue;
         }
 
