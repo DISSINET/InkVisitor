@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-} from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
 import { Tooltip } from "components";
 import {
   StyledCheckbox,
+  StyledCheckboxIndicator,
   StyledCheckboxWrapper,
   StyledIconOnlyCheckbox,
   StyledLabel,
 } from "./CheckboxStyles";
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 
 interface Checkbox {
   value: boolean;
@@ -42,9 +36,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   onClickFn = () => {},
 }) => {
   const [checked, setChecked] = useState(value);
-  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
-    null
-  );
+  const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
@@ -73,30 +65,20 @@ export const Checkbox: React.FC<Checkbox> = ({
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          <StyledCheckboxWrapper style={{ cursor: "pointer" }}>
-            {checked ? (
-              <MdOutlineCheckBox
-                size={size}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setChecked(false);
-                }}
-              />
-            ) : (
-              <MdOutlineCheckBoxOutlineBlank
-                size={size}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setChecked(true);
-                }}
-              />
-            )}
+          <StyledCheckboxWrapper $hasLabel={!!label}>
+            <StyledCheckboxIndicator
+              $checked={checked}
+              $size={size}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                setChecked(!checked);
+              }}
+            >
+              {checked && <FaCheck size={size * 0.6} />}
+            </StyledCheckboxIndicator>
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel
-              ref={setReferenceElement}
-              onClick={() => setChecked(!checked)}
-            >
+            <StyledLabel ref={setReferenceElement} onClick={() => setChecked(!checked)}>
               {label}
               {icon}
             </StyledLabel>

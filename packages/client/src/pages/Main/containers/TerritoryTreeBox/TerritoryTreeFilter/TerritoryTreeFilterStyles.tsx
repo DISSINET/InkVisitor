@@ -6,8 +6,10 @@ export const StyledFilterWrap = styled.div`
   margin-top: ${({ theme }) => theme.space[2]};
 `;
 export const StyledFilterList = styled.div`
+  margin: 0.3rem 0;
   display: flex;
   flex-direction: column;
+  gap: 0.3rem;
 `;
 export const StyledCancelButton = styled.div`
   position: absolute;
@@ -22,5 +24,5 @@ export const StyledInputWrap = styled.div`
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0 4px;
+  gap: 0 0.4rem;
 `;
