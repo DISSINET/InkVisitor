@@ -30,7 +30,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
 
   return (
     <>
-      {results?.length && (
+      {results && results.length > 0 && (
         <StyledResultsAnimatedWrap style={animatedHeight}>
           <List
             rowProps={{ data }}

@@ -358,7 +358,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     excludedActantIds={readTerritories.map((r) => r.territory)}
                   />
                   <StyledTerritoryList>
-                    {readTerritories.length && territoryActants ? (
+                    {readTerritories.length > 0 && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
                           (t) => t.territory.id === right.territory,
@@ -434,7 +434,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       excludedActantIds={writeTerritories.map((r) => r.territory)}
                     />
                     <StyledTerritoryList>
-                      {writeTerritories.length && territoryActants ? (
+                      {writeTerritories.length > 0 && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
                             (t) => t.territory.id === right.territory,
