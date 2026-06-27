@@ -45,6 +45,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   width: 100%;
 
   .react-select__control {
+    cursor: pointer;
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
