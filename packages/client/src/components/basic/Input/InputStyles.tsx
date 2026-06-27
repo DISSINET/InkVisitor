@@ -223,7 +223,7 @@ export const StyledIconWrapper = styled.div`
 
 export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
   position: absolute;
-  right: 0.25rem;
+  right: 0.35rem;
   top: 0.3rem;
   bottom: 0.3rem;
   display: flex;

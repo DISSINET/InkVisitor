@@ -73,6 +73,6 @@ export const StyledIconOnlyCheckbox = styled.div<StyledIconOnlyCheckbox>`
   cursor: pointer;
 
   border: 1px solid ${({ theme, $checked }) => ($checked ? theme.color["info"] : "transparent")};
-  border-radius: 0.2rem;
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   color: ${({ theme, $checked }) => ($checked ? theme.color["info"] : theme.color["gray"][600])};
 `;
