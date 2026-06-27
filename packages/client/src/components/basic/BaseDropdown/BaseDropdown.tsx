@@ -98,12 +98,18 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  const SuggesterDropdownIndicator = (props: DropdownIndicatorProps) => (
+    <components.DropdownIndicator {...props}>
+      <StyledFaChevronDown size={9} $suggester={suggester} />
+    </components.DropdownIndicator>
+  );
+
   const localCustomComponents = {
     Option,
     SingleValue,
     MultiValue,
     ValueContainer,
-    DropdownIndicator,
+    DropdownIndicator: SuggesterDropdownIndicator,
     Control,
     MenuPortal,
   };
@@ -260,13 +266,6 @@ const MultiValue = (
   );
 };
 
-const DropdownIndicator = (props: DropdownIndicatorProps & { selectProps: StyledSelect }) => {
-  return (
-    <components.DropdownIndicator {...props}>
-      <StyledFaChevronDown size={9} $suggester={props.selectProps.$suggester ?? false} />
-    </components.DropdownIndicator>
-  );
-};
 
 const Control = ({
   children,
