@@ -80,7 +80,7 @@ export const StyledLegendColorBox = styled.div<{ $color?: string }>`
   background-color: ${({ $color }) => $color};
   width: ${({ theme }) => theme.space[6]};
   height: ${({ theme }) => theme.space[6]};
-  border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   flex-shrink: 0;
 `;
 

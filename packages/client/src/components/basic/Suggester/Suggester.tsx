@@ -3,6 +3,7 @@ import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 import { IconButton, Input, Loader, TemplateActionModal, TypeBar } from "components";
 import Dropdown from "components/advanced";
 import { useTheme } from "hooks";
@@ -318,8 +319,8 @@ export const Suggester: React.FC<Suggester> = ({
   // the focus/hover ring and the create button, so the whole suggester announces
   // which class you are searching/creating. Falls back to info for the wildcard.
   const entityColorKey = EntityColors[category]?.color;
-  const accentColorKey = entityColorKey && entityColorKey !== "white" ? entityColorKey : "info";
-  const accentColor = theme.color[accentColorKey as keyof ThemeColor];
+  const accentColorKey: keyof ThemeColor =
+    entityColorKey && entityColorKey !== "white" ? entityColorKey : "info";
 
   if (isHidden) {
     return <SuggesterHidden />;
@@ -347,7 +348,7 @@ export const Suggester: React.FC<Suggester> = ({
           $hasButton={!disableCreate}
           $isOver={isOver}
           $isFocused={isFocused}
-          $accentColor={accentColor}
+          $accentColor={accentColorKey}
         >
           <Dropdown.Single.Entity
             value={category}
@@ -364,7 +365,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
-          <TypeBar entityLetter={category} noMargin width={6} />
+          <TypeBar entityLetter={category} noMargin width={5} />
 
           <div
             ref={(node) => {

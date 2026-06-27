@@ -20,7 +20,6 @@ interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
   $isFocused?: boolean;
-  // selected entity-class colour; tints the hover/focus ring
   $accentColor: keyof ThemeColor;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
@@ -29,25 +28,20 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
   height: 2.5rem;
-  /* The whole suggester reads as a single rounded, bordered group. Inner segments
-     are borderless and clipped to the rounded shape; the hover/focus highlight
-     lives here on the outer (visible) edge. */
   background-color: ${({ theme }) => theme.color["white"]};
   border-style: solid;
-  border-width: ${({ $isFocused }) => ($isFocused ? "1px" : "1px")};
+  border-width: ${({ $isFocused }) => ($isFocused ? "2px" : "1px")};
   border-color: ${({ $isFocused, $accentColor, theme }) =>
-    $isFocused ? $accentColor : theme.color["gray"]["600"]};
+    $isFocused ? String(theme.color[$accentColor]) : theme.color["gray"]["600"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 
   &:hover {
-    border-color: ${({ $accentColor }) => $accentColor};
+    border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
   }
-
-  /* Neutralize inner element borders; the TypeBar and the trailing button divider
-     provide the internal separators. */
   input[type="text"],
   .react-select__control {
+    /* border-color: transparent !important; */
     border-color: transparent !important;
   }
   select {
