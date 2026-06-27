@@ -321,6 +321,9 @@ export const Suggester: React.FC<Suggester> = ({
   const entityColorKey = EntityColors[category]?.color;
   const accentColorKey: keyof ThemeColor =
     entityColorKey && entityColorKey !== "white" ? entityColorKey : "info";
+  const PALE_ENTITY_COLORS: string[] = ["white", "entityB"];
+  const buttonColorKey: keyof ThemeColor =
+    entityColorKey && !PALE_ENTITY_COLORS.includes(entityColorKey) ? entityColorKey : "primary";
 
   if (isHidden) {
     return <SuggesterHidden />;
@@ -403,7 +406,7 @@ export const Suggester: React.FC<Suggester> = ({
                   <IconButton
                     icon={<FaPlus />}
                     tooltipLabel="create new entity"
-                    color={accentColorKey}
+                    color={buttonColorKey}
                     noBackground
                     noBorder
                     onClick={() => {
