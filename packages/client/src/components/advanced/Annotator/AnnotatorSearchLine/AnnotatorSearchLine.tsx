@@ -324,9 +324,15 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
               minWidth={140}
               inputRef={searchInputRef}
               roundCorners
-              icon={<BiSearch />}
+              icon={
+                <IconWithTooltip
+                  icon={<BiSearch />}
+                  tooltipLabel="ctrl+f to search"
+                  tooltipPosition="top"
+                  color="inherit"
+                />
+              }
               placeholder="search"
-              tooltipLabel="ctrl+f to search"
               rightContent={
                 <StyledCheckboxWrapper>
                   <Checkbox
