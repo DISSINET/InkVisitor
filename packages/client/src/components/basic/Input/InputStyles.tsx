@@ -88,7 +88,7 @@ export const StyledInput = styled.input<IValueStyle>`
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
-    border-width: ${({ theme }) => theme.borderWidth[1]};
+    border-width: ${({ theme }) => theme.borderWidth[2]};
   }
   &::placeholder {
     font-size: 1.1rem;
