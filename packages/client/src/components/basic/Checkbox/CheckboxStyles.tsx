@@ -42,7 +42,7 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
     ${({ $checked }) =>
       $checked &&
       css`
-        animation: ${checkmarkPop} 0.2s ease-out;
+        /* animation: ${checkmarkPop} 0.2s ease-out; */
       `}
   }
 `;

@@ -66,7 +66,7 @@ export const StyledTr = styled.tr<StyledTr>`
   cursor: ${({ $isOpened, $listMode }) => ($isOpened && $listMode ? "default" : "pointer")};
   td:first-child {
     position: relative;
-    padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
+    padding-left: 0.9rem;
     width: 1%;
   }
   td:first-child::before {
@@ -125,6 +125,12 @@ export const StyledCheckboxWrapper = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
+`;
+// keeps the checkbox above the absolutely-positioned focus circle
+export const StyledSelectionCheckbox = styled.div`
+  position: relative;
+  z-index: 2;
+  display: flex;
 `;
 
 export const StyledAbbreviatedLabel = styled.div`

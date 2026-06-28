@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { FaCheck } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaCheck, FaMinus } from "react-icons/fa";
 import { Tooltip } from "components";
 import {
   StyledCheckbox,
@@ -12,7 +12,9 @@ import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core
 
 interface Checkbox {
   value: boolean;
-  onChangeFn?: (value: boolean) => void;
+  // partial-selection state (e.g. batch-select header): filled box with a dash
+  indeterminate?: boolean;
+  onChangeFn?: (value: boolean, event?: React.MouseEvent) => void;
   label?: string;
   icon?: React.ReactNode;
   size?: number;
@@ -25,6 +27,7 @@ interface Checkbox {
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
+  indeterminate = false,
   onChangeFn = () => {},
   label,
   icon,
@@ -35,13 +38,14 @@ export const Checkbox: React.FC<Checkbox> = ({
   tooltipPosition = "bottom",
   onClickFn = () => {},
 }) => {
-  const [checked, setChecked] = useState(value);
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  useEffect(() => {
-    onChangeFn(checked);
-  }, [checked]);
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChangeFn(!value, e);
+    onClickFn();
+  };
 
   return (
     <>
@@ -50,35 +54,33 @@ export const Checkbox: React.FC<Checkbox> = ({
           ref={setReferenceElement}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
-          $checked={checked}
-          onClick={(e) => {
-            e.stopPropagation();
-            setChecked(!checked);
-            onClickFn();
-          }}
+          $checked={value}
+          onClick={handleToggle}
         >
           {icon}
         </StyledIconOnlyCheckbox>
       )}
       {!iconOnly && (
         <StyledCheckbox
+          ref={setReferenceElement}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
           <StyledCheckboxWrapper $hasLabel={!!label}>
             <StyledCheckboxIndicator
-              $checked={checked}
+              $checked={value || indeterminate}
               $size={size}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                setChecked(!checked);
-              }}
+              onClick={handleToggle}
             >
-              {checked && <FaCheck size={size * 0.6} />}
+              {indeterminate ? (
+                <FaMinus size={size * 0.6} />
+              ) : value ? (
+                <FaCheck size={size * 0.6} />
+              ) : null}
             </StyledCheckboxIndicator>
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel ref={setReferenceElement} onClick={() => setChecked(!checked)}>
+            <StyledLabel onClick={handleToggle}>
               {label}
               {icon}
             </StyledLabel>

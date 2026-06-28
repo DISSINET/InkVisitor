@@ -14,7 +14,7 @@ import {
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import { AxiosResponse } from "axios";
-import { Button, Submit } from "components";
+import { Button, Checkbox, Submit } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -25,11 +25,6 @@ import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { FaArrowDownShortWide } from "react-icons/fa6";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-  MdOutlineIndeterminateCheckBox,
-} from "react-icons/md";
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -290,32 +285,21 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
-    const size = 18;
+    const size = 16;
+    const hasSelection = isAllSelected || selectedRows.length > 0;
 
-    if (isAllSelected) {
-      return (
-        <MdOutlineCheckBox
-          size={size}
-          onClick={() => {
-            handleSelectAll(false);
-            dispatch(setLastClickedIndex(-1));
-          }}
-        />
-      );
-    } else if (selectedRows.length > 0) {
-      // some rows selected
-      return (
-        <MdOutlineIndeterminateCheckBox
-          size={size}
-          onClick={() => {
-            handleSelectAll(false);
-            dispatch(setLastClickedIndex(-1));
-          }}
-        />
-      );
-    } else {
-      return <MdOutlineCheckBoxOutlineBlank size={size} onClick={() => handleSelectAll(true)} />;
-    }
+    return (
+      <Checkbox
+        size={size}
+        value={isAllSelected}
+        indeterminate={!isAllSelected && selectedRows.length > 0}
+        onChangeFn={() => {
+          // any selection -> clear; none -> select all
+          handleSelectAll(!hasSelection);
+          dispatch(setLastClickedIndex(-1));
+        }}
+      />
+    );
   };
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);

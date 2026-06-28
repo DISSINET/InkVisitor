@@ -8,14 +8,13 @@ import {
 } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button, TagGroup } from "components";
+import { Button, Checkbox, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
 import { CellProps, Column, useExpanded, useRowSelect, useTable } from "react-table";
@@ -30,6 +29,7 @@ import {
   StyledAnchor,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
+  StyledSelectionCheckbox,
   StyledTHead,
   StyledTable,
   StyledTh,
@@ -155,47 +155,34 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         id: "selection",
         Cell: ({ row }: CellType) => {
-          const size = 18;
+          const size = 16;
           const checked = selectedRows.includes(row.id);
           const isFocused = lastClickedIndex === row.index;
 
           return (
             <StyledCheckboxWrapper>
               {isFocused && <StyledFocusedCircle checked={checked} />}
-              {checked ? (
-                <MdOutlineCheckBox
+              <StyledSelectionCheckbox>
+                <Checkbox
                   size={size}
-                  style={{ zIndex: 2 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== row.index) {
-                      // unset all between
+                  value={checked}
+                  onChangeFn={(_value, e) => {
+                    if (e?.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== row.index) {
                       const mappedIds = handleSelection(lastClickedIndex, row.index);
-                      const filteredIds = selectedRows.filter((id) => !mappedIds.includes(id));
-                      setSelectedRows(filteredIds);
+                      if (checked) {
+                        // unset all between
+                        setSelectedRows(selectedRows.filter((id) => !mappedIds.includes(id)));
+                      } else {
+                        // set all between
+                        setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
+                      }
                     } else {
                       handleRowSelect(row.id);
                     }
                     dispatch(setLastClickedIndex(row.index));
                   }}
                 />
-              ) : (
-                <MdOutlineCheckBoxOutlineBlank
-                  size={size}
-                  style={{ zIndex: 2 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (e.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== row.index) {
-                      // set all between
-                      const mappedIds = handleSelection(lastClickedIndex, row.index);
-                      setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
-                    } else {
-                      handleRowSelect(row.id);
-                    }
-                    dispatch(setLastClickedIndex(row.index));
-                  }}
-                />
-              )}
+              </StyledSelectionCheckbox>
             </StyledCheckboxWrapper>
           );
         },
