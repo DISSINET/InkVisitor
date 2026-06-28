@@ -1,5 +1,5 @@
 import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
-import { Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
+import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
@@ -27,8 +27,19 @@ import {
 import { StatsChart, StatsTable } from "components/advanced";
 import { useUserQuery } from "hooks/react-query";
 
-export const EntitiesTab: React.FC = () => {
-  const [state, dispatch] = useReducer(statsReducer, undefined, createEntitiesTabState);
+interface EntitiesTab {
+  /** Event types selectable in this tab; also the initial selection. */
+  eventTypes?: EventType[];
+}
+
+export const EntitiesTab: React.FC<EntitiesTab> = ({
+  eventTypes = VISIBLE_EVENT_TYPES,
+}) => {
+  const [state, dispatch] = useReducer(
+    statsReducer,
+    eventTypes,
+    createEntitiesTabState
+  );
   const [filterDebounceEnabled, setFilterDebounceEnabled] = useState(false);
 
   const queryClient = useQueryClient();
@@ -286,7 +297,7 @@ export const EntitiesTab: React.FC = () => {
           <StyledField>
             <StyledFieldLabel>Event type</StyledFieldLabel>
             <ButtonGroup $noMarginRight>
-              {VISIBLE_EVENT_TYPES.map((eventType) => (
+              {eventTypes.map((eventType) => (
                 <Button
                   key={eventType}
                   label={String(eventType)}
