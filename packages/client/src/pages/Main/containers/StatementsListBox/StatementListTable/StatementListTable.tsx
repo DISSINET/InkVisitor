@@ -494,7 +494,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     {column.render("Header") as React.ReactNode}
                   </StyledTh>
                 ) : (
-                  <th key={key}></th>
+                  <StyledTh key={key}></StyledTh>
                 ),
               )}
               {displayMode !== StatementListDisplayMode.TEXT && (

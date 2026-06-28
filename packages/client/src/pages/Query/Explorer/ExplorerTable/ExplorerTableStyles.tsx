@@ -12,28 +12,6 @@ export const StyledTableWrapper = styled.div<StyledTableWrapper>`
 export const StyledRowWrapper = styled.div`
   display: block;
 `;
-interface StyledRow {
-  $isOdd: boolean;
-  $isSelected: boolean;
-  $width: number;
-  $height: number;
-}
-export const StyledRow = styled.div<StyledRow>`
-  display: flex;
-  width: ${({ $width }) => `${$width}px`};
-  align-items: center;
-  height: ${({ theme, $height }) => `${$height}px`};
-  background-color: ${({ theme, $isOdd, $isSelected }) =>
-    $isSelected
-      ? theme.color["tableOpened"]
-      : $isOdd
-        ? theme.color["white"]
-        : theme.color["tableOddRow"]};
-  &:hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
-  }
-`;
-
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
