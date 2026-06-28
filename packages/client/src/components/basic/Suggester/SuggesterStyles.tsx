@@ -30,15 +30,36 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   height: 2.5rem;
   background-color: ${({ theme }) => theme.color["white"]};
   border-style: solid;
-  border-width: 2px;
+  border-width: 0.1rem;
   border-color: ${({ $isFocused, $accentColor, theme }) =>
     $isFocused ? String(theme.color[$accentColor]) : theme.color["gray"]["500"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -0.1rem;
+    border-radius: inherit;
+    border: 0.2rem solid transparent;
+    pointer-events: none;
+    z-index: 1;
+  }
+
   &:hover {
     border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
+    &::after {
+      border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
+    }
   }
+
+  ${({ $isFocused, $accentColor, theme }) =>
+    $isFocused &&
+    `
+    &::after {
+      border-color: ${String(theme.color[$accentColor])};
+    }
+  `}
   input[type="text"],
   .react-select__control {
     /* border-color: transparent !important; */

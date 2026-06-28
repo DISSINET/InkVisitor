@@ -91,7 +91,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     font-size: ${({ theme }) => theme.fontSize["xs"]};
     font-weight: inherit;
     top: 50%;
-    transform: ${({ $suggester }) => ($suggester ? "translateY(-13%)" : "")};
+    transform: ${({ $suggester }) => ($suggester ? "translateY(-6%)" : "")};
     margin-top: 0;
     margin-bottom: 0;
     margin-left: ${({ theme, entityDropdown, wildCardChar, $suggester }) =>
@@ -154,7 +154,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
 
 export const StyledFaChevronDown = styled(FaChevronDown)<{ $suggester?: boolean }>`
   margin-right: ${({ $suggester }) => ($suggester ? "0.3rem" : "0.4rem")};
-  margin-bottom: ${({ $suggester }) => ($suggester ? "0.10rem" : "0")};
+  /* margin-bottom: ${({ $suggester }) => ($suggester ? "0.10rem" : "0")}; */
 `;
 
 export const StyledValueIconWrap = styled.div`
