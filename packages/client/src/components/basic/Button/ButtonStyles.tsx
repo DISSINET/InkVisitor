@@ -15,7 +15,7 @@ const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean, $shape?: Butto
     return "7px 0 0 7px";
   } else if ($radiusRight) {
     return "0 7px 7px 0";
-  } else if ($shape === "square-sharp") {
+  } else if ($shape === "sharp-square") {
     return "0";
   } else if ($shape) {
     return theme.borderRadius[$shape as keyof typeof theme.borderRadius];

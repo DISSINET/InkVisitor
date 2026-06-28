@@ -33,6 +33,7 @@ import {
   StyledTerritoryListItemMissing,
   StyledTh,
   StyledTHead,
+  StyledUserListButtonGroup,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
@@ -588,7 +589,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           return (
-            <ButtonGroup $noMarginRight>
+            <StyledUserListButtonGroup>
               <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}
@@ -600,6 +601,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
+                shape="sharp-square"
               />
               <Button
                 icon={<FaKey size={14} />}
@@ -609,6 +611,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
                 }}
+                shape="sharp-square"
               />
               {canVerifyManually && !verified && (
                 <Button
@@ -627,6 +630,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       },
                     );
                   }}
+                  shape="sharp-square"
                 />
               )}
               <Button
@@ -649,8 +653,9 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     },
                   );
                 }}
+                shape="sharp-square"
               />
-            </ButtonGroup>
+            </StyledUserListButtonGroup>
           );
         },
       },

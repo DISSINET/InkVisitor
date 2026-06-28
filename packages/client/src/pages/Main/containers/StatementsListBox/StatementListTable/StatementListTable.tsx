@@ -341,7 +341,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                       setStatementToDelete(row.original);
                       setShowSubmit(true);
                     }}
-                    shape="square-sharp"
+                    shape="sharp-square"
                     size={ButtonSize.Small}
                   />,
                   <Button
@@ -352,7 +352,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     onClick={() => {
                       cloneStatementMutation.mutate(row.original.id);
                     }}
-                    shape="square-sharp"
+                    shape="sharp-square"
                     size={ButtonSize.Small}
                   />,
                   <Button
@@ -368,7 +368,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     onClick={() => {
                       addStatementAtCertainIndex(row.index);
                     }}
-                    shape="square-sharp"
+                    shape="sharp-square"
                   />,
                   <Button
                     key="add-down"
@@ -383,7 +383,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     onClick={() => {
                       addStatementAtCertainIndex(row.index + 1);
                     }}
-                    shape="square-sharp"
+                    shape="sharp-square"
                   />,
                 ]}
               />

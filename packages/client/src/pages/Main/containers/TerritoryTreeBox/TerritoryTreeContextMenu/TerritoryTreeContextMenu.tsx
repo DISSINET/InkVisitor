@@ -106,7 +106,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipPosition="top"
                     icon={<FaPlus size={14} />}
                     color="info"
-                    shape="square-sharp"
+                    shape="sharp-square"
                     onClick={() => {
                       // add child
                       setShowCreate(true);
@@ -122,7 +122,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipPosition="top"
                     icon={<FaStar size={14} />}
                     color={isFavorited ? "grey" : "warning"}
-                    shape="square-sharp"
+                    shape="sharp-square"
                     onClick={() => {
                       if (isFavorited) {
                         // remove from favorites
@@ -159,7 +159,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipPosition="top"
                     icon={<TbArrowsSort size={14} />}
                     color="success"
-                    shape="square-sharp"
+                    shape="sharp-square"
                     onClick={() => {
                       setShowReorder(true);
                       setShowMenu(false);
@@ -175,7 +175,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipPosition="top"
                     icon={<FaTrashAlt size={14} />}
                     color="danger"
-                    shape="square-sharp"
+                    shape="sharp-square"
                     onClick={() => {
                       setShowSubmit(true);
                       setShowMenu(false);
