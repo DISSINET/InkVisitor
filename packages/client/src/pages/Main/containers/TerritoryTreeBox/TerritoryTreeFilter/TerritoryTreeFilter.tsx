@@ -3,9 +3,9 @@ import { Checkbox, Input } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import { useTheme } from "hooks";
 import React from "react";
-import { FaSearch } from "react-icons/fa";
 import { ITerritoryFilter } from "types";
 import { StyledFilterList, StyledFilterWrap, StyledInputWrap } from "./TerritoryTreeFilterStyles";
+import { BiSearch } from "react-icons/bi";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -66,7 +66,6 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           onChangeFn={(value: boolean) => handleFilterChange("withStatements", value)}
         />
         <StyledInputWrap>
-          <FaSearch style={{ flexShrink: 0 }} size={14} color={theme.color.black} />
           <Input
             value={filterData.filter}
             placeholder="Filter by text"
@@ -74,6 +73,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             changeOnType
             width="full"
             clearable
+            icon={<BiSearch />}
           />
         </StyledInputWrap>
       </StyledFilterList>

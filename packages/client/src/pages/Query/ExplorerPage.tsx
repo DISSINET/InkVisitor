@@ -549,9 +549,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
 
   return (
     <>
-      {queryLeftPanelExpanded &&
-        isExplorerNormal &&
-        querySeparatorYPosition > 0 && (
+      {queryLeftPanelExpanded && isExplorerNormal && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           width={leftPanelWidth}
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
