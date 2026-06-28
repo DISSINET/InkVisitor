@@ -228,7 +228,7 @@ export default Router()
         }
       }
 
-      await Audit.createNew(request, model.id, request.body, EventType.CREATE);
+      await Audit.createNew(request, AuditScope.Entity, model.id, request.body, EventType.CREATE);
 
       return out;
     })
@@ -281,7 +281,7 @@ export default Router()
           throw new InternalServerError("cannot copy entity");
         }
 
-        await Audit.createNew(request, clone.id, clone, EventType.CREATE);
+        await Audit.createNew(request, AuditScope.Entity, clone.id, clone, EventType.CREATE);
 
         const rels = (await Relation.findForEntities(request.db.connection, [originalId])).filter(
           (rel) => {
@@ -434,7 +434,7 @@ export default Router()
       const result = await model.update(request.db.connection, entityData);
 
       if (result.replaced || result.unchanged) {
-        await Audit.createNew(request, entityId, entityData, EventType.EDIT);
+        await Audit.createNew(request, AuditScope.Entity, entityId, entityData, EventType.EDIT);
 
         return {
           result: true,
@@ -970,7 +970,7 @@ export default Router()
           const result = await model.update(request.db.connection, updateData);
 
           if (result.replaced || result.unchanged) {
-            await Audit.createNew(request, entityData.id, updateData, EventType.EDIT);
+            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
             updated++;
           } else {
             errors[entityData.id] = "update failed";
@@ -1053,7 +1053,7 @@ export default Router()
           const result = await model.update(request.db.connection, updateData);
 
           if (result.replaced || result.unchanged) {
-            await Audit.createNew(request, entityData.id, updateData, EventType.EDIT);
+            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
             updated++;
           } else {
             errors[entityData.id] = "update failed";

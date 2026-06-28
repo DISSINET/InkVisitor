@@ -84,24 +84,28 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
-   * Combines Audit constructor and save method to immediately create & persist in the db
+   * Combines Audit constructor and save method to immediately create & persist
+   * an audit for any scope (entity, document or relation).
    * @param req IRequest
-   * @param entityId
-   * @param updateData blob containing snapshot of entity data
+   * @param auditScope scope of the audited model
+   * @param modelId id of the audited model
+   * @param changes blob containing snapshot of the model data
+   * @param type event type
    * @returns Promise<boolean>
    */
   static async createNew(
     req: IRequest,
-    entityId: string,
-    updateData: object,
+    auditScope: AuditScope,
+    modelId: string,
+    changes: object,
     type: EventType
   ): Promise<boolean> {
     const entry = new Audit({
-      modelId: entityId,
-      auditScope: AuditScope.Entity,
+      modelId,
+      auditScope,
       user: req.getUserOrFail().id,
-      changes: updateData,
-      type: type,
+      changes,
+      type,
     });
     return entry.save(req.db.connection);
   }
@@ -138,48 +142,6 @@ export default class Audit implements IAudit, IDbModel {
       return EventType.TEXT_EDIT;
     }
     return EventType.EDIT;
-  }
-
-  static async createNewForDocument(
-    req: IRequest,
-    documentId: string,
-    type: EventType,
-    changes: object
-  ): Promise<boolean> {
-    const entry = new Audit({
-      modelId: documentId,
-      auditScope: AuditScope.Document,
-      user: req.getUserOrFail().id,
-      changes,
-      type,
-    });
-    return entry.save(req.db.connection);
-  }
-
-  /**
-   * Combines Audit constructor and save method to immediately create & persist a
-   * relation-scoped audit. The type is one of the RELATION_* event types and
-   * changes holds the relation snapshot.
-   * @param req IRequest
-   * @param relationId id of the affected relation
-   * @param changes snapshot of the relation data
-   * @param type RELATION_CREATE | RELATION_EDIT | RELATION_DELETE
-   * @returns Promise<boolean>
-   */
-  static async createNewForRelation(
-    req: IRequest,
-    relationId: string,
-    changes: object,
-    type: EventType
-  ): Promise<boolean> {
-    const entry = new Audit({
-      modelId: relationId,
-      auditScope: AuditScope.Relation,
-      user: req.getUserOrFail().id,
-      changes,
-      type,
-    });
-    return entry.save(req.db.connection);
   }
 
   /**

@@ -1,6 +1,6 @@
 import { determineOrder, IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { IEntity, Relation as RelationTypes, AuditScope } from "@inkvisitor/shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { EnumValidators } from "@inkvisitor/shared/enums";
 import {
@@ -274,8 +274,9 @@ export default class Relation implements IRelationModel {
    */
   async afterSave(request: IRequest): Promise<void> {
     if (this._auditEventType && this.id) {
-      await Audit.createNewForRelation(
+      await Audit.createNew(
         request,
+        AuditScope.Relation,
         this.id,
         this.auditSnapshot(),
         this._auditEventType
@@ -291,8 +292,9 @@ export default class Relation implements IRelationModel {
    */
   async afterDelete(request: IRequest): Promise<void> {
     if (this.id) {
-      await Audit.createNewForRelation(
+      await Audit.createNew(
         request,
+        AuditScope.Relation,
         this.id,
         this.auditSnapshot(),
         EventType.RELATION_DELETE
