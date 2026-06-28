@@ -156,6 +156,10 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
     border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
+    &:focus {
+      border-color: ${({ theme }) => theme.color["info"]};
+      box-shadow: ${({ theme }) => `inset 0 0 0 0.1rem ${theme.color["info"]}`};
+    }
   }
   &:hover {
     border-color: ${({ theme, disabled }) => (!disabled ? theme.color["info"] : "")};

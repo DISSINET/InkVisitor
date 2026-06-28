@@ -18,4 +18,8 @@ export const StyledHeader = styled.div`
 
 export const StyledFolderList = styled.div`
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-right: 0.3rem;
 `;
