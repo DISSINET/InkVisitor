@@ -164,7 +164,7 @@ export const StyledLabelFilter = styled.div`
   gap: 0.2rem;
   width: 100%;
   margin: 0 0.5rem;
-  max-width: 40rem;
+  max-width: 36rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`

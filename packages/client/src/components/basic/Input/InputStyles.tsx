@@ -223,13 +223,13 @@ export const StyledIconWrapper = styled.div`
 
 export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
   position: absolute;
-  right: 0.35rem;
+  right: 0.3rem;
   top: 0.3rem;
   bottom: 0.3rem;
   display: flex;
   align-items: center;
   gap: 0.15rem;
-  padding-left: ${({ $showDivider }) => ($showDivider ? "0.3rem" : "0")};
+  padding-left: ${({ $showDivider }) => ($showDivider ? "0.2rem" : "0")};
   border-left: ${({ theme, $showDivider }) =>
     $showDivider ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
 `;
