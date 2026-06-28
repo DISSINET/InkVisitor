@@ -146,6 +146,7 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   font-size: ${({ theme, $fontSizeTextArea }) => theme.fontSize[$fontSizeTextArea]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
+  padding-right: ${({ $rightPadding }) => ($rightPadding ? `${$rightPadding}px` : "")};
   background: ${({ disabled, theme }) => (disabled ? theme.background["stripes"] : "")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;

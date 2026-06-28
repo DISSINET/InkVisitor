@@ -46,6 +46,8 @@ interface Input {
   fullHeightTextArea?: boolean;
   fontSizeTextArea?: keyof ThemeFontSize;
   roundCorners?: boolean;
+  // reserve right padding inside the textarea (e.g. for an overlaid action button)
+  textareaRightPadding?: number;
 
   autocomplete?: string;
   required?: boolean;
@@ -93,6 +95,7 @@ export const Input: React.FC<Input> = ({
   fullHeightTextArea = false,
   fontSizeTextArea = "xs",
   roundCorners = true,
+  textareaRightPadding,
 
   autocomplete = "",
   required = false,
@@ -324,6 +327,7 @@ export const Input: React.FC<Input> = ({
           $fontSizeTextArea={fontSizeTextArea}
           $borderColor={borderColor}
           $roundCorners={roundCorners}
+          $rightPadding={textareaRightPadding}
         />
       )}
       {(type === "datetime-local" || type === "date") && (
