@@ -3,11 +3,12 @@
   display: flex;
   align-items: stretch;
   box-sizing: border-box;
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid var(--qt-row-border, #e2e8f0);
   padding: 0;
+  background: var(--qt-row-bg, #fff);
 }
 .qt-row-odd {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--qt-row-odd-bg, #f0f8ff);
 }
 .qt-row-selected {
   background: rgba(188, 229, 255, 0.4);

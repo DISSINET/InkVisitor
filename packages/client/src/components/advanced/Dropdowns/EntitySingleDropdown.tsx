@@ -1,10 +1,21 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { BaseDropdown, Tooltip } from "components";
+import { BaseDropdown, Tooltip, TypeBar } from "components";
 import React, { useState } from "react";
 import { components, OptionProps } from "react-select";
+import styled from "styled-components";
 import { EntityColors } from "types";
 import { StyledEntityValue } from "./DropdownStyles";
+
+/* Wraps the dropdown so the entity-class TypeBar sits flush on the left and is
+   clipped to the rounded corners (same look as the suggester). */
+const StyledEntityDropdownWrap = styled.div<{ $fullWidth: boolean }>`
+  position: relative;
+  display: ${({ $fullWidth }) => ($fullWidth ? "flex" : "inline-flex")};
+  width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
+`;
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
@@ -19,6 +30,8 @@ interface EntitySingleDropdown<T = string> {
   disableTyping?: boolean;
   disabled?: boolean;
   disableTooltip?: boolean;
+  /** Show the entity-class colour bar on the left. Defaults to true. */
+  showTypeBar?: boolean;
 
   loggerId?: string;
 }
@@ -35,9 +48,10 @@ export const EntitySingleDropdown = <T extends string>({
   disableTyping,
   disabled,
   disableTooltip,
+  showTypeBar = true,
   loggerId,
 }: EntitySingleDropdown<T>) => {
-  return (
+  const dropdown = (
     <BaseDropdown
       entityDropdown
       width={width}
@@ -53,11 +67,24 @@ export const EntitySingleDropdown = <T extends string>({
       autoFocus={autoFocus}
       loggerId={loggerId}
       customComponents={{
-        Option: (props: any) => (
-          <Option {...props} disableTooltip={disableTooltip} />
-        ),
+        Option: (props: any) => <Option {...props} disableTooltip={disableTooltip} />,
       }}
     />
+  );
+
+  // The suggester renders its own TypeBar inside the grouped layout, so skip it
+  // here to avoid duplicates.
+  const typeBarVisible = showTypeBar && !suggester && !!EntityColors[value as string];
+
+  if (!typeBarVisible) {
+    return dropdown;
+  }
+
+  return (
+    <StyledEntityDropdownWrap $fullWidth={width === "full"}>
+      {dropdown}
+      <TypeBar entityLetter={value as keyof typeof EntityColors} noMargin width={4} />
+    </StyledEntityDropdownWrap>
   );
 };
 
@@ -66,8 +93,7 @@ const Option = ({
   ...props
 }: OptionProps<any> & { disableTooltip?: boolean }): React.ReactElement => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
 
   return (
     <components.Option {...props}>
@@ -83,11 +109,7 @@ const Option = ({
         props.data.value !== EntityEnums.Extension.Any &&
         props.data.value !== "" && (
           <Tooltip
-            label={
-              entitiesDictKeys[
-                props.data.value as keyof typeof entitiesDictKeys
-              ]?.label
-            }
+            label={entitiesDictKeys[props.data.value as keyof typeof entitiesDictKeys]?.label}
             visible={showTooltip}
             referenceElement={referenceElement}
             position="left"

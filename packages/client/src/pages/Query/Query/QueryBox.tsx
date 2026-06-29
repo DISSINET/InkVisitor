@@ -190,6 +190,29 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   includeSubordinates={includeSubordinates}
                 />
               )}
+              {/* Vertical spine from below AND/OR switch down to the first child edge */}
+              {rootHasParallelEdges && (
+                <svg
+                  width={QUERY_GRID_WIDTH}
+                  height={QUERY_GRID_HEIGHT + 28}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <line
+                    x1={20}
+                    x2={20}
+                    y1={QUERY_GRID_HEIGHT + 10}
+                    y2={QUERY_GRID_HEIGHT + 28}
+                    stroke={theme.color.query2}
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
               {nextCellAssociatedEdge && (
                 <QueryGridEdge
                   node={nextCellNode}

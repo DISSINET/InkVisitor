@@ -82,7 +82,8 @@ export class SettingsOverlay {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(0, 0, 0, 0.35)",
+      // primary-tinted dim to match the app's modal backdrop (theme.color.modalBg)
+      background: "rgba(9, 16, 52, 0.3)",
     } as Partial<CSSStyleDeclaration>);
 
     this.anchor = anchor ?? null;
@@ -100,9 +101,9 @@ export class SettingsOverlay {
       overflow: "auto",
       background: this.colors.bg,
       border: `1px solid ${this.colors.border}`,
-      borderRadius: "6px",
-      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.25)",
-      font: '13px "Roboto", sans-serif',
+      borderRadius: "5px",
+      boxShadow: "0px 5px 10px hsla(0, 0%, 0%, 0.15)",
+      font: '12px "Roboto", sans-serif',
       color: this.colors.text,
     } as Partial<CSSStyleDeclaration>);
     // Clicks inside the box must not fall through to the backdrop dismiss.
@@ -265,11 +266,12 @@ export class SettingsOverlay {
       btn.textContent = action.label;
       Object.assign(btn.style, {
         font: "inherit",
-        padding: "5px 12px",
-        border: `1px solid ${this.colors.border}`,
-        borderRadius: "4px",
-        background: this.colors.buttonBg,
-        color: this.colors.text,
+        fontWeight: "bold",
+        padding: "6px 14px",
+        border: "none",
+        borderRadius: "5px",
+        background: this.colors.accent,
+        color: this.colors.accentText,
         cursor: "pointer",
       } as Partial<CSSStyleDeclaration>);
       btn.addEventListener("mousedown", (e) => {
@@ -295,6 +297,7 @@ export class SettingsOverlay {
 
     const label = document.createElement("span");
     label.textContent = labelText;
+    label.style.fontSize = "13px";
     row.appendChild(label);
     return { row, label };
   }
@@ -306,18 +309,26 @@ export class SettingsOverlay {
     const input = document.createElement("input");
     input.type = "color";
     input.value = setting.value;
+    input.className = "annotator-color-picker";
     Object.assign(input.style, {
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      appearance: "none",
       width: "40px",
       height: "24px",
       padding: "0",
-      border: `1px solid ${this.colors.border}`,
-      borderRadius: "4px",
+      border: `2px solid ${this.colors.border}`,
+      borderRadius: "5px",
       cursor: "pointer",
-      background: "none",
+      background: setting.value,
     } as Partial<CSSStyleDeclaration>);
+    this.injectColorPickerStyle();
     // Keep clicks inside the control from dismissing the backdrop.
     input.addEventListener("mousedown", (e) => e.stopPropagation());
-    input.addEventListener("input", () => setting.onChange(input.value));
+    input.addEventListener("input", () => {
+      input.style.background = input.value;
+      setting.onChange(input.value);
+    });
 
     row.appendChild(input);
     return row;
@@ -332,7 +343,7 @@ export class SettingsOverlay {
     Object.assign(select.style, {
       padding: "4px 8px",
       border: `1px solid ${this.colors.border}`,
-      borderRadius: "4px",
+      borderRadius: "5px",
       background: this.colors.bg,
       color: setting.disabled ? this.colors.disabled : this.colors.text,
       cursor: setting.disabled ? "default" : "pointer",
@@ -363,12 +374,15 @@ export class SettingsOverlay {
   private buildSegmented(setting: SegmentedSetting): HTMLDivElement {
     const { row } = this.buildRow(setting.label);
 
+    // matches the app's SwitchGroup: pale container, gapped rounded segments,
+    // active = solid accent chip, no hard dividers
     const group = document.createElement("div");
     Object.assign(group.style, {
       display: "inline-flex",
-      border: `1px solid ${this.colors.border}`,
-      borderRadius: "4px",
-      overflow: "hidden",
+      gap: "2px",
+      padding: "3px",
+      background: this.colors.buttonBg,
+      borderRadius: "5px",
     } as Partial<CSSStyleDeclaration>);
 
     let selected = setting.value;
@@ -378,7 +392,7 @@ export class SettingsOverlay {
       for (const seg of segments) {
         const active = seg.value === selected;
         Object.assign(seg.el.style, {
-          background: active ? this.colors.accent : this.colors.bg,
+          background: active ? this.colors.accent : "transparent",
           color: active ? this.colors.accentText : this.colors.text,
         } as Partial<CSSStyleDeclaration>);
       }
@@ -390,7 +404,8 @@ export class SettingsOverlay {
       Object.assign(seg.style, {
         padding: "4px 12px",
         cursor: "pointer",
-        borderLeft: segments.length ? `1px solid ${this.colors.border}` : "none",
+        borderRadius: "3px",
+        transition: "background-color 0.12s ease",
       } as Partial<CSSStyleDeclaration>);
       seg.addEventListener("mousedown", (e) => {
         e.preventDefault();
@@ -407,6 +422,19 @@ export class SettingsOverlay {
 
     row.appendChild(group);
     return row;
+  }
+
+  private colorPickerStyleInjected = false;
+  private injectColorPickerStyle(): void {
+    if (this.colorPickerStyleInjected) return;
+    const style = document.createElement("style");
+    style.textContent = `
+      .annotator-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+      .annotator-color-picker::-webkit-color-swatch { border: none; border-radius: 3px; }
+      .annotator-color-picker::-moz-color-swatch { border: none; border-radius: 3px; }
+    `;
+    document.head.appendChild(style);
+    this.colorPickerStyleInjected = true;
   }
 
   private readonly onKeyDown = (e: KeyboardEvent) => {

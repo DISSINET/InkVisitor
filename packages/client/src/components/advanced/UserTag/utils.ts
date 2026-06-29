@@ -45,69 +45,90 @@ const toInvertedBgKey = (color: UserTagColor): keyof ThemeType["color"]["inverte
   return map[color];
 };
 
+export interface UserTagColors {
+  // thin outline of the whole pill
+  border: string;
+  // solid accent disc that holds the role icon
+  avatarBackground: string;
+  iconColor: string;
+  // pale field the name sits on
+  labelBackground: string;
+  labelText: string;
+}
+
+// Two-tone "contributor badge": a solid accent avatar disc floating on a pale
+// name field. The colour split (not just the pill shape) is what makes it read
+// as a person rather than a Button.
 export const getVariantColors = (
   theme: ThemeType,
   color: UserTagColor,
   variant: UserTagVariant
-): { border: string; background: string; text: string; icon: string } => {
+): UserTagColors => {
   const base = theme.color[color];
   const inverted = theme.color.invertedBg[toInvertedBgKey(color)];
 
   if (variant === "filled") {
     return {
       border: base,
-      background: base,
-      text: theme.color.white,
-      icon: theme.color.white,
+      avatarBackground: base,
+      iconColor: base,
+      labelBackground: inverted,
+      labelText: base,
     };
   }
 
   if (variant === "inverted") {
     return {
       border: theme.color.white,
-      background: theme.color.white,
-      text: base,
-      icon: base,
+      avatarBackground: theme.color.white,
+      iconColor: base,
+      labelBackground: theme.color.white,
+      labelText: base,
     };
   }
   if (variant === "transparent") {
     return {
       border: "transparent",
-      background: "transparent",
-      text: base,
-      icon: base,
+      avatarBackground: "transparent",
+      iconColor: base,
+      labelBackground: "transparent",
+      labelText: base,
     };
   }
   if (variant === "dark") {
     return {
       border: STATIC_DARK,
-      background: STATIC_DARK,
-      text: STATIC_BRIGHT,
-      icon: STATIC_BRIGHT,
+      avatarBackground: STATIC_DARK,
+      iconColor: STATIC_BRIGHT,
+      labelBackground: STATIC_DARK,
+      labelText: STATIC_BRIGHT,
     };
   }
   if (variant === "bright") {
     return {
       border: STATIC_BRIGHT,
-      background: STATIC_BRIGHT,
-      text: STATIC_DARK,
-      icon: STATIC_DARK,
+      avatarBackground: STATIC_BRIGHT,
+      iconColor: STATIC_DARK,
+      labelBackground: STATIC_BRIGHT,
+      labelText: STATIC_DARK,
     };
   }
   // bordered inverted background
   if (variant === "light") {
     return {
       border: base,
-      background: inverted,
-      text: base,
-      icon: base,
+      avatarBackground: base,
+      iconColor: base,
+      labelBackground: inverted,
+      labelText: base,
     };
   }
   // bordered
   return {
     border: base,
-    background: theme.color.white,
-    text: base,
-    icon: base,
+    avatarBackground: base,
+    iconColor: base,
+    labelBackground: theme.color.white,
+    labelText: base,
   };
 };

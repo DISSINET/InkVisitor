@@ -234,6 +234,13 @@ const theme = {
     md: "1rem",
     lg: "1.5rem",
     full: "9999px",
+    input: "0.5rem",
+    // for Button component
+    "rounded-sm": "0.3rem",
+    "rounded-md": "0.5rem",
+    "rounded-lg": "0.8rem",
+    "rounded-xl": "1rem",
+    "rounded-full": "9999px",
   },
   borderStyle: {
     //logical type

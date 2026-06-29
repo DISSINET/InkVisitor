@@ -3,7 +3,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import api from "api";
-import { Button, Input, Loader, TypeBar } from "components";
+import { Button, Input, Loader } from "components";
 
 import { useQuery } from "@tanstack/react-query";
 import Dropdown, { EntityTag } from "components/advanced";
@@ -147,7 +147,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                   disableTyping
                   disableTooltip={!widthTooNarrow}
                 />
-                <TypeBar entityLetter={filterByClass} />
               </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>

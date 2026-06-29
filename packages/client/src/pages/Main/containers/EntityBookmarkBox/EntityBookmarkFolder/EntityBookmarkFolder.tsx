@@ -52,8 +52,6 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
   setOpenedFolders,
 }) => {
   const queryClient = useQueryClient();
-  const fourthPanelWidth = useSelector(selectPanelWidth(3));
-  const isNarrow = fourthPanelWidth < 250;
 
   const handleClickFolder = (folderId: string) => {
     if (open) {
@@ -125,8 +123,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
 
   drop(dropRef);
 
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
@@ -210,8 +207,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
                 addBookmark(bookmarkFolder.id, bookmarkId);
               }}
               categoryTypes={classesAll}
-              placeholder={isNarrow ? "add bookmark" : "add new bookmark"}
-              inputWidth={isNarrow ? 80 : "full"}
+              placeholder="add bookmark"
+              inputWidth="full"
               excludedActantIds={bookmarkFolder.entities.map((e) => e.id)}
             />
           </StyledFolderSuggester>

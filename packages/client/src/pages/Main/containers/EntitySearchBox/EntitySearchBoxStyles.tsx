@@ -40,6 +40,14 @@ export const StyledAdvancedOptions = styled.div`
   }
 `;
 
+export const StyledDropdownWithTypeBar = styled.div`
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
+  /* padding-left: 0.4rem; */
+`;
+
 export const StyledRowHeader = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   display: block;
@@ -207,7 +215,9 @@ export const StyledPillCloseIcon = styled.div`
   cursor: pointer;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border-radius: 2rem;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
 
   ${StyledPill}:hover &,
   ${StyledPill}:active &,

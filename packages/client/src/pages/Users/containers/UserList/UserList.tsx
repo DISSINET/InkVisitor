@@ -1,8 +1,9 @@
 import { userRoleDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
+import { useUsersGetMoreQuery } from "hooks/react-query";
 import { Button, ButtonGroup, Loader, Submit } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { UserTagSize } from "components/advanced/UserTag/utils";
@@ -32,6 +33,7 @@ import {
   StyledTerritoryListItemMissing,
   StyledTh,
   StyledTHead,
+  StyledUserListButtonGroup,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
@@ -85,15 +87,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
-  const { data: users, isFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await api.usersGetMore({});
-      return res.data ?? [];
-    },
-    enabled: api.isLoggedIn(),
-    select: (data) => [...data].sort((a, b) => (a.id > b.id ? 1 : -1)),
-  });
+  const { data: users, isFetching } = useUsersGetMoreQuery();
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
@@ -365,7 +359,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     excludedActantIds={readTerritories.map((r) => r.territory)}
                   />
                   <StyledTerritoryList>
-                    {readTerritories.length && territoryActants ? (
+                    {readTerritories.length > 0 && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
                           (t) => t.territory.id === right.territory,
@@ -441,7 +435,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       excludedActantIds={writeTerritories.map((r) => r.territory)}
                     />
                     <StyledTerritoryList>
-                      {writeTerritories.length && territoryActants ? (
+                      {writeTerritories.length > 0 && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
                             (t) => t.territory.id === right.territory,
@@ -595,7 +589,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           return (
-            <ButtonGroup $noMarginRight>
+            <StyledUserListButtonGroup>
               <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}
@@ -607,6 +601,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
+                shape="sharp-square"
               />
               <Button
                 icon={<FaKey size={14} />}
@@ -616,6 +611,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
                 }}
+                shape="sharp-square"
               />
               {canVerifyManually && !verified && (
                 <Button
@@ -634,6 +630,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       },
                     );
                   }}
+                  shape="sharp-square"
                 />
               )}
               <Button
@@ -656,8 +653,9 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     },
                   );
                 }}
+                shape="sharp-square"
               />
-            </ButtonGroup>
+            </StyledUserListButtonGroup>
           );
         },
       },

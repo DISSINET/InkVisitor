@@ -7,7 +7,7 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Button, Checkbox } from "components";
+import { Button, Checkbox, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { getRelationConstrainedCategoryTypes } from "../../utils";
@@ -121,42 +121,44 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   return (
     <StyledNodeContainer>
       {hasParallelEdges && (
-        <StyledParallelOperator>
-          <Checkbox
-            key={`${node.id}-and-${node.operator}`}
+        <SwitchGroup $column>
+          <Button
             label="AND"
-            value={node.operator === Query.NodeOperator.And}
+            shape="rounded-sm"
+            noBorder
+            inverted={node.operator !== Query.NodeOperator.And}
+            noBackground={node.operator !== Query.NodeOperator.And}
+            color={node.operator === Query.NodeOperator.And ? "primary" : "greyer"}
             tooltipLabel="match all parallel branches"
-            onChangeFn={(checked) => {
-              if (checked) {
-                dispatch({
-                  type: QueryActionType.updateNodeOperator,
-                  payload: {
-                    nodeId: node.id,
-                    newOperator: Query.NodeOperator.And,
-                  },
-                });
-              }
+            onClick={() => {
+              dispatch({
+                type: QueryActionType.updateNodeOperator,
+                payload: {
+                  nodeId: node.id,
+                  newOperator: Query.NodeOperator.And,
+                },
+              });
             }}
           />
-          <Checkbox
-            key={`${node.id}-or-${node.operator}`}
+          <Button
             label="OR"
-            value={node.operator === Query.NodeOperator.Or}
+            shape="rounded-sm"
+            noBorder
+            inverted={node.operator !== Query.NodeOperator.Or}
+            noBackground={node.operator !== Query.NodeOperator.Or}
+            color={node.operator === Query.NodeOperator.Or ? "primary" : "greyer"}
             tooltipLabel="match any parallel branch"
-            onChangeFn={(checked) => {
-              if (checked) {
-                dispatch({
-                  type: QueryActionType.updateNodeOperator,
-                  payload: {
-                    nodeId: node.id,
-                    newOperator: Query.NodeOperator.Or,
-                  },
-                });
-              }
+            onClick={() => {
+              dispatch({
+                type: QueryActionType.updateNodeOperator,
+                payload: {
+                  nodeId: node.id,
+                  newOperator: Query.NodeOperator.Or,
+                },
+              });
             }}
           />
-        </StyledParallelOperator>
+        </SwitchGroup>
       )}
       <StyledNodeMainRow>
         <StyledGraphNode

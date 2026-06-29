@@ -12,13 +12,17 @@ import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
 import { computeDifferences } from "utils/utils";
 import { useUserQuery } from "hooks/react-query";
+import { EditorBoxState } from "types";
 
 export const StatementEditorBox: React.FC = () => {
   const thirdPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelExpanded
   );
+  const editorBoxState: EditorBoxState = useAppSelector(
+    (state) => state.layout.mainPage.editorBoxState
+  );
 
-  const { statementId, setStatementId, selectedDetailId, setTerritoryId } = useSearchParams();
+  const { statementId, setStatementId, selectedDetailId, setTerritoryId, editorOpened } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -401,9 +405,11 @@ export const StatementEditorBox: React.FC = () => {
 
       <Loader
         show={
-          isFetchingStatement ||
-          updateStatementMutation.isPending ||
-          (thirdPanelExpanded && !showEditor)
+          editorOpened &&
+          editorBoxState !== EditorBoxState.Minimized &&
+          (isFetchingStatement ||
+            updateStatementMutation.isPending ||
+            (thirdPanelExpanded && !showEditor))
         }
       />
     </>

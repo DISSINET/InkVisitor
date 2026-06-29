@@ -1,10 +1,6 @@
 import { Button } from "components";
 import React from "react";
-import {
-  StyledButtonWrap,
-  StyledPropButtonGroup,
-  StyledWrap,
-} from "./AttributeButtonGroupStyles";
+import { StyledButtonWrap, StyledPropButtonGroup, StyledWrap } from "./AttributeButtonGroupStyles";
 
 interface AttributeButtonGroup {
   options: {
@@ -63,25 +59,23 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
             return (
               <Button
                 key={oi}
-                disabled={
-                  option.optionDisabled || (disabled && !option.selected)
-                }
+                disabled={option.optionDisabled || (disabled && !option.selected)}
                 fullWidth={iconsOnly || fullWidth}
                 label={
                   iconsOnly
                     ? undefined
                     : option.selected
-                    ? option.longValue
-                    : option.shortValue !== undefined
-                    ? option.shortValue
-                    : option.longValue
+                      ? option.longValue
+                      : option.shortValue !== undefined
+                        ? option.shortValue
+                        : option.longValue
                 }
                 icon={
                   option.icon
                     ? option.icon
                     : !option.selected && option.shortIcon
-                    ? option.shortIcon
-                    : undefined
+                      ? option.shortIcon
+                      : undefined
                 }
                 tooltipLabel={
                   (!option.selected || iconsOnly) &&
@@ -95,6 +89,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 textRegular={option.selected ? false : true}
                 radiusLeft={firstInRow}
                 radiusRight={lastInRow}
+                shape={option.selected && !firstInRow && !lastInRow ? "sharp" : undefined}
                 onClick={() => {
                   if ((!option.selected || canSelectMultiple) && !disabled) {
                     option.onClick();

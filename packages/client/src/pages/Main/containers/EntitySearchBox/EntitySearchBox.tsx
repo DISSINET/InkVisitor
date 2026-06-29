@@ -36,6 +36,7 @@ import {
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
+  StyledDropdownWithTypeBar,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -354,14 +355,21 @@ export const EntitySearchBox: React.FC = () => {
                 changeOnType
                 onChangeFn={(value: string) => handleChange({ labelOrId: value })}
                 clearable
+                rightContent={
+                  <>
+                    {userRole !== UserEnums.Role.Viewer && (
+                      <Button
+                        tooltipLabel="create entity"
+                        icon={<FaPlus />}
+                        onClick={() => setShowEntityCreateModal(true)}
+                        noBackground
+                        noBorder
+                        inverted
+                      />
+                    )}
+                  </>
+                }
               />
-              {userRole !== UserEnums.Role.Viewer && (
-                <Button
-                  tooltipLabel="create entity"
-                  icon={<FaPlus />}
-                  onClick={() => setShowEntityCreateModal(true)}
-                />
-              )}
             </div>
           </StyledRow>
 
@@ -378,27 +386,24 @@ export const EntitySearchBox: React.FC = () => {
             {expandedOptions.includes(SearchEnums.AdvancedOption.Class) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Class)}
-                <div style={{ position: "relative" }}>
-                  <Dropdown.Single.Entity
-                    placeholder={""}
-                    width="full"
-                    options={[defaultClassOption].concat(entitiesDict)}
-                    value={classOption}
-                    onChange={(selectedOption) => {
-                      handleChange({
-                        class: selectedOption,
-                      });
-                    }}
-                  />
-                  <TypeBar entityLetter={classOption} />
-                </div>
+                <Dropdown.Single.Entity
+                  placeholder={""}
+                  width="full"
+                  options={[defaultClassOption].concat(entitiesDict)}
+                  value={classOption}
+                  onChange={(selectedOption) => {
+                    handleChange({
+                      class: selectedOption,
+                    });
+                  }}
+                />
               </StyledRow>
             )}
 
             {expandedOptions.includes(SearchEnums.AdvancedOption.Status) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Status)}
-                <div style={{ position: "relative" }}>
+                <StyledDropdownWithTypeBar>
                   <Dropdown.Single.Basic
                     placeholder={""}
                     width="full"
@@ -410,15 +415,15 @@ export const EntitySearchBox: React.FC = () => {
                       });
                     }}
                   />
-                  <TypeBar entityLetter={classOption} />
-                </div>
+                  <TypeBar entityLetter={classOption} noMargin width={4} />
+                </StyledDropdownWithTypeBar>
               </StyledRow>
             )}
 
             {expandedOptions.includes(SearchEnums.AdvancedOption.Language) && (
               <StyledRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Language)}
-                <div style={{ position: "relative" }}>
+                <StyledDropdownWithTypeBar>
                   <Dropdown.Single.Basic
                     placeholder={""}
                     width="full"
@@ -433,8 +438,8 @@ export const EntitySearchBox: React.FC = () => {
                       });
                     }}
                   />
-                  <TypeBar entityLetter={classOption} />
-                </div>
+                  <TypeBar entityLetter={classOption} noMargin width={4} />
+                </StyledDropdownWithTypeBar>
               </StyledRow>
             )}
 

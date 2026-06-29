@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const StyledTreeWrapper = styled.div`
-  margin-top: 2px;
+  margin-top: 0.6rem;
   display: flex;
   flex-direction: column;
   overflow: auto;
