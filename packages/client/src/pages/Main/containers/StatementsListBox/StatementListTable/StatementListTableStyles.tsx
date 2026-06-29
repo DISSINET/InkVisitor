@@ -62,8 +62,11 @@ export const StyledTr = styled.tr<StyledTr>`
   transition: box-shadow 0.2s ease-in-out;
   box-shadow: ${({ theme, $isAnnotatorHovered }) =>
     `inset 0 0 0 2px ${$isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0}`};
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   cursor: ${({ $isOpened, $listMode }) => ($isOpened && $listMode ? "default" : "pointer")};
+
+  &:not(:first-child) td {
+    border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  }
   td:first-child {
     position: relative;
     padding-left: 0.9rem;
