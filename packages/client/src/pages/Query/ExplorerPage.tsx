@@ -668,7 +668,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     noBackground={isStatsView}
                     color={isStatsView ? "greyer" : "primary"}
                     icon={<BiTable />}
-                    onClick={() => setExploreViewMode(Explore.EViewMode.Table)}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Table);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
                   />
                   <Button
                     tooltipLabel="stats view"
@@ -679,7 +682,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     noBackground={!isStatsView}
                     color={!isStatsView ? "greyer" : "primary"}
                     icon={<BiBarChartAlt2 />}
-                    onClick={() => setExploreViewMode(Explore.EViewMode.Stats)}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Stats);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
                   />
                 </SwitchGroup>
               }

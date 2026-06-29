@@ -250,7 +250,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     disableCreate
                     includeEquivalents={includeEquivalents}
                     includeSubordinates={includeSubordinates}
-                    disabled={isRelationEntityPickerDisabled}
+                    disabled={isRelationEntityPickerDisabled || (paramEntityClass && (node.params.entityClasses?.length ?? 0) > 0)}
                     initCategory={
                       node.params.entityClasses?.[0] ??
                       entityIdCategoryTypes[0] ??
