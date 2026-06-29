@@ -181,15 +181,21 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 paramEntityClass ? (
                   <>
                     <p>
-                      Empty suggester entity = any entity of selected class (select * for all
-                      classes).
+                      [edge type] with empty suggester entity = any entity of selected class (select
+                      * for all classes).
                     </p>
-                    <p>NOT with empty suggester entity = not has [edge type] entity empty.</p>
+                    <p>
+                      NOT [edge type] with empty suggester entity = not has [edge type] entity
+                      empty.
+                    </p>
                   </>
                 ) : (
                   <>
-                    <p>Empty suggester entity = any entity.</p>
-                    <p>NOT with empty suggester entity = not has [edge type] entity empty.</p>
+                    <p>[edge type] with empty suggester entity = any entity.</p>
+                    <p>
+                      NOT [edge type] with empty suggester entity = not has [edge type] entity
+                      empty.
+                    </p>
                   </>
                 )
               }
