@@ -119,7 +119,7 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
             noBackground
             inverted
             disabled={isFirst}
-            icon={<MdChevronLeft color={theme.color.headerTextColor} />}
+            icon={<MdChevronLeft size={15} color={theme.color.headerTextColor} />}
             onClick={() => onMoveColumn(index, index - 1)}
             tooltipLabel="move column left"
           />
@@ -128,7 +128,7 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
             noBackground
             inverted
             disabled={isLast}
-            icon={<MdChevronRight color={theme.color.headerTextColor} />}
+            icon={<MdChevronRight size={15} color={theme.color.headerTextColor} />}
             onClick={() => onMoveColumn(index, index + 1)}
             tooltipLabel="move column right"
           />
