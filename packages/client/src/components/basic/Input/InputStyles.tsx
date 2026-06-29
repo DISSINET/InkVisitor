@@ -32,6 +32,7 @@ interface StyledWrapper {
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
+  align-items: center;
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
