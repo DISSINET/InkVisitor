@@ -297,6 +297,7 @@ export class SettingsOverlay {
 
     const label = document.createElement("span");
     label.textContent = labelText;
+    label.style.fontSize = "13px";
     row.appendChild(label);
     return { row, label };
   }
@@ -308,18 +309,26 @@ export class SettingsOverlay {
     const input = document.createElement("input");
     input.type = "color";
     input.value = setting.value;
+    input.className = "annotator-color-picker";
     Object.assign(input.style, {
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      appearance: "none",
       width: "40px",
       height: "24px",
       padding: "0",
-      border: `1px solid ${this.colors.border}`,
+      border: `2px solid ${this.colors.border}`,
       borderRadius: "5px",
       cursor: "pointer",
-      background: "none",
+      background: setting.value,
     } as Partial<CSSStyleDeclaration>);
+    this.injectColorPickerStyle();
     // Keep clicks inside the control from dismissing the backdrop.
     input.addEventListener("mousedown", (e) => e.stopPropagation());
-    input.addEventListener("input", () => setting.onChange(input.value));
+    input.addEventListener("input", () => {
+      input.style.background = input.value;
+      setting.onChange(input.value);
+    });
 
     row.appendChild(input);
     return row;
@@ -413,6 +422,19 @@ export class SettingsOverlay {
 
     row.appendChild(group);
     return row;
+  }
+
+  private colorPickerStyleInjected = false;
+  private injectColorPickerStyle(): void {
+    if (this.colorPickerStyleInjected) return;
+    const style = document.createElement("style");
+    style.textContent = `
+      .annotator-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+      .annotator-color-picker::-webkit-color-swatch { border: none; border-radius: 3px; }
+      .annotator-color-picker::-moz-color-swatch { border: none; border-radius: 3px; }
+    `;
+    document.head.appendChild(style);
+    this.colorPickerStyleInjected = true;
   }
 
   private readonly onKeyDown = (e: KeyboardEvent) => {
