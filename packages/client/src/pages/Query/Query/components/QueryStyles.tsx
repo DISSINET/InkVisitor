@@ -1,3 +1,4 @@
+import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import styled from "styled-components";
 
 export const StyledNodeContainer = styled.div<{ $column?: boolean }>`
@@ -48,4 +49,41 @@ export const StyledNodeTypeSelect = styled.div`
     font-weight: 900 !important;
     font-size: large;
   }
+`;
+
+export const StyledEdgeContainer = styled.div`
+  position: relative;
+`;
+
+export const StyledEdgeSvg = styled.svg.attrs({
+  width: QUERY_GRID_WIDTH,
+  height: QUERY_GRID_HEIGHT,
+})`
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+`;
+
+export const StyledEdgeControlsLayer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+`;
+
+export const StyledEdgeBox = styled.div<{ $color: string }>`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  background-color: ${({ $color }) => $color};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  padding: ${({ theme }) => theme.space[1]};
+  padding-left: ${({ theme }) => theme.space[2]};
+  margin-top: 10px;
 `;

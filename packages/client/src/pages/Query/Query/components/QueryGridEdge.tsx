@@ -7,6 +7,12 @@ import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
 import { findValidEdgeTypesForSourceNode } from "pages/Query/utils";
+import {
+  StyledEdgeBox,
+  StyledEdgeContainer,
+  StyledEdgeControlsLayer,
+  StyledEdgeSvg,
+} from "./QueryStyles";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
@@ -65,30 +71,23 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
     return a.label.localeCompare(b.label);
   });
 
+  const x = 20;
+  const midY = QUERY_GRID_HEIGHT / 2;
+  const curveRadius = 8;
+  const branchPath = [
+    `M ${x} 0`,
+    `L ${x} ${midY - curveRadius}`,
+    `Q ${x} ${midY} ${x + curveRadius} ${midY}`,
+    `L ${QUERY_GRID_WIDTH} ${midY}`,
+  ].join(" ");
+
   return (
-    <div
-      style={{
-        position: "relative",
-      }}
-    >
-      <svg
-        width={QUERY_GRID_WIDTH}
-        height={QUERY_GRID_HEIGHT}
-        // decorative connector - must never intercept clicks on the controls
-        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
-      >
+    <StyledEdgeContainer>
+      <StyledEdgeSvg>
         <g style={{ strokeWidth: 3 }}>
-          {/* this edge's own branch: upper spine (junction) + horizontal to the
-              node, in this edge's colour - red/dashed when negative */}
           <g style={{ stroke: lineColor }} strokeDasharray={isNegative ? "6 4" : undefined}>
-            <path
-              d={`M 20 0 L 20 ${QUERY_GRID_HEIGHT / 2 - 8} Q 20 ${QUERY_GRID_HEIGHT / 2} 28 ${QUERY_GRID_HEIGHT / 2} L ${QUERY_GRID_WIDTH} ${QUERY_GRID_HEIGHT / 2}`}
-              fill="none"
-              strokeLinecap="round"
-            />
+            <path d={branchPath} fill="none" strokeLinecap="round" />
           </g>
-          {/* pass-through spine continuing down to the next sibling, coloured
-              by that sibling's logic */}
           {extendVertical && (
             <g
               style={{
@@ -97,45 +96,18 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               strokeDasharray={extendNegative ? "6 4" : undefined}
             >
               <line
-                x1={20}
-                x2={20}
-                y1={QUERY_GRID_HEIGHT / 2}
+                x1={x}
+                x2={x}
+                y1={midY}
                 y2={QUERY_GRID_HEIGHT}
                 strokeLinecap="round"
               />
             </g>
           )}
         </g>
-      </svg>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "5px",
-          width: "100%",
-          height: "100%",
-          justifyContent: "center",
-          // keep the controls above the decorative connector line so the line
-          // is hidden behind the box instead of drawn over the NOT checkbox
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: "5px",
-            // a negative edge tints its own box red; this is scoped to the edge
-            // itself (its level), not its target node or deeper edges
-            backgroundColor: lineColor,
-            borderRadius: theme.borderRadius["default"],
-            padding: theme.space[1],
-            paddingLeft: theme.space[2],
-            marginTop: 10,
-          }}
-        >
+      </StyledEdgeSvg>
+      <StyledEdgeControlsLayer>
+        <StyledEdgeBox $color={lineColor}>
           <Checkbox
             key={`${edge.id}-not-${edge.logic}`}
             label="NOT"
@@ -143,7 +115,6 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             tooltipLabel="negate this condition (find entities that do NOT match)"
             onChangeFn={(checked) => {
               const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
-              // skip the redundant dispatch fired on (re)mount
               if (newLogic === edge.logic) {
                 return;
               }
@@ -178,8 +149,8 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               });
             }}
           />
-        </div>
-      </div>
-    </div>
+        </StyledEdgeBox>
+      </StyledEdgeControlsLayer>
+    </StyledEdgeContainer>
   );
 };
