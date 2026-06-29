@@ -10,9 +10,11 @@ import { findValidEdgeTypesForSourceNode } from "pages/Query/utils";
 
 interface QueryGridEdgeProps {
   node: INodeItem;
+  rootNode: Query.INode;
   edge: Query.IEdge;
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
+  isRootEdge?: boolean;
   // when this edge is not the last of its parent's children, the vertical
   // spine must continue down past this branch to reach the siblings below
   extendVertical?: boolean;
@@ -23,14 +25,17 @@ interface QueryGridEdgeProps {
 
 export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   node,
+  rootNode,
   edge,
   dispatch,
   problems,
+  isRootEdge = false,
   extendVertical = false,
   extendNegative = false,
 }) => {
   const theme = useTheme();
-  const validEdgesTypes = findValidEdgeTypesForSourceNode(node);
+  const sourceNode = isRootEdge ? rootNode : node;
+  const validEdgesTypes = findValidEdgeTypesForSourceNode(sourceNode, isRootEdge);
 
   const edgeTypeOptions = validEdgesTypes.map((type) => ({
     value: type,

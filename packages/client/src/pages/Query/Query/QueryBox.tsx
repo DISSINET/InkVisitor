@@ -216,6 +216,8 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
               {nextCellAssociatedEdge && (
                 <QueryGridEdge
                   node={nextCellNode}
+                  rootNode={state}
+                  isRootEdge={wi === 0}
                   dispatch={dispatch}
                   edge={nextCellAssociatedEdge}
                   extendVertical={extendEdgeIds.has(nextCellAssociatedEdge.id)}

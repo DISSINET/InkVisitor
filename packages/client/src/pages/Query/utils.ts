@@ -111,12 +111,17 @@ export const getRelationSuggesterConfig = (
   };
 };
 
-export const findValidEdgeTypesForSourceNode = (node: Query.INode): Query.EdgeType[] => {
+export const findValidEdgeTypesForSourceNode = (
+  node: Query.INode,
+  filterByClass = false,
+): Query.EdgeType[] => {
   const validEdges = Object.entries(Query.EdgeTypeNodeRules)
-    .filter(([, [ruleFrom, ruleTo]]) => {
+    .filter(([, [ruleFrom]]) => {
       const validType = ruleFrom.nodeType === node.type;
       const validClass =
-        node.params?.entityClasses?.length && ruleFrom.params.entityClass?.length
+        filterByClass &&
+        node.params?.entityClasses?.length &&
+        ruleFrom.params.entityClass?.length
           ? node.params.entityClasses.some((cl) => ruleFrom.params.entityClass?.includes(cl))
           : true;
       return validType && validClass;
