@@ -17,6 +17,7 @@ import {
   StyledHeaderColumnControls,
   StyledHeaderColumnLabel,
   StyledHeaderDragHandle,
+  StyledHeaderEditIcon,
 } from "../ExplorerTableStyles";
 import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
 
@@ -112,7 +113,9 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
           <MdDragIndicator size={14} color={theme.color.headerTextColor} />
         </StyledHeaderDragHandle>
         {column.editable && (
-          <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />
+          <StyledHeaderEditIcon title="editable column">
+            <MdOutlineEdit size={14} color={theme.color.headerTextColor} />
+          </StyledHeaderEditIcon>
         )}
         <StyledHeaderColumnLabel>
           <ExploreTableHeaderTooltip column={column}>

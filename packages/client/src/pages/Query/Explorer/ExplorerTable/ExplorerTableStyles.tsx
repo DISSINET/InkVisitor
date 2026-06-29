@@ -41,6 +41,16 @@ export const StyledHeaderDragHandle = styled.span`
   }
 `;
 
+export const StyledHeaderEditIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 0.3rem;
+  /* Informational marker (column is editable) - not a button, not draggable. */
+  cursor: default;
+  opacity: 0.55;
+`;
+
 export const StyledHeaderColumnLabel = styled.span`
   display: inline-flex;
   align-items: center;
