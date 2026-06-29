@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
@@ -7,7 +7,7 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Button, Checkbox, SwitchGroup } from "components";
+import { Button, Checkbox, SwitchGroup, Tooltip } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { getRelationConstrainedCategoryTypes } from "../../utils";
@@ -49,6 +49,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 }) => {
   const theme = useTheme();
   const isValid = problems.length === 0;
+
+  const [nodeHovered, setNodeHovered] = useState(false);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
     value: type,
@@ -162,11 +165,28 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       )}
       <StyledNodeMainRow>
         <StyledGraphNode
+          ref={nodeRef}
+          onMouseEnter={() => setNodeHovered(true)}
+          onMouseLeave={() => setNodeHovered(false)}
           style={{
             backgroundColor: nodeColor,
             border: `3px solid ${nodeBorder}`,
           }}
         >
+          {!isRoot && paramEntityId && paramEntityClass && (
+            <Tooltip
+              visible={nodeHovered}
+              referenceElement={nodeRef.current}
+              content={
+                <>
+                  <p>Empty = any entity of selected class.</p>
+                  <p>NOT with empty = not has [edge type] entity empty.</p>
+                </>
+              }
+              position="top"
+              color="tooltipNodeBackground"
+            />
+          )}
           {/* <StyledNodeTypeSelect>
           <Dropdown.Single.Basic
             options={nodeTypeOptions}
@@ -187,7 +207,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
         </StyledNodeTypeSelect> */}
-          {(paramEntityClass || isRoot) && (
+          {(paramEntityClass || isRoot) && !(paramEntityId && !isRoot) && (
             <Dropdown.Multi.Entity
               shortLabel
               closeMenuOnSelect={false}
@@ -220,7 +240,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               placeholder="all classes"
               disabled={node.params.entityId !== undefined}
               limitSelectedItems={Math.floor((270 - 110) / 37)}
-
             />
           )}
           {paramEntityId && (
@@ -250,12 +269,25 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     disableCreate
                     includeEquivalents={includeEquivalents}
                     includeSubordinates={includeSubordinates}
-                    disabled={isRelationEntityPickerDisabled || (paramEntityClass && (node.params.entityClasses?.length ?? 0) > 0)}
+                    disabled={isRelationEntityPickerDisabled}
                     initCategory={
                       node.params.entityClasses?.[0] ??
                       entityIdCategoryTypes[0] ??
                       EntityEnums.Class.Concept
                     }
+                    onChangeCategory={(option) => {
+                      if (paramEntityClass) {
+                        const newClasses =
+                          option === EntityEnums.Extension.Any ? [] : [option as EntityEnums.Class];
+                        dispatch({
+                          type: QueryActionType.updateNodeClass,
+                          payload: {
+                            nodeId: node.id,
+                            newEntityClasses: newClasses,
+                          },
+                        });
+                      }
+                    }}
                     onSelected={(entityId: string) => {
                       dispatch({
                         type: QueryActionType.updateNodeEntityId,
