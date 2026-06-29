@@ -165,9 +165,6 @@ export const TextAnnotatorMenu = ({
   const [selectedStatementTargetId, setSelectedStatementTargetId] = useState<string | undefined>(
     defaultStatementTargetId,
   );
-  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
-  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
-  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
 
   // reset to the deepest leaf whenever the selection (and thus the candidate
   // subTs) changes
