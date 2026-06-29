@@ -10,6 +10,10 @@
  * This is the behavior any offset-model migration (Phase 3.2/3.3) must either
  * preserve (with an affinity bit) or deliberately change — these tests make the
  * choice explicit instead of silent. They assert what the editor does today.
+ *
+ * #3145: plain ArrowLeft from a continuation line start lands on the previous
+ * line's end (just after its last character); only shift+ArrowLeft skips that
+ * so a selection grows. Wrapping keeps that end position visible at the margin.
  */
 import { Annotator } from "../lib/Annotator";
 import { EditMode } from "../lib/constants";
@@ -46,18 +50,18 @@ describe("characterization: caret affinity at a soft-wrap boundary", () => {
     expect(a.text.segments[0].lines).toEqual(["supercalif", "ragilistic"]);
   });
 
-  test("ArrowLeft from start of the next line lands at end of the wrapped line", () => {
+  test("ArrowLeft from start of the next line lands after the last char of the wrapped line", () => {
     const a = mk(WRAPPED);
     a.cursor.setPosition(0, 1);
     key(a, "ArrowLeft");
-    expect(pos(a)).toEqual({ x: 10, y: 0 }); // end-of-line position is reachable
+    expect(pos(a)).toEqual({ x: 10, y: 0 }); // just after "supercalif", visible at margin
   });
 
   test("a second ArrowLeft then steps one real char back", () => {
     const a = mk(WRAPPED);
     a.cursor.setPosition(0, 1);
-    key(a, "ArrowLeft"); // (10,0)
-    key(a, "ArrowLeft"); // (9,0)
+    key(a, "ArrowLeft"); // (10,0) after the last char
+    key(a, "ArrowLeft"); // (9,0) into the content
     expect(pos(a)).toEqual({ x: 9, y: 0 });
   });
 

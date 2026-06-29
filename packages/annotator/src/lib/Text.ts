@@ -496,14 +496,6 @@ class Text {
           cells.push({ text: t.text, space: t.space, parts: [t] });
         }
       }
-      // Index of the last content cell: a whitespace run before it stays
-      // trailing on the current line; trailing whitespace after it gets its own
-      // line so the caret typed at a full line end remains visible.
-      let lastContentIdx = -1;
-      for (let i = 0; i < cells.length; i++) {
-        if (!cells[i].space) lastContentIdx = i;
-      }
-
       let currentLine: string[] = [];
       let currentLineLength = 0;
       const pushLine = () => {
@@ -525,25 +517,20 @@ class Text {
         }
 
         if (cell.space) {
-          if (ci >= lastContentIdx) {
-            // Trailing whitespace after the last content: give it its own line
-            // so the caret typed at a full line end stays on screen.
-            if (currentLineLength > 0) pushLine();
-            appendStr(cell.text);
-            continue;
-          }
-          // Inter-word whitespace that doesn't fit: keep exactly ONE wrap-space
-          // trailing on the current line (standard soft-wrap — a single space is
-          // allowed to overflow the width by one), then break and carry any EXTRA
-          // whitespace to the start of the next visual line so it stays visible
-          // instead of piling up off-screen past the margin (#3145 follow-up:
-          // typing a space at the start of a wrapped word).
+          // Overflowing whitespace: fill the line's remaining room, then carry
+          // the rest to the next line(s) so it stays visible (no h-scroll). #3145
           const fit = Math.max(0, maxLen - currentLineLength);
-          const keep = Math.min(cell.text.length, fit + 1);
-          appendStr(cell.text.slice(0, keep));
-          const rest = cell.text.slice(keep);
+          const keep = Math.min(cell.text.length, fit);
+          if (keep > 0) appendStr(cell.text.slice(0, keep));
+          let rest = cell.text.slice(keep);
           if (rest.length > 0) {
             pushLine();
+            // Chunk an over-wide carried run so no single line exceeds the width.
+            while (rest.length > maxLen) {
+              appendStr(rest.slice(0, maxLen));
+              pushLine();
+              rest = rest.slice(maxLen);
+            }
             appendStr(rest);
           }
           continue;

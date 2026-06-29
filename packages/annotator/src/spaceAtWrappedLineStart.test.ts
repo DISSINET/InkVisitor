@@ -28,16 +28,18 @@ function setup(value: string): Annotator {
 describe("space typed at the start of a wrapped word (#3145 follow-up)", () => {
   test("the extra wrap whitespace becomes a visible leading space and the caret moves", () => {
     const a = setup("aaaa bbbbb ccccc");
-    expect(a.text.getLine(0)).toBe("aaaa bbbbb ");
-    expect(a.text.getLine(1)).toBe("ccccc");
+    // line 0 fills exactly, so the wrap space can't render trailing; it leads
+    // line 1 (visible) and "ccccc" follows it.
+    expect(a.text.getLine(0)).toBe("aaaa bbbbb");
+    expect(a.text.getLine(1)).toBe(" ccccc");
 
-    a.cursor.setPosition(0, 1); // start of "ccccc"
+    a.cursor.setPosition(0, 1); // start of the wrapped line (before the lead space)
     keyDown(a, " ");
 
     expect(a.text.value).toBe("aaaa bbbbb  ccccc");
-    // exactly one wrap-space stays trailing; the typed space leads line 1
-    expect(a.text.getLine(0)).toBe("aaaa bbbbb ");
-    expect(a.text.getLine(1)).toBe(" ccccc");
+    // the overflow whitespace leads line 1 (now two leading spaces)
+    expect(a.text.getLine(0)).toBe("aaaa bbbbb");
+    expect(a.text.getLine(1)).toBe("  ccccc");
 
     // caret visibly advanced past the inserted space
     expect(a.cursor.yLine).toBe(1);
@@ -55,11 +57,12 @@ describe("space typed at the start of a wrapped word (#3145 follow-up)", () => {
     }
   });
 
-  test("single inter-word wrap space is unchanged (regression guard)", () => {
+  test("a single wrap space on a full line leads the next line (overflow)", () => {
     const a = setup("aaaa bbbbb ccccc");
-    // untouched layout: one trailing wrap space on line 0, word on line 1
-    expect(a.text.getLine(0)).toBe("aaaa bbbbb ");
-    expect(a.text.getLine(1)).toBe("ccccc");
+    // line 0 is exactly full, so the single wrap space overflows the width and
+    // leads line 1 (visible) rather than sitting off-screen trailing line 0.
+    expect(a.text.getLine(0)).toBe("aaaa bbbbb");
+    expect(a.text.getLine(1)).toBe(" ccccc");
     expect(a.text.noLines).toBe(2);
   });
 });

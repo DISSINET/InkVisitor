@@ -85,13 +85,15 @@ describe("caret follows the word across a re-wrap (#3145)", () => {
     );
   });
 
-  test("BACKSPACE at the start of a wrapped line deletes the boundary space", () => {
+  test("BACKSPACE at the start of a wrapped word deletes the boundary space", () => {
     const a = setup("aaaa bbbbb ccccc");
-    expect(a.text.getLine(0)).toBe("aaaa bbbbb ");
-    expect(a.text.getLine(1)).toBe("ccccc");
+    // line 0 fills exactly, so the wrap space leads line 1; "ccccc" starts at
+    // column 1 (after the leading space).
+    expect(a.text.getLine(0)).toBe("aaaa bbbbb");
+    expect(a.text.getLine(1)).toBe(" ccccc");
 
-    // caret at column 0 of the wrapped line (start of "ccccc")
-    a.cursor.setPosition(0, 1);
+    // caret at the start of "ccccc" (column 1, after the leading wrap space)
+    a.cursor.setPosition(1, 1);
 
     keyDown(a, "Backspace");
 
