@@ -29,9 +29,9 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   background-color: ${({ theme, $checked }) =>
     $checked ? theme.color["info"] : theme.color["white"]};
   cursor: pointer;
-  transition:
+  /* transition:
     background-color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease; */
 
   &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
