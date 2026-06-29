@@ -5,8 +5,12 @@ export const StyledFilterWrap = styled.div`
   flex-direction: column;
   margin-top: ${({ theme }) => theme.space[2]};
 `;
+export const StyledLogicalOperator = styled.div`
+  margin-bottom: 0.1rem;
+  padding: 0 0.5rem;
+`;
 export const StyledFilterList = styled.div`
-  margin: 0.3rem 0;
+  margin: 0.3rem 0.3rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;

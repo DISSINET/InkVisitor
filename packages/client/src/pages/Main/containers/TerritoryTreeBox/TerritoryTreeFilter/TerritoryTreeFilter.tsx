@@ -4,7 +4,12 @@ import { AttributeButtonGroup } from "components/advanced";
 import { useTheme } from "hooks";
 import React from "react";
 import { ITerritoryFilter } from "types";
-import { StyledFilterList, StyledFilterWrap, StyledInputWrap } from "./TerritoryTreeFilterStyles";
+import {
+  StyledFilterList,
+  StyledFilterWrap,
+  StyledInputWrap,
+  StyledLogicalOperator,
+} from "./TerritoryTreeFilterStyles";
 import { BiSearch } from "react-icons/bi";
 
 interface TerritoryTreeFilter {
@@ -21,7 +26,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
 
   return (
     <StyledFilterWrap>
-      <div style={{ margin: "0rem 0", padding: "0 0.5rem" }}>
+      <StyledLogicalOperator>
         <AttributeButtonGroup
           fullWidth
           options={[
@@ -39,7 +44,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             },
           ]}
         />
-      </div>
+      </StyledLogicalOperator>
       <StyledFilterList>
         <Checkbox
           label="starred"

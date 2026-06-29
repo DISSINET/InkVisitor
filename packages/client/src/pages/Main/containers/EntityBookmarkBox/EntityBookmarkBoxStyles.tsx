@@ -5,7 +5,8 @@ export const StyledContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: start;
-  padding-left: 1rem;
+  margin-top: 0.3rem;
+  padding-left: 0.5rem;
   background-color: ${({ theme }) => theme.color["white"]};
   padding-bottom: 1rem;
   overflow: auto;
