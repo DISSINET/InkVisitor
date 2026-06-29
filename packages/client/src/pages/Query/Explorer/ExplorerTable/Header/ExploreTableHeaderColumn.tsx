@@ -103,7 +103,7 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
     >
       <StyledHeaderColumnContent $isDragging={isDragging}>
         <StyledHeaderDragHandle ref={dragRef} title="drag to reorder">
-          <MdDragIndicator size={14} color={theme.color.headerTextColor} />
+          <MdDragIndicator size={16} color={theme.color.headerTextColor} />
         </StyledHeaderDragHandle>
         {column.editable && (
           <StyledHeaderEditIcon title="editable column">
