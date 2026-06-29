@@ -1,16 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { List } from "react-window";
 
-import {
-  autoUpdate,
-  flip,
-  FloatingPortal,
-  offset,
-  shift,
-  useDismiss,
-  useFloating,
-  useInteractions,
-} from "@floating-ui/react";
 import { Tag } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
@@ -24,6 +14,7 @@ import {
   FaCaretDown,
   FaClipboard,
   FaExclamationTriangle,
+  FaLongArrowAltRight,
   FaPlus,
 } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
@@ -43,7 +34,6 @@ import {
   AnnotatorAnchorGridRowData,
   AnnotatorAnchorListItem,
 } from "./AnnotatorMenuAnchorListRow";
-import { AnnotatorStatementTargetPicker } from "./AnnotatorStatementTargetPicker";
 import {
   StyledAnnotatorAnchorListWrap,
   StyledAnnotatorDoneButton,
@@ -53,16 +43,15 @@ import {
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
-  StyledStatementCaretAnchor,
-  StyledStatementCreateSplit,
   StyledStatementSubsection,
+  StyledStatementTargetArrow,
   StyledStatementTargetCurrent,
   StyledStatementTargetInfo,
-  StyledStatementTargetPopover,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
+import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -89,6 +78,7 @@ interface TextAnnotatorMenuProps {
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl,
+    targetTerritoryId?: string,
   ) => void;
   onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
@@ -159,7 +149,7 @@ export const TextAnnotatorMenu = ({
   // The deepest leaf subT at the cursor (smallest span = innermost) is the
   // "relevant" T and the default Statement target. The active T (opened in the
   // Tree) is offered separately, as a flat option without hierarchy.
-  const leafStatementTargetId =
+  const leafTargetTerritoryId =
     annotatorPositionHierarchy.length > 0
       ? annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1].id
       : undefined;
@@ -174,42 +164,79 @@ export const TextAnnotatorMenu = ({
 
   // show the selector only when the position hierarchy adds a subT beyond the
   // active T
-  const showStatementTargetSelector = useMemo(
+  const showTargetTerritorySelector = useMemo(
     () => annotatorPositionHierarchy.some((node) => node.id !== activeTerritoryId),
     [annotatorPositionHierarchy, activeTerritoryId],
   );
 
-  const defaultStatementTargetId = leafStatementTargetId ?? activeTerritoryId;
+  const defaultTargetTerritoryId = leafTargetTerritoryId ?? activeTerritoryId;
 
-  const [selectedStatementTargetId, setSelectedStatementTargetId] = useState<string | undefined>(
-    defaultStatementTargetId,
+  const [selectedTargetTerritoryId, setSelectedTargetTerritoryId] = useState<string | undefined>(
+    defaultTargetTerritoryId,
   );
 
   // reset to the deepest leaf whenever the selection (and thus the candidate
   // subTs) changes
   useEffect(() => {
-    setSelectedStatementTargetId(defaultStatementTargetId);
-  }, [defaultStatementTargetId]);
+    setSelectedTargetTerritoryId(defaultTargetTerritoryId);
+  }, [defaultTargetTerritoryId]);
 
-  const selectedStatementTargetEntity =
-    (selectedStatementTargetId ? entities[selectedStatementTargetId] : false) || territory;
+  const selectedTargetTerritoryEntity =
+    (selectedTargetTerritoryId ? entities[selectedTargetTerritoryId] : false) || territory;
 
-  // Target picker popover, opened from the split button's caret. Anchored to the
-  // caret wrapper; dismissed on outside click / Esc.
-  const [isTargetPickerOpen, setIsTargetPickerOpen] = useState(false);
-  const {
-    refs: targetPickerRefs,
-    floatingStyles: targetPickerFloatingStyles,
-    context: targetPickerContext,
-  } = useFloating({
-    open: isTargetPickerOpen,
-    onOpenChange: setIsTargetPickerOpen,
-    placement: "bottom-start",
-    whileElementsMounted: autoUpdate,
-    middleware: [offset(4), flip(), shift({ padding: 4 })],
+  // Shared target picker, driven from a caret in both the Statement and the
+  // Territory subsection. Both edit the same selected target; each keeps its own
+  // anchor and open state (dismissed on outside click / Esc).
+  const targetPickerArgs = {
+    hierarchy: annotatorPositionHierarchy,
+    activeTerritoryId,
+    activeTInHierarchy,
+    entities,
+    territory,
+    value: selectedTargetTerritoryId,
+    onChange: setSelectedTargetTerritoryId,
+  };
+  const statementTargetPicker = useAnnotatorTargetPicker({
+    ...targetPickerArgs,
+    title: "create S in T",
   });
-  const targetPickerDismiss = useDismiss(targetPickerContext);
-  const { getReferenceProps, getFloatingProps } = useInteractions([targetPickerDismiss]);
+  const territoryTargetPicker = useAnnotatorTargetPicker({
+    ...targetPickerArgs,
+    title: "create T relative to",
+  });
+
+  // Trailing cluster shown after the action button(s): an arrow into the target
+  // T tag, plus a caret opening the shared picker. Used by both the Statement
+  // and Territory subsections to read consistently as "create … → <target> ▾".
+  const renderTargetTrailer = (
+    picker: ReturnType<typeof useAnnotatorTargetPicker>,
+    pickerTooltip: string,
+  ) =>
+    selectedTargetTerritoryEntity ? (
+      <>
+        <StyledStatementTargetArrow>
+          <FaLongArrowAltRight size={16} />
+        </StyledStatementTargetArrow>
+        <StyledStatementTargetCurrent>
+          <EntityTag
+            disableCopyToClipboard
+            entity={selectedTargetTerritoryEntity}
+            disableDoubleClick
+            disableDrag
+          />
+        </StyledStatementTargetCurrent>
+        {showTargetTerritorySelector && (
+          <span {...picker.referenceProps}>
+            <Button
+              icon={<FaCaretDown size={13} />}
+              color="primary"
+              tooltipLabel={pickerTooltip}
+              onClick={picker.toggle}
+            />
+          </span>
+        )}
+      </>
+    ) : null;
 
   const someAnchorsWithoutElvl = useMemo(
     () =>
@@ -324,49 +351,23 @@ export const TextAnnotatorMenu = ({
             {onCreateStatement && (
               <StyledStatementSubsection>
                 <StyledAnnotatorItemContentLine>
-                  <StyledStatementCreateSplit>
-                    <Button
-                      label="New Statement"
-                      tooltipLabel={`Create new Statement in ${
-                        selectedStatementTargetEntity
-                          ? selectedStatementTargetEntity.labels[0]
-                          : "the active T"
-                      }`}
-                      icon={<TbAnchor size={15} />}
-                      color="primary"
-                      radiusLeft={showStatementTargetSelector}
-                      onClick={() => {
-                        onCreateStatement(statementElvl, undefined, selectedStatementTargetId);
-                      }}
-                    />
-                    {showStatementTargetSelector && (
-                      <StyledStatementCaretAnchor
-                        ref={targetPickerRefs.setReference}
-                        {...getReferenceProps()}
-                      >
-                        <Button
-                          icon={<FaCaretDown size={13} />}
-                          color="primary"
-                          radiusRight
-                          fullHeight
-                          tooltipLabel="Choose target territory for the new Statement"
-                          onClick={() => setIsTargetPickerOpen((open) => !open)}
-                        />
-                      </StyledStatementCaretAnchor>
-                    )}
-                  </StyledStatementCreateSplit>
-
-                  {selectedStatementTargetEntity && (
-                    <StyledStatementTargetCurrent>
-                      <EntityTag
-                        disableCopyToClipboard
-                        entity={selectedStatementTargetEntity}
-                        disableDoubleClick
-                        disableDrag
-                      />
-                    </StyledStatementTargetCurrent>
+                  <Button
+                    label="New Statement"
+                    tooltipLabel={`Create new Statement in ${
+                      selectedTargetTerritoryEntity
+                        ? selectedTargetTerritoryEntity.labels[0]
+                        : "the active T"
+                    }`}
+                    icon={<TbAnchor size={15} />}
+                    color="primary"
+                    onClick={() => {
+                      onCreateStatement(statementElvl, undefined, selectedTargetTerritoryId);
+                    }}
+                  />
+                  {renderTargetTrailer(
+                    statementTargetPicker,
+                    "Choose target territory for the new Statement",
                   )}
-
                   <ElvlButtonGroup
                     border
                     value={statementElvl}
@@ -382,28 +383,7 @@ export const TextAnnotatorMenu = ({
                   </StyledStatementTargetInfo>
                 )}
 
-                {isTargetPickerOpen && (
-                  <FloatingPortal>
-                    <StyledStatementTargetPopover
-                      ref={targetPickerRefs.setFloating}
-                      style={targetPickerFloatingStyles}
-                      {...getFloatingProps()}
-                    >
-                      <AnnotatorStatementTargetPicker
-                        hierarchy={annotatorPositionHierarchy}
-                        activeTerritoryId={activeTerritoryId}
-                        activeTInHierarchy={activeTInHierarchy}
-                        entities={entities}
-                        territory={territory}
-                        value={selectedStatementTargetId}
-                        onChange={(id) => {
-                          setSelectedStatementTargetId(id);
-                          setIsTargetPickerOpen(false);
-                        }}
-                      />
-                    </StyledStatementTargetPopover>
-                  </FloatingPortal>
-                )}
+                {statementTargetPicker.popover}
               </StyledStatementSubsection>
             )}
           </StyledAnnotatorItemContent>
@@ -418,7 +398,7 @@ export const TextAnnotatorMenu = ({
                 }}
                 inputWidth={200}
                 openDetailOnCreate
-                parentTerritory={selectedStatementTargetEntity || territory}
+                parentTerritory={selectedTargetTerritoryEntity || territory}
                 onEntityCreateMutationSuccess={(entity) => {
                   dispatch(setSecondPanelExpanded(true));
                   if (entity.class === EntityEnums.Class.Statement) {
@@ -465,7 +445,7 @@ export const TextAnnotatorMenu = ({
                       }
                       color={isTextInsideThisT ? "greyer" : "primary"}
                       onClick={() => {
-                        onCreateTerritory("sibling-T", territoryElvl);
+                        onCreateTerritory("sibling-T", territoryElvl, selectedTargetTerritoryId);
                       }}
                       label="Sibling"
                       tooltipLabel="Create new sibling territory anchor"
@@ -487,11 +467,15 @@ export const TextAnnotatorMenu = ({
                         }
                         color={isTextInsideThisT ? "primary" : "greyer"}
                         onClick={() => {
-                          onCreateTerritory("child-T", territoryElvl);
+                          onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
                         }}
                         label="Child"
                         tooltipLabel="Create new child territory anchor"
                       />
+                    )}
+                    {renderTargetTrailer(
+                      territoryTargetPicker,
+                      "Choose the territory the new Territory is relative to",
                     )}
                     <ElvlButtonGroup
                       border
@@ -500,6 +484,7 @@ export const TextAnnotatorMenu = ({
                         setTerritoryElvl(territoryElvl);
                       }}
                     />
+                    {territoryTargetPicker.popover}
                   </StyledTerritorySubsection>
                 )}
               </StyledAnnotatorItemContentLine>

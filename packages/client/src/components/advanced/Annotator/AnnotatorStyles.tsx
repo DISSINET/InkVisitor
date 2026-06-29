@@ -250,33 +250,17 @@ export const StyledStatementTargetNote = styled.span`
   white-space: nowrap;
 `;
 
-export const StyledStatementCreateSplit = styled.div`
-  display: flex;
-  align-items: stretch;
-`;
-
-export const StyledStatementCaretAnchor = styled.span`
-  position: relative;
-  display: flex;
-  align-items: stretch;
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 25%;
-    bottom: 25%;
-    width: 1px;
-    background-color: ${({ theme }) => theme.color.gray["600"]};
-    z-index: 1;
-    pointer-events: none;
-  }
-`;
-
 export const StyledStatementTargetCurrent = styled.div`
   display: flex;
   align-items: center;
   min-width: 0;
+`;
+
+export const StyledStatementTargetArrow = styled.span`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.color.gray["600"]};
 `;
 
 export const StyledStatementTargetPopover = styled.div`

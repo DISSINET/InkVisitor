@@ -211,21 +211,6 @@ export const TextAnnotator = ({
     setAnnotatorMode(EditMode.HIGHLIGHT);
   }, [territoryId]);
 
-  const parentTerritoryId = territory?.data?.parent
-    ? territory?.data?.parent?.territoryId
-    : undefined;
-
-  const { data: dataParentTerritory } = useQuery({
-    queryKey: ["territory", parentTerritoryId as string],
-    queryFn: async () => {
-      if (parentTerritoryId) {
-        const res = await api.entityGet(parentTerritoryId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: !!parentTerritoryId,
-  });
 
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
@@ -505,6 +490,11 @@ export const TextAnnotator = ({
 
   const [territoryCreateModalType, setTerritoryCreateModalType] =
     useState<TerritoryCreateModalType>(false);
+
+  // Parent T the new Territory is created under, resolved relative to the target
+  // subT chosen in the menu (the in-document T, not the active Tree T): for a
+  // child it is the target itself, for a sibling it is the target's parent.
+  const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(undefined);
 
   // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -1025,22 +1015,50 @@ export const TextAnnotator = ({
     }
   }, [width]);
 
-  const onCreateTerritory = (mode: TerritoryCreateModalType, elvl: EntityEnums.Elvl) => {
-    setTerritoryCreateModalType(mode);
+  const onCreateTerritory = async (
+    mode: TerritoryCreateModalType,
+    elvl: EntityEnums.Elvl,
+    // target subT chosen in the menu (the in-document T at the selection);
+    // defaults to the active Tree T when no subT is targeted
+    targetTerritoryId?: string,
+  ): Promise<void> => {
     setTerritoryElvl(elvl);
+
+    const targetId = targetTerritoryId ?? thisTerritoryEntityId;
+    if (!mode || !targetId) {
+      return;
+    }
+
+    const fetchEntity = (id: string) =>
+      queryClient.fetchQuery({
+        queryKey: ["territory", id],
+        queryFn: async () => (await api.entityGet(id)).data ?? undefined,
+      });
+
+    try {
+      // child → parent is the target itself; sibling → parent is the target's parent
+      let parent: IEntity | undefined;
+      if (mode === "child-T") {
+        parent = await fetchEntity(targetId);
+      } else if (mode === "sibling-T") {
+        const target = (await fetchEntity(targetId)) as IResponseTerritory | undefined;
+        const parentId = target?.data?.parent ? target.data.parent.territoryId : undefined;
+        parent = parentId ? await fetchEntity(parentId) : undefined;
+      }
+      setTerritoryCreateParent(parent);
+      setTerritoryCreateModalType(mode);
+    } catch {
+      toast.error("Failed to resolve the target territory");
+    }
   };
 
   const newTerritoryName = useMemo<string>(() => {
-    const thisTName = territory?.labels[0];
-    const parentTName = dataParentTerritory?.labels[0];
-
-    if (territoryCreateModalType === "sibling-T") {
+    const parentTName = territoryCreateParent?.labels[0];
+    if (parentTName) {
       return `subT of ${parentTName}`;
-    } else if (territoryCreateModalType === "child-T") {
-      return `subT of ${thisTName}`;
     }
     return "new Territory";
-  }, [territoryCreateModalType, territory]);
+  }, [territoryCreateParent]);
 
   const onCreateStatement = async (
     elvl: EntityEnums.Elvl,
@@ -1589,12 +1607,11 @@ export const TextAnnotator = ({
           }}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
           labelTyped={newTerritoryName}
-          parentTerritory={
-            territoryCreateModalType === "sibling-T" ? dataParentTerritory : territory
-          }
+          parentTerritory={territoryCreateParent}
           onMutationSuccess={async (entity) => {
             await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
+            setTerritoryCreateParent(undefined);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
