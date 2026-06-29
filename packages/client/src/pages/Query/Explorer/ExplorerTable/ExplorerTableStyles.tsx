@@ -16,16 +16,11 @@ export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
   height: ${({ theme }) => theme.space[12]};
-  background-image: linear-gradient(
-    180deg,
-    ${({ theme }) => theme.color["explorerHeader"]} 0%,
-    ${({ theme }) => theme.color["query3"]} 220%
-  );
+  background-color: ${({ theme }) => theme.color["explorerHeader"]};
   color: ${({ theme }) => theme.color["headerTextColor"]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
 `;
 
 export const StyledHeaderDragHandle = styled.span`
