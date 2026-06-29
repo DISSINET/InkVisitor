@@ -171,6 +171,7 @@ export const StyledTerritorySubsection = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
   margin-top: ${({ theme }) => theme.space[1]};
+  width: 100%;
 `;
 
 export const StyledTerritorySubsectionTitle = styled.div`
@@ -265,8 +266,8 @@ export const StyledStatementTargetArrow = styled.span`
 
 export const StyledStatementTargetPopover = styled.div`
   z-index: 1000;
-  background-color: ${({ theme }) => theme.color["white"]};
-  border: ${({ theme }) => `1px solid ${theme.color.gray["400"]}`};
+  background-color: ${({ theme }) => theme.color.blue["50"]};
+  border: ${({ theme }) => `1px solid ${theme.color.blue["200"]}`};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
   padding: ${({ theme }) => theme.space[3]};
