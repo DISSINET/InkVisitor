@@ -419,13 +419,12 @@ export const Suggester: React.FC<Suggester> = ({
                     }}
                     disabled={disabled}
                   />
-                ) : undefined
+                ) : (
+                  button && button
+                )
               }
             />
           </div>
-
-          {/* External action button as a flush trailing segment (e.g. move territory) */}
-          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (

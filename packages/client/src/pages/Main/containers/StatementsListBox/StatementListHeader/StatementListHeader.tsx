@@ -438,7 +438,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     setShowTActionModal(true);
                   }}
                   excludedActantIds={excludedMoveTerritories}
-                  clearableInput={!contentWidthTooNarrow}
+                  clearableInput={false}
                   button={
                     <Button
                       icon={<TbHomeMove size={14} />}
