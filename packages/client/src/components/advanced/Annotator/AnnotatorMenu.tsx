@@ -14,6 +14,8 @@ import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
+import { useAppDispatch } from "redux/hooks";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
@@ -102,6 +104,7 @@ export const TextAnnotatorMenu = ({
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
   const { setStatementId } = useSearchParams();
 
   const tryCloseMenu = useCallback(() => {
@@ -265,6 +268,7 @@ export const TextAnnotatorMenu = ({
                 openDetailOnCreate
                 parentTerritory={territory}
                 onEntityCreateMutationSuccess={(entity) => {
+                  dispatch(setSecondPanelExpanded(true));
                   if (entity.class === EntityEnums.Class.Statement) {
                     queryClient.invalidateQueries({
                       queryKey: ["territory", "statement-list"],
