@@ -14,13 +14,13 @@ export const StyledMenuGroupWrapper = styled.div`
 export const StyledMenuGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.1rem;
   background-color: ${({ theme }) => theme.color["white"]};
   border: 1px solid ${({ theme }) => theme.color.gray[400]};
   box-shadow: 0 4px 12px ${({ theme }) => theme.color.menuShadow};
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   overflow: hidden;
-  padding: 0.6rem;
+  padding: 0.5rem;
 `;
 
 interface StyledMenuItem {
@@ -40,8 +40,7 @@ export const StyledMenuItem = styled.div<StyledMenuItem>`
     background-color 0.2s ease;
 
   &:hover {
-    color: ${({ theme, $color }) =>
-      $color ? theme.color[$color] : theme.color.black};
+    color: ${({ theme, $color }) => ($color ? theme.color[$color] : theme.color.black)};
     background-color: ${({ theme, $color }) =>
       $color ? theme.color.invertedBg[$color] : theme.color.menuHover};
   }
@@ -52,15 +51,18 @@ export const StyledMenuItem = styled.div<StyledMenuItem>`
 `;
 
 export const StyledIcon = styled.div`
-  width: 3.5rem;
-  margin-left: 0.1rem;
+  width: 3.4rem;
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
+export const StyledMenuItemLabel = styled.span`
+  padding-top: 1px;
+`;
+
 export const StyledMenuDivider = styled.div`
   height: 1px;
   background-color: ${({ theme }) => theme.color.gray[300]};
-  margin: 0.3rem 0;
+  margin: 0.35rem 0;
 `;

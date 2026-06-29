@@ -2,14 +2,7 @@ import { IResponseGeneric, IResponseUser, IUser } from "@inkvisitor/shared/types
 import { UseMutationResult } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import {
-  Button,
-  ButtonGroup,
-  Input,
-  Modal,
-  ModalContent,
-  ModalFooter,
-} from "components";
+import { Button, ButtonGroup, Input, Modal, ModalContent, ModalFooter } from "components";
 import React, { useEffect, useState } from "react";
 import { TiWarning } from "react-icons/ti";
 import { toast } from "react-toastify";
@@ -23,10 +16,7 @@ interface UserListEmailInput {
     unknown
   >;
 }
-export const UserListEmailInput: React.FC<UserListEmailInput> = ({
-  user,
-  userMutation,
-}) => {
+export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMutation }) => {
   const [showReactivationModal, setShowReactivationModal] = useState(false);
 
   const [localEmail, setLocalEmail] = useState("");
@@ -66,22 +56,20 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({
             setShowReactivationModal(true);
           }
         }}
+        roundCorners
       />
 
       {/* Reactivation */}
-      <Modal
-        showModal={showReactivationModal}
-        onClose={() => setShowReactivationModal(false)}
-      >
+      <Modal showModal={showReactivationModal} onClose={() => setShowReactivationModal(false)}>
         <ModalContent>
           <div style={{ display: "flex", alignItems: "center" }}>
             <span style={{ width: "14rem" }}>
               <TiWarning size={40} />
             </span>
             <p>
-              After changing the email address, a new activation email will be
-              sent. The old activation mail will not be valid anymore. Do you
-              want to proceed and change the email for this user?
+              After changing the email address, a new activation email will be sent. The old
+              activation mail will not be valid anymore. Do you want to proceed and change the email
+              for this user?
             </p>
           </div>
         </ModalContent>

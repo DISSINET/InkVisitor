@@ -1,8 +1,8 @@
 /**
- * Characterization tests — Phase 2, Task 2.1 (navigation).
+ * Characterization tests for navigation.
  *
  * These lock the CURRENT caret-navigation behavior of the annotator as a safety
- * net before the cursor-model refactor (see packages/annotator/BASIC_EDITOR_BACKLOG.md).
+ * net before the cursor-model refactor.
  * They assert what the editor does today, not necessarily what is "ideal" — if a
  * value looks wrong, that is a separate bug to file, not something to change here.
  */

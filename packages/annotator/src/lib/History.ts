@@ -2,7 +2,7 @@ import { CaretAffinity } from "./Text";
 
 /**
  * A full editor state: the raw document string plus the canonical caret/selection
- * offsets (Phase 3 offset model). Restoring one is just assigning the string and
+ * offsets. Restoring one is just assigning the string and
  * the four offset fields — no fragile visual coordinates are stored.
  */
 export interface HistorySnapshot {
@@ -14,7 +14,7 @@ export interface HistorySnapshot {
 }
 
 /**
- * Phase 4 (#3086) — bounded undo/redo stack.
+ * (#3086) — bounded undo/redo stack.
  *
  * Each `record` is given the state as it was *before* a mutation. Undo pushes the
  * live ("present") state onto the redo stack and pops the previous before-state;

@@ -1,5 +1,5 @@
 /**
- * Phase 3 pivot — caret always-in-bounds invariant (fuzz).
+ * Caret always-in-bounds invariant (fuzz).
  *
  * The recurring class of bugs (#1/#3/#4) was the caret drifting out of bounds via
  * the visual clamp/wrap/repair dance. This fuzzes long sequences of real key

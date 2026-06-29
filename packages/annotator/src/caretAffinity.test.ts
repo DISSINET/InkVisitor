@@ -1,5 +1,5 @@
 /**
- * Phase 3.2 — affinity-aware offset<->visual converters.
+ * Affinity-aware offset<->visual converters.
  *
  * At a soft-wrap boundary one document offset maps to two visual caret
  * positions; the affinity bit picks which:

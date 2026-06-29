@@ -93,9 +93,25 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
           req,
           preloadedEntities as Record<string, IEntity>
         );
-        if (useWarnings && !this.isTemplate) {
-          responseStatement.warnings = await responseStatement.getWarnings(req, settings);
-        }
+      }
+
+      if (useWarnings && !this.isTemplate) {
+        // Each statement's getWarnings is an independent chain of DB
+        // round-trips. Awaiting them one statement at a time serialized the
+        // whole territory; rethinkdb-ts multiplexes concurrent queries over
+        // the single per-request connection, so running them together
+        // pipelines the work. Peak in-flight stays roughly the statement
+        // count because each statement's own per-entity lookups remain
+        // sequential internally. Statements are distinct instances with no
+        // shared mutable state, so order of responseStatements is preserved.
+        await Promise.all(
+          responseStatements.map(async (responseStatement) => {
+            responseStatement.warnings = await responseStatement.getWarnings(
+              req,
+              settings
+            );
+          })
+        );
       }
     } else {
       // Add parent territory entity if it exists

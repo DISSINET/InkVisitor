@@ -13,7 +13,6 @@ interface UsersUtils {
 }
 
 export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
-  // const [newUserName, setNewUserName] = useState<string>("");
   const [newUserEmail, setNewUserEmail] = useState<string>("");
   const [testEmail, setTestEmail] = useState<string>("");
 
@@ -25,9 +24,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
         email: newUserEmail,
       }),
     onSuccess(data, variables) {
-      toast.success(
-        `User created! \n Verification email sent to ${newUserEmail}.`
-      );
+      toast.success(`User created! \n Verification email sent to ${newUserEmail}.`);
       setNewUserEmail("");
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
@@ -53,6 +50,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
           onChangeFn={async (newValue: string) => {
             setNewUserEmail(newValue);
           }}
+          roundCorners
         />
         <Button
           key="add"
@@ -84,6 +82,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
             onChangeFn={async (newValue: string) => {
               setTestEmail(newValue);
             }}
+            roundCorners
           />
           <Button
             tooltipLabel="Test email will be sent to your email"

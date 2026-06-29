@@ -1,8 +1,8 @@
 /**
- * Characterization tests — Phase 2, Task 2.3 (editing).
+ * Characterization tests (editing).
  *
  * These lock the CURRENT editing behavior of the annotator as a safety net
- * before the cursor-model refactor (see packages/annotator/BASIC_EDITOR_BACKLOG.md).
+ * before the cursor-model refactor.
  * They assert what the editor does today, not necessarily what is "ideal" — if a
  * value looks wrong, that is a separate bug to file, not something to change here.
  *

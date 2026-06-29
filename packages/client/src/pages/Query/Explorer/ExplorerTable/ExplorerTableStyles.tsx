@@ -104,7 +104,6 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
-  background-color: ${({ theme }) => theme.color["gray"][200]};
   z-index: 20;
 `;
 
@@ -215,8 +214,9 @@ export const StyledChipInputBox = styled.div`
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][400]};
-  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
-  &:focus-within {
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  &:focus-within,
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
 `;

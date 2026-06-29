@@ -1,5 +1,5 @@
 /**
- * Characterization tests — Phase 2 gap fill / Phase 3 guard (wrap-boundary nav).
+ * Characterization tests — wrap-boundary nav.
  *
  * Locks the CURRENT caret behavior at a soft-wrap boundary, where ONE document
  * offset corresponds to TWO distinct, reachable visual caret positions:
@@ -7,7 +7,7 @@
  *   - start of the next visual line    e.g. (0,1)
  * i.e. the editor today preserves caret *affinity* across a soft wrap.
  *
- * This is the behavior any offset-model migration (Phase 3.2/3.3) must either
+ * This is the behavior any offset-model migration must either
  * preserve (with an affinity bit) or deliberately change — these tests make the
  * choice explicit instead of silent. They assert what the editor does today.
  *
