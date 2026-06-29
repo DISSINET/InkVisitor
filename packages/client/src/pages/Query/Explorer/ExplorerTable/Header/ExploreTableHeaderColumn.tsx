@@ -11,7 +11,6 @@ import {
   MdOutlineEdit,
 } from "react-icons/md";
 import { DragItem, Identifier, ItemTypes } from "types";
-import { dndHoverFnHorizontal } from "utils/utils";
 import { getColumnWidth } from "../utils";
 import {
   StyledHeaderColumnContent,
@@ -50,7 +49,32 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
   >({
     accept: ItemTypes.EXPLORER_COLUMN,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      dndHoverFnHorizontal(item, index, monitor, dropRef, onMoveColumn);
+      if (!dropRef.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      // Swap as soon as the pointer crosses into this column (its leading edge),
+      // not at its midpoint - columns have different widths.
+      const rect = dropRef.current.getBoundingClientRect();
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) {
+        return;
+      }
+      const hoverClientX = clientOffset.x - rect.left;
+      // Moving right: trigger once past the start (left edge) of the next column.
+      if (dragIndex < hoverIndex && hoverClientX < 0) {
+        return;
+      }
+      // Moving left: trigger once past the middle of the previous column.
+      if (dragIndex > hoverIndex && hoverClientX > rect.width / 2) {
+        return;
+      }
+      onMoveColumn(dragIndex, hoverIndex);
+      item.index = hoverIndex;
     },
     collect(monitor) {
       return {
