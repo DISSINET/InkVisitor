@@ -1568,6 +1568,12 @@ class Text {
   /**
    * Gets text content within the specified absolute coordinate range.
    *
+   * Only the real line breaks of the source (segment boundaries, i.e. the `\n`
+   * in {@link value}) appear in the result. The soft-wrap breaks the annotator
+   * inserts to fit text to the view width are NOT emitted - copying must yield
+   * the natural paragraph/line breaks of the original, not view-imposed ones
+   * Within a segment the wrapped visual lines are concatenated back together; segments are joined with a single `\n`.
+   *
    * @param start - The start coordinates of the range
    * @param end - The end coordinates of the range
    * @returns The text content within the range
@@ -1583,15 +1589,25 @@ class Text {
       end = tempStart;
     }
 
-    const rangeLines = this.getRangeLines(start.yLine, end.yLine + 1);
-    const linesSize = rangeLines.length;
-    if (!linesSize) {
+    const startPos = this.getSegmentPosition(start.yLine, start.xLine);
+    const endPos = this.getSegmentPosition(end.yLine, end.xLine);
+    if (!startPos || !endPos) {
       return "";
     }
 
-    rangeLines[linesSize - 1] = rangeLines[linesSize - 1].slice(0, end.xLine);
-    rangeLines[0] = rangeLines[0].slice(start.xLine, rangeLines[0].length + 1);
-    return rangeLines.join("\n");
+    const parts: string[] = [];
+    for (let i = startPos.segmentIndex; i <= endPos.segmentIndex; i++) {
+      // Joining the wrapped visual lines back together reconstructs the
+      // segment's display text (raw in RAW mode, tag-free in HIGHLIGHT/SEMI)
+      // without the soft-wrap breaks. calculateLines only ever partitions this
+      // text, so no characters are lost or added.
+      const display = this.segments[i].lines.join("");
+      const from = i === startPos.segmentIndex ? startPos.parsedTextIndex : 0;
+      const to =
+        i === endPos.segmentIndex ? endPos.parsedTextIndex : display.length;
+      parts.push(display.slice(from, to));
+    }
+    return parts.join("\n");
   }
 
   /**
