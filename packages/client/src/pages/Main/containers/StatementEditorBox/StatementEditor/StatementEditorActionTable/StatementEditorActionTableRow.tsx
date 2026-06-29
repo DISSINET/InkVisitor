@@ -22,7 +22,7 @@ import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -41,7 +41,6 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
-import { FaCaretDown } from "react-icons/fa6";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -204,7 +203,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
-      <ButtonGroup $noMarginRight $height={19}>
+      <ButtonGroup $noMarginRight $height={19} style={{ gap: "0.2rem" }}>
         {userCanEdit && (
           <Button
             key="a"

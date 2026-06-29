@@ -43,8 +43,11 @@ export const UserTag: React.FC<UserTagProps> = ({
 
   const tagComponent = useMemo(() => {
     return (
-      <StyledUserTag $backgroundColor={variantColors.background}>
-        <StyledUserIcon $color={variantColors.icon}>
+      <StyledUserTag
+        $backgroundColor={variantColors.avatarBackground}
+        $borderColor={variantColors.border}
+      >
+        <StyledUserIcon $color={variantColors.iconColor}>
           {getUserIcon(dataUser?.role ?? UserEnums.Role.Viewer, size)}
         </StyledUserIcon>
       </StyledUserTag>
@@ -54,8 +57,9 @@ export const UserTag: React.FC<UserTagProps> = ({
   const labelComponent = useMemo(() => {
     return (
       <StyledUserLabel
-        $backgroundColor={variantColors.background}
-        $textColor={variantColors.text}
+        $backgroundColor={variantColors.labelBackground}
+        $textColor={variantColors.labelText}
+        $borderColor={variantColors.border}
         $variant={variant}
         $size={size}
         $fontWeight={fontWeight}
@@ -66,7 +70,10 @@ export const UserTag: React.FC<UserTagProps> = ({
   }, [label, variantColors, size]);
 
   return (
-    <StyledUserTagWrap $borderColor={variantColors.border}>
+    <StyledUserTagWrap
+      $borderColor={variantColors.border}
+      $backgroundColor={variantColors.labelBackground}
+    >
       <Tag
         dragDisabled
         showOnly={showOnly}

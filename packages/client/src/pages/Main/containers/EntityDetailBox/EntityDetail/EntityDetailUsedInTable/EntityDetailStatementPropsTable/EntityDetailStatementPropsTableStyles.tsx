@@ -26,6 +26,7 @@ export const StyledTableHeader = styled.div`
   gap: ${({ theme }) => theme.space[4]};
   padding-left: 0.5rem;
   border: 1px solid ${({ theme }) => theme.color.gray[500]};
+  border-radius: ${({ theme }) => `${theme.borderRadius["input"]} ${theme.borderRadius["input"]} 0 0`};
   font-weight: 600;
   font-size: 1.2rem;
   background-color: ${({ theme }) => theme.color.gray[100]};

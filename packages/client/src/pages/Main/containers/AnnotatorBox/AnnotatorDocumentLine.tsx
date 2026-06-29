@@ -1,7 +1,15 @@
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
-import { Button, IconWithTooltip, Loader, Modal, ModalContent, ModalHeader } from "components";
+import {
+  Button,
+  IconButton,
+  IconWithTooltip,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalHeader,
+} from "components";
 import Dropdown, {
   DocumentModalExport,
   DocumentTitle,
@@ -117,7 +125,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.6;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.9;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
@@ -170,6 +178,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                         }}
                         tooltipLabel="export document"
                         tooltipPosition="top"
+                        shape="sharp"
                       />
                     ) : undefined
                   }
@@ -278,7 +287,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </>
             )}
             {isUndersized && (
-              <Button
+              <IconButton
+                inverted={false}
                 icon={<FaHighlighter />}
                 tooltipContent={<HighlightTooltipContent hlEntities={hlEntities} />}
                 onClick={() => setShowHighlightModal(true)}

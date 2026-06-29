@@ -419,6 +419,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         style={
           {
             "--qt-row-focused-bg": themeContext.color.tableOpened,
+            "--qt-row-odd-bg": themeContext.color.tableOddRow,
+            "--qt-row-bg": themeContext.color.white,
+            "--qt-row-border": themeContext.color.gray[300],
             width: contentWidth,
             minWidth: "100%",
             height: heightBox - 20,

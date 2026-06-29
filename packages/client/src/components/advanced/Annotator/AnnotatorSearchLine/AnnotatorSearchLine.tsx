@@ -2,7 +2,7 @@ import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Checkbox, IconWithTooltip, Input, Loader } from "components";
+import { Button, Checkbox, IconButton, IconWithTooltip, Input, Loader } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
 import React, { useMemo, useRef, useState } from "react";
@@ -13,14 +13,13 @@ import { LuCaseSensitive, LuRegex, LuReplace, LuReplaceAll, LuWholeWord } from "
 import { TbReplace } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
+import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 import {
   StyledSearchContainer,
-  StyledSearchIcon,
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
 import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
-import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 
 interface AnnotatorSearchLine {
   searchTerm: string;
@@ -314,88 +313,91 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
       {isSearchAllowed && (
         <>
           <StyledSearchContainer>
-            <StyledSearchIcon>
-              <IconWithTooltip
-                icon={<BiSearch size={18} color={theme.color.info} />}
-                tooltipLabel="ctrl + f to search"
-                tooltipPosition="left"
-              />
-            </StyledSearchIcon>
-
             <Input
               value={searchTerm}
               onChangeFn={(newText: string) => {
                 setSearchTerm(newText);
               }}
               changeOnType
-              width={annotatorWidthTooNarrow ? 100 : 130}
-              minWidth={50}
+              clearable={!annotatorWidthTooNarrow}
+              width={annotatorWidthTooNarrow ? 200 : 230}
+              minWidth={140}
               inputRef={searchInputRef}
-              clearable
+              roundCorners
+              icon={
+                <IconWithTooltip
+                  icon={<BiSearch />}
+                  tooltipLabel="ctrl+f to search"
+                  tooltipPosition="top"
+                  color="inherit"
+                />
+              }
+              placeholder="search"
+              rightContent={
+                <StyledCheckboxWrapper>
+                  <Checkbox
+                    iconOnly
+                    value={isCaseSensitiveMode}
+                    onChangeFn={(checked: boolean) => {
+                      setIsCaseSensitiveMode(checked);
+                    }}
+                    onClickFn={() => {
+                      searchInputRef.current?.focus();
+                    }}
+                    icon={<LuCaseSensitive size={16} />}
+                    tooltipLabel="case sensitive mode"
+                    tooltipPosition="top"
+                  />
+                  {annotatorMode === EditMode.HIGHLIGHT && (
+                    <Checkbox
+                      iconOnly
+                      value={isExtendToWholeWordMode}
+                      onChangeFn={(checked: boolean) => {
+                        setIsExtendToWholeWordMode(checked);
+                      }}
+                      onClickFn={() => {
+                        searchInputRef.current?.focus();
+                      }}
+                      icon={<FaExpand size={12} />}
+                      tooltipLabel="extend to whole word(s)"
+                      tooltipPosition="top"
+                    />
+                  )}
+
+                  {annotatorMode !== EditMode.HIGHLIGHT && (
+                    <Checkbox
+                      iconOnly
+                      value={isWholeWordOnlyMode}
+                      onChangeFn={(checked: boolean) => {
+                        setIsWholeWordOnlyMode(checked);
+                      }}
+                      onClickFn={() => {
+                        searchInputRef.current?.focus();
+                      }}
+                      icon={<LuWholeWord size={16} />}
+                      tooltipLabel="whole word only"
+                      tooltipPosition="top"
+                    />
+                  )}
+
+                  <Checkbox
+                    iconOnly
+                    value={isRegexMode}
+                    onChangeFn={(checked: boolean) => {
+                      setIsRegexMode(checked);
+                    }}
+                    onClickFn={() => {
+                      searchInputRef.current?.focus();
+                    }}
+                    icon={<LuRegex size={14} />}
+                    tooltipLabel="regex mode"
+                    tooltipPosition="top"
+                  />
+                </StyledCheckboxWrapper>
+              }
             />
 
-            <StyledCheckboxWrapper>
-              <Checkbox
-                iconOnly
-                value={isCaseSensitiveMode}
-                onChangeFn={(checked: boolean) => {
-                  setIsCaseSensitiveMode(checked);
-                }}
-                onClickFn={() => {
-                  searchInputRef.current?.focus();
-                }}
-                icon={<LuCaseSensitive size={16} />}
-                tooltipLabel="case sensitive mode"
-                tooltipPosition="top"
-              />
-              {annotatorMode === EditMode.HIGHLIGHT && (
-                <Checkbox
-                  iconOnly
-                  value={isExtendToWholeWordMode}
-                  onChangeFn={(checked: boolean) => {
-                    setIsExtendToWholeWordMode(checked);
-                  }}
-                  onClickFn={() => {
-                    searchInputRef.current?.focus();
-                  }}
-                  icon={<FaExpand size={12} />}
-                  tooltipLabel="extend to whole word(s)"
-                  tooltipPosition="top"
-                />
-              )}
-
-              {annotatorMode !== EditMode.HIGHLIGHT && (
-                <Checkbox
-                  iconOnly
-                  value={isWholeWordOnlyMode}
-                  onChangeFn={(checked: boolean) => {
-                    setIsWholeWordOnlyMode(checked);
-                  }}
-                  onClickFn={() => {
-                    searchInputRef.current?.focus();
-                  }}
-                  icon={<LuWholeWord size={16} />}
-                  tooltipLabel="whole word only"
-                  tooltipPosition="top"
-                />
-              )}
-
-              <Checkbox
-                iconOnly
-                value={isRegexMode}
-                onChangeFn={(checked: boolean) => {
-                  setIsRegexMode(checked);
-                }}
-                onClickFn={() => {
-                  searchInputRef.current?.focus();
-                }}
-                icon={<LuRegex size={14} />}
-                tooltipLabel="regex mode"
-                tooltipPosition="top"
-              />
-            </StyledCheckboxWrapper>
-
-            {searchOccurences !== null && (
+            {searchOccurences !== null ? (
               <StyledSearchResults $annotatorWidthTooNarrow={annotatorWidthTooNarrow}>
                 {searchOccurences.length === 0 ? (
                   <div style={{ marginLeft: "0.2rem" }}>no results</div>
@@ -435,6 +437,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                   </>
                 )}
               </StyledSearchResults>
+            ) : (
+              <div style={{ width: "4rem" }} />
             )}
           </StyledSearchContainer>
 
@@ -526,12 +530,9 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       position: "relative",
                     }}
                   >
-                    <Button
-                      shape="circle"
+                    <IconButton
                       color="info"
-                      inverted
                       tooltipLabel="replace one occurence"
-                      noBackground
                       icon={<LuReplace size={12} />}
                       onClick={replaceOccurence}
                       disabled={
@@ -550,12 +551,9 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       position: "relative",
                     }}
                   >
-                    <Button
-                      shape="circle"
+                    <IconButton
                       color="info"
-                      inverted
                       tooltipLabel="replace all occurences"
-                      noBackground
                       icon={<LuReplaceAll size={12} />}
                       onClick={replaceAllOccurences}
                       disabled={

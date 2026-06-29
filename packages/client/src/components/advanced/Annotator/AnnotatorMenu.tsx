@@ -9,16 +9,13 @@ import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
-import {
-  FaBolt,
-  FaClipboard,
-  FaExclamationTriangle,
-  FaPlus,
-} from "react-icons/fa";
+import { FaBolt, FaClipboard, FaExclamationTriangle, FaPlus } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
+import { useAppDispatch } from "redux/hooks";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
@@ -56,11 +53,11 @@ interface TextAnnotatorMenuProps {
       detail: string;
       territoryId: string;
       language: EntityEnums.Language;
-    }
+    },
   ) => void;
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
-    elvl: EntityEnums.Elvl
+    elvl: EntityEnums.Elvl,
   ) => void;
   onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
@@ -107,11 +104,11 @@ export const TextAnnotatorMenu = ({
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
   const { setStatementId } = useSearchParams();
 
   const tryCloseMenu = useCallback(() => {
-    const isModalOpen =
-      document.querySelector('[data-attribute-modal="true"]') !== null;
+    const isModalOpen = document.querySelector('[data-attribute-modal="true"]') !== null;
     if (!isModalOpen) {
       onEscapePressed();
     }
@@ -120,17 +117,12 @@ export const TextAnnotatorMenu = ({
   useKeypress("Escape", tryCloseMenu);
   useKeypress("Enter", tryCloseMenu, undefined, true);
 
-  const [activeTerritoryElvl, setActiveTerritoryElvl] =
-    useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
-  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(
-    EntityEnums.Elvl.Textual
+  const [activeTerritoryElvl, setActiveTerritoryElvl] = useState<EntityEnums.Elvl>(
+    EntityEnums.Elvl.Textual,
   );
-  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(
-    EntityEnums.Elvl.Textual
-  );
-  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(
-    EntityEnums.Elvl.Textual
-  );
+  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
 
   const someAnchorsWithoutElvl = useMemo(
     () =>
@@ -138,9 +130,9 @@ export const TextAnnotatorMenu = ({
         (anchor) =>
           anchor.attributes.elvl === undefined ||
           anchor.attributes.elvl === null ||
-          anchor.attributes.elvl === ""
+          anchor.attributes.elvl === "",
       ),
-    [anchors]
+    [anchors],
   );
 
   const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
@@ -162,7 +154,7 @@ export const TextAnnotatorMenu = ({
       onUpdateAnchor,
       readonly,
     }),
-    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor, readonly]
+    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor, readonly],
   );
 
   return (
@@ -199,9 +191,7 @@ export const TextAnnotatorMenu = ({
                 inverted
                 icon={<MdOutlineDone size={25} />}
                 size={ButtonSize.ExtraLarge}
-                radiusRight
-                radiusLeft
-                shape="square"
+                shape="rounded-md"
                 noBackground
                 onClick={() => onEscapePressed()}
                 tooltipLabel="Close selection menu"
@@ -278,6 +268,7 @@ export const TextAnnotatorMenu = ({
                 openDetailOnCreate
                 parentTerritory={territory}
                 onEntityCreateMutationSuccess={(entity) => {
+                  dispatch(setSecondPanelExpanded(true));
                   if (entity.class === EntityEnums.Class.Statement) {
                     queryClient.invalidateQueries({
                       queryKey: ["territory", "statement-list"],
@@ -286,8 +277,7 @@ export const TextAnnotatorMenu = ({
                   }
                 }}
                 onCreateStatement={(entityCreateModalProps) =>
-                  onCreateStatement &&
-                  onCreateStatement(suggesterElvl, entityCreateModalProps)
+                  onCreateStatement && onCreateStatement(suggesterElvl, entityCreateModalProps)
                 }
                 disableCleanTypedAfterCreate
               />
@@ -302,68 +292,66 @@ export const TextAnnotatorMenu = ({
           </StyledAnnotatorItemContent>
           {/* Territory Sibling or Child */}
           {activeTerritoryId && (
-          <StyledAnnotatorItemContent>
-            <StyledAnnotatorItemContentLine>
-              {onCreateTerritory && (
-                <StyledTerritorySubsection>
-                  <StyledTerritorySubsectionTitle>
-                    territory
-                  </StyledTerritorySubsectionTitle>
-                  <Button
-                    icon={
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M2 3.75C2 2.784 2.784 2 3.75 2h8.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 7H5v2.5A1.5 1.5 0 0 0 6.5 11H8v-.25C8 9.784 8.784 9 9.75 9h2.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 14h-2.5A1.75 1.75 0 0 1 8 12.25V12H6.5A2.5 2.5 0 0 1 4 9.5V7h-.25A1.75 1.75 0 0 1 2 5.25zm7 8.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75zM12.25 6a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75z"
-                        />
-                      </svg>
-                    }
-                    color={isTextInsideThisT ? "greyer" : "primary"}
-                    onClick={() => {
-                      onCreateTerritory("sibling-T", territoryElvl);
-                    }}
-                    label="Sibling"
-                    tooltipLabel="Create new sibling territory anchor"
-                  />
-                  {hasParentT && (
+            <StyledAnnotatorItemContent>
+              <StyledAnnotatorItemContentLine>
+                {onCreateTerritory && (
+                  <StyledTerritorySubsection>
+                    <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
                     <Button
                       icon={
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="14"
                           height="14"
-                          viewBox="0 0 32 32"
+                          viewBox="0 0 16 16"
                         >
                           <path
                             fill="currentColor"
-                            d="M28 12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11v4H9a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H9v-4h14v4h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-3v-4a2 2 0 0 0-2-2h-6v-4ZM12 28H4v-4h8Zm16 0h-8v-4h8ZM4 4h24v6H4Z"
+                            d="M2 3.75C2 2.784 2.784 2 3.75 2h8.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 7H5v2.5A1.5 1.5 0 0 0 6.5 11H8v-.25C8 9.784 8.784 9 9.75 9h2.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 14h-2.5A1.75 1.75 0 0 1 8 12.25V12H6.5A2.5 2.5 0 0 1 4 9.5V7h-.25A1.75 1.75 0 0 1 2 5.25zm7 8.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75zM12.25 6a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75z"
                           />
                         </svg>
                       }
-                      color={isTextInsideThisT ? "primary" : "greyer"}
+                      color={isTextInsideThisT ? "greyer" : "primary"}
                       onClick={() => {
-                        onCreateTerritory("child-T", territoryElvl);
+                        onCreateTerritory("sibling-T", territoryElvl);
                       }}
-                      label="Child"
-                      tooltipLabel="Create new child territory anchor"
+                      label="Sibling"
+                      tooltipLabel="Create new sibling territory anchor"
                     />
-                  )}
-                  <ElvlButtonGroup
-                    border
-                    value={territoryElvl}
-                    onChange={(territoryElvl) => {
-                      setTerritoryElvl(territoryElvl);
-                    }}
-                  />
-                </StyledTerritorySubsection>
-              )}
-            </StyledAnnotatorItemContentLine>
-          </StyledAnnotatorItemContent>
+                    {hasParentT && (
+                      <Button
+                        icon={
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 32 32"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M28 12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11v4H9a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H9v-4h14v4h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-3v-4a2 2 0 0 0-2-2h-6v-4ZM12 28H4v-4h8Zm16 0h-8v-4h8ZM4 4h24v6H4Z"
+                            />
+                          </svg>
+                        }
+                        color={isTextInsideThisT ? "primary" : "greyer"}
+                        onClick={() => {
+                          onCreateTerritory("child-T", territoryElvl);
+                        }}
+                        label="Child"
+                        tooltipLabel="Create new child territory anchor"
+                      />
+                    )}
+                    <ElvlButtonGroup
+                      border
+                      value={territoryElvl}
+                      onChange={(territoryElvl) => {
+                        setTerritoryElvl(territoryElvl);
+                      }}
+                    />
+                  </StyledTerritorySubsection>
+                )}
+              </StyledAnnotatorItemContentLine>
+            </StyledAnnotatorItemContent>
           )}
         </StyledAnnotatorItem>
       )}
@@ -384,16 +372,12 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorItemContent>
           <StyledAnnotatorAnchorListWrap>
             {anchors.length === 0 && (
-              <StyledAnnotatorNoAnchors>
-                no anchors in selection
-              </StyledAnnotatorNoAnchors>
+              <StyledAnnotatorNoAnchors>no anchors in selection</StyledAnnotatorNoAnchors>
             )}
             {resolvedAnchors.length > 0 && (
               <List
                 rowProps={{ data: anchorGridRowData }}
-                rowCount={Math.ceil(
-                  resolvedAnchors.length / ANCHOR_GRID_COLUMNS
-                )}
+                rowCount={Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS)}
                 rowHeight={ANCHOR_GRID_ROW_HEIGHT}
                 overscanCount={8}
                 style={{ maxHeight: "13rem", width: "100%" }}

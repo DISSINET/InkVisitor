@@ -2,7 +2,8 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { Checkbox, Input } from "components";
 import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
-import { LuRegex, LuSearch } from "react-icons/lu";
+import { BiSearch } from "react-icons/bi";
+import { LuRegex } from "react-icons/lu";
 import { ExploreAction, ExploreActionType } from "../../state";
 import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "../ExplorerTableStyles";
 
@@ -59,21 +60,23 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         onChangeFn={setInputValue}
         clearable
         roundCorners
-        icon={<LuSearch size={14} />}
+        icon={<BiSearch />}
+        rightContent={
+          <StyledLabelFilterCheckboxWrapper>
+            <Checkbox
+              iconOnly
+              value={useRegex}
+              onChangeFn={(checked: boolean) => {
+                setUseRegex(checked);
+                dispatchFilter(inputValue, checked);
+              }}
+              icon={<LuRegex size={14} />}
+              tooltipLabel="regex mode"
+              tooltipPosition="top"
+            />
+          </StyledLabelFilterCheckboxWrapper>
+        }
       />
-      <StyledLabelFilterCheckboxWrapper>
-        <Checkbox
-          iconOnly
-          value={useRegex}
-          onChangeFn={(checked: boolean) => {
-            setUseRegex(checked);
-            dispatchFilter(inputValue, checked);
-          }}
-          icon={<LuRegex size={14} />}
-          tooltipLabel="regex mode"
-          tooltipPosition="top"
-        />
-      </StyledLabelFilterCheckboxWrapper>
     </StyledLabelFilter>
   );
 };

@@ -24,7 +24,7 @@ export interface StyledSelect {
   width?: number | "full";
   disabled?: boolean;
   isOneOptionSingleEntitySelect?: boolean;
-  suggester?: boolean;
+  $suggester?: boolean;
   isMulti: boolean;
   entityDropdown?: boolean;
   userDropdown?: boolean;
@@ -34,6 +34,7 @@ export interface StyledSelect {
   loggerId?: string;
   limitSelectedItems?: number;
   shortLabel?: boolean;
+  roundCorners?: boolean;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
@@ -44,6 +45,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   width: 100%;
 
   .react-select__control {
+    cursor: pointer;
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[10]};
@@ -53,12 +55,14 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       limitSelectedItems && !userDropdown ? "27px" : ""};
     border-width: 1px;
     border-style: solid;
-    border-color: ${({ theme, suggester }) =>
-      suggester ? theme.color["black"] : theme.color["gray"]["400"]};
-    border-right: ${({ suggester }) => (suggester ? "none" : "")};
-    border-radius: 0;
-    background-color: ${({ theme, entityDropdown, suggester }) =>
-      entityDropdown && suggester ? theme.color["gray"][200] : theme.color["white"]};
+    border-color: ${({ theme, $suggester }) =>
+      $suggester ? theme.color["black"] : theme.color["gray"]["400"]};
+    border-right: ${({ $suggester }) => ($suggester ? "none" : "")};
+    border-radius: ${({ theme, roundCorners, $suggester }) =>
+      $suggester ? "0" : roundCorners ? theme.borderRadius["input"] : "0"};
+    /* In the suggester the class box merges with the input into one white field;
+       the entity-class colour band (TypeBar) carries the class identity. */
+    background-color: ${({ theme }) => theme.color["white"]};
     &:hover {
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1px;
@@ -69,11 +73,11 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       isOneOptionSingleEntitySelect ? "" : theme.background["stripes"]};
   }
   .react-select__control--is-focused {
-    box-shadow: none;
-
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
     border-width: 1px;
+    box-shadow: ${({ $suggester, theme }) =>
+      $suggester ? "none" : `inset 0 0 0 ${theme.borderWidth[1]} ${theme.color["info"]}`};
   }
   .react-select__value-container {
     height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
@@ -85,10 +89,17 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__single-value {
     font-size: ${({ theme }) => theme.fontSize["xs"]};
+    font-weight: inherit;
     top: 50%;
-    margin-left: ${({ theme, entityDropdown, wildCardChar }) =>
-      entityDropdown && !wildCardChar ? theme.space[3] : theme.space[2]};
-    margin-top: 1px;
+    transform: ${({ $suggester }) => ($suggester ? "translateY(-6%)" : "")};
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: ${({ theme, entityDropdown, wildCardChar, $suggester }) =>
+      $suggester
+        ? theme.space[4]
+        : entityDropdown && !wildCardChar
+          ? theme.space[3]
+          : theme.space[2]};
 
     color: ${({ theme }) => theme.color["primary"]};
     vertical-align: middle;
@@ -108,7 +119,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
-    padding: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    /* suggester: drop the chevron padding so it sits tight to the letter/input */
+    padding: ${({ userDropdown, $suggester }) => (userDropdown || $suggester ? "0" : "")};
     svg {
       height: 18;
     }
@@ -140,9 +152,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   // portal menu style is in global stylesheet
 `;
 
-export const StyledFaChevronDown = styled(FaChevronDown)`
-  margin-right: 4px;
-  margin-left: 1px;
+export const StyledFaChevronDown = styled(FaChevronDown)<{ $suggester?: boolean }>`
+  margin-right: ${({ $suggester }) => ($suggester ? "0.3rem" : "0.4rem")};
+  /* margin-bottom: ${({ $suggester }) => ($suggester ? "0.10rem" : "0")}; */
 `;
 
 export const StyledValueIconWrap = styled.div`

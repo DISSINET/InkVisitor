@@ -16,7 +16,7 @@ import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanc
 import { deleteProp, deleteRef } from "constructors";
 
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import { UserTagSize } from "components/advanced/UserTag/utils";
+
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
@@ -326,12 +326,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       } else if (typeof (cellValue as IUser)?.email !== "undefined") {
         // is type IUser[]
         return (
-          <UserTag
-            userId={(cellValue as IUser).id}
-            variant="dark"
-            size={UserTagSize.Medium}
-            fontWeight="normal"
-          />
+          <UserTag userId={(cellValue as IUser).id} />
         );
       } else {
         if (column.editable) {
