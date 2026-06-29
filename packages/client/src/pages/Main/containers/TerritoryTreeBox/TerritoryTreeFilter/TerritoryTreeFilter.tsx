@@ -22,8 +22,6 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
   handleFilterChange,
   userRole,
 }) => {
-  const theme = useTheme();
-
   return (
     <StyledFilterWrap>
       <StyledLogicalOperator>
@@ -46,11 +44,6 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
         />
       </StyledLogicalOperator>
       <StyledFilterList>
-        <Checkbox
-          label="starred"
-          value={filterData.starred}
-          onChangeFn={(value: boolean) => handleFilterChange("starred", value)}
-        />
         {/* Only for non admin users */}
         {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner && (
           <Checkbox
