@@ -173,15 +173,25 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             border: `3px solid ${nodeBorder}`,
           }}
         >
-          {!isRoot && paramEntityId && paramEntityClass && (
+          {!isRoot && paramEntityId && (
             <Tooltip
               visible={nodeHovered}
               referenceElement={nodeRef.current}
               content={
-                <>
-                  <p>Empty = any entity of selected class.</p>
-                  <p>NOT with empty = not has [edge type] entity empty.</p>
-                </>
+                paramEntityClass ? (
+                  <>
+                    <p>
+                      Empty suggester entity = any entity of selected class (select * for all
+                      classes).
+                    </p>
+                    <p>NOT with empty suggester entity = not has [edge type] entity empty.</p>
+                  </>
+                ) : (
+                  <>
+                    <p>Empty suggester entity = any entity.</p>
+                    <p>NOT with empty suggester entity = not has [edge type] entity empty.</p>
+                  </>
+                )
               }
               position="top"
               color="tooltipNodeBackground"
