@@ -1,48 +1,46 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Box, Button, ButtonGroup, Panel } from "components";
+import { Box, Button, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
-import { BiBarChartAlt2, BiRefresh, BiSearch, BiTable } from "react-icons/bi";
+import { BiBarChartAlt2, BiHide, BiRefresh, BiSearch, BiTable } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
-import { useUserQuery } from "hooks/react-query";
-import { UserEnums } from "@inkvisitor/shared/enums";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { floorNumberToOneDecimal } from "utils/utils";
+import {
+  QUERY_BUILDER_MIN_HEIGHT,
+  QUERY_LEFT_PANEL_MIN_WIDTH,
+  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
+  QUERY_RIGHT_PANEL_MIN_WIDTH,
+  QUERY_SEARCH_PANEL_MIN_HEIGHT,
+} from "./constants";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import ExplorerTableIdsFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableIdsFilter";
 import ExplorerTableLabelFilter from "./Explorer/ExplorerTable/Filters/ExplorerTableLabelFilter";
-import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import {
   defaultExploreStatsParams,
   ExploreActionType,
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
+import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
-import {
-  QueryValidity,
-  QueryValidityProblem,
-} from "./types";
-import {
-  QUERY_LEFT_PANEL_MIN_WIDTH,
-  QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
-  QUERY_RIGHT_PANEL_MIN_WIDTH,
-  QUERY_BUILDER_MIN_HEIGHT,
-  QUERY_SEARCH_PANEL_MIN_HEIGHT,
-} from "./constants";
+import { QueryValidity, QueryValidityProblem } from "./types";
 import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
+
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
@@ -62,6 +60,26 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
 
   const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
+
+  // Page-level expansion options for the whole Explorer query (#2969): mix the
+  // result entities with their equivalents (SYN/IDE/AEE) and/or subordinates
+  // (inverse SCL/SOE/HOL + child territories). Persisted across sessions.
+  const includeSubordinatesStorageKey = "queryIncludeSubordinates";
+  const includeEquivalentsStorageKey = "queryIncludeEquivalents";
+  const [includeSubordinates, setIncludeSubordinates] = useState(
+    () => localStorage.getItem(includeSubordinatesStorageKey) === "true",
+  );
+  const [includeEquivalents, setIncludeEquivalents] = useState(
+    () => localStorage.getItem(includeEquivalentsStorageKey) === "true",
+  );
+  const handleToggleIncludeSubordinates = useCallback((value: boolean) => {
+    localStorage.setItem(includeSubordinatesStorageKey, String(value));
+    setIncludeSubordinates(value);
+  }, []);
+  const handleToggleIncludeEquivalents = useCallback((value: boolean) => {
+    localStorage.setItem(includeEquivalentsStorageKey, String(value));
+    setIncludeEquivalents(value);
+  }, []);
 
   /**
    * Collects all problems with the query state
@@ -203,6 +221,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   };
 
   const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
+  const explorerBoxMinimizedStorageKey = "queryExplorerBoxMinimized";
 
   const persistSeparatorYPercent = (yPosition: number) => {
     const separatorYPercentPosition = floorNumberToOneDecimal(
@@ -214,9 +233,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const [explorerBoxMaximized, setExplorerBoxMaximized] = useState(
     () => localStorage.getItem(explorerBoxMaximizedStorageKey) === "true",
   );
+  const [explorerBoxMinimized, setExplorerBoxMinimized] = useState(
+    () =>
+      localStorage.getItem(explorerBoxMinimizedStorageKey) === "true" &&
+      localStorage.getItem(explorerBoxMaximizedStorageKey) !== "true",
+  );
   const savedExplorerSeparatorYRef = useRef<number | null>(null);
 
   const getDefaultSeparatorYPosition = () => contentHeight / 2;
+
+  const explorerMinimizedSeparatorY = contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT;
 
   const handleSeparatorYPositionChange = (yPosition: number) => {
     if (querySeparatorYPosition !== yPosition) {
@@ -226,12 +252,28 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         savedExplorerSeparatorYRef.current = null;
       } else if (
         !explorerBoxMaximized &&
+        !explorerBoxMinimized &&
         yPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT &&
         querySeparatorYPosition !== QUERY_SEARCH_PANEL_MIN_HEIGHT
       ) {
         savedExplorerSeparatorYRef.current = querySeparatorYPosition;
         setExplorerBoxMaximized(true);
         localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
+      }
+
+      if (explorerBoxMinimized && yPosition < explorerMinimizedSeparatorY) {
+        setExplorerBoxMinimized(false);
+        localStorage.setItem(explorerBoxMinimizedStorageKey, "false");
+        savedExplorerSeparatorYRef.current = null;
+      } else if (
+        !explorerBoxMaximized &&
+        !explorerBoxMinimized &&
+        yPosition === explorerMinimizedSeparatorY &&
+        querySeparatorYPosition !== explorerMinimizedSeparatorY
+      ) {
+        savedExplorerSeparatorYRef.current = querySeparatorYPosition;
+        setExplorerBoxMinimized(true);
+        localStorage.setItem(explorerBoxMinimizedStorageKey, "true");
       }
 
       setQuerySeparatorYPosition(yPosition);
@@ -244,6 +286,9 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     if (localStorage.getItem(explorerBoxMaximizedStorageKey) === "true") {
       return QUERY_SEARCH_PANEL_MIN_HEIGHT;
     }
+    if (localStorage.getItem(explorerBoxMinimizedStorageKey) === "true") {
+      return contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT;
+    }
     return localStorageSeparatorYPosition
       ? Number(localStorageSeparatorYPosition) * (contentHeight / 100)
       : contentHeight / 2;
@@ -254,6 +299,12 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   useEffect(() => {
     if (explorerBoxMaximized) {
       setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+      setCurrentContentHeight(contentHeight);
+      return;
+    }
+
+    if (explorerBoxMinimized) {
+      setQuerySeparatorYPosition(contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT);
       setCurrentContentHeight(contentHeight);
       return;
     }
@@ -270,32 +321,64 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       ),
     );
     setQuerySeparatorYPosition(newY);
-    localStorage.setItem("querySeparatorYPosition", floorNumberToOneDecimal(newY / onePercentOfContentHeight).toString());
+    localStorage.setItem(
+      "querySeparatorYPosition",
+      floorNumberToOneDecimal(newY / onePercentOfContentHeight).toString(),
+    );
     setCurrentContentHeight(contentHeight);
-  }, [contentHeight, explorerBoxMaximized]);
+  }, [contentHeight, explorerBoxMaximized, explorerBoxMinimized]);
 
-  const isExplorerAtMaxHeight = querySeparatorYPosition === QUERY_SEARCH_PANEL_MIN_HEIGHT;
+  const isExplorerNormal = !explorerBoxMaximized && !explorerBoxMinimized;
 
-  const toggleExplorerBoxMaximized = () => {
-    if (isExplorerAtMaxHeight) {
-      const restoredHeight =
-        savedExplorerSeparatorYRef.current !== null &&
-        savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT
-          ? savedExplorerSeparatorYRef.current
-          : getDefaultSeparatorYPosition();
-      setExplorerBoxMaximized(false);
-      localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
-      savedExplorerSeparatorYRef.current = null;
-      setQuerySeparatorYPosition(restoredHeight);
-      persistSeparatorYPercent(restoredHeight);
+  const restoreExplorerToHalf = () => {
+    const restoredHeight =
+      savedExplorerSeparatorYRef.current !== null &&
+      savedExplorerSeparatorYRef.current !== QUERY_SEARCH_PANEL_MIN_HEIGHT &&
+      savedExplorerSeparatorYRef.current !== explorerMinimizedSeparatorY
+        ? savedExplorerSeparatorYRef.current
+        : getDefaultSeparatorYPosition();
+    setExplorerBoxMaximized(false);
+    localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+    setExplorerBoxMinimized(false);
+    localStorage.setItem(explorerBoxMinimizedStorageKey, "false");
+    savedExplorerSeparatorYRef.current = null;
+    setQuerySeparatorYPosition(restoredHeight);
+    persistSeparatorYPercent(restoredHeight);
+  };
+
+  const handleMaximizeExplorerBox = () => {
+    if (isExplorerNormal) {
+      savedExplorerSeparatorYRef.current = querySeparatorYPosition;
+      setExplorerBoxMaximized(true);
+      localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
+      setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+      persistSeparatorYPercent(QUERY_SEARCH_PANEL_MIN_HEIGHT);
       return;
     }
 
+    restoreExplorerToHalf();
+  };
+
+  const getMaximizeExplorerBtnTooltip = () => {
+    if (explorerBoxMinimized) {
+      return "open explorer box";
+    }
+    if (explorerBoxMaximized) {
+      return "restore half height";
+    }
+    return "maximize explorer box";
+  };
+
+  const toggleExplorerBoxMinimized = () => {
     savedExplorerSeparatorYRef.current = querySeparatorYPosition;
-    setExplorerBoxMaximized(true);
-    localStorage.setItem(explorerBoxMaximizedStorageKey, "true");
-    setQuerySeparatorYPosition(QUERY_SEARCH_PANEL_MIN_HEIGHT);
-    persistSeparatorYPercent(QUERY_SEARCH_PANEL_MIN_HEIGHT);
+    setExplorerBoxMinimized(true);
+    localStorage.setItem(explorerBoxMinimizedStorageKey, "true");
+    if (explorerBoxMaximized) {
+      setExplorerBoxMaximized(false);
+      localStorage.setItem(explorerBoxMaximizedStorageKey, "false");
+    }
+    setQuerySeparatorYPosition(explorerMinimizedSeparatorY);
+    persistSeparatorYPercent(explorerMinimizedSeparatorY);
   };
 
   const handleSeparatorXPositionChange = (xPosition: number) => {
@@ -331,7 +414,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       ),
     );
     setQuerySeparatorXPosition(newX);
-    localStorage.setItem("querySeparatorXPosition", floorNumberToOneDecimal(newX / onePercentOfLayoutWidth).toString());
+    localStorage.setItem(
+      "querySeparatorXPosition",
+      floorNumberToOneDecimal(newX / onePercentOfLayoutWidth).toString(),
+    );
     setCurrentLayoutWidth(layoutWidth);
   }, [layoutWidth]);
 
@@ -483,7 +569,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
 
   return (
     <>
-      {queryLeftPanelExpanded && querySeparatorYPosition > 0 && (
+      {queryLeftPanelExpanded && isExplorerNormal && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           width={leftPanelWidth}
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
@@ -513,10 +599,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               borderColor="white"
               height={querySeparatorYPosition}
               label="Query Builder"
-              disableHeaderClick
-              onHeaderClick={toggleExplorerBoxMaximized}
+              disableHeaderClick={!explorerBoxMaximized}
+              onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
-                <ExplorerTableLabelFilter filters={exploreState.filters} dispatch={exploreStateDispatch} />
+                <ExplorerTableLabelFilter
+                  filters={exploreState.filters}
+                  dispatch={exploreStateDispatch}
+                />
               }
               buttons={[
                 <Button
@@ -527,9 +616,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
                 />,
-                <Button
+                <IconButton
                   key="toggle-query-left-panel"
-                  inverted
                   tooltipLabel="collapse left panel"
                   icon={<RiMenuFoldFill />}
                   onClick={toggleQueryLeftPanel}
@@ -543,8 +631,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
+                includeEquivalents={includeEquivalents}
+                includeSubordinates={includeSubordinates}
               />
-              {!isExplorerAtMaxHeight && (
+              {!explorerBoxMaximized && (
                 <ExplorerTableIdsFilter
                   filters={exploreState.filters}
                   dispatch={exploreStateDispatch}
@@ -553,7 +643,11 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               <FloatingSearchContainer
                 filters={exploreState.filters}
                 exploreDispatch={exploreStateDispatch}
-                hideButton={isExplorerAtMaxHeight}
+                hideButton={explorerBoxMaximized}
+                includeSubordinates={includeSubordinates}
+                includeEquivalents={includeEquivalents}
+                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
               />
             </Box>
             <Box
@@ -561,53 +655,73 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               borderColor="white"
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
-              buttons={[
-                <ButtonGroup
-                  key="explorer-view-mode"
-                  $noMarginRight
-                  style={{ marginRight: "0.6rem" }}
-                >
+              disableHeaderClick={explorerBoxMaximized}
+              onHeaderClick={handleMaximizeExplorerBox}
+              headerComponent={
+                <SwitchGroup key="explorer-view-mode" style={{ marginRight: "2rem" }}>
                   <Button
                     tooltipLabel="table view"
                     label="table"
+                    shape="rounded-sm"
+                    noBorder
                     inverted={isStatsView}
+                    noBackground={isStatsView}
+                    color={isStatsView ? "greyer" : "primary"}
                     icon={<BiTable />}
-                    onClick={() => setExploreViewMode(Explore.EViewMode.Table)}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Table);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
                   />
                   <Button
                     tooltipLabel="stats view"
                     label="stats"
+                    shape="rounded-sm"
+                    noBorder
                     inverted={!isStatsView}
+                    noBackground={!isStatsView}
+                    color={!isStatsView ? "greyer" : "primary"}
                     icon={<BiBarChartAlt2 />}
-                    onClick={() => setExploreViewMode(Explore.EViewMode.Stats)}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Stats);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
                   />
-                </ButtonGroup>,
-                <Button
+                </SwitchGroup>
+              }
+              buttons={[
+                <IconButton
                   key="refresh queries"
                   tooltipLabel="refresh data"
-                  inverted
                   icon={<BiRefresh />}
                   onClick={handleInvalidateQuery}
                 />,
-                <Button
+                <IconButton
                   key="maximize-explorer-box"
                   dataTestId="maximize-explorer-box"
-                  inverted
-                  tooltipLabel={
-                    isExplorerAtMaxHeight ? "restore half height" : "maximize explorer box"
-                  }
+                  tooltipLabel={getMaximizeExplorerBtnTooltip()}
                   icon={
-                    isExplorerAtMaxHeight ? (
-                      <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                    ) : (
+                    isExplorerNormal ? (
                       <BsSquareFill />
+                    ) : (
+                      <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
                     )
                   }
-                  onClick={toggleExplorerBoxMaximized}
+                  onClick={handleMaximizeExplorerBox}
                 />,
-                <Button
+                <>
+                  {!explorerBoxMinimized && (
+                    <IconButton
+                      key="minimize-explorer-box"
+                      dataTestId="minimize-explorer-box"
+                      tooltipLabel="minimize explorer box"
+                      icon={<BiHide />}
+                      onClick={toggleExplorerBoxMinimized}
+                    />
+                  )}
+                </>,
+                <IconButton
                   key="toggle-query-left-panel"
-                  inverted
                   tooltipLabel="collapse left panel"
                   icon={<RiMenuFoldFill />}
                   onClick={toggleQueryLeftPanel}
@@ -641,9 +755,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             isExpanded={false}
             onHeaderClick={toggleQueryLeftPanel}
             buttons={[
-              <Button
+              <IconButton
                 key="toggle-query-left-panel"
-                inverted
                 tooltipLabel="expand query panel"
                 icon={<RiMenuUnfoldFill />}
                 onClick={toggleQueryLeftPanel}
@@ -664,17 +777,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             buttons={[
               <>
                 {queryDetailPanelExpanded && (
-                  <Button
-                    inverted
+                  <IconButton
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={clearAllDetailIds}
                   />
                 )}
               </>,
-              <Button
+              <IconButton
                 key="toggle-query-detail-panel"
-                inverted
                 tooltipLabel={
                   queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"
                 }

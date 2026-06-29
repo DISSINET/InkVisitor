@@ -111,12 +111,17 @@ export const getRelationSuggesterConfig = (
   };
 };
 
-export const findValidEdgeTypesForSourceNode = (node: Query.INode): Query.EdgeType[] => {
+export const findValidEdgeTypesForSourceNode = (
+  node: Query.INode,
+  filterByClass = false,
+): Query.EdgeType[] => {
   const validEdges = Object.entries(Query.EdgeTypeNodeRules)
-    .filter(([, [ruleFrom, ruleTo]]) => {
+    .filter(([, [ruleFrom]]) => {
       const validType = ruleFrom.nodeType === node.type;
       const validClass =
-        node.params?.entityClasses?.length && ruleFrom.params.entityClass?.length
+        filterByClass &&
+        node.params?.entityClasses?.length &&
+        ruleFrom.params.entityClass?.length
           ? node.params.entityClasses.some((cl) => ruleFrom.params.entityClass?.includes(cl))
           : true;
       return validType && validClass;
@@ -165,6 +170,12 @@ export const isNodeValid = (node: Query.INode, rule: Query.EdgeRule): boolean =>
     return false;
   }
   if (rule.params.entityClass === undefined || rule.params.entityClass.length === 0) {
+    return true;
+  }
+  // a concrete picked entity already fixes the node's class - the entity picker
+  // enforced the allowed classes at selection time, and picking clears
+  // entityClasses to [] (see updateNodeEntityId), so fall back to trusting it
+  if (node.params.entityId !== undefined) {
     return true;
   }
   if (node.params.entityClasses === undefined || node.params.entityClasses.length === 0) {

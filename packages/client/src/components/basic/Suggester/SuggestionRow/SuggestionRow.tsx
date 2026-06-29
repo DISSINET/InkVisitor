@@ -1,5 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, IResponseEntity } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { FaLink, FaPlusSquare } from "react-icons/fa";
@@ -42,8 +42,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
   const { items } = data;
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityEnums.Status.Discouraged;
-  const territoryWithoutParent =
-    entity.class === EntityEnums.Class.Territory && !territoryParentId;
+  const territoryWithoutParent = entity.class === EntityEnums.Class.Territory && !territoryParentId;
 
   const renderIcons = () => {
     return (
@@ -70,22 +69,21 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             icon={<FaLink />}
           />
         )}
-        {entity.isTemplate &&
-          (!territoryWithoutParent || disableTemplateInstantiation) && (
-            <Button
-              tooltipLabel="link a new template instance"
-              key="instantiate template"
-              inverted
-              noBorder
-              noBackground
-              onClick={() => {
-                // onPick template inside nonTemplate
-                onPick(entity, true);
-              }}
-              icon={<FaPlusSquare />}
-            />
-          )}
-        {entity.isTemplate && isInsideTemplate && (
+        {!!entity.isTemplate && (!territoryWithoutParent || disableTemplateInstantiation) && (
+          <Button
+            tooltipLabel="link a new template instance"
+            key="instantiate template"
+            inverted
+            noBorder
+            noBackground
+            onClick={() => {
+              // onPick template inside nonTemplate
+              onPick(entity, true);
+            }}
+            icon={<FaPlusSquare />}
+          />
+        )}
+        {!!entity.isTemplate && isInsideTemplate && (
           <Button
             tooltipLabel="link template"
             key="link template"
@@ -109,9 +107,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
     <StyledSuggestionRow
       key={index}
       style={style}
-      $twoIcons={
-        entityIsTemplate && isInsideTemplate && !territoryWithoutParent
-      }
+      $twoIcons={entityIsTemplate && isInsideTemplate && !territoryWithoutParent}
       $isSelected={selected === index}
     >
       <StyledSuggestionLineActions>
@@ -119,7 +115,13 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag>
         <StyledTagWrapper>
-          <EntityTag fullWidth entity={entity} tooltipPosition="right" />
+          <EntityTag
+            fullWidth
+            entity={entity}
+            isEquivalent={(entity as IResponseEntity).isEquivalent}
+            isSubordinate={(entity as IResponseEntity).isSubordinate}
+            tooltipPosition="right"
+          />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>
       <StyledSuggestionLineIcons>{icons}</StyledSuggestionLineIcons>

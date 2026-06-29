@@ -6,8 +6,7 @@ interface StyledCgMenuBoxed {
   $inverted?: boolean;
 }
 export const StyledCgMenuBoxed = styled(CgMenuBoxed)<StyledCgMenuBoxed>`
-  color: ${({ theme, $inverted }) =>
-    $inverted ? theme.color["white"] : theme.color["primary"]};
+  color: ${({ theme, $inverted }) => ($inverted ? theme.color["white"] : theme.color["primary"])};
   margin: ${({ theme }) => `${theme.space[1]} ${theme.space[1]}`};
   cursor: default;
 `;
@@ -20,6 +19,8 @@ export const StyledWrapper = styled.div`
 export const StyledContextBtnGroup = styled(animated.div)`
   display: flex;
   flex-direction: row;
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
+  overflow: hidden;
   z-index: 100;
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
 `;

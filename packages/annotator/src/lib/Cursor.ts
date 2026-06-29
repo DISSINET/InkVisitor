@@ -513,11 +513,17 @@ export default class Cursor
         relY >= 0 &&
         relY <= viewport.noLines
       ) {
+        // A wrapped line can run one trailing space past the viewport; clamp the
+        // caret column to the width so it stays visible (no h-scroll, #3145).
+        // Monospace only: proportional resolves pixel x from the prefix table.
+        const caretX = drawingOptions.columnToPixelX
+          ? this.xLine
+          : Math.min(this.xLine, drawingOptions.charsAtLine);
         this.drawLine(
           ctx,
           relY,
-          this.xLine,
-          this.xLine,
+          caretX,
+          caretX,
           {
             ...drawingOptions,
             color: this.style.selectorColor,

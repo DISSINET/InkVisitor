@@ -14,7 +14,6 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  TypeBar,
 } from "components";
 import Dropdown from "components/advanced";
 import { CEntity, CStatement, CTemplateEntity } from "constructors";
@@ -154,7 +153,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
               disableTyping
               autoFocus
             />
-            <TypeBar entityLetter={createModalEntityClass} />
           </ModalInputWrap>
           <ModalInputLabel>{"Label: "}</ModalInputLabel>
           <ModalInputWrap>

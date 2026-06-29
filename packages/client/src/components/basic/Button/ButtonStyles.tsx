@@ -1,17 +1,24 @@
 import styled from "styled-components";
-import { InvertedBgColor, ThemeColor } from "Theme/theme";
-import { ButtonSize } from "types";
+import theme, { InvertedBgColor, ThemeColor } from "Theme/theme";
+import { ButtonShape, ButtonSize } from "types";
 
-const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean, $shape?: "square" | "circle") => {
-  if ($shape === "circle") {
+const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean, $shape?: ButtonShape) => {
+  if ($shape === "sharp") {
+    return "0";
+  } else if ($shape === "circle") {
     return "50%";
-  }
-  if ($radiusLeft && $radiusRight) {
+  } else if ($shape === "square") {
+    return theme.borderRadius["rounded-sm"];
+  } else if ($radiusLeft && $radiusRight) {
     return "7px";
   } else if ($radiusLeft) {
     return "7px 0 0 7px";
   } else if ($radiusRight) {
     return "0 7px 7px 0";
+  } else if ($shape === "sharp-square") {
+    return "0";
+  } else if ($shape) {
+    return theme.borderRadius[$shape as keyof typeof theme.borderRadius];
   } else {
     return "0";
   }
@@ -68,7 +75,7 @@ interface IButtonStyle {
   $noPadding?: boolean;
   $fullHeight?: boolean;
 
-  $shape?: "square" | "circle";
+  $shape?: ButtonShape;
   $size: ButtonSize;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
@@ -79,7 +86,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   justify-content: center;
   width: ${({ $fullWidth, $shape, $size }) => {
     if ($fullWidth) return "100%";
-    if ($shape) {
+    if ($shape === "circle" || $shape === "square") {
       switch ($size) {
         case ButtonSize.Small:
           return "2rem";
@@ -95,7 +102,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   }};
   height: ${({ $fullHeight, $shape, $size }) => {
     if ($fullHeight) return "100%";
-    if ($shape) {
+    if ($shape === "circle" || $shape === "square") {
       switch ($size) {
         case ButtonSize.Small:
           return "2rem";
@@ -112,7 +119,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
   font-weight: ${({ $disabled, $textRegular }) => ($disabled ? 400 : $textRegular ? 500 : 900)};
   padding: ${({ $iconButton, $size, $noPadding, $shape }) =>
-    $noPadding || $shape
+    $noPadding || $shape === "circle" || $shape === "square"
       ? "0"
       : `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
   border-color: ${({ theme, $disabled, $color, $borderColor }) =>
@@ -166,5 +173,4 @@ export const StyledButtonLabel = styled.span<{
 }>`
   margin-left: ${({ theme, $hasIcon = false, $noIconMargin = false }) =>
     $hasIcon ? ($noIconMargin ? 0 : "0.4rem") : 0};
-  text-transform: lowercase;
 `;

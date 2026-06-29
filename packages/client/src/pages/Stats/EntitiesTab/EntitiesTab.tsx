@@ -2,10 +2,11 @@ import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, Timestamp } from "components";
+import { Button, ButtonGroup, Input, Loader, SwitchGroup, Timestamp } from "components";
+import { StatsChart, StatsTable } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaTimes, FaUndo } from "react-icons/fa";
+import { FaCalendarPlus, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
 import {
@@ -24,32 +25,15 @@ import {
   datePickerToIso,
   isoToDatetimePicker,
 } from "../utils";
-import { StatsChart, StatsTable } from "components/advanced";
-import { useUserQuery } from "hooks/react-query";
 
 interface EntitiesTab {
   /** Event types selectable in this tab; also the initial selection. */
   eventTypes?: EventType[];
 }
 
-export const EntitiesTab: React.FC<EntitiesTab> = ({
-  eventTypes = VISIBLE_EVENT_TYPES,
-}) => {
-  const [state, dispatch] = useReducer(
-    statsReducer,
-    eventTypes,
-    createEntitiesTabState
-  );
+export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_TYPES }) => {
+  const [state, dispatch] = useReducer(statsReducer, eventTypes, createEntitiesTabState);
   const [filterDebounceEnabled, setFilterDebounceEnabled] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const fetchStats = useCallback(async (request: IRequestStats, useMaterialized: boolean) => {
-    const response = useMaterialized
-      ? await api.statsMaterializedGet(request)
-      : await api.statsGet(request);
-    return response.data;
-  }, []);
 
   const {
     ref: chartRef,
@@ -277,56 +261,68 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({
         <StyledFieldGroup style={{ marginBottom: "1rem" }}>
           <StyledField>
             <StyledFieldLabel>Time Unit</StyledFieldLabel>
-            <ButtonGroup $noMarginRight>
+            <SwitchGroup>
               {Object.values(TimeUnit).map((unit) => (
                 <Button
                   key={unit}
                   label={String(unit)}
+                  shape="rounded-sm"
+                  noBorder
                   onClick={() => {
                     dispatch({
                       type: "timeUnitUpdate",
                       payload: unit as TimeUnit,
                     });
                   }}
-                  color={state.timeUnit === unit ? "primary" : "grey"}
+                  color={state.timeUnit === unit ? "primary" : "greyer"}
+                  inverted={state.timeUnit !== unit}
+                  noBackground={state.timeUnit !== unit}
                 />
               ))}
-            </ButtonGroup>
+            </SwitchGroup>
           </StyledField>
 
           <StyledField>
             <StyledFieldLabel>Event type</StyledFieldLabel>
-            <ButtonGroup $noMarginRight>
+            <SwitchGroup>
               {eventTypes.map((eventType) => (
                 <Button
                   key={eventType}
                   label={String(eventType)}
+                  shape="rounded-sm"
+                  noBorder
                   onClick={() => {
                     dispatch({
                       type: "eventTypeUpdate",
                       payload: eventType,
                     });
                   }}
-                  color={state.eventType.includes(eventType) ? "primary" : "grey"}
+                  color={state.eventType.includes(eventType) ? "primary" : "greyer"}
+                  inverted={!state.eventType.includes(eventType)}
+                  noBackground={!state.eventType.includes(eventType)}
                 />
               ))}
-            </ButtonGroup>
+            </SwitchGroup>
           </StyledField>
 
           <StyledField>
             <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-            <ButtonGroup $noMarginRight>
+            <SwitchGroup>
               {Object.values(Aggregation).map((agg) => (
                 <Button
                   key={agg}
                   label={String(agg)}
+                  shape="rounded-sm"
+                  noBorder
                   onClick={() => {
                     dispatch({ type: "aggregateUpdate", payload: agg });
                   }}
-                  color={state.aggregate === agg ? "primary" : "grey"}
+                  color={state.aggregate === agg ? "primary" : "greyer"}
+                  inverted={state.aggregate !== agg}
+                  noBackground={state.aggregate !== agg}
                 />
               ))}
-            </ButtonGroup>
+            </SwitchGroup>
           </StyledField>
           {state.aggregate === Aggregation.USER && (
             <StyledField>

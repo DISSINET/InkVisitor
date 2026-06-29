@@ -129,7 +129,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               }}
             />
           )}
-          {userCanEdit && entity.isTemplate && (
+          {userCanEdit && !!entity.isTemplate && (
             <>
               <Button
                 key="template-create-template"

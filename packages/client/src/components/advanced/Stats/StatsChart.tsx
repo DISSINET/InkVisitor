@@ -31,6 +31,7 @@ import {
   StyledLegendText,
   StyledLegendWrapper,
   StyledPayload,
+  StyledPayloadColorBox,
   StyledPayloadItem,
 } from "./StatsChartStyles";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
@@ -145,13 +146,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
 
             return (
               <StyledPayloadItem key={index}>
-                <span
-                  style={{
-                    backgroundColor: categoryColors[category],
-                    width: theme.space[6],
-                    height: theme.space[4],
-                  }}
-                />
+                <StyledPayloadColorBox $color={categoryColors[category]} />
                 <span
                   style={{
                     fontSize: theme.fontSize.xs,

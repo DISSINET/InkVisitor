@@ -1,5 +1,6 @@
 import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
+import { ThemeColor } from "Theme/theme";
 import { space2 } from "Theme/theme-space-shortcut";
 
 interface StyledSuggester {
@@ -12,38 +13,62 @@ export const StyledSuggester = styled.div<StyledSuggester>`
   display: ${({ $fullWidth }) => ($fullWidth ? "flex" : "inline-flex")};
 
   margin-top: ${({ $marginTop }) => ($marginTop ? space2 : 0)};
-
-  input[type="text"] {
-    border-width: ${({ $isFocused }) => ($isFocused ? "2px" : "1px")};
-  }
-  .react-select__control {
-    border-width: ${({ $isFocused }) =>
-      $isFocused ? "2px !important" : "1px"};
-  }
 `;
 
 interface Column {}
 interface InputWrapper {
   $isOver: boolean;
   $hasButton: boolean;
+  $isFocused?: boolean;
+  $accentColor: keyof ThemeColor;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
+  position: relative;
   display: flex;
   opacity: ${({ $isOver }) => $isOver && "50%"};
   width: 100%;
   height: 2.5rem;
-  input[type="text"] {
-    border-left-width: 0;
-    border-right-width: ${({ $hasButton }) => ($hasButton ? 0 : "")};
+  background-color: ${({ theme }) => theme.color["white"]};
+  border-style: solid;
+  border-width: 0.1rem;
+  border-color: ${({ $isFocused, $accentColor, theme }) =>
+    $isFocused ? String(theme.color[$accentColor]) : theme.color["gray"]["500"]};
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -0.1rem;
+    border-radius: inherit;
+    border: 0.2rem solid transparent;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &:hover {
+    border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
+    &::after {
+      border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
+    }
+  }
+
+  ${({ $isFocused, $accentColor, theme }) =>
+    $isFocused &&
+    `
+    &::after {
+      border-color: ${String(theme.color[$accentColor])};
+    }
+  `}
+  input[type="text"],
+  .react-select__control {
+    /* border-color: transparent !important; */
+    border-color: transparent !important;
   }
   select {
     border-right-width: 0;
   }
 `;
-export const StyledSuggesterButton = styled.div`
-  border: 1px solid ${({ theme }) => theme.color["primary"]};
-`;
-
 export const StyledSuggesterList = styled.div`
   /* Rendered in a #page-content portal that forms no stacking context, so this
      competes at the body level with the modal wrap (z 500). Match the other

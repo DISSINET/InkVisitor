@@ -52,6 +52,153 @@ describe("query builder offers the inverse in-statement edges", () => {
   });
 });
 
+describe("query builder offers the in-statement actant-role edges (statement chains)", () => {
+  it("a Statement source node can select I_IS:S / I_IS:A1 / I_IS:A2", () => {
+    const selectable = selectableEdgeTypes(
+      sourceNode([EntityEnums.Class.Statement])
+    );
+    expect(selectable).toEqual(
+      expect.arrayContaining([
+        Query.EdgeType["I_IS:S"],
+        Query.EdgeType["I_IS:A1"],
+        Query.EdgeType["I_IS:A2"],
+      ])
+    );
+  });
+
+  it("each role edge exposes target class + entity params (so the actant can be constrained to Statement)", () => {
+    for (const type of [
+      Query.EdgeType["I_IS:S"],
+      Query.EdgeType["I_IS:A1"],
+      Query.EdgeType["I_IS:A2"],
+    ]) {
+      expect(Query.EdgeTypeTargetNodeParams[type].entityClass).toBeTruthy();
+      expect(Query.EdgeTypeTargetNodeParams[type].entityId).toBeTruthy();
+    }
+  });
+
+  it("source must be a Statement; a Statement target is valid", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["I_IS:S"], sourceNode([EntityEnums.Class.Statement]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["I_IS:S"], sourceNode([EntityEnums.Class.Statement]))
+      ).valid
+    ).toBe(false);
+  });
+});
+
+describe("query builder offers the any-position in-statement edge (I_IS:) for co-occurrence", () => {
+  it("a Statement source node can select I_IS:", () => {
+    expect(
+      selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))
+    ).toContain(Query.EdgeType["I_IS:"]);
+  });
+
+  it("I_IS: exposes an entity target param (any class) so the co-occurring entity can be picked", () => {
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["I_IS:"]];
+    expect(params.entityId).toBeTruthy();
+    expect(params.entityId.allowedClasses).toEqual([]);
+    // index-keyed by entity id, not class: no class picker is offered
+    expect(params.entityClass).toBeFalsy();
+  });
+
+  it("source must be a Statement; any target entity is valid", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["I_IS:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["I_IS:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(false);
+  });
+
+  it("stays valid once an actual entity is picked (entityClasses cleared)", () => {
+    const pickedEntity: Query.INode = {
+      id: "target",
+      type: Query.NodeType.E,
+      operator: Query.NodeOperator.And,
+      params: { entityClasses: [], entityId: "some-entity-id" },
+      edges: [],
+    };
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["I_IS:"], pickedEntity)
+      ).valid
+    ).toBe(true);
+  });
+});
+
+describe("query builder offers the 'used in statements under T' edge (EUT:)", () => {
+  it("any source node (e.g. Person, Object) can select EUT:", () => {
+    for (const cls of [
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Object,
+      EntityEnums.Class.Concept,
+    ]) {
+      expect(selectableEdgeTypes(sourceNode([cls]))).toContain(
+        Query.EdgeType["EUT:"]
+      );
+    }
+  });
+
+  it("I_SUT: exposes a Territory entity target param so the territory can be picked", () => {
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["EUT:"]];
+    expect(params.entityId).toBeTruthy();
+    expect(params.entityId.allowedClasses).toEqual([
+      EntityEnums.Class.Territory,
+    ]);
+  });
+
+  it("source may be any entity; the target must be a Territory", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EUT:"], sourceNode([EntityEnums.Class.Territory]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EUT:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(false);
+  });
+
+  it("stays valid once an actual Territory entity is picked (entityClasses cleared)", () => {
+    // the runtime state after picking a target entity: entityId set,
+    // entityClasses reset to [] (updateNodeEntityId). The query must remain
+    // executable rather than being gated invalid.
+    const pickedTerritory: Query.INode = {
+      id: "target",
+      type: Query.NodeType.E,
+      operator: Query.NodeOperator.And,
+      params: { entityClasses: [], entityId: "some-territory-id" },
+      edges: [],
+    };
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["EUT:"], pickedTerritory)
+      ).valid
+    ).toBe(true);
+  });
+});
+
 describe("query builder offers the superordinate (R:SOE) edge", () => {
   it("a Location source node can select R:SOE", () => {
     const selectable = selectableEdgeTypes(sourceNode([EntityEnums.Class.Location]));

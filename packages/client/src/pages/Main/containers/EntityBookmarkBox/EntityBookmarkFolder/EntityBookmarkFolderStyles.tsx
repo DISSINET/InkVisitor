@@ -6,8 +6,10 @@ export const StyledFolderWrapper = styled.div`
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   background-color: ${({ theme }) => theme.color["white"]};
+  overflow: hidden;
   &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
