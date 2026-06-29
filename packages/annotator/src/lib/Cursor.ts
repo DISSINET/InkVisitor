@@ -490,7 +490,10 @@ export default class Cursor
         relY >= 0 &&
         relY <= viewport.noLines
       ) {
-        this.drawLine(ctx, relY, this.xLine, this.xLine, {
+        // A wrapped line can run one trailing space past the viewport; clamp the
+        // drawn caret column to the width so it stays visible (no h-scroll). #3145
+        const caretX = Math.min(this.xLine, drawingOptions.charsAtLine);
+        this.drawLine(ctx, relY, caretX, caretX, {
           ...drawingOptions,
           color: this.style.selectorColor,
         });
