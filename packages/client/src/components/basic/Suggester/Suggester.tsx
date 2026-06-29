@@ -75,6 +75,7 @@ interface Suggester {
   externalDroppedItem?: EntityDragItem | null;
   onConsumeExternalDrop?: () => void;
   onEmptyAddButtonClick?: () => void;
+  clearableInput?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -119,6 +120,7 @@ export const Suggester: React.FC<Suggester> = ({
   externalDroppedItem,
   onConsumeExternalDrop,
   onEmptyAddButtonClick,
+  clearableInput = true,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -403,7 +405,7 @@ export const Suggester: React.FC<Suggester> = ({
               autoFocus={(categories.length === 1 || autoFocusInput) && autoFocus}
               disabled={disabled}
               fullHeight
-              clearable
+              clearable={clearableInput}
               rightContent={
                 !disableCreate ? (
                   <IconButton

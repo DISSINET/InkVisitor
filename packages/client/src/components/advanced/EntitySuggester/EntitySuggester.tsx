@@ -78,6 +78,7 @@ interface EntitySuggesterProps {
   disabled?: boolean;
   isHidden?: boolean;
   disableCleanTypedAfterCreate?: boolean;
+  clearableInput?: boolean;
   onEmptyAddButtonClick?: () => void;
 
   // opt-in expansion of the suggestions with related entities (#2969), surfaced
@@ -140,6 +141,7 @@ const EntitySuggesterFull: React.FC<
   onConsumeExternalDrop,
   disableCleanTypedAfterCreate = false,
   onEmptyAddButtonClick,
+  clearableInput = true,
   includeEquivalents = false,
   includeSubordinates = false,
 }) => {
@@ -498,6 +500,7 @@ const EntitySuggesterFull: React.FC<
         externalDroppedItem={externalDroppedItem}
         onConsumeExternalDrop={onConsumeExternalDrop}
         onEmptyAddButtonClick={onEmptyAddButtonClick}
+        clearableInput={clearableInput}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
