@@ -4,12 +4,7 @@ import { useTheme } from "hooks";
 import React, { useRef } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { CgClose } from "react-icons/cg";
-import {
-  MdChevronLeft,
-  MdChevronRight,
-  MdDragIndicator,
-  MdOutlineEdit,
-} from "react-icons/md";
+import { MdChevronLeft, MdChevronRight, MdDragIndicator, MdOutlineEdit } from "react-icons/md";
 import { DragItem, Identifier, ItemTypes } from "types";
 import { getColumnWidth } from "../utils";
 import {
@@ -43,14 +38,14 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
   const dragRef = useRef<HTMLSpanElement>(null);
   const width = getColumnWidth(column.type);
 
-  const [{ handlerId }, drop] = useDrop<
-    DragItem,
-    void,
-    { handlerId: Identifier | null }
-  >({
+  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
     accept: ItemTypes.EXPLORER_COLUMN,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (!dropRef.current) {
+        return;
+      }
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) {
         return;
       }
       const dragIndex = item.index;
@@ -58,20 +53,18 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
       if (dragIndex === hoverIndex) {
         return;
       }
-      // Swap as soon as the pointer crosses into this column (its leading edge),
-      // not at its midpoint - columns have different widths.
+
       const rect = dropRef.current.getBoundingClientRect();
-      const clientOffset = monitor.getClientOffset();
-      if (!clientOffset) {
-        return;
-      }
       const hoverClientX = clientOffset.x - rect.left;
-      // Moving right: trigger once past the start (left edge) of the next column.
-      if (dragIndex < hoverIndex && hoverClientX < 0) {
+      // Single trigger line, shifted toward the left of the column so the swap
+      // happens early. Both directions use the same line, which preserves the
+      // hysteresis that stops flicker between different-width columns.
+      const hoverThresholdX = rect.width * 0.15;
+
+      if (dragIndex < hoverIndex && hoverClientX < hoverThresholdX) {
         return;
       }
-      // Moving left: trigger once past the middle of the previous column.
-      if (dragIndex > hoverIndex && hoverClientX > rect.width / 2) {
+      if (dragIndex > hoverIndex && hoverClientX > hoverThresholdX) {
         return;
       }
       onMoveColumn(dragIndex, hoverIndex);
@@ -118,9 +111,7 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
           </StyledHeaderEditIcon>
         )}
         <StyledHeaderColumnLabel>
-          <ExploreTableHeaderTooltip column={column}>
-            {column.name}
-          </ExploreTableHeaderTooltip>
+          <ExploreTableHeaderTooltip column={column}>{column.name}</ExploreTableHeaderTooltip>
         </StyledHeaderColumnLabel>
         <StyledHeaderColumnControls>
           <Button
