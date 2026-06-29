@@ -156,6 +156,7 @@ export enum ItemTypes {
   REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
   DETAIL_TAB = "DETAIL_TAB",
+  EXPLORER_COLUMN = "EXPLORER_COLUMN",
 }
 
 export type DragItem = {

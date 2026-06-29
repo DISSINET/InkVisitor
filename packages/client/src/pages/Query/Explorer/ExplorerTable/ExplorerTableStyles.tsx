@@ -23,6 +23,39 @@ export const StyledHeader = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
+export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.3 : 1)};
+`;
+
+export const StyledHeaderDragHandle = styled.span`
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.2rem;
+  cursor: grab;
+  color: ${({ theme }) => theme.color["headerTextColor"]};
+  &:active {
+    cursor: grabbing;
+  }
+`;
+
+export const StyledHeaderColumnLabel = styled.span`
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+export const StyledHeaderColumnControls = styled.span`
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  padding-left: 0.3rem;
+`;
+
 export const StyledBody = styled.div``;
 
 export const StyledEmptyMessage = styled.div`

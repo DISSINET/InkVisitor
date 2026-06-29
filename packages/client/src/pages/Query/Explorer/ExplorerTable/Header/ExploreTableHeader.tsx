@@ -1,20 +1,14 @@
 import { Explore } from "@inkvisitor/shared/types/query";
-import { Button, Loader } from "components";
-import { useTheme } from "hooks";
 import React from "react";
-import { CgClose } from "react-icons/cg";
-import { MdOutlineEdit } from "react-icons/md";
-import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
+import ExploreTableHeaderColumn from "./ExploreTableHeaderColumn";
 import { StyledHeader } from "../ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "../constants";
-import { getColumnWidth } from "../utils";
 
 const ExploreTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];
   onRemoveColumn: (id: string) => void;
-}> = React.memo(({ columns, onRemoveColumn }) => {
-  const theme = useTheme();
-
+  onMoveColumn: (fromIndex: number, toIndex: number) => void;
+}> = React.memo(({ columns, onRemoveColumn, onMoveColumn }) => {
   return (
     <StyledHeader>
       <div
@@ -29,30 +23,15 @@ const ExploreTableHeader: React.FC<{
       </div>
       {columns.map((column, key) => {
         return (
-          <div
-            key={key}
-            className="qt-col qt-col-header"
-            style={{
-              width: getColumnWidth(column.type),
-              minWidth: getColumnWidth(column.type),
-              maxWidth: getColumnWidth(column.type),
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            {column.editable && <MdOutlineEdit size={14} style={{ marginRight: "0.3rem" }} />}
-            <ExploreTableHeaderTooltip column={column}>{column.name}</ExploreTableHeaderTooltip>
-            <span style={{ marginLeft: "0.5rem" }}>
-              <Button
-                noBorder
-                noBackground
-                inverted
-                icon={<CgClose color={theme.color.headerTextColor} />}
-                onClick={() => onRemoveColumn(column.id)}
-                tooltipLabel="remove column"
-              />
-            </span>
-          </div>
+          <ExploreTableHeaderColumn
+            key={column.id}
+            column={column}
+            index={key}
+            isFirst={key === 0}
+            isLast={key === columns.length - 1}
+            onRemoveColumn={onRemoveColumn}
+            onMoveColumn={onMoveColumn}
+          />
         );
       })}
     </StyledHeader>

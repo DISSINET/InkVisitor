@@ -256,6 +256,16 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [dispatch],
   );
 
+  const handleMoveColumn = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      dispatch({
+        type: ExploreActionType.moveColumn,
+        payload: { fromIndex, toIndex },
+      });
+    },
+    [dispatch],
+  );
+
   const widthTable = useMemo(() => {
     return (
       WIDTH_COLUMN_FIRST +
@@ -433,7 +443,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
         <div style={{ width: widthTable, minWidth: "100%" }}>
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
-          <ExploreTableHeader columns={columns} onRemoveColumn={handleRemoveColumn} />
+          <ExploreTableHeader
+            columns={columns}
+            onRemoveColumn={handleRemoveColumn}
+            onMoveColumn={handleMoveColumn}
+          />
 
           {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
           <StyledBody
