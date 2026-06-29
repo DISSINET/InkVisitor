@@ -299,7 +299,10 @@ export const Suggester: React.FC<Suggester> = ({
               territoryParentId={territoryParentId}
               disableButtons={disableButtons}
               disableTemplateInstantiation={disableTemplateInstantiation}
-              onPick={onPick}
+              onPick={(entity, instantiate) => {
+                setIsHovered(false);
+                onPick(entity, instantiate);
+              }}
             />
           );
         }}
