@@ -492,6 +492,43 @@ export const getLeafTerritoryAnchorsAtIndex = (
   });
 };
 
+// Build the chain of Territory anchors whose span contains the given index,
+// ordered outermost first, each tagged with its nesting depth (the number of
+// other containing Territory anchors that strictly enclose it). This is the
+// in-document subT hierarchy the cursor sits inside, from the highest subT that
+// owns this document's text down to the deepest leaf. Duplicate ids collapse to
+// their outermost occurrence.
+export const getTerritoryHierarchyAtIndex = (
+  anchors: IAnchorsNode[],
+  index: number
+): { id: string; depth: number }[] => {
+  const containing = collectTerritoryAnchorsAtIndex(anchors, index);
+
+  const sorted = [...containing].sort((a, b) => {
+    const spanA = a.indexEnd - a.indexStart;
+    const spanB = b.indexEnd - b.indexStart;
+    if (spanA !== spanB) return spanB - spanA; // outermost (largest span) first
+    return a.indexStart - b.indexStart;
+  });
+
+  const seen = new Set<string>();
+  const chain: { id: string; depth: number }[] = [];
+  for (const node of sorted) {
+    if (seen.has(node.anchor)) continue;
+    seen.add(node.anchor);
+    const depth = containing.filter(
+      (other) =>
+        other !== node &&
+        other.indexStart <= node.indexStart &&
+        other.indexEnd >= node.indexEnd &&
+        (other.indexStart !== node.indexStart ||
+          other.indexEnd !== node.indexEnd)
+    ).length;
+    chain.push({ id: node.anchor, depth });
+  }
+  return chain;
+};
+
 export const getStatementOrderByIndex = (
   index: number,
   statements: IResponseStatement[]

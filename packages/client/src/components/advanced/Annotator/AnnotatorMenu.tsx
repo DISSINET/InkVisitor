@@ -39,6 +39,7 @@ import {
   StyledStatementSubsection,
   StyledStatementTargetInfo,
   StyledStatementTargetList,
+  StyledStatementTargetNote,
   StyledStatementTargetOption,
   StyledStatementTargetRadio,
   StyledStatementTargetSelector,
@@ -47,6 +48,13 @@ import {
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
 import { TerritoryCreateModalType } from "./types";
+
+export interface AnnotatorPositionTNode {
+  /** Territory anchor (entity) id. */
+  id: string;
+  /** Nesting depth within the position hierarchy (0 = outermost). */
+  depth: number;
+}
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -64,11 +72,12 @@ interface TextAnnotatorMenuProps {
     targetTerritoryId?: string,
   ) => void;
   /**
-   * Leaf subTs (Territory anchors) the current selection sits inside, deepest
-   * first. Lets the user target the proper subT for the new Statement instead
-   * of always using the active subT.
+   * The in-document subT (Territory anchor) hierarchy the current selection sits
+   * inside, outermost first with nesting depth. Lets the user target the proper
+   * subT for the new Statement, showing the chain from the highest subT owning
+   * this document's text down to the deepest leaf at the cursor.
    */
-  annotatorPositionSubTIds: string[];
+  annotatorPositionHierarchy: AnnotatorPositionTNode[];
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl,
@@ -99,7 +108,7 @@ export const TextAnnotatorMenu = ({
   entities,
   onAnchorAdd,
   onCreateStatement = undefined,
-  annotatorPositionSubTIds,
+  annotatorPositionHierarchy,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
@@ -139,28 +148,30 @@ export const TextAnnotatorMenu = ({
   const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
 
-  // target subT for the new Statement. Options = the active subT plus the leaf
-  // subTs the selection sits inside (per the Annotator position). The selector
-  // only matters when those differ; default is the deepest leaf subT.
-  const statementTargetOptions = useMemo(() => {
-    const ids: string[] = [];
-    annotatorPositionSubTIds.forEach((id) => {
-      if (id && !ids.includes(id)) ids.push(id);
-    });
-    if (activeTerritoryId && !ids.includes(activeTerritoryId)) {
-      ids.push(activeTerritoryId);
-    }
-    return ids;
-  }, [annotatorPositionSubTIds, activeTerritoryId]);
+  // The deepest leaf subT at the cursor (smallest span = innermost) is the
+  // "relevant" T and the default Statement target. The active T (opened in the
+  // Tree) is offered separately, as a flat option without hierarchy.
+  const leafStatementTargetId =
+    annotatorPositionHierarchy.length > 0
+      ? annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1].id
+      : undefined;
 
-  // show the selector only when the position-based leaf subTs add something
-  // beyond the active subT
-  const showStatementTargetSelector = useMemo(
-    () => annotatorPositionSubTIds.some((id) => id && id !== activeTerritoryId),
-    [annotatorPositionSubTIds, activeTerritoryId],
+  // the active T is rendered as its own flat option only when it is not already
+  // part of the position hierarchy; otherwise the "opened in Tree" note rides on
+  // the matching hierarchy node
+  const activeTInHierarchy = useMemo(
+    () => annotatorPositionHierarchy.some((node) => node.id === activeTerritoryId),
+    [annotatorPositionHierarchy, activeTerritoryId],
   );
 
-  const defaultStatementTargetId = annotatorPositionSubTIds[0] ?? activeTerritoryId;
+  // show the selector only when the position hierarchy adds a subT beyond the
+  // active T
+  const showStatementTargetSelector = useMemo(
+    () => annotatorPositionHierarchy.some((node) => node.id !== activeTerritoryId),
+    [annotatorPositionHierarchy, activeTerritoryId],
+  );
+
+  const defaultStatementTargetId = leafStatementTargetId ?? activeTerritoryId;
 
   const [selectedStatementTargetId, setSelectedStatementTargetId] = useState<string | undefined>(
     defaultStatementTargetId,
@@ -174,6 +185,33 @@ export const TextAnnotatorMenu = ({
 
   const selectedStatementTargetEntity =
     (selectedStatementTargetId ? entities[selectedStatementTargetId] : false) || territory;
+
+  const renderStatementTargetOption = (optionId: string, depth: number) => {
+    const optionEntity =
+      entities[optionId] || (optionId === activeTerritoryId ? territory : undefined);
+    if (!optionEntity) {
+      return null;
+    }
+    return (
+      <StyledStatementTargetOption
+        key={optionId}
+        $isSelected={optionId === selectedStatementTargetId}
+        $depth={depth}
+        onClick={() => setSelectedStatementTargetId(optionId)}
+      >
+        <EntityTag
+          fullWidth
+          disableCopyToClipboard
+          entity={optionEntity}
+          disableDoubleClick
+          disableDrag
+        />
+        {optionId === activeTerritoryId && (
+          <StyledStatementTargetNote>T currently opened in Tree</StyledStatementTargetNote>
+        )}
+      </StyledStatementTargetOption>
+    );
+  };
 
   const someAnchorsWithoutElvl = useMemo(
     () =>
@@ -291,36 +329,17 @@ export const TextAnnotatorMenu = ({
                   <StyledStatementTargetSelector>
                     <StyledStatementTargetTitle>create S in T</StyledStatementTargetTitle>
                     <StyledStatementTargetList>
-                      {statementTargetOptions.map((optionId) => {
-                        const optionEntity =
-                          entities[optionId] ||
-                          (optionId === activeTerritoryId ? territory : undefined);
-                        if (!optionEntity) {
-                          return null;
-                        }
-                        const isSelected = optionId === selectedStatementTargetId;
-                        return (
-                          <StyledStatementTargetOption
-                            key={optionId}
-                            $isSelected={isSelected}
-                            onClick={() => setSelectedStatementTargetId(optionId)}
-                          >
-                            <StyledStatementTargetRadio $isSelected={isSelected} />
-                            <EntityTag
-                              fullWidth
-                              disableCopyToClipboard
-                              entity={optionEntity}
-                              disableDoubleClick
-                              disableDrag
-                            />
-                          </StyledStatementTargetOption>
-                        );
-                      })}
+                      {annotatorPositionHierarchy.map((node) =>
+                        renderStatementTargetOption(node.id, node.depth),
+                      )}
+                      {!activeTInHierarchy &&
+                        activeTerritoryId &&
+                        renderStatementTargetOption(activeTerritoryId, 0)}
                     </StyledStatementTargetList>
                   </StyledStatementTargetSelector>
                 )}
 
-                {annotatorPositionSubTIds.length === 0 && (
+                {annotatorPositionHierarchy.length === 0 && (
                   <StyledStatementTargetInfo>
                     selection is not within any subT — S will be created in the active T
                   </StyledStatementTargetInfo>

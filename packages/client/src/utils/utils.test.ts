@@ -6,6 +6,7 @@ import {
   collectTerritoryAnchorsAtIndex,
   collectTerritoryChildren,
   getLeafTerritoryAnchorsAtIndex,
+  getTerritoryHierarchyAtIndex,
   computeDifferences,
   deepCopy,
   floorNumberToOneDecimal,
@@ -294,6 +295,38 @@ describe("getLeafTerritoryAnchorsAtIndex", () => {
     expect(getLeafTerritoryAnchorsAtIndex(tied, 5).map((a) => a.anchor)).toEqual([
       "Tb",
       "Ta",
+    ]);
+  });
+});
+
+describe("getTerritoryHierarchyAtIndex", () => {
+  it("orders containing Ts outermost first with nesting depth", () => {
+    expect(getTerritoryHierarchyAtIndex(territoryAnchorTree, 45)).toEqual([
+      { id: "Touter", depth: 0 },
+      { id: "Tother", depth: 0 },
+      { id: "Tinner", depth: 1 },
+    ]);
+  });
+
+  it("returns the single containing T at depth 0 when no nesting applies", () => {
+    expect(getTerritoryHierarchyAtIndex(territoryAnchorTree, 5)).toEqual([
+      { id: "Touter", depth: 0 },
+    ]);
+  });
+
+  it("returns empty when index is in no Territory span", () => {
+    expect(getTerritoryHierarchyAtIndex(territoryAnchorTree, 200)).toEqual([]);
+  });
+
+  it("collapses a duplicate T id to its outermost occurrence", () => {
+    const dup = [
+      { anchor: "Touter", class: EntityEnums.Class.Territory, indexStart: 0, indexEnd: 100, children: [] },
+      { anchor: "Tdup", class: EntityEnums.Class.Territory, indexStart: 10, indexEnd: 60, children: [] },
+      { anchor: "Tdup", class: EntityEnums.Class.Territory, indexStart: 20, indexEnd: 40, children: [] },
+    ] as unknown as IAnchorsNode[];
+    expect(getTerritoryHierarchyAtIndex(dup, 30)).toEqual([
+      { id: "Touter", depth: 0 },
+      { id: "Tdup", depth: 1 },
     ]);
   });
 });

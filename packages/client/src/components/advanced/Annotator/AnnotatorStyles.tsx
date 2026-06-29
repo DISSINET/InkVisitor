@@ -226,17 +226,29 @@ export const StyledStatementTargetList = styled.div`
   gap: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledStatementTargetOption = styled.div<{ $isSelected: boolean }>`
+export const StyledStatementTargetOption = styled.div<{
+  $isSelected: boolean;
+  $depth?: number;
+}>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   cursor: pointer;
   padding: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme, $depth }) =>
+    $depth ? `calc(${theme.space[4]} * ${$depth})` : 0};
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   border: ${({ theme, $isSelected }) =>
     `1px solid ${$isSelected ? theme.color.primary : "transparent"}`};
   background-color: ${({ theme, $isSelected }) =>
     $isSelected ? theme.color.blue["200"] : "transparent"};
+`;
+
+export const StyledStatementTargetNote = styled.span`
+  color: ${({ theme }) => theme.color.gray["600"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: italic;
+  white-space: nowrap;
 `;
 
 export const StyledStatementTargetRadio = styled.div<{ $isSelected: boolean }>`

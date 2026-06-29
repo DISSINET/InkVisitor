@@ -50,8 +50,8 @@ import { HiCodeBracket } from "react-icons/hi2";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import {
   collectStatementAnchors,
-  getLeafTerritoryAnchorsAtIndex,
   getStatementOrderByIndex,
+  getTerritoryHierarchyAtIndex,
 } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
@@ -1082,17 +1082,18 @@ export const TextAnnotator = ({
     }
   };
 
-  // leaf subTs (Territory anchors) the current selection sits inside, deepest
-  // first. Multiple Ts can share one full-text, so the cursor may be inside
-  // several. Used to let the user target the proper subT for the new Statement.
-  const annotatorPositionSubTAnchorIds = useMemo(() => {
+  // The in-document subT hierarchy (Territory anchors) the current selection
+  // sits inside, outermost first with nesting depth. Lets the user target the
+  // proper subT for the new Statement, showing the chain from the highest subT
+  // owning this document's text down to the deepest leaf at the cursor.
+  const annotatorPositionHierarchy = useMemo(() => {
     if (!dataDocument || selectionStartIndex === -1) {
       return [];
     }
-    return getLeafTerritoryAnchorsAtIndex(
+    return getTerritoryHierarchyAtIndex(
       dataDocument.anchors,
       selectionStartIndex,
-    ).map((anchor) => anchor.anchor);
+    );
   }, [dataDocument, selectionStartIndex]);
 
   const onRemoveAnchor = (anchor: Tag) => {
@@ -1383,7 +1384,7 @@ export const TextAnnotator = ({
                       onAnchorAdd={handleAddAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
-                      annotatorPositionSubTIds={annotatorPositionSubTAnchorIds}
+                      annotatorPositionHierarchy={annotatorPositionHierarchy}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       readonly={isMenuReadOnly}
