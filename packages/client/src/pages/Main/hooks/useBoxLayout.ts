@@ -30,8 +30,12 @@ export function useBoxLayout({
     (state) => state.layout.mainPage.editorBoxState,
   );
   const statementListOpened = useAppSelector((state) => state.layout.mainPage.statementListOpened);
+  const secondPanelExpanded = useAppSelector((state) => state.layout.mainPage.secondPanelExpanded);
+  const thirdPanelExpanded = useAppSelector((state) => state.layout.mainPage.thirdPanelExpanded);
 
   const [lastState, setLastState] = useState(DetailBoxState.Normal);
+
+  const getCollapsedPanelHalfHeight = () => contentHeight / 2;
 
   // DETAIL HORIZONTAL SEPARATOR STATE
   const [detailSeparatorY, setDetailSeparatorY] = useState<number>(() => {
@@ -91,6 +95,9 @@ export function useBoxLayout({
   }, [detailBoxState, statementListOpened, detailIdArrayLength]);
 
   const getDetailBoxHeight = () => {
+    if (!secondPanelExpanded && detailIdArrayLength > 0) {
+      return getCollapsedPanelHalfHeight();
+    }
     switch (detailBoxState) {
       case DetailBoxState.FullHeight:
         return contentHeight - hiddenBoxHeight;
@@ -105,12 +112,18 @@ export function useBoxLayout({
     if (!detailIdArrayLength) {
       return contentHeight;
     }
+    if (!secondPanelExpanded) {
+      return getCollapsedPanelHalfHeight();
+    }
     return contentHeight - (getDetailBoxHeight() ?? 0);
   };
 
   const getEditorBoxHeight = () => {
     if (!editorOpened) {
       return hiddenBoxHeight;
+    }
+    if (!thirdPanelExpanded && statementId) {
+      return getCollapsedPanelHalfHeight();
     }
     switch (editorBoxState) {
       case EditorBoxState.FullHeight:
@@ -125,6 +138,9 @@ export function useBoxLayout({
   const getAnnotatorBoxHeight = () => {
     if (!statementId) {
       return contentHeight;
+    }
+    if (!thirdPanelExpanded && editorOpened) {
+      return getCollapsedPanelHalfHeight();
     }
     return contentHeight - (getEditorBoxHeight() ?? 0);
   };

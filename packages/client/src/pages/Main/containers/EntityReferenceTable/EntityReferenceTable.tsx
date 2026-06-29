@@ -49,6 +49,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   const [fieldToUpdate, setFieldToUpdate] = useState<false | "resource" | "value">(false);
   const [initResourceTyped, setInitResourceTyped] = useState("");
   const [initValueTyped, setInitValueTyped] = useState("");
+  const [autoFocusField, setAutoFocusField] = useState<false | "resource" | "value">(false);
 
   useEffect(() => {
     if (JSON.stringify(localReferences) !== JSON.stringify(references)) {
@@ -63,6 +64,9 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         setInitResourceTyped("");
         setTempValueTyped("");
         setFieldToUpdate(false);
+      }
+      if (autoFocusField) {
+        setTimeout(() => setAutoFocusField(false), 0);
       }
     }
   }, [references]);
@@ -132,6 +136,8 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             territoryParentId={territoryParentId}
             initResourceTyped={localReferences.length === key + 1 ? initResourceTyped : undefined}
             initValueTyped={localReferences.length === key + 1 ? initValueTyped : undefined}
+            autoFocusResource={localReferences.length === key + 1 && autoFocusField === "resource"}
+            autoFocusValue={localReferences.length === key + 1 && autoFocusField === "value"}
             onClearAfterInitTyped={() => {
               setInitResourceTyped("");
               setInitValueTyped("");
@@ -152,6 +158,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             territoryActants={[]}
             onSelected={(newSelectedId) => {
               onChange([...references, { id: uuidv4(), resource: newSelectedId, value: "" }], true);
+              setAutoFocusField("value");
               if (tempValueTyped.length) {
                 setFieldToUpdate("value");
               }
@@ -173,6 +180,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             territoryActants={[]}
             onSelected={(newSelectedId: string) => {
               onChange([...references, { id: uuidv4(), resource: "", value: newSelectedId }], true);
+              setAutoFocusField("resource");
               if (tempResourceTyped.length) {
                 setFieldToUpdate("resource");
               }

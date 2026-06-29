@@ -1,3 +1,5 @@
+import { MenuColors, LIGHT_MENU_COLORS } from "./constants";
+
 /**
  * Lightweight right-click context menu for the annotator.
  *
@@ -19,6 +21,7 @@ export interface ContextMenuItem {
 
 export class ContextMenu {
   private el: HTMLDivElement | null = null;
+  colors: MenuColors = LIGHT_MENU_COLORS;
 
   /** Whether the menu is currently shown. */
   get isOpen(): boolean {
@@ -37,15 +40,15 @@ export class ContextMenu {
       position: "fixed",
       left: `${clientX}px`,
       top: `${clientY}px`,
-      zIndex: "10000",
+      zIndex: "200",
       minWidth: "160px",
-      padding: "4px 0",
-      background: "#ffffff",
-      border: "1px solid #d0d0d0",
-      borderRadius: "4px",
+      padding: "4px",
+      background: this.colors.bg,
+      border: `1px solid ${this.colors.border}`,
+      borderRadius: "8px",
       boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-      font: '13px "Roboto Mono", monospace',
-      color: "#222",
+      font: '13px "Roboto", sans-serif',
+      color: this.colors.text,
       userSelect: "none",
     } as Partial<CSSStyleDeclaration>);
 
@@ -55,7 +58,7 @@ export class ContextMenu {
         Object.assign(sep.style, {
           height: "1px",
           margin: "4px 0",
-          background: "#e0e0e0",
+          background: this.colors.separator,
         } as Partial<CSSStyleDeclaration>);
         menu.appendChild(sep);
         continue;
@@ -66,13 +69,15 @@ export class ContextMenu {
       Object.assign(row.style, {
         padding: "5px 14px",
         cursor: item.disabled ? "default" : "pointer",
-        color: item.disabled ? "#aaa" : "inherit",
+        color: item.disabled ? this.colors.disabled : "inherit",
         whiteSpace: "nowrap",
+        borderRadius: "4px",
+        transition: "background-color 0.2s ease",
       } as Partial<CSSStyleDeclaration>);
 
       if (!item.disabled) {
         row.addEventListener("mouseenter", () => {
-          row.style.background = "#f0f0f0";
+          row.style.background = this.colors.hover;
         });
         row.addEventListener("mouseleave", () => {
           row.style.background = "transparent";

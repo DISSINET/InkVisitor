@@ -129,6 +129,7 @@ export const Tooltip: React.FC<Tooltip> = ({
                   id="arrow"
                   ref={setArrowElement}
                   style={styles.arrow}
+                  $color={color}
                 />
               )}
               <div>

@@ -49,14 +49,16 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
     }
   }
 `;
-export const StyledArrow = styled.div`
+interface StyledArrow {
+  $color?: keyof ThemeColor;
+}
+export const StyledArrow = styled.div<StyledArrow>`
   position: absolute;
   width: 10px;
   height: 10px;
   &:after {
     content: "";
-    /* background-color: ${({ theme }) => theme.color["black"]}; */
-    background-color: black;
+    background-color: ${({ theme, $color }) => $color ? theme.color[$color] : theme.color["tooltipBackground"]};
     position: absolute;
     left: 0;
     transform: rotate(45deg);

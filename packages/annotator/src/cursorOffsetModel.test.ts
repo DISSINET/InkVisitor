@@ -1,8 +1,8 @@
 /**
- * Phase 3, Task 3.1 — the document-offset cursor model (ADDITIVE).
+ * The document-offset cursor model (ADDITIVE).
  *
  * These prove the offset<->visual converters and Cursor's sync helpers in
- * isolation, before navigation/editing are rewired onto them (Tasks 3.2+). The
+ * isolation, before navigation/editing are rewired onto them. The
  * canonical round-trip is offset -> visual -> offset (the soft-wrap boundary
  * means visual -> offset -> visual is intentionally NOT 1:1).
  */

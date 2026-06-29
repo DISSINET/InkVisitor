@@ -245,12 +245,16 @@ export function useVerticalSeparators() {
           );
 
           if (
-            arePanelWidthsUndersized(savedWidths, [
-              firstPanelExpanded,
-              secondPanelExpanded,
-              thirdPanelExpanded,
-              fourthPanelExpanded,
-            ])
+            arePanelWidthsUndersized(
+              savedWidths,
+              [
+                firstPanelExpanded,
+                secondPanelExpanded,
+                thirdPanelExpanded,
+                fourthPanelExpanded,
+              ],
+              layoutWidth,
+            )
           ) {
             // something is undersized
             console.log("something is undersized");

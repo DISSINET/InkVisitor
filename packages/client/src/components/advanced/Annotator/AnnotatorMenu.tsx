@@ -14,6 +14,8 @@ import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
+import { useAppDispatch } from "redux/hooks";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
@@ -117,6 +119,7 @@ export const TextAnnotatorMenu = ({
 }: TextAnnotatorMenuProps) => {
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
   const { setStatementId } = useSearchParams();
 
   const tryCloseMenu = useCallback(() => {
@@ -162,6 +165,9 @@ export const TextAnnotatorMenu = ({
   const [selectedStatementTargetId, setSelectedStatementTargetId] = useState<string | undefined>(
     defaultStatementTargetId,
   );
+  const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
 
   // reset to the deepest leaf whenever the selection (and thus the candidate
   // subTs) changes
@@ -239,9 +245,7 @@ export const TextAnnotatorMenu = ({
                 inverted
                 icon={<MdOutlineDone size={25} />}
                 size={ButtonSize.ExtraLarge}
-                radiusRight
-                radiusLeft
-                shape="square"
+                shape="rounded-md"
                 noBackground
                 onClick={() => onEscapePressed()}
                 tooltipLabel="Close selection menu"
@@ -358,6 +362,7 @@ export const TextAnnotatorMenu = ({
                 openDetailOnCreate
                 parentTerritory={selectedStatementTargetEntity || territory}
                 onEntityCreateMutationSuccess={(entity) => {
+                  dispatch(setSecondPanelExpanded(true));
                   if (entity.class === EntityEnums.Class.Statement) {
                     queryClient.invalidateQueries({
                       queryKey: ["territory", "statement-list"],

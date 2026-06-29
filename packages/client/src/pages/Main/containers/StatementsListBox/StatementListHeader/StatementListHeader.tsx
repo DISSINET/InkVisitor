@@ -1,6 +1,7 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
+  DropdownItem,
   IEntity,
   IReference,
   IResponseGeneric,
@@ -10,25 +11,20 @@ import {
   ITerritory,
   Relation,
 } from "@inkvisitor/shared/types";
-import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
-import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Submit } from "components";
+import { Button, Checkbox, Submit } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
   TerritoryActionModal,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
+import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { FaArrowDownShortWide } from "react-icons/fa6";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-  MdOutlineIndeterminateCheckBox,
-} from "react-icons/md";
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -51,8 +47,6 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { DropdownItem } from "@inkvisitor/shared/types";
-import { useUserQuery } from "hooks/react-query";
 
 interface StatementListHeader {
   territory?: IResponseTerritory;
@@ -282,7 +276,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   }, [treeData, territoryId]);
 
   const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
+    (state) => state.territoryTree.selectedTerritoryPath,
   );
 
   const handleSelectAll = (checked: boolean) =>
@@ -291,32 +285,21 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
-    const size = 18;
+    const size = 16;
+    const hasSelection = isAllSelected || selectedRows.length > 0;
 
-    if (isAllSelected) {
-      return (
-        <MdOutlineCheckBox
-          size={size}
-          onClick={() => {
-            handleSelectAll(false);
-            dispatch(setLastClickedIndex(-1));
-          }}
-        />
-      );
-    } else if (selectedRows.length > 0) {
-      // some rows selected
-      return (
-        <MdOutlineIndeterminateCheckBox
-          size={size}
-          onClick={() => {
-            handleSelectAll(false);
-            dispatch(setLastClickedIndex(-1));
-          }}
-        />
-      );
-    } else {
-      return <MdOutlineCheckBoxOutlineBlank size={size} onClick={() => handleSelectAll(true)} />;
-    }
+    return (
+      <Checkbox
+        size={size}
+        value={isAllSelected}
+        indeterminate={!isAllSelected && selectedRows.length > 0}
+        onChangeFn={() => {
+          // any selection -> clear; none -> select all
+          handleSelectAll(!hasSelection);
+          dispatch(setLastClickedIndex(-1));
+        }}
+      />
+    );
   };
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
@@ -346,7 +329,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   }, [territoryId, selectedTerritoryPath.join(","), territory?.labels, favoritedTerritoryIds]);
 
   const hasAnchoredStatementsOutOfOrder = statementsWithOrder.some(
-    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0
+    (s) => s.isAnchored && s.orderCorrection && s.orderCorrection.distance > 0,
   );
 
   const oldParentTerritory = territory?.data.parent
@@ -455,11 +438,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     setShowTActionModal(true);
                   }}
                   excludedActantIds={excludedMoveTerritories}
+                  clearableInput={false}
                   button={
                     <Button
                       icon={<TbHomeMove size={14} />}
                       onClick={() => setShowTActionModal(true)}
                       tooltipLabel="move current territory"
+                      noBackground
+                      noBorder
+                      inverted
                     />
                   }
                 />

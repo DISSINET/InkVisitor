@@ -71,6 +71,7 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
                       icon={<BsArrow90DegLeft />}
                       color="plain"
                       inverted
+                      shape="sharp"
                       tooltipLabel="go to territory"
                       onClick={() => {
                         dispatch(setTreeInitialized(false));

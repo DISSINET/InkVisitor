@@ -103,10 +103,19 @@ export default class Highlighter {
     relLine: number,
     xStart: number,
     xEnd: number,
-    options: DrawingOptions
+    options: DrawingOptions,
+    absLine?: number
   ) {
-    const { charWidth, lineHeight, color: colorOverride } = options;
-    const width = (xEnd - xStart) * charWidth;
+    const { charWidth, lineHeight, color: colorOverride, columnToPixelX } =
+      options;
+    // Proportional uses measured widths keyed by the ABSOLUTE line;
+    // monospace (no resolver / no absLine) keeps the exact `col * charWidth` grid.
+    const toPx =
+      columnToPixelX && absLine !== undefined
+        ? (col: number) => columnToPixelX(absLine, col)
+        : (col: number) => col * charWidth;
+    const xStartPx = toPx(xStart);
+    const width = toPx(xEnd) - xStartPx;
     // const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
 
     const isNarrowHighlight =
@@ -126,20 +135,19 @@ export default class Highlighter {
 
     if (this.hlMode === "focus") {
       ctx.globalCompositeOperation = "xor";
-      ctx.fillRect(xStart * charWidth, relLine * lineHeight, width, lineHeight);
+      ctx.fillRect(xStartPx, relLine * lineHeight, width, lineHeight);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
       const offsetPx = UNDERLINE_OFFSET_PX * this.ratio;
       const underlineY = (relLine + 1) * lineHeight - height - offsetPx;
-      ctx.fillRect(xStart * charWidth, underlineY, width, height);
+      ctx.fillRect(xStartPx, underlineY, width, height);
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStart * charWidth, y, width, height);
+      ctx.fillRect(xStartPx, y, width, height);
     } else if (this.hlMode === "select") {
       ctx.globalCompositeOperation = "color";
-      ctx.globalAlpha = 1;
       // width === 0 means a collapsed caret; honor the configured caret width.
-      ctx.fillRect(xStart * charWidth, y, width || options.caretWidth || 1, height);
+      ctx.fillRect(xStartPx, y, width || options.caretWidth || 1, height);
     }
   }
 
@@ -212,7 +220,14 @@ export default class Highlighter {
       }
 
       for (const row of rowsToDraw) {
-        this.drawLine(ctx, row.rowI, row.start, row.end, drawingOptions);
+        this.drawLine(
+          ctx,
+          row.rowI,
+          row.start,
+          row.end,
+          drawingOptions,
+          viewport.lineStart + row.rowI
+        );
         //this.xLine = row.end
         // this.yLine = row.rowI
       }

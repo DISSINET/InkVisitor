@@ -80,6 +80,16 @@ export const StyledLegendColorBox = styled.div<{ $color?: string }>`
   background-color: ${({ $color }) => $color};
   width: ${({ theme }) => theme.space[6]};
   height: ${({ theme }) => theme.space[6]};
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  flex-shrink: 0;
+`;
+
+export const StyledPayloadColorBox = styled.span<{ $color?: string }>`
+  background-color: ${({ $color }) => $color};
+  width: ${({ theme }) => theme.space[6]};
+  height: ${({ theme }) => theme.space[4]};
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
+  flex-shrink: 0;
 `;
 
 export const StyledLegendText = styled.span<{ $color?: string }>`

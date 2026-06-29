@@ -7,10 +7,18 @@ import {
   tagRemovalRegex,
   wrapTokenRegex,
 } from "./Annotator";
+import {
+  TextMeasurer,
+  buildPrefixWidths,
+  additiveWidth,
+  columnToPixelX as prefixColumnToPixelX,
+  pixelXToColumn as prefixPixelXToColumn,
+  pixelWidthOfLine as prefixPixelWidthOfLine,
+} from "./TextMeasurer";
 
 /**
  * Caret affinity at a soft-wrap boundary, where a single document offset maps to
- * two visual positions (Phase 3 offset model):
+ * two visual positions:
  * - `UPSTREAM`   — render at the END of the wrapped visual line.
  * - `DOWNSTREAM` — render at the START of the following visual line.
  * Irrelevant for any offset that is not a soft-wrap boundary.
@@ -220,6 +228,12 @@ export class Segment {
   openingTags: Tag[] = [];
   closingTags: Tag[] = [];
   lines: string[] = [];
+  /**
+   * Per-line cumulative pixel offsets, parallel to {@link lines}.
+   * `linePrefixes[i][c]` is the pixel x of column `c` on visual line `i`.
+   * Empty unless a proportional measurer is active (monospace path is untouched).
+   */
+  linePrefixes: number[][] = [];
   segmentIndex: number = -1; // index of this segment in the text
 
   /**
@@ -330,20 +344,119 @@ class Text {
   value: string;
   charsAtLine: number;
   noLines: number;
+  /**
+   * When set, {@link calculateLines} wraps by measured pixel width and
+   * builds per-line prefix-width tables, and the column↔pixel converters use
+   * measured widths. When absent the annotator stays on the legacy monospace
+   * grid (wrap by {@link charsAtLine}; `col * charWidth`).
+   */
+  measurer?: TextMeasurer;
+  /**
+   * Wrap budget in device pixels, used instead of {@link charsAtLine}
+   * when a {@link measurer} is active. Undefined means "no width limit".
+   */
+  maxPixelWidth?: number;
 
   /**
    * Creates a new Text instance from raw text content.
    *
    * @param value - The raw text content
-   * @param charsAtLine - Maximum characters per line for text wrapping
+   * @param charsAtLine - Maximum characters per line (monospace wrap budget)
+   * @param measurer - Optional proportional measurer. When omitted the
+   *   monospace grid is used and no prefix tables are built.
+   * @param maxPixelWidth - Proportional wrap budget in device px.
    */
-  constructor(value: string, charsAtLine: number) {
+  constructor(
+    value: string,
+    charsAtLine: number,
+    measurer?: TextMeasurer,
+    maxPixelWidth?: number
+  ) {
     this.value = value;
     this.segments = [];
     this.prepareSegments();
     this.charsAtLine = charsAtLine;
+    this.measurer = measurer;
+    this.maxPixelWidth = maxPixelWidth;
     this.noLines = 0;
     this.calculateLines();
+  }
+
+  /**
+   * Swap the proportional measurer (or clear it to return to the
+   * monospace grid) and rebuild lines/prefix tables. Pass `maxPixelWidth` to
+   * update the proportional wrap budget at the same time.
+   */
+  setMeasurer(measurer?: TextMeasurer, maxPixelWidth?: number) {
+    this.measurer = measurer;
+    // Clear the budget when leaving proportional mode (state hygiene — it is
+    // only read while a measurer is set), otherwise update it when provided.
+    if (!measurer) {
+      this.maxPixelWidth = undefined;
+    } else if (maxPixelWidth !== undefined) {
+      this.maxPixelWidth = maxPixelWidth;
+    }
+    this.calculateLines();
+  }
+
+  /**
+   * Update the proportional wrap budget (device px) and re-wrap.
+   * Used on resize; no-op effect on the monospace path.
+   */
+  updateMaxPixelWidth(maxPixelWidth: number) {
+    this.maxPixelWidth = maxPixelWidth;
+    this.calculateLines();
+  }
+
+  /**
+   * Prefix-width table for an absolute visual line, or undefined (monospace).
+   * The line is clamped into `[0, noLines-1]` so a hit-test for a click past the
+   * document edge resolves against the nearest line (draw always passes a valid
+   * line, so the clamp is a no-op there).
+   */
+  private prefixForLine(absLine: number): number[] | undefined {
+    const clamped = Math.max(0, Math.min(absLine, Math.max(0, this.noLines - 1)));
+    const segment = this.segments.find(
+      (s) => s.lineStart <= clamped && s.lineEndExclusive > clamped
+    );
+    return segment?.linePrefixes[clamped - segment.lineStart];
+  }
+
+  /**
+   * Pixel x of column `col` on absolute visual line `absLine`.
+   * Returns 0 when no prefix table exists (only used in proportional mode).
+   */
+  columnToPixelX(absLine: number, col: number): number {
+    const prefix = this.prefixForLine(absLine);
+    return prefix ? prefixColumnToPixelX(prefix, col) : 0;
+  }
+
+  /** Nearest column for a pixel x on absolute visual line `absLine`. */
+  pixelXToColumn(absLine: number, x: number): number {
+    const prefix = this.prefixForLine(absLine);
+    return prefix ? prefixPixelXToColumn(prefix, x) : 0;
+  }
+
+  /** Pixel right edge of absolute visual line `absLine`. */
+  pixelWidthOfLine(absLine: number): number {
+    const prefix = this.prefixForLine(absLine);
+    return prefix ? prefixPixelWidthOfLine(prefix) : 0;
+  }
+
+  /**
+   * Measured width (device px) of the cell at column `col` on line
+   * `absLine`, used for drag-handle grab tolerance. At/after the line end (and
+   * for col<0) it falls back to the nearest real cell so the tolerance never
+   * collapses to 0. Returns 0 on the monospace path (no prefix table).
+   */
+  glyphWidthAt(absLine: number, col: number): number {
+    const prefix = this.prefixForLine(absLine);
+    if (!prefix || prefix.length < 2) {
+      return 0;
+    }
+    const lastCell = prefix.length - 2; // index of the last [c, c+1] cell
+    const c = Math.max(0, Math.min(col, lastCell));
+    return prefix[c + 1] - prefix[c];
   }
 
   /**
@@ -430,6 +543,41 @@ class Text {
    */
   calculateLines(): void {
     const time1 = performance.now();
+
+    // Width basis for wrapping. Monospace: 1 code unit = 1 unit,
+    // budget = charsAtLine (byte-identical to the legacy loop). Proportional:
+    // measured pixels via `additiveWidth` (per code unit — the SAME basis as the
+    // prefix table), budget = maxPixelWidth, so line breaks agree with the
+    // caret/selection x-offsets the prefix table produces (within-token kerning
+    // is ignored; grapheme handling deferred — see TextMeasurer.additiveWidth).
+    // `widthOf`/`maxWidth`/`charsThatFit` are the only difference between the two
+    // modes; everything else is shared.
+    const measurer = this.measurer;
+    const widthOf = measurer
+      ? (s: string) => additiveWidth(s, measurer)
+      : (s: string) => s.length;
+    const maxWidth = measurer
+      ? Math.max(1, this.maxPixelWidth ?? Infinity)
+      : Math.max(1, this.charsAtLine);
+    // Largest code-unit count of `s` whose measured width fits `budget`.
+    // Monospace reduces to min(len, budget) — i.e. the legacy `maxLen - used`.
+    // Iterates code units (s[n]) like the prefix table; grapheme-aware splitting
+    // is deferred.
+    const charsThatFit = (s: string, budget: number): number => {
+      if (!measurer) {
+        return Math.max(0, Math.min(s.length, budget));
+      }
+      let acc = 0;
+      let n = 0;
+      while (n < s.length) {
+        const w = measurer.measure(s[n]);
+        if (acc + w > budget) break;
+        acc += w;
+        n++;
+      }
+      return n;
+    };
+
     for (
       let segmentIndex = 0;
       segmentIndex < this.segments.length;
@@ -463,9 +611,8 @@ class Text {
       // is only allowed next to whitespace; a word together with the
       // punctuation glued to it ("ds.") is therefore one unbreakable unit that
       // wraps to the next line as a whole rather than letting the punctuation
-      // (and the caret after it) spill past charsAtLine. A unit longer than the
+      // (and the caret after it) spill past the budget. A unit longer than the
       // whole line is broken character-wise so nothing ever exceeds the width.
-      const maxLen = Math.max(1, this.charsAtLine);
 
       // Atomic tokens: tags (<...>) must never be split; word, punctuation and
       // whitespace runs are kept separate so we can find break opportunities.
@@ -496,14 +643,6 @@ class Text {
           cells.push({ text: t.text, space: t.space, parts: [t] });
         }
       }
-      // Index of the last content cell: a whitespace run before it stays
-      // trailing on the current line; trailing whitespace after it gets its own
-      // line so the caret typed at a full line end remains visible.
-      let lastContentIdx = -1;
-      for (let i = 0; i < cells.length; i++) {
-        if (!cells[i].space) lastContentIdx = i;
-      }
-
       let currentLine: string[] = [];
       let currentLineLength = 0;
       const pushLine = () => {
@@ -513,27 +652,38 @@ class Text {
       };
       const appendStr = (s: string) => {
         currentLine.push(s);
-        currentLineLength += s.length;
+        currentLineLength += widthOf(s);
       };
 
       for (let ci = 0; ci < cells.length; ci++) {
         const cell = cells[ci];
 
-        if (currentLineLength + cell.text.length <= maxLen) {
+        if (currentLineLength + widthOf(cell.text) <= maxWidth) {
           appendStr(cell.text);
           continue;
         }
 
         if (cell.space) {
-          // Keep an inter-word space trailing on the current line (the next
-          // content breaks to the margin); a trailing space at the very end
-          // gets its own line so the caret after it stays on screen.
-          if (ci >= lastContentIdx && currentLineLength > 0) pushLine();
-          appendStr(cell.text);
+          // Overflowing whitespace: fill the line's remaining room, then carry
+          // the rest to the next line(s) so it stays visible (no h-scroll). #3145
+          const keep = charsThatFit(cell.text, maxWidth - currentLineLength);
+          if (keep > 0) appendStr(cell.text.slice(0, keep));
+          let rest = cell.text.slice(keep);
+          if (rest.length > 0) {
+            pushLine();
+            // Chunk an over-wide carried run so no single line exceeds the width.
+            while (widthOf(rest) > maxWidth) {
+              const take = Math.max(1, charsThatFit(rest, maxWidth));
+              appendStr(rest.slice(0, take));
+              pushLine();
+              rest = rest.slice(take);
+            }
+            appendStr(rest);
+          }
           continue;
         }
 
-        if (cell.text.length <= maxLen) {
+        if (widthOf(cell.text) <= maxWidth) {
           // Move the whole unit down to a fresh line.
           if (currentLineLength > 0) pushLine();
           appendStr(cell.text);
@@ -544,14 +694,20 @@ class Text {
         // fits on a line, but a tag longer than the line is still broken — with
         // no horizontal scroll, an unsplit over-long tag would run off the edge.
         for (const part of cell.parts) {
-          if (part.atomic && part.text.length <= maxLen) {
-            if (currentLineLength > 0 && currentLineLength + part.text.length > maxLen)
+          if (part.atomic && widthOf(part.text) <= maxWidth) {
+            if (
+              currentLineLength > 0 &&
+              currentLineLength + widthOf(part.text) > maxWidth
+            )
               pushLine();
             appendStr(part.text);
           } else {
             let s = part.text;
-            while (currentLineLength + s.length > maxLen) {
-              const take = maxLen - currentLineLength;
+            while (currentLineLength + widthOf(s) > maxWidth) {
+              // Chars that still fit the remaining budget; force at least one on
+              // an empty line so an over-wide glyph can't loop forever (#narrow).
+              const fit = charsThatFit(s, maxWidth - currentLineLength);
+              const take = currentLineLength === 0 ? Math.max(1, fit) : fit;
               if (take > 0) {
                 appendStr(s.slice(0, take));
                 s = s.slice(take);
@@ -570,6 +726,12 @@ class Text {
       if (!segment.lines.length) {
         segment.lines = [""];
       }
+
+      // Build the per-line prefix-width tables (proportional only).
+      // Left empty on the monospace path so draw/hit-test keep using charWidth.
+      segment.linePrefixes = measurer
+        ? segment.lines.map((line) => buildPrefixWidths(line, measurer))
+        : [];
     }
 
     this.noLines = this.segments.reduce<number>(
@@ -830,7 +992,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — raw document offset (index into {@link value}) to
+   * Raw document offset (index into {@link value}) to
    * ABSOLUTE visual coordinates (`yLine` is an absolute line index, not
    * viewport-relative). The offset is clamped into `[0, value.length]`. The
    * returned `xLine` is the visual column in the current edit mode (tags are
@@ -871,7 +1033,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — ABSOLUTE visual coordinates to a raw document offset.
+   * ABSOLUTE visual coordinates to a raw document offset.
    * Returns `-1` when the line index is out of bounds (uses the non-clamping
    * {@link getSegmentPositionOrNull}). Inverse of {@link visualFromOffset}.
    */
@@ -881,7 +1043,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — one VISIBLE column to the right of an absolute visual
+   * One VISIBLE column to the right of an absolute visual
    * position, crossing visual line boundaries. Works in every mode (a "visible
    * column" is a parsed column in HIGHLIGHT/SEMI, a raw column in RAW); the
    * caller converts the result back to a raw offset, which skips hidden markup.
@@ -903,7 +1065,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — one VISIBLE column to the left of an absolute visual
+   * One VISIBLE column to the left of an absolute visual
    * position, crossing visual line boundaries. At document start it is unchanged.
    */
   stepVisualLeft(
@@ -921,7 +1083,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — is `offset` a soft-wrap boundary, i.e. the start of a
+   * Is `offset` a soft-wrap boundary, i.e. the start of a
    * continuation visual line WITHIN a segment (not a hard `\n` boundary, which
    * begins a new segment at lineIndex 0)? Such offsets have two visual caret
    * positions distinguished by {@link CaretAffinity}.
@@ -936,7 +1098,7 @@ class Text {
   }
 
   /**
-   * Phase 3 offset model — ABSOLUTE visual coordinates to a document offset PLUS
+   * ABSOLUTE visual coordinates to a document offset PLUS
    * the affinity that visual position implies: the end of a wrapped (non-last)
    * visual line is UPSTREAM, everything else DOWNSTREAM. Inverse companion of
    * {@link visualFromOffset} that recovers the affinity bit lost by a bare offset.
@@ -966,7 +1128,7 @@ class Text {
    * Non-clamping variant of {@link getSegmentPosition}: returns `null` when
    * `absLineIndex` falls outside `[0, noLines - 1]` instead of clamping it into
    * range. Use this when a `null` return is meant to signal "invalid position"
-   * (the offset-model code in Phase 3 relies on this); the clamping variant
+   * (the offset-model code relies on this); the clamping variant
    * stays for existing callers that depend on the old behavior.
    *
    * @param absLineIndex - The absolute line index
@@ -1409,6 +1571,12 @@ class Text {
   /**
    * Gets text content within the specified absolute coordinate range.
    *
+   * Only the real line breaks of the source (segment boundaries, i.e. the `\n`
+   * in {@link value}) appear in the result. The soft-wrap breaks the annotator
+   * inserts to fit text to the view width are NOT emitted - copying must yield
+   * the natural paragraph/line breaks of the original, not view-imposed ones
+   * Within a segment the wrapped visual lines are concatenated back together; segments are joined with a single `\n`.
+   *
    * @param start - The start coordinates of the range
    * @param end - The end coordinates of the range
    * @returns The text content within the range
@@ -1424,15 +1592,25 @@ class Text {
       end = tempStart;
     }
 
-    const rangeLines = this.getRangeLines(start.yLine, end.yLine + 1);
-    const linesSize = rangeLines.length;
-    if (!linesSize) {
+    const startPos = this.getSegmentPosition(start.yLine, start.xLine);
+    const endPos = this.getSegmentPosition(end.yLine, end.xLine);
+    if (!startPos || !endPos) {
       return "";
     }
 
-    rangeLines[linesSize - 1] = rangeLines[linesSize - 1].slice(0, end.xLine);
-    rangeLines[0] = rangeLines[0].slice(start.xLine, rangeLines[0].length + 1);
-    return rangeLines.join("\n");
+    const parts: string[] = [];
+    for (let i = startPos.segmentIndex; i <= endPos.segmentIndex; i++) {
+      // Joining the wrapped visual lines back together reconstructs the
+      // segment's display text (raw in RAW mode, tag-free in HIGHLIGHT/SEMI)
+      // without the soft-wrap breaks. calculateLines only ever partitions this
+      // text, so no characters are lost or added.
+      const display = this.segments[i].lines.join("");
+      const from = i === startPos.segmentIndex ? startPos.parsedTextIndex : 0;
+      const to =
+        i === endPos.segmentIndex ? endPos.parsedTextIndex : display.length;
+      parts.push(display.slice(from, to));
+    }
+    return parts.join("\n");
   }
 
   /**

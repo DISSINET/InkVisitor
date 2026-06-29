@@ -1,12 +1,28 @@
 import { getRelationClass } from "@models/factory";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IRequest } from "src/custom_typings/request";
-import { Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { getEntitiesByIds } from "@service/shorthands";
+import Territory from "@models/territory/territory";
 import Relation from "./relation";
+import Identification from "./identification";
 import { Connection } from "rethinkdb-ts";
 import { EntityTooltip } from "@inkvisitor/shared/types";
 
 const MAX_NEST_LVL = 3;
+
+// inverse direction of these relations yields "subordinate" entities: inverse
+// SuperordinateEntity = subordinates, inverse Superclass = subclasses, inverse
+// Holonym = meronyms. For all three the parent/whole is entityIds[1] and the
+// subordinate is entityIds[0].
+const SUBORDINATE_RELATION_TYPES: RelationEnums.Type[] = [
+  RelationEnums.Type.SuperordinateEntity,
+  RelationEnums.Type.Superclass,
+  RelationEnums.Type.Holonym,
+];
+
+// safety bound on how many subordinates a single expansion collects
+const SUBORDINATE_MAX_NODES = 1000;
 
 /**
  * recursively search for action event trees
@@ -256,4 +272,161 @@ export const copyRelations = async (
     await relation.save(request.db.connection);
     await relation.afterSave(request);
   }
+};
+
+/**
+ * Pure tree-walk: collects every entity id referenced by a list of
+ * identification connections (including their transitive `subtrees`) into `acc`.
+ * Extracted so it can be unit-tested without a DB connection.
+ * @param connections forward identification connection trees
+ * @param acc set accumulating the collected entity ids
+ * @returns the (mutated) accumulator set
+ */
+export const collectIdsFromIdentificationConnections = (
+  connections: RelationTypes.IConnection<RelationTypes.IIdentification>[],
+  acc: Set<string> = new Set<string>()
+): Set<string> => {
+  for (const connection of connections) {
+    for (const id of connection.entityIds) {
+      acc.add(id);
+    }
+    if (connection.subtrees && connection.subtrees.length) {
+      collectIdsFromIdentificationConnections(connection.subtrees, acc);
+    }
+  }
+  return acc;
+};
+
+/**
+ * Returns the set of entity ids considered "equivalent" to the input entities,
+ * used by the "include equivalents" search option (#2969). Equivalence covers:
+ *  - SYN (Synonym): the full synonym cloud. Clouds are merged at save time, so a
+ *    single batched lookup already yields the transitive set.
+ *  - AEE (ActionEventEquivalent): single hop, both directions (Action<->Concept),
+ *    not transitive.
+ *  - IDE (Identification): mirrors the detail-view traversal - direct
+ *    identifications of any certainty, followed transitively only through
+ *    `Certain` ones (depth-capped).
+ * The original input ids are removed from the result.
+ * @param conn db connection
+ * @param entityIds source entity ids to expand
+ * @returns unique equivalent entity ids, excluding the inputs
+ */
+export const getEquivalentEntityIds = async (
+  conn: Connection,
+  entityIds: string[]
+): Promise<string[]> => {
+  const result = new Set<string>();
+
+  if (!entityIds.length) {
+    return [];
+  }
+
+  // SYN (full transitive cloud) and AEE (single hop, both directions): batched,
+  // just flatten the related ids
+  for (const type of [
+    RelationEnums.Type.Synonym,
+    RelationEnums.Type.ActionEventEquivalent,
+  ]) {
+    const relations = await Relation.findForEntities(conn, entityIds, type);
+    for (const relation of relations) {
+      for (const id of relation.entityIds) {
+        result.add(id);
+      }
+    }
+  }
+
+  // IDE - per-entity transitive traversal (mirrors detail view), run in parallel
+  const identificationTrees = await Promise.all(
+    entityIds.map((entityId) =>
+      Identification.getIdentificationForwardConnections(
+        conn,
+        entityId,
+        MAX_NEST_LVL,
+        1,
+        []
+      )
+    )
+  );
+  for (const tree of identificationTrees) {
+    collectIdsFromIdentificationConnections(tree, result);
+  }
+
+  // never return the inputs themselves
+  for (const id of entityIds) {
+    result.delete(id);
+  }
+
+  return [...result];
+};
+
+/**
+ * Returns the set of entity ids considered "subordinate" to the input entities,
+ * used by the "include subordinates" search option (#2969). Subordinates are the
+ * inverse/downward direction, followed to all levels:
+ *  - inverse SCL (Superclass): subclasses
+ *  - inverse SOE (SuperordinateEntity): subordinate entities
+ *  - inverse HOL (Holonym): meronyms
+ *  - child Territories (all levels) when an input is a Territory
+ * The relation traversal is a batched, cycle-safe BFS bounded by
+ * SUBORDINATE_MAX_NODES; the input ids are removed from the result.
+ * @param conn db connection
+ * @param entityIds source entity ids to expand
+ * @returns unique subordinate entity ids, excluding the inputs
+ */
+export const getSubordinateEntityIds = async (
+  conn: Connection,
+  entityIds: string[]
+): Promise<string[]> => {
+  if (!entityIds.length) {
+    return [];
+  }
+
+  const visited = new Set<string>(entityIds); // guards against cycles / re-visits
+  const collected = new Set<string>(); // subordinates only (inputs excluded)
+
+  // inverse SCL/SOE/HOL, all levels, batched one query per type per BFS level
+  let frontier = [...new Set(entityIds)];
+  while (frontier.length && collected.size < SUBORDINATE_MAX_NODES) {
+    const relationsPerType = await Promise.all(
+      SUBORDINATE_RELATION_TYPES.map((type) =>
+        Relation.findForEntities(conn, frontier, type, 1)
+      )
+    );
+
+    const next: string[] = [];
+    for (const relations of relationsPerType) {
+      for (const relation of relations) {
+        const subordinateId = relation.entityIds[0];
+        if (!visited.has(subordinateId)) {
+          visited.add(subordinateId);
+          collected.add(subordinateId);
+          next.push(subordinateId);
+        }
+      }
+    }
+    frontier = next;
+  }
+
+  // child territories (all levels) of any input that is itself a Territory
+  const inputEntities = await getEntitiesByIds<IEntity>(conn, entityIds);
+  for (const entity of inputEntities) {
+    if (entity.class !== EntityEnums.Class.Territory) {
+      continue;
+    }
+    const childs = Object.values(
+      await new Territory({ id: entity.id }).findChilds(conn, true)
+    );
+    for (const child of childs) {
+      if (collected.size >= SUBORDINATE_MAX_NODES) {
+        break;
+      }
+      if (child.id && !visited.has(child.id)) {
+        visited.add(child.id);
+        collected.add(child.id);
+      }
+    }
+  }
+
+  return [...collected];
 };

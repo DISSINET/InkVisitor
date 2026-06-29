@@ -1,7 +1,15 @@
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
-import { Button, IconWithTooltip, Loader, Modal, ModalContent, ModalHeader } from "components";
+import {
+  Button,
+  IconButton,
+  IconWithTooltip,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalHeader,
+} from "components";
 import Dropdown, {
   DocumentModalExport,
   DocumentTitle,
@@ -24,13 +32,36 @@ import {
   StyledNoDocumentMessage,
   StyledSearchNavigation,
 } from "../StatementsListBox/StatementListBoxStyles";
-import { StyledInfoText } from "../StatementsListBox/StatementListHeader/StatementListHeaderStyles";
 import {
   StyledDocumentContainer,
+  StyledHighlightTooltipDot,
+  StyledHighlightTooltipRow,
+  StyledHighlightTooltipTitle,
+  StyledInfoText,
   StyledLoadingDocument,
   StyledWarningsListHeader,
   StyledWarningWrapper,
 } from "./AnnotatorBoxStyles";
+
+const HighlightTooltipContent: React.FC<{ hlEntities: EntityEnums.Class[] }> = ({ hlEntities }) => {
+  const selectedEntityClasses = entitiesDict.filter((e) => hlEntities.includes(e.value));
+
+  if (selectedEntityClasses.length === 0) {
+    return <StyledHighlightTooltipTitle>No highlights</StyledHighlightTooltipTitle>;
+  }
+
+  return (
+    <>
+      <StyledHighlightTooltipTitle>Highlight</StyledHighlightTooltipTitle>
+      {selectedEntityClasses.map((e) => (
+        <StyledHighlightTooltipRow key={e.value}>
+          <StyledHighlightTooltipDot $entityClass={e.value} />
+          {e.label}
+        </StyledHighlightTooltipRow>
+      ))}
+    </>
+  );
+};
 
 // icon + margin + gap in StyledHighlightContainer when highlight label is shown
 const HIGHLIGHT_ICON_RESERVED_WIDTH = 10;
@@ -94,7 +125,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   }, [contentWidth]);
 
   const highlightDropdownWidth = useMemo(() => {
-    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.6;
+    const baseWidth = annotatorWidthTooNarrow ? contentWidth / 3.3 : contentWidth / 2.9;
     return isUndersized ? baseWidth + HIGHLIGHT_ICON_RESERVED_WIDTH : baseWidth;
   }, [contentWidth, annotatorWidthTooNarrow, isUndersized]);
 
@@ -147,6 +178,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                         }}
                         tooltipLabel="export document"
                         tooltipPosition="top"
+                        shape="sharp"
                       />
                     ) : undefined
                   }
@@ -167,17 +199,17 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               minWidth: "2rem",
             }}
           >
-            {selectedDocument && !selectedDocumentIsFetching && (
+            {selectedDocument && (
               <DocumentTitle
                 title={selectedDocument.title}
                 width={annotatorWidthTooNarrow ? 80 : "full"}
                 noMargin
               />
             )}
-            {selectedDocumentIsFetching && (
+            {selectedDocumentIsFetching && !selectedDocument && (
               <StyledLoadingDocument>
-                <Loader show size={14} />
-                <StyledInfoText>Loading document</StyledInfoText>
+                <Loader show size={16} />
+                <StyledInfoText>Loading</StyledInfoText>
               </StyledLoadingDocument>
             )}
           </StyledDocumentTitleContainer>
@@ -195,7 +227,8 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledWarningWrapper>
             )}
 
-          {!selectedDocumentIsFetching &&
+          {!selectedDocument &&
+            !selectedDocumentIsFetching &&
             selectedResource !== false &&
             selectedResource.data.documentId === undefined && (
               <StyledNoDocumentMessage>
@@ -204,33 +237,31 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </StyledNoDocumentMessage>
             )}
 
-          {!selectedDocumentIsFetching &&
-            selectedResource !== false &&
-            selectedResource?.data?.documentId && (
-              <StyledAnnotatorMenuBar>
-                {activeTHasAnchor ? (
-                  <Button
-                    label=""
-                    iconRight={
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <TbAnchor />
-                        <FaLongArrowAltRight />
-                      </div>
-                    }
-                    tooltipLabel="locate anchor"
-                    inverted
-                    onClick={() => {
-                      annotator?.scrollToAnchor(territoryId);
-                    }}
-                    color="warning"
-                  />
-                ) : (
-                  <StyledSearchNavigation>
-                    <TbAnchorOff title="no anchor for T" />
-                  </StyledSearchNavigation>
-                )}
-              </StyledAnnotatorMenuBar>
-            )}
+          {selectedResource !== false && selectedResource?.data?.documentId && (
+            <StyledAnnotatorMenuBar>
+              {activeTHasAnchor ? (
+                <Button
+                  label=""
+                  iconRight={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <TbAnchor />
+                      <FaLongArrowAltRight />
+                    </div>
+                  }
+                  tooltipLabel="locate anchor"
+                  inverted
+                  onClick={() => {
+                    annotator?.scrollToAnchor(territoryId);
+                  }}
+                  color="warning"
+                />
+              ) : (
+                <StyledSearchNavigation>
+                  <TbAnchorOff title="no anchor for T" />
+                </StyledSearchNavigation>
+              )}
+            </StyledAnnotatorMenuBar>
+          )}
         </StyledDocumentContainer>
 
         {/* Class selector - HIGHLIGHT */}
@@ -246,7 +277,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
                   options={entitiesDict}
                   disableEmpty
                   isClearable
-                  disableAny
                   closeMenuOnSelect={false}
                   onChange={setHlEntities}
                   value={hlEntities}
@@ -257,9 +287,10 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
               </>
             )}
             {isUndersized && (
-              <Button
+              <IconButton
+                inverted={false}
                 icon={<FaHighlighter />}
-                tooltipLabel="Highlight settings"
+                tooltipContent={<HighlightTooltipContent hlEntities={hlEntities} />}
                 onClick={() => setShowHighlightModal(true)}
               />
             )}
@@ -290,7 +321,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             options={entitiesDict}
             disableEmpty
             isClearable
-            disableAny
             closeMenuOnSelect={false}
             onChange={setHlEntities}
             value={hlEntities}

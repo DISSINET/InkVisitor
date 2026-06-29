@@ -12,28 +12,6 @@ export const StyledTableWrapper = styled.div<StyledTableWrapper>`
 export const StyledRowWrapper = styled.div`
   display: block;
 `;
-interface StyledRow {
-  $isOdd: boolean;
-  $isSelected: boolean;
-  $width: number;
-  $height: number;
-}
-export const StyledRow = styled.div<StyledRow>`
-  display: flex;
-  width: ${({ $width }) => `${$width}px`};
-  align-items: center;
-  height: ${({ theme, $height }) => `${$height}px`};
-  background-color: ${({ theme, $isOdd, $isSelected }) =>
-    $isSelected
-      ? theme.color["tableOpened"]
-      : $isOdd
-        ? theme.color["white"]
-        : theme.color["tableOddRow"]};
-  &:hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
-  }
-`;
-
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
@@ -104,7 +82,6 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
-  background-color: ${({ theme }) => theme.color["gray"][200]};
   z-index: 20;
 `;
 
@@ -165,7 +142,7 @@ export const StyledLabelFilter = styled.div`
   gap: 0.2rem;
   width: 100%;
   margin: 0 0.5rem;
-  max-width: 40rem;
+  max-width: 36rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`
@@ -215,8 +192,9 @@ export const StyledChipInputBox = styled.div`
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][400]};
-  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
-  &:focus-within {
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  &:focus-within,
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
 `;

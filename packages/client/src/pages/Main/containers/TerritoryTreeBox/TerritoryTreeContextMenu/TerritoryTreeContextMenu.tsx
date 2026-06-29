@@ -7,13 +7,16 @@ import { rootTerritoryId } from "Theme/constants";
 import { Button } from "components";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
+import { TbArrowsSort } from "react-icons/tb";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
+import { ReorderTerritoryChildrenModal } from "../ReorderTerritoryChildrenModal/ReorderTerritoryChildrenModal";
 import {
   StyledCgMenuBoxed,
   StyledContextButtonGroup,
   StyledWrapper,
 } from "./TerritoryTreeContextMenuStyles";
 import { EntityCreateModal } from "components/advanced";
+import { IExtendedResponseTree } from "types";
 
 interface TerritoryTreeContextMenu {
   territoryActant: IEntity;
@@ -24,6 +27,8 @@ interface TerritoryTreeContextMenu {
   storedTerritories: string[];
   updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
   isFavorited?: boolean;
+  hasPaginatedChildren?: boolean;
+  childTerritories?: IExtendedResponseTree[];
 }
 export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
   territoryActant,
@@ -34,10 +39,15 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
   storedTerritories,
   updateUserMutation,
   isFavorited,
+  hasPaginatedChildren,
+  childTerritories,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const [showReorder, setShowReorder] = useState(false);
+
+  const canReorder = hasPaginatedChildren && childTerritories && childTerritories.length > 1;
 
   const animatedMount = useSpring({
     opacity: showMenu ? 1 : 0,
@@ -96,6 +106,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipPosition="top"
                     icon={<FaPlus size={14} />}
                     color="info"
+                    shape="sharp-square"
                     onClick={() => {
                       // add child
                       setShowCreate(true);
@@ -107,12 +118,11 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                 {!isRootTerritory && (
                   <Button
                     key="favorites"
-                    tooltipLabel={
-                      isFavorited ? "remove from favorites" : "add to favorites"
-                    }
+                    tooltipLabel={isFavorited ? "remove from favorites" : "add to favorites"}
                     tooltipPosition="top"
                     icon={<FaStar size={14} />}
                     color={isFavorited ? "grey" : "warning"}
+                    shape="sharp-square"
                     onClick={() => {
                       if (isFavorited) {
                         // remove from favorites
@@ -142,6 +152,21 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     }}
                   />
                 )}
+                {canReorder && right !== UserEnums.RoleMode.Read && (
+                  <Button
+                    key="reorder"
+                    tooltipLabel="reorder children"
+                    tooltipPosition="top"
+                    icon={<TbArrowsSort size={14} />}
+                    color="success"
+                    shape="sharp-square"
+                    onClick={() => {
+                      setShowReorder(true);
+                      setShowMenu(false);
+                      onMenuClose();
+                    }}
+                  />
+                )}
                 {((right === UserEnums.RoleMode.Admin && empty) ||
                   (right === UserEnums.RoleMode.Write && empty)) && (
                   <Button
@@ -150,6 +175,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     tooltipPosition="top"
                     icon={<FaTrashAlt size={14} />}
                     color="danger"
+                    shape="sharp-square"
                     onClick={() => {
                       setShowSubmit(true);
                       setShowMenu(false);
@@ -173,10 +199,15 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
         <EntityCreateModal
           closeModal={() => setShowCreate(false)}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
-          onMutationSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: ["tree"] })
-          }
+          onMutationSuccess={() => queryClient.invalidateQueries({ queryKey: ["tree"] })}
           parentTerritory={territoryActant}
+        />
+      )}
+      {showReorder && childTerritories && (
+        <ReorderTerritoryChildrenModal
+          parentId={territoryActant.id}
+          children={childTerritories}
+          onClose={() => setShowReorder(false)}
         />
       )}
     </>

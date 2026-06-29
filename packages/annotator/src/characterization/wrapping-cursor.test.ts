@@ -1,10 +1,9 @@
 /**
- * Characterization tests — Phase 2, Task 2.4 (wrapping <-> cursor).
+ * Characterization tests (wrapping <-> cursor).
  *
  * These lock the CURRENT interaction between line wrapping and the
  * visual<->document coordinate converters, plus tag-position queries, as a
- * safety net before the cursor-model refactor (see
- * packages/annotator/BASIC_EDITOR_BACKLOG.md). The Phase 3 offset model is built
+ * safety net before the cursor-model refactor. The offset model is built
  * directly on these converters, so the round-trip guarantees captured here are
  * the contract that refactor must preserve.
  *

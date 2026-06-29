@@ -24,7 +24,7 @@ export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelBoxesOpened
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened,
   );
 
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
@@ -194,7 +194,7 @@ export const EntityBookmarkBox: React.FC = () => {
       <StyledHeader>
         <Button
           key="add"
-          icon={<FaPlus size={14} />}
+          icon={<FaPlus />}
           color="primary"
           label="bookmark folder"
           onClick={() => clickNewBookmarFolderkHandle()}

@@ -17,6 +17,10 @@ import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-sea
 import { Setting } from "@models/setting/setting";
 import { ISetting } from "@inkvisitor/shared/types/settings";
 import Relation from "@models/relation/relation";
+import {
+  getEquivalentEntityIds,
+  getSubordinateEntityIds,
+} from "@models/relation/functions";
 
 /**
  * Statement.getEntitiesIds() appends territory lineage (ancestors toward root) for other features.
@@ -497,25 +501,22 @@ export class SearchQuery {
       );
     }
 
-    if (req.editedBy) {
-      const updatedBy = await Audit.getByUpdatedBy(
-        this.connection,
-        req.editedBy as string
-      );
-      const createdBy = await Audit.getByCreatedBy(
-        this.connection,
-        req.editedBy as string
-      );
+    if (req.editedBy?.length) {
+      // OR semantics - union of entities edited (created or updated) by any of the listed users
+      const auditEntityIdsSet = new Set<string>();
+      for (const userId of req.editedBy) {
+        const updatedBy = await Audit.getByUpdatedBy(this.connection, userId);
+        const createdBy = await Audit.getByCreatedBy(this.connection, userId);
 
-      const auditEntityIds = updatedBy
-        .concat(createdBy)
-        .filter((a) => a.auditScope === AuditScope.Entity)
-        .map((a) => a.modelId);
+        updatedBy
+          .concat(createdBy)
+          .filter((a) => a.auditScope === AuditScope.Entity)
+          .forEach((a) => auditEntityIdsSet.add(a.modelId));
+      }
 
       if (!req.entityIds) {
-        req.entityIds = auditEntityIds;
+        req.entityIds = Array.from(auditEntityIdsSet);
       } else {
-        const auditEntityIdsSet = new Set(auditEntityIds);
         req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
       }
     }
@@ -570,8 +571,92 @@ export class SearchQuery {
 export class ResponseSearch {
   request: RequestSearch;
 
+  /**
+   * Upper bound on how many base matches are expanded. The related-id lookups do
+   * per-entity transitive traversal, so the input is capped; when there are more
+   * base matches, only the first ones (as returned by the query) are expanded.
+   */
+  static EXPANSION_CAP = 100;
+
   constructor(request: RequestSearch) {
     this.request = request;
+  }
+
+  /**
+   * Mixes entities surfaced by the expansion options - "include equivalents"
+   * (SYN/IDE/AEE) and/or "include subordinates" (inverse SCL/SOE/HOL + child
+   * territories) - into the base result set (#2969). For each enabled option the
+   * related ids of the base matches are collected and the search is re-run for
+   * those ids with the label dropped but every other condition reapplied, so
+   * expanded entities are only kept if they meet the other conditions. Returns
+   * the merged (deduped) entities plus the id sets that came in via each option,
+   * used to mark them in the response.
+   * @param conn db connection
+   * @param request original search request
+   * @param baseEntities entities matched by the original (label) search
+   */
+  static async expandResults(
+    conn: Connection,
+    request: RequestSearch,
+    baseEntities: IEntity[]
+  ): Promise<{
+    entities: IEntity[];
+    equivalentIds: Set<string>;
+    subordinateIds: Set<string>;
+  }> {
+    const idsToExpand = baseEntities
+      .slice(0, ResponseSearch.EXPANSION_CAP)
+      .map((e) => e.id);
+    const seen = new Set(baseEntities.map((e) => e.id));
+    const entities = [...baseEntities];
+    const equivalentIds = new Set<string>();
+    const subordinateIds = new Set<string>();
+
+    const expansions: Array<
+      [(c: Connection, ids: string[]) => Promise<string[]>, Set<string>]
+    > = [];
+    if (request.includeEquivalents) {
+      expansions.push([getEquivalentEntityIds, equivalentIds]);
+    }
+    if (request.includeSubordinates) {
+      expansions.push([getSubordinateEntityIds, subordinateIds]);
+    }
+
+    for (const [getRelatedIds, target] of expansions) {
+      const relatedIds = (await getRelatedIds(conn, idsToExpand)).filter(
+        (id) => !seen.has(id)
+      );
+      if (!relatedIds.length) {
+        continue;
+      }
+
+      // Reapply every condition except the label match: start from a
+      // primary-index lookup of the related ids, force filterUsed so fromRequest
+      // layers the remaining conditions (class/status/territory/cooccurrence/
+      // audit...) on top as intersecting filters.
+      const expansionRequest = new RequestSearch({
+        ...request,
+        label: undefined,
+        labelOrId: undefined,
+        entityIds: undefined,
+        includeEquivalents: false,
+        includeSubordinates: false,
+      });
+      const query = new SearchQuery(conn);
+      query.whereEntityIds(relatedIds);
+      query.filterUsed = true;
+      await query.fromRequest(expansionRequest);
+
+      for (const entity of await query.do()) {
+        if (!seen.has(entity.id)) {
+          seen.add(entity.id);
+          target.add(entity.id);
+          entities.push(entity);
+        }
+      }
+    }
+
+    return { entities, equivalentIds, subordinateIds };
   }
 
   /**
@@ -677,6 +762,22 @@ export class ResponseSearch {
     await query.fromRequest(this.request);
     let entities = await query.do();
 
+    // mix in equivalents/subordinates of the direct matches (#2969); the
+    // returned id sets flag which results were added by each option
+    let equivalentIds: Set<string> | undefined;
+    let subordinateIds: Set<string> | undefined;
+    if (
+      (this.request.includeEquivalents || this.request.includeSubordinates) &&
+      entities.length
+    ) {
+      ({ entities, equivalentIds, subordinateIds } =
+        await ResponseSearch.expandResults(
+          httpRequest.db.connection,
+          this.request,
+          entities
+        ));
+    }
+
     entities = await ResponseSearch.filterEntitiesByRootValidity(
       httpRequest.db.connection,
       entities,
@@ -694,6 +795,11 @@ export class ResponseSearch {
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
+      if (equivalentIds?.has(entityData.id)) {
+        response.isEquivalent = true;
+      } else if (subordinateIds?.has(entityData.id)) {
+        response.isSubordinate = true;
+      }
       out.push(response);
     }
 
