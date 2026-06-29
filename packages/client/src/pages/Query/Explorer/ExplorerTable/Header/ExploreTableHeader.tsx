@@ -1,7 +1,7 @@
 import { Explore } from "@inkvisitor/shared/types/query";
 import React from "react";
 import ExploreTableHeaderColumn from "./ExploreTableHeaderColumn";
-import { StyledHeader } from "../ExplorerTableStyles";
+import { StyledHeader, StyledHeaderEntityCell } from "../ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "../constants";
 
 const ExploreTableHeader: React.FC<{
@@ -11,7 +11,7 @@ const ExploreTableHeader: React.FC<{
 }> = React.memo(({ columns, onRemoveColumn, onMoveColumn }) => {
   return (
     <StyledHeader>
-      <div
+      <StyledHeaderEntityCell
         className="qt-col qt-col-header"
         style={{
           width: WIDTH_COLUMN_FIRST,
@@ -20,7 +20,7 @@ const ExploreTableHeader: React.FC<{
         }}
       >
         Entity
-      </div>
+      </StyledHeaderEntityCell>
       {columns.map((column, key) => {
         return (
           <ExploreTableHeaderColumn

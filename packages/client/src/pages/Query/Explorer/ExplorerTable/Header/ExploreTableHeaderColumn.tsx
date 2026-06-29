@@ -8,6 +8,7 @@ import { MdChevronLeft, MdChevronRight, MdDragIndicator, MdOutlineEdit } from "r
 import { DragItem, Identifier, ItemTypes } from "types";
 import { getColumnWidth } from "../utils";
 import {
+  StyledHeaderColumnCell,
   StyledHeaderColumnContent,
   StyledHeaderColumnControls,
   StyledHeaderColumnLabel,
@@ -89,17 +90,11 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
   drag(dragRef);
 
   return (
-    <div
+    <StyledHeaderColumnCell
       ref={dropRef}
       data-handler-id={handlerId}
       className="qt-col qt-col-header"
-      style={{
-        width,
-        minWidth: width,
-        maxWidth: width,
-        display: "flex",
-        alignItems: "center",
-      }}
+      $width={width}
     >
       <StyledHeaderColumnContent $isDragging={isDragging}>
         <StyledHeaderDragHandle ref={dragRef} title="drag to reorder">
@@ -142,7 +137,7 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
           />
         </StyledHeaderColumnControls>
       </StyledHeaderColumnContent>
-    </div>
+    </StyledHeaderColumnCell>
   );
 };
 

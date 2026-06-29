@@ -16,26 +16,27 @@ export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
   height: ${({ theme }) => theme.space[12]};
-  background-color: ${({ theme }) => theme.color["explorerHeader"]};
+  background-image: linear-gradient(
+    180deg,
+    ${({ theme }) => theme.color["explorerHeader"]} 0%,
+    ${({ theme }) => theme.color["query3"]} 220%
+  );
   color: ${({ theme }) => theme.color["headerTextColor"]};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-`;
-
-export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  opacity: ${({ $isDragging }) => ($isDragging ? 0.3 : 1)};
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
 `;
 
 export const StyledHeaderDragHandle = styled.span`
   display: inline-flex;
   align-items: center;
-  margin-right: 0.2rem;
+  margin-right: 0.1rem;
   cursor: grab;
   color: ${({ theme }) => theme.color["headerTextColor"]};
+  /* Subtle at rest; brightens when the column is hovered. */
+  opacity: 0.4;
+  transition: opacity 0.12s ease;
   &:active {
     cursor: grabbing;
   }
@@ -52,18 +53,70 @@ export const StyledHeaderEditIcon = styled.span`
 `;
 
 export const StyledHeaderColumnLabel = styled.span`
-  display: inline-flex;
-  align-items: center;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  letter-spacing: 0.01em;
 `;
 
 export const StyledHeaderColumnControls = styled.span`
   display: inline-flex;
   align-items: center;
+  gap: 0.1rem;
   margin-left: auto;
-  padding-left: 0.3rem;
+  flex-shrink: 0;
+  /*
+   * Collapsed to zero width at rest so the label can use the full column,
+   * then expanded on column hover / keyboard focus. Revealing on demand keeps
+   * the resting header clean while showing more of the label.
+   */
+  max-width: 0;
+  padding-left: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.15s ease, opacity 0.12s ease, padding-left 0.15s ease;
+`;
+
+export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.3 : 1)};
+`;
+
+export const StyledHeaderColumnCell = styled.div<{ $width: number }>`
+  width: ${({ $width }) => $width}px;
+  min-width: ${({ $width }) => $width}px;
+  max-width: ${({ $width }) => $width}px;
+  display: flex;
+  align-items: center;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.14);
+  transition: background-color 0.12s ease;
+
+  &:hover,
+  &:focus-within {
+    background-color: rgba(255, 255, 255, 0.09);
+  }
+  &:hover ${StyledHeaderDragHandle}, &:focus-within ${StyledHeaderDragHandle} {
+    opacity: 0.85;
+  }
+  &:hover ${StyledHeaderColumnControls}, &:focus-within ${StyledHeaderColumnControls} {
+    max-width: 8rem;
+    padding-left: 0.3rem;
+    opacity: 1;
+  }
+`;
+
+export const StyledHeaderEntityCell = styled.div`
+  display: inline-flex;
+  align-items: center;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  letter-spacing: 0.01em;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.14);
 `;
 
 export const StyledBody = styled.div``;
