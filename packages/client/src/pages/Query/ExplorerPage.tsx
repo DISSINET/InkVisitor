@@ -61,6 +61,26 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
+  // Page-level expansion options for the whole Explorer query (#2969): mix the
+  // result entities with their equivalents (SYN/IDE/AEE) and/or subordinates
+  // (inverse SCL/SOE/HOL + child territories). Persisted across sessions.
+  const includeSubordinatesStorageKey = "queryIncludeSubordinates";
+  const includeEquivalentsStorageKey = "queryIncludeEquivalents";
+  const [includeSubordinates, setIncludeSubordinates] = useState(
+    () => localStorage.getItem(includeSubordinatesStorageKey) === "true",
+  );
+  const [includeEquivalents, setIncludeEquivalents] = useState(
+    () => localStorage.getItem(includeEquivalentsStorageKey) === "true",
+  );
+  const handleToggleIncludeSubordinates = useCallback((value: boolean) => {
+    localStorage.setItem(includeSubordinatesStorageKey, String(value));
+    setIncludeSubordinates(value);
+  }, []);
+  const handleToggleIncludeEquivalents = useCallback((value: boolean) => {
+    localStorage.setItem(includeEquivalentsStorageKey, String(value));
+    setIncludeEquivalents(value);
+  }, []);
+
   /**
    * Collects all problems with the query state
    */
@@ -611,6 +631,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
+                includeEquivalents={includeEquivalents}
+                includeSubordinates={includeSubordinates}
               />
               {!explorerBoxMaximized && (
                 <ExplorerTableIdsFilter
@@ -622,6 +644,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 filters={exploreState.filters}
                 exploreDispatch={exploreStateDispatch}
                 hideButton={explorerBoxMaximized}
+                includeSubordinates={includeSubordinates}
+                includeEquivalents={includeEquivalents}
+                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
               />
             </Box>
             <Box
@@ -642,7 +668,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     noBackground={isStatsView}
                     color={isStatsView ? "greyer" : "primary"}
                     icon={<BiTable />}
-                    onClick={() => setExploreViewMode(Explore.EViewMode.Table)}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Table);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
                   />
                   <Button
                     tooltipLabel="stats view"
@@ -653,7 +682,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     noBackground={!isStatsView}
                     color={!isStatsView ? "greyer" : "primary"}
                     icon={<BiBarChartAlt2 />}
-                    onClick={() => setExploreViewMode(Explore.EViewMode.Stats)}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Stats);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
                   />
                 </SwitchGroup>
               }

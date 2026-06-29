@@ -89,7 +89,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__single-value {
     font-size: ${({ theme }) => theme.fontSize["xs"]};
-    font-weight: inherit;
+    font-weight: ${({ $suggester }) => ($suggester ? "bold" : "inherit")};
     top: 50%;
     transform: ${({ $suggester }) => ($suggester ? "translateY(-6%)" : "")};
     margin-top: 0;

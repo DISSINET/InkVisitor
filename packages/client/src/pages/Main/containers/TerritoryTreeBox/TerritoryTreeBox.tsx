@@ -281,7 +281,7 @@ export const TerritoryTreeBox: React.FC = () => {
               />
               <Button
                 icon={<FaStar size={14} />}
-                color="warning"
+                color={filterSettings.starred ? "warning" : "greyer"}
                 inverted={!filterSettings.starred}
                 onClick={() => {
                   handleFilterChange("starred", !filterSettings.starred);

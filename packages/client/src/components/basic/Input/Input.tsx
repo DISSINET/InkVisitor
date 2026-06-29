@@ -119,6 +119,8 @@ export const Input: React.FC<Input> = ({
   // Measure rightContent so the input reserves matching right padding (its width
   // is dynamic, e.g. a variable number of icon checkboxes) and the clearable
   // button can be offset to sit left of it.
+  const internalInputRef = useRef<HTMLInputElement>(null);
+  const resolvedInputRef = inputRef ?? internalInputRef;
   const rightContentRef = useRef<HTMLDivElement>(null);
   const [rightContentWidth, setRightContentWidth] = useState(0);
   useEffect(() => {
@@ -159,7 +161,7 @@ export const Input: React.FC<Input> = ({
         >
           <StyledInput
             $roundCorners={roundCorners}
-            ref={inputRef}
+            ref={resolvedInputRef}
             disabled={disabled}
             type={type}
             width={width}
@@ -240,6 +242,7 @@ export const Input: React.FC<Input> = ({
                 onClick={() => {
                   setDisplayValue("");
                   onChangeFn("");
+                  resolvedInputRef.current?.focus();
                 }}
               />
             </StyledClearableInputButton>

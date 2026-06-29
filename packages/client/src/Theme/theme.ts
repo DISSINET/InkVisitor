@@ -114,6 +114,7 @@ const theme = {
 
     tooltipColor: "#fff",
     tooltipBackground: "#000",
+    tooltipNodeBackground: "#324185",
     tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
     tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
 

@@ -121,7 +121,12 @@ export const EntitySearchBox: React.FC = () => {
     isFetching,
     isPending,
   } = useQuery({
-    queryKey: ["search", { searchData: JSON.stringify(debouncedValues) }],
+    queryKey: [
+      "search",
+      {
+        searchData: JSON.stringify(debouncedValues),
+      },
+    ],
     queryFn: async () => {
       // if (debouncedValues.usedTemplate === "Any") {
       //   const { usedTemplate, ...filters } = debouncedValues;

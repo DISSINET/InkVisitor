@@ -27,6 +27,8 @@ export interface IRequestSearch {
   haveReferenceTo?: string;
   isRootInvalid?: IRequestSearchRootValidity;
   editedBy?: string[];
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 }
 
 export enum IRequestSearchRootValidity {
@@ -60,6 +62,8 @@ export class RequestSearch {
   haveReferenceTo?: string;
   isRootInvalid?: IRequestSearchRootValidity;
   editedBy?: string[];
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -92,9 +96,7 @@ export class RequestSearch {
     }
 
     this.cooccurrenceId =
-      requestData.cooccurrenceId ||
-      (requestData as any).relatedEntityId ||
-      false;
+      requestData.cooccurrenceId || (requestData as any).relatedEntityId || false;
 
     this.entityIds = requestData.entityIds;
 
@@ -113,11 +115,17 @@ export class RequestSearch {
     this.subTerritorySearch = Boolean(requestData.subTerritorySearch);
     this.resourceHasDocument = Boolean(requestData.resourceHasDocument);
     this.haveReferenceTo = requestData.haveReferenceTo ?? undefined;
-    this.isRootInvalid =
-      requestData.isRootInvalid ?? IRequestSearchRootValidity.Any;
+    this.isRootInvalid = requestData.isRootInvalid ?? IRequestSearchRootValidity.Any;
     this.createdBy = requestData.createdBy ?? undefined;
     this.updatedBy = requestData.updatedBy ?? undefined;
     this.editedBy = requestData.editedBy ?? undefined;
+    // GET query params arrive as strings, so "false" must not be coerced to true
+    this.includeEquivalents =
+      requestData.includeEquivalents === true ||
+      (requestData.includeEquivalents as unknown) === "true";
+    this.includeSubordinates =
+      requestData.includeSubordinates === true ||
+      (requestData.includeSubordinates as unknown) === "true";
   }
 
   /**
@@ -129,24 +137,16 @@ export class RequestSearch {
       return new BadParams("invalid 'class' value");
     }
 
-    if (
-      this.excluded !== undefined &&
-      this.excluded.constructor.name !== "Array"
-    ) {
+    if (this.excluded !== undefined && this.excluded.constructor.name !== "Array") {
       // attempt to fix the string => array with one element
       if (typeof this.excluded === "string") {
-        this.excluded = (this.excluded as string).split(
-          ","
-        ) as EntityEnums.Class[];
+        this.excluded = (this.excluded as string).split(",") as EntityEnums.Class[];
       } else {
         return new BadParams("excluded needs to be an array");
       }
     }
 
-    if (
-      this.entityIds !== undefined &&
-      this.entityIds.constructor.name !== "Array"
-    ) {
+    if (this.entityIds !== undefined && this.entityIds.constructor.name !== "Array") {
       // attempt to fix the string => array with one element
       if (typeof this.entityIds === "string") {
         this.entityIds = (this.entityIds as string).split(",");
@@ -156,47 +156,27 @@ export class RequestSearch {
     }
 
     // check dates
-    if (
-      this.createdDate !== undefined &&
-      this.createdDate.constructor.name !== "Date"
-    ) {
+    if (this.createdDate !== undefined && this.createdDate.constructor.name !== "Date") {
       return new BadParams("createdDate needs to be a date");
     }
-    if (
-      this.createdAfter !== undefined &&
-      this.createdAfter.constructor.name !== "Date"
-    ) {
+    if (this.createdAfter !== undefined && this.createdAfter.constructor.name !== "Date") {
       return new BadParams("createdAfter needs to be a date");
     }
-    if (
-      this.createdBefore !== undefined &&
-      this.createdBefore.constructor.name !== "Date"
-    ) {
+    if (this.createdBefore !== undefined && this.createdBefore.constructor.name !== "Date") {
       return new BadParams("createdBefore needs to be a date");
     }
-    if (
-      this.updatedDate !== undefined &&
-      this.updatedDate.constructor.name !== "Date"
-    ) {
+    if (this.updatedDate !== undefined && this.updatedDate.constructor.name !== "Date") {
       return new BadParams("updatedDate needs to be a date");
     }
-    if (
-      this.updatedAfter !== undefined &&
-      this.updatedAfter.constructor.name !== "Date"
-    ) {
+    if (this.updatedAfter !== undefined && this.updatedAfter.constructor.name !== "Date") {
       return new BadParams("updatedAfter needs to be a date");
     }
-    if (
-      this.updatedBefore !== undefined &&
-      this.updatedBefore.constructor.name !== "Date"
-    ) {
+    if (this.updatedBefore !== undefined && this.updatedBefore.constructor.name !== "Date") {
       return new BadParams("updatedBefore needs to be a date");
     }
 
     if (this.subTerritorySearch && !this.territoryId) {
-      return new BadParams(
-        "subTerritorySearch needs valid territoryId to be set"
-      );
+      return new BadParams("subTerritorySearch needs valid territoryId to be set");
     }
 
     if (

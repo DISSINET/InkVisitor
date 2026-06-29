@@ -47,6 +47,7 @@ export namespace Query {
     "I_IS:PS" = "I_IS:PS",
     "SUT:" = "SUT:",
     "I_SUT:" = "I_SUT:",
+    "EUT:" = "EUT:",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
     "SUT:C" = "SUT:C",
@@ -124,21 +125,35 @@ export namespace Query {
     },
 
     "IS:": {},
-    "I_IS:": {},
+    "I_IS:": {
+      entityId: { allowedClasses: [] },
+    },
     "IS:A": {},
     "I_IS:A": {},
     "IS:S": {},
-    "I_IS:S": {},
+    "I_IS:S": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "IS:A1": {},
-    "I_IS:A1": {},
+    "I_IS:A1": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "IS:A2": {},
-    "I_IS:A2": {},
+    "I_IS:A2": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "IS:PS": {},
     "I_IS:PS": {},
     "SUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
     "I_SUT:": {},
+    "EUT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "SUT:D": {},
     "I_SUT:D": {},
     "SUT:C": {},
@@ -395,6 +410,13 @@ export namespace Query {
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "EUT:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
       },
     ],
     "HR:R": [
@@ -831,6 +853,7 @@ export namespace Query {
     "I_IS:PS": "S has: pseudoactant",
     "SUT:": "S under T: any",
     "I_SUT:": "T has S: any",
+    "EUT:": "used in statements under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "SUT:C": "S under T: children",
