@@ -643,14 +643,6 @@ class Text {
           cells.push({ text: t.text, space: t.space, parts: [t] });
         }
       }
-      // Index of the last content cell: a whitespace run before it stays
-      // trailing on the current line; trailing whitespace after it gets its own
-      // line so the caret typed at a full line end remains visible.
-      let lastContentIdx = -1;
-      for (let i = 0; i < cells.length; i++) {
-        if (!cells[i].space) lastContentIdx = i;
-      }
-
       let currentLine: string[] = [];
       let currentLineLength = 0;
       const pushLine = () => {
@@ -672,11 +664,22 @@ class Text {
         }
 
         if (cell.space) {
-          // Keep an inter-word space trailing on the current line (the next
-          // content breaks to the margin); a trailing space at the very end
-          // gets its own line so the caret after it stays on screen.
-          if (ci >= lastContentIdx && currentLineLength > 0) pushLine();
-          appendStr(cell.text);
+          // Overflowing whitespace: fill the line's remaining room, then carry
+          // the rest to the next line(s) so it stays visible (no h-scroll). #3145
+          const keep = charsThatFit(cell.text, maxWidth - currentLineLength);
+          if (keep > 0) appendStr(cell.text.slice(0, keep));
+          let rest = cell.text.slice(keep);
+          if (rest.length > 0) {
+            pushLine();
+            // Chunk an over-wide carried run so no single line exceeds the width.
+            while (widthOf(rest) > maxWidth) {
+              const take = Math.max(1, charsThatFit(rest, maxWidth));
+              appendStr(rest.slice(0, take));
+              pushLine();
+              rest = rest.slice(take);
+            }
+            appendStr(rest);
+          }
           continue;
         }
 
