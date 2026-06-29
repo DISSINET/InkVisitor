@@ -130,10 +130,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const nextCellAssociatedEdge =
             nextCellNode && allEdges.find((edge) => edge.node.id === nextCellNode.id);
 
-          const isRootCell = wi === 0 && hi === 0;
-          const rootHasParallelEdges =
-            isRootCell && thisCellNode !== undefined && thisCellNode.edges.length > 1;
-
           const railKey = `${wi}-${hi}`;
           const showRail = railCells.has(railKey);
           const railNegative = railCells.get(railKey) === true;
@@ -146,8 +142,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                 gridColumn: wi + 1,
                 gridRow: hi + 1,
                 width: QUERY_GRID_WIDTH,
-                height: rootHasParallelEdges ? QUERY_GRID_HEIGHT + 28 : QUERY_GRID_HEIGHT,
-                overflow: rootHasParallelEdges ? "visible" : undefined,
+                height: QUERY_GRID_HEIGHT,
               }}
             >
               {showRail && (
@@ -189,29 +184,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   includeEquivalents={includeEquivalents}
                   includeSubordinates={includeSubordinates}
                 />
-              )}
-              {/* Vertical spine from below AND/OR switch down to the first child edge */}
-              {rootHasParallelEdges && (
-                <svg
-                  width={QUERY_GRID_WIDTH}
-                  height={QUERY_GRID_HEIGHT + 28}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <line
-                    x1={20}
-                    x2={20}
-                    y1={QUERY_GRID_HEIGHT + 10}
-                    y2={QUERY_GRID_HEIGHT + 28}
-                    stroke={theme.color.query2}
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                  />
-                </svg>
               )}
               {nextCellAssociatedEdge && (
                 <QueryGridEdge
