@@ -235,8 +235,7 @@ export const StyledStatementTargetOption = styled.div<{
   gap: ${({ theme }) => theme.space[2]};
   cursor: pointer;
   padding: ${({ theme }) => theme.space[1]};
-  margin-left: ${({ theme, $depth }) =>
-    $depth ? `calc(${theme.space[4]} * ${$depth})` : 0};
+  margin-left: ${({ theme, $depth }) => ($depth ? `calc(${theme.space[4]} * ${$depth})` : 0)};
   border-radius: ${({ theme }) => theme.borderRadius.xs};
   border: ${({ theme, $isSelected }) =>
     `1px solid ${$isSelected ? theme.color.primary : "transparent"}`};
@@ -251,14 +250,43 @@ export const StyledStatementTargetNote = styled.span`
   white-space: nowrap;
 `;
 
-export const StyledStatementTargetRadio = styled.div<{ $isSelected: boolean }>`
-  flex-shrink: 0;
-  width: ${({ theme }) => theme.space[3]};
-  height: ${({ theme }) => theme.space[3]};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  border: ${({ theme }) => `2px solid ${theme.color.primary}`};
-  background-color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.color.primary : "transparent"};
+export const StyledStatementCreateSplit = styled.div`
+  display: flex;
+  align-items: stretch;
+`;
+
+export const StyledStatementCaretAnchor = styled.span`
+  position: relative;
+  display: flex;
+  align-items: stretch;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 1px;
+    background-color: ${({ theme }) => theme.color.gray["600"]};
+    z-index: 1;
+    pointer-events: none;
+  }
+`;
+
+export const StyledStatementTargetCurrent = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+`;
+
+export const StyledStatementTargetPopover = styled.div`
+  z-index: 1000;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: ${({ theme }) => `1px solid ${theme.color.gray["400"]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  padding: ${({ theme }) => theme.space[3]};
+  max-width: 26rem;
 `;
 
 export const StyledStatementTargetInfo = styled.div`
