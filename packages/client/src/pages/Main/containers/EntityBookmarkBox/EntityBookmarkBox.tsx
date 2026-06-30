@@ -12,9 +12,10 @@ import {
   Submit,
 } from "components";
 import { CBookmarkFolder } from "constructors";
+import { useBookmarksQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
@@ -34,21 +35,9 @@ export const EntityBookmarkBox: React.FC = () => {
   const [openedFolders, setOpenedFolders] = useState<string[]>([]);
 
   // User query
-  const {
-    status: statusStatement,
-    data: bookmarkFolders,
-    error: errorStatement,
-    isFetching: isFetching,
-  } = useQuery({
-    queryKey: ["bookmarks"],
-    queryFn: async () => {
-      const res = await api.bookmarksGet("me");
-      const data = res.data ?? [];
-      data.sort((a, b) => (a.name > b.name ? 1 : -1));
-      return data;
-    },
-    enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"],
-  });
+  const { data: bookmarkFolders, isFetching } = useBookmarksQuery(
+    fourthPanelBoxesOpened["bookmarks"],
+  );
 
   const removingFolderName = useMemo(() => {
     if (bookmarkFolders) {
@@ -136,7 +125,7 @@ export const EntityBookmarkBox: React.FC = () => {
     },
 
     onSuccess: () => {
-      toast.info("Bookmark edited");
+      toast.info("Bookmark folder edited");
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       setEditingFolderName("");
       setEditingFolder(false);

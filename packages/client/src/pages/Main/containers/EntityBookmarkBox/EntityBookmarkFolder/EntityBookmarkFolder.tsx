@@ -150,9 +150,9 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
       >
         <StyledFolderWrapperOpenArea>
           <StyledIconWrap>
-            <FolderIcon />
+            <FolderIcon size={15} />
           </StyledIconWrap>
-          <StyledFolderHeaderText>{bookmarkFolder.name}</StyledFolderHeaderText>
+          <StyledFolderHeaderText $open={open}>{bookmarkFolder.name}</StyledFolderHeaderText>
         </StyledFolderWrapperOpenArea>
 
         <StyledFolderHeaderButtons>
