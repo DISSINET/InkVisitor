@@ -12,12 +12,7 @@ import {
 } from "./AuditTableStyles";
 import { Button } from "components/basic/Button/Button";
 
-export const AuditTable: React.FC<IResponseAudit> = ({
-  modelId,
-  auditScope,
-  last,
-  first,
-}) => {
+export const AuditTable: React.FC<IResponseAudit> = ({ modelId, auditScope, last, first }) => {
   return (
     <div>
       <StyledAuditTable>
@@ -26,12 +21,8 @@ export const AuditTable: React.FC<IResponseAudit> = ({
           .map((auditLast, ai) => (
             <AuditTableRow mode="edit" key={ai} {...auditLast}></AuditTableRow>
           ))}
-        {last && last.length > 1 && (
-          <StyledAuditEllipsis>...</StyledAuditEllipsis>
-        )}
-        {first && (
-          <AuditTableRow mode="create" key="first" {...first}></AuditTableRow>
-        )}
+        {last && last.length > 1 && <StyledAuditEllipsis>...</StyledAuditEllipsis>}
+        {first && <AuditTableRow mode="create" key="first" {...first}></AuditTableRow>}
       </StyledAuditTable>
     </div>
   );
@@ -92,13 +83,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
             tooltipLabel="created"
           />
         ) : (
-          <Button
-            icon={<FaExchangeAlt />}
-            noBackground
-            inverted
-            noBorder
-            tooltipLabel="edited"
-          />
+          <Button icon={<FaExchangeAlt />} noBackground inverted noBorder tooltipLabel="edited" />
         )}
         {mode === "create" ? "" : changedKeys.join(", ")}
       </StyledAuditColumn>

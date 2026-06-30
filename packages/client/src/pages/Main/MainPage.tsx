@@ -21,6 +21,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
@@ -111,9 +112,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
     const isNewStatement = prevStatementIdRef.current !== statementId;
     prevStatementIdRef.current = statementId;
 
-    if (statementId && isNewStatement && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
-      setEditorOpened(true);
-      dispatch(setEditorBoxState(EditorBoxState.Normal));
+    if (statementId && isNewStatement) {
+      dispatch(setThirdPanelExpanded(true));
+      if (!editorOpened || editorBoxState === EditorBoxState.Minimized) {
+        setEditorOpened(true);
+        dispatch(setEditorBoxState(EditorBoxState.Normal));
+      }
     }
   }, [statementId]);
 
