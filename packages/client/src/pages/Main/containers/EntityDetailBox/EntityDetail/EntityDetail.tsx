@@ -155,12 +155,24 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   const isClassChangeable = entity && allowedEntityChangeClasses.includes(entity.class);
 
-  const { data: allTemplates } = useTemplatesQuery();
+  const {
+    data: allTemplates,
+    isStale: templatesStale,
+    refetch: refetchTemplates,
+  } = useTemplatesQuery();
 
   const templates = useMemo(
     () => allTemplates?.filter((template: IEntity) => template.class === entity?.class),
     [allTemplates, entity?.class]
   );
+
+  // refresh the template list when the user opens the dropdown, but only once
+  // the 5min staleTime has elapsed - avoids refetching on every open
+  const handleTemplateDropdownFocus = () => {
+    if (templatesStale) {
+      refetchTemplates();
+    }
+  };
 
   const templateOptions = useMemo<DropdownItem[]>(() => {
     const options =
@@ -645,6 +657,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                     isTerritoryWithParent={isTerritoryWithParent}
                     allowedEntityChangeClasses={allowedEntityChangeClasses}
                     handleAskForTemplateApply={handleAskForTemplateApply}
+                    onTemplateDropdownFocus={handleTemplateDropdownFocus}
                     setSelectedEntityType={setSelectedEntityType}
                     setShowTypeSubmit={setShowTypeSubmit}
                     templateOptions={templateOptions}

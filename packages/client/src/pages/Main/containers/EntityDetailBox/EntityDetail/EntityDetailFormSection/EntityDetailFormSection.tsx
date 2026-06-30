@@ -63,6 +63,7 @@ interface EntityDetailFormSection {
   setSelectedEntityType: (value: React.SetStateAction<EntityEnums.Class | undefined>) => void;
   setShowTypeSubmit: (value: React.SetStateAction<boolean>) => void;
   handleAskForTemplateApply: (templateIdToApply: string) => void;
+  onTemplateDropdownFocus?: () => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
   widthTooNarrow: boolean;
@@ -79,6 +80,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   setSelectedEntityType,
   setShowTypeSubmit,
   handleAskForTemplateApply,
+  onTemplateDropdownFocus,
   isTerritoryWithParent,
   isStatementWithTerritory,
   widthTooNarrow,
@@ -214,6 +216,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 width="full"
                 value={null}
                 options={templateOptions}
+                onFocus={onTemplateDropdownFocus}
                 onChange={handleAskForTemplateApply}
               />
             </StyledDetailContentRowValue>

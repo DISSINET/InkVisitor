@@ -165,7 +165,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  const { data: allTemplates } = useTemplatesQuery();
+  const {
+    data: allTemplates,
+    isStale: templatesStale,
+    refetch: refetchTemplates,
+  } = useTemplatesQuery();
+
+  // refresh the template list when the user opens the dropdown, but only once
+  // the 5min staleTime has elapsed - avoids refetching on every open
+  const handleTemplateDropdownFocus = () => {
+    if (templatesStale) {
+      refetchTemplates();
+    }
+  };
 
   const templates = useMemo(
     () =>
@@ -676,6 +688,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   width="full"
                   value={null}
                   options={templateOptions}
+                  onFocus={handleTemplateDropdownFocus}
                   onChange={(templateToApply) => {
                     handleAskForTemplateApply(templateToApply);
                   }}
