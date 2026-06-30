@@ -149,7 +149,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
         onMouseLeave={() => setShowTooltip(false)}
       >
         <StyledFolderWrapperOpenArea>
-          <StyledIconWrap>
+          <StyledIconWrap $isOpen={open}>
             <FolderIcon size={15} />
           </StyledIconWrap>
           <StyledFolderHeaderText $open={open}>{bookmarkFolder.name}</StyledFolderHeaderText>

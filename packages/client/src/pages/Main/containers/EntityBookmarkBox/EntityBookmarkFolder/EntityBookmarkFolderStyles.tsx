@@ -41,7 +41,10 @@ export const StyledFolderWrapperOpenArea = styled.div`
   min-width: 0;
   overflow: hidden;
 `;
-export const StyledIconWrap = styled.div`
+interface StyledIconWrapProps {
+  $isOpen: boolean;
+}
+export const StyledIconWrap = styled.div<StyledIconWrapProps>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +52,7 @@ export const StyledIconWrap = styled.div`
   width: ${({ theme }) => theme.space[9]};
   height: ${({ theme }) => theme.space[9]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
+  scale: ${({ $isOpen }) => ($isOpen ? 1.1 : 1)};
   transition: scale 0.2s ease;
 
   ${StyledFolderHeader}:hover & {
