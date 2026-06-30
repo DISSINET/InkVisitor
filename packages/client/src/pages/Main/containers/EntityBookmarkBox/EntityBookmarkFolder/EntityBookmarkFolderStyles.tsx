@@ -23,8 +23,10 @@ export const StyledFolderHeader = styled.div`
   padding: ${({ theme }) => theme.space[3]};
 `;
 export const StyledFolderHeaderText = styled.div`
-  vertical-align: text-bottom;
+  display: flex;
+  align-items: center;
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[1]};
   width: 100%;
@@ -36,6 +38,7 @@ export const StyledFolderHeaderText = styled.div`
 export const StyledFolderWrapperOpenArea = styled.div`
   cursor: pointer;
   display: inline-flex;
+  align-items: center;
   overflow: hidden;
   width: 100%;
 `;

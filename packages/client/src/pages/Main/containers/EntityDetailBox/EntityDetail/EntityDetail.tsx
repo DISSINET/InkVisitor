@@ -9,7 +9,7 @@ import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from 
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
-import { useTemplatesQuery } from "hooks/react-query";
+import { useStatementQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -227,19 +227,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     );
   }, [entity]);
 
-  const {
-    status: statusStatement,
-    data: statement,
-    error: statementError,
-    isFetching: isFetchingStatement,
-  } = useQuery({
-    queryKey: ["statement", statementId],
-    queryFn: async () => {
-      const res = await api.statementGet(statementId);
-      return res.data;
-    },
-    enabled: !!statementId && api.isLoggedIn(),
-  });
+  const { data: statement } = useStatementQuery(statementId);
 
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),

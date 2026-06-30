@@ -45,7 +45,11 @@ import {
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { useResourcesWithDocumentsQuery, useUserQuery } from "hooks/react-query";
+import {
+  useDocumentQuery,
+  useResourcesWithDocumentsQuery,
+  useUserQuery,
+} from "hooks/react-query";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -177,17 +181,7 @@ export const StatementListBox: React.FC = () => {
     return undefined;
   }, [selectedResourceId, resources]);
 
-  const { data: selectedDocument } = useQuery({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: api.isLoggedIn() && !!selectedDocumentId,
-  });
+  const { data: selectedDocument } = useDocumentQuery(selectedDocumentId);
 
   const deleteStatementMutation = useMutation({
     mutationFn: async (sId: string) => await api.entityDelete(sId, { ignoreErrorToast: true }),

@@ -21,6 +21,6 @@ export const StyledFolderList = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.5rem;
   padding-right: 0.3rem;
 `;

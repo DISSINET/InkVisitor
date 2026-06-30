@@ -12,6 +12,7 @@ import api from "api";
 import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import {
+  useDocumentQuery,
   useDocumentsQuery,
   useResourcesWithDocumentsQuery,
   useUserQuery,
@@ -145,17 +146,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useQuery({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: api.isLoggedIn() && !!selectedDocumentId,
-  });
+  } = useDocumentQuery(selectedDocumentId);
 
   const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) => await api.entityCreate(newStatement),

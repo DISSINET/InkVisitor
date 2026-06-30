@@ -6,8 +6,6 @@ import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
 import React, { useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import {
   FaEdit,
@@ -15,7 +13,7 @@ import {
   FaFolderOpen,
   FaRegFolder,
   FaRegFolderOpen,
-  FaTrash,
+  FaTrashAlt,
 } from "react-icons/fa";
 import { DragItem, ItemTypes } from "types";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
@@ -158,26 +156,30 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
         </StyledFolderWrapperOpenArea>
 
         <StyledFolderHeaderButtons>
-          <ButtonGroup>
+          <ButtonGroup $smallGap>
             <Button
               key="edit"
-              icon={<FaEdit size={12} />}
+              icon={<FaEdit size={16} />}
               color="warning"
               inverted
               onClick={(e: React.MouseEvent) => {
                 e.stopPropagation();
                 startEditingFolder(bookmarkFolder);
               }}
+              noBackground
+              noBorder
             />
             <Button
               key="remove"
-              icon={<FaTrash size={12} />}
+              icon={<FaTrashAlt size={14} />}
               color="danger"
               inverted
               onClick={(e: React.MouseEvent) => {
                 e.stopPropagation();
                 askRemoveFolder(bookmarkFolder.id);
               }}
+              noBackground
+              noBorder
             />
           </ButtonGroup>
         </StyledFolderHeaderButtons>
