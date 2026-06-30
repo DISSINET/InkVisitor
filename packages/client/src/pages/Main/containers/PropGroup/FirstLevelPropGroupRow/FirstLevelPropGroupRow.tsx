@@ -28,7 +28,7 @@ interface FirstLevelPropGroupRow {
   setInitValueTyped: (value: React.SetStateAction<string>) => void;
 
   userCanEdit: boolean;
-  territoryActants: string[];
+  territoryId: string;
   entities: {
     [key: string]: IEntity;
   };
@@ -59,7 +59,7 @@ export const FirstLevelPropGroupRow: React.FC<FirstLevelPropGroupRow> = ({
   setInitValueTyped,
 
   userCanEdit,
-  territoryActants,
+  territoryId,
   entities,
   disabledAttributes,
   originId,
@@ -98,7 +98,7 @@ export const FirstLevelPropGroupRow: React.FC<FirstLevelPropGroupRow> = ({
         removeProp={removeProp}
         addProp={addProp}
         userCanEdit={userCanEdit}
-        territoryActants={territoryActants || []}
+        territoryId={territoryId}
         openDetailOnCreate={openDetailOnCreate}
         moveProp={moveProp}
         movePropToIndex={movePropToIndex}

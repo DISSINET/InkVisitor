@@ -119,25 +119,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const username: string = useAppSelector((state) => state.username);
   const { data: user } = useUserQuery();
 
-  // territory query
-  const {
-    status,
-    data: territoryActants = [],
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["territoryActants", statement.data.territory?.territoryId],
-    queryFn: async () => {
-      if (statement.data.territory?.territoryId) {
-        const res = await api.entityIdsInTerritory(statement.data.territory.territoryId);
-        return res.data ?? [];
-      } else {
-        return [];
-      }
-    },
-    enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
-  });
-
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] = useState<boolean>(false);
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(false);
@@ -808,12 +789,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               removeProp={removeProp}
               movePropToIndex={movePropToIndex}
               territoryParentId={statementTerritoryId}
-              territoryActants={territoryActants}
               handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
-                territoryActants={territoryActants}
+                territoryId={statementTerritoryId}
                 openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   addAction(newSelectedId);
@@ -864,12 +844,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               territoryParentId={statementTerritoryId}
               addClassification={addClassification}
               addIdentification={addIdentification}
-              territoryActants={territoryActants}
               handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
-                territoryActants={territoryActants}
+                territoryId={statementTerritoryId}
                 openDetailOnCreate
                 onSelected={addActant}
                 categoryTypes={classesEditorActants}
@@ -953,7 +932,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledTagsList>
             {userCanEdit && (
               <EntitySuggester
-                territoryActants={territoryActants}
+                territoryId={statementTerritoryId}
                 openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   if (!statement.data.tags.find((t) => t === newSelectedId)) {

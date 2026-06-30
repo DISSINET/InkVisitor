@@ -39,7 +39,7 @@ interface StatementEditorActantClassification {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   sActant: IStatementActant;
-  territoryActants?: string[];
+  territoryId?: string;
 }
 export const StatementEditorActantClassification: React.FC<
   StatementEditorActantClassification
@@ -52,7 +52,7 @@ export const StatementEditorActantClassification: React.FC<
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  territoryActants,
+  territoryId,
 }) => {
   const entity = statement.entities[classification.entityId];
 
@@ -117,7 +117,7 @@ export const StatementEditorActantClassification: React.FC<
               }}
               openDetailOnCreate
               isInsideTemplate={isInsideTemplate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               isHidden={!userCanEdit}
             />
           </StyledSuggesterWrap>

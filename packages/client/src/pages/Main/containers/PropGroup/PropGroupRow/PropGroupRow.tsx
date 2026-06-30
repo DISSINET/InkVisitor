@@ -50,7 +50,7 @@ interface PropGroupRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
-  territoryActants: string[];
+  territoryId: string;
   openDetailOnCreate: boolean;
 
   parentId: string;
@@ -82,7 +82,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   moveProp,
   movePropToIndex,
   userCanEdit,
-  territoryActants = [],
+  territoryId,
   openDetailOnCreate = false,
   parentId,
   id,
@@ -209,7 +209,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 disabledAttributes={disabledAttributes}
                 isInsideTemplate={isInsideTemplate}
                 openDetailOnCreate={openDetailOnCreate}
-                territoryActants={territoryActants}
+                territoryId={territoryId}
                 territoryParentId={territoryParentId}
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
@@ -227,7 +227,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               disabledAttributes={disabledAttributes}
               isInsideTemplate={isInsideTemplate}
               openDetailOnCreate={openDetailOnCreate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               territoryParentId={territoryParentId}
               updateProp={updateProp}
               userCanEdit={userCanEdit}

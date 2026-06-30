@@ -22,7 +22,6 @@ interface StatementEditorActantTable {
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
-  territoryActants?: string[];
 
   handleDataAttributeChange: (
     changes: Partial<IStatementData>,
@@ -42,7 +41,6 @@ export const StatementEditorActantTable: React.FC<
   territoryParentId,
   addClassification,
   addIdentification,
-  territoryActants,
 
   handleDataAttributeChange,
 }) => {
@@ -104,7 +102,6 @@ export const StatementEditorActantTable: React.FC<
                 territoryParentId={territoryParentId}
                 addClassification={addClassification}
                 addIdentification={addIdentification}
-                territoryActants={territoryActants}
                 hasOrder={filteredActants.length > 1}
                 handleDataAttributeChange={handleDataAttributeChange}
               />

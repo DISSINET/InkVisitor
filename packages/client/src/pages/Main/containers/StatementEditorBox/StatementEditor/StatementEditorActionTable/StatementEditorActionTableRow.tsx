@@ -54,7 +54,6 @@ interface StatementEditorActionTableRow {
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
-  territoryActants?: string[];
   hasOrder?: boolean;
 
   handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
@@ -72,13 +71,15 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
   removeProp,
   movePropToIndex,
   territoryParentId,
-  territoryActants,
   hasOrder,
 
   handleDataAttributeChange,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
+  // the statement's own territory - may differ from the URL territoryId, so the
+  // suggester home icon is keyed off the statement, not the opened territory.
+  const statementTerritoryId = statement.data.territory?.territoryId;
   const { action, sAction } = filteredAction.data;
 
   const dropRef = useRef<HTMLTableRowElement>(null);
@@ -192,7 +193,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
           placeholder={"add action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
-          territoryActants={territoryActants}
+          territoryId={statementTerritoryId}
           isHidden={!userCanEdit}
         />
       </StyledSuggesterWrap>

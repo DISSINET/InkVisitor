@@ -63,7 +63,6 @@ interface StatementEditorActantTableRow {
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
-  territoryActants?: string[];
   hasOrder?: boolean;
 
   handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
@@ -84,7 +83,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
   territoryParentId,
   addClassification,
   addIdentification,
-  territoryActants,
   hasOrder,
 
   handleDataAttributeChange,
@@ -94,6 +92,9 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
 
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
+  // the statement's own territory - may differ from the URL territoryId, so the
+  // suggester home icon is keyed off the statement, not the opened territory.
+  const statementTerritoryId = statement.data.territory?.territoryId;
   const {
     actant,
     sActant,
@@ -234,7 +235,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           excludedEntityClasses={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
-          territoryActants={territoryActants}
+          territoryId={statementTerritoryId}
           placeholder={"add actant"}
           isInsideStatement
           isHidden={!userCanEdit}
@@ -532,7 +533,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
                     isInsideTemplate={isInsideTemplate}
                     updateActant={updateActant}
                     userCanEdit={userCanEdit}
-                    territoryActants={territoryActants}
+                    territoryId={statementTerritoryId}
                   />
                 ))}
             </StyledCI>
@@ -555,7 +556,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
                     updateActant={updateActant}
                     userCanEdit={userCanEdit}
                     classEntitiesActant={classEntitiesActant}
-                    territoryActants={territoryActants}
+                    territoryId={statementTerritoryId}
                   />
                 ))}
             </StyledCI>

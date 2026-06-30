@@ -35,7 +35,10 @@ interface EntitySuggesterProps {
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
-  territoryActants?: string[];
+  // territoryId of the territory whose actant entity ids are fetched (lazily,
+  // only once the suggester is actively searching) to render the home icon next
+  // to suggestion list items in the StatementEditor.
+  territoryId?: string;
   excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
@@ -105,7 +108,7 @@ const EntitySuggesterFull: React.FC<
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
-  territoryActants,
+  territoryId,
   excludedEntityClasses = [],
   filterEditorRights = false,
   excludedActantIds = [],
@@ -226,6 +229,23 @@ const EntitySuggesterFull: React.FC<
       api.isLoggedIn(),
   });
 
+  // territory actants query - fetched lazily, only once the suggester is
+  // actively searching, to mark suggestions already present in the territory.
+  const { data: fetchedTerritoryActants } = useQuery({
+    queryKey: ["territoryActants", territoryId],
+    queryFn: async () => {
+      if (territoryId) {
+        const res = await api.entityIdsInTerritory(territoryId);
+        return res.data ?? [];
+      }
+      return [];
+    },
+    enabled: !!territoryId && debouncedTyped.length > 1 && api.isLoggedIn(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const territoryActantIds = fetchedTerritoryActants;
+
   const filterSuggestions = (suggestions: IResponseEntity[]) => {
     return (
       deepCopy(suggestions)
@@ -260,7 +280,7 @@ const EntitySuggesterFull: React.FC<
         .map((entity: IEntity) => {
           const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(entity.id)) {
+          if (territoryActantIds?.includes(entity.id)) {
             icons.push(<FaHome key={entity.id} color="" />);
           }
 

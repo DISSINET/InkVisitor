@@ -29,7 +29,7 @@ interface PropGroupRowType {
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  territoryActants: string[];
+  territoryId: string;
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
@@ -44,7 +44,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  territoryActants,
+  territoryId,
   isExpanded,
   disabledAttributes,
   openDetailOnCreate,
@@ -132,7 +132,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           </>
         ) : (
           <EntitySuggester
-            territoryActants={territoryActants}
+            territoryId={territoryId}
             onSelected={(newSelectedId: string) => {
               updateProp(
                 prop.id,

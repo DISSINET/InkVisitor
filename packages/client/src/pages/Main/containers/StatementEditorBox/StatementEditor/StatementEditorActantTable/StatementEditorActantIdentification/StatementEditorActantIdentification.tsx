@@ -41,7 +41,7 @@ interface StatementEditorActantIdentification {
   territoryParentId?: string;
   sActant: IStatementActant;
   classEntitiesActant: EntityEnums.Class[];
-  territoryActants?: string[];
+  territoryId?: string;
 }
 export const StatementEditorActantIdentification: React.FC<
   StatementEditorActantIdentification
@@ -55,7 +55,7 @@ export const StatementEditorActantIdentification: React.FC<
   territoryParentId,
   sActant,
   classEntitiesActant,
-  territoryActants,
+  territoryId,
 }) => {
   const entity = statement.entities[identification.entityId];
 
@@ -121,7 +121,7 @@ export const StatementEditorActantIdentification: React.FC<
               }}
               openDetailOnCreate
               isInsideTemplate={isInsideTemplate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               excludedEntityClasses={excludedSuggesterEntities}
               isHidden={!userCanEdit}
             />
