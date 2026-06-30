@@ -153,15 +153,16 @@ interface StyledModalInputForm {
 export const StyledModalInputForm = styled.div<StyledModalInputForm>`
   display: grid;
   grid-template-columns: ${({ $alignLeft }) => ($alignLeft ? "auto 1fr" : "auto auto")};
-  grid-row-gap: ${({ theme }) => theme.space[1]};
+  grid-row-gap: 0.5rem;
+  grid-column-gap: 0.5rem;
   width: 100%;
 `;
 export const StyledModalInputLabel = styled.p`
   display: grid;
   justify-content: flex-end;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[4]};
   white-space: nowrap;
+  font-size: 1.3rem;
 `;
 interface StyledModalInputWrap {
   width?: number;
@@ -170,7 +171,6 @@ export const StyledModalInputWrap = styled.div<StyledModalInputWrap>`
   width: ${({ width }) => (width ? `${width / 10}rem` : "auto")};
   display: grid;
   position: relative;
-  margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledCloseIconWrap = styled.span`
