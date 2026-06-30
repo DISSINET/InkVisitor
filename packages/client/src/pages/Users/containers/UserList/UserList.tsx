@@ -42,6 +42,7 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
+import { ButtonSize } from "types";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -602,6 +603,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   setRemovingUserId(userId);
                 }}
                 shape="sharp-square"
+                size={ButtonSize.Medium}
               />
               <Button
                 icon={<FaKey size={14} />}
@@ -612,6 +614,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   resetPasswordMutation.mutate(userId);
                 }}
                 shape="sharp-square"
+                size={ButtonSize.Medium}
               />
               {canVerifyManually && !verified && (
                 <Button
@@ -631,6 +634,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     );
                   }}
                   shape="sharp-square"
+                  size={ButtonSize.Medium}
                 />
               )}
               <Button
@@ -654,6 +658,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   );
                 }}
                 shape="sharp-square"
+                size={ButtonSize.Medium}
               />
             </StyledUserListButtonGroup>
           );
