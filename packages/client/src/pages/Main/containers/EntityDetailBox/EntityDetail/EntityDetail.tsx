@@ -3,15 +3,19 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { IEntity, IProp, IReference, IResponseDetail, Relation } from "@inkvisitor/shared/types";
 import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useSearchParams } from "hooks";
-import { useStatementQuery, useTemplatesQuery } from "hooks/react-query";
+import { useIsInViewport, useSearchParams } from "hooks";
+import {
+  useAuditQuery,
+  useStatementQuery,
+  useTemplatesQuery,
+} from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
@@ -188,27 +192,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     return options;
   }, [templates, entity]);
 
-  // Audit query
-  const {
-    status: statusAudit,
-    data: audit,
-    error: auditError,
-    isFetching: isFetchingAudit,
-  } = useQuery({
-    queryKey: ["audit", detailId],
-    queryFn: async () => {
-      const res = await api.auditGet(detailId);
-      return res.data;
-    },
-    enabled: !!detailId && api.isLoggedIn(),
-  });
-
-  // refetch audit when statement changes
-  useEffect(() => {
-    if (entity !== undefined) {
-      queryClient.invalidateQueries({ queryKey: ["audit"] });
-    }
-  }, [entity]);
+  // Audit query - only fetched once the Audits section scrolls into view
+  const auditSectionRef = useRef<HTMLDivElement>(null);
+  const auditInViewport = useIsInViewport(auditSectionRef, "200px");
+  const { data: audit } = useAuditQuery(detailId, auditInViewport);
 
   useEffect(() => {
     if (entity !== undefined) {
@@ -233,6 +220,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["audit", detailId] });
       invalidateAllExplorerQueries(queryClient);
 
       if (
@@ -1013,7 +1001,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                   <StyledDetailSectionHeading>Audits</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.Audits) && (
-                  <StyledDetailSectionContent>
+                  <StyledDetailSectionContent ref={auditSectionRef}>
                     {audit && <AuditTable {...audit} />}
                   </StyledDetailSectionContent>
                 )}

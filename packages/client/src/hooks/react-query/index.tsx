@@ -1,3 +1,4 @@
+import { useAuditQuery } from "./useAuditQuery";
 import { useBookmarksQuery } from "./useBookmarksQuery";
 import { useDetailQuery } from "./useDetailQuery";
 import { useDocumentQuery } from "./useDocumentQuery";
@@ -11,6 +12,7 @@ import { useUsersGetMoreQuery } from "./useUsersGetMoreQuery";
 import { useUsersSimplifiedQuery } from "./useUsersSimplifiedQuery";
 
 export {
+  useAuditQuery,
   useBookmarksQuery,
   useDetailQuery,
   useDocumentQuery,

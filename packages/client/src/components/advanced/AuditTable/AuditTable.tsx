@@ -1,10 +1,9 @@
 import { IAudit, IResponseAudit } from "@inkvisitor/shared/types";
-import api from "api";
 import React from "react";
 import { FaExchangeAlt, FaRegCalendarAlt, FaUser } from "react-icons/fa";
 import { MdAddCircleOutline } from "react-icons/md";
 import { RiTimeLine } from "react-icons/ri";
-import { useQuery } from "@tanstack/react-query";
+import { useUsersSimplifiedQuery } from "hooks/react-query";
 import {
   StyledAuditColumn,
   StyledAuditEllipsis,
@@ -48,14 +47,8 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   changes,
   mode,
 }) => {
-  const { data: userData, isFetching: isFetchingUser } = useQuery({
-    queryKey: ["user", user],
-    queryFn: async () => {
-      const res = await api.withoutToaster().usersGet(user as string);
-      return res.data;
-    },
-    enabled: !!user,
-  });
+  const { data: users } = useUsersSimplifiedQuery();
+  const userName = users?.find((u) => u.id === user)?.name;
 
   const changedKeys =
     Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"
@@ -79,7 +72,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
     <StyledAuditRow>
       <StyledAuditColumn>
         <FaUser />
-        {userData ? userData.name : <i>{"removed user"}</i>}
+        {userName ? userName : <i>{"removed user"}</i>}
       </StyledAuditColumn>
       <StyledAuditColumn>
         <FaRegCalendarAlt />

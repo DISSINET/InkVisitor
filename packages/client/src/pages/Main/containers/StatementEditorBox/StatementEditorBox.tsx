@@ -54,6 +54,7 @@ export const StatementEditorBox: React.FC = () => {
       // }
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["audit", statementId] });
 
       if (variables.labels?.[0] !== undefined) {
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });

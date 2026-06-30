@@ -31,9 +31,9 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useSearchParams, useTheme } from "hooks";
+import { useIsInViewport, useSearchParams, useTheme } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -72,7 +72,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
+import { useAuditQuery, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -110,20 +110,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const queryClient = useQueryClient();
   const theme = useTheme();
 
-  // Audit query
-  const {
-    status: statusAudit,
-    data: audit,
-    error: auditError,
-    isFetching: isFetchingAudit,
-  } = useQuery({
-    queryKey: ["audit", statementId],
-    queryFn: async () => {
-      const res = await api.auditGet(statementId);
-      return res.data;
-    },
-    enabled: !!statementId && api.isLoggedIn(),
-  });
+  // Audit query - only fetched once the Audits section scrolls into view
+  const auditSectionRef = useRef<HTMLDivElement>(null);
+  const auditInViewport = useIsInViewport(auditSectionRef, "200px");
+  const { data: audit } = useAuditQuery(statementId, auditInViewport);
 
   // user query
   const username: string = useAppSelector((state) => state.username);
@@ -198,10 +188,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return options;
   }, [templates, statement]);
 
-  // refetch audit when statement changes
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["audit"] });
-  }, [statement]);
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
@@ -1016,7 +1002,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Audits</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
-          <StyledEditorSectionContent>
+          <StyledEditorSectionContent ref={auditSectionRef}>
             {audit && <AuditTable {...audit} />}
           </StyledEditorSectionContent>
         </StyledEditorSection>
