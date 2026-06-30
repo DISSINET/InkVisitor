@@ -86,7 +86,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     setData(initialValues);
   }, [initialValues]);
 
-
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
     setData({
       ...data,
@@ -356,13 +355,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <EntityTag
                     entity={defaultTerritory}
                     tooltipPosition="left"
-                  unlinkButton={{
-                    onClick: () => {
-                      setDefaultTerritory(null);
-                      setData((prev) => ({ ...prev, defaultTerritory: "" }));
-                    },
+                    unlinkButton={{
+                      onClick: () => {
+                        setDefaultTerritory(null);
+                        setData((prev) => ({ ...prev, defaultTerritory: "" }));
+                      },
                       color: "danger",
                     }}
+                    fullWidth
                   />
                 ) : (
                   <div>
