@@ -21,7 +21,7 @@ import {
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaQuestion } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { isSafePassword } from "utils/utils";
@@ -86,7 +86,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     setData(initialValues);
   }, [initialValues]);
 
+  const isTerritoryMounted = useRef(false);
   useEffect(() => {
+    if (!isTerritoryMounted.current) {
+      isTerritoryMounted.current = true;
+      return;
+    }
     // territory is selected in the suggester
     if (defaultTerritory) {
       setData({
@@ -166,11 +171,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
-    [rights]
+    [rights],
   );
   const writeRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Write),
-    [rights]
+    [rights],
   );
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
