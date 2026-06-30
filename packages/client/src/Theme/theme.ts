@@ -263,6 +263,11 @@ const theme = {
 
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
+// keys of ThemeColor whose value is a plain color string, excluding the
+// nested groups (gray, blue, invertedBg, ...)
+export type FlatThemeColor = {
+  [K in keyof ThemeColor]: ThemeColor[K] extends string ? K : never;
+}[keyof ThemeColor];
 export type ThemeBorderWidth = typeof theme.borderWidth;
 export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;

@@ -51,7 +51,7 @@ export const annotatorHighlight = (
 
     const classItem = EntityColors[entityClass];
     const colorName = classItem?.color ?? "transparent";
-    const color = theme.color[colorName] as string;
+    const color = theme.color[colorName];
 
     return {
       mode: HighlightMode.BACKGROUND,
