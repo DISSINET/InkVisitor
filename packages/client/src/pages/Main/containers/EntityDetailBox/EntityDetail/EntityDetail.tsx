@@ -264,9 +264,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
       }
       if (entity?.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
-        if (entity?.class === EntityEnums.Class.Statement) {
-          queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
-        }
       }
     },
   });

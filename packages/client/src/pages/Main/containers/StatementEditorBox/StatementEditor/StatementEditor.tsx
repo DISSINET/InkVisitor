@@ -72,7 +72,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { useUserQuery } from "hooks/react-query";
+import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -165,27 +165,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
-    queryKey: ["statement-templates"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        onlyTemplates: true,
-        class: EntityEnums.Class.Statement,
-      });
+  const { data: allTemplates } = useTemplatesQuery();
 
-      const templates = res.data ?? [];
-      templates.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1,
-      );
-      return templates;
-    },
-    enabled: !!statement && api.isLoggedIn(),
-  });
+  const templates = useMemo(
+    () =>
+      allTemplates?.filter((template: IEntity) => template.class === EntityEnums.Class.Statement),
+    [allTemplates],
+  );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options = templates

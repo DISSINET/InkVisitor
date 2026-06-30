@@ -83,7 +83,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
-  const { data: documents } = useDocumentsQuery(actantMode === "resource");
+  const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
+    actantMode === "resource",
+  );
 
   const noDocumentLinkedItem: DropdownItem = {
     value: "",
@@ -594,7 +596,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               {/* document id */}
               <StyledDetailContentRow>
                 <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
-                <StyledDetailContentRowValue>
+                <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>
                   <Dropdown.Single.Basic
                     disabled={!userCanEdit}
                     value={selectedDocumentOption}

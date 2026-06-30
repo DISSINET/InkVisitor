@@ -82,7 +82,8 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     enabled: !!territoryId && api.isLoggedIn(),
   });
 
-  const { data: resources } = useResourcesWithDocumentsQuery();
+  const { data: resources, refetch: refetchResources } =
+    useResourcesWithDocumentsQuery();
 
   const { data: documents } = useDocumentsQuery();
 
@@ -283,6 +284,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       selectedDocumentError={selectedDocumentError}
       selectedResource={selectedResource}
       resources={resources}
+      onResourcePickerFocus={() => refetchResources()}
       setSelectedResourceId={(id) => {
         userPickedRef.current = true;
         dispatch(setSelectedResourceId(id));

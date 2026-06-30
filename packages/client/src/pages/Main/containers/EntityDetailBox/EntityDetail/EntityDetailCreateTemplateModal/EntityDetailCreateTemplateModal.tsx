@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseGeneric } from "@inkvisitor/shared/types";
 import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -43,15 +43,12 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
 
-  const { statementId, appendDetailId } = useSearchParams();
+  const { appendDetailId } = useSearchParams();
 
   const templateCreateMutation = useMutation({
     mutationFn: async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      if (statementId && variables.class === EntityEnums.Class.Statement) {
-        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
-      }
       updateEntityMutation.mutate({ usedTemplate: variables.id });
 
       appendDetailId(variables.id);

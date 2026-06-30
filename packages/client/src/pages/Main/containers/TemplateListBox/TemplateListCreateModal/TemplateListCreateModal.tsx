@@ -66,7 +66,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       if (variables.class === EntityEnums.Class.Statement) {
         setStatementId(variables.id);
-        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
       } else {
         appendDetailId(variables.id);
       }

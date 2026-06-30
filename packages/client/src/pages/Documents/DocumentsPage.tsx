@@ -53,13 +53,15 @@ export const DocumentsPage: React.FC = ({}) => {
     [isAdminOrOwner, userData, assignedResourceIds]
   );
 
-  const { data: documents, error, isFetching } = useDocumentsQuery();
+  // documents page is the management hub - always refetch on entry so edits
+  // made elsewhere (or by other users) show up regardless of staleTime
+  const { data: documents, error, isFetching } = useDocumentsQuery(true, "always");
 
   const {
     data: resources,
     error: resourcesError,
     isFetching: resourcesIsFetching,
-  } = useResourcesWithDocumentsQuery();
+  } = useResourcesWithDocumentsQuery(true, "always");
 
   const documentsWithResources: DocumentWithResource[] = useMemo(() => {
     return documents

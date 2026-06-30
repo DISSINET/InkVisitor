@@ -19,7 +19,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   entityToRemove,
 }) => {
   const queryClient = useQueryClient();
-  const { detailIdArray, removeDetailId, statementId } = useSearchParams();
+  const { detailIdArray, removeDetailId } = useSearchParams();
 
   const [showModal, setShowModal] = useState(false);
 
@@ -42,13 +42,6 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           )}" was removed`
         );
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      if (
-        statementId &&
-        entityToRemove &&
-        entityToRemove.class === EntityEnums.Class.Statement
-      ) {
-        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
-      }
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       setRemoveEntityId(false);
     },
