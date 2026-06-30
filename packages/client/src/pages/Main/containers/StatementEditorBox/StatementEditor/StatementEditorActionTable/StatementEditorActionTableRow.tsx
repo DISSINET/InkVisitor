@@ -203,7 +203,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
-      <ButtonGroup $noMarginRight $height={19} style={{ gap: "0.2rem" }}>
+      <ButtonGroup $smallGap $height={19}>
         {userCanEdit && (
           <Button
             key="a"
