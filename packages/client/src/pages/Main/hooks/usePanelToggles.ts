@@ -179,11 +179,60 @@ export function usePanelToggles({
   const toggleThirdPanel = () => {
     if (thirdPanelExpanded) {
       dispatch(setThirdPanelExpanded(false));
+
+      // hand the freed third-panel width to the second panel (preferred over the
+      // fourth): move the center separator right and keep the search separator,
+      // so the fourth panel keeps its width. Remember the width to restore it.
+      if (secondPanelExpanded && fourthPanelExpanded) {
+        const freed = panelWidths[2] - COLLAPSED_PANEL_WIDTH;
+        if (freed > 0) {
+          localStorage.setItem(
+            "mainPageThirdPanelRestoreWidth",
+            floorNumberToOneDecimal(panelWidths[2] / onePercentOfLayoutWidth).toString(),
+          );
+          const newCenterPos = centerSeparator.position + freed;
+          centerSeparator.setPosition(newCenterPos);
+          persistSeparator("mainPageCenterSeparatorXPosition", newCenterPos);
+          dispatch(
+            setPanelWidths([
+              panelWidths[0],
+              floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
+              COLLAPSED_PANEL_WIDTH,
+              panelWidths[3],
+            ]),
+          );
+        }
+      }
       return;
     }
 
     dispatch(setThirdPanelExpanded(true));
     queryClient.invalidateQueries({ queryKey: ["document"] });
+
+    // if the third panel's width was previously parked into the second panel,
+    // give it back by moving the center separator left (fourth panel untouched)
+    const storedRestore = localStorage.getItem("mainPageThirdPanelRestoreWidth");
+    if (storedRestore && secondPanelExpanded && fourthPanelExpanded) {
+      localStorage.removeItem("mainPageThirdPanelRestoreWidth");
+      const restoreWidth = Math.max(
+        Number(storedRestore) * onePercentOfLayoutWidth,
+        THIRD_PANEL_MIN_WIDTH,
+      );
+      const minCenterPos = treeSeparator.position + SECOND_PANEL_MIN_WIDTH;
+      const newCenterPos = Math.max(searchSeparator.position - restoreWidth, minCenterPos);
+
+      centerSeparator.setPosition(newCenterPos);
+      persistSeparator("mainPageCenterSeparatorXPosition", newCenterPos);
+      dispatch(
+        setPanelWidths([
+          panelWidths[0],
+          floorNumberToOneDecimal(newCenterPos - panelWidths[0]),
+          floorNumberToOneDecimal(searchSeparator.position - newCenterPos),
+          panelWidths[3],
+        ]),
+      );
+      return;
+    }
 
     let newTreePos = treeSeparator.position;
     let newSearchPos = searchSeparator.position;

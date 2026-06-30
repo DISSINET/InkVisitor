@@ -163,3 +163,10 @@ export const StyledOrderCorrection = styled.div`
   width: 100%;
   color: ${({ theme }) => theme.color["gray"]["800"]};
 `;
+
+// wraps tag cells so clicking/double-clicking a tag (e.g. to open its detail)
+// does not bubble up and activate the statement row; display: contents keeps
+// the cell layout unchanged
+export const StyledTagCellWrap = styled.div`
+  display: contents;
+`;

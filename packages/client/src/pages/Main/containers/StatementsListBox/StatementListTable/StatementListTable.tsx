@@ -30,10 +30,14 @@ import {
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledSelectionCheckbox,
+  StyledTagCellWrap,
   StyledTHead,
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
+
+// stop tag clicks/double-clicks from bubbling up and activating the row
+const stopRowActivation = (e: React.MouseEvent) => e.stopPropagation();
 
 const HIDDEN_COLUMNS_FULL = ["id", "anchor"];
 const HIDDEN_COLUMNS_MINIFIED = [
@@ -198,7 +202,14 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "",
         Cell: ({ row }: CellType) => {
           const statement = row.original;
-          return <EntityTag entity={statement} showOnly="tag" />;
+          return (
+            <StyledTagCellWrap
+              onClick={stopRowActivation}
+              onDoubleClick={stopRowActivation}
+            >
+              <EntityTag entity={statement} showOnly="tag" />
+            </StyledTagCellWrap>
+          );
         },
       },
       {
@@ -213,7 +224,14 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const subjectObjects = subjectIds.map((actantId: string) => entities[actantId]);
           const definedSubjects = subjectObjects.filter((s) => s !== undefined);
 
-          return <>{definedSubjects ? <TagGroup definedEntities={definedSubjects} /> : <div />}</>;
+          return (
+            <StyledTagCellWrap
+              onClick={stopRowActivation}
+              onDoubleClick={stopRowActivation}
+            >
+              {definedSubjects ? <TagGroup definedEntities={definedSubjects} /> : <div />}
+            </StyledTagCellWrap>
+          );
         },
       },
       {
@@ -226,7 +244,14 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const actionObjects = actionIds.map((actionId: string) => entities[actionId]);
           const definedActions = actionObjects.filter((a) => a !== undefined);
 
-          return <>{definedActions ? <TagGroup definedEntities={definedActions} /> : <div />}</>;
+          return (
+            <StyledTagCellWrap
+              onClick={stopRowActivation}
+              onDoubleClick={stopRowActivation}
+            >
+              {definedActions ? <TagGroup definedEntities={definedActions} /> : <div />}
+            </StyledTagCellWrap>
+          );
         },
       },
       {
@@ -240,13 +265,16 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const definedObjects = actantObjects.filter((o) => o !== undefined);
 
           return (
-            <>
+            <StyledTagCellWrap
+              onClick={stopRowActivation}
+              onDoubleClick={stopRowActivation}
+            >
               {definedObjects ? (
                 <TagGroup definedEntities={definedObjects} oversizeLimit={3} />
               ) : (
                 <div />
               )}
-            </>
+            </StyledTagCellWrap>
           );
         },
       },
