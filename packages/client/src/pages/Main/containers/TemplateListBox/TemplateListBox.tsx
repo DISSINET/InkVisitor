@@ -1,15 +1,12 @@
 import { entitiesDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
-import api from "api";
 import { Button, Input, Loader } from "components";
 
-import { useQuery } from "@tanstack/react-query";
 import Dropdown, { EntityTag } from "components/advanced";
+import { useTemplatesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useAppSelector } from "redux/hooks";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -40,42 +37,34 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   >(EntityEnums.Extension.Any);
   const [filterByLabel, setFilterByLabel] = useState<string>("");
 
-  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelBoxesOpened
-  );
   const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
   const widthTooNarrow = fourthPanelWidth < 220;
 
-  const {
-    status,
-    data: templatesData = [],
-    error,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
-    queryKey: ["templates", filterByClass, filterByLabel],
-    queryFn: async () => {
-      const filters: IRequestSearch = {
-        onlyTemplates: true,
-      };
-      if (filterByClass !== allEntityOption.value) {
-        filters.class = filterByClass as EntityEnums.Class;
-      }
-      if (filterByLabel.length) {
-        filters.label = filterByLabel + "*";
-      }
+  const { data: allTemplatesData, isFetching: isFetchingTemplates } =
+    useTemplatesQuery();
 
-      const res = await api.entitiesSearch(filters);
-
-      const templates = res.data ?? [];
-      templates.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase()
-          ? 1
-          : -1
-      );
-      return templates;
-    },
-    enabled: api.isLoggedIn() && fourthPanelBoxesOpened["templates"],
-  });
+  const templatesData = useMemo(() => {
+    if (!allTemplatesData) {
+      return [];
+    }
+    return allTemplatesData.filter((template: IEntity) => {
+      if (
+        filterByClass !== allEntityOption.value &&
+        template.class !== filterByClass
+      ) {
+        return false;
+      }
+      if (
+        filterByLabel.length &&
+        !template.labels[0]
+          ?.toLocaleLowerCase()
+          .startsWith(filterByLabel.toLocaleLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [allTemplatesData, filterByClass, filterByLabel]);
 
   // CREATE MODAL
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);

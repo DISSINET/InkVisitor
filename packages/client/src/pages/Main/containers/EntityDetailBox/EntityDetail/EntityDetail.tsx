@@ -9,6 +9,7 @@ import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from 
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
+import { useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -154,29 +155,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   const isClassChangeable = entity && allowedEntityChangeClasses.includes(entity.class);
 
-  const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
-    queryKey: ["entity-templates", "templates", entity?.class],
-    queryFn: async () => {
-      if (entity) {
-        const res = await api.entitiesSearch({
-          onlyTemplates: true,
-          class: entity?.class,
-        });
+  const { data: allTemplates } = useTemplatesQuery();
 
-        const templates: IEntity[] = res.data ?? [];
-        templates.sort((a: IEntity, b: IEntity) =>
-          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
-        );
-        return templates;
-      }
-    },
-    enabled: !!entity && api.isLoggedIn(),
-  });
+  const templates = useMemo(
+    () => allTemplates?.filter((template: IEntity) => template.class === entity?.class),
+    [allTemplates, entity?.class]
+  );
 
   const templateOptions = useMemo<DropdownItem[]>(() => {
     const options =
@@ -280,7 +264,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
       }
       if (entity?.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
-        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
         if (entity?.class === EntityEnums.Class.Statement) {
           queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
         }

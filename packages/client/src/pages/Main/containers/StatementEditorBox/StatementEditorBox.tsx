@@ -68,7 +68,6 @@ export const StatementEditorBox: React.FC = () => {
       }
       if (statement && statement.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
-        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
       }
     },
     onError: (err, newTodo, context) => {

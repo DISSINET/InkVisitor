@@ -1,10 +1,6 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseGeneric } from "@inkvisitor/shared/types";
-import {
-  UseMutationResult,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import {
@@ -37,9 +33,7 @@ interface EntityDetailCreateTemplateModal {
     unknown
   >;
 }
-export const EntityDetailCreateTemplateModal: React.FC<
-  EntityDetailCreateTemplateModal
-> = ({
+export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplateModal> = ({
   entity,
   showModal = false,
   userCanEdit,
@@ -49,18 +43,14 @@ export const EntityDetailCreateTemplateModal: React.FC<
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
 
-  const { statementId, selectedDetailId, appendDetailId } = useSearchParams();
+  const { statementId, appendDetailId } = useSearchParams();
 
   const templateCreateMutation = useMutation({
-    mutationFn: async (templateEntity: IEntity) =>
-      await api.entityCreate(templateEntity),
+    mutationFn: async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       if (statementId && variables.class === EntityEnums.Class.Statement) {
         queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
-      }
-      if (selectedDetailId) {
-        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
       }
       updateEntityMutation.mutate({ usedTemplate: variables.id });
 
@@ -72,11 +62,8 @@ export const EntityDetailCreateTemplateModal: React.FC<
       toast.info(
         `Template [${variables.class}]: "${getShortLabelByLetterCount(
           variables.labels[0],
-          120
-        )}" created from entity "${getShortLabelByLetterCount(
-          entity.labels[0],
-          120
-        )}"`
+          120,
+        )}" created from entity "${getShortLabelByLetterCount(entity.labels[0], 120)}"`,
       );
     },
   });
@@ -86,7 +73,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
     const templateEntity = CTemplateEntity(
       localStorage.getItem("userrole") as UserEnums.Role,
       entity,
-      createTemplateLabel
+      createTemplateLabel,
     );
     templateCreateMutation.mutate(templateEntity);
   };
@@ -110,7 +97,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
       <ModalHeader title="Create Template" />
       <ModalContent>
         <ModalInputForm alignLeft>
-          <ModalInputLabel>Label</ModalInputLabel>
+          <ModalInputLabel>Label:</ModalInputLabel>
           <ModalInputWrap>
             <Input
               disabled={!userCanEdit}
