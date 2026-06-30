@@ -9,7 +9,6 @@ export const StyledUserCustomization = styled.div`
 export const StyledUserCustomizationSection = styled.div`
   display: flex;
   flex-direction: column;
-  /* gap: 1rem; */
 `;
 export const StyledRightsWrap = styled.div`
   display: flex;
