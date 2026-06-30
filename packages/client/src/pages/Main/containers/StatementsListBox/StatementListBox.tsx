@@ -45,7 +45,7 @@ import {
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { useUserQuery } from "hooks/react-query";
+import { useResourcesWithDocumentsQuery, useUserQuery } from "hooks/react-query";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -168,16 +168,7 @@ export const StatementListBox: React.FC = () => {
   // Resources are needed only to resolve the selected resource -> documentId so
   // the list can read the document for order-correction / auto-order. The
   // document itself comes from the same React Query cache the AnnotatorBox fills.
-  const { data: resources } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: resources } = useResourcesWithDocumentsQuery();
 
   const selectedDocumentId = useMemo<string | undefined>(() => {
     if (selectedResourceId && resources) {

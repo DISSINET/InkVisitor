@@ -8,6 +8,10 @@ import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EmptyEntityTag, EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
+import {
+  useDocumentsQuery,
+  useResourcesWithDocumentsQuery,
+} from "hooks/react-query";
 import { useMemo } from "react";
 import { Column } from "react-table";
 import {
@@ -146,24 +150,11 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       debounceDelay: 50,
     });
 
-  const { data: dataDocuments, isLoading: isLoadingDocuments } = useQuery({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-  });
+  const { data: dataDocuments, isLoading: isLoadingDocuments } =
+    useDocumentsQuery();
 
-  const { data: resources, isLoading: isLoadingResources } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data ?? [];
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: resources, isLoading: isLoadingResources } =
+    useResourcesWithDocumentsQuery();
 
   const selectedResource = useMemo(() => {
     if (!selectedDocument?.value || !resources) {

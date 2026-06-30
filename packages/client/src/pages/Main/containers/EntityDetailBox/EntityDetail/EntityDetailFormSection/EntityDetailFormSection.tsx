@@ -16,7 +16,8 @@ import {
   ITerritory,
 } from "@inkvisitor/shared/types";
 import { IConceptData } from "@inkvisitor/shared/types/concept";
-import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { useDocumentsQuery } from "hooks/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -82,14 +83,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
-  const { data: documents } = useQuery({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: actantMode === "resource" && api.isLoggedIn(),
-  });
+  const { data: documents } = useDocumentsQuery(actantMode === "resource");
 
   const noDocumentLinkedItem: DropdownItem = {
     value: "",

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
@@ -6,7 +6,11 @@ import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
-import { useUserQuery } from "hooks/react-query";
+import {
+  useDocumentsQuery,
+  useResourcesWithDocumentsQuery,
+  useUserQuery,
+} from "hooks/react-query";
 import React, { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import { DocumentsTableHeader } from "./DocumentsTableHeader";
@@ -49,33 +53,13 @@ export const DocumentsPage: React.FC = ({}) => {
     [isAdminOrOwner, userData, assignedResourceIds]
   );
 
-  const {
-    data: documents,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data ?? [];
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: documents, error, isFetching } = useDocumentsQuery();
 
   const {
     data: resources,
     error: resourcesError,
     isFetching: resourcesIsFetching,
-  } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data ?? [];
-    },
-    enabled: api.isLoggedIn(),
-  });
+  } = useResourcesWithDocumentsQuery();
 
   const documentsWithResources: DocumentWithResource[] = useMemo(() => {
     return documents
