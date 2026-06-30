@@ -1,6 +1,13 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IProp, IReference, IResponseDetail, Relation } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IProp,
+  IReference,
+  IResponseDetail,
+  IResponseStatement,
+  Relation,
+} from "@inkvisitor/shared/types";
 import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,11 +16,7 @@ import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from 
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useIsInViewport, useSearchParams } from "hooks";
-import {
-  useAuditQuery,
-  useStatementQuery,
-  useTemplatesQuery,
-} from "hooks/react-query";
+import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -214,8 +217,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     );
   }, [entity]);
 
-  const { data: statement } = useStatementQuery(statementId);
-
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
     onSuccess: (data, variables) => {
@@ -223,6 +224,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
       queryClient.invalidateQueries({ queryKey: ["audit", detailId] });
       invalidateAllExplorerQueries(queryClient);
 
+      // read the open statement from cache (the editor already fetched it) -
+      // no need to subscribe and fetch it here just for this check
+      const statement = queryClient.getQueryData<IResponseStatement>([
+        "statement",
+        statementId,
+      ]);
       if (
         statementId &&
         (statementId === entity?.id ||
