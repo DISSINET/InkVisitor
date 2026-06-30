@@ -21,7 +21,7 @@ import {
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaQuestion } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { isSafePassword } from "utils/utils";
@@ -86,22 +86,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     setData(initialValues);
   }, [initialValues]);
 
-  const isTerritoryMounted = useRef(false);
-  useEffect(() => {
-    if (!isTerritoryMounted.current) {
-      isTerritoryMounted.current = true;
-      return;
-    }
-    // territory is selected in the suggester
-    if (defaultTerritory) {
-      setData({
-        ...data,
-        defaultTerritory: defaultTerritory.id,
-      });
-    } else {
-      handleChange("defaultTerritory", "");
-    }
-  }, [defaultTerritory]);
 
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
     setData({
@@ -117,12 +101,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     },
   });
 
-  const {
-    status,
-    data: territory,
-    error,
-    isFetching,
-  } = useQuery({
+  const {} = useQuery({
     queryKey: ["territory", data.defaultTerritory],
     queryFn: async () => {
       // defaultTerritory is set but is not loaded in local state
@@ -377,10 +356,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <EntityTag
                     entity={defaultTerritory}
                     tooltipPosition="left"
-                    unlinkButton={{
-                      onClick: () => {
-                        setDefaultTerritory(null);
-                      },
+                  unlinkButton={{
+                    onClick: () => {
+                      setDefaultTerritory(null);
+                      setData((prev) => ({ ...prev, defaultTerritory: "" }));
+                    },
                       color: "danger",
                     }}
                   />
@@ -390,6 +370,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       categoryTypes={[EntityEnums.Class.Territory]}
                       onPicked={(entity) => {
                         setDefaultTerritory(entity);
+                        setData((prev) => ({ ...prev, defaultTerritory: entity.id }));
                       }}
                       inputWidth={104}
                       disableTemplatesAccept
