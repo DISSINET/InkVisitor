@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const FLOATING_SEARCH_COLLAPSED_SIZE = 48;
-export const FLOATING_SEARCH_EXPANDED_WIDTH = 255;
+export const FLOATING_SEARCH_EXPANDED_WIDTH = 280;
 export const FLOATING_SEARCH_PAGE_PADDING = 16;
 
 interface StyledFloatingRootProps {
@@ -12,7 +12,7 @@ export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
   position: absolute;
   left: ${({ $left }) => $left}px;
   top: ${({ $top }) => $top}px;
-  z-index: 160;
+  z-index: 164;
 `;
 
 export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`
@@ -86,6 +86,16 @@ export const StyledExpandedContent = styled.div`
   padding: ${({ theme }) => theme.space[3]};
   min-height: 6rem;
   overflow-y: auto;
+`;
+
+// page-level expansion toggles (#2969), separated from the filter form above
+export const StyledExpansionOptions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  margin-top: ${({ theme }) => theme.space[3]};
+  padding-top: ${({ theme }) => theme.space[2]};
+  border-top: 1px solid ${({ theme }) => theme.color.blue[150]};
 `;
 
 export const StyledCloseButtonWrap = styled.span`

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { r as rethink, RDatum } from "rethinkdb-ts";
 import { entityCacheKey, findEntityById } from "@service/shorthands";
+import treeCache from "@service/treeCache";
 import { cache } from "@service/ttlCache";
 import {
   BadParams,
@@ -184,13 +185,16 @@ export default Router()
       for (let i = 0; i < sortedStatements.length; i++) {
         const statementData = sortedStatements[i];
         const model = new Statement({ ...(statementData as IStatement) });
-        //update territory with new order
         model.data.territory = new StatementTerritory({
           territoryId: newTerritoryId,
           order: lastOrder + i + 1,
         });
-        await model.update(request.db.connection, { data: model.data });
+        await model.update(request.db.connection, {
+          data: model.data,
+        }, true);
       }
+
+      await treeCache.initialize();
 
       return {
         result: true,
@@ -309,7 +313,8 @@ export default Router()
 
         model.resetIds();
 
-        await model.save(req.db.connection);
+        // Skip the per-statement tree rebuild; we rebuild once after the loop.
+        await model.save(req.db.connection, true);
         newIds.push(model.id);
 
         const origId = stmtData.id;
@@ -324,6 +329,9 @@ export default Router()
           relsErr = true;
         }
       }
+
+      // One rebuild for the whole batch instead of N (one per saved statement).
+      await treeCache.initialize();
 
       let msg = `${statementsCount} statements have been copied under '${territory.labels[0]}'`;
       if (relsErr) {

@@ -9,7 +9,7 @@ import {
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import { MdClose } from "react-icons/md";
-import { ExploreAction, ExploreActionType } from "../state";
+import { ExploreAction, ExploreActionType } from "../../state";
 import {
   StyledChipInputBox,
   StyledChipTextInput,
@@ -26,7 +26,7 @@ import {
   StyledIdsToggleWrapper,
   StyledUuidChip,
   StyledUuidChipRemove,
-} from "./ExplorerTableStyles";
+} from "../ExplorerTableStyles";
 
 interface ExplorerTableIdsFilterProps {
   filters: Explore.IExploreSearchFilter[];
@@ -55,6 +55,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   const [isOpen, setIsOpen] = useState(false);
   const [allSelected, setAllSelected] = useState(false);
   const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
+  const [useSideLayout, setUseSideLayout] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipBoxRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -204,9 +205,6 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     }
   }, [appliedIds, draft, isOpen]);
 
-  // Bound the panel height to the floating container's positioned ancestor (the
-  // explorer area), so a long list of UUIDs scrolls inside the page instead of
-  // overflowing past the top of the page content.
   useLayoutEffect(() => {
     if (!isOpen) {
       return;
@@ -214,13 +212,20 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     const measure = () => {
       const button = buttonRef.current;
       const parent = (rootRef.current?.offsetParent as HTMLElement | null) ?? null;
-      if (!button) {
+      if (!button || !parent) {
         return;
       }
-      const buttonRect = button.getBoundingClientRect();
-      const parentTop = parent ? parent.getBoundingClientRect().top : 0;
-      const available = buttonRect.top - parentTop - PANEL_BOTTOM_GAP - PANEL_TOP_MARGIN;
-      setMaxPanelHeight(Math.max(PANEL_MIN_HEIGHT, available));
+      const parentHeight = parent.getBoundingClientRect().height;
+      const side = parentHeight < 310;
+      setUseSideLayout(side);
+      if (!side) {
+        const buttonRect = button.getBoundingClientRect();
+        const parentTop = parent.getBoundingClientRect().top;
+        const available = buttonRect.top - parentTop - PANEL_BOTTOM_GAP - PANEL_TOP_MARGIN;
+        setMaxPanelHeight(Math.max(PANEL_MIN_HEIGHT, available));
+      } else {
+        setMaxPanelHeight(undefined);
+      }
     };
     measure();
     window.addEventListener("resize", measure);
@@ -245,7 +250,22 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   return (
     <StyledIdsFloatingRoot ref={rootRef}>
       {isOpen && (
-        <StyledIdsPanel style={maxPanelHeight ? { maxHeight: maxPanelHeight } : undefined} data-run-on-enter="true">
+        <StyledIdsPanel
+          style={
+            useSideLayout
+              ? {
+                  position: "absolute",
+                  top: 0,
+                  right: "100%",
+                  marginRight: "0.5rem",
+                  maxHeight: PANEL_MIN_HEIGHT,
+                }
+              : maxPanelHeight
+                ? { maxHeight: maxPanelHeight }
+                : undefined
+          }
+          data-run-on-enter="true"
+        >
           <StyledIdsPanelHeader>
             <StyledIdsPanelTitle>Entity UUIDs</StyledIdsPanelTitle>
             <StyledUuidChipRemove

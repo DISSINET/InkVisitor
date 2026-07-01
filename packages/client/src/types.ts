@@ -125,13 +125,16 @@ export interface IPage {
     | "backups"
     | "customize"
     | "stats"
-    | "explorer";
+    | "explorer"
+    | "reset-layout";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
   admin?: boolean;
   owner?: boolean;
   icon?: React.ReactElement;
+  mainPageOnly?: boolean;
+  onClick?: () => void;
 }
 
 export interface Node {
@@ -153,6 +156,7 @@ export enum ItemTypes {
   REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
   DETAIL_TAB = "DETAIL_TAB",
+  EXPLORER_COLUMN = "EXPLORER_COLUMN",
 }
 
 export type DragItem = {
@@ -432,7 +436,24 @@ export enum ButtonSize {
   ExtraLarge = "XL",
 }
 
+export type ButtonShape =
+  | "sharp"
+  | "square"
+  | "sharp-square"
+  | "circle"
+  | "rounded-sm"
+  | "rounded-md"
+  | "rounded-lg"
+  | "rounded-xl"
+  | "rounded-full";
+
 export enum DetailBoxState {
+  Minimized = "minimized",
+  Normal = "normal",
+  FullHeight = "fullHeight",
+}
+
+export enum EditorBoxState {
   Minimized = "minimized",
   Normal = "normal",
   FullHeight = "fullHeight",

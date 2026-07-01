@@ -8,20 +8,19 @@ export const StyledTable = styled.table<StyledTable>`
   min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10 - 2.5}rem`};
   height: 100%;
   border-spacing: 0;
-  border-collapse: collapse;
+  border-collapse: separate;
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
+  border-radius: ${({ theme }) => theme.borderRadius["input"]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
-  overflow-x: ${({ $isListMode }) => ($isListMode ? "auto" : "hidden")};
+  overflow: hidden;
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[4]};
   transition: width 0.3s ease;
 `;
 export const StyledTHead = styled.thead`
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  border-style: solid;
-  border-color: ${({ theme }) => theme.color["gray"][500]};
   background: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["gray"][700]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -30,6 +29,8 @@ export const StyledTh = styled.th`
   text-align: left;
   padding-right: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[2]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][500]};
 `;
 
 interface StyledTr {
@@ -45,24 +46,41 @@ export const StyledTr = styled.tr<StyledTr>`
     $isOpened
       ? theme.color["tableOpened"]
       : $isSelected
-      ? theme.color["tableSelection"]
-      : theme.color["white"]};
-  color: ${({ theme, $isOpened }) =>
-    $isOpened ? theme.color["primary"] : theme.color["black"]};
+        ? theme.color["tableSelection"]
+        : theme.color["white"]};
+
+  &:nth-child(odd) {
+    background-color: ${({ theme, $isOpened, $isSelected }) =>
+      $isOpened
+        ? theme.color["tableOpened"]
+        : $isSelected
+          ? theme.color["tableSelection"]
+          : theme.color["tableOddRow"]};
+  }
+  color: ${({ theme, $isOpened }) => ($isOpened ? theme.color["primary"] : theme.color["black"])};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   transition: box-shadow 0.2s ease-in-out;
   box-shadow: ${({ theme, $isAnnotatorHovered }) =>
-    `inset 0 0 0 2px ${
-      $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0
-    }`};
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-left: ${({ theme, $isOpened }) =>
-    $isOpened ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ $isOpened, $listMode }) =>
-    $isOpened && $listMode ? "default" : "pointer"};
+    `inset 0 0 0 2px ${$isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0}`};
+  cursor: ${({ $isOpened, $listMode }) => ($isOpened && $listMode ? "default" : "pointer")};
+
+  &:not(:first-child) td {
+    border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  }
   td:first-child {
-    padding-left: ${({ $isOpened }) => (!$isOpened ? "0.9rem" : "")};
+    position: relative;
+    padding-left: 0.9rem;
     width: 1%;
+  }
+  td:first-child::before {
+    content: ${({ $isOpened }) => ($isOpened ? '""' : "none")};
+    position: absolute;
+    left: 0;
+    top: 15%;
+    bottom: 15%;
+    width: 4px;
+    border-radius: 0 2px 2px 0;
+    background-color: ${({ theme }) => theme.color["success"]};
   }
   td:last-child {
     padding-right: ${({ theme }) => theme.space[4]};
@@ -72,8 +90,8 @@ export const StyledTr = styled.tr<StyledTr>`
       $isSelected
         ? theme.color["tableSelectionHover"]
         : $isOpened
-        ? theme.color["tableOpened"]
-        : theme.color["gray"][100]};
+          ? theme.color["tableOpened"]
+          : theme.color["gray"][100]};
   }
 `;
 
@@ -110,6 +128,12 @@ export const StyledCheckboxWrapper = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
+`;
+// keeps the checkbox above the absolutely-positioned focus circle
+export const StyledSelectionCheckbox = styled.div`
+  position: relative;
+  z-index: 2;
+  display: flex;
 `;
 
 export const StyledAbbreviatedLabel = styled.div`

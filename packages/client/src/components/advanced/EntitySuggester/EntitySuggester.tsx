@@ -66,6 +66,7 @@ interface EntitySuggesterProps {
 
   disableEnter?: boolean;
   autoFocus?: boolean;
+  autoFocusInput?: boolean;
 
   initTyped?: string;
   initCategory?: EntityEnums.Class;
@@ -77,7 +78,15 @@ interface EntitySuggesterProps {
   disabled?: boolean;
   isHidden?: boolean;
   disableCleanTypedAfterCreate?: boolean;
+  clearableInput?: boolean;
   onEmptyAddButtonClick?: () => void;
+
+  // opt-in expansion of the suggestions with related entities (#2969), surfaced
+  // (badged) in the dropdown so they can be picked directly. Off by default, so
+  // suggesters elsewhere are unaffected; only opted-in instances (the Explorer
+  // node-edge picker) expand.
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
 }
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
@@ -118,6 +127,7 @@ const EntitySuggesterFull: React.FC<
   disableButtons = false,
   disableEnter = false,
   autoFocus,
+  autoFocusInput,
 
   initTyped,
   initCategory,
@@ -131,6 +141,9 @@ const EntitySuggesterFull: React.FC<
   onConsumeExternalDrop,
   disableCleanTypedAfterCreate = false,
   onEmptyAddButtonClick,
+  clearableInput = true,
+  includeEquivalents = false,
+  includeSubordinates = false,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
@@ -184,7 +197,14 @@ const EntitySuggesterFull: React.FC<
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery({
-    queryKey: ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
+    queryKey: [
+      "suggestion",
+      debouncedTyped,
+      selectedCategory,
+      excludedEntityClasses,
+      includeEquivalents,
+      includeSubordinates,
+    ],
     queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
         labelOrId: debouncedTyped + wildCardChar,
@@ -193,6 +213,8 @@ const EntitySuggesterFull: React.FC<
             ? undefined
             : (selectedCategory as EntityEnums.Class),
         excluded: excludedEntityClasses.length ? excludedEntityClasses : undefined,
+        includeEquivalents: includeEquivalents || undefined,
+        includeSubordinates: includeSubordinates || undefined,
       });
 
       return filterSuggestions(resSuggestions.data ?? []);
@@ -219,7 +241,7 @@ const EntitySuggesterFull: React.FC<
           userRole !== UserEnums.Role.Admin &&
           userRole !== UserEnums.Role.Owner
             ? s.right === UserEnums.RoleMode.Write
-            : s
+            : s,
         )
         .filter((s) => (excludedActantIds.length ? !excludedActantIds.includes(s.id) : s))
         .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
@@ -232,7 +254,7 @@ const EntitySuggesterFull: React.FC<
               s.isTemplate &&
               isInsideStatement &&
               isInsideTemplate
-            )
+            ),
         )
         .filter((s) => categoryTypes.includes(s.class))
         .map((entity: IEntity) => {
@@ -301,7 +323,7 @@ const EntitySuggesterFull: React.FC<
         },
         newCreated.entityClass,
         newCreated.label,
-        newCreated.detail
+        newCreated.detail,
       );
       entityCreateMutation.mutate(newEntity);
     }
@@ -309,29 +331,29 @@ const EntitySuggesterFull: React.FC<
 
   const [showAddTerritoryModal, setShowAddTerritoryModal] = useState(false);
   const [tempTemplateToInstantiate, setTempTemplateToInstantiate] = useState<ITerritory | false>(
-    false
+    false,
   );
 
   const instantiateTerritory = async (
     territoryToInst: ITerritory,
-    territoryParentId?: string
+    territoryParentId?: string,
   ): Promise<IEntity | false> => {
     return await InstTemplate(
       territoryToInst,
       localStorage.getItem("userrole") as UserEnums.Role,
-      territoryParentId
+      territoryParentId,
     );
   };
 
   const handleInstantiateTemplate = async (
-    templateToDuplicate: IEntity | IStatement | ITerritory
+    templateToDuplicate: IEntity | IStatement | ITerritory,
   ) => {
     let newEntity: IEntity | false;
     if (templateToDuplicate.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
         newEntity = await instantiateTerritory(
           templateToDuplicate as ITerritory,
-          territoryParentId
+          territoryParentId,
         );
       } else {
         setTempTemplateToInstantiate(templateToDuplicate as ITerritory);
@@ -341,7 +363,7 @@ const EntitySuggesterFull: React.FC<
     } else {
       newEntity = await InstTemplate(
         templateToDuplicate,
-        localStorage.getItem("userrole") as UserEnums.Role
+        localStorage.getItem("userrole") as UserEnums.Role,
       );
     }
     if (newEntity) {
@@ -415,7 +437,7 @@ const EntitySuggesterFull: React.FC<
 
     if (excludedEntityClasses.length) {
       filteredSuggestions = filteredSuggestions.filter(
-        (entity) => !excludedEntityClasses.includes(entity.class)
+        (entity) => !excludedEntityClasses.includes(entity.class),
       );
     }
 
@@ -466,6 +488,7 @@ const EntitySuggesterFull: React.FC<
         territoryParentId={territoryParentId}
         userOptions={user.options}
         autoFocus={autoFocus}
+        autoFocusInput={autoFocusInput}
         disabled={disabled}
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
@@ -477,6 +500,7 @@ const EntitySuggesterFull: React.FC<
         externalDroppedItem={externalDroppedItem}
         onConsumeExternalDrop={onConsumeExternalDrop}
         onEmptyAddButtonClick={onEmptyAddButtonClick}
+        clearableInput={clearableInput}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
@@ -484,7 +508,7 @@ const EntitySuggesterFull: React.FC<
             setShowAddTerritoryModal(false);
             const newEntity = await instantiateTerritory(
               tempTemplateToInstantiate as ITerritory,
-              territoryId
+              territoryId,
             );
             if (newEntity) {
               onSelected(newEntity.id);
@@ -620,8 +644,7 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
           tooltipLabel="Open suggester"
           icon={<LuScanSearch color="black" />}
           color="gray"
-          radiusLeft
-          radiusRight
+          shape="rounded-lg"
           size={ButtonSize.Medium}
           // inverted
           noBorder

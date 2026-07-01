@@ -41,6 +41,7 @@ interface BaseDropdown {
   // dropdown type settings
   isMulti?: boolean;
   entityDropdown?: boolean;
+  userDropdown?: boolean;
   attributeDropdown?: boolean;
   //
   disableTyping?: boolean;
@@ -57,6 +58,7 @@ interface BaseDropdown {
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
   loading?: boolean;
+  roundCorners?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
@@ -66,8 +68,8 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   width,
   hideSelectedOptions = false,
   noDropDownIndicator = false,
-  placeholder = "select..",
-  noOptionsMessage = "no option selected",
+  placeholder = "Select",
+  noOptionsMessage = "No option selected",
   isClearable = false,
   isMulti = false,
   disabled = false,
@@ -81,6 +83,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   tooltipLabel,
   tooltipPosition = "top",
   entityDropdown = false,
+  userDropdown = false,
   attributeDropdown,
 
   loggerId,
@@ -88,18 +91,25 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   closeMenuOnSelect = true,
   shortLabel = false,
   loading = false,
+  roundCorners = true,
 }) => {
   const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  const SuggesterDropdownIndicator = (props: DropdownIndicatorProps) => (
+    <components.DropdownIndicator {...props}>
+      <StyledFaChevronDown size={9} $suggester={suggester} />
+    </components.DropdownIndicator>
+  );
+
   const localCustomComponents = {
     Option,
     SingleValue,
     MultiValue,
     ValueContainer,
-    DropdownIndicator,
+    DropdownIndicator: SuggesterDropdownIndicator,
     Control,
     MenuPortal,
   };
@@ -118,7 +128,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
       >
         <StyledSelect
           // menuIsOpen={loggerId === ""}
-          suggester={suggester}
+          $suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
           onBlur={onBlur}
@@ -128,6 +138,8 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
+          roundCorners={roundCorners}
+          userDropdown={userDropdown}
           wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
           className="react-select-container"
           classNamePrefix="react-select"
@@ -254,13 +266,6 @@ const MultiValue = (
   );
 };
 
-const DropdownIndicator = (props: DropdownIndicatorProps) => {
-  return (
-    <components.DropdownIndicator {...props}>
-      <StyledFaChevronDown size={9} />
-    </components.DropdownIndicator>
-  );
-};
 
 const Control = ({
   children,
@@ -277,12 +282,18 @@ const Control = ({
 };
 
 const MenuPortal: typeof components.MenuPortal = (props: any & { selectProps: StyledSelect }) => {
-  const { entityDropdown } = props.selectProps;
+  const { entityDropdown, userDropdown } = props.selectProps;
 
   return (
     <components.MenuPortal
       {...props}
-      className={entityDropdown ? "react-select__entity-dropdown" : ""}
+      className={
+        entityDropdown
+          ? "react-select__entity-dropdown"
+          : userDropdown
+            ? "react-select__user-dropdown"
+            : ""
+      }
     />
   );
 };

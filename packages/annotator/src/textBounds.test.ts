@@ -1,10 +1,10 @@
 /**
- * Phase 3 prerequisite — explicit out-of-bounds handling for line→position lookup.
+ * Explicit out-of-bounds handling for line→position lookup.
  *
  * `getSegmentPosition` CLAMPS an out-of-range line index into [0, noLines-1],
  * which silently hides invalid positions from callers that test validity via a
  * null return. `getSegmentPositionOrNull` is the non-clamping variant the
- * offset-model refactor (Phase 3) relies on; the clamping variant stays for
+ * offset-model refactor relies on; the clamping variant stays for
  * existing callers.
  */
 import Text from "./lib/Text";

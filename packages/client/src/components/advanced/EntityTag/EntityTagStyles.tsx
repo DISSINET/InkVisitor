@@ -27,6 +27,34 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
 
+// wraps the class glyph so the "equivalent" badge can be corner-anchored to it
+export const StyledTagComponentWrap = styled.div`
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+`;
+
+// small corner marker shown when an entity was surfaced via an expansion option
+// ("include equivalents" -> "eq", "include subordinates" -> "sub")
+export const StyledExpansionBadge = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0.72rem;
+  padding: 0 0.12rem;
+  border-bottom-right-radius: 4px;
+  background: ${({ theme }) => theme.color.white};
+  color: ${({ theme }) => theme.color.black};
+  font-size: 0.55rem;
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  line-height: 1;
+  letter-spacing: -0.02em;
+  pointer-events: none;
+`;
+
 interface StyledLabelWrap {
   $invertedLabel: boolean;
 }

@@ -5,7 +5,7 @@ import { useTheme } from "hooks";
 import { StyledDots } from "pages/Main/containers/StatementsListBox/StatementListBoxStyles";
 import React, { useState } from "react";
 import { getEntityLabel } from "utils/utils";
-import { StyledTooltipRow, StyledTooltipValue } from "./ExploreTableHeaderTooltipStyles";
+import { StyledTooltipRow, StyledTooltipValue } from "../Header/ExploreTableHeaderTooltipStyles";
 import {
   StyledOverflowTextList,
   StyledOverflowTooltipContent,

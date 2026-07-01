@@ -34,7 +34,7 @@ import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
-import { QueryPage } from "pages";
+import { ExplorerPage } from "pages";
 
 const clockPerformance = (
   profilerId: any,
@@ -217,7 +217,7 @@ export const App: React.FC = () => {
                       path="/explorer"
                       element={
                         <RequireAuth>
-                          <QueryPage />
+                          <ExplorerPage />
                         </RequireAuth>
                       }
                     />

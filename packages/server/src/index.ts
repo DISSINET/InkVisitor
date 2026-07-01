@@ -17,6 +17,7 @@ import {
   cookieParserMiddleware,
   sessionMiddleware,
 } from "@middlewares/session";
+import Document from "@models/document/document";
 
 (async () => {
   const db = new Db();
@@ -24,6 +25,11 @@ import {
 
   await assertRequiredIndexes(db.connection);
   await ensureSessionsTable(db.connection);
+
+  const backfilled = await Document.backfillEntityIds(db.connection);
+  if (backfilled > 0) {
+    console.log(`[startup] backfilled entityIds for ${backfilled} documents`);
+  }
 
   await prepareTreeCache(db.connection);
 

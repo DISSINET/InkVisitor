@@ -11,10 +11,10 @@ import Dropdown from "components/advanced";
 
 import { Explore } from "@inkvisitor/shared/types/query";
 import { ThemeContext } from "styled-components";
-import { ExploreAction } from "../state";
-import ExplorerTableLabelFilter from "./ExplorerTableLabelFilter";
-import { StyledCounter, StyledExploreFilters, StyledTableControl } from "./ExplorerTableStyles";
-import { BatchAction, batchOptions } from "./types";
+import { ExploreAction } from "../../state";
+import ExplorerTableLabelFilter from "../Filters/ExplorerTableLabelFilter";
+import { StyledCounter, StyledExploreFilters, StyledTableControl } from "../ExplorerTableStyles";
+import { BatchAction, batchOptions } from "../types";
 
 interface ExploreTableControlProps {
   isNewColumnOpen: boolean;

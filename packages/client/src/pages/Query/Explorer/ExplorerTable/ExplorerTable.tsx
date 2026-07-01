@@ -21,13 +21,9 @@ import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
 import { StyledBody, StyledEmptyMessage, StyledTableWrapper } from "./ExplorerTableStyles";
 
-import ExploreTableHeader from "./ExploreTableHeader";
-import {
-  HEIGHT_ROW_DEFAULT,
-  WIDTH_COLUMN_DEFAULT,
-  WIDTH_COLUMN_EUC,
-  WIDTH_COLUMN_FIRST,
-} from "./types";
+import ExploreTableHeader from "./Header/ExploreTableHeader";
+import { HEIGHT_ROW_DEFAULT, WIDTH_COLUMN_FIRST } from "./constants";
+import { getColumnWidth } from "./utils";
 
 const OVERSCAN_ROWS = 10;
 
@@ -260,13 +256,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [dispatch],
   );
 
-  // created by columns are smaller than the default columns, subtract the difference
+  const handleMoveColumn = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      dispatch({
+        type: ExploreActionType.moveColumn,
+        payload: { fromIndex, toIndex },
+      });
+    },
+    [dispatch],
+  );
+
   const widthTable = useMemo(() => {
     return (
-      columns.length * WIDTH_COLUMN_DEFAULT +
-      WIDTH_COLUMN_FIRST -
-      columns.filter((column) => column.type === Explore.EExploreColumnType.EUC).length *
-        (WIDTH_COLUMN_DEFAULT - WIDTH_COLUMN_EUC)
+      WIDTH_COLUMN_FIRST +
+      columns.reduce((sum, col) => sum + getColumnWidth(col.type), 0)
     );
   }, [columns]);
 
@@ -426,6 +429,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         style={
           {
             "--qt-row-focused-bg": themeContext.color.tableOpened,
+            "--qt-row-odd-bg": themeContext.color.tableOddRow,
+            "--qt-row-bg": themeContext.color.white,
+            "--qt-row-border": themeContext.color.gray[300],
             width: contentWidth,
             minWidth: "100%",
             height: heightBox - 20,
@@ -437,7 +443,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
         <div style={{ width: widthTable, minWidth: "100%" }}>
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
-          <ExploreTableHeader columns={columns} onRemoveColumn={handleRemoveColumn} />
+          <ExploreTableHeader
+            columns={columns}
+            onRemoveColumn={handleRemoveColumn}
+            onMoveColumn={handleMoveColumn}
+          />
 
           {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
           <StyledBody

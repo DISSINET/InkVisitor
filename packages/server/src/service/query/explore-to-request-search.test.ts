@@ -50,11 +50,11 @@ describe("exploreFiltersToRequestSearch", () => {
     const req = exploreFiltersToRequestSearch([
       { type: Explore.SearchOption.CreatedBy, createdBy: "u1" },
       { type: Explore.SearchOption.UpdatedBy, updatedBy: "u2" },
-      { type: Explore.SearchOption.EditedBy, editedBy: "u3" },
+      { type: Explore.SearchOption.EditedBy, editedBy: ["u3", "u4"] },
     ]);
     expect(req!.createdBy).toBe("u1");
     expect(req!.updatedBy).toBe("u2");
-    expect(req!.editedBy).toBe("u3");
+    expect(req!.editedBy).toEqual(["u3", "u4"]);
   });
 
   it("ignores empty by-user / date values", () => {

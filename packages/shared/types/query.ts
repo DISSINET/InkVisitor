@@ -47,6 +47,7 @@ export namespace Query {
     "I_IS:PS" = "I_IS:PS",
     "SUT:" = "SUT:",
     "I_SUT:" = "I_SUT:",
+    "EUT:" = "EUT:",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
     "SUT:C" = "SUT:C",
@@ -124,21 +125,35 @@ export namespace Query {
     },
 
     "IS:": {},
-    "I_IS:": {},
+    "I_IS:": {
+      entityId: { allowedClasses: [] },
+    },
     "IS:A": {},
     "I_IS:A": {},
     "IS:S": {},
-    "I_IS:S": {},
+    "I_IS:S": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "IS:A1": {},
-    "I_IS:A1": {},
+    "I_IS:A1": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "IS:A2": {},
-    "I_IS:A2": {},
+    "I_IS:A2": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "IS:PS": {},
     "I_IS:PS": {},
     "SUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
     "I_SUT:": {},
+    "EUT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "SUT:D": {},
     "I_SUT:D": {},
     "SUT:C": {},
@@ -395,6 +410,13 @@ export namespace Query {
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Statement] },
+      },
+    ],
+    "EUT:": [
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Territory] },
       },
     ],
     "HR:R": [
@@ -831,6 +853,7 @@ export namespace Query {
     "I_IS:PS": "S has: pseudoactant",
     "SUT:": "S under T: any",
     "I_SUT:": "T has S: any",
+    "EUT:": "used in statements under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "SUT:C": "S under T: children",
@@ -1004,7 +1027,8 @@ export namespace Explore {
   }
   interface IExploreEditedByFilter {
     type: SearchOption.EditedBy;
-    editedBy: string;
+    // OR semantics - matches entities edited by any of the listed users
+    editedBy: string[];
   }
   interface IExploreRootValidityFilter {
     type: SearchOption.RootValidity;
@@ -1038,6 +1062,12 @@ export namespace Explore {
     EUE = "EUE", // Edited by
     EUEN = "EUEN", // Number of edits
     EDC = "EDC", // Creation date
+    ELI = "ELI", // Entity Legacy ID
+    EST = "EST", // Entity Status
+    ELA = "ELA", // Entity Label Language
+    EAL = "EAL", // Entity Alt Labels
+    EPOS = "EPOS", // Entity Part of Speech
+    EDET = "EDET", // Entity Detail
   }
 
   /** Param value types - determines which form control to render */
@@ -1081,6 +1111,12 @@ export namespace Explore {
     [EExploreColumnType.EUE]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EUEN]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EDC]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ELI]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EST]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ELA]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EAL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EPOS]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EDET]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1174,6 +1210,42 @@ export namespace Explore {
       label: "Creation date",
       description: "Shows when this entity was created.",
       isDisabled: true,
+      params: {},
+    },
+    [EExploreColumnType.ELI]: {
+      label: "Legacy ID",
+      description: "Shows the legacy identifier of this entity, if available.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EST]: {
+      label: "Status",
+      description: "Shows the approval status of this entity (e.g. pending, approved).",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ELA]: {
+      label: "Label language",
+      description: "Shows the language assigned to this entity's label.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EAL]: {
+      label: "Alt labels",
+      description: "Shows alternative labels of this entity (all labels beyond the first).",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EPOS]: {
+      label: "Part of speech",
+      description: "Shows the part of speech for Concept and Action entities.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EDET]: {
+      label: "Detail",
+      description: "Shows the detail/description field of this entity.",
+      isDisabled: false,
       params: {},
     },
   };

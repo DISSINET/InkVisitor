@@ -36,8 +36,7 @@ export const WarningsChip: React.FC<{ count: number; onClick: () => void }> = ({
     textColor="warningText"
     color="warningMessage"
     borderColor="warningBorder"
-    radiusLeft
-    radiusRight
+    shape="rounded-lg"
     tooltipLabel={warningsTitle(count)}
     onClick={onClick}
   />

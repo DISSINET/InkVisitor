@@ -4,10 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useDebounce, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsFilter } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaStar } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
@@ -40,7 +41,16 @@ const initFilterSettings: ITerritoryFilter = {
 };
 export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.firstPanelExpanded
+    (state) => state.layout.mainPage.firstPanelExpanded,
+  );
+  const secondPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.secondPanelExpanded,
+  );
+  const thirdPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.thirdPanelExpanded,
+  );
+  const fourthPanelExpanded: boolean = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelExpanded,
   );
 
   const queryClient = useQueryClient();
@@ -51,7 +61,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const storedTerritoryIds = useMemo(
     () => userData?.storedTerritories?.map((territory) => territory.territory.id) ?? [],
-    [userData]
+    [userData],
   );
 
   const userId = localStorage.getItem("userid");
@@ -76,7 +86,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
+    (state) => state.territoryTree.selectedTerritoryPath,
   );
 
   const [filterSettings, setFilterSettings] = useState<ITerritoryFilter>(initFilterSettings);
@@ -120,7 +130,7 @@ export const TerritoryTreeBox: React.FC = () => {
         if (filterSettings.starred && userData) {
           const starredTreeData = filterTreeByFavorites(
             treeData,
-            userData.storedTerritories.map((t) => t.territory.id)
+            userData.storedTerritories.map((t) => t.territory.id),
           );
           if (starredTreeData) filteredResults.push(starredTreeData);
         }
@@ -154,7 +164,7 @@ export const TerritoryTreeBox: React.FC = () => {
         if (filterSettings.starred && userData) {
           const starredTreeData = filterTreeByFavorites(
             newFilteredTreeData,
-            userData.storedTerritories.map((t) => t.territory.id)
+            userData.storedTerritories.map((t) => t.territory.id),
           );
           newFilteredTreeData = starredTreeData;
         }
@@ -181,7 +191,7 @@ export const TerritoryTreeBox: React.FC = () => {
         const markedTreeData = markNodesWithFilters(
           newFilteredTreeData,
           filterSettings,
-          userData.storedTerritories.map((t) => t.territory.id)
+          userData.storedTerritories.map((t) => t.territory.id),
         );
         return markedTreeData;
       }
@@ -201,9 +211,25 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeFilterOpen: boolean = useAppSelector((state) => state.territoryTree.filterOpen);
 
-  const treeWidth = useDebounce(useSelector(selectPanelWidth(0)), 200);
+  const basePanelWidth = useSelector(selectPanelWidth(0));
+  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
 
-  const treeWidthTooNarrow = treeWidth < 140;
+  const treeWidth = useMemo(() => {
+    if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
+    if (!secondPanelExpanded && !thirdPanelExpanded && !fourthPanelExpanded) {
+      return layoutWidth - 3 * COLLAPSED_PANEL_WIDTH;
+    }
+    return basePanelWidth;
+  }, [
+    firstPanelExpanded,
+    secondPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+    layoutWidth,
+    basePanelWidth,
+  ]);
+
+  const treeWidthTooNarrow = treeWidth < 160;
 
   // delay of show content for fluent animation on open
   const [showTerritoryTree, setShowTerritoryTree] = useState(true);
@@ -233,7 +259,7 @@ export const TerritoryTreeBox: React.FC = () => {
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
             )}
-            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "0.2rem" }}>
               <Button
                 label={!treeWidthTooNarrow ? "filter" : ""}
                 onClick={() => {
@@ -251,6 +277,16 @@ export const TerritoryTreeBox: React.FC = () => {
                 fullWidth
                 icon={<BsFilter size={14} />}
                 tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
+                tooltipPosition="right"
+              />
+              <Button
+                icon={<FaStar size={14} />}
+                color={filterSettings.starred ? "warning" : "greyer"}
+                inverted={!filterSettings.starred}
+                onClick={() => {
+                  handleFilterChange("starred", !filterSettings.starred);
+                }}
+                tooltipLabel="starred territories"
                 tooltipPosition="right"
               />
             </div>

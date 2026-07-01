@@ -59,16 +59,20 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
   .react-select__menu-portal {
     font-size: ${({ theme }) => theme.fontSize["xs"]};
     .react-select__menu {
-      border-radius: 0;
+      border-radius: ${({ theme }) => theme.borderRadius["input"]};
       box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
       width: 100%;
       transform: translate(0, -6px);
+      overflow: hidden;
 
       color: ${({ theme }) => theme.color["black"]};
       background-color: ${({ theme }) => theme.color["white"]};
     }
     .react-select__menu-list {
       max-height: 18rem;
+      border-radius: ${({ theme }) => theme.borderRadius["input"]};
+      padding-top: 0;
+      padding-bottom: 0;
     }
     .react-select__option {
       margin: 0;
@@ -79,8 +83,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       color: ${({ theme }) => theme.color["black"]};
       background-color: ${({ theme }) => theme.color["white"]};
       &:hover {
-        background-color: ${({ theme }) =>
-          theme.color["invertedBg"]["primary"]};
+        background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
       }
     }
     .react-select__option--is-focused {
@@ -97,6 +100,13 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       padding-left: 0;
     }
     .react-select__option--is-selected {
+    }
+  }
+
+  .react-select__user-dropdown {
+    .react-select__option {
+      min-height: unset;
+      padding: 2px 6px;
     }
   }
 `;

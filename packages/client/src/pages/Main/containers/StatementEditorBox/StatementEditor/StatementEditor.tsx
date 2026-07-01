@@ -38,9 +38,11 @@ import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DetailBoxState, classesEditorActants, classesEditorTags } from "types";
+import { EditorBoxState, DetailBoxState, classesEditorActants, classesEditorTags } from "types";
 import { deepCopy, getEntityLabel, getShortLabelByLetterCount, searchTree } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -103,7 +105,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     setTerritoryId,
     appendDetailId,
     appendMultipleDetailIds,
-    setAnnotatorOpened,
   } = useSearchParams();
 
   const queryClient = useQueryClient();
@@ -575,7 +576,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       timeout = 2000;
     }
     dispatch(setDetailBoxState(DetailBoxState.Normal));
-    setAnnotatorOpened(true);
+    dispatch(setThirdPanelExpanded(true));
+    dispatch(setEditorBoxState(EditorBoxState.Normal));
     if (parentTerritoryId.length && territoryId !== parentTerritoryId) {
       setTerritoryId(parentTerritoryId);
     }

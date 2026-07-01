@@ -6,6 +6,8 @@ import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
 import React, { useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import {
   FaEdit,
@@ -121,8 +123,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
 
   drop(dropRef);
 
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
@@ -206,7 +207,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
                 addBookmark(bookmarkFolder.id, bookmarkId);
               }}
               categoryTypes={classesAll}
-              placeholder={"add new bookmark"}
+              placeholder="add bookmark"
+              inputWidth="full"
               excludedActantIds={bookmarkFolder.entities.map((e) => e.id)}
             />
           </StyledFolderSuggester>

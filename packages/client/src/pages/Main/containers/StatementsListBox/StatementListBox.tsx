@@ -1,10 +1,8 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
   IReference,
-  IResponseEntity,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -21,7 +19,7 @@ import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
@@ -29,9 +27,8 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH, SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
+import { SECOND_PANEL_MIN_WIDTH } from "Theme/constants";
 import {
-  DetailBoxState,
   EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
   StatementOrderCorrection,
@@ -43,13 +40,11 @@ import {
   StyledContentWrapper,
   StyledEmptyState,
   StyledInfoWrapper,
-  StyledLoaderWrap,
   StyledStatementListBox,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { useUserQuery } from "hooks/react-query";
 
 const initialData: {
@@ -71,32 +66,14 @@ export const StatementListBox: React.FC = () => {
   );
   const isLoading: boolean = useAppSelector((state) => state.statementList.isLoading);
 
-  const [hlEntities, setHlEntities] = useState<EntityEnums.Class[]>([
-    EntityEnums.Class.Action,
-    EntityEnums.Class.Person,
-    EntityEnums.Class.Being,
-    EntityEnums.Class.Concept,
-    EntityEnums.Class.Group,
-    EntityEnums.Class.Location,
-    EntityEnums.Class.Object,
-    EntityEnums.Class.Event,
-    EntityEnums.Class.Resource,
-    EntityEnums.Class.Person,
-    EntityEnums.Class.Statement,
-    EntityEnums.Class.Value,
-    EntityEnums.Class.Territory,
-  ]);
-
   const {
     territoryId,
     setTerritoryId,
     statementId,
     setStatementId,
-    selectedDetailId,
     detailIdArray,
     removeDetailId,
     appendDetailId,
-    annotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -112,19 +89,20 @@ export const StatementListBox: React.FC = () => {
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [annotatorHoveredStatementId, setAnnotatorHoveredStatementId] = useState<string | null>(
-    null
+  // Hover sync (annotator -> list) and the selected resource now live in Redux,
+  // shared with the separate AnnotatorBox.
+  const annotatorHoveredStatementId = useAppSelector(
+    (state) => state.statementAnnotator.hoveredStatementId
+  );
+  const selectedResourceId = useAppSelector(
+    (state) => state.statementAnnotator.selectedResourceId
   );
 
-  const displayMode: StatementListDisplayMode = useMemo(() => {
-    if (annotatorOpened === null) {
-      return StatementListDisplayMode.TEXT;
-    }
-    return annotatorOpened ? StatementListDisplayMode.TEXT : StatementListDisplayMode.LIST;
-  }, [annotatorOpened]);
+  // The statement list is now always shown in full (the annotator lives in its
+  // own box); the legacy list/annotator toggle has been removed.
+  const displayMode: StatementListDisplayMode = StatementListDisplayMode.LIST;
 
   const {
-    status,
     data: territory,
     error,
     isFetching: isFetchingTerritory,
@@ -151,21 +129,6 @@ export const StatementListBox: React.FC = () => {
 
   const { statements, entities, right } = territory || initialData;
 
-  const handleStatementAnchorHover = useCallback(
-    (id: string | null) => {
-      if (!id) {
-        setAnnotatorHoveredStatementId(null);
-        return;
-      }
-      if (statements.some((s) => s.id === id)) {
-        setAnnotatorHoveredStatementId(id);
-      } else {
-        setAnnotatorHoveredStatementId(null);
-      }
-    },
-    [statements]
-  );
-
   useEffect(() => {
     dispatch(setRowsExpanded([]));
   }, [territoryId]);
@@ -186,22 +149,6 @@ export const StatementListBox: React.FC = () => {
     }
   }, [error]);
 
-  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<string | false>(false);
-  // const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
-
-  // so the annotator jumps to the anchor
-  useEffect(() => {
-    setStoredAnnotatorResourceId(false);
-    // setStoredAnnotatorScroll(0);
-  }, [territoryId]);
-
-  // its needed as the scroll event is executed even when the annotator is not active
-  // useEffect(() => {
-  // if (!storedAnnotatorResourceId) {
-  // setStoredAnnotatorScroll(0);
-  // }
-  // }, [storedAnnotatorResourceId]);
-
   // delay of show content for fluent animation on open
   const [enableStatementListLoader, setEnableStatementListLoader] = useState(true);
 
@@ -215,32 +162,13 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statementListOpened]);
 
-  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
-  const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] = useState<number | null>(
-    null
-  );
+  // The list still needs the live annotator to scroll to anchors on row click.
+  const { scrollToAnchor } = useAnnotator();
 
-  // useEffect(() => {
-  //   console.log("storedAnnotatorScrollPosition", storedAnnotatorScrollPosition);
-  // }, [storedAnnotatorScrollPosition]);
-
-  useEffect(() => {
-    setStoredAnnotatorScrollPosition(null);
-  }, [territoryId]);
-
-  const { setAnnotator: useAnnotatorSetAnnotator } = useAnnotator();
-
-  useEffect(() => {
-    if (annotator) {
-      useAnnotatorSetAnnotator(annotator);
-    }
-  }, [annotator, useAnnotatorSetAnnotator]);
-
-  const {
-    data: resources,
-    error: resourcesError,
-    isFetching: resourcesIsFetching,
-  } = useQuery({
+  // Resources are needed only to resolve the selected resource -> documentId so
+  // the list can read the document for order-correction / auto-order. The
+  // document itself comes from the same React Query cache the AnnotatorBox fills.
+  const { data: resources } = useQuery({
     queryKey: ["resourcesWithDocuments"],
     queryFn: async () => {
       const res = await api.entitiesSearch({
@@ -251,106 +179,14 @@ export const StatementListBox: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
-  const {
-    data: documents,
-    error: documentsError,
-    isFetching: documentsIsFetching,
-  } = useQuery<IDocument[]>({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
-
-  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
-    storedAnnotatorResourceId
-  );
-
-  useEffect(() => {
-    if (selectedResourceId) {
-      setStoredAnnotatorResourceId(selectedResourceId);
-    }
-  }, [selectedResourceId]);
-
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  const selectedTerritoryPath: string[] = useAppSelector(
-    (state) => state.territoryTree.selectedTerritoryPath
-  );
-
-  const loadDefaultResource = () => {
-    if (resources && documents && !isInitialized) {
-      // First try to find resource with document containing territoryId
-      let resourceWithAnchor = resources.find((resource) => {
-        if (resource.data.documentId) {
-          const document = documents.find((d) => d.id === resource.data.documentId);
-          if (document) {
-            return document.entityIds.T.includes(territoryId);
-          }
-        }
-        return false;
-      });
-
-      // If not found, try each territory in the path in reverse order
-      if (!resourceWithAnchor) {
-        for (let i = selectedTerritoryPath.length - 1; i > 0; i--) {
-          const territoryInPath = selectedTerritoryPath[i];
-          resourceWithAnchor = resources.find((resource) => {
-            if (resource.data.documentId) {
-              const document = documents.find((d) => d.id === resource.data.documentId);
-              if (document) {
-                return document.entityIds.T.includes(territoryInPath);
-              }
-            }
-            return false;
-          });
-          if (resourceWithAnchor) break;
-        }
-      }
-
-      if (resourceWithAnchor) {
-        setSelectedResourceId(resourceWithAnchor.id);
-      } else {
-        setSelectedResourceId(false);
-      }
-
-      setIsInitialized(true);
-    }
-  };
-
-  useEffect(() => {
-    loadDefaultResource();
-  }, [resources, documents, isInitialized, territoryId]);
-
-  useEffect(() => {
-    setIsInitialized(false);
-  }, [territoryId]);
-
-  const selectedResource = useMemo<IResponseEntity | false>(() => {
-    if (selectedResourceId && resources) {
-      return resources?.find((r) => r.id === selectedResourceId) ?? false;
-    }
-    return false;
-  }, [selectedResourceId, resources]);
-
   const selectedDocumentId = useMemo<string | undefined>(() => {
-    if (selectedResource) {
-      return selectedResource.data.documentId;
+    if (selectedResourceId && resources) {
+      return resources.find((r) => r.id === selectedResourceId)?.data.documentId;
     }
     return undefined;
-  }, [selectedResource]);
+  }, [selectedResourceId, resources]);
 
-  useEffect(() => {
-    setAnnotatorHoveredStatementId(null);
-  }, [territoryId, selectedDocumentId]);
-
-  const {
-    data: selectedDocument,
-    error: selectedDocumentError,
-    isFetching: selectedDocumentIsFetching,
-  } = useQuery({
+  const { data: selectedDocument } = useQuery({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
       if (selectedDocumentId) {
@@ -584,6 +420,12 @@ export const StatementListBox: React.FC = () => {
       setSelectedRows([]);
       setTerritoryId(data.newTerritoryId);
     },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      toast.error("Error moving statements");
+      setSelectedRows([]);
+    },
   });
 
   const duplicateStatementsMutation = useMutation({
@@ -777,18 +619,6 @@ export const StatementListBox: React.FC = () => {
 
   const contentWidth = useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth);
   const contentHeight = useAppSelector((state) => state.layout.contentHeight);
-  const detailBoxState = useAppSelector((state) => state.layout.mainPage.detailBoxState);
-
-  const statementListHeaderHeight = 103;
-  const contentHeightAnnotator = useMemo(() => {
-    if (!selectedDetailId) {
-      return contentHeight - statementListHeaderHeight;
-    } else if (detailBoxState === DetailBoxState.Normal) {
-      return contentHeight / 2 - statementListHeaderHeight;
-    } else if (detailBoxState === DetailBoxState.Minimized) {
-      return contentHeight - statementListHeaderHeight - 56; // 56 is the height of the submit button
-    }
-  }, [contentHeight, detailBoxState, selectedDetailId]);
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
   const statementsWithOrder: (IResponseStatement & {
@@ -856,33 +686,6 @@ export const StatementListBox: React.FC = () => {
     }));
   }, [selectedDocument, statements]);
 
-  const userCanEdit = useMemo(() => territory?.right !== UserEnums.RoleMode.Read, [territory]);
-
-  // Editors (and admin/owner) may load any Resource into the annotator to view
-  // and search; viewers cannot. (#4)
-  const canSelectResource = useMemo(
-    () => userCanEdit || userData?.role === UserEnums.Role.Editor,
-    [userCanEdit, userData?.role]
-  );
-
-  // Whether the currently loaded document may be edited (anchors / text /
-  // batch replace / annotate). Owner/Admin always; Editor only when the loaded
-  // Resource is assigned to them; viewers never. (#4)
-  const canEditDocument = useMemo(() => {
-    if (
-      userData?.role === UserEnums.Role.Owner ||
-      userData?.role === UserEnums.Role.Admin
-    ) {
-      return true;
-    }
-    if (userData?.role !== UserEnums.Role.Editor || !selectedResource) {
-      return false;
-    }
-    const assignedResourceIds =
-      userData.resourceRights?.map((r) => r.resource.id) ?? [];
-    return assignedResourceIds.includes(selectedResource.id);
-  }, [userData, selectedResource]);
-
   const isListNonEmpty = statements.length > 0;
 
   // Check if there are statements to determine if the list is loading
@@ -918,12 +721,10 @@ export const StatementListBox: React.FC = () => {
 
   const tableWidth = useMemo(() => {
     if (isListNonEmpty || statementListTableIsLoading) {
-      return displayMode === StatementListDisplayMode.LIST
-        ? contentWidth - 8
-        : COLLAPSED_TABLE_WIDTH;
+      return contentWidth - 8;
     }
     return 0;
-  }, [displayMode, contentWidth, isListNonEmpty, statementListTableIsLoading]);
+  }, [contentWidth, isListNonEmpty, statementListTableIsLoading]);
 
   return (
     <StyledStatementListBox>
@@ -984,10 +785,7 @@ export const StatementListBox: React.FC = () => {
                 customStyle={{
                   display: "flex",
                   flexShrink: 0,
-                  // fix for overheight because of marginTop which is necessary to make space for annotator header
-                  marginTop: displayMode === StatementListDisplayMode.TEXT ? "6.2rem" : undefined,
-                  height:
-                    displayMode === StatementListDisplayMode.TEXT ? "calc(100% - 6rem)" : "100%",
+                  height: "100%",
                 }}
               >
                 <StyledTableWrapper $isListMode={displayMode === StatementListDisplayMode.LIST}>
@@ -998,8 +796,8 @@ export const StatementListBox: React.FC = () => {
                         dispatch(setShowWarnings(false));
                         if (statementId !== rowId) {
                           setStatementId(rowId);
-                        } else if (displayMode === StatementListDisplayMode.TEXT && annotator) {
-                          annotator.scrollToAnchor(rowId);
+                        } else {
+                          scrollToAnchor(rowId);
                         }
                       }}
                       actantsUpdateMutation={statementUpdateMutation}
@@ -1012,7 +810,6 @@ export const StatementListBox: React.FC = () => {
                       selectedRows={selectedRows}
                       setSelectedRows={setSelectedRows}
                       displayMode={displayMode}
-                      annotator={annotator}
                       isLoading={statementListTableIsLoading}
                       annotatorHoveredStatementId={annotatorHoveredStatementId}
                     />
@@ -1020,52 +817,9 @@ export const StatementListBox: React.FC = () => {
                 </StyledTableWrapper>
               </CustomScrollbar>
 
-              {displayMode === StatementListDisplayMode.TEXT && (
-                <StatementListTextAnnotator
-                  contentHeight={contentHeightAnnotator || 0}
-                  contentWidth={contentWidth - 10}
-                  territoryId={territoryId}
-                  territory={territory}
-                  statementId={statementId}
-                  storedAnnotatorScrollPosition={storedAnnotatorScrollPosition}
-                  setStoredAnnotatorScrollPosition={setStoredAnnotatorScrollPosition}
-                  hlEntities={hlEntities}
-                  setHlEntities={setHlEntities}
-                  statementCreateMutation={statementCreateMutation}
-                  annotator={annotator}
-                  setAnnotator={setAnnotator}
-                  selectedDocumentId={selectedDocumentId}
-                  selectedDocument={selectedDocument}
-                  selectedDocumentIsFetching={selectedDocumentIsFetching}
-                  selectedDocumentError={selectedDocumentError}
-                  selectedResource={selectedResource}
-                  resources={resources}
-                  setSelectedResourceId={setSelectedResourceId}
-                  showStatementList={isListNonEmpty || statementListTableIsLoading}
-                  userCanEdit={userCanEdit}
-                  canSelectResource={canSelectResource}
-                  canEditDocument={canEditDocument}
-                  userData={userData}
-                  onStatementAnchorHover={handleStatementAnchorHover}
-                />
+              {statementListTableIsLoading && enableStatementListLoader && (
+                <Loader show size={50} />
               )}
-
-              {statementListTableIsLoading &&
-                tableWidth > 0 &&
-                contentHeightAnnotator &&
-                contentHeightAnnotator > 0 &&
-                enableStatementListLoader && (
-                  <StyledLoaderWrap
-                    $width={tableWidth + 4}
-                    $height={
-                      displayMode === StatementListDisplayMode.TEXT
-                        ? contentHeightAnnotator - 56
-                        : contentHeightAnnotator + 4
-                    }
-                  >
-                    <Loader show size={50} />
-                  </StyledLoaderWrap>
-                )}
             </StyledContentWrapper>
           )}
 

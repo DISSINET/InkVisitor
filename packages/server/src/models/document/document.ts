@@ -426,4 +426,23 @@ export default class Document implements IDocument, IDbModel {
       .run(db);
     return entries && entries.length ? entries : [];
   }
+
+  static async backfillEntityIds(conn: Connection): Promise<number> {
+    const docs = await Document.getAll(conn);
+    let count = 0;
+    for (const raw of docs) {
+      const doc = new Document(raw);
+      const normalized = Document.normalizeEntityIds(doc.entityIds);
+      const isEmpty = Object.values(normalized).every((arr) => arr.length === 0);
+      if (isEmpty && doc.content) {
+        await doc.preprocess(conn);
+        await doc.update(conn, {
+          entityIds: doc.entityIds,
+          anchors: doc.anchors,
+        });
+        count++;
+      }
+    }
+    return count;
+  }
 }

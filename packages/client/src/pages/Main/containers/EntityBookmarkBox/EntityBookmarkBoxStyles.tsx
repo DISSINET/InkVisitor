@@ -5,7 +5,8 @@ export const StyledContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: start;
-  padding-left: 1rem;
+  padding-top: 0.3rem;
+  padding-left: 0.5rem;
   background-color: ${({ theme }) => theme.color["white"]};
   padding-bottom: 1rem;
   overflow: auto;
@@ -18,4 +19,8 @@ export const StyledHeader = styled.div`
 
 export const StyledFolderList = styled.div`
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-right: 0.3rem;
 `;

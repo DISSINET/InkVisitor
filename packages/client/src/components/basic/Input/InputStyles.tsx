@@ -13,6 +13,9 @@ interface IValueStyle {
   $autocomplete?: string;
   $fullHeight?: boolean;
   $iconCount?: number;
+  $roundCorners?: boolean;
+  $icon?: React.ReactNode;
+  $rightPadding?: number;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -29,6 +32,7 @@ interface StyledWrapper {
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
+  align-items: center;
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
@@ -45,10 +49,10 @@ export const Label = styled.span<{ $labelSpaceNoWrap: boolean }>`
   white-space: ${({ $labelSpaceNoWrap }) => ($labelSpaceNoWrap ? "nowrap" : "normal")};
 `;
 export const StyledInput = styled.input<IValueStyle>`
-  /* height: ${({ theme }) => theme.space[10]}; */
   height: ${({ $fullHeight, theme }) => ($fullHeight ? "100%" : theme.space[10])};
   text-align: left;
   border-style: solid;
+  border-radius: ${({ $roundCorners, theme }) => ($roundCorners ? theme.borderRadius.input : "0")};
   color: ${({ $inverted, theme }) => ($inverted ? theme.color["white"] : theme.color["primary"])};
   background-color: ${({ $inverted, theme }) =>
     $inverted ? theme.color["primary"] : theme.color["white"]};
@@ -61,9 +65,12 @@ export const StyledInput = styled.input<IValueStyle>`
         ? theme.color[$borderColor]
         : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  padding-left: ${({ theme }) => theme.space[2]};
+  padding-left: ${({ theme, $icon, $suggester }) =>
+    $icon ? "2.4rem" : $suggester ? "0.1rem" : theme.space[2]};
 
-  padding-right: ${({ theme, $iconCount }) => {
+  padding-right: ${({ theme, $iconCount, $rightPadding }) => {
+    // Explicit pixel padding (e.g. measured rightContent width) wins.
+    if ($rightPadding) return `${$rightPadding}px`;
     if (!$iconCount) return theme.space[1];
     // 1 icon = space[7], 2 icons = space[10]
     return $iconCount === 1 ? theme.space[7] : theme.space[14];
@@ -82,7 +89,8 @@ export const StyledInput = styled.input<IValueStyle>`
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
-    border-width: ${({ theme }) => theme.borderWidth[1]};
+    box-shadow: ${({ $suggester, theme }) =>
+      $suggester ? "none" : `inset 0 0 0 0.1rem ${theme.color["info"]}`};
   }
   &::placeholder {
     font-size: 1.1rem;
@@ -139,25 +147,33 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   font-size: ${({ theme, $fontSizeTextArea }) => theme.fontSize[$fontSizeTextArea]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
+  padding-right: ${({ $rightPadding }) => ($rightPadding ? `${$rightPadding}px` : "")};
   background: ${({ disabled, theme }) => (disabled ? theme.background["stripes"] : "")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
   line-height: 1.2;
+  border-radius: ${({ $roundCorners, theme }) => ($roundCorners ? theme.borderRadius.input : "0")};
 
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.color["success"]};
     border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
+    &:focus {
+      border-color: ${({ theme }) => theme.color["info"]};
+      box-shadow: ${({ theme }) => `inset 0 0 0 0.1rem ${theme.color["info"]}`};
+    }
   }
   &:hover {
     border-color: ${({ theme, disabled }) => (!disabled ? theme.color["info"] : "")};
   }
 `;
 
-interface StyledClearableInputButton {}
+interface StyledClearableInputButton {
+  $rightOffset?: number;
+}
 export const StyledClearableInputButton = styled.div<StyledClearableInputButton>`
   position: absolute;
-  right: 0.25rem;
+  right: ${({ $rightOffset }) => ($rightOffset ? `${$rightOffset + 7}px` : "0.25rem")};
   display: flex;
   cursor: pointer;
   top: 50%;
@@ -198,4 +214,28 @@ export const StyledActionButton = styled.button`
   &:focus {
     outline: none;
   }
+`;
+
+export const StyledIconWrapper = styled.div`
+  position: absolute;
+  left: 0.6rem;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${({ theme }) => theme.color["gray"][500]};
+`;
+
+export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
+  position: absolute;
+  right: 0.3rem;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding-left: ${({ $showDivider }) => ($showDivider ? "0.2rem" : "0")};
+  border-left: ${({ theme, $showDivider }) =>
+    $showDivider ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
 `;

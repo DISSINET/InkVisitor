@@ -23,8 +23,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         icon={<IoIosArrowBack />}
         inverted
         color="greyer"
-        radiusLeft
-        radiusRight
+        shape="rounded-lg"
       />
       <span style={{ textAlign: "center" }}>
         {currentPage} of {totalPages}
@@ -34,8 +33,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         icon={<IoIosArrowForward />}
         inverted
         color="greyer"
-        radiusLeft
-        radiusRight
+        shape="rounded-lg"
       />
     </StyledPagination>
   );

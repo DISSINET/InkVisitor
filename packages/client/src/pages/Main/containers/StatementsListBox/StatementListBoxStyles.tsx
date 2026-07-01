@@ -9,6 +9,7 @@ export const StyledStatementListBox = styled.div`
 `;
 
 export const StyledContentWrapper = styled.div`
+  position: relative;
   display: flex;
   height: 100%;
   overflow: hidden;
@@ -23,19 +24,6 @@ export const StyledDots = styled.p`
   align-items: flex-end;
   margin-left: ${({ theme }) => theme.space[1]};
   cursor: default;
-`;
-
-interface StyledLoaderWrap {
-  $width: number;
-  $height: number;
-}
-export const StyledLoaderWrap = styled.div<StyledLoaderWrap>`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  width: ${({ $width }) => `${$width / 10}rem`};
-  height: ${({ $height }) => `${$height / 10}rem`};
 `;
 
 export const StyledSelectorCell = styled.div`
@@ -83,21 +71,18 @@ export const StyledDocumentLine = styled.div<StyledDocumentSearchLine>`
   align-items: center;
   justify-content: space-between;
   height: 3rem;
-  padding: 0rem 0.5rem;
+  padding: 0rem 0.2rem;
   margin-bottom: 0.2rem;
-  padding-right: 0.5rem;
   overflow: hidden;
   white-space: nowrap;
-  margin-left: ${({ $marginLeft }) =>
-    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ $marginLeft }) => ($marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0")};
 `;
 
 export const StyledSearchLine = styled.div<StyledDocumentSearchLine>`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
-  margin-left: ${({ $marginLeft }) =>
-    $marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0"};
+  margin-left: ${({ $marginLeft }) => ($marginLeft ? `-${COLLAPSED_TABLE_WIDTH / 10}rem` : "0")};
   justify-content: center;
   height: 3rem;
 `;
@@ -116,11 +101,6 @@ export const StyledSearchContainer = styled.div`
   user-select: none;
 `;
 
-export const StyledSearchIcon = styled.div`
-  display: flex;
-  flex-shrink: 0;
-`;
-
 interface StyledSearchResults {
   $annotatorWidthTooNarrow?: boolean;
 }
@@ -133,8 +113,8 @@ export const StyledSearchResults = styled.div<StyledSearchResults>`
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   white-space: nowrap;
-  flex-wrap: ${({ $annotatorWidthTooNarrow }) =>
-    $annotatorWidthTooNarrow ? "wrap" : "nowrap"};
+  flex-wrap: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "wrap" : "nowrap")};
+  min-width: 4rem;
   margin: 0 0.2rem;
 `;
 

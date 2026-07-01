@@ -32,6 +32,7 @@ export const StyledBackground = styled(animated.div)`
 interface Card {
   width: "full" | "fat" | "normal" | "auto" | number;
   $fullHeight: boolean;
+  $maxWidth?: number;
 }
 const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
@@ -52,7 +53,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
 export const StyledCard = styled(animated.div)<Card>`
   position: relative;
   width: ${({ width }) => getWidth(width)};
-  max-width: calc(100vw - 4rem);
+  max-width: ${({ $maxWidth }) => ($maxWidth ? `${$maxWidth / 10}rem` : "calc(100vw - 4rem)")};
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
@@ -88,7 +89,7 @@ export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
   display: flex;
   flex-shrink: 0;
   font-size: 1.7rem;
-  margin-right: 0.5rem;
+  margin-right: 0.2rem;
   color: ${({ theme, $color }) => ($color ? theme.color[$color] : "inherit")};
 `;
 interface StyledCardTitle {

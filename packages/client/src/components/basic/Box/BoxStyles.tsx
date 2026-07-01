@@ -24,10 +24,10 @@ interface StyledHead {
 export const StyledHead = styled(animated.div)<StyledHead>`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: ${({ theme }) => theme.space[2]};
   height: 3.2rem;
-  background-color: ${({ theme, $color }) =>
-    $color ? theme.color[$color] : ""};
+  background-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "")};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
@@ -47,22 +47,23 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
 export const StyledLabel = styled(animated.div)`
-  flex: 1 1 auto;
+  display: block;
   min-width: 0;
-  max-width: 100%;
+  flex-shrink: 1;
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;
 `;
 interface StyledHeaderComponentWrap {
   $isExpanded: boolean;
+  $flexGrow?: boolean;
 }
 export const StyledHeaderComponentWrap = styled.div<StyledHeaderComponentWrap>`
-  flex: 1 1 auto;
   display: flex;
-  justify-content: ${({ $isExpanded }) => ($isExpanded ? "flex-end" : "center")};
+  justify-content: center;
   align-items: center;
   width: ${({ $isExpanded }) => ($isExpanded ? "auto" : "100%")};
+  flex-grow: ${({ $flexGrow }) => ($flexGrow ? 1 : 0)};
 `;
 interface StyledContent {
   $noFrame: boolean;
@@ -79,11 +80,7 @@ export const StyledContent = styled(animated.div)<StyledContent>`
   font-size: ${({ theme }) => theme.fontSize["base"]};
 
   border-color: ${({ theme, $isExpanded, $borderColor }) =>
-    $isExpanded
-      ? $borderColor
-        ? theme.color[$borderColor]
-        : theme.color["gray"]["200"]
-      : ""};
+    $isExpanded ? ($borderColor ? theme.color[$borderColor] : theme.color["gray"]["200"]) : ""};
   border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "")};
   border-width: ${({ theme, $noFrame, $isExpanded }) =>
     $noFrame || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
@@ -93,9 +90,7 @@ interface StyledContentAnimationWrap {
   $hideContent: boolean;
   $disableScroll?: boolean;
 }
-export const StyledContentAnimationWrap = styled(
-  animated.div
-)<StyledContentAnimationWrap>`
+export const StyledContentAnimationWrap = styled(animated.div)<StyledContentAnimationWrap>`
   display: ${({ $hideContent }) => ($hideContent ? "none" : "inherit")};
   flex-direction: column;
   height: 100%;
@@ -108,8 +103,7 @@ export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   position: absolute;
   top: ${({ theme }) => theme.space[14]};
   left: 0.4rem;
-  display: ${({ $showContentLabel }) =>
-    $showContentLabel ? "initial" : "none"};
+  display: ${({ $showContentLabel }) => ($showContentLabel ? "initial" : "none")};
   writing-mode: vertical-rl;
   text-orientation: mixed;
   font-family: Muni;

@@ -2,7 +2,7 @@ import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
-import api, { IDbStats } from "api";
+import api, { HTML_CAPTURE_EVENT, HTML_CAPTURE_STORAGE_KEY, IDbStats } from "api";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useRef, useState } from "react";
@@ -23,6 +23,12 @@ import {
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
+  StyledHtmlCaptureActions,
+  StyledHtmlCaptureIcon,
+  StyledHtmlCapturePanel,
+  StyledHtmlCapturePre,
+  StyledHtmlCaptureText,
+  StyledHtmlCaptureWrap,
   StyledLoggedAsWrap,
   StyledMenu,
   StyledPingColor,
@@ -65,6 +71,12 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
   const [dbStats, setDbStats] = useState<IDbStats | null>(api.getDbStats());
   const statsWrapRef = useRef<HTMLDivElement | null>(null);
 
+  // Diagnostic captures of "Server returned HTML instead of JSON" (written by the
+  // api response interceptor). The warning icon below only renders when present.
+  const [htmlCaptures, setHtmlCaptures] = useState<any[] | null>(null);
+  const [htmlCapturesOpen, setHtmlCapturesOpen] = useState(false);
+  const htmlCapturesWrapRef = useRef<HTMLDivElement | null>(null);
+
   // Poll lightly until the first sample arrives (only privileged sockets ever
   // receive one). Until it does, the popup trigger stays inert.
   useEffect(() => {
@@ -92,6 +104,57 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
       document.removeEventListener("mousedown", onDocClick);
     };
   }, [statsOpen]);
+
+  // Load captured diagnostics on mount and whenever one is written (same-tab
+  // custom event) or changed in another tab (native "storage" event).
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const raw = localStorage.getItem(HTML_CAPTURE_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        setHtmlCaptures(Array.isArray(parsed) && parsed.length ? parsed : null);
+      } catch {
+        setHtmlCaptures(null);
+      }
+    };
+    refresh();
+    window.addEventListener(HTML_CAPTURE_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(HTML_CAPTURE_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!htmlCapturesOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (!htmlCapturesWrapRef.current?.contains(e.target as Node)) {
+        setHtmlCapturesOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [htmlCapturesOpen]);
+
+  const handleCopyHtmlCaptures = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(htmlCaptures, null, 2));
+      toast.info("Diagnostic copied — please send it to support");
+    } catch {
+      toast.error("Could not copy to clipboard");
+    }
+  };
+
+  const handleClearHtmlCaptures = () => {
+    try {
+      localStorage.removeItem(HTML_CAPTURE_STORAGE_KEY);
+    } catch {
+      // ignore — clearing state below is what matters for the UI
+    }
+    setHtmlCaptures(null);
+    setHtmlCapturesOpen(false);
+  };
 
   useEffect(() => {
     if ((ping === -1 || ping === -2) && !waitingForServerRestart) {
@@ -212,6 +275,34 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
             </StyledStatsWrap>
           )}
           {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
+
+          {htmlCaptures && (
+            <StyledHtmlCaptureWrap ref={htmlCapturesWrapRef}>
+              <StyledHtmlCaptureIcon
+                size={18}
+                title="A server response error was captured — click for details"
+                onClick={() => setHtmlCapturesOpen((v) => !v)}
+              />
+              {htmlCapturesOpen && (
+                <StyledHtmlCapturePanel>
+                  <StyledHtmlCaptureText>
+                    <strong>{htmlCaptures.length}</strong> server response problem
+                    {htmlCaptures.length > 1 ? "s were" : " was"} captured (the server returned HTML
+                    instead of JSON). Please{" "}
+                    <strong>copy the details below and send them to support</strong> so the issue
+                    can be diagnosed.
+                  </StyledHtmlCaptureText>
+                  <StyledHtmlCapturePre>
+                    {JSON.stringify(htmlCaptures, null, 2)}
+                  </StyledHtmlCapturePre>
+                  <StyledHtmlCaptureActions>
+                    <Button label="Copy" color="primary" onClick={handleCopyHtmlCaptures} />
+                    <Button label="Clear" color="danger" onClick={handleClearHtmlCaptures} />
+                  </StyledHtmlCaptureActions>
+                </StyledHtmlCapturePanel>
+              )}
+            </StyledHtmlCaptureWrap>
+          )}
         </StyledFlexRow>
       </StyledFlexColumn>
     </StyledHeader>
@@ -272,7 +363,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               handleThemeChange(
                 selectedThemeId === InterfaceEnums.Theme.Light
                   ? InterfaceEnums.Theme.Dark
-                  : InterfaceEnums.Theme.Light
+                  : InterfaceEnums.Theme.Light,
               );
             }}
           >
@@ -293,8 +384,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               }}
             >
               <Button
-                radiusLeft
-                radiusRight
+                shape="rounded-lg"
                 label="global validations"
                 icon={<PiSealCheckFill size={14} />}
                 onClick={() => setShowGlobalValidations(true)}
@@ -337,5 +427,5 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
         )}
       </>
     );
-  }
+  },
 );

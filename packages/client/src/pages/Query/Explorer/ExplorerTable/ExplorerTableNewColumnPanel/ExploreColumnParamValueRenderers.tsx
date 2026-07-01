@@ -1,9 +1,8 @@
-import React from "react";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { RelationEnums } from "@inkvisitor/shared/enums";
-import { EntityTag } from "components/advanced";
-import { EntityTagById } from "../../../../components/advanced/EntityTag/EntityTagById";
+import { EntityTagById } from "components/advanced";
+import React from "react";
 
 export interface IExploreColumnParamRenderContext {
   value: unknown;
@@ -12,7 +11,7 @@ export interface IExploreColumnParamRenderContext {
 }
 
 export type ExploreColumnParamValueRenderer = (
-  ctx: IExploreColumnParamRenderContext
+  ctx: IExploreColumnParamRenderContext,
 ) => React.ReactNode;
 
 export const exploreColumnParamValueRenderers: Record<
@@ -21,10 +20,7 @@ export const exploreColumnParamValueRenderers: Record<
 > = {
   relationType: ({ value }) => {
     if (value == null) return null;
-    return (
-      RelationEnums.RelationTypeLabels[value as RelationEnums.Type] ??
-      String(value)
-    );
+    return RelationEnums.RelationTypeLabels[value as RelationEnums.Type] ?? String(value);
   },
   entity: ({ value, entities }) => {
     if (value == null) return null;
@@ -36,7 +32,7 @@ export const exploreColumnParamValueRenderers: Record<
 };
 
 export const renderExploreColumnParamValue = (
-  ctx: IExploreColumnParamRenderContext
+  ctx: IExploreColumnParamRenderContext,
 ): React.ReactNode => {
   const renderer = exploreColumnParamValueRenderers[ctx.paramDef.type];
   return renderer ? renderer(ctx) : String(ctx.value ?? "");

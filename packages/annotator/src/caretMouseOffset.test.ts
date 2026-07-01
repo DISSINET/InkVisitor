@@ -1,5 +1,5 @@
 /**
- * Phase 3 (Step B) — mouse interactions set the canonical document offset.
+ * Mouse interactions set the canonical document offset.
  *
  * Click/drag go through getBoundingClientRect (0-sized in jsdom, so positioning
  * isn't meaningfully testable here); double-click uses offsetX and IS testable.

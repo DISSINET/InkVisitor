@@ -9,6 +9,7 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } f
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState, DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
 import {
@@ -20,12 +21,28 @@ import {
 import {
   StyledEntityTag,
   StyledEntityTagWrap,
+  StyledExpansionBadge,
   StyledFaStar,
   StyledLabel,
   StyledLabelWrap,
   StyledStarWrap,
+  StyledTagComponentWrap,
 } from "./EntityTagStyles";
 import useDragDrop from "./useDragDrop";
+
+// marker shown on the class glyph when a search surfaced this entity via an
+// expansion option rather than a direct match (#2969)
+const EXPANSION_MARK = {
+  equivalent: {
+    label: "eq",
+    tooltip: "Surfaced via 'include equivalents' (SYN / IDE / AEE)",
+  },
+  subordinate: {
+    label: "sub",
+    tooltip:
+      "Surfaced via 'include subordinates' (subclass / subordinate / meronym / child T)",
+  },
+} as const;
 
 export interface UnlinkButton {
   onClick: () => void;
@@ -56,6 +73,10 @@ interface EntityTag {
   customTooltipAttributes?: { partLabel?: string; childCount?: number };
   /** When set, replaces the default double-click behavior (open in detail). */
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
+  /** Marks the tag as surfaced via "include equivalents" (SYN/IDE/AEE). */
+  isEquivalent?: boolean;
+  /** Marks the tag as surfaced via "include subordinates" (inverse SCL/SOE/HOL + child T). */
+  isSubordinate?: boolean;
 }
 
 const EntityTagComponent: React.FC<EntityTag> = ({
@@ -81,6 +102,8 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   unlinkButton,
   customTooltipAttributes,
   onDoubleClick: onDoubleClickOverride,
+  isEquivalent = false,
+  isSubordinate = false,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -139,20 +162,33 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         color={unlinkButton.color ? unlinkButton.color : "plain"}
         inverted
         onClick={unlinkButton.onClick}
+        shape="sharp"
       />
     );
   }, []);
 
   const tagComponent = useMemo(() => {
+    const mark = isEquivalent
+      ? EXPANSION_MARK.equivalent
+      : isSubordinate
+        ? EXPANSION_MARK.subordinate
+        : undefined;
     return (
-      <StyledEntityTag
-        $color={EntityColors[entity.class].color}
-        $isTemplate={entity.isTemplate ?? false}
-      >
-        {entity.class}
-      </StyledEntityTag>
+      <StyledTagComponentWrap>
+        <StyledEntityTag
+          $color={EntityColors[entity.class].color}
+          $isTemplate={entity.isTemplate ?? false}
+        >
+          {entity.class}
+        </StyledEntityTag>
+        {mark && (
+          <StyledExpansionBadge title={mark.tooltip}>
+            {mark.label}
+          </StyledExpansionBadge>
+        )}
+      </StyledTagComponentWrap>
     );
-  }, [entity]);
+  }, [entity, isEquivalent, isSubordinate]);
 
   const labelComponent = useMemo(() => {
     return (
@@ -261,6 +297,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           }
           if (!disableDoubleClick) {
             appendDetailId(entity.id);
+            dispatch(setSecondPanelExpanded(true));
             if (detailBoxState === DetailBoxState.Minimized) {
               dispatch(setDetailBoxState(DetailBoxState.Normal));
             }
@@ -292,6 +329,8 @@ function areEntityTagsEqual(
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isFavorited !== next.isFavorited) return false;
+  if (prev.isEquivalent !== next.isEquivalent) return false;
+  if (prev.isSubordinate !== next.isSubordinate) return false;
   if (prev.showOnly !== next.showOnly) return false;
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;

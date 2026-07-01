@@ -1,15 +1,50 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  arePanelWidthsUndersized,
+  getInitPercentPanelWidths,
+  panelWidthsFromSeparators,
+} from "utils/layoutUtils";
+import { floorNumberToOneDecimal } from "utils/utils";
 import { RootState } from "redux/store";
 
-// Selector for a specific panel width allows us to get the panel width in component without rerenders on different component changes
-// Usage: const treeWidth = useSelector(selectPanelWidth(0));
 export const selectPanelWidth = (panelIndex: number) =>
   createSelector(
     (state: RootState) => state.layout.mainPage.panelWidths,
     (panelWidths) => panelWidths[panelIndex]
   );
 
-const initialState: number[] = [0, 0, 0, 0];
+function computeInitialPanelWidths(): number[] {
+  if (typeof window === "undefined") return [0, 0, 0, 0];
+
+  const layoutWidth = window.innerWidth;
+  if (layoutWidth <= 0) return [0, 0, 0, 0];
+
+  const treeSep = localStorage.getItem("mainPageTreeSeparatorXPosition");
+  const centerSep = localStorage.getItem("mainPageCenterSeparatorXPosition");
+  const searchSep = localStorage.getItem("mainPageSearchSeparatorXPosition");
+
+  if (treeSep && centerSep && searchSep) {
+    const widths = panelWidthsFromSeparators(
+      Number(treeSep), Number(centerSep), Number(searchSep), layoutWidth,
+    );
+    const expanded = [
+      localStorage.getItem("firstPanelExpanded") !== "false",
+      localStorage.getItem("secondPanelExpanded") !== "false",
+      localStorage.getItem("thirdPanelExpanded") !== "false",
+      localStorage.getItem("fourthPanelExpanded") !== "false",
+    ];
+    if (!arePanelWidthsUndersized(widths, expanded, layoutWidth)) {
+      return widths.map(floorNumberToOneDecimal);
+    }
+  }
+
+  const onePercent = layoutWidth / 100;
+  return getInitPercentPanelWidths(layoutWidth).map(
+    (p) => floorNumberToOneDecimal(p * onePercent),
+  );
+}
+
+const initialState: number[] = computeInitialPanelWidths();
 
 const panelWidthsSlice = createSlice({
   name: "panelWidths",
