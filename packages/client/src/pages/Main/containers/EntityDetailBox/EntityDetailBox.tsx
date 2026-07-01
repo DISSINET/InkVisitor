@@ -48,7 +48,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
   const { data, error } = useQuery({
     queryKey: ["detail-tab-entities", detailIdArray],
     queryFn: async () => {
-      const res = await api.entitiesSearch({ entityIds: detailIdArray });
+      const res = await api.entitiesGet(detailIdArray);
       return res.data ?? [];
     },
     enabled: api.isLoggedIn() && detailIdArray.length > 0,

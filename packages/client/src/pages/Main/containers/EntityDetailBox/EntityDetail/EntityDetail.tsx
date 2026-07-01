@@ -625,7 +625,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                       {entity.warnings
                         .filter((w) => w.position?.section === IWarningPositionSection.Entity)
                         .map((warning, key) => {
-                          return <Message key={key} warning={warning} />;
+                          return (
+                            <Message key={key} warning={warning} entities={entity.entities} />
+                          );
                         })}
                     </StyledDetailWarnings>
                   )}
@@ -713,7 +715,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                               (w) => w.position?.section === IWarningPositionSection.Valencies
                             )
                             .map((warning, key) => {
-                              return <Message key={key} warning={warning} />;
+                              return (
+                            <Message key={key} warning={warning} entities={entity.entities} />
+                          );
                             })}
                       </StyledDetailWarnings>
                       <StyledDetailSectionContent>
@@ -748,7 +752,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         {entity.warnings
                           .filter((w) => w.position?.section === IWarningPositionSection.Relations)
                           .map((warning, key) => {
-                            return <Message key={key} warning={warning} />;
+                            return (
+                            <Message key={key} warning={warning} entities={entity.entities} />
+                          );
                           })}
                       </StyledDetailWarnings>
                     )}

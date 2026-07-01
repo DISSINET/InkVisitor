@@ -169,7 +169,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     return options;
   }, [templates, statement]);
 
-
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
     return statement.data.territory?.territoryId;
@@ -196,9 +195,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     enabled: !!statementId && !!statementTerritoryId,
   });
 
-  // territoryData already carries every entity referenced by the territory's
-  // statements - the same set api.entityIdsInTerritory returns. Seed the shared
-  // ["territoryActants"] cache from it so the EntitySuggesters in this editor
+  // Seed the shared ["territoryActants"] cache for EntitySuggester in this editor
   // resolve the home-icon ids from cache instead of firing a redundant request.
   useEffect(() => {
     if (statementTerritoryId && territoryData) {
