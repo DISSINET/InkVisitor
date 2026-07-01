@@ -45,11 +45,7 @@ import {
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import {
-  useDocumentQuery,
-  useResourcesWithDocumentsQuery,
-  useUserQuery,
-} from "hooks/react-query";
+import { useDocumentQuery, useResourcesWithDocumentsQuery, useUserQuery } from "hooks/react-query";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -66,7 +62,7 @@ export const StatementListBox: React.FC = () => {
   const dispatch = useAppDispatch();
   const rowsExpanded: string[] = useAppSelector((state) => state.statementList.rowsExpanded);
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.mainPage.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened,
   );
   const isLoading: boolean = useAppSelector((state) => state.statementList.isLoading);
 
@@ -96,11 +92,9 @@ export const StatementListBox: React.FC = () => {
   // Hover sync (annotator -> list) and the selected resource now live in Redux,
   // shared with the separate AnnotatorBox.
   const annotatorHoveredStatementId = useAppSelector(
-    (state) => state.statementAnnotator.hoveredStatementId
+    (state) => state.statementAnnotator.hoveredStatementId,
   );
-  const selectedResourceId = useAppSelector(
-    (state) => state.statementAnnotator.selectedResourceId
-  );
+  const selectedResourceId = useAppSelector((state) => state.statementAnnotator.selectedResourceId);
 
   // The statement list is now always shown in full (the annotator lives in its
   // own box); the legacy list/annotator toggle has been removed.
@@ -169,10 +163,16 @@ export const StatementListBox: React.FC = () => {
   // The list still needs the live annotator to scroll to anchors on row click.
   const { scrollToAnchor } = useAnnotator();
 
+  const secondPanelExpanded = useAppSelector((state) => state.layout.mainPage.secondPanelExpanded);
+  const statementsListBoxOpen = useAppSelector(
+    (state) => state.layout.mainPage.statementListOpened,
+  );
   // Resources are needed only to resolve the selected resource -> documentId so
   // the list can read the document for order-correction / auto-order. The
   // document itself comes from the same React Query cache the AnnotatorBox fills.
-  const { data: resources } = useResourcesWithDocumentsQuery();
+  const { data: resources } = useResourcesWithDocumentsQuery(
+    secondPanelExpanded && statementsListBoxOpen && !!territoryId,
+  );
 
   const selectedDocumentId = useMemo<string | undefined>(() => {
     if (selectedResourceId && resources) {
@@ -207,7 +207,7 @@ export const StatementListBox: React.FC = () => {
         />,
         {
           autoClose: 5000,
-        }
+        },
       );
 
       if (detailIdArray.includes(sId)) {
@@ -292,7 +292,7 @@ export const StatementListBox: React.FC = () => {
         // Insert statement at correct position based on order
         const order = newStatement.data.territory.order;
         const insertIndex = updatedStatements.findIndex(
-          (s) => (s.data.territory?.order ?? 0) > order
+          (s) => (s.data.territory?.order ?? 0) > order,
         );
         if (insertIndex === -1) {
           updatedStatements.push(optimisticStatement);
@@ -305,7 +305,7 @@ export const StatementListBox: React.FC = () => {
           {
             ...previousTerritory,
             statements: updatedStatements,
-          }
+          },
         );
       }
 
@@ -333,13 +333,13 @@ export const StatementListBox: React.FC = () => {
       if (context?.previousTerritory) {
         queryClient.setQueryData<IResponseTerritory>(
           ["territory", "statement-list", territoryId, statementListOpened],
-          context.previousTerritory
+          context.previousTerritory,
         );
       }
       if (context?.previousDocument) {
         queryClient.setQueryData<IDocument | undefined>(
           ["document", selectedDocumentId],
-          context.previousDocument
+          context.previousDocument,
         );
       }
       toast.error(`Error: Statement not created!`);
@@ -371,7 +371,7 @@ export const StatementListBox: React.FC = () => {
           userData.options,
           "",
           "",
-          territoryId
+          territoryId,
         );
         (newStatement.data.territory as IStatementDataTerritory).order = newOrder;
 
@@ -400,7 +400,7 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       toast.info(
-        `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""} moved`
+        `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""} moved`,
       );
       setSelectedRows([]);
       setTerritoryId(data.newTerritoryId);
@@ -484,12 +484,12 @@ export const StatementListBox: React.FC = () => {
 
       const deletedRows = responseArray.filter((row) => !(row as any).error);
       const deletedIds = (deletedRows as EntitiesDeleteSuccessResponse[]).map(
-        (row) => row.entityId
+        (row) => row.entityId,
       );
 
       if (deletedIds.length < selectedRows.length) {
         toast.error(
-          `Some statements (${selectedRows.length - deletedIds.length}) are not possible to delete`
+          `Some statements (${selectedRows.length - deletedIds.length}) are not possible to delete`,
         );
       }
 
@@ -519,7 +519,7 @@ export const StatementListBox: React.FC = () => {
       if (errorCount > 0) {
         if (errorRows[0].details.error === "RelationPathExist") {
           toast.error(
-            `${errorCount} relation${errorCount === 1 ? "" : "s"} to this entity already existed`
+            `${errorCount} relation${errorCount === 1 ? "" : "s"} to this entity already existed`,
           );
         } else {
           toast.error(`Some relations ${errorCount} were not possible to create`);
@@ -541,17 +541,20 @@ export const StatementListBox: React.FC = () => {
       // Collect anchors from the document and remove duplicates
       const statementAnchors = Array.from(
         new Map(
-          collectStatementAnchors(selectedDocument.anchors).map((anchor) => [anchor.anchor, anchor])
-        ).values()
+          collectStatementAnchors(selectedDocument.anchors).map((anchor) => [
+            anchor.anchor,
+            anchor,
+          ]),
+        ).values(),
       );
       // only filter the statement anchors that are in the statements list
       const statementIds = new Set(statements.map((s) => s.id));
       const statementAnchorsInList = statementAnchors.filter((anchor) =>
-        statementIds.has(anchor.anchor)
+        statementIds.has(anchor.anchor),
       );
 
       const correctPositionMap = new Map(
-        statementAnchorsInList.map((anchor, index) => [anchor.anchor, index])
+        statementAnchorsInList.map((anchor, index) => [anchor.anchor, index]),
       );
 
       // Separate anchored and non-anchored statements
@@ -579,7 +582,7 @@ export const StatementListBox: React.FC = () => {
       });
 
       const currentOrderMap = new Map(
-        statements.map((statement) => [statement.id, statement.data.territory?.order])
+        statements.map((statement) => [statement.id, statement.data.territory?.order]),
       );
 
       const updates = finalOrder
@@ -615,18 +618,18 @@ export const StatementListBox: React.FC = () => {
     // Collect anchors from the document and remove duplicates
     const statementAnchors = Array.from(
       new Map(
-        collectStatementAnchors(selectedDocument.anchors).map((anchor) => [anchor.anchor, anchor])
-      ).values()
+        collectStatementAnchors(selectedDocument.anchors).map((anchor) => [anchor.anchor, anchor]),
+      ).values(),
     );
     const statementIds = new Set(statements.map((s) => s.id));
     const statementAnchorsInList = statementAnchors.filter((anchor) =>
-      statementIds.has(anchor.anchor)
+      statementIds.has(anchor.anchor),
     );
 
     // Create a map of statement IDs to their correct positions
     const correctPositionMap = new Map(
       // this index is the position of the statement IN THE DOCUMENT
-      statementAnchorsInList.map((anchor, index) => [anchor.anchor, index])
+      statementAnchorsInList.map((anchor, index) => [anchor.anchor, index]),
     );
 
     // First, create a map of all statements with their original indexes
@@ -642,7 +645,7 @@ export const StatementListBox: React.FC = () => {
     // Create a map of territory statements (anchored) with position in the list
     const currentAnchoredPositions = new Map(
       // this index is the position of the statement IN THE LIST
-      anchoredStatements.map((item, index) => [item.statement.id, index])
+      anchoredStatements.map((item, index) => [item.statement.id, index]),
     );
 
     // Create a map of anchored statements with their corrections
@@ -657,10 +660,10 @@ export const StatementListBox: React.FC = () => {
           shouldMoveDown:
             (item.correctPosition ?? 0) > (currentAnchoredPositions.get(item.statement.id) ?? 0),
           distance: Math.abs(
-            (item.correctPosition ?? 0) - (currentAnchoredPositions.get(item.statement.id) ?? 0)
+            (item.correctPosition ?? 0) - (currentAnchoredPositions.get(item.statement.id) ?? 0),
           ),
         },
-      ])
+      ]),
     );
 
     // Reconstruct the array in original order with corrections

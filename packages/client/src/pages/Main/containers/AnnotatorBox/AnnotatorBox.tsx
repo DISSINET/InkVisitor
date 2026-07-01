@@ -83,13 +83,10 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     enabled: !!territoryId && api.isLoggedIn(),
   });
 
-  const resourcesEnabled =
-    !!territoryId || (!!selectedTerritoryPath && selectedTerritoryPath.length > 0);
-
   const { data: resources, refetch: refetchResources } =
-    useResourcesWithDocumentsQuery(resourcesEnabled);
+    useResourcesWithDocumentsQuery(!!territoryId);
 
-  const { data: documents } = useDocumentsQuery(resourcesEnabled);
+  const { data: documents } = useDocumentsQuery(!!territoryId);
 
   // Set once the user manually picks a resource so auto-load stops overriding it.
   const userPickedRef = useRef(false);
