@@ -4,8 +4,8 @@ export const StyledWarningIcon = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  padding: 0.1rem 0.35rem;
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  padding: 0.1rem 0.45rem;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
   color: ${({ theme }) => theme.color["warningText"]};
   /* very light tint of the warning color to group icon + code together */
   background-color: ${({ theme }) => theme.color["warningText"]}14;
