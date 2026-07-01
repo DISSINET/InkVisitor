@@ -6,7 +6,7 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import {
   StyledBorderLeft,
   StyledValue,
@@ -437,7 +437,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
           />
           <Button
             color="danger"
-            icon={<FaTrashAlt />}
+            icon={<IcoTrash />}
             onClick={removeValidationRule}
             inverted
             label="remove validation rule"

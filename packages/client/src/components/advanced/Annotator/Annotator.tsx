@@ -10,7 +10,8 @@ import {
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaHighlighter, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { FaHighlighter, FaPen, FaRegSave } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -1501,7 +1502,7 @@ export const TextAnnotator = ({
                 label="discard"
                 color="greyer"
                 inverted
-                icon={<FaTrash />}
+                icon={<IcoTrash />}
                 disabled={
                   !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }

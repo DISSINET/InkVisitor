@@ -13,9 +13,9 @@ import {
   FaKey,
   FaToggleOff,
   FaToggleOn,
-  FaTrashAlt,
   FaUserCheck,
 } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import { getUserIcon } from "utils/iconUtils";
@@ -385,7 +385,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                             <Button
                               key="d"
                               tooltipLabel="remove invalid territory"
-                              icon={<FaTrashAlt />}
+                              icon={<IcoTrash />}
                               color="danger"
                               noBorder
                               onClick={() => {
@@ -461,7 +461,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               <Button
                                 key="d"
                                 tooltipLabel="remove invalid territory"
-                                icon={<FaTrashAlt />}
+                                icon={<IcoTrash />}
                                 color="danger"
                                 noBorder
                                 onClick={() => {
@@ -535,7 +535,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               <Button
                                 key="d"
                                 tooltipLabel="remove invalid resource"
-                                icon={<FaTrashAlt />}
+                                icon={<IcoTrash />}
                                 color="danger"
                                 noBorder
                                 onClick={() => {
@@ -593,7 +593,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             <StyledUserListButtonGroup>
               <Button
                 key="r"
-                icon={<FaTrashAlt size={14} />}
+                icon={<IcoTrash size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
                 disabled={

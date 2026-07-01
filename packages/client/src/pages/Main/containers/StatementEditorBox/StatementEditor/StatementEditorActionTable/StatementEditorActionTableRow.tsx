@@ -21,7 +21,8 @@ import { TooltipAttributes } from "pages/Main/containers";
 import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaGripVertical, FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -378,7 +379,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
               {userCanEdit && (
                 <Button
                   key="d"
-                  icon={<FaTrashAlt />}
+                  icon={<IcoTrash />}
                   color="plain"
                   inverted
                   tooltipLabel="remove action row"

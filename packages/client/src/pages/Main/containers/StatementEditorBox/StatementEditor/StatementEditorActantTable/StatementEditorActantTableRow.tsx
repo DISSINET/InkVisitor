@@ -21,7 +21,8 @@ import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaCaretDown, FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaCaretDown, FaGripVertical, FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -421,7 +422,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               {userCanEdit && (
                 <Button
                   key="d"
-                  icon={<FaTrashAlt />}
+                  icon={<IcoTrash />}
                   color="plain"
                   inverted
                   tooltipLabel="remove actant row"

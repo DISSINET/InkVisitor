@@ -8,7 +8,8 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -327,7 +328,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   {userCanEdit && (
                     <Button
                       key="delete"
-                      icon={<FaTrashAlt />}
+                      icon={<IcoTrash />}
                       tooltipLabel="remove prop row"
                       color="plain"
                       inverted

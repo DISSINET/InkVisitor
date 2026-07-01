@@ -8,7 +8,7 @@ import { EntitySuggester } from "components/advanced";
 import React, { useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaFolder, FaFolderOpen, FaRegFolder, FaRegFolderOpen } from "react-icons/fa";
-import { FaTrashCan } from "react-icons/fa6";
+import { IcoTrash } from "Theme/icons";
 import { MdEdit } from "react-icons/md";
 import { DragItem, ItemTypes } from "types";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
@@ -170,7 +170,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
             <StyledRemoveButtonWrap>
               <Button
                 key="remove"
-                icon={<FaTrashCan size={14} />}
+                icon={<IcoTrash size={14} />}
                 inverted
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();

@@ -21,7 +21,7 @@ import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
 import { MdEdit } from "react-icons/md";
-import { FaTrashCan } from "react-icons/fa6";
+import { IcoTrash } from "Theme/icons";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -253,7 +253,7 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       <Submit
-        headerIcon={<FaTrashCan size={14} />}
+        headerIcon={<IcoTrash size={14} />}
         title={`Delete Bookmark folder ${removingFolderName}`}
         text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}

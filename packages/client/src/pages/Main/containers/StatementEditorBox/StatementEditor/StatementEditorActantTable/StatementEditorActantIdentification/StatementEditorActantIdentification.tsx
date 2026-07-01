@@ -17,7 +17,7 @@ import Dropdown, {
 } from "components/advanced";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useState } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { AttributeData } from "types";
 import {
@@ -173,7 +173,7 @@ export const StatementEditorActantIdentification: React.FC<
         {userCanEdit && (
           <Button
             key="d"
-            icon={<FaTrashAlt />}
+            icon={<IcoTrash />}
             color="plain"
             inverted
             tooltipLabel="remove identification row"

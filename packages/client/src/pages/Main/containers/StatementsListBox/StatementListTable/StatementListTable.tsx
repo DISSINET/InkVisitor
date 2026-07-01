@@ -14,7 +14,8 @@ import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
-import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaClone, FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
 import { CellProps, Column, useExpanded, useRowSelect, useTable } from "react-table";
@@ -349,7 +350,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 buttons={[
                   <Button
                     key="r"
-                    icon={<FaTrashAlt size={14} />}
+                    icon={<IcoTrash size={14} />}
                     color="danger"
                     tooltipLabel="delete"
                     onClick={() => {

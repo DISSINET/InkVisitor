@@ -39,7 +39,7 @@ import {
   StyledDropdownWithTypeBar,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { BiSearch } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -345,7 +345,7 @@ export const EntitySearchBox: React.FC = () => {
             <div style={{ gridColumn: "1 / -1" }}>
             <Input
               width="full"
-              icon={<BiSearch />}
+              icon={<IcoSearch />}
               placeholder="label or uuid"
               changeOnType
               onChangeFn={(value: string) => handleChange({ labelOrId: value })}

@@ -23,7 +23,7 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaTrash } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaArrowDownShortWide } from "react-icons/fa6";
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
@@ -391,7 +391,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     {/* Batch delete */}
                     {batchAction.value === BatchOption.delete_S && (
                       <Button
-                        icon={<FaTrash />}
+                        icon={<IcoTrash />}
                         color="danger"
                         inverted
                         onClick={() => setShowSubmit(true)}

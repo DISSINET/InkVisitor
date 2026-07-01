@@ -9,7 +9,8 @@ import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
-import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaClone, FaEdit } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { MdCleaningServices } from "react-icons/md";
 import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
@@ -114,7 +115,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               size={ButtonSize.Medium}
               shape="square"
               color="primary"
-              icon={<FaTrashAlt size={13} />}
+              icon={<IcoTrash size={13} />}
               disabled={!mayBeRemoved}
               tooltipLabel={
                 mayBeRemoved
