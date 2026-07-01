@@ -39,6 +39,7 @@ import {
   StyledDropdownWithTypeBar,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { BiSearch } from "react-icons/bi";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -341,35 +342,29 @@ export const EntitySearchBox: React.FC = () => {
       <StyledBoxContent>
         <StyledOptions $isUndersized={isUndersized}>
           <StyledRow>
-            <StyledRowHeader>label or uuid</StyledRowHeader>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr auto",
-                width: "100%",
-              }}
-            >
-              <Input
-                width="full"
-                placeholder="type to search"
-                changeOnType
-                onChangeFn={(value: string) => handleChange({ labelOrId: value })}
-                clearable
-                rightContent={
-                  <>
-                    {userRole !== UserEnums.Role.Viewer && (
-                      <Button
-                        tooltipLabel="create entity"
-                        icon={<FaPlus />}
-                        onClick={() => setShowEntityCreateModal(true)}
-                        noBackground
-                        noBorder
-                        inverted
-                      />
-                    )}
-                  </>
-                }
-              />
+            <div style={{ gridColumn: "1 / -1" }}>
+            <Input
+              width="full"
+              icon={<BiSearch />}
+              placeholder="label or uuid"
+              changeOnType
+              onChangeFn={(value: string) => handleChange({ labelOrId: value })}
+              clearable
+              rightContent={
+                <>
+                  {userRole !== UserEnums.Role.Viewer && (
+                    <Button
+                      tooltipLabel="create entity"
+                      icon={<FaPlus />}
+                      onClick={() => setShowEntityCreateModal(true)}
+                      noBackground
+                      noBorder
+                      inverted
+                    />
+                  )}
+                </>
+              }
+            />
             </div>
           </StyledRow>
 

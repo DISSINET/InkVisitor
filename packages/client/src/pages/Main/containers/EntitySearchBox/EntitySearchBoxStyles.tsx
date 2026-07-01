@@ -14,7 +14,9 @@ interface StyledOptionsProps {
   $isUndersized?: boolean;
 }
 export const StyledOptions = styled.div<StyledOptionsProps>`
-  margin-right: ${({ $isUndersized, theme }) => ($isUndersized ? theme.space[1] : theme.space[4])};
+  padding-top: 0.5rem;
+  padding-right: ${({ $isUndersized }) => ($isUndersized ? "0.5rem" : "1rem")};
+  padding-left: ${({ $isUndersized }) => ($isUndersized ? "0.5rem" : "1rem")};
 `;
 export const StyledRow = styled.div`
   position: relative;
@@ -30,7 +32,6 @@ export const StyledAdvancedOptions = styled.div`
   padding: 0 ${({ theme }) => theme.space[4]};
   height: 3rem;
   margin-bottom: 0.5rem;
-  margin-left: 0.7rem;
   border: 1px dashed ${({ theme }) => theme.color["gray"][300]};
   border-radius: 5rem;
   cursor: default;
