@@ -232,9 +232,11 @@ export const TextAnnotatorMenu = ({
               </StyledAnnotatorItemContentLine>
             </StyledAnnotatorItemContent>
           )}
-          {/* New Statement */}
-          <StyledAnnotatorItemContent>
-            {onCreateStatement && (
+          {/* New Statement - only with an active territory to put the new
+              statement into. Without one, creating a statement would silently
+              fail while still leaving a dangling anchor in the document. */}
+          {onCreateStatement && activeTerritoryId && (
+            <StyledAnnotatorItemContent>
               <StyledAnnotatorItemContentLine>
                 <Button
                   label="New Statement"
@@ -253,8 +255,8 @@ export const TextAnnotatorMenu = ({
                   }}
                 />
               </StyledAnnotatorItemContentLine>
-            )}
-          </StyledAnnotatorItemContent>
+            </StyledAnnotatorItemContent>
+          )}
           {/* Entity Suggester */}
           <StyledAnnotatorItemContent>
             <StyledAnnotatorItemContentLine>

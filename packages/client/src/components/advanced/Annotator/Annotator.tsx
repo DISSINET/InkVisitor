@@ -407,7 +407,7 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     },
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
       // filter only Statements
@@ -455,6 +455,7 @@ export const TextAnnotator = ({
             newOrder,
           );
           await statementCreateMutation?.mutateAsync(newStatement);
+          return true;
         } else {
           const newStatement: IStatement = CStatement(
             localStorage.getItem("userrole") as UserEnums.Role,
@@ -466,9 +467,11 @@ export const TextAnnotator = ({
             newOrder,
           );
           await statementCreateMutation?.mutateAsync(newStatement);
+          return true;
         }
       }
     }
+    return false;
   };
 
   const [territoryCreateModalType, setTerritoryCreateModalType] =
@@ -1030,7 +1033,7 @@ export const TextAnnotator = ({
       // document is saved first, the new statement's id is dropped from the
       // document's entityIds/anchors tree and the anchor stays invisible (in
       // usedInDocuments) until the document is preprocessed again.
-      await handleCreateStatement(
+      const statementCreated = await handleCreateStatement(
         validatedText,
         newStatementId,
         selectionStartIndex,
@@ -1043,7 +1046,14 @@ export const TextAnnotator = ({
             }
           : undefined,
       );
-      await handleAddAnchor(newStatementId, elvl);
+      // Only anchor the statement into the document once it actually exists.
+      // Otherwise (e.g. no active territory) we would leave a dangling anchor
+      // pointing at a statement that was never created.
+      if (statementCreated) {
+        await handleAddAnchor(newStatementId, elvl);
+      } else {
+        toast.warning("Cannot create statement without an active territory");
+      }
     }
   };
 
