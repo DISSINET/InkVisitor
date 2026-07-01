@@ -8,10 +8,7 @@ import { BaseDropdown, Loader, Table, Timestamp } from "components";
 import { EmptyEntityTag, EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
-import {
-  useDocumentsQuery,
-  useResourcesWithDocumentsQuery,
-} from "hooks/react-query";
+import { useDocumentsQuery, useResourcesWithDocumentsQuery } from "hooks/react-query";
 import { useMemo } from "react";
 import { Column } from "react-table";
 import {
@@ -111,7 +108,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
               const entity = entitiesById[anchor];
               if (entity) {
                 return (
-                  <div style={{ display: "grid" }}>
+                  <div style={{ display: "grid" }} key={index}>
                     <EntityTag
                       key={`${section.key}-${anchor}-${index}`}
                       entity={entity}
@@ -150,11 +147,9 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
       debounceDelay: 50,
     });
 
-  const { data: dataDocuments, isLoading: isLoadingDocuments } =
-    useDocumentsQuery();
+  const { data: dataDocuments, isLoading: isLoadingDocuments } = useDocumentsQuery();
 
-  const { data: resources, isLoading: isLoadingResources } =
-    useResourcesWithDocumentsQuery();
+  const { data: resources, isLoading: isLoadingResources } = useResourcesWithDocumentsQuery();
 
   const selectedResource = useMemo(() => {
     if (!selectedDocument?.value || !resources) {

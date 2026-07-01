@@ -121,15 +121,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [statementId]);
 
-  const prevEditorBoxStateRef = useRef(editorBoxState);
+  const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
-    const wasFullHeight = prevEditorBoxStateRef.current === EditorBoxState.FullHeight;
-    prevEditorBoxStateRef.current = editorBoxState;
+    const prev = prevEditorStateRef.current;
+    prevEditorStateRef.current = { editorOpened, editorBoxState };
 
-    if (wasFullHeight && editorBoxState !== EditorBoxState.FullHeight) {
+    const wasFullSize = prev.editorOpened && prev.editorBoxState === EditorBoxState.FullHeight;
+    const isNowFullSize = editorOpened && editorBoxState === EditorBoxState.FullHeight;
+
+    if (wasFullSize && !isNowFullSize) {
       queryClient.invalidateQueries({ queryKey: ["document"] });
     }
-  }, [editorBoxState, queryClient]);
+  }, [editorOpened, editorBoxState, queryClient]);
 
   useEffect(() => {
     if (thirdPanelExpanded && editorBoxState !== EditorBoxState.FullHeight) {
