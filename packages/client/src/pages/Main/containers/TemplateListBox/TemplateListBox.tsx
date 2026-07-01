@@ -7,7 +7,7 @@ import Dropdown, { EntityTag } from "components/advanced";
 import { useTemplatesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -170,7 +170,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                           handleAskRemoveTemplate(templateEntity.id);
                         },
                         tooltipLabel: "delete template",
-                        icon: <IcoTrash />,
+                        icon: <IcoTrashSimple />,
                       }
                     }
                   />

@@ -109,6 +109,8 @@ export { FaUserTag as IcoUserTag } from "react-icons/fa";
 
 // fa6 — IcoTrash is the canonical trash icon; change here to swap everywhere
 export { FaTrashCan as IcoTrash } from "react-icons/fa6";
+// simpler outline variant (no lid detail) — used where a lighter icon fits better
+export { FaTrash as IcoTrashSimple } from "react-icons/fa";
 export { FaAnchorCircleCheck as IcoAnchorCheck } from "react-icons/fa6";
 export { FaArrowDownShortWide as IcoSortDown } from "react-icons/fa6";
 export { FaArrowDownLong as IcoArrowDownLong } from "react-icons/fa6";
