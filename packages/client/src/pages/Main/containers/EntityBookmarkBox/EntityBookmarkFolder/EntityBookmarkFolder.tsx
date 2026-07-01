@@ -7,31 +7,24 @@ import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
 import React, { useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import {
-  FaEdit,
-  FaFolder,
-  FaFolderOpen,
-  FaRegFolder,
-  FaRegFolderOpen,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaFolder, FaFolderOpen, FaRegFolder, FaRegFolderOpen } from "react-icons/fa";
+import { FaTrashCan } from "react-icons/fa6";
+import { MdEdit } from "react-icons/md";
 import { DragItem, ItemTypes } from "types";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
+  StyledEditButtonWrap,
   StyledFolderContent,
   StyledFolderContentTags,
   StyledFolderHeader,
   StyledFolderHeaderButtons,
   StyledFolderHeaderText,
-  StyledEditButtonWrap,
   StyledFolderSuggester,
   StyledFolderWrapper,
   StyledFolderWrapperOpenArea,
   StyledIconWrap,
   StyledRemoveButtonWrap,
 } from "./EntityBookmarkFolderStyles";
-import { MdEdit } from "react-icons/md";
-import { FaTrashCan } from "react-icons/fa6";
 
 interface EntityBookmarkFolder {
   bookmarkFolder: IResponseBookmarkFolder;
@@ -164,8 +157,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
             <StyledEditButtonWrap>
               <Button
                 key="edit"
-                icon={<MdEdit size={17} />}
-                // color="warning"
+                icon={<MdEdit size={18} />}
                 inverted
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
@@ -179,7 +171,6 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
               <Button
                 key="remove"
                 icon={<FaTrashCan size={14} />}
-                // color="danger"
                 inverted
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
