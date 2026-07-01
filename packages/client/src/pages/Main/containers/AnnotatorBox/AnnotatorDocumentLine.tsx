@@ -276,7 +276,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             {contentWidth > 0 && !isUndersized && (
               <>
                 <StyledInfoText style={{ textWrap: "nowrap" }}>
-                  <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
+                  <IconWithTooltip
+                    color="info"
+                    icon={<FaHighlighter size={14} />}
+                    tooltipLabel="Highlight"
+                  />
                 </StyledInfoText>
                 <Dropdown.Multi.Entity
                   shortLabel
