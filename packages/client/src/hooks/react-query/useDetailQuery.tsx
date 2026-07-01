@@ -9,6 +9,6 @@ export function useDetailQuery(entityId: string) {
       return res.data;
     },
     enabled: !!entityId && api.isLoggedIn(),
-    staleTime: 1.5 * 60 * 1000,
+    staleTime: 1 * 60 * 1000,
   });
 }

@@ -23,6 +23,7 @@ import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListR
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { useSelector } from "react-redux";
 import { useDebounce } from "hooks";
+import { useAppSelector } from "redux/hooks";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {
@@ -33,33 +34,28 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   } as { value: EntityEnums.Extension.Any; label: string };
   const allEntityOptions = [allEntityOption, ...entitiesDict];
 
-  const [filterByClass, setFilterByClass] = useState<
-    EntityEnums.Class | EntityEnums.Extension.Any
-  >(EntityEnums.Extension.Any);
+  const [filterByClass, setFilterByClass] = useState<EntityEnums.Class | EntityEnums.Extension.Any>(
+    EntityEnums.Extension.Any,
+  );
   const [filterByLabel, setFilterByLabel] = useState<string>("");
 
   const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
   const widthTooNarrow = fourthPanelWidth < 220;
 
-  const { data: allTemplatesData, isFetching: isFetchingTemplates } =
-    useTemplatesQuery();
+  // purposefully fetch on page load so the detail box can use it immediately
+  const { data: allTemplatesData, isFetching: isFetchingTemplates } = useTemplatesQuery();
 
   const templatesData = useMemo(() => {
     if (!allTemplatesData) {
       return [];
     }
     return allTemplatesData.filter((template: IEntity) => {
-      if (
-        filterByClass !== allEntityOption.value &&
-        template.class !== filterByClass
-      ) {
+      if (filterByClass !== allEntityOption.value && template.class !== filterByClass) {
         return false;
       }
       if (
         filterByLabel.length &&
-        !template.labels[0]
-          ?.toLocaleLowerCase()
-          .startsWith(filterByLabel.toLocaleLowerCase())
+        !template.labels[0]?.toLocaleLowerCase().startsWith(filterByLabel.toLocaleLowerCase())
       ) {
         return false;
       }
@@ -84,7 +80,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   const entityToRemove: false | IEntity = useMemo(() => {
     if (removeEntityId) {
       const templateToBeRemoved = templatesData?.find(
-        (template: IEntity) => template.id === removeEntityId
+        (template: IEntity) => template.id === removeEntityId,
       );
       return templateToBeRemoved || false;
     } else {
@@ -113,9 +109,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
 
         <StyledTemplateFilter>
           <StyledTemplateFilterInputRow>
-            <StyledTemplateFilterInputLabel>
-              {"Entity class: "}
-            </StyledTemplateFilterInputLabel>
+            <StyledTemplateFilterInputLabel>{"Entity class: "}</StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
               <div style={{ position: "relative" }}>
                 <Dropdown.Single.Entity
@@ -141,9 +135,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>
           <StyledTemplateFilterInputRow>
-            <StyledTemplateFilterInputLabel>
-              {"Label: "}
-            </StyledTemplateFilterInputLabel>
+            <StyledTemplateFilterInputLabel>{"Label: "}</StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
               <Input
                 value={filterByLabel}

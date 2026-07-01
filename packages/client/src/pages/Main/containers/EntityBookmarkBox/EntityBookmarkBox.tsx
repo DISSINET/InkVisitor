@@ -26,10 +26,11 @@ import { IcoTrash } from "Theme/icons";
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelBoxesOpened,
+  const isBookmarksBoxOpen = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened.bookmarks,
   );
 
+  const fourthPanelExpanded = useAppSelector((state) => state.layout.mainPage.fourthPanelExpanded);
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
   const [removingFolder, setRemovingFolder] = useState<string | false>(false);
   const [creatingFolder, setCreatingFolder] = useState<boolean>(false);
@@ -38,7 +39,7 @@ export const EntityBookmarkBox: React.FC = () => {
 
   // User query
   const { data: bookmarkFolders, isFetching } = useBookmarksQuery(
-    fourthPanelBoxesOpened["bookmarks"],
+    isBookmarksBoxOpen && fourthPanelExpanded,
   );
 
   const removingFolderName = useMemo(() => {
