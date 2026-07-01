@@ -31,7 +31,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   onChangeFn = () => {},
   label,
   icon,
-  size = 16,
+  size = 15,
   tooltipLabel,
   tooltipContent,
   iconOnly = false,

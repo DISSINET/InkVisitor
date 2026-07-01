@@ -285,12 +285,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
-    const size = 15;
     const hasSelection = isAllSelected || selectedRows.length > 0;
 
     return (
       <Checkbox
-        size={size}
         value={isAllSelected}
         indeterminate={!isAllSelected && selectedRows.length > 0}
         onChangeFn={() => {

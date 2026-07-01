@@ -159,7 +159,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         id: "selection",
         Cell: ({ row }: CellType) => {
-          const size = 15;
           const checked = selectedRows.includes(row.id);
           const isFocused = lastClickedIndex === row.index;
 
@@ -168,7 +167,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               {isFocused && <StyledFocusedCircle checked={checked} />}
               <StyledSelectionCheckbox>
                 <Checkbox
-                  size={size}
                   value={checked}
                   onChangeFn={(_value, e) => {
                     if (e?.shiftKey && lastClickedIndex !== -1 && lastClickedIndex !== row.index) {
