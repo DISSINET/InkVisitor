@@ -55,7 +55,6 @@ interface Suggester {
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
   onHover: (item: EntityDragItem) => void;
   onCancel: () => void;
-  onFocus?: () => void;
   cleanOnSelect?: boolean;
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
@@ -101,7 +100,6 @@ export const Suggester: React.FC<Suggester> = ({
   onDrop,
   onHover,
   onCancel,
-  onFocus,
   isFetching,
   isWrongDropCategory,
   isInsideTemplate = false,
@@ -363,7 +361,6 @@ export const Suggester: React.FC<Suggester> = ({
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);
-              onFocus?.();
             }}
             onBlur={() => setIsFocused(false)}
             disableTyping
@@ -393,7 +390,6 @@ export const Suggester: React.FC<Suggester> = ({
               roundCorners={false}
               onFocus={() => {
                 setIsFocused(true);
-                onFocus?.();
               }}
               onBlur={() => {
                 // Comment this for debug

@@ -35,9 +35,10 @@ interface EntitySuggesterProps {
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
-  // territoryId of the territory whose actant entity ids are fetched (lazily,
-  // only once the suggester is actively searching) to render the home icon next
-  // to suggestion list items in the StatementEditor.
+  // territoryId keys the cached set of entity ids already used in the territory,
+  // used to render the home icon next to suggestion list items. The cache is
+  // seeded by the StatementEditor from its territoryData - this component never
+  // fetches it, so the icon only appears where that seed exists (StatementEditor).
   territoryId?: string;
   excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
@@ -150,9 +151,6 @@ const EntitySuggesterFull: React.FC<
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
-  // becomes true once the suggester is focused, so the territory actants query
-  // runs on focus - the preSuggestions (territory-based) are shown before typing.
-  const [hasFocused, setHasFocused] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
   >();
@@ -232,22 +230,17 @@ const EntitySuggesterFull: React.FC<
       api.isLoggedIn(),
   });
 
-  // territory actants query - fetched lazily, only once the suggester is
-  // actively searching, to mark suggestions already present in the territory.
-  const { data: fetchedTerritoryActants } = useQuery({
+  // territory actants - the ids of entities already used in the territory, used
+  // to mark such suggestions with a home icon. This never fetches: the StatementEditor
+  // seeds this cache from its already-loaded territoryData (same id set as
+  // api.entityIdsInTerritory). Elsewhere (e.g. entity detail) nothing seeds it,
+  // so it resolves to [] and no home icon is shown - it is only relevant there.
+  const { data: territoryActantIds } = useQuery<string[]>({
     queryKey: ["territoryActants", territoryId],
-    queryFn: async () => {
-      if (territoryId) {
-        const res = await api.entityIdsInTerritory(territoryId);
-        return res.data ?? [];
-      }
-      return [];
-    },
-    enabled: !!territoryId && hasFocused && api.isLoggedIn(),
-    staleTime: 1000 * 60 * 5,
+    queryFn: async () => [],
+    enabled: !!territoryId,
+    staleTime: Infinity,
   });
-
-  const territoryActantIds = fetchedTerritoryActants;
 
   const filterSuggestions = (suggestions: IResponseEntity[]) => {
     return (
@@ -480,7 +473,6 @@ const EntitySuggesterFull: React.FC<
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
         onCancel={handleClean}
-        onFocus={() => setHasFocused(true)}
         onType={(newType: string) => {
           setTyped(newType);
           onTyped && onTyped(newType);

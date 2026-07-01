@@ -196,6 +196,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     enabled: !!statementId && !!statementTerritoryId,
   });
 
+  // territoryData already carries every entity referenced by the territory's
+  // statements - the same set api.entityIdsInTerritory returns. Seed the shared
+  // ["territoryActants"] cache from it so the EntitySuggesters in this editor
+  // resolve the home-icon ids from cache instead of firing a redundant request.
+  useEffect(() => {
+    if (statementTerritoryId && territoryData) {
+      queryClient.setQueryData(
+        ["territoryActants", statementTerritoryId],
+        Object.keys(territoryData.entities),
+      );
+    }
+  }, [statementTerritoryId, territoryData]);
+
   // get data for the previous statement
   const previousStatement: false | IResponseStatement = useMemo(() => {
     if (territoryData) {

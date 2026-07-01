@@ -10,7 +10,7 @@ import {
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { FaHighlighter, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -1442,7 +1442,7 @@ export const TextAnnotator = ({
                 <StyledDisplayModeButtonIconWrapper
                   $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                 >
-                  <FaPen size={11} />
+                  <FaHighlighter size={11} />
                 </StyledDisplayModeButtonIconWrapper>
               }
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}

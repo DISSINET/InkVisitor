@@ -23,11 +23,15 @@ import {
   StyledFolderHeader,
   StyledFolderHeaderButtons,
   StyledFolderHeaderText,
+  StyledEditButtonWrap,
   StyledFolderSuggester,
   StyledFolderWrapper,
   StyledFolderWrapperOpenArea,
   StyledIconWrap,
+  StyledRemoveButtonWrap,
 } from "./EntityBookmarkFolderStyles";
+import { MdEdit } from "react-icons/md";
+import { FaTrashCan } from "react-icons/fa6";
 
 interface EntityBookmarkFolder {
   bookmarkFolder: IResponseBookmarkFolder;
@@ -157,30 +161,34 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
 
         <StyledFolderHeaderButtons>
           <ButtonGroup $smallGap>
-            <Button
-              key="edit"
-              icon={<FaEdit size={16} />}
-              color="warning"
-              inverted
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                startEditingFolder(bookmarkFolder);
-              }}
-              noBackground
-              noBorder
-            />
-            <Button
-              key="remove"
-              icon={<FaTrashAlt size={14} />}
-              color="danger"
-              inverted
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                askRemoveFolder(bookmarkFolder.id);
-              }}
-              noBackground
-              noBorder
-            />
+            <StyledEditButtonWrap>
+              <Button
+                key="edit"
+                icon={<MdEdit size={17} />}
+                // color="warning"
+                inverted
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  startEditingFolder(bookmarkFolder);
+                }}
+                noBackground
+                noBorder
+              />
+            </StyledEditButtonWrap>
+            <StyledRemoveButtonWrap>
+              <Button
+                key="remove"
+                icon={<FaTrashCan size={14} />}
+                // color="danger"
+                inverted
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  askRemoveFolder(bookmarkFolder.id);
+                }}
+                noBackground
+                noBorder
+              />
+            </StyledRemoveButtonWrap>
           </ButtonGroup>
         </StyledFolderHeaderButtons>
       </StyledFolderHeader>

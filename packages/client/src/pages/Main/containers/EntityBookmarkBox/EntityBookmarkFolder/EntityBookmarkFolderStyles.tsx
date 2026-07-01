@@ -110,3 +110,21 @@ export const StyledFolderContentTag = styled.div`
   display: inline-block;
 `;
 export const StyledFolderSuggester = styled.div``;
+
+export const StyledEditButtonWrap = styled.div`
+  display: flex;
+  align-items: center;
+
+  &:hover button {
+    color: ${({ theme }) => theme.color["warning"]};
+  }
+`;
+
+export const StyledRemoveButtonWrap = styled.div`
+  display: flex;
+  align-items: center;
+
+  &:hover button {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
