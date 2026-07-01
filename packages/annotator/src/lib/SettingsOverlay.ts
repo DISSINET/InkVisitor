@@ -71,7 +71,12 @@ export class SettingsOverlay {
    */
   private colors: MenuColors = LIGHT_MENU_COLORS;
 
-  open(settings: SettingControl[] = [], anchor?: HTMLElement, footer: FooterAction[] = [], colors?: MenuColors): void {
+  open(
+    settings: SettingControl[] = [],
+    anchor?: HTMLElement,
+    footer: FooterAction[] = [],
+    colors?: MenuColors
+  ): void {
     if (colors) this.colors = colors;
     this.close();
 
@@ -113,7 +118,7 @@ export class SettingsOverlay {
 
     const body = document.createElement("div");
     Object.assign(body.style, {
-      padding: "16px 14px",
+      padding: "1.2rem",
       display: "flex",
       flexDirection: "column",
       gap: "14px",
@@ -222,7 +227,7 @@ export class SettingsOverlay {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "10px 14px",
+      padding: "1.2rem",
       borderBottom: `1px solid ${this.colors.separator}`,
       fontWeight: "bold",
     } as Partial<CSSStyleDeclaration>);
@@ -231,12 +236,12 @@ export class SettingsOverlay {
     title.textContent = "Options";
 
     const closeBtn = document.createElement("span");
-    closeBtn.textContent = "×";
+    closeBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="3" x2="13" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="13" y1="3" x2="3" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
     Object.assign(closeBtn.style, {
       cursor: "pointer",
-      padding: "0 4px",
-      fontSize: "18px",
-      lineHeight: "1",
+      padding: "0",
+      display: "flex",
+      alignItems: "center",
     } as Partial<CSSStyleDeclaration>);
     closeBtn.addEventListener("mousedown", (e) => {
       e.preventDefault();
@@ -256,7 +261,7 @@ export class SettingsOverlay {
       display: "flex",
       justifyContent: "flex-end",
       gap: "8px",
-      padding: "10px 14px",
+      padding: "1.2rem",
       borderTop: `1px solid ${this.colors.separator}`,
     } as Partial<CSSStyleDeclaration>);
 
@@ -267,7 +272,7 @@ export class SettingsOverlay {
       Object.assign(btn.style, {
         font: "inherit",
         fontWeight: "bold",
-        padding: "6px 14px",
+        padding: "6px 1.4rem",
         border: "none",
         borderRadius: "5px",
         background: this.colors.accent,
@@ -402,7 +407,7 @@ export class SettingsOverlay {
       const seg = document.createElement("div");
       seg.textContent = opt.label;
       Object.assign(seg.style, {
-        padding: "4px 12px",
+        padding: "0.4rem 1rem",
         cursor: "pointer",
         borderRadius: "3px",
         transition: "background-color 0.12s ease",

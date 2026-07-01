@@ -88,8 +88,9 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
 export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
   display: flex;
   flex-shrink: 0;
-  font-size: 1.7rem;
+  font-size: 1.8rem;
   margin-right: 0.2rem;
+  margin-bottom: 0.1rem;
   color: ${({ theme, $color }) => ($color ? theme.color[$color] : "inherit")};
 `;
 interface StyledCardTitle {

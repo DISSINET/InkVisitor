@@ -20,6 +20,8 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
+import { MdEdit } from "react-icons/md";
+import { FaTrashCan } from "react-icons/fa6";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -218,17 +220,19 @@ export const EntityBookmarkBox: React.FC = () => {
         showModal={isFolderModalOpen}
         onClose={closeFolderModal}
         onEnterPress={submitFolderModal}
+        width={350}
       >
-        <ModalHeader title="Bookmark Folder" />
+        <ModalHeader icon={<MdEdit />} title="Edit Bookmark folder" />
         <ModalContent>
           <Input
-            label="Bookmark folder name: "
+            label="new label:"
             labelSpaceNoWrap
             placeholder=""
             onChangeFn={(newName: string) => setEditingFolderName(newName)}
             value={editingFolderName}
             changeOnType
             autoFocus
+            width="full"
           />
         </ModalContent>
 
@@ -249,6 +253,7 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       <Submit
+        headerIcon={<FaTrashCan size={14} />}
         title={`Delete Bookmark folder ${removingFolderName}`}
         text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}
