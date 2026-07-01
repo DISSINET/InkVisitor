@@ -150,6 +150,9 @@ const EntitySuggesterFull: React.FC<
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
+  // becomes true once the suggester is focused, so the territory actants query
+  // runs on focus - the preSuggestions (territory-based) are shown before typing.
+  const [hasFocused, setHasFocused] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
   >();
@@ -240,7 +243,7 @@ const EntitySuggesterFull: React.FC<
       }
       return [];
     },
-    enabled: !!territoryId && debouncedTyped.length > 1 && api.isLoggedIn(),
+    enabled: !!territoryId && hasFocused && api.isLoggedIn(),
     staleTime: 1000 * 60 * 5,
   });
 
@@ -281,7 +284,7 @@ const EntitySuggesterFull: React.FC<
           const icons: React.ReactNode[] = [];
 
           if (territoryActantIds?.includes(entity.id)) {
-            icons.push(<FaHome key={entity.id} color="" />);
+            icons.push(<FaHome key={entity.id} size={12} />);
           }
 
           return {
@@ -477,6 +480,7 @@ const EntitySuggesterFull: React.FC<
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
         onCancel={handleClean}
+        onFocus={() => setHasFocused(true)}
         onType={(newType: string) => {
           setTyped(newType);
           onTyped && onTyped(newType);
