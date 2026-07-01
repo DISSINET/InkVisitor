@@ -114,6 +114,7 @@ const theme = {
 
     tooltipColor: "#fff",
     tooltipBackground: "#000",
+    tooltipNodeBackground: "#324185",
     tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
     tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
 
@@ -122,6 +123,8 @@ const theme = {
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
+    menuHover: "#CCD5F4",
+    pageBg: "#edf2f7",
     menuShadow: "rgba(0, 0, 0, 0.3)",
 
     closeBtnBackground: "rgba(130, 130, 130, 0.1)",
@@ -226,12 +229,19 @@ const theme = {
   },
   borderRadius: {
     none: "0",
-    xs: "0.25rem",
+    xs: "0.3rem",
     sm: "0.5rem",
-    default: "0.75rem",
+    default: "0.8rem",
     md: "1rem",
     lg: "1.5rem",
     full: "9999px",
+    input: "0.5rem",
+    // for Button component
+    "rounded-sm": "0.3rem",
+    "rounded-md": "0.5rem",
+    "rounded-lg": "0.8rem",
+    "rounded-xl": "1rem",
+    "rounded-full": "9999px",
   },
   borderStyle: {
     //logical type

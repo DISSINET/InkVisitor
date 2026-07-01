@@ -33,7 +33,7 @@ const darkTheme = {
     },
     invertedBg: {
       plain: "#2d3748",
-      danger: "#661313",
+      danger: "#3D1A1A",
       info: "#1e1d3d",
       success: "#1d1d4a",
       primary: "#0b3a59",
@@ -86,6 +86,8 @@ const darkTheme = {
 
     statsChartCursor: "rgba(246, 246, 255, 0.08)", // gentle primary tint for hovered column
 
+    pageBg: "#283040",
+    menuHover: "#222A40",
     closeBtnBackground: "rgba(200, 200, 200, 0.1)",
 
     staging: "#911111",

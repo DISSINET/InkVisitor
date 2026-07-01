@@ -1,7 +1,7 @@
 /**
- * Phase 4 (#3086) — undo/redo end-to-end through the keyboard + public API.
+ * (#3086) — undo/redo end-to-end through the keyboard + public API.
  *
- * Snapshots are document string + offsets (Phase 3), so undo restores both the
+ * Snapshots are document string + offsets, so undo restores both the
  * text and the caret. Coalescing: a contiguous run of single-char typing is one
  * undo step; Enter / Backspace / Delete / paste / replace are discrete steps.
  */

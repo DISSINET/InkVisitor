@@ -69,36 +69,36 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     <>
       <div style={{ display: "flex", flexDirection: "column", height }}>
         {!isStatsEmpty && (
-        <ExplorerControlBar
-          mode={state.view.mode}
-          filters={state.filters}
-          dispatch={dispatch}
-          isQueryFetching={isQueryFetching}
-          selection={
-            isStats
-              ? undefined
-              : {
-                  selectedCount: controls.selectedEntityIds.length,
-                  isAllCurrentSelected: controls.isAllCurrentSelected,
-                  hasPartialSelection: controls.hasPartialSelection,
-                  rowsTotal: controls.total,
-                  onAllRowsSelect: controls.handleAllRowsSelect,
-                  setRowLastClicked: controls.setRowLastClicked,
-                  batchActionSelected: controls.batchActionSelected,
-                  setBatchActionSelected: controls.setBatchActionSelected,
-                  onApplyBatchAction: controls.handleApplyBatchAction,
-                  canBatchEdit,
-                }
-          }
-          newColumn={
-            isStats
-              ? undefined
-              : {
-                  isNewColumnOpen: controls.isNewColumnOpen,
-                  setIsNewColumnOpen: controls.setIsNewColumnOpen,
-                }
-          }
-        />
+          <ExplorerControlBar
+            mode={state.view.mode}
+            filters={state.filters}
+            dispatch={dispatch}
+            isQueryFetching={isQueryFetching}
+            selection={
+              isStats
+                ? undefined
+                : {
+                    selectedCount: controls.selectedEntityIds.length,
+                    isAllCurrentSelected: controls.isAllCurrentSelected,
+                    hasPartialSelection: controls.hasPartialSelection,
+                    rowsTotal: controls.total,
+                    onAllRowsSelect: controls.handleAllRowsSelect,
+                    setRowLastClicked: controls.setRowLastClicked,
+                    batchActionSelected: controls.batchActionSelected,
+                    setBatchActionSelected: controls.setBatchActionSelected,
+                    onApplyBatchAction: controls.handleApplyBatchAction,
+                    canBatchEdit,
+                  }
+            }
+            newColumn={
+              isStats
+                ? undefined
+                : {
+                    isNewColumnOpen: controls.isNewColumnOpen,
+                    setIsNewColumnOpen: controls.setIsNewColumnOpen,
+                  }
+            }
+          />
         )}
 
         <div style={{ flex: 1, minHeight: 0 }}>

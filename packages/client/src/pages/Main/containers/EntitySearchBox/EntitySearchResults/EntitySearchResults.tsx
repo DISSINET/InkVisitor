@@ -30,7 +30,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
 
   return (
     <>
-      {results?.length && (
+      {results && results.length > 0 && (
         <StyledResultsAnimatedWrap style={animatedHeight}>
           <List
             rowProps={{ data }}
@@ -68,6 +68,7 @@ const Row: React.FC<Row> = ({ data, index, style }) => {
                 tooltipLabel="open statement in editor"
                 color="plain"
                 inverted
+                shape="sharp"
                 icon={<FaEdit />}
                 onClick={() => setStatementId(entity.id)}
               />

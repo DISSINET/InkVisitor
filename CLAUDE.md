@@ -16,5 +16,5 @@
 - Always use styled-components instead of inline `style={}` props. Prefer creating
   new styled components in the corresponding `*Styles.tsx` file.
 - Always use theme values for colors (including black text: `theme.color["black"]`),
-  font sizes, spacing, etc. Never hardcode color values — the app supports dark mode
+  font sizes, etc. Never hardcode color values — the app supports dark mode
   and hardcoded colors break it.

@@ -10,11 +10,11 @@ export const StyledBoxContent = styled.div`
 
 export const StyledTemplateSection = styled.div`
   position: relative;
-  padding: ${({ theme }) => theme.space[6]};
+  margin-top: 0.3rem;
   background-color: ${({ theme }) => theme.color["white"]};
 `;
 export const StyledTemplateSectionHeader = styled.div`
-  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space["2"]};
   color: ${({ theme }) => theme.color["primary"]};

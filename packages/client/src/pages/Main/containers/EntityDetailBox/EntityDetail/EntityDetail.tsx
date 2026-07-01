@@ -920,7 +920,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 {isSectionExpanded(EntityDetailSection.UsedIn) && (
                   <StyledDetailSectionContent>
                     {/* used as template */}
-                    {entity.isTemplate && entity.usedAsTemplate && (
+                    {!!entity.isTemplate && entity.usedAsTemplate && (
                       <>
                         <StyledUsedAsHeading>
                           <StyledUsedAsTitle>

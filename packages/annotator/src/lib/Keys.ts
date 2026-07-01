@@ -1,7 +1,7 @@
 import { EditMode } from "./constants";
 import Cursor from "./Cursor";
 import { HistorySnapshot } from "./History";
-import Text from "./Text";
+import Text, { CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
 
 /** Snapshot of caret before an arrow-key nudge (absolute line / column). */
@@ -41,12 +41,18 @@ export interface AnnotatorCallbacks {
   resetCaretBlink(): void;
   width: number;
   charWidth: number;
+  /**
+   * Proportional text flag. When true, vertical Up/Down remember the
+   * caret's pixel x (goal-column resolved via the prefix table); when false,
+   * legacy char-column goal behavior applies.
+   */
+  proportional: boolean;
   cursor: Cursor;
   viewport: Viewport;
   text: Text;
   element: HTMLCanvasElement;
   scrollExtentLineCount(): number;
-  // Phase 4 (#3086) — undo/redo
+  // undo/redo (#3086)
   captureSnapshot(): HistorySnapshot;
   recordHistory(before: HistorySnapshot, coalesce: boolean): void;
   undo(): void;
@@ -70,7 +76,7 @@ export default class Keys {
   }
 
   /**
-   * Phase 3 — after a navigation handler has moved the visual caret, make the
+   * After a navigation handler has moved the visual caret, make the
    * canonical `head` offset follow it and either EXTEND the selection (shift:
    * `anchor` stays fixed, selectStart/End are derived from anchor/head) or
    * COLLAPSE it (anchor = head, selection cleared). Replaces the visual-anchor
@@ -179,15 +185,34 @@ export default class Keys {
     } else {
       // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
+      const beforeOffset = this.text.offsetFromVisual(before.xLine, before.yLine);
       this.onArrowLeft({
         ctrlKey: ctrlKey || altKey,
         shiftKey,
         altKey: false,
         metaKey: false,
       });
-      const after = this.cursor.getAbsolutePosition();
+      let after = this.cursor.getAbsolutePosition();
+      let caretOffset = this.text.offsetFromVisual(after.xLine, after.yLine);
 
+      // Soft-wrap boundary: the start of a continuation line and the end of the
+      // previous line are the SAME offset, so arrow-left can move the caret
+      // visually without moving the offset
+      if (
+        beforeOffset >= 0 &&
+        caretOffset === beforeOffset &&
+        (after.xLine !== before.xLine || after.yLine !== before.yLine)
+      ) {
+        const next = this.text.stepVisualLeft(after.xLine, after.yLine);
+        after = { xLine: next.xLine, yLine: next.yLine };
+        caretOffset = this.text.offsetFromVisual(after.xLine, after.yLine);
+      }
+
+      // Capture the caret's landing offset (the left edge of the deletion) BEFORE the edit
       this.text.deleteRangeText(before, after);
+      if (caretOffset >= 0) {
+        this.cursor.moveToOffset(this.text, caretOffset);
+      }
     }
   }
 
@@ -227,9 +252,16 @@ export default class Keys {
       });
       const after = this.cursor.getAbsolutePosition();
 
+      // Caret stays at before (the left edge). Capture its offset before the
+      // edit and re-derive the visual position afterwards
+      const caretOffset = this.text.offsetFromVisual(before.xLine, before.yLine);
       this.text.deleteRangeText(before, after);
-      this.cursor.xLine = before.xLine;
-      this.cursor.yLine = before.yLine;
+      if (caretOffset >= 0) {
+        this.cursor.moveToOffset(this.text, caretOffset);
+      } else {
+        this.cursor.xLine = before.xLine;
+        this.cursor.yLine = before.yLine;
+      }
     }
   }
 
@@ -363,11 +395,19 @@ export default class Keys {
 
     // Preserve the desired column across vertical moves (goal column): clamp to
     // this line for the move, but remember the original column to restore later.
+    // In proportional mode the goal is a remembered PIXEL x, resolved to
+    // the nearest column on each line (captured once, alongside goalColumn).
     if (this.cursor.goalColumn === null) {
       this.cursor.goalColumn = originalXLine;
+      this.cursor.goalPixelX = this.annotator.proportional
+        ? this.text.columnToPixelX(originalAbsYline, originalXLine)
+        : null;
     }
     const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-    this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
+    this.cursor.xLine =
+      this.annotator.proportional && this.cursor.goalPixelX !== null
+        ? this.text.pixelXToColumn(this.cursor.yLine, this.cursor.goalPixelX)
+        : Math.min(this.cursor.goalColumn, line.length);
 
     this.finishCaretMove(!!shiftKey);
     this.scrollCursorIntoView();
@@ -440,8 +480,12 @@ export default class Keys {
     }
 
     // Preserve the desired column across vertical moves (goal column).
+    // Proportional mode remembers a pixel x (see onArrowUp).
     if (this.cursor.goalColumn === null) {
       this.cursor.goalColumn = originalXLine;
+      this.cursor.goalPixelX = this.annotator.proportional
+        ? this.text.columnToPixelX(originalAbsYline, originalXLine)
+        : null;
     }
 
     this.cursor.move(0, 1);
@@ -453,7 +497,10 @@ export default class Keys {
       this.cursor.yLine = Math.max(0, this.text.noLines - 1);
       this.cursor.xLine = line.length;
     } else {
-      this.cursor.xLine = Math.min(this.cursor.goalColumn, line.length);
+      this.cursor.xLine =
+        this.annotator.proportional && this.cursor.goalPixelX !== null
+          ? this.text.pixelXToColumn(this.cursor.yLine, this.cursor.goalPixelX)
+          : Math.min(this.cursor.goalColumn, line.length);
     }
 
     this.finishCaretMove(!!shiftKey);
@@ -603,19 +650,21 @@ export default class Keys {
           Math.min(this.cursor.anchor, this.cursor.head)
         );
       } else {
-        const next = this.text.stepVisualLeft(
-          this.cursor.xLine,
-          this.cursor.yLine
-        );
-        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-          next.xLine,
-          next.yLine
-        );
-        this.cursor.head = offset;
-        this.cursor.headAffinity = affinity;
+        const beforeOffset = this.cursor.head;
+        let next = this.text.stepVisualLeft(this.cursor.xLine, this.cursor.yLine);
+        let info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+        // Plain Left lands on the previous line's end (the boundary's two
+        // visual positions share one offset). For shift that flip wouldn't grow
+        // the selection, so step once more so shift+Left selects a char. #3145
+        if (shiftKey && info.offset === beforeOffset) {
+          next = this.text.stepVisualLeft(next.xLine, next.yLine);
+          info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+        }
+        this.cursor.head = info.offset;
+        this.cursor.headAffinity = info.affinity;
         if (!shiftKey) {
-          this.cursor.anchor = offset;
-          this.cursor.anchorAffinity = affinity;
+          this.cursor.anchor = info.offset;
+          this.cursor.anchorAffinity = info.affinity;
         }
         this.cursor.syncVisualFromOffset(this.text);
       }
@@ -798,19 +847,20 @@ export default class Keys {
       } else {
         // Step one visible column right (crosses line boundaries, honours the
         // soft-wrap affinity, clamps at EOF), then store the canonical offset.
-        const next = this.text.stepVisualRight(
-          this.cursor.xLine,
-          this.cursor.yLine
-        );
-        const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-          next.xLine,
-          next.yLine
-        );
-        this.cursor.head = offset;
-        this.cursor.headAffinity = affinity;
+        const beforeOffset = this.cursor.head;
+        let next = this.text.stepVisualRight(this.cursor.xLine, this.cursor.yLine);
+        let info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+        // Symmetric to ArrowLeft: plain Right lands on the next line's start;
+        // for shift, step once more so it selects a char instead of just flipping.
+        if (shiftKey && info.offset === beforeOffset) {
+          next = this.text.stepVisualRight(next.xLine, next.yLine);
+          info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+        }
+        this.cursor.head = info.offset;
+        this.cursor.headAffinity = info.affinity;
         if (!shiftKey) {
-          this.cursor.anchor = offset;
-          this.cursor.anchorAffinity = affinity;
+          this.cursor.anchor = info.offset;
+          this.cursor.anchorAffinity = info.affinity;
         }
         // Derive caret + selectStart/selectEnd from anchor/head.
         this.cursor.syncVisualFromOffset(this.text);
@@ -1032,10 +1082,21 @@ export default class Keys {
             this.cursor.xLine,
             this.cursor.yLine
           );
+          // captured before the edit mutates affinity
+          const wasAtWrappedLineEnd =
+            this.cursor.headAffinity === CaretAffinity.UPSTREAM;
           this.text.insertText(this.viewport, this.cursor, key);
           const insertAt =
             insertOffset >= 0 ? insertOffset : this.cursor.head;
-          this.cursor.moveToOffset(this.text, insertAt + key.length);
+          const caretAt = insertAt + key.length;
+          // Typing at a wrapped line's end keeps the caret there (UPSTREAM)
+          // instead of jumping to the next line; a mid-line tail that wraps
+          // down still follows it (DOWNSTREAM). #3145
+          const typedAffinity =
+            wasAtWrappedLineEnd && this.text.isWrapBoundary(caretAt)
+              ? CaretAffinity.UPSTREAM
+              : CaretAffinity.DOWNSTREAM;
+          this.cursor.moveToOffset(this.text, caretAt, typedAffinity);
 
           // When typing moves the cursor outside of the current viewport,
           // keep behaviour consistent with arrow keys and scroll so that

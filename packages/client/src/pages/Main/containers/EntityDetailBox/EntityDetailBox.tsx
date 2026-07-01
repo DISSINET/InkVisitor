@@ -126,11 +126,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
 
   return (
     <>
-      {(showContent || detailBoxMinimized) && (
+      {entities && entities.length > 0 && (
         <StyledTabGroup>
-          {entities &&
-            entities.length > 0 &&
-            entities?.map((entity, key) => (
+          {entities.map((entity, key) => (
               <EntityDetailTab
                 key={key}
                 index={key}
@@ -162,7 +160,11 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
             isFetching={isFetching}
           />
         ) : (
-          <>{(ping === -10 || ping >= 0) && !detailBoxMinimized && <Loader show />}</>
+          <>
+            {(ping === -10 || ping >= 0) && !detailBoxMinimized && (
+              <Loader show />
+            )}
+          </>
         )}
       </>
     </>

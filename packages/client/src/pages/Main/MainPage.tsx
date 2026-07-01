@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Box, Button, ButtonGroup, Panel } from "components";
+import { Box, Button, ButtonGroup, IconButton, Panel } from "components";
 import {
   EntityCreateModal,
   LayoutSeparatorHorizontal,
@@ -39,7 +39,7 @@ import {
   SECOND_PANEL_MIN_WIDTH,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
-import { DetailBoxState, EditorBoxState } from "types";
+import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
@@ -106,8 +106,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const thirdPanelRealWidth: number = useAppSelector(
     (state) => state.layout.mainPage.thirdPanelRealWidth,
   );
+  const prevStatementIdRef = useRef(statementId);
   useEffect(() => {
-    if (statementId && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
+    const isNewStatement = prevStatementIdRef.current !== statementId;
+    prevStatementIdRef.current = statementId;
+
+    if (statementId && isNewStatement && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
       setEditorOpened(true);
       dispatch(setEditorBoxState(EditorBoxState.Normal));
     }
@@ -250,27 +254,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
     });
 
   const firstPanelButton = () => (
-    <Button
+    <IconButton
       onClick={toggleFirstPanel}
-      inverted
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
 
   const secondPanelButton = () => (
-    <Button
+    <IconButton
       onClick={toggleSecondPanel}
-      inverted
       icon={secondPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
 
-  const reverseThirdPanelIcon = !secondPanelExpanded;
+  const reverseThirdPanelIcon =
+    !firstPanelExpanded ||
+    !secondPanelExpanded ||
+    (!thirdPanelExpanded && fourthPanelExpanded) ||
+    (firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded);
 
   const thirdPanelButton = () => (
-    <Button
+    <IconButton
       onClick={toggleThirdPanel}
-      inverted
       icon={
         reverseThirdPanelIcon ? (
           thirdPanelExpanded ? (
@@ -294,6 +299,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
       key="hide"
       onClick={toggleFourthPanel}
       inverted
+      shape="square"
+      size={ButtonSize.Small}
       icon={
         reverseFourthPanelIcon ? (
           fourthPanelExpanded ? (
@@ -582,7 +589,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Territories"
           isExpanded={firstPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["tree", "territory", "user"]} isHidden={!firstPanelExpanded} />,
+            <RefreshBoxButton
+              queriesToRefresh={["tree", "territory", "user"]}
+              isHidden={!firstPanelExpanded}
+            />,
             firstPanelButton(),
           ]}
           noFrame
@@ -610,7 +620,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 <>
                   {territoryId && (
                     <ButtonGroup style={{ marginRight: "0.5rem" }}>
-                      <Button
+                      <IconButton
                         color="info"
                         icon={<FaDiagramNext style={{ transform: "rotate(180deg)" }} />}
                         tooltipLabel="go to previous territory"
@@ -623,8 +633,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                           }
                         }}
                         disabled={!previousTerritoryId}
+                        inverted={false}
                       />
-                      <Button
+                      <IconButton
                         color="info"
                         icon={<FaDiagramNext />}
                         tooltipLabel="go to next territory"
@@ -637,6 +648,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                           }
                         }}
                         disabled={!nextTerritoryId}
+                        inverted={false}
                       />
                     </ButtonGroup>
                   )}
@@ -663,9 +675,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     </ButtonGroup>
                   )}
                 </>,
-                statementListOpened &&
-                  territoryId &&
-                  <RefreshBoxButton queriesToRefresh={["territory", "statement", "user"]} isHidden={false} />,
+                statementListOpened && territoryId && (
+                  <RefreshBoxButton
+                    queriesToRefresh={["territory", "statement", "user"]}
+                    isHidden={false}
+                  />
+                ),
                 secondPanelButton(),
               ]}
             >
@@ -690,9 +705,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
                       />
                     )}
                   </>,
-                  <Button
+                  <IconButton
                     dataTestId="maximize-detail-box"
-                    inverted
                     tooltipLabel={getMaximizeBtnTooltip()}
                     icon={
                       detailBoxState === DetailBoxState.Normal ? (
@@ -705,16 +719,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />,
                   <>
                     {detailBoxState !== DetailBoxState.Minimized && (
-                      <Button
+                      <IconButton
                         tooltipLabel={"minimize detail box"}
-                        inverted
                         icon={<BiHide />}
                         onClick={handleMinimizeDetailBox}
                       />
                     )}
                   </>,
-                  <Button
-                    inverted
+                  <IconButton
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={() => {
@@ -729,14 +741,26 @@ const MainPage: React.FC<MainPage> = ({}) => {
             )}
           </>
         ) : (
-          <Box
-            height={contentHeight}
-            label="Statements"
-            borderColor="white"
-            isExpanded={false}
-            buttons={[secondPanelButton()]}
-            onHeaderClick={toggleSecondPanel}
-          />
+          <>
+            <Box
+              height={getStatementListBoxHeight()}
+              label="Statements"
+              borderColor="white"
+              isExpanded={false}
+              buttons={[secondPanelButton()]}
+              onHeaderClick={toggleSecondPanel}
+            />
+            {(selectedDetailId || detailIdArray.length > 0) && (
+              <Box
+                height={getDetailBoxHeight()}
+                label="Detail"
+                borderColor="white"
+                isExpanded={false}
+                buttons={[secondPanelButton()]}
+                onHeaderClick={toggleSecondPanel}
+              />
+            )}
+          </>
         )}
         {showEntityCreateModal && (
           <EntityCreateModal
@@ -780,9 +804,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
               <>
                 {thirdPanelExpanded && (
                   <>
-                    <Button
+                    <IconButton
                       key="maximize-editor"
-                      inverted
                       tooltipLabel={getEditorMaximizeBtnTooltip()}
                       icon={
                         editorOpened && editorBoxState === EditorBoxState.Normal ? (
@@ -798,9 +821,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
               </>,
               <>
                 {thirdPanelExpanded && editorOpened && (
-                  <Button
+                  <IconButton
                     key="hide-editor"
-                    inverted
                     tooltipLabel="minimize editor box"
                     icon={<BiHide />}
                     onClick={() => setEditorOpened(false)}
@@ -809,9 +831,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
               </>,
               <>
                 {thirdPanelExpanded && (
-                  <Button
+                  <IconButton
                     key="close-editor"
-                    inverted
                     tooltipLabel="close editor box"
                     icon={<VscClose style={{ transform: "scale(1.3)" }} />}
                     onClick={() => {
@@ -837,7 +858,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["search-templates", "search"]} isHidden={!fourthPanelExpanded} />,
+            <RefreshBoxButton
+              queriesToRefresh={["search-templates", "search"]}
+              isHidden={!fourthPanelExpanded}
+            />,
             <ToggleFourthPanelBoxButton boxToHide="search" />,
             hideFourthPanelButton(),
           ]}

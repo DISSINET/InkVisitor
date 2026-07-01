@@ -69,12 +69,11 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
-  margin-left: ${({ $widthTooNarrow }) =>
-    $widthTooNarrow ? "1.5rem" : "2rem"};
+  margin-left: ${({ $widthTooNarrow }) => ($widthTooNarrow ? "1.5rem" : "2rem")};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   border-bottom-style: solid;
-  background-color: ${({ theme }) => theme.color["gray"][200]};
+  /* background-color: ${({ theme }) => theme.color["gray"][200]}; */
   &:hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
@@ -152,8 +151,7 @@ interface StyledTagsList {
 }
 export const StyledTagsList = styled.div<StyledTagsList>`
   display: block;
-  padding-bottom: ${({ theme, $paddingBottom }) =>
-    $paddingBottom ? theme.space[6] : ""};
+  padding-bottom: ${({ theme, $paddingBottom }) => ($paddingBottom ? theme.space[6] : "")};
 `;
 
 interface StyledTagsListItem {}

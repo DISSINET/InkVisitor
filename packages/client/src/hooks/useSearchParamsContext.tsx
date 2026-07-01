@@ -154,7 +154,7 @@ export const SearchParamsProvider = ({
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
-    setTimeout(() => setSelectedDetailId(id), 100);
+    setSelectedDetailId(id);
   };
 
   const appendMultipleDetailIds = (ids: string[], maxCount: number = maxTabCount) => {
@@ -182,7 +182,7 @@ export const SearchParamsProvider = ({
     }
 
     setDetailId(newDetailIdArray.join(arrJoinChar));
-    setTimeout(() => setSelectedDetailId(ids[0]), 100);
+    setSelectedDetailId(ids[0]);
   };
 
   const replaceDetailIds = (ids: string[]) => {

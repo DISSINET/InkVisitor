@@ -313,7 +313,8 @@ export default Router()
 
         model.resetIds();
 
-        await model.save(req.db.connection);
+        // Skip the per-statement tree rebuild; we rebuild once after the loop.
+        await model.save(req.db.connection, true);
         newIds.push(model.id);
 
         const origId = stmtData.id;
@@ -328,6 +329,9 @@ export default Router()
           relsErr = true;
         }
       }
+
+      // One rebuild for the whole batch instead of N (one per saved statement).
+      await treeCache.initialize();
 
       let msg = `${statementsCount} statements have been copied under '${territory.labels[0]}'`;
       if (relsErr) {

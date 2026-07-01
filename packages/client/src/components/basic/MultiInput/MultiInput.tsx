@@ -1,7 +1,8 @@
 import { Button, Input } from "components";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
-import { StyledRow } from "./MultiInputStyles";
+import { ButtonSize } from "types";
+import { StyledDeleteButton, StyledRow } from "./MultiInputStyles";
 
 interface MultiInput {
   values: string[];
@@ -9,12 +10,7 @@ interface MultiInput {
   width?: number | "full";
   disabled?: boolean;
 }
-export const MultiInput: React.FC<MultiInput> = ({
-  values,
-  onChange,
-  width,
-  disabled = true,
-}) => {
+export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disabled = true }) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {
     const newDisplayValues = values.map((v) => v || "");
@@ -60,28 +56,29 @@ export const MultiInput: React.FC<MultiInput> = ({
               }}
               width={width}
               value={value}
+              textareaRightPadding={!disabled ? 12 : undefined}
             />
-            <div style={{ display: "flex" }}>
-              {!disabled && (
+            {!disabled && (
+              <StyledDeleteButton>
                 <Button
                   color="danger"
                   inverted
+                  noBorder
+                  noBackground
+                  size={ButtonSize.Small}
                   icon={<FaTrashAlt />}
+                  tooltipLabel="delete note"
                   onClick={() => handleDelete(key)}
                 />
-              )}
-            </div>
+              </StyledDeleteButton>
+            )}
           </StyledRow>
         );
       })}
 
       {!disabled && (
         <div style={{ paddingTop: displayValues.length > 0 ? "0.5rem" : "" }}>
-          <Button
-            icon={<FaPlus />}
-            label={"new note"}
-            onClick={() => handleAdd()}
-          />
+          <Button icon={<FaPlus />} label={"new note"} onClick={() => handleAdd()} />
         </div>
       )}
     </>

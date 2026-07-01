@@ -126,6 +126,11 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   const [warningsModalOpen, setWarningsModalOpen] = useState(false);
   const [warningAnchorCount, setWarningAnchorCount] = useState(0);
 
+  useEffect(() => {
+    setWarningAnchorCount(0);
+    setWarningsModalOpen(false);
+  }, [selectedDocumentId]);
+
   const activeTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument && territoryId) {
       return selectedDocument?.entityIds.T.includes(territoryId);
@@ -191,7 +196,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
         lastScrolledAnnotatorRef.current = annotator;
       }
     }
-  }, [selectedDocument, statementId, annotator, territory]);
+  }, [selectedDocument, statementId, annotator, territory, territoryId]);
 
   return (
     <>

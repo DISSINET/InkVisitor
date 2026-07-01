@@ -20,7 +20,7 @@ import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanst
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Input, MultiInput, TypeBar } from "components";
+import { Button, Input, MultiInput } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
@@ -134,7 +134,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           ? [rootTerritoryId, entity.data.parent.territoryId]
           : [rootTerritoryId]
         : [],
-    [entity.class, entity.data.parent?.territoryId]
+    [entity.class, entity.data.parent?.territoryId],
   );
 
   const queryClient = useQueryClient();
@@ -199,10 +199,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                       setSelectedEntityType(selectedOption);
                       setShowTypeSubmit(true);
                     }}
-                    width={200}
+                    width="full"
                     disableTyping
                   />
-                  <TypeBar entityLetter={entity.class} />
                 </StyledRelativePosition>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
@@ -322,10 +321,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         placeholder="move"
                         disableTemplatesAccept
                         filterEditorRights
-                        inputWidth={
-                          80
-                          // selectedRows.length > 0 && contentWidthTooNarrow ? 36 : 80
-                        }
+                        inputWidth={"full"}
                         disableCreate
                         categoryTypes={[EntityEnums.Class.Territory]}
                         onPicked={(selectedEntity) => {
@@ -338,6 +334,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                             icon={<TbHomeMove size={14} />}
                             onClick={() => setShowTActionModal(true)}
                             tooltipLabel="move current territory"
+                            noBackground
+                            noBorder
+                            inverted
                           />
                         }
                       />

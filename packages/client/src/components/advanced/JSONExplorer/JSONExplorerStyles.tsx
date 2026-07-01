@@ -5,4 +5,7 @@ export const StyledJSONExplorerWrapper = styled.div`
   button {
     margin-bottom: ${({ theme }) => theme.space[3]};
   }
+  .react-json-view {
+    background-color: transparent !important;
+  }
 `;

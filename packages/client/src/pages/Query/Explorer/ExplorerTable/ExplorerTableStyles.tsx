@@ -12,28 +12,6 @@ export const StyledTableWrapper = styled.div<StyledTableWrapper>`
 export const StyledRowWrapper = styled.div`
   display: block;
 `;
-interface StyledRow {
-  $isOdd: boolean;
-  $isSelected: boolean;
-  $width: number;
-  $height: number;
-}
-export const StyledRow = styled.div<StyledRow>`
-  display: flex;
-  width: ${({ $width }) => `${$width}px`};
-  align-items: center;
-  height: ${({ theme, $height }) => `${$height}px`};
-  background-color: ${({ theme, $isOdd, $isSelected }) =>
-    $isSelected
-      ? theme.color["tableOpened"]
-      : $isOdd
-        ? theme.color["white"]
-        : theme.color["tableOddRow"]};
-  &:hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
-  }
-`;
-
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
@@ -43,6 +21,97 @@ export const StyledHeader = styled.div`
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
+export const StyledHeaderDragHandle = styled.span`
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.1rem;
+  cursor: grab;
+  color: ${({ theme }) => theme.color["headerTextColor"]};
+  /* Subtle at rest; brightens when the column is hovered. */
+  opacity: 0.4;
+  transition: opacity 0.12s ease;
+  &:active {
+    cursor: grabbing;
+  }
+`;
+
+export const StyledHeaderEditIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: 0.3rem;
+  /* Informational marker (column is editable) - not a button, not draggable. */
+  cursor: default;
+  opacity: 0.55;
+`;
+
+export const StyledHeaderColumnLabel = styled.span`
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  letter-spacing: 0.01em;
+`;
+
+export const StyledHeaderColumnControls = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  /*
+   * Collapsed to zero width at rest so the label can use the full column,
+   * then expanded on column hover / keyboard focus. Revealing on demand keeps
+   * the resting header clean while showing more of the label.
+   */
+  max-width: 0;
+  padding-left: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.15s ease, opacity 0.12s ease, padding-left 0.15s ease;
+`;
+
+export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  opacity: ${({ $isDragging }) => ($isDragging ? 0.3 : 1)};
+`;
+
+export const StyledHeaderColumnCell = styled.div<{ $width: number }>`
+  width: ${({ $width }) => $width}px;
+  min-width: ${({ $width }) => $width}px;
+  max-width: ${({ $width }) => $width}px;
+  display: flex;
+  align-items: center;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.14);
+  transition: background-color 0.12s ease;
+
+  &:hover,
+  &:focus-within {
+    background-color: rgba(255, 255, 255, 0.09);
+  }
+  &:hover ${StyledHeaderDragHandle}, &:focus-within ${StyledHeaderDragHandle} {
+    opacity: 0.85;
+  }
+  &:hover ${StyledHeaderColumnControls}, &:focus-within ${StyledHeaderColumnControls} {
+    max-width: 8rem;
+    padding-left: 0.3rem;
+    opacity: 1;
+  }
+`;
+
+export const StyledHeaderEntityCell = styled.div`
+  display: inline-flex;
+  align-items: center;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  letter-spacing: 0.01em;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.14);
 `;
 
 export const StyledBody = styled.div``;
@@ -104,7 +173,6 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
   margin-right: 2rem;
-  background-color: ${({ theme }) => theme.color["gray"][200]};
   z-index: 20;
 `;
 
@@ -165,7 +233,7 @@ export const StyledLabelFilter = styled.div`
   gap: 0.2rem;
   width: 100%;
   margin: 0 0.5rem;
-  max-width: 40rem;
+  max-width: 36rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`
@@ -215,8 +283,9 @@ export const StyledChipInputBox = styled.div`
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][400]};
-  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
-  &:focus-within {
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  &:focus-within,
+  &:hover {
     border-color: ${({ theme }) => theme.color["info"]};
   }
 `;

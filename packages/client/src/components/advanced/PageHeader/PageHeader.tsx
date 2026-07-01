@@ -2,11 +2,7 @@ import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
-import api, {
-  HTML_CAPTURE_EVENT,
-  HTML_CAPTURE_STORAGE_KEY,
-  IDbStats,
-} from "api";
+import api, { HTML_CAPTURE_EVENT, HTML_CAPTURE_STORAGE_KEY, IDbStats } from "api";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useRef, useState } from "react";
@@ -290,26 +286,18 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) =>
               {htmlCapturesOpen && (
                 <StyledHtmlCapturePanel>
                   <StyledHtmlCaptureText>
-                    <strong>{htmlCaptures.length}</strong> server response
-                    problem{htmlCaptures.length > 1 ? "s were" : " was"} captured
-                    (the server returned HTML instead of JSON). Please{" "}
-                    <strong>copy the details below and send them to support</strong>{" "}
-                    so the issue can be diagnosed.
+                    <strong>{htmlCaptures.length}</strong> server response problem
+                    {htmlCaptures.length > 1 ? "s were" : " was"} captured (the server returned HTML
+                    instead of JSON). Please{" "}
+                    <strong>copy the details below and send them to support</strong> so the issue
+                    can be diagnosed.
                   </StyledHtmlCaptureText>
                   <StyledHtmlCapturePre>
                     {JSON.stringify(htmlCaptures, null, 2)}
                   </StyledHtmlCapturePre>
                   <StyledHtmlCaptureActions>
-                    <Button
-                      label="Copy"
-                      color="primary"
-                      onClick={handleCopyHtmlCaptures}
-                    />
-                    <Button
-                      label="Clear"
-                      color="danger"
-                      onClick={handleClearHtmlCaptures}
-                    />
+                    <Button label="Copy" color="primary" onClick={handleCopyHtmlCaptures} />
+                    <Button label="Clear" color="danger" onClick={handleClearHtmlCaptures} />
                   </StyledHtmlCaptureActions>
                 </StyledHtmlCapturePanel>
               )}
@@ -375,7 +363,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               handleThemeChange(
                 selectedThemeId === InterfaceEnums.Theme.Light
                   ? InterfaceEnums.Theme.Dark
-                  : InterfaceEnums.Theme.Light
+                  : InterfaceEnums.Theme.Light,
               );
             }}
           >
@@ -396,8 +384,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               }}
             >
               <Button
-                radiusLeft
-                radiusRight
+                shape="rounded-lg"
                 label="global validations"
                 icon={<PiSealCheckFill size={14} />}
                 onClick={() => setShowGlobalValidations(true)}
@@ -440,5 +427,5 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
         )}
       </>
     );
-  }
+  },
 );

@@ -1,20 +1,10 @@
-import {
-  FloatingPortal,
-  autoUpdate,
-  flip,
-  useFloating,
-} from "@floating-ui/react";
+import { FloatingPortal, autoUpdate, flip, offset, useFloating } from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
 import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
-import {
-  Button,
-  Input,
-  Loader,
-  TemplateActionModal,
-  TypeBar,
-} from "components";
+import { ThemeColor } from "Theme/theme";
+import { IconButton, Input, Loader, TemplateActionModal, TypeBar } from "components";
 import Dropdown from "components/advanced";
 import { useTheme } from "hooks";
 import useKeypress from "hooks/useKeyPress";
@@ -22,8 +12,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { List, ListProps } from "react-window";
+import { List } from "react-window";
 import {
+  EntityColors,
   EntityDragItem,
   EntitySingleDropdownItem,
   EntitySuggestion,
@@ -36,14 +27,10 @@ import {
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
-  StyledSuggesterButton,
   StyledSuggesterList,
   SuggesterHidden,
 } from "./SuggesterStyles";
-import {
-  SuggestionRowEntityRow,
-  SuggestionRowEntityItemData,
-} from "./SuggestionRow/SuggestionRow";
+import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
   marginTop?: boolean;
@@ -62,9 +49,7 @@ interface Suggester {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (
-    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
-  ) => void;
+  onChangeCategory: (selectedOption: EntityEnums.Class | EntityEnums.Extension.Any) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -76,6 +61,7 @@ interface Suggester {
   territoryParentId?: string;
   userOptions?: IUserOptions;
   autoFocus?: boolean;
+  autoFocusInput?: boolean;
   disableEnter?: boolean;
   disableWildCard?: boolean;
 
@@ -89,6 +75,7 @@ interface Suggester {
   externalDroppedItem?: EntityDragItem | null;
   onConsumeExternalDrop?: () => void;
   onEmptyAddButtonClick?: () => void;
+  clearableInput?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -120,6 +107,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   userOptions,
   autoFocus,
+  autoFocusInput,
   disableEnter,
   disableWildCard,
 
@@ -132,22 +120,21 @@ export const Suggester: React.FC<Suggester> = ({
   externalDroppedItem,
   onConsumeExternalDrop,
   onEmptyAddButtonClick,
+  clearableInput = true,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
-    false
-  );
+  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(false);
 
   useKeypress(
     "Escape",
     () => {
       if (!showCreateModal && isFocused) onCancel();
     },
-    [showCreateModal, isFocused]
+    [showCreateModal, isFocused],
   );
 
   const inputRef = useRef<HTMLDivElement>(null);
@@ -314,7 +301,10 @@ export const Suggester: React.FC<Suggester> = ({
               territoryParentId={territoryParentId}
               disableButtons={disableButtons}
               disableTemplateInstantiation={disableTemplateInstantiation}
-              onPick={onPick}
+              onPick={(entity, instantiate) => {
+                setIsHovered(false);
+                onPick(entity, instantiate);
+              }}
             />
           );
         }}
@@ -325,14 +315,33 @@ export const Suggester: React.FC<Suggester> = ({
   const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [flip({ padding: 10 })],
+    middleware: [offset(4), flip({ padding: 10 })],
   });
 
   const theme = useTheme();
 
+  // Entity class drives the control's identity: the selected class colour tints
+  // the focus/hover ring and the create button, so the whole suggester announces
+  // which class you are searching/creating. Falls back to info for the wildcard.
+  const entityColorKey = EntityColors[category]?.color;
+  const accentColorKey: keyof ThemeColor =
+    entityColorKey && entityColorKey !== "white" ? entityColorKey : "info";
+  const PALE_ENTITY_COLORS: string[] = ["white", "entityB"];
+  const buttonColorKey: keyof ThemeColor =
+    entityColorKey && !PALE_ENTITY_COLORS.includes(entityColorKey) ? entityColorKey : "primary";
+
   if (isHidden) {
     return <SuggesterHidden />;
   }
+
+  // The create button now lives inside the input (as rightContent) instead of a
+  // separate trailing segment. Reserve its footprint in the input width so the
+  // typing area stays as roomy as before and the suggester keeps its overall size.
+  const CREATE_BUTTON_WIDTH = 25;
+  const effectiveInputWidth =
+    typeof inputWidth === "number" && !disableCreate
+      ? inputWidth + CREATE_BUTTON_WIDTH
+      : inputWidth;
 
   return (
     // div is necessary for flex to work and render the clear button properly
@@ -346,16 +355,14 @@ export const Suggester: React.FC<Suggester> = ({
           ref={dropRef}
           $hasButton={!disableCreate}
           $isOver={isOver}
+          $isFocused={isFocused}
+          $accentColor={accentColorKey}
         >
           <Dropdown.Single.Entity
             value={category}
-            options={
-              disableWildCard
-                ? [...categories]
-                : [dropdownWildCard, ...categories]
-            }
+            options={disableWildCard ? [...categories] : [dropdownWildCard, ...categories]}
             onChange={onChangeCategory}
-            width={36}
+            width={categories.length > 1 ? 33 : 26}
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);
@@ -364,9 +371,9 @@ export const Suggester: React.FC<Suggester> = ({
             disableTyping
             suggester
             disabled={disabled}
-            autoFocus={categories.length > 1 && autoFocus}
+            autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
           />
-          <TypeBar entityLetter={category} />
+          <TypeBar entityLetter={category} noMargin width={5} />
 
           <div
             ref={(node) => {
@@ -384,7 +391,8 @@ export const Suggester: React.FC<Suggester> = ({
               placeholder={placeholder}
               suggester
               changeOnType
-              width={inputWidth}
+              width={effectiveInputWidth}
+              roundCorners={false}
               onFocus={() => {
                 setIsFocused(true);
               }}
@@ -394,29 +402,29 @@ export const Suggester: React.FC<Suggester> = ({
                 setSelected(-1);
               }}
               onEnterPressFn={handleEnterPress}
-              autoFocus={categories.length === 1 && autoFocus}
+              autoFocus={(categories.length === 1 || autoFocusInput) && autoFocus}
               disabled={disabled}
               fullHeight
-              clearable
+              clearable={clearableInput}
+              rightContent={
+                !disableCreate ? (
+                  <IconButton
+                    icon={<FaPlus />}
+                    tooltipLabel="create new entity"
+                    color={buttonColorKey}
+                    noBackground
+                    noBorder
+                    onClick={() => {
+                      handleAddBtnClick();
+                    }}
+                    disabled={disabled}
+                  />
+                ) : (
+                  button && button
+                )
+              }
             />
           </div>
-
-          {!disableCreate && (
-            <StyledSuggesterButton>
-              <Button
-                icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-                tooltipLabel="create new entity"
-                color="primary"
-                inverted={selected !== -1}
-                onClick={() => {
-                  handleAddBtnClick();
-                }}
-                disabled={disabled}
-                fullHeight
-              />
-            </StyledSuggesterButton>
-          )}
-          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
@@ -447,8 +455,7 @@ export const Suggester: React.FC<Suggester> = ({
                   </StyledRelativePosition>
                   <SuggesterKeyPress
                     onArrowDown={() => {
-                      if (selected < suggestions.length - 1)
-                        setSelected(selected + 1);
+                      if (selected < suggestions.length - 1) setSelected(selected + 1);
                     }}
                     onArrowUp={() => {
                       if (selected > -1) setSelected(selected - 1);
@@ -459,7 +466,7 @@ export const Suggester: React.FC<Suggester> = ({
               ) : null}
 
               {/* PRE-SUGGESTIONS */}
-              {preSuggestions?.length && typed.length === 0 ? (
+              {preSuggestions && preSuggestions.length > 0 && typed.length === 0 ? (
                 <>
                   <StyledRelativePosition $width={resultWidth}>
                     {renderEntitySuggestions(preSuggestions)}
@@ -467,8 +474,7 @@ export const Suggester: React.FC<Suggester> = ({
                   </StyledRelativePosition>
                   <SuggesterKeyPress
                     onArrowDown={() => {
-                      if (selected < preSuggestions.length - 1)
-                        setSelected(selected + 1);
+                      if (selected < preSuggestions.length - 1) setSelected(selected + 1);
                     }}
                     onArrowUp={() => {
                       if (selected > -1) setSelected(selected - 1);
