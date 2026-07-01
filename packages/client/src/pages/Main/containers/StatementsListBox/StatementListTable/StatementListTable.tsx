@@ -1,6 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
 import {
-  IDocument,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -15,13 +14,13 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import { FaClone, FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
 import { TbAnchor } from "react-icons/tb";
 import { TiWarningOutline } from "react-icons/ti";
 import { CellProps, Column, useExpanded, useRowSelect, useTable } from "react-table";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { IcoTrash } from "Theme/icons";
 import { ButtonSize, StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
@@ -31,10 +30,10 @@ import {
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledSelectionCheckbox,
-  StyledTagCellWrap,
-  StyledTHead,
   StyledTable,
+  StyledTagCellWrap,
   StyledTh,
+  StyledTHead,
 } from "./StatementListTableStyles";
 
 // stop tag clicks/double-clicks from bubbling up and activating the row
@@ -160,7 +159,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         id: "selection",
         Cell: ({ row }: CellType) => {
-          const size = 16;
+          const size = 15;
           const checked = selectedRows.includes(row.id);
           const isFocused = lastClickedIndex === row.index;
 
@@ -204,10 +203,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Cell: ({ row }: CellType) => {
           const statement = row.original;
           return (
-            <StyledTagCellWrap
-              onClick={stopRowActivation}
-              onDoubleClick={stopRowActivation}
-            >
+            <StyledTagCellWrap onClick={stopRowActivation} onDoubleClick={stopRowActivation}>
               <EntityTag entity={statement} showOnly="tag" />
             </StyledTagCellWrap>
           );
@@ -226,10 +222,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const definedSubjects = subjectObjects.filter((s) => s !== undefined);
 
           return (
-            <StyledTagCellWrap
-              onClick={stopRowActivation}
-              onDoubleClick={stopRowActivation}
-            >
+            <StyledTagCellWrap onClick={stopRowActivation} onDoubleClick={stopRowActivation}>
               {definedSubjects ? <TagGroup definedEntities={definedSubjects} /> : <div />}
             </StyledTagCellWrap>
           );
@@ -246,10 +239,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const definedActions = actionObjects.filter((a) => a !== undefined);
 
           return (
-            <StyledTagCellWrap
-              onClick={stopRowActivation}
-              onDoubleClick={stopRowActivation}
-            >
+            <StyledTagCellWrap onClick={stopRowActivation} onDoubleClick={stopRowActivation}>
               {definedActions ? <TagGroup definedEntities={definedActions} /> : <div />}
             </StyledTagCellWrap>
           );
@@ -266,10 +256,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const definedObjects = actantObjects.filter((o) => o !== undefined);
 
           return (
-            <StyledTagCellWrap
-              onClick={stopRowActivation}
-              onDoubleClick={stopRowActivation}
-            >
+            <StyledTagCellWrap onClick={stopRowActivation} onDoubleClick={stopRowActivation}>
               {definedObjects ? (
                 <TagGroup definedEntities={definedObjects} oversizeLimit={3} />
               ) : (
