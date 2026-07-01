@@ -2218,18 +2218,51 @@ export class Annotator {
       }
     }
 
-    // Sort tags by their absolute position for consistent ordering
+    // Order the anchors "from inside outwards" (issue #2051): the innermost /
+    // most specific anchor (e.g. a Location on a single word) should come first,
+    // then the enclosing anchors (its Statement, the Territory the Statement is
+    // in, its parent Territory, ...). Anchors that do not nest but sit next to
+    // each other (parallel / same-level) keep their order of appearance.
+    //
+    // We achieve both by sorting on the position where each anchor *closes*
+    // rather than where it opens: a nested anchor always closes before the one
+    // enclosing it, while parallel anchors close in their order of appearance.
+    const openingToClosing = new Map<Tag, Tag>();
+    for (const [closingTag, openingTag] of closingToOpeningMap) {
+      openingToClosing.set(openingTag, closingTag);
+    }
+
+    const getOpenAbsolutePosition = (tag: Tag): number =>
+      tag.segmentIndex !== -1 ? getAbsoluteTextIndex(tag) : tag.position;
+
+    const getCloseAbsolutePosition = (openingTag: Tag): number => {
+      const closingTag = openingToClosing.get(openingTag);
+      // The scan only visits segments up to `end.segmentIndex`, so anchors that
+      // close in a later segment are never paired here. Those are exactly the
+      // anchors that stay open past the selection — the enclosing containers —
+      // so they sort last (their internal order is handled by the tie-break).
+      if (!closingTag) {
+        return Number.POSITIVE_INFINITY;
+      }
+      return getAbsoluteTextIndex(closingTag);
+    };
+
     return processedFinalTags.sort((a, b) => {
-      // Use the segmentIndex from the tags
-      const aSegmentIndex = a.segmentIndex;
-      const bSegmentIndex = b.segmentIndex;
-
-      const aAbsolutePosition =
-        aSegmentIndex !== -1 ? getAbsoluteTextIndex(a) : a.position;
-      const bAbsolutePosition =
-        bSegmentIndex !== -1 ? getAbsoluteTextIndex(b) : b.position;
-
-      return aAbsolutePosition - bAbsolutePosition;
+      const aClose = getCloseAbsolutePosition(a);
+      const bClose = getCloseAbsolutePosition(b);
+      if (aClose !== bClose) {
+        return aClose - bClose;
+      }
+      // Same closing position. Anchors that stay open past the selection (their
+      // closing tag was never scanned) are enclosing containers that form a
+      // proper nesting chain — the one that opened *later* is nested more deeply
+      // and must come first (inside -> outside).
+      if (aClose === Number.POSITIVE_INFINITY) {
+        return getOpenAbsolutePosition(b) - getOpenAbsolutePosition(a);
+      }
+      // Genuine equal closing position (e.g. broken / asymmetrical anchors):
+      // keep them in order of appearance.
+      return getOpenAbsolutePosition(a) - getOpenAbsolutePosition(b);
     });
   }
 
