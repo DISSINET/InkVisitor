@@ -88,7 +88,7 @@ export class SettingsOverlay {
       alignItems: "center",
       justifyContent: "center",
       // primary-tinted dim to match the app's modal backdrop (theme.color.modalBg)
-      background: "rgba(9, 16, 52, 0.3)",
+      background: "rgba(9, 16, 52, 0.4)",
     } as Partial<CSSStyleDeclaration>);
 
     this.anchor = anchor ?? null;
