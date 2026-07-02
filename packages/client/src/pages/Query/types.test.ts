@@ -199,6 +199,38 @@ describe("query builder offers the 'used in statements under T' edge (EUT:)", ()
   });
 });
 
+describe("query builder offers the 'S under T: children' edge (SUT:C)", () => {
+  it("a Statement source node can select SUT:C", () => {
+    expect(
+      selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))
+    ).toContain(Query.EdgeType["SUT:C"]);
+  });
+
+  it("SUT:C exposes a Territory entity target param so the territory can be picked", () => {
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["SUT:C"]];
+    expect(params.entityId).toBeTruthy();
+    expect(params.entityId.allowedClasses).toEqual([
+      EntityEnums.Class.Territory,
+    ]);
+  });
+
+  it("source must be a Statement; the target must be a Territory", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Statement]),
+        edge(Query.EdgeType["SUT:C"], sourceNode([EntityEnums.Class.Territory]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["SUT:C"], sourceNode([EntityEnums.Class.Territory]))
+      ).valid
+    ).toBe(false);
+  });
+});
+
 describe("query builder offers the superordinate (R:SOE) edge", () => {
   it("a Location source node can select R:SOE", () => {
     const selectable = selectableEdgeTypes(sourceNode([EntityEnums.Class.Location]));

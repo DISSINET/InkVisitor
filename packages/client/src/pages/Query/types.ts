@@ -41,6 +41,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:SCL"],
   Query.EdgeType["R:SOE"],
   Query.EdgeType["SUT:"],
+  // SUT:C match Statements under the target Territory OR any descendant
+  // territory, recursively (whole subtree; server: EdgeSUnderChildrenT in edge.ts)
+  Query.EdgeType["SUT:C"],
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],

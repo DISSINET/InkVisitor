@@ -4,7 +4,7 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
-import { r, RDatum, RStream, RValue } from "rethinkdb-ts";
+import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 
 export default class SearchEdge implements Query.IEdge {
@@ -20,6 +20,15 @@ export default class SearchEdge implements Query.IEdge {
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
     this.id = data.id || "";
+  }
+
+  /**
+   * Optional async precomputation hook, invoked by the node evaluator before
+   * run(). run() only composes synchronous ReQL, so edges needing data fetched
+   * ahead of time (e.g. a territory-subtree closure) do it here. No-op default.
+   */
+  async prepare(db: Connection): Promise<void> {
+    return;
   }
 
   run(q: RStream): RStream {
@@ -76,6 +85,106 @@ export class EdgeSUnderT extends SearchEdge {
       .map(function(e) {
         return e("id");
       });
+  }
+}
+
+/**
+ * SUT:C ("S under T: children"). Emits every Statement whose territory is the
+ * target territory T OR any descendant of T, recursively to any depth (the whole
+ * subtree rooted at T, T itself included).
+ *
+ * Territories store only their DIRECT parent (data.parent.territoryId) with no
+ * ancestor path, so the descendant closure can't be a single index lookup. It's
+ * resolved in prepare(): all territories are fetched via the `class` index (a
+ * small set) and the subtree is walked in memory - no recursive DB calls. run()
+ * then pulls the subtree's statements through the StatementTerritory index and
+ * intersects them with the incoming stream (the subset invariant that positive
+ * matching and negation rely on). No target territory -> matches nothing.
+ */
+export class EdgeSUnderChildrenT extends SearchEdge {
+  private subtreeTerritoryIds: string[] = [];
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SUT:C"];
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    const rootId = this.node.params.entityId;
+    if (!rootId) {
+      this.subtreeTerritoryIds = [];
+      return;
+    }
+
+    const territories = (await r
+      .table(Entity.table)
+      .getAll(EntityEnums.Class.Territory, { index: DbEnums.Indexes.Class })
+      .map(function (t: RDatum<IEntity>) {
+        return {
+          id: t("id"),
+          parentId: r.branch(
+            t("data")("parent").default(null).typeOf().eq("OBJECT"),
+            t("data")("parent")("territoryId"),
+            null
+          ),
+        };
+      })
+      .run(db)) as { id: string; parentId: string | null }[];
+
+    const childrenByParent = new Map<string, string[]>();
+    for (const t of territories) {
+      if (t.parentId) {
+        const list = childrenByParent.get(t.parentId) ?? [];
+        list.push(t.id);
+        childrenByParent.set(t.parentId, list);
+      }
+    }
+
+    // BFS the subtree rooted at T (T included); `seen` guards against cycles in
+    // a broken tree so this can't loop forever
+    const subtree: string[] = [];
+    const seen = new Set<string>();
+    const queue: string[] = [rootId];
+    while (queue.length) {
+      const id = queue.shift() as string;
+      if (seen.has(id)) {
+        continue;
+      }
+      seen.add(id);
+      subtree.push(id);
+      for (const child of childrenByParent.get(id) ?? []) {
+        queue.push(child);
+      }
+    }
+
+    this.subtreeTerritoryIds = subtree;
+  }
+
+  run(q: RStream): RStream {
+    const subtreeIds = this.subtreeTerritoryIds;
+
+    const statementIds: RDatum = subtreeIds.length
+      ? (r
+          .table(Entity.table)
+          .getAll(r.args(subtreeIds), {
+            index: DbEnums.Indexes.StatementTerritory,
+          })
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .getField("id")
+          .distinct() as unknown as RDatum).coerceTo("array")
+      : r.expr([] as string[]);
+
+    return statementIds.do(function (ids: RDatum) {
+      return q
+        .filter(function (e: RDatum<IEntity>) {
+          return ids.contains(e("id"));
+        })
+        .map(function (e: RDatum<IEntity>) {
+          return e("id");
+        });
+    }) as unknown as RStream;
   }
 }
 
@@ -876,6 +985,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasSuperordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
+    case Query.EdgeType["SUT:C"]:
+      return new EdgeSUnderChildrenT(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
     default:

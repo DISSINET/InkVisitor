@@ -156,7 +156,9 @@ export namespace Query {
     },
     "SUT:D": {},
     "I_SUT:D": {},
-    "SUT:C": {},
+    "SUT:C": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "I_SUT:C": {},
     "HR:R": {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
