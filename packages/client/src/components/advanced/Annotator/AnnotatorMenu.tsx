@@ -128,7 +128,7 @@ export const TextAnnotatorMenu = ({
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-  const { setStatementId } = useSearchParams();
+  const { setStatementId, setTerritoryId } = useSearchParams();
 
   const tryCloseMenu = useCallback(() => {
     const isModalOpen = document.querySelector('[data-attribute-modal="true"]') !== null;
@@ -424,6 +424,10 @@ export const TextAnnotatorMenu = ({
                       queryKey: ["territory", "statement-list"],
                     });
                     setStatementId(entity.id);
+                  }
+                  if (entity.class === EntityEnums.Class.Territory) {
+                    queryClient.invalidateQueries({ queryKey: ["tree"] });
+                    setTerritoryId(entity.id);
                   }
                 }}
                 onCreateStatement={(entityCreateModalProps) =>
