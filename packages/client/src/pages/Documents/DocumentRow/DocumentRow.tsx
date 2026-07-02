@@ -7,7 +7,8 @@ import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { FaDownload, FaTrash } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { RiFileEditFill } from "react-icons/ri";
 import { EntityColors } from "types";
 import {
@@ -140,7 +141,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             tooltipLabel={"open document"}
           />
           <Button
-            icon={<FaTrash />}
+            icon={<IcoTrash />}
             color="danger"
             inverted
             disabled={!canManage}

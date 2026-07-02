@@ -1,5 +1,15 @@
 import styled from "styled-components";
 
+export const StyledUserCustomization = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+export const StyledUserCustomizationSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 export const StyledRightsWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -7,11 +17,9 @@ export const StyledRightsWrap = styled.div`
 export const StyledUserRights = styled.div`
   display: grid;
   grid-template-columns: auto auto;
-  margin-top: ${({ theme }) => theme.space[2]};
   width: 28rem;
 `;
 export const StyledRightsHeading = styled.div`
-  margin-top: ${({ theme }) => theme.space[4]};
   margin-bottom: ${({ theme }) => theme.space[2]};
   width: 100%;
   text-align: center;
@@ -30,4 +38,12 @@ export const StyledButtonWrap = styled.div`
   width: 100%;
   justify-content: center;
   margin-top: 0.5rem;
+`;
+export const StyledPasswordDescriptionWrap = styled.div`
+  max-width: 31rem;
+`;
+export const StyledDropdownWrap = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 `;

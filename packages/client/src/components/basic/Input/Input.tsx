@@ -91,7 +91,6 @@ export const Input: React.FC<Input> = ({
   borderColor,
   onFocus = () => {},
   onBlur = () => {},
-
   fullHeightTextArea = false,
   fontSizeTextArea = "xs",
   roundCorners = true,

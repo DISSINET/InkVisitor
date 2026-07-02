@@ -6,7 +6,7 @@ import { Button, Checkbox, IconButton, IconWithTooltip, Input, Loader } from "co
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
 import React, { useMemo, useRef, useState } from "react";
-import { BiSearch } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 import { FaAnchor, FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-icons/fa";
 import { FaAnchorCircleCheck, FaExpand } from "react-icons/fa6";
 import { LuCaseSensitive, LuRegex, LuReplace, LuReplaceAll, LuWholeWord } from "react-icons/lu";
@@ -326,7 +326,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
               roundCorners
               icon={
                 <IconWithTooltip
-                  icon={<BiSearch />}
+                  icon={<IcoSearch />}
                   tooltipLabel="ctrl+f to search"
                   tooltipPosition="top"
                   color="inherit"

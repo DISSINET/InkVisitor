@@ -6,16 +6,12 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@inkvisitor/shared/types";
-import { Button, Table, TagGroup } from "components";
+import { Table, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
-import { FaEdit } from "react-icons/fa";
 import { CellProps, Column } from "react-table";
-import {
-  StyledShortenedText,
-  StyledTableTextGridCell,
-} from "../EntityDetailUsedInTableStyles";
+import { StyledShortenedText, StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
 
 type CellType = CellProps<IResponseUsedInStatement<EntityEnums.UsedInPosition>>;
 
@@ -26,16 +22,18 @@ interface EntityDetailStatementsTable {
   perPage?: number;
   disableRowClick?: boolean;
 }
-export const EntityDetailStatementsTable: React.FC<
-  EntityDetailStatementsTable
-> = ({ title, entities, useCases, perPage = 5, disableRowClick }) => {
+export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> = ({
+  title,
+  entities,
+  useCases,
+  perPage = 5,
+  disableRowClick,
+}) => {
   const { setStatementId, setTerritoryId } = useSearchParams();
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-  const columns = useMemo<
-    Column<IResponseUsedInStatement<EntityEnums.UsedInPosition>>[]
-  >(
+  const columns = useMemo<Column<IResponseUsedInStatement<EntityEnums.UsedInPosition>>[]>(
     () => [
       {
         Header: "",
@@ -44,13 +42,7 @@ export const EntityDetailStatementsTable: React.FC<
           const useCase = row.original;
           const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
-          return (
-            <>
-              {entity && (
-                <EntityTag key={entity.id} entity={entity} showOnly="tag" />
-              )}
-            </>
-          );
+          return <>{entity && <EntityTag key={entity.id} entity={entity} showOnly="tag" />}</>;
         },
       },
       {
@@ -65,15 +57,7 @@ export const EntityDetailStatementsTable: React.FC<
             return entities[actantId];
           });
 
-          return (
-            <>
-              {subjectObjects ? (
-                <TagGroup definedEntities={subjectObjects} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
+          return <>{subjectObjects ? <TagGroup definedEntities={subjectObjects} /> : <div />}</>;
         },
       },
       {
@@ -86,15 +70,7 @@ export const EntityDetailStatementsTable: React.FC<
             return entities[actionId];
           });
 
-          return (
-            <>
-              {actionObjects ? (
-                <TagGroup definedEntities={actionObjects} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
+          return <>{actionObjects ? <TagGroup definedEntities={actionObjects} /> : <div />}</>;
         },
       },
       {
@@ -146,7 +122,7 @@ export const EntityDetailStatementsTable: React.FC<
         accessor: "position",
       },
     ],
-    [entities]
+    [entities],
   );
 
   return (

@@ -1,6 +1,7 @@
 import { useContainerDimensions } from "./useContainerDimensions";
 import useDebounce from "./useDebounce";
 import useDebouncedCallback from "./useDebouncedCallback";
+import { useIsInViewport } from "./useIsInViewport";
 import useKeyLift from "./useKeyLift";
 import useKeyPress from "./useKeyPress";
 import { useResizeObserver } from "./useResizeObserver";
@@ -14,6 +15,7 @@ export {
   useKeyPress,
   useKeyLift,
   useContainerDimensions,
+  useIsInViewport,
   useSearchParams,
   useDebouncedCallback,
   useResizeObserver,

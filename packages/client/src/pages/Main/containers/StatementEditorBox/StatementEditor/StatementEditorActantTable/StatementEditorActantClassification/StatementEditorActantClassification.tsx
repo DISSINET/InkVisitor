@@ -16,7 +16,7 @@ import Dropdown, {
 } from "components/advanced";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useState } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { AttributeData } from "types";
 import {
@@ -39,7 +39,7 @@ interface StatementEditorActantClassification {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   sActant: IStatementActant;
-  territoryActants?: string[];
+  territoryId?: string;
 }
 export const StatementEditorActantClassification: React.FC<
   StatementEditorActantClassification
@@ -52,7 +52,7 @@ export const StatementEditorActantClassification: React.FC<
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  territoryActants,
+  territoryId,
 }) => {
   const entity = statement.entities[classification.entityId];
 
@@ -117,7 +117,7 @@ export const StatementEditorActantClassification: React.FC<
               }}
               openDetailOnCreate
               isInsideTemplate={isInsideTemplate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               isHidden={!userCanEdit}
             />
           </StyledSuggesterWrap>
@@ -168,7 +168,7 @@ export const StatementEditorActantClassification: React.FC<
         {userCanEdit && (
           <Button
             key="d"
-            icon={<FaTrashAlt />}
+            icon={<IcoTrash />}
             color="plain"
             inverted
             tooltipLabel="remove classification row"

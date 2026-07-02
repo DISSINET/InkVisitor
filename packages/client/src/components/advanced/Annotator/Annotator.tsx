@@ -10,7 +10,8 @@ import {
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { FaHighlighter, FaPen, FaRegSave } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,7 +29,9 @@ import {
   IEntity,
   IResponseEntity,
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
+  IResponseTree,
   IResponseUser,
   IStatement,
 } from "@inkvisitor/shared/types";
@@ -47,7 +50,14 @@ import {
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
-import { collectStatementAnchors, getStatementOrderByIndex } from "utils/utils";
+import {
+  collectStatementAnchors,
+  collectTerritoryAnchors,
+  getStatementOrderByIndex,
+  getTerritoryHierarchyAtIndex,
+  getTerritoryOrderByIndex,
+  searchTree,
+} from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
@@ -157,7 +167,8 @@ export const TextAnnotator = ({
   const queryClient = useQueryClient();
   const theme = useTheme();
 
-  const { appendDetailId, statementId, selectedDetailId } = useSearchParams();
+  const { appendDetailId, statementId, selectedDetailId, setTerritoryId, setStatementId } =
+    useSearchParams();
 
   const { annotator, setAnnotator } = useAnnotator();
 
@@ -205,21 +216,6 @@ export const TextAnnotator = ({
     setAnnotatorMode(EditMode.HIGHLIGHT);
   }, [territoryId]);
 
-  const parentTerritoryId = territory?.data?.parent
-    ? territory?.data?.parent?.territoryId
-    : undefined;
-
-  const { data: dataParentTerritory } = useQuery({
-    queryKey: ["territory", parentTerritoryId as string],
-    queryFn: async () => {
-      if (parentTerritoryId) {
-        const res = await api.entityGet(parentTerritoryId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: !!parentTerritoryId,
-  });
 
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
@@ -407,6 +403,9 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     },
+    // target subT chosen in the anchor menu (New Statement button path).
+    // The EntitySuggester path carries its target via entityCreateModalProps.territoryId.
+    targetTerritoryId?: string,
   ): Promise<void> => {
     if (dataDocument && statementCreateMutation) {
       // take order from the anchors in the document
@@ -416,9 +415,26 @@ export const TextAnnotator = ({
           collectStatementAnchors(dataDocument.anchors).map((anchor) => [anchor.anchor, anchor]),
         ).values(),
       );
-      const territoryStatements = territory?.statements || [];
 
-      const statementIds = new Set(territoryStatements.map((s) => s.id));
+      // the subT the new Statement should land in: an explicitly chosen target
+      // (suggester via modal props, or the New Statement button) wins over the
+      // active subT opened in the Statement list / Territory tree.
+      const effectiveTerritoryId =
+        entityCreateModalProps?.territoryId ?? targetTerritoryId ?? territory?.id;
+
+      if (!effectiveTerritoryId) {
+        return;
+      }
+
+      // statements of the target subT, used to compute the new Statement's order
+      // by text index. The active subT already has them loaded; a different subT
+      // is fetched on demand.
+      const targetStatements: IResponseStatement[] =
+        effectiveTerritoryId === territory?.id
+          ? territory?.statements || []
+          : (await api.territoryGetStatements(effectiveTerritoryId)).data ?? [];
+
+      const statementIds = new Set(targetStatements.map((s) => s.id));
       // filter only anchors that are in the statement list
       const statementAnchorsInList = statementAnchors.filter((anchor) =>
         statementIds.has(anchor.anchor),
@@ -434,12 +450,12 @@ export const TextAnnotator = ({
 
       // see the order of the previous start index statement in the statement list and put the new statement after it
       const lastIndexBeforeHighlight =
-        territoryStatements.findIndex(
+        targetStatements.findIndex(
           (statement) => statement.id === lastAnchorBeforeIndex?.anchor,
         ) ?? -1;
-      const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, territoryStatements);
+      const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, targetStatements);
 
-      if (userData && territory && statementCreateMutation) {
+      if (userData && statementCreateMutation) {
         if (entityCreateModalProps) {
           const { label, detail, territoryId, language } = entityCreateModalProps;
           const newStatement: IStatement = CStatement(
@@ -461,18 +477,39 @@ export const TextAnnotator = ({
             userData.options,
             text,
             "",
-            territory.id,
+            effectiveTerritoryId,
             statementId,
             newOrder,
           );
           await statementCreateMutation?.mutateAsync(newStatement);
         }
+
+        // when the Statement was created in a subT other than the active one,
+        // open that subT so the user sees where it landed
+        if (effectiveTerritoryId !== territory?.id) {
+          setTerritoryId(effectiveTerritoryId);
+        }
+        // select the new Statement so it opens in the detail/editor, matching
+        // the EntitySuggester create-statement path
+        setStatementId(statementId);
       }
     }
   };
 
   const [territoryCreateModalType, setTerritoryCreateModalType] =
     useState<TerritoryCreateModalType>(false);
+
+  // Parent T the new Territory is created under, resolved relative to the target
+  // subT chosen in the menu (the in-document T, not the active Tree T): for a
+  // child it is the target itself, for a sibling it is the target's parent.
+  const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(undefined);
+
+  // Order among the parent's existing child Ts for the new subT, computed from
+  // the selection's position relative to sibling Territory anchors in the
+  // document — mirrors how a new Statement's order is derived from its anchor.
+  const [territoryCreateOrder, setTerritoryCreateOrder] = useState<number>(
+    EntityEnums.Order.Last,
+  );
 
   // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -993,22 +1030,94 @@ export const TextAnnotator = ({
     }
   }, [width]);
 
-  const onCreateTerritory = (mode: TerritoryCreateModalType, elvl: EntityEnums.Elvl) => {
-    setTerritoryCreateModalType(mode);
+  const onCreateTerritory = async (
+    mode: TerritoryCreateModalType,
+    elvl: EntityEnums.Elvl,
+    // target subT chosen in the menu (the in-document T at the selection);
+    // defaults to the active Tree T when no subT is targeted
+    targetTerritoryId?: string,
+  ): Promise<void> => {
     setTerritoryElvl(elvl);
+
+    const targetId = targetTerritoryId ?? thisTerritoryEntityId;
+    if (!mode || !targetId) {
+      return;
+    }
+
+    const fetchEntity = (id: string) =>
+      queryClient.fetchQuery({
+        queryKey: ["territory", id],
+        queryFn: async () => (await api.entityGet(id)).data ?? undefined,
+      });
+
+    try {
+      // child → parent is the target itself; sibling → parent is the target's parent
+      let parent: IEntity | undefined;
+      if (mode === "child-T") {
+        parent = await fetchEntity(targetId);
+      } else if (mode === "sibling-T") {
+        const target = (await fetchEntity(targetId)) as IResponseTerritory | undefined;
+        const parentId = target?.data?.parent ? target.data.parent.territoryId : undefined;
+        parent = parentId ? await fetchEntity(parentId) : undefined;
+      }
+
+      // Place the new subT among its siblings by the selection's text position,
+      // the same way a new Statement's order is derived from its anchor.
+      let newOrder: number = EntityEnums.Order.Last;
+      if (parent && dataDocument) {
+        const treeData = await queryClient.fetchQuery<IResponseTree | undefined>({
+          queryKey: ["tree"],
+          queryFn: async () => (await api.treeGet()).data ?? undefined,
+        });
+        const parentNode = treeData ? searchTree(treeData, parent.id) : null;
+        // sibling Ts of the new subT, sorted by their order under the parent
+        const siblings = (parentNode?.children ?? [])
+          .map((child) => child.territory)
+          .sort(
+            (a, b) =>
+              (a.data.parent ? a.data.parent.order : 0) -
+              (b.data.parent ? b.data.parent.order : 0),
+          );
+
+        // sibling Territory anchors present in this document, deduped by id
+        const siblingIds = new Set(siblings.map((t) => t.id));
+        const siblingAnchors = Array.from(
+          new Map(
+            collectTerritoryAnchors(dataDocument.anchors)
+              .filter((anchor) => siblingIds.has(anchor.anchor))
+              .map((anchor) => [anchor.anchor, anchor]),
+          ).values(),
+        );
+
+        // last sibling anchor that starts before the selection
+        const lastAnchorBeforeIndex =
+          selectionStartIndex !== -1
+            ? siblingAnchors
+                .filter((anchor) => anchor.indexStart < selectionStartIndex)
+                .sort((a, b) => b.indexStart - a.indexStart)[0]
+            : undefined;
+
+        const lastIndexBeforeSelection = siblings.findIndex(
+          (t) => t.id === lastAnchorBeforeIndex?.anchor,
+        );
+        newOrder = getTerritoryOrderByIndex(lastIndexBeforeSelection + 1, siblings);
+      }
+
+      setTerritoryCreateParent(parent);
+      setTerritoryCreateOrder(newOrder);
+      setTerritoryCreateModalType(mode);
+    } catch {
+      toast.error("Failed to resolve the target territory");
+    }
   };
 
   const newTerritoryName = useMemo<string>(() => {
-    const thisTName = territory?.labels[0];
-    const parentTName = dataParentTerritory?.labels[0];
-
-    if (territoryCreateModalType === "sibling-T") {
+    const parentTName = territoryCreateParent?.labels[0];
+    if (parentTName) {
       return `subT of ${parentTName}`;
-    } else if (territoryCreateModalType === "child-T") {
-      return `subT of ${thisTName}`;
     }
     return "new Territory";
-  }, [territoryCreateModalType, territory]);
+  }, [territoryCreateParent]);
 
   const onCreateStatement = async (
     elvl: EntityEnums.Elvl,
@@ -1019,6 +1128,8 @@ export const TextAnnotator = ({
       territoryId: string;
       language: EntityEnums.Language;
     },
+    // target subT chosen in the New Statement section of the anchor menu
+    targetTerritoryId?: string,
   ): Promise<void> => {
     if (handleCreateStatement && selectedText && selectionStartIndex !== -1) {
       const newStatementId = uuidv4();
@@ -1042,10 +1153,25 @@ export const TextAnnotator = ({
               language: entityCreateModalProps.language,
             }
           : undefined,
+        targetTerritoryId,
       );
       await handleAddAnchor(newStatementId, elvl);
     }
   };
+
+  // The in-document subT hierarchy (Territory anchors) the current selection
+  // sits inside, outermost first with nesting depth. Lets the user target the
+  // proper subT for the new Statement, showing the chain from the highest subT
+  // owning this document's text down to the deepest leaf at the cursor.
+  const annotatorPositionHierarchy = useMemo(() => {
+    if (!dataDocument || selectionStartIndex === -1) {
+      return [];
+    }
+    return getTerritoryHierarchyAtIndex(
+      dataDocument.anchors,
+      selectionStartIndex,
+    );
+  }, [dataDocument, selectionStartIndex]);
 
   const onRemoveAnchor = (anchor: Tag) => {
     annotator?.removeAnchorFromSelection(anchor);
@@ -1147,8 +1273,6 @@ export const TextAnnotator = ({
       contextElement: page,
     });
   }, [isMenuDisplayed]);
-
-  const hasParentT = territory?.data?.parent !== undefined;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
@@ -1335,12 +1459,10 @@ export const TextAnnotator = ({
                       onAnchorAdd={handleAddAnchor}
                       onCreateTerritory={onCreateTerritory}
                       onCreateStatement={onCreateStatement}
+                      annotatorPositionHierarchy={annotatorPositionHierarchy}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       readonly={isMenuReadOnly}
-                      isTextInsideThisT={selectedAnchors.some(
-                        (anchor) => anchor.getTagName() === thisTerritoryEntityId,
-                      )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
                         await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
@@ -1348,7 +1470,6 @@ export const TextAnnotator = ({
                       canCreateActiveTAnchor={
                         !dataDocument?.entityIds.T.includes(thisTerritoryEntityId ?? "")
                       }
-                      hasParentT={hasParentT}
                       territory={territory}
                       disableCreate={disableCreate || isMenuReadOnly}
                       isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
@@ -1442,7 +1563,7 @@ export const TextAnnotator = ({
                 <StyledDisplayModeButtonIconWrapper
                   $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
                 >
-                  <FaPen size={11} />
+                  <FaHighlighter size={11} />
                 </StyledDisplayModeButtonIconWrapper>
               }
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
@@ -1501,7 +1622,7 @@ export const TextAnnotator = ({
                 label="discard"
                 color="greyer"
                 inverted
-                icon={<FaTrash />}
+                icon={<IcoTrash />}
                 disabled={
                   !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
                 }
@@ -1531,23 +1652,28 @@ export const TextAnnotator = ({
         </StyledAnnotatorButtons>
       </div>
 
-      {territory && territoryCreateModalType && (
+      {territoryCreateModalType && (
         <EntityCreateModal
           closeModal={() => {
             setTerritoryCreateModalType(false);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
+            setTerritoryCreateOrder(EntityEnums.Order.Last);
           }}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
           labelTyped={newTerritoryName}
-          parentTerritory={
-            territoryCreateModalType === "sibling-T" ? dataParentTerritory : territory
-          }
+          parentTerritory={territoryCreateParent}
+          entityCreateTerritoryOrder={territoryCreateOrder}
           onMutationSuccess={async (entity) => {
             await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
+            setTerritoryCreateParent(undefined);
+            setTerritoryCreateOrder(EntityEnums.Order.Last);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
+            // select the new T in the tree so it opens as active, matching the
+            // new-Statement path that selects its created entity
+            setTerritoryId(entity.id);
             appendDetailId(entity.id);
           }}
         />

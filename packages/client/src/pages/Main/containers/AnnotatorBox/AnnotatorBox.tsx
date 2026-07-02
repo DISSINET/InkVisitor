@@ -11,7 +11,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import { useUserQuery } from "hooks/react-query";
+import {
+  useDocumentQuery,
+  useDocumentsQuery,
+  useResourcesWithDocumentsQuery,
+  useUserQuery,
+} from "hooks/react-query";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { setSelectedResourceId } from "redux/features/statementAnnotator/selectedResourceIdSlice";
 import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
@@ -78,23 +83,10 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     enabled: !!territoryId && api.isLoggedIn(),
   });
 
-  const { data: resources } = useQuery({
-    queryKey: ["resourcesWithDocuments"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({ resourceHasDocument: true });
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: resources, refetch: refetchResources } =
+    useResourcesWithDocumentsQuery(!!territoryId);
 
-  const { data: documents } = useQuery({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const { data: documents } = useDocumentsQuery(!!territoryId);
 
   // Set once the user manually picks a resource so auto-load stops overriding it.
   const userPickedRef = useRef(false);
@@ -154,17 +146,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useQuery({
-    queryKey: ["document", selectedDocumentId],
-    queryFn: async () => {
-      if (selectedDocumentId) {
-        const res = await api.documentGet(selectedDocumentId);
-        return res.data ?? undefined;
-      }
-      return undefined;
-    },
-    enabled: api.isLoggedIn() && !!selectedDocumentId,
-  });
+  } = useDocumentQuery(selectedDocumentId);
 
   const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) => await api.entityCreate(newStatement),
@@ -293,6 +275,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       selectedDocumentError={selectedDocumentError}
       selectedResource={selectedResource}
       resources={resources}
+      onResourcePickerFocus={() => refetchResources()}
       setSelectedResourceId={(id) => {
         userPickedRef.current = true;
         dispatch(setSelectedResourceId(id));
