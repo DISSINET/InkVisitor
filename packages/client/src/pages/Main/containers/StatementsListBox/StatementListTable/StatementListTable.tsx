@@ -327,7 +327,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         Header: "",
         id: "menu",
-        width: 100,
         Cell: ({ row }: CellType) => {
           return (
             right !== UserEnums.RoleMode.Read && (

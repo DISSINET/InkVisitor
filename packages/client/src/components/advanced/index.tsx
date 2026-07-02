@@ -7,6 +7,7 @@ import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
 import DocumentModalExport from "./DocumentModal/DocumentModalExport";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
+import { BasicMultiDropdown } from "./Dropdowns/BasicMultiDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
 import { EntitySingleDropdown } from "./Dropdowns/EntitySingleDropdown";
 import { UserMultiDropdown } from "./Dropdowns/UserMultiDropdown";
@@ -47,6 +48,7 @@ const Dropdown = {
   },
   Multi: {
     Attribute: AttributeMultiDropdown,
+    Basic: BasicMultiDropdown,
     Entity: EntityMultiDropdown,
     User: UserMultiDropdown,
   },

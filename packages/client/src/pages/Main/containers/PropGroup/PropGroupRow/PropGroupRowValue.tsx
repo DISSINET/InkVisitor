@@ -1,4 +1,5 @@
 import { partitivityDict, virtualityDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button } from "components";
@@ -91,6 +92,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                         value: {
                           ...prop.value,
                           entityId: "",
+                          elvl: EntityEnums.Elvl.Textual,
                         },
                       });
                     },

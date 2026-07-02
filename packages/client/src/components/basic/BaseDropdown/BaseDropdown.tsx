@@ -43,6 +43,7 @@ interface BaseDropdown {
   entityDropdown?: boolean;
   userDropdown?: boolean;
   attributeDropdown?: boolean;
+  compactChips?: boolean;
   //
   disableTyping?: boolean;
   disabled?: boolean;
@@ -85,6 +86,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   entityDropdown = false,
   userDropdown = false,
   attributeDropdown,
+  compactChips = false,
 
   loggerId,
   limitSelectedItems,
@@ -138,6 +140,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
+          compactChips={compactChips}
           roundCorners={roundCorners}
           userDropdown={userDropdown}
           wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
