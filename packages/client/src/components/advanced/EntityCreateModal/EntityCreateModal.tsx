@@ -51,6 +51,9 @@ interface EntityCreateModal {
   // init for create T / S
   parentTerritory?: IEntity;
   entityCreateStatementOrder?: number;
+  // order among sibling territories, computed by the annotator from the anchor
+  // position so a new subT lands in the relevant place (like statements)
+  entityCreateTerritoryOrder?: number;
 
   allowedEntityClasses?: EntityEnums.Class[];
 }
@@ -63,6 +66,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   languageSelected,
   parentTerritory,
   entityCreateStatementOrder,
+  entityCreateTerritoryOrder,
   allowedEntityClasses,
 }) => {
   const entityClasses = allowedEntityClasses ? allowedEntityClasses : classesAll;
@@ -183,7 +187,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           newCreated.label,
           newCreated.detail || "",
           newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-          EntityEnums.Order.Last
+          entityCreateTerritoryOrder ?? EntityEnums.Order.Last
         );
         entityCreateMutation.mutate(newTerritory);
       } else if (newCreated.entityClass === EntityEnums.Class.Action) {
