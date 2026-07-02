@@ -181,6 +181,14 @@ export const StyledTerritorySubsectionTitle = styled.div`
   font-variant-caps: small-caps;
 `;
 
+/** Stacks the Sibling / Child Territory create buttons, right-aligned. */
+export const StyledTerritoryButtonColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
 export const StyledAnnotatorNoAnchors = styled.div`
   color: ${({ theme }) => theme.color.white};
   align-self: center;
@@ -317,7 +325,6 @@ export const StyledWarningRow = styled.div`
   padding-right: 1.25rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
-  /* box-shadow: ${({ theme }) => theme.boxShadow.inset}; */
 `;
 
 export const StyledWarningInfo = styled.div`
