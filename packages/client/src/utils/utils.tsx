@@ -462,36 +462,6 @@ export const collectTerritoryAnchorsAtIndex = (
   }, []);
 };
 
-// reduce the Territory anchors at an index to the lowest-level (leaf) ones:
-// a candidate is kept only when no other candidate's span is strictly inside
-// it. Result is sorted deepest first (smallest span; ties broken by larger
-// indexStart, then original order).
-export const getLeafTerritoryAnchorsAtIndex = (
-  anchors: IAnchorsNode[],
-  index: number
-): IAnchorsNode[] => {
-  const candidates = collectTerritoryAnchorsAtIndex(anchors, index);
-
-  const leaves = candidates.filter(
-    (candidate) =>
-      !candidates.some(
-        (other) =>
-          other !== candidate &&
-          other.indexStart >= candidate.indexStart &&
-          other.indexEnd <= candidate.indexEnd &&
-          (other.indexStart !== candidate.indexStart ||
-            other.indexEnd !== candidate.indexEnd)
-      )
-  );
-
-  return leaves.sort((a, b) => {
-    const spanA = a.indexEnd - a.indexStart;
-    const spanB = b.indexEnd - b.indexStart;
-    if (spanA !== spanB) return spanA - spanB;
-    return b.indexStart - a.indexStart;
-  });
-};
-
 // Build the chain of Territory anchors whose span contains the given index,
 // ordered outermost first, each tagged with its nesting depth (the number of
 // other containing Territory anchors that strictly enclose it). This is the

@@ -5,7 +5,6 @@ import {
   collectStatementAnchors,
   collectTerritoryAnchorsAtIndex,
   collectTerritoryChildren,
-  getLeafTerritoryAnchorsAtIndex,
   getTerritoryHierarchyAtIndex,
   computeDifferences,
   deepCopy,
@@ -267,35 +266,6 @@ describe("collectTerritoryAnchorsAtIndex", () => {
     expect(
       collectTerritoryAnchorsAtIndex(territoryAnchorTree, 100).map((a) => a.anchor)
     ).toContain("Touter");
-  });
-});
-
-describe("getLeafTerritoryAnchorsAtIndex", () => {
-  it("drops Ts that contain another candidate, keeping leaves, deepest (smallest span) first", () => {
-    expect(
-      getLeafTerritoryAnchorsAtIndex(territoryAnchorTree, 45).map((a) => a.anchor)
-    ).toEqual(["Tinner", "Tother"]);
-  });
-
-  it("returns the single containing T when no nesting applies", () => {
-    expect(
-      getLeafTerritoryAnchorsAtIndex(territoryAnchorTree, 5).map((a) => a.anchor)
-    ).toEqual(["Touter"]);
-  });
-
-  it("returns empty when index is in no Territory span", () => {
-    expect(getLeafTerritoryAnchorsAtIndex(territoryAnchorTree, 200)).toEqual([]);
-  });
-
-  it("breaks span ties by larger indexStart first", () => {
-    const tied = [
-      { anchor: "Ta", class: EntityEnums.Class.Territory, indexStart: 0, indexEnd: 10, children: [] },
-      { anchor: "Tb", class: EntityEnums.Class.Territory, indexStart: 3, indexEnd: 13, children: [] },
-    ] as unknown as IAnchorsNode[];
-    expect(getLeafTerritoryAnchorsAtIndex(tied, 5).map((a) => a.anchor)).toEqual([
-      "Tb",
-      "Ta",
-    ]);
   });
 });
 
