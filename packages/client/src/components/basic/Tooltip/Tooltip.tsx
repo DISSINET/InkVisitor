@@ -28,6 +28,7 @@ interface Tooltip {
   // style
   color?: keyof ThemeColor;
   position?: AutoPlacement | BasePlacement | VariationPlacement;
+  fallbackPlacements?: (AutoPlacement | BasePlacement | VariationPlacement)[];
   noArrow?: boolean;
   offsetX?: number;
   offsetY?: number;
@@ -47,6 +48,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   // style
   color = "tooltipBackground",
   position = "bottom",
+  fallbackPlacements = ["auto"],
   noArrow = false,
   offsetX = 0,
   offsetY = 7,
@@ -76,7 +78,7 @@ export const Tooltip: React.FC<Tooltip> = ({
           name: "flip",
           enabled: !disableAutoPosition,
           options: {
-            fallbackPlacements: ["auto"],
+            fallbackPlacements: fallbackPlacements,
           },
         },
       ],
