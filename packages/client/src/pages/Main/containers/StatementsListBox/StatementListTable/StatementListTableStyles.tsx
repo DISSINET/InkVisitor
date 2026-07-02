@@ -54,6 +54,15 @@ export const StyledTr = styled.tr<StyledTr>`
         ? theme.color["tableSelection"]
         : theme.color["white"]};
 
+  &:nth-child(odd) {
+    background-color: ${({ theme, $isOpened, $isSelected }) =>
+      $isOpened
+        ? theme.color["tableOpened"]
+        : $isSelected
+          ? theme.color["tableSelection"]
+          : theme.color["tableOddRow"]};
+  }
+
   color: ${({ theme, $isOpened }) => ($isOpened ? theme.color["primary"] : theme.color["black"])};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   transition: box-shadow 0.2s ease-in-out;
