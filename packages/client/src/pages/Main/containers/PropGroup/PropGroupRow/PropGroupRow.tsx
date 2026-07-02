@@ -51,7 +51,7 @@ interface PropGroupRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
-  territoryId: string;
+  territoryId?: string;
   openDetailOnCreate: boolean;
 
   parentId: string;

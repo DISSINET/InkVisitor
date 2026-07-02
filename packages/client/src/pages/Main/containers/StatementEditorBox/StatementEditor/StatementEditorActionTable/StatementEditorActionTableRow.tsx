@@ -77,7 +77,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
   handleDataAttributeChange,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
-  const { statementId, territoryId } = useSearchParams();
+  const { statementId } = useSearchParams();
   // the statement's own territory - may differ from the URL territoryId, so the
   // suggester home icon is keyed off the statement, not the opened territory.
   const statementTerritoryId = statement.data.territory?.territoryId;
@@ -266,7 +266,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             originId={originActant ? originActant.id : ""}
             entities={statement.entities}
             props={props}
-            territoryId={territoryId}
+            territoryId={statementTerritoryId}
             updateProp={updateProp}
             removeProp={removeProp}
             addProp={addProp}

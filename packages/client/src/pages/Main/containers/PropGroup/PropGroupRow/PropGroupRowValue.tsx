@@ -29,7 +29,7 @@ interface PropGroupRowValue {
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  territoryId: string;
+  territoryId?: string;
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;

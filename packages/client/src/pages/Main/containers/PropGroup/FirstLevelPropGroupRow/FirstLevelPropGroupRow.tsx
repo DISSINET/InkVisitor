@@ -28,7 +28,7 @@ interface FirstLevelPropGroupRow {
   setInitValueTyped: (value: React.SetStateAction<string>) => void;
 
   userCanEdit: boolean;
-  territoryId: string;
+  territoryId?: string;
   entities: {
     [key: string]: IEntity;
   };

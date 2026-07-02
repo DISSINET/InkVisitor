@@ -812,7 +812,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         originId={entity.id}
                         entities={entity.entities}
                         props={entity.props}
-                        territoryId={territoryId}
                         updateProp={updateProp}
                         removeProp={removeProp}
                         addProp={addMetaProp}

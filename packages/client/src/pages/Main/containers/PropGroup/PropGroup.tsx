@@ -21,7 +21,8 @@ interface PropGroup {
   originId: string;
   entities: { [key: string]: IEntity };
   props: IProp[];
-  territoryId: string;
+  /** Only used to flag suggestions already in the territory (home icon); omit outside the StatementEditor. */
+  territoryId?: string;
   boxEntity: IResponseStatement | IResponseDetail;
 
   updateProp: (
