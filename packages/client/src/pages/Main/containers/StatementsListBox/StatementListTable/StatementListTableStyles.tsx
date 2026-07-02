@@ -24,6 +24,11 @@ export const StyledTHead = styled.thead`
   background: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["gray"][700]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+
+  th:nth-last-child(2) {
+    width: 1%;
+    white-space: nowrap;
+  }
 `;
 export const StyledTh = styled.th`
   text-align: left;
@@ -49,14 +54,6 @@ export const StyledTr = styled.tr<StyledTr>`
         ? theme.color["tableSelection"]
         : theme.color["white"]};
 
-  &:nth-child(even) {
-    background-color: ${({ theme, $isOpened, $isSelected }) =>
-      $isOpened
-        ? theme.color["tableOpened"]
-        : $isSelected
-          ? theme.color["tableSelection"]
-          : theme.color["tableOddRow"]};
-  }
   color: ${({ theme, $isOpened }) => ($isOpened ? theme.color["primary"] : theme.color["black"])};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   transition: box-shadow 0.2s ease-in-out;
@@ -84,6 +81,10 @@ export const StyledTr = styled.tr<StyledTr>`
   }
   td:last-child {
     padding-right: ${({ theme }) => theme.space[4]};
+  }
+  td:nth-last-child(2) {
+    width: 1%;
+    white-space: nowrap;
   }
   &:hover {
     background-color: ${({ theme, $isOpened, $isSelected }) =>

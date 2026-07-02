@@ -504,3 +504,34 @@ export const extensiveLanguages = [
 ];
 
 export const languageDict = [...basicLanguages, ...extensiveLanguages];
+
+/**
+ * Returns a reordered copy of `languageDict` with the user's working languages
+ * surfaced first, so they are easy to find in the long ISO 639-2 list.
+ *
+ * Order: `empty` (no-language sentinel) stays pinned first, then working
+ * languages in `languageDict` order, then all remaining languages in original
+ * order. Because react-select's default filter preserves option array order,
+ * this makes working languages rank first both on open and while typing.
+ *
+ * Unknown or duplicate values in `workingLanguages` are ignored.
+ */
+export const orderLanguageDict = (
+  workingLanguages: EntityEnums.Language[],
+) => {
+  const working = new Set(
+    workingLanguages.filter((lang) => lang !== EntityEnums.Language.Empty),
+  );
+
+  const empty = languageDict.filter(
+    (item) => item.value === EntityEnums.Language.Empty,
+  );
+  const promoted = languageDict.filter(
+    (item) => item.value !== EntityEnums.Language.Empty && working.has(item.value),
+  );
+  const rest = languageDict.filter(
+    (item) => item.value !== EntityEnums.Language.Empty && !working.has(item.value),
+  );
+
+  return [...empty, ...promoted, ...rest];
+};

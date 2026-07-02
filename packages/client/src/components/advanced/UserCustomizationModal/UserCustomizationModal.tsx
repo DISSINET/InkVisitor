@@ -20,6 +20,7 @@ import {
   ModalInputWrap,
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { useOrderedLanguageDict } from "hooks/react-query";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaQuestion } from "react-icons/fa";
@@ -45,6 +46,7 @@ interface DataObject {
   defaultLanguage: EntityEnums.Language;
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
+  workingLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
 }
 interface UserCustomizationModal {
@@ -79,12 +81,15 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
       defaultStatementLanguage: options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
+      workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
     };
   }, [user]);
 
   const [data, setData] = useState<DataObject>(initialValues);
   const [defaultTerritory, setDefaultTerritory] = useState<IEntity | null>(null);
+
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   useEffect(() => {
     setData(initialValues);
@@ -142,6 +147,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultLanguage: data.defaultLanguage,
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
+          workingLanguages: data.workingLanguages.map((wL) => wL),
           defaultTerritory: data.defaultTerritory || "",
         },
       });
@@ -302,7 +308,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       width="full"
                       value={defaultLanguage}
                       onChange={(newValue) => handleChange("defaultLanguage", newValue)}
-                      options={languageDict}
+                      options={orderedLanguageDict}
                     />
                     <IconWithTooltip
                       color="success"
@@ -318,12 +324,36 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       width="full"
                       value={defaultStatementLanguage}
                       onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
-                      options={languageDict}
+                      options={orderedLanguageDict}
                     />
                     <IconWithTooltip
                       color="success"
                       icon={<FaQuestion />}
                       tooltipLabel="Dominant language of the source texts being coded into statements"
+                    />
+                  </StyledDropdownWrap>
+                </ModalInputWrap>
+
+                <ModalInputLabel>{"working languages"}</ModalInputLabel>
+                <ModalInputWrap width={165}>
+                  <StyledDropdownWrap>
+                    <Dropdown.Multi.Basic
+                      width="full"
+                      value={data.workingLanguages}
+                      onChange={(selectedOptions) =>
+                        setData((prev) => ({
+                          ...prev,
+                          workingLanguages: selectedOptions as EntityEnums.Language[],
+                        }))
+                      }
+                      options={languageDict.filter(
+                        (lang) => lang.value !== EntityEnums.Language.Empty,
+                      )}
+                    />
+                    <IconWithTooltip
+                      color="success"
+                      icon={<FaQuestion />}
+                      tooltipLabel="Languages you work with. They are shown first in every language dropdown to make them easy to find in the full list."
                     />
                   </StyledDropdownWrap>
                 </ModalInputWrap>

@@ -1,7 +1,6 @@
 import {
   actionPartOfSpeechDict,
   conceptPartOfSpeechDict,
-  languageDict,
 } from "@inkvisitor/shared/dictionaries";
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
@@ -31,7 +30,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { StyledNote } from "./EntityCreateModalStyles";
-import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
+import { useOrderedLanguageDict, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
@@ -93,6 +92,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [territoryEntity, setTerritoryEntity] = useState<false | IEntity>(parentTerritory || false);
 
   const { data: user } = useUserQuery();
+
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   useEffect(() => {
     if (user && !languageSelected) {
@@ -366,7 +367,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputWrap>
               <Dropdown.Single.Basic
                 width="full"
-                options={languageDict}
+                options={orderedLanguageDict}
                 value={selectedLanguage}
                 onChange={(newValue) => {
                   setSelectedLanguage(newValue);
