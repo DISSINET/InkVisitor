@@ -102,7 +102,10 @@ export const extensiveLanguages = [
   { label: "Bulgarian", value: EntityEnums.Language.Bulgarian },
   { label: "Blin", value: EntityEnums.Language.Blin },
   { label: "Caddo", value: EntityEnums.Language.Caddo },
-  { label: "Central American Indian languages", value: EntityEnums.Language.CentralAmericanIndianLanguages },
+  {
+    label: "Central American Indian languages",
+    value: EntityEnums.Language.CentralAmericanIndianLanguages,
+  },
   { label: "Galibi Carib", value: EntityEnums.Language.GalibiCarib },
   { label: "Catalan", value: EntityEnums.Language.Catalan },
   { label: "Caucasian languages", value: EntityEnums.Language.CaucasianLanguages },
@@ -125,9 +128,18 @@ export const extensiveLanguages = [
   { label: "Coptic", value: EntityEnums.Language.Coptic },
   { label: "Cornish", value: EntityEnums.Language.Cornish },
   { label: "Corsican", value: EntityEnums.Language.Corsican },
-  { label: "English-based Creoles and Pidgins", value: EntityEnums.Language.EnglishBasedCreolesAndPidgins },
-  { label: "French-based Creoles and Pidgins", value: EntityEnums.Language.FrenchBasedCreolesAndPidgins },
-  { label: "Portuguese-based Creoles and Pidgins", value: EntityEnums.Language.PortugueseBasedCreolesAndPidgins },
+  {
+    label: "English-based Creoles and Pidgins",
+    value: EntityEnums.Language.EnglishBasedCreolesAndPidgins,
+  },
+  {
+    label: "French-based Creoles and Pidgins",
+    value: EntityEnums.Language.FrenchBasedCreolesAndPidgins,
+  },
+  {
+    label: "Portuguese-based Creoles and Pidgins",
+    value: EntityEnums.Language.PortugueseBasedCreolesAndPidgins,
+  },
   { label: "Cree", value: EntityEnums.Language.Cree },
   { label: "Crimean Tatar", value: EntityEnums.Language.CrimeanTatar },
   { label: "Creoles and pidgins", value: EntityEnums.Language.CreolesAndPidgins },
@@ -217,7 +229,10 @@ export const extensiveLanguages = [
   { label: "Inuktitut", value: EntityEnums.Language.Inuktitut },
   { label: "Interlingue", value: EntityEnums.Language.Interlingue },
   { label: "Iloko", value: EntityEnums.Language.Iloko },
-  { label: "Interlingua (International Auxiliary Language Association)", value: EntityEnums.Language.InterlinguaInternationalAuxiliaryLanguageAssociation },
+  {
+    label: "Interlingua (International Auxiliary Language Association)",
+    value: EntityEnums.Language.InterlinguaInternationalAuxiliaryLanguageAssociation,
+  },
   { label: "Indic languages", value: EntityEnums.Language.IndicLanguages },
   { label: "Indonesian", value: EntityEnums.Language.Indonesian },
   { label: "Indo-European languages", value: EntityEnums.Language.IndoEuropeanLanguages },
@@ -322,7 +337,10 @@ export const extensiveLanguages = [
   { label: "Mayan languages", value: EntityEnums.Language.MayanLanguages },
   { label: "Erzya", value: EntityEnums.Language.Erzya },
   { label: "Nahuatl languages", value: EntityEnums.Language.NahuatlLanguages },
-  { label: "North American Indian languages", value: EntityEnums.Language.NorthAmericanIndianLanguages },
+  {
+    label: "North American Indian languages",
+    value: EntityEnums.Language.NorthAmericanIndianLanguages,
+  },
   { label: "Neapolitan", value: EntityEnums.Language.Neapolitan },
   { label: "Nauru", value: EntityEnums.Language.Nauru },
   { label: "Navajo", value: EntityEnums.Language.Navajo },
@@ -383,7 +401,10 @@ export const extensiveLanguages = [
   { label: "Sandawe", value: EntityEnums.Language.Sandawe },
   { label: "Sango", value: EntityEnums.Language.Sango },
   { label: "Yakut", value: EntityEnums.Language.Yakut },
-  { label: "South American Indian languages", value: EntityEnums.Language.SouthAmericanIndianLanguages },
+  {
+    label: "South American Indian languages",
+    value: EntityEnums.Language.SouthAmericanIndianLanguages,
+  },
   { label: "Salishan languages", value: EntityEnums.Language.SalishanLanguages },
   { label: "Samaritan Aramaic", value: EntityEnums.Language.SamaritanAramaic },
   { label: "Sanskrit", value: EntityEnums.Language.Sanskrit },
@@ -503,7 +524,9 @@ export const extensiveLanguages = [
   { label: "Zaza", value: EntityEnums.Language.Zaza },
 ];
 
-export const languageDict = [...basicLanguages, ...extensiveLanguages];
+export const languageDict = [...basicLanguages, ...extensiveLanguages].sort((a, b) =>
+  a.label.localeCompare(b.label),
+);
 
 /**
  * Returns a reordered copy of `languageDict` with the user's working languages
@@ -516,16 +539,10 @@ export const languageDict = [...basicLanguages, ...extensiveLanguages];
  *
  * Unknown or duplicate values in `workingLanguages` are ignored.
  */
-export const orderLanguageDict = (
-  workingLanguages: EntityEnums.Language[],
-) => {
-  const working = new Set(
-    workingLanguages.filter((lang) => lang !== EntityEnums.Language.Empty),
-  );
+export const orderLanguageDict = (workingLanguages: EntityEnums.Language[]) => {
+  const working = new Set(workingLanguages.filter((lang) => lang !== EntityEnums.Language.Empty));
 
-  const empty = languageDict.filter(
-    (item) => item.value === EntityEnums.Language.Empty,
-  );
+  const empty = languageDict.filter((item) => item.value === EntityEnums.Language.Empty);
   const promoted = languageDict.filter(
     (item) => item.value !== EntityEnums.Language.Empty && working.has(item.value),
   );
