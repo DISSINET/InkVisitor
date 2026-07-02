@@ -286,6 +286,7 @@ export const StyledStatementTargetInfo = styled.div`
   color: ${({ theme }) => theme.color.gray["600"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-style: italic;
+  white-space: nowrap;
 `;
 
 interface StyledDisplayModeButtonIconWrapper {
