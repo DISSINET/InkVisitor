@@ -36,15 +36,21 @@ export class UserOptions implements IUserOptions {
   defaultStatementLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   defaultLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   searchLanguages: EntityEnums.Language[] = [];
+  workingLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
     fillArray(this.searchLanguages, String, data?.searchLanguages || []);
+    fillArray(this.workingLanguages, String, data?.workingLanguages || []);
   }
 
   isValid(): boolean {
     if (this.searchLanguages.find((lang) => !lang)) {
+      return false;
+    }
+
+    if (this.workingLanguages.find((lang) => !lang)) {
       return false;
     }
 

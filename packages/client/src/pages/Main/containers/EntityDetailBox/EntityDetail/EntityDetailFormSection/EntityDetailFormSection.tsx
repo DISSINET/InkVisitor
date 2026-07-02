@@ -4,7 +4,6 @@ import {
   conceptPartOfSpeechDict,
   entitiesDictKeys,
   entityStatusDict,
-  languageDict,
 } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
@@ -17,7 +16,7 @@ import {
 } from "@inkvisitor/shared/types";
 import { IConceptData } from "@inkvisitor/shared/types/concept";
 import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
-import { useDocumentsQuery } from "hooks/react-query";
+import { useDocumentsQuery, useOrderedLanguageDict } from "hooks/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -88,6 +87,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
     actantMode === "resource",
   );
+
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   const noDocumentLinkedItem: DropdownItem = {
     value: "",
@@ -386,7 +387,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <Dropdown.Single.Basic
                 disabled={!userCanEdit}
                 width="full"
-                options={languageDict}
+                options={orderedLanguageDict}
                 value={entity.language}
                 onChange={(selectedOption) => {
                   updateEntityMutation.mutate({

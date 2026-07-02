@@ -1,4 +1,4 @@
-import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
+import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { entitiesDict } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, SearchEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IEntity } from "@inkvisitor/shared/types";
@@ -18,6 +18,7 @@ import Dropdown, {
   EntityTag,
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
+import { useOrderedLanguageDict } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
@@ -63,8 +64,6 @@ const defaultLanguageOption = {
   label: "any",
   value: languageFilterAny as EntityEnums.Language,
 };
-const languageOptions: DropdownItem[] = [defaultLanguageOption].concat(languageDict);
-
 const anyTemplate: DropdownItem = {
   value: "Any",
   label: "Any template",
@@ -85,6 +84,12 @@ export const EntitySearchBox: React.FC = () => {
 
   const { ref: resultRef, height: debouncedResultsHeight = 0 } =
     useResizeObserver<HTMLDivElement>();
+
+  const orderedLanguageDict = useOrderedLanguageDict();
+  const languageOptions: DropdownItem[] = useMemo(
+    () => [defaultLanguageOption].concat(orderedLanguageDict),
+    [orderedLanguageDict],
+  );
 
   const statusOptionSelected: EntityEnums.Status = useMemo(() => {
     if (!!searchData.status) {

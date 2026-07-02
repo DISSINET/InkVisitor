@@ -31,6 +31,9 @@ export interface IUserOptions {
   // the language of the source documents
   defaultStatementLanguage?: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
+
+  // languages the user works with - surfaced first in language dropdowns
+  workingLanguages: EntityEnums.Language[];
 }
 
 export interface IStoredTerritory {

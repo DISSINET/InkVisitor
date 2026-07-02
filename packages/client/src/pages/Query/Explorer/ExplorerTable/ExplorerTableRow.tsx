@@ -5,7 +5,6 @@ import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
   entityStatusDict,
-  languageDict,
   conceptPartOfSpeechDict,
   actionPartOfSpeechDict,
 } from "@inkvisitor/shared/dictionaries";
@@ -14,6 +13,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
+import { useOrderedLanguageDict } from "hooks/react-query";
 
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 
@@ -180,6 +180,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   );
 
   const queryClient = useQueryClient();
+
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   const updateEntityMutation = useMutation({
     mutationFn: async (variables: { entityId: string; changes: Partial<IEntity> }) =>
@@ -376,7 +378,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               <Dropdown.Single.Basic
                 width={140}
                 value={recordEntity.language}
-                options={languageDict}
+                options={orderedLanguageDict}
                 onChange={(v) => {
                   updateEntityMutation.mutate({
                     entityId: recordEntity.id,
@@ -435,7 +437,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }
     },
-    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation],
+    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation, orderedLanguageDict],
   );
 
   const renderCell = React.useCallback(

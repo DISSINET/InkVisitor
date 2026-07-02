@@ -1,4 +1,4 @@
-import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
+import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IRequestSearch,
@@ -6,6 +6,7 @@ import {
 } from "@inkvisitor/shared/types/request-search";
 import { Input, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup } from "components/advanced";
+import { useOrderedLanguageDict } from "hooks/react-query";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
@@ -33,8 +34,6 @@ const defaultLanguageOption = {
   label: "any",
   value: languageFilterAny as EntityEnums.Language,
 };
-const languageOptions: DropdownItem[] = [defaultLanguageOption].concat(languageDict);
-
 const defaultClassForTypeBar = "" as EntityEnums.Class;
 
 const initSearchValues: IRequestSearch = {
@@ -62,6 +61,12 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
   const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
 
   const { data: users } = useUsersSimplifiedQuery();
+
+  const orderedLanguageDict = useOrderedLanguageDict();
+  const languageOptions: DropdownItem[] = useMemo(
+    () => [defaultLanguageOption].concat(orderedLanguageDict),
+    [orderedLanguageDict],
+  );
 
   const statusOptionSelected: EntityEnums.Status = useMemo(() => {
     if (!!searchData.status) {

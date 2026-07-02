@@ -3,6 +3,7 @@ import { useBookmarksQuery } from "./useBookmarksQuery";
 import { useDetailQuery } from "./useDetailQuery";
 import { useDocumentQuery } from "./useDocumentQuery";
 import { useDocumentsQuery } from "./useDocumentsQuery";
+import { useOrderedLanguageDict } from "./useOrderedLanguageDict";
 import { useResourcesWithDocumentsQuery } from "./useResourcesWithDocumentsQuery";
 import { useStatementQuery } from "./useStatementQuery";
 import { useTemplatesQuery } from "./useTemplatesQuery";
@@ -17,6 +18,7 @@ export {
   useDetailQuery,
   useDocumentQuery,
   useDocumentsQuery,
+  useOrderedLanguageDict,
   useResourcesWithDocumentsQuery,
   useStatementQuery,
   useTemplatesQuery,

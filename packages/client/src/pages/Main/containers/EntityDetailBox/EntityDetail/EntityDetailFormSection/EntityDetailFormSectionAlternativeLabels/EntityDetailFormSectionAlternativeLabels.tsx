@@ -35,16 +35,8 @@ interface EntityDetailFormSectionAlternativeLabels {
 }
 export const EntityDetailFormSectionAlternativeLabels: React.FC<
   EntityDetailFormSectionAlternativeLabels
-> = ({
-  entity,
-  newLabel,
-  updateEntityMutation,
-  handlePromoteLabel,
-  userCanEdit,
-}) => {
-  const [currentlyEditedAltLabel, setCurrentlyEditedAltLabel] = useState<
-    false | number
-  >(false);
+> = ({ entity, newLabel, updateEntityMutation, handlePromoteLabel, userCanEdit }) => {
+  const [currentlyEditedAltLabel, setCurrentlyEditedAltLabel] = useState<false | number>(false);
   const [newAltLabel, setNewAltLabel] = useState<string>("");
   const alternativeLabels = entity.labels.slice(1);
 
@@ -53,10 +45,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
       <StyledAlternativeLabels>
         {alternativeLabels.map((label, key) => {
           return (
-            <StyledAlternativeLabelWrap
-              key={key}
-              $isEditing={currentlyEditedAltLabel === key}
-            >
+            <StyledAlternativeLabelWrap key={key} $isEditing={currentlyEditedAltLabel === key}>
               <StyledGreyBar />
               <>
                 {currentlyEditedAltLabel === key ? (
@@ -74,7 +63,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
                         labels: [
                           newLabel,
                           ...alternativeLabels.map((label, index) =>
-                            index === key ? value : label
+                            index === key ? value : label,
                           ),
                         ],
                       });
@@ -94,9 +83,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
                 ) : (
                   // grid is used to wrap the label if it is too long (text-overflow: ellipsis doesn't work without the grid)
                   <div style={{ maxWidth: "100%", display: "grid" }}>
-                    <StyledAlternativeLabel
-                      onClick={() => setCurrentlyEditedAltLabel(key)}
-                    >
+                    <StyledAlternativeLabel onClick={() => setCurrentlyEditedAltLabel(key)}>
                       {label}
                     </StyledAlternativeLabel>
                   </div>
@@ -156,8 +143,24 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
             });
             setNewAltLabel("");
           }}
+          rightContent={
+            <Button
+              disabled={newAltLabel.length === 0 || entity.labels.includes(newAltLabel)}
+              color="black"
+              icon={<FaPlus />}
+              onClick={() => {
+                updateEntityMutation.mutate({
+                  labels: [...entity.labels, newAltLabel],
+                });
+                setNewAltLabel("");
+              }}
+              noBorder
+              noBackground
+              inverted
+            />
+          }
         />
-        <span>
+        {/* <span>
           <Button
             disabled={
               newAltLabel.length === 0 || entity.labels.includes(newAltLabel)
@@ -171,7 +174,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
               setNewAltLabel("");
             }}
           />
-        </span>
+        </span> */}
       </StyledAddLabel>
     </>
   );
