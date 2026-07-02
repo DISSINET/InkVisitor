@@ -14,6 +14,8 @@ export function useTemplatesQuery(enabled = true) {
       return templates;
     },
     enabled: api.isLoggedIn() && enabled,
-    staleTime: 5 * 60 * 1000,
+    // templaptes are refetched on apply template dropdown click
+    // (has also refresh button when yet empty)
+    staleTime: 2 * 60 * 1000,
   });
 }

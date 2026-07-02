@@ -14,6 +14,7 @@ export function useBookmarksQuery(enabled = true) {
     // no need to fetch from other users, could be even infinity
     // (this stale time only counts on having app opened in two browsers
     // or switching to different computer without app reload)
-    staleTime: 60 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 }

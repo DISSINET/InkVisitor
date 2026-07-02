@@ -9,6 +9,5 @@ export function useStatementQuery(statementId: string) {
       return res.data;
     },
     enabled: !!statementId && api.isLoggedIn(),
-    staleTime: 1 * 60 * 1000,
   });
 }

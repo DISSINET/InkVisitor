@@ -12,5 +12,6 @@ export function useDocumentQuery(documentId?: string) {
       return res.data ?? undefined;
     },
     enabled: !!documentId && api.isLoggedIn(),
+    refetchOnWindowFocus: true,
   });
 }
