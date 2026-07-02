@@ -29,6 +29,7 @@ export interface StyledSelect {
   entityDropdown?: boolean;
   userDropdown?: boolean;
   attributeDropdown?: boolean;
+  compactChips?: boolean;
   wildCardChar?: boolean;
   icon?: React.ReactNode;
   loggerId?: string;
@@ -80,10 +81,12 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       $suggester ? "none" : `inset 0 0 0 ${theme.borderWidth[1]} ${theme.color["info"]}`};
   }
   .react-select__value-container {
-    height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
-    align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
+    height: ${({ userDropdown, compactChips }) => (userDropdown || compactChips ? "auto" : "100%")};
+    align-content: ${({ userDropdown, compactChips }) =>
+      userDropdown || compactChips ? "flex-start" : ""};
     gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
-    padding: ${({ userDropdown }) => (userDropdown ? "0.2rem 0.2rem" : "0")};
+    padding: ${({ userDropdown, compactChips }) =>
+      userDropdown ? "0.2rem" : compactChips ? "0.1rem" : "0"};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
   }
@@ -115,7 +118,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
     min-width: ${({ userDropdown }) => (userDropdown ? "0" : "")};
     max-width: ${({ userDropdown }) => (userDropdown ? "100%" : "")};
-    margin: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    margin: ${({ userDropdown, compactChips }) => (userDropdown ? "0" : compactChips ? "1px" : "")};
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
@@ -144,6 +147,12 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__multi-value__remove {
     padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
     padding-right: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
+
+    /* recolor only the icon on hover, no filled square around it */
+    &:hover {
+      background-color: transparent;
+      color: ${({ theme }) => theme.color["danger"]};
+    }
   }
   .react-select__input-container {
     color: ${({ theme }) => theme.color["black"]};

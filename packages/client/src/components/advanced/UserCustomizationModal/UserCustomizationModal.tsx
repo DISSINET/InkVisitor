@@ -214,7 +214,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                         <Button
                           label="Change password"
                           noBorder
-                          color="warning"
+                          color="success"
                           inverted
                           noBackground
                           onClick={() => setShowPasswordChange(true)}
