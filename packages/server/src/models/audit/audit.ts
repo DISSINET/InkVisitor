@@ -272,6 +272,32 @@ export default class Audit implements IAudit, IDbModel {
     return result.map((r) => new Audit(r));
   }
 
+  /**
+   * Retrieves the relation audits connected to an entity, i.e. relation
+   * create/edit/delete audits whose snapshot lists this entity in its
+   * entityIds. Backed by the relation_entityIds multi-index (which only holds
+   * relation-scoped rows); the auditScope filter is a defensive guard. Ordered
+   * newest-first for the entity Detail/Audits section.
+   * @param db rethinkdb Connection
+   * @param entityId string
+   * @returns Promise<Audit[]>
+   */
+  static async getRelationAuditsForEntity(
+    db: Connection,
+    entityId: string
+  ): Promise<Audit[]> {
+    const result = await rethink
+      .table(Audit.table)
+      .getAll(entityId, {
+        index: DbEnums.Indexes.AuditRelationEntityIds,
+      })
+      .filter({ auditScope: AuditScope.Relation })
+      .orderBy(rethink.desc("date"))
+      .run(db);
+
+    return result.map((r) => new Audit(r));
+  }
+
   static async getLastNForDocument(
     dbConn: Connection,
     documentId: string,

@@ -7,6 +7,7 @@ export class ResponseAudit implements IResponseAudit {
   auditScope: AuditScope = AuditScope.Entity;
   last: IAudit[] = [];
   first?: IAudit;
+  relations: IAudit[] = [];
 
   constructor(entityId: string) {
     this.modelId = entityId;
@@ -20,6 +21,7 @@ export class ResponseAudit implements IResponseAudit {
         this.first = firstEntity;
       }
     }
+    this.relations = await Audit.getRelationAuditsForEntity(db, this.modelId);
   }
 }
 
@@ -28,6 +30,7 @@ export class ResponseDocumentAudit implements IResponseAudit {
   auditScope: AuditScope = AuditScope.Document;
   last: IAudit[] = [];
   first?: IAudit;
+  relations: IAudit[] = [];
 
   constructor(documentId: string) {
     this.modelId = documentId;

@@ -148,6 +148,17 @@ const auditsIndexes: IndexDef[] = [
     r.row("type"),
     r.row("user"),
   ]),
+  // Multi-index over the connected entity ids captured in a relation audit's
+  // changes snapshot. Only relation audits carry changes.entityIds; every other
+  // scope resolves to [] via .default and contributes no entries, so this index
+  // effectively holds relation audits only. Backs
+  // Audit.getRelationAuditsForEntity (relation audits shown in an entity's
+  // Detail/Audits section).
+  def(
+    DbEnums.Indexes.AuditRelationEntityIds,
+    r.row("changes")("entityIds").default([]),
+    { multi: true }
+  ),
 ];
 
 const relationsIndexes: IndexDef[] = [

@@ -3,7 +3,7 @@ import { r as rethink } from "rethinkdb-ts";
 import Relation from "./relation";
 import Synonym from "./synonym";
 import Audit from "@models/audit/audit";
-import { RelationEnums } from "@inkvisitor/shared/enums";
+import { DbEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { AuditScope } from "@inkvisitor/shared/types";
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { IRequest } from "../../custom_typings/request";
@@ -39,6 +39,32 @@ async function ensureTable(name: string): Promise<void> {
   }
 }
 
+/**
+ * Mirrors the relation_entityIds multi-index declared in the db schema
+ * (packages/database/scripts/import/indexes.ts) so getRelationAuditsForEntity
+ * can be exercised against the test DB.
+ */
+async function ensureRelationEntityIdsIndex(): Promise<void> {
+  const indexes: string[] = await rethink
+    .table(Audit.table)
+    .indexList()
+    .run(connection());
+  if (!indexes.includes(DbEnums.Indexes.AuditRelationEntityIds)) {
+    await rethink
+      .table(Audit.table)
+      .indexCreate(
+        DbEnums.Indexes.AuditRelationEntityIds,
+        rethink.row("changes")("entityIds").default([]),
+        { multi: true }
+      )
+      .run(connection());
+    await rethink
+      .table(Audit.table)
+      .indexWait(DbEnums.Indexes.AuditRelationEntityIds)
+      .run(connection());
+  }
+}
+
 let db: Db;
 const connection = () => db.connection;
 
@@ -60,6 +86,7 @@ describe("Relation audits", () => {
     await ensureDb();
     await ensureTable(Relation.table);
     await ensureTable(Audit.table);
+    await ensureRelationEntityIdsIndex();
   });
 
   afterEach(async () => {
@@ -134,6 +161,40 @@ describe("Relation audits", () => {
       .getAll(a.id, b.id)
       .run(connection());
     expect(remaining).toHaveLength(0);
+  });
+
+  it("getRelationAuditsForEntity returns relation audits touching the entity, not entity audits", async () => {
+    // relation audit whose snapshot lists relE1 among its entityIds
+    const rel = newSuperclass(["relE1", "relE2"]);
+    await rel.save(connection());
+    await rel.afterSave(mockRequest(db));
+
+    // an entity-scoped audit for relE1 must NOT be indexed/returned (its
+    // changes blob has no entityIds -> .default([]) yields no index entries)
+    await Audit.createNew(
+      mockRequest(db),
+      AuditScope.Entity,
+      "relE1",
+      { class: "P" },
+      EventType.CREATE
+    );
+
+    const found = await Audit.getRelationAuditsForEntity(connection(), "relE1");
+    expect(found).toHaveLength(1);
+    expect(found[0].auditScope).toBe(AuditScope.Relation);
+    expect(found[0].type).toBe(EventType.RELATION_CREATE);
+    expect(found[0].modelId).toBe(rel.id);
+
+    // the same relation is also reachable from its other entity
+    expect(
+      await Audit.getRelationAuditsForEntity(connection(), "relE2")
+    ).toHaveLength(1);
+    // an entity with no relation audits yields nothing
+    expect(
+      await Audit.getRelationAuditsForEntity(connection(), "relE-none")
+    ).toHaveLength(0);
+
+    await rel.delete(connection());
   });
 
   it("does not persist the transient audit marker onto the relation row", async () => {
