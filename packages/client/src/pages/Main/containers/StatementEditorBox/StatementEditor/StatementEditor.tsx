@@ -343,7 +343,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           changes.value.entityId &&
           changes.value.elvl !== EntityEnums.Elvl.Inferential);
 
-      if (languageCheck && isTypeOrValueChange && user && user.options.defaultStatementLanguage) {
+      if (languageCheck && isTypeOrValueChange && user && user.options.workingLanguages?.length) {
         checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
@@ -351,19 +351,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
+  // checking if the entity language is not in the user's working languages -> in that case, switch elvl to EntityEnums.Elvl.Inferential
   const checkTypeEntityLanguage = (propId: string, changes: any, instantUpdate?: boolean) => {
     if (user) {
-      const statementLanguage = user.options.defaultStatementLanguage;
+      const workingLanguages = user.options.workingLanguages ?? [];
       if (changes.type) {
         api.entityGet(changes.type?.entityId).then((typeEntity) => {
           if (typeEntity.data) {
             const entityLanguage = typeEntity.data.language;
-            if (entityLanguage !== statementLanguage && changes.type) {
+            if (!workingLanguages.includes(entityLanguage) && changes.type) {
               changes.type.elvl = EntityEnums.Elvl.Inferential;
               applyPropChanges(propId, changes, instantUpdate);
               toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property type slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`,
+                `The language of the entity (${entityLanguage}) assigned to the property type slot is not among your working languages. Epistemic level of property type's involvement changed to "inferential"`,
               );
             }
           }
@@ -373,11 +373,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         api.entityGet(changes.value.entityId).then((valueEntity) => {
           if (valueEntity.data) {
             const entityLanguage = valueEntity.data.language;
-            if (entityLanguage !== statementLanguage && changes.value) {
+            if (!workingLanguages.includes(entityLanguage) && changes.value) {
               changes.value.elvl = EntityEnums.Elvl.Inferential;
               applyPropChanges(propId, changes, instantUpdate);
               toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property value slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`,
+                `The language of the entity (${entityLanguage}) assigned to the property value slot is not among your working languages. Epistemic level of property value's involvement changed to "inferential"`,
               );
             }
           }
