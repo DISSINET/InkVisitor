@@ -75,6 +75,7 @@ interface ExploreAction {
 enum ExploreActionType {
   addColumn,
   removeColumn,
+  moveColumn,
   setViewMode,
   setStatsParams,
   setOffset,
@@ -129,6 +130,33 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
           ...state.view,
           columns: state.view.columns.filter((column) => column.id !== removedColumnId),
         },
+      };
+    }
+
+    case ExploreActionType.moveColumn: {
+      if (state.view.mode !== Explore.EViewMode.Table) {
+        return state;
+      }
+      const { fromIndex, toIndex } = action.payload as {
+        fromIndex: number;
+        toIndex: number;
+      };
+      const columns = state.view.columns;
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= columns.length ||
+        toIndex >= columns.length
+      ) {
+        return state;
+      }
+      const nextColumns = [...columns];
+      const [moved] = nextColumns.splice(fromIndex, 1);
+      nextColumns.splice(toIndex, 0, moved);
+      return {
+        ...state,
+        view: { ...state.view, columns: nextColumns },
       };
     }
 
