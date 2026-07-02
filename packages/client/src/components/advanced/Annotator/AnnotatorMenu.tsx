@@ -86,7 +86,6 @@ interface TextAnnotatorMenuProps {
   onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
   onCreateActiveTAnchor?: (elvl: EntityEnums.Elvl) => void;
-  hasParentT: boolean;
   isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
   territory?: IResponseTerritory;
@@ -115,7 +114,6 @@ export const TextAnnotatorMenu = ({
   onRemoveAnchor = undefined,
   onUpdateAnchor = undefined,
   canCreateActiveTAnchor,
-  hasParentT,
   isTextInsideThisT,
   activeTerritoryId,
   territory,
@@ -157,6 +155,11 @@ export const TextAnnotatorMenu = ({
       ? annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1].id
       : undefined;
 
+  // The selection sits inside at least one in-document Territory anchor. Ts are
+  // created relative to those anchors, so the Sibling/Child buttons key off this
+  // rather than the T opened in the Tree.
+  const isSelectionInsideTAnchor = annotatorPositionHierarchy.length > 0;
+
   // the active T is rendered as its own flat option only when it is not already
   // part of the position hierarchy; otherwise the "opened in Tree" note rides on
   // the matching hierarchy node
@@ -186,6 +189,13 @@ export const TextAnnotatorMenu = ({
 
   const selectedTargetTerritoryEntity =
     (selectedTargetTerritoryId ? entities[selectedTargetTerritoryId] : false) || territory;
+
+  // A sibling-T is created under the target T's parent, so it only makes sense
+  // when the target T (the anchor the cursor sits in, not the Tree T) has one. A
+  // child-T is always creatable (its parent is the target itself).
+  const selectedTargetHasParentT =
+    selectedTargetTerritoryEntity?.class === EntityEnums.Class.Territory &&
+    Boolean((selectedTargetTerritoryEntity as IResponseTerritory).data?.parent);
 
   // Shared target picker, driven from a caret in both the Statement and the
   // Territory subsection. Both edit the same selected target; each keeps its own
@@ -431,33 +441,37 @@ export const TextAnnotatorMenu = ({
             </StyledAnnotatorItemContentLine>
           </StyledAnnotatorItemContent>
           {/* Territory Sibling or Child */}
-          {activeTerritoryId && (
+          {isSelectionInsideTAnchor && (
             <StyledAnnotatorItemContent>
               <StyledAnnotatorItemContentLine>
                 {onCreateTerritory && (
                   <StyledTerritorySubsection>
                     <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
                     <StyledTerritoryButtonColumn>
-                      <Button
-                        icon={<TerritorySiblingIcon />}
-                        color={isTextInsideThisT ? "greyer" : "primary"}
-                        onClick={() => {
-                          onCreateTerritory("sibling-T", territoryElvl, selectedTargetTerritoryId);
-                        }}
-                        label="Sibling"
-                        tooltipLabel="Create new sibling territory anchor"
-                      />
-                      {hasParentT && (
+                      {selectedTargetHasParentT && (
                         <Button
-                          icon={<TerritoryChildIcon />}
-                          color={isTextInsideThisT ? "primary" : "greyer"}
+                          icon={<TerritorySiblingIcon />}
+                          color={isTextInsideThisT ? "greyer" : "primary"}
                           onClick={() => {
-                            onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
+                            onCreateTerritory(
+                              "sibling-T",
+                              territoryElvl,
+                              selectedTargetTerritoryId,
+                            );
                           }}
-                          label="Child"
-                          tooltipLabel="Create new child territory anchor"
+                          label="Sibling"
+                          tooltipLabel="Create new sibling territory anchor"
                         />
                       )}
+                      <Button
+                        icon={<TerritoryChildIcon />}
+                        color={isTextInsideThisT ? "primary" : "greyer"}
+                        onClick={() => {
+                          onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
+                        }}
+                        label="Child"
+                        tooltipLabel="Create new child territory anchor"
+                      />
                     </StyledTerritoryButtonColumn>
                     {renderTargetTrailer(
                       territoryTargetPicker,

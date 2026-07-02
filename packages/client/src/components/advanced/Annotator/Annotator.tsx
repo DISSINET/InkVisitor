@@ -1215,8 +1215,6 @@ export const TextAnnotator = ({
     });
   }, [isMenuDisplayed]);
 
-  const hasParentT = territory?.data?.parent !== undefined;
-
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchOccurences, setSearchOccurences] = useState<
     { segmentIndex: number; lineIndex: number; start: number; end: number }[] | null
@@ -1416,7 +1414,6 @@ export const TextAnnotator = ({
                       canCreateActiveTAnchor={
                         !dataDocument?.entityIds.T.includes(thisTerritoryEntityId ?? "")
                       }
-                      hasParentT={hasParentT}
                       territory={territory}
                       disableCreate={disableCreate || isMenuReadOnly}
                       isLoading={isSaving || isSavingWithoutRefresh || isFetchingAnchorEntities}
@@ -1599,7 +1596,7 @@ export const TextAnnotator = ({
         </StyledAnnotatorButtons>
       </div>
 
-      {territory && territoryCreateModalType && (
+      {territoryCreateModalType && (
         <EntityCreateModal
           closeModal={() => {
             setTerritoryCreateModalType(false);
