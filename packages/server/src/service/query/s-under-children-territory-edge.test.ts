@@ -94,7 +94,10 @@ describe("SUT:C edge / S under T: children (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
-    // run() reads candidate statements via the territory index...
+    // run() reads candidate statements via the territory index. prepare() resolves
+    // the subtree through Territory.findChilds(deep) - treeCache is empty under
+    // NODE_ENV=test, so it takes the DB fallback (a plain class+parent filter, no
+    // index needed).
     await r
       .table(TABLE)
       .indexCreate(
@@ -102,10 +105,7 @@ describe("SUT:C edge / S under T: children (real ReQL)", () => {
         r.row("data")("territory")("territoryId")
       )
       .run(conn);
-    // ...and prepare() reads all territories via the class index
-    await r.table(TABLE).indexCreate(DbEnums.Indexes.Class).run(conn);
     await r.table(TABLE).indexWait(DbEnums.Indexes.StatementTerritory).run(conn);
-    await r.table(TABLE).indexWait(DbEnums.Indexes.Class).run(conn);
     await r.table(TABLE).insert(FIXTURES).run(conn);
   }, 30000);
 

@@ -1,5 +1,6 @@
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
+import Territory from "@models/territory/territory";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
@@ -95,11 +96,12 @@ export class EdgeSUnderT extends SearchEdge {
  *
  * Territories store only their DIRECT parent (data.parent.territoryId) with no
  * ancestor path, so the descendant closure can't be a single index lookup. It's
- * resolved in prepare(): all territories are fetched via the `class` index (a
- * small set) and the subtree is walked in memory - no recursive DB calls. run()
- * then pulls the subtree's statements through the StatementTerritory index and
- * intersects them with the incoming stream (the subset invariant that positive
- * matching and negation rely on). No target territory -> matches nothing.
+ * resolved in prepare() via Territory.findChilds(deep), which walks the in-memory
+ * treeCache (zero DB reads in prod) and falls back to a live DB walk when the
+ * cache is cold or the territory is absent. run() then pulls the subtree's
+ * statements through the StatementTerritory index and intersects them with the
+ * incoming stream (the subset invariant that positive matching and negation rely
+ * on). No target territory -> matches nothing.
  */
 export class EdgeSUnderChildrenT extends SearchEdge {
   private subtreeTerritoryIds: string[] = [];
@@ -116,48 +118,10 @@ export class EdgeSUnderChildrenT extends SearchEdge {
       return;
     }
 
-    const territories = (await r
-      .table(Entity.table)
-      .getAll(EntityEnums.Class.Territory, { index: DbEnums.Indexes.Class })
-      .map(function (t: RDatum<IEntity>) {
-        return {
-          id: t("id"),
-          parentId: r.branch(
-            t("data")("parent").default(null).typeOf().eq("OBJECT"),
-            t("data")("parent")("territoryId"),
-            null
-          ),
-        };
-      })
-      .run(db)) as { id: string; parentId: string | null }[];
-
-    const childrenByParent = new Map<string, string[]>();
-    for (const t of territories) {
-      if (t.parentId) {
-        const list = childrenByParent.get(t.parentId) ?? [];
-        list.push(t.id);
-        childrenByParent.set(t.parentId, list);
-      }
-    }
-
-    // BFS the subtree rooted at T (T included); `seen` guards against cycles in
-    // a broken tree so this can't loop forever
-    const subtree: string[] = [];
-    const seen = new Set<string>();
-    const queue: string[] = [rootId];
-    while (queue.length) {
-      const id = queue.shift() as string;
-      if (seen.has(id)) {
-        continue;
-      }
-      seen.add(id);
-      subtree.push(id);
-      for (const child of childrenByParent.get(id) ?? []) {
-        queue.push(child);
-      }
-    }
-
-    this.subtreeTerritoryIds = subtree;
+    // findChilds(deep) returns descendants only (keyed by id) - add the root
+    // itself to cover Statements sitting directly in the target territory
+    const descendants = await new Territory({ id: rootId }).findChilds(db, true);
+    this.subtreeTerritoryIds = [rootId, ...Object.keys(descendants)];
   }
 
   run(q: RStream): RStream {
