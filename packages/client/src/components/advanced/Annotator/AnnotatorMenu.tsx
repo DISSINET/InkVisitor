@@ -18,7 +18,7 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
-import { PiSelectionFill } from "react-icons/pi";
+import { PiCheckBold, PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
@@ -55,6 +55,7 @@ import {
 } from "./AnnotatorStyles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
 import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
+import { LuCheck } from "react-icons/lu";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -319,9 +320,9 @@ export const TextAnnotatorMenu = ({
               <Button
                 color="primary"
                 inverted
-                icon={<MdOutlineDone size={25} />}
+                icon={<PiCheckBold size={25} />}
                 size={ButtonSize.ExtraLarge}
-                shape="rounded-md"
+                shape="rounded-xl"
                 noBackground
                 onClick={() => onEscapePressed()}
                 tooltipLabel="Close selection menu"

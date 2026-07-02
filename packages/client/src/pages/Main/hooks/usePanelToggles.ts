@@ -202,12 +202,83 @@ export function usePanelToggles({
             ]),
           );
         }
+      } else if (!secondPanelExpanded) {
+        // when second panel is hidden, give ALL freed visual space to first panel
+        // instead of fourth. fourthPanelWidth = layoutWidth - sum(others), so the
+        // only way to keep fourth unchanged is to push all three separators right
+        // until first panel absorbs everything. Save original positions to restore.
+        const desiredTreePos = panelWidths[0] + panelWidths[1] + panelWidths[2] - 2 * COLLAPSED_PANEL_WIDTH;
+        const desiredCenterPos = desiredTreePos + SECOND_PANEL_MIN_WIDTH;
+        const desiredSearchPos = desiredCenterPos + COLLAPSED_PANEL_WIDTH;
+
+        const newSearchPos = Math.min(desiredSearchPos, layoutWidth - FOURTH_PANEL_MIN_WIDTH);
+        const newCenterPos = Math.min(desiredCenterPos, newSearchPos - COLLAPSED_PANEL_WIDTH);
+        const newTreePos = Math.min(desiredTreePos, newCenterPos - SECOND_PANEL_MIN_WIDTH);
+
+        if (newTreePos > treeSeparator.position) {
+          localStorage.setItem(
+            "mainPageThirdPanelRestoreTree",
+            floorNumberToOneDecimal(treeSeparator.position / onePercentOfLayoutWidth).toString(),
+          );
+          localStorage.setItem(
+            "mainPageThirdPanelRestoreCenter",
+            floorNumberToOneDecimal(centerSeparator.position / onePercentOfLayoutWidth).toString(),
+          );
+          localStorage.setItem(
+            "mainPageThirdPanelRestoreSearch",
+            floorNumberToOneDecimal(searchSeparator.position / onePercentOfLayoutWidth).toString(),
+          );
+
+          treeSeparator.setPosition(newTreePos);
+          persistSeparator("mainPageTreeSeparatorXPosition", newTreePos);
+          centerSeparator.setPosition(newCenterPos);
+          persistSeparator("mainPageCenterSeparatorXPosition", newCenterPos);
+          searchSeparator.setPosition(newSearchPos);
+          persistSeparator("mainPageSearchSeparatorXPosition", newSearchPos);
+          dispatch(
+            setPanelWidths([
+              newTreePos,
+              floorNumberToOneDecimal(newCenterPos - newTreePos),
+              COLLAPSED_PANEL_WIDTH,
+              floorNumberToOneDecimal(layoutWidth - newSearchPos),
+            ]),
+          );
+        }
       }
       return;
     }
 
     dispatch(setThirdPanelExpanded(true));
     queryClient.invalidateQueries({ queryKey: ["document"] });
+
+    // if all three separators were shifted right when second panel was hidden,
+    // restore them all to exact pre-collapse positions
+    const savedTree = localStorage.getItem("mainPageThirdPanelRestoreTree");
+    const savedCenter = localStorage.getItem("mainPageThirdPanelRestoreCenter");
+    const savedSearch = localStorage.getItem("mainPageThirdPanelRestoreSearch");
+    if (savedTree && savedCenter && savedSearch && !secondPanelExpanded) {
+      localStorage.removeItem("mainPageThirdPanelRestoreTree");
+      localStorage.removeItem("mainPageThirdPanelRestoreCenter");
+      localStorage.removeItem("mainPageThirdPanelRestoreSearch");
+      const restoreTreePos = Number(savedTree) * onePercentOfLayoutWidth;
+      const restoreCenterPos = Number(savedCenter) * onePercentOfLayoutWidth;
+      const restoreSearchPos = Number(savedSearch) * onePercentOfLayoutWidth;
+      treeSeparator.setPosition(restoreTreePos);
+      persistSeparator("mainPageTreeSeparatorXPosition", restoreTreePos);
+      centerSeparator.setPosition(restoreCenterPos);
+      persistSeparator("mainPageCenterSeparatorXPosition", restoreCenterPos);
+      searchSeparator.setPosition(restoreSearchPos);
+      persistSeparator("mainPageSearchSeparatorXPosition", restoreSearchPos);
+      dispatch(
+        setPanelWidths([
+          restoreTreePos,
+          floorNumberToOneDecimal(restoreCenterPos - restoreTreePos),
+          floorNumberToOneDecimal(restoreSearchPos - restoreCenterPos),
+          floorNumberToOneDecimal(layoutWidth - restoreSearchPos),
+        ]),
+      );
+      return;
+    }
 
     // if the third panel's width was previously parked into the second panel,
     // give it back by moving the center separator left (fourth panel untouched)
