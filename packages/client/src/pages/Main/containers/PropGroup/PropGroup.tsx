@@ -5,9 +5,7 @@ import {
   IResponseDetail,
   IResponseStatement,
 } from "@inkvisitor/shared/types";
-import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import api from "api";
 import { EntitySuggester } from "components/advanced";
 import React, { useCallback, useEffect, useState } from "react";
 import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
@@ -23,7 +21,8 @@ interface PropGroup {
   originId: string;
   entities: { [key: string]: IEntity };
   props: IProp[];
-  territoryId: string;
+  /** Only used to flag suggestions already in the territory (home icon); omit outside the StatementEditor. */
+  territoryId?: string;
   boxEntity: IResponseStatement | IResponseDetail;
 
   updateProp: (
@@ -76,25 +75,6 @@ export const PropGroup: React.FC<PropGroup> = ({
   alwaysShowCreateModal,
   disableSpareRow,
 }) => {
-  // territory query
-  const {
-    status,
-    data: territoryActants = [],
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["territoryActants", territoryId],
-    queryFn: async () => {
-      if (territoryId) {
-        const res = await api.entityIdsInTerritory(territoryId);
-        return res.data ?? [];
-      } else {
-        return [];
-      }
-    },
-    enabled: !!territoryId && api.isLoggedIn(),
-  });
-
   // this states are part of the spare row functionality
   const [tempTypeTyped, setTempTypeTyped] = useState("");
   const [tempValueTyped, setTempValueTyped] = useState("");
@@ -148,7 +128,7 @@ export const PropGroup: React.FC<PropGroup> = ({
           movePropToIndex={movePropToIndex}
           userCanEdit={userCanEdit}
           addPropWithEntityId={addPropWithEntityId}
-          territoryActants={territoryActants}
+          territoryId={territoryId}
           entities={entities}
           disabledAttributes={disabledAttributes}
           originId={originId}
@@ -202,7 +182,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             removeProp={removeProp}
             addProp={addProp}
             userCanEdit={userCanEdit}
-            territoryActants={territoryActants || []}
+            territoryId={territoryId}
             openDetailOnCreate={openDetailOnCreate}
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
@@ -253,7 +233,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             removeProp={removeProp}
             addProp={addProp}
             userCanEdit={userCanEdit}
-            territoryActants={territoryActants || []}
+            territoryId={territoryId}
             openDetailOnCreate={openDetailOnCreate}
             moveProp={moveProp}
             movePropToIndex={movePropToIndex}
@@ -290,7 +270,6 @@ export const PropGroup: React.FC<PropGroup> = ({
             placeholder="type"
             alwaysShowCreateModal={alwaysShowCreateModal}
             openDetailOnCreate={openDetailOnCreate}
-            territoryActants={[]}
             onSelected={(newSelectedId) => {
               if (addPropWithEntityId) {
                 addPropWithEntityId({ typeEntityId: newSelectedId });
@@ -314,7 +293,6 @@ export const PropGroup: React.FC<PropGroup> = ({
             alwaysShowCreateModal={alwaysShowCreateModal}
             excludedEntityClasses={excludedSuggesterEntities}
             openDetailOnCreate={openDetailOnCreate}
-            territoryActants={[]}
             onSelected={(newSelectedId: string) => {
               if (addPropWithEntityId) {
                 addPropWithEntityId({ valueEntityId: newSelectedId });

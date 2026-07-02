@@ -2,7 +2,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { Checkbox, Input } from "components";
 import { useDebounce } from "hooks";
 import React, { useCallback, useEffect, useState } from "react";
-import { BiSearch } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 import { LuRegex } from "react-icons/lu";
 import { ExploreAction, ExploreActionType } from "../../state";
 import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "../ExplorerTableStyles";
@@ -60,7 +60,7 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         onChangeFn={setInputValue}
         clearable
         roundCorners
-        icon={<BiSearch />}
+        icon={<IcoSearch />}
         rightContent={
           <StyledLabelFilterCheckboxWrapper>
             <Checkbox

@@ -17,6 +17,7 @@ interface BasicDropdown<T = string> {
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   disableTyping?: boolean;
   disabled?: boolean;
+  onFocus?: () => void;
 
   noDropDownIndicator?: boolean;
   loggerId?: string;
@@ -32,6 +33,7 @@ export const BasicDropdown = <T extends string>({
   tooltipPosition,
   disableTyping = false,
   disabled,
+  onFocus,
   loggerId,
   noDropDownIndicator = false,
 }: BasicDropdown<T>) => {
@@ -48,6 +50,7 @@ export const BasicDropdown = <T extends string>({
       noDropDownIndicator={noDropDownIndicator}
       disableTyping={disableTyping}
       disabled={disabled}
+      onFocus={onFocus}
       loggerId={loggerId}
     />
   );

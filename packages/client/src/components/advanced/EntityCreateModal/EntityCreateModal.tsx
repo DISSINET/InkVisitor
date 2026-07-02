@@ -6,7 +6,7 @@ import {
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IEntity, IResponseEntity } from "@inkvisitor/shared/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   MIN_LABEL_LENGTH_MESSAGE,
   excludedSuggesterEntities,
@@ -31,7 +31,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { StyledNote } from "./EntityCreateModalStyles";
-import { useUserQuery } from "hooks/react-query";
+import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
@@ -233,24 +233,12 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const { data: templates } = useQuery({
-    queryKey: ["entity-templates", "templates", selectedCategory],
-    queryFn: async () => {
-      if (selectedCategory) {
-        const res = await api.entitiesSearch({
-          onlyTemplates: true,
-          class: selectedCategory,
-        });
+  const { data: allTemplates } = useTemplatesQuery();
 
-        const templates = res.data ?? [];
-        templates.sort((a: IEntity, b: IEntity) =>
-          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
-        );
-        return templates;
-      }
-    },
-    enabled: !!selectedCategory && api.isLoggedIn(),
-  });
+  const templates = useMemo(
+    () => allTemplates?.filter((template) => template.class === selectedCategory),
+    [allTemplates, selectedCategory]
+  );
 
   const templateOptions: DropdownItem[] & { template: IEntity }[] = useMemo(() => {
     const options = templates

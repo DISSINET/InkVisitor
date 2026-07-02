@@ -49,7 +49,7 @@ export const StyledTr = styled.tr<StyledTr>`
         ? theme.color["tableSelection"]
         : theme.color["white"]};
 
-  &:nth-child(odd) {
+  &:nth-child(even) {
     background-color: ${({ theme, $isOpened, $isSelected }) =>
       $isOpened
         ? theme.color["tableOpened"]
@@ -128,6 +128,8 @@ export const StyledCheckboxWrapper = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
+  margin-left: 0.4rem;
+  margin-right: 0.1rem;
 `;
 // keeps the checkbox above the absolutely-positioned focus circle
 export const StyledSelectionCheckbox = styled.div`
@@ -162,4 +164,14 @@ export const StyledOrderCorrection = styled.div`
   max-width: 2.6rem;
   width: 100%;
   color: ${({ theme }) => theme.color["gray"]["800"]};
+`;
+
+// wraps tag cells so clicking/double-clicking a tag (e.g. to open its detail)
+// does not bubble up and activate the statement row; width: fit-content keeps
+// the clickable box hugging the tags so clicks in the empty cell space still
+// reach the row
+export const StyledTagCellWrap = styled.div`
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
 `;

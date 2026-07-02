@@ -35,7 +35,11 @@ interface EntitySuggesterProps {
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
-  territoryActants?: string[];
+  // territoryId keys the cached set of entity ids already used in the territory,
+  // used to render the home icon next to suggestion list items. The cache is
+  // seeded by the StatementEditor from its territoryData - this component never
+  // fetches it, so the icon only appears where that seed exists (StatementEditor).
+  territoryId?: string;
   excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
@@ -105,7 +109,7 @@ const EntitySuggesterFull: React.FC<
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
-  territoryActants,
+  territoryId,
   excludedEntityClasses = [],
   filterEditorRights = false,
   excludedActantIds = [],
@@ -226,6 +230,18 @@ const EntitySuggesterFull: React.FC<
       api.isLoggedIn(),
   });
 
+  // territory actants - the ids of entities already used in the territory, used
+  // to mark such suggestions with a home icon. This never fetches: the StatementEditor
+  // seeds this cache from its already-loaded territoryData (same id set as
+  // api.entityIdsInTerritory). Elsewhere (e.g. entity detail) nothing seeds it,
+  // so it resolves to [] and no home icon is shown - it is only relevant there.
+  const { data: territoryActantIds } = useQuery<string[]>({
+    queryKey: ["territoryActants", territoryId],
+    queryFn: async () => [],
+    enabled: !!territoryId,
+    staleTime: Infinity,
+  });
+
   const filterSuggestions = (suggestions: IResponseEntity[]) => {
     return (
       deepCopy(suggestions)
@@ -260,8 +276,8 @@ const EntitySuggesterFull: React.FC<
         .map((entity: IEntity) => {
           const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(entity.id)) {
-            icons.push(<FaHome key={entity.id} color="" />);
+          if (territoryActantIds?.includes(entity.id)) {
+            icons.push(<FaHome key={entity.id} size={12} />);
           }
 
           return {

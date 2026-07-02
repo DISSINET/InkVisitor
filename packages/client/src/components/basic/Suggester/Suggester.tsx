@@ -281,11 +281,6 @@ export const Suggester: React.FC<Suggester> = ({
 
     return (
       <List<SuggestionRowEntityItemData>
-        // height={
-        //   suggestions.length > 7
-        //     ? rowHeight * 8
-        //     : rowHeight * suggestions.length
-        // }
         rowProps={{ items: suggestions }}
         rowCount={suggestions.length}
         rowHeight={rowHeight}

@@ -1,8 +1,11 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
-import { ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { IResponseEntity } from "@inkvisitor/shared/types";
+import { useQuery } from "@tanstack/react-query";
+import api from "api";
+import { ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
-import React from "react";
+import React, { useMemo } from "react";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { FaScissors } from "react-icons/fa6";
 import { TbAnchor } from "react-icons/tb";
@@ -72,6 +75,30 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   showChip = true,
   isLoading = false,
 }) => {
+  const anchorIds = useMemo(
+    () => [...new Set(anchors.map((a) => a.tagName))],
+    [anchors]
+  );
+
+  // Batch-fetch all anchor entities in a single request instead of letting each
+  // EntityTagById fetch on its own. Only runs while the modal is open.
+  const { data: anchorEntities, isFetching: isFetchingEntities } = useQuery({
+    queryKey: ["warning-anchor-entities", anchorIds],
+    queryFn: async () => {
+      const res = await api.entitiesGet(anchorIds);
+      return res.data ?? [];
+    },
+    enabled: open && anchorIds.length > 0 && api.isLoggedIn(),
+  });
+
+  const entityMap = useMemo(() => {
+    const map: Record<string, IResponseEntity> = {};
+    (anchorEntities ?? []).forEach((entity) => {
+      map[entity.id] = entity;
+    });
+    return map;
+  }, [anchorEntities]);
+
   if (anchors.length === 0) {
     return null;
   }
@@ -111,13 +138,18 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                 />
                 <StyledWarningInfo>
                   <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
-                  <EntityTagById
-                    entityId={anchor.tagName}
-                    disableToast
-                    fullWidth
-                    disableTooltip={false}
-                    disableDoubleClick={false}
-                  />
+                  {isFetchingEntities && !entityMap[anchor.tagName] ? (
+                    <Loader size={12} show noBackground />
+                  ) : (
+                    <EntityTagById
+                      entityId={anchor.tagName}
+                      entity={entityMap[anchor.tagName]}
+                      disableToast
+                      fullWidth
+                      disableTooltip={false}
+                      disableDoubleClick={false}
+                    />
+                  )}
                 </StyledWarningInfo>
                 <ButtonGroup>
                   <Button

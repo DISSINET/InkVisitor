@@ -44,7 +44,7 @@ const getVerticalMargin = ($size: ButtonSize) => {
     case ButtonSize.Large:
       return "0.45rem";
     case ButtonSize.ExtraLarge:
-      return "0.6rem";
+      return "0.8rem";
   }
 };
 const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
@@ -56,7 +56,7 @@ const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
     case ButtonSize.Large:
       return $iconButton ? "0.45rem" : "0.7rem";
     case ButtonSize.ExtraLarge:
-      return $iconButton ? "0.6rem" : "0.9rem";
+      return $iconButton ? "0.8rem" : "0.9rem";
   }
 };
 interface IButtonStyle {

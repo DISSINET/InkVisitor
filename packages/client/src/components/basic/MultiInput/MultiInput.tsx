@@ -1,6 +1,7 @@
 import { Button, Input } from "components";
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { ButtonSize } from "types";
 import { StyledDeleteButton, StyledRow } from "./MultiInputStyles";
 
@@ -66,7 +67,7 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disa
                   noBorder
                   noBackground
                   size={ButtonSize.Small}
-                  icon={<FaTrashAlt />}
+                  icon={<IcoTrash />}
                   tooltipLabel="delete note"
                   onClick={() => handleDelete(key)}
                 />

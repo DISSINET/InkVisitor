@@ -13,6 +13,7 @@ import {
 } from "@inkvisitor/shared/types";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
+import { IcoTrashSimple } from "Theme/icons";
 import { AxiosResponse } from "axios";
 import { Button, Checkbox, Submit } from "components";
 import Dropdown, {
@@ -23,7 +24,6 @@ import Dropdown, {
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaTrash } from "react-icons/fa";
 import { FaArrowDownShortWide } from "react-icons/fa6";
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
@@ -285,12 +285,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
-    const size = 16;
     const hasSelection = isAllSelected || selectedRows.length > 0;
 
     return (
       <Checkbox
-        size={size}
         value={isAllSelected}
         indeterminate={!isAllSelected && selectedRows.length > 0}
         onChangeFn={() => {
@@ -391,7 +389,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     {/* Batch delete */}
                     {batchAction.value === BatchOption.delete_S && (
                       <Button
-                        icon={<FaTrash />}
+                        icon={<IcoTrashSimple />}
                         color="danger"
                         inverted
                         onClick={() => setShowSubmit(true)}

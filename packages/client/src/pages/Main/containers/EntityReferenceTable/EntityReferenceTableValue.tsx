@@ -87,7 +87,6 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
           placeholder={resourceEntity?.data?.partValueLabel}
           excludedEntityClasses={excludedSuggesterEntities}
           openDetailOnCreate={openDetailOnCreate}
-          territoryActants={[]}
           onSelected={(newSelectedId: string) => {
             handleChangeValue(reference.id, newSelectedId, true);
           }}

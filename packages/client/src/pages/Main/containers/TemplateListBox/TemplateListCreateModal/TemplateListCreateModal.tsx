@@ -32,8 +32,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   setShowCreateModal,
 }) => {
   const queryClient = useQueryClient();
-  const { setStatementId, appendDetailId, selectedDetailId, setSelectedDetailId } =
-    useSearchParams();
+  const { setStatementId, appendDetailId } = useSearchParams();
 
   const [createModalEntityClass, setCreateModalEntityClass] = useState<EntityEnums.Class>(
     entitiesDict[0].value
@@ -65,12 +64,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         )}" was created`
       );
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      if (selectedDetailId) {
-        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
-      }
       if (variables.class === EntityEnums.Class.Statement) {
         setStatementId(variables.id);
-        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
       } else {
         appendDetailId(variables.id);
       }
