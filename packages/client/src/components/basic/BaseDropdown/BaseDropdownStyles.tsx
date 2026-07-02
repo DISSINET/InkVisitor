@@ -158,6 +158,21 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     color: ${({ theme }) => theme.color["black"]};
     ${({ userDropdown }) => (userDropdown ? "margin: 0; padding: 0; line-height: 1;" : "")}
   }
+  /* when not focused, take the (empty) text input out of the flex flow so it
+     doesn't wrap onto a spare row after the chips; kept 1px + absolute so the
+     control is still clickable/focusable */
+  ${({ compactChips }) =>
+    compactChips &&
+    `
+    .react-select__control:not(.react-select__control--is-focused) .react-select__input-container {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+  `}
   // portal menu style is in global stylesheet
 `;
 
