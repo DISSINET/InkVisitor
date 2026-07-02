@@ -166,7 +166,7 @@ export const TextAnnotator = ({
   const queryClient = useQueryClient();
   const theme = useTheme();
 
-  const { appendDetailId, statementId, selectedDetailId, setTerritoryId } =
+  const { appendDetailId, statementId, selectedDetailId, setTerritoryId, setStatementId } =
     useSearchParams();
 
   const { annotator, setAnnotator } = useAnnotator();
@@ -488,6 +488,9 @@ export const TextAnnotator = ({
         if (effectiveTerritoryId !== territory?.id) {
           setTerritoryId(effectiveTerritoryId);
         }
+        // select the new Statement so it opens in the detail/editor, matching
+        // the EntitySuggester create-statement path
+        setStatementId(statementId);
       }
     }
   };
@@ -1670,6 +1673,9 @@ export const TextAnnotator = ({
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
+            // select the new T in the tree so it opens as active, matching the
+            // new-Statement path that selects its created entity
+            setTerritoryId(entity.id);
             appendDetailId(entity.id);
           }}
         />
