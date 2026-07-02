@@ -78,9 +78,9 @@ const theme = {
 
     tableOddRow: "#eef0fa",
     tableEvenRow: "#fff",
-    tableOpened: "#F2EBFE",
-    tableSelection: "#bce5ff",
-    tableSelectionHover: "#e0f3ff",
+    tableOpened: "#d8ddf5",
+    tableSelection: "#c4caf0",
+    tableSelectionHover: "#e4e7f8",
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 
