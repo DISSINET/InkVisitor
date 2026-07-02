@@ -65,7 +65,7 @@ export const StyledTr = styled.tr<StyledTr>`
 
   color: ${({ theme, $isOpened }) => ($isOpened ? theme.color["primary"] : theme.color["black"])};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  transition: box-shadow 0.2s ease-in-out;
+  transition: box-shadow 0.2s ease-in-out, background-color 0.15s ease-in-out;
   box-shadow: ${({ theme, $isAnnotatorHovered }) =>
     `inset 0 0 0 2px ${$isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0}`};
   cursor: ${({ $isOpened, $listMode }) => ($isOpened && $listMode ? "default" : "pointer")};
@@ -79,14 +79,17 @@ export const StyledTr = styled.tr<StyledTr>`
     width: 1%;
   }
   td:first-child::before {
-    content: ${({ $isOpened }) => ($isOpened ? '""' : "none")};
+    content: "";
     position: absolute;
     left: 0;
-    top: 15%;
-    bottom: 15%;
-    width: 4px;
-    border-radius: 0 2px 2px 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
     background-color: ${({ theme }) => theme.color["success"]};
+    transform: scaleX(${({ $isOpened }) => ($isOpened ? 1 : 0)});
+    transform-origin: left;
+    opacity: ${({ $isOpened }) => ($isOpened ? 1 : 0)};
+    transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
   }
   td:last-child {
     padding-right: ${({ theme }) => theme.space[4]};
@@ -138,7 +141,7 @@ export const StyledCheckboxWrapper = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
-  margin-left: 0.4rem;
+  margin-left: 0.3rem;
   margin-right: 0.1rem;
 `;
 // keeps the checkbox above the absolutely-positioned focus circle
