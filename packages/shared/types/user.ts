@@ -34,6 +34,10 @@ export interface IUserOptions {
 
   // languages the user works with - surfaced first in language dropdowns
   workingLanguages: EntityEnums.Language[];
+
+  // show a confirm modal before deleting a metaprop that has child properties
+  // (undefined is treated as true - warn by default)
+  askBeforePropDelete?: boolean;
 }
 
 export interface IStoredTerritory {
