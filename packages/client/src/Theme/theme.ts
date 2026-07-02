@@ -76,7 +76,8 @@ const theme = {
     treeNodeWrite: "#2d3748",
     foundByTreeFilter: "#b4c0e8",
 
-    tableOddRow: "#f0f8ff",
+    tableOddRow: "#eef0fa",
+    tableEvenRow: "#fff",
     tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",

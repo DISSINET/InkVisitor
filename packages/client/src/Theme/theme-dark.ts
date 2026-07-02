@@ -78,6 +78,7 @@ const darkTheme = {
     queryInvalid: "#EF4444",
 
     tableOddRow: "#0A1B2E",
+    tableEvenRow: "#060c26",
     tableOpened: "#0b3a59",
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",

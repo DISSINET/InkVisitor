@@ -655,7 +655,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               borderColor="white"
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
-              disableHeaderClick={explorerBoxMaximized}
+              disableHeaderClick
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
                 <SwitchGroup key="explorer-view-mode" style={{ marginRight: "2rem" }}>
