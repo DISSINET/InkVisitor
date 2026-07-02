@@ -1,10 +1,11 @@
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
+import Territory from "@models/territory/territory";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
-import { r, RDatum, RStream, RValue } from "rethinkdb-ts";
+import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 
 export default class SearchEdge implements Query.IEdge {
@@ -20,6 +21,15 @@ export default class SearchEdge implements Query.IEdge {
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
     this.id = data.id || "";
+  }
+
+  /**
+   * Optional async precomputation hook, invoked by the node evaluator before
+   * run(). run() only composes synchronous ReQL, so edges needing data fetched
+   * ahead of time (e.g. a territory-subtree closure) do it here. No-op default.
+   */
+  async prepare(db: Connection): Promise<void> {
+    return;
   }
 
   run(q: RStream): RStream {
@@ -76,6 +86,69 @@ export class EdgeSUnderT extends SearchEdge {
       .map(function(e) {
         return e("id");
       });
+  }
+}
+
+/**
+ * SUT:C ("S under T: children"). Emits every Statement whose territory is the
+ * target territory T OR any descendant of T, recursively to any depth (the whole
+ * subtree rooted at T, T itself included).
+ *
+ * Territories store only their DIRECT parent (data.parent.territoryId) with no
+ * ancestor path, so the descendant closure can't be a single index lookup. It's
+ * resolved in prepare() via Territory.findChilds(deep), which walks the in-memory
+ * treeCache (zero DB reads in prod) and falls back to a live DB walk when the
+ * cache is cold or the territory is absent. run() then pulls the subtree's
+ * statements through the StatementTerritory index and intersects them with the
+ * incoming stream (the subset invariant that positive matching and negation rely
+ * on). No target territory -> matches nothing.
+ */
+export class EdgeSUnderChildrenT extends SearchEdge {
+  private subtreeTerritoryIds: string[] = [];
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SUT:C"];
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    const rootId = this.node.params.entityId;
+    if (!rootId) {
+      this.subtreeTerritoryIds = [];
+      return;
+    }
+
+    // findChilds(deep) returns descendants only (keyed by id) - add the root
+    // itself to cover Statements sitting directly in the target territory
+    const descendants = await new Territory({ id: rootId }).findChilds(db, true);
+    this.subtreeTerritoryIds = [rootId, ...Object.keys(descendants)];
+  }
+
+  run(q: RStream): RStream {
+    const subtreeIds = this.subtreeTerritoryIds;
+
+    const statementIds: RDatum = subtreeIds.length
+      ? (r
+          .table(Entity.table)
+          .getAll(r.args(subtreeIds), {
+            index: DbEnums.Indexes.StatementTerritory,
+          })
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .getField("id")
+          .distinct() as unknown as RDatum).coerceTo("array")
+      : r.expr([] as string[]);
+
+    return statementIds.do(function (ids: RDatum) {
+      return q
+        .filter(function (e: RDatum<IEntity>) {
+          return ids.contains(e("id"));
+        })
+        .map(function (e: RDatum<IEntity>) {
+          return e("id");
+        });
+    }) as unknown as RStream;
   }
 }
 
@@ -768,6 +841,61 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
   }
 }
 
+/**
+ * IS: ("is in S: any position", aka XIsInS). Emits the ENTITIES USED in the
+ * target Statement S in ANY position - actions + action props, actants +
+ * their classifications / identifications / props, statement-level props
+ * (recursing children to lvl3), reference resource / value, and tags. This is
+ * exactly the broad "used" set collectStatementEntityIds surfaces (the same set
+ * EUT: surfaces per territory), so the two share that collector.
+ *
+ * The single target statement is fetched by primary key (no index needed); a
+ * non-statement or unknown id yields no statement and therefore no matches. The
+ * used-id set is intersected back with the incoming stream q, keeping the subset
+ * invariant that positive matching and negation both rely on. With no target the
+ * edge matches nothing (membership "in S" is only meaningful relative to a
+ * specific statement). The statement's own id and its territory lineage are not
+ * "entities used" and are intentionally excluded (see collectStatementEntityIds).
+ */
+function runIsInStatementEdge(
+  q: RStream,
+  statementId: string | undefined
+): RStream {
+  const usedIds: RDatum = statementId
+    ? (r
+        .table(Entity.table)
+        .getAll(statementId)
+        .filter(function (e: RDatum<IEntity>) {
+          return e("class").eq(EntityEnums.Class.Statement);
+        })
+        .concatMap(function (stmt: RDatum) {
+          return collectStatementEntityIds(stmt);
+        })
+        .distinct() as unknown as RDatum).coerceTo("array")
+    : r.expr([] as string[]);
+
+  return usedIds.do(function (ids: RDatum) {
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return ids.contains(e("id"));
+      })
+      .map(function (e: RDatum<IEntity>) {
+        return e("id");
+      });
+  }) as unknown as RStream;
+}
+
+export class EdgeIsInStatement extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementEdge(q, this.node.params.entityId);
+  }
+}
+
 export class EdgeHasReferenceResource extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -876,8 +1004,12 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasSuperordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
+    case Query.EdgeType["SUT:C"]:
+      return new EdgeSUnderChildrenT(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
+    case Query.EdgeType["IS:"]:
+      return new EdgeIsInStatement(data);
     default:
       throw new InternalServerError(`unknown edge type: ${data.type}`);
   }

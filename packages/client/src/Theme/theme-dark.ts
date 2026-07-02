@@ -77,10 +77,11 @@ const darkTheme = {
     query4: "#1A2332",
     queryInvalid: "#EF4444",
 
-    tableOddRow: "#0A1B2E",
-    tableOpened: "#0b3a59",
-    tableSelection: "#4c82a1",
-    tableSelectionHover: "#2c638c",
+    tableOddRow: "#141c38",
+    tableEvenRow: "#080d22",
+    tableOpened: "#1a2650",
+    tableSelection: "#2e3f7a",
+    tableSelectionHover: "#3a4d8c",
     focusedCheckbox: "rgba(246,246,255,0.1)",
     uploadDocumentBg: "#22315a",
 

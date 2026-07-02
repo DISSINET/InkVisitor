@@ -76,10 +76,11 @@ const theme = {
     treeNodeWrite: "#2d3748",
     foundByTreeFilter: "#b4c0e8",
 
-    tableOddRow: "#f0f8ff",
-    tableOpened: "#F2EBFE",
-    tableSelection: "#bce5ff",
-    tableSelectionHover: "#e0f3ff",
+    tableOddRow: "#eef0fa",
+    tableEvenRow: "#fff",
+    tableOpened: "#d8ddf5",
+    tableSelection: "#c4caf0",
+    tableSelectionHover: "#e4e7f8",
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 

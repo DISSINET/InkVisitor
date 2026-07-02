@@ -267,10 +267,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   );
 
   const widthTable = useMemo(() => {
-    return (
-      WIDTH_COLUMN_FIRST +
-      columns.reduce((sum, col) => sum + getColumnWidth(col.type), 0)
-    );
+    return WIDTH_COLUMN_FIRST + columns.reduce((sum, col) => sum + getColumnWidth(col.type), 0);
   }, [columns]);
 
   const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -430,7 +427,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {
             "--qt-row-focused-bg": themeContext.color.tableOpened,
             "--qt-row-odd-bg": themeContext.color.tableOddRow,
-            "--qt-row-bg": themeContext.color.white,
+            "--qt-row-bg": themeContext.color.tableEvenRow,
             "--qt-row-border": themeContext.color.gray[300],
             width: contentWidth,
             minWidth: "100%",

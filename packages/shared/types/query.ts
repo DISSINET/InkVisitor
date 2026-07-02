@@ -124,7 +124,9 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
 
-    "IS:": {},
+    "IS:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:": {
       entityId: { allowedClasses: [] },
     },
@@ -156,7 +158,9 @@ export namespace Query {
     },
     "SUT:D": {},
     "I_SUT:D": {},
-    "SUT:C": {},
+    "SUT:C": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "I_SUT:C": {},
     "HR:R": {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },

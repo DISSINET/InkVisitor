@@ -192,6 +192,7 @@ export default class SearchNode implements Query.INode {
     baseStream: RStream,
     edge: SearchEdge
   ): Promise<string[]> {
+    await edge.prepare(db);
     const directIds = await edge.run(baseStream).distinct().run(db);
 
     const childNode = edge.node;
