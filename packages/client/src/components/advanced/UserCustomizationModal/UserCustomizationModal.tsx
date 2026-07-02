@@ -450,26 +450,28 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledRightsGrid>
             </StyledUserCustomizationSection>
 
-            {process.env.NODE_ENV === "development" && (
-              <StyledUserCustomizationSection>
-                <div>
-                  <Button
-                    label="Simulate HTML API response"
-                    color="danger"
-                    onClick={async () => {
-                      const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
-                      console.log("response", response);
-                    }}
-                  />
-                </div>
-              </StyledUserCustomizationSection>
-            )}
-
             <Loader show={passwordUpdateMutation.isPending} />
           </StyledUserCustomization>
         </ModalContent>
 
-        <ModalFooter>
+        <ModalFooter spaceBetween>
+          {process.env.NODE_ENV === "development" && (
+            <StyledUserCustomizationSection>
+              <div>
+                <Button
+                  label="Simulate HTML API response"
+                  color="primary"
+                  noBorder
+                  // noBackground
+                  inverted
+                  onClick={async () => {
+                    const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
+                    console.log("response", response);
+                  }}
+                />
+              </div>
+            </StyledUserCustomizationSection>
+          )}
           <ButtonGroup>
             {/* {role === UserEnums.Role.Admin && (
               <Button
