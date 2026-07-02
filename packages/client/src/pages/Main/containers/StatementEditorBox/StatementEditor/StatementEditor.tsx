@@ -33,7 +33,7 @@ import {
 } from "constructors";
 import { useIsInViewport, useSearchParams, useTheme } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -111,8 +111,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const theme = useTheme();
 
   // Audit query - only fetched once the Audits section scrolls into view
-  const auditSectionRef = useRef<HTMLDivElement>(null);
-  const auditInViewport = useIsInViewport(auditSectionRef, "200px");
+  const [auditSectionRef, auditInViewport] = useIsInViewport("200px");
   const { data: audit } = useAuditQuery(statementId, auditInViewport);
 
   // user query

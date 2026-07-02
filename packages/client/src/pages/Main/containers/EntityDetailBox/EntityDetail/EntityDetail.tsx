@@ -18,7 +18,7 @@ import { CMetaProp, DProps } from "constructors";
 import { useIsInViewport, useSearchParams } from "hooks";
 import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
@@ -196,8 +196,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   }, [templates, entity]);
 
   // Audit query - only fetched once the Audits section scrolls into view
-  const auditSectionRef = useRef<HTMLDivElement>(null);
-  const auditInViewport = useIsInViewport(auditSectionRef, "200px");
+  const [auditSectionRef, auditInViewport] = useIsInViewport("200px");
   const { data: audit } = useAuditQuery(detailId, auditInViewport);
 
   useEffect(() => {
