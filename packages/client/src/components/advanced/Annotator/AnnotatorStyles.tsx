@@ -338,3 +338,7 @@ export const StyledWarningKind = styled.div`
   color: ${({ theme }) => theme.color.warningText};
   white-space: nowrap;
 `;
+
+export const StyledCaretButtonWrapper = styled.span`
+  display: flex;
+`;

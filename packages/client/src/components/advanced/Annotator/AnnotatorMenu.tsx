@@ -43,6 +43,7 @@ import {
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
+  StyledCaretButtonWrapper,
   StyledStatementSubsection,
   StyledStatementTargetArrow,
   StyledStatementTargetCurrent,
@@ -223,18 +224,23 @@ export const TextAnnotatorMenu = ({
             entity={selectedTargetTerritoryEntity}
             disableDoubleClick
             disableDrag
+            button={
+              <>
+                {showTargetTerritorySelector && (
+                  <StyledCaretButtonWrapper {...picker.referenceProps}>
+                    <Button
+                      icon={<FaCaretDown size={13} />}
+                      color="primary"
+                      tooltipLabel={pickerTooltip}
+                      onClick={picker.toggle}
+                      shape="sharp-square"
+                    />
+                  </StyledCaretButtonWrapper>
+                )}
+              </>
+            }
           />
         </StyledStatementTargetCurrent>
-        {showTargetTerritorySelector && (
-          <span {...picker.referenceProps}>
-            <Button
-              icon={<FaCaretDown size={13} />}
-              color="primary"
-              tooltipLabel={pickerTooltip}
-              onClick={picker.toggle}
-            />
-          </span>
-        )}
       </>
     ) : null;
 
