@@ -39,3 +39,11 @@ export const StyledButtonWrap = styled.div`
   justify-content: center;
   margin-top: 0.5rem;
 `;
+export const StyledPasswordDescriptionWrap = styled.div`
+  max-width: 31rem;
+`;
+export const StyledDropdownWrap = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+`;

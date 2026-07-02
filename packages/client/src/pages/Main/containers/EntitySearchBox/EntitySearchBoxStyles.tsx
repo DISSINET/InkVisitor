@@ -25,6 +25,9 @@ export const StyledRow = styled.div`
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
+export const StyledCellMerge = styled.div`
+  grid-column: 1 / -1;
+`;
 export const StyledAdvancedOptions = styled.div`
   display: flex;
   align-items: center;

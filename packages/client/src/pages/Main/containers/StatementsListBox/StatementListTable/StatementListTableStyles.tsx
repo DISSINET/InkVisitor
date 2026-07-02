@@ -167,8 +167,11 @@ export const StyledOrderCorrection = styled.div`
 `;
 
 // wraps tag cells so clicking/double-clicking a tag (e.g. to open its detail)
-// does not bubble up and activate the statement row; display: contents keeps
-// the cell layout unchanged
+// does not bubble up and activate the statement row; width: fit-content keeps
+// the clickable box hugging the tags so clicks in the empty cell space still
+// reach the row
 export const StyledTagCellWrap = styled.div`
-  display: contents;
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
 `;

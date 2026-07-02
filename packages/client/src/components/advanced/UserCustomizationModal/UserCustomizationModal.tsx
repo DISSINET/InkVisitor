@@ -27,6 +27,8 @@ import { toast } from "react-toastify";
 import { isSafePassword } from "utils/utils";
 import {
   StyledButtonWrap,
+  StyledDropdownWrap,
+  StyledPasswordDescriptionWrap,
   StyledRightsHeading,
   StyledRightsWrap,
   StyledUserCustomization,
@@ -247,9 +249,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     </ModalInputWrap>
                   </ModalInputForm>
 
-                  <div style={{ maxWidth: "31rem" }}>
+                  <StyledPasswordDescriptionWrap>
                     <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
-                  </div>
+                  </StyledPasswordDescriptionWrap>
 
                   <StyledButtonWrap>
                     <ButtonGroup>
@@ -295,13 +297,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <ModalInputForm>
                 <ModalInputLabel>default entity label language</ModalInputLabel>
                 <ModalInputWrap width={165}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
+                  <StyledDropdownWrap>
                     <Dropdown.Single.Basic
                       width="full"
                       value={defaultLanguage}
@@ -313,17 +309,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       icon={<FaQuestion />}
                       tooltipLabel="Default language used for labeling entities."
                     />
-                  </div>
+                  </StyledDropdownWrap>
                 </ModalInputWrap>
                 <ModalInputLabel>default source language</ModalInputLabel>
                 <ModalInputWrap width={165}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
+                  <StyledDropdownWrap>
                     <Dropdown.Single.Basic
                       width="full"
                       value={defaultStatementLanguage}
@@ -335,7 +325,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       icon={<FaQuestion />}
                       tooltipLabel="Dominant language of the source texts being coded into statements"
                     />
-                  </div>
+                  </StyledDropdownWrap>
                 </ModalInputWrap>
 
                 {/* NOT USED NOW */}
