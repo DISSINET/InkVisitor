@@ -652,21 +652,22 @@ export default class Relation implements IRelationModel {
     request: IRequest,
     ids: string[]
   ): Promise<WriteResult> {
-    if (ids.length) {
-      const rows: RelationTypes.IRelation[] = await rethink
-        .table(Relation.table)
-        .getAll.apply(undefined, ids)
-        .run(request.db.connection);
+    // Delete first and emit a deletion audit only for the rows actually removed
+    // (returnChanges carries their pre-delete snapshot). This mirrors the single
+    // DELETE route (delete -> audit on success), so a failing delete can never
+    // leave RELATION_DELETE audits for relations that still exist.
+    const result = await rethink
+      .table(Relation.table)
+      .getAll.apply(undefined, ids)
+      .delete({ returnChanges: true })
+      .run(request.db.connection);
 
-      for (const row of rows) {
-        await new Relation(row).afterDelete(request);
+    for (const change of result.changes || []) {
+      if (change.old_val) {
+        await new Relation(change.old_val).afterDelete(request);
       }
     }
 
-    return rethink
-      .table(Relation.table)
-      .getAll.apply(undefined, ids)
-      .delete()
-      .run(request.db.connection);
+    return result;
   }
 }
