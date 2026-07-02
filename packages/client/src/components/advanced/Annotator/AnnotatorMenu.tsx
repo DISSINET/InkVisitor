@@ -86,7 +86,6 @@ interface TextAnnotatorMenuProps {
   onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
   onCreateActiveTAnchor?: (elvl: EntityEnums.Elvl) => void;
-  isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
   territory?: IResponseTerritory;
   onEscapePressed: () => void;
@@ -114,7 +113,6 @@ export const TextAnnotatorMenu = ({
   onRemoveAnchor = undefined,
   onUpdateAnchor = undefined,
   canCreateActiveTAnchor,
-  isTextInsideThisT,
   activeTerritoryId,
   territory,
   onEscapePressed,
@@ -455,7 +453,7 @@ export const TextAnnotatorMenu = ({
                       {selectedTargetHasParentT && (
                         <Button
                           icon={<TerritorySiblingIcon />}
-                          color={isTextInsideThisT ? "greyer" : "primary"}
+                          color="greyer"
                           onClick={() => {
                             onCreateTerritory(
                               "sibling-T",
@@ -467,9 +465,12 @@ export const TextAnnotatorMenu = ({
                           tooltipLabel="Create new sibling territory anchor"
                         />
                       )}
+                      {/* Child is the suggested action: the cursor sits inside
+                          the target T, so nesting a new subT under it is the
+                          natural default; Sibling is the greyed alternative. */}
                       <Button
                         icon={<TerritoryChildIcon />}
-                        color={isTextInsideThisT ? "primary" : "greyer"}
+                        color="primary"
                         onClick={() => {
                           onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
                         }}

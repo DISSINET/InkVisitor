@@ -1462,9 +1462,6 @@ export const TextAnnotator = ({
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
                       readonly={isMenuReadOnly}
-                      isTextInsideThisT={selectedAnchors.some(
-                        (anchor) => anchor.getTagName() === thisTerritoryEntityId,
-                      )}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
                         await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
