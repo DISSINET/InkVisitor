@@ -25,7 +25,12 @@ export const StyledAuditEllipsis = styled.div`
   display: table-row;
   text-align: center;
 `;
-export const StyledRelationAuditCell = styled.div`
+export const StyledRelationAuditType = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+export const StyledRelationAuditEntities = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;

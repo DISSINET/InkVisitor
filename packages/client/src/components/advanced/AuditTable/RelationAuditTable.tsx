@@ -14,8 +14,9 @@ import {
   StyledAuditColumn,
   StyledAuditRow,
   StyledAuditTable,
-  StyledRelationAuditCell,
   StyledRelationAuditEmpty,
+  StyledRelationAuditEntities,
+  StyledRelationAuditType,
 } from "./AuditTableStyles";
 
 /** Snapshot stored in a relation audit's `changes` blob (Relation.auditSnapshot). */
@@ -114,11 +115,15 @@ export const RelationAuditTable: React.FC<RelationAuditTable> = ({
               <RiTimeLine />
               {prettyTime}
             </StyledAuditColumn>
-            <StyledAuditColumn $wrap>
-              <StyledRelationAuditCell>
-                {actionButton(audit.type)}
+            <StyledAuditColumn>{actionButton(audit.type)}</StyledAuditColumn>
+            <StyledAuditColumn>
+              <StyledRelationAuditType>
                 <LetterIcon letter={changes.type} color="info" />
                 {label}
+              </StyledRelationAuditType>
+            </StyledAuditColumn>
+            <StyledAuditColumn $wrap>
+              <StyledRelationAuditEntities>
                 {changes.entityIds
                   ?.filter((id) => id !== detailEntityId)
                   .map((id) => {
@@ -136,7 +141,7 @@ export const RelationAuditTable: React.FC<RelationAuditTable> = ({
                       />
                     );
                   })}
-              </StyledRelationAuditCell>
+              </StyledRelationAuditEntities>
             </StyledAuditColumn>
           </StyledAuditRow>
         );
