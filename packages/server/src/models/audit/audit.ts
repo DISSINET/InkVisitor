@@ -273,18 +273,21 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
-   * Retrieves the relation audits connected to an entity, i.e. relation
-   * create/edit/delete audits whose snapshot lists this entity in its
+   * Retrieves the N most recent relation audits connected to an entity, i.e.
+   * relation create/edit/delete audits whose snapshot lists this entity in its
    * entityIds. Backed by the relation_entityIds multi-index (which only holds
    * relation-scoped rows); the auditScope filter is a defensive guard. Ordered
-   * newest-first for the entity Detail/Audits section.
+   * newest-first and capped (mirroring the entity `last` cap) so a heavily
+   * edited entity's Detail/Audits section stays bounded.
    * @param db rethinkdb Connection
    * @param entityId string
+   * @param n max number of returned entries
    * @returns Promise<Audit[]>
    */
   static async getRelationAuditsForEntity(
     db: Connection,
-    entityId: string
+    entityId: string,
+    n = 10
   ): Promise<Audit[]> {
     const result = await rethink
       .table(Audit.table)
@@ -293,6 +296,7 @@ export default class Audit implements IAudit, IDbModel {
       })
       .filter({ auditScope: AuditScope.Relation })
       .orderBy(rethink.desc("date"))
+      .limit(n)
       .run(db);
 
     return result.map((r) => new Audit(r));

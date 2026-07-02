@@ -25,3 +25,15 @@ export const StyledAuditEllipsis = styled.div`
   display: table-row;
   text-align: center;
 `;
+export const StyledRelationAuditCell = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+export const StyledRelationAuditEmpty = styled.div`
+  padding: ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-style: italic;
+  color: ${({ theme }) => theme.color["black"]};
+`;
