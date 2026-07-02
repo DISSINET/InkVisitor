@@ -54,7 +54,7 @@ export const StyledAnnotatorDoneButton = styled.div`
   transform: translate(0, -50%);
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
-  border-radius: 7px;
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-xl"]};
   background-color: ${({ theme }) => theme.color.blue[100]};
 `;
 

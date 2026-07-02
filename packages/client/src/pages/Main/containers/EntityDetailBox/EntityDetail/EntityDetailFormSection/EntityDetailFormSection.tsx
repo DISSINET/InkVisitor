@@ -16,7 +16,8 @@ import {
   ITerritory,
 } from "@inkvisitor/shared/types";
 import { IConceptData } from "@inkvisitor/shared/types/concept";
-import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { useDocumentsQuery } from "hooks/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -62,6 +63,7 @@ interface EntityDetailFormSection {
   setSelectedEntityType: (value: React.SetStateAction<EntityEnums.Class | undefined>) => void;
   setShowTypeSubmit: (value: React.SetStateAction<boolean>) => void;
   handleAskForTemplateApply: (templateIdToApply: string) => void;
+  onTemplateDropdownFocus?: () => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
   widthTooNarrow: boolean;
@@ -78,18 +80,14 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   setSelectedEntityType,
   setShowTypeSubmit,
   handleAskForTemplateApply,
+  onTemplateDropdownFocus,
   isTerritoryWithParent,
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
-  const { data: documents } = useQuery({
-    queryKey: ["documents"],
-    queryFn: async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    enabled: actantMode === "resource" && api.isLoggedIn(),
-  });
+  const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
+    actantMode === "resource",
+  );
 
   const noDocumentLinkedItem: DropdownItem = {
     value: "",
@@ -218,6 +216,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 width="full"
                 value={null}
                 options={templateOptions}
+                onFocus={onTemplateDropdownFocus}
                 onChange={handleAskForTemplateApply}
               />
             </StyledDetailContentRowValue>
@@ -600,7 +599,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               {/* document id */}
               <StyledDetailContentRow>
                 <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
-                <StyledDetailContentRowValue>
+                <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>
                   <Dropdown.Single.Basic
                     disabled={!userCanEdit}
                     value={selectedDocumentOption}

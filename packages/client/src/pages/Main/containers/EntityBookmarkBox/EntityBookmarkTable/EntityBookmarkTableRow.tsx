@@ -1,17 +1,16 @@
 import { IEntity, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
-import { useTheme } from "hooks";
 import React, { useRef } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
-import { FaGripVertical } from "react-icons/fa";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils/utils";
-import { StyledTd, StyledTr } from "./EntityBookmarkTableStyles";
+import {
+  StyledDragHandleIcon,
+  StyledDragHandlePlaceholderTd,
+  StyledDragHandleTd,
+  StyledTd,
+  StyledTr,
+} from "./EntityBookmarkTableStyles";
 
 interface EntityBookmarkTableRow {
   row: Row<IEntity>;
@@ -58,17 +57,15 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   preview(drop(dropRef));
   drag(dragRef);
 
-  const theme = useTheme();
-
   return (
     <React.Fragment key={index}>
       <StyledTr ref={dropRef} opacity={opacity} $isOdd={Boolean(index % 2)}>
         {hasOrder ? (
-          <td ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical color={theme.color.black} />
-          </td>
+          <StyledDragHandleTd ref={dragRef}>
+            <StyledDragHandleIcon />
+          </StyledDragHandleTd>
         ) : (
-          <td style={{ width: "2rem" }} />
+          <StyledDragHandlePlaceholderTd />
         )}
         {row.cells.map((cell, key) => {
           return (

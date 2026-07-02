@@ -17,7 +17,7 @@ import Dropdown, {
 } from "components/advanced";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useState } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { AttributeData } from "types";
 import {
@@ -41,7 +41,7 @@ interface StatementEditorActantIdentification {
   territoryParentId?: string;
   sActant: IStatementActant;
   classEntitiesActant: EntityEnums.Class[];
-  territoryActants?: string[];
+  territoryId?: string;
 }
 export const StatementEditorActantIdentification: React.FC<
   StatementEditorActantIdentification
@@ -55,7 +55,7 @@ export const StatementEditorActantIdentification: React.FC<
   territoryParentId,
   sActant,
   classEntitiesActant,
-  territoryActants,
+  territoryId,
 }) => {
   const entity = statement.entities[identification.entityId];
 
@@ -121,7 +121,7 @@ export const StatementEditorActantIdentification: React.FC<
               }}
               openDetailOnCreate
               isInsideTemplate={isInsideTemplate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               excludedEntityClasses={excludedSuggesterEntities}
               isHidden={!userCanEdit}
             />
@@ -173,7 +173,7 @@ export const StatementEditorActantIdentification: React.FC<
         {userCanEdit && (
           <Button
             key="d"
-            icon={<FaTrashAlt />}
+            icon={<IcoTrash />}
             color="plain"
             inverted
             tooltipLabel="remove identification row"

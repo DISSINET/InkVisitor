@@ -151,6 +151,9 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         referenceElement={referenceElement}
         label={getEntityLabel(entity)}
         position="top"
+        // never sit center-right over the move/close buttons: prefer left,
+        // then bottom-right, before any horizontal-center fallback
+        fallbackPlacements={["left", "bottom-end", "bottom"]}
       />
     </>
   );

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo, useRef, useState } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
@@ -337,7 +338,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         {node.gridX !== 0 && node.gridY !== 0 && edge && (
           <div>
             <Button
-              icon={<FaTrash style={{ fontSize: "16px", padding: "2px" }} />}
+              icon={<IcoTrash style={{ fontSize: "16px", padding: "2px" }} />}
               tooltipLabel="remove this node"
               color="warning"
               onClick={() => {

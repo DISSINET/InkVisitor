@@ -3,7 +3,8 @@ import { Button } from "components";
 import { useTheme } from "hooks";
 import React, { useEffect, useRef } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaExternalLinkAlt, FaGripVertical, FaTrashAlt } from "react-icons/fa";
+import { FaExternalLinkAlt, FaGripVertical } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { DragItem, Identifier, ItemTypes } from "types";
 import { dndHoverFn } from "utils/utils";
 import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
@@ -171,7 +172,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 key="delete"
                 tooltipLabel="remove reference row"
                 inverted
-                icon={<FaTrashAlt />}
+                icon={<IcoTrash />}
                 color="plain"
                 onClick={() => {
                   handleRemove(reference.id);

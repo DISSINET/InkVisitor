@@ -155,7 +155,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             inputWidth={editorWidthTooNarrow ? "full" : undefined}
             alwaysShowCreateModal={alwaysShowCreateModal}
             openDetailOnCreate={openDetailOnCreate}
-            territoryActants={[]}
             onSelected={(newSelectedId) => {
               onChange([...references, { id: uuidv4(), resource: newSelectedId, value: "" }], true);
               setAutoFocusField("value");
@@ -177,7 +176,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             alwaysShowCreateModal={alwaysShowCreateModal}
             excludedEntityClasses={excludedSuggesterEntities}
             openDetailOnCreate={openDetailOnCreate}
-            territoryActants={[]}
             onSelected={(newSelectedId: string) => {
               onChange([...references, { id: uuidv4(), resource: "", value: newSelectedId }], true);
               setAutoFocusField("resource");

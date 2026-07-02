@@ -51,6 +51,7 @@ interface StatementListTextAnnotator {
   selectedDocument?: IDocument;
   selectedResource: IResponseEntity | false;
   resources?: IResponseEntity[];
+  onResourcePickerFocus?: () => void;
   setSelectedResourceId: (id: string | false) => void;
 
   // useQuery for selectedDocument
@@ -92,6 +93,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   selectedDocument,
   selectedResource,
   resources,
+  onResourcePickerFocus,
   setSelectedResourceId,
 
   selectedDocumentId,
@@ -210,6 +212,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
           annotator={annotator}
           territoryId={territoryId}
           resources={resources || []}
+          onResourcePickerFocus={onResourcePickerFocus}
           showStatementList={showStatementList}
           canSelectResource={canSelectResource}
           canEditDocument={canEditDocument}

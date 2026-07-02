@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { FaGripVertical } from "react-icons/fa";
 
 export const StyledTable = styled.table`
   /* width: 100%; */
@@ -22,6 +23,9 @@ interface StyledTr {
 }
 export const StyledTr = styled.tr<StyledTr>`
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
+  td {
+    vertical-align: middle;
+  }
   td:first-child {
     padding-left: ${({ theme }) => theme.space[1]};
     padding-right: ${({ theme }) => theme.space[2]};
@@ -39,4 +43,14 @@ export const StyledTd = styled.td`
 `;
 export const StyledTagWrap = styled.div`
   display: grid;
+`;
+export const StyledDragHandleTd = styled.td`
+  cursor: move;
+`;
+export const StyledDragHandlePlaceholderTd = styled.td`
+  width: 2rem;
+`;
+export const StyledDragHandleIcon = styled(FaGripVertical)`
+  color: ${({ theme }) => theme.color.black};
+  display: block;
 `;

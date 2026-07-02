@@ -77,6 +77,9 @@ interface StatementListDocumentLine {
   annotator?: any;
   territoryId?: string;
   resources: IEntity[];
+  // refetch resources-with-documents when the user focuses the picker, so a
+  // resource another user just linked shows up without waiting out staleTime
+  onResourcePickerFocus?: () => void;
   // is list non empty
   showStatementList: boolean;
   // Editor/admin/owner may load any Resource (show the resource suggester).
@@ -104,6 +107,7 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
   annotator,
   territoryId,
   resources,
+  onResourcePickerFocus,
   showStatementList,
   canSelectResource,
   canEditDocument,
@@ -143,19 +147,21 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         <StyledDocumentContainer>
           <StyledEntityContainer>
             {!selectedResource && (
-              <EntitySuggester
-                placeholder="select resource"
-                categoryTypes={[EntityEnums.Class.Resource]}
-                preSuggestions={resources}
-                onPicked={(entity) => {
-                  if (resources.some((r) => r.id === entity.id)) {
-                    setSelectedResourceId(entity.id);
-                  } else {
-                    toast.warning("Resource does not have a document");
-                  }
-                }}
-                isHidden={!canSelectResource}
-              />
+              <div onFocus={onResourcePickerFocus}>
+                <EntitySuggester
+                  placeholder="select resource"
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  preSuggestions={resources}
+                  onPicked={(entity) => {
+                    if (resources.some((r) => r.id === entity.id)) {
+                      setSelectedResourceId(entity.id);
+                    } else {
+                      toast.warning("Resource does not have a document");
+                    }
+                  }}
+                  isHidden={!canSelectResource}
+                />
+              </div>
             )}
             {selectedResource && (
               <div
@@ -270,7 +276,11 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
             {contentWidth > 0 && !isUndersized && (
               <>
                 <StyledInfoText style={{ textWrap: "nowrap" }}>
-                  <IconWithTooltip icon={<FaHighlighter />} tooltipLabel="Highlight" />
+                  <IconWithTooltip
+                    color="info"
+                    icon={<FaHighlighter size={14} />}
+                    tooltipLabel="Highlight"
+                  />
                 </StyledInfoText>
                 <Dropdown.Multi.Entity
                   shortLabel

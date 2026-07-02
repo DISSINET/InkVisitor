@@ -7,7 +7,7 @@ import {
   unparsedRemainder,
 } from "pages/Query/utils";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { BiSearch } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 import { MdClose } from "react-icons/md";
 import { ExploreAction, ExploreActionType } from "../../state";
 import {
@@ -340,7 +340,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
           aria-expanded={isOpen}
           onClick={() => setIsOpen((open) => !open)}
         >
-          {appliedIds.length > 0 ? <BiSearch size={18} /> : "+ "}
+          {appliedIds.length > 0 ? <IcoSearch size={18} /> : "+ "}
           UUIDs
           {appliedIds.length > 0 && <StyledIdsCountBadge>{appliedIds.length}</StyledIdsCountBadge>}
         </StyledIdsToggleButton>

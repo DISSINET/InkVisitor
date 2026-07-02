@@ -1,13 +1,14 @@
 import { entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
 import { entitiesDict } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, SearchEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { DropdownItem, IEntity } from "@inkvisitor/shared/types";
 import {
   IRequestSearch,
   IRequestSearchRootValidity,
 } from "@inkvisitor/shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FOURTH_PANEL_MIN_WIDTH, wildCardChar } from "Theme/constants";
+import { IcoSearch } from "Theme/icons";
 import api from "api";
 import { Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
@@ -22,10 +23,11 @@ import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem } from "@inkvisitor/shared/types";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,
+  StyledCellMerge,
+  StyledDropdownWithTypeBar,
   StyledNoResults,
   StyledOptions,
   StyledPill,
@@ -36,7 +38,6 @@ import {
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
-  StyledDropdownWithTypeBar,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -341,17 +342,11 @@ export const EntitySearchBox: React.FC = () => {
       <StyledBoxContent>
         <StyledOptions $isUndersized={isUndersized}>
           <StyledRow>
-            <StyledRowHeader>label or uuid</StyledRowHeader>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr auto",
-                width: "100%",
-              }}
-            >
+            <StyledCellMerge>
               <Input
                 width="full"
-                placeholder="type to search"
+                icon={<IcoSearch />}
+                placeholder="label or uuid"
                 changeOnType
                 onChangeFn={(value: string) => handleChange({ labelOrId: value })}
                 clearable
@@ -370,7 +365,7 @@ export const EntitySearchBox: React.FC = () => {
                   </>
                 }
               />
-            </div>
+            </StyledCellMerge>
           </StyledRow>
 
           <EntitySearchAdvancedOptions
