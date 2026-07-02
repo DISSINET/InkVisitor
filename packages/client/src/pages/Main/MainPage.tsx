@@ -274,11 +274,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     />
   );
 
-  const reverseThirdPanelIcon =
-    !firstPanelExpanded ||
-    !secondPanelExpanded ||
-    (!thirdPanelExpanded && fourthPanelExpanded) ||
-    (firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded);
+  const reverseThirdPanelIcon = !firstPanelExpanded && !secondPanelExpanded && !fourthPanelExpanded;
 
   const thirdPanelButton = () => (
     <IconButton
