@@ -124,7 +124,9 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
 
-    "IS:": {},
+    "IS:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:": {
       entityId: { allowedClasses: [] },
     },

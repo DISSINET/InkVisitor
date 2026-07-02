@@ -841,6 +841,61 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
   }
 }
 
+/**
+ * IS: ("is in S: any position", aka XIsInS). Emits the ENTITIES USED in the
+ * target Statement S in ANY position - actions + action props, actants +
+ * their classifications / identifications / props, statement-level props
+ * (recursing children to lvl3), reference resource / value, and tags. This is
+ * exactly the broad "used" set collectStatementEntityIds surfaces (the same set
+ * EUT: surfaces per territory), so the two share that collector.
+ *
+ * The single target statement is fetched by primary key (no index needed); a
+ * non-statement or unknown id yields no statement and therefore no matches. The
+ * used-id set is intersected back with the incoming stream q, keeping the subset
+ * invariant that positive matching and negation both rely on. With no target the
+ * edge matches nothing (membership "in S" is only meaningful relative to a
+ * specific statement). The statement's own id and its territory lineage are not
+ * "entities used" and are intentionally excluded (see collectStatementEntityIds).
+ */
+function runIsInStatementEdge(
+  q: RStream,
+  statementId: string | undefined
+): RStream {
+  const usedIds: RDatum = statementId
+    ? (r
+        .table(Entity.table)
+        .getAll(statementId)
+        .filter(function (e: RDatum<IEntity>) {
+          return e("class").eq(EntityEnums.Class.Statement);
+        })
+        .concatMap(function (stmt: RDatum) {
+          return collectStatementEntityIds(stmt);
+        })
+        .distinct() as unknown as RDatum).coerceTo("array")
+    : r.expr([] as string[]);
+
+  return usedIds.do(function (ids: RDatum) {
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return ids.contains(e("id"));
+      })
+      .map(function (e: RDatum<IEntity>) {
+        return e("id");
+      });
+  }) as unknown as RStream;
+}
+
+export class EdgeIsInStatement extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementEdge(q, this.node.params.entityId);
+  }
+}
+
 export class EdgeHasReferenceResource extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -953,6 +1008,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeSUnderChildrenT(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
+    case Query.EdgeType["IS:"]:
+      return new EdgeIsInStatement(data);
     default:
       throw new InternalServerError(`unknown edge type: ${data.type}`);
   }

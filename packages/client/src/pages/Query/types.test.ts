@@ -231,6 +231,60 @@ describe("query builder offers the 'S under T: children' edge (SUT:C)", () => {
   });
 });
 
+describe("query builder offers the 'is in S: any position' edge (IS: / XIsInS)", () => {
+  it("any source node (e.g. Person, Object, Concept) can select IS:", () => {
+    for (const cls of [
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Object,
+      EntityEnums.Class.Concept,
+    ]) {
+      expect(selectableEdgeTypes(sourceNode([cls]))).toContain(
+        Query.EdgeType["IS:"]
+      );
+    }
+  });
+
+  it("IS: exposes a Statement entity target param so the statement can be picked", () => {
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["IS:"]];
+    expect(params.entityId).toBeTruthy();
+    expect(params.entityId.allowedClasses).toEqual([
+      EntityEnums.Class.Statement,
+    ]);
+  });
+
+  it("source may be any entity; the target must be a Statement", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["IS:"], sourceNode([EntityEnums.Class.Statement]))
+      ).valid
+    ).toBe(true);
+
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["IS:"], sourceNode([EntityEnums.Class.Person]))
+      ).valid
+    ).toBe(false);
+  });
+
+  it("stays valid once an actual Statement entity is picked (entityClasses cleared)", () => {
+    const pickedStatement: Query.INode = {
+      id: "target",
+      type: Query.NodeType.E,
+      operator: Query.NodeOperator.And,
+      params: { entityClasses: [], entityId: "some-statement-id" },
+      edges: [],
+    };
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["IS:"], pickedStatement)
+      ).valid
+    ).toBe(true);
+  });
+});
+
 describe("query builder offers the superordinate (R:SOE) edge", () => {
   it("a Location source node can select R:SOE", () => {
     const selectable = selectableEdgeTypes(sourceNode([EntityEnums.Class.Location]));
