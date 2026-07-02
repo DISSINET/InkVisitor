@@ -3,9 +3,11 @@ import { IResponseEntity, IResponseTree } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import {
   collectStatementAnchors,
+  collectTerritoryAnchors,
   collectTerritoryAnchorsAtIndex,
   collectTerritoryChildren,
   getTerritoryHierarchyAtIndex,
+  getTerritoryOrderByIndex,
   computeDifferences,
   deepCopy,
   floorNumberToOneDecimal,
@@ -17,6 +19,7 @@ import {
   normalizeURL,
   searchTree,
 } from "./utils";
+import { ITerritory } from "@inkvisitor/shared/types";
 
 test("isSafePassword should return true for a safe password", () => {
   const safePassword = "SafePassword123!";
@@ -206,6 +209,51 @@ describe("collectStatementAnchors", () => {
       "S1",
       "S2",
     ]);
+  });
+});
+
+describe("collectTerritoryAnchors", () => {
+  it("collects nested anchors with the Territory class", () => {
+    const anchors = [
+      {
+        anchor: "T1",
+        class: EntityEnums.Class.Territory,
+        children: [
+          { anchor: "S1", class: EntityEnums.Class.Statement },
+          { anchor: "T2", class: EntityEnums.Class.Territory },
+        ],
+      },
+      { anchor: "P1", class: EntityEnums.Class.Person },
+    ] as unknown as IAnchorsNode[];
+    expect(collectTerritoryAnchors(anchors).map((a) => a.anchor)).toEqual([
+      "T1",
+      "T2",
+    ]);
+  });
+});
+
+describe("getTerritoryOrderByIndex", () => {
+  const siblings = [
+    { data: { parent: { order: 0 } } },
+    { data: { parent: { order: 2 } } },
+    { data: { parent: { order: 4 } } },
+  ] as unknown as ITerritory[];
+
+  it("returns Last when the index is past the end", () => {
+    expect(getTerritoryOrderByIndex(3, siblings)).toBe(EntityEnums.Order.Last);
+  });
+
+  it("returns First when inserting before the first sibling", () => {
+    expect(getTerritoryOrderByIndex(0, siblings)).toBe(EntityEnums.Order.First);
+  });
+
+  it("returns the average of the neighbours when inserting between", () => {
+    expect(getTerritoryOrderByIndex(1, siblings)).toBe(1);
+    expect(getTerritoryOrderByIndex(2, siblings)).toBe(3);
+  });
+
+  it("returns Last when there are no siblings", () => {
+    expect(getTerritoryOrderByIndex(0, [])).toBe(EntityEnums.Order.Last);
   });
 });
 

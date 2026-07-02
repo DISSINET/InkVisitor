@@ -30,6 +30,7 @@ import {
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
+  IResponseTree,
   IResponseUser,
   IStatement,
 } from "@inkvisitor/shared/types";
@@ -50,8 +51,11 @@ import { HiCodeBracket } from "react-icons/hi2";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import {
   collectStatementAnchors,
+  collectTerritoryAnchors,
   getStatementOrderByIndex,
   getTerritoryHierarchyAtIndex,
+  getTerritoryOrderByIndex,
+  searchTree,
 } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
@@ -495,6 +499,13 @@ export const TextAnnotator = ({
   // subT chosen in the menu (the in-document T, not the active Tree T): for a
   // child it is the target itself, for a sibling it is the target's parent.
   const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(undefined);
+
+  // Order among the parent's existing child Ts for the new subT, computed from
+  // the selection's position relative to sibling Territory anchors in the
+  // document — mirrors how a new Statement's order is derived from its anchor.
+  const [territoryCreateOrder, setTerritoryCreateOrder] = useState<number>(
+    EntityEnums.Order.Last,
+  );
 
   // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -1045,7 +1056,51 @@ export const TextAnnotator = ({
         const parentId = target?.data?.parent ? target.data.parent.territoryId : undefined;
         parent = parentId ? await fetchEntity(parentId) : undefined;
       }
+
+      // Place the new subT among its siblings by the selection's text position,
+      // the same way a new Statement's order is derived from its anchor.
+      let newOrder: number = EntityEnums.Order.Last;
+      if (parent && dataDocument) {
+        const treeData = await queryClient.fetchQuery<IResponseTree | undefined>({
+          queryKey: ["tree"],
+          queryFn: async () => (await api.treeGet()).data ?? undefined,
+        });
+        const parentNode = treeData ? searchTree(treeData, parent.id) : null;
+        // sibling Ts of the new subT, sorted by their order under the parent
+        const siblings = (parentNode?.children ?? [])
+          .map((child) => child.territory)
+          .sort(
+            (a, b) =>
+              (a.data.parent ? a.data.parent.order : 0) -
+              (b.data.parent ? b.data.parent.order : 0),
+          );
+
+        // sibling Territory anchors present in this document, deduped by id
+        const siblingIds = new Set(siblings.map((t) => t.id));
+        const siblingAnchors = Array.from(
+          new Map(
+            collectTerritoryAnchors(dataDocument.anchors)
+              .filter((anchor) => siblingIds.has(anchor.anchor))
+              .map((anchor) => [anchor.anchor, anchor]),
+          ).values(),
+        );
+
+        // last sibling anchor that starts before the selection
+        const lastAnchorBeforeIndex =
+          selectionStartIndex !== -1
+            ? siblingAnchors
+                .filter((anchor) => anchor.indexStart < selectionStartIndex)
+                .sort((a, b) => b.indexStart - a.indexStart)[0]
+            : undefined;
+
+        const lastIndexBeforeSelection = siblings.findIndex(
+          (t) => t.id === lastAnchorBeforeIndex?.anchor,
+        );
+        newOrder = getTerritoryOrderByIndex(lastIndexBeforeSelection + 1, siblings);
+      }
+
       setTerritoryCreateParent(parent);
+      setTerritoryCreateOrder(newOrder);
       setTerritoryCreateModalType(mode);
     } catch {
       toast.error("Failed to resolve the target territory");
@@ -1601,14 +1656,17 @@ export const TextAnnotator = ({
           closeModal={() => {
             setTerritoryCreateModalType(false);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
+            setTerritoryCreateOrder(EntityEnums.Order.Last);
           }}
           allowedEntityClasses={[EntityEnums.Class.Territory]}
           labelTyped={newTerritoryName}
           parentTerritory={territoryCreateParent}
+          entityCreateTerritoryOrder={territoryCreateOrder}
           onMutationSuccess={async (entity) => {
             await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);
             setTerritoryCreateParent(undefined);
+            setTerritoryCreateOrder(EntityEnums.Order.Last);
             setTerritoryElvl(EntityEnums.Elvl.Textual);
             toast.info(`${newTerritoryName} created!`);
             queryClient.invalidateQueries({ queryKey: ["tree"] });
