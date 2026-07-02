@@ -1,14 +1,22 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IProp, IReference, IResponseDetail, Relation } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IProp,
+  IReference,
+  IResponseDetail,
+  IResponseStatement,
+  Relation,
+} from "@inkvisitor/shared/types";
 import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
 import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useSearchParams } from "hooks";
+import { useIsInViewport, useSearchParams } from "hooks";
+import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -155,28 +163,23 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const isClassChangeable = entity && allowedEntityChangeClasses.includes(entity.class);
 
   const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
-    queryKey: ["entity-templates", "templates", entity?.class],
-    queryFn: async () => {
-      if (entity) {
-        const res = await api.entitiesSearch({
-          onlyTemplates: true,
-          class: entity?.class,
-        });
+    data: allTemplates,
+    isStale: templatesStale,
+    refetch: refetchTemplates,
+  } = useTemplatesQuery();
 
-        const templates: IEntity[] = res.data ?? [];
-        templates.sort((a: IEntity, b: IEntity) =>
-          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
-        );
-        return templates;
-      }
-    },
-    enabled: !!entity && api.isLoggedIn(),
-  });
+  const templates = useMemo(
+    () => allTemplates?.filter((template: IEntity) => template.class === entity?.class),
+    [allTemplates, entity?.class]
+  );
+
+  // refresh the template list when the user opens the dropdown, but only once
+  // the 5min staleTime has elapsed - avoids refetching on every open
+  const handleTemplateDropdownFocus = () => {
+    if (templatesStale) {
+      refetchTemplates();
+    }
+  };
 
   const templateOptions = useMemo<DropdownItem[]>(() => {
     const options =
@@ -192,27 +195,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     return options;
   }, [templates, entity]);
 
-  // Audit query
-  const {
-    status: statusAudit,
-    data: audit,
-    error: auditError,
-    isFetching: isFetchingAudit,
-  } = useQuery({
-    queryKey: ["audit", detailId],
-    queryFn: async () => {
-      const res = await api.auditGet(detailId);
-      return res.data;
-    },
-    enabled: !!detailId && api.isLoggedIn(),
-  });
-
-  // refetch audit when statement changes
-  useEffect(() => {
-    if (entity !== undefined) {
-      queryClient.invalidateQueries({ queryKey: ["audit"] });
-    }
-  }, [entity]);
+  // Audit query - only fetched once the Audits section scrolls into view
+  const [auditSectionRef, auditInViewport] = useIsInViewport("200px");
+  const { data: audit } = useAuditQuery(detailId, auditInViewport);
 
   useEffect(() => {
     if (entity !== undefined) {
@@ -231,26 +216,19 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     );
   }, [entity]);
 
-  const {
-    status: statusStatement,
-    data: statement,
-    error: statementError,
-    isFetching: isFetchingStatement,
-  } = useQuery({
-    queryKey: ["statement", statementId],
-    queryFn: async () => {
-      const res = await api.statementGet(statementId);
-      return res.data;
-    },
-    enabled: !!statementId && api.isLoggedIn(),
-  });
-
   const updateEntityMutation = useMutation({
     mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["audit", detailId] });
       invalidateAllExplorerQueries(queryClient);
 
+      // read the open statement from cache (the editor already fetched it) -
+      // no need to subscribe and fetch it here just for this check
+      const statement = queryClient.getQueryData<IResponseStatement>([
+        "statement",
+        statementId,
+      ]);
       if (
         statementId &&
         (statementId === entity?.id ||
@@ -280,10 +258,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
       }
       if (entity?.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
-        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
-        if (entity?.class === EntityEnums.Class.Statement) {
-          queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
-        }
       }
     },
   });
@@ -650,7 +624,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                       {entity.warnings
                         .filter((w) => w.position?.section === IWarningPositionSection.Entity)
                         .map((warning, key) => {
-                          return <Message key={key} warning={warning} />;
+                          return (
+                            <Message key={key} warning={warning} entities={entity.entities} />
+                          );
                         })}
                     </StyledDetailWarnings>
                   )}
@@ -665,6 +641,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                     isTerritoryWithParent={isTerritoryWithParent}
                     allowedEntityChangeClasses={allowedEntityChangeClasses}
                     handleAskForTemplateApply={handleAskForTemplateApply}
+                    onTemplateDropdownFocus={handleTemplateDropdownFocus}
                     setSelectedEntityType={setSelectedEntityType}
                     setShowTypeSubmit={setShowTypeSubmit}
                     templateOptions={templateOptions}
@@ -737,7 +714,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                               (w) => w.position?.section === IWarningPositionSection.Valencies
                             )
                             .map((warning, key) => {
-                              return <Message key={key} warning={warning} />;
+                              return (
+                            <Message key={key} warning={warning} entities={entity.entities} />
+                          );
                             })}
                       </StyledDetailWarnings>
                       <StyledDetailSectionContent>
@@ -772,7 +751,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         {entity.warnings
                           .filter((w) => w.position?.section === IWarningPositionSection.Relations)
                           .map((warning, key) => {
-                            return <Message key={key} warning={warning} />;
+                            return (
+                            <Message key={key} warning={warning} entities={entity.entities} />
+                          );
                           })}
                       </StyledDetailWarnings>
                     )}
@@ -831,7 +812,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         originId={entity.id}
                         entities={entity.entities}
                         props={entity.props}
-                        territoryId={territoryId}
                         updateProp={updateProp}
                         removeProp={removeProp}
                         addProp={addMetaProp}
@@ -1032,7 +1012,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                   <StyledDetailSectionHeading>Audits</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.Audits) && (
-                  <StyledDetailSectionContent>
+                  <StyledDetailSectionContent ref={auditSectionRef}>
                     {audit && <AuditTable {...audit} />}
                   </StyledDetailSectionContent>
                 )}

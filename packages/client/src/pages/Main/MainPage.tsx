@@ -21,6 +21,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
@@ -111,21 +112,27 @@ const MainPage: React.FC<MainPage> = ({}) => {
     const isNewStatement = prevStatementIdRef.current !== statementId;
     prevStatementIdRef.current = statementId;
 
-    if (statementId && isNewStatement && (!editorOpened || editorBoxState === EditorBoxState.Minimized)) {
-      setEditorOpened(true);
-      dispatch(setEditorBoxState(EditorBoxState.Normal));
+    if (statementId && isNewStatement) {
+      dispatch(setThirdPanelExpanded(true));
+      if (!editorOpened || editorBoxState === EditorBoxState.Minimized) {
+        setEditorOpened(true);
+        dispatch(setEditorBoxState(EditorBoxState.Normal));
+      }
     }
   }, [statementId]);
 
-  const prevEditorBoxStateRef = useRef(editorBoxState);
+  const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
-    const wasFullHeight = prevEditorBoxStateRef.current === EditorBoxState.FullHeight;
-    prevEditorBoxStateRef.current = editorBoxState;
+    const prev = prevEditorStateRef.current;
+    prevEditorStateRef.current = { editorOpened, editorBoxState };
 
-    if (wasFullHeight && editorBoxState !== EditorBoxState.FullHeight) {
+    const wasFullSize = prev.editorOpened && prev.editorBoxState === EditorBoxState.FullHeight;
+    const isNowFullSize = editorOpened && editorBoxState === EditorBoxState.FullHeight;
+
+    if (wasFullSize && !isNowFullSize) {
       queryClient.invalidateQueries({ queryKey: ["document"] });
     }
-  }, [editorBoxState, queryClient]);
+  }, [editorOpened, editorBoxState, queryClient]);
 
   useEffect(() => {
     if (thirdPanelExpanded && editorBoxState !== EditorBoxState.FullHeight) {
@@ -267,11 +274,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     />
   );
 
-  const reverseThirdPanelIcon =
-    !firstPanelExpanded ||
-    !secondPanelExpanded ||
-    (!thirdPanelExpanded && fourthPanelExpanded) ||
-    (firstPanelExpanded && secondPanelExpanded && thirdPanelExpanded && fourthPanelExpanded);
+  const reverseThirdPanelIcon = !firstPanelExpanded && !secondPanelExpanded && !fourthPanelExpanded;
 
   const thirdPanelButton = () => (
     <IconButton

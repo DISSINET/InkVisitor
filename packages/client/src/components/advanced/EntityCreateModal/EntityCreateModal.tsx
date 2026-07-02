@@ -1,12 +1,11 @@
 import {
   actionPartOfSpeechDict,
   conceptPartOfSpeechDict,
-  languageDict,
 } from "@inkvisitor/shared/dictionaries";
 import { classesAll, entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IEntity, IResponseEntity } from "@inkvisitor/shared/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   MIN_LABEL_LENGTH_MESSAGE,
   excludedSuggesterEntities,
@@ -31,7 +30,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { StyledNote } from "./EntityCreateModalStyles";
-import { useUserQuery } from "hooks/react-query";
+import { useOrderedLanguageDict, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
 interface EntityCreateModal {
@@ -51,6 +50,9 @@ interface EntityCreateModal {
   // init for create T / S
   parentTerritory?: IEntity;
   entityCreateStatementOrder?: number;
+  // order among sibling territories, computed by the annotator from the anchor
+  // position so a new subT lands in the relevant place (like statements)
+  entityCreateTerritoryOrder?: number;
 
   allowedEntityClasses?: EntityEnums.Class[];
 }
@@ -63,6 +65,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   languageSelected,
   parentTerritory,
   entityCreateStatementOrder,
+  entityCreateTerritoryOrder,
   allowedEntityClasses,
 }) => {
   const entityClasses = allowedEntityClasses ? allowedEntityClasses : classesAll;
@@ -89,6 +92,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [territoryEntity, setTerritoryEntity] = useState<false | IEntity>(parentTerritory || false);
 
   const { data: user } = useUserQuery();
+
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   useEffect(() => {
     if (user && !languageSelected) {
@@ -183,7 +188,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           newCreated.label,
           newCreated.detail || "",
           newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-          EntityEnums.Order.Last
+          entityCreateTerritoryOrder ?? EntityEnums.Order.Last
         );
         entityCreateMutation.mutate(newTerritory);
       } else if (newCreated.entityClass === EntityEnums.Class.Action) {
@@ -229,24 +234,12 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const { data: templates } = useQuery({
-    queryKey: ["entity-templates", "templates", selectedCategory],
-    queryFn: async () => {
-      if (selectedCategory) {
-        const res = await api.entitiesSearch({
-          onlyTemplates: true,
-          class: selectedCategory,
-        });
+  const { data: allTemplates } = useTemplatesQuery();
 
-        const templates = res.data ?? [];
-        templates.sort((a: IEntity, b: IEntity) =>
-          a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1
-        );
-        return templates;
-      }
-    },
-    enabled: !!selectedCategory && api.isLoggedIn(),
-  });
+  const templates = useMemo(
+    () => allTemplates?.filter((template) => template.class === selectedCategory),
+    [allTemplates, selectedCategory]
+  );
 
   const templateOptions: DropdownItem[] & { template: IEntity }[] = useMemo(() => {
     const options = templates
@@ -374,7 +367,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputWrap>
               <Dropdown.Single.Basic
                 width="full"
-                options={languageDict}
+                options={orderedLanguageDict}
                 value={selectedLanguage}
                 onChange={(newValue) => {
                   setSelectedLanguage(newValue);

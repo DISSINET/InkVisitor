@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 interface ButtonGroup {
   $noMarginRight?: boolean;
+  $smallGap?: boolean;
   $column?: boolean;
   $marginBottom?: boolean;
   $marginTop?: boolean;
@@ -17,7 +18,8 @@ export const ButtonGroup = styled.div.attrs({
   margin-bottom: ${({ $marginBottom, theme }) => ($marginBottom ? theme.space[2] : "")};
   > button:not(:last-child),
   > span:not(:last-child) {
-    margin-right: ${({ $noMarginRight }) => ($noMarginRight ? 0 : "0.5rem")};
+    margin-right: ${({ $noMarginRight, $smallGap }) =>
+      $noMarginRight ? 0 : $smallGap ? "0.2rem" : "0.5rem"};
   }
 `;
 

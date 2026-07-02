@@ -10,7 +10,7 @@ import {
   StyledInputWrap,
   StyledLogicalOperator,
 } from "./TerritoryTreeFilterStyles";
-import { BiSearch } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -71,7 +71,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             changeOnType
             width="full"
             clearable
-            icon={<BiSearch />}
+            icon={<IcoSearch />}
           />
         </StyledInputWrap>
       </StyledFilterList>

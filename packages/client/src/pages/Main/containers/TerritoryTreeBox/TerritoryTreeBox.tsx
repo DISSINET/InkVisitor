@@ -15,7 +15,7 @@ import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ITerritoryFilter } from "types";
+import { ButtonSize, ITerritoryFilter } from "types";
 import { searchTree } from "utils/utils";
 import { StyledNoResults, StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
@@ -248,7 +248,7 @@ export const TerritoryTreeBox: React.FC = () => {
     <>
       {showTerritoryTree && (
         <>
-          <ButtonGroup>
+          <ButtonGroup $smallGap>
             {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
@@ -259,37 +259,35 @@ export const TerritoryTreeBox: React.FC = () => {
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
             )}
-            <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "0.2rem" }}>
-              <Button
-                label={!treeWidthTooNarrow ? "filter" : ""}
-                onClick={() => {
-                  if (treeFilterOpen) {
-                    dispatch(setFilterOpen(false));
-                    setFilteredTreeData(treeData);
-                    setFilterSettings(initFilterSettings);
-                    dispatch(setTreeInitialized(false));
-                  } else {
-                    dispatch(setFilterOpen(true));
-                  }
-                }}
-                color="success"
-                inverted={!treeFilterOpen}
-                fullWidth
-                icon={<BsFilter size={14} />}
-                tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
-                tooltipPosition="right"
-              />
-              <Button
-                icon={<FaStar size={14} />}
-                color={filterSettings.starred ? "warning" : "greyer"}
-                inverted={!filterSettings.starred}
-                onClick={() => {
-                  handleFilterChange("starred", !filterSettings.starred);
-                }}
-                tooltipLabel="starred territories"
-                tooltipPosition="right"
-              />
-            </div>
+            <Button
+              label={!treeWidthTooNarrow ? "filter" : ""}
+              onClick={() => {
+                if (treeFilterOpen) {
+                  dispatch(setFilterOpen(false));
+                  setFilteredTreeData(treeData);
+                  setFilterSettings(initFilterSettings);
+                  dispatch(setTreeInitialized(false));
+                } else {
+                  dispatch(setFilterOpen(true));
+                }
+              }}
+              color="success"
+              inverted={!treeFilterOpen}
+              fullWidth
+              icon={<BsFilter size={14} />}
+              tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
+              tooltipPosition="right"
+            />
+            <Button
+              icon={<FaStar size={14} />}
+              color={filterSettings.starred ? "warning" : "greyer"}
+              inverted={!filterSettings.starred}
+              onClick={() => {
+                handleFilterChange("starred", !filterSettings.starred);
+              }}
+              tooltipLabel="starred territories"
+              tooltipPosition="right"
+            />
           </ButtonGroup>
 
           {treeFilterOpen && (

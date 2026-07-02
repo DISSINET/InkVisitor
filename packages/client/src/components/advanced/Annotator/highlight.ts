@@ -12,8 +12,12 @@ export const annotatorHighlight = (
   entityId: string,
   data: annotatorHighlightData,
   hlClasses: EntityEnums.Class[],
-  theme: DefaultTheme | undefined
+  theme: DefaultTheme | undefined,
 ): HighlightSchema | undefined => {
+  if (!theme) {
+    return undefined;
+  }
+
   const dReferenceEntityIds: Record<EntityEnums.Class, string[]> =
     data.dataDocument?.entityIds ?? {};
 
@@ -21,26 +25,22 @@ export const annotatorHighlight = (
     return {
       mode: HighlightMode.FOCUS,
       style: {
-        color: theme?.color["black"],
+        color: theme.color["black"],
         opacity: 0.08,
       },
     };
   }
 
   const entityClass = Object.keys(dReferenceEntityIds).find((key) =>
-    dReferenceEntityIds[key as EntityEnums.Class].includes(entityId)
+    dReferenceEntityIds[key as EntityEnums.Class].includes(entityId),
   );
 
-  if (
-    entityClass &&
-    hlClasses &&
-    hlClasses.includes(entityClass as EntityEnums.Class)
-  ) {
+  if (entityClass && hlClasses && hlClasses.includes(entityClass as EntityEnums.Class)) {
     if (entityClass === EntityEnums.Class.Statement) {
       return {
         mode: HighlightMode.UNDERLINE,
         style: {
-          color: theme?.color.entityS as string,
+          color: theme.color.entityS,
           opacity: 1,
         },
       };
@@ -51,7 +51,7 @@ export const annotatorHighlight = (
 
     const classItem = EntityColors[entityClass];
     const colorName = classItem?.color ?? "transparent";
-    const color = theme?.color[colorName] as string;
+    const color = theme.color[colorName];
 
     return {
       mode: HighlightMode.BACKGROUND,

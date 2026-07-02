@@ -7,12 +7,12 @@ import {
   IStatementAction,
   Relation,
 } from "@inkvisitor/shared/types";
-import { ThemeColor } from "Theme/theme";
+import { FlatThemeColor } from "Theme/theme";
 import { AxiosResponse } from "axios";
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: keyof ThemeColor;
+  color: FlatThemeColor;
   label: string;
 }
 
@@ -156,6 +156,7 @@ export enum ItemTypes {
   REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
   DETAIL_TAB = "DETAIL_TAB",
+  EXPLORER_COLUMN = "EXPLORER_COLUMN",
 }
 
 export type DragItem = {

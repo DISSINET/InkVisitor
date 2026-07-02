@@ -21,7 +21,8 @@ import { TooltipAttributes } from "pages/Main/containers";
 import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaGripVertical, FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -54,7 +55,6 @@ interface StatementEditorActionTableRow {
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
-  territoryActants?: string[];
   hasOrder?: boolean;
 
   handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
@@ -72,13 +72,15 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
   removeProp,
   movePropToIndex,
   territoryParentId,
-  territoryActants,
   hasOrder,
 
   handleDataAttributeChange,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
-  const { statementId, territoryId } = useSearchParams();
+  const { statementId } = useSearchParams();
+  // the statement's own territory - may differ from the URL territoryId, so the
+  // suggester home icon is keyed off the statement, not the opened territory.
+  const statementTerritoryId = statement.data.territory?.territoryId;
   const { action, sAction } = filteredAction.data;
 
   const dropRef = useRef<HTMLTableRowElement>(null);
@@ -192,7 +194,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
           placeholder={"add action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
-          territoryActants={territoryActants}
+          territoryId={statementTerritoryId}
           isHidden={!userCanEdit}
         />
       </StyledSuggesterWrap>
@@ -203,7 +205,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
-      <ButtonGroup $noMarginRight $height={19} style={{ gap: "0.2rem" }}>
+      <ButtonGroup $smallGap $height={19}>
         {userCanEdit && (
           <Button
             key="a"
@@ -264,7 +266,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             originId={originActant ? originActant.id : ""}
             entities={statement.entities}
             props={props}
-            territoryId={territoryId}
+            territoryId={statementTerritoryId}
             updateProp={updateProp}
             removeProp={removeProp}
             addProp={addProp}
@@ -377,7 +379,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
               {userCanEdit && (
                 <Button
                   key="d"
-                  icon={<FaTrashAlt />}
+                  icon={<IcoTrash />}
                   color="plain"
                   inverted
                   tooltipLabel="remove action row"

@@ -1,10 +1,9 @@
 import { IAudit, IResponseAudit } from "@inkvisitor/shared/types";
-import api from "api";
 import React from "react";
 import { FaExchangeAlt, FaRegCalendarAlt, FaUser } from "react-icons/fa";
 import { MdAddCircleOutline } from "react-icons/md";
 import { RiTimeLine } from "react-icons/ri";
-import { useQuery } from "@tanstack/react-query";
+import { useUsersSimplifiedQuery } from "hooks/react-query";
 import {
   StyledAuditColumn,
   StyledAuditEllipsis,
@@ -13,12 +12,7 @@ import {
 } from "./AuditTableStyles";
 import { Button } from "components/basic/Button/Button";
 
-export const AuditTable: React.FC<IResponseAudit> = ({
-  modelId,
-  auditScope,
-  last,
-  first,
-}) => {
+export const AuditTable: React.FC<IResponseAudit> = ({ modelId, auditScope, last, first }) => {
   return (
     <div>
       <StyledAuditTable>
@@ -27,12 +21,8 @@ export const AuditTable: React.FC<IResponseAudit> = ({
           .map((auditLast, ai) => (
             <AuditTableRow mode="edit" key={ai} {...auditLast}></AuditTableRow>
           ))}
-        {last && last.length > 1 && (
-          <StyledAuditEllipsis>...</StyledAuditEllipsis>
-        )}
-        {first && (
-          <AuditTableRow mode="create" key="first" {...first}></AuditTableRow>
-        )}
+        {last && last.length > 1 && <StyledAuditEllipsis>...</StyledAuditEllipsis>}
+        {first && <AuditTableRow mode="create" key="first" {...first}></AuditTableRow>}
       </StyledAuditTable>
     </div>
   );
@@ -48,14 +38,8 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   changes,
   mode,
 }) => {
-  const { data: userData, isFetching: isFetchingUser } = useQuery({
-    queryKey: ["user", user],
-    queryFn: async () => {
-      const res = await api.withoutToaster().usersGet(user as string);
-      return res.data;
-    },
-    enabled: !!user,
-  });
+  const { data: users } = useUsersSimplifiedQuery();
+  const userName = users?.find((u) => u.id === user)?.name;
 
   const changedKeys =
     Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"
@@ -79,7 +63,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
     <StyledAuditRow>
       <StyledAuditColumn>
         <FaUser />
-        {userData ? userData.name : <i>{"removed user"}</i>}
+        {userName ? userName : <i>{"removed user"}</i>}
       </StyledAuditColumn>
       <StyledAuditColumn>
         <FaRegCalendarAlt />
@@ -99,13 +83,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
             tooltipLabel="created"
           />
         ) : (
-          <Button
-            icon={<FaExchangeAlt />}
-            noBackground
-            inverted
-            noBorder
-            tooltipLabel="edited"
-          />
+          <Button icon={<FaExchangeAlt />} noBackground inverted noBorder tooltipLabel="edited" />
         )}
         {mode === "create" ? "" : changedKeys.join(", ")}
       </StyledAuditColumn>

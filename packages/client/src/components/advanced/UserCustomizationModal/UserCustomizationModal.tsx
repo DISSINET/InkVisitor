@@ -15,23 +15,27 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalInputForm,
-  ModalInputLabel,
-  ModalInputWrap,
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { useOrderedLanguageDict } from "hooks/react-query";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaQuestion } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { isSafePassword } from "utils/utils";
 import {
-  StyledButtonWrap,
-  StyledRightsHeading,
+  StyledFieldControl,
+  StyledFieldGrid,
+  StyledFieldHelp,
+  StyledFieldLabel,
+  StyledFieldSpan,
+  StyledInlineAction,
+  StyledRightsGrid,
+  StyledRightsLabel,
   StyledRightsWrap,
-  StyledUserRightHeading,
-  StyledUserRightItem,
-  StyledUserRights,
+  StyledSectionTitle,
+  StyledUserCustomization,
+  StyledUserCustomizationSection,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
 
@@ -41,6 +45,7 @@ interface DataObject {
   defaultLanguage: EntityEnums.Language;
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
+  workingLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
 }
 interface UserCustomizationModal {
@@ -75,6 +80,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
       defaultStatementLanguage: options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
+      workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
     };
   }, [user]);
@@ -82,21 +88,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const [data, setData] = useState<DataObject>(initialValues);
   const [defaultTerritory, setDefaultTerritory] = useState<IEntity | null>(null);
 
+  const orderedLanguageDict = useOrderedLanguageDict();
+
   useEffect(() => {
     setData(initialValues);
   }, [initialValues]);
-
-  useEffect(() => {
-    // territory is selected in the suggester
-    if (defaultTerritory) {
-      setData({
-        ...data,
-        defaultTerritory: defaultTerritory.id,
-      });
-    } else {
-      handleChange("defaultTerritory", "");
-    }
-  }, [defaultTerritory]);
 
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
     setData({
@@ -112,12 +108,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     },
   });
 
-  const {
-    status,
-    data: territory,
-    error,
-    isFetching,
-  } = useQuery({
+  const {} = useQuery({
     queryKey: ["territory", data.defaultTerritory],
     queryFn: async () => {
       // defaultTerritory is set but is not loaded in local state
@@ -155,6 +146,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultLanguage: data.defaultLanguage,
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
+          workingLanguages: data.workingLanguages.map((wL) => wL),
           defaultTerritory: data.defaultTerritory || "",
         },
       });
@@ -166,11 +158,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
-    [rights]
+    [rights],
   );
   const writeRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Write),
-    [rights]
+    [rights],
   );
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -188,171 +180,179 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       >
         <ModalHeader title="User customization" />
         <ModalContent column enableScroll>
-          <div style={{ position: "relative" }}>
-            <StyledRightsHeading>
-              <b>{"User information"}</b>
-            </StyledRightsHeading>
-            <ModalInputForm>
-              <ModalInputLabel>{"name"}</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                <Input
-                  width="full"
-                  changeOnType
-                  value={name}
-                  onChangeFn={(value: string) => handleChange("name", value)}
-                />
-              </ModalInputWrap>
-              <ModalInputLabel>{"email"}</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                <Input
-                  width="full"
-                  changeOnType
-                  value={email}
-                  onChangeFn={(value: string) => handleChange("email", value)}
-                />
-              </ModalInputWrap>
-            </ModalInputForm>
+          <StyledUserCustomization>
+            <StyledUserCustomizationSection>
+              <StyledSectionTitle>User information</StyledSectionTitle>
+              <StyledFieldGrid>
+                <StyledFieldLabel>Name</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Input
+                    width="full"
+                    changeOnType
+                    value={name}
+                    onChangeFn={(value: string) => handleChange("name", value)}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp />
 
-            {!showPasswordChange && (
-              <div
-                style={{
-                  display: "flex",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
-                <Button
-                  label="change password"
-                  noBorder
-                  color="warning"
-                  inverted
-                  noBackground
-                  onClick={() => setShowPasswordChange(!showPasswordChange)}
-                />
-              </div>
-            )}
+                <StyledFieldLabel>Email</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Input
+                    width="full"
+                    changeOnType
+                    value={email}
+                    onChangeFn={(value: string) => handleChange("email", value)}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp />
 
-            {showPasswordChange && (
-              <>
-                <StyledRightsHeading>
-                  <b>{"Change password"}</b>
-                </StyledRightsHeading>
+                {!showPasswordChange && (
+                  <>
+                    <StyledFieldLabel />
+                    <StyledFieldControl>
+                      <StyledInlineAction>
+                        <Button
+                          label="Change password"
+                          noBorder
+                          color="success"
+                          inverted
+                          noBackground
+                          onClick={() => setShowPasswordChange(true)}
+                        />
+                      </StyledInlineAction>
+                    </StyledFieldControl>
+                    <StyledFieldHelp />
+                  </>
+                )}
 
-                <ModalInputForm>
-                  <ModalInputLabel>{"new password"}</ModalInputLabel>
-                  <ModalInputWrap width={165}>
-                    <Input
-                      type="password"
-                      width="full"
-                      changeOnType
-                      value={newPassword}
-                      onChangeFn={(value: string) => setNewPassword(value)}
-                    />
-                  </ModalInputWrap>
-                  <ModalInputLabel>{"repeat password"}</ModalInputLabel>
-                  <ModalInputWrap width={165}>
-                    <Input
-                      type="password"
-                      width="full"
-                      changeOnType
-                      value={repeatPassword}
-                      onChangeFn={(value: string) => setRepeatPassword(value)}
-                    />
-                  </ModalInputWrap>
-                </ModalInputForm>
+                {showPasswordChange && (
+                  <>
+                    <StyledFieldLabel>New password</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Input
+                        type="password"
+                        width="full"
+                        changeOnType
+                        value={newPassword}
+                        onChangeFn={(value: string) => setNewPassword(value)}
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp />
 
-                <div style={{ maxWidth: "31rem" }}>
-                  <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
-                </div>
+                    <StyledFieldLabel>Repeat password</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Input
+                        type="password"
+                        width="full"
+                        changeOnType
+                        value={repeatPassword}
+                        onChangeFn={(value: string) => setRepeatPassword(value)}
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp />
 
-                <StyledButtonWrap>
-                  <ButtonGroup>
-                    <Button
-                      color="warning"
-                      label="Cancel"
-                      inverted
-                      onClick={() => {
-                        setShowPasswordChange(false);
-                        setNewPassword("");
-                        setRepeatPassword("");
-                      }}
-                    />
-                    <Button
-                      color="danger"
-                      label="Submit"
-                      inverted
-                      onClick={() => {
-                        if (newPassword.length > 0 && !isSafePassword(newPassword)) {
-                          toast.warning(UnsafePasswordError.message);
-                        } else {
-                          if (newPassword === repeatPassword) {
-                            passwordUpdateMutation.mutate();
+                    <StyledFieldSpan>
+                      <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
+                      <ButtonGroup>
+                        <Button
+                          color="warning"
+                          label="Cancel"
+                          inverted
+                          onClick={() => {
                             setShowPasswordChange(false);
                             setNewPassword("");
                             setRepeatPassword("");
-                          } else {
-                            toast.warning("Passwords are not matching");
-                          }
-                        }
-                      }}
-                    />
-                  </ButtonGroup>
-                </StyledButtonWrap>
-              </>
-            )}
+                          }}
+                        />
+                        <Button
+                          color="danger"
+                          label="Save password"
+                          inverted
+                          onClick={() => {
+                            if (newPassword.length > 0 && !isSafePassword(newPassword)) {
+                              toast.warning(UnsafePasswordError.message);
+                            } else {
+                              if (newPassword === repeatPassword) {
+                                passwordUpdateMutation.mutate();
+                                setShowPasswordChange(false);
+                                setNewPassword("");
+                                setRepeatPassword("");
+                              } else {
+                                toast.warning("Passwords are not matching");
+                              }
+                            }
+                          }}
+                        />
+                      </ButtonGroup>
+                    </StyledFieldSpan>
+                  </>
+                )}
+              </StyledFieldGrid>
+            </StyledUserCustomizationSection>
+            <StyledUserCustomizationSection>
+              <StyledSectionTitle>Customization</StyledSectionTitle>
 
-            <StyledRightsHeading>
-              <b>{"Customization"}</b>
-            </StyledRightsHeading>
-
-            <ModalInputForm>
-              <ModalInputLabel>default entity label language</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
+              <StyledFieldGrid>
+                <StyledFieldLabel>Default label language</StyledFieldLabel>
+                <StyledFieldControl>
                   <Dropdown.Single.Basic
                     width="full"
                     value={defaultLanguage}
                     onChange={(newValue) => handleChange("defaultLanguage", newValue)}
-                    options={languageDict}
+                    options={orderedLanguageDict}
                   />
+                </StyledFieldControl>
+                <StyledFieldHelp>
                   <IconWithTooltip
                     color="success"
                     icon={<FaQuestion />}
                     tooltipLabel="Default language used for labeling entities."
                   />
-                </div>
-              </ModalInputWrap>
-              <ModalInputLabel>default source language</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
+                </StyledFieldHelp>
+
+                <StyledFieldLabel>Default source language</StyledFieldLabel>
+                <StyledFieldControl>
                   <Dropdown.Single.Basic
                     width="full"
                     value={defaultStatementLanguage}
                     onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
-                    options={languageDict}
+                    options={orderedLanguageDict}
                   />
+                </StyledFieldControl>
+                <StyledFieldHelp>
                   <IconWithTooltip
                     color="success"
                     icon={<FaQuestion />}
                     tooltipLabel="Dominant language of the source texts being coded into statements"
                   />
-                </div>
-              </ModalInputWrap>
+                </StyledFieldHelp>
 
-              {/* NOT USED NOW */}
-              {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
+                <StyledFieldLabel>Working languages</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Dropdown.Multi.Basic
+                    width="full"
+                    value={data.workingLanguages}
+                    onChange={(selectedOptions) =>
+                      setData((prev) => ({
+                        ...prev,
+                        workingLanguages: selectedOptions as EntityEnums.Language[],
+                      }))
+                    }
+                    options={languageDict.filter(
+                      (lang) => lang.value !== EntityEnums.Language.Empty,
+                    )}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Languages you work with. They are shown first in every language dropdown to make them easy to find in the full list."
+                  />
+                </StyledFieldHelp>
+
+                {/* NOT USED NOW */}
+                {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
                 <ModalInputWrap width={165}>
                   <Dropdown.Multi.Attribute
                     value={data.searchLanguages}
@@ -366,74 +366,71 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </ModalInputWrap> */}
 
-              <ModalInputLabel>{"default territory"}</ModalInputLabel>
-              <ModalInputWrap width={165}>
-                {defaultTerritory ? (
-                  <EntityTag
-                    entity={defaultTerritory}
-                    tooltipPosition="left"
-                    unlinkButton={{
-                      onClick: () => {
-                        setDefaultTerritory(null);
-                      },
-                      color: "danger",
-                    }}
-                  />
-                ) : (
-                  <div>
+                <StyledFieldLabel>Default territory</StyledFieldLabel>
+                <StyledFieldControl>
+                  {defaultTerritory ? (
+                    <EntityTag
+                      entity={defaultTerritory}
+                      tooltipPosition="left"
+                      unlinkButton={{
+                        onClick: () => {
+                          setDefaultTerritory(null);
+                          setData((prev) => ({ ...prev, defaultTerritory: "" }));
+                        },
+                        color: "danger",
+                      }}
+                      fullWidth
+                    />
+                  ) : (
                     <EntitySuggester
                       categoryTypes={[EntityEnums.Class.Territory]}
                       onPicked={(entity) => {
                         setDefaultTerritory(entity);
+                        setData((prev) => ({ ...prev, defaultTerritory: entity.id }));
                       }}
-                      inputWidth={104}
+                      inputWidth="full"
                       disableTemplatesAccept
                     />
-                  </div>
-                )}
-              </ModalInputWrap>
-            </ModalInputForm>
+                  )}
+                </StyledFieldControl>
+                <StyledFieldHelp />
+              </StyledFieldGrid>
+            </StyledUserCustomizationSection>
+            <StyledUserCustomizationSection>
+              <StyledSectionTitle>User rights</StyledSectionTitle>
+              <StyledRightsGrid>
+                <StyledRightsLabel>Role</StyledRightsLabel>
+                <AttributeButtonGroup
+                  disabled
+                  options={[
+                    {
+                      longValue: userRoleDict[0].label,
+                      shortValue: userRoleDict[0].label,
+                      selected: role === userRoleDict[0].value,
+                      onClick: () => {},
+                    },
+                    {
+                      longValue: userRoleDict[1].label,
+                      shortValue: userRoleDict[1].label,
+                      selected: role === userRoleDict[1].value,
+                      onClick: () => {},
+                    },
+                    {
+                      longValue: userRoleDict[2].label,
+                      shortValue: userRoleDict[2].label,
+                      selected: role === userRoleDict[2].value,
+                      onClick: () => {},
+                    },
+                    {
+                      longValue: userRoleDict[3].label,
+                      shortValue: userRoleDict[3].label,
+                      selected: role === userRoleDict[3].value,
+                      onClick: () => {},
+                    },
+                  ]}
+                />
 
-            <StyledRightsHeading>
-              <b>{"User rights"}</b>
-            </StyledRightsHeading>
-            <StyledUserRights>
-              <StyledUserRightHeading>{"role"}</StyledUserRightHeading>
-              <StyledUserRightItem>
-                <div>
-                  <AttributeButtonGroup
-                    disabled
-                    options={[
-                      {
-                        longValue: userRoleDict[0].label,
-                        shortValue: userRoleDict[0].label,
-                        selected: role === userRoleDict[0].value,
-                        onClick: () => {},
-                      },
-                      {
-                        longValue: userRoleDict[1].label,
-                        shortValue: userRoleDict[1].label,
-                        selected: role === userRoleDict[1].value,
-                        onClick: () => {},
-                      },
-                      {
-                        longValue: userRoleDict[2].label,
-                        shortValue: userRoleDict[2].label,
-                        selected: role === userRoleDict[2].value,
-                        onClick: () => {},
-                      },
-                      {
-                        longValue: userRoleDict[3].label,
-                        shortValue: userRoleDict[3].label,
-                        selected: role === userRoleDict[3].value,
-                        onClick: () => {},
-                      },
-                    ]}
-                  />
-                </div>
-              </StyledUserRightItem>
-              <StyledUserRightHeading>{"read"}</StyledUserRightHeading>
-              <StyledUserRightItem>
+                <StyledRightsLabel>Read</StyledRightsLabel>
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? readRights.map((right, key) => (
@@ -441,9 +438,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       ))
                     : "all"}
                 </StyledRightsWrap>
-              </StyledUserRightItem>
-              <StyledUserRightHeading>{"write"}</StyledUserRightHeading>
-              <StyledUserRightItem>
+
+                <StyledRightsLabel>Write</StyledRightsLabel>
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? writeRights.map((right, key) => (
@@ -451,25 +447,31 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       ))
                     : "all"}
                 </StyledRightsWrap>
-              </StyledUserRightItem>
-            </StyledUserRights>
-
-            {process.env.NODE_ENV === "development" && (
-              <Button
-                label="Simulate HTML API response"
-                color="warning"
-                onClick={async () => {
-                  const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
-                  console.log("response", response);
-                }}
-              />
-            )}
+              </StyledRightsGrid>
+            </StyledUserCustomizationSection>
 
             <Loader show={passwordUpdateMutation.isPending} />
-          </div>
+          </StyledUserCustomization>
         </ModalContent>
 
-        <ModalFooter>
+        <ModalFooter spaceBetween>
+          {process.env.NODE_ENV === "development" && (
+            <StyledUserCustomizationSection>
+              <div>
+                <Button
+                  label="Simulate HTML API response"
+                  color="primary"
+                  noBorder
+                  // noBackground
+                  inverted
+                  onClick={async () => {
+                    const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
+                    console.log("response", response);
+                  }}
+                />
+              </div>
+            </StyledUserCustomizationSection>
+          )}
           <ButtonGroup>
             {/* {role === UserEnums.Role.Admin && (
               <Button

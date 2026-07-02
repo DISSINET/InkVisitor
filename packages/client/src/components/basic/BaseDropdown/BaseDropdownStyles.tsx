@@ -29,6 +29,7 @@ export interface StyledSelect {
   entityDropdown?: boolean;
   userDropdown?: boolean;
   attributeDropdown?: boolean;
+  compactChips?: boolean;
   wildCardChar?: boolean;
   icon?: React.ReactNode;
   loggerId?: string;
@@ -80,10 +81,12 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       $suggester ? "none" : `inset 0 0 0 ${theme.borderWidth[1]} ${theme.color["info"]}`};
   }
   .react-select__value-container {
-    height: ${({ userDropdown }) => (userDropdown ? "auto" : "100%")};
-    align-content: ${({ userDropdown }) => (userDropdown ? "flex-start" : "")};
+    height: ${({ userDropdown, compactChips }) => (userDropdown || compactChips ? "auto" : "100%")};
+    align-content: ${({ userDropdown, compactChips }) =>
+      userDropdown || compactChips ? "flex-start" : ""};
     gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
-    padding: ${({ userDropdown }) => (userDropdown ? "0.2rem 0.2rem" : "0")};
+    padding: ${({ userDropdown, compactChips }) =>
+      userDropdown ? "0.2rem" : compactChips ? "0.1rem" : "0"};
     margin: 0;
     width: ${({ width }) => getWidth(width)};
   }
@@ -115,7 +118,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
     min-width: ${({ userDropdown }) => (userDropdown ? "0" : "")};
     max-width: ${({ userDropdown }) => (userDropdown ? "100%" : "")};
-    margin: ${({ userDropdown }) => (userDropdown ? "0" : "")};
+    margin: ${({ userDropdown, compactChips }) => (userDropdown ? "0" : compactChips ? "1px" : "")};
   }
   .react-select__indicator {
     color: ${({ theme }) => theme.color["primary"]};
@@ -144,11 +147,32 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__multi-value__remove {
     padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
     padding-right: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
+
+    /* recolor only the icon on hover, no filled square around it */
+    &:hover {
+      background-color: transparent;
+      color: ${({ theme }) => theme.color["danger"]};
+    }
   }
   .react-select__input-container {
     color: ${({ theme }) => theme.color["black"]};
     ${({ userDropdown }) => (userDropdown ? "margin: 0; padding: 0; line-height: 1;" : "")}
   }
+  /* when not focused, take the (empty) text input out of the flex flow so it
+     doesn't wrap onto a spare row after the chips; kept 1px + absolute so the
+     control is still clickable/focusable */
+  ${({ compactChips }) =>
+    compactChips &&
+    `
+    .react-select__control:not(.react-select__control--is-focused) .react-select__input-container {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+  `}
   // portal menu style is in global stylesheet
 `;
 

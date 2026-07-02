@@ -31,7 +31,7 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useSearchParams, useTheme } from "hooks";
+import { useIsInViewport, useSearchParams, useTheme } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
@@ -72,7 +72,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { useUserQuery } from "hooks/react-query";
+import { useAuditQuery, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const valencyErrorTypes: WarningTypeEnums[] = [
   WarningTypeEnums.MA,
@@ -110,43 +110,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const queryClient = useQueryClient();
   const theme = useTheme();
 
-  // Audit query
-  const {
-    status: statusAudit,
-    data: audit,
-    error: auditError,
-    isFetching: isFetchingAudit,
-  } = useQuery({
-    queryKey: ["audit", statementId],
-    queryFn: async () => {
-      const res = await api.auditGet(statementId);
-      return res.data;
-    },
-    enabled: !!statementId && api.isLoggedIn(),
-  });
+  // Audit query - only fetched once the Audits section scrolls into view
+  const [auditSectionRef, auditInViewport] = useIsInViewport("200px");
+  const { data: audit } = useAuditQuery(statementId, auditInViewport);
 
   // user query
   const username: string = useAppSelector((state) => state.username);
   const { data: user } = useUserQuery();
-
-  // territory query
-  const {
-    status,
-    data: territoryActants = [],
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["territoryActants", statement.data.territory?.territoryId],
-    queryFn: async () => {
-      if (statement.data.territory?.territoryId) {
-        const res = await api.entityIdsInTerritory(statement.data.territory.territoryId);
-        return res.data ?? [];
-      } else {
-        return [];
-      }
-    },
-    enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
-  });
 
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] = useState<boolean>(false);
@@ -166,26 +136,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
-    queryKey: ["statement-templates"],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        onlyTemplates: true,
-        class: EntityEnums.Class.Statement,
-      });
+    data: allTemplates,
+    isStale: templatesStale,
+    refetch: refetchTemplates,
+  } = useTemplatesQuery();
 
-      const templates = res.data ?? [];
-      templates.sort((a: IEntity, b: IEntity) =>
-        a.labels[0].toLocaleLowerCase() > b.labels[0].toLocaleLowerCase() ? 1 : -1,
-      );
-      return templates;
-    },
-    enabled: !!statement && api.isLoggedIn(),
-  });
+  // refresh the template list when the user opens the dropdown, but only once
+  // the 5min staleTime has elapsed - avoids refetching on every open
+  const handleTemplateDropdownFocus = () => {
+    if (templatesStale) {
+      refetchTemplates();
+    }
+  };
+
+  const templates = useMemo(
+    () =>
+      allTemplates?.filter((template: IEntity) => template.class === EntityEnums.Class.Statement),
+    [allTemplates],
+  );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options = templates
@@ -199,11 +167,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
     return options;
   }, [templates, statement]);
-
-  // refetch audit when statement changes
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["audit"] });
-  }, [statement]);
 
   // stores territory id
   const statementTerritoryId: string | undefined = useMemo(() => {
@@ -230,6 +193,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     },
     enabled: !!statementId && !!statementTerritoryId,
   });
+
+  // Seed the shared ["territoryActants"] cache for EntitySuggester in this editor
+  // resolve the home-icon ids from cache instead of firing a redundant request.
+  useEffect(() => {
+    if (statementTerritoryId && territoryData) {
+      queryClient.setQueryData(
+        ["territoryActants", statementTerritoryId],
+        Object.keys(territoryData.entities),
+      );
+    }
+  }, [statementTerritoryId, territoryData]);
 
   // get data for the previous statement
   const previousStatement: false | IResponseStatement = useMemo(() => {
@@ -369,7 +343,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           changes.value.entityId &&
           changes.value.elvl !== EntityEnums.Elvl.Inferential);
 
-      if (languageCheck && isTypeOrValueChange && user && user.options.defaultStatementLanguage) {
+      if (languageCheck && isTypeOrValueChange && user && user.options.workingLanguages?.length) {
         checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
@@ -377,19 +351,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
+  // checking if the entity language is not in the user's working languages -> in that case, switch elvl to EntityEnums.Elvl.Inferential
   const checkTypeEntityLanguage = (propId: string, changes: any, instantUpdate?: boolean) => {
     if (user) {
-      const statementLanguage = user.options.defaultStatementLanguage;
+      const workingLanguages = user.options.workingLanguages ?? [];
       if (changes.type) {
         api.entityGet(changes.type?.entityId).then((typeEntity) => {
           if (typeEntity.data) {
             const entityLanguage = typeEntity.data.language;
-            if (entityLanguage !== statementLanguage && changes.type) {
+            if (!workingLanguages.includes(entityLanguage) && changes.type) {
               changes.type.elvl = EntityEnums.Elvl.Inferential;
               applyPropChanges(propId, changes, instantUpdate);
               toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property type slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`,
+                `The language of the entity (${entityLanguage}) assigned to the property type slot is not among your working languages. Epistemic level of property type's involvement changed to "inferential"`,
               );
             }
           }
@@ -399,11 +373,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         api.entityGet(changes.value.entityId).then((valueEntity) => {
           if (valueEntity.data) {
             const entityLanguage = valueEntity.data.language;
-            if (entityLanguage !== statementLanguage && changes.value) {
+            if (!workingLanguages.includes(entityLanguage) && changes.value) {
               changes.value.elvl = EntityEnums.Elvl.Inferential;
               applyPropChanges(propId, changes, instantUpdate);
               toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property value slot does not correspondent with the user statement language (${user.options.defaultStatementLanguage}) .Epistemic level of property type's involvement changed to "inferential"`,
+                `The language of the entity (${entityLanguage}) assigned to the property value slot is not among your working languages. Epistemic level of property value's involvement changed to "inferential"`,
               );
             }
           }
@@ -690,6 +664,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   width="full"
                   value={null}
                   options={templateOptions}
+                  onFocus={handleTemplateDropdownFocus}
                   onChange={(templateToApply) => {
                     handleAskForTemplateApply(templateToApply);
                   }}
@@ -823,12 +798,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               removeProp={removeProp}
               movePropToIndex={movePropToIndex}
               territoryParentId={statementTerritoryId}
-              territoryActants={territoryActants}
               handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
-                territoryActants={territoryActants}
+                territoryId={statementTerritoryId}
                 openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   addAction(newSelectedId);
@@ -879,12 +853,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               territoryParentId={statementTerritoryId}
               addClassification={addClassification}
               addIdentification={addIdentification}
-              territoryActants={territoryActants}
               handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
-                territoryActants={territoryActants}
+                territoryId={statementTerritoryId}
                 openDetailOnCreate
                 onSelected={addActant}
                 categoryTypes={classesEditorActants}
@@ -968,7 +941,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledTagsList>
             {userCanEdit && (
               <EntitySuggester
-                territoryActants={territoryActants}
+                territoryId={statementTerritoryId}
                 openDetailOnCreate
                 onSelected={(newSelectedId: string) => {
                   if (!statement.data.tags.find((t) => t === newSelectedId)) {
@@ -1017,7 +990,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Audits</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
-          <StyledEditorSectionContent>
+          <StyledEditorSectionContent ref={auditSectionRef}>
             {audit && <AuditTable {...audit} />}
           </StyledEditorSectionContent>
         </StyledEditorSection>

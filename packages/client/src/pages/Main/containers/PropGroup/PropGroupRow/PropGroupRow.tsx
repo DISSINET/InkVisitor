@@ -8,7 +8,8 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -50,7 +51,7 @@ interface PropGroupRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
-  territoryActants: string[];
+  territoryId?: string;
   openDetailOnCreate: boolean;
 
   parentId: string;
@@ -82,7 +83,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   moveProp,
   movePropToIndex,
   userCanEdit,
-  territoryActants = [],
+  territoryId,
   openDetailOnCreate = false,
   parentId,
   id,
@@ -209,7 +210,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 disabledAttributes={disabledAttributes}
                 isInsideTemplate={isInsideTemplate}
                 openDetailOnCreate={openDetailOnCreate}
-                territoryActants={territoryActants}
+                territoryId={territoryId}
                 territoryParentId={territoryParentId}
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
@@ -227,7 +228,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               disabledAttributes={disabledAttributes}
               isInsideTemplate={isInsideTemplate}
               openDetailOnCreate={openDetailOnCreate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               territoryParentId={territoryParentId}
               updateProp={updateProp}
               userCanEdit={userCanEdit}
@@ -327,7 +328,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   {userCanEdit && (
                     <Button
                       key="delete"
-                      icon={<FaTrashAlt />}
+                      icon={<IcoTrash />}
                       tooltipLabel="remove prop row"
                       color="plain"
                       inverted

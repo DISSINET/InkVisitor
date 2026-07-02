@@ -1,7 +1,7 @@
 import { FloatingPortal } from "@floating-ui/react";
 import { Button, Checkbox } from "components";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { BiSearch } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 import { GrClose } from "react-icons/gr";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { ExploreAction, ExploreActionType } from "../Explorer/state";
@@ -379,7 +379,7 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
           aria-label={isExpanded ? "Close search panel" : "Open search panel"}
           aria-expanded={isExpanded}
         >
-          <BiSearch size={22} />
+          <IcoSearch size={22} />
         </StyledCollapsedButton>
       )}
       {isExpanded && (

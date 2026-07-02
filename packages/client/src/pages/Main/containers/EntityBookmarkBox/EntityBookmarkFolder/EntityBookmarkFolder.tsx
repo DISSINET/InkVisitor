@@ -6,20 +6,14 @@ import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
 import React, { useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import {
-  FaEdit,
-  FaFolder,
-  FaFolderOpen,
-  FaRegFolder,
-  FaRegFolderOpen,
-  FaTrash,
-} from "react-icons/fa";
+import { FaFolder, FaFolderOpen, FaRegFolder, FaRegFolderOpen } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
+import { MdEdit } from "react-icons/md";
 import { DragItem, ItemTypes } from "types";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
+  StyledEditButtonWrap,
   StyledFolderContent,
   StyledFolderContentTags,
   StyledFolderHeader,
@@ -29,6 +23,7 @@ import {
   StyledFolderWrapper,
   StyledFolderWrapperOpenArea,
   StyledIconWrap,
+  StyledRemoveButtonWrap,
 } from "./EntityBookmarkFolderStyles";
 
 interface EntityBookmarkFolder {
@@ -151,34 +146,40 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
         onMouseLeave={() => setShowTooltip(false)}
       >
         <StyledFolderWrapperOpenArea>
-          <StyledIconWrap>
-            <FolderIcon />
+          <StyledIconWrap $isOpen={open}>
+            <FolderIcon size={15} />
           </StyledIconWrap>
-          <StyledFolderHeaderText>{bookmarkFolder.name}</StyledFolderHeaderText>
+          <StyledFolderHeaderText $open={open}>{bookmarkFolder.name}</StyledFolderHeaderText>
         </StyledFolderWrapperOpenArea>
 
         <StyledFolderHeaderButtons>
-          <ButtonGroup>
-            <Button
-              key="edit"
-              icon={<FaEdit size={12} />}
-              color="warning"
-              inverted
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                startEditingFolder(bookmarkFolder);
-              }}
-            />
-            <Button
-              key="remove"
-              icon={<FaTrash size={12} />}
-              color="danger"
-              inverted
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                askRemoveFolder(bookmarkFolder.id);
-              }}
-            />
+          <ButtonGroup $smallGap>
+            <StyledEditButtonWrap>
+              <Button
+                key="edit"
+                icon={<MdEdit size={18} />}
+                inverted
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  startEditingFolder(bookmarkFolder);
+                }}
+                noBackground
+                noBorder
+              />
+            </StyledEditButtonWrap>
+            <StyledRemoveButtonWrap>
+              <Button
+                key="remove"
+                icon={<IcoTrash size={14} />}
+                inverted
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  askRemoveFolder(bookmarkFolder.id);
+                }}
+                noBackground
+                noBorder
+              />
+            </StyledRemoveButtonWrap>
           </ButtonGroup>
         </StyledFolderHeaderButtons>
       </StyledFolderHeader>
