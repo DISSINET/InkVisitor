@@ -13,12 +13,14 @@ const icons = {
 };
 interface ElvlButtonGroup {
   border?: boolean;
+  sharpCorners?: boolean;
   value: EntityEnums.Elvl;
   onChange: (elvl: EntityEnums.Elvl) => void;
   disabled?: boolean;
 }
 export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
   border = false,
+  sharpCorners = false,
   value,
   onChange,
   disabled,
@@ -27,6 +29,7 @@ export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
     <IconButtonGroup<EntityEnums.Elvl>
       attributeName="epistemic level"
       border={border}
+      sharpCorners={sharpCorners}
       icons={icons}
       options={elvlDict}
       onChange={onChange}

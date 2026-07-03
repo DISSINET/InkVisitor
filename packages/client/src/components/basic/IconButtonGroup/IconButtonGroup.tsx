@@ -13,6 +13,7 @@ type ValueTypes =
 type IconButtonGroup<TValue extends ValueTypes> = {
   attributeName?: string;
   border?: boolean;
+  sharpCorners?: boolean;
   options: { value: TValue; label: string; info?: string }[];
   onChange: (value: TValue) => void;
   value: TValue;
@@ -23,6 +24,7 @@ type IconButtonGroup<TValue extends ValueTypes> = {
 export const IconButtonGroup = <TValue extends ValueTypes>({
   attributeName,
   border,
+  sharpCorners,
   options,
   onChange,
   value,
@@ -30,7 +32,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
   disabled = false,
 }: IconButtonGroup<TValue>) => {
   return (
-    <StyledWrapper $border={border}>
+    <StyledWrapper $border={border} $sharpCorners={sharpCorners}>
       {options.map((option, key) => {
         return (
           <React.Fragment key={key}>
@@ -41,8 +43,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                   <p>
                     {attributeName ? (
                       <>
-                        <StyledBold>{option.label}</StyledBold> ({attributeName}
-                        )
+                        <StyledBold>{option.label}</StyledBold> ({attributeName})
                       </>
                     ) : (
                       <StyledBold>{option.label}</StyledBold>

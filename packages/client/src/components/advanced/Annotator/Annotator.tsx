@@ -1240,10 +1240,17 @@ export const TextAnnotator = ({
   // restores exactly.
   const moveAnchorOriginalTextRef = useRef<string | null>(null);
   const moveAnchorDirtyRef = useRef<boolean>(false);
+  const moveAnchorActiveRef = useRef<boolean>(false);
 
-  const handleMoveAnchorBegin = () => {
-    moveAnchorOriginalTextRef.current = annotator?.text.value ?? null;
+  const handleMoveAnchorBegin = (tagName: string, openTagRef: AnchorOpenTagRef) => {
+    if (!annotator) {
+      return;
+    }
+    moveAnchorOriginalTextRef.current = annotator.text.value;
     moveAnchorDirtyRef.current = false;
+    moveAnchorActiveRef.current = true;
+    // Hide the blue selection, pulse the anchor, and bring it into view.
+    annotator.beginAnchorResize(tagName, openTagRef);
   };
 
   const handleMoveAnchorBoundary = (
@@ -1266,37 +1273,42 @@ export const TextAnnotator = ({
     return result;
   };
 
-  const handleMoveAnchorSave = () => {
-    if (moveAnchorDirtyRef.current) {
-      handleSaveNewContent(true, true);
+  // Leave resize mode. commit=true (Done) saves the buffered series; otherwise
+  // (Discard, Esc, closing the menu, unmount) the moves are reverted. Either
+  // way the pulse stops and the frozen selection is unhidden at its original
+  // position. Idempotent — safe to call when no resize is active.
+  const endMoveAnchor = (commit: boolean) => {
+    if (!moveAnchorActiveRef.current) {
+      return;
     }
-    moveAnchorDirtyRef.current = false;
-    moveAnchorOriginalTextRef.current = null;
-  };
-
-  const handleMoveAnchorDiscard = () => {
-    if (moveAnchorDirtyRef.current && moveAnchorOriginalTextRef.current !== null) {
+    moveAnchorActiveRef.current = false;
+    if (commit) {
+      if (moveAnchorDirtyRef.current) {
+        handleSaveNewContent(true, true);
+      }
+    } else if (moveAnchorDirtyRef.current && moveAnchorOriginalTextRef.current !== null) {
       annotator?.updateText(moveAnchorOriginalTextRef.current);
     }
+    annotator?.endAnchorResize();
     moveAnchorDirtyRef.current = false;
     moveAnchorOriginalTextRef.current = null;
   };
 
   // Ref indirection so the menu-close effect and the unmount cleanup always
   // call the latest closure (with the current annotator/document).
-  const handleMoveAnchorDiscardRef = useRef(handleMoveAnchorDiscard);
-  handleMoveAnchorDiscardRef.current = handleMoveAnchorDiscard;
+  const endMoveAnchorRef = useRef(endMoveAnchor);
+  endMoveAnchorRef.current = endMoveAnchor;
 
   // Any unconfirmed exit reverts the buffered moves: the selection menu
   // disappearing (Esc, clicking elsewhere, selection cleared) and unmount.
   useEffect(() => {
     if (!isMenuDisplayed) {
-      handleMoveAnchorDiscardRef.current();
+      endMoveAnchorRef.current(false);
     }
   }, [isMenuDisplayed]);
 
   useEffect(() => {
-    return () => handleMoveAnchorDiscardRef.current();
+    return () => endMoveAnchorRef.current(false);
   }, []);
 
   const annotatorMenuMiddleware = useMemo(() => {
@@ -1536,9 +1548,11 @@ export const TextAnnotator = ({
                         isMenuReadOnly ? undefined : handleMoveAnchorBoundary
                       }
                       onMoveAnchorBegin={isMenuReadOnly ? undefined : handleMoveAnchorBegin}
-                      onMoveAnchorSave={isMenuReadOnly ? undefined : handleMoveAnchorSave}
+                      onMoveAnchorSave={
+                        isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(true)
+                      }
                       onMoveAnchorDiscard={
-                        isMenuReadOnly ? undefined : handleMoveAnchorDiscard
+                        isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(false)
                       }
                       readonly={isMenuReadOnly}
                       activeTerritoryId={thisTerritoryEntityId}

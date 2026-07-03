@@ -117,8 +117,8 @@ interface TextAnnotatorMenuProps {
     boundary: "open" | "close",
     direction: -1 | 1,
   ) => MoveAnchorBoundaryResult | undefined;
-  /** Called when move mode begins — the parent snapshots the text so Discard can revert. */
-  onMoveAnchorBegin?: () => void;
+  /** Called when move mode begins — the parent snapshots the text (for Discard) and starts the resize pulse. */
+  onMoveAnchorBegin?: (tagName: string, openTagRef: AnchorOpenTagRef) => void;
   /** Done: the parent saves the buffered series of moves. */
   onMoveAnchorSave?: () => void;
   /** Discard / cancel (Esc): the parent reverts the buffered moves. */
@@ -175,14 +175,12 @@ export const TextAnnotatorMenu = ({
 
   const handleMoveAnchorStart = useCallback(
     (anchor: Tag) => {
-      onMoveAnchorBegin?.();
-      setMovingAnchor({
-        tagName: anchor.getTagName(),
-        openTagRef: {
-          segmentIndex: anchor.segmentIndex,
-          position: anchor.position,
-        },
-      });
+      const openTagRef = {
+        segmentIndex: anchor.segmentIndex,
+        position: anchor.position,
+      };
+      onMoveAnchorBegin?.(anchor.getTagName(), openTagRef);
+      setMovingAnchor({ tagName: anchor.getTagName(), openTagRef });
     },
     [onMoveAnchorBegin],
   );

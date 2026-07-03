@@ -3,6 +3,7 @@ import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
 import History, { HistorySnapshot } from "./History";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
 import { CaretBlink } from "./CaretBlink";
+import { ResizePulse } from "./ResizePulse";
 import { SettingsOverlay, SettingControl } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
@@ -205,6 +206,16 @@ export class Annotator {
   /** Blinks the collapsed text caret at 1Hz; repaints via draw() (#3092). */
   private readonly caretBlink: CaretBlink;
 
+  // #2885 — anchor-resize mode. While active the anchor being resized pulses
+  // (its own class colour, animated opacity) and the original text selection is
+  // frozen but not painted, so the blue selection is hidden yet its position is
+  // preserved for restoration on exit.
+  private readonly resizePulse: ResizePulse;
+  private resizeAnchor: { tagName: string; openTagRef: AnchorOpenTagRef } | null =
+    null;
+  /** When true, the cursor selection is kept but neither painted nor reported via onSelectText. */
+  private selectionHidden: boolean = false;
+
   private deferredInitTimeout?: ReturnType<typeof setTimeout>;
 
   private destroyed = false;
@@ -338,6 +349,12 @@ export class Annotator {
     this.element = element;
 
     this.caretBlink = new CaretBlink(() => {
+      if (!this.destroyed) {
+        this.draw();
+      }
+    });
+
+    this.resizePulse = new ResizePulse(() => {
       if (!this.destroyed) {
         this.draw();
       }
@@ -1770,6 +1787,7 @@ export class Annotator {
     }
 
     this.caretBlink.destroy();
+    this.resizePulse.destroy();
     if (this.deferredInitTimeout !== undefined) {
       clearTimeout(this.deferredInitTimeout);
       this.deferredInitTimeout = undefined;
@@ -2423,7 +2441,7 @@ export class Annotator {
     // Blink only while a collapsed caret is shown and the canvas is focused.
     this.caretBlink.sync(this.cursor.hasCaret() && this.canvasFocused);
 
-    if (textSegment) {
+    if (textSegment && !this.selectionHidden) {
       const line = this.text.getLineFromPosition(textSegment);
       if (this.cursor.xLine > line.length) {
         // Offset-model navigation/editing keeps the caret in bounds; this is a
@@ -2462,7 +2480,9 @@ export class Annotator {
     this.hoverHighlighter.reset();
 
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
-    if (this.onSelectTextCb) {
+    // While resizing an anchor the selection is frozen and hidden — don't report
+    // it, so the host's selection state (and the open menu) stay put (#2885).
+    if (this.onSelectTextCb && !this.selectionHidden) {
       const [start, end] = this.cursor.getAbsBounds();
       if (
         start &&
@@ -2518,6 +2538,11 @@ export class Annotator {
           continue;
         }
         processedTagNames.add(tagName);
+        // The anchor being resized is drawn separately as an animated pulse
+        // (below), so skip its static highlight here to avoid double-painting.
+        if (this.resizeAnchor && this.resizeAnchor.tagName === tagName) {
+          continue;
+        }
         const hlSchema = this.onHighlightCb(tagName);
         if (hlSchema) {
           let occurence: IAbsCoordinates[];
@@ -2565,6 +2590,36 @@ export class Annotator {
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
         });
+      }
+
+      // #2885 — pulse overlay for the anchor being resized: its own class colour
+      // with opacity oscillating via the ResizePulse phase, so it reads as a
+      // living accent while the ordinary blue selection is hidden.
+      if (this.resizeAnchor) {
+        const span = this.getAnchorSpanCoords(
+          this.resizeAnchor.tagName,
+          this.resizeAnchor.openTagRef
+        );
+        const schema = this.onHighlightCb?.(this.resizeAnchor.tagName);
+        if (span && schema) {
+          const baseOpacity = schema.style.opacity || 0.4;
+          // Fade between a dim floor and a brighter peak so the accent always
+          // reads (never fully transparent) yet visibly pulses.
+          const opacity = baseOpacity * (0.45 + 0.55 * this.resizePulse.intensity());
+          const pulse = new Highlighter(
+            this.ratio,
+            { color: schema.style.color, opacity },
+            schema.mode
+          );
+          pulse.selectStart = span.start;
+          pulse.selectEnd = span.end;
+          pulse.draw(this.ctx, this.viewport, this.text, {
+            lineHeight: this.lineHeight,
+            charWidth: this.charWidth,
+            charsAtLine: this.text.charsAtLine,
+            columnToPixelX: this.drawColumnToPixelX(),
+          });
+        }
       }
     }
 
@@ -2921,6 +2976,143 @@ export class Annotator {
   }
 
   /**
+   * Resolves an anchor to its opening + pairing closing {@link Tag} against the
+   * current segments, using the same exact-then-nearest matching and
+   * nearest-following-close pairing as {@link moveAnchorBoundary}. Returns null
+   * when the anchor cannot be resolved (unknown name, or asymmetrical).
+   */
+  private resolveAnchorTags(
+    tagName: string,
+    openTagRef: AnchorOpenTagRef
+  ): { openTag: Tag; closeTag: Tag } | null {
+    const segments = this.text.segments;
+
+    let openTag: Tag | undefined;
+    const refSegment = segments[openTagRef.segmentIndex];
+    if (refSegment) {
+      openTag = refSegment.openingTags.find(
+        (t) => t.getTagName() === tagName && t.position === openTagRef.position
+      );
+    }
+    if (!openTag) {
+      let refAbs = openTagRef.position;
+      for (let i = 0; i < Math.min(openTagRef.segmentIndex, segments.length); i++) {
+        refAbs += segments[i].raw.length + 1;
+      }
+      let bestDistance = Infinity;
+      for (const segment of segments) {
+        for (const candidate of segment.openingTags) {
+          if (candidate.getTagName() !== tagName) {
+            continue;
+          }
+          const distance = Math.abs(
+            candidate.getAbsoluteTagPosition(segments) - refAbs
+          );
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            openTag = candidate;
+          }
+        }
+      }
+    }
+    if (!openTag) {
+      return null;
+    }
+
+    const resolvedOpenTag = openTag;
+    let closeTag: Tag | undefined;
+    for (let i = resolvedOpenTag.segmentIndex; i < segments.length; i++) {
+      const candidates =
+        i === resolvedOpenTag.segmentIndex
+          ? segments[i].closingTags.filter(
+              (t) => t.position > resolvedOpenTag.position
+            )
+          : segments[i].closingTags;
+      closeTag = candidates.find((t) => t.getTagName() === tagName);
+      if (closeTag) {
+        break;
+      }
+    }
+    if (!closeTag) {
+      return null;
+    }
+    return { openTag: resolvedOpenTag, closeTag };
+  }
+
+  /** Parsed start/end coordinates of an anchor's span, for drawing the pulse overlay. */
+  private getAnchorSpanCoords(
+    tagName: string,
+    openTagRef: AnchorOpenTagRef
+  ): { start: IAbsCoordinates; end: IAbsCoordinates } | null {
+    const resolved = this.resolveAnchorTags(tagName, openTagRef);
+    if (!resolved) {
+      return null;
+    }
+    const openSegment = this.text.segments[resolved.openTag.segmentIndex];
+    const closeSegment = this.text.segments[resolved.closeTag.segmentIndex];
+    if (!openSegment || !closeSegment) {
+      return null;
+    }
+    const start = openSegment.findTagParsedPosition(resolved.openTag);
+    const end = closeSegment.findTagParsedPosition(resolved.closeTag);
+    return {
+      start: { xLine: start.x, yLine: start.y },
+      end: { xLine: end.x, yLine: end.y },
+    };
+  }
+
+  /**
+   * Scrolls the given raw index into view only when it currently sits outside
+   * the visible line range, so the resized anchor (or a boundary that just
+   * moved off-screen) stays visible without snapping the viewport otherwise.
+   */
+  private ensureRawIndexVisible(rawIndex: number): void {
+    const pos = this.text.getSegmentFromAbsTextIndex(rawIndex);
+    if (!pos) {
+      return;
+    }
+    const segment = this.text.segments[pos.segmentIndex];
+    if (!segment) {
+      return;
+    }
+    const absLine = segment.lineStart + pos.lineIndex;
+    if (absLine < this.viewport.lineStart || absLine > this.viewport.lineEnd) {
+      this.scrollToRawPosition(rawIndex);
+    }
+  }
+
+  /**
+   * Enters anchor-resize mode (#2885): the anchor identified by `openTagRef`
+   * starts pulsing in its own class colour, the current text selection is
+   * frozen and hidden (so the blue selection disappears but its position is
+   * kept for restoration), and the anchor is scrolled into view if off-screen.
+   */
+  beginAnchorResize(tagName: string, openTagRef: AnchorOpenTagRef): void {
+    this.resizeAnchor = { tagName, openTagRef };
+    this.selectionHidden = true;
+    const resolved = this.resolveAnchorTags(tagName, openTagRef);
+    if (resolved) {
+      this.ensureRawIndexVisible(
+        resolved.openTag.getAbsoluteTagPosition(this.text.segments)
+      );
+    }
+    this.resizePulse.start();
+    this.draw();
+  }
+
+  /**
+   * Leaves anchor-resize mode: stops the pulse and unhides the frozen selection,
+   * which repaints at its original position (the cursor bounds were never
+   * mutated during resize).
+   */
+  endAnchorResize(): void {
+    this.resizePulse.stop();
+    this.resizeAnchor = null;
+    this.selectionHidden = false;
+    this.draw();
+  }
+
+  /**
    * Moves one boundary (opening or closing tag) of an existing anchor by
    * exactly one visible character (issue #2885). The anchor is identified by
    * its opening tag's location; each successful move returns the new location
@@ -3058,38 +3250,47 @@ export class Annotator {
       segmentIndex++;
     }
 
-    // Re-resolve both tags to select the moved span — the same visual feedback
-    // addAnchor gives after creating an anchor.
-    const movedOpenSegment = newSegments[segmentIndex];
-    const movedOpenTag = movedOpenSegment?.openingTags.find(
-      (t) => t.getTagName() === tagName && t.position === position
-    );
-    if (movedOpenTag) {
-      let movedCloseTag: Tag | undefined;
-      let movedCloseSegmentIndex = -1;
-      for (let i = segmentIndex; i < newSegments.length; i++) {
-        const candidates =
-          i === segmentIndex
-            ? newSegments[i].closingTags.filter(
-                (t) => t.position > movedOpenTag.position
-              )
-            : newSegments[i].closingTags;
-        const found = candidates.find((t) => t.getTagName() === tagName);
-        if (found) {
-          movedCloseTag = found;
-          movedCloseSegmentIndex = i;
-          break;
+    if (this.resizeAnchor) {
+      // Resize mode owns the visuals: keep tracking the anchor for the pulse
+      // overlay and keep the just-moved boundary on screen. The selection is
+      // deliberately NOT touched (it stays frozen and hidden), so the pulse is
+      // the only feedback and the menu's selection state doesn't churn (#2885).
+      this.resizeAnchor = { tagName, openTagRef: { segmentIndex, position } };
+      this.ensureRawIndexVisible(insertAt);
+    } else {
+      // Re-resolve both tags to select the moved span — the same visual feedback
+      // addAnchor gives after creating an anchor.
+      const movedOpenSegment = newSegments[segmentIndex];
+      const movedOpenTag = movedOpenSegment?.openingTags.find(
+        (t) => t.getTagName() === tagName && t.position === position
+      );
+      if (movedOpenTag) {
+        let movedCloseTag: Tag | undefined;
+        let movedCloseSegmentIndex = -1;
+        for (let i = segmentIndex; i < newSegments.length; i++) {
+          const candidates =
+            i === segmentIndex
+              ? newSegments[i].closingTags.filter(
+                  (t) => t.position > movedOpenTag.position
+                )
+              : newSegments[i].closingTags;
+          const found = candidates.find((t) => t.getTagName() === tagName);
+          if (found) {
+            movedCloseTag = found;
+            movedCloseSegmentIndex = i;
+            break;
+          }
         }
-      }
-      if (movedCloseTag) {
-        const start = movedOpenSegment.findTagParsedPosition(movedOpenTag);
-        const end =
-          newSegments[movedCloseSegmentIndex].findTagParsedPosition(
-            movedCloseTag
-          );
-        this.cursor.selectStart = { xLine: start.x, yLine: start.y };
-        this.cursor.selectEnd = { xLine: end.x, yLine: end.y };
-        this.cursor.setTrueSelectionDirection();
+        if (movedCloseTag) {
+          const start = movedOpenSegment.findTagParsedPosition(movedOpenTag);
+          const end =
+            newSegments[movedCloseSegmentIndex].findTagParsedPosition(
+              movedCloseTag
+            );
+          this.cursor.selectStart = { xLine: start.x, yLine: start.y };
+          this.cursor.selectEnd = { xLine: end.x, yLine: end.y };
+          this.cursor.setTrueSelectionDirection();
+        }
       }
     }
 

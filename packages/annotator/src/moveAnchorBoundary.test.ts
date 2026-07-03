@@ -254,3 +254,57 @@ describe("moveAnchorBoundary — guards", () => {
     expect(annotator.text.value).toBe("a<e1  elvl='2'> bc</e1> d");
   });
 });
+
+describe("anchor resize mode (#2885)", () => {
+  const TEXT = "abc <e1>def</e1> ghi";
+  const REF = { segmentIndex: 0, position: 4 };
+
+  test("beginAnchorResize hides the selection without reporting it", () => {
+    const annotator = createAnnotator(TEXT);
+    // Seed a selection and register a spy so we can prove it's suppressed.
+    const selections: Array<{ text: string }> = [];
+    annotator.onSelectText((s) => selections.push({ text: s.text }));
+    (annotator as any).cursor.selectStart = { xLine: 4, yLine: 0 };
+    (annotator as any).cursor.selectEnd = { xLine: 7, yLine: 0 };
+    (annotator as any).cursor.setTrueSelectionDirection();
+
+    selections.length = 0;
+    annotator.beginAnchorResize("e1", REF);
+
+    // The draw during begin must NOT emit an onSelectText event (selection frozen/hidden).
+    expect(selections).toHaveLength(0);
+    expect((annotator as any).selectionHidden).toBe(true);
+    // The cursor bounds are preserved (position "saved") for later restoration.
+    expect((annotator as any).cursor.selectStart).toEqual({ xLine: 4, yLine: 0 });
+    expect((annotator as any).cursor.selectEnd).toEqual({ xLine: 7, yLine: 0 });
+  });
+
+  test("moveAnchorBoundary in resize mode does not touch the cursor selection", () => {
+    const annotator = createAnnotator(TEXT);
+    (annotator as any).cursor.selectStart = { xLine: 4, yLine: 0 };
+    (annotator as any).cursor.selectEnd = { xLine: 7, yLine: 0 };
+    (annotator as any).cursor.setTrueSelectionDirection();
+
+    annotator.beginAnchorResize("e1", REF);
+    const result = annotator.moveAnchorBoundary("e1", REF, "open", -1);
+
+    expect(result.status).toBe("moved");
+    // Text changed, but the frozen selection bounds are untouched.
+    expect(annotator.text.value).toBe("abc<e1> def</e1> ghi");
+    expect((annotator as any).cursor.selectStart).toEqual({ xLine: 4, yLine: 0 });
+    expect((annotator as any).cursor.selectEnd).toEqual({ xLine: 7, yLine: 0 });
+  });
+
+  test("endAnchorResize unhides the selection and clears resize state", () => {
+    const annotator = createAnnotator(TEXT);
+    annotator.beginAnchorResize("e1", REF);
+    expect((annotator as any).selectionHidden).toBe(true);
+
+    const selections: Array<{ text: string }> = [];
+    annotator.onSelectText((s) => selections.push({ text: s.text }));
+    annotator.endAnchorResize();
+
+    expect((annotator as any).selectionHidden).toBe(false);
+    expect((annotator as any).resizeAnchor).toBeNull();
+  });
+});

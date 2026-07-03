@@ -80,6 +80,7 @@ export const AnnotatorAnchorGridRow = React.memo(
                 onChange={(elvl) => {
                   onUpdateAnchor?.(item.anchor, elvl);
                 }}
+                sharpCorners
               />
             )
           }
