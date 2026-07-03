@@ -8,6 +8,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Checkbox,
   IconWithTooltip,
   Input,
   Loader,
@@ -47,6 +48,7 @@ interface DataObject {
   searchLanguages: EntityEnums.Language[];
   workingLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
+  askBeforePropDelete: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -82,6 +84,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       searchLanguages: options.searchLanguages,
       workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
+      askBeforePropDelete: options.askBeforePropDelete !== false,
     };
   }, [user]);
 
@@ -148,6 +151,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           searchLanguages: data.searchLanguages.map((sL) => sL),
           workingLanguages: data.workingLanguages.map((wL) => wL),
           defaultTerritory: data.defaultTerritory || "",
+          askBeforePropDelete: data.askBeforePropDelete,
         },
       });
     }
@@ -394,6 +398,21 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   )}
                 </StyledFieldControl>
                 <StyledFieldHelp />
+
+                <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Checkbox
+                    value={data.askBeforePropDelete}
+                    onChangeFn={(value) => handleChange("askBeforePropDelete", value)}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Show a confirmation before deleting a metaprop that has child properties, since they would be deleted too."
+                  />
+                </StyledFieldHelp>
               </StyledFieldGrid>
             </StyledUserCustomizationSection>
             <StyledUserCustomizationSection>
