@@ -134,7 +134,10 @@ export default class Highlighter {
     ctx.globalAlpha = this.style.opacity;
 
     if (this.hlMode === "focus") {
-      ctx.globalCompositeOperation = "xor";
+      // source-over (not xor): xor over opaque text just fades by alpha and
+      // ignores the fill colour, so the veil could never be tinted. source-over
+      // lays the actual colour down, so the scrim takes `style.color` (#2887).
+      ctx.globalCompositeOperation = "source-over";
       ctx.fillRect(xStartPx, relLine * lineHeight, width, lineHeight);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
@@ -173,8 +176,6 @@ export default class Highlighter {
     text: Text,
     drawingOptions: DrawingOptions
   ) {
-    const { charsAtLine } = drawingOptions;
-
     let [hStart, hEnd] = this.getAbsBounds();
     if (hStart && hEnd) {
       if (hStart.yLine > hEnd.yLine) {
@@ -193,9 +194,30 @@ export default class Highlighter {
         const lastCharX = text.getLine(currY).length;
 
         if (this.hlMode === "focus") {
-          if (currY < hStart.yLine || currY > hEnd.yLine) {
-            rowsToDraw.push({ rowI: i, start: 0, end: charsAtLine });
+          // A line fully outside the focused span is dimmed across the ENTIRE
+          // editor width, in device px (#2887). A column count can't express
+          // "full width" under a proportional font, and it also lets blank or
+          // short trailing lines be covered uniformly instead of collapsing to
+          // a zero-width strip. `currY < text.noLines` skips the phantom row at
+          // index `noLines` (valid lines are [0, noLines-1]) so the veil never
+          // paints one line below the last real line at the end of the document.
+          if (
+            (currY < hStart.yLine || currY > hEnd.yLine) &&
+            currY < text.noLines
+          ) {
+            ctx.globalCompositeOperation = "source-over";
+            ctx.globalAlpha = this.style.opacity;
+            ctx.fillStyle = drawingOptions.color || this.style.color;
+            ctx.fillRect(
+              0,
+              i * drawingOptions.lineHeight,
+              ctx.canvas.width,
+              drawingOptions.lineHeight
+            );
           }
+          // The territory's own start/end lines only dim the portion of the
+          // line outside the span; these stay column-based (correct under a
+          // proportional font via drawLine's columnToPixelX).
           if (currY === hStart.yLine) {
             rowsToDraw.push({ rowI: i, start: 0, end: hStart.xLine });
           }
