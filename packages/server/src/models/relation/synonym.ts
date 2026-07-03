@@ -70,6 +70,9 @@ export default class Synonym
    * @param request
    */
   async afterSave(request: IRequest): Promise<void> {
+    // emit the create/edit audit for this synonym relation
+    await super.afterSave(request);
+
     if (this.siblingRelations) {
       await Relation.deleteMany(request, this.siblingRelations);
     }

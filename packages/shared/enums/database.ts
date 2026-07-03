@@ -8,6 +8,7 @@ export namespace DbEnums {
     AuditScopeModelId = "auditScope_modelId",
     AuditDate = "date",
     AuditDateTypeUser = "date_type_user",
+    AuditRelationEntityIds = "relation_entityIds",
     EntityUsedTemplate = "usedTemplate",
     PropsRecursive = "props.recursive",
     RelationsEntityIds = "entityIds",

@@ -1,21 +1,21 @@
 import { IAudit, IResponseAudit } from "@inkvisitor/shared/types";
+import { IconWithTooltip } from "components";
+import { useUsersSimplifiedQuery } from "hooks/react-query";
 import React from "react";
 import { FaExchangeAlt, FaRegCalendarAlt, FaUser } from "react-icons/fa";
 import { MdAddCircleOutline } from "react-icons/md";
 import { RiTimeLine } from "react-icons/ri";
-import { useUsersSimplifiedQuery } from "hooks/react-query";
 import {
   StyledAuditColumn,
   StyledAuditEllipsis,
   StyledAuditRow,
   StyledAuditTable,
 } from "./AuditTableStyles";
-import { Button } from "components/basic/Button/Button";
 
 export const AuditTable: React.FC<IResponseAudit> = ({ modelId, auditScope, last, first }) => {
   return (
     <div>
-      <StyledAuditTable>
+      <StyledAuditTable $columns={4}>
         {last
           .filter((auditLast) => first && auditLast.date !== first.date)
           .map((auditLast, ai) => (
@@ -75,15 +75,9 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
       </StyledAuditColumn>
       <StyledAuditColumn $wrap>
         {mode === "create" ? (
-          <Button
-            icon={<MdAddCircleOutline />}
-            noBackground
-            inverted
-            noBorder
-            tooltipLabel="created"
-          />
+          <IconWithTooltip icon={<MdAddCircleOutline />} tooltipLabel="created" />
         ) : (
-          <Button icon={<FaExchangeAlt />} noBackground inverted noBorder tooltipLabel="edited" />
+          <IconWithTooltip icon={<FaExchangeAlt />} tooltipLabel="edited" />
         )}
         {mode === "create" ? "" : changedKeys.join(", ")}
       </StyledAuditColumn>
