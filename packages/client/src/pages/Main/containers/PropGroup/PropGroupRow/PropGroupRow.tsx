@@ -73,6 +73,12 @@ interface PropGroupRow {
   autoFocusValue?: boolean;
 }
 
+const countAllChildren = (prop: IProp): number =>
+  prop.children.reduce(
+    (sum, child) => sum + 1 + countAllChildren(child),
+    0
+  );
+
 export const PropGroupRow: React.FC<PropGroupRow> = ({
   prop,
   entities,
@@ -356,8 +362,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       </div>
       <Submit
         title="Delete metaprop"
-        text={`This metaprop has ${prop.children.length} child propert${
-          prop.children.length === 1 ? "y" : "ies"
+        text={`This metaprop has ${countAllChildren(prop)} child propert${
+          countAllChildren(prop) === 1 ? "y" : "ies"
         } which will also be deleted. Do you really want to continue?`}
         submitLabel="Delete"
         show={showDeleteSubmit}
