@@ -1,6 +1,7 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup, Submit } from "components";
+import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -8,7 +9,8 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -50,7 +52,7 @@ interface PropGroupRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
 
   userCanEdit: boolean;
-  territoryActants: string[];
+  territoryId?: string;
   openDetailOnCreate: boolean;
 
   parentId: string;
@@ -71,6 +73,12 @@ interface PropGroupRow {
   autoFocusValue?: boolean;
 }
 
+const countAllChildren = (prop: IProp): number =>
+  prop.children.reduce(
+    (sum, child) => sum + 1 + countAllChildren(child),
+    0
+  );
+
 export const PropGroupRow: React.FC<PropGroupRow> = ({
   prop,
   entities,
@@ -82,7 +90,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   moveProp,
   movePropToIndex,
   userCanEdit,
-  territoryActants = [],
+  territoryId,
   openDetailOnCreate = false,
   parentId,
   id,
@@ -177,8 +185,20 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   }, [isDragging]);
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showDeleteSubmit, setShowDeleteSubmit] = useState(false);
+
+  const { data: user } = useUserQuery();
+  const askBeforePropDelete = user?.options.askBeforePropDelete !== false;
 
   const opacity = isDragging ? 0.5 : 1;
+
+  const handleDeleteClick = () => {
+    if (prop.children.length > 0 && askBeforePropDelete) {
+      setShowDeleteSubmit(true);
+    } else {
+      removeProp(prop.id);
+    }
+  };
 
   return (
     <>
@@ -209,7 +229,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 disabledAttributes={disabledAttributes}
                 isInsideTemplate={isInsideTemplate}
                 openDetailOnCreate={openDetailOnCreate}
-                territoryActants={territoryActants}
+                territoryId={territoryId}
                 territoryParentId={territoryParentId}
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
@@ -227,7 +247,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               disabledAttributes={disabledAttributes}
               isInsideTemplate={isInsideTemplate}
               openDetailOnCreate={openDetailOnCreate}
-              territoryActants={territoryActants}
+              territoryId={territoryId}
               territoryParentId={territoryParentId}
               updateProp={updateProp}
               userCanEdit={userCanEdit}
@@ -327,13 +347,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   {userCanEdit && (
                     <Button
                       key="delete"
-                      icon={<FaTrashAlt />}
+                      icon={<IcoTrash />}
                       tooltipLabel="remove prop row"
                       color="plain"
                       inverted
-                      onClick={() => {
-                        removeProp(prop.id);
-                      }}
+                      onClick={handleDeleteClick}
                     />
                   )}
                 </>
@@ -342,6 +360,19 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           </StyledPropLineColumn>
         </StyledGrid>
       </div>
+      <Submit
+        title="Delete metaprop"
+        text={`This metaprop has ${countAllChildren(prop)} child propert${
+          countAllChildren(prop) === 1 ? "y" : "ies"
+        } which will also be deleted. Do you really want to continue?`}
+        submitLabel="Delete"
+        show={showDeleteSubmit}
+        onSubmit={() => {
+          removeProp(prop.id);
+          setShowDeleteSubmit(false);
+        }}
+        onCancel={() => setShowDeleteSubmit(false)}
+      />
     </>
   );
 };

@@ -1,6 +1,7 @@
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
+import { useDetailQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
@@ -47,7 +48,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
   const { data, error } = useQuery({
     queryKey: ["detail-tab-entities", detailIdArray],
     queryFn: async () => {
-      const res = await api.entitiesSearch({ entityIds: detailIdArray });
+      const res = await api.entitiesGet(detailIdArray);
       return res.data ?? [];
     },
     enabled: api.isLoggedIn() && detailIdArray.length > 0,
@@ -111,18 +112,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
   }, [detailBoxMinimized]);
 
   const {
-    status,
     data: entity,
     error: entityError,
     isFetching,
-  } = useQuery({
-    queryKey: ["entity", selectedDetailId],
-    queryFn: async () => {
-      const res = await api.detailGet(selectedDetailId);
-      return res.data;
-    },
-    enabled: !!selectedDetailId && api.isLoggedIn(),
-  });
+  } = useDetailQuery(selectedDetailId);
 
   return (
     <>

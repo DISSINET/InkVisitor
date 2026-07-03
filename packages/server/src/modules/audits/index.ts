@@ -12,7 +12,13 @@ import { IRequest } from "src/custom_typings/request";
 import Audit from "@models/audit/audit";
 
 export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
-  async (request: IRequest) => {
+  async (
+    request: IRequest<
+      { entityId: string },
+      unknown,
+      { relationsLimit?: string }
+    >
+  ) => {
     const entityId = request.params.entityId;
 
     if (!entityId) {
@@ -29,8 +35,12 @@ export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
       );
     }
 
+    const relationsLimit = request.query.relationsLimit
+      ? parseInt(request.query.relationsLimit, 10)
+      : 10;
+
     const response = new ResponseAudit(entityId);
-    await response.prepare(request.db.connection);
+    await response.prepare(request.db.connection, relationsLimit);
 
     return response;
   }

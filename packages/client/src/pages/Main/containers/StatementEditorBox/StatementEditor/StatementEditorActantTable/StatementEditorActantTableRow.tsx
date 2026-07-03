@@ -21,7 +21,8 @@ import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaCaretDown, FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaCaretDown, FaGripVertical, FaPlus } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -63,7 +64,6 @@ interface StatementEditorActantTableRow {
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
-  territoryActants?: string[];
   hasOrder?: boolean;
 
   handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate?: boolean) => void;
@@ -84,7 +84,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
   territoryParentId,
   addClassification,
   addIdentification,
-  territoryActants,
   hasOrder,
 
   handleDataAttributeChange,
@@ -93,7 +92,9 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
   const dispatch = useAppDispatch();
 
   const isInsideTemplate = statement.isTemplate || false;
-  const { statementId, territoryId } = useSearchParams();
+  // the statement's own territory - may differ from the URL territoryId, so the
+  // suggester home icon is keyed off the statement, not the opened territory.
+  const statementTerritoryId = statement.data.territory?.territoryId;
   const {
     actant,
     sActant,
@@ -234,7 +235,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           excludedEntityClasses={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
-          territoryActants={territoryActants}
+          territoryId={statementTerritoryId}
           placeholder={"add actant"}
           isInsideStatement
           isHidden={!userCanEdit}
@@ -262,7 +263,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
-      <ButtonGroup $noMarginRight $height={19} style={{ gap: "0.2rem" }}>
+      <ButtonGroup $smallGap $height={19}>
         {userCanEdit && (
           <Button
             key="a"
@@ -330,7 +331,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
             originId={originActant ? originActant.id : ""}
             entities={statement.entities}
             props={props}
-            territoryId={territoryId}
+            territoryId={statementTerritoryId}
             updateProp={updateProp}
             removeProp={removeProp}
             addProp={addProp}
@@ -420,7 +421,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               {userCanEdit && (
                 <Button
                   key="d"
-                  icon={<FaTrashAlt />}
+                  icon={<IcoTrash />}
                   color="plain"
                   inverted
                   tooltipLabel="remove actant row"
@@ -532,7 +533,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
                     isInsideTemplate={isInsideTemplate}
                     updateActant={updateActant}
                     userCanEdit={userCanEdit}
-                    territoryActants={territoryActants}
+                    territoryId={statementTerritoryId}
                   />
                 ))}
             </StyledCI>
@@ -555,7 +556,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
                     updateActant={updateActant}
                     userCanEdit={userCanEdit}
                     classEntitiesActant={classEntitiesActant}
-                    territoryActants={territoryActants}
+                    territoryId={statementTerritoryId}
                   />
                 ))}
             </StyledCI>

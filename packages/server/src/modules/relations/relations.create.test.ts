@@ -11,8 +11,9 @@ import { supertestConfig } from "..";
 import { Db } from "@service/rethink";
 import "ts-jest";
 import Relation from "@models/relation/relation";
-import { RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
+import { prepareEntity } from "@models/entity/entity.test";
 
 describe("Relations create", function () {
   afterAll(async () => {
@@ -47,9 +48,16 @@ describe("Relations create", function () {
       const db = new Db();
       await db.initDb();
 
+      // Superclass requires two existing Concept (or Action) entities; isValid()
+      // also requires at least 2 entityIds and the route checks they exist in db.
+      const [, c1] = prepareEntity(EntityEnums.Class.Concept);
+      const [, c2] = prepareEntity(EntityEnums.Class.Concept);
+      await c1.save(db.connection);
+      await c2.save(db.connection);
+
       const newRelation = new Relation({
         type: RelationEnums.Type.Superclass,
-        entityIds: ["1"],
+        entityIds: [c1.id, c2.id],
       });
 
       await request(app)

@@ -260,20 +260,12 @@ class Api {
       };
 
       // eslint-disable-next-line no-console
-      console.error(
-        "[html-instead-of-json] non-JSON API response captured:",
-        record
-      );
+      console.error("[html-instead-of-json] non-JSON API response captured:", record);
 
       try {
-        const prev = JSON.parse(
-          localStorage.getItem(HTML_CAPTURE_STORAGE_KEY) || "[]"
-        );
+        const prev = JSON.parse(localStorage.getItem(HTML_CAPTURE_STORAGE_KEY) || "[]");
         prev.push(record);
-        localStorage.setItem(
-          HTML_CAPTURE_STORAGE_KEY,
-          JSON.stringify(prev.slice(-20))
-        );
+        localStorage.setItem(HTML_CAPTURE_STORAGE_KEY, JSON.stringify(prev.slice(-20)));
         // notify the header (same-tab; native "storage" event only fires cross-tab)
         window.dispatchEvent(new Event(HTML_CAPTURE_EVENT));
       } catch {
@@ -1066,8 +1058,8 @@ class Api {
   }
 
   /**
-   * entityIdsInTerritory retieves ids of statements that are used on the territory
-   * @see Statement.findDependentStatementIds
+   * Returns unique entity IDs referenced by all statements
+   * on the given territory (actants, actions, props, tags, etc.).
    */
   async entityIdsInTerritory(
     territoryId: string,
@@ -1207,9 +1199,19 @@ class Api {
   /**
    * Audit
    */
-  async auditGet(entityId: string, options?: IApiOptions): Promise<AxiosResponse<IResponseAudit>> {
+  async auditGet(
+    entityId: string,
+    relationsLimit = 10,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/entities/${entityId}/audits`, options);
+      const response = await this.connection.get(`/entities/${entityId}/audits`, {
+        ...options,
+        params: {
+          ...(options?.params as Record<string, unknown>),
+          relationsLimit,
+        },
+      });
       return response;
     } catch (err) {
       throw this.handleError(err);

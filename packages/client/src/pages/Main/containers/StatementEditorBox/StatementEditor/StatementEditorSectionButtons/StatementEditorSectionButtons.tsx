@@ -13,7 +13,7 @@ import {
   DStatementActions,
 } from "constructors";
 import React, { useState } from "react";
-import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaClone, FaPlus } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./StatementEditorSectionButtonsStyles";
 import { MdDeleteSweep } from "react-icons/md";

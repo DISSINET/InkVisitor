@@ -9,9 +9,46 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import "ts-jest";
 import { ResponseStatement } from "./response";
-import Statement, { StatementActant } from "./statement";
+import Statement, { StatementActant, StatementAction } from "./statement";
 import { prepareStatement } from "./statement.test";
 import Territory from "@models/territory/territory";
+import { ISetting } from "@inkvisitor/shared/types/settings";
+import treeCache from "@service/treeCache";
+
+// getWarnings now first runs the territory-based validations, which resolve the
+// statement's territory lineage from the (global) tree cache. The unit tests
+// below only exercise the action/actant structural warnings, so we register a
+// minimal root territory in the tree cache and point the statements at it; the
+// T-based pass then resolves to an empty lineage and contributes no warnings.
+const ROOT_TERRITORY_ID = "root";
+
+const seedTreeCacheRoot = () => {
+  treeCache.tree.idMap[ROOT_TERRITORY_ID] = {
+    territory: new Territory({ id: ROOT_TERRITORY_ID }) as any,
+    statementsCount: 0,
+    lvl: 0,
+    children: [],
+    path: [],
+    empty: true,
+    right: undefined as any,
+  } as any;
+};
+
+const attachRootTerritory = (response: ResponseStatement) => {
+  response.data.territory = { territoryId: ROOT_TERRITORY_ID, order: 0 } as any;
+};
+
+// Statement warnings are now gated behind validation settings; these tests
+// assert the structural warnings fire, so they run with every validation
+// toggle enabled.
+const allValidationsEnabled: ISetting[] = [
+  "validation_MA",
+  "validation_WA",
+  "validationANAC",
+  "validation_WAC",
+  "validation_AVU",
+  "validation_NA",
+].map((id) => ({ id, value: true, public: true }));
 
 class MockResponse extends ResponseStatement {
   static new(): MockResponse {
@@ -30,13 +67,17 @@ class MockResponse extends ResponseStatement {
       action.data.entities[pos] = map[key];
     }
 
-    // this.data.actions.push(new StatementAction({ actionId: action.id }));
+    this.data.actions.push(new StatementAction({ actionId: action.id }));
     this.entities[action.id] = action;
   }
 
   addActant(actant: IEntity, position: EntityEnums.Position) {
     this.data.actants.push(
       new StatementActant({
+        // Mirror the actant entity id onto the StatementActant id so that
+        // actant-specific warnings (which now reference position.actantId)
+        // can be matched back to the originating actant in the assertions.
+        id: actant.id,
         entityId: actant.id,
         position,
       })
@@ -50,19 +91,35 @@ describe("models/statement/response", function () {
   describe("test ResponseStatement.getWarnings", function () {
     const db = new Db();
     const request = newMockRequest(db);
+
+    beforeAll(async () => {
+      seedTreeCacheRoot();
+      // getWarnings -> getTValidationWarnings issues real DB reads through
+      // req.db.connection, so the mock request needs a live connection.
+      await db.initDb();
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
     test("not prepared entity should thrown an error", async () => {
       const [, statement] = prepareStatement();
       const response = new ResponseStatement(statement);
+      attachRootTerritory(response);
 
-      const warning = await response.getWarnings(request);
-
-      expect(() => warning).toThrowError(InternalServerError);
+      // getWarnings throws while resolving warnings for the (not preloaded)
+      // action entity via getEntity.
+      await expect(
+        response.getWarnings(request, allValidationsEnabled)
+      ).rejects.toThrowError(InternalServerError);
     });
 
     test("no action", async () => {
       const response = MockResponse.new();
+      attachRootTerritory(response);
 
-      const warnings = await response.getWarnings(request);
+      const warnings = await response.getWarnings(request, allValidationsEnabled);
       expect(warnings.find((w) => w.type === WarningTypeEnums.NA)).toBeTruthy();
     });
 
@@ -74,7 +131,7 @@ describe("models/statement/response", function () {
             [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
           });
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
         });
@@ -90,7 +147,7 @@ describe("models/statement/response", function () {
           response.addActant(group, EntityEnums.Position.Subject);
 
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -114,14 +171,14 @@ describe("models/statement/response", function () {
 
         it("should only accept P & G, L should has a warning", () => {
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(
             ws.find(
               (w) =>
                 w.type === WarningTypeEnums.WA &&
-                w.position?.entityId === location.id
+                w.position?.actantId === location.id
             )
           ).toBeTruthy();
         });
@@ -134,7 +191,7 @@ describe("models/statement/response", function () {
             [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
           });
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -149,7 +206,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(
             ws.filter((w) => w.type === WarningTypeEnums.ANA)
@@ -171,20 +228,20 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(
             ws.filter(
               (w) =>
                 w.type === WarningTypeEnums.ANA &&
-                w.position?.entityId === act1.id
+                w.position?.actantId === act1.id
             )
           ).toHaveLength(1);
           expect(
             ws.filter(
               (w) =>
                 w.type === WarningTypeEnums.ANA &&
-                w.position?.entityId === act2.id
+                w.position?.actantId === act2.id
             )
           ).toHaveLength(1);
           expect(ws).toHaveLength(2);
@@ -201,7 +258,7 @@ describe("models/statement/response", function () {
             ],
           });
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -219,7 +276,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -241,7 +298,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -263,13 +320,13 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(
             ws.filter(
               (w) =>
                 w.type === WarningTypeEnums.WA &&
-                w.position?.entityId === grp1.id
+                w.position?.actantId === grp1.id
             )
           ).toHaveLength(1);
           expect(ws).toHaveLength(1);
@@ -281,7 +338,7 @@ describe("models/statement/response", function () {
           const response = MockResponse.new();
           response.addAction({ [EntityEnums.Position.Subject]: [] });
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -299,7 +356,7 @@ describe("models/statement/response", function () {
           );
 
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(
             ws.filter((w) => w.type === WarningTypeEnums.AVU)
@@ -326,7 +383,7 @@ describe("models/statement/response", function () {
         test("no actant - MA", () => {
           const response = prepareResponse();
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
         });
@@ -339,7 +396,7 @@ describe("models/statement/response", function () {
           response.addActant(group, EntityEnums.Position.Subject);
 
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -360,7 +417,7 @@ describe("models/statement/response", function () {
 
         it("should return MA if no actant", () => {
           const ws = prepareResponse().getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
@@ -376,7 +433,7 @@ describe("models/statement/response", function () {
             const response = prepareResponse();
             response.addActant(person, EntityEnums.Position.Subject);
             const ws = response.getWarningsForPosition(
-              EntityEnums.Position.Subject
+              EntityEnums.Position.Subject, allValidationsEnabled
             );
             expect(ws).toHaveLength(0);
           });
@@ -385,7 +442,7 @@ describe("models/statement/response", function () {
             const response = prepareResponse();
             response.addActant(group, EntityEnums.Position.Subject);
             const ws = response.getWarningsForPosition(
-              EntityEnums.Position.Subject
+              EntityEnums.Position.Subject, allValidationsEnabled
             );
 
             expect(ws).toHaveLength(1);
@@ -393,7 +450,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position?.entityId === group.id
+                  w.position?.actantId === group.id
               )
             ).toBeTruthy();
           });
@@ -403,7 +460,7 @@ describe("models/statement/response", function () {
             response.addActant(person, EntityEnums.Position.Subject);
             response.addActant(person2, EntityEnums.Position.Subject);
             const ws = response.getWarningsForPosition(
-              EntityEnums.Position.Subject
+              EntityEnums.Position.Subject, allValidationsEnabled
             );
 
             expect(ws).toHaveLength(0);
@@ -414,7 +471,7 @@ describe("models/statement/response", function () {
             response.addActant(person, EntityEnums.Position.Subject);
             response.addActant(group, EntityEnums.Position.Subject);
             const ws = response.getWarningsForPosition(
-              EntityEnums.Position.Subject
+              EntityEnums.Position.Subject, allValidationsEnabled
             );
 
             expect(ws).toHaveLength(1);
@@ -422,7 +479,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position?.entityId === group.id
+                  w.position?.actantId === group.id
               )
             ).toBeTruthy();
           });
@@ -445,7 +502,7 @@ describe("models/statement/response", function () {
         it("should return WAC for no actant", () => {
           const response = prepareResponse();
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -458,7 +515,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -475,7 +532,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -500,7 +557,7 @@ describe("models/statement/response", function () {
         it("should return WAC for no entities", () => {
           const response = prepareResponse();
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -513,7 +570,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -526,7 +583,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -551,7 +608,7 @@ describe("models/statement/response", function () {
         it("should return MA for no entities", () => {
           const response = prepareResponse();
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
@@ -564,7 +621,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -580,7 +637,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -595,7 +652,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(1);
           expect(ws.find((w) => w.type === WarningTypeEnums.WA)).toBeTruthy();
@@ -617,7 +674,7 @@ describe("models/statement/response", function () {
         it("should return WAC+AVU for no entities", () => {
           const response = prepareResponse();
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(2);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -631,7 +688,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(2);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -649,7 +706,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(2);
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
@@ -672,7 +729,7 @@ describe("models/statement/response", function () {
         it("should return ok for no entities", () => {
           const response = prepareResponse();
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(0);
         });
@@ -684,7 +741,7 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           const ws = response.getWarningsForPosition(
-            EntityEnums.Position.Subject
+            EntityEnums.Position.Subject, allValidationsEnabled
           );
           expect(ws).toHaveLength(2);
           expect(

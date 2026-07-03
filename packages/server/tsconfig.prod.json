@@ -12,5 +12,11 @@
     "./src/custom_typings/dotenv.d.ts"
   ],
   "include": ["./src/**/*.ts"],
-  "exclude": ["./src/public/", "./src/**/*.test.ts", "node_modules", "dist"]
+  "exclude": [
+    "./src/public/",
+    "./src/test/",
+    "./src/**/*.test.ts",
+    "node_modules",
+    "dist"
+  ]
 }

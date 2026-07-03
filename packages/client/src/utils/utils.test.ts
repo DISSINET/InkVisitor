@@ -3,7 +3,11 @@ import { IResponseEntity, IResponseTree } from "@inkvisitor/shared/types";
 import { IAnchorsNode } from "@inkvisitor/shared/types/document";
 import {
   collectStatementAnchors,
+  collectTerritoryAnchors,
+  collectTerritoryAnchorsAtIndex,
   collectTerritoryChildren,
+  getTerritoryHierarchyAtIndex,
+  getTerritoryOrderByIndex,
   computeDifferences,
   deepCopy,
   floorNumberToOneDecimal,
@@ -15,6 +19,7 @@ import {
   normalizeURL,
   searchTree,
 } from "./utils";
+import { ITerritory } from "@inkvisitor/shared/types";
 
 test("isSafePassword should return true for a safe password", () => {
   const safePassword = "SafePassword123!";
@@ -203,6 +208,143 @@ describe("collectStatementAnchors", () => {
     expect(collectStatementAnchors(anchors).map((a) => a.anchor)).toEqual([
       "S1",
       "S2",
+    ]);
+  });
+});
+
+describe("collectTerritoryAnchors", () => {
+  it("collects nested anchors with the Territory class", () => {
+    const anchors = [
+      {
+        anchor: "T1",
+        class: EntityEnums.Class.Territory,
+        children: [
+          { anchor: "S1", class: EntityEnums.Class.Statement },
+          { anchor: "T2", class: EntityEnums.Class.Territory },
+        ],
+      },
+      { anchor: "P1", class: EntityEnums.Class.Person },
+    ] as unknown as IAnchorsNode[];
+    expect(collectTerritoryAnchors(anchors).map((a) => a.anchor)).toEqual([
+      "T1",
+      "T2",
+    ]);
+  });
+});
+
+describe("getTerritoryOrderByIndex", () => {
+  const siblings = [
+    { data: { parent: { order: 0 } } },
+    { data: { parent: { order: 2 } } },
+    { data: { parent: { order: 4 } } },
+  ] as unknown as ITerritory[];
+
+  it("returns Last when the index is past the end", () => {
+    expect(getTerritoryOrderByIndex(3, siblings)).toBe(EntityEnums.Order.Last);
+  });
+
+  it("returns First when inserting before the first sibling", () => {
+    expect(getTerritoryOrderByIndex(0, siblings)).toBe(EntityEnums.Order.First);
+  });
+
+  it("returns the average of the neighbours when inserting between", () => {
+    expect(getTerritoryOrderByIndex(1, siblings)).toBe(1);
+    expect(getTerritoryOrderByIndex(2, siblings)).toBe(3);
+  });
+
+  it("returns Last when there are no siblings", () => {
+    expect(getTerritoryOrderByIndex(0, [])).toBe(EntityEnums.Order.Last);
+  });
+});
+
+// nested + overlapping Territory anchors sharing one full-text
+const territoryAnchorTree = [
+  {
+    anchor: "Touter",
+    class: EntityEnums.Class.Territory,
+    indexStart: 0,
+    indexEnd: 100,
+    children: [
+      {
+        anchor: "Tinner",
+        class: EntityEnums.Class.Territory,
+        indexStart: 10,
+        indexEnd: 50,
+        children: [
+          { anchor: "S1", class: EntityEnums.Class.Statement, indexStart: 20, indexEnd: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    anchor: "Tother",
+    class: EntityEnums.Class.Territory,
+    indexStart: 40,
+    indexEnd: 120,
+    children: [],
+  },
+] as unknown as IAnchorsNode[];
+
+describe("collectTerritoryAnchorsAtIndex", () => {
+  it("collects all Territory anchors whose span contains the index", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 45)
+        .map((a) => a.anchor)
+        .sort()
+    ).toEqual(["Tinner", "Tother", "Touter"]);
+  });
+
+  it("ignores non-Territory anchors", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 22).map((a) => a.anchor)
+    ).not.toContain("S1");
+  });
+
+  it("returns only the outer T when index is outside inner/other spans", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 5).map((a) => a.anchor)
+    ).toEqual(["Touter"]);
+  });
+
+  it("returns empty when index is in no Territory span", () => {
+    expect(collectTerritoryAnchorsAtIndex(territoryAnchorTree, 200)).toEqual([]);
+  });
+
+  it("treats span bounds as inclusive", () => {
+    expect(
+      collectTerritoryAnchorsAtIndex(territoryAnchorTree, 100).map((a) => a.anchor)
+    ).toContain("Touter");
+  });
+});
+
+describe("getTerritoryHierarchyAtIndex", () => {
+  it("orders containing Ts outermost first with nesting depth", () => {
+    expect(getTerritoryHierarchyAtIndex(territoryAnchorTree, 45)).toEqual([
+      { id: "Touter", depth: 0 },
+      { id: "Tother", depth: 0 },
+      { id: "Tinner", depth: 1 },
+    ]);
+  });
+
+  it("returns the single containing T at depth 0 when no nesting applies", () => {
+    expect(getTerritoryHierarchyAtIndex(territoryAnchorTree, 5)).toEqual([
+      { id: "Touter", depth: 0 },
+    ]);
+  });
+
+  it("returns empty when index is in no Territory span", () => {
+    expect(getTerritoryHierarchyAtIndex(territoryAnchorTree, 200)).toEqual([]);
+  });
+
+  it("collapses a duplicate T id to its outermost occurrence", () => {
+    const dup = [
+      { anchor: "Touter", class: EntityEnums.Class.Territory, indexStart: 0, indexEnd: 100, children: [] },
+      { anchor: "Tdup", class: EntityEnums.Class.Territory, indexStart: 10, indexEnd: 60, children: [] },
+      { anchor: "Tdup", class: EntityEnums.Class.Territory, indexStart: 20, indexEnd: 40, children: [] },
+    ] as unknown as IAnchorsNode[];
+    expect(getTerritoryHierarchyAtIndex(dup, 30)).toEqual([
+      { id: "Touter", depth: 0 },
+      { id: "Tdup", depth: 1 },
     ]);
   });
 });

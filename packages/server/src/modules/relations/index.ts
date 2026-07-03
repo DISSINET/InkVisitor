@@ -241,6 +241,8 @@ export default Router()
       const result = await existing.delete(request.db.connection);
 
       if (result.deleted === 1) {
+        await existing.afterDelete(request);
+
         return {
           result: true,
         };

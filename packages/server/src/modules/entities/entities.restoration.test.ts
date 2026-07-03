@@ -2,11 +2,7 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
-import {
-  AuditDoesNotExist,
-  BadParams,
-  EntityDoesExist,
-} from "@inkvisitor/shared/types/errors";
+import { AuditDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
@@ -19,24 +15,20 @@ import { AuditScope } from "@inkvisitor/shared/types";
 import Audit from "@models/audit/audit";
 import { pool } from "@middlewares/db";
 
+// The restoration endpoint was redesigned: it is now
+// `POST /entities/:entityId/restore` (no `fromAuditId` query param). It restores
+// the entity from its last stored audit snapshot. Therefore the previous
+// scenarios that relied on `fromAuditId` (BadParams for empty/mismatched audit)
+// and the `EntityDoesExist` guard no longer apply and have been removed.
 describe("Entities restoration", function () {
   afterAll(async () => {
     await pool.end();
   });
 
-  describe("empty fromAuditId", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
-        .post(`${apiPath}/entities/1/restoration?fromAuditId=`)
-        .set("authorization", "Bearer " + supertestConfig.token)
-        .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
-    });
-  });
   describe("non existing entities", () => {
     it("should return a AuditDoesNotExist error wrapped in IResponseGeneric", async () => {
       await request(app)
-        .post(`${apiPath}/entities/random/restoration?fromAuditId=random`)
+        .post(`${apiPath}/entities/random/restore`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
@@ -44,29 +36,24 @@ describe("Entities restoration", function () {
         );
     });
   });
+
   describe("ok statement data", () => {
     const db = new Db();
     const [, entity] = prepareEntity();
-    const [, differentEntity] = prepareEntity();
-    const audit = new Audit({
-      modelId: entity.id,
-      auditScope: AuditScope.Entity,
-      changes: JSON.parse(JSON.stringify(entity)),
-    });
     const randomId = Math.random().toString();
+    const restorableId = `entity-${randomId}`;
+    // Audit snapshot for an entity that does not currently exist - so that
+    // restoring it will create the entity from the stored snapshot.
     const validAudit = new Audit({
-      modelId: `entity-${randomId}`,
+      modelId: restorableId,
       auditScope: AuditScope.Entity,
       changes: {
         ...JSON.parse(JSON.stringify(entity)),
-        id: `entity-${randomId}`,
+        id: restorableId,
       },
     });
     beforeAll(async () => {
       await db.initDb();
-      await differentEntity.save(db.connection);
-      await entity.save(db.connection);
-      await audit.save(db.connection);
       await validAudit.save(db.connection);
     });
 
@@ -74,35 +61,17 @@ describe("Entities restoration", function () {
       await db.close();
     });
 
-    it("should return a BadParams error wrapped in IResponseGeneric if audit is not for entity", async () => {
-      await request(app)
-        .post(
-          `${apiPath}/entities/${differentEntity.id}/restoration?fromAuditId=${audit.id}`
-        )
-        .set("authorization", "Bearer " + supertestConfig.token)
-        .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
-    });
-
-    it("should return a EntityDoesExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
-        .post(
-          `${apiPath}/entities/${entity.id}/restoration?fromAuditId=${audit.id}`
-        )
-        .set("authorization", "Bearer " + supertestConfig.token)
-        .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new EntityDoesExist("")));
-    });
-
     it("should restore the entity from valid audit and return successful IResponseGeneric", async () => {
       await request(app)
-        .post(
-          `${apiPath}/entities/${validAudit.modelId}/restoration?fromAuditId=${validAudit.id}`
-        )
+        .post(`${apiPath}/entities/${validAudit.modelId}/restore`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
-        .expect(successfulGenericResponse);
+        // The restore endpoint now returns a message plus the restored entity in
+        // `data`, so the body is no longer strictly equal to { result: true }.
+        .expect((res) => {
+          expect(res.body.result).toEqual(true);
+        });
 
       const restored = await findEntityById(db.connection, validAudit.modelId);
       expect(restored).toBeTruthy();

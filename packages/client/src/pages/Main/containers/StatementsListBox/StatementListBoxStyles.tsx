@@ -95,7 +95,7 @@ export const StyledSearchContainer = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  margin-left: ${({ theme }) => theme.space[2]};
+  margin-left: 0.2rem;
   flex-shrink: 1;
   min-width: 0;
   user-select: none;

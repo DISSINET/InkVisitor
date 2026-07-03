@@ -7,12 +7,12 @@ import {
   IStatementAction,
   Relation,
 } from "@inkvisitor/shared/types";
-import { ThemeColor } from "Theme/theme";
+import { FlatThemeColor } from "Theme/theme";
 import { AxiosResponse } from "axios";
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: keyof ThemeColor;
+  color: FlatThemeColor;
   label: string;
 }
 

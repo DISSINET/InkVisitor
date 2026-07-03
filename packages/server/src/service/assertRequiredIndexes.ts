@@ -36,6 +36,11 @@ const REQUIRED: RequiredIndex[] = [
     index: DbEnums.Indexes.DocumentEntityIds,
     usedBy: "Document.findByEntityId (entity tooltip/detail usedInDocuments, delete check)",
   },
+  {
+    table: "audits",
+    index: DbEnums.Indexes.AuditRelationEntityIds,
+    usedBy: "Audit.getRelationAuditsForEntity (entity-detail relation audits)",
+  },
 ];
 
 /**

@@ -545,7 +545,23 @@ describe("models/entity/warnings", function () {
 
   describe("test hasAVAL", function () {
     const db = new Db();
-    const [, actionEntity] = prepareEntity(EntityEnums.Class.Action);
+    // hasAVAL reads action.data.valencies/entities, so the stored record must be
+    // a proper Action with that data shape (a raw Entity stores data: {} and crashes).
+    const actionEntity = new Action({
+      data: {
+        entities: {
+          a1: [],
+          a2: [],
+          s: [],
+        },
+        valencies: {
+          a1: "",
+          a2: "",
+          s: "",
+        },
+        pos: EntityEnums.ActionPartOfSpeech.Verb,
+      },
+    });
     const [, aee] = prepareRelation(RelationEnums.Type.ActionEventEquivalent);
     aee.entityIds = [actionEntity.id, "random"];
 
@@ -564,7 +580,9 @@ describe("models/entity/warnings", function () {
         actionEntity.id,
         actionEntity.class
       ).hasAVAL(db.connection);
-      expect(sclm).toBeFalsy();
+      // hasAVAL returns an array; with empty valencies/entities and no semantics
+      // relations it yields no AVAL warning.
+      expect(sclm).toHaveLength(0);
     });
   });
 
@@ -626,6 +644,26 @@ describe("models/entity/warnings", function () {
       await actionWithEmptyLanguage.save(db.connection);
       await conceptWithSetLanguage.save(db.connection);
     });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should have LM warning for entity with empty language", async () => {
+      const lm = await new EntityWarnings(
+        actionWithEmptyLanguage.id,
+        actionWithEmptyLanguage.class
+      ).hasLM(db.connection);
+      expect(lm).toBeTruthy();
+    });
+
+    it("should not have LM warning for entity with set language", async () => {
+      const lm = await new EntityWarnings(
+        conceptWithSetLanguage.id,
+        conceptWithSetLanguage.class
+      ).hasLM(db.connection);
+      expect(lm).toBeFalsy();
+    });
   });
 
   describe("test VETV", function () {
@@ -650,6 +688,9 @@ describe("models/entity/warnings", function () {
         s: [EntityEnums.Class.Action],
       },
     };
+    // hasLM fires when language is Empty (the prepareEntity default), so set a
+    // real language for the "entity with language" case to avoid a false LM warning.
+    actionEntity1.language = EntityEnums.Language.English;
     actionEntity2.data = {
       entities: {
         a1: [

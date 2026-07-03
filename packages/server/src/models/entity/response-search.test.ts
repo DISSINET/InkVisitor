@@ -66,7 +66,10 @@ describe("models/response-search", function () {
     });
 
     describe("existing territory + subTerritorySearch flag", () => {
-      const parentT = new Territory({ id: "t0" });
+      // Territory.save() rejects a parentless territory unless its id is "T0",
+      // starts with "root", or it is a template; use a root- prefix so the
+      // standalone parent territory can be saved.
+      const parentT = new Territory({ id: "root-t0" });
       const childT1 = new Territory({ id: "t0-1" });
       const childT2 = new Territory({ id: "t0-2" });
       const childT3 = new Territory({ id: "t0-3" });
@@ -96,8 +99,10 @@ describe("models/response-search", function () {
 
         const query = new SearchQuery(db.connection);
         await query.fromRequest(req);
-        expect(req.entityIds).toEqual(
-          st1a.getEntitiesIds().concat(st2a.getEntitiesIds())
+        // Result order across sub-territories is not guaranteed by the query;
+        // compare as an unordered id set.
+        expect([...(req.entityIds ?? [])].sort()).toEqual(
+          st1a.getEntitiesIds().concat(st2a.getEntitiesIds()).sort()
         );
       });
     });

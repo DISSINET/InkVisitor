@@ -14,6 +14,7 @@ export interface IDocumentAuditAnchorChanges {
 export enum AuditScope {
   Entity = "entity",
   Document = "document",
+  Relation = "relation",
 }
 
 export interface IAudit {

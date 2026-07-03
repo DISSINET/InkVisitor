@@ -1,21 +1,11 @@
-import { partitivityDict, virtualityDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button } from "components";
-import Dropdown, {
-  ElvlButtonGroup,
-  EntityDropzone,
-  EntitySuggester,
-  EntityTag,
-  LogicButtonGroup,
-} from "components/advanced";
+import { ElvlButtonGroup, EntityDropzone, EntitySuggester, EntityTag } from "components/advanced";
 import React from "react";
 import { PropAttributeFilter, classesPropType } from "types";
-import {
-  StyledAttributesFlexColumn,
-  StyledAttributesFlexRow,
-  StyledTagGrid,
-} from "./PropGroupRowStyles";
+import { StyledAttributesFlexColumn, StyledTagGrid } from "./PropGroupRowStyles";
 
 interface PropGroupRowType {
   prop: IProp;
@@ -24,12 +14,12 @@ interface PropGroupRowType {
     propId: string,
     changes: Partial<IProp>,
     instantUpdate?: boolean,
-    languageCheck?: boolean
+    languageCheck?: boolean,
   ) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  territoryActants: string[];
+  territoryId?: string;
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
@@ -44,7 +34,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  territoryActants,
+  territoryId,
   isExpanded,
   disabledAttributes,
   openDetailOnCreate,
@@ -69,7 +59,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                     },
                   },
                   true,
-                  true
+                  true,
                 );
               }}
               categoryTypes={classesPropType}
@@ -90,6 +80,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                         type: {
                           ...prop.type,
                           entityId: "",
+                          elvl: EntityEnums.Elvl.Textual,
                         },
                       });
                     },
@@ -109,7 +100,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                             },
                           },
                           false,
-                          false
+                          false,
                         )
                       }
                       disabled={!userCanEdit}
@@ -132,7 +123,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           </>
         ) : (
           <EntitySuggester
-            territoryActants={territoryActants}
+            territoryId={territoryId}
             onSelected={(newSelectedId: string) => {
               updateProp(
                 prop.id,
@@ -143,7 +134,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                   },
                 },
                 true,
-                true
+                true,
               );
             }}
             placeholder="type"

@@ -13,6 +13,7 @@ import {
   IResponseTree,
   IStatement,
   IStatementDataTerritory,
+  ITerritory,
   IWarning,
   Relation,
 } from "@inkvisitor/shared/types";
@@ -439,6 +440,81 @@ export const collectStatementAnchors = (
   }, []);
 };
 
+// collect all anchors that have class Territory
+export const collectTerritoryAnchors = (
+  anchors: IAnchorsNode[]
+): IAnchorsNode[] => {
+  return anchors.reduce((acc: IAnchorsNode[], anchor) => {
+    if (anchor.class === EntityEnums.Class.Territory) {
+      acc.push(anchor);
+    }
+    if (anchor.children) {
+      acc.push(...collectTerritoryAnchors(anchor.children));
+    }
+    return acc;
+  }, []);
+};
+
+// collect all Territory anchors whose span contains the given text index.
+// Territory anchors segment the full-text, so these are the subTs the cursor
+// currently sits inside (a position can be inside several when subTs overlap
+// or nest, since multiple Ts can share one full-text).
+export const collectTerritoryAnchorsAtIndex = (
+  anchors: IAnchorsNode[],
+  index: number
+): IAnchorsNode[] => {
+  return anchors.reduce((acc: IAnchorsNode[], anchor) => {
+    if (
+      anchor.class === EntityEnums.Class.Territory &&
+      anchor.indexStart <= index &&
+      index <= anchor.indexEnd
+    ) {
+      acc.push(anchor);
+    }
+    if (anchor.children) {
+      acc.push(...collectTerritoryAnchorsAtIndex(anchor.children, index));
+    }
+    return acc;
+  }, []);
+};
+
+// Build the chain of Territory anchors whose span contains the given index,
+// ordered outermost first, each tagged with its nesting depth (the number of
+// other containing Territory anchors that strictly enclose it). This is the
+// in-document subT hierarchy the cursor sits inside, from the highest subT that
+// owns this document's text down to the deepest leaf. Duplicate ids collapse to
+// their outermost occurrence.
+export const getTerritoryHierarchyAtIndex = (
+  anchors: IAnchorsNode[],
+  index: number
+): { id: string; depth: number }[] => {
+  const containing = collectTerritoryAnchorsAtIndex(anchors, index);
+
+  const sorted = [...containing].sort((a, b) => {
+    const spanA = a.indexEnd - a.indexStart;
+    const spanB = b.indexEnd - b.indexStart;
+    if (spanA !== spanB) return spanB - spanA; // outermost (largest span) first
+    return a.indexStart - b.indexStart;
+  });
+
+  const seen = new Set<string>();
+  const chain: { id: string; depth: number }[] = [];
+  for (const node of sorted) {
+    if (seen.has(node.anchor)) continue;
+    seen.add(node.anchor);
+    const depth = containing.filter(
+      (other) =>
+        other !== node &&
+        other.indexStart <= node.indexStart &&
+        other.indexEnd >= node.indexEnd &&
+        (other.indexStart !== node.indexStart ||
+          other.indexEnd !== node.indexEnd)
+    ).length;
+    chain.push({ id: node.anchor, depth });
+  }
+  return chain;
+};
+
 export const getStatementOrderByIndex = (
   index: number,
   statements: IResponseStatement[]
@@ -462,6 +538,32 @@ export const getStatementOrderByIndex = (
           .order +
           (statements[index].data.territory as IStatementDataTerritory).order) /
         2;
+    }
+  }
+  return newOrder;
+};
+
+// Mirror of getStatementOrderByIndex for Territories: given the target position
+// among sibling territories (sorted by their parent.order), compute the
+// parent.order for a new sibling inserted at that index.
+export const getTerritoryOrderByIndex = (
+  index: number,
+  siblings: ITerritory[]
+) => {
+  let newOrder: number = EntityEnums.Order.Last;
+
+  if (index + 1 > siblings.length) {
+    // last one
+    newOrder = EntityEnums.Order.Last;
+  } else {
+    const prevParent = siblings[index - 1]?.data.parent;
+    const currParent = siblings[index]?.data.parent;
+    if (index < 1 && currParent) {
+      // first one
+      newOrder = EntityEnums.Order.First;
+    } else if (prevParent && currParent) {
+      // somewhere between
+      newOrder = (prevParent.order + currParent.order) / 2;
     }
   }
   return newOrder;

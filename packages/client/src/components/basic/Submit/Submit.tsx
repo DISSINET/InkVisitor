@@ -1,12 +1,5 @@
 import { IEntity } from "@inkvisitor/shared/types";
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
+import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { EntityTag } from "components/advanced";
 import React from "react";
 
@@ -19,6 +12,7 @@ interface Submit {
   onCancel: () => void;
   loading?: boolean;
   submitLabel?: string;
+  headerIcon?: React.ReactNode;
 }
 export const Submit: React.FC<Submit> = ({
   title,
@@ -29,6 +23,7 @@ export const Submit: React.FC<Submit> = ({
   onCancel,
   loading = false,
   submitLabel = "Submit",
+  headerIcon,
 }) => {
   return (
     <>
@@ -40,17 +35,11 @@ export const Submit: React.FC<Submit> = ({
         isLoading={loading}
         width="auto"
       >
-        <ModalHeader title={title} />
+        <ModalHeader title={title} icon={headerIcon} />
         <ModalContent>
           <div>
             {text}{" "}
-            {entityToSubmit && (
-              <EntityTag
-                entity={entityToSubmit}
-                disableDoubleClick
-                disableDrag
-              />
-            )}
+            {entityToSubmit && <EntityTag entity={entityToSubmit} disableDoubleClick disableDrag />}
           </div>
         </ModalContent>
         <ModalFooter>

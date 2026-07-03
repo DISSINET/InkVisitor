@@ -54,7 +54,7 @@ export const StyledAnnotatorDoneButton = styled.div`
   transform: translate(0, -50%);
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
-  border-radius: 7px;
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-xl"]};
   background-color: ${({ theme }) => theme.color.blue[100]};
 `;
 
@@ -171,6 +171,7 @@ export const StyledTerritorySubsection = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   margin-left: ${({ theme }) => theme.space["-2"]};
   margin-top: ${({ theme }) => theme.space[1]};
+  width: 100%;
 `;
 
 export const StyledTerritorySubsectionTitle = styled.div`
@@ -178,6 +179,14 @@ export const StyledTerritorySubsectionTitle = styled.div`
   color: ${({ theme }) => theme.color.gray["800"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-variant-caps: small-caps;
+`;
+
+/** Stacks the Sibling / Child Territory create buttons, right-aligned. */
+export const StyledTerritoryButtonColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledAnnotatorNoAnchors = styled.div`
@@ -193,6 +202,91 @@ export const StyledInfoText = styled.div`
   color: ${({ theme }) => theme.color.black};
   font-size: ${({ theme }) => theme.fontSize.sm};
   margin: ${({ theme }) => theme.space[4]};
+`;
+
+export const StyledStatementSubsection = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: ${({ theme }) => theme.color.blue["200"]};
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  margin-left: ${({ theme }) => theme.space["-2"]};
+  margin-top: ${({ theme }) => theme.space[1]};
+  max-width: 100%;
+`;
+
+export const StyledStatementTargetSelector = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledStatementTargetTitle = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  color: ${({ theme }) => theme.color.gray["700"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-variant-caps: small-caps;
+`;
+
+export const StyledStatementTargetList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledStatementTargetOption = styled.div<{
+  $isSelected: boolean;
+  $depth?: number;
+}>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  cursor: pointer;
+  padding: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme, $depth }) => ($depth ? `calc(${theme.space[4]} * ${$depth})` : 0)};
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+  border: ${({ theme, $isSelected }) =>
+    `1px solid ${$isSelected ? theme.color.primary : "transparent"}`};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color.blue["200"] : "transparent"};
+`;
+
+export const StyledStatementTargetNote = styled.span`
+  color: ${({ theme }) => theme.color.gray["600"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: italic;
+  white-space: nowrap;
+`;
+
+export const StyledStatementTargetCurrent = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+`;
+
+export const StyledStatementTargetArrow = styled.span`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.color.gray["600"]};
+`;
+
+export const StyledStatementTargetPopover = styled.div`
+  z-index: 1000;
+  background-color: ${({ theme }) => theme.color.blue["50"]};
+  border: ${({ theme }) => `1px solid ${theme.color.blue["200"]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  padding: ${({ theme }) => theme.space[3]};
+  max-width: 26rem;
+`;
+
+export const StyledStatementTargetInfo = styled.div`
+  color: ${({ theme }) => theme.color.gray["600"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: italic;
+  white-space: nowrap;
 `;
 
 interface StyledDisplayModeButtonIconWrapper {
@@ -232,7 +326,6 @@ export const StyledWarningRow = styled.div`
   padding-right: 1.25rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
-  /* box-shadow: ${({ theme }) => theme.boxShadow.inset}; */
 `;
 
 export const StyledWarningInfo = styled.div`
@@ -252,4 +345,8 @@ export const StyledWarningKind = styled.div`
   font-variant-caps: small-caps;
   color: ${({ theme }) => theme.color.warningText};
   white-space: nowrap;
+`;
+
+export const StyledCaretButtonWrapper = styled.span`
+  display: flex;
 `;

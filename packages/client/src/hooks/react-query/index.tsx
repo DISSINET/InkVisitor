@@ -1,6 +1,29 @@
+import { useAuditQuery } from "./useAuditQuery";
+import { useBookmarksQuery } from "./useBookmarksQuery";
+import { useDetailQuery } from "./useDetailQuery";
+import { useDocumentQuery } from "./useDocumentQuery";
+import { useDocumentsQuery } from "./useDocumentsQuery";
+import { useOrderedLanguageDict } from "./useOrderedLanguageDict";
+import { useResourcesWithDocumentsQuery } from "./useResourcesWithDocumentsQuery";
+import { useStatementQuery } from "./useStatementQuery";
+import { useTemplatesQuery } from "./useTemplatesQuery";
 import { useTreeQuery } from "./useTreeQuery";
 import { useUserQuery } from "./useUserQuery";
 import { useUsersGetMoreQuery } from "./useUsersGetMoreQuery";
 import { useUsersSimplifiedQuery } from "./useUsersSimplifiedQuery";
 
-export { useTreeQuery, useUserQuery, useUsersGetMoreQuery, useUsersSimplifiedQuery };
+export {
+  useAuditQuery,
+  useBookmarksQuery,
+  useDetailQuery,
+  useDocumentQuery,
+  useDocumentsQuery,
+  useOrderedLanguageDict,
+  useResourcesWithDocumentsQuery,
+  useStatementQuery,
+  useTemplatesQuery,
+  useTreeQuery,
+  useUserQuery,
+  useUsersGetMoreQuery,
+  useUsersSimplifiedQuery,
+};

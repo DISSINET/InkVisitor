@@ -425,11 +425,12 @@ export default Router()
           treeDiff: anchorDiff,
           newOrderedList,
         });
-        await Audit.createNewForDocument(
+        await Audit.createNew(
           request,
+          AuditScope.Document,
           documentId,
-          auditType,
-          auditData
+          auditData,
+          auditType
         );
         return {
           result: true,

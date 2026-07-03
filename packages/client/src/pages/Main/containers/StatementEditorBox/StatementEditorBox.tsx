@@ -1,6 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IResponseStatement, IStatement, IStatementData } from "@inkvisitor/shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
@@ -11,7 +11,7 @@ import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
 import { computeDifferences } from "utils/utils";
-import { useUserQuery } from "hooks/react-query";
+import { useStatementQuery, useUserQuery } from "hooks/react-query";
 import { EditorBoxState } from "types";
 
 export const StatementEditorBox: React.FC = () => {
@@ -30,18 +30,10 @@ export const StatementEditorBox: React.FC = () => {
 
   // Statement query
   const {
-    status: statusStatement,
     data: statement,
     error: statementError,
     isFetching: isFetchingStatement,
-  } = useQuery({
-    queryKey: ["statement", statementId],
-    queryFn: async () => {
-      const res = await api.statementGet(statementId);
-      return res.data;
-    },
-    enabled: !!statementId && api.isLoggedIn(),
-  });
+  } = useStatementQuery(statementId);
 
   useEffect(() => {
     if (statementError && (statementError as any).error === "StatementDoesNotExits") {
@@ -62,13 +54,13 @@ export const StatementEditorBox: React.FC = () => {
       // }
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["audit", statementId] });
 
       if (variables.labels?.[0] !== undefined) {
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
       }
       if (statement && statement.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
-        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
       }
     },
     onError: (err, newTodo, context) => {

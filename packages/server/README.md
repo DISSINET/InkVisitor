@@ -18,10 +18,26 @@ You would normally use default `development` environment - run in nodemon contex
 
 ## Test
 
-- create a new `.env.test` file in the `env` folder that
-- `pnpm test` will use `jest` framework to test everything, or
-- `pnpm run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
-- if you are using Visual Studio Code, we recommend installing `Jest Runner` extension
+Tests run against a **dedicated, disposable test database** — never your
+development data. The suite refuses to run unless `DB_NAME` names a test
+database (it must match `^iv_test_`, `_test$`, or `^test_`, e.g. `inkvisitor_test`).
+
+1. Create an `env/.env.test` file with `NODE_ENV=test`, a test `DB_NAME`
+   (e.g. `inkvisitor_test`), and `DB_HOST`/`DB_PORT` pointing at a reachable
+   RethinkDB. See [example.env](./env/example.env).
+2. The suite provisions a fresh ephemeral database (tables + indexes + a seeded
+   admin) before each run, drops it afterwards, and resets state before each
+   test file — so runs are isolated and repeatable.
+
+Commands (via `jest`):
+
+- `pnpm test` — the full suite (unit + integration), run serially. Needs RethinkDB.
+- `pnpm test:unit` — fast unit tests only; **no database required** (runs in parallel).
+- `pnpm test:integration` — only the database-backed tests (serial).
+- `pnpm test -t "<name>"` — only tests whose `describe`/`it` name matches the pattern.
+
+If you use Visual Studio Code, the `Jest Runner` extension is handy for running
+individual tests.
 
 ## Build & run
 

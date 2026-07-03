@@ -1,4 +1,5 @@
 import { partitivityDict, virtualityDict } from "@inkvisitor/shared/dictionaries";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button } from "components";
@@ -29,7 +30,7 @@ interface PropGroupRowValue {
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  territoryActants: string[];
+  territoryId?: string;
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
@@ -45,7 +46,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  territoryActants,
+  territoryId,
   isExpanded,
   disabledAttributes,
   openDetailOnCreate,
@@ -91,6 +92,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                         value: {
                           ...prop.value,
                           entityId: "",
+                          elvl: EntityEnums.Elvl.Textual,
                         },
                       });
                     },
@@ -133,7 +135,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
           </>
         ) : (
           <EntitySuggester
-            territoryActants={territoryActants}
+            territoryId={territoryId}
             onSelected={(newSelectedId: string) => {
               updateProp(
                 prop.id,

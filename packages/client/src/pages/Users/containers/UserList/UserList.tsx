@@ -13,9 +13,9 @@ import {
   FaKey,
   FaToggleOff,
   FaToggleOn,
-  FaTrashAlt,
   FaUserCheck,
 } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import { getUserIcon } from "utils/iconUtils";
@@ -42,6 +42,7 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
+import { ButtonSize } from "types";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -384,7 +385,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                             <Button
                               key="d"
                               tooltipLabel="remove invalid territory"
-                              icon={<FaTrashAlt />}
+                              icon={<IcoTrash />}
                               color="danger"
                               noBorder
                               onClick={() => {
@@ -460,7 +461,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               <Button
                                 key="d"
                                 tooltipLabel="remove invalid territory"
-                                icon={<FaTrashAlt />}
+                                icon={<IcoTrash />}
                                 color="danger"
                                 noBorder
                                 onClick={() => {
@@ -534,7 +535,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                               <Button
                                 key="d"
                                 tooltipLabel="remove invalid resource"
-                                icon={<FaTrashAlt />}
+                                icon={<IcoTrash />}
                                 color="danger"
                                 noBorder
                                 onClick={() => {
@@ -592,7 +593,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             <StyledUserListButtonGroup>
               <Button
                 key="r"
-                icon={<FaTrashAlt size={14} />}
+                icon={<IcoTrash size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
                 disabled={
@@ -602,6 +603,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   setRemovingUserId(userId);
                 }}
                 shape="sharp-square"
+                size={ButtonSize.Medium}
               />
               <Button
                 icon={<FaKey size={14} />}
@@ -612,6 +614,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   resetPasswordMutation.mutate(userId);
                 }}
                 shape="sharp-square"
+                size={ButtonSize.Medium}
               />
               {canVerifyManually && !verified && (
                 <Button
@@ -631,6 +634,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     );
                   }}
                   shape="sharp-square"
+                  size={ButtonSize.Medium}
                 />
               )}
               <Button
@@ -654,6 +658,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   );
                 }}
                 shape="sharp-square"
+                size={ButtonSize.Medium}
               />
             </StyledUserListButtonGroup>
           );
