@@ -8,10 +8,15 @@ import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
+import { drawAnchorMarker } from "./AnchorMarker";
 import { CanvasMeasurer } from "./TextMeasurer";
 import Viewport from "./Viewport";
 import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
+  ANCHOR_MARKER_ARM_H_RATIO,
+  ANCHOR_MARKER_ARM_W_RATIO,
+  ANCHOR_MARKER_LINE_WIDTH_PX,
+  ANCHOR_MARKER_STACK_STEP_PX,
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
   PROPORTIONAL_FONT,
@@ -2353,6 +2358,95 @@ export class Annotator {
   }
 
   /**
+   * Issue #2887 — draw corner markers at the ends of ANCHOR-mode highlights
+   * (Territory anchors). Each item contributes a start (┌) and an end (└)
+   * marker; a filled span is never drawn, so the whole-territory anchor does
+   * not flood the fulltext. Markers sharing an exact position are stacked with
+   * a small horizontal offset (e.g. a book and its first chapter starting on
+   * the same character), preserving the innermost-first order the highlight
+   * list already carries (#2051). Assumes the ctx is translated for scroll,
+   * matching the surrounding draw passes.
+   */
+  private drawAnchorMarkers(
+    higlightItems: {
+      schema: HighlightSchema;
+      start: IAbsCoordinates;
+      end: IAbsCoordinates;
+    }[]
+  ): void {
+    const anchorItems = higlightItems.filter(
+      (it) => it.schema.mode === HighlightMode.ANCHOR
+    );
+    if (anchorItems.length === 0) {
+      return;
+    }
+
+    const armH = ANCHOR_MARKER_ARM_H_RATIO * this.lineHeight;
+    const armW = ANCHOR_MARKER_ARM_W_RATIO * this.charWidth;
+    const lineWidth = ANCHOR_MARKER_LINE_WIDTH_PX * this.ratio;
+    const stackStep = ANCHOR_MARKER_STACK_STEP_PX * this.ratio;
+
+    const columnToPixelX = this.drawColumnToPixelX();
+    const toPx = (yLine: number, xLine: number): number =>
+      columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth;
+
+    // Only rows the main text renderer paints are eligible; a marker whose
+    // endpoint is off-screen is simply skipped (a multi-screen territory shows
+    // ┌ on its first visible line and ┘ on its last).
+    const lastVisibleRel =
+      Math.min(this.viewport.lineEnd, this.text.noLines) -
+      this.viewport.lineStart;
+
+    // Expand each anchor into its two endpoint markers, in list order.
+    const points: {
+      yLine: number;
+      xLine: number;
+      kind: "start" | "end";
+      color: string;
+    }[] = [];
+    for (const it of anchorItems) {
+      points.push({
+        yLine: it.start.yLine,
+        xLine: it.start.xLine,
+        kind: "start",
+        color: it.schema.style.color,
+      });
+      points.push({
+        yLine: it.end.yLine,
+        xLine: it.end.xLine,
+        kind: "end",
+        color: it.schema.style.color,
+      });
+    }
+
+    // Offset successive markers that land on the exact same position/side so
+    // stacked anchors remain individually visible instead of overprinting.
+    const stackIndex = new Map<string, number>();
+    for (const p of points) {
+      const relLine = p.yLine - this.viewport.lineStart;
+      if (relLine < 0 || relLine > lastVisibleRel) {
+        continue;
+      }
+
+      const key = `${p.yLine}:${p.xLine}:${p.kind}`;
+      const idx = stackIndex.get(key) ?? 0;
+      stackIndex.set(key, idx + 1);
+
+      // Stacked markers fan out to the right (both arms point right), so a
+      // stack never runs off the left margin where boundaries commonly sit.
+      const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
+      const yMid = (relLine + 0.5) * this.lineHeight;
+
+      drawAnchorMarker(this.ctx, xPx, yMid, p.kind, {
+        armH,
+        armW,
+        lineWidth,
+        color: p.color,
+      });
+    }
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
@@ -2518,6 +2612,11 @@ export class Annotator {
       });
 
       for (const item of higlightItems) {
+        // ANCHOR items are point markers, not spans — drawn in the dedicated
+        // pass below (#2887), never as a filled range.
+        if (item.schema.mode === HighlightMode.ANCHOR) {
+          continue;
+        }
         const highlighter = new Highlighter(
           this.ratio,
           {
@@ -2536,6 +2635,8 @@ export class Annotator {
           columnToPixelX: this.drawColumnToPixelX(),
         });
       }
+
+      this.drawAnchorMarkers(higlightItems);
     }
 
     // Issue #3108 — draw the draggable handles on top of the selection. Inside

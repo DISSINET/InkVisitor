@@ -15,6 +15,12 @@ export enum HighlightMode {
   BACKGROUND = "background",
   FOCUS = "focus",
   UNDERLINE = "underline",
+  /**
+   * Point marker at each end of an anchor instead of a span fill (#2887).
+   * Used for Territory anchors, whose span covers a whole territory and would
+   * flood the fulltext if filled — only the start/end corner brackets are drawn.
+   */
+  ANCHOR = "anchor",
 }
 export const LINE_HEIGHT = 23;
 
@@ -91,3 +97,18 @@ export const SELECTION_HANDLE_KNOB_RADIUS_PX = 4.5;
  * handle comfortably catchable on a monospace grid.
  */
 export const SELECTION_HANDLE_GRAB_CHAR_FACTOR = 1;
+
+/**
+ * Issue #2887 — Territory (T) anchor markers. An L-shaped corner at the anchor
+ * start and an inverse-L at the end, framing the territory span without filling
+ * it. All values are in CSS px / line-relative ratios and scaled by the device
+ * pixel ratio at draw time.
+ */
+/** Vertical arm length as a fraction of one line height. */
+export const ANCHOR_MARKER_ARM_H_RATIO = 0.4;
+/** Horizontal arm length as a fraction of one character width. */
+export const ANCHOR_MARKER_ARM_W_RATIO = 0.4;
+/** Stroke width of the corner glyph, in CSS px (scaled by ratio at draw time). */
+export const ANCHOR_MARKER_LINE_WIDTH_PX = 1.5;
+/** Horizontal offset per stacked marker at a shared position, in CSS px. */
+export const ANCHOR_MARKER_STACK_STEP_PX = 3;
