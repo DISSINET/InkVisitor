@@ -1,6 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import React from "react";
+import { FaArrowsAltH } from "react-icons/fa";
+import { Button } from "components/basic/Button/Button";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import { Tag } from "@inkvisitor/annotator/src/lib";
@@ -16,6 +18,8 @@ export type AnnotatorAnchorGridRowData = {
   entities: Record<string, IEntity | false>;
   onRemoveAnchor?: (anchor: Tag) => void;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
+  /** Enters move-anchor mode for this anchor (#2885); absent when readonly. */
+  onMoveAnchor?: (anchor: Tag) => void;
   /** View-only: render anchors without unlink/elvl controls. */
   readonly?: boolean;
 };
@@ -28,7 +32,7 @@ export type AnnotatorAnchorGridRowProps = {
 
 export const AnnotatorAnchorGridRow = React.memo(
   ({ index, style, data }: AnnotatorAnchorGridRowProps) => {
-    const { items, entities, onRemoveAnchor, onUpdateAnchor, readonly } = data;
+    const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly } = data;
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
 
@@ -43,6 +47,20 @@ export const AnnotatorAnchorGridRow = React.memo(
       return (
         <EntityTag
           fullWidth
+          button={
+            onMoveAnchor ? (
+              <Button
+                icon={<FaArrowsAltH size={11} />}
+                color="primary"
+                inverted
+                tooltipLabel="Move anchor span"
+                onClick={() => {
+                  onMoveAnchor(item.anchor);
+                }}
+                shape="sharp-square"
+              />
+            ) : undefined
+          }
           unlinkButton={
             readonly
               ? false
@@ -102,5 +120,5 @@ export const AnnotatorAnchorGridRow = React.memo(
         </div>
       </div>
     );
-  }
+  },
 );

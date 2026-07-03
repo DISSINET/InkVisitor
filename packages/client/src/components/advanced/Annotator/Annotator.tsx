@@ -16,10 +16,12 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import {
+  AnchorOpenTagRef,
   Annotator,
   AsymmetricalAnchor,
   EditMode,
   editModeDisplayLabel,
+  MoveAnchorBoundaryResult,
   Tag,
   WarningType,
 } from "@inkvisitor/annotator/src/lib";
@@ -1229,6 +1231,74 @@ export const TextAnnotator = ({
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
+  // #2885 — anchor-move mode. Arrow clicks edit the raw text on the canvas as a
+  // live preview but are NOT saved; the user commits a whole series with Done
+  // (save) or reverts it with Discard. The raw text is snapshotted when move
+  // mode begins so Discard — and any unconfirmed exit (Esc, closing the menu,
+  // unmount) — can restore the original span. Moving a boundary only relocates
+  // a fixed-length tag, so the total text length is invariant and the snapshot
+  // restores exactly.
+  const moveAnchorOriginalTextRef = useRef<string | null>(null);
+  const moveAnchorDirtyRef = useRef<boolean>(false);
+
+  const handleMoveAnchorBegin = () => {
+    moveAnchorOriginalTextRef.current = annotator?.text.value ?? null;
+    moveAnchorDirtyRef.current = false;
+  };
+
+  const handleMoveAnchorBoundary = (
+    tagName: string,
+    openTagRef: AnchorOpenTagRef,
+    boundary: "open" | "close",
+    direction: -1 | 1,
+  ): MoveAnchorBoundaryResult | undefined => {
+    if (!annotator) {
+      return undefined;
+    }
+    const result = annotator.moveAnchorBoundary(tagName, openTagRef, boundary, direction);
+    if (result.status === "moved") {
+      moveAnchorDirtyRef.current = true;
+    } else if (result.status === "blocked-same-name") {
+      toast.info("Cannot move across another anchor of the same entity");
+    } else if (result.status === "not-found") {
+      toast.warning("Anchor is broken (unpaired) — fix it in the warnings panel");
+    }
+    return result;
+  };
+
+  const handleMoveAnchorSave = () => {
+    if (moveAnchorDirtyRef.current) {
+      handleSaveNewContent(true, true);
+    }
+    moveAnchorDirtyRef.current = false;
+    moveAnchorOriginalTextRef.current = null;
+  };
+
+  const handleMoveAnchorDiscard = () => {
+    if (moveAnchorDirtyRef.current && moveAnchorOriginalTextRef.current !== null) {
+      annotator?.updateText(moveAnchorOriginalTextRef.current);
+    }
+    moveAnchorDirtyRef.current = false;
+    moveAnchorOriginalTextRef.current = null;
+  };
+
+  // Ref indirection so the menu-close effect and the unmount cleanup always
+  // call the latest closure (with the current annotator/document).
+  const handleMoveAnchorDiscardRef = useRef(handleMoveAnchorDiscard);
+  handleMoveAnchorDiscardRef.current = handleMoveAnchorDiscard;
+
+  // Any unconfirmed exit reverts the buffered moves: the selection menu
+  // disappearing (Esc, clicking elsewhere, selection cleared) and unmount.
+  useEffect(() => {
+    if (!isMenuDisplayed) {
+      handleMoveAnchorDiscardRef.current();
+    }
+  }, [isMenuDisplayed]);
+
+  useEffect(() => {
+    return () => handleMoveAnchorDiscardRef.current();
+  }, []);
+
   const annotatorMenuMiddleware = useMemo(() => {
     if (typeof document === "undefined") return [];
     const page = document.getElementById("page");
@@ -1462,6 +1532,14 @@ export const TextAnnotator = ({
                       annotatorPositionHierarchy={annotatorPositionHierarchy}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
+                      onMoveAnchorBoundary={
+                        isMenuReadOnly ? undefined : handleMoveAnchorBoundary
+                      }
+                      onMoveAnchorBegin={isMenuReadOnly ? undefined : handleMoveAnchorBegin}
+                      onMoveAnchorSave={isMenuReadOnly ? undefined : handleMoveAnchorSave}
+                      onMoveAnchorDiscard={
+                        isMenuReadOnly ? undefined : handleMoveAnchorDiscard
+                      }
                       readonly={isMenuReadOnly}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {

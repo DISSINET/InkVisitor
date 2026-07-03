@@ -350,3 +350,38 @@ export const StyledWarningKind = styled.div`
 export const StyledCaretButtonWrapper = styled.span`
   display: flex;
 `;
+
+// #2885 — move-anchor mode: compact panel that replaces the menu body while
+// an anchor span is being nudged with the arrow buttons.
+export const StyledMoveAnchorPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[3]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledMoveAnchorControls = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: ${({ theme }) => theme.space[6]};
+`;
+
+export const StyledMoveAnchorGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledMoveAnchorGroupLabel = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color.gray["600"]};
+`;
+
+export const StyledMoveAnchorGroupButtons = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: ${({ theme }) => theme.space[1]};
+`;

@@ -50,6 +50,36 @@ export const wrapTokenRegex = /(<[^>]+>)|(\s+)|([\w']+)|([^\s\w'<]+|<)/g;
 export const createSpecificOpeningTagRegex = (tagName: string) =>
   new RegExp(`<${tagName}(?:\\s+[^>]*)?>`, "g");
 
+/**
+ * Full-string match for one complete piece of tag markup, mirroring exactly
+ * what the parser recognizes (openingTagRegex / closingTagRegex): a closing
+ * tag has no attributes; an opening tag may. Literal "<"/">" sequences that
+ * don't form a valid tag are ordinary text characters.
+ */
+const wholeTagRegex = /^(?:<\/[a-zA-Z0-9\-_]+>|<[a-zA-Z0-9\-_]+(?:\s+[^>]*)?>)$/;
+
+/** Extracts the tag name from a complete markup string like `</e1>` or `<e1 elvl="1">`. */
+const getTagNameFromMarkup = (markup: string): string =>
+  markup.replace(/^<\/?/, "").replace(/>$/, "").trim().split(/\s+/)[0];
+
+/** Identifies an anchor by its opening tag's location (Tag.position semantics). */
+export interface AnchorOpenTagRef {
+  segmentIndex: number;
+  position: number;
+}
+
+export type MoveAnchorBoundaryStatus =
+  | "moved"
+  | "blocked-bounds"
+  | "blocked-same-name"
+  | "not-found";
+
+export interface MoveAnchorBoundaryResult {
+  status: MoveAnchorBoundaryStatus;
+  /** Present when status === "moved": the opening tag's new location, for the next call. */
+  openTagRef?: AnchorOpenTagRef;
+}
+
 /** One live annotator per host element — a new constructor tears down the previous (#3092). */
 const canvasHosts = new WeakMap<HTMLCanvasElement, Annotator>();
 const scrollerHosts = new WeakMap<HTMLDivElement, Annotator>();
@@ -2831,6 +2861,242 @@ export class Annotator {
         }
       }
     }
+  }
+
+  /**
+   * Walks `raw` from `from` in `direction`, skipping complete tag markup, until
+   * exactly one visible (non-markup) character is consumed. `\n` counts as a
+   * visible character, so anchor boundaries can cross line/segment boundaries.
+   *
+   * @returns the consumed character's index plus the names of tags skipped on
+   * the way, or null when the document edge is reached first
+   */
+  private scanOneVisibleChar(
+    raw: string,
+    from: number,
+    direction: -1 | 1
+  ): { charIndex: number; crossedTagNames: string[] } | null {
+    const crossedTagNames: string[] = [];
+    let i = from;
+
+    if (direction === 1) {
+      while (i < raw.length) {
+        if (raw[i] === "<") {
+          const gt = raw.indexOf(">", i);
+          if (gt !== -1) {
+            const candidate = raw.slice(i, gt + 1);
+            if (wholeTagRegex.test(candidate)) {
+              crossedTagNames.push(getTagNameFromMarkup(candidate));
+              i = gt + 1;
+              continue;
+            }
+          }
+        }
+        return { charIndex: i, crossedTagNames };
+      }
+      return null;
+    }
+
+    while (i > 0) {
+      if (raw[i - 1] === ">") {
+        const lt = raw.lastIndexOf("<", i - 1);
+        if (lt !== -1) {
+          const candidate = raw.slice(lt, i);
+          if (wholeTagRegex.test(candidate)) {
+            crossedTagNames.push(getTagNameFromMarkup(candidate));
+            i = lt;
+            continue;
+          }
+        }
+      }
+      return { charIndex: i - 1, crossedTagNames };
+    }
+    return null;
+  }
+
+  /** Whether at least one visible (non-markup) character exists in raw[start, end). */
+  private hasVisibleCharBetween(raw: string, start: number, end: number): boolean {
+    const scan = this.scanOneVisibleChar(raw, start, 1);
+    return scan !== null && scan.charIndex < end;
+  }
+
+  /**
+   * Moves one boundary (opening or closing tag) of an existing anchor by
+   * exactly one visible character (issue #2885). The anchor is identified by
+   * its opening tag's location; each successful move returns the new location
+   * so repeated calls stay locked onto the same anchor across re-parses.
+   *
+   * The moved tag is re-inserted immediately adjacent to the character stepped
+   * over — intervening markup is skipped, so a tag never lands inside another
+   * tag's markup. Crossing a tag with the SAME name is refused (name-based
+   * pairing would re-pair and corrupt both spans); crossing other entities'
+   * tags is legal and may create overlapping spans.
+   */
+  moveAnchorBoundary(
+    tagName: string,
+    openTagRef: AnchorOpenTagRef,
+    boundary: "open" | "close",
+    direction: -1 | 1
+  ): MoveAnchorBoundaryResult {
+    const segments = this.text.segments;
+
+    // Resolve the opening tag: exact ref match, else nearest same-name opening
+    // tag by absolute raw distance (the ref goes stale when an earlier edit
+    // shifted raw positions).
+    let openTag: Tag | undefined;
+    const refSegment = segments[openTagRef.segmentIndex];
+    if (refSegment) {
+      openTag = refSegment.openingTags.find(
+        (t) => t.getTagName() === tagName && t.position === openTagRef.position
+      );
+    }
+    if (!openTag) {
+      let refAbs = openTagRef.position;
+      for (
+        let i = 0;
+        i < Math.min(openTagRef.segmentIndex, segments.length);
+        i++
+      ) {
+        refAbs += segments[i].raw.length + 1;
+      }
+      let bestDistance = Infinity;
+      for (const segment of segments) {
+        for (const candidate of segment.openingTags) {
+          if (candidate.getTagName() !== tagName) {
+            continue;
+          }
+          const distance = Math.abs(
+            candidate.getAbsoluteTagPosition(segments) - refAbs
+          );
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            openTag = candidate;
+          }
+        }
+      }
+    }
+    if (!openTag) {
+      return { status: "not-found" };
+    }
+
+    // Pairing closing tag: nearest following same-name closing tag (same rule
+    // as removeAnchorFromSelection).
+    const resolvedOpenTag = openTag;
+    let closeTag: Tag | undefined;
+    for (let i = resolvedOpenTag.segmentIndex; i < segments.length; i++) {
+      const candidates =
+        i === resolvedOpenTag.segmentIndex
+          ? segments[i].closingTags.filter(
+              (t) => t.position > resolvedOpenTag.position
+            )
+          : segments[i].closingTags;
+      closeTag = candidates.find((t) => t.getTagName() === tagName);
+      if (closeTag) {
+        break;
+      }
+    }
+    if (!closeTag) {
+      return { status: "not-found" };
+    }
+
+    const raw = this.text.value;
+    const openAbs = resolvedOpenTag.getAbsoluteTagPosition(segments);
+    const closeAbs = closeTag.getAbsoluteTagPosition(segments);
+
+    // Splice the moving tag out verbatim — slice the raw text rather than
+    // re-serializing the Tag, so exotic attribute spacing/quoting survives.
+    const movingAbs = boundary === "open" ? openAbs : closeAbs;
+    const movingEnd = raw.indexOf(">", movingAbs) + 1;
+    const movingMarkup = raw.slice(movingAbs, movingEnd);
+    const rawWithout = raw.slice(0, movingAbs) + raw.slice(movingEnd);
+
+    // The other boundary's index within rawWithout (close is always after
+    // open, so removing the close never shifts the open).
+    const otherAbs =
+      boundary === "open" ? closeAbs - movingMarkup.length : openAbs;
+
+    const scan = this.scanOneVisibleChar(rawWithout, movingAbs, direction);
+    if (scan === null) {
+      return { status: "blocked-bounds" };
+    }
+    // Insert immediately adjacent to the consumed character: before it when
+    // moving left, after it when moving right.
+    const insertAt = direction === -1 ? scan.charIndex : scan.charIndex + 1;
+
+    // The span must keep at least one visible character.
+    if (boundary === "open") {
+      if (!this.hasVisibleCharBetween(rawWithout, insertAt, otherAbs)) {
+        return { status: "blocked-bounds" };
+      }
+    } else {
+      const openTagEnd = rawWithout.indexOf(">", otherAbs) + 1;
+      if (!this.hasVisibleCharBetween(rawWithout, openTagEnd, insertAt)) {
+        return { status: "blocked-bounds" };
+      }
+    }
+
+    if (scan.crossedTagNames.includes(tagName)) {
+      return { status: "blocked-same-name" };
+    }
+
+    this.text.value =
+      rawWithout.slice(0, insertAt) + movingMarkup + rawWithout.slice(insertAt);
+    this.text.prepareSegments();
+    this.text.calculateLines();
+
+    // Locate the opening tag's new absolute position and convert it to a
+    // (segmentIndex, position) ref against the freshly parsed segments.
+    const newOpenAbs = boundary === "open" ? insertAt : openAbs;
+    const newSegments = this.text.segments;
+    let segmentIndex = 0;
+    let position = newOpenAbs;
+    while (
+      segmentIndex < newSegments.length - 1 &&
+      position > newSegments[segmentIndex].raw.length
+    ) {
+      position -= newSegments[segmentIndex].raw.length + 1;
+      segmentIndex++;
+    }
+
+    // Re-resolve both tags to select the moved span — the same visual feedback
+    // addAnchor gives after creating an anchor.
+    const movedOpenSegment = newSegments[segmentIndex];
+    const movedOpenTag = movedOpenSegment?.openingTags.find(
+      (t) => t.getTagName() === tagName && t.position === position
+    );
+    if (movedOpenTag) {
+      let movedCloseTag: Tag | undefined;
+      let movedCloseSegmentIndex = -1;
+      for (let i = segmentIndex; i < newSegments.length; i++) {
+        const candidates =
+          i === segmentIndex
+            ? newSegments[i].closingTags.filter(
+                (t) => t.position > movedOpenTag.position
+              )
+            : newSegments[i].closingTags;
+        const found = candidates.find((t) => t.getTagName() === tagName);
+        if (found) {
+          movedCloseTag = found;
+          movedCloseSegmentIndex = i;
+          break;
+        }
+      }
+      if (movedCloseTag) {
+        const start = movedOpenSegment.findTagParsedPosition(movedOpenTag);
+        const end =
+          newSegments[movedCloseSegmentIndex].findTagParsedPosition(
+            movedCloseTag
+          );
+        this.cursor.selectStart = { xLine: start.x, yLine: start.y };
+        this.cursor.selectEnd = { xLine: end.x, yLine: end.y };
+        this.cursor.setTrueSelectionDirection();
+      }
+    }
+
+    this.runWarningChecks();
+    this.draw();
+
+    return { status: "moved", openTagRef: { segmentIndex, position } };
   }
 
   /**

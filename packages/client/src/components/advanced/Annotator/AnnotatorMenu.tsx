@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { List } from "react-window";
 
-import { Tag } from "@inkvisitor/annotator/src/lib";
+import {
+  AnchorOpenTagRef,
+  MoveAnchorBoundaryResult,
+  Tag,
+} from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,8 +14,11 @@ import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import {
+  FaArrowsAltH,
   FaBolt,
   FaCaretDown,
+  FaChevronLeft,
+  FaChevronRight,
   FaClipboard,
   FaExclamationTriangle,
   FaLongArrowAltRight,
@@ -20,6 +27,7 @@ import {
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiCheckBold, PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
+import { IcoTrash } from "Theme/icons";
 import { toast } from "react-toastify";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -45,6 +53,11 @@ import {
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
   StyledCaretButtonWrapper,
+  StyledMoveAnchorControls,
+  StyledMoveAnchorGroup,
+  StyledMoveAnchorGroupButtons,
+  StyledMoveAnchorGroupLabel,
+  StyledMoveAnchorPanel,
   StyledStatementSubsection,
   StyledStatementTargetArrow,
   StyledStatementTargetCurrent,
@@ -93,6 +106,24 @@ interface TextAnnotatorMenuProps {
   disableCreate?: boolean;
   onUpdateAnchor?: (anchor: Tag, elvl: EntityEnums.Elvl) => void;
 
+  /**
+   * Moves one boundary of an anchored span by one character (#2885).
+   * Undefined when the document is read-only. Returns the move result so the
+   * menu can chain the returned openTagRef into the next click.
+   */
+  onMoveAnchorBoundary?: (
+    tagName: string,
+    openTagRef: AnchorOpenTagRef,
+    boundary: "open" | "close",
+    direction: -1 | 1,
+  ) => MoveAnchorBoundaryResult | undefined;
+  /** Called when move mode begins — the parent snapshots the text so Discard can revert. */
+  onMoveAnchorBegin?: () => void;
+  /** Done: the parent saves the buffered series of moves. */
+  onMoveAnchorSave?: () => void;
+  /** Discard / cancel (Esc): the parent reverts the buffered moves. */
+  onMoveAnchorDiscard?: () => void;
+
   /** View-only menu: hides anchor unlink/elvl controls (e.g. unassigned documents). */
   readonly?: boolean;
 
@@ -113,6 +144,10 @@ export const TextAnnotatorMenu = ({
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
   onUpdateAnchor = undefined,
+  onMoveAnchorBoundary = undefined,
+  onMoveAnchorBegin = undefined,
+  onMoveAnchorSave = undefined,
+  onMoveAnchorDiscard = undefined,
   canCreateActiveTAnchor,
   activeTerritoryId,
   territory,
@@ -129,12 +164,74 @@ export const TextAnnotatorMenu = ({
   const dispatch = useAppDispatch();
   const { setStatementId, setTerritoryId } = useSearchParams();
 
+  // #2885 — non-null while an anchor span is being moved with the arrow
+  // buttons; the menu body is replaced by the move panel. openTagRef is
+  // refreshed from every successful move so repeated clicks track the anchor
+  // across re-parses.
+  const [movingAnchor, setMovingAnchor] = useState<{
+    tagName: string;
+    openTagRef: AnchorOpenTagRef;
+  } | null>(null);
+
+  const handleMoveAnchorStart = useCallback(
+    (anchor: Tag) => {
+      onMoveAnchorBegin?.();
+      setMovingAnchor({
+        tagName: anchor.getTagName(),
+        openTagRef: {
+          segmentIndex: anchor.segmentIndex,
+          position: anchor.position,
+        },
+      });
+    },
+    [onMoveAnchorBegin],
+  );
+
+  // Done commits the buffered series; Discard (and Esc) reverts it. Both leave
+  // move mode back to the normal anchor menu.
+  const finishMove = useCallback(
+    (commit: boolean) => {
+      if (commit) {
+        onMoveAnchorSave?.();
+      } else {
+        onMoveAnchorDiscard?.();
+      }
+      setMovingAnchor(null);
+    },
+    [onMoveAnchorSave, onMoveAnchorDiscard],
+  );
+
+  const handleMoveClick = (boundary: "open" | "close", direction: -1 | 1) => {
+    if (!movingAnchor || !onMoveAnchorBoundary) {
+      return;
+    }
+    const result = onMoveAnchorBoundary(
+      movingAnchor.tagName,
+      movingAnchor.openTagRef,
+      boundary,
+      direction,
+    );
+    if (result?.status === "moved" && result.openTagRef) {
+      setMovingAnchor({ ...movingAnchor, openTagRef: result.openTagRef });
+    }
+  };
+
+  const movingEntity = movingAnchor
+    ? entities[movingAnchor.tagName] || undefined
+    : undefined;
+
   const tryCloseMenu = useCallback(() => {
+    // Esc inside move mode cancels the buffered moves (revert); a second Esc
+    // then closes the menu.
+    if (movingAnchor) {
+      finishMove(false);
+      return;
+    }
     const isModalOpen = document.querySelector('[data-attribute-modal="true"]') !== null;
     if (!isModalOpen) {
       onEscapePressed();
     }
-  }, [onEscapePressed]);
+  }, [onEscapePressed, movingAnchor, finishMove]);
 
   useKeypress("Escape", tryCloseMenu);
   useKeypress("Enter", tryCloseMenu, undefined, true);
@@ -283,9 +380,19 @@ export const TextAnnotatorMenu = ({
       entities,
       onRemoveAnchor,
       onUpdateAnchor,
+      onMoveAnchor:
+        readonly || !onMoveAnchorBoundary ? undefined : handleMoveAnchorStart,
       readonly,
     }),
-    [resolvedAnchors, entities, onRemoveAnchor, onUpdateAnchor, readonly],
+    [
+      resolvedAnchors,
+      entities,
+      onRemoveAnchor,
+      onUpdateAnchor,
+      readonly,
+      onMoveAnchorBoundary,
+      handleMoveAnchorStart,
+    ],
   );
 
   return (
@@ -297,240 +404,315 @@ export const TextAnnotatorMenu = ({
         </StyledAnnotatorMenuDragHandle>
       )}
 
-      <StyledAnnotatorItem>
-        <StyledAnnotatorItemTitle>
-          <FaBolt size={13} />
-          Actions
-        </StyledAnnotatorItemTitle>
-        <StyledAnnotatorItemContent>
-          <StyledAnnotatorItemContentLine>
-            <Button
-              icon={<FaClipboard size={10} />}
-              size={ButtonSize.Small}
-              color="primary"
-              onClick={() => {
-                navigator.clipboard.writeText(text);
-                toast.info("Text copied to clipboard");
-              }}
-              label={"clipboard"}
-              tooltipLabel="Copy selected text to clipboard"
-            />
-            {/* Done Button */}
-            <StyledAnnotatorDoneButton>
-              <Button
-                color="primary"
-                inverted
-                icon={<PiCheckBold size={25} />}
-                size={ButtonSize.ExtraLarge}
-                shape="rounded-xl"
-                noBackground
-                onClick={() => onEscapePressed()}
-                tooltipLabel="Close selection menu"
-                tooltipContent={<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>}
-                tooltipPosition="right"
-              />
-            </StyledAnnotatorDoneButton>
-          </StyledAnnotatorItemContentLine>
-        </StyledAnnotatorItemContent>
-      </StyledAnnotatorItem>
-      {!disableCreate && (
+      {movingAnchor && movingEntity ? (
+        // #2885 — move-anchor mode covers the whole menu body: just the moved
+        // entity and the four boundary arrows.
         <StyledAnnotatorItem>
           <StyledAnnotatorItemTitle>
-            <FaPlus size={13} />
-            Create Anchors
+            <FaArrowsAltH size={13} />
+            Move anchor
           </StyledAnnotatorItemTitle>
-          {/* Active Territory */}
-          {activeTerritoryId && canCreateActiveTAnchor && onCreateActiveTAnchor && (
-            <StyledAnnotatorItemContent>
-              <StyledAnnotatorItemContentLine>
-                <Button
-                  label="Active Territory"
-                  icon={<TbAnchor size={15} />}
-                  color="primary"
-                  onClick={() => {
-                    onCreateActiveTAnchor(activeTerritoryElvl);
-                  }}
-                  tooltipLabel="Create anchor for active territory"
-                />
-                {activeTerritory && <EntityTag entity={activeTerritory} />}
-                <ElvlButtonGroup
-                  border
-                  value={activeTerritoryElvl}
-                  onChange={(territoryElvl) => {
-                    setActiveTerritoryElvl(territoryElvl);
-                  }}
-                />
-              </StyledAnnotatorItemContentLine>
-            </StyledAnnotatorItemContent>
-          )}
-          {/* New Statement */}
           <StyledAnnotatorItemContent>
-            {onCreateStatement && (
-              <StyledStatementSubsection>
+            <StyledMoveAnchorPanel>
+              <EntityTag
+                entity={movingEntity}
+                fullWidth
+                disableDrag
+                disableDoubleClick
+              />
+              <StyledMoveAnchorControls>
+                <StyledMoveAnchorGroup>
+                  <StyledMoveAnchorGroupLabel>start</StyledMoveAnchorGroupLabel>
+                  <StyledMoveAnchorGroupButtons>
+                    <Button
+                      icon={<FaChevronLeft size={13} />}
+                      color="primary"
+                      tooltipLabel="move start one character left"
+                      onClick={() => handleMoveClick("open", -1)}
+                    />
+                    <Button
+                      icon={<FaChevronRight size={13} />}
+                      color="primary"
+                      tooltipLabel="move start one character right"
+                      onClick={() => handleMoveClick("open", 1)}
+                    />
+                  </StyledMoveAnchorGroupButtons>
+                </StyledMoveAnchorGroup>
+                <StyledMoveAnchorGroup>
+                  <StyledMoveAnchorGroupLabel>end</StyledMoveAnchorGroupLabel>
+                  <StyledMoveAnchorGroupButtons>
+                    <Button
+                      icon={<FaChevronLeft size={13} />}
+                      color="primary"
+                      tooltipLabel="move end one character left"
+                      onClick={() => handleMoveClick("close", -1)}
+                    />
+                    <Button
+                      icon={<FaChevronRight size={13} />}
+                      color="primary"
+                      tooltipLabel="move end one character right"
+                      onClick={() => handleMoveClick("close", 1)}
+                    />
+                  </StyledMoveAnchorGroupButtons>
+                </StyledMoveAnchorGroup>
+                <Button
+                  icon={<IcoTrash />}
+                  label="discard"
+                  color="danger"
+                  inverted
+                  onClick={() => finishMove(false)}
+                  tooltipLabel="Discard the moves (Esc)"
+                />
+                <Button
+                  icon={<MdOutlineDone size={16} />}
+                  label="done"
+                  color="primary"
+                  onClick={() => finishMove(true)}
+                  tooltipLabel="Save the moved anchor span"
+                />
+              </StyledMoveAnchorControls>
+              <Loader show={isLoading} size={20} />
+            </StyledMoveAnchorPanel>
+          </StyledAnnotatorItemContent>
+        </StyledAnnotatorItem>
+      ) : (
+        <>
+        <StyledAnnotatorItem>
+          <StyledAnnotatorItemTitle>
+            <FaBolt size={13} />
+            Actions
+          </StyledAnnotatorItemTitle>
+          <StyledAnnotatorItemContent>
+            <StyledAnnotatorItemContentLine>
+              <Button
+                icon={<FaClipboard size={10} />}
+                size={ButtonSize.Small}
+                color="primary"
+                onClick={() => {
+                  navigator.clipboard.writeText(text);
+                  toast.info("Text copied to clipboard");
+                }}
+                label={"clipboard"}
+                tooltipLabel="Copy selected text to clipboard"
+              />
+              {/* Done Button */}
+              <StyledAnnotatorDoneButton>
+                <Button
+                  color="primary"
+                  inverted
+                  icon={<PiCheckBold size={25} />}
+                  size={ButtonSize.ExtraLarge}
+                  shape="rounded-xl"
+                  noBackground
+                  onClick={() => onEscapePressed()}
+                  tooltipLabel="Close selection menu"
+                  tooltipContent={<p>(Esc, Ctrl+Enter or ⌘+Enter)</p>}
+                  tooltipPosition="right"
+                />
+              </StyledAnnotatorDoneButton>
+            </StyledAnnotatorItemContentLine>
+          </StyledAnnotatorItemContent>
+        </StyledAnnotatorItem>
+        {!disableCreate && (
+          <StyledAnnotatorItem>
+            <StyledAnnotatorItemTitle>
+              <FaPlus size={13} />
+              Create Anchors
+            </StyledAnnotatorItemTitle>
+            {/* Active Territory */}
+            {activeTerritoryId && canCreateActiveTAnchor && onCreateActiveTAnchor && (
+              <StyledAnnotatorItemContent>
                 <StyledAnnotatorItemContentLine>
                   <Button
-                    label="New Statement"
-                    tooltipLabel={`Create new Statement in ${
-                      selectedTargetTerritoryEntity
-                        ? selectedTargetTerritoryEntity.labels[0]
-                        : "the active T"
-                    }`}
+                    label="Active Territory"
                     icon={<TbAnchor size={15} />}
                     color="primary"
                     onClick={() => {
-                      onCreateStatement(statementElvl, undefined, selectedTargetTerritoryId);
+                      onCreateActiveTAnchor(activeTerritoryElvl);
                     }}
+                    tooltipLabel="Create anchor for active territory"
                   />
-                  {renderTargetTrailer(
-                    statementTargetPicker,
-                    "Choose target territory for the new Statement",
-                  )}
+                  {activeTerritory && <EntityTag entity={activeTerritory} />}
                   <ElvlButtonGroup
                     border
-                    value={statementElvl}
-                    onChange={(statementElvl) => {
-                      setStatementElvl(statementElvl);
+                    value={activeTerritoryElvl}
+                    onChange={(territoryElvl) => {
+                      setActiveTerritoryElvl(territoryElvl);
                     }}
                   />
                 </StyledAnnotatorItemContentLine>
-
-                {annotatorPositionHierarchy.length === 0 && (
-                  <StyledStatementTargetInfo>
-                    selection is not within any subT — S will be created in the active T
-                  </StyledStatementTargetInfo>
-                )}
-
-                {statementTargetPicker.popover}
-              </StyledStatementSubsection>
+              </StyledAnnotatorItemContent>
             )}
-          </StyledAnnotatorItemContent>
-          {/* Entity Suggester */}
-          <StyledAnnotatorItemContent>
-            <StyledAnnotatorItemContentLine>
-              <EntitySuggester
-                categoryTypes={classesAnnotator}
-                initTyped={text.length > 30 ? text.substring(0, 30) : text}
-                onSelected={(newAnchorId) => {
-                  onAnchorAdd(newAnchorId, suggesterElvl);
-                }}
-                inputWidth={200}
-                openDetailOnCreate
-                parentTerritory={selectedTargetTerritoryEntity || territory}
-                onEntityCreateMutationSuccess={(entity) => {
-                  dispatch(setSecondPanelExpanded(true));
-                  if (entity.class === EntityEnums.Class.Statement) {
-                    queryClient.invalidateQueries({
-                      queryKey: ["territory", "statement-list"],
-                    });
-                    setStatementId(entity.id);
-                  }
-                  if (entity.class === EntityEnums.Class.Territory) {
-                    queryClient.invalidateQueries({ queryKey: ["tree"] });
-                    setTerritoryId(entity.id);
-                  }
-                }}
-                onCreateStatement={(entityCreateModalProps) =>
-                  onCreateStatement && onCreateStatement(suggesterElvl, entityCreateModalProps)
-                }
-                disableCleanTypedAfterCreate
-              />
-              <ElvlButtonGroup
-                border
-                value={suggesterElvl}
-                onChange={(suggesterElvl) => {
-                  setSuggesterElvl(suggesterElvl);
-                }}
-              />
-            </StyledAnnotatorItemContentLine>
-          </StyledAnnotatorItemContent>
-          {/* Territory Sibling or Child */}
-          {isSelectionInsideTAnchor && (
+            {/* New Statement */}
             <StyledAnnotatorItemContent>
-              <StyledAnnotatorItemContentLine>
-                {onCreateTerritory && (
-                  <StyledTerritorySubsection>
-                    <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
-                    <StyledTerritoryButtonColumn>
-                      {selectedTargetHasParentT && (
-                        <Button
-                          icon={<TerritorySiblingIcon />}
-                          color="greyer"
-                          onClick={() => {
-                            onCreateTerritory(
-                              "sibling-T",
-                              territoryElvl,
-                              selectedTargetTerritoryId,
-                            );
-                          }}
-                          label="Sibling"
-                          tooltipLabel="Create new sibling territory anchor"
-                        />
-                      )}
-                      {/* Child is the suggested action: the cursor sits inside
-                          the target T, so nesting a new subT under it is the
-                          natural default; Sibling is the greyed alternative. */}
-                      <Button
-                        icon={<TerritoryChildIcon />}
-                        color="primary"
-                        onClick={() => {
-                          onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
-                        }}
-                        label="Child"
-                        tooltipLabel="Create new child territory anchor"
-                      />
-                    </StyledTerritoryButtonColumn>
+              {onCreateStatement && (
+                <StyledStatementSubsection>
+                  <StyledAnnotatorItemContentLine>
+                    <Button
+                      label="New Statement"
+                      tooltipLabel={`Create new Statement in ${
+                        selectedTargetTerritoryEntity
+                          ? selectedTargetTerritoryEntity.labels[0]
+                          : "the active T"
+                      }`}
+                      icon={<TbAnchor size={15} />}
+                      color="primary"
+                      onClick={() => {
+                        onCreateStatement(statementElvl, undefined, selectedTargetTerritoryId);
+                      }}
+                    />
                     {renderTargetTrailer(
-                      territoryTargetPicker,
-                      "Choose the territory the new Territory is relative to",
+                      statementTargetPicker,
+                      "Choose target territory for the new Statement",
                     )}
                     <ElvlButtonGroup
                       border
-                      value={territoryElvl}
-                      onChange={(territoryElvl) => {
-                        setTerritoryElvl(territoryElvl);
+                      value={statementElvl}
+                      onChange={(statementElvl) => {
+                        setStatementElvl(statementElvl);
                       }}
                     />
-                    {territoryTargetPicker.popover}
-                  </StyledTerritorySubsection>
-                )}
+                  </StyledAnnotatorItemContentLine>
+
+                  {annotatorPositionHierarchy.length === 0 && (
+                    <StyledStatementTargetInfo>
+                      selection is not within any subT — S will be created in the active T
+                    </StyledStatementTargetInfo>
+                  )}
+
+                  {statementTargetPicker.popover}
+                </StyledStatementSubsection>
+              )}
+            </StyledAnnotatorItemContent>
+            {/* Entity Suggester */}
+            <StyledAnnotatorItemContent>
+              <StyledAnnotatorItemContentLine>
+                <EntitySuggester
+                  categoryTypes={classesAnnotator}
+                  initTyped={text.length > 30 ? text.substring(0, 30) : text}
+                  onSelected={(newAnchorId) => {
+                    onAnchorAdd(newAnchorId, suggesterElvl);
+                  }}
+                  inputWidth={200}
+                  openDetailOnCreate
+                  parentTerritory={selectedTargetTerritoryEntity || territory}
+                  onEntityCreateMutationSuccess={(entity) => {
+                    dispatch(setSecondPanelExpanded(true));
+                    if (entity.class === EntityEnums.Class.Statement) {
+                      queryClient.invalidateQueries({
+                        queryKey: ["territory", "statement-list"],
+                      });
+                      setStatementId(entity.id);
+                    }
+                    if (entity.class === EntityEnums.Class.Territory) {
+                      queryClient.invalidateQueries({ queryKey: ["tree"] });
+                      setTerritoryId(entity.id);
+                    }
+                  }}
+                  onCreateStatement={(entityCreateModalProps) =>
+                    onCreateStatement && onCreateStatement(suggesterElvl, entityCreateModalProps)
+                  }
+                  disableCleanTypedAfterCreate
+                />
+                <ElvlButtonGroup
+                  border
+                  value={suggesterElvl}
+                  onChange={(suggesterElvl) => {
+                    setSuggesterElvl(suggesterElvl);
+                  }}
+                />
               </StyledAnnotatorItemContentLine>
             </StyledAnnotatorItemContent>
-          )}
+            {/* Territory Sibling or Child */}
+            {isSelectionInsideTAnchor && (
+              <StyledAnnotatorItemContent>
+                <StyledAnnotatorItemContentLine>
+                  {onCreateTerritory && (
+                    <StyledTerritorySubsection>
+                      <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
+                      <StyledTerritoryButtonColumn>
+                        {selectedTargetHasParentT && (
+                          <Button
+                            icon={<TerritorySiblingIcon />}
+                            color="greyer"
+                            onClick={() => {
+                              onCreateTerritory(
+                                "sibling-T",
+                                territoryElvl,
+                                selectedTargetTerritoryId,
+                              );
+                            }}
+                            label="Sibling"
+                            tooltipLabel="Create new sibling territory anchor"
+                          />
+                        )}
+                        {/* Child is the suggested action: the cursor sits inside
+                            the target T, so nesting a new subT under it is the
+                            natural default; Sibling is the greyed alternative. */}
+                        <Button
+                          icon={<TerritoryChildIcon />}
+                          color="primary"
+                          onClick={() => {
+                            onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
+                          }}
+                          label="Child"
+                          tooltipLabel="Create new child territory anchor"
+                        />
+                      </StyledTerritoryButtonColumn>
+                      {renderTargetTrailer(
+                        territoryTargetPicker,
+                        "Choose the territory the new Territory is relative to",
+                      )}
+                      <ElvlButtonGroup
+                        border
+                        value={territoryElvl}
+                        onChange={(territoryElvl) => {
+                          setTerritoryElvl(territoryElvl);
+                        }}
+                      />
+                      {territoryTargetPicker.popover}
+                    </StyledTerritorySubsection>
+                  )}
+                </StyledAnnotatorItemContentLine>
+              </StyledAnnotatorItemContent>
+            )}
+          </StyledAnnotatorItem>
+        )}
+        <StyledAnnotatorItem>
+          <StyledAnnotatorItemTitle>
+            <PiSelectionFill size={13} />
+            Anchors in selection
+            <div style={{ marginLeft: "0.5rem" }}>
+              {someAnchorsWithoutElvl && (
+                <IconWithTooltip
+                  color="warning"
+                  icon={<FaExclamationTriangle size={13} />}
+                  tooltipLabel="Selection contains anchors which do not have epistemic level selected."
+                />
+              )}
+            </div>
+          </StyledAnnotatorItemTitle>
+          <StyledAnnotatorItemContent>
+            <StyledAnnotatorAnchorListWrap>
+              {anchors.length === 0 && (
+                <StyledAnnotatorNoAnchors>no anchors in selection</StyledAnnotatorNoAnchors>
+              )}
+              {resolvedAnchors.length > 0 && (
+                <List
+                  rowProps={{ data: anchorGridRowData }}
+                  rowCount={Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS)}
+                  rowHeight={ANCHOR_GRID_ROW_HEIGHT}
+                  overscanCount={8}
+                  style={{ maxHeight: "13rem", width: "100%" }}
+                  rowComponent={(props) => <AnnotatorAnchorGridRow {...props} />}
+                />
+              )}
+            </StyledAnnotatorAnchorListWrap>
+            <Loader show={isLoading} size={20} />
+          </StyledAnnotatorItemContent>
         </StyledAnnotatorItem>
+        </>
       )}
-      <StyledAnnotatorItem>
-        <StyledAnnotatorItemTitle>
-          <PiSelectionFill size={13} />
-          Anchors in selection
-          <div style={{ marginLeft: "0.5rem" }}>
-            {someAnchorsWithoutElvl && (
-              <IconWithTooltip
-                color="warning"
-                icon={<FaExclamationTriangle size={13} />}
-                tooltipLabel="Selection contains anchors which do not have epistemic level selected."
-              />
-            )}
-          </div>
-        </StyledAnnotatorItemTitle>
-        <StyledAnnotatorItemContent>
-          <StyledAnnotatorAnchorListWrap>
-            {anchors.length === 0 && (
-              <StyledAnnotatorNoAnchors>no anchors in selection</StyledAnnotatorNoAnchors>
-            )}
-            {resolvedAnchors.length > 0 && (
-              <List
-                rowProps={{ data: anchorGridRowData }}
-                rowCount={Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS)}
-                rowHeight={ANCHOR_GRID_ROW_HEIGHT}
-                overscanCount={8}
-                style={{ maxHeight: "13rem", width: "100%" }}
-                rowComponent={(props) => <AnnotatorAnchorGridRow {...props} />}
-              />
-            )}
-          </StyledAnnotatorAnchorListWrap>
-          <Loader show={isLoading} size={20} />
-        </StyledAnnotatorItemContent>
-      </StyledAnnotatorItem>
     </>
   );
 };
