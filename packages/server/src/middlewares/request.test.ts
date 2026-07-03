@@ -7,13 +7,18 @@ import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { generateAccessToken } from "@common/auth";
 import { pool } from "./db";
+import { UserEnums } from "@inkvisitor/shared/enums";
 
 describe("Test valid/invalid user", function () {
   const db = new Db();
+  // Owner role so the active user passes the ACL layer (GET /users/me has no
+  // seeded public ACL entry, so non-privileged roles are auto-denied); this
+  // test only asserts the active/inactive request-middleware behavior.
   const activeUser = new User({
     email: "active@active.com",
     name: "active",
     active: true,
+    role: UserEnums.Role.Owner,
   });
   const inactiveUser = new User({
     email: "inactive@inactive.com",

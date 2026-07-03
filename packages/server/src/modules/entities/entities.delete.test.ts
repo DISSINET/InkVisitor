@@ -16,9 +16,9 @@ import Statement, { StatementActant } from "@models/statement/statement";
 import { link } from "fs";
 
 describe("Entities delete - single entity", function () {
-  afterAll(async () => {
-    await pool.end();
-  });
+  // NOTE: the shared db pool is ended once in the final top-level describe's
+  // afterAll. Ending it here would drain the pool before the later
+  // "Entities delete - batch" describe runs, causing database-timeout 500s.
 
   describe("faulty data", () => {
     it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", async () => {

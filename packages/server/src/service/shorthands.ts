@@ -8,9 +8,40 @@ import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUser } from "@inkvisitor/shared/types";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { Connection, RDatum, r as rethink, WriteResult } from "rethinkdb-ts";
-import { Db } from "./rethink";
+import { Db, rethinkConfig } from "./rethink";
 import { DbHandle } from "./dbHandle";
 import { cache } from "./ttlCache";
+
+// A database name is only considered safe to wipe if it is unmistakably a
+// throwaway test DB. Matches `inkvisitor_test`, `iv_test_*`, `test_*`, etc.
+const TEST_DB_PATTERN = /(^iv_test_)|(_test$)|(^test_)/i;
+
+/**
+ * Safety guard for the full-table wipe helpers below. Each of them deletes
+ * EVERY row of a table and is only ever called from test setup/teardown.
+ * Refuse to run unless the connected database is clearly a disposable test DB
+ * - otherwise a misconfigured DB_NAME (e.g. the real `inkvisitor` dev DB
+ * leaking in via a stray shell export, or an unfixed env/.env.test) would
+ * silently and irreversibly destroy a developer's working data (RethinkDB has
+ * no transactions, so there is no rollback).
+ *
+ * Escape hatch: set ALLOW_DB_WIPE=1 to override intentionally (e.g. dedicated
+ * reset tooling against a known-disposable instance).
+ */
+function assertTestDb(): void {
+  if (process.env.ALLOW_DB_WIPE === "1") {
+    return;
+  }
+  const dbName = rethinkConfig.db || "";
+  if (!TEST_DB_PATTERN.test(dbName)) {
+    throw new Error(
+      `Refusing to wipe tables on non-test database "${dbName}". ` +
+        `Full-table delete helpers may only target a disposable test DB ` +
+        `(name matching ${TEST_DB_PATTERN}). Point DB_NAME at a test database ` +
+        `(e.g. inkvisitor_test) or set ALLOW_DB_WIPE=1 to override.`
+    );
+  }
+}
 
 const ENTITY_CACHE_TTL_MS = 60 * 1000;
 export const ENTITY_CACHE_KEY_PREFIX = "entity:byId:";
@@ -72,6 +103,7 @@ export async function createEntity(db: Db | DbHandle, data: IDbModel): Promise<b
 }
 
 export async function deleteEntities(db: Db | DbHandle): Promise<WriteResult> {
+  assertTestDb();
   const result = await rethink.table(Entity.table).delete().run(db.connection);
   // Bulk wipe bypasses Entity.delete/update, so invalidate every cached
   // entity entry. Used by test setup but safe to fire in any context.
@@ -80,14 +112,17 @@ export async function deleteEntities(db: Db | DbHandle): Promise<WriteResult> {
 }
 
 export async function deleteAudits(db: Db | DbHandle): Promise<WriteResult> {
+  assertTestDb();
   return rethink.table(Audit.table).delete().run(db.connection);
 }
 
 export async function deleteRelations(db: Db | DbHandle): Promise<WriteResult> {
+  assertTestDb();
   return rethink.table(Relation.table).delete().run(db.connection);
 }
 
 export async function deleteUsers(db: Db | DbHandle): Promise<WriteResult> {
+  assertTestDb();
   const result = await rethink
     .table(User.table)
     .filter(function (user: RDatum<IUser>) {
@@ -103,5 +138,6 @@ export async function deleteUsers(db: Db | DbHandle): Promise<WriteResult> {
 }
 
 export async function deleteDocuments(db: Db | DbHandle): Promise<WriteResult> {
+  assertTestDb();
   return rethink.table(Document.table).delete().run(db.connection);
 }

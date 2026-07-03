@@ -28,15 +28,20 @@ describe("test Identification.beforeSave", function () {
       const okRelation = new Identification({
         entityIds: [entities[i].id, entities[i + 1].id],
       });
-      okRelation.entities = entities;
+      // preloaded entities count must match entityIds count, otherwise
+      // beforeSave re-fetches them from the (empty) db and fails
+      okRelation.entities = [entities[i], entities[i + 1]];
       await expect(okRelation.beforeSave(request)).resolves.not.toThrowError();
     }
   });
 
   test("bad relation", async () => {
+    // Identification allows any class combination except the disabledEntities
+    // (Action, Concept). Location-Value is now valid, so use a disabled class
+    // (Action) to trigger the ModelNotValidError.
     const entities = [
       new Entity({ id: "1", class: EntityEnums.Class.Location }),
-      new Entity({ id: "2", class: EntityEnums.Class.Value }),
+      new Entity({ id: "2", class: EntityEnums.Class.Action }),
     ];
     const badRelation = new Identification({
       entityIds: [entities[0].id, entities[1].id],

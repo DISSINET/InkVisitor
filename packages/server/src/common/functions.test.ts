@@ -26,8 +26,10 @@ function isSafePassword(password: string) {
   if (!/\d/.test(password)) {
     return false;
   }
-  // Check if the password contains at least one symbol
-  if (!/[!@#$%^&*()_+{}\[\]:;<>,.?/~\\-]/.test(password)) {
+  // Check if the password contains at least one symbol. This class must cover
+  // every symbol generatePassword can emit (`!@#$%^&*()-_=+[]{}|;:,.<>?`),
+  // otherwise a password whose only symbol is `=` or `|` is wrongly rejected.
+  if (!/[!@#$%^&*()_=+{}\[\]|;:,.<>?/~\\-]/.test(password)) {
     return false;
   }
   // If all conditions are met, the password is considered safe
