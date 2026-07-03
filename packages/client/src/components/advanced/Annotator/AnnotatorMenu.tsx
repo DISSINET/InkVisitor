@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { List } from "react-window";
 
 import { Tag } from "@inkvisitor/annotator/src/lib";
@@ -9,9 +9,16 @@ import { IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
-import { FaBolt, FaClipboard, FaExclamationTriangle, FaPlus } from "react-icons/fa";
+import {
+  FaBolt,
+  FaCaretDown,
+  FaClipboard,
+  FaExclamationTriangle,
+  FaLongArrowAltRight,
+  FaPlus,
+} from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
-import { PiSelectionFill } from "react-icons/pi";
+import { PiCheckBold, PiSelectionFill } from "react-icons/pi";
 import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
@@ -20,6 +27,7 @@ import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
   ANCHOR_GRID_COLUMNS,
   ANCHOR_GRID_ROW_HEIGHT,
@@ -36,10 +44,18 @@ import {
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
+  StyledCaretButtonWrapper,
+  StyledStatementSubsection,
+  StyledStatementTargetArrow,
+  StyledStatementTargetCurrent,
+  StyledStatementTargetInfo,
+  StyledTerritoryButtonColumn,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
 } from "./AnnotatorStyles";
-import { TerritoryCreateModalType } from "./types";
+import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
+import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
+import { LuCheck } from "react-icons/lu";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -54,16 +70,23 @@ interface TextAnnotatorMenuProps {
       territoryId: string;
       language: EntityEnums.Language;
     },
+    targetTerritoryId?: string,
   ) => void;
+  /**
+   * The in-document subT (Territory anchor) hierarchy the current selection sits
+   * inside, outermost first with nesting depth. Lets the user target the proper
+   * subT for the new Statement, showing the chain from the highest subT owning
+   * this document's text down to the deepest leaf at the cursor.
+   */
+  annotatorPositionHierarchy: AnnotatorPositionTNode[];
   onCreateTerritory?: (
     territoryCreateModalType: TerritoryCreateModalType,
     elvl: EntityEnums.Elvl,
+    targetTerritoryId?: string,
   ) => void;
   onRemoveAnchor?: (anchor: Tag) => void;
   canCreateActiveTAnchor: boolean;
   onCreateActiveTAnchor?: (elvl: EntityEnums.Elvl) => void;
-  hasParentT: boolean;
-  isTextInsideThisT: boolean;
   activeTerritoryId: string | undefined;
   territory?: IResponseTerritory;
   onEscapePressed: () => void;
@@ -85,13 +108,12 @@ export const TextAnnotatorMenu = ({
   entities,
   onAnchorAdd,
   onCreateStatement = undefined,
+  annotatorPositionHierarchy,
   onCreateTerritory = undefined,
   onCreateActiveTAnchor = undefined,
   onRemoveAnchor = undefined,
   onUpdateAnchor = undefined,
   canCreateActiveTAnchor,
-  hasParentT,
-  isTextInsideThisT,
   activeTerritoryId,
   territory,
   onEscapePressed,
@@ -105,7 +127,7 @@ export const TextAnnotatorMenu = ({
   const activeTerritory = entities[activeTerritoryId ?? ""];
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-  const { setStatementId } = useSearchParams();
+  const { setStatementId, setTerritoryId } = useSearchParams();
 
   const tryCloseMenu = useCallback(() => {
     const isModalOpen = document.querySelector('[data-attribute-modal="true"]') !== null;
@@ -123,6 +145,115 @@ export const TextAnnotatorMenu = ({
   const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
   const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+
+  // The deepest leaf subT at the cursor (smallest span = innermost) is the
+  // "relevant" T and the default Statement target. The active T (opened in the
+  // Tree) is offered separately, as a flat option without hierarchy.
+  const leafTargetTerritoryId =
+    annotatorPositionHierarchy.length > 0
+      ? annotatorPositionHierarchy[annotatorPositionHierarchy.length - 1].id
+      : undefined;
+
+  // The selection sits inside at least one in-document Territory anchor. Ts are
+  // created relative to those anchors, so the Sibling/Child buttons key off this
+  // rather than the T opened in the Tree.
+  const isSelectionInsideTAnchor = annotatorPositionHierarchy.length > 0;
+
+  // the active T is rendered as its own flat option only when it is not already
+  // part of the position hierarchy; otherwise the "opened in Tree" note rides on
+  // the matching hierarchy node
+  const activeTInHierarchy = useMemo(
+    () => annotatorPositionHierarchy.some((node) => node.id === activeTerritoryId),
+    [annotatorPositionHierarchy, activeTerritoryId],
+  );
+
+  // show the selector only when the position hierarchy adds a subT beyond the
+  // active T
+  const showTargetTerritorySelector = useMemo(
+    () => annotatorPositionHierarchy.some((node) => node.id !== activeTerritoryId),
+    [annotatorPositionHierarchy, activeTerritoryId],
+  );
+
+  const defaultTargetTerritoryId = leafTargetTerritoryId ?? activeTerritoryId;
+
+  const [selectedTargetTerritoryId, setSelectedTargetTerritoryId] = useState<string | undefined>(
+    defaultTargetTerritoryId,
+  );
+
+  // reset to the deepest leaf whenever the selection (and thus the candidate
+  // subTs) changes
+  useEffect(() => {
+    setSelectedTargetTerritoryId(defaultTargetTerritoryId);
+  }, [defaultTargetTerritoryId]);
+
+  const selectedTargetTerritoryEntity =
+    (selectedTargetTerritoryId ? entities[selectedTargetTerritoryId] : false) || territory;
+
+  // A sibling-T is created under the target T's parent, so it only makes sense
+  // when the target T (the anchor the cursor sits in, not the Tree T) has one. A
+  // child-T is always creatable (its parent is the target itself).
+  const selectedTargetHasParentT =
+    selectedTargetTerritoryEntity?.class === EntityEnums.Class.Territory &&
+    Boolean((selectedTargetTerritoryEntity as IResponseTerritory).data?.parent);
+
+  // Shared target picker, driven from a caret in both the Statement and the
+  // Territory subsection. Both edit the same selected target; each keeps its own
+  // anchor and open state (dismissed on outside click / Esc).
+  const targetPickerArgs = {
+    hierarchy: annotatorPositionHierarchy,
+    activeTerritoryId,
+    activeTInHierarchy,
+    entities,
+    territory,
+    value: selectedTargetTerritoryId,
+    onChange: setSelectedTargetTerritoryId,
+  };
+  const statementTargetPicker = useAnnotatorTargetPicker({
+    ...targetPickerArgs,
+    title: "create S in T",
+  });
+  const territoryTargetPicker = useAnnotatorTargetPicker({
+    ...targetPickerArgs,
+    title: "create T relative to",
+  });
+
+  // Trailing cluster shown after the action button(s): an arrow into the target
+  // T tag, plus a caret opening the shared picker. Used by both the Statement
+  // and Territory subsections to read consistently as "create … → <target> ▾".
+  const renderTargetTrailer = (
+    picker: ReturnType<typeof useAnnotatorTargetPicker>,
+    pickerTooltip: string,
+  ) =>
+    selectedTargetTerritoryEntity ? (
+      <>
+        <StyledStatementTargetArrow>
+          <FaLongArrowAltRight size={16} />
+        </StyledStatementTargetArrow>
+        <StyledStatementTargetCurrent>
+          <EntityTag
+            disableCopyToClipboard
+            entity={selectedTargetTerritoryEntity}
+            disableDoubleClick
+            disableDrag
+            button={
+              <>
+                {showTargetTerritorySelector && (
+                  <StyledCaretButtonWrapper {...picker.referenceProps}>
+                    <Button
+                      icon={<FaCaretDown size={13} />}
+                      color="primary"
+                      tooltipLabel={pickerTooltip}
+                      onClick={picker.toggle}
+                      shape="sharp-square"
+                    />
+                  </StyledCaretButtonWrapper>
+                )}
+              </>
+            }
+          />
+        </StyledStatementTargetCurrent>
+      </>
+    ) : null;
 
   const someAnchorsWithoutElvl = useMemo(
     () =>
@@ -189,9 +320,9 @@ export const TextAnnotatorMenu = ({
               <Button
                 color="primary"
                 inverted
-                icon={<MdOutlineDone size={25} />}
+                icon={<PiCheckBold size={25} />}
                 size={ButtonSize.ExtraLarge}
-                shape="rounded-md"
+                shape="rounded-xl"
                 noBackground
                 onClick={() => onEscapePressed()}
                 tooltipLabel="Close selection menu"
@@ -235,24 +366,42 @@ export const TextAnnotatorMenu = ({
           {/* New Statement */}
           <StyledAnnotatorItemContent>
             {onCreateStatement && (
-              <StyledAnnotatorItemContentLine>
-                <Button
-                  label="New Statement"
-                  tooltipLabel="Create new Statement from selection"
-                  icon={<TbAnchor size={15} />}
-                  color="primary"
-                  onClick={() => {
-                    onCreateStatement(statementElvl);
-                  }}
-                />
-                <ElvlButtonGroup
-                  border
-                  value={statementElvl}
-                  onChange={(statementElvl) => {
-                    setStatementElvl(statementElvl);
-                  }}
-                />
-              </StyledAnnotatorItemContentLine>
+              <StyledStatementSubsection>
+                <StyledAnnotatorItemContentLine>
+                  <Button
+                    label="New Statement"
+                    tooltipLabel={`Create new Statement in ${
+                      selectedTargetTerritoryEntity
+                        ? selectedTargetTerritoryEntity.labels[0]
+                        : "the active T"
+                    }`}
+                    icon={<TbAnchor size={15} />}
+                    color="primary"
+                    onClick={() => {
+                      onCreateStatement(statementElvl, undefined, selectedTargetTerritoryId);
+                    }}
+                  />
+                  {renderTargetTrailer(
+                    statementTargetPicker,
+                    "Choose target territory for the new Statement",
+                  )}
+                  <ElvlButtonGroup
+                    border
+                    value={statementElvl}
+                    onChange={(statementElvl) => {
+                      setStatementElvl(statementElvl);
+                    }}
+                  />
+                </StyledAnnotatorItemContentLine>
+
+                {annotatorPositionHierarchy.length === 0 && (
+                  <StyledStatementTargetInfo>
+                    selection is not within any subT — S will be created in the active T
+                  </StyledStatementTargetInfo>
+                )}
+
+                {statementTargetPicker.popover}
+              </StyledStatementSubsection>
             )}
           </StyledAnnotatorItemContent>
           {/* Entity Suggester */}
@@ -266,7 +415,7 @@ export const TextAnnotatorMenu = ({
                 }}
                 inputWidth={200}
                 openDetailOnCreate
-                parentTerritory={territory}
+                parentTerritory={selectedTargetTerritoryEntity || territory}
                 onEntityCreateMutationSuccess={(entity) => {
                   dispatch(setSecondPanelExpanded(true));
                   if (entity.class === EntityEnums.Class.Statement) {
@@ -274,6 +423,10 @@ export const TextAnnotatorMenu = ({
                       queryKey: ["territory", "statement-list"],
                     });
                     setStatementId(entity.id);
+                  }
+                  if (entity.class === EntityEnums.Class.Territory) {
+                    queryClient.invalidateQueries({ queryKey: ["tree"] });
+                    setTerritoryId(entity.id);
                   }
                 }}
                 onCreateStatement={(entityCreateModalProps) =>
@@ -291,55 +444,44 @@ export const TextAnnotatorMenu = ({
             </StyledAnnotatorItemContentLine>
           </StyledAnnotatorItemContent>
           {/* Territory Sibling or Child */}
-          {activeTerritoryId && (
+          {isSelectionInsideTAnchor && (
             <StyledAnnotatorItemContent>
               <StyledAnnotatorItemContentLine>
                 {onCreateTerritory && (
                   <StyledTerritorySubsection>
                     <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
-                    <Button
-                      icon={
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 16 16"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M2 3.75C2 2.784 2.784 2 3.75 2h8.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 7H5v2.5A1.5 1.5 0 0 0 6.5 11H8v-.25C8 9.784 8.784 9 9.75 9h2.5c.966 0 1.75.784 1.75 1.75v1.5A1.75 1.75 0 0 1 12.25 14h-2.5A1.75 1.75 0 0 1 8 12.25V12H6.5A2.5 2.5 0 0 1 4 9.5V7h-.25A1.75 1.75 0 0 1 2 5.25zm7 8.5c0 .414.336.75.75.75h2.5a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75zM12.25 6a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75h-8.5a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75z"
-                          />
-                        </svg>
-                      }
-                      color={isTextInsideThisT ? "greyer" : "primary"}
-                      onClick={() => {
-                        onCreateTerritory("sibling-T", territoryElvl);
-                      }}
-                      label="Sibling"
-                      tooltipLabel="Create new sibling territory anchor"
-                    />
-                    {hasParentT && (
+                    <StyledTerritoryButtonColumn>
+                      {selectedTargetHasParentT && (
+                        <Button
+                          icon={<TerritorySiblingIcon />}
+                          color="greyer"
+                          onClick={() => {
+                            onCreateTerritory(
+                              "sibling-T",
+                              territoryElvl,
+                              selectedTargetTerritoryId,
+                            );
+                          }}
+                          label="Sibling"
+                          tooltipLabel="Create new sibling territory anchor"
+                        />
+                      )}
+                      {/* Child is the suggested action: the cursor sits inside
+                          the target T, so nesting a new subT under it is the
+                          natural default; Sibling is the greyed alternative. */}
                       <Button
-                        icon={
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 32 32"
-                          >
-                            <path
-                              fill="currentColor"
-                              d="M28 12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11v4H9a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H9v-4h14v4h-3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-3v-4a2 2 0 0 0-2-2h-6v-4ZM12 28H4v-4h8Zm16 0h-8v-4h8ZM4 4h24v6H4Z"
-                            />
-                          </svg>
-                        }
-                        color={isTextInsideThisT ? "primary" : "greyer"}
+                        icon={<TerritoryChildIcon />}
+                        color="primary"
                         onClick={() => {
-                          onCreateTerritory("child-T", territoryElvl);
+                          onCreateTerritory("child-T", territoryElvl, selectedTargetTerritoryId);
                         }}
                         label="Child"
                         tooltipLabel="Create new child territory anchor"
                       />
+                    </StyledTerritoryButtonColumn>
+                    {renderTargetTrailer(
+                      territoryTargetPicker,
+                      "Choose the territory the new Territory is relative to",
                     )}
                     <ElvlButtonGroup
                       border
@@ -348,6 +490,7 @@ export const TextAnnotatorMenu = ({
                         setTerritoryElvl(territoryElvl);
                       }}
                     />
+                    {territoryTargetPicker.popover}
                   </StyledTerritorySubsection>
                 )}
               </StyledAnnotatorItemContentLine>

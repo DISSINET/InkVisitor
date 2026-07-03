@@ -15,8 +15,9 @@ import { getAuthenticatedAgent } from "@modules/testAuth";
 import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Relation from "@models/relation/relation";
-import { RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
+import { prepareEntity } from "@models/entity/entity.test";
 
 describe("Relations update", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
@@ -81,10 +82,17 @@ describe("Relations update", function () {
       const db = new Db();
       await db.initDb();
 
+      // PUT route requires isValid() (>= 2 entityIds) and entities to exist in
+      // db. Both Superclass and Antonym accept Concept-Concept.
+      const [, c1] = prepareEntity(EntityEnums.Class.Concept);
+      const [, c2] = prepareEntity(EntityEnums.Class.Concept);
+      await c1.save(db.connection);
+      await c2.save(db.connection);
+
       const changeTypeTo: RelationEnums.Type = RelationEnums.Type.Antonym;
       const relationEntry = new Relation({
         type: RelationEnums.Type.Superclass,
-        entityIds: ["1"],
+        entityIds: [c1.id, c2.id],
       });
 
       await relationEntry.save(db.connection);

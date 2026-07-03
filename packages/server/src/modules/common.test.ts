@@ -31,6 +31,9 @@ export const successfulGenericResponse: IResponseGeneric = {
 export const newMockRequest = (db: Db): IRequest => {
   return {
     acl: new Acl(),
+    // Tests pass a raw Db; handlers exercised via the mock only touch
+    // req.db.connection, which Db provides directly. Cast to satisfy the
+    // IRequest.db: DbHandle contract introduced by the pool refactor.
     db: db as unknown as DbHandle,
     user: undefined,
     getUserOrFail: () => {

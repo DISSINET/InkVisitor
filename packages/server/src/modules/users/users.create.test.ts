@@ -1,5 +1,5 @@
 import { testErroneousResponse } from "@modules/common.test";
-import { BadParams } from "@inkvisitor/shared/types/errors";
+import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
@@ -21,21 +21,27 @@ describe("Users create", function () {
     await pool.end();
   });
 
+  // The create handler now constructs a User and rejects an invalid model with
+  // ModelNotValidError (400) instead of the previous BadParams gate.
   describe("empty data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+    it("should return a ModelNotValidError wrapped in IResponseGeneric", async () => {
       await authAgent
         .post(`${apiPath}/users`)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+        .expect(
+          testErroneousResponse.bind(undefined, new ModelNotValidError(""))
+        );
     });
   });
   describe("faulty data ", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+    it("should return a ModelNotValidError wrapped in IResponseGeneric", async () => {
       await authAgent
         .post(`${apiPath}/users`)
         .send({ test: "" })
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+        .expect(
+          testErroneousResponse.bind(undefined, new ModelNotValidError(""))
+        );
     });
   });
   describe("ok data", () => {
@@ -61,7 +67,9 @@ describe("Users create", function () {
 
       const createdUser = await User.findUserByLogin(db, email, false);
       expect(createdUser).toBeTruthy();
-      expect(createdUser?.active).toEqual(true);
+      // The create handler forces active=false; the user becomes active only
+      // after completing the emailed activation flow.
+      expect(createdUser?.active).toEqual(false);
     });
   });
 });

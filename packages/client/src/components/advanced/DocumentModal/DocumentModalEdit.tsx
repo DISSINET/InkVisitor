@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import { Modal, ModalContent, ModalHeader } from "components";
+import { useDocumentQuery } from "hooks/react-query";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
@@ -33,14 +32,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
     data: dataDocument,
     error: errorDocument,
     isFetching: dataDocumentIsFetching,
-  } = useQuery({
-    queryKey: ["document", documentId],
-    queryFn: async () => {
-      const res = await api.documentGet(documentId);
-      return res.data;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  } = useDocumentQuery(documentId);
 
   return (
     <Modal

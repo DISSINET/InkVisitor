@@ -1,12 +1,30 @@
 import { EventType } from "@inkvisitor/shared/types/stats";
 
-/** Event types hidden from stats UI and document audit table rows. */
-export const HIDDEN_EVENT_TYPES: EventType[] = [EventType.DELETE, EventType.ANCHOR_DELETE];
+/** Relation audit event types - shown on the dedicated Relations stats tab. */
+export const RELATION_EVENT_TYPES: EventType[] = [
+  EventType.RELATION_CREATE,
+  EventType.RELATION_EDIT,
+  EventType.RELATION_DELETE,
+];
+
+/** Event types hidden from stats UI and document audit table rows (deletions fold into their edit type). */
+export const HIDDEN_EVENT_TYPES: EventType[] = [
+  EventType.DELETE,
+  EventType.ANCHOR_DELETE,
+  EventType.RELATION_DELETE,
+];
 
 /** Anchor diff sections hidden in DocumentTable (paired with anchor_delete). */
 export const HIDDEN_DOCUMENT_CHANGE_SECTIONS = ["removals"] as const;
 
+/** Entity/document activity types selectable on the Entities tab (relation types have their own tab). */
 export const VISIBLE_EVENT_TYPES = Object.values(EventType).filter(
+  (type) =>
+    !HIDDEN_EVENT_TYPES.includes(type) && !RELATION_EVENT_TYPES.includes(type)
+);
+
+/** Relation activity types selectable on the Relations tab. */
+export const VISIBLE_RELATION_EVENT_TYPES = RELATION_EVENT_TYPES.filter(
   (type) => !HIDDEN_EVENT_TYPES.includes(type)
 );
 

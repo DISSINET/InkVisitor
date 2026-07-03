@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 
 import { WarningTypeEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IWarning } from "@inkvisitor/shared/types";
+import { useQuery } from "@tanstack/react-query";
 import { WarningIcon } from "./WarningIcon";
 import api from "api";
 import { EntityTag } from "components/advanced";
@@ -34,69 +35,49 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     pa: "Pseudo-Actant",
   };
 
-  const [extendedEntities, setExtendedEntities] = useState<
-    Record<string, IEntity>
-  >(entities ?? {});
-
   const originId = warning.origin;
-  const originEntity = entities?.[originId];
 
-  useEffect((): void => {
-    const entitiesOut = [];
-    const newEntityIds: string[] = [];
-
-    async function getEntities(eids: string[]) {
-      const extractedEntities: Record<string, IEntity> = { ...entities };
-      for (const eid of eids) {
-        const entityRes = await api.entityGet(eid).catch(() => undefined);
-        if (entityRes?.data && !entities?.[eid]) {
-          extractedEntities[eid] = entityRes.data;
-        }
+  // Warning-referenced ids not already present in the provided entities map.
+  const missingEntityIds = useMemo(() => {
+    const ids = new Set<string>();
+    const addMissing = (eid?: string) => {
+      if (eid && !entities?.[eid]) {
+        ids.add(eid);
       }
-      setExtendedEntities(extractedEntities);
-    }
-
-    const isInEntities = (eid: string) => {
-      return entities && entities[eid] ? true : false;
     };
-
-    warning?.validation?.propType?.forEach((eid) => {
-      if (eid && !isInEntities(eid)) {
-        newEntityIds.push(eid);
-      }
+    warning.validation?.propType?.forEach(addMissing);
+    warning.validation?.allowedEntities?.forEach(addMissing);
+    warning.details?.forEach((detail) => {
+      addMissing(detail.entityId);
+      detail.relatedEntityIds?.forEach(addMissing);
     });
-
-    warning?.validation?.allowedEntities?.forEach((eid) => {
-      if (eid && !isInEntities(eid)) {
-        newEntityIds.push(eid);
-      }
-    });
-
-    warning?.details?.forEach((detail) => {
-      [detail.entityId, ...(detail.relatedEntityIds ?? [])].forEach((eid) => {
-        if (eid && !isInEntities(eid) && !newEntityIds.includes(eid)) {
-          newEntityIds.push(eid);
-        }
-      });
-    });
-
-    if (newEntityIds.length > 0) {
-      getEntities(newEntityIds);
-    }
+    return [...ids];
   }, [warning, entities]);
 
-  const [entity, setEntity] = useState<IEntity | undefined>(undefined);
+  // Single batched fallback for ids missing from the provided map. The shared
+  // cache key lets multiple warnings referencing the same entities dedupe.
+  const { data: fetchedEntities } = useQuery({
+    queryKey: ["message-warning-entities", missingEntityIds],
+    queryFn: async () => {
+      const res = await api.entitiesGet(missingEntityIds);
+      return res.data ?? [];
+    },
+    enabled: missingEntityIds.length > 0 && api.isLoggedIn(),
+  });
 
-  useEffect(() => {
-    if (warning.position?.entityId && entities) {
-      const entity = entities[warning.position.entityId];
-      if (entity) {
-        setEntity(entity);
-      } else {
-        setEntity(undefined);
-      }
-    }
-  }, [warning, entities]);
+  // Provided entities plus any fetched fallbacks.
+  const extendedEntities = useMemo(() => {
+    const map: Record<string, IEntity> = { ...entities };
+    fetchedEntities?.forEach((fetchedEntity) => {
+      map[fetchedEntity.id] = fetchedEntity;
+    });
+    return map;
+  }, [entities, fetchedEntities]);
+
+  const originEntity = extendedEntities[originId];
+  const entity = warning.position?.entityId
+    ? extendedEntities[warning.position.entityId]
+    : undefined;
 
   function renderEntityTags(
     entityIds: (string | undefined)[]

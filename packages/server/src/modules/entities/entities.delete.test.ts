@@ -18,12 +18,11 @@ import { link } from "fs";
 describe("Entities delete - single entity", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
 
+  // NOTE: the shared db pool is ended once in the final top-level describe's
+  // afterAll. Ending it here would drain the pool before the later
+  // "Entities delete - batch" describe runs, causing database-timeout 500s.
   beforeAll(async () => {
     authAgent = await getAuthenticatedAgent();
-  });
-
-  afterAll(async () => {
-    await pool.end();
   });
 
   describe("faulty data", () => {

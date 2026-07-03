@@ -5,8 +5,9 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { useOrderedLanguageDict } from "hooks/react-query";
 import React, { useMemo } from "react";
-import { FaTrashAlt } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import {
   StyledBorderLeft,
   StyledValue,
@@ -51,6 +52,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     allowedClasses,
     allowedEntities,
   } = validation;
+
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   const disabledEntityClassesSection = useMemo<boolean>(() => {
     return allowedEntities !== undefined && allowedEntities.length > 0;
@@ -211,7 +214,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={!userCanEdit}
               placeholder="Add new rule language"
               width={200}
-              options={languageDict.filter(
+              options={orderedLanguageDict.filter(
                 (language) => !entityLanguages || !entityLanguages.includes(language.value)
               )}
               value={null}
@@ -437,7 +440,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
           />
           <Button
             color="danger"
-            icon={<FaTrashAlt />}
+            icon={<IcoTrash />}
             onClick={removeValidationRule}
             inverted
             label="remove validation rule"

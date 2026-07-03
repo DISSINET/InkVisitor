@@ -34,9 +34,14 @@ export const initialState: StatsStore = {
   showDateToRangePicker: false, // Hidden by default, show "Until Now"
 };
 
-/** Fresh state on each mount so dateTo is current without a post-mount dispatch. */
-export const createEntitiesTabState = (): StatsStore => ({
+/**
+ * Fresh state on each mount so dateTo is current without a post-mount dispatch.
+ * The selectable event types are passed in so the same component can drive the
+ * Entities tab and the Relations tab.
+ */
+export const createEntitiesTabState = (eventType: EventType[]): StatsStore => ({
   ...initialState,
+  eventType: [...eventType],
   dateTo: new Date().toISOString(),
 });
 

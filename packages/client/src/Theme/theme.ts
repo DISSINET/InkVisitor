@@ -54,7 +54,7 @@ const theme = {
     info: "#324185",
     plain: "#4a5568", // gray 700
     primaryTransparent: "rgba(9,16,52,0.2)",
-    modalBg: "rgba(9,16,52,0.3)",
+    modalBg: "rgba(9,16,52,0.4)",
     backupDownloadOverlay: "rgba(237, 242, 247, 0.8)",
 
     tagBackground: "#fff",
@@ -76,10 +76,11 @@ const theme = {
     treeNodeWrite: "#2d3748",
     foundByTreeFilter: "#b4c0e8",
 
-    tableOddRow: "#f0f8ff",
-    tableOpened: "#F2EBFE",
-    tableSelection: "#bce5ff",
-    tableSelectionHover: "#e0f3ff",
+    tableOddRow: "#eef0fa",
+    tableEvenRow: "#fff",
+    tableOpened: "#d8ddf5",
+    tableSelection: "#c4caf0",
+    tableSelectionHover: "#e4e7f8",
     focusedCheckbox: "rgba(9,16,52,0.1)",
     uploadDocumentBg: "#CCD5F4",
 
@@ -263,6 +264,11 @@ const theme = {
 
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
+// keys of ThemeColor whose value is a plain color string, excluding the
+// nested groups (gray, blue, invertedBg, ...)
+export type FlatThemeColor = {
+  [K in keyof ThemeColor]: ThemeColor[K] extends string ? K : never;
+}[keyof ThemeColor];
 export type ThemeBorderWidth = typeof theme.borderWidth;
 export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;

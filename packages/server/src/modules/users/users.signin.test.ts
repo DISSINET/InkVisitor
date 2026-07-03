@@ -4,8 +4,37 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { pool } from "@middlewares/db";
+import { Db } from "@service/rethink";
+import { r } from "rethinkdb-ts";
 
 describe("Users signin", function () {
+  // The ephemeral test DB seeds no acl_permissions, so the otherwise-public
+  // /users/signin route would be auto-denied (403). Seed the public permission
+  // the production dataset normally provides so the handler is reachable.
+  beforeAll(async () => {
+    const db = new Db();
+    await db.initDb();
+    await r
+      .table("acl_permissions")
+      .insert({
+        controller: "users",
+        method: "POST",
+        route: "signin",
+        roles: [],
+        public: true,
+      })
+      .run(db.connection);
+    // Another suite (users.password) mutates the seeded admin's password and
+    // does not restore it; reset it here so this signin assertion is
+    // independent of test execution order.
+    await r
+      .table("users")
+      .filter({ name: "admin" })
+      .update({ password: "admin" })
+      .run(db.connection);
+    await db.close();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -19,7 +48,9 @@ describe("Users signin", function () {
     });
   });
   describe("Ok body with faulty params ", () => {
-    it("should return a BadCredentials error wrapped in IResponseGeneric", async () => {
+    // The signin handler now reads `login` (not `username`) and responds with
+    // BadCredentialsError (401) for an unknown login, instead of UserDoesNotExits.
+    it("should return a BadCredentialsError wrapped in IResponseGeneric", async () => {
       await request(app)
         .post(`${apiPath}/users/signin`)
         .send({ login: "fake", password: "fake" })

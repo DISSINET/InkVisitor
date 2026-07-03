@@ -5,7 +5,10 @@ import { StatsChart, StatsTable } from "components/advanced";
 import { Button, ButtonGroup, Loader } from "components";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useEffect, useState } from "react";
-import { STATS_FILTER_DEBOUNCE_MS } from "pages/Stats/constants";
+import {
+  RELATION_EVENT_TYPES,
+  STATS_FILTER_DEBOUNCE_MS,
+} from "pages/Stats/constants";
 import { ExploreAction, ExploreActionType } from "../state";
 // --- Parked time filter (see the commented From/To block below) ---
 // import { Input } from "components";
@@ -23,12 +26,17 @@ import {
   // StyledDateInputWrapper, // parked time filter
 } from "./ExplorerStatsStyles";
 
-/** Event types hidden from the stats config (paired deletion markers). */
+/**
+ * Event types hidden from the stats config (paired deletion markers, plus
+ * relation types - the explorer stats are entity-scoped so relation audits
+ * never appear here).
+ */
 const HIDDEN_EVENT_TYPES: EventType[] = [
   EventType.ANCHOR_ADD,
   EventType.ANCHOR_DELETE,
   EventType.ANCHOR_EDIT,
   EventType.TEXT_EDIT,
+  ...RELATION_EVENT_TYPES,
 ];
 const VISIBLE_EVENT_TYPES = Object.values(EventType).filter(
   (type) => !HIDDEN_EVENT_TYPES.includes(type),

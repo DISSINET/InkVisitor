@@ -11,7 +11,8 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useMemo } from "react";
-import { FaAnchor, FaTrashAlt } from "react-icons/fa";
+import { FaAnchor } from "react-icons/fa";
+import { IcoTrash } from "Theme/icons";
 import { HiClipboardList } from "react-icons/hi";
 import { CellProps, Column } from "react-table";
 import { toast } from "react-toastify";
@@ -242,7 +243,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         Cell: ({ row }: CellType) => {
           return (
             <Button
-              icon={<FaTrashAlt />}
+              icon={<IcoTrash />}
               color="danger"
               inverted
               onClick={() =>

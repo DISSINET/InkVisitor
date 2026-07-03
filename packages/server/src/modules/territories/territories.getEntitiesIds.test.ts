@@ -35,8 +35,10 @@ describe("Territories getEntityIds", () => {
   });
 
   describe("one territory, two linked statement via territory.id and tags at once", () => {
-    it("should return empty array", async () => {
-      const territory = new Territory({});
+    it("should return the deduplicated linked entity ids", async () => {
+      // Territory.save() requires a parent unless the id starts with
+      // "root"/"T0" or it is a template - use a root-prefixed id.
+      const territory = new Territory({ id: `root-${Math.random()}` });
       await territory.save(db.connection);
 
       // statements linked by tag/reference and territory - 3 linked actants
@@ -62,7 +64,11 @@ describe("Territories getEntityIds", () => {
         .expect((res: IRequest) => {
           expect(res.body).not.toBeNull();
           expect(res.body?.constructor.name).toEqual("Array");
-          expect(res.body).toHaveLength(3);
+          // Both statements are identical, so the referenced ids dedupe to the
+          // territory (lineage root, no parent) and the shared tag "tagid".
+          expect([...(res.body as unknown as string[])].sort()).toEqual(
+            [territory.id, "tagid"].sort()
+          );
         });
     });
   });

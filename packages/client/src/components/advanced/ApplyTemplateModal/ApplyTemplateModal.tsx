@@ -1,11 +1,7 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import {
@@ -19,6 +15,7 @@ import {
 } from "components";
 import { EntityTag } from "components/advanced";
 import { applyTemplate, InstRelations } from "constructors";
+import { useDetailQuery } from "hooks/react-query";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
@@ -46,18 +43,10 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   setTemplateToApply,
 }) => {
   const {
-    status,
     data: templateDetail,
     error: templateDetailError,
     isFetching: templateDetailIsFetching,
-  } = useQuery({
-    queryKey: ["entity", templateToApply.id],
-    queryFn: async () => {
-      const res = await api.detailGet(templateToApply.id);
-      return res.data;
-    },
-    enabled: !!templateToApply.id && api.isLoggedIn(),
-  });
+  } = useDetailQuery(templateToApply.id);
 
   const [newRelations, setNewRelations] = useState<Relation.IRelation[]>([]);
 

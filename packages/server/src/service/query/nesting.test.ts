@@ -60,7 +60,10 @@ const makeEdge = (
   });
   const node = new SearchNode({ operator: childOperator });
   (node as any).edges = childEdges;
-  return { type: "EP:T", logic, params: {}, id: "e", node, run } as any;
+  // no-op prepare mirrors the SearchEdge contract (the evaluator calls it
+  // before run(); only the subtree-resolving edges do real work there)
+  const prepare = jest.fn(async () => undefined);
+  return { type: "EP:T", logic, params: {}, id: "e", node, run, prepare } as any;
 };
 
 const evaluate = (

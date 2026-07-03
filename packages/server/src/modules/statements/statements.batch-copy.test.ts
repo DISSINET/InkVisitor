@@ -55,6 +55,7 @@ describe("statements/batch-copy", function () {
     beforeAll(async () => {
       await db.initDb();
       await createMockTree(db, randSuffix);
+      treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
       rootId = `root-${randSuffix}`;
       T1Id = `T1-${randSuffix}`;

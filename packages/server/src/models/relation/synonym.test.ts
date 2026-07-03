@@ -23,15 +23,20 @@ describe("test Synonym.beforeSave", function () {
   });
 
   test("ok relations", async () => {
-    let entities = [new Entity({ id: "1", class: EntityEnums.Class.Action })];
-    const okRelation1 = new Synonym({ entityIds: entities.map((e) => e.id) });
-    okRelation1.entities = entities;
+    // Synonym.beforeSave -> findSiblings resets this.entities to undefined and
+    // super.beforeSave re-fetches them from the db, so preloaded entities are
+    // ignored. The entities must actually exist in the db.
+    const [, a1] = prepareEntity();
+    a1.class = EntityEnums.Class.Action;
+    await a1.save(db.connection);
+    const okRelation1 = new Synonym({ entityIds: [a1.id] });
     await expect(okRelation1.beforeSave(request)).resolves.not.toThrowError();
 
-    entities = [new Entity({ id: "2", class: EntityEnums.Class.Concept })];
-    const okRelation2 = new Synonym({ entityIds: entities.map((e) => e.id) });
-    okRelation2.entities = entities;
-    await expect(okRelation1.beforeSave(request)).resolves.not.toThrowError();
+    const [, c1] = prepareEntity();
+    c1.class = EntityEnums.Class.Concept;
+    await c1.save(db.connection);
+    const okRelation2 = new Synonym({ entityIds: [c1.id] });
+    await expect(okRelation2.beforeSave(request)).resolves.not.toThrowError();
   });
 
   test("bad relation", async () => {

@@ -12,21 +12,25 @@ import {
   Submit,
 } from "components";
 import { CBookmarkFolder } from "constructors";
+import { useBookmarksQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
+import { MdEdit } from "react-icons/md";
+import { IcoTrash } from "Theme/icons";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelBoxesOpened,
+  const isBookmarksBoxOpen = useAppSelector(
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened.bookmarks,
   );
 
+  const fourthPanelExpanded = useAppSelector((state) => state.layout.mainPage.fourthPanelExpanded);
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
   const [removingFolder, setRemovingFolder] = useState<string | false>(false);
   const [creatingFolder, setCreatingFolder] = useState<boolean>(false);
@@ -34,21 +38,9 @@ export const EntityBookmarkBox: React.FC = () => {
   const [openedFolders, setOpenedFolders] = useState<string[]>([]);
 
   // User query
-  const {
-    status: statusStatement,
-    data: bookmarkFolders,
-    error: errorStatement,
-    isFetching: isFetching,
-  } = useQuery({
-    queryKey: ["bookmarks"],
-    queryFn: async () => {
-      const res = await api.bookmarksGet("me");
-      const data = res.data ?? [];
-      data.sort((a, b) => (a.name > b.name ? 1 : -1));
-      return data;
-    },
-    enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"],
-  });
+  const { data: bookmarkFolders, isFetching } = useBookmarksQuery(
+    isBookmarksBoxOpen && fourthPanelExpanded,
+  );
 
   const removingFolderName = useMemo(() => {
     if (bookmarkFolders) {
@@ -136,7 +128,7 @@ export const EntityBookmarkBox: React.FC = () => {
     },
 
     onSuccess: () => {
-      toast.info("Bookmark edited");
+      toast.info("Bookmark folder edited");
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       setEditingFolderName("");
       setEditingFolder(false);
@@ -229,17 +221,19 @@ export const EntityBookmarkBox: React.FC = () => {
         showModal={isFolderModalOpen}
         onClose={closeFolderModal}
         onEnterPress={submitFolderModal}
+        width={350}
       >
-        <ModalHeader title="Bookmark Folder" />
+        <ModalHeader icon={<MdEdit />} title="Edit Bookmark folder" />
         <ModalContent>
           <Input
-            label="Bookmark folder name: "
+            label="new label:"
             labelSpaceNoWrap
             placeholder=""
             onChangeFn={(newName: string) => setEditingFolderName(newName)}
             value={editingFolderName}
             changeOnType
             autoFocus
+            width="full"
           />
         </ModalContent>
 
@@ -260,6 +254,7 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       <Submit
+        headerIcon={<IcoTrash size={14} />}
         title={`Delete Bookmark folder ${removingFolderName}`}
         text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}

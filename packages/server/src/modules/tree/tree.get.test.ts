@@ -12,6 +12,7 @@ import Territory from "@models/territory/territory";
 import { IResponseTree, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
+import treeCache from "@service/treeCache";
 
 const findSubtreeInTree = (
   territories: IResponseTree,
@@ -32,7 +33,11 @@ const findSubtreeInTree = (
 };
 
 const testCorrectRootTerritory = (mockTerritories: ITerritory[], res: any) => {
-  expect(res.body.territory).toEqual(mockTerritories[0]);
+  // res.body is JSON-serialized (Date -> string, class instances -> plain
+  // objects), so compare against the JSON-roundtripped expected territory.
+  expect(res.body.territory).toEqual(
+    JSON.parse(JSON.stringify(mockTerritories[0]))
+  );
   expect(res.body.empty).toEqual(false);
 };
 
@@ -92,8 +97,11 @@ const hasParent = (
 
 const testCorrectPaths = (mockTerritories: ITerritory[], res: any) => {
   (function testPath(rootTree: IResponseTree) {
+    // path is ordered [root, ..., immediate parent], so walk it from the end
+    // (closest parent) up to the root.
     let currentId = rootTree.territory.id;
-    for (const parentId of rootTree.path) {
+    for (let i = rootTree.path.length - 1; i >= 0; i--) {
+      const parentId = rootTree.path[i];
       expect(hasParent(mockTerritories, currentId, parentId)).toEqual(true);
       currentId = parentId;
     }
@@ -132,6 +140,12 @@ describe("Tree get", function () {
       },
     });
     await createEntity(db, additionalEmptyTerritory);
+
+    // treeCache.initialize() is a no-op under NODE_ENV=test, so the GET /tree
+    // route would otherwise serve an empty cached tree. Build the singleton
+    // cache from the db explicitly after the mock territories are created.
+    treeCache.db = db.connection;
+    treeCache.tree = await treeCache.createTree();
 
     await authAgent
       .get(`${apiPath}/tree`)

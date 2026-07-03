@@ -13,6 +13,9 @@ export enum EventType {
   ANCHOR_ADD = "anchor_add",
   ANCHOR_DELETE = "anchor_delete",
   ANCHOR_EDIT = "anchor_edit",
+  RELATION_CREATE = "relation_create",
+  RELATION_EDIT = "relation_edit",
+  RELATION_DELETE = "relation_delete",
 }
 
 export enum Aggregation {

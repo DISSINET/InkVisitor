@@ -232,6 +232,7 @@ export const StyledNotActiveText = styled.p`
 export const StyledUserListButtonGroup = styled.div`
   display: flex;
   flex-direction: row;
+  gap: 0.2rem;
   border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
   overflow: hidden;
   z-index: 100;

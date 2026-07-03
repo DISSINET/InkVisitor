@@ -78,7 +78,6 @@ export const EntityReferenceTableResource: React.FC<
           inputWidth={editorWidthTooNarrow ? "full" : 100}
           alwaysShowCreateModal={alwaysShowCreateModal}
           openDetailOnCreate={openDetailOnCreate}
-          territoryActants={[]}
           onSelected={(newSelectedId) => {
             handleChangeResource(reference.id, newSelectedId, true);
           }}

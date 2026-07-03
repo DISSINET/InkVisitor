@@ -1,6 +1,6 @@
 import { determineOrder, IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
+import { IEntity, Relation as RelationTypes, AuditScope } from "@inkvisitor/shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { EnumValidators } from "@inkvisitor/shared/enums";
 import {
@@ -13,6 +13,8 @@ import User from "@models/user/user";
 import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
+import Audit from "@models/audit/audit";
+import { EventType } from "@inkvisitor/shared/types/stats";
 import Path from "./path";
 import { findEntityById } from "@service/shorthands";
 
@@ -31,6 +33,11 @@ export default class Relation implements IRelationModel {
 
   @nonenumerable
   entities?: IEntity[]; // holds preloaded entities for validity checks
+
+  @nonenumerable
+  // transient marker set by save()/update() so afterSave() knows which audit
+  // event to emit; non-enumerable so it is never persisted into the row
+  _auditEventType?: EventType;
 
   constructor(data: Partial<RelationTypes.IRelation>) {
     this.id = data.id || "";
@@ -261,10 +268,52 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * Use this method for doing asynchronous operation/checks after the save operation
+   * Use this method for doing asynchronous operation/checks after the save operation.
+   * Emits the relation audit (create or edit) marked by save()/update().
    * @param request
    */
-  async afterSave(request: IRequest): Promise<void> {}
+  async afterSave(request: IRequest): Promise<void> {
+    if (this._auditEventType && this.id) {
+      await Audit.createNew(
+        request,
+        AuditScope.Relation,
+        this.id,
+        this.auditSnapshot(),
+        this._auditEventType
+      );
+      this._auditEventType = undefined;
+    }
+  }
+
+  /**
+   * Emits the relation deletion audit. Called after the relation is removed -
+   * from the delete route and from deleteMany (Synonym cloud-merge).
+   * @param request
+   */
+  async afterDelete(request: IRequest): Promise<void> {
+    if (this.id) {
+      await Audit.createNew(
+        request,
+        AuditScope.Relation,
+        this.id,
+        this.auditSnapshot(),
+        EventType.RELATION_DELETE
+      );
+    }
+  }
+
+  /**
+   * Snapshot of the relation data stored in the audit `changes` blob.
+   * @returns plain object snapshot
+   */
+  auditSnapshot(): object {
+    return {
+      id: this.id,
+      type: this.type,
+      entityIds: this.entityIds,
+      order: this.order,
+    };
+  }
 
   /**
    * returns list of relations with the same main entityId (minus this entity)
@@ -286,6 +335,10 @@ export default class Relation implements IRelationModel {
    * @returns Promise<boolean> to indicate result of the operation
    */
   async save(db: Connection | undefined): Promise<boolean> {
+    // mark for the create audit emitted in afterSave (excluded from the insert
+    // below since _auditEventType is non-enumerable)
+    this._auditEventType = EventType.RELATION_CREATE;
+
     const result = await rethink
       .table(Relation.table)
       .insert({ ...this, id: this.id || undefined })
@@ -308,6 +361,9 @@ export default class Relation implements IRelationModel {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
+    // mark for the edit audit emitted in afterSave
+    this._auditEventType = EventType.RELATION_EDIT;
+
     return rethink
       .table(Relation.table)
       .get(this.id)
@@ -585,7 +641,9 @@ export default class Relation implements IRelationModel {
     return relationsCopied;
   }
   /**
-   * Removes multiple relation entries
+   * Removes multiple relation entries, emitting a deletion audit for each.
+   * Loads the relations first (the audit needs the snapshot) before the bulk
+   * delete.
    * @param request
    * @param ids
    * @returns
@@ -594,10 +652,22 @@ export default class Relation implements IRelationModel {
     request: IRequest,
     ids: string[]
   ): Promise<WriteResult> {
-    return rethink
+    // Delete first and emit a deletion audit only for the rows actually removed
+    // (returnChanges carries their pre-delete snapshot). This mirrors the single
+    // DELETE route (delete -> audit on success), so a failing delete can never
+    // leave RELATION_DELETE audits for relations that still exist.
+    const result = await rethink
       .table(Relation.table)
       .getAll.apply(undefined, ids)
-      .delete()
+      .delete({ returnChanges: true })
       .run(request.db.connection);
+
+    for (const change of result.changes || []) {
+      if (change.old_val) {
+        await new Relation(change.old_val).afterDelete(request);
+      }
+    }
+
+    return result;
   }
 }

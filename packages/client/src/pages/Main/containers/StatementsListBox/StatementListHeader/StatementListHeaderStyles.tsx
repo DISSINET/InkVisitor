@@ -25,6 +25,14 @@ export const StyledMoveToParent = styled(animated.div)`
   margin-left: 0.3rem;
 `;
 
+export const StyledInfoText = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["info"]};
+  margin-left: 0.3rem;
+`;
 export const StyledHeadingText = styled.div``;
 export const StyledSuggesterRow = styled.div`
   display: flex;

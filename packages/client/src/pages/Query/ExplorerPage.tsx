@@ -9,7 +9,8 @@ import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/a
 import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
-import { BiBarChartAlt2, BiHide, BiRefresh, BiSearch, BiTable } from "react-icons/bi";
+import { BiBarChartAlt2, BiHide, BiRefresh, BiTable } from "react-icons/bi";
+import { IcoSearch } from "Theme/icons";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
@@ -612,7 +613,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   key="run-search"
                   tooltipLabel="run search (Enter)"
                   label="run search"
-                  icon={<BiSearch />}
+                  icon={<IcoSearch />}
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
                 />,
@@ -655,7 +656,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               borderColor="white"
               height={contentHeight - querySeparatorYPosition}
               label="Explorer"
-              disableHeaderClick={explorerBoxMaximized}
+              disableHeaderClick
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
                 <SwitchGroup key="explorer-view-mode" style={{ marginRight: "2rem" }}>

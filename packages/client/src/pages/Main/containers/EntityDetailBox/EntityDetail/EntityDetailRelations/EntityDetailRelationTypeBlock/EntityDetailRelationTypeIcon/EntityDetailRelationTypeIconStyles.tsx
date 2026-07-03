@@ -17,5 +17,5 @@ export const StyledArrow = styled.span`
 `;
 export const StyledLabel = styled.div`
   color: ${({ theme }) => theme.color["info"]};
-  font-size: ${({ theme }) => theme.fontSize["s"]};
+  font-size: ${({ theme }) => theme.fontSize["base"]};
 `;

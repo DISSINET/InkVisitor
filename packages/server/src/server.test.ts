@@ -29,6 +29,8 @@ describe("Test unknown route", function () {
 
 describe("Test unauthorized request", function () {
   it("should return an unauthorizedError wrapped in IResponeGeneric response", async () => {
+    // No cookie session on a protected route -> the auth middleware rejects the
+    // request with an unauthorized error.
     await request(app)
       .get(`${apiPath}/users/122322`)
       .expect(unauthorizedError.statusCode())
