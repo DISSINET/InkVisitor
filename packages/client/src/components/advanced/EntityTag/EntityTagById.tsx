@@ -10,6 +10,7 @@ interface EntityTagByIdProps {
   entityId: string;
   entity?: IEntity;
   fullWidth?: boolean;
+  tagMaxWidth?: string;
   disableTooltip?: boolean;
   unlinkButton?: UnlinkButton | false;
   disableToast?: boolean;
@@ -23,6 +24,7 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
   entityId,
   entity: entityProp,
   fullWidth = false,
+  tagMaxWidth,
   disableTooltip = true,
   unlinkButton,
   disableToast = false,
@@ -52,6 +54,7 @@ export const EntityTagById: React.FC<EntityTagByIdProps> = ({
       entity={entity}
       disableTooltip={disableTooltip}
       fullWidth={fullWidth}
+      tagMaxWidth={tagMaxWidth}
       unlinkButton={unlinkButton}
       disableDoubleClick={disableDoubleClick}
     />

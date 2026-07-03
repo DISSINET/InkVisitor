@@ -55,6 +55,8 @@ interface EntityTag {
   parentId?: string;
   showOnly?: "tag" | "label";
   fullWidth?: boolean;
+  /** Override the label's max-width (e.g. theme.space value). */
+  tagMaxWidth?: string;
   button?: ReactNode;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
@@ -85,6 +87,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   parentId,
   showOnly,
   fullWidth = false,
+  tagMaxWidth,
   button = false,
   index,
   moveFn,
@@ -207,6 +210,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
           $tagBorderColorKey={entity.status}
           $labelOnly={showOnly === "label"}
           $fullWidth={fullWidth}
+          $maxWidth={tagMaxWidth}
           $isFavorited={isFavorited ?? false}
           $isItalic={isFirstLabelEmpty(entity.labels)}
         >
@@ -214,7 +218,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         </StyledLabel>
       </StyledLabelWrap>
     );
-  }, [entity, entityLabel, isSelected, isFavorited, showOnly, fullWidth]);
+  }, [entity, entityLabel, isSelected, isFavorited, showOnly, fullWidth, tagMaxWidth]);
 
   if (!isValidEntityClass(entity.class)) {
     // labels needs to have length and first label needs to be non-empty

@@ -1514,7 +1514,12 @@ export const TextAnnotator = ({
                   }, 200);
                 }}
               >
-                <EntityTagById entityId={xmlMarkupAnchorHover.entityId} disableTooltip={false} />
+                <EntityTagById
+                  entityId={xmlMarkupAnchorHover.entityId}
+                  disableTooltip={false}
+                  disableDoubleClick={false}
+                  tagMaxWidth={theme.space[60]}
+                />
               </div>
             </FloatingPortal>
           )}
