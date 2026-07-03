@@ -23,21 +23,35 @@ export interface AnchorMarkerStyle {
   color: string;
 }
 
+/** Axis-aligned bounding box of a drawn marker (device px). */
+export interface AnchorMarkerBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 /**
- * Strokes a single corner marker.
+ * Strokes a single corner marker and returns the box it occupied (so the caller
+ * can build a matching hover hit target).
  *
- * A `start` marker is a top-left corner (`┌`: stem on the left, top arm right);
- * an `end` marker is the horizontally-mirrored bottom-right corner (`┘`: stem
- * on the right, bottom arm left). A start/end pair frames the territory span.
- * Both glyphs occupy the x-range `[xPx, xPx + armW]` — the end marker is shifted
- * right so its leftward arm never clips past the left margin, where most
- * territory boundaries sit.
+ * A `start` marker is a top-left corner (`┌`: stem at the boundary, top arm
+ * running right into the content). An `end` marker is the mirrored bottom-right
+ * corner (`┘`: stem at the boundary, bottom arm running left over the content).
+ * Both arms point inward, framing the span — and neither sits over the text that
+ * follows the anchor.
+ *
+ * Left-margin safety: strokes are centred on the path, so a stem on the boundary
+ * column (`xPx == 0`) would be half-clipped by the canvas edge. The `start` stem
+ * is nudged right by half the stroke; the `end` glyph's leftmost point is
+ * clamped to that same inset, so its leftward arm never crosses into negative x.
  *
  * @param ctx    target 2D context (assumed already translated for scroll)
  * @param xPx    device-px x of the anchor boundary
  * @param yMidPx device-px y of the vertical centre of the target line
  * @param kind   which end of the anchor this marker represents
  * @param style  glyph geometry and colour
+ * @returns the device-px bounding box of the strokes drawn
  */
 export function drawAnchorMarker(
   ctx: CanvasRenderingContext2D,
@@ -45,16 +59,11 @@ export function drawAnchorMarker(
   yMidPx: number,
   kind: AnchorMarkerKind,
   style: AnchorMarkerStyle
-): void {
+): AnchorMarkerBox {
   const half = style.armH / 2;
   const top = yMidPx - half;
   const bottom = yMidPx + half;
-  // Strokes are centred on the path, so a stem sitting exactly on the boundary
-  // column (xPx == 0 at the left margin) would have half its width clipped by
-  // the canvas edge and render thinner. Nudge every x right by half the stroke
-  // so the leftmost stem edge lands on xPx — applied to both kinds so the start
-  // (┌) and end (┘) strokes are equally sized.
-  const x0 = xPx + style.lineWidth / 2;
+  const inset = style.lineWidth / 2;
 
   ctx.save();
   // Markers paint crisp at full opacity, independent of the highlight passes
@@ -64,24 +73,30 @@ export function drawAnchorMarker(
   ctx.strokeStyle = style.color;
   ctx.lineWidth = style.lineWidth;
 
+  let leftX: number;
   ctx.beginPath();
   if (kind === "start") {
-    // ┌ : vertical stem on the left at x0, top arm running right.
-    ctx.moveTo(x0, top);
-    ctx.lineTo(x0, bottom);
-    ctx.moveTo(x0, top);
-    ctx.lineTo(x0 + style.armW, top);
+    // ┌ : stem at the boundary (inset off the edge), top arm running right.
+    const stemX = xPx + inset;
+    leftX = stemX;
+    ctx.moveTo(stemX, top);
+    ctx.lineTo(stemX, bottom);
+    ctx.moveTo(stemX, top);
+    ctx.lineTo(stemX + style.armW, top);
   } else {
-    // ┘ : vertical stem on the right, bottom arm running left back to x0. The
-    // glyph is shifted right by armW so its leftmost point is x0 (the boundary
-    // column) — the leftward arm never crosses the left edge into negative x.
-    const stemX = x0 + style.armW;
+    // ┘ : stem at the boundary, bottom arm running left over the content. The
+    // leftmost point is clamped to `inset` so at the left margin the whole
+    // glyph shifts right just enough to stay on-screen.
+    leftX = Math.max(xPx - style.armW, inset);
+    const stemX = leftX + style.armW;
     ctx.moveTo(stemX, top);
     ctx.lineTo(stemX, bottom);
     ctx.moveTo(stemX, bottom);
-    ctx.lineTo(x0, bottom);
+    ctx.lineTo(leftX, bottom);
   }
   ctx.stroke();
 
   ctx.restore();
+
+  return { x: leftX, y: top, w: style.armW, h: style.armH };
 }

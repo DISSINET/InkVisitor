@@ -2476,24 +2476,24 @@ export class Annotator {
       const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
       const yMid = (relLine + 0.5) * this.lineHeight;
 
-      drawAnchorMarker(this.ctx, xPx, yMid, p.kind, {
+      const box = drawAnchorMarker(this.ctx, xPx, yMid, p.kind, {
         armH,
         armW,
         lineWidth,
         color: p.color,
       });
 
-      // Record a padded hit target (glyph box grown by the pad on each side)
-      // so the tiny corner is comfortably hoverable. Coordinates match the
-      // draw space; detectAndEmitAnchorTagHover converts the pointer to match.
+      // Record a padded hit target around the box actually drawn — start and
+      // end glyphs sit on opposite sides of the boundary, so the drawer reports
+      // its own bounds. Coordinates match the draw space;
+      // detectAndEmitAnchorTagHover converts the pointer to match.
       if (p.tag) {
-        const half = armH / 2;
         const pad = ANCHOR_MARKER_HIT_PAD_PX * this.ratio;
         this.anchorMarkerHitboxes.push({
-          x: xPx - pad,
-          y: yMid - half - pad,
-          w: armW + 2 * pad,
-          h: armH + 2 * pad,
+          x: box.x - pad,
+          y: box.y - pad,
+          w: box.w + 2 * pad,
+          h: box.h + 2 * pad,
           tag: p.tag,
         });
       }

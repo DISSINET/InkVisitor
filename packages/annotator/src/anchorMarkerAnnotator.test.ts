@@ -11,7 +11,14 @@ import { EditMode, HighlightMode } from "./lib/constants";
 import { drawAnchorMarker } from "./lib/AnchorMarker";
 
 jest.mock("./lib/AnchorMarker", () => ({
-  drawAnchorMarker: jest.fn(),
+  // Return a plausible bounding box keyed off the draw coords so the recorded
+  // hitboxes reflect distinct positions (the real fn returns its drawn box).
+  drawAnchorMarker: jest.fn((_ctx: unknown, xPx: number, yMid: number) => ({
+    x: xPx,
+    y: yMid - 5,
+    w: 4,
+    h: 10,
+  })),
 }));
 
 const markerMock = drawAnchorMarker as jest.Mock;

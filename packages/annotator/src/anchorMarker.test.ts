@@ -57,18 +57,49 @@ describe("drawAnchorMarker", () => {
     ]);
   });
 
-  test("end marker draws ┘ — stem shifted right, bottom arm running left to xPx", () => {
+  test("end marker draws ┘ — stem at boundary, bottom arm running left over content", () => {
     const { ctx, ops } = mkCtx();
     drawAnchorMarker(ctx, 100, 50, "end", style);
 
     const lines = ops.filter((o) => o.op === "moveTo" || o.op === "lineTo");
-    // x0 = 101; stem shifted right by armW(4) → 105; bottom arm runs left to x0.
+    // Inline (xPx 100 » inset): stem at the boundary (100), arm left to xPx-armW (96).
     expect(lines).toEqual([
-      { op: "moveTo", x: 105, y: 45 }, // vertical stem shifted right by armW
-      { op: "lineTo", x: 105, y: 55 }, // stem bottom
-      { op: "moveTo", x: 105, y: 55 }, // bottom arm origin at the corner
-      { op: "lineTo", x: 101, y: 55 }, // runs left to x0 (leftmost = x0, unclipped)
+      { op: "moveTo", x: 100, y: 45 }, // stem top
+      { op: "lineTo", x: 100, y: 55 }, // stem bottom
+      { op: "moveTo", x: 100, y: 55 }, // bottom arm origin at the corner
+      { op: "lineTo", x: 96, y: 55 }, // runs left over the content by armW
     ]);
+  });
+
+  test("end marker clamps at the left margin — nothing drawn at negative x", () => {
+    const { ctx, ops } = mkCtx();
+    drawAnchorMarker(ctx, 0, 50, "end", style); // boundary at the very left edge
+
+    const lines = ops.filter((o) => o.op === "moveTo" || o.op === "lineTo");
+    // leftX = max(0 - armW(4), inset(1)) = 1; stem = 1 + 4 = 5.
+    expect(lines).toEqual([
+      { op: "moveTo", x: 5, y: 45 },
+      { op: "lineTo", x: 5, y: 55 },
+      { op: "moveTo", x: 5, y: 55 },
+      { op: "lineTo", x: 1, y: 55 },
+    ]);
+    expect(lines.every((l) => (l as { x: number }).x >= 0)).toBe(true);
+  });
+
+  test("returns the drawn bounding box (used for the hover hit target)", () => {
+    const { ctx } = mkCtx();
+    expect(drawAnchorMarker(ctx, 100, 50, "start", style)).toEqual({
+      x: 101, // stem at xPx + inset
+      y: 45,
+      w: 4, // armW
+      h: 10, // armH
+    });
+    expect(drawAnchorMarker(ctx, 100, 50, "end", style)).toEqual({
+      x: 96, // leftmost = xPx - armW
+      y: 45,
+      w: 4,
+      h: 10,
+    });
   });
 
   test("uses the passed colour and line width, and strokes once", () => {
