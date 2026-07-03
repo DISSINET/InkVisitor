@@ -2603,9 +2603,13 @@ export class Annotator {
         const schema = this.onHighlightCb?.(this.resizeAnchor.tagName);
         if (span && schema) {
           const baseOpacity = schema.style.opacity || 0.4;
-          // Fade between a dim floor and a brighter peak so the accent always
-          // reads (never fully transparent) yet visibly pulses.
-          const opacity = baseOpacity * (0.45 + 0.55 * this.resizePulse.intensity());
+          // Pulse from the entity's normal highlight opacity (floor) up to a
+          // stronger, less-transparent peak, so the resized anchor always reads
+          // at least as clearly as a static one and brightens on the "up" phase.
+          const opacity = Math.min(
+            1,
+            baseOpacity * (1 + 0.9 * this.resizePulse.intensity())
+          );
           const pulse = new Highlighter(
             this.ratio,
             { color: schema.style.color, opacity },
@@ -2625,7 +2629,11 @@ export class Annotator {
 
     // Issue #3108 — draw the draggable handles on top of the selection. Inside
     // the translated context (so use viewport-relative line coords, no scroll term).
-    this.drawSelectionHandles();
+    // Hidden while resizing an anchor: the selection is frozen and not shown, so
+    // its handles must not show either (#2885).
+    if (!this.selectionHidden) {
+      this.drawSelectionHandles();
+    }
 
     this.ctx.restore();
 
