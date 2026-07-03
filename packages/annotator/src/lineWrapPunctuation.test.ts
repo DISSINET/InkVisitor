@@ -10,10 +10,11 @@ const visibleLen = (line: string) => line.replace(/\s+$/, "").length;
 
 describe("line wrapping - punctuation must not start a wrapped line", () => {
   test("comma after a word stays on the previous wrapped line", () => {
-    // "aaaaaaaaa," fills the width-10 line; the overflow space leads the next
-    // line, but the comma stays put rather than starting the wrapped line (#3145)
+    // "aaaaaaaaa," fills the width-10 line; the following space stays trailing on
+    // that line (collapsed in the margin) so "bbbb" begins the next line flush —
+    // the comma never starts a wrapped line.
     const text = new Text("aaaaaaaaa, bbbb", 10);
-    expect(text.segments[0].lines).toEqual(["aaaaaaaaa,", " bbbb"]);
+    expect(text.segments[0].lines).toEqual(["aaaaaaaaa, ", "bbbb"]);
   });
 
   test("no wrapped line begins with punctuation across many break points", () => {
@@ -29,11 +30,12 @@ describe("line wrapping - punctuation must not start a wrapped line", () => {
     expect(lines.join("")).toBe(input);
   });
 
-  test("an inter-word space that can't render trailing leads the next line (#3145)", () => {
-    // the word fills the line, so the following space can't render trailing and
-    // is carried to the next line's start where it stays visible (no h-scroll)
+  test("an inter-word space that overflows stays trailing on the previous line", () => {
+    // the word fills the line, so the following space can't fit; it stays as
+    // trailing whitespace on that line (invisible in the margin) rather than
+    // leading the next line, which begins flush with "bbbb".
     const text = new Text("aaaaaaaaaa bbbb", 10);
-    expect(text.segments[0].lines).toEqual(["aaaaaaaaaa", " bbbb"]);
+    expect(text.segments[0].lines).toEqual(["aaaaaaaaaa ", "bbbb"]);
     expect(text.segments[0].lines.join("")).toBe("aaaaaaaaaa bbbb");
   });
 

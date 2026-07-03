@@ -664,22 +664,12 @@ class Text {
         }
 
         if (cell.space) {
-          // Overflowing whitespace: fill the line's remaining room, then carry
-          // the rest to the next line(s) so it stays visible (no h-scroll). #3145
-          const keep = charsThatFit(cell.text, maxWidth - currentLineLength);
-          if (keep > 0) appendStr(cell.text.slice(0, keep));
-          let rest = cell.text.slice(keep);
-          if (rest.length > 0) {
-            pushLine();
-            // Chunk an over-wide carried run so no single line exceeds the width.
-            while (widthOf(rest) > maxWidth) {
-              const take = Math.max(1, charsThatFit(rest, maxWidth));
-              appendStr(rest.slice(0, take));
-              pushLine();
-              rest = rest.slice(take);
-            }
-            appendStr(rest);
-          }
+          // A soft wrap never starts a line with whitespace (Google-Docs
+          // style): an overflowing inter-word space run stays as trailing
+          // whitespace on the current line, collapsed into the margin past the
+          // visible edge. The next non-space cell then begins the following
+          // line flush-left, so no wrapped line is ever led by a wrap space.
+          appendStr(cell.text);
           continue;
         }
 
@@ -1080,6 +1070,78 @@ class Text {
     }
     const prevLen = (this.getLine(yLine - 1) ?? "").length;
     return { xLine: prevLen, yLine: yLine - 1 };
+  }
+
+  /**
+   * Caret navigation one visible column LEFT. Steps left, and if that
+   * step only flipped affinity across a soft-wrap boundary — it landed on the same
+   * offset, the shared "end of the previous line == start of this line" position —
+   * steps once more so the caret reaches a real earlier column: the second-to-last
+   * position of the previous line, the Word-style behavior where a wrapped line's
+   * end and the next line's start are one position. At a hard newline / mid-line the
+   * first step already changed the offset, so it stops after one step. Used for both
+   * a collapsed caret and a growing (shift) selection.
+   */
+  caretStepLeft(
+    xLine: number,
+    yLine: number
+  ): { offset: number; affinity: CaretAffinity } {
+    const beforeOffset = this.offsetFromVisual(xLine, yLine);
+    let next = this.stepVisualLeft(xLine, yLine);
+    let info = this.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+    if (info.offset === beforeOffset) {
+      next = this.stepVisualLeft(next.xLine, next.yLine);
+      info = this.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+    }
+    return info;
+  }
+
+  /**
+   * Caret navigation one visible column RIGHT. It mirrors {@link caretStepLeft}:
+   * a soft-wrap boundary is ONE logical position (the wrapped line's end and the
+   * next line's start are the same document offset), so the caret walks it as it
+   * would the raw text — one offset per step, never resting twice at that offset.
+   * Just as Left from a continuation-line start lands on the second-to-LAST
+   * position of the previous line, Right from a wrapped line end lands on the
+   * SECOND position of the next line.
+   *
+   * - `extend` (shift-selection): if the step only flipped affinity, step once
+   *   more so the selection grows by a real char (a trailing wrap space is stepped
+   *   through and stays visibly selected).
+   * - Collapsed caret, stepping INTO the boundary from the position just before it:
+   *   if that wrapped line ends in a wrap WHITESPACE, render the boundary at the
+   *   next line's start (DOWNSTREAM) instead of past the invisible trailing space;
+   *   if it ends in a VISIBLE char (a mid-word break), stop at the line end after
+   *   that char. `\s` matches the same whitespace class the wrap tokenizer
+   *   ({@link wrapTokenRegex}) breaks on.
+   * - Collapsed caret, already AT the boundary (the step only flipped affinity to
+   *   the same offset): step once more so the caret advances into the next line
+   *   rather than resting a second time at the one boundary offset. This applies to
+   *   whitespace- and visible-char-ending wraps alike, keeping Left/Right symmetric.
+   */
+  caretStepRight(
+    xLine: number,
+    yLine: number,
+    extend: boolean
+  ): { offset: number; affinity: CaretAffinity } {
+    const beforeOffset = this.offsetFromVisual(xLine, yLine);
+    let next = this.stepVisualRight(xLine, yLine);
+    let info = this.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+    if (extend) {
+      if (info.offset === beforeOffset) {
+        next = this.stepVisualRight(next.xLine, next.yLine);
+        info = this.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+      }
+    } else if (
+      info.affinity === CaretAffinity.UPSTREAM &&
+      /\s$/.test(this.getLine(next.yLine))
+    ) {
+      info = { offset: info.offset, affinity: CaretAffinity.DOWNSTREAM };
+    } else if (info.offset === beforeOffset) {
+      next = this.stepVisualRight(next.xLine, next.yLine);
+      info = this.offsetWithAffinityFromVisual(next.xLine, next.yLine);
+    }
+    return info;
   }
 
   /**
