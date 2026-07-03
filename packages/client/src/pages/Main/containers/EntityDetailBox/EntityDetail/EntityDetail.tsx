@@ -204,7 +204,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   // Audit query - only fetched once the Audits section scrolls into view
   const [auditSectionRef, auditInViewport] = useIsInViewport("200px");
-  const { data: audit } = useAuditQuery(detailId, auditInViewport);
+  const [relationsLimit, setRelationsLimit] = useState(10);
+  useEffect(() => {
+    setRelationsLimit(10);
+  }, [detailId]);
+  const { data: audit } = useAuditQuery(detailId, auditInViewport, relationsLimit);
 
   useEffect(() => {
     if (entity !== undefined) {
@@ -1049,6 +1053,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         relations={audit.relations}
                         detailEntityId={detailId}
                         entities={entity.entities}
+                        hasMore={audit.relations.length >= relationsLimit}
+                        onLoadMore={() => setRelationsLimit((limit) => limit + 10)}
                       />
                     )}
                   </StyledDetailSectionContent>

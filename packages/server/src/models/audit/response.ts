@@ -13,7 +13,7 @@ export class ResponseAudit implements IResponseAudit {
     this.modelId = entityId;
   }
 
-  async prepare(db: Connection): Promise<void> {
+  async prepare(db: Connection, relationsLimit = 10): Promise<void> {
     this.last = await Audit.getLastNForEntity(db, this.modelId, 10);
     if (this.last.length) {
       const firstEntity = await Audit.getFirstForEntity(db, this.modelId);
@@ -21,7 +21,11 @@ export class ResponseAudit implements IResponseAudit {
         this.first = firstEntity;
       }
     }
-    this.relations = await Audit.getRelationAuditsForEntity(db, this.modelId);
+    this.relations = await Audit.getRelationAuditsForEntity(
+      db,
+      this.modelId,
+      relationsLimit
+    );
   }
 }
 

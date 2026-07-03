@@ -15,7 +15,7 @@ import { Button } from "components/basic/Button/Button";
 export const AuditTable: React.FC<IResponseAudit> = ({ modelId, auditScope, last, first }) => {
   return (
     <div>
-      <StyledAuditTable>
+      <StyledAuditTable $columns={4}>
         {last
           .filter((auditLast) => first && auditLast.date !== first.date)
           .map((auditLast, ai) => (
