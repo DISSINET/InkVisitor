@@ -26,10 +26,11 @@ export interface AnchorMarkerStyle {
 /**
  * Strokes a single corner marker.
  *
- * The vertical arm is centred on `yMidPx` and spans `armH`. Both arms run
- * right: a `start` marker caps the top (`┌`) and an `end` marker caps the
- * bottom (`└`), so a start/end pair reads as a vertical bracket around the
- * territory. Rightward arms never clip at the left margin, where most
+ * A `start` marker is a top-left corner (`┌`: stem on the left, top arm right);
+ * an `end` marker is the horizontally-mirrored bottom-right corner (`┘`: stem
+ * on the right, bottom arm left). A start/end pair frames the territory span.
+ * Both glyphs occupy the x-range `[xPx, xPx + armW]` — the end marker is shifted
+ * right so its leftward arm never clips past the left margin, where most
  * territory boundaries sit.
  *
  * @param ctx    target 2D context (assumed already translated for scroll)
@@ -48,6 +49,12 @@ export function drawAnchorMarker(
   const half = style.armH / 2;
   const top = yMidPx - half;
   const bottom = yMidPx + half;
+  // Strokes are centred on the path, so a stem sitting exactly on the boundary
+  // column (xPx == 0 at the left margin) would have half its width clipped by
+  // the canvas edge and render thinner. Nudge every x right by half the stroke
+  // so the leftmost stem edge lands on xPx — applied to both kinds so the start
+  // (┌) and end (┘) strokes are equally sized.
+  const x0 = xPx + style.lineWidth / 2;
 
   ctx.save();
   // Markers paint crisp at full opacity, independent of the highlight passes
@@ -58,17 +65,21 @@ export function drawAnchorMarker(
   ctx.lineWidth = style.lineWidth;
 
   ctx.beginPath();
-  // Vertical arm (shared by both kinds).
-  ctx.moveTo(xPx, top);
-  ctx.lineTo(xPx, bottom);
   if (kind === "start") {
-    // Top arm, running right → ┌
-    ctx.moveTo(xPx, top);
-    ctx.lineTo(xPx + style.armW, top);
+    // ┌ : vertical stem on the left at x0, top arm running right.
+    ctx.moveTo(x0, top);
+    ctx.lineTo(x0, bottom);
+    ctx.moveTo(x0, top);
+    ctx.lineTo(x0 + style.armW, top);
   } else {
-    // Bottom arm, running right → └
-    ctx.moveTo(xPx, bottom);
-    ctx.lineTo(xPx + style.armW, bottom);
+    // ┘ : vertical stem on the right, bottom arm running left back to x0. The
+    // glyph is shifted right by armW so its leftmost point is x0 (the boundary
+    // column) — the leftward arm never crosses the left edge into negative x.
+    const stemX = x0 + style.armW;
+    ctx.moveTo(stemX, top);
+    ctx.lineTo(stemX, bottom);
+    ctx.moveTo(stemX, bottom);
+    ctx.lineTo(x0, bottom);
   }
   ctx.stroke();
 

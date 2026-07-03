@@ -112,3 +112,5 @@ export const ANCHOR_MARKER_ARM_W_RATIO = 0.4;
 export const ANCHOR_MARKER_LINE_WIDTH_PX = 1.5;
 /** Horizontal offset per stacked marker at a shared position, in CSS px. */
 export const ANCHOR_MARKER_STACK_STEP_PX = 3;
+/** Padding added around a marker glyph to form its hover hit target, in CSS px. */
+export const ANCHOR_MARKER_HIT_PAD_PX = 4;

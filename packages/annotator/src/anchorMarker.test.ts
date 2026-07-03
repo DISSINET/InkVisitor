@@ -48,24 +48,26 @@ describe("drawAnchorMarker", () => {
     drawAnchorMarker(ctx, 100, 50, "start", style);
 
     const lines = ops.filter((o) => o.op === "moveTo" || o.op === "lineTo");
+    // x0 = xPx(100) + lineWidth(2)/2 = 101; armW = 4; half = armH(10)/2 = 5.
     expect(lines).toEqual([
-      { op: "moveTo", x: 100, y: 45 }, // vertical arm top (yMid 50 - half 5)
-      { op: "lineTo", x: 100, y: 55 }, // vertical arm bottom
-      { op: "moveTo", x: 100, y: 45 }, // top arm origin
-      { op: "lineTo", x: 104, y: 45 }, // top arm runs right by armW
+      { op: "moveTo", x: 101, y: 45 }, // vertical stem top
+      { op: "lineTo", x: 101, y: 55 }, // vertical stem bottom
+      { op: "moveTo", x: 101, y: 45 }, // top arm origin
+      { op: "lineTo", x: 105, y: 45 }, // top arm runs right by armW
     ]);
   });
 
-  test("end marker draws └ — vertical arm + bottom arm running right", () => {
+  test("end marker draws ┘ — stem shifted right, bottom arm running left to xPx", () => {
     const { ctx, ops } = mkCtx();
     drawAnchorMarker(ctx, 100, 50, "end", style);
 
     const lines = ops.filter((o) => o.op === "moveTo" || o.op === "lineTo");
+    // x0 = 101; stem shifted right by armW(4) → 105; bottom arm runs left to x0.
     expect(lines).toEqual([
-      { op: "moveTo", x: 100, y: 45 }, // vertical arm top
-      { op: "lineTo", x: 100, y: 55 }, // vertical arm bottom
-      { op: "moveTo", x: 100, y: 55 }, // bottom arm origin
-      { op: "lineTo", x: 104, y: 55 }, // bottom arm runs right by armW
+      { op: "moveTo", x: 105, y: 45 }, // vertical stem shifted right by armW
+      { op: "lineTo", x: 105, y: 55 }, // stem bottom
+      { op: "moveTo", x: 105, y: 55 }, // bottom arm origin at the corner
+      { op: "lineTo", x: 101, y: 55 }, // runs left to x0 (leftmost = x0, unclipped)
     ]);
   });
 

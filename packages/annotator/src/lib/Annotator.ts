@@ -15,6 +15,7 @@ import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
   ANCHOR_MARKER_ARM_H_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
+  ANCHOR_MARKER_HIT_PAD_PX,
   ANCHOR_MARKER_LINE_WIDTH_PX,
   ANCHOR_MARKER_STACK_STEP_PX,
   DEFAULT_FONT,
@@ -240,7 +241,10 @@ export class Annotator {
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
-  onHighlightCb?: (entityId: string) => HighlightSchema | void;
+  // A tag may map to several treatments at once (#2887): the active territory
+  // is both dimmed (FOCUS) and marked at its ends (ANCHOR). Returning an array
+  // draws each; a single schema (or void) keeps the original behaviour.
+  onHighlightCb?: (entityId: string) => HighlightSchema | HighlightSchema[] | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
@@ -248,6 +252,21 @@ export class Annotator {
     tag: Tag | null,
     position: { x: number; y: number } | null
   ) => void;
+
+  /**
+   * #2887 — hit rectangles for the Territory anchor markers drawn this frame,
+   * in draw coordinates (device px, before the scroll translate), each paired
+   * with its anchor Tag. Repopulated every draw; consumed by
+   * detectAndEmitAnchorTagHover so hovering a marker previews its territory
+   * through the same channel the RAW `<id>` markup hover already uses.
+   */
+  private anchorMarkerHitboxes: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    tag: Tag;
+  }[] = [];
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -821,10 +840,21 @@ export class Annotator {
   /**
    * Detects whether the mouse is over tag markup (`<tag>` or `</tag>`) and
    * emits the owning opening Tag, or null when not over any markup.
-   * Only meaningful in RAW mode since HIGHLIGHT mode hides tag markup.
+   *
+   * In RAW mode this reports `<id>` markup under the pointer. In HIGHLIGHT mode
+   * markup is hidden, but Territory anchor corner markers (#2887) are drawn and
+   * hit-tested here first, so hovering a marker previews its territory through
+   * the same channel. The marker hitbox list is empty outside HIGHLIGHT, so the
+   * prefix is inert there — no mode branch required.
    */
   private detectAndEmitAnchorTagHover(e: MouseEvent) {
     if (!this.onAnchorTagHoverCb) {
+      return;
+    }
+
+    const markerTag = this.hitTestAnchorMarker(e);
+    if (markerTag) {
+      this.onAnchorTagHoverCb(markerTag, { x: e.pageX, y: e.pageY });
       return;
     }
 
@@ -950,7 +980,9 @@ export class Annotator {
     this.onCanvasResize();
   }
 
-  onHighlight(cb: (entityId: string) => HighlightSchema | void): void {
+  onHighlight(
+    cb: (entityId: string) => HighlightSchema | HighlightSchema[] | void
+  ): void {
     this.onHighlightCb = cb;
   }
 
@@ -2372,6 +2404,7 @@ export class Annotator {
       schema: HighlightSchema;
       start: IAbsCoordinates;
       end: IAbsCoordinates;
+      tag?: Tag;
     }[]
   ): void {
     const anchorItems = higlightItems.filter(
@@ -2380,6 +2413,9 @@ export class Annotator {
     if (anchorItems.length === 0) {
       return;
     }
+    // Note: this.anchorMarkerHitboxes is cleared once per frame at the top of
+    // draw() (so it empties even in RAW/SEMI where this method never runs); we
+    // only append here.
 
     const armH = ANCHOR_MARKER_ARM_H_RATIO * this.lineHeight;
     const armW = ANCHOR_MARKER_ARM_W_RATIO * this.charWidth;
@@ -2403,6 +2439,7 @@ export class Annotator {
       xLine: number;
       kind: "start" | "end";
       color: string;
+      tag?: Tag;
     }[] = [];
     for (const it of anchorItems) {
       points.push({
@@ -2410,12 +2447,14 @@ export class Annotator {
         xLine: it.start.xLine,
         kind: "start",
         color: it.schema.style.color,
+        tag: it.tag,
       });
       points.push({
         yLine: it.end.yLine,
         xLine: it.end.xLine,
         kind: "end",
         color: it.schema.style.color,
+        tag: it.tag,
       });
     }
 
@@ -2443,7 +2482,44 @@ export class Annotator {
         lineWidth,
         color: p.color,
       });
+
+      // Record a padded hit target (glyph box grown by the pad on each side)
+      // so the tiny corner is comfortably hoverable. Coordinates match the
+      // draw space; detectAndEmitAnchorTagHover converts the pointer to match.
+      if (p.tag) {
+        const half = armH / 2;
+        const pad = ANCHOR_MARKER_HIT_PAD_PX * this.ratio;
+        this.anchorMarkerHitboxes.push({
+          x: xPx - pad,
+          y: yMid - half - pad,
+          w: armW + 2 * pad,
+          h: armH + 2 * pad,
+          tag: p.tag,
+        });
+      }
     }
+  }
+
+  /**
+   * #2887 — is the pointer over a Territory anchor marker drawn this frame?
+   * Returns the marker's Tag, or null. Pointer offsets (CSS px, canvas-local)
+   * are converted to the marker draw space: ×ratio for device px, and +scroll
+   * offset on Y to undo the draw-time `translate(0, -scrollOffsetY)`. Markers
+   * are only populated during a HIGHLIGHT-mode draw, so this is inert (empty
+   * list) in RAW/SEMI without any explicit mode check.
+   */
+  private hitTestAnchorMarker(e: MouseEvent): Tag | null {
+    if (this.anchorMarkerHitboxes.length === 0) {
+      return null;
+    }
+    const mx = e.offsetX * this.ratio;
+    const my = e.offsetY * this.ratio + this.viewport.scrollOffsetY;
+    for (const hb of this.anchorMarkerHitboxes) {
+      if (mx >= hb.x && mx <= hb.x + hb.w && my >= hb.y && my <= hb.y + hb.h) {
+        return hb.tag;
+      }
+    }
+    return null;
   }
 
   /**
@@ -2458,6 +2534,10 @@ export class Annotator {
     if (this.showFps) {
       this.updateFps();
     }
+
+    // #2887 — clear last frame's marker hover targets; the HIGHLIGHT draw below
+    // repopulates them. Cleared unconditionally so RAW/SEMI frames leave none.
+    this.anchorMarkerHitboxes = [];
 
     this.syncLineNumbersCanvasToMain();
 
@@ -2574,6 +2654,7 @@ export class Annotator {
         schema: HighlightSchema;
         start: IAbsCoordinates;
         end: IAbsCoordinates;
+        tag?: Tag; // #2887 — carried so ANCHOR markers know their entity for hover
       }[] = [];
       const processedTagNames = new Set<string>();
       for (const tag of annotated) {
@@ -2582,18 +2663,26 @@ export class Annotator {
           continue;
         }
         processedTagNames.add(tagName);
-        const hlSchema = this.onHighlightCb(tagName);
-        if (hlSchema) {
+        const hlResult = this.onHighlightCb(tagName);
+        const schemas = Array.isArray(hlResult)
+          ? hlResult
+          : hlResult
+          ? [hlResult]
+          : [];
+        if (schemas.length) {
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
             occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
-              higlightItems.push({
-                schema: hlSchema,
-                start: occurence[0],
-                end: occurence[1],
-              });
+              for (const schema of schemas) {
+                higlightItems.push({
+                  schema,
+                  start: occurence[0],
+                  end: occurence[1],
+                  tag,
+                });
+              }
             }
             i++;
           } while (!!occurence.length);
