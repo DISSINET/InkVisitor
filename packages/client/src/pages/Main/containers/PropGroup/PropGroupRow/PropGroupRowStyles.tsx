@@ -26,8 +26,7 @@ interface StyledListHeaderColumn {
 }
 export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-weight: ${({ theme }) => theme.fontWeight.light};
-  margin-left: ${({ theme, leftMargin }) =>
-    leftMargin ? theme.space[16] : theme.space[1]};
+  margin-left: ${({ theme, leftMargin }) => (leftMargin ? theme.space[16] : theme.space[1])};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   color: ${({ theme }) => theme.color["info"]};
   text-align: left;
@@ -55,8 +54,7 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   display: inline-flex;
   margin: ${({ theme }) => theme.space[1]};
   align-items: center;
-  margin-left: ${({ $level = 0, $lowIdent = false }) =>
-    getIndentation($level, $lowIdent)};
+  margin-left: ${({ $level = 0, $lowIdent = false }) => getIndentation($level, $lowIdent)};
   padding-right: 0.3rem;
 `;
 
@@ -71,7 +69,7 @@ export const StyledAttributesFlexColumn = styled.div`
   display: inline-flex;
   flex-direction: column;
   gap: 0.5rem;
-  min-width: 13rem;
+  min-width: 15rem;
 `;
 
 interface StyledAttributesFlexRow {
