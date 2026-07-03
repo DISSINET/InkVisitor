@@ -9,6 +9,5 @@ export function useAuditQuery(entityId: string, enabled = true) {
       return res.data;
     },
     enabled: !!entityId && api.isLoggedIn() && enabled,
-    staleTime: 5 * 60 * 1000,
   });
 }
