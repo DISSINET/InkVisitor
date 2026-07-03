@@ -105,7 +105,7 @@ export const SELECTION_HANDLE_GRAB_CHAR_FACTOR = 1;
  * pixel ratio at draw time.
  */
 /** Vertical arm length as a fraction of one line height. */
-export const ANCHOR_MARKER_ARM_H_RATIO = 0.4;
+export const ANCHOR_MARKER_ARM_H_RATIO = 0.7;
 /** Horizontal arm length as a fraction of one character width. */
 export const ANCHOR_MARKER_ARM_W_RATIO = 0.4;
 /** Stroke width of the corner glyph, in CSS px (scaled by ratio at draw time). */

@@ -132,7 +132,9 @@ export class Annotator {
   bgColor: string = "white";
 
   private _menuColors: MenuColors = LIGHT_MENU_COLORS;
-  get menuColors(): MenuColors { return this._menuColors; }
+  get menuColors(): MenuColors {
+    return this._menuColors;
+  }
   set menuColors(c: MenuColors) {
     this._menuColors = c;
     this.contextMenu.colors = c;
@@ -248,10 +250,7 @@ export class Annotator {
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
-  onAnchorTagHoverCb?: (
-    tag: Tag | null,
-    position: { x: number; y: number } | null
-  ) => void;
+  onAnchorTagHoverCb?: (tag: Tag | null, position: { x: number; y: number } | null) => void;
 
   /**
    * #2887 — hit rectangles for the Territory anchor markers drawn this frame,
@@ -274,11 +273,9 @@ export class Annotator {
 
   private readonly boundOnMouseMove = (e: MouseEvent) => this.onMouseMove(e);
 
-  private readonly boundOnContextMenu = (e: MouseEvent) =>
-    this.onContextMenu(e);
+  private readonly boundOnContextMenu = (e: MouseEvent) => this.onContextMenu(e);
 
-  private readonly boundOnMouseDoubleClick = (e: MouseEvent) =>
-    this.onMouseDoubleClick(e);
+  private readonly boundOnMouseDoubleClick = (e: MouseEvent) => this.onMouseDoubleClick(e);
 
   private readonly boundOnCanvasMouseLeave = () => {
     if (this.hoverDebounceTimeout) {
@@ -322,11 +319,7 @@ export class Annotator {
     this.endHandleDrag(e);
   };
 
-  constructor(
-    element: HTMLCanvasElement,
-    inputText: string,
-    ratio: number = 1
-  ) {
+  constructor(element: HTMLCanvasElement, inputText: string, ratio: number = 1) {
     canvasHosts.get(element)?.destroy();
 
     this.element = element;
@@ -348,10 +341,8 @@ export class Annotator {
     this.lineHeight = this.lineHeightForSize(this.fontSize);
 
     this.ctx = ctx;
-    this.width =
-      Number(this.element.style.width.replace("px", "")) * this.ratio;
-    this.height =
-      Number(this.element.style.height.replace("px", "")) * this.ratio;
+    this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
+    this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
     this.element.width = this.width;
     this.element.height = this.height;
@@ -415,11 +406,7 @@ export class Annotator {
     });
   }
 
-  setSelectStyle(
-    selectColor: string,
-    selectOpacity: number,
-    selectorColor: string
-  ) {
+  setSelectStyle(selectColor: string, selectOpacity: number, selectorColor: string) {
     this.selectColor = selectColor;
     this.selectOpacity = selectOpacity;
 
@@ -524,8 +511,7 @@ export class Annotator {
       const closeSeg = this.text.segments[closeSegIdx];
       const closePos = closeTag.position;
       closeSeg.raw =
-        closeSeg.raw.slice(0, closePos) +
-        closeSeg.raw.slice(closePos + closeTag.getTagLength());
+        closeSeg.raw.slice(0, closePos) + closeSeg.raw.slice(closePos + closeTag.getTagLength());
       changedSegmentIndices.add(closeSegIdx);
     }
 
@@ -545,11 +531,7 @@ export class Annotator {
     this.text.calculateLines();
 
     // Recalculate selection bounds after anchor removal (issue #2899)
-    if (
-      hasSelection &&
-      oldStartIndex !== undefined &&
-      oldEndIndex !== undefined
-    ) {
+    if (hasSelection && oldStartIndex !== undefined && oldEndIndex !== undefined) {
       let newStartIndex = oldStartIndex;
       let newEndIndex = oldEndIndex;
 
@@ -573,8 +555,7 @@ export class Annotator {
       }
 
       // Convert adjusted indices back to segment positions
-      const newStartSegPos =
-        this.text.getSegmentFromAbsTextIndex(newStartIndex);
+      const newStartSegPos = this.text.getSegmentFromAbsTextIndex(newStartIndex);
       const newEndSegPos = this.text.getSegmentFromAbsTextIndex(newEndIndex);
 
       if (newStartSegPos && newEndSegPos) {
@@ -604,7 +585,7 @@ export class Annotator {
   /**
    * Highlights all anchors with the given tag name (for statement list hover interaction).
    * Part 1 of issue #2835: When hovering over statement list, highlight the anchor in annotator.
-   * 
+   *
    * @param tagName - The entity/tag name to highlight (e.g., "entity-id-123")
    */
   highlightAnchorByTag(tagName: string) {
@@ -630,9 +611,7 @@ export class Annotator {
     // Find all opening tags with this tag name across all segments
     const matchingTags: Tag[] = [];
     for (const segment of this.text.segments) {
-      const foundTags = segment.openingTags.filter(
-        (tag) => tag.getTagName() === tagName
-      );
+      const foundTags = segment.openingTags.filter((tag) => tag.getTagName() === tagName);
       matchingTags.push(...foundTags);
     }
 
@@ -712,9 +691,7 @@ export class Annotator {
    * @param openTag - Opening tag to match
    * @returns Matching closing tag with its segment index, or null
    */
-  private findMatchingClosingTag(
-    openTag: Tag
-  ): { closeTag: Tag; closeSegIdx: number } | null {
+  private findMatchingClosingTag(openTag: Tag): { closeTag: Tag; closeSegIdx: number } | null {
     const tagName = openTag.getTagName();
     let depth = 0;
 
@@ -769,7 +746,7 @@ export class Annotator {
 
   /**
    * Detects anchors at the current mouse position and emits hover callback. When hovering over anchored text, emit tags to highlight statements.
-   * 
+   *
    * @param e - Mouse event
    */
   private detectAndEmitAnchorHover(e: MouseEvent) {
@@ -789,16 +766,10 @@ export class Annotator {
     );
 
     // Clamp to valid line range
-    tempCursor.yLine = Math.max(
-      0,
-      Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1))
-    );
+    tempCursor.yLine = Math.max(0, Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1)));
 
     // Get segment position at cursor
-    const segmentPos = this.text.getSegmentPosition(
-      tempCursor.yLine,
-      tempCursor.xLine
-    );
+    const segmentPos = this.text.getSegmentPosition(tempCursor.yLine, tempCursor.xLine);
 
     if (!segmentPos) {
       this.onAnchorHoverCb([]);
@@ -822,9 +793,7 @@ export class Annotator {
         }
 
         const openAbsRawStart = openTag.getAbsoluteTagPosition(this.text.segments);
-        const closeAbsRawStart = match.closeTag.getAbsoluteTagPosition(
-          this.text.segments
-        );
+        const closeAbsRawStart = match.closeTag.getAbsoluteTagPosition(this.text.segments);
         const contentStart = openAbsRawStart + openTag.getTagLength();
         const contentEnd = closeAbsRawStart;
 
@@ -868,15 +837,9 @@ export class Annotator {
       this.proportionalHitTest()
     );
 
-    tempCursor.yLine = Math.max(
-      0,
-      Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1))
-    );
+    tempCursor.yLine = Math.max(0, Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1)));
 
-    const segmentPos = this.text.getSegmentPosition(
-      tempCursor.yLine,
-      tempCursor.xLine
-    );
+    const segmentPos = this.text.getSegmentPosition(tempCursor.yLine, tempCursor.xLine);
 
     if (!segmentPos) {
       this.onAnchorTagHoverCb(null, null);
@@ -901,9 +864,7 @@ export class Annotator {
           continue;
         }
 
-        const closeStart = match.closeTag.getAbsoluteTagPosition(
-          this.text.segments
-        );
+        const closeStart = match.closeTag.getAbsoluteTagPosition(this.text.segments);
         const closeEnd = closeStart + match.closeTag.getTagLength();
 
         if (hoverAbsRawIndex >= closeStart && hoverAbsRawIndex < closeEnd) {
@@ -917,10 +878,8 @@ export class Annotator {
   }
 
   onCanvasResize() {
-    this.width =
-      Number(this.element.style.width.replace("px", "")) * this.ratio;
-    this.height =
-      Number(this.element.style.height.replace("px", "")) * this.ratio;
+    this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
+    this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
     this.element.width = this.width;
     this.element.height = this.height;
@@ -934,8 +893,7 @@ export class Annotator {
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const extent = this.scrollExtentLineCount();
-    const positionBeforeRel =
-      extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
+    const positionBeforeRel = extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
 
     this.viewport.updateLineEnd(noLinesViewport);
     // Keep the proportional wrap budget in sync with the new width
@@ -958,15 +916,10 @@ export class Annotator {
       this.scrollExtentLineCount()
     );
 
-    this.scroller?.setRunnerSize(
-      (this.viewport.noLines / this.scrollExtentLineCount()) * 100
-    );
+    this.scroller?.setRunnerSize((this.viewport.noLines / this.scrollExtentLineCount()) * 100);
 
     this.scroller?.setViewportSize(
-      Math.min(
-        100,
-        (this.viewport.noLines / this.scrollExtentLineCount()) * 100
-      )
+      Math.min(100, (this.viewport.noLines / this.scrollExtentLineCount()) * 100)
     );
 
     if (this.settingsOverlay.isOpen) {
@@ -980,9 +933,7 @@ export class Annotator {
     this.onCanvasResize();
   }
 
-  onHighlight(
-    cb: (entityId: string) => HighlightSchema | HighlightSchema[] | void
-  ): void {
+  onHighlight(cb: (entityId: string) => HighlightSchema | HighlightSchema[] | void): void {
     this.onHighlightCb = cb;
   }
 
@@ -1017,7 +968,7 @@ export class Annotator {
   /**
    * Registers callback for anchor hover events (Part 2 of #2835).
    * Called when user hovers over anchored text in the annotator.
-   * 
+   *
    * @param cb - Callback receiving array of Tags at the hover position
    */
   onAnchorHover(cb: (tags: Tag[]) => void) {
@@ -1030,9 +981,7 @@ export class Annotator {
    * Emits the opening Tag for both opening and closing markup hits, or null
    * when the pointer leaves any tag markup.
    */
-  onAnchorTagHover(
-    cb: (tag: Tag | null, position: { x: number; y: number } | null) => void
-  ) {
+  onAnchorTagHover(cb: (tag: Tag | null, position: { x: number; y: number } | null) => void) {
     this.onAnchorTagHoverCb = cb;
   }
 
@@ -1145,12 +1094,8 @@ export class Annotator {
    * The proportional column→pixel resolver to put on DrawingOptions,
    * or undefined when monospace (so draw keeps using `col * charWidth`).
    */
-  private drawColumnToPixelX():
-    | ((absLine: number, col: number) => number)
-    | undefined {
-    return this.proportional
-      ? (absLine, col) => this.text.columnToPixelX(absLine, col)
-      : undefined;
+  private drawColumnToPixelX(): ((absLine: number, col: number) => number) | undefined {
+    return this.proportional ? (absLine, col) => this.text.columnToPixelX(absLine, col) : undefined;
   }
 
   /**
@@ -1158,9 +1103,7 @@ export class Annotator {
    * (device px → caret column on a given line), or undefined when monospace
    * (so the legacy `xToCharI` is used). Mirror of {@link drawColumnToPixelX}.
    */
-  private proportionalHitTest():
-    | ((absLine: number, deviceX: number) => number)
-    | undefined {
+  private proportionalHitTest(): ((absLine: number, deviceX: number) => number) | undefined {
     return this.proportional
       ? (absLine, deviceX) => this.text.pixelXToColumn(absLine, deviceX)
       : undefined;
@@ -1183,11 +1126,7 @@ export class Annotator {
    */
   private handleToleranceX(pt: IAbsCoordinates): number {
     return this.proportional
-      ? Math.max(
-          1,
-          this.text.glyphWidthAt(pt.yLine, pt.xLine) *
-            SELECTION_HANDLE_GRAB_CHAR_FACTOR
-        )
+      ? Math.max(1, this.text.glyphWidthAt(pt.yLine, pt.xLine) * SELECTION_HANDLE_GRAB_CHAR_FACTOR)
       : this.charWidth * SELECTION_HANDLE_GRAB_CHAR_FACTOR;
   }
 
@@ -1285,18 +1224,14 @@ export class Annotator {
    * selection.
    */
   private selectionHandlesActive(): boolean {
-    return (
-      this.text.mode === EditMode.HIGHLIGHT && this.cursor.isSelected()
-    );
+    return this.text.mode === EditMode.HIGHLIGHT && this.cursor.isSelected();
   }
 
   /**
    * The two absolute visual boundary points (document-ordered start, end) where
    * the handles sit, or null when handles should not be shown.
    */
-  private selectionHandlePoints():
-    | { start: IAbsCoordinates; end: IAbsCoordinates }
-    | null {
+  private selectionHandlePoints(): { start: IAbsCoordinates; end: IAbsCoordinates } | null {
     if (!this.selectionHandlesActive()) {
       return null;
     }
@@ -1312,10 +1247,7 @@ export class Annotator {
    * cursor (unlike applyPointerToCursor). Clamps into the document like a normal
    * click would.
    */
-  private pointerToVisual(
-    clientX: number,
-    clientY: number
-  ): IAbsCoordinates {
+  private pointerToVisual(clientX: number, clientY: number): IAbsCoordinates {
     const rect = this.element.getBoundingClientRect();
     const { ox, oy } = this.clientCoordsToCanvasOffsets(clientX, clientY, rect);
     const tmp = this.scratchCursor;
@@ -1388,14 +1320,8 @@ export class Annotator {
     if (!points) {
       return false;
     }
-    const startOff = this.text.offsetFromVisual(
-      points.start.xLine,
-      points.start.yLine
-    );
-    const endOff = this.text.offsetFromVisual(
-      points.end.xLine,
-      points.end.yLine
-    );
+    const startOff = this.text.offsetFromVisual(points.start.xLine, points.start.yLine);
+    const endOff = this.text.offsetFromVisual(points.end.xLine, points.end.yLine);
     if (startOff < 0 || endOff < 0) {
       return false;
     }
@@ -1409,10 +1335,7 @@ export class Annotator {
    * Bypasses the normal selection path entirely so the existing selection is not
    * collapsed before we move it.
    */
-  private startHandleDrag(
-    mode: "start" | "end" | "span",
-    e: MouseEvent
-  ): void {
+  private startHandleDrag(mode: "start" | "end" | "span", e: MouseEvent): void {
     this.dragHandle = mode;
     this.handleDragMoved = false;
     this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
@@ -1422,14 +1345,8 @@ export class Annotator {
       const pt = this.pointerToVisual(e.clientX, e.clientY);
       const grabOff = this.text.offsetFromVisual(pt.xLine, pt.yLine);
       if (points && grabOff >= 0) {
-        const startOff = this.text.offsetFromVisual(
-          points.start.xLine,
-          points.start.yLine
-        );
-        const endOff = this.text.offsetFromVisual(
-          points.end.xLine,
-          points.end.yLine
-        );
+        const startOff = this.text.offsetFromVisual(points.start.xLine, points.start.yLine);
+        const endOff = this.text.offsetFromVisual(points.end.xLine, points.end.yLine);
         this.spanDragState = { startOff, endOff, grabOff };
       } else {
         this.spanDragState = null;
@@ -1581,10 +1498,7 @@ export class Annotator {
 
   private readonly tickSelectionEdgeScroll = () => {
     this.selectionScrollRaf = 0;
-    if (
-      (!this.cursor.isSelecting() && !this.dragHandle) ||
-      !this.lastSelectPointer
-    ) {
+    if ((!this.cursor.isSelecting() && !this.dragHandle) || !this.lastSelectPointer) {
       return;
     }
 
@@ -1602,17 +1516,9 @@ export class Annotator {
     const speed = this.lineHeight * SELECTION_EDGE_SCROLL_SPEED;
 
     if (inTopZone) {
-      this.viewport.addScrollOffset(
-        -speed,
-        this.lineHeight,
-        this.scrollExtentLineCount()
-      );
+      this.viewport.addScrollOffset(-speed, this.lineHeight, this.scrollExtentLineCount());
     } else if (inBottomZone) {
-      this.viewport.addScrollOffset(
-        speed,
-        this.lineHeight,
-        this.scrollExtentLineCount()
-      );
+      this.viewport.addScrollOffset(speed, this.lineHeight, this.scrollExtentLineCount());
     }
 
     const scrolled =
@@ -1622,15 +1528,9 @@ export class Annotator {
     if (scrolled) {
       if (this.dragHandle) {
         this.handleDragMoved = true;
-        this.applyHandleDrag(
-          this.lastSelectPointer.cx,
-          this.lastSelectPointer.cy
-        );
+        this.applyHandleDrag(this.lastSelectPointer.cx, this.lastSelectPointer.cy);
       } else {
-        this.applyPointerToCursor(
-          this.lastSelectPointer.cx,
-          this.lastSelectPointer.cy
-        );
+        this.applyPointerToCursor(this.lastSelectPointer.cx, this.lastSelectPointer.cy);
       }
       this.draw();
     }
@@ -1642,17 +1542,12 @@ export class Annotator {
       inZone &&
       scrolled
     ) {
-      this.selectionScrollRaf = requestAnimationFrame(
-        this.tickSelectionEdgeScroll
-      );
+      this.selectionScrollRaf = requestAnimationFrame(this.tickSelectionEdgeScroll);
     }
   };
 
   private ensureSelectionEdgeScrollRunning() {
-    if (
-      !this.lastSelectPointer ||
-      (!this.cursor.isSelecting() && !this.dragHandle)
-    ) {
+    if (!this.lastSelectPointer || (!this.cursor.isSelecting() && !this.dragHandle)) {
       return;
     }
     if (this.selectionScrollRaf) {
@@ -1661,9 +1556,7 @@ export class Annotator {
     const rect = this.element.getBoundingClientRect();
     const cy = this.lastSelectPointer.cy;
     if (cy < rect.top || cy > rect.bottom) {
-      this.selectionScrollRaf = requestAnimationFrame(
-        this.tickSelectionEdgeScroll
-      );
+      this.selectionScrollRaf = requestAnimationFrame(this.tickSelectionEdgeScroll);
     }
   }
 
@@ -1722,10 +1615,7 @@ export class Annotator {
     this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
     this.applyPointerToCursor(e.clientX, e.clientY);
 
-    this.annotatedPosition = this.text.cursorToIndex(
-      this.viewport,
-      this.cursor
-    );
+    this.annotatedPosition = this.text.cursorToIndex(this.viewport, this.cursor);
 
     this.draw();
 
@@ -1860,10 +1750,7 @@ export class Annotator {
       }
     }
 
-    const [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
-      this.viewport,
-      this.cursor
-    );
+    const [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(this.viewport, this.cursor);
     this.cursor.selectStart = {
       xLine: this.cursor.xLine + offsetLeft,
       yLine: this.cursor.yLine,
@@ -1992,15 +1879,20 @@ export class Annotator {
       onChange: (px) => this.setFontSize(px),
     });
 
-    this.settingsOverlay.open(settings, this.element, [
-      {
-        label: "Reset to defaults",
-        onClick: () => {
-          this.resetSettings();
-          this.openSettings(); // re-render so controls show the defaults
+    this.settingsOverlay.open(
+      settings,
+      this.element,
+      [
+        {
+          label: "Reset to defaults",
+          onClick: () => {
+            this.resetSettings();
+            this.openSettings(); // re-render so controls show the defaults
+          },
         },
-      },
-    ], this.menuColors);
+      ],
+      this.menuColors
+    );
   }
 
   /**
@@ -2010,11 +1902,7 @@ export class Annotator {
    */
   onWheel(e: WheelEvent) {
     const deltaBufferPx = e.deltaY * this.ratio;
-    this.viewport.addScrollOffset(
-      deltaBufferPx,
-      this.lineHeight,
-      this.scrollExtentLineCount()
-    );
+    this.viewport.addScrollOffset(deltaBufferPx, this.lineHeight, this.scrollExtentLineCount());
 
     e.preventDefault();
     this.draw();
@@ -2025,19 +1913,11 @@ export class Annotator {
     if (prev && prev !== this) {
       prev.destroy();
     }
-    this.lines = new Lines(
-      canvasElement,
-      this.ratio,
-      this.lineHeight,
-      this.charWidth
-    );
+    this.lines = new Lines(canvasElement, this.ratio, this.lineHeight, this.charWidth);
     linesHosts.set(canvasElement, this);
   }
 
-  getAnnotations(
-    start: SegmentPosition | null,
-    end: SegmentPosition | null
-  ): Tag[] {
+  getAnnotations(start: SegmentPosition | null, end: SegmentPosition | null): Tag[] {
     // Track open/close tag pairs more cleanly using Tag objects
     const tagStack: Tag[] = [];
     const finalTags: Tag[] = [];
@@ -2078,10 +1958,7 @@ export class Annotator {
     };
 
     // Helper function to find the closest opening tag for a given tag name
-    const findClosestOpeningTag = (
-      tagName: string,
-      beforeAbsolutePosition: number
-    ): Tag | null => {
+    const findClosestOpeningTag = (tagName: string, beforeAbsolutePosition: number): Tag | null => {
       let closestTag: Tag | null = null;
       let closestDistance = Infinity;
 
@@ -2089,10 +1966,7 @@ export class Annotator {
         const segment = this.text.segments[i];
         for (const tag of segment.openingTags) {
           const tagAbsolutePosition = getAbsoluteTextIndex(tag);
-          if (
-            tag.getTagName() === tagName &&
-            tagAbsolutePosition < beforeAbsolutePosition
-          ) {
+          if (tag.getTagName() === tagName && tagAbsolutePosition < beforeAbsolutePosition) {
             const distance = beforeAbsolutePosition - tagAbsolutePosition;
             if (distance < closestDistance) {
               closestDistance = distance;
@@ -2142,8 +2016,7 @@ export class Annotator {
           }
         } else {
           const matchingIndex = tagStack.findLastIndex(
-            (stackTag) =>
-              stackTag.getTagName() === tag.getTagName() && !stackTag.closing
+            (stackTag) => stackTag.getTagName() === tag.getTagName() && !stackTag.closing
           );
 
           if (matchingIndex !== -1) {
@@ -2153,10 +2026,8 @@ export class Annotator {
 
             const closingTagInSelection =
               (i > start.segmentIndex ||
-                (i === start.segmentIndex &&
-                  tag.position >= start.rawTextIndex)) &&
-              (i < end.segmentIndex ||
-                (i === end.segmentIndex && tag.position < end.rawTextIndex));
+                (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
+              (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex));
 
             const openingTagOpenedBeforeEnd =
               matchedOpeningTag.segmentIndex < end.segmentIndex ||
@@ -2167,8 +2038,7 @@ export class Annotator {
               closingTagInSelection ||
               (openingTagOpenedBeforeEnd &&
                 (i > start.segmentIndex ||
-                  (i === start.segmentIndex &&
-                    tag.position >= start.rawTextIndex)));
+                  (i === start.segmentIndex && tag.position >= start.rawTextIndex)));
 
             if (shouldIncludeOpeningTag) {
               addToFinal(matchedOpeningTag);
@@ -2182,10 +2052,8 @@ export class Annotator {
 
           const closingTagInSelection =
             (i > start.segmentIndex ||
-              (i === start.segmentIndex &&
-                tag.position >= start.rawTextIndex)) &&
-            (i < end.segmentIndex ||
-              (i === end.segmentIndex && tag.position < end.rawTextIndex));
+              (i === start.segmentIndex && tag.position >= start.rawTextIndex)) &&
+            (i < end.segmentIndex || (i === end.segmentIndex && tag.position < end.rawTextIndex));
           if (closingTagInSelection) {
             addToFinal(tag);
           }
@@ -2200,8 +2068,7 @@ export class Annotator {
       // Tags that opened after end position should not be included
       const tagOpenedBeforeEnd =
         unclosedTag.segmentIndex < end.segmentIndex ||
-        (unclosedTag.segmentIndex === end.segmentIndex &&
-          unclosedTag.position < end.rawTextIndex);
+        (unclosedTag.segmentIndex === end.segmentIndex && unclosedTag.position < end.rawTextIndex);
 
       if (tagOpenedBeforeEnd) {
         // Tag opened before end position and is still unclosed, so it's active in the selection
@@ -2238,10 +2105,7 @@ export class Annotator {
           const tagSegmentIndex = tag.segmentIndex;
           if (tagSegmentIndex !== -1) {
             const tagAbsolutePosition = getAbsoluteTextIndex(tag);
-            const closestOpening = findClosestOpeningTag(
-              tag.getTagName(),
-              tagAbsolutePosition
-            );
+            const closestOpening = findClosestOpeningTag(tag.getTagName(), tagAbsolutePosition);
             if (closestOpening) {
               const closestOpeningId = getTagId(closestOpening);
               if (!processedTagIds.has(closestOpeningId)) {
@@ -2316,10 +2180,7 @@ export class Annotator {
     this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
-      const scrollableLines = Math.max(
-        0,
-        this.scrollExtentLineCount() - viewportLines
-      );
+      const scrollableLines = Math.max(0, this.scrollExtentLineCount() - viewportLines);
       const scrollablePx = scrollableLines * this.lineHeight;
       const targetPx = (percentage / 100) * scrollablePx;
       const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
@@ -2332,9 +2193,7 @@ export class Annotator {
       );
       this.draw();
     });
-    this.scroller?.setRunnerSize(
-      (this.viewport.noLines / this.scrollExtentLineCount()) * 100
-    );
+    this.scroller?.setRunnerSize((this.viewport.noLines / this.scrollExtentLineCount()) * 100);
 
     const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
@@ -2362,25 +2221,20 @@ export class Annotator {
     };
 
     const mainCssW = parseCssPx(mainEl.style.width) || mainEl.clientWidth || 1;
-    const gutterCssW =
-      parseCssPx(lineEl.style.width) || lineEl.clientWidth || 50;
+    const gutterCssW = parseCssPx(lineEl.style.width) || lineEl.clientWidth || 50;
 
     if (mainEl.style.height) {
       lineEl.style.height = mainEl.style.height;
     }
 
-    const scale =
-      mainEl.width > 0 && mainCssW > 0 ? mainEl.width / mainCssW : this.ratio;
+    const scale = mainEl.width > 0 && mainCssW > 0 ? mainEl.width / mainCssW : this.ratio;
     const nextW = Math.max(1, Math.round(gutterCssW * scale));
     const nextH =
       mainEl.height > 0
         ? mainEl.height
         : Math.max(
             1,
-            Math.round(
-              (parseCssPx(mainEl.style.height) || mainEl.clientHeight) *
-                this.ratio
-            )
+            Math.round((parseCssPx(mainEl.style.height) || mainEl.clientHeight) * this.ratio)
           );
 
     if (lineEl.width !== nextW || lineEl.height !== nextH) {
@@ -2407,9 +2261,7 @@ export class Annotator {
       tag?: Tag;
     }[]
   ): void {
-    const anchorItems = higlightItems.filter(
-      (it) => it.schema.mode === HighlightMode.ANCHOR
-    );
+    const anchorItems = higlightItems.filter((it) => it.schema.mode === HighlightMode.ANCHOR);
     if (anchorItems.length === 0) {
       return;
     }
@@ -2430,8 +2282,7 @@ export class Annotator {
     // endpoint is off-screen is simply skipped (a multi-screen territory shows
     // ┌ on its first visible line and ┘ on its last).
     const lastVisibleRel =
-      Math.min(this.viewport.lineEnd, this.text.noLines) -
-      this.viewport.lineStart;
+      Math.min(this.viewport.lineEnd, this.text.noLines) - this.viewport.lineStart;
 
     // Expand each anchor into its two endpoint markers, in list order.
     const points: {
@@ -2608,19 +2459,12 @@ export class Annotator {
     // if (this.onSelectTextCb && this.cursor.isSelected()) {
     if (this.onSelectTextCb) {
       const [start, end] = this.cursor.getAbsBounds();
-      if (
-        start &&
-        end &&
-        (start.xLine !== end.xLine || start?.yLine !== end?.yLine)
-      ) {
+      if (start && end && (start.xLine !== end.xLine || start?.yLine !== end?.yLine)) {
         const startSegment = this.text.getSegmentPosition(
           start.yLine,
           start.xLine
         ) as SegmentPosition;
-        const endSegment = this.text.getSegmentPosition(
-          end.yLine,
-          end.xLine
-        ) as SegmentPosition;
+        const endSegment = this.text.getSegmentPosition(end.yLine, end.xLine) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
@@ -2639,15 +2483,8 @@ export class Annotator {
     }
 
     if (this.text.mode === EditMode.HIGHLIGHT && this.onHighlightCb) {
-      const startPos = this.text.getSegmentPosition(
-        this.viewport.lineStart,
-        0,
-        true
-      );
-      const endPos = this.text.getSegmentPosition(
-        this.viewport.lineEnd,
-        this.text.charsAtLine
-      );
+      const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0, true);
+      const endPos = this.text.getSegmentPosition(this.viewport.lineEnd, this.text.charsAtLine);
 
       const annotated: Tag[] = this.getAnnotations(startPos, endPos);
       const higlightItems: {
@@ -2664,11 +2501,7 @@ export class Annotator {
         }
         processedTagNames.add(tagName);
         const hlResult = this.onHighlightCb(tagName);
-        const schemas = Array.isArray(hlResult)
-          ? hlResult
-          : hlResult
-          ? [hlResult]
-          : [];
+        const schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         if (schemas.length) {
           let occurence: IAbsCoordinates[];
           let i = 0;
@@ -2726,6 +2559,21 @@ export class Annotator {
       }
 
       this.drawAnchorMarkers(higlightItems);
+
+      // #2887 — highlights and anchor markers paint after the collapsed caret
+      // above, so a caret sharing a marker's cell is hidden underneath. Repaint
+      // it on top. Guarded to the collapsed case: cursor.draw then strokes only
+      // the caret, so selection rects are never lifted over the highlights.
+      if (textSegment && !this.cursor.isSelected()) {
+        this.cursor.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+          caretWidth: this.caretWidth * this.ratio,
+          caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
+          columnToPixelX: this.drawColumnToPixelX(),
+        });
+      }
     }
 
     // Issue #3108 — draw the draggable handles on top of the selection. Inside
@@ -2780,9 +2628,7 @@ export class Annotator {
   private loadSettings(): void {
     let parsed: PersistedSettings | null = null;
     try {
-      const raw =
-        typeof localStorage !== "undefined" &&
-        localStorage.getItem(SETTINGS_STORAGE_KEY);
+      const raw = typeof localStorage !== "undefined" && localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (raw) {
         parsed = JSON.parse(raw) as PersistedSettings;
       }
@@ -2839,9 +2685,7 @@ export class Annotator {
     // Default to the first host-supplied option (e.g. "Sans (app)") so the
     // picker shows a valid value; fall back to the generic when none supplied.
     this.proportionalFontFamily =
-      this.fontFamilyOptions.length > 0
-        ? this.fontFamilyOptions[0].value
-        : PROPORTIONAL_FONT;
+      this.fontFamilyOptions.length > 0 ? this.fontFamilyOptions[0].value : PROPORTIONAL_FONT;
 
     try {
       if (typeof localStorage !== "undefined") {
@@ -2881,10 +2725,7 @@ export class Annotator {
    * shows the real default rather than black.
    */
   getHighlightColor(): string {
-    return (
-      this.highlightColor ??
-      this.cssColorToHex(this.cursor.style.color as string)
-    );
+    return this.highlightColor ?? this.cssColorToHex(this.cursor.style.color as string);
   }
 
   /**
@@ -2931,17 +2772,13 @@ export class Annotator {
    * during activity and dips after idle gaps.
    */
   private updateFps() {
-    const now =
-      typeof performance !== "undefined" ? performance.now() : Date.now();
+    const now = typeof performance !== "undefined" ? performance.now() : Date.now();
     if (this.lastFrameTime > 0) {
       const dt = now - this.lastFrameTime;
       if (dt > 0) {
         const instantaneous = 1000 / dt;
         // Exponential moving average smooths jitter between on-demand redraws.
-        this.fps =
-          this.fps === 0
-            ? instantaneous
-            : this.fps * 0.8 + instantaneous * 0.2;
+        this.fps = this.fps === 0 ? instantaneous : this.fps * 0.8 + instantaneous * 0.2;
       }
     }
     this.lastFrameTime = now;
@@ -2997,10 +2834,7 @@ export class Annotator {
       const absLine = segment.lineStart + newPos.lineIndex;
       this.viewport.lineStart = Math.max(
         0,
-        Math.min(
-          absLine,
-          Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines)
-        )
+        Math.min(absLine, Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines))
       );
       this.viewport.scrollOffsetY = scrollOffsetBefore;
     }
@@ -3082,18 +2916,13 @@ export class Annotator {
         maxTagEnd = Math.max(maxTagEnd, m.index + m[0].length);
       }
       const selectionEncompassesAllTags =
-        minTagStart <= maxTagEnd &&
-        indexStart <= minTagStart &&
-        indexEnd >= maxTagEnd;
+        minTagStart <= maxTagEnd && indexStart <= minTagStart && indexEnd >= maxTagEnd;
       if (selectionEncompassesAllTags) {
         if (indexStart === 0) {
           indexEnd = raw.length;
         }
       } else {
-        [indexStart, indexEnd] = this.sanitizeEnvelopeRange(
-          indexStart,
-          indexEnd
-        );
+        [indexStart, indexEnd] = this.sanitizeEnvelopeRange(indexStart, indexEnd);
       }
 
       // could be '<tag>text .... text</tag> (closing tag always included if present)
@@ -3104,12 +2933,7 @@ export class Annotator {
       const openTagString = openTag.getTag();
       const closeTagString = closeTag.getTag();
 
-      this.text.value =
-        beforeText +
-        openTagString +
-        selectedRawText +
-        closeTagString +
-        afterText;
+      this.text.value = beforeText + openTagString + selectedRawText + closeTagString + afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
@@ -3208,8 +3032,7 @@ export class Annotator {
 
     // Scroll to where the anchored content starts (just past the opening tag).
     this.scrollCaretToRawIndex(
-      openingTag.getAbsoluteTagPosition(this.text.segments) +
-        openingTag.getTagLength()
+      openingTag.getAbsoluteTagPosition(this.text.segments) + openingTag.getTagLength()
     );
   }
 
@@ -3250,16 +3073,9 @@ export class Annotator {
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
     // doesn't snap the viewport to the top of a line.
-    const maxLineStart = Math.max(
-      0,
-      this.scrollExtentLineCount() - 1 - this.viewport.noLines
-    );
-    const clampedLineStart = Math.max(
-      0,
-      Math.min(positionBeforeChange, maxLineStart)
-    );
-    const desiredLineStart =
-      clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
+    const maxLineStart = Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines);
+    const clampedLineStart = Math.max(0, Math.min(positionBeforeChange, maxLineStart));
+    const desiredLineStart = clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
 
     this.viewport.setScrollPosition(
       desiredLineStart,
@@ -3276,19 +3092,11 @@ export class Annotator {
    * @param isRegex
    * @returns
    */
-  search(
-    toFind: string,
-    isRegex: boolean = false,
-    isCaseSensitive: boolean = true
-  ): Occurrence[] {
+  search(toFind: string, isRegex: boolean = false, isCaseSensitive: boolean = true): Occurrence[] {
     const occurrences = [];
     const normalizedTerm = isCaseSensitive ? toFind : toFind.toLowerCase();
 
-    const collectLiteralOccurrences = (
-      line: string,
-      segmentIndex: number,
-      lineIndex: number
-    ) => {
+    const collectLiteralOccurrences = (line: string, segmentIndex: number, lineIndex: number) => {
       const normalizedLine = isCaseSensitive ? line : line.toLowerCase();
       let startIndex = 0;
 
@@ -3328,18 +3136,10 @@ export class Annotator {
             }
           } catch (error) {
             // If regex is invalid, treat as literal string
-            collectLiteralOccurrences(
-              line,
-              parseInt(segmentI, 10),
-              parseInt(lineI, 10)
-            );
+            collectLiteralOccurrences(line, parseInt(segmentI, 10), parseInt(lineI, 10));
           }
         } else {
-          collectLiteralOccurrences(
-            line,
-            parseInt(segmentI, 10),
-            parseInt(lineI, 10)
-          );
+          collectLiteralOccurrences(line, parseInt(segmentI, 10), parseInt(lineI, 10));
         }
       }
     }
@@ -3352,9 +3152,7 @@ export class Annotator {
    * @param occurence
    */
   selectSearchOccurrence(occurence: Occurrence) {
-    const absY =
-      this.text.segments[occurence.segmentIndex].lineStart +
-      occurence.lineIndex;
+    const absY = this.text.segments[occurence.segmentIndex].lineStart + occurence.lineIndex;
     this.cursor.xLine = occurence.end;
     this.cursor.yLine = absY;
 
@@ -3379,10 +3177,7 @@ export class Annotator {
           start.yLine,
           start.xLine
         ) as SegmentPosition;
-        const endSegment = this.text.getSegmentPosition(
-          end.yLine,
-          end.xLine
-        ) as SegmentPosition;
+        const endSegment = this.text.getSegmentPosition(end.yLine, end.xLine) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
@@ -3429,11 +3224,7 @@ export class Annotator {
     this.keys.scrollCursorIntoView();
     this.runWarningChecks();
 
-    if (
-      changed &&
-      this.text.mode !== EditMode.HIGHLIGHT &&
-      this.onTextChangeCb
-    ) {
+    if (changed && this.text.mode !== EditMode.HIGHLIGHT && this.onTextChangeCb) {
       this.onTextChangeCb(this.text.value);
     }
     this.draw();
@@ -3508,10 +3299,7 @@ export class Annotator {
         // Place the caret at insert-offset + length via the offset model. Unlike
         // move(len, 0) — which only shifts xLine and mishandles pasted newlines —
         // this lands correctly for multi-line text and stays in bounds.
-        const insertOffset = this.text.offsetFromVisual(
-          this.cursor.xLine,
-          this.cursor.yLine
-        );
+        const insertOffset = this.text.offsetFromVisual(this.cursor.xLine, this.cursor.yLine);
         this.text.insertText(this.viewport, this.cursor, clipText);
         const pasteAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
         this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
@@ -3539,10 +3327,7 @@ export class Annotator {
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     }
     // See onPasteText: offset-based caret placement handles multi-line text.
-    const insertOffset = this.text.offsetFromVisual(
-      this.cursor.xLine,
-      this.cursor.yLine
-    );
+    const insertOffset = this.text.offsetFromVisual(this.cursor.xLine, this.cursor.yLine);
     this.text.insertText(this.viewport, this.cursor, text);
     const insertAt = insertOffset >= 0 ? insertOffset : this.cursor.head;
     this.cursor.moveToOffset(this.text, insertAt + text.length);
@@ -3637,10 +3422,7 @@ export class Annotator {
    * @param indexEnd The current end index of the text range
    * @returns Adjusted [indexStart, indexEnd] to ensure proper nesting
    */
-  private sanitizeEnvelopeRange(
-    indexStart: number,
-    indexEnd: number
-  ): [number, number] {
+  private sanitizeEnvelopeRange(indexStart: number, indexEnd: number): [number, number] {
     const raw = this.text.value;
 
     // Utility functions
@@ -3661,14 +3443,8 @@ export class Annotator {
       const searchText = raw.slice(rangeStart, rangeEnd);
 
       // Use existing regexes to find all tags in the search range
-      const openingRegex = new RegExp(
-        openingTagRegex.source,
-        openingTagRegex.flags
-      );
-      const closingRegex = new RegExp(
-        closingTagRegex.source,
-        closingTagRegex.flags
-      );
+      const openingRegex = new RegExp(openingTagRegex.source, openingTagRegex.flags);
+      const closingRegex = new RegExp(closingTagRegex.source, closingTagRegex.flags);
 
       // Find all opening tags
       let match;
@@ -3757,9 +3533,7 @@ export class Annotator {
         const closingTag = tagPositions.find(
           (t) => !t.isOpen && t.name === tag.name && t.start > tag.start
         );
-        return (
-          closingTag != null && start <= tag.start && end >= closingTag.end
-        );
+        return closingTag != null && start <= tag.start && end >= closingTag.end;
       });
 
       if (hasCompleteTagPairFullyContained) {
@@ -3786,11 +3560,7 @@ export class Annotator {
         }
 
         // If we found valid content boundaries, use them
-        if (
-          contentStart < contentEnd &&
-          contentStart >= start &&
-          contentEnd <= end
-        ) {
+        if (contentStart < contentEnd && contentStart >= start && contentEnd <= end) {
           return [clamp(contentStart), clamp(contentEnd)];
         }
       }
@@ -3799,9 +3569,7 @@ export class Annotator {
     }
 
     // Find tags that overlap with our selection
-    const overlappingTags = tagPositions.filter(
-      (tag) => tag.start < end && tag.end > start
-    );
+    const overlappingTags = tagPositions.filter((tag) => tag.start < end && tag.end > start);
 
     // Remove immediate closing nodes from the left neighbor group
     // This handles cases where selection starts with closing tags that should be excluded
@@ -3828,10 +3596,7 @@ export class Annotator {
       if (nextOpeningTag && end > nextOpeningTag.end) {
         // Check if the selection ends with the matching closing tag for this opening tag
         const matchingClosingTag = tagPositions.find(
-          (t) =>
-            !t.isOpen &&
-            t.name === nextOpeningTag.name &&
-            t.start > nextOpeningTag.start
+          (t) => !t.isOpen && t.name === nextOpeningTag.name && t.start > nextOpeningTag.start
         );
 
         // Only remove the opening tag if the selection doesn't include the complete tag pair
@@ -3846,14 +3611,12 @@ export class Annotator {
       // Also check for closing tags at the end that should be removed
       // But only remove them if they're not part of a complete tag pair
       let adjustedEnd = end;
-      const closingTagsAtEnd = overlappingTags.filter(
-        (tag) => !tag.isOpen && tag.end === end
-      );
+      const closingTagsAtEnd = overlappingTags.filter((tag) => !tag.isOpen && tag.end === end);
 
       if (closingTagsAtEnd.length > 0) {
         // Find the leftmost closing tag at the end
-        const leftmostClosingTagAtEnd = closingTagsAtEnd.reduce(
-          (min, current) => (current.start < min.start ? current : min)
+        const leftmostClosingTagAtEnd = closingTagsAtEnd.reduce((min, current) =>
+          current.start < min.start ? current : min
         );
 
         // Check if this closing tag is part of a complete tag pair
@@ -3865,11 +3628,12 @@ export class Annotator {
               t.name === leftmostClosingTagAtEnd.name &&
               t.start < leftmostClosingTagAtEnd.start
           )
-          .reduce(
-            (closest, current) =>
-              current.start > closest.start ? current : closest,
-            { start: -1, end: -1, name: "", isOpen: false }
-          );
+          .reduce((closest, current) => (current.start > closest.start ? current : closest), {
+            start: -1,
+            end: -1,
+            name: "",
+            isOpen: false,
+          });
 
         // Only remove the closing tag if it's not part of a complete tag pair
         if (!matchingOpeningTag || matchingOpeningTag.start < adjustedStart) {
@@ -3911,10 +3675,7 @@ export class Annotator {
       let isSeparate = true;
       for (let i = 0; i < openTags.length - 1; i++) {
         for (let j = i + 1; j < openTags.length; j++) {
-          if (
-            openTags[i].start < openTags[j].start &&
-            openTags[j].end < openTags[i].end
-          ) {
+          if (openTags[i].start < openTags[j].start && openTags[j].end < openTags[i].end) {
             isSeparate = false;
             break;
           }
@@ -3939,11 +3700,7 @@ export class Annotator {
     let newEnd = end;
 
     // If selection starts before the tag and ends after the tag starts
-    if (
-      start <= innermostTag.start &&
-      end > innermostTag.start &&
-      end <= innermostTag.end
-    ) {
+    if (start <= innermostTag.start && end > innermostTag.start && end <= innermostTag.end) {
       // Move start to after the tag (exclude the tag)
       newStart = innermostTag.end;
     }
@@ -3953,11 +3710,7 @@ export class Annotator {
       newStart = innermostTag.end;
     }
     // If selection starts before the tag ends and ends after the tag
-    else if (
-      start >= innermostTag.start &&
-      start < innermostTag.end &&
-      end >= innermostTag.end
-    ) {
+    else if (start >= innermostTag.start && start < innermostTag.end && end >= innermostTag.end) {
       // Move end to before the tag (exclude the tag)
       newEnd = innermostTag.start;
     }
@@ -3967,10 +3720,7 @@ export class Annotator {
       if (innermostTag.isOpen) {
         // This is an opening tag, find its closing tag
         const closingTag = tagPositions.find(
-          (t) =>
-            !t.isOpen &&
-            t.name === innermostTag.name &&
-            t.start > innermostTag.start
+          (t) => !t.isOpen && t.name === innermostTag.name && t.start > innermostTag.start
         );
         if (closingTag) {
           newStart = innermostTag.end;
@@ -3979,10 +3729,7 @@ export class Annotator {
       } else {
         // This is a closing tag, find its opening tag
         const openingTag = tagPositions.find(
-          (t) =>
-            t.isOpen &&
-            t.name === innermostTag.name &&
-            t.start < innermostTag.start
+          (t) => t.isOpen && t.name === innermostTag.name && t.start < innermostTag.start
         );
         if (openingTag) {
           newStart = openingTag.end;
@@ -3996,11 +3743,7 @@ export class Annotator {
     if (newStart === start && newEnd === end) {
       // Find closing tags that are before the innermost tag and within our selection
       for (const tag of overlappingTags) {
-        if (
-          !tag.isOpen &&
-          tag.end <= innermostTag.start &&
-          tag.start >= start
-        ) {
+        if (!tag.isOpen && tag.end <= innermostTag.start && tag.start >= start) {
           // This is a closing tag before the innermost tag, move start past it
           newStart = Math.max(newStart, tag.end);
         }
@@ -4011,9 +3754,7 @@ export class Annotator {
     // move the start to exclude the closing tag
     if (newStart === start && newEnd === end) {
       // Check if selection starts with a closing tag
-      const startingClosingTag = overlappingTags.find(
-        (tag) => !tag.isOpen && tag.start === start
-      );
+      const startingClosingTag = overlappingTags.find((tag) => !tag.isOpen && tag.start === start);
 
       if (startingClosingTag) {
         // Check if the end matches a complete tag pair
@@ -4024,10 +3765,7 @@ export class Annotator {
         if (endingTag) {
           // Find the matching closing tag for the ending tag
           const matchingClosingTag = tagPositions.find(
-            (t) =>
-              !t.isOpen &&
-              t.name === endingTag.name &&
-              t.start > endingTag.start
+            (t) => !t.isOpen && t.name === endingTag.name && t.start > endingTag.start
           );
 
           if (matchingClosingTag && matchingClosingTag.end === end) {
@@ -4060,11 +3798,7 @@ export class Annotator {
       }
 
       // If we found valid content boundaries, use them
-      if (
-        contentStart < contentEnd &&
-        contentStart >= start &&
-        contentEnd <= end
-      ) {
+      if (contentStart < contentEnd && contentStart >= start && contentEnd <= end) {
         newStart = contentStart;
         newEnd = contentEnd;
       }
@@ -4098,10 +3832,7 @@ export class Annotator {
     segmentIndex: number
   ): { tag: Tag; issue: AsymmetricalAnchor } | undefined {
     const issue = this.validateAnchors().find(
-      (i) =>
-        i.tagName === tagName &&
-        i.position === position &&
-        i.segmentIndex === segmentIndex
+      (i) => i.tagName === tagName && i.position === position && i.segmentIndex === segmentIndex
     );
     if (!issue) {
       return undefined;
@@ -4112,13 +3843,8 @@ export class Annotator {
       return undefined;
     }
 
-    const tags =
-      issue.type === "orphaned-opening"
-        ? segment.openingTags
-        : segment.closingTags;
-    const tag = tags.find(
-      (t) => t.getTagName() === tagName && t.position === issue.position
-    );
+    const tags = issue.type === "orphaned-opening" ? segment.openingTags : segment.closingTags;
+    const tag = tags.find((t) => t.getTagName() === tagName && t.position === issue.position);
 
     return tag ? { tag, issue } : undefined;
   }
@@ -4150,11 +3876,7 @@ export class Annotator {
    * Remove an asymmetrical (broken) anchor identified by tag name, per-segment
    * position and segment index. Returns true if successfully removed.
    */
-  removeAsymmetricalAnchor(
-    tagName: string,
-    position: number,
-    segmentIndex: number
-  ): boolean {
+  removeAsymmetricalAnchor(tagName: string, position: number, segmentIndex: number): boolean {
     const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
     if (!found) {
       return false;
@@ -4192,18 +3914,12 @@ export class Annotator {
    * both orphaned opening and orphaned closing tags. Intended to be used in RAW
    * mode, where the tag markup is visible and line positions match raw text.
    */
-  scrollToAsymmetricalAnchor(
-    tagName: string,
-    position: number,
-    segmentIndex: number
-  ): void {
+  scrollToAsymmetricalAnchor(tagName: string, position: number, segmentIndex: number): void {
     const found = this.findAsymmetricalTag(tagName, position, segmentIndex);
     if (!found) {
       return;
     }
-    this.scrollCaretToRawIndex(
-      found.tag.getAbsoluteTagPosition(this.text.segments)
-    );
+    this.scrollCaretToRawIndex(found.tag.getAbsoluteTagPosition(this.text.segments));
   }
 
   /**

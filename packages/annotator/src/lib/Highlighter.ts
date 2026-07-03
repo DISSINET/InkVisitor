@@ -145,7 +145,15 @@ export default class Highlighter {
       ctx.globalCompositeOperation = "multiply";
       ctx.fillRect(xStartPx, y, width, height);
     } else if (this.hlMode === "select") {
-      ctx.globalCompositeOperation = "color";
+      // A collapsed caret (width === 0) is painted solid so it stays visible on
+      // top of anchor markers / highlights; the "color" blend only tints them
+      // and the caret vanishes (#2887). Selection spans keep the blend.
+      if (width === 0) {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.globalAlpha = 1;
+      } else {
+        ctx.globalCompositeOperation = "color";
+      }
       // width === 0 means a collapsed caret; honor the configured caret width.
       ctx.fillRect(xStartPx, y, width || options.caretWidth || 1, height);
     }
