@@ -384,7 +384,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
     }
-    applyPropChanges(propId, changes);
+    applyPropChanges(propId, changes, instantUpdate);
   };
 
   const applyPropChanges = (propId: string, changes: Partial<IProp>, instantUpdate?: boolean) => {
