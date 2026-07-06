@@ -76,6 +76,22 @@ describe("Annotator draws Territory anchor markers (#2887)", () => {
     }
   });
 
+  test("end boundary at column 0 renders at the previous line's end", () => {
+    // The closing tag sits at the start of the second line; drawing the ┘
+    // there would clamp its left-running arm over that line's text, so the
+    // marker is moved after the previous line's last character.
+    const a = mk("<T1>abc\n</T1>xyz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => anchorSchema);
+    a.draw();
+
+    const byKind = (k: string) => markerMock.mock.calls.find((c) => c[3] === k)!;
+    // Same line as the start marker (yMid equal)…
+    expect(byKind("end")[2]).toBe(byKind("start")[2]);
+    // …and to its right, after the line's last character.
+    expect(byKind("end")[1]).toBeGreaterThan(byKind("start")[1]);
+  });
+
   test("no markers drawn when no ANCHOR schema is returned", () => {
     const a = mk("foo <T1>bar</T1> baz");
     a.setMode(EditMode.HIGHLIGHT);

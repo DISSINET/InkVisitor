@@ -2300,9 +2300,19 @@ export class Annotator {
         color: it.schema.style.color,
         tag: it.tag,
       });
+      // An end boundary at column 0 belongs visually to the previous line —
+      // drawn on its own line, the ┘ arm (running left) would be clamped
+      // rightward over that line's text. Render it after the previous line's
+      // last character instead.
+      let endYLine = it.end.yLine;
+      let endXLine = it.end.xLine;
+      if (endXLine === 0 && endYLine > 0) {
+        endYLine -= 1;
+        endXLine = this.text.getLine(endYLine).length;
+      }
       points.push({
-        yLine: it.end.yLine,
-        xLine: it.end.xLine,
+        yLine: endYLine,
+        xLine: endXLine,
         kind: "end",
         color: it.schema.style.color,
         tag: it.tag,
