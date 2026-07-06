@@ -2394,11 +2394,24 @@ export class Annotator {
       const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
       const yMid = (relLine + 0.5) * this.lineHeight;
 
+      // #2885 — the anchor being resized pulses its corner markers too (not just
+      // the span wash), so a Territory (whose only visual is these markers) shows
+      // which boundary is being moved. Oscillate the marker opacity between
+      // PULSE_MARKER_MIN and full via the shared ResizePulse phase, never fully
+      // hidden so it stays locatable.
+      const pulsing =
+        this.resizeAnchor != null && p.tag?.getTagName() === this.resizeAnchor.tagName;
+      const PULSE_MARKER_MIN = 0.3;
+      const markerOpacity = pulsing
+        ? PULSE_MARKER_MIN + (1 - PULSE_MARKER_MIN) * this.resizePulse.intensity()
+        : 1;
+
       const box = drawAnchorMarker(this.ctx, xPx, yMid, p.kind, {
         armH,
         armW,
         lineWidth,
         color: p.color,
+        opacity: markerOpacity,
       });
 
       // Record a padded hit target around the box actually drawn — start and
@@ -3213,7 +3226,11 @@ export class Annotator {
       return false;
     }
     const tag = boundary === "open" ? resolved.openTag : resolved.closeTag;
-    this.scrollToRawPosition(tag.getAbsoluteTagPosition(this.text.segments));
+    // For the closing boundary leave one line of context above so the span's end
+    // (and its blinking pulse) lands on the second visible line instead of being
+    // clipped at the very top edge. The opening boundary stays at the top (#2885).
+    const lineOffset = boundary === "close" ? -1 : 0;
+    this.scrollToRawPosition(tag.getAbsoluteTagPosition(this.text.segments), lineOffset);
     return true;
   }
 
@@ -3584,13 +3601,15 @@ export class Annotator {
   }
 
   /**
-   * Scrolls the viewport so that the given raw text character index is at the top of the visible area.
+   * Scrolls the viewport so that the given raw text character index is at the top
+   * of the visible area. `lineOffset` shifts the target line (e.g. -1 leaves one
+   * line of context above so the position lands on the second visible line).
    */
-  scrollToRawPosition(rawIndex: number): void {
+  scrollToRawPosition(rawIndex: number, lineOffset: number = 0): void {
     const pos = this.text.getSegmentFromAbsTextIndex(rawIndex);
     if (!pos) return;
     const segment = this.text.segments[pos.segmentIndex];
-    const absLine = segment.lineStart + pos.lineIndex;
+    const absLine = Math.max(0, segment.lineStart + pos.lineIndex + lineOffset);
     this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
     this.draw();
   }
