@@ -1,7 +1,7 @@
 import { createMockTree, testErroneousResponse } from "@modules/common.test";
 import { BadParams, StatementDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -11,15 +11,20 @@ import treeCache from "@service/treeCache";
 import { pool } from "@middlewares/db";
 
 describe("statements/batch-reorder", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("Empty/Invalid params", () => {
     it("should return a BadParams error wrapped in IResponseGeneric for empty params", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/batch-reorder`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
@@ -42,10 +47,9 @@ describe("statements/batch-reorder", function () {
     });
 
     it("should return StatementDoesNotExits for unknown statement id", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/batch-reorder`)
         .send({ updates: [{ id: "missing-id", order: 100 }] })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new StatementDoesNotExits("", ""))
         );
@@ -65,7 +69,7 @@ describe("statements/batch-reorder", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/batch-reorder`)
         .send({
           updates: [
@@ -73,7 +77,6 @@ describe("statements/batch-reorder", function () {
             { id: statement2.id, order: 100 },
           ],
         })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((resp) => {
           expect(resp.body.result).toBe(true);
@@ -99,7 +102,7 @@ describe("statements/batch-reorder", function () {
       // Reverse the order: s1->30, s2->20, s3->10. Every target collides
       // with an existing sibling — the legacy code path produced fractional
       // orders here.
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/batch-reorder`)
         .send({
           updates: [
@@ -108,7 +111,6 @@ describe("statements/batch-reorder", function () {
             { id: s3.id, order: 10 },
           ],
         })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200);
 
       const after1 = await findEntityById(db, s1.id);
@@ -141,10 +143,9 @@ describe("statements/batch-reorder", function () {
       }));
 
       const start = Date.now();
-      await request(app)
+      await authAgent
         .put(`${apiPath}/statements/batch-reorder`)
         .send({ updates })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200);
       const elapsedMs = Date.now() - start;
 

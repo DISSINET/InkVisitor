@@ -24,19 +24,24 @@ import { ITerritory } from "@inkvisitor/shared/types";
 import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import "ts-jest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import app from "../../server";
 
 describe("Entities create", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
@@ -45,10 +50,9 @@ describe("Entities create", function () {
   });
   describe("faulty data ", () => {
     it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities`)
         .send({ test: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
@@ -68,10 +72,9 @@ describe("Entities create", function () {
         }),
       });
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities`)
         .send(entityData)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         // The create endpoint now echoes the created entity back in `data`, so
@@ -95,10 +98,9 @@ describe("Entities create", function () {
         id: randomId,
       });
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities`)
         .send(territoryData)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         .expect((res) => {
@@ -122,10 +124,9 @@ describe("Entities create", function () {
       // template; use a template so the server still generates a fresh id.
       const ent = new Territory({ labels: ["22323"], isTemplate: true });
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities`)
         .send(ent)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         .expect((res) => {
@@ -188,10 +189,9 @@ describe("Entities create", function () {
         const [, newEntity] = prepareEntity();
         newEntity.usedTemplate = "random1235";
 
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities`)
           .send(newEntity)
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(
             testErroneousResponse.bind(undefined, new EntityDoesNotExist(""))
@@ -203,10 +203,9 @@ describe("Entities create", function () {
       it("should receive 200", async () => {
         newEntity.usedTemplate = conceptTemplate.id;
 
-        await request(app)
+        await authAgent
           .post(`${apiPath}/entities`)
           .send(newEntity)
-          .set("authorization", "Bearer " + supertestConfig.token)
           .expect("Content-Type", /json/)
           .expect(200);
       });

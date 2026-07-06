@@ -5,7 +5,7 @@ import {
 } from "@modules/common.test";
 import { createEntity } from "@service/shorthands";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import Territory from "@models/territory/territory";
@@ -112,6 +112,12 @@ const testCorrectPaths = (mockTerritories: ITerritory[], res: any) => {
 };
 
 describe("Tree get", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -141,9 +147,8 @@ describe("Tree get", function () {
     treeCache.db = db.connection;
     treeCache.tree = await treeCache.createTree();
 
-    await request(app)
+    await authAgent
       .get(`${apiPath}/tree`)
-      .set("authorization", "Bearer " + supertestConfig.token)
       .expect(200)
       .expect(testCorrectRootTerritory.bind(undefined, territories))
       .expect(

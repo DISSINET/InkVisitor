@@ -14,29 +14,33 @@ import { findEntityById } from "@service/shorthands";
 import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams, EntityDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import app from "../../server";
 
 describe("Entities update", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/entities/1`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data ", () => {
     it("should return an EntityDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/entities/1`)
         .send({ test: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
@@ -58,10 +62,9 @@ describe("Entities update", function () {
       });
       await statementData.save(db.connection);
 
-      await request(app)
+      await authAgent
         .put(`${apiPath}/entities/${testId}`)
         .send({ labels: [changeLabelTo] })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(successfulGenericResponse)

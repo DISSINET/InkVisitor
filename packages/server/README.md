@@ -53,7 +53,9 @@ Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `
 - `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
 - `BACKUP_DIR` = directory containing the DB backup archives (mounted read-only from the `inkvisitor-backup` PVC in deployments); empty/unset disables the backups API
 - `PORT` = port which should be used for this app
-- `SECRET` = for signing jwt token
+- `SECRET` = for signing short-lived download tokens
+- `SESSION_SECRET` = session cookie signing secret (defaults to `SECRET`)
+- `SESSION_MAX_AGE` = session cookie max age in milliseconds (default 30 days)
 - `SMTP_HOST` / `SMTP_PORT` = SMTP relay (e.g. Mailjet `in-v3.mailjet.com`, port `587`)
 - `SMTP_USER` / `SMTP_SECRET` = SMTP credentials (Mailjet: API key and secret key from the dashboard)
 - `MAILER_SENDER` = From address; must match a verified sender at your provider
@@ -67,11 +69,11 @@ Please refer to exported [postman collection](./postman/inkvisitor_api.postman_c
 
 ## Authorization
 
-Api uses JWT tokens to authenticate the user. With this the session is controlled by token which makes the development faster, makes api easier for testing but exposes several problems, mainly token expiration question and/or session invalidation. As mentioned avove, the jwt should be replaced by cookie session in the future. Token based authorization, hovewer, should still be available.
+The API uses HttpOnly cookie sessions stored in RethinkDB. Sign in via `POST /users/signin` with `{ "login", "password" }`; the response includes the user profile and the server sets the session cookie. Sign out via `POST /users/signout`.
 
-Utility script for generating new jwt tokens:
+Short-lived signed `?token=` query parameters are still used for one-shot backup download URLs where a cookie cannot be sent.
 
-`pnpm run jwt`
+Tests authenticate with `getAuthenticatedAgent()` from `src/modules/testAuth.ts` (cookie jar via supertest agent).
 
 ## Errors
 

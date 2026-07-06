@@ -7,11 +7,17 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import Statement, { StatementData } from "@models/statement/statement";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { pool } from "@middlewares/db";
 import treeCache from "@service/treeCache";
 
 describe("Territories get query", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -21,17 +27,13 @@ describe("Territories get query", function () {
     // param, so a request without an id matches no route and yields a 404
     // instead of reaching the BadParams check inside the handler.
     it("should return a 404 for a missing territoryId path segment", async () => {
-      await request(app)
-        .get(`${apiPath}/territories`)
-        .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(404);
+      await authAgent.get(`${apiPath}/territories`).expect(404);
     });
   });
   describe("Wrong param", () => {
     it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/territories/123`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -83,9 +85,8 @@ describe("Territories get query", function () {
       treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
 
-      await request(app)
+      await authAgent
         .get(`${apiPath}/territories/${testTerritoryId}?preload=1`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
           expect(res.body).toBeTruthy();

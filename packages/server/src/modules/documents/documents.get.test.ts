@@ -1,7 +1,7 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { DocumentDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -9,15 +9,20 @@ import Document from "@models/document/document";
 import { pool } from "@middlewares/db";
 
 describe("modules/documents GET", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("Wrong param", () => {
     it("should return an DocumentDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/documents/123`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -42,9 +47,8 @@ describe("modules/documents GET", function () {
     afterAll(async () => await clean(db));
 
     it("should return a 200 code", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/documents/${document.id}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {
           expect(typeof res.body).toEqual("object");

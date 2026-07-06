@@ -1,5 +1,5 @@
 import request from "supertest";
-import { supertestConfig } from "./modules";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "./server";
 import { unknownRouteError, unauthorizedError } from "@middlewares/errors";
@@ -9,10 +9,15 @@ import { pool } from "@middlewares/db";
 import { testErroneousResponse } from "@modules/common.test";
 
 describe("Test unknown route", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   it("should return an unknownRouteError wrapped in IResponeGeneric response", async () => {
-    await request(app)
+    await authAgent
       .get(`${apiPath}/random/get`)
-      .set("authorization", "Bearer " + supertestConfig.token)
       .expect(unknownRouteError.statusCode())
       .expect({
         result: false,
@@ -23,19 +28,16 @@ describe("Test unknown route", function () {
 });
 
 describe("Test unauthorized request", function () {
-  afterAll(async () => {
-    await pool.end();
-  });
-
   it("should return an unauthorizedError wrapped in IResponeGeneric response", async () => {
-    // A request with no Authorization header falls back to the dev
-    // TEST_JWT_TOKEN (validateJwt.getToken), so it would authenticate as admin
-    // and hit a 400 instead. Send a present-but-bogus bearer token to exercise
-    // the unauthorized path (mirrors src/test/harness.smoke.test.ts).
+    // No cookie session on a protected route -> the auth middleware rejects the
+    // request with an unauthorized error.
     await request(app)
       .get(`${apiPath}/users/122322`)
-      .set("authorization", "Bearer not-a-real-token")
       .expect(unauthorizedError.statusCode())
       .expect(testErroneousResponse.bind(undefined, unauthorizedError));
   });
+});
+
+afterAll(async () => {
+  await pool.end();
 });

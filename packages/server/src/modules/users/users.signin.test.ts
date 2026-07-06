@@ -1,8 +1,5 @@
 import { testErroneousResponse } from "@modules/common.test";
-import {
-  BadParams,
-  BadCredentialsError,
-} from "@inkvisitor/shared/types/errors";
+import { BadCredentialsError, BadParams } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
@@ -65,16 +62,15 @@ describe("Users signin", function () {
   });
   describe("Ok body with ok user", () => {
     it("should return a 200 code with successful response", async () => {
-      await request(app)
+      const res = await request(app)
         .post(`${apiPath}/users/signin`)
         .send({ login: "admin", password: "admin" })
         .expect("Content-Type", /json/)
-        .expect((res) => {
-          expect(res.body).toBeInstanceOf(Object);
-          expect(res.body).toHaveProperty("token");
-          expect(res.body.token).toBeTruthy();
-        })
         .expect(200);
+
+      expect(res.body).toBeTruthy();
+      expect(typeof res.body).toBe("object");
+      expect(res.body.id).toBeTruthy();
     });
   });
 });

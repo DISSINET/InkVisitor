@@ -2,6 +2,7 @@ import * as cron from "node-cron";
 import { Connection } from "rethinkdb-ts";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
 import { EventType } from "@inkvisitor/shared/types/stats";
+import { reapExpiredSessions } from "@service/rethinkSessionStore";
 
 export class CronService {
   private db: Connection;
@@ -31,9 +32,25 @@ export class CronService {
     });
 
     task.start();
+
+    // Reap expired sessions hourly so abandoned sessions don't pile up in the
+    // sessions table (active ones are also cleaned lazily on access).
+    const sessionReapTask = cron.schedule(
+      "0 * * * *",
+      async () => {
+        await this.runSessionReap();
+      },
+      {
+        timezone: "UTC",
+      }
+    );
+
+    sessionReapTask.start();
     this.isRunning = true;
 
-    console.log("Cron service started - stats aggregation will run daily at midnight UTC");
+    console.log(
+      "Cron service started - stats aggregation daily at midnight UTC, expired-session reap hourly"
+    );
   }
 
   /**
@@ -69,6 +86,22 @@ export class CronService {
         `[stats-cron] ${runDate}: stats aggregation failed after ${duration}ms`,
         error
       );
+    }
+  }
+
+  /**
+   * Deletes expired sessions from the RethinkDB session store.
+   */
+  async runSessionReap(): Promise<void> {
+    const startTime = Date.now();
+    try {
+      const deleted = await reapExpiredSessions(this.db);
+      if (deleted > 0) {
+        console.log(`[session-reap] removed ${deleted} expired session(s)`);
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`[session-reap] failed after ${duration}ms`, error);
     }
   }
 

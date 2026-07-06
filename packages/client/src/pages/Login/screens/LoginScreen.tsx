@@ -47,7 +47,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         const res = await api.signIn(usernameLocal, password, {
           ignoreErrorToast: true,
         });
-        if (res?.token) {
+        if (res?.id) {
           await dispatch(setUsername(usernameLocal));
           setRedirectToMain(true);
         }

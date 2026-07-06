@@ -6,7 +6,7 @@ import { AuditDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import "ts-jest";
@@ -21,15 +21,20 @@ import { pool } from "@middlewares/db";
 // scenarios that relied on `fromAuditId` (BadParams for empty/mismatched audit)
 // and the `EntityDoesExist` guard no longer apply and have been removed.
 describe("Entities restoration", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("non existing entities", () => {
     it("should return a AuditDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/random/restore`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new AuditDoesNotExist(""))
@@ -62,9 +67,8 @@ describe("Entities restoration", function () {
     });
 
     it("should restore the entity from valid audit and return successful IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/${validAudit.modelId}/restore`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         // The restore endpoint now returns a message plus the restored entity in

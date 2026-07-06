@@ -3,32 +3,36 @@ import { BadParams, DocumentDoesNotExist } from "@inkvisitor/shared/types/errors
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Document from "@models/document/document";
 import { pool } from "@middlewares/db";
 
 describe("modules/documents UPDATE", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/documents/random1345`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data ", () => {
     it("should return an DocumentDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/documents/random13545`)
         .send({ test: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(
@@ -54,10 +58,9 @@ describe("modules/documents UPDATE", function () {
     afterAll(async () => await clean(db));
 
     it("should return a 200 code with successful response", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/documents/${document.id}`)
         .send({ title: changeTitleTo })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(successfulGenericResponse)

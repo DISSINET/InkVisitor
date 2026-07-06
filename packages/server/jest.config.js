@@ -27,7 +27,9 @@ if (!TEST_DB_PATTERN.test(process.env.DB_NAME || "")) {
 
 const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   (prev, curr) => {
-    // alias prefix without the trailing "/*" (handles multi-segment names like "@inkvisitor/shared")
+    if (curr === "src/*") {
+      return prev;
+    }
     const prefix = curr.replace(/\/\*$/, "");
     // Anchor with ^ so the alias only matches imports that START with it - matching
     // TypeScript's path semantics. Without the anchor, "src/(.*)" matches ANY
@@ -132,9 +134,10 @@ module.exports = {
       // drop it afterwards, so tests never touch real data. See src/test/.
       globalSetup: "<rootDir>/src/test/globalSetup.ts",
       globalTeardown: "<rootDir>/src/test/globalTeardown.ts",
-      // Runs in each worker before any test module is imported; mints TEST_JWT_TOKEN.
       // (Re-list SILENCE_CONSOLE: this array overrides the one from `base`.)
-      setupFiles: [SILENCE_CONSOLE, "<rootDir>/src/test/setup.ts"],
+      // Auth is cookie-session based (see @modules/testAuth), so no per-worker
+      // token minting is needed here.
+      setupFiles: [SILENCE_CONSOLE],
       // retry.ts: retry the irreducible transport flake (integration only).
       // isolate.ts: restore the globalSetup baseline before each file so suites
       // never inherit each other's leftover rows.

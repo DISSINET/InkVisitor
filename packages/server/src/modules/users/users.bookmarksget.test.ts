@@ -9,12 +9,18 @@ import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import User from "@models/user/user";
 import { IBookmarkFolder } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
 
 describe("Users bookmarksGet", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   const db = new Db();
 
   beforeAll(async () => {
@@ -28,9 +34,8 @@ describe("Users bookmarksGet", function () {
 
   describe("Wrong param", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/users/123/bookmarks`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
         );
@@ -42,9 +47,8 @@ describe("Users bookmarksGet", function () {
       const user = new User({ id: testUserId, bookmarks: [] });
       await user.save(db.connection);
 
-      await request(app)
+      await authAgent
         .get(`${apiPath}/users/${testUserId}/bookmarks`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           expect(res.body).toEqual([]);
         })
@@ -77,9 +81,8 @@ describe("Users bookmarksGet", function () {
       });
       await user.save(db.connection);
 
-      await request(app)
+      await authAgent
         .get(`${apiPath}/users/${testId}/bookmarks`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
           expect(res.body).toHaveLength(1);
           expect(res.body[0].entities).toHaveLength(1);

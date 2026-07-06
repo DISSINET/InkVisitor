@@ -1,143 +1,27 @@
 import * as bcrypt from "bcryptjs";
-import { sign as signJwt, verify as verifyJwtRaw, JwtPayload } from "jsonwebtoken";
-import { IUser } from "@inkvisitor/shared/types/user";
-import { expressjwt, Request as JWTRequest } from "express-jwt";
-import { NextFunction, Request } from "express";
 import { v1 as uuid } from "uuid";
 
-/**
- * Wrapper around bcrypt method for password hashing
- * @param rawPassword
- * @returns
- */
 export function hashPassword(rawPassword: string): string {
   return bcrypt.hashSync(rawPassword, 10);
 }
 
-/**
- * Convenient function which generates random char sequence
- * @param len
- * @returns
- */
 export function generateRandomString(len: number): string {
   return Math.random().toString(36).slice(-len);
 }
 
-/**
- * Wrapper around library-provided uuid function
- * @returns
- */
 export function generateUuid(): string {
   return uuid();
 }
 
-/**
- * Wrapper around bcrypt method for checking raw ~ hashed password
- * Also handles plain text passwords for backward compatibility (local dev)
- * @param rawPassword
- * @param storedHash
- * @returns
- */
 export function checkPassword(
   rawPassword: string,
   storedHash: string
 ): boolean {
-  // Check if stored password is a bcrypt hash (starts with $2a$, $2b$, or $2y$)
   const isBcryptHash = /^\$2[ayb]\$\d{2}\$/.test(storedHash);
 
   if (isBcryptHash) {
-    // Use bcrypt comparison for hashed passwords
     return bcrypt.compareSync(rawPassword, storedHash);
   } else {
-    // Fallback to direct comparison for plain text passwords (local dev only)
-    // This allows the database to work with plain text passwords during development
     return rawPassword === storedHash;
   }
-}
-
-const defaultJwtAlgo = "HS256";
-
-// apply altered secret variable - each run will get secret refresh
-let secret = (process.env.SECRET as string) || "";
-if (process.env.NODE_ENV !== "test") {
-  if (process.argv.length > 3) {
-    secret += process.argv[3];
-  } else if (process.env.BUILD_TIMESTAMP) {
-    secret += process.env.BUILD_TIMESTAMP;
-  }
-}
-
-if (secret) {
-  console.log(`SECRET set to ${secret}`);
-}
-
-function signToken(user: IUser, expSeconds: number): string {
-  return signJwt(
-    { user, exp: Math.floor(Date.now() / 1000) + expSeconds },
-    secret,
-    { algorithm: defaultJwtAlgo }
-  );
-}
-
-/**
- * Standard session JWT used for Bearer-header auth.
- */
-export const generateAccessToken = (user: IUser, expDays = 30): string =>
-  signToken(user, 86400 * expDays);
-
-/**
- * Short-lived JWT intended for one-shot URL-embedded auth
- * (e.g. file download links where the browser cannot send Bearer headers).
- */
-export const generateShortLivedToken = (user: IUser, expSeconds: number): string =>
-  signToken(user, expSeconds);
-
-/**
- * Verifies a JWT and returns the embedded user payload, or null on any failure.
- * Used by non-Express auth surfaces (e.g. socket.io handshake) so the JWT
- * secret stays scoped to this module.
- */
-export function verifyJwtToken(token: string): IUser | null {
-  if (!token) return null;
-  try {
-    const decoded = verifyJwtRaw(token, secret, {
-      algorithms: [defaultJwtAlgo],
-    }) as JwtPayload & { user?: IUser };
-    return decoded?.user ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Middleware constructor that checks provided jwt token. Token must be valid - must be decodeable/signed and not expired.
- * For db specific task - check for user's properties, see customizeAuthenticatedRequest middleware in ./request.ts
- * @returns middleware
- */
-export function validateJwt() {
-  return expressjwt({
-    secret: secret,
-    algorithms: [defaultJwtAlgo],
-    requestProperty: "user",
-    isRevoked: async (req, token) => {
-      return false;
-    },
-    getToken: (req: Request): string | Promise<string> | undefined => {
-      if (
-        req.headers.authorization &&
-        req.headers.authorization.split(" ")[0] === "Bearer"
-      ) {
-        return req.headers.authorization.split(" ")[1];
-      } else if (req.query && req.query.token) {
-        return req.query.token as string;
-      }
-
-      // dev purposes - check pnpm run jwt to generate it and set it as env variable TEST_JWT_TOKEN
-      if (process.env.TEST_JWT_TOKEN) {
-        return process.env.TEST_JWT_TOKEN;
-      }
-
-      return undefined;
-    },
-  });
 }
