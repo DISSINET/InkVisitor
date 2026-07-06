@@ -20,10 +20,11 @@ import { adminSeed } from "./fixtures";
  *      its password) or leave extra users behind. Re-seeding the canonical admin
  *      makes auth and the signin flow independent of file execution order.
  *
- * acl_permissions is left untouched: globalSetup seeds none and the suites that
- * need a row (e.g. signin) insert their own in a beforeAll that runs after this.
- * Tolerant of a missing/unreachable DB so a pure-unit run without RethinkDB is
- * unaffected.
+ * acl_permissions is left untouched: globalSetup seeds the public signin row
+ * (which cookie-session auth needs) once, and it is never mutated per-file, so
+ * there is nothing to restore here. Suites that need extra rows insert their own
+ * in a beforeAll that runs after this. Tolerant of a missing/unreachable DB so a
+ * pure-unit run without RethinkDB is unaffected.
  */
 const MUTABLE_TABLES = [
   "entities",

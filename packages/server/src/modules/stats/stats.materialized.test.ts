@@ -2,15 +2,18 @@ import request from "supertest";
 import app from "../../server";
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import { MaterializedStats } from "@models/stats/materialized-stats";
 import { EventType, Aggregation, TimeUnit } from "@inkvisitor/shared/types/stats";
 
 describe("modules/stats materialized endpoint", function () {
   const db = new Db();
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
 
   beforeAll(async () => {
     await db.initDb();
+    authAgent = await getAuthenticatedAgent();
   });
 
   afterAll(async () => {
@@ -42,7 +45,7 @@ describe("modules/stats materialized endpoint", function () {
         },
       };
 
-      const response = await request(app)
+      const response = await authAgent
         .post(`${apiPath}/stats/materialized`)
         .send(requestBody)
         .expect(200);
@@ -79,7 +82,7 @@ describe("modules/stats materialized endpoint", function () {
         },
       };
 
-      const response = await request(app)
+      const response = await authAgent
         .post(`${apiPath}/stats/materialized`)
         .send(requestBody)
         .expect(200);
@@ -129,7 +132,7 @@ describe("modules/stats materialized endpoint", function () {
         },
       };
 
-      const response = await request(app)
+      const response = await authAgent
         .post(`${apiPath}/stats/materialized`)
         .send(requestBody)
         .expect(200);
@@ -149,7 +152,7 @@ describe("modules/stats materialized endpoint", function () {
         aggregateBy: [Aggregation.USER],
       };
 
-      const response = await request(app)
+      const response = await authAgent
         .post(`${apiPath}/stats/aggregate`)
         .send(requestBody)
         .expect(200);
@@ -166,7 +169,7 @@ describe("modules/stats materialized endpoint", function () {
         // Missing toDate
       };
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/stats/aggregate`)
         .send(requestBody)
         .expect(500); // Should throw an error
@@ -178,7 +181,7 @@ describe("modules/stats materialized endpoint", function () {
         toDate: new Date("2023-01-01").getTime(), // After fromDate
       };
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/stats/aggregate`)
         .send(requestBody)
         .expect(500); // Should throw an error
@@ -191,7 +194,7 @@ describe("modules/stats materialized endpoint", function () {
         // No timeUnits or aggregateBy specified
       };
 
-      const response = await request(app)
+      const response = await authAgent
         .post(`${apiPath}/stats/aggregate`)
         .send(requestBody)
         .expect(200);

@@ -1,7 +1,7 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams, StatementDoesNotExits } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -33,6 +33,12 @@ const testValidStatement = (res: any) => {
 };
 
 describe("Statements get", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -43,17 +49,15 @@ describe("Statements get", function () {
   // Express cannot match an empty :statementId segment.
   describe.skip("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/statements`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("Wrong param", () => {
     it("should return a StatementDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .get(`${apiPath}/statements/invalidId12345`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -88,9 +92,8 @@ describe("Statements get", function () {
       treeCache.db = db.connection;
       treeCache.tree = await treeCache.createTree();
 
-      await request(app)
+      await authAgent
         .get(`${apiPath}/statements/${randomId}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect(testValidStatement);
 

@@ -7,22 +7,27 @@ import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { Db } from "@service/rethink";
 import "ts-jest";
 import Document from "@models/document/document";
 import { pool } from "@middlewares/db";
 
 describe("modules/documents create", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("empty data", () => {
     it("should return a ModelNotValid", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/documents`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
@@ -31,10 +36,9 @@ describe("modules/documents create", function () {
   });
   describe("faulty data ", () => {
     it("should return a ModelNotValid", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/documents`)
         .send({ test: "" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
@@ -51,10 +55,9 @@ describe("modules/documents create", function () {
         title: "test",
       });
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/documents`)
         .send(newDocument)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse);

@@ -1,7 +1,7 @@
 import { testErroneousResponse } from "@modules/common.test";
 import { DocumentDoesNotExist } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -9,6 +9,12 @@ import { pool } from "@middlewares/db";
 import Audit from "@models/audit/audit";
 
 describe("modules/audits GET", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   const db = new Db();
   const firstAudit1980 = new Audit({ date: new Date("1980") });
   const secondAudit1990 = new Audit({ date: new Date("1990") });
@@ -28,9 +34,8 @@ describe("modules/audits GET", function () {
 
   describe("Without params", () => {
     it("should return a first audit nonetheless", async () => {
-      const response = await request(app)
+      const response = await authAgent
         .get(`${apiPath}/audits`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200);
 
       expect(new Date(response.body.data.date)).toEqual(firstAudit1980.date);
@@ -39,9 +44,8 @@ describe("modules/audits GET", function () {
 
   describe("With specific date param", () => {
     it("should return a 2000 audit", async () => {
-      const response = await request(app)
+      const response = await authAgent
         .get(`${apiPath}/audits?from=2000`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200);
 
       expect(new Date(response.body.data.date)).toEqual(secondAudit2000.date);

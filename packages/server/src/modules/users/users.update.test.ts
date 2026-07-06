@@ -4,18 +4,23 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { successfulGenericResponse } from "../common.test";
-import { supertestConfig } from "..";
 import User from "@models/user/user";
 import { Db } from "@service/rethink";
-import { checkPassword, generateAccessToken } from "@common/auth";
+import { checkPassword } from "@common/auth";
 import { r } from "rethinkdb-ts";
 import { pool } from "@middlewares/db";
+import {
+  createAgentWithUserId,
+  getAuthenticatedAgent,
+} from "@modules/testAuth";
 
 describe("Users update", function () {
   let db: Db;
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
   const updateUser = new User({
     email: `user${Math.random()}}`,
     active: true,
+    verified: true,
     name: `user${Math.random()}}`,
   });
 
@@ -23,6 +28,7 @@ describe("Users update", function () {
     db = new Db();
     await db.initDb();
     await updateUser.save(db.connection);
+    authAgent = await getAuthenticatedAgent();
   });
 
   afterAll(async () => {
@@ -31,9 +37,8 @@ describe("Users update", function () {
 
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/users/1`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
@@ -44,9 +49,8 @@ describe("Users update", function () {
   // simply ignores unknown keys, so a "faulty" body now updates successfully.
   describe.skip("faulty data ", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/users/1`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ test: "" })
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
@@ -55,9 +59,8 @@ describe("Users update", function () {
 
   describe("not existing user ", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/users/2132312323`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ email: "123" })
         .expect("Content-Type", /json/)
         .expect(
@@ -68,9 +71,8 @@ describe("Users update", function () {
 
   describe("ok data", () => {
     it("should return a 200 code with successful response", async () => {
-      await request(app)
+      await authAgent
         .put(`${apiPath}/users/1`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ email: `admin${Math.random()}@admin.com` })
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
@@ -79,18 +81,16 @@ describe("Users update", function () {
   });
   describe("password data", () => {
     it("should fail if attempting to update non-owned user", async () => {
-      const data = await request(app)
+      const data = await authAgent
         .get(`${apiPath}/users/me`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/);
 
       const adminId = data.body.id;
       const newPassword = "test" + Math.random().toFixed();
-      const viewerAccessToken = generateAccessToken(updateUser);
+      const viewerAgent = await createAgentWithUserId(updateUser.id);
 
-      await request(app)
+      await viewerAgent
         .put(`${apiPath}/users/${adminId}`)
-        .set("authorization", "Bearer " + viewerAccessToken)
         .send({ password: newPassword })
         .expect("Content-Type", /json/)
         .expect(403);
@@ -98,9 +98,8 @@ describe("Users update", function () {
     it("should return a 200 code with successful response and update password", async () => {
       const newPassword = "test" + Math.random();
 
-      await request(app)
+      await authAgent
         .put(`${apiPath}/users/${updateUser.id}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .send({ password: newPassword })
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)

@@ -4,7 +4,7 @@ import { EntityDoesNotExist, ModelNotValidError } from "@inkvisitor/shared/types
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
@@ -15,15 +15,20 @@ import Relation from "@models/relation/relation";
 import { pool } from "@middlewares/db";
 
 describe("Entities clone", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("non existing original entity", () => {
     it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/doesnotexist/clone`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
@@ -48,9 +53,8 @@ describe("Entities clone", function () {
       const saved = await entity.save(db.connection); // should be saved without isValid test
       expect(saved).toBeTruthy();
 
-      await request(app)
+      await authAgent
         .post(`${apiPath}/entities/${entity.id}/clone`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
@@ -90,9 +94,8 @@ describe("Entities clone", function () {
     });
 
     it("should return a successful response wrapped in IResponseGeneric", async () => {
-      const data = await request(app)
+      const data = await authAgent
         .post(`${apiPath}/entities/${entity.id}/clone`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200);
       const cloneData = data.body.data;

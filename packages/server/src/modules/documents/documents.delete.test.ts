@@ -4,20 +4,25 @@ import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import Document from "@models/document/document";
 import { pool } from "@middlewares/db";
 
 describe("modules/documents DELETE", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("faulty data", () => {
     it("should return a DocumentDoesNotExist error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/documents/randomid12345`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(
@@ -43,9 +48,8 @@ describe("modules/documents DELETE", function () {
     afterAll(async () => await clean(db));
 
     it("should return a 200 code with successful response", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/documents/${document.id}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
         .expect(async () => {

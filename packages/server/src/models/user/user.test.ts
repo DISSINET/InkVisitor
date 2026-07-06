@@ -19,6 +19,7 @@ const prepareUserData = (): IUser => {
       defaultTerritory: "",
       defaultStatementLanguage: EntityEnums.Language.English,
       searchLanguages: [],
+      workingLanguages: [],
       // server-side UserOptions defaults this to false; the field is not yet in
       // the shared IUserOptions type, so it is cast in below.
       hideStatementElementsOrderTable: false,

@@ -8,11 +8,17 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "../common.test";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import User from "@models/user/user";
 import { pool } from "@middlewares/db";
 
 describe("Users delete", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -22,18 +28,16 @@ describe("Users delete", function () {
   // path now returns a 404 (no matching route) instead of a JSON BadParams.
   describe.skip("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/users`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data", () => {
     it("should return a 200 code with unsuccessful message", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/users/randomid12345`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
@@ -52,9 +56,8 @@ describe("Users delete", function () {
     })
 
     it("should return a 200 code with successful response", async () => {
-      await request(app)
+      await authAgent
         .delete(`${apiPath}/users/${testUserId}`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
         .expect(200);

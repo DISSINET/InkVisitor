@@ -1,6 +1,6 @@
 import { clean } from "@modules/common.test";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -9,6 +9,12 @@ import { deleteDocuments } from "@service/shorthands";
 import { pool } from "@middlewares/db";
 
 describe("modules/documents INDEX", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   const db = new Db();
 
   const document1 = new Document({
@@ -33,9 +39,8 @@ describe("modules/documents INDEX", function () {
   });
 
   it("should return a 200 code", async () => {
-    await request(app)
+    await authAgent
       .get(`${apiPath}/documents`)
-      .set("authorization", "Bearer " + supertestConfig.token)
       .expect(200)
       .expect((res) => {
         expect(res.body.length).toBeTruthy();

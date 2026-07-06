@@ -5,7 +5,7 @@ import {
   TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
 import request from "supertest";
-import { supertestConfig } from "..";
+import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { Db } from "@service/rethink";
@@ -15,30 +15,33 @@ import treeCache from "@service/treeCache";
 import { pool } from "@middlewares/db";
 
 describe("statements/batch-copy", function () {
+  let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
+
+  beforeAll(async () => {
+    authAgent = await getAuthenticatedAgent();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
 
   describe("Empty/Invalid params", () => {
     it("should return a BadParams error wrapped in IResponseGeneric for empty params", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/statements/batch-copy`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
     it("should return a BadParams error wrapped in IResponseGeneric for missing territory id", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/statements/batch-copy?ids=1,2,3`)
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
     it("should return a BadParams error wrapped in IResponseGeneric for missing ids", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/statements/batch-copy`)
         .send({ territoryId: "1" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
@@ -63,10 +66,9 @@ describe("statements/batch-copy", function () {
     });
 
     it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric for invalid id", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/statements/batch-copy?ids=1`)
         .send({ territoryId: "random-something" })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -76,10 +78,9 @@ describe("statements/batch-copy", function () {
     });
 
     it("should return a StatementDoesNotExits error wrapped in IResponseGeneric for invalid id", async () => {
-      await request(app)
+      await authAgent
         .post(`${apiPath}/statements/batch-copy?ids=1`)
         .send({ territoryId: treeCache.tree.parentMap[""][0].id })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(
             undefined,
@@ -100,12 +101,11 @@ describe("statements/batch-copy", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      await request(app)
+      await authAgent
         .post(
           `${apiPath}/statements/batch-copy?ids=${statement1.id},${statement2.id}`
         )
         .send({ territoryId: rootId })
-        .set("authorization", "Bearer " + supertestConfig.token)
         .expect((resp) => !!resp.body.result);
     });
 
@@ -121,12 +121,11 @@ describe("statements/batch-copy", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      const response = await request(app)
+      const response = await authAgent
         .post(
           `${apiPath}/statements/batch-copy?ids=${statement1.id},${statement2.id}`
         )
-        .send({ territoryId: T1Id })
-        .set("authorization", "Bearer " + supertestConfig.token);
+        .send({ territoryId: T1Id });
       expect(response.body.result).toBeTruthy();
       expect(response.body.data).toHaveLength(2); // 2 statements
 

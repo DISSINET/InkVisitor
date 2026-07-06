@@ -26,7 +26,7 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
       const res = await api.signIn(autoUsername, autoPassword, {
         ignoreErrorToast: true,
       });
-      if (res?.token) {
+      if (res?.id) {
         setRedirectToMain(true);
       }
     } catch (err) {
