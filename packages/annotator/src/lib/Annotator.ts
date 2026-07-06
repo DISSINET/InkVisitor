@@ -3099,18 +3099,26 @@ export class Annotator {
    * Highlight schemas the resize pulse (#2885) draws for the given entity.
    * Every span schema of the entity pulses (its static copy is suppressed
    * while resizing); ANCHOR schemas are excluded — they are point markers
-   * with no fill (#2887) and stay drawn statically. Entities whose schemas
-   * contain no fill at all (Statement's underline, Territory's markers) get
-   * an extra BACKGROUND wash in their class colour appended, so the resized
-   * span always reads as an area rather than just a blinking line.
+   * with no fill (#2887) and stay drawn statically. FOCUS (the tree-selected
+   * Territory's inverted wash, which dims everything OUTSIDE the span) is
+   * remapped to a BACKGROUND wash ON the span, so resizing reads as a positive
+   * highlight of the span rather than an inverted dimming of its surroundings.
+   * Entities whose schemas contain no fill at all (Statement's underline,
+   * Territory's markers) get an extra BACKGROUND wash in their class colour
+   * appended, so the resized span always reads as an area rather than just a
+   * blinking line.
    */
   private getResizePulseSchemas(tagName: string): HighlightSchema[] {
     const result = this.onHighlightCb?.(tagName);
     const schemas = Array.isArray(result) ? result : result ? [result] : [];
-    const pulseSchemas = schemas.filter((s) => s.mode !== HighlightMode.ANCHOR);
-    const hasFill = pulseSchemas.some(
-      (s) => s.mode === HighlightMode.BACKGROUND || s.mode === HighlightMode.FOCUS
-    );
+    const pulseSchemas = schemas
+      .filter((s) => s.mode !== HighlightMode.ANCHOR)
+      .map((s) =>
+        s.mode === HighlightMode.FOCUS
+          ? { mode: HighlightMode.BACKGROUND, style: s.style }
+          : s
+      );
+    const hasFill = pulseSchemas.some((s) => s.mode === HighlightMode.BACKGROUND);
     if (!hasFill && schemas.length) {
       pulseSchemas.push({ mode: HighlightMode.BACKGROUND, style: schemas[0].style });
     }

@@ -355,14 +355,17 @@ describe("resize pulse schemas (#2885)", () => {
     expect(schemas[0].style.color).toBe("#00f");
   });
 
-  test("active territory ([FOCUS, ANCHOR]) pulses the existing focus wash only", () => {
+  test("active territory ([FOCUS, ANCHOR]) pulses a non-inverted background wash", () => {
+    // FOCUS dims everything OUTSIDE the span (inverted highlight); during resize
+    // that reads backwards, so it pulses as a normal BACKGROUND wash on the span.
     const annotator = createAnnotator(TEXT);
     annotator.onHighlight(() => [
       { mode: HighlightMode.FOCUS, style: { color: "#00f", opacity: 0.1 } },
       { mode: HighlightMode.ANCHOR, style: { color: "#00f", opacity: 1 } },
     ]);
     const schemas = schemasFor(annotator, "e1");
-    expect(schemas.map((s) => s.mode)).toEqual([HighlightMode.FOCUS]);
+    expect(schemas.map((s) => s.mode)).toEqual([HighlightMode.BACKGROUND]);
+    expect(schemas[0].style.color).toBe("#00f");
   });
 
   test("no highlight schema yields no pulse schemas", () => {

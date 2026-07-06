@@ -221,9 +221,19 @@ export const TextAnnotator = ({
 
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
-      queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) =>
-        old ? { ...old, ...variables.doc } : old,
-      );
+      queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) => {
+        if (!old) return old;
+        // Merge ONLY content — the single field this save changes. variables.doc
+        // is built by spreading the (stale) dataDocument prop, so its entityIds
+        // and anchors trail any optimistic update already written into the cache
+        // (e.g. statementCreateMutation.onMutate adds the new Statement id to
+        // entityIds). Spreading the whole stale doc clobbers those back, so a
+        // just-added anchor's highlight blinks off until the refetch lands. Keep
+        // the cached entityIds/anchors; the invalidate refetch reconciles them.
+        return variables.doc.content !== undefined
+          ? { ...old, content: variables.doc.content }
+          : old;
+      });
     },
     [queryClient],
   );
