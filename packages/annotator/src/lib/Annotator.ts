@@ -1036,6 +1036,15 @@ export class Annotator {
       this.proportional ? this.width : undefined
     );
 
+    // The re-wrap can shrink the document (the new font wraps to fewer lines);
+    // clamp the scroll so a viewport parked near the old end doesn't dangle
+    // in empty space past the new last line.
+    const maxStart = Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines);
+    if (this.viewport.lineStart > maxStart) {
+      this.viewport.lineStart = maxStart;
+      this.viewport.scrollOffsetY = 0;
+    }
+
     this.cursor.syncVisualFromOffset(this.text);
     if (redraw) {
       this.draw();
