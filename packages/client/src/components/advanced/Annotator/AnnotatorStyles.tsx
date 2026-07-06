@@ -357,7 +357,7 @@ export const StyledMoveAnchorControls = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  padding-left: ${({ theme }) => theme.space[2]};
   width: 100%;
   gap: ${({ theme }) => theme.space[10]};
 `;
