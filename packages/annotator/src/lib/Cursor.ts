@@ -160,6 +160,27 @@ export default class Cursor
   }
 
   /**
+   * Apply a caret-navigation step (see {@link Text.caretStepLeft} /
+   * {@link Text.caretStepRight}). When `extend` (shift) only the head moves so the
+   * selection grows; otherwise the caret collapses (anchor follows head). The
+   * visual caret + selection are derived via {@link syncVisualFromOffset}.
+   */
+  stepHeadTo(
+    text: Text,
+    offset: number,
+    affinity: CaretAffinity,
+    extend: boolean
+  ) {
+    this.head = offset;
+    this.headAffinity = affinity;
+    if (!extend) {
+      this.anchor = offset;
+      this.anchorAffinity = affinity;
+    }
+    this.syncVisualFromOffset(text);
+  }
+
+  /**
    * Reconcile the canonical `head`/`anchor` offsets with
    * the current VISUAL caret + selection. Needed because `setPosition`,
    * `setMode` and mouse handlers set `xLine`/`yLine` (and `selectStart`/`End`)
@@ -513,8 +534,9 @@ export default class Cursor
         relY >= 0 &&
         relY <= viewport.noLines
       ) {
-        // A wrapped line can run one trailing space past the viewport; clamp the
-        // caret column to the width so it stays visible (no h-scroll, #3145).
+        // A wrapped line can carry trailing wrap whitespace past the viewport
+        // edge (collapsed in the margin); clamp the caret column to the width so
+        // it stays visible even when its offset sits inside that margin run.
         // Monospace only: proportional resolves pixel x from the prefix table.
         const caretX = drawingOptions.columnToPixelX
           ? this.xLine
@@ -543,21 +565,24 @@ export default class Cursor
 
         if (hStart.yLine <= currY && hEnd.yLine >= currY) {
           if (hStart.yLine === currY) {
-            // opening highlight line
+            // opening highlight line — end flush with the last character, without
+            // the extra "virtual" newline/wrap column past it (Google-Docs style,
+            // which does not highlight a phantom char at a line break).
             rowsToDraw.push({
               rowI: i,
               start: hStart.xLine,
-              end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX + 1,
+              end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
             });
           } else if (hEnd.yLine === currY) {
             // closing highlight line
             rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
           } else {
-            // full line highlight (between open & end)
+            // full line highlight (between open & end) — likewise no virtual
+            // newline column past the last character.
             rowsToDraw.push({
               rowI: i,
               start: 0,
-              end: lastCharX + 1,
+              end: lastCharX,
             });
           }
         }
