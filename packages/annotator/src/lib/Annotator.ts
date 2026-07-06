@@ -3195,6 +3195,29 @@ export class Annotator {
   }
 
   /**
+   * Scrolls one boundary (opening or closing tag) of the anchor currently being
+   * resized into view (#2885). A long span often has its start and end off the
+   * same screen; this lets the move panel jump the viewport to either end so the
+   * user can see the boundary they are nudging. Returns false when no resize is
+   * active or the anchor cannot be resolved.
+   */
+  scrollResizeAnchorBoundaryIntoView(boundary: "open" | "close"): boolean {
+    if (!this.resizeAnchor) {
+      return false;
+    }
+    const resolved = this.resolveAnchorTags(
+      this.resizeAnchor.tagName,
+      this.resizeAnchor.openTagRef
+    );
+    if (!resolved) {
+      return false;
+    }
+    const tag = boundary === "open" ? resolved.openTag : resolved.closeTag;
+    this.scrollToRawPosition(tag.getAbsoluteTagPosition(this.text.segments));
+    return true;
+  }
+
+  /**
    * Moves one boundary (opening or closing tag) of an existing anchor by
    * exactly one visible character (issue #2885). The anchor is identified by
    * its opening tag's location; each successful move returns the new location

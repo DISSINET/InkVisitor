@@ -1282,6 +1282,13 @@ export const TextAnnotator = ({
     return result;
   };
 
+  // #2885 — jump the viewport to the start (open) or end (close) boundary of the
+  // anchor being resized, so a long span whose ends sit off the same screen can
+  // be located from the move panel.
+  const handleLocateAnchorBoundary = (boundary: "open" | "close") => {
+    annotator?.scrollResizeAnchorBoundaryIntoView(boundary);
+  };
+
   // Leave resize mode. commit=true (Done) saves the buffered series; otherwise
   // (Discard, Esc, closing the menu, unmount) the moves are reverted. Either
   // way the pulse stops and the frozen selection is unhidden at its original
@@ -1557,6 +1564,9 @@ export const TextAnnotator = ({
                         isMenuReadOnly ? undefined : handleMoveAnchorBoundary
                       }
                       onMoveAnchorBegin={isMenuReadOnly ? undefined : handleMoveAnchorBegin}
+                      onLocateAnchorBoundary={
+                        isMenuReadOnly ? undefined : handleLocateAnchorBoundary
+                      }
                       onMoveAnchorSave={
                         isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(true)
                       }

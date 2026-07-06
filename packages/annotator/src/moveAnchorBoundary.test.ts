@@ -308,6 +308,35 @@ describe("anchor resize mode (#2885)", () => {
     expect((annotator as any).selectionHidden).toBe(false);
     expect((annotator as any).resizeAnchor).toBeNull();
   });
+
+  test("scrollResizeAnchorBoundaryIntoView scrolls to each boundary while resizing", () => {
+    const annotator = createAnnotator(TEXT);
+    const scrollSpy = jest
+      .spyOn(annotator, "scrollToRawPosition")
+      .mockImplementation(() => {});
+
+    annotator.beginAnchorResize("e1", REF);
+
+    // open tag "<e1>" starts at abs 4, close tag "</e1>" at abs 11
+    expect(annotator.scrollResizeAnchorBoundaryIntoView("open")).toBe(true);
+    expect(scrollSpy).toHaveBeenLastCalledWith(4);
+    expect(annotator.scrollResizeAnchorBoundaryIntoView("close")).toBe(true);
+    expect(scrollSpy).toHaveBeenLastCalledWith(11);
+
+    scrollSpy.mockRestore();
+  });
+
+  test("scrollResizeAnchorBoundaryIntoView is a no-op when not resizing", () => {
+    const annotator = createAnnotator(TEXT);
+    const scrollSpy = jest
+      .spyOn(annotator, "scrollToRawPosition")
+      .mockImplementation(() => {});
+
+    expect(annotator.scrollResizeAnchorBoundaryIntoView("open")).toBe(false);
+    expect(scrollSpy).not.toHaveBeenCalled();
+
+    scrollSpy.mockRestore();
+  });
 });
 
 describe("resize pulse schemas (#2885)", () => {

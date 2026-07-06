@@ -10,6 +10,7 @@ import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import {
+  FaAnchor,
   FaArrowsAltH,
   FaBolt,
   FaCaretDown,
@@ -115,6 +116,8 @@ interface TextAnnotatorMenuProps {
   ) => MoveAnchorBoundaryResult | undefined;
   /** Called when move mode begins — the parent snapshots the text (for Discard) and starts the resize pulse. */
   onMoveAnchorBegin?: (tagName: string, openTagRef: AnchorOpenTagRef) => void;
+  /** Scrolls the given boundary of the resized anchor into view (locate a long span's ends). */
+  onLocateAnchorBoundary?: (boundary: "open" | "close") => void;
   /** Done: the parent saves the buffered series of moves. */
   onMoveAnchorSave?: () => void;
   /** Discard / cancel (Esc): the parent reverts the buffered moves. */
@@ -142,6 +145,7 @@ export const TextAnnotatorMenu = ({
   onUpdateAnchor = undefined,
   onMoveAnchorBoundary = undefined,
   onMoveAnchorBegin = undefined,
+  onLocateAnchorBoundary = undefined,
   onMoveAnchorSave = undefined,
   onMoveAnchorDiscard = undefined,
   canCreateActiveTAnchor,
@@ -423,6 +427,15 @@ export const TextAnnotatorMenu = ({
                       tooltipLabel="move start one character right"
                       onClick={() => handleMoveClick("open", 1)}
                     />
+                    {onLocateAnchorBoundary && (
+                      <Button
+                        icon={<FaAnchor size={13} />}
+                        noBackground
+                        noBorder
+                        tooltipLabel="scroll to the start of the span"
+                        onClick={() => onLocateAnchorBoundary("open")}
+                      />
+                    )}
                   </StyledMoveAnchorGroupButtons>
                 </StyledMoveAnchorGroup>
                 <StyledMoveAnchorGroup>
@@ -440,6 +453,15 @@ export const TextAnnotatorMenu = ({
                       tooltipLabel="move end one character right"
                       onClick={() => handleMoveClick("close", 1)}
                     />
+                    {onLocateAnchorBoundary && (
+                      <Button
+                        icon={<FaAnchor size={13} />}
+                        noBackground
+                        noBorder
+                        tooltipLabel="scroll to the end of the span"
+                        onClick={() => onLocateAnchorBoundary("close")}
+                      />
+                    )}
                   </StyledMoveAnchorGroupButtons>
                 </StyledMoveAnchorGroup>
                 <Button
