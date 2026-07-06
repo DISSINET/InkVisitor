@@ -61,9 +61,17 @@ export function drawAnchorMarker(
   style: AnchorMarkerStyle
 ): AnchorMarkerBox {
   const half = style.armH / 2;
-  const top = yMidPx - half;
-  const bottom = yMidPx + half;
   const inset = style.lineWidth / 2;
+
+  // Snap a stroke centre to the device-pixel grid so its edges land on whole
+  // pixels instead of straddling two columns/rows (which the canvas renders as
+  // a soft, "pixelated"-looking antialiased smear). A stroke of width w centred
+  // at c covers [c - w/2, c + w/2]; we want that lower edge on an integer.
+  const snap = (center: number): number =>
+    Math.round(center - inset) + inset;
+
+  const top = snap(yMidPx - half);
+  const bottom = snap(yMidPx + half);
 
   ctx.save();
   // Markers paint crisp at full opacity, independent of the highlight passes
@@ -72,26 +80,31 @@ export function drawAnchorMarker(
   ctx.globalCompositeOperation = "source-over";
   ctx.strokeStyle = style.color;
   ctx.lineWidth = style.lineWidth;
+  // A single continuous polyline per glyph: the stem and arm share one mitered
+  // corner instead of being two separately-capped subpaths whose ends overlap
+  // into a ragged notch. `butt` caps keep the free ends flush to the box.
+  ctx.lineJoin = "miter";
+  ctx.lineCap = "butt";
 
   let leftX: number;
   ctx.beginPath();
   if (kind === "start") {
     // ┌ : stem at the boundary (inset off the edge), top arm running right.
-    const stemX = xPx + inset;
+    const stemX = snap(xPx + inset);
     leftX = stemX;
-    ctx.moveTo(stemX, top);
-    ctx.lineTo(stemX, bottom);
-    ctx.moveTo(stemX, top);
+    // bottom of stem → corner → right end of arm, in one stroke.
+    ctx.moveTo(stemX, bottom);
+    ctx.lineTo(stemX, top);
     ctx.lineTo(stemX + style.armW, top);
   } else {
     // ┘ : stem at the boundary, bottom arm running left over the content. The
     // leftmost point is clamped to `inset` so at the left margin the whole
     // glyph shifts right just enough to stay on-screen.
     leftX = Math.max(xPx - style.armW, inset);
-    const stemX = leftX + style.armW;
+    const stemX = snap(leftX + style.armW);
+    // top of stem → corner → left end of arm, in one stroke.
     ctx.moveTo(stemX, top);
     ctx.lineTo(stemX, bottom);
-    ctx.moveTo(stemX, bottom);
     ctx.lineTo(leftX, bottom);
   }
   ctx.stroke();

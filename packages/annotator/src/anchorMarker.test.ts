@@ -49,10 +49,10 @@ describe("drawAnchorMarker", () => {
 
     const lines = ops.filter((o) => o.op === "moveTo" || o.op === "lineTo");
     // x0 = xPx(100) + lineWidth(2)/2 = 101; armW = 4; half = armH(10)/2 = 5.
+    // One continuous stroke: stem bottom → corner → arm end (shared miter join).
     expect(lines).toEqual([
-      { op: "moveTo", x: 101, y: 45 }, // vertical stem top
-      { op: "lineTo", x: 101, y: 55 }, // vertical stem bottom
-      { op: "moveTo", x: 101, y: 45 }, // top arm origin
+      { op: "moveTo", x: 101, y: 55 }, // vertical stem bottom
+      { op: "lineTo", x: 101, y: 45 }, // up to the corner
       { op: "lineTo", x: 105, y: 45 }, // top arm runs right by armW
     ]);
   });
@@ -63,10 +63,10 @@ describe("drawAnchorMarker", () => {
 
     const lines = ops.filter((o) => o.op === "moveTo" || o.op === "lineTo");
     // Inline (xPx 100 » inset): stem at the boundary (100), arm left to xPx-armW (96).
+    // One continuous stroke: stem top → corner → arm end (shared miter join).
     expect(lines).toEqual([
       { op: "moveTo", x: 100, y: 45 }, // stem top
-      { op: "lineTo", x: 100, y: 55 }, // stem bottom
-      { op: "moveTo", x: 100, y: 55 }, // bottom arm origin at the corner
+      { op: "lineTo", x: 100, y: 55 }, // down to the corner
       { op: "lineTo", x: 96, y: 55 }, // runs left over the content by armW
     ]);
   });
@@ -80,7 +80,6 @@ describe("drawAnchorMarker", () => {
     expect(lines).toEqual([
       { op: "moveTo", x: 5, y: 45 },
       { op: "lineTo", x: 5, y: 55 },
-      { op: "moveTo", x: 5, y: 55 },
       { op: "lineTo", x: 1, y: 55 },
     ]);
     expect(lines.every((l) => (l as { x: number }).x >= 0)).toBe(true);
