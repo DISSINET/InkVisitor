@@ -220,11 +220,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       queryClient.invalidateQueries({
         queryKey: ["territory", "statement-list", territoryId],
       });
-      if (selectedDocumentId) {
-        queryClient.invalidateQueries({
-          queryKey: ["document", selectedDocumentId],
-        });
-      }
       queryClient.invalidateQueries({ queryKey: ["anchorEntities"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
     },
