@@ -2641,21 +2641,8 @@ export class Annotator {
           this.resizeAnchor.tagName,
           this.resizeAnchor.openTagRef
         );
-        const pulseResult = this.onHighlightCb?.(this.resizeAnchor.tagName);
-        const pulseSchemas = Array.isArray(pulseResult)
-          ? pulseResult
-          : pulseResult
-          ? [pulseResult]
-          : [];
-        // ANCHOR schemas are point markers with no fill (#2887) — prefer a
-        // span schema for the pulse, falling back to the anchor colour drawn
-        // as a background wash.
-        const schema =
-          pulseSchemas.find((s) => s.mode !== HighlightMode.ANCHOR) ??
-          (pulseSchemas[0]
-            ? { mode: HighlightMode.BACKGROUND, style: pulseSchemas[0].style }
-            : undefined);
-        if (span && schema) {
+        const pulseSchemas = this.getResizePulseSchemas(this.resizeAnchor.tagName);
+        if (span && pulseSchemas.length) {
           const baseOpacity = 0.5;
           // Pulse both below AND above the entity's normal highlight opacity —
           // the midpoint of the cycle (intensity 0.5) matches the static look,
@@ -2669,19 +2656,21 @@ export class Annotator {
                 (1 - PULSE_AMPLITUDE + 2 * PULSE_AMPLITUDE * this.resizePulse.intensity())
             )
           );
-          const pulse = new Highlighter(
-            this.ratio,
-            { color: schema.style.color, opacity },
-            schema.mode
-          );
-          pulse.selectStart = span.start;
-          pulse.selectEnd = span.end;
-          pulse.draw(this.ctx, this.viewport, this.text, {
-            lineHeight: this.lineHeight,
-            charWidth: this.charWidth,
-            charsAtLine: this.text.charsAtLine,
-            columnToPixelX: this.drawColumnToPixelX(),
-          });
+          for (const schema of pulseSchemas) {
+            const pulse = new Highlighter(
+              this.ratio,
+              { color: schema.style.color, opacity },
+              schema.mode
+            );
+            pulse.selectStart = span.start;
+            pulse.selectEnd = span.end;
+            pulse.draw(this.ctx, this.viewport, this.text, {
+              lineHeight: this.lineHeight,
+              charWidth: this.charWidth,
+              charsAtLine: this.text.charsAtLine,
+              columnToPixelX: this.drawColumnToPixelX(),
+            });
+          }
         }
       }
 
@@ -3103,6 +3092,28 @@ export class Annotator {
       return null;
     }
     return { openTag: resolvedOpenTag, closeTag };
+  }
+
+  /**
+   * Highlight schemas the resize pulse (#2885) draws for the given entity.
+   * Every span schema of the entity pulses (its static copy is suppressed
+   * while resizing); ANCHOR schemas are excluded — they are point markers
+   * with no fill (#2887) and stay drawn statically. Entities whose schemas
+   * contain no fill at all (Statement's underline, Territory's markers) get
+   * an extra BACKGROUND wash in their class colour appended, so the resized
+   * span always reads as an area rather than just a blinking line.
+   */
+  private getResizePulseSchemas(tagName: string): HighlightSchema[] {
+    const result = this.onHighlightCb?.(tagName);
+    const schemas = Array.isArray(result) ? result : result ? [result] : [];
+    const pulseSchemas = schemas.filter((s) => s.mode !== HighlightMode.ANCHOR);
+    const hasFill = pulseSchemas.some(
+      (s) => s.mode === HighlightMode.BACKGROUND || s.mode === HighlightMode.FOCUS
+    );
+    if (!hasFill && schemas.length) {
+      pulseSchemas.push({ mode: HighlightMode.BACKGROUND, style: schemas[0].style });
+    }
+    return pulseSchemas;
   }
 
   /** Parsed start/end coordinates of an anchor's span, for drawing the pulse overlay. */

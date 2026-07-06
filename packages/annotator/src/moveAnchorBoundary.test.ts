@@ -4,6 +4,7 @@
  */
 
 import { Annotator } from "./lib/Annotator";
+import { HighlightMode } from "./lib/constants";
 
 const createMockCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement("canvas");
@@ -306,5 +307,67 @@ describe("anchor resize mode (#2885)", () => {
 
     expect((annotator as any).selectionHidden).toBe(false);
     expect((annotator as any).resizeAnchor).toBeNull();
+  });
+});
+
+describe("resize pulse schemas (#2885)", () => {
+  const TEXT = "abc <e1>def</e1> ghi";
+
+  const schemasFor = (annotator: Annotator, tagName: string) =>
+    (annotator as any).getResizePulseSchemas(tagName) as Array<{
+      mode: string;
+      style: { color: string; opacity: number };
+    }>;
+
+  test("a plain background entity pulses its own fill only", () => {
+    const annotator = createAnnotator(TEXT);
+    annotator.onHighlight(() => ({
+      mode: HighlightMode.BACKGROUND,
+      style: { color: "#f00", opacity: 0.4 },
+    }));
+    const schemas = schemasFor(annotator, "e1");
+    expect(schemas.map((s) => s.mode)).toEqual([HighlightMode.BACKGROUND]);
+  });
+
+  test("an underline entity (Statement) also gets a background wash", () => {
+    const annotator = createAnnotator(TEXT);
+    annotator.onHighlight(() => ({
+      mode: HighlightMode.UNDERLINE,
+      style: { color: "#0a0", opacity: 1 },
+    }));
+    const schemas = schemasFor(annotator, "e1");
+    expect(schemas.map((s) => s.mode)).toEqual([
+      HighlightMode.UNDERLINE,
+      HighlightMode.BACKGROUND,
+    ]);
+    // wash borrows the entity's class colour
+    expect(schemas[1].style.color).toBe("#0a0");
+  });
+
+  test("an anchor-only entity (Territory) gets a background wash", () => {
+    const annotator = createAnnotator(TEXT);
+    annotator.onHighlight(() => ({
+      mode: HighlightMode.ANCHOR,
+      style: { color: "#00f", opacity: 1 },
+    }));
+    const schemas = schemasFor(annotator, "e1");
+    expect(schemas.map((s) => s.mode)).toEqual([HighlightMode.BACKGROUND]);
+    expect(schemas[0].style.color).toBe("#00f");
+  });
+
+  test("active territory ([FOCUS, ANCHOR]) pulses the existing focus wash only", () => {
+    const annotator = createAnnotator(TEXT);
+    annotator.onHighlight(() => [
+      { mode: HighlightMode.FOCUS, style: { color: "#00f", opacity: 0.1 } },
+      { mode: HighlightMode.ANCHOR, style: { color: "#00f", opacity: 1 } },
+    ]);
+    const schemas = schemasFor(annotator, "e1");
+    expect(schemas.map((s) => s.mode)).toEqual([HighlightMode.FOCUS]);
+  });
+
+  test("no highlight schema yields no pulse schemas", () => {
+    const annotator = createAnnotator(TEXT);
+    annotator.onHighlight(() => undefined);
+    expect(schemasFor(annotator, "e1")).toEqual([]);
   });
 });
