@@ -133,12 +133,12 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
   );
 };
 
-type DocumentTableProps = {
+type StatsDocumentTable = {
   selectedDocument: DropdownItem | null;
   setSelectedDocument: (document: DropdownItem | null) => void;
 };
 
-export const DocumentTable: React.FC<DocumentTableProps> = ({
+export const StatsDocumentTable: React.FC<StatsDocumentTable> = ({
   selectedDocument,
   setSelectedDocument,
 }) => {
