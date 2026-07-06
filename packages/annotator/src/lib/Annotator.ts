@@ -1941,6 +1941,7 @@ export class Annotator {
       [
         {
           label: "Reset to defaults",
+          variant: "secondary",
           onClick: () => {
             this.resetSettings();
             this.openSettings(); // re-render so controls show the defaults

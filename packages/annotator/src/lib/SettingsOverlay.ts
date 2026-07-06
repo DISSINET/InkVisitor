@@ -48,6 +48,8 @@ export type SettingControl = SegmentedSetting | ColorSetting | SelectSetting;
 export interface FooterAction {
   label: string;
   onClick: () => void;
+  /** Primary = accent fill (default). Secondary = muted gray for destructive/ancillary actions. */
+  variant?: "primary" | "secondary";
 }
 
 export class SettingsOverlay {
@@ -269,14 +271,15 @@ export class SettingsOverlay {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = action.label;
+      const secondary = action.variant === "secondary";
       Object.assign(btn.style, {
         font: "inherit",
-        fontWeight: "bold",
+        fontWeight: secondary ? "normal" : "bold",
         padding: "6px 1.4rem",
-        border: "none",
+        border: secondary ? `1px solid ${this.colors.border}` : "none",
         borderRadius: "5px",
-        background: this.colors.accent,
-        color: this.colors.accentText,
+        background: secondary ? this.colors.buttonBg : this.colors.accent,
+        color: secondary ? this.colors.text : this.colors.accentText,
         cursor: "pointer",
       } as Partial<CSSStyleDeclaration>);
       btn.addEventListener("mousedown", (e) => {
