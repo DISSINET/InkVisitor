@@ -19,7 +19,7 @@ export const ButtonGroup = styled.div.attrs({
   > button:not(:last-child),
   > span:not(:last-child) {
     margin-right: ${({ $noMarginRight, $smallGap }) =>
-      $noMarginRight ? 0 : $smallGap ? "0.2rem" : "0.5rem"};
+      $noMarginRight ? 0 : $smallGap ? "0.25rem" : "0.5rem"};
   }
 `;
 

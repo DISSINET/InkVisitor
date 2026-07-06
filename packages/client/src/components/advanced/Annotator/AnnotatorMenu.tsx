@@ -5,13 +5,12 @@ import { AnchorOpenTagRef, MoveAnchorBoundaryResult, Tag } from "@inkvisitor/ann
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { IconWithTooltip, Loader } from "components";
+import { ButtonGroup, IconWithTooltip, Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import {
   FaAnchor,
-  FaArrowsAltH,
   FaBolt,
   FaCaretDown,
   FaChevronLeft,
@@ -23,11 +22,12 @@ import {
 } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiCheckBold, PiSelectionFill } from "react-icons/pi";
+import { RiExpandWidthLine } from "react-icons/ri";
 import { TbAnchor } from "react-icons/tb";
-import { IcoTrash } from "Theme/icons";
 import { toast } from "react-toastify";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch } from "redux/hooks";
+import { IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
@@ -51,8 +51,9 @@ import {
   StyledAnnotatorNoAnchors,
   StyledCaretButtonWrapper,
   StyledMoveAnchorControls,
+  StyledMoveAnchorEntityTag,
+  StyledMoveAnchorFooter,
   StyledMoveAnchorGroup,
-  StyledMoveAnchorGroupButtons,
   StyledMoveAnchorGroupLabel,
   StyledMoveAnchorPanel,
   StyledStatementSubsection,
@@ -65,7 +66,6 @@ import {
 } from "./AnnotatorStyles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
 import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
-import { LuCheck } from "react-icons/lu";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -403,18 +403,28 @@ export const TextAnnotatorMenu = ({
         // entity and the four boundary arrows.
         <StyledAnnotatorItem>
           <StyledAnnotatorItemTitle>
-            <FaArrowsAltH size={13} />
-            Move anchor
+            <RiExpandWidthLine size={18} />
+            Resize anchor span
           </StyledAnnotatorItemTitle>
+          <StyledMoveAnchorEntityTag style={{ display: "grid" }}>
+            <EntityTag entity={movingEntity} fullWidth disableDrag disableDoubleClick />
+          </StyledMoveAnchorEntityTag>
           <StyledAnnotatorItemContent>
             <StyledMoveAnchorPanel>
-              <div style={{ display: "grid" }}>
-                <EntityTag entity={movingEntity} fullWidth disableDrag disableDoubleClick />
-              </div>
               <StyledMoveAnchorControls>
                 <StyledMoveAnchorGroup>
+                  {onLocateAnchorBoundary && (
+                    <Button
+                      icon={<FaAnchor size={13} />}
+                      noBackground
+                      noBorder
+                      tooltipLabel="scroll to the start of the span"
+                      onClick={() => onLocateAnchorBoundary("open")}
+                      inverted
+                    />
+                  )}
                   <StyledMoveAnchorGroupLabel>start</StyledMoveAnchorGroupLabel>
-                  <StyledMoveAnchorGroupButtons>
+                  <ButtonGroup $smallGap>
                     <Button
                       icon={<FaChevronLeft size={13} />}
                       color="primary"
@@ -427,20 +437,21 @@ export const TextAnnotatorMenu = ({
                       tooltipLabel="move start one character right"
                       onClick={() => handleMoveClick("open", 1)}
                     />
-                    {onLocateAnchorBoundary && (
-                      <Button
-                        icon={<FaAnchor size={13} />}
-                        noBackground
-                        noBorder
-                        tooltipLabel="scroll to the start of the span"
-                        onClick={() => onLocateAnchorBoundary("open")}
-                      />
-                    )}
-                  </StyledMoveAnchorGroupButtons>
+                  </ButtonGroup>
                 </StyledMoveAnchorGroup>
                 <StyledMoveAnchorGroup>
+                  {onLocateAnchorBoundary && (
+                    <Button
+                      icon={<FaAnchor size={13} />}
+                      noBackground
+                      noBorder
+                      tooltipLabel="scroll to the end of the span"
+                      onClick={() => onLocateAnchorBoundary("close")}
+                      inverted
+                    />
+                  )}
                   <StyledMoveAnchorGroupLabel>end</StyledMoveAnchorGroupLabel>
-                  <StyledMoveAnchorGroupButtons>
+                  <ButtonGroup $smallGap>
                     <Button
                       icon={<FaChevronLeft size={13} />}
                       color="primary"
@@ -453,33 +464,29 @@ export const TextAnnotatorMenu = ({
                       tooltipLabel="move end one character right"
                       onClick={() => handleMoveClick("close", 1)}
                     />
-                    {onLocateAnchorBoundary && (
-                      <Button
-                        icon={<FaAnchor size={13} />}
-                        noBackground
-                        noBorder
-                        tooltipLabel="scroll to the end of the span"
-                        onClick={() => onLocateAnchorBoundary("close")}
-                      />
-                    )}
-                  </StyledMoveAnchorGroupButtons>
+                  </ButtonGroup>
                 </StyledMoveAnchorGroup>
-                <Button
-                  icon={<IcoTrash />}
-                  label="discard"
-                  color="danger"
-                  inverted
-                  onClick={() => finishMove(false)}
-                  tooltipLabel="Discard the moves (Esc)"
-                />
-                <Button
-                  icon={<MdOutlineDone size={16} />}
-                  label="done"
-                  color="primary"
-                  onClick={() => finishMove(true)}
-                  tooltipLabel="Save the moved anchor span"
-                />
               </StyledMoveAnchorControls>
+
+              <StyledMoveAnchorFooter>
+                <ButtonGroup>
+                  <Button
+                    icon={<IcoTrash />}
+                    label="discard"
+                    color="danger"
+                    inverted
+                    onClick={() => finishMove(false)}
+                    tooltipLabel="Discard the moves (Esc)"
+                  />
+                  <Button
+                    icon={<MdOutlineDone size={16} />}
+                    label="done"
+                    color="primary"
+                    onClick={() => finishMove(true)}
+                    tooltipLabel="Save the moved anchor span"
+                  />
+                </ButtonGroup>
+              </StyledMoveAnchorFooter>
               <Loader show={isLoading} size={20} />
             </StyledMoveAnchorPanel>
           </StyledAnnotatorItemContent>
