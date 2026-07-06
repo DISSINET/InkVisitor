@@ -317,11 +317,13 @@ describe("anchor resize mode (#2885)", () => {
 
     annotator.beginAnchorResize("e1", REF);
 
-    // open tag "<e1>" starts at abs 4, close tag "</e1>" at abs 11
+    // open tag "<e1>" starts at abs 4, close tag "</e1>" at abs 11. The close
+    // boundary scrolls one line up (lineOffset -1) so the span's end lands on the
+    // second visible line; the open boundary stays at the top (offset 0).
     expect(annotator.scrollResizeAnchorBoundaryIntoView("open")).toBe(true);
-    expect(scrollSpy).toHaveBeenLastCalledWith(4);
+    expect(scrollSpy).toHaveBeenLastCalledWith(4, 0);
     expect(annotator.scrollResizeAnchorBoundaryIntoView("close")).toBe(true);
-    expect(scrollSpy).toHaveBeenLastCalledWith(11);
+    expect(scrollSpy).toHaveBeenLastCalledWith(11, -1);
 
     scrollSpy.mockRestore();
   });

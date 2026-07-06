@@ -1947,6 +1947,12 @@ export class Annotator {
             this.openSettings(); // re-render so controls show the defaults
           },
         },
+        {
+          // Primary fill = the same accent the active segmented buttons use.
+          label: "Done",
+          variant: "primary",
+          onClick: () => this.settingsOverlay.close(),
+        },
       ],
       this.menuColors
     );
