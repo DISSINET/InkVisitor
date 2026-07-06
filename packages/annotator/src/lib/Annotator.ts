@@ -9,10 +9,16 @@ import Keys from "./Keys";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
 import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
+import { drawAnchorMarker } from "./AnchorMarker";
 import { CanvasMeasurer } from "./TextMeasurer";
 import Viewport from "./Viewport";
 import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
 import {
+  ANCHOR_MARKER_ARM_H_RATIO,
+  ANCHOR_MARKER_ARM_W_RATIO,
+  ANCHOR_MARKER_HIT_PAD_PX,
+  ANCHOR_MARKER_LINE_WIDTH_PX,
+  ANCHOR_MARKER_STACK_STEP_PX,
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
   PROPORTIONAL_FONT,
@@ -277,11 +283,29 @@ export class Annotator {
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
-  onHighlightCb?: (entityId: string) => HighlightSchema | void;
+  // A tag may map to several treatments at once (#2887): the active territory
+  // is both dimmed (FOCUS) and marked at its ends (ANCHOR). Returning an array
+  // draws each; a single schema (or void) keeps the original behaviour.
+  onHighlightCb?: (entityId: string) => HighlightSchema | HighlightSchema[] | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
   onAnchorTagHoverCb?: (tag: Tag | null, position: { x: number; y: number } | null) => void;
+
+  /**
+   * #2887 — hit rectangles for the Territory anchor markers drawn this frame,
+   * in draw coordinates (device px, before the scroll translate), each paired
+   * with its anchor Tag. Repopulated every draw; consumed by
+   * detectAndEmitAnchorTagHover so hovering a marker previews its territory
+   * through the same channel the RAW `<id>` markup hover already uses.
+   */
+  private anchorMarkerHitboxes: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    tag: Tag;
+  }[] = [];
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -831,10 +855,21 @@ export class Annotator {
   /**
    * Detects whether the mouse is over tag markup (`<tag>` or `</tag>`) and
    * emits the owning opening Tag, or null when not over any markup.
-   * Only meaningful in RAW mode since HIGHLIGHT mode hides tag markup.
+   *
+   * In RAW mode this reports `<id>` markup under the pointer. In HIGHLIGHT mode
+   * markup is hidden, but Territory anchor corner markers (#2887) are drawn and
+   * hit-tested here first, so hovering a marker previews its territory through
+   * the same channel. The marker hitbox list is empty outside HIGHLIGHT, so the
+   * prefix is inert there — no mode branch required.
    */
   private detectAndEmitAnchorTagHover(e: MouseEvent) {
     if (!this.onAnchorTagHoverCb) {
+      return;
+    }
+
+    const markerTag = this.hitTestAnchorMarker(e);
+    if (markerTag) {
+      this.onAnchorTagHoverCb(markerTag, { x: e.pageX, y: e.pageY });
       return;
     }
 
@@ -944,7 +979,7 @@ export class Annotator {
     this.onCanvasResize();
   }
 
-  onHighlight(cb: (entityId: string) => HighlightSchema | void): void {
+  onHighlight(cb: (entityId: string) => HighlightSchema | HighlightSchema[] | void): void {
     this.onHighlightCb = cb;
   }
 
@@ -1046,6 +1081,15 @@ export class Annotator {
       this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
       this.proportional ? this.width : undefined
     );
+
+    // The re-wrap can shrink the document (the new font wraps to fewer lines);
+    // clamp the scroll so a viewport parked near the old end doesn't dangle
+    // in empty space past the new last line.
+    const maxStart = Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines);
+    if (this.viewport.lineStart > maxStart) {
+      this.viewport.lineStart = maxStart;
+      this.viewport.scrollOffsetY = 0;
+    }
 
     this.cursor.syncVisualFromOffset(this.text);
     if (redraw) {
@@ -2256,6 +2300,146 @@ export class Annotator {
   }
 
   /**
+   * Issue #2887 — draw corner markers at the ends of ANCHOR-mode highlights
+   * (Territory anchors). Each item contributes a start (┌) and an end (└)
+   * marker; a filled span is never drawn, so the whole-territory anchor does
+   * not flood the fulltext. Markers sharing an exact position are stacked with
+   * a small horizontal offset (e.g. a book and its first chapter starting on
+   * the same character), preserving the innermost-first order the highlight
+   * list already carries (#2051). Assumes the ctx is translated for scroll,
+   * matching the surrounding draw passes.
+   */
+  private drawAnchorMarkers(
+    higlightItems: {
+      schema: HighlightSchema;
+      start: IAbsCoordinates;
+      end: IAbsCoordinates;
+      tag?: Tag;
+    }[]
+  ): void {
+    const anchorItems = higlightItems.filter((it) => it.schema.mode === HighlightMode.ANCHOR);
+    if (anchorItems.length === 0) {
+      return;
+    }
+    // Note: this.anchorMarkerHitboxes is cleared once per frame at the top of
+    // draw() (so it empties even in RAW/SEMI where this method never runs); we
+    // only append here.
+
+    const armH = ANCHOR_MARKER_ARM_H_RATIO * this.lineHeight;
+    const armW = ANCHOR_MARKER_ARM_W_RATIO * this.charWidth;
+    const lineWidth = ANCHOR_MARKER_LINE_WIDTH_PX * this.ratio;
+    const stackStep = ANCHOR_MARKER_STACK_STEP_PX * this.ratio;
+
+    const columnToPixelX = this.drawColumnToPixelX();
+    const toPx = (yLine: number, xLine: number): number =>
+      columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth;
+
+    // Only rows the main text renderer paints are eligible; a marker whose
+    // endpoint is off-screen is simply skipped (a multi-screen territory shows
+    // ┌ on its first visible line and ┘ on its last).
+    const lastVisibleRel =
+      Math.min(this.viewport.lineEnd, this.text.noLines) - this.viewport.lineStart;
+
+    // Expand each anchor into its two endpoint markers, in list order.
+    const points: {
+      yLine: number;
+      xLine: number;
+      kind: "start" | "end";
+      color: string;
+      tag?: Tag;
+    }[] = [];
+    for (const it of anchorItems) {
+      points.push({
+        yLine: it.start.yLine,
+        xLine: it.start.xLine,
+        kind: "start",
+        color: it.schema.style.color,
+        tag: it.tag,
+      });
+      // An end boundary at column 0 belongs visually to the previous line —
+      // drawn on its own line, the ┘ arm (running left) would be clamped
+      // rightward over that line's text. Render it after the previous line's
+      // last character instead.
+      let endYLine = it.end.yLine;
+      let endXLine = it.end.xLine;
+      if (endXLine === 0 && endYLine > 0) {
+        endYLine -= 1;
+        endXLine = this.text.getLine(endYLine).length;
+      }
+      points.push({
+        yLine: endYLine,
+        xLine: endXLine,
+        kind: "end",
+        color: it.schema.style.color,
+        tag: it.tag,
+      });
+    }
+
+    // Offset successive markers that land on the exact same position/side so
+    // stacked anchors remain individually visible instead of overprinting.
+    const stackIndex = new Map<string, number>();
+    for (const p of points) {
+      const relLine = p.yLine - this.viewport.lineStart;
+      if (relLine < 0 || relLine > lastVisibleRel) {
+        continue;
+      }
+
+      const key = `${p.yLine}:${p.xLine}:${p.kind}`;
+      const idx = stackIndex.get(key) ?? 0;
+      stackIndex.set(key, idx + 1);
+
+      // Stacked markers fan out to the right (both arms point right), so a
+      // stack never runs off the left margin where boundaries commonly sit.
+      const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
+      const yMid = (relLine + 0.5) * this.lineHeight;
+
+      const box = drawAnchorMarker(this.ctx, xPx, yMid, p.kind, {
+        armH,
+        armW,
+        lineWidth,
+        color: p.color,
+      });
+
+      // Record a padded hit target around the box actually drawn — start and
+      // end glyphs sit on opposite sides of the boundary, so the drawer reports
+      // its own bounds. Coordinates match the draw space;
+      // detectAndEmitAnchorTagHover converts the pointer to match.
+      if (p.tag) {
+        const pad = ANCHOR_MARKER_HIT_PAD_PX * this.ratio;
+        this.anchorMarkerHitboxes.push({
+          x: box.x - pad,
+          y: box.y - pad,
+          w: box.w + 2 * pad,
+          h: box.h + 2 * pad,
+          tag: p.tag,
+        });
+      }
+    }
+  }
+
+  /**
+   * #2887 — is the pointer over a Territory anchor marker drawn this frame?
+   * Returns the marker's Tag, or null. Pointer offsets (CSS px, canvas-local)
+   * are converted to the marker draw space: ×ratio for device px, and +scroll
+   * offset on Y to undo the draw-time `translate(0, -scrollOffsetY)`. Markers
+   * are only populated during a HIGHLIGHT-mode draw, so this is inert (empty
+   * list) in RAW/SEMI without any explicit mode check.
+   */
+  private hitTestAnchorMarker(e: MouseEvent): Tag | null {
+    if (this.anchorMarkerHitboxes.length === 0) {
+      return null;
+    }
+    const mx = e.offsetX * this.ratio;
+    const my = e.offsetY * this.ratio + this.viewport.scrollOffsetY;
+    for (const hb of this.anchorMarkerHitboxes) {
+      if (mx >= hb.x && mx <= hb.x + hb.w && my >= hb.y && my <= hb.y + hb.h) {
+        return hb.tag;
+      }
+    }
+    return null;
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
@@ -2267,6 +2451,10 @@ export class Annotator {
     if (this.showFps) {
       this.updateFps();
     }
+
+    // #2887 — clear last frame's marker hover targets; the HIGHLIGHT draw below
+    // repopulates them. Cleared unconditionally so RAW/SEMI frames leave none.
+    this.anchorMarkerHitboxes = [];
 
     this.syncLineNumbersCanvasToMain();
 
@@ -2371,6 +2559,7 @@ export class Annotator {
         schema: HighlightSchema;
         start: IAbsCoordinates;
         end: IAbsCoordinates;
+        tag?: Tag; // #2887 — carried so ANCHOR markers know their entity for hover
       }[] = [];
       const processedTagNames = new Set<string>();
       for (const tag of annotated) {
@@ -2379,23 +2568,29 @@ export class Annotator {
           continue;
         }
         processedTagNames.add(tagName);
+        const hlResult = this.onHighlightCb(tagName);
+        let schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         // The anchor being resized is drawn separately as an animated pulse
-        // (below), so skip its static highlight here to avoid double-painting.
+        // (below), so drop its fill/underline schemas to avoid double-painting.
+        // Its ANCHOR corner markers are kept: for Territory anchors they are
+        // the only visual, and hiding them makes the anchor look deleted (#2887).
         if (this.resizeAnchor && this.resizeAnchor.tagName === tagName) {
-          continue;
+          schemas = schemas.filter((s) => s.mode === HighlightMode.ANCHOR);
         }
-        const hlSchema = this.onHighlightCb(tagName);
-        if (hlSchema) {
+        if (schemas.length) {
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
             occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
-              higlightItems.push({
-                schema: hlSchema,
-                start: occurence[0],
-                end: occurence[1],
-              });
+              for (const schema of schemas) {
+                higlightItems.push({
+                  schema,
+                  start: occurence[0],
+                  end: occurence[1],
+                  tag,
+                });
+              }
             }
             i++;
           } while (!!occurence.length);
@@ -2414,6 +2609,11 @@ export class Annotator {
       });
 
       for (const item of higlightItems) {
+        // ANCHOR items are point markers, not spans — drawn in the dedicated
+        // pass below (#2887), never as a filled range.
+        if (item.schema.mode === HighlightMode.ANCHOR) {
+          continue;
+        }
         const highlighter = new Highlighter(
           this.ratio,
           {
@@ -2441,7 +2641,20 @@ export class Annotator {
           this.resizeAnchor.tagName,
           this.resizeAnchor.openTagRef
         );
-        const schema = this.onHighlightCb?.(this.resizeAnchor.tagName);
+        const pulseResult = this.onHighlightCb?.(this.resizeAnchor.tagName);
+        const pulseSchemas = Array.isArray(pulseResult)
+          ? pulseResult
+          : pulseResult
+          ? [pulseResult]
+          : [];
+        // ANCHOR schemas are point markers with no fill (#2887) — prefer a
+        // span schema for the pulse, falling back to the anchor colour drawn
+        // as a background wash.
+        const schema =
+          pulseSchemas.find((s) => s.mode !== HighlightMode.ANCHOR) ??
+          (pulseSchemas[0]
+            ? { mode: HighlightMode.BACKGROUND, style: pulseSchemas[0].style }
+            : undefined);
         if (span && schema) {
           const baseOpacity = 0.5;
           // Pulse both below AND above the entity's normal highlight opacity —
@@ -2470,6 +2683,23 @@ export class Annotator {
             columnToPixelX: this.drawColumnToPixelX(),
           });
         }
+      }
+
+      this.drawAnchorMarkers(higlightItems);
+
+      // #2887 — highlights and anchor markers paint after the collapsed caret
+      // above, so a caret sharing a marker's cell is hidden underneath. Repaint
+      // it on top. Guarded to the collapsed case: cursor.draw then strokes only
+      // the caret, so selection rects are never lifted over the highlights.
+      if (textSegment && !this.cursor.isSelected()) {
+        this.cursor.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+          caretWidth: this.caretWidth * this.ratio,
+          caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
+          columnToPixelX: this.drawColumnToPixelX(),
+        });
       }
     }
 

@@ -7,7 +7,9 @@
   },
   "scripts": {
     "lint": "tslint --project \"tsconfig.json\"",
-    "test": "jest -w 1 -t",
+    "test": "jest --runInBand",
+    "test:unit": "jest --selectProjects unit",
+    "test:integration": "jest --selectProjects integration --runInBand",
     "start": "ENV_FILE=development nodemon",
     "dev": "ENV_FILE=development nodemon",
     "build": "tsgo --build tsconfig.prod.json",

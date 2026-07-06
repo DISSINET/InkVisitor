@@ -4,6 +4,7 @@ import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import User from "@models/user/user";
 import { Db } from "@service/rethink";
+import { DbHandle } from "@service/dbHandle";
 import {
   createEntity,
   deleteAudits,
@@ -30,7 +31,10 @@ export const successfulGenericResponse: IResponseGeneric = {
 export const newMockRequest = (db: Db): IRequest => {
   return {
     acl: new Acl(),
-    db: db,
+    // Tests pass a raw Db; handlers exercised via the mock only touch
+    // req.db.connection, which Db provides directly. Cast to satisfy the
+    // IRequest.db: DbHandle contract introduced by the pool refactor.
+    db: db as unknown as DbHandle,
     user: undefined,
     getUserOrFail: () => {
       return new User({});

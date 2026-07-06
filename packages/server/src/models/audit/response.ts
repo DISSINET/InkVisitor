@@ -7,12 +7,13 @@ export class ResponseAudit implements IResponseAudit {
   auditScope: AuditScope = AuditScope.Entity;
   last: IAudit[] = [];
   first?: IAudit;
+  relations: IAudit[] = [];
 
   constructor(entityId: string) {
     this.modelId = entityId;
   }
 
-  async prepare(db: Connection): Promise<void> {
+  async prepare(db: Connection, relationsLimit = 10): Promise<void> {
     this.last = await Audit.getLastNForEntity(db, this.modelId, 10);
     if (this.last.length) {
       const firstEntity = await Audit.getFirstForEntity(db, this.modelId);
@@ -20,6 +21,11 @@ export class ResponseAudit implements IResponseAudit {
         this.first = firstEntity;
       }
     }
+    this.relations = await Audit.getRelationAuditsForEntity(
+      db,
+      this.modelId,
+      relationsLimit
+    );
   }
 }
 
@@ -28,6 +34,7 @@ export class ResponseDocumentAudit implements IResponseAudit {
   auditScope: AuditScope = AuditScope.Document;
   last: IAudit[] = [];
   first?: IAudit;
+  relations: IAudit[] = [];
 
   constructor(documentId: string) {
     this.modelId = documentId;

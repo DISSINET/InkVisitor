@@ -84,8 +84,8 @@ export const StyledTr = styled.tr<StyledTr>`
     content: "";
     position: absolute;
     left: 0;
-    top: 5%;
-    bottom: 5%;
+    top: 6%;
+    bottom: 6%;
     width: 4px;
     border-radius: 0 10px 10px 0;
     background-color: ${({ theme }) => theme.color["success"]};

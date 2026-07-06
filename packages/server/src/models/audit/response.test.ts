@@ -2,6 +2,7 @@ import "ts-jest";
 import { Db } from "@service/rethink";
 import { clean } from "@modules/common.test";
 import { AuditScope } from "@inkvisitor/shared/types";
+import { deleteAudits } from "@service/shorthands";
 import Audit from "./audit";
 
 function prepareAudit(forEntityId: string, date: Date): [string, Audit] {
@@ -96,11 +97,16 @@ describe("test Audit.getEarliestDate", function () {
   it("should return null when no audit entries exist", async () => {
     const emptyDb = new Db();
     await emptyDb.initDb();
-    
+
+    // getEarliestDate scans the whole (shared) audits table, so emptying it is
+    // the only way to exercise the no-entries branch. Runs after the
+    // earliest-date test above, which still needs the seeded entries.
+    await deleteAudits(emptyDb);
+
     const earliestDate = await Audit.getEarliestDate(emptyDb.connection);
     expect(earliestDate).toBe(null);
-    
-    await clean(emptyDb);
+
+    await emptyDb.close();
   });
 });
 

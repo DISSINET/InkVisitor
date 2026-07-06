@@ -47,7 +47,11 @@ describe("Users password", function () {
         .expect(200)
         .then(async () => {
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
-          const user = await User.findUserByLogin(db, supertestConfig.username);
+          const user = await User.findUserByLogin(
+            db,
+            supertestConfig.username,
+            false
+          );
           expect(user).not.toBeNull();
           if (user) {
             expect(
@@ -77,7 +81,11 @@ describe("Users password", function () {
 
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
 
-          const user = await User.findUserByLogin(db, supertestConfig.username);
+          const user = await User.findUserByLogin(
+            db,
+            supertestConfig.username,
+            false
+          );
           expect(user).not.toBeNull();
           if (user) {
             expect(

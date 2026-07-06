@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 
-export function useAuditQuery(entityId: string, enabled = true) {
+export function useAuditQuery(entityId: string, enabled = true, relationsLimit = 10) {
   return useQuery({
-    queryKey: ["audit", entityId],
+    queryKey: ["audit", entityId, relationsLimit],
     queryFn: async () => {
-      const res = await api.auditGet(entityId);
+      const res = await api.auditGet(entityId, relationsLimit);
       return res.data;
     },
     enabled: !!entityId && api.isLoggedIn() && enabled,
-    staleTime: 5 * 60 * 1000,
   });
 }

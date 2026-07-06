@@ -31,7 +31,7 @@ function setup(value: string): Annotator {
   return a;
 }
 
-describe("caret follows the word across a re-wrap (#3145)", () => {
+describe("caret follows the word across a re-wrap", () => {
   test("layout sanity: word wraps to line 1", () => {
     const a = setup("aa bbbb cccccc");
     expect(a.text.getLine(0)).toBe("aa bbbb ");
@@ -87,19 +87,23 @@ describe("caret follows the word across a re-wrap (#3145)", () => {
 
   test("BACKSPACE at the start of a wrapped word deletes the boundary space", () => {
     const a = setup("aaaa bbbbb ccccc");
-    // line 0 fills exactly, so the wrap space leads line 1; "ccccc" starts at
-    // column 1 (after the leading space).
-    expect(a.text.getLine(0)).toBe("aaaa bbbbb");
-    expect(a.text.getLine(1)).toBe(" ccccc");
+    // line 0 fills exactly; the wrap space trails it and "ccccc" starts line 1
+    // flush (column 0), no leading space.
+    expect(a.text.getLine(0)).toBe("aaaa bbbbb ");
+    expect(a.text.getLine(1)).toBe("ccccc");
 
-    // caret at the start of "ccccc" (column 1, after the leading wrap space)
-    a.cursor.setPosition(1, 1);
+    // caret at the start of "ccccc" (offset 11, just after the trailing space)
+    a.cursor.setPosition(0, 1);
 
     keyDown(a, "Backspace");
 
-    // like a normal editor: backspace removes the space before the caret,
-    // merging the words — it must NOT be a silent no-op
+    // like a normal editor: backspace removes the boundary space before the
+    // caret, merging the words — it must NOT be a silent no-op. The merged
+    // "bbbbbccccc" is a 10-char unit, so it wraps whole to line 1.
     expect(a.text.value).toBe("aaaa bbbbbccccc");
+    expect(a.text.getLine(0)).toBe("aaaa ");
+    expect(a.text.getLine(1)).toBe("bbbbbccccc");
+    // caret sits at the merge point, between "bbbbb" and "ccccc"
     expect(a.cursor.yLine).toBe(1);
     expect(a.cursor.xLine).toBe(5);
 

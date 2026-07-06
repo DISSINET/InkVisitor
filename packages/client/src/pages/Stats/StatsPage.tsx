@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { DocumentTable } from "./DocumentTable/DocumentTable";
+import { StatsDocumentTable } from "./StatsDocumentTable/StatsDocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
+import { RelationsTab } from "./RelationsTab/RelationsTab";
 import {
   StyledStatsContent,
   StyledStatsTab,
@@ -12,10 +13,10 @@ import {
   StyledTabsContainer,
 } from "./StatsPageStyles";
 
-type StatsTab = "entities" | "documents";
+type StatsTab = "entities" | "documents" | "relations";
 
 const parseStatsTab = (tab: string | null): StatsTab =>
-  tab === "documents" ? "documents" : "entities";
+  tab === "documents" ? "documents" : tab === "relations" ? "relations" : "entities";
 
 export const StatsPage = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export const StatsPage = () => {
           return nextParams.toString();
         })(),
       },
-      { replace: true }
+      { replace: true },
     );
   }, [activeTab, location.hash, navigate, rawTab]);
 
@@ -81,6 +82,13 @@ export const StatsPage = () => {
               >
                 Documents
               </StyledStatsTab>
+              <StyledStatsTab
+                type="button"
+                $isSelected={activeTab === "relations"}
+                onClick={() => handleTabChange("relations")}
+              >
+                Relations
+              </StyledStatsTab>
             </StyledStatsTabGroup>
           </StyledTabsContainer>
         }
@@ -88,11 +96,12 @@ export const StatsPage = () => {
         <StyledStatsContent>
           {activeTab === "entities" && <EntitiesTab />}
           {activeTab === "documents" && (
-            <DocumentTable
+            <StatsDocumentTable
               selectedDocument={selectedDocument}
               setSelectedDocument={setSelectedDocument}
             />
           )}
+          {activeTab === "relations" && <RelationsTab />}
         </StyledStatsContent>
       </Box>
     </Panel>

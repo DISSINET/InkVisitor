@@ -650,23 +650,11 @@ export default class Keys {
           Math.min(this.cursor.anchor, this.cursor.head)
         );
       } else {
-        const beforeOffset = this.cursor.head;
-        let next = this.text.stepVisualLeft(this.cursor.xLine, this.cursor.yLine);
-        let info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
-        // Plain Left lands on the previous line's end (the boundary's two
-        // visual positions share one offset). For shift that flip wouldn't grow
-        // the selection, so step once more so shift+Left selects a char. #3145
-        if (shiftKey && info.offset === beforeOffset) {
-          next = this.text.stepVisualLeft(next.xLine, next.yLine);
-          info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
-        }
-        this.cursor.head = info.offset;
-        this.cursor.headAffinity = info.affinity;
-        if (!shiftKey) {
-          this.cursor.anchor = info.offset;
-          this.cursor.anchorAffinity = info.affinity;
-        }
-        this.cursor.syncVisualFromOffset(this.text);
+        const info = this.text.caretStepLeft(
+          this.cursor.xLine,
+          this.cursor.yLine
+        );
+        this.cursor.stepHeadTo(this.text, info.offset, info.affinity, !!shiftKey);
       }
       this.scrollCursorIntoView();
       return;
@@ -846,24 +834,13 @@ export default class Keys {
         );
       } else {
         // Step one visible column right (crosses line boundaries, honours the
-        // soft-wrap affinity, clamps at EOF), then store the canonical offset.
-        const beforeOffset = this.cursor.head;
-        let next = this.text.stepVisualRight(this.cursor.xLine, this.cursor.yLine);
-        let info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
-        // Symmetric to ArrowLeft: plain Right lands on the next line's start;
-        // for shift, step once more so it selects a char instead of just flipping.
-        if (shiftKey && info.offset === beforeOffset) {
-          next = this.text.stepVisualRight(next.xLine, next.yLine);
-          info = this.text.offsetWithAffinityFromVisual(next.xLine, next.yLine);
-        }
-        this.cursor.head = info.offset;
-        this.cursor.headAffinity = info.affinity;
-        if (!shiftKey) {
-          this.cursor.anchor = info.offset;
-          this.cursor.anchorAffinity = info.affinity;
-        }
-        // Derive caret + selectStart/selectEnd from anchor/head.
-        this.cursor.syncVisualFromOffset(this.text);
+        // soft-wrap affinity and the wrap-boundary rules, clamps at EOF).
+        const info = this.text.caretStepRight(
+          this.cursor.xLine,
+          this.cursor.yLine,
+          !!shiftKey
+        );
+        this.cursor.stepHeadTo(this.text, info.offset, info.affinity, !!shiftKey);
       }
       this.scrollCursorIntoView();
       return;
