@@ -769,12 +769,11 @@ export const TextAnnotator = ({
       });
     };
 
-    // XML markup anchor hover to preview the entity tag when hovering over the <id> markup (RAW mode)
+    // Entity-tag preview on hover: over `<id>` markup in RAW mode, or over a
+    // Territory anchor marker in HIGHLIGHT mode (#2887). The annotator only
+    // emits a tag in those cases, so no edit-mode gate is needed here.
     const registerAnchorTagMarkupHover = (a: Annotator) => {
       a.onAnchorTagHover((tag: Tag | null, position: { x: number; y: number } | null) => {
-        if (annotatorModeRef.current !== EditMode.RAW) {
-          return;
-        }
         const clearScheduled = xmlMarkupAnchorHoverClearTimerRef;
         const cancelClear = () => {
           if (clearScheduled.current !== null) {
@@ -1480,7 +1479,7 @@ export const TextAnnotator = ({
             </FloatingPortal>
           )}
 
-          {xmlMarkupAnchorHover && annotatorMode === EditMode.RAW && api.isLoggedIn() && (
+          {xmlMarkupAnchorHover && api.isLoggedIn() && (
             <FloatingPortal id="page">
               <div
                 style={{
@@ -1515,7 +1514,12 @@ export const TextAnnotator = ({
                   }, 200);
                 }}
               >
-                <EntityTagById entityId={xmlMarkupAnchorHover.entityId} disableTooltip={false} />
+                <EntityTagById
+                  entityId={xmlMarkupAnchorHover.entityId}
+                  disableTooltip={false}
+                  disableDoubleClick={false}
+                  tagMaxWidth={theme.space[60]}
+                />
               </div>
             </FloatingPortal>
           )}

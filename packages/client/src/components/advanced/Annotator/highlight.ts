@@ -13,7 +13,7 @@ export const annotatorHighlight = (
   data: annotatorHighlightData,
   hlClasses: EntityEnums.Class[],
   theme: DefaultTheme | undefined,
-): HighlightSchema | undefined => {
+): HighlightSchema | HighlightSchema[] | undefined => {
   if (!theme) {
     return undefined;
   }
@@ -22,13 +22,24 @@ export const annotatorHighlight = (
     data.dataDocument?.entityIds ?? {};
 
   if (entityId === data.thisTerritoryEntityId) {
-    return {
-      mode: HighlightMode.FOCUS,
-      style: {
-        color: theme.color["black"],
-        opacity: 0.08,
+    // #2887 — the active territory keeps its dim wash (FOCUS) and also gets the
+    // start/end corner markers (ANCHOR), same as any other territory anchor.
+    return [
+      {
+        mode: HighlightMode.FOCUS,
+        style: {
+          color: theme.color.entityT,
+          opacity: 0.1,
+        },
       },
-    };
+      {
+        mode: HighlightMode.ANCHOR,
+        style: {
+          color: theme.color.entityT,
+          opacity: 1,
+        },
+      },
+    ];
   }
 
   const entityClass = Object.keys(dReferenceEntityIds).find((key) =>
@@ -46,7 +57,17 @@ export const annotatorHighlight = (
       };
     }
     if (entityClass === EntityEnums.Class.Territory) {
-      return undefined;
+      // #2887 — a Territory anchor spans a whole territory; filling it as a
+      // highlight would flood the fulltext. Draw only corner markers at the
+      // anchor ends (ANCHOR mode) so child/sibling territories stay visible in
+      // basic highlight view without overwhelming the text.
+      return {
+        mode: HighlightMode.ANCHOR,
+        style: {
+          color: theme.color.entityT,
+          opacity: 1,
+        },
+      };
     }
 
     const classItem = EntityColors[entityClass];

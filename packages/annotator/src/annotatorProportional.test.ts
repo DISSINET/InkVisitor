@@ -69,4 +69,20 @@ describe("Annotator proportional flag", () => {
     a.setProportional(false);
     expect(a.font).toContain("Roboto Mono");
   });
+
+  test("switching fonts at the document end clamps the viewport scroll", () => {
+    // Proportional wraps to far more lines here (mocked 100px/char against an
+    // 800px budget) than monospace. Park the viewport at the proportional end,
+    // switch back, and the scroll must be clamped to the shrunken document —
+    // not left dangling in empty space past the last line.
+    const text = Array.from({ length: 40 }, () => "abcdefghij klmnopqrs").join("\n");
+    const a = mk(text);
+    a.setProportional(true);
+    a.scrollToLine(a.scrollExtentLineCount());
+    a.setProportional(false);
+
+    const viewport = (a as any).viewport as { lineStart: number; noLines: number };
+    const maxStart = Math.max(0, a.scrollExtentLineCount() - 1 - viewport.noLines);
+    expect(viewport.lineStart).toBeLessThanOrEqual(maxStart);
+  });
 });

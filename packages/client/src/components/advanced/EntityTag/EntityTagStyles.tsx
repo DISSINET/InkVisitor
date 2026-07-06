@@ -100,6 +100,7 @@ interface StyledLabel {
   $isFavorited: boolean;
   $labelOnly?: boolean;
   $isItalic: boolean;
+  $maxWidth?: string;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -116,7 +117,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   border-left-color: ${({ theme, $tagBorderColorKey }) =>
     theme.color.tagBorderColor[$tagBorderColorKey]};
   border-left-style: solid;
-  max-width: ${({ theme, $fullWidth }) => ($fullWidth ? "100%" : theme.space[30])};
+  max-width: ${({ theme, $fullWidth, $maxWidth }) =>
+    $maxWidth ? $maxWidth : $fullWidth ? "100%" : theme.space[30]};
   font-weight: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
