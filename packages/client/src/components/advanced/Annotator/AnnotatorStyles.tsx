@@ -351,6 +351,7 @@ export const StyledMoveAnchorPanel = styled.div`
   flex-direction: row;
   align-items: flex-end;
   gap: ${({ theme }) => theme.space[3]};
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledMoveAnchorControls = styled.div`
@@ -378,7 +379,7 @@ export const StyledMoveAnchorEntityTag = styled.div`
   display: grid;
   align-items: center;
   width: 100%;
-  padding-left: ${({ theme }) => theme.space[2]};
+  padding-left: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledMoveAnchorFooter = styled.div`

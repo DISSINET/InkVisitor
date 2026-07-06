@@ -406,10 +406,10 @@ export const TextAnnotatorMenu = ({
             <RiExpandWidthLine size={18} />
             Resize anchor span
           </StyledAnnotatorItemTitle>
-          <StyledMoveAnchorEntityTag style={{ display: "grid" }}>
-            <EntityTag entity={movingEntity} fullWidth disableDrag disableDoubleClick />
-          </StyledMoveAnchorEntityTag>
           <StyledAnnotatorItemContent>
+            <StyledMoveAnchorEntityTag>
+              <EntityTag entity={movingEntity} fullWidth disableDrag disableDoubleClick />
+            </StyledMoveAnchorEntityTag>
             <StyledMoveAnchorPanel>
               <StyledMoveAnchorControls>
                 <StyledMoveAnchorGroup>
