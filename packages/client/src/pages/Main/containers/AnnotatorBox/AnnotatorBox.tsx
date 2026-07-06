@@ -182,13 +182,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
           { ...previousTerritory, statements: updatedStatements },
         );
       }
-      // Deliberately NOT optimistically inserting the new Statement id into the
-      // document's entityIds here. That drove the anchor's highlight on-screen
-      // before the anchor was actually saved, and a subsequent document refetch
-      // (which momentarily lacks it) toggled it back off — the highlight blinked.
-      // The anchor is added and saved right after (handleAddAnchor → document
-      // save + refetch); letting it appear only once that fetch lands is smoother
-      // than an optimistic flash that has to be corrected (#2885 follow-up).
       return { previousTerritory };
     },
     onError: (_error, _variables, context) => {
