@@ -2648,7 +2648,7 @@ export class Annotator {
           // Pulse both below AND above the entity's normal highlight opacity —
           // the midpoint of the cycle (intensity 0.5) matches the static look,
           // dimmer at the "down" phase, stronger at the "up" phase.
-          const PULSE_AMPLITUDE = 0.5;
+          const PULSE_AMPLITUDE = 0.47;
           const opacity = Math.max(
             0,
             Math.min(
@@ -3114,9 +3114,7 @@ export class Annotator {
     const pulseSchemas = schemas
       .filter((s) => s.mode !== HighlightMode.ANCHOR)
       .map((s) =>
-        s.mode === HighlightMode.FOCUS
-          ? { mode: HighlightMode.BACKGROUND, style: s.style }
-          : s
+        s.mode === HighlightMode.FOCUS ? { mode: HighlightMode.BACKGROUND, style: s.style } : s
       );
     const hasFill = pulseSchemas.some((s) => s.mode === HighlightMode.BACKGROUND);
     if (!hasFill && schemas.length) {
