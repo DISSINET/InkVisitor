@@ -13,7 +13,13 @@ import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
-import { ApplyTemplateModal, AuditTable, EntityTag, JSONExplorer } from "components/advanced";
+import {
+  ApplyTemplateModal,
+  AuditTable,
+  EntityTag,
+  JSONExplorer,
+  RelationAuditTable,
+} from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useIsInViewport, useSearchParams } from "hooks";
 import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
@@ -94,6 +100,7 @@ enum EntityDetailSection {
   References = "references",
   UsedIn = "usedIn",
   Audits = "audits",
+  RelationAudits = "relationAudits",
   Json = "json",
 }
 
@@ -197,7 +204,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   // Audit query - only fetched once the Audits section scrolls into view
   const [auditSectionRef, auditInViewport] = useIsInViewport("200px");
-  const { data: audit } = useAuditQuery(detailId, auditInViewport);
+  const [relationsLimit, setRelationsLimit] = useState(10);
+  useEffect(() => {
+    setRelationsLimit(10);
+  }, [detailId]);
+  const { data: audit } = useAuditQuery(detailId, auditInViewport, relationsLimit);
 
   useEffect(() => {
     if (entity !== undefined) {
@@ -532,6 +543,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // refresh the Relation audits section on every open detail - a relation
+      // touches more than the current entity
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
@@ -543,6 +557,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     }) => await api.relationUpdate(relationObject.relationId, relationObject.changes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
@@ -551,6 +566,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
@@ -1014,6 +1030,33 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 {isSectionExpanded(EntityDetailSection.Audits) && (
                   <StyledDetailSectionContent ref={auditSectionRef}>
                     {audit && <AuditTable {...audit} />}
+                  </StyledDetailSectionContent>
+                )}
+              </StyledDetailSection>
+
+              {/* Relation audits */}
+              <StyledDetailSection key="editor-section-relation-audits">
+                <StyledDetailSectionHeader
+                  onClick={() => toggleSection(EntityDetailSection.RelationAudits)}
+                >
+                  <EntityDetailExpandIcon
+                    isExpanded={isSectionExpanded(EntityDetailSection.RelationAudits)}
+                  />
+                  <StyledDetailSectionHeading>
+                    Relation audits
+                  </StyledDetailSectionHeading>
+                </StyledDetailSectionHeader>
+                {isSectionExpanded(EntityDetailSection.RelationAudits) && (
+                  <StyledDetailSectionContent>
+                    {audit && (
+                      <RelationAuditTable
+                        relations={audit.relations}
+                        detailEntityId={detailId}
+                        entities={entity.entities}
+                        hasMore={audit.relations.length >= relationsLimit}
+                        onLoadMore={() => setRelationsLimit((limit) => limit + 10)}
+                      />
+                    )}
                   </StyledDetailSectionContent>
                 )}
               </StyledDetailSection>

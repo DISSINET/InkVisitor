@@ -7,6 +7,7 @@ import { IRequest } from "src/custom_typings/request";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { prepareRelation } from "@models/relation/relation.test";
 import Document from "./document";
+import { AnchorsNode } from "./anchors";
 
 describe("test Document.findByEntityId", function () {
   const db = new Db();
@@ -178,11 +179,25 @@ describe("Document.buildAnchorsTree", () => {
 
     // footer //
 `;
-  const document = new Document({
-    content: content,
-  });
+  // anchors are no longer auto-built in the constructor; they are produced by
+  // AnchorsNode.buildAnchorsTree (called from Document.preprocess at write time)
+  // and only tags whose ids are present in entityIds become nodes.
+  const entityIds = {
+    ...Document.emptyEntityIdsRecord(),
+    [EntityEnums.Class.Person]: [
+      "tag1",
+      "tag2",
+      "tag3",
+      "tag4",
+      "tag5",
+      "tag6",
+      "tag7",
+      "tag8",
+      "tag9",
+    ],
+  };
 
-  const tree = document.anchors;
+  const tree = AnchorsNode.buildAnchorsTree(content, entityIds);
   it("should contain 3 root anchors", () => {
     expect(tree).toHaveLength(3);
   });

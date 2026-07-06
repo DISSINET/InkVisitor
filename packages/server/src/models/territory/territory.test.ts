@@ -5,7 +5,6 @@ import { clean, getITerritoryMock } from "@modules/common.test";
 import { findEntityById, deleteEntities } from "@service/shorthands";
 import { IParentTerritory, ITerritory } from "@inkvisitor/shared/types";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { ECASTEMOVariant } from "@inkvisitor/shared/types/territory";
 import { randomUUID } from "crypto";
 
 describe("models/territory", function () {
@@ -44,7 +43,7 @@ describe("models/territory", function () {
       it("should return true", () => {
         const okData = new Territory({
           id: "id",
-          label: "label",
+          labels: ["label"],
           data: {
             parent: {
               territoryId: "2",
@@ -131,7 +130,7 @@ describe("models/territory", function () {
     });
 
     describe("save territory without parent", () => {
-      it("should have empty parent prop", async (done) => {
+      it("should have empty parent prop", async () => {
         const territory = new Territory({});
         territory.id = "T0";
         await territory.save(db.connection);
@@ -139,12 +138,11 @@ describe("models/territory", function () {
         const createdData = await findEntityById<ITerritory>(db, territory.id);
         expect(createdData.data.parent).toEqual(false);
 
-        done();
       });
     });
 
     describe("save territory with parent", () => {
-      it("should have order as expected", async (done) => {
+      it("should have order as expected", async () => {
         const territory = new Territory({
           data: { parent: { territoryId: "any", order: 999 } },
         });
@@ -156,12 +154,11 @@ describe("models/territory", function () {
 
         expect(got.territoryId).toEqual(expected.territoryId);
         expect(got.order).toEqual(expected.order);
-        done();
       });
     });
 
     describe("save two territories without explicit orders", () => {
-      it("should have orders 0 and 1 respectively", async (done) => {
+      it("should have orders 0 and 1 respectively", async () => {
         const territory1 = new Territory({
           data: { parent: { territoryId: "any", order: 0 } },
         });
@@ -185,12 +182,11 @@ describe("models/territory", function () {
         expect(createdData2.data.parent).toEqual(territory2.data.parent);
         expect((createdData2.data.parent as any).order).toEqual(1);
 
-        done();
       });
     });
 
     describe("save three territories with explicit orders", () => {
-      it("should have orders as provided", async (done) => {
+      it("should have orders as provided", async () => {
         const territory1 = new Territory({
           data: { parent: { territoryId: "any", order: 14 } },
         });
@@ -228,7 +224,6 @@ describe("models/territory", function () {
         expect(createdData3.data.parent).toEqual(territory3.data.parent);
         expect((createdData3.data.parent as any).order).toEqual(3);
 
-        done();
       });
     });
   });
@@ -249,23 +244,22 @@ describe("models/territory", function () {
     });
 
     describe("update territory without parent", () => {
-      it("should have empty parent prop, but set lavel prop", async (done) => {
+      it("should have empty parent prop, but set lavel prop", async () => {
         const territory = new Territory({});
         territory.id = "T0";
         await territory.save(db.connection);
 
-        await territory.update(db.connection, { label: "new label" });
+        await territory.update(db.connection, { labels: ["new label"] });
 
         const createdData = await findEntityById<ITerritory>(db, territory.id);
         expect(createdData.data.parent).toEqual(false);
-        expect(createdData.label).toEqual("new label");
+        expect(createdData.labels).toEqual(["new label"]);
 
-        done();
       });
     });
 
     describe("update territory with new parent without explicit order", () => {
-      it("should have order as expected", async (done) => {
+      it("should have order as expected", async () => {
         const territory = new Territory({ id: "T0" });
         await territory.save(db.connection);
         await territory.update(db.connection, {
@@ -281,12 +275,11 @@ describe("models/territory", function () {
           (createdData.data.parent as IParentTerritory).territoryId
         ).toEqual("new");
 
-        done();
       });
     });
 
     describe("update territory so it is sibling to existing one", () => {
-      it("should have order set to wanted value", async (done) => {
+      it("should have order set to wanted value", async () => {
         const parent = new TerritoryParent({ territoryId: "parent" });
         const territory1 = new Territory({});
         territory1.data.parent = parent;
@@ -315,7 +308,6 @@ describe("models/territory", function () {
           (updatedTerritory.data.parent as IParentTerritory).territoryId
         ).toEqual(parent.territoryId);
 
-        done();
       });
     });
   });
@@ -341,10 +333,11 @@ describe("models/territory", function () {
             project: "T0",
             description: "",
             endDate: "",
-            guidelinesResource: "",
-            guidelinesVersion: "",
             startDate: "",
-            variant: ECASTEMOVariant.FullCASTEMO,
+            dataCollectionMethods: [],
+            guidelines: [],
+            detailedProtocols: [],
+            relatedDataPublications: [],
           },
         },
       });
@@ -368,10 +361,11 @@ describe("models/territory", function () {
             project: "twithProtocol",
             description: "",
             endDate: "",
-            guidelinesResource: "",
-            guidelinesVersion: "",
             startDate: "",
-            variant: ECASTEMOVariant.FullCASTEMO,
+            dataCollectionMethods: [],
+            guidelines: [],
+            detailedProtocols: [],
+            relatedDataPublications: [],
           },
         },
       });
@@ -413,11 +407,12 @@ describe("models/territory", function () {
             protocol: {
               description: "",
               endDate: "",
-              guidelinesResource: "",
-              guidelinesVersion: "",
               project: customProject,
               startDate: "",
-              variant: ECASTEMOVariant.FullCASTEMO,
+              dataCollectionMethods: [],
+              guidelines: [],
+              detailedProtocols: [],
+              relatedDataPublications: [],
             },
           },
         });
@@ -445,47 +440,43 @@ describe("models/territory", function () {
   /*
   describe("Territory - test getClosestRight", function () {
     describe("no input rights", () => {
-      it("should return undefined as no closest right found", async (done) => {
+      it("should return undefined as no closest right found", async () => {
         const territory = new Territory(undefined);
 
         expect(territory.getClosestRight([])).toEqual(undefined);
-        done();
       });
     });
 
     describe("right with equal id", () => {
-      it("should return the right object", async (done) => {
+      it("should return the right object", async () => {
         const territory = new Territory({ id: "this" });
         const right = new UserRight({
           mode: UserEnums.RoleMode.Admin,
           territory: "this",
         });
         expect(territory.getClosestRight([right])).toEqual(right);
-        done();
       });
     });
 
     describe("right defined for parent territory", () => {
-      it("should return the same right object as was defined for the parent", async (done) => {
+      it("should return the same right object as was defined for the parent", async () => {
         const territory = new Territory({ id: "thisthat" });
         const right = new UserRight({
           mode: UserEnums.RoleMode.Admin,
           territory: "this",
         });
         expect(territory.getClosestRight([right])).toEqual(right);
-        done();
       });
     });
 
     describe("right defined for child territory", () => {
-      it("should return undefined", async (done) => {
+      it("should return undefined", async () => {
         const territory = new Territory({ id: "that" });
         const right = new UserRight({
           mode: UserEnums.RoleMode.Admin,
           territory: "this",
         });
         expect(territory.getClosestRight([right])).toEqual(undefined);
-        done();
       });
     });
   });

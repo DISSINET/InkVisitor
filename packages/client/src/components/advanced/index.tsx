@@ -2,6 +2,7 @@ import { AddTerritoryModal } from "./AddTerritoryModal/AddTerritoryModal";
 import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
+import { RelationAuditTable } from "./AuditTable/RelationAuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
 import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
 import DocumentModalExport from "./DocumentModal/DocumentModalExport";
@@ -61,6 +62,7 @@ export {
   AttributeButtonGroup,
   AbbreviatedTextWithTooltip,
   AuditTable,
+  RelationAuditTable,
   BreadcrumbItem,
   DocumentTitle,
   DocumentModalEdit,

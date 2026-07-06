@@ -93,15 +93,24 @@ describe("test Relation.beforeSave", function () {
     const [, entity1] = prepareEntity();
     entity1.class = EntityEnums.Class.Action;
     await entity1.save(db.connection);
-    const [, entity2] = prepareEntity();
-    entity2.class = EntityEnums.Class.Concept;
-    await entity2.save(db.connection);
+
+    // multiple distinct target entities - beforeSave now forbids duplicate
+    // relations sharing the same (entityIds[0], entityIds[1]) pair via
+    // RelationPathExist, so each relation needs a distinct second entity.
+    // Ordering siblings are still grouped by entityIds[0].
+    const targets: Entity[] = [];
+    for (let i = 0; i < 4; i++) {
+      const [, target] = prepareEntity();
+      target.class = EntityEnums.Class.Concept;
+      await target.save(db.connection);
+      targets.push(target);
+    }
 
     // first - should have order 0
     const [, relation1] = prepareRelation<Actant1Semantics>(
       RelationEnums.Type.Actant1Semantics
     );
-    relation1.entityIds = [entity1.id, entity2.id];
+    relation1.entityIds = [entity1.id, targets[0].id];
     await relation1.beforeSave(newMockRequest(db));
     await relation1.save(db.connection);
     expect(relation1.order).toEqual(0);
@@ -110,7 +119,7 @@ describe("test Relation.beforeSave", function () {
     const [, relation2] = prepareRelation<Actant1Semantics>(
       RelationEnums.Type.Actant1Semantics
     );
-    relation2.entityIds = [entity1.id, entity2.id];
+    relation2.entityIds = [entity1.id, targets[1].id];
     await relation2.beforeSave(newMockRequest(db));
     await relation2.save(db.connection);
     expect(relation2.order).toEqual(1);
@@ -119,7 +128,7 @@ describe("test Relation.beforeSave", function () {
     const [, relation3] = prepareRelation<Actant1Semantics>(
       RelationEnums.Type.Actant1Semantics
     );
-    relation3.entityIds = [entity1.id, entity2.id];
+    relation3.entityIds = [entity1.id, targets[2].id];
     relation3.order = 0;
     await relation3.beforeSave(newMockRequest(db));
     await relation3.save(db.connection);
@@ -129,7 +138,7 @@ describe("test Relation.beforeSave", function () {
     const [, relation4] = prepareRelation<Actant2Semantics>(
       RelationEnums.Type.Actant2Semantics
     );
-    relation4.entityIds = [entity1.id, entity2.id];
+    relation4.entityIds = [entity1.id, targets[0].id];
     await relation4.beforeSave(newMockRequest(db));
     await relation4.save(db.connection);
     expect(relation4.order).toEqual(0);
@@ -138,7 +147,7 @@ describe("test Relation.beforeSave", function () {
     const [, relation5] = prepareRelation<Actant1Semantics>(
       RelationEnums.Type.Actant1Semantics
     );
-    relation5.entityIds = [entity1.id, entity2.id];
+    relation5.entityIds = [entity1.id, targets[3].id];
     await relation5.beforeSave(newMockRequest(db));
     await relation5.save(db.connection);
     expect(relation5.order).toEqual(2);
@@ -147,8 +156,11 @@ describe("test Relation.beforeSave", function () {
 
 describe("test Relation.validateEntities", function () {
   test("missing preloaded entities", () => {
+    // validateEntities -> validateEntitiesData -> getPreloadedEntity now throws
+    // an InternalServerError synchronously when entities are not preloaded
+    // (rather than returning it).
     const relation = new Relation({ entityIds: ["1", "2"] });
-    expect(relation.validateEntities()).toBeInstanceOf(InternalServerError);
+    expect(() => relation.validateEntities()).toThrow(InternalServerError);
   });
 
   test("test synonym (success)", () => {

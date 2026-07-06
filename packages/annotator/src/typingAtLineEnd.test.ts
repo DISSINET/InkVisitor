@@ -34,7 +34,7 @@ describe("typing at end of wrapped line", () => {
     }
   });
 
-  test("space at end of full wrapped line advances cursor to next line", () => {
+  test("space at end of full wrapped line stays trailing; the caret is draw-clamped", () => {
     annotator = new Annotator(mockCanvas, "");
     annotator.setMode(EditMode.RAW);
     const charsAtLine = annotator.text.charsAtLine;
@@ -48,11 +48,15 @@ describe("typing at end of wrapped line", () => {
 
     expect(annotator.text.value.length).toBe(lenBefore + 1);
     expect(annotator.text.value).toContain(" ");
-    expect(annotator.cursor.yLine).toBe(1);
-    expect(annotator.cursor.xLine).toBe(1);
+    // Google-Docs style: the space stays trailing on the full line (no wrap to a
+    // leading-space line); the caret stays on line 0 with its drawn column
+    // clamped to the width, so it never scrolls off-screen.
+    expect(annotator.text.noLines).toBe(1);
+    expect(annotator.cursor.yLine).toBe(0);
+    expect(Math.min(annotator.cursor.xLine, charsAtLine)).toBe(charsAtLine);
   });
 
-  test("repeated spaces at wrapped line end keep advancing", () => {
+  test("repeated spaces at a full wrapped line end accumulate trailing, caret clamped", () => {
     annotator = new Annotator(mockCanvas, "");
     annotator.setMode(EditMode.RAW);
     const charsAtLine = annotator.text.charsAtLine;
@@ -62,7 +66,12 @@ describe("typing at end of wrapped line", () => {
     keyDown(annotator, " ");
     keyDown(annotator, " ");
 
-    expect(annotator.cursor.yLine).toBeGreaterThanOrEqual(1);
+    // both spaces stay trailing on the one line; the caret's drawn column stays
+    // clamped to the width rather than scrolling off-screen
     expect(annotator.text.value.split(" ").length - 1).toBeGreaterThanOrEqual(2);
+    expect(annotator.text.noLines).toBe(1);
+    expect(Math.min(annotator.cursor.xLine, charsAtLine)).toBeLessThanOrEqual(
+      charsAtLine
+    );
   });
 });

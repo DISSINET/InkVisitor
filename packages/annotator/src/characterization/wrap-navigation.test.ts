@@ -11,9 +11,13 @@
  * preserve (with an affinity bit) or deliberately change — these tests make the
  * choice explicit instead of silent. They assert what the editor does today.
  *
- * #3145: plain ArrowLeft from a continuation line start lands on the previous
- * line's end (just after its last character); only shift+ArrowLeft skips that
- * so a selection grows. Wrapping keeps that end position visible at the margin.
+ * Plain ArrowLeft from a continuation line start skips the phantom
+ * end-of-previous-line stop and lands on the second-to-last position of the
+ * previous line (Word-style); ArrowRight is now its mirror image — from the
+ * wrapped line end it advances to the second position of the next line rather
+ * than resting again at the boundary. The two visual positions of the boundary
+ * offset are still each reachable (e.g. by click, or by Left from the next line),
+ * but neither Left nor Right dead-stops twice on the one boundary offset.
  */
 import { Annotator } from "../lib/Annotator";
 import { EditMode } from "../lib/constants";
@@ -50,19 +54,19 @@ describe("characterization: caret affinity at a soft-wrap boundary", () => {
     expect(a.text.segments[0].lines).toEqual(["supercalif", "ragilistic"]);
   });
 
-  test("ArrowLeft from start of the next line lands after the last char of the wrapped line", () => {
+  test("ArrowLeft from start of the next line lands on the second-to-last position of the wrapped line", () => {
     const a = mk(WRAPPED);
     a.cursor.setPosition(0, 1);
     key(a, "ArrowLeft");
-    expect(pos(a)).toEqual({ x: 10, y: 0 }); // just after "supercalif", visible at margin
+    expect(pos(a)).toEqual({ x: 9, y: 0 }); // one before "supercalif"'s last char (Word-style)
   });
 
-  test("a second ArrowLeft then steps one real char back", () => {
+  test("a second ArrowLeft then steps one more real char back", () => {
     const a = mk(WRAPPED);
     a.cursor.setPosition(0, 1);
-    key(a, "ArrowLeft"); // (10,0) after the last char
-    key(a, "ArrowLeft"); // (9,0) into the content
-    expect(pos(a)).toEqual({ x: 9, y: 0 });
+    key(a, "ArrowLeft"); // (9,0) second-to-last of the wrapped line
+    key(a, "ArrowLeft"); // (8,0) one more char back
+    expect(pos(a)).toEqual({ x: 8, y: 0 });
   });
 
   test("ArrowRight from end of the wrapped line stops at the boundary first", () => {
@@ -72,12 +76,12 @@ describe("characterization: caret affinity at a soft-wrap boundary", () => {
     expect(pos(a)).toEqual({ x: 10, y: 0 }); // pauses at end-of-line, not (0,1)
   });
 
-  test("a second ArrowRight then moves to start of the next line", () => {
+  test("a second ArrowRight then advances to the second position of the next line", () => {
     const a = mk(WRAPPED);
     a.cursor.setPosition(9, 0);
-    key(a, "ArrowRight"); // (10,0)
-    key(a, "ArrowRight"); // (0,1)
-    expect(pos(a)).toEqual({ x: 0, y: 1 });
+    key(a, "ArrowRight"); // (10,0) end of the wrapped line
+    key(a, "ArrowRight"); // (1,1) second position of the next line, not its start
+    expect(pos(a)).toEqual({ x: 1, y: 1 });
   });
 
   test("the end-of-wrapped-line position (10,0) is itself a valid caret position", () => {

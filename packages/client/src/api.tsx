@@ -1199,9 +1199,19 @@ class Api {
   /**
    * Audit
    */
-  async auditGet(entityId: string, options?: IApiOptions): Promise<AxiosResponse<IResponseAudit>> {
+  async auditGet(
+    entityId: string,
+    relationsLimit = 10,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseAudit>> {
     try {
-      const response = await this.connection.get(`/entities/${entityId}/audits`, options);
+      const response = await this.connection.get(`/entities/${entityId}/audits`, {
+        ...options,
+        params: {
+          ...(options?.params as Record<string, unknown>),
+          relationsLimit,
+        },
+      });
       return response;
     } catch (err) {
       throw this.handleError(err);

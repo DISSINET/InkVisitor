@@ -3,12 +3,14 @@ import { EventType } from "@inkvisitor/shared/types/stats";
 /**
  * Deletion event types are folded into their matching edit type for stats, so a
  * deletion counts as an edit (contribution) rather than its own category:
- *   DELETE        -> EDIT
- *   ANCHOR_DELETE -> ANCHOR_EDIT
+ *   DELETE          -> EDIT
+ *   ANCHOR_DELETE   -> ANCHOR_EDIT
+ *   RELATION_DELETE -> RELATION_EDIT
  */
 const STATS_FOLD_MAP: Partial<Record<EventType, EventType>> = {
   [EventType.DELETE]: EventType.EDIT,
   [EventType.ANCHOR_DELETE]: EventType.ANCHOR_EDIT,
+  [EventType.RELATION_DELETE]: EventType.RELATION_EDIT,
 };
 
 /** Maps a single event type to the type it is counted as in stats. */
