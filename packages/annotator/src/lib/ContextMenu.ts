@@ -22,6 +22,12 @@ export interface ContextMenuItem {
 export class ContextMenu {
   private el: HTMLDivElement | null = null;
   colors: MenuColors = LIGHT_MENU_COLORS;
+  /**
+   * Stacking layer of the menu. It is appended to `document.body`, so it must
+   * out-rank whatever it sits over — including the app's modal (the Documents
+   * page hosts the annotator inside one, z-index 500). Toasts (10000) stay above.
+   */
+  zIndex = 700;
 
   /** Whether the menu is currently shown. */
   get isOpen(): boolean {
@@ -40,7 +46,7 @@ export class ContextMenu {
       position: "fixed",
       left: `${clientX}px`,
       top: `${clientY}px`,
-      zIndex: "200",
+      zIndex: `${this.zIndex}`,
       minWidth: "160px",
       padding: "4px",
       background: this.colors.bg,

@@ -60,6 +60,13 @@ export class SettingsOverlay {
   private followRaf: number | null = null;
   /** Last anchor rect applied, so the follow loop only writes on change. */
   private lastRect: { left: number; top: number; width: number; height: number } | null = null;
+  /**
+   * Stacking layer of the backdrop. The overlay is appended to `document.body`,
+   * so it must out-rank whatever it sits over — including the app's modal (the
+   * Documents page hosts the annotator inside one, z-index 500). Toasts (10000)
+   * stay above; kept just under the context menu so a stray menu never hides.
+   */
+  zIndex = 650;
 
   /** Whether the overlay is currently shown. */
   get isOpen(): boolean {
@@ -85,7 +92,7 @@ export class SettingsOverlay {
     const backdrop = document.createElement("div");
     Object.assign(backdrop.style, {
       position: "fixed",
-      zIndex: "10",
+      zIndex: `${this.zIndex}`,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",

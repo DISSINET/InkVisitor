@@ -1723,6 +1723,11 @@ export class Annotator {
 
     this.caretBlink.destroy();
     this.resizePulse.destroy();
+    // Tear down the body-level overlays so closing the host (e.g. the Documents
+    // page modal, which unmounts the annotator) also dismisses them instead of
+    // leaving an orphaned menu/settings box floating over the app.
+    this.contextMenu.close();
+    this.settingsOverlay.close();
     if (this.deferredInitTimeout !== undefined) {
       clearTimeout(this.deferredInitTimeout);
       this.deferredInitTimeout = undefined;
