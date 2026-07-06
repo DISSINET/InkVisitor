@@ -167,7 +167,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
         ) : canManage ? (
           <EntitySuggester
-            inputWidth={93}
+            inputWidth="full"
             placeholder="add resource"
             categoryTypes={[EntityEnums.Class.Resource]}
             onSelected={(id: string) => updateResourceMutation.mutate(id)}
