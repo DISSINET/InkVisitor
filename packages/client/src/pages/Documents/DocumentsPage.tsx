@@ -193,6 +193,17 @@ export const DocumentsPage: React.FC = ({}) => {
   const [editDocumentId, setEditDocumentId] = useState<string | false>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const documentToDelete = documents?.find((doc) => doc.id === docToDelete);
+  const documentToDeleteAnchorCount = useMemo(() => {
+    if (!documentToDelete) {
+      return 0;
+    }
+    return Object.values(documentToDelete.entityIds).reduce(
+      (total, classEntities) => total + (Array.isArray(classEntities) ? classEntities.length : 0),
+      0
+    );
+  }, [documentToDelete]);
+
   return (
     <>
       <StyledContent>
@@ -253,8 +264,10 @@ export const DocumentsPage: React.FC = ({}) => {
       )}
 
       <Submit
-        title="Delete document"
-        text="Do you really want to delete this document?"
+        title={`Delete document "${documentToDelete?.title ?? ""}"`}
+        text={`Do you really want to delete this document? It has ${documentToDeleteAnchorCount} anchor${
+          documentToDeleteAnchorCount === 1 ? "" : "s"
+        }.`}
         show={docToDelete !== false}
         onSubmit={() => docToDelete && documentDeleteMutation.mutate(docToDelete)}
         onCancel={() => setDocToDelete(false)}

@@ -22,7 +22,7 @@ export const Submit: React.FC<Submit> = ({
   onSubmit,
   onCancel,
   loading = false,
-  submitLabel = "Submit",
+  submitLabel = "Confirm",
   headerIcon,
 }) => {
   return (

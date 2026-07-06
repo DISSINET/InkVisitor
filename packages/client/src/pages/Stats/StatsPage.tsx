@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { DocumentTable } from "./DocumentTable/DocumentTable";
+import { StatsDocumentTable } from "./StatsDocumentTable/StatsDocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
 import { RelationsTab } from "./RelationsTab/RelationsTab";
 import {
@@ -16,11 +16,7 @@ import {
 type StatsTab = "entities" | "documents" | "relations";
 
 const parseStatsTab = (tab: string | null): StatsTab =>
-  tab === "documents"
-    ? "documents"
-    : tab === "relations"
-    ? "relations"
-    : "entities";
+  tab === "documents" ? "documents" : tab === "relations" ? "relations" : "entities";
 
 export const StatsPage = () => {
   const navigate = useNavigate();
@@ -46,7 +42,7 @@ export const StatsPage = () => {
           return nextParams.toString();
         })(),
       },
-      { replace: true }
+      { replace: true },
     );
   }, [activeTab, location.hash, navigate, rawTab]);
 
@@ -100,7 +96,7 @@ export const StatsPage = () => {
         <StyledStatsContent>
           {activeTab === "entities" && <EntitiesTab />}
           {activeTab === "documents" && (
-            <DocumentTable
+            <StatsDocumentTable
               selectedDocument={selectedDocument}
               setSelectedDocument={setSelectedDocument}
             />
