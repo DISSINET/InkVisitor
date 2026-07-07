@@ -129,6 +129,13 @@ export interface DrawingOptions {
   caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
+   * Minimum fill width in device px for BACKGROUND spans. When set, an empty
+   * (newline-only) line in the span still paints a thin sliver instead of a
+   * zero-width nothing, so the resize pulse stays locatable across newlines —
+   * mirroring how the SELECT caret keeps empty-line selection visible (#2885).
+   */
+  minFillWidth?: number;
+  /**
    * Proportional column→pixel resolver. When present (and the caller
    * passes the absolute visual line), draw uses measured widths instead of
    * `col * charWidth`. Absent on the monospace path.
@@ -2697,6 +2704,18 @@ export class Annotator {
         );
         const pulseSchemas = this.getResizePulseSchemas(this.resizeAnchor.tagName);
         if (span && pulseSchemas.length) {
+          // An end boundary at column 0 belongs visually to the previous line —
+          // the close tag sits on a fresh line with no leading space. Mirror the
+          // end-marker convention (see drawAnchorMarkers) so the pulse wash ends
+          // at the previous line's last char instead of painting a stray sliver
+          // on the tag's own (empty) line (#2885).
+          const spanEnd =
+            span.end.xLine === 0 && span.end.yLine > 0
+              ? {
+                  yLine: span.end.yLine - 1,
+                  xLine: this.text.getLine(span.end.yLine - 1).length,
+                }
+              : span.end;
           const baseOpacity = 0.5;
           // Pulse both below AND above the entity's normal highlight opacity —
           // the midpoint of the cycle (intensity 0.5) matches the static look,
@@ -2717,12 +2736,14 @@ export class Annotator {
               schema.mode
             );
             pulse.selectStart = span.start;
-            pulse.selectEnd = span.end;
+            pulse.selectEnd = spanEnd;
             pulse.draw(this.ctx, this.viewport, this.text, {
               lineHeight: this.lineHeight,
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
               columnToPixelX: this.drawColumnToPixelX(),
+              // Keep newline-only lines of the resized span visible (#2885).
+              minFillWidth: this.caretWidth * this.ratio,
             });
           }
         }
