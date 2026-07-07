@@ -4,6 +4,7 @@ import History, { HistorySnapshot } from "./History";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
 import { CaretBlink } from "./CaretBlink";
 import { ResizePulse } from "./ResizePulse";
+import { HoverHighlightFade } from "./HoverHighlightFade";
 import { SettingsOverlay, SettingControl } from "./SettingsOverlay";
 import Keys from "./Keys";
 import { Lines } from "./Lines";
@@ -210,6 +211,17 @@ export class Annotator {
   hoverHighlighter: Highlighter; // For statement list hover interaction
   hoverRegions: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
   hoverTagName: string | null = null; // Tag name last passed to highlightAnchorByTag; recomputed on resize.
+  /** Fades the hover highlight in/out (#2835) so it doesn't pop on/off. */
+  private readonly hoverFade: HoverHighlightFade;
+  /**
+   * Regions of the PREVIOUS hover anchor while cross-fading to a new one (#2835):
+   * they fade out (via `1 - hoverFade.value()`, scaled by {@link hoverOutStart})
+   * as the new regions fade in, so moving between statement rows dissolves rather
+   * than jumping. Empty when not cross-fading.
+   */
+  private hoverRegionsOut: { start: IAbsCoordinates; end: IAbsCoordinates }[] = [];
+  /** Fade factor the outgoing regions had at the moment of the switch. */
+  private hoverOutStart = 0;
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
@@ -381,6 +393,25 @@ export class Annotator {
       if (!this.destroyed) {
         this.draw();
       }
+    });
+
+    this.hoverFade = new HoverHighlightFade(() => {
+      if (this.destroyed) {
+        return;
+      }
+      if (!this.hoverFade.isActive()) {
+        if (this.hoverFade.value() === 0) {
+          // Fully faded out → drop everything so nothing lingers between draws.
+          this.hoverRegions = [];
+          this.hoverRegionsOut = [];
+          this.hoverTagName = null;
+          this.hoverHighlighter.reset();
+        } else if (this.hoverFade.value() === 1) {
+          // Cross-fade done → the outgoing regions are now invisible; drop them.
+          this.hoverRegionsOut = [];
+        }
+      }
+      this.draw();
     });
 
     const ctx = this.element.getContext("2d");
@@ -647,11 +678,30 @@ export class Annotator {
       return;
     }
 
+    // Moving straight from one visible anchor to another (statement row → row):
+    // stash the current regions as outgoing and restart the fade from 0, so the
+    // old highlight dissolves out while the new one fades in (#2835) instead of
+    // swapping instantly. Same-tag re-hovers just keep fading toward 1.
+    const switching =
+      tagName !== this.hoverTagName &&
+      this.hoverRegions.length > 0 &&
+      this.hoverFade.value() > 0;
+    const previousRegions = this.hoverRegions;
+
     this.hoverTagName = tagName;
     if (!this.refreshHoverHighlightRegions()) {
       this.clearHoverHighlight();
       return;
     }
+
+    if (switching) {
+      this.hoverRegionsOut = previousRegions;
+      this.hoverOutStart = this.hoverFade.value();
+      this.hoverFade.setValue(0);
+    }
+    // Fade the highlight in (#2835); to() picks up from the current value so a
+    // hover landing mid fade-out reverses smoothly instead of snapping.
+    this.hoverFade.to(1);
     this.draw();
   }
 
@@ -732,9 +782,19 @@ export class Annotator {
    * Clears the hover highlight (for statement list hover interaction).
    */
   clearHoverHighlight() {
+    // Fade out rather than dropping the highlight instantly (#2835). The regions
+    // are kept so the fade-out can still draw them; the fade's onTick clears them
+    // once it settles at 0. Guard the no-highlight case so we don't spin a timer.
+    if (this.hoverRegions.length === 0 && this.hoverFade.value() === 0) {
+      this.hoverTagName = null;
+      this.hoverRegionsOut = [];
+      return;
+    }
     this.hoverTagName = null;
-    this.hoverRegions = [];
-    this.hoverHighlighter.reset();
+    // Drop any in-flight cross-fade: only the current regions should fade out
+    // (the outgoing set fades via `1 - value`, which would revive it here).
+    this.hoverRegionsOut = [];
+    this.hoverFade.to(0);
     this.draw();
   }
 
@@ -1772,6 +1832,7 @@ export class Annotator {
 
     this.caretBlink.destroy();
     this.resizePulse.destroy();
+    this.hoverFade.destroy();
     // Tear down the body-level overlays so closing the host (e.g. the Documents
     // page modal, which unmounts the annotator) also dismisses them instead of
     // leaving an orphaned menu/settings box floating over the app.
@@ -2596,16 +2657,37 @@ export class Annotator {
     // occurrence is drawn as its own region so multiple anchors of the same
     // statement are not connected into one continuous span (#3017). The single
     // hoverHighlighter is reused so its configured style is preserved.
-    for (const region of this.hoverRegions) {
-      this.hoverHighlighter.selectStart = region.start;
-      this.hoverHighlighter.selectEnd = region.end;
-      this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
-        lineHeight: this.lineHeight,
-        charWidth: this.charWidth,
-        charsAtLine: this.text.charsAtLine,
-        columnToPixelX: this.drawColumnToPixelX(),
-      });
-    }
+    const hoverFadeFactor = this.hoverFade.value();
+    const baseHoverOpacity = this.hoverHighlighter.style.opacity;
+    const drawHoverRegions = (
+      regions: { start: IAbsCoordinates; end: IAbsCoordinates }[],
+      opacity: number
+    ) => {
+      if (!regions.length || opacity <= 0) {
+        return;
+      }
+      // Scale the configured base opacity by the fade factor for a gradual
+      // appear/disappear (#2835), then restore it so the base isn't lost.
+      this.hoverHighlighter.style.opacity = opacity;
+      for (const region of regions) {
+        this.hoverHighlighter.selectStart = region.start;
+        this.hoverHighlighter.selectEnd = region.end;
+        this.hoverHighlighter.draw(this.ctx, this.viewport, this.text, {
+          lineHeight: this.lineHeight,
+          charWidth: this.charWidth,
+          charsAtLine: this.text.charsAtLine,
+          columnToPixelX: this.drawColumnToPixelX(),
+        });
+      }
+      this.hoverHighlighter.style.opacity = baseHoverOpacity;
+    };
+    // Outgoing anchor (previous row) fading out while the new one fades in.
+    drawHoverRegions(
+      this.hoverRegionsOut,
+      baseHoverOpacity * this.hoverOutStart * (1 - hoverFadeFactor)
+    );
+    // Incoming / current anchor.
+    drawHoverRegions(this.hoverRegions, baseHoverOpacity * hoverFadeFactor);
     // Clear the per-region bounds so the highlighter isn't left holding the last
     // region's selectStart/selectEnd between draws (style is preserved). reset()
     // only nulls the bounds, not the configured style.
