@@ -717,6 +717,7 @@ export const TextAnnotatorMenu = ({
                 {anchors.length === 0 && (
                   <StyledAnnotatorNoAnchors>no anchors in selection</StyledAnnotatorNoAnchors>
                 )}
+
                 {resolvedAnchors.length > 0 && (
                   <List
                     rowProps={{ data: anchorGridRowData }}

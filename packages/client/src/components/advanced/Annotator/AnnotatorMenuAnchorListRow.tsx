@@ -92,11 +92,9 @@ export const AnnotatorAnchorGridRow = React.memo(
       <div
         style={{
           ...style,
-          boxSizing: "border-box",
           display: "flex",
           flexDirection: "row",
           gap: "0.5rem",
-          padding: "0 0.25rem",
         }}
       >
         <div
