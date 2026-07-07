@@ -2352,6 +2352,13 @@ export class Annotator {
     const lastVisibleRel =
       Math.min(this.viewport.lineEnd, this.text.noLines) - this.viewport.lineStart;
 
+    // The single occurrence being resized (matched by opening-tag position, not
+    // entity/tag name): only its corner markers pulse, so other occurrences of a
+    // multi-anchored entity keep steady markers.
+    const resizeSpan = this.resizeAnchor
+      ? this.getAnchorSpanCoords(this.resizeAnchor.tagName, this.resizeAnchor.openTagRef)
+      : null;
+
     // Expand each anchor into its two endpoint markers, in list order.
     const points: {
       yLine: number;
@@ -2359,14 +2366,21 @@ export class Annotator {
       kind: "start" | "end";
       color: string;
       tag?: Tag;
+      pulsing: boolean;
     }[] = [];
     for (const it of anchorItems) {
+      const itemPulsing =
+        resizeSpan != null &&
+        it.tag?.getTagName() === this.resizeAnchor?.tagName &&
+        it.start.xLine === resizeSpan.start.xLine &&
+        it.start.yLine === resizeSpan.start.yLine;
       points.push({
         yLine: it.start.yLine,
         xLine: it.start.xLine,
         kind: "start",
         color: it.schema.style.color,
         tag: it.tag,
+        pulsing: itemPulsing,
       });
       // An end boundary at column 0 belongs visually to the previous line —
       // drawn on its own line, the ┘ arm (running left) would be clamped
@@ -2384,6 +2398,7 @@ export class Annotator {
         kind: "end",
         color: it.schema.style.color,
         tag: it.tag,
+        pulsing: itemPulsing,
       });
     }
 
@@ -2409,9 +2424,9 @@ export class Annotator {
       // the span wash), so a Territory (whose only visual is these markers) shows
       // which boundary is being moved. Oscillate the marker opacity between
       // PULSE_MARKER_MIN and full via the shared ResizePulse phase, never fully
-      // hidden so it stays locatable.
-      const pulsing =
-        this.resizeAnchor != null && p.tag?.getTagName() === this.resizeAnchor.tagName;
+      // hidden so it stays locatable. Only the resized occurrence pulses (keyed
+      // on opening-tag position above), not every anchor of the same entity.
+      const pulsing = p.pulsing;
       const PULSE_MARKER_MIN = 0.3;
       const markerOpacity = pulsing
         ? PULSE_MARKER_MIN + (1 - PULSE_MARKER_MIN) * this.resizePulse.intensity()
@@ -2587,6 +2602,16 @@ export class Annotator {
         tag?: Tag; // #2887 — carried so ANCHOR markers know their entity for hover
       }[] = [];
       const processedTagNames = new Set<string>();
+      // Coords of the single occurrence being resized (matched by opening-tag
+      // position, not entity/tag name): only this occurrence drops its
+      // fill/underline for the pulse below — other occurrences of a
+      // multi-anchored entity keep their normal highlights.
+      const resizeSpan = this.resizeAnchor
+        ? this.getAnchorSpanCoords(
+            this.resizeAnchor.tagName,
+            this.resizeAnchor.openTagRef
+          )
+        : null;
       for (const tag of annotated) {
         const tagName = tag.getTagName();
         if (processedTagNames.has(tagName)) {
@@ -2594,21 +2619,28 @@ export class Annotator {
         }
         processedTagNames.add(tagName);
         const hlResult = this.onHighlightCb(tagName);
-        let schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
-        // The anchor being resized is drawn separately as an animated pulse
-        // (below), so drop its fill/underline schemas to avoid double-painting.
-        // Its ANCHOR corner markers are kept: for Territory anchors they are
-        // the only visual, and hiding them makes the anchor look deleted (#2887).
-        if (this.resizeAnchor && this.resizeAnchor.tagName === tagName) {
-          schemas = schemas.filter((s) => s.mode === HighlightMode.ANCHOR);
-        }
+        const schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         if (schemas.length) {
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
             occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
-              for (const schema of schemas) {
+              // The occurrence being resized is drawn separately as an animated
+              // pulse (below), so drop its fill/underline schemas to avoid
+              // double-painting. Its ANCHOR corner markers are kept: for
+              // Territory anchors they are the only visual, and hiding them makes
+              // the anchor look deleted (#2887). Matched by occurrence (opening
+              // position), so sibling anchors of the same entity are unaffected.
+              const isResized =
+                resizeSpan != null &&
+                this.resizeAnchor?.tagName === tagName &&
+                occurence[0].xLine === resizeSpan.start.xLine &&
+                occurence[0].yLine === resizeSpan.start.yLine;
+              const occSchemas = isResized
+                ? schemas.filter((s) => s.mode === HighlightMode.ANCHOR)
+                : schemas;
+              for (const schema of occSchemas) {
                 higlightItems.push({
                   schema,
                   start: occurence[0],
