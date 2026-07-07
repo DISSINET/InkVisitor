@@ -156,6 +156,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__input-container {
     color: ${({ theme }) => theme.color["black"]};
+    /* align the typing cursor with the placeholder / Input left padding */
+    margin-left: ${({ theme, userDropdown }) => (userDropdown ? "" : theme.space[2])};
     ${({ userDropdown }) => (userDropdown ? "margin: 0; padding: 0; line-height: 1;" : "")}
   }
   /* when not focused, take the (empty) text input out of the flex flow so it
