@@ -141,9 +141,9 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   min-height: 0;
   max-height: 13rem;
   border: ${({ theme }) => `1px solid ${theme.color.blue["200"]}`};
-  background-color: ${({ theme }) => theme.color.blue["100"]};
-  padding: 0 0.23rem;
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  background-color: ${({ theme }) => theme.color.blue["200"]};
+  padding: 0 0.5rem;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`

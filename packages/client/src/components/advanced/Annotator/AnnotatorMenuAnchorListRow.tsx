@@ -10,6 +10,13 @@ import { Tag } from "@inkvisitor/annotator/src/lib";
 export const ANCHOR_GRID_COLUMNS = 2;
 /** One virtual row: two columns for EntityTag + elvl controls (allows wrapped labels). */
 export const ANCHOR_GRID_ROW_HEIGHT = 27;
+/**
+ * Breathing room before the first row and after the last row. Added to those
+ * rows' heights (see rowHeight in AnnotatorMenu) and rendered as border-box
+ * padding inside the row, so it scrolls with the content instead of shrinking
+ * the scroll viewport (which container padding would do).
+ */
+export const ANCHOR_GRID_ROW_MARGIN = 5;
 
 export type AnnotatorAnchorListItem = { anchor: Tag; anchorTagName: string };
 
@@ -35,6 +42,9 @@ export const AnnotatorAnchorGridRow = React.memo(
     const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly } = data;
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
+
+    const isFirst = index === 0;
+    const isLast = index === Math.ceil(items.length / ANCHOR_GRID_COLUMNS) - 1;
 
     const renderCell = (item: AnnotatorAnchorListItem | undefined) => {
       if (!item) {
@@ -92,6 +102,9 @@ export const AnnotatorAnchorGridRow = React.memo(
       <div
         style={{
           ...style,
+          boxSizing: "border-box",
+          paddingTop: isFirst ? ANCHOR_GRID_ROW_MARGIN : undefined,
+          paddingBottom: isLast ? ANCHOR_GRID_ROW_MARGIN : undefined,
           display: "flex",
           flexDirection: "row",
           gap: "0.5rem",

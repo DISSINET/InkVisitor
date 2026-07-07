@@ -36,6 +36,7 @@ import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
   ANCHOR_GRID_COLUMNS,
   ANCHOR_GRID_ROW_HEIGHT,
+  ANCHOR_GRID_ROW_MARGIN,
   AnnotatorAnchorGridRow,
   AnnotatorAnchorGridRowData,
   AnnotatorAnchorListItem,
@@ -722,7 +723,17 @@ export const TextAnnotatorMenu = ({
                   <List
                     rowProps={{ data: anchorGridRowData }}
                     rowCount={Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS)}
-                    rowHeight={ANCHOR_GRID_ROW_HEIGHT}
+                    rowHeight={(index) => {
+                      // First/last rows are taller by the margin; the row renders
+                      // that extra as border-box padding, so the space scrolls
+                      // with the content and doesn't shrink the viewport.
+                      const lastRow =
+                        Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS) - 1;
+                      const extra =
+                        (index === 0 ? ANCHOR_GRID_ROW_MARGIN : 0) +
+                        (index === lastRow ? ANCHOR_GRID_ROW_MARGIN : 0);
+                      return ANCHOR_GRID_ROW_HEIGHT + extra;
+                    }}
                     overscanCount={8}
                     style={{ maxHeight: "13rem", width: "100%" }}
                     rowComponent={(props) => <AnnotatorAnchorGridRow {...props} />}
