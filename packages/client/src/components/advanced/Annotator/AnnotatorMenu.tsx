@@ -377,8 +377,17 @@ export const TextAnnotatorMenu = ({
       entities,
       onRemoveAnchor,
       onUpdateAnchor,
-      onMoveAnchor: readonly || !onMoveAnchorBoundary ? undefined : handleMoveAnchorStart,
+      // The resize-anchor button follows the same gates as anchor creation:
+      // hidden when creation is disabled (documents page) and for users without
+      // edit rights (readonly = non owner/admin/editor-with-Resource-rights).
+      onMoveAnchor:
+        readonly || disableCreate || !onMoveAnchorBoundary
+          ? undefined
+          : handleMoveAnchorStart,
       readonly,
+      // Hide elvl controls where creation is disabled (documents page), same as
+      // the resize button above.
+      hideElvl: disableCreate,
     }),
     [
       resolvedAnchors,
@@ -386,6 +395,7 @@ export const TextAnnotatorMenu = ({
       onRemoveAnchor,
       onUpdateAnchor,
       readonly,
+      disableCreate,
       onMoveAnchorBoundary,
       handleMoveAnchorStart,
     ],

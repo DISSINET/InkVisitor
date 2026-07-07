@@ -29,6 +29,8 @@ export type AnnotatorAnchorGridRowData = {
   onMoveAnchor?: (anchor: Tag) => void;
   /** View-only: render anchors without unlink/elvl controls. */
   readonly?: boolean;
+  /** Hide the elvl button group even when not fully readonly (documents page). */
+  hideElvl?: boolean;
 };
 
 export type AnnotatorAnchorGridRowProps = {
@@ -39,7 +41,8 @@ export type AnnotatorAnchorGridRowProps = {
 
 export const AnnotatorAnchorGridRow = React.memo(
   ({ index, style, data }: AnnotatorAnchorGridRowProps) => {
-    const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly } = data;
+    const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly, hideElvl } =
+      data;
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
 
@@ -82,7 +85,7 @@ export const AnnotatorAnchorGridRow = React.memo(
           }
           entity={entity}
           elvlButtonGroup={
-            readonly ? (
+            readonly || hideElvl ? (
               false
             ) : (
               <ElvlButtonGroup
