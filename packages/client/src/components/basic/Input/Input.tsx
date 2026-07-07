@@ -238,6 +238,13 @@ export const Input: React.FC<Input> = ({
             <StyledClearableInputButton $rightOffset={rightContentWidth}>
               <MdCancel
                 size={15}
+                onMouseDown={(e) => {
+                  // Prevent the input from blurring on mousedown, which would
+                  // otherwise close and immediately reopen the suggester list
+                  // (causing a visible blink) before the click clears the value.
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 onClick={() => {
                   setDisplayValue("");
                   onChangeFn("");
