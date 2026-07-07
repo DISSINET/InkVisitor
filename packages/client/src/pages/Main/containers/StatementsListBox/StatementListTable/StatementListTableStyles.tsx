@@ -65,12 +65,34 @@ export const StyledTr = styled.tr<StyledTr>`
 
   color: ${({ theme, $isOpened }) => ($isOpened ? theme.color["primary"] : theme.color["black"])};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  transition:
-    box-shadow 0.2s ease-in-out,
-    background-color 0.15s ease-in-out;
-  box-shadow: ${({ theme, $isAnnotatorHovered }) =>
-    `inset 0 0 0 2px ${$isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0}`};
+  transition: background-color 0.15s ease-in-out;
   cursor: ${({ $isOpened, $listMode }) => ($isOpened && $listMode ? "default" : "pointer")};
+
+  /*
+   * Annotator-hover frame. Painted on the cells, not the <tr>: a box-shadow on a
+   * table row is broken up by each cell's own background (left/right edges and
+   * cell seams drop out). Every cell draws the top+bottom edge; the first/last
+   * cell add the left/right edge, so the four sides read as one continuous frame.
+   */
+  td {
+    transition: box-shadow 0.2s ease-in-out;
+    box-shadow: ${({ theme, $isAnnotatorHovered }) => {
+      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}`;
+    }};
+  }
+  td:first-child {
+    box-shadow: ${({ theme, $isAnnotatorHovered }) => {
+      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}, inset 2px 0 0 0 ${c}`;
+    }};
+  }
+  td:last-child {
+    box-shadow: ${({ theme, $isAnnotatorHovered }) => {
+      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}, inset -2px 0 0 0 ${c}`;
+    }};
+  }
 
   &:not(:first-child) td {
     border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
