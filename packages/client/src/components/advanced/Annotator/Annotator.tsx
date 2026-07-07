@@ -1400,6 +1400,24 @@ export const TextAnnotator = ({
           paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
         }}
         onKeyDownCapture={(e) => {
+          // Cmd/Ctrl+S saves the document. Intercept in capture so it beats the
+          // browser's "save page" dialog and the canvas's own keydown. Mirrors
+          // the save button's guard (only when an editable doc has pending
+          // changes and isn't already saving/fetching).
+          if ((e.metaKey || e.ctrlKey) && (e.key === "s" || e.key === "S")) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (
+              canEditDocument &&
+              isChangeMade &&
+              !isSaving &&
+              !isSavingWithoutRefresh &&
+              !dataDocumentIsFetching
+            ) {
+              handleSaveNewContent(false);
+            }
+            return;
+          }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
           if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
