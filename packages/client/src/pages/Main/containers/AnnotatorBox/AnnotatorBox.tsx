@@ -1,6 +1,7 @@
 import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
+  IDocument,
   IResponseEntity,
   IResponseStatement,
   IResponseTerritory,
@@ -162,6 +163,10 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
         territoryId,
         statementListOpened,
       ]);
+      const previousDocument = queryClient.getQueryData<IDocument | undefined>([
+        "document",
+        selectedDocumentId,
+      ]);
       if (previousTerritory && newStatement.data.territory) {
         const optimisticStatement: IResponseStatement = {
           ...newStatement,
@@ -182,13 +187,32 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
           { ...previousTerritory, statements: updatedStatements },
         );
       }
-      return { previousTerritory };
+      if (previousDocument && selectedDocumentId) {
+        const sId = newStatement.id;
+        const currentStatementIds = previousDocument.entityIds[EntityEnums.Class.Statement] || [];
+        if (!currentStatementIds.includes(sId)) {
+          queryClient.setQueryData<IDocument>(["document", selectedDocumentId], {
+            ...previousDocument,
+            entityIds: {
+              ...previousDocument.entityIds,
+              [EntityEnums.Class.Statement]: [...currentStatementIds, sId],
+            },
+          });
+        }
+      }
+      return { previousTerritory, previousDocument };
     },
     onError: (_error, _variables, context) => {
       if (context?.previousTerritory) {
         queryClient.setQueryData<IResponseTerritory>(
           ["territory", "statement-list", territoryId, statementListOpened],
           context.previousTerritory,
+        );
+      }
+      if (context?.previousDocument) {
+        queryClient.setQueryData<IDocument | undefined>(
+          ["document", selectedDocumentId],
+          context.previousDocument,
         );
       }
     },
