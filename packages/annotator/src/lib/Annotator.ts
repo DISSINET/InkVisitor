@@ -2607,10 +2607,7 @@ export class Annotator {
       // fill/underline for the pulse below — other occurrences of a
       // multi-anchored entity keep their normal highlights.
       const resizeSpan = this.resizeAnchor
-        ? this.getAnchorSpanCoords(
-            this.resizeAnchor.tagName,
-            this.resizeAnchor.openTagRef
-          )
+        ? this.getAnchorSpanCoords(this.resizeAnchor.tagName, this.resizeAnchor.openTagRef)
         : null;
       for (const tag of annotated) {
         const tagName = tag.getTagName();
@@ -3532,7 +3529,19 @@ export class Annotator {
       this.text.calculateLines();
 
       // Find the newly added anchor and select it
-      const tagPosition = this.text.getTagPosition(openTag.getTagName(), 0);
+      const anchorName = openTag.getTagName();
+      let newOccurrenceIndex = 0;
+      for (const segment of this.text.segments) {
+        for (const open of segment.openingTags) {
+          if (
+            open.getTagName() === anchorName &&
+            open.getAbsoluteTagPosition(this.text.segments) < indexStart
+          ) {
+            newOccurrenceIndex++;
+          }
+        }
+      }
+      const tagPosition = this.text.getTagPosition(anchorName, newOccurrenceIndex);
       if (tagPosition && tagPosition.length === 2) {
         this.cursor.selectStart = tagPosition[0];
         this.cursor.selectEnd = tagPosition[1];
