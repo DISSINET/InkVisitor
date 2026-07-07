@@ -50,8 +50,8 @@ export const AnnotatorAnchorGridRow = React.memo(
           button={
             onMoveAnchor ? (
               <Button
-                icon={<FaArrowsAltH size={11} />}
-                color="primary"
+                icon={<FaArrowsAltH size={12} />}
+                color="info"
                 inverted
                 tooltipLabel="resize anchor span"
                 onClick={() => {
