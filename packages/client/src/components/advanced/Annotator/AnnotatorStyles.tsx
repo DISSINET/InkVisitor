@@ -140,8 +140,8 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   overflow: hidden;
   min-height: 0;
   max-height: 13rem;
-  border: ${({ theme }) => `1px solid ${theme.color.blue["200"]}`};
-  background-color: ${({ theme }) => theme.color.blue["200"]};
+  border: ${({ theme }) => `1px solid ${theme.color.blue["100"]}`};
+  background-color: ${({ theme }) => theme.color.blue["50"]};
   padding: 0 0.5rem;
   border-radius: ${({ theme }) => theme.borderRadius.default};
 `;
