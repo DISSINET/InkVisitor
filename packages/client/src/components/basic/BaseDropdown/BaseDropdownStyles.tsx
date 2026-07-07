@@ -82,6 +82,11 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__value-container {
     height: ${({ userDropdown, compactChips }) => (userDropdown || compactChips ? "auto" : "100%")};
+    /* single-row limited dropdown: never wrap, otherwise focusing (which inserts
+       the growing input) pushes the chips onto a 2nd row that the fixed 27px
+       height clips away, making all selected chips vanish from the control */
+    flex-wrap: ${({ limitSelectedItems, userDropdown }) =>
+      limitSelectedItems && !userDropdown ? "nowrap" : ""};
     align-content: ${({ userDropdown, compactChips }) =>
       userDropdown || compactChips ? "flex-start" : ""};
     gap: ${({ userDropdown }) => (userDropdown ? "0.2rem" : "")};
