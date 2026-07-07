@@ -67,16 +67,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const initialValues: DataObject = useMemo(() => {
     const { options, name, email } = user;
 
-    // const defaultLanguageObject =
-    //   languageDict.find((i) => i.value === options.defaultLanguage) ??
-    //   {label: , value: EntityEnums.Language.Empty};
-    // const defaultStatementLanguageObject =
-    //   languageDict.find((i) => i.value === options.defaultStatementLanguage) ??
-    //   {label: , value: EntityEnums.Language.Empty};
-    // const searchLanguagesObject = options.searchLanguages.map((sL) => {
-    //   return languageDict.find((i) => i.value === sL);
-    // });
-
     return {
       name: name,
       email: email,
@@ -365,21 +355,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </StyledFieldHelp>
 
-                {/* NOT USED NOW */}
-                {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
-                <ModalInputWrap width={165}>
-                  <Dropdown.Multi.Attribute
-                    value={data.searchLanguages}
-                    width="full"
-                    onChange={(selectedOption) =>
-                      handleChange("searchLanguages", selectedOption)
-                    }
-                    options={languageDict.filter(
-                      (lang) => lang.value !== EntityEnums.Language.Empty
-                    )}
-                  />
-                </ModalInputWrap> */}
-
                 <StyledFieldLabel>Default territory</StyledFieldLabel>
                 <StyledFieldControl>
                   {defaultTerritory ? (
@@ -489,7 +464,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           </StyledUserCustomization>
         </ModalContent>
 
-        <ModalFooter spaceBetween>
+        <ModalFooter spaceBetween={process.env.NODE_ENV === "development"}>
           {process.env.NODE_ENV === "development" && (
             <StyledUserCustomizationSection>
               <div>
@@ -497,7 +472,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   label="Simulate HTML API response"
                   color="primary"
                   noBorder
-                  // noBackground
                   inverted
                   onClick={async () => {
                     const response = await api.devSimulateHtmlError({ ignoreErrorToast: true });
@@ -508,15 +482,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledUserCustomizationSection>
           )}
           <ButtonGroup>
-            {/* {role === UserEnums.Role.Admin && (
-              <Button
-                key="reset-password"
-                label="Reset password"
-                tooltipLabel={`Generate a new password and send it to ${user.email}`}
-                color="info"
-                onClick={() => handleResetPassword()}
-              />
-            )} */}
             <Button key="cancel" label="Cancel" color="warning" onClick={onClose} />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}

@@ -1,6 +1,6 @@
 import React from "react";
 import { FaToggleOff, FaToggleOn } from "react-icons/fa";
-import { StyledToggle } from "./ToggleStyles";
+import { StyledToggle, StyledToggleLabel } from "./ToggleStyles";
 
 interface Toggle {
   value: boolean;
@@ -22,11 +22,13 @@ export const Toggle: React.FC<Toggle> = ({
     <StyledToggle $active={value} onClick={() => onChange(!value)}>
       {value ? (
         <>
-          <FaToggleOn size={size} /> {!hideLabels && activeLabel}
+          <FaToggleOn size={size} />
+          <StyledToggleLabel>{!hideLabels && activeLabel}</StyledToggleLabel>
         </>
       ) : (
         <>
-          <FaToggleOff size={size} /> {!hideLabels && inactiveLabel}
+          <FaToggleOff size={size} />
+          <StyledToggleLabel>{!hideLabels && inactiveLabel}</StyledToggleLabel>
         </>
       )}
     </StyledToggle>
