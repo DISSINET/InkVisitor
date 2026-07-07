@@ -1,6 +1,6 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "engines": {
     "node": "^22.13.1",
     "pnpm": "^11.1.2"
