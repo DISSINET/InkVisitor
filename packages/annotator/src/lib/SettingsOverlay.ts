@@ -61,12 +61,15 @@ export class SettingsOverlay {
   /** Last anchor rect applied, so the follow loop only writes on change. */
   private lastRect: { left: number; top: number; width: number; height: number } | null = null;
   /**
-   * Stacking layer of the backdrop. The overlay is appended to `document.body`,
-   * so it must out-rank whatever it sits over — including the app's modal (the
-   * Documents page hosts the annotator inside one, z-index 500). Toasts (10000)
-   * stay above; kept just under the context menu so a stray menu never hides.
+   * Stacking layer of the backdrop. Appended to `document.body`. The default
+   * suits an annotator embedded in an ordinary page panel (kept low so it never
+   * floats over the host's own overlays). A host that mounts the annotator inside
+   * its own stacking context (e.g. a modal) raises this via the field to sit
+   * above that surface. The library carries no knowledge of the host's z-index
+   * scale; hosts should keep it just under {@link ContextMenu.zIndex} so a stray
+   * menu never hides behind the backdrop.
    */
-  zIndex = 650;
+  zIndex = 10;
 
   /** Whether the overlay is currently shown. */
   get isOpen(): boolean {

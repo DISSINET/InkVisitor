@@ -113,6 +113,14 @@ interface TextAnnotatorProps {
   disableCreate?: boolean;
 
   /**
+   * Overrides the annotator's context-menu / settings-overlay stacking layers.
+   * Both overlays are appended to `document.body`; the library defaults suit a
+   * plain page panel (MainPage). A host that mounts the annotator inside a modal
+   * (the Documents page) passes higher values so the overlays sit above it.
+   */
+  overlayZIndex?: { contextMenu: number; settingsOverlay: number };
+
+  /**
    * When false the document is read-only: text editing, adding/removing
    * anchors, batch replace and the annotate menu are disabled (search,
    * highlight and navigation stay). Editors get this when the loaded Resource
@@ -158,6 +166,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  overlayZIndex,
   canEditDocument = true,
   onStatementAnchorHover,
 
@@ -926,6 +935,13 @@ export const TextAnnotator = ({
     );
 
     applyCanvasTheme(newAnnotator);
+
+    // Raise the body-appended overlays above the host modal on the Documents
+    // page; MainPage leaves the lib defaults (which sit under app modals).
+    if (overlayZIndex) {
+      newAnnotator.contextMenu.zIndex = overlayZIndex.contextMenu;
+      newAnnotator.settingsOverlay.zIndex = overlayZIndex.settingsOverlay;
+    }
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);

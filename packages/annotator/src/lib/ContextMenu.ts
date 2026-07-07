@@ -23,11 +23,13 @@ export class ContextMenu {
   private el: HTMLDivElement | null = null;
   colors: MenuColors = LIGHT_MENU_COLORS;
   /**
-   * Stacking layer of the menu. It is appended to `document.body`, so it must
-   * out-rank whatever it sits over — including the app's modal (the Documents
-   * page hosts the annotator inside one, z-index 500). Toasts (10000) stay above.
+   * Stacking layer of the menu. Appended to `document.body`, so it must out-rank
+   * the surrounding page content. The default suits an annotator embedded in an
+   * ordinary page panel; a host that mounts the annotator inside its own stacking
+   * context (e.g. a modal) raises this via the field to sit above that surface.
+   * The library carries no knowledge of the host's z-index scale.
    */
-  zIndex = 700;
+  zIndex = 200;
 
   /** Whether the menu is currently shown. */
   get isOpen(): boolean {
