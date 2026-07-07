@@ -1276,6 +1276,39 @@ export class Annotator {
     this.cursor.syncOffsetFromVisual(this.text, wasSelecting);
   }
 
+  /**
+   * Shift+click / shift+drag: extend the selection from the current anchor to the
+   * clicked position, keeping the anchor fixed (like a normal text editor). The
+   * offset model does the work — `reconcileOffsetsFromVisual` derives the anchor
+   * from the existing caret or selection, then `stepHeadTo(..., extend)` moves
+   * only the head. `selecting` is left true so a following drag keeps extending.
+   */
+  private extendSelectionToPointer(e: MouseEvent) {
+    this.caretBlink.reset(); // solid caret immediately (#3092)
+    this.lastSelectPointer = { cx: e.clientX, cy: e.clientY };
+
+    // Anchor = the fixed end of the current caret/selection.
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+
+    const pt = this.pointerToVisual(e.clientX, e.clientY);
+    const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
+      pt.xLine,
+      pt.yLine
+    );
+    if (offset >= 0) {
+      this.cursor.stepHeadTo(this.text, offset, affinity, true);
+    }
+    this.cursor.beginSelectingKeepingAnchor();
+
+    this.annotatedPosition = this.text.cursorToIndex(this.viewport, this.cursor);
+
+    this.draw();
+
+    document.addEventListener("mousemove", this.onDocumentSelectMove);
+    document.addEventListener("mouseup", this.onDocumentSelectUp);
+    this.ensureSelectionEdgeScrollRunning();
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // Issue #3108 — drag the highlight span via start/end handles or by its middle.
   // ───────────────────────────────────────────────────────────────────────────
@@ -1659,6 +1692,15 @@ export class Annotator {
     // context menu opens over the existing highlight instead of collapsing it
     // (#3092).
     if (e.button !== 0) {
+      return;
+    }
+
+    // Shift+click extends the selection from the existing caret/anchor to the
+    // clicked position, like a normal text editor. Handled before the handle
+    // hit-test and applyPointerToCursor, both of which would otherwise collapse
+    // or replace the current selection. Requires a placed caret to extend from.
+    if (e.shiftKey && this.cursor.xLine >= 0 && this.cursor.yLine >= 0) {
+      this.extendSelectionToPointer(e);
       return;
     }
 
