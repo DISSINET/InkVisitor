@@ -37,6 +37,7 @@ import { TagGroup } from "./basic/TagGroup/TagGroup";
 import { TemplateActionModal } from "./basic/TemplateActionModal/TemplateActionModal";
 import { Timestamp } from "./basic/Timestamp/Timestamp";
 import { Toast } from "./basic/Toast/Toast";
+import { Toggle } from "./basic/Toggle/Toggle";
 import ToastWithLink from "./basic/Toast/ToastWithLink";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
@@ -88,6 +89,7 @@ export {
   TemplateActionModal,
   Timestamp,
   Toast,
+  Toggle,
   WarningIcon,
   ToastWithLink,
   Tooltip,

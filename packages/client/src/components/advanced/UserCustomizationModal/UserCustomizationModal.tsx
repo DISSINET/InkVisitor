@@ -4,18 +4,18 @@ import { DropdownItem, IEntity, IResponseUser, IUser } from "@inkvisitor/shared/
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
+import { IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
 import api from "api";
 import {
   Button,
   ButtonGroup,
-  Checkbox,
   IconWithTooltip,
   Input,
   Loader,
   Modal,
   ModalContent,
   ModalFooter,
-  ModalHeader,
+  Toggle,
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
@@ -35,6 +35,7 @@ import {
   StyledRightsLabel,
   StyledRightsWrap,
   StyledSectionTitle,
+  StyledSectionTitleIcon,
   StyledUserCustomization,
   StyledUserCustomizationSection,
 } from "./UserCustomizationModalStyles";
@@ -182,11 +183,15 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         onClose={onClose}
         isLoading={updateUserMutation.isPending}
       >
-        <ModalHeader title="User customization" />
         <ModalContent column enableScroll>
           <StyledUserCustomization>
             <StyledUserCustomizationSection>
-              <StyledSectionTitle>User information</StyledSectionTitle>
+              <StyledSectionTitle>
+                <StyledSectionTitleIcon>
+                  <IcoUserAlt />
+                </StyledSectionTitleIcon>
+                User information
+              </StyledSectionTitle>
               <StyledFieldGrid>
                 <StyledFieldLabel>Name</StyledFieldLabel>
                 <StyledFieldControl>
@@ -294,7 +299,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledFieldGrid>
             </StyledUserCustomizationSection>
             <StyledUserCustomizationSection>
-              <StyledSectionTitle>Customization</StyledSectionTitle>
+              <StyledSectionTitle>
+                <StyledSectionTitleIcon>
+                  <IcoSettings size={13} />
+                </StyledSectionTitleIcon>
+                Customization
+              </StyledSectionTitle>
 
               <StyledFieldGrid>
                 <StyledFieldLabel>Default label language</StyledFieldLabel>
@@ -401,9 +411,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
                 <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
                 <StyledFieldControl>
-                  <Checkbox
+                  <Toggle
                     value={data.askBeforePropDelete}
-                    onChangeFn={(value) => handleChange("askBeforePropDelete", value)}
+                    onChange={(value) => handleChange("askBeforePropDelete", value)}
+                    // hideLabels
                   />
                 </StyledFieldControl>
                 <StyledFieldHelp>
@@ -416,7 +427,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledFieldGrid>
             </StyledUserCustomizationSection>
             <StyledUserCustomizationSection>
-              <StyledSectionTitle>User rights</StyledSectionTitle>
+              <StyledSectionTitle>
+                <StyledSectionTitleIcon>
+                  <IcoShield />
+                </StyledSectionTitleIcon>
+                User rights
+              </StyledSectionTitle>
               <StyledRightsGrid>
                 <StyledRightsLabel>Role</StyledRightsLabel>
                 <AttributeButtonGroup

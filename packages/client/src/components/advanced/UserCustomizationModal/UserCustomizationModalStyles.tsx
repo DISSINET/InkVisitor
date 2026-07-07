@@ -19,6 +19,9 @@ export const StyledUserCustomizationSection = styled.div`
 `;
 
 export const StyledSectionTitle = styled.h3`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   margin: 0;
   padding-bottom: ${({ theme }) => theme.space[2]};
   border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
@@ -27,6 +30,16 @@ export const StyledSectionTitle = styled.h3`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   text-transform: uppercase;
   letter-spacing: 0.09em;
+`;
+
+export const StyledSectionTitleIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+  width: 1.3rem;
 `;
 
 export const StyledFieldGrid = styled.div`

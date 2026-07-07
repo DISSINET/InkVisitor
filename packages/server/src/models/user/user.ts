@@ -1,4 +1,10 @@
-import { IUser, IUserOptions, IBookmarkFolder, IStoredTerritory, IUserRight } from "@inkvisitor/shared/types";
+import {
+  IUser,
+  IUserOptions,
+  IBookmarkFolder,
+  IStoredTerritory,
+  IUserRight,
+} from "@inkvisitor/shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
@@ -14,8 +20,7 @@ import { cache } from "@service/ttlCache";
 // service/changefeedInvalidator.ts plus the explicit cache.delete calls
 // in User.update / User.delete.
 export const USER_CACHE_KEY_PREFIX = "user:byId:";
-export const userCacheKey = (id: string): string =>
-  `${USER_CACHE_KEY_PREFIX}${id}`;
+export const userCacheKey = (id: string): string => `${USER_CACHE_KEY_PREFIX}${id}`;
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -38,6 +43,7 @@ export class UserOptions implements IUserOptions {
   searchLanguages: EntityEnums.Language[] = [];
   workingLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
+  askBeforePropDelete?: boolean = true;
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);

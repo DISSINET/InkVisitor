@@ -37,17 +37,6 @@ export const StyledBlockSeparator = styled.div`
   grid-column: span 2;
   border-top: 1px dashed grey;
 `;
-interface StyledToggleWrap {
-  $active: boolean;
-}
-export const StyledToggleWrap = styled.div<StyledToggleWrap>`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: ${({ theme, $active }) => ($active ? theme.color["info"] : theme.color["danger"])};
-  cursor: pointer;
-`;
-
 export const StyledDetailRowControls = styled.div`
   display: flex;
   flex-direction: column;

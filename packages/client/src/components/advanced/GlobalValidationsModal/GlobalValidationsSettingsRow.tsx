@@ -7,10 +7,8 @@ import React, { useState } from "react";
 import {
   StyledGridFormLabel,
   StyledGridFormLabelContent,
-  StyledToggleWrap,
 } from "./GlobalValidationsModalStyles";
-import { FaToggleOn, FaToggleOff } from "react-icons/fa";
-import { Tooltip, WarningIcon } from "components";
+import { Toggle, Tooltip, WarningIcon } from "components";
 
 interface GlobalValidationsSettingsRow {
   validation: ValidationKey;
@@ -43,17 +41,7 @@ export const GlobalValidationsSettingsRow: React.FC<
         </StyledGridFormLabelContent>
       </StyledGridFormLabel>
       <div>
-        <StyledToggleWrap $active={active} onClick={() => toggleRule()}>
-          {active ? (
-            <>
-              <FaToggleOn size={22} /> active
-            </>
-          ) : (
-            <>
-              <FaToggleOff size={22} /> inactive
-            </>
-          )}
-        </StyledToggleWrap>
+        <Toggle value={active} onChange={() => toggleRule()} />
       </div>
 
       {tooltipContent && (

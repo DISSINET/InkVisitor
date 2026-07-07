@@ -5,14 +5,12 @@ import {
   globalValidationsDict,
   WarningTypeEnums,
 } from "@inkvisitor/shared/enums/warning";
-import { WarningIcon } from "components";
+import { Toggle, WarningIcon } from "components";
 import Dropdown from "components/advanced";
 import React from "react";
-import { FaToggleOff, FaToggleOn } from "react-icons/fa";
 import {
   StyledDetailRowControls,
   StyledGridFormLabel,
-  StyledToggleWrap,
 } from "./GlobalValidationsModalStyles";
 
 // classes the validation targets by default when first switched on
@@ -44,20 +42,10 @@ export const GlobalValidationsDetailRow: React.FC<
         {globalValidationsDict.validation_DM.label}
       </StyledGridFormLabel>
       <StyledDetailRowControls>
-        <StyledToggleWrap
-          $active={active}
-          onClick={() => update(active ? false : defaultDmClasses)}
-        >
-          {active ? (
-            <>
-              <FaToggleOn size={22} /> active
-            </>
-          ) : (
-            <>
-              <FaToggleOff size={22} /> inactive
-            </>
-          )}
-        </StyledToggleWrap>
+        <Toggle
+          value={active}
+          onChange={(next) => update(next ? defaultDmClasses : false)}
+        />
         {active && (
           <Dropdown.Multi.Entity
             disableEmpty
