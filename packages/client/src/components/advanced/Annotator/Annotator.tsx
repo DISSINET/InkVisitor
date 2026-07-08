@@ -227,7 +227,6 @@ export const TextAnnotator = ({
     setAnnotatorMode(EditMode.HIGHLIGHT);
   }, [territoryId]);
 
-
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
       queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) => {
@@ -453,7 +452,7 @@ export const TextAnnotator = ({
       const targetStatements: IResponseStatement[] =
         effectiveTerritoryId === territory?.id
           ? territory?.statements || []
-          : (await api.territoryGetStatements(effectiveTerritoryId)).data ?? [];
+          : ((await api.territoryGetStatements(effectiveTerritoryId)).data ?? []);
 
       const statementIds = new Set(targetStatements.map((s) => s.id));
       // filter only anchors that are in the statement list
@@ -471,9 +470,8 @@ export const TextAnnotator = ({
 
       // see the order of the previous start index statement in the statement list and put the new statement after it
       const lastIndexBeforeHighlight =
-        targetStatements.findIndex(
-          (statement) => statement.id === lastAnchorBeforeIndex?.anchor,
-        ) ?? -1;
+        targetStatements.findIndex((statement) => statement.id === lastAnchorBeforeIndex?.anchor) ??
+        -1;
       const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, targetStatements);
 
       if (userData && statementCreateMutation) {
@@ -523,14 +521,14 @@ export const TextAnnotator = ({
   // Parent T the new Territory is created under, resolved relative to the target
   // subT chosen in the menu (the in-document T, not the active Tree T): for a
   // child it is the target itself, for a sibling it is the target's parent.
-  const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(undefined);
+  const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(
+    undefined,
+  );
 
   // Order among the parent's existing child Ts for the new subT, computed from
   // the selection's position relative to sibling Territory anchors in the
   // document — mirrors how a new Statement's order is derived from its anchor.
-  const [territoryCreateOrder, setTerritoryCreateOrder] = useState<number>(
-    EntityEnums.Order.Last,
-  );
+  const [territoryCreateOrder, setTerritoryCreateOrder] = useState<number>(EntityEnums.Order.Last);
 
   // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -857,7 +855,8 @@ export const TextAnnotator = ({
       // the app just supplies the candidates, defaulting to the application font.
       a.setFontFamilyOptions([
         { label: "Sans (app)", value: '"Roboto", sans-serif' },
-        { label: "System", value: "system-ui, sans-serif" },
+        // System option hidden for now because of inconsistent anchor highlight
+        // { label: "System", value: "system-ui, sans-serif" },
         { label: "Serif", value: "Georgia, serif" },
       ]);
     };
@@ -1102,8 +1101,7 @@ export const TextAnnotator = ({
           .map((child) => child.territory)
           .sort(
             (a, b) =>
-              (a.data.parent ? a.data.parent.order : 0) -
-              (b.data.parent ? b.data.parent.order : 0),
+              (a.data.parent ? a.data.parent.order : 0) - (b.data.parent ? b.data.parent.order : 0),
           );
 
         // sibling Territory anchors present in this document, deduped by id
@@ -1194,10 +1192,7 @@ export const TextAnnotator = ({
     if (!dataDocument || selectionStartIndex === -1) {
       return [];
     }
-    return getTerritoryHierarchyAtIndex(
-      dataDocument.anchors,
-      selectionStartIndex,
-    );
+    return getTerritoryHierarchyAtIndex(dataDocument.anchors, selectionStartIndex);
   }, [dataDocument, selectionStartIndex]);
 
   const onRemoveAnchor = (anchor: Tag) => {
@@ -1594,9 +1589,7 @@ export const TextAnnotator = ({
                       annotatorPositionHierarchy={annotatorPositionHierarchy}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
-                      onMoveAnchorBoundary={
-                        isMenuReadOnly ? undefined : handleMoveAnchorBoundary
-                      }
+                      onMoveAnchorBoundary={isMenuReadOnly ? undefined : handleMoveAnchorBoundary}
                       onMoveAnchorBegin={isMenuReadOnly ? undefined : handleMoveAnchorBegin}
                       onLocateAnchorBoundary={
                         isMenuReadOnly ? undefined : handleLocateAnchorBoundary
