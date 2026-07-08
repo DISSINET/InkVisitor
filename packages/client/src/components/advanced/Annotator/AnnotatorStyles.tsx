@@ -50,8 +50,8 @@ interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorDoneButton = styled.div`
   position: absolute;
   top: 0rem;
-  right: 0.5em;
-  transform: translate(0, -50%);
+  right: -0.2rem;
+  transform: translate(0, -48%);
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-xl"]};

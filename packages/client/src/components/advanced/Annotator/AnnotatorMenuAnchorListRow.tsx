@@ -29,8 +29,11 @@ export type AnnotatorAnchorGridRowData = {
   onMoveAnchor?: (anchor: Tag) => void;
   /** View-only: render anchors without unlink/elvl controls. */
   readonly?: boolean;
-  /** Hide the elvl button group even when not fully readonly (documents page). */
-  hideElvl?: boolean;
+  /**
+   * Render the elvl button group in disabled mode (single, non-interactive
+   * current-elvl icon) even when not fully readonly (documents page).
+   */
+  disableElvl?: boolean;
 };
 
 export type AnnotatorAnchorGridRowProps = {
@@ -41,7 +44,7 @@ export type AnnotatorAnchorGridRowProps = {
 
 export const AnnotatorAnchorGridRow = React.memo(
   ({ index, style, data }: AnnotatorAnchorGridRowProps) => {
-    const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly, hideElvl } =
+    const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly, disableElvl } =
       data;
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
@@ -57,6 +60,12 @@ export const AnnotatorAnchorGridRow = React.memo(
       if (!entity) {
         return null;
       }
+      const elvlValue = item.anchor.attributes.elvl as EntityEnums.Elvl;
+      // Disabled elvl shows only the current value; when there is no valid value
+      // there is nothing to show, so drop the whole slot (and its divider) rather
+      // than leave an empty elvl wrapper on the tag.
+      const showElvl =
+        !disableElvl || Object.values(EntityEnums.Elvl).includes(elvlValue);
       return (
         <EntityTag
           fullWidth
@@ -75,7 +84,9 @@ export const AnnotatorAnchorGridRow = React.memo(
             ) : undefined
           }
           unlinkButton={
-            readonly
+            // Hidden for readonly users and for everybody on the documents page
+            // (disableElvl), where anchors are not editable.
+            readonly || disableElvl
               ? false
               : {
                   onClick: () => {
@@ -85,16 +96,17 @@ export const AnnotatorAnchorGridRow = React.memo(
           }
           entity={entity}
           elvlButtonGroup={
-            readonly || hideElvl ? (
-              false
-            ) : (
+            showElvl ? (
               <ElvlButtonGroup
-                value={item.anchor.attributes.elvl as EntityEnums.Elvl}
+                value={elvlValue}
                 onChange={(elvl) => {
                   onUpdateAnchor?.(item.anchor, elvl);
                 }}
                 sharpCorners
+                disabled={disableElvl}
               />
+            ) : (
+              false
             )
           }
         />

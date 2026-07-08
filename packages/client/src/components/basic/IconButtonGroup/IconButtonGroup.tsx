@@ -31,6 +31,12 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
   icons,
   disabled = false,
 }: IconButtonGroup<TValue>) => {
+  // Disabled mode shows only the selected option. If nothing is selected there
+  // is nothing to show, so hide the component entirely (no empty wrapper box).
+  if (disabled && !options.some((option) => option.value === value)) {
+    return null;
+  }
+
   return (
     <StyledWrapper $border={border} $sharpCorners={sharpCorners}>
       {options.map((option, key) => {

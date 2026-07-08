@@ -385,9 +385,9 @@ export const TextAnnotatorMenu = ({
           ? undefined
           : handleMoveAnchorStart,
       readonly,
-      // Hide elvl controls where creation is disabled (documents page), same as
-      // the resize button above.
-      hideElvl: disableCreate,
+      // Disable (not hide) elvl controls where creation is disabled (documents
+      // page): show the current elvl as a static icon, same as the readonly case.
+      disableElvl: disableCreate,
     }),
     [
       resolvedAnchors,
