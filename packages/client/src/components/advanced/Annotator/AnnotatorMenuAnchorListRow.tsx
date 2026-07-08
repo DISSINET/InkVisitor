@@ -133,14 +133,18 @@ const AnnotatorAnchorControlsCluster: React.FC<AnnotatorAnchorControlsCluster> =
           />
         </>
       )}
-      {/* Kebab stays last so its position is stable whether open or not. */}
-      <Button
-        icon={<FaEllipsisV size={12} />}
-        color="gray"
-        inverted
-        tooltipLabel="anchor actions"
-        shape="sharp-square"
-      />
+      {/* Kebab is the hover affordance for view mode only; edit mode (permanent
+          or Ctrl-hold) shows every button, so no kebab. Kept last so its
+          position is stable between collapsed and hover-expanded. */}
+      {!editControls && (
+        <Button
+          icon={<FaEllipsisV size={12} />}
+          color="gray"
+          inverted
+          tooltipLabel="anchor actions"
+          shape="sharp-square"
+        />
+      )}
     </StyledAnchorControlsCluster>
   );
 };
