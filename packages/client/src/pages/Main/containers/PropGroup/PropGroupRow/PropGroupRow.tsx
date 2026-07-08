@@ -243,7 +243,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               buttons={
                 <>
-                  <ButtonGroup $height={19} $noMarginRight>
+                  <ButtonGroup $height={19} $noGap>
                     {prop.logic == "2" && (
                       <Button
                         tooltipLabel="Negative logic"

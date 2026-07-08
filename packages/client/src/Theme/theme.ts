@@ -275,5 +275,5 @@ export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;
 export type ThemeFontSize = typeof theme.fontSize;
 export type PingColor = typeof theme.color.ping;
-
+export type ThemeBorderRadius = typeof theme.borderRadius;
 export default theme;
