@@ -16,6 +16,8 @@ interface UserTagProps {
   size?: UserTagSize;
   showOnly?: "tag" | "label";
   fontWeight?: "normal" | "bold";
+  // only for first login to show the user tag during the activation process
+  disableFetch?: boolean;
 }
 
 export const UserTag: React.FC<UserTagProps> = ({
@@ -24,6 +26,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   size = UserTagSize.Small,
   showOnly,
   fontWeight = "bold",
+  disableFetch = false,
 }) => {
   const theme = useTheme();
   const currentUserId = localStorage.getItem("userid");
@@ -35,7 +38,7 @@ export const UserTag: React.FC<UserTagProps> = ({
       const res = await api.usersGet(userId, { ignoreErrorToast: true });
       return res.data;
     },
-    enabled: Boolean(userId),
+    enabled: Boolean(userId) && !disableFetch,
   });
 
   const variantColors = getVariantColors(theme, color, variant);

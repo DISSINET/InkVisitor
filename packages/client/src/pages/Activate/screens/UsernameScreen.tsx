@@ -123,10 +123,6 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
         <>
           <p>User</p>
           <StyledMail>
-            <span style={{ display: "flex", width: "100%" }}>
-              <FaUserTag size={14} style={{ marginRight: "0.25rem" }} />
-            </span>
-            <b style={{ display: "flex" }}>{username}</b>
             {/* To use UserTag we need to have the userId in the database */}
             <UserTag userId={username} />
           </StyledMail>

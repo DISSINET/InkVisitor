@@ -219,7 +219,8 @@ export const StyledActionButton = styled.button`
 
 export const StyledIconWrapper = styled.div`
   position: absolute;
-  left: 0;
+  left: 0rem;
+  /* left: 0.6rem; */
   width: ${({ theme }) => theme.space[13]};
   top: 0;
   bottom: 0;

@@ -310,7 +310,7 @@ export const Suggester: React.FC<Suggester> = ({
   const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [offset(4), flip({ padding: 10 })],
+    middleware: [offset(1), flip({ padding: 10 })],
   });
 
   const theme = useTheme();

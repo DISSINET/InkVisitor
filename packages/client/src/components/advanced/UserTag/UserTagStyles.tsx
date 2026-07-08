@@ -16,7 +16,7 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
   .tag {
     align-items: center;
     gap: ${({ theme }) => theme.space[1]};
-    padding-left: ${({ theme }) => theme.space[1]};
+    padding-left: ${({ theme }) => theme.space[2]};
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
     border-width: 2px;
