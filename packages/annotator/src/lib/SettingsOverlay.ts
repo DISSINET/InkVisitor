@@ -48,6 +48,8 @@ export type SettingControl = SegmentedSetting | ColorSetting | SelectSetting;
 export interface FooterAction {
   label: string;
   onClick: () => void;
+  /** Primary = accent fill (default). Secondary = muted gray for destructive/ancillary actions. */
+  variant?: "primary" | "secondary";
 }
 
 export class SettingsOverlay {
@@ -58,6 +60,16 @@ export class SettingsOverlay {
   private followRaf: number | null = null;
   /** Last anchor rect applied, so the follow loop only writes on change. */
   private lastRect: { left: number; top: number; width: number; height: number } | null = null;
+  /**
+   * Stacking layer of the backdrop. Appended to `document.body`. The default
+   * suits an annotator embedded in an ordinary page panel (kept low so it never
+   * floats over the host's own overlays). A host that mounts the annotator inside
+   * its own stacking context (e.g. a modal) raises this via the field to sit
+   * above that surface. The library carries no knowledge of the host's z-index
+   * scale; hosts should keep it just under {@link ContextMenu.zIndex} so a stray
+   * menu never hides behind the backdrop.
+   */
+  zIndex = 10;
 
   /** Whether the overlay is currently shown. */
   get isOpen(): boolean {
@@ -83,7 +95,7 @@ export class SettingsOverlay {
     const backdrop = document.createElement("div");
     Object.assign(backdrop.style, {
       position: "fixed",
-      zIndex: "10",
+      zIndex: `${this.zIndex}`,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -269,14 +281,15 @@ export class SettingsOverlay {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = action.label;
+      const secondary = action.variant === "secondary";
       Object.assign(btn.style, {
         font: "inherit",
-        fontWeight: "bold",
+        fontWeight: secondary ? "normal" : "bold",
         padding: "6px 1.4rem",
-        border: "none",
+        border: secondary ? `1px solid ${this.colors.border}` : "none",
         borderRadius: "5px",
-        background: this.colors.accent,
-        color: this.colors.accentText,
+        background: secondary ? this.colors.buttonBg : this.colors.accent,
+        color: secondary ? this.colors.text : this.colors.accentText,
         cursor: "pointer",
       } as Partial<CSSStyleDeclaration>);
       btn.addEventListener("mousedown", (e) => {

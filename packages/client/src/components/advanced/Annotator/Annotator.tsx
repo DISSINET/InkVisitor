@@ -16,10 +16,12 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import {
+  AnchorOpenTagRef,
   Annotator,
   AsymmetricalAnchor,
   EditMode,
   editModeDisplayLabel,
+  MoveAnchorBoundaryResult,
   Tag,
   WarningType,
 } from "@inkvisitor/annotator/src/lib";
@@ -111,6 +113,14 @@ interface TextAnnotatorProps {
   disableCreate?: boolean;
 
   /**
+   * Overrides the annotator's context-menu / settings-overlay stacking layers.
+   * Both overlays are appended to `document.body`; the library defaults suit a
+   * plain page panel (MainPage). A host that mounts the annotator inside a modal
+   * (the Documents page) passes higher values so the overlays sit above it.
+   */
+  overlayZIndex?: { contextMenu: number; settingsOverlay: number };
+
+  /**
    * When false the document is read-only: text editing, adding/removing
    * anchors, batch replace and the annotate menu are disabled (search,
    * highlight and navigation stay). Editors get this when the loaded Resource
@@ -156,6 +166,7 @@ export const TextAnnotator = ({
   statementCreateMutation = undefined,
   userData,
   disableCreate = false,
+  overlayZIndex,
   canEditDocument = true,
   onStatementAnchorHover,
 
@@ -216,12 +227,21 @@ export const TextAnnotator = ({
     setAnnotatorMode(EditMode.HIGHLIGHT);
   }, [territoryId]);
 
-
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {
-      queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) =>
-        old ? { ...old, ...variables.doc } : old,
-      );
+      queryClient.setQueryData<IDocument | undefined>(["document", variables.id], (old) => {
+        if (!old) return old;
+        // Merge ONLY content — the single field this save changes. variables.doc
+        // is built by spreading the (stale) dataDocument prop, so its entityIds
+        // and anchors trail any optimistic update already written into the cache
+        // (e.g. statementCreateMutation.onMutate adds the new Statement id to
+        // entityIds). Spreading the whole stale doc clobbers those back, so a
+        // just-added anchor's highlight blinks off until the refetch lands. Keep
+        // the cached entityIds/anchors; the invalidate refetch reconciles them.
+        return variables.doc.content !== undefined
+          ? { ...old, content: variables.doc.content }
+          : old;
+      });
     },
     [queryClient],
   );
@@ -432,7 +452,7 @@ export const TextAnnotator = ({
       const targetStatements: IResponseStatement[] =
         effectiveTerritoryId === territory?.id
           ? territory?.statements || []
-          : (await api.territoryGetStatements(effectiveTerritoryId)).data ?? [];
+          : ((await api.territoryGetStatements(effectiveTerritoryId)).data ?? []);
 
       const statementIds = new Set(targetStatements.map((s) => s.id));
       // filter only anchors that are in the statement list
@@ -450,9 +470,8 @@ export const TextAnnotator = ({
 
       // see the order of the previous start index statement in the statement list and put the new statement after it
       const lastIndexBeforeHighlight =
-        targetStatements.findIndex(
-          (statement) => statement.id === lastAnchorBeforeIndex?.anchor,
-        ) ?? -1;
+        targetStatements.findIndex((statement) => statement.id === lastAnchorBeforeIndex?.anchor) ??
+        -1;
       const newOrder = getStatementOrderByIndex(lastIndexBeforeHighlight + 1, targetStatements);
 
       if (userData && statementCreateMutation) {
@@ -502,14 +521,14 @@ export const TextAnnotator = ({
   // Parent T the new Territory is created under, resolved relative to the target
   // subT chosen in the menu (the in-document T, not the active Tree T): for a
   // child it is the target itself, for a sibling it is the target's parent.
-  const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(undefined);
+  const [territoryCreateParent, setTerritoryCreateParent] = useState<IEntity | undefined>(
+    undefined,
+  );
 
   // Order among the parent's existing child Ts for the new subT, computed from
   // the selection's position relative to sibling Territory anchors in the
   // document — mirrors how a new Statement's order is derived from its anchor.
-  const [territoryCreateOrder, setTerritoryCreateOrder] = useState<number>(
-    EntityEnums.Order.Last,
-  );
+  const [territoryCreateOrder, setTerritoryCreateOrder] = useState<number>(EntityEnums.Order.Last);
 
   // isSaving controls refresh of the annotator
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -836,7 +855,8 @@ export const TextAnnotator = ({
       // the app just supplies the candidates, defaulting to the application font.
       a.setFontFamilyOptions([
         { label: "Sans (app)", value: '"Roboto", sans-serif' },
-        { label: "System", value: "system-ui, sans-serif" },
+        // System option hidden for now because of inconsistent anchor highlight
+        // { label: "System", value: "system-ui, sans-serif" },
         { label: "Serif", value: "Georgia, serif" },
       ]);
     };
@@ -914,6 +934,13 @@ export const TextAnnotator = ({
     );
 
     applyCanvasTheme(newAnnotator);
+
+    // Raise the body-appended overlays above the host modal on the Documents
+    // page; MainPage leaves the lib defaults (which sit under app modals).
+    if (overlayZIndex) {
+      newAnnotator.contextMenu.zIndex = overlayZIndex.contextMenu;
+      newAnnotator.settingsOverlay.zIndex = overlayZIndex.settingsOverlay;
+    }
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -1074,8 +1101,7 @@ export const TextAnnotator = ({
           .map((child) => child.territory)
           .sort(
             (a, b) =>
-              (a.data.parent ? a.data.parent.order : 0) -
-              (b.data.parent ? b.data.parent.order : 0),
+              (a.data.parent ? a.data.parent.order : 0) - (b.data.parent ? b.data.parent.order : 0),
           );
 
         // sibling Territory anchors present in this document, deduped by id
@@ -1166,10 +1192,7 @@ export const TextAnnotator = ({
     if (!dataDocument || selectionStartIndex === -1) {
       return [];
     }
-    return getTerritoryHierarchyAtIndex(
-      dataDocument.anchors,
-      selectionStartIndex,
-    );
+    return getTerritoryHierarchyAtIndex(dataDocument.anchors, selectionStartIndex);
   }, [dataDocument, selectionStartIndex]);
 
   const onRemoveAnchor = (anchor: Tag) => {
@@ -1227,6 +1250,93 @@ export const TextAnnotator = ({
       dataDocument !== undefined
     );
   }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
+
+  // #2885 — anchor-move mode. Arrow clicks edit the raw text on the canvas as a
+  // live preview but are NOT saved; the user commits a whole series with Done
+  // (save) or reverts it with Discard. The raw text is snapshotted when move
+  // mode begins so Discard — and any unconfirmed exit (Esc, closing the menu,
+  // unmount) — can restore the original span. Moving a boundary only relocates
+  // a fixed-length tag, so the total text length is invariant and the snapshot
+  // restores exactly.
+  const moveAnchorOriginalTextRef = useRef<string | null>(null);
+  const moveAnchorDirtyRef = useRef<boolean>(false);
+  const moveAnchorActiveRef = useRef<boolean>(false);
+
+  const handleMoveAnchorBegin = (tagName: string, openTagRef: AnchorOpenTagRef) => {
+    if (!annotator) {
+      return;
+    }
+    moveAnchorOriginalTextRef.current = annotator.text.value;
+    moveAnchorDirtyRef.current = false;
+    moveAnchorActiveRef.current = true;
+    // Hide the blue selection, pulse the anchor, and bring it into view.
+    annotator.beginAnchorResize(tagName, openTagRef);
+  };
+
+  const handleMoveAnchorBoundary = (
+    tagName: string,
+    openTagRef: AnchorOpenTagRef,
+    boundary: "open" | "close",
+    direction: -1 | 1,
+  ): MoveAnchorBoundaryResult | undefined => {
+    if (!annotator) {
+      return undefined;
+    }
+    const result = annotator.moveAnchorBoundary(tagName, openTagRef, boundary, direction);
+    if (result.status === "moved") {
+      moveAnchorDirtyRef.current = true;
+    } else if (result.status === "blocked-same-name") {
+      toast.info("Cannot move across another anchor of the same entity");
+    } else if (result.status === "not-found") {
+      toast.warning("Anchor is broken (unpaired) — fix it in the warnings panel");
+    }
+    return result;
+  };
+
+  // #2885 — jump the viewport to the start (open) or end (close) boundary of the
+  // anchor being resized, so a long span whose ends sit off the same screen can
+  // be located from the move panel.
+  const handleLocateAnchorBoundary = (boundary: "open" | "close") => {
+    annotator?.scrollResizeAnchorBoundaryIntoView(boundary);
+  };
+
+  // Leave resize mode. commit=true (Done) saves the buffered series; otherwise
+  // (Discard, Esc, closing the menu, unmount) the moves are reverted. Either
+  // way the pulse stops and the frozen selection is unhidden at its original
+  // position. Idempotent — safe to call when no resize is active.
+  const endMoveAnchor = (commit: boolean) => {
+    if (!moveAnchorActiveRef.current) {
+      return;
+    }
+    moveAnchorActiveRef.current = false;
+    if (commit) {
+      if (moveAnchorDirtyRef.current) {
+        handleSaveNewContent(true, true);
+      }
+    } else if (moveAnchorDirtyRef.current && moveAnchorOriginalTextRef.current !== null) {
+      annotator?.updateText(moveAnchorOriginalTextRef.current);
+    }
+    annotator?.endAnchorResize();
+    moveAnchorDirtyRef.current = false;
+    moveAnchorOriginalTextRef.current = null;
+  };
+
+  // Ref indirection so the menu-close effect and the unmount cleanup always
+  // call the latest closure (with the current annotator/document).
+  const endMoveAnchorRef = useRef(endMoveAnchor);
+  endMoveAnchorRef.current = endMoveAnchor;
+
+  // Any unconfirmed exit reverts the buffered moves: the selection menu
+  // disappearing (Esc, clicking elsewhere, selection cleared) and unmount.
+  useEffect(() => {
+    if (!isMenuDisplayed) {
+      endMoveAnchorRef.current(false);
+    }
+  }, [isMenuDisplayed]);
+
+  useEffect(() => {
+    return () => endMoveAnchorRef.current(false);
+  }, []);
 
   const annotatorMenuMiddleware = useMemo(() => {
     if (typeof document === "undefined") return [];
@@ -1479,6 +1589,17 @@ export const TextAnnotator = ({
                       annotatorPositionHierarchy={annotatorPositionHierarchy}
                       onRemoveAnchor={isMenuReadOnly ? undefined : onRemoveAnchor}
                       onUpdateAnchor={isMenuReadOnly ? undefined : onUpdateAnchor}
+                      onMoveAnchorBoundary={isMenuReadOnly ? undefined : handleMoveAnchorBoundary}
+                      onMoveAnchorBegin={isMenuReadOnly ? undefined : handleMoveAnchorBegin}
+                      onLocateAnchorBoundary={
+                        isMenuReadOnly ? undefined : handleLocateAnchorBoundary
+                      }
+                      onMoveAnchorSave={
+                        isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(true)
+                      }
+                      onMoveAnchorDiscard={
+                        isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(false)
+                      }
                       readonly={isMenuReadOnly}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {

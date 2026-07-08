@@ -50,8 +50,8 @@ interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorDoneButton = styled.div`
   position: absolute;
   top: 0rem;
-  right: 0.5em;
-  transform: translate(0, -50%);
+  right: -0.2rem;
+  transform: translate(0, -48%);
   z-index: 101;
   color: ${({ theme }) => theme.color.primary};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-xl"]};
@@ -70,11 +70,10 @@ export const StyledAnnotatorMenuDraggable = styled.div`
   flex-direction: column;
   width: 100%;
   pointer-events: auto;
-  gap: 0.5rem;
   background-color: ${({ theme }) => theme.color.blue[100]};
   padding: ${({ theme }) => theme.space[2]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
-  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  border-radius: 1rem;
 
   opacity: 0.95;
 
@@ -95,7 +94,7 @@ export const StyledAnnotatorMenuDragHandle = styled.div`
   justify-content: center;
   gap: ${({ theme }) => theme.space[1]};
   padding: ${({ theme }) => theme.space[1]} 0 ${({ theme }) => theme.space[2]};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  border-radius: ${({ theme }) => theme.borderRadius.default};
   color: ${({ theme }) => theme.color.gray["600"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   flex-shrink: 0;
@@ -113,7 +112,7 @@ export const StyledAnnotatorItem = styled.div`
   display: flex;
   flex-direction: column;
   padding: ${({ theme }) => theme.space[2]};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
+  border-radius: ${({ theme }) => theme.borderRadius.default};
 
   &:hover {
     background: ${({ theme }) => theme.color.blue["150"]};
@@ -124,9 +123,7 @@ export const StyledAnnotatorItemContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[2]};
-  margin-top: ${({ theme }) => theme.space[2]};
-  margin-left: ${({ theme }) => theme.space[3]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin: ${({ theme }) => theme.space[2]};
   flex-wrap: wrap;
   position: relative;
 `;
@@ -143,12 +140,10 @@ export const StyledAnnotatorAnchorListWrap = styled.div`
   overflow: hidden;
   min-height: 0;
   max-height: 13rem;
-  border-radius: ${({ theme }) => theme.borderRadius.xs};
-  background-color: ${({ theme }) => theme.color.gray["500"]};
-  padding: ${({ theme }) => theme.space[3]};
-  padding-bottom: ${({ theme }) => theme.space[4]};
-  border-radius: ${({ theme }) => theme.borderRadius.sm};
-  margin-left: ${({ theme }) => theme.space["-2"]};
+  border: ${({ theme }) => `1px solid ${theme.color.blue["100"]}`};
+  background-color: ${({ theme }) => theme.color.blue["50"]};
+  padding: 0 0.5rem;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
 `;
 
 export const StyledAnnotatorItemTitle = styled.div`
@@ -159,6 +154,7 @@ export const StyledAnnotatorItemTitle = styled.div`
   font-variant-caps: small-caps;
   display: flex;
   align-items: center;
+  padding-left: ${({ theme }) => theme.space[3]};
   gap: ${({ theme }) => theme.space[1]};
 `;
 
@@ -169,8 +165,6 @@ export const StyledTerritorySubsection = styled.div`
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  margin-left: ${({ theme }) => theme.space["-2"]};
-  margin-top: ${({ theme }) => theme.space[1]};
   width: 100%;
 `;
 
@@ -211,8 +205,6 @@ export const StyledStatementSubsection = styled.div`
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
-  margin-left: ${({ theme }) => theme.space["-2"]};
-  margin-top: ${({ theme }) => theme.space[1]};
   max-width: 100%;
 `;
 
@@ -349,4 +341,49 @@ export const StyledWarningKind = styled.div`
 
 export const StyledCaretButtonWrapper = styled.span`
   display: flex;
+`;
+
+// #2885 — move-anchor mode: compact panel that replaces the menu body while
+// an anchor span is being nudged with the arrow buttons.
+export const StyledMoveAnchorPanel = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: ${({ theme }) => theme.space[3]};
+  margin-top: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledMoveAnchorControls = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: ${({ theme }) => theme.space[2]};
+  width: 100%;
+  gap: ${({ theme }) => theme.space[10]};
+`;
+
+export const StyledMoveAnchorGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const StyledMoveAnchorGroupLabel = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color.gray["600"]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledMoveAnchorEntityTag = styled.div`
+  display: grid;
+  align-items: center;
+  width: 100%;
+  padding-left: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledMoveAnchorFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: ${({ theme }) => theme.space[2]};
 `;

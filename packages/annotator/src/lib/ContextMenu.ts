@@ -22,6 +22,14 @@ export interface ContextMenuItem {
 export class ContextMenu {
   private el: HTMLDivElement | null = null;
   colors: MenuColors = LIGHT_MENU_COLORS;
+  /**
+   * Stacking layer of the menu. Appended to `document.body`, so it must out-rank
+   * the surrounding page content. The default suits an annotator embedded in an
+   * ordinary page panel; a host that mounts the annotator inside its own stacking
+   * context (e.g. a modal) raises this via the field to sit above that surface.
+   * The library carries no knowledge of the host's z-index scale.
+   */
+  zIndex = 200;
 
   /** Whether the menu is currently shown. */
   get isOpen(): boolean {
@@ -40,7 +48,7 @@ export class ContextMenu {
       position: "fixed",
       left: `${clientX}px`,
       top: `${clientY}px`,
-      zIndex: "200",
+      zIndex: `${this.zIndex}`,
       minWidth: "160px",
       padding: "4px",
       background: this.colors.bg,

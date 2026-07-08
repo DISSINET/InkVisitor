@@ -29,16 +29,11 @@ interface StyledIcon {
 }
 export const StyledFaUserAlt = styled(FaUserAlt)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme, $isError }) =>
-    $isError ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $isError }) => ($isError ? theme.color["danger"] : theme.color["primary"])};
 `;
 export const StyledFaLock = styled(FaLock)<StyledIcon>`
-  margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme, $isError }) =>
-    $isError ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $isError }) => ($isError ? theme.color["danger"] : "")};
 `;
 export const StyledTbMailFilled = styled(TbMailFilled)<StyledIcon>`
-  margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme, $isError }) =>
-    $isError ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $isError }) => ($isError ? theme.color["danger"] : "")};
 `;

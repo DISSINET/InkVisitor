@@ -13,6 +13,7 @@ type ValueTypes =
 type IconButtonGroup<TValue extends ValueTypes> = {
   attributeName?: string;
   border?: boolean;
+  sharpCorners?: boolean;
   options: { value: TValue; label: string; info?: string }[];
   onChange: (value: TValue) => void;
   value: TValue;
@@ -23,14 +24,21 @@ type IconButtonGroup<TValue extends ValueTypes> = {
 export const IconButtonGroup = <TValue extends ValueTypes>({
   attributeName,
   border,
+  sharpCorners,
   options,
   onChange,
   value,
   icons,
   disabled = false,
 }: IconButtonGroup<TValue>) => {
+  // Disabled mode shows only the selected option. If nothing is selected there
+  // is nothing to show, so hide the component entirely (no empty wrapper box).
+  if (disabled && !options.some((option) => option.value === value)) {
+    return null;
+  }
+
   return (
-    <StyledWrapper $border={border}>
+    <StyledWrapper $border={border} $sharpCorners={sharpCorners}>
       {options.map((option, key) => {
         return (
           <React.Fragment key={key}>
@@ -41,8 +49,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                   <p>
                     {attributeName ? (
                       <>
-                        <StyledBold>{option.label}</StyledBold> ({attributeName}
-                        )
+                        <StyledBold>{option.label}</StyledBold> ({attributeName})
                       </>
                     ) : (
                       <StyledBold>{option.label}</StyledBold>
@@ -51,6 +58,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                 }
                 noBorder
                 inverted
+                shape={sharpCorners ? "sharp" : undefined}
                 color={option.value === value ? "primary" : "grey"}
                 onClick={() => {
                   if (option.value !== value) {

@@ -1,7 +1,4 @@
-import {
-  PasswordDoesNotMatchError,
-  UnsafePasswordError,
-} from "@inkvisitor/shared/types/errors";
+import { PasswordDoesNotMatchError, UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import { Button, Input, ModalInputWrap } from "components";
 import {
@@ -15,11 +12,9 @@ import React, { useEffect, useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
 import { isSafePassword } from "utils/utils";
-import {
-  StyledTbLockExclamation,
-  StyledTbLockPlus,
-} from "./ActivateSreensStyles";
+import { StyledForm, StyledTbLockExclamation, StyledTbLockPlus } from "./ActivateSreensStyles";
 import useKeypress from "hooks/useKeyPress";
+import { ButtonSize } from "types";
 
 interface PasswordScreen {
   email: string;
@@ -62,7 +57,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
     () => {
       handleContinue();
     },
-    []
+    [],
   );
 
   return (
@@ -73,11 +68,11 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
         {email}
       </StyledMail>
       <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
-      <form>
+      <StyledForm>
         <ModalInputWrap>
           <StyledInputRow>
-            <StyledTbLockPlus size={16} $isError={error !== false} />
             <Input
+              icon={<StyledTbLockPlus size={16} $isError={error !== false} />}
               type="password"
               placeholder="new password"
               onChangeFn={(text: string) => setPassword(text)}
@@ -92,8 +87,8 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
         </ModalInputWrap>
         <ModalInputWrap>
           <StyledInputRow>
-            <StyledTbLockExclamation size={16} $isError={error !== false} />
             <Input
+              icon={<StyledTbLockExclamation size={16} $isError={error !== false} />}
               type="password"
               placeholder="repeat password"
               onChangeFn={(text: string) => setPasswordRepeat(text)}
@@ -105,7 +100,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
             />
           </StyledInputRow>
         </ModalInputWrap>
-      </form>
+      </StyledForm>
 
       <div style={{ minHeight: "2rem" }}>
         {error !== false && <StyledErrorText>{error}</StyledErrorText>}

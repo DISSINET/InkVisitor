@@ -3,21 +3,16 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { useUsersGetMoreQuery } from "hooks/react-query";
 import { Button, ButtonGroup, Loader, Submit } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { UserTagSize } from "components/advanced/UserTag/utils";
+import { useResourcesWithDocumentsQuery, useUsersGetMoreQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  FaEnvelopeOpenText,
-  FaKey,
-  FaToggleOff,
-  FaToggleOn,
-  FaUserCheck,
-} from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaEnvelopeOpenText, FaKey, FaToggleOff, FaToggleOn, FaUserCheck } from "react-icons/fa";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
+import { IcoTrash } from "Theme/icons";
+import { ButtonSize } from "types";
 import { getUserIcon } from "utils/iconUtils";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import { UserListIcon } from "./UserListIcon/UserListIcon";
@@ -33,7 +28,6 @@ import {
   StyledTerritoryListItemMissing,
   StyledTh,
   StyledTHead,
-  StyledUserListButtonGroup,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
@@ -42,7 +36,6 @@ import {
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
-import { ButtonSize } from "types";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -200,6 +193,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const getRowId = useCallback((row: IResponseUser) => {
     return row.id;
   }, []);
+
+  const { data: resourcesWithDocuments } = useResourcesWithDocumentsQuery();
 
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
@@ -508,6 +503,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                       categoryTypes={[EntityEnums.Class.Resource]}
                       placeholder={"assign a resource"}
                       excludedActantIds={annotateRights.map((r) => r.territory)}
+                      preSuggestions={resourcesWithDocuments}
                     />
                     <StyledTerritoryList>
                       {annotateRights.length > 0 && resourceRights ? (
@@ -590,7 +586,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           return (
-            <StyledUserListButtonGroup>
+            <ButtonGroup $noGap>
               <Button
                 key="r"
                 icon={<IcoTrash size={14} />}
@@ -602,7 +598,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
-                shape="sharp-square"
+                shape="rounded-left-sm"
                 size={ButtonSize.Medium}
               />
               <Button
@@ -639,6 +635,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               )}
               <Button
                 icon={active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />}
+                shape="rounded-right-sm"
                 disabled={
                   !verified ||
                   userId === localStorage.getItem("userid") ||
@@ -657,15 +654,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     },
                   );
                 }}
-                shape="sharp-square"
                 size={ButtonSize.Medium}
               />
-            </StyledUserListButtonGroup>
+            </ButtonGroup>
           );
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash],
+    [canVerifyManually, scheduleRowFlash, resourcesWithDocuments],
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } =

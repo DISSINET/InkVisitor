@@ -2,21 +2,26 @@ import styled from "styled-components";
 import theme, { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonShape, ButtonSize } from "types";
 
-const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean, $shape?: ButtonShape) => {
-  if ($shape === "sharp") {
+const sideRadius = {
+  sm: theme.borderRadius["rounded-sm"],
+  md: theme.borderRadius["rounded-md"],
+  lg: theme.borderRadius["rounded-lg"],
+  xl: theme.borderRadius["rounded-xl"],
+  full: theme.borderRadius["rounded-full"],
+};
+const getRadius = ($shape?: ButtonShape) => {
+  if ($shape === "sharp" || $shape === "sharp-square") {
     return "0";
   } else if ($shape === "circle") {
     return "50%";
   } else if ($shape === "square") {
     return theme.borderRadius["rounded-sm"];
-  } else if ($radiusLeft && $radiusRight) {
-    return "7px";
-  } else if ($radiusLeft) {
-    return "7px 0 0 7px";
-  } else if ($radiusRight) {
-    return "0 7px 7px 0";
-  } else if ($shape === "sharp-square") {
-    return "0";
+  } else if ($shape?.startsWith("rounded-left-")) {
+    const r = sideRadius[$shape.replace("rounded-left-", "") as keyof typeof sideRadius];
+    return `${r} 0 0 ${r}`;
+  } else if ($shape?.startsWith("rounded-right-")) {
+    const r = sideRadius[$shape.replace("rounded-right-", "") as keyof typeof sideRadius];
+    return `0 ${r} ${r} 0`;
   } else if ($shape) {
     return theme.borderRadius[$shape as keyof typeof theme.borderRadius];
   } else {
@@ -70,8 +75,6 @@ interface IButtonStyle {
   $textColor?: keyof ThemeColor;
   $borderColor?: keyof ThemeColor;
   $disabled?: boolean;
-  $radiusLeft?: boolean;
-  $radiusRight?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
 
@@ -126,8 +129,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     $disabled ? theme.color["gray"][400] : theme.color[$borderColor ?? $color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
   border-style: solid;
-  border-radius: ${({ $radiusLeft, $radiusRight, $shape }) =>
-    getRadius($radiusLeft, $radiusRight, $shape)};
+  border-radius: ${({ $shape }) => getRadius($shape)};
   /* border-radius: ${({ theme }) => theme.borderRadius.xs}; */
   color: ${({ theme, $disabled, $color, $inverted, $textColor }) => {
     if ($disabled) {

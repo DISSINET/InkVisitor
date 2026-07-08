@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 
-export function useUserQuery(enabled?: boolean) {
+export function useUserQuery(enabled = true) {
   const userId = localStorage.getItem("userid");
   return useQuery({
     queryKey: ["user", userId],
@@ -11,6 +11,9 @@ export function useUserQuery(enabled?: boolean) {
       return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn() && enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 1 * 60 * 1000,
+    // refetch is important for aquiring new rights for Resources (with documents)
+    // assigned by admin / owner
+    refetchOnWindowFocus: true,
   });
 }

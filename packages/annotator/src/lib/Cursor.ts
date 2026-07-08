@@ -472,6 +472,15 @@ export default class Cursor
   }
 
   /**
+   * Mark an in-progress selection without resetting its anchor, so a subsequent
+   * drag extends the current selection (moving `selectEnd`) instead of starting a
+   * fresh one. Used after a shift+click sets the span via the offset model.
+   */
+  beginSelectingKeepingAnchor() {
+    this.selecting = true;
+  }
+
+  /**
    * endHighlight marks final position for highlighted area by setting control flag to false
    */
   endSelection() {

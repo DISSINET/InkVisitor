@@ -1,12 +1,14 @@
 import styled from "styled-components";
+import { ThemeBorderRadius } from "Theme/theme";
 
 interface ButtonGroup {
-  $noMarginRight?: boolean;
+  $noGap?: boolean;
   $smallGap?: boolean;
   $column?: boolean;
   $marginBottom?: boolean;
   $marginTop?: boolean;
   $height?: number;
+  $borderRadius?: keyof ThemeBorderRadius;
 }
 export const ButtonGroup = styled.div.attrs({
   className: "buttongroup",
@@ -16,10 +18,12 @@ export const ButtonGroup = styled.div.attrs({
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   margin-top: ${({ $marginTop, theme }) => ($marginTop ? theme.space[2] : "")};
   margin-bottom: ${({ $marginBottom, theme }) => ($marginBottom ? theme.space[2] : "")};
+  border-radius: ${({ $borderRadius, theme }) =>
+    $borderRadius ? theme.borderRadius[$borderRadius] : "none"};
+  overflow: hidden;
   > button:not(:last-child),
   > span:not(:last-child) {
-    margin-right: ${({ $noMarginRight, $smallGap }) =>
-      $noMarginRight ? 0 : $smallGap ? "0.2rem" : "0.5rem"};
+    margin-right: ${({ $noGap, $smallGap }) => ($noGap ? 0 : $smallGap ? "0.25rem" : "0.5rem")};
   }
 `;
 

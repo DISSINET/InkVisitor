@@ -3,12 +3,7 @@ import { IEntity, IProp } from "@inkvisitor/shared/types";
 import { AttributeIcon, Button, ButtonGroup, Submit } from "components";
 import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-} from "react-dnd";
+import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
@@ -44,7 +39,7 @@ interface PropGroupRow {
     propId: string,
     changes: Partial<IProp>,
     instantUpdate?: boolean,
-    languageCheck?: boolean
+    languageCheck?: boolean,
   ) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
@@ -74,10 +69,7 @@ interface PropGroupRow {
 }
 
 const countAllChildren = (prop: IProp): number =>
-  prop.children.reduce(
-    (sum, child) => sum + 1 + countAllChildren(child),
-    0
-  );
+  prop.children.reduce((sum, child) => sum + 1 + countAllChildren(child), 0);
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
   prop,
@@ -116,9 +108,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   const draggedPropRowRef = useRef<DraggedPropRowItem>({});
 
   const dispatch = useAppDispatch();
-  const draggedPropRow: DraggedPropRowItem = useAppSelector(
-    (state) => state.rowDnd.draggedPropRow
-  );
+  const draggedPropRow: DraggedPropRowItem = useAppSelector((state) => state.rowDnd.draggedPropRow);
 
   const [tempDisabled, setTempDisabled] = useState(false);
 
@@ -133,11 +123,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
     }
   }, [draggedPropRow.parentId, draggedPropRow.category, parentId, category]);
 
-  const [{ handlerId }, drop] = useDrop<
-    DragItem,
-    void,
-    { handlerId: Identifier | null }
-  >({
+  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
     accept: itemType ? itemType : ItemTypes.PROP_ROW,
     collect(monitor) {
       return {
@@ -159,11 +145,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      if (
-        item &&
-        draggedPropRow.index !== undefined &&
-        item.index !== undefined
-      )
+      if (item && draggedPropRow.index !== undefined && item.index !== undefined)
         if (draggedPropRow.index !== item.index) {
           movePropToIndex(id, draggedPropRow.index, item.index);
         }
@@ -202,11 +184,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
 
   return (
     <>
-      <div
-        ref={dropRef}
-        data-handler-id={handlerId}
-        style={{ opacity: opacity }}
-      >
+      <div ref={dropRef} data-handler-id={handlerId} style={{ opacity: opacity }}>
         <StyledGrid
           key={level + "|" + id}
           $tempDisabled={tempDisabled && category === draggedPropRow.category}
@@ -265,7 +243,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               buttons={
                 <>
-                  <ButtonGroup $height={19} $noMarginRight>
+                  <ButtonGroup $height={19} $noGap>
                     {prop.logic == "2" && (
                       <Button
                         tooltipLabel="Negative logic"

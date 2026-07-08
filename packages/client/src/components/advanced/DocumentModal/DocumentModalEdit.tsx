@@ -77,6 +77,9 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               thisTerritoryEntityId={anchor?.entityId}
               canEditDocument={canEdit}
               disableCreate
+              // Annotator lives inside this modal; lift its body-appended
+              // overlays above the modal (default lib values sit under it).
+              overlayZIndex={{ contextMenu: 700, settingsOverlay: 650 }}
             />
           </AnnotatorProvider>
         ) : (

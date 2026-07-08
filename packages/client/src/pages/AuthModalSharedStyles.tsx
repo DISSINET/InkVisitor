@@ -4,18 +4,19 @@ export const StyledMail = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 2.5rem;
   margin-top: 0.2rem;
 `;
 export const StyledDescription = styled.p`
   text-align: center;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   margin-top: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 `;
 export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  justify-content: center;
 `;
 export const StyledButtonWrap = styled.div`
   display: flex;

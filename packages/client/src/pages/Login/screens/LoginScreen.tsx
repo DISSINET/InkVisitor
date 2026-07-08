@@ -1,8 +1,4 @@
-import {
-  IErrorSignature,
-  NetworkError,
-  getErrorByCode,
-} from "@inkvisitor/shared/types/errors";
+import { IErrorSignature, NetworkError, getErrorByCode } from "@inkvisitor/shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
 import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
@@ -10,11 +6,7 @@ import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  StyledFaLock,
-  StyledInputRow,
-  StyledTbMailFilled,
-} from "./LoginScreensStyles";
+import { StyledFaLock, StyledInputRow, StyledTbMailFilled } from "./LoginScreensStyles";
 import useKeypress from "hooks/useKeyPress";
 import { ButtonSize } from "types";
 
@@ -33,9 +25,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   setRedirectToMain,
 }) => {
   const dispatch = useAppDispatch();
-  const [error, setError] = useState<
-    { title?: string; message: string } | false
-  >(false);
+  const [error, setError] = useState<{ title?: string; message: string } | false>(false);
 
   const ping: number = useAppSelector((state) => state.ping);
 
@@ -61,7 +51,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
               }
             : {
                 message: errorTemp.message,
-              }
+              },
         );
       }
     }
@@ -72,15 +62,15 @@ export const LoginScreen: React.FC<LoginScreen> = ({
     () => {
       handleLogIn();
     },
-    [usernameLocal, password]
+    [usernameLocal, password],
   );
 
   return (
     <>
       <form>
         <StyledInputRow>
-          <StyledTbMailFilled size={14} $isError={error !== false} />
           <Input
+            icon={<StyledTbMailFilled size={14} $isError={error !== false} />}
             width={200}
             autocomplete="username"
             placeholder="email or username"
@@ -92,8 +82,8 @@ export const LoginScreen: React.FC<LoginScreen> = ({
           />
         </StyledInputRow>
         <StyledInputRow>
-          <StyledFaLock size={14} $isError={error !== false} />
           <Input
+            icon={<StyledFaLock size={12} $isError={error !== false} />}
             width={200}
             autocomplete="current-password"
             type="password"

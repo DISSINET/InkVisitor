@@ -66,7 +66,7 @@ export const StyledInput = styled.input<IValueStyle>`
         : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme, $icon, $suggester }) =>
-    $icon ? "2.4rem" : $suggester ? "0.1rem" : theme.space[2]};
+    $icon ? "2.5rem" : $suggester ? "0.1rem" : theme.space[2]};
 
   padding-right: ${({ theme, $iconCount, $rightPadding }) => {
     // Explicit pixel padding (e.g. measured rightContent width) wins.
@@ -219,16 +219,29 @@ export const StyledActionButton = styled.button`
 
 export const StyledIconWrapper = styled.div`
   position: absolute;
-  left: 0.6rem;
+  left: 0rem;
+  width: 2.8rem;
   top: 0;
   bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.color["gray"][500]};
+
+  /* Icons passed via the icon prop are centered here; strip any margin they
+     could carry so they stay centered. */
+  svg {
+    margin: 0;
+  }
 `;
 
-export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
+// Default divider height, independent of the button/input height. Override per
+// call site via the `dividerHeight` prop.
+export const DEFAULT_DIVIDER_HEIGHT = "1.3rem";
+
+export const StyledRightContent = styled.div<{
+  $showDivider?: boolean;
+}>`
   position: absolute;
   right: 0.3rem;
   top: 0.3rem;
@@ -236,7 +249,16 @@ export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.15rem;
-  padding-left: ${({ $showDivider }) => ($showDivider ? "0.2rem" : "0")};
-  border-left: ${({ theme, $showDivider }) =>
-    $showDivider ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
+  padding-left: ${({ $showDivider }) => ($showDivider ? "0.4rem" : "0")};
+
+  &::before {
+    content: ${({ $showDivider }) => ($showDivider ? '""' : "none")};
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: ${DEFAULT_DIVIDER_HEIGHT};
+    width: ${({ theme }) => theme.borderWidth[1]};
+    background-color: ${({ theme }) => theme.color["gray"][300]};
+  }
 `;

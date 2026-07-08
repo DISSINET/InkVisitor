@@ -122,7 +122,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
 
   const renderBatchButtons = useCallback(() => {
     return (
-      <ButtonGroup $noMarginRight>
+      <ButtonGroup $noGap>
         <Button
           inverted
           noBackground

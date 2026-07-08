@@ -176,7 +176,9 @@ const theme = {
     8: "2rem",
     9: "2.25rem",
     10: "2.5rem",
+    11: "2.75rem",
     12: "3rem",
+    13: "3.25rem",
     14: "3.5rem",
     16: "4rem",
     18: "4.5rem",
@@ -274,5 +276,5 @@ export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;
 export type ThemeFontSize = typeof theme.fontSize;
 export type PingColor = typeof theme.color.ping;
-
+export type ThemeBorderRadius = typeof theme.borderRadius;
 export default theme;

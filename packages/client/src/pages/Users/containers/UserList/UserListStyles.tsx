@@ -228,12 +228,3 @@ export const StyledNotActiveText = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color.warning};
 `;
-
-export const StyledUserListButtonGroup = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 0.2rem;
-  border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
-  overflow: hidden;
-  z-index: 100;
-`;

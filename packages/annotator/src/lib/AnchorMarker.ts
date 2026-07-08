@@ -21,6 +21,8 @@ export interface AnchorMarkerStyle {
   lineWidth: number;
   /** Stroke colour (Territory blue). */
   color: string;
+  /** Stroke opacity 0..1 (default 1). Used to pulse the resized anchor (#2885). */
+  opacity?: number;
 }
 
 /** Axis-aligned bounding box of a drawn marker (device px). */
@@ -74,9 +76,10 @@ export function drawAnchorMarker(
   const bottom = snap(yMidPx + half);
 
   ctx.save();
-  // Markers paint crisp at full opacity, independent of the highlight passes
-  // that may have left globalAlpha / compositing in a non-default state.
-  ctx.globalAlpha = 1;
+  // Markers paint crisp, independent of the highlight passes that may have left
+  // globalAlpha / compositing in a non-default state. Opacity defaults to full;
+  // the resized anchor passes a pulsing value (#2885).
+  ctx.globalAlpha = style.opacity ?? 1;
   ctx.globalCompositeOperation = "source-over";
   ctx.strokeStyle = style.color;
   ctx.lineWidth = style.lineWidth;

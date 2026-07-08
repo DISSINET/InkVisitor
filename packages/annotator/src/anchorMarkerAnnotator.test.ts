@@ -186,3 +186,39 @@ describe("Territory anchor marker hover (#2887)", () => {
     expect((a as any).anchorMarkerHitboxes.length).toBe(0);
   });
 });
+
+describe("anchor markers during anchor resize (#2885)", () => {
+  test("resizing a Territory anchor keeps its corner markers visible", () => {
+    // Entering resize mode suppresses the resized anchor's static fill (the
+    // pulse replaces it), but its ANCHOR corner markers are its only visual —
+    // they must NOT vanish, or the anchor appears deleted.
+    const a = mk("foo <T1>bar</T1> baz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => anchorSchema);
+    a.beginAnchorResize("T1", { segmentIndex: 0, position: 4 });
+    markerMock.mockClear();
+    a.draw();
+
+    const kinds = markerMock.mock.calls.map((c) => c[3]);
+    expect(kinds).toContain("start");
+    expect(kinds).toContain("end");
+  });
+
+  test("resizing suppresses the fill schema but keeps the ANCHOR schema", () => {
+    // Active-territory style: [FOCUS wash, ANCHOR markers]. During resize the
+    // wash is replaced by the pulse, the markers stay.
+    const a = mk("foo <T1>bar</T1> baz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => [
+      { mode: HighlightMode.FOCUS, style: { color: "#2079DF", opacity: 0.1 } },
+      anchorSchema,
+    ]);
+    a.beginAnchorResize("T1", { segmentIndex: 0, position: 4 });
+    markerMock.mockClear();
+    a.draw();
+
+    const kinds = markerMock.mock.calls.map((c) => c[3]);
+    expect(kinds).toContain("start");
+    expect(kinds).toContain("end");
+  });
+});

@@ -146,7 +146,10 @@ export default class Highlighter {
       ctx.fillRect(xStartPx, underlineY, width, height);
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
-      ctx.fillRect(xStartPx, y, width, height);
+      // width === 0 is an empty (newline-only) line in the span. Without a floor
+      // it paints nothing, so a resized anchor vanishes across runs of newlines.
+      // minFillWidth keeps a thin sliver visible, like the SELECT caret (#2885).
+      ctx.fillRect(xStartPx, y, width || options.minFillWidth || width, height);
     } else if (this.hlMode === "select") {
       // A collapsed caret (width === 0) is painted solid so it stays visible on
       // top of anchor markers / highlights; the "color" blend only tints them

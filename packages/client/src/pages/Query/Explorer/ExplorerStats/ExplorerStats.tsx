@@ -229,7 +229,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Time Unit</StyledFieldLabel>
-          <ButtonGroup $noMarginRight>
+          <ButtonGroup $noGap>
             {Object.values(TimeUnit).map((unit) => (
               <Button
                 key={unit}
@@ -243,7 +243,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Event type</StyledFieldLabel>
-          <ButtonGroup $noMarginRight>
+          <ButtonGroup $noGap>
             {VISIBLE_EVENT_TYPES.map((eventType) => {
               const active = localStats.eventType.includes(eventType);
               return (
@@ -266,7 +266,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-          <ButtonGroup $noMarginRight>
+          <ButtonGroup $noGap>
             {Object.values(Aggregation).map((agg) => (
               <Button
                 key={agg}

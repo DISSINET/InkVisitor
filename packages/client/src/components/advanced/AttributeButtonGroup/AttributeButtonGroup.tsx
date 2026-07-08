@@ -1,5 +1,6 @@
 import { Button } from "components";
 import React from "react";
+import { ButtonShape } from "types";
 import { StyledButtonWrap, StyledPropButtonGroup, StyledWrap } from "./AttributeButtonGroupStyles";
 
 interface AttributeButtonGroup {
@@ -35,16 +36,15 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   iconsOnly = false,
   fullWidth = false,
 }) => {
+  // With exactly two options, the whole group acts as a single toggle:
+  // clicking any segment switches to the other option.
+  const isToggle = options.length === 2 && !canSelectMultiple;
+
   return (
     <StyledWrap>
       {disabled && !fullSizeDisabled ? (
         <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
-          <Button
-            disabled
-            radiusLeft
-            radiusRight
-            label={options.find((o) => o.selected)?.longValue}
-          />
+          <Button disabled shape="rounded-md" label={options.find((o) => o.selected)?.longValue} />
         </StyledButtonWrap>
       ) : (
         <StyledPropButtonGroup
@@ -56,6 +56,16 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
           {options.map((option, oi) => {
             const firstInRow = oi === 0;
             const lastInRow = oi === options.length - 1;
+            const shape: ButtonShape | undefined =
+              firstInRow && lastInRow
+                ? "rounded-md"
+                : firstInRow
+                  ? "rounded-left-lg"
+                  : lastInRow
+                    ? "rounded-right-lg"
+                    : option.selected
+                      ? "sharp"
+                      : undefined;
             return (
               <Button
                 key={oi}
@@ -87,11 +97,16 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 inverted
                 color={option.selected ? "primary" : "greyer"}
                 textRegular={option.selected ? false : true}
-                radiusLeft={firstInRow}
-                radiusRight={lastInRow}
-                shape={option.selected && !firstInRow && !lastInRow ? "sharp" : undefined}
+                shape={shape}
                 onClick={() => {
-                  if ((!option.selected || canSelectMultiple) && !disabled) {
+                  if (disabled) {
+                    return;
+                  }
+                  if (isToggle) {
+                    options.find((o) => !o.selected)?.onClick();
+                    return;
+                  }
+                  if (!option.selected || canSelectMultiple) {
                     option.onClick();
                   }
                 }}
