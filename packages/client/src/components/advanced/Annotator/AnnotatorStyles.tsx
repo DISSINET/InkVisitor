@@ -403,7 +403,15 @@ export const StyledAnchorCell = styled.div`
  */
 export const StyledAnchorControlsCluster = styled.div`
   display: flex;
-  align-items: center;
+`;
+
+/** Wraps the move-anchor button with a right border divider. */
+export const StyledAnchorClusterMoveButton = styled.div`
+  display: flex;
+  border-right: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["black"]}`};
+  && button {
+    border-right-width: 0;
+  }
 `;
 
 /**
@@ -414,6 +422,15 @@ export const StyledAnchorControlsCluster = styled.div`
  * elvl slot) and no divider between the option buttons.
  */
 export const StyledAnchorClusterElvl = styled.div`
+  display: flex;
+  border-left: ${({ theme }) => `2px solid ${theme.color["black"]}`};
+  && button {
+    border-left-width: 0;
+  }
+`;
+
+/** Wraps the unlink button with a left border divider. */
+export const StyledAnchorClusterUnlinkButton = styled.div`
   display: flex;
   border-left: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["black"]}`};
   && button {

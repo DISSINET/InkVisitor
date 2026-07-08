@@ -8,6 +8,8 @@ import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import {
   StyledAnchorCell,
   StyledAnchorClusterElvl,
+  StyledAnchorClusterMoveButton,
+  StyledAnchorClusterUnlinkButton,
   StyledAnchorControlsCluster,
 } from "./AnnotatorStyles";
 import { Tag } from "@inkvisitor/annotator/src/lib";
