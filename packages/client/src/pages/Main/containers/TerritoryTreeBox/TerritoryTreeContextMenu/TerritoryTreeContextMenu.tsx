@@ -17,7 +17,7 @@ import {
   StyledWrapper,
 } from "./TerritoryTreeContextMenuStyles";
 import { EntityCreateModal } from "components/advanced";
-import { IExtendedResponseTree } from "types";
+import { ButtonSize, IExtendedResponseTree } from "types";
 
 interface TerritoryTreeContextMenu {
   territoryActant: IEntity;
@@ -108,6 +108,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     icon={<FaPlus size={14} />}
                     color="info"
                     shape="sharp-square"
+                    size={ButtonSize.Medium}
                     onClick={() => {
                       // add child
                       setShowCreate(true);
@@ -124,6 +125,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     icon={<FaStar size={14} />}
                     color={isFavorited ? "grey" : "warning"}
                     shape="sharp-square"
+                    size={ButtonSize.Medium}
                     onClick={() => {
                       if (isFavorited) {
                         // remove from favorites
@@ -161,6 +163,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     icon={<TbArrowsSort size={14} />}
                     color="success"
                     shape="sharp-square"
+                    size={ButtonSize.Medium}
                     onClick={() => {
                       setShowReorder(true);
                       setShowMenu(false);
@@ -177,6 +180,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     icon={<IcoTrash size={14} />}
                     color="danger"
                     shape="sharp-square"
+                    size={ButtonSize.Medium}
                     onClick={() => {
                       setShowSubmit(true);
                       setShowMenu(false);

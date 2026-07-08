@@ -16,23 +16,14 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   inverted,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
   const handleMouseEnter = () => {
     setPortalMounted(true);
     setShowMenu(true);
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(null);
-    }
   };
 
   const handleMouseLeave = () => {
-    const id = window.setTimeout(() => {
-      setShowMenu(false);
-    }, 150);
-
-    setTimeoutId(id);
+    setShowMenu(false);
   };
 
   const [portalMounted, setPortalMounted] = useState(false);
