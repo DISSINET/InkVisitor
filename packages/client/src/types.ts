@@ -441,11 +441,24 @@ export type ButtonShape =
   | "square"
   | "sharp-square"
   | "circle"
+  //
   | "rounded-sm"
   | "rounded-md"
   | "rounded-lg"
   | "rounded-xl"
-  | "rounded-full";
+  | "rounded-full"
+  //
+  | "rounded-left-sm"
+  | "rounded-left-md"
+  | "rounded-left-lg"
+  | "rounded-left-xl"
+  | "rounded-left-full"
+  //
+  | "rounded-right-sm"
+  | "rounded-right-md"
+  | "rounded-right-lg"
+  | "rounded-right-xl"
+  | "rounded-right-full";
 
 export enum DetailBoxState {
   Minimized = "minimized",

@@ -8,7 +8,7 @@ interface ButtonGroup {
   $marginBottom?: boolean;
   $marginTop?: boolean;
   $height?: number;
-  $cornerRadius?: keyof ThemeBorderRadius;
+  $borderRadius?: keyof ThemeBorderRadius;
 }
 export const ButtonGroup = styled.div.attrs({
   className: "buttongroup",
@@ -18,8 +18,8 @@ export const ButtonGroup = styled.div.attrs({
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   margin-top: ${({ $marginTop, theme }) => ($marginTop ? theme.space[2] : "")};
   margin-bottom: ${({ $marginBottom, theme }) => ($marginBottom ? theme.space[2] : "")};
-  border-radius: ${({ $cornerRadius, theme }) =>
-    $cornerRadius ? theme.borderRadius[$cornerRadius] : "none"};
+  border-radius: ${({ $borderRadius, theme }) =>
+    $borderRadius ? theme.borderRadius[$borderRadius] : "none"};
   overflow: hidden;
   > button:not(:last-child),
   > span:not(:last-child) {

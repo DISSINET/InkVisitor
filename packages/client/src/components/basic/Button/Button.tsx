@@ -18,8 +18,6 @@ interface ButtonProps {
   inverted?: boolean;
   noBorder?: boolean;
   textRegular?: boolean;
-  radiusLeft?: boolean;
-  radiusRight?: boolean;
   disabled?: boolean;
   color?: keyof ThemeColor;
   /** Overrides only the text/icon color, leaving background and border to other props. */
@@ -49,8 +47,6 @@ export const Button: React.FC<ButtonProps> = ({
   inverted = false,
   noBorder = false,
   noBackground = false,
-  radiusLeft = false,
-  radiusRight = false,
   textRegular = false,
   disabled = false,
   color = "primary",
@@ -90,8 +86,6 @@ export const Button: React.FC<ButtonProps> = ({
         $textRegular={textRegular}
         $noBorder={noBorder}
         $noBackground={noBackground}
-        $radiusLeft={radiusLeft}
-        $radiusRight={radiusRight}
         $fullWidth={fullWidth}
         $fullHeight={fullHeight}
         $disabled={disabled}

@@ -127,8 +127,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                   color="success"
                   inverted
                   noBorder
-                  radiusLeft
-                  radiusRight
+                  shape="rounded-md"
                   tooltipLabel="scroll to anchor in text (RAW mode)"
                   onClick={() => {
                     onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
