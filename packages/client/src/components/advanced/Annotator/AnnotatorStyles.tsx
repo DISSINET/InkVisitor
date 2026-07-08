@@ -395,13 +395,23 @@ export const StyledAnchorCell = styled.div`
 `;
 
 /**
- * Hover target for a row's anchor controls (view mode). Holds a kebab hint at
- * rest and expands to the inline resize / elvl / unlink controls on hover. The
- * hover lives on this one wrapper — not the whole tag — so only the kebab (not
- * the label) opens it, and the controls stay put while the pointer moves across
- * them (the wrapper is the same element before and after expanding).
+ * Outer wrapper for a row's anchor controls (view mode). Lays out the
+ * collapsed static elvl icon next to the hover zone below; itself carries no
+ * hover behavior.
  */
 export const StyledAnchorControlsCluster = styled.div`
+  display: flex;
+`;
+
+/**
+ * Hover target for the kebab + expanded controls only (not the collapsed
+ * static elvl icon, which sits outside it in StyledAnchorControlsCluster).
+ * Holds a kebab hint at rest and expands to the inline resize / elvl / unlink
+ * controls on hover, so only the kebab — not the disabled elvl icon or the
+ * label — opens it, and the controls stay put while the pointer moves across
+ * them (the wrapper is the same element before and after expanding).
+ */
+export const StyledAnchorClusterHoverZone = styled.div`
   display: flex;
 `;
 

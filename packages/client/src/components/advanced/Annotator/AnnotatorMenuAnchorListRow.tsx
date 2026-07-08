@@ -8,6 +8,7 @@ import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import {
   StyledAnchorCell,
   StyledAnchorClusterElvl,
+  StyledAnchorClusterHoverZone,
   StyledAnchorClusterMoveButton,
   StyledAnchorClusterUnlinkButton,
   StyledAnchorControlsCluster,
@@ -92,55 +93,60 @@ const AnnotatorAnchorControlsCluster: React.FC<AnnotatorAnchorControlsCluster> =
   const open = !!editControls || hovered;
 
   return (
-    <StyledAnchorControlsCluster
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Static current-elvl icon at a glance while collapsed. */}
+    <StyledAnchorControlsCluster>
+      {/* Static current-elvl icon at a glance while collapsed. Sits outside
+          the hover zone below so hovering it (disabled, non-interactive)
+          does not open the controls. */}
       {!open && hasElvlValue && (
         <ElvlButtonGroup value={elvlValue} onChange={() => {}} sharpCorners disabled />
       )}
-      {open && (
-        <>
-          {onMoveAnchor && (
+      <StyledAnchorClusterHoverZone
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {open && (
+          <>
+            {onMoveAnchor && (
+              <Button
+                icon={<FaArrowsAltH size={12} />}
+                color="info"
+                inverted
+                tooltipLabel="resize anchor span"
+                onClick={() => {
+                  onMoveAnchor(item.anchor);
+                }}
+                shape="sharp-square"
+              />
+            )}
+            <StyledAnchorClusterElvl>
+              <ElvlButtonGroup
+                value={elvlValue}
+                onChange={(elvl) => {
+                  onUpdateAnchor?.(item.anchor, elvl);
+                }}
+                sharpCorners
+              />
+            </StyledAnchorClusterElvl>
             <Button
-              icon={<FaArrowsAltH size={12} />}
-              color="info"
+              icon={<FaUnlink size={12} />}
+              color="plain"
               inverted
-              tooltipLabel="resize anchor span"
+              tooltipLabel="unlink entity"
               onClick={() => {
-                onMoveAnchor(item.anchor);
+                onRemoveAnchor?.(item.anchor);
               }}
               shape="sharp-square"
             />
-          )}
-          <StyledAnchorClusterElvl>
-            <ElvlButtonGroup
-              value={elvlValue}
-              onChange={(elvl) => {
-                onUpdateAnchor?.(item.anchor, elvl);
-              }}
-              sharpCorners
-            />
-          </StyledAnchorClusterElvl>
-          <Button
-            icon={<FaUnlink size={12} />}
-            color="plain"
-            inverted
-            tooltipLabel="unlink entity"
-            onClick={() => {
-              onRemoveAnchor?.(item.anchor);
-            }}
-            shape="sharp-square"
-          />
-        </>
-      )}
-      {/* Kebab is the hover affordance for view mode only; edit mode (permanent
-          or Ctrl-hold) shows every button, so no kebab. Kept last so its
-          position is stable between collapsed and hover-expanded. */}
-      {!editControls && (
-        <Button icon={<FaEllipsisV size={12} />} color="gray" inverted shape="sharp-square" />
-      )}
+          </>
+        )}
+        {/* Kebab is the hover affordance for view mode only; edit mode
+            (permanent or Ctrl-hold) shows every button, so no kebab. Kept
+            last so its position is stable between collapsed and
+            hover-expanded. */}
+        {!editControls && (
+          <Button icon={<FaEllipsisV size={12} />} color="gray" inverted shape="sharp-square" />
+        )}
+      </StyledAnchorClusterHoverZone>
     </StyledAnchorControlsCluster>
   );
 };
