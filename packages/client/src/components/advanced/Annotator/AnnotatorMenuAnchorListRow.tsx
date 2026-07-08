@@ -137,13 +137,7 @@ const AnnotatorAnchorControlsCluster: React.FC<AnnotatorAnchorControlsCluster> =
           or Ctrl-hold) shows every button, so no kebab. Kept last so its
           position is stable between collapsed and hover-expanded. */}
       {!editControls && (
-        <Button
-          icon={<FaEllipsisV size={12} />}
-          color="gray"
-          inverted
-          tooltipLabel="anchor actions"
-          shape="sharp-square"
-        />
+        <Button icon={<FaEllipsisV size={12} />} color="gray" inverted shape="sharp-square" />
       )}
     </StyledAnchorControlsCluster>
   );
