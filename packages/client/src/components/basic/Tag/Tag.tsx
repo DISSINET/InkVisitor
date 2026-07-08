@@ -1,6 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import React, { ReactNode, useMemo } from "react";
-import { StyledButtonWrapper, StyledElvlWrapper, StyledTagWrapper } from "./TagStyles";
+import React, { ReactNode } from "react";
+import { StyledTagWrapper } from "./TagStyles";
 
 interface TagProps {
   ref?: React.RefObject<HTMLDivElement>;
@@ -13,9 +13,12 @@ interface TagProps {
   // components to render inside tag
   tagComponent?: ReactNode;
   labelComponent?: ReactNode;
-  // TODO: elvl button group is entity specific and should be moved to EntityTag
-  elvlButtonGroup?: ReactNode | false;
-  button?: ReactNode;
+  /**
+   * Generic slot rendered on the trailing (right) side of the tag. Consumers own
+   * its content and layout (e.g. EntityTag composes the elvl group and action
+   * buttons here).
+   */
+  rightContent?: ReactNode;
 
   showOnly?: "tag" | "label";
 
@@ -23,9 +26,6 @@ interface TagProps {
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  onButtonOver?: () => void;
-  onButtonOut?: () => void;
-  onBtnClick?: () => void;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -38,57 +38,14 @@ export const Tag: React.FC<TagProps> = ({
   dragDisabled = false,
   tagComponent,
   labelComponent,
-  button,
-  elvlButtonGroup,
+  rightContent,
   showOnly,
 
   onClick,
   onDoubleClick,
   onMouseEnter,
   onMouseLeave,
-  onButtonOver,
-  onButtonOut,
-  onBtnClick,
 }) => {
-  const renderTag = useMemo(() => {
-    const elvlWrapper = elvlButtonGroup && <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>;
-
-    const buttonWrap = button && (
-      <StyledButtonWrapper
-        $tagBorderColorKey={tagBorderColorKey}
-        onMouseEnter={onButtonOver}
-        onMouseLeave={onButtonOut}
-        onClick={onBtnClick}
-      >
-        {button}
-      </StyledButtonWrapper>
-    );
-
-    return showOnly ? (
-      <>
-        {showOnly === "tag" ? tagComponent : labelComponent}
-        {buttonWrap}
-      </>
-    ) : (
-      <>
-        {tagComponent}
-        {labelComponent}
-        {elvlWrapper}
-        {buttonWrap}
-      </>
-    );
-  }, [
-    tagComponent,
-    labelComponent,
-    elvlButtonGroup,
-    showOnly,
-    tagBorderColorKey,
-    button,
-    onButtonOver,
-    onButtonOut,
-    onBtnClick,
-  ]);
-
   return (
     <StyledTagWrapper
       ref={ref}
@@ -107,7 +64,13 @@ export const Tag: React.FC<TagProps> = ({
       onMouseEnter={onMouseEnter && onMouseEnter}
       onMouseLeave={onMouseLeave && onMouseLeave}
     >
-      {renderTag}
+      {showOnly ? (showOnly === "tag" ? tagComponent : labelComponent) : (
+        <>
+          {tagComponent}
+          {labelComponent}
+        </>
+      )}
+      {rightContent}
     </StyledTagWrapper>
   );
 };

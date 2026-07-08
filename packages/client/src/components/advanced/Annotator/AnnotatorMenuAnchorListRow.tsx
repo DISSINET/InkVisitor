@@ -64,11 +64,11 @@ export const AnnotatorAnchorGridRow = React.memo(
       // Disabled elvl shows only the current value; when there is no valid value
       // there is nothing to show, so drop the whole slot (and its divider) rather
       // than leave an empty elvl wrapper on the tag.
-      const showElvl =
-        !disableElvl || Object.values(EntityEnums.Elvl).includes(elvlValue);
+      const showElvl = !disableElvl || Object.values(EntityEnums.Elvl).includes(elvlValue);
       return (
         <EntityTag
           fullWidth
+          buttonOnHover
           button={
             onMoveAnchor ? (
               <Button

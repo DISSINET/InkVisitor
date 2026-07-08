@@ -23,30 +23,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   user-select: none;
 `;
 
-interface StyledButtonWrapper {
-  $tagBorderColorKey: EntityEnums.Status;
-}
-export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
-  display: flex;
-  button {
-    border-width: 0;
-    border-left-width: ${({ theme }) => theme.borderWidth[2]};
-    border-left-color: ${({ theme, $tagBorderColorKey }) =>
-      theme.color.tagBorderColor[$tagBorderColorKey]};
-    border-left-style: solid;
-  }
-`;
-
-export const StyledElvlWrapper = styled.div`
-  display: flex;
-  > div {
-    border-width: 0;
-    border-left-width: ${({ theme }) => theme.borderWidth[1]};
-    border-left-color: ${({ theme }) => theme.color["black"]};
-    border-left-style: solid;
-  }
-`;
-
 export const StyledItalic = styled.i`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 `;
