@@ -61,11 +61,10 @@ interface EntityTag {
   tagMaxWidth?: string;
   button?: ReactNode;
   /**
-   * Render `button` before the elvl group (left of it) and only while the tag is
-   * hovered. Used for the annotator resize-anchor button so it does not sit right
-   * next to the unlink button (avoids misclicks).
+   * Render `button` before the elvl group (left of it), away from the unlink
+   * button to avoid misclicks. Used for the annotator resize-anchor button.
    */
-  buttonOnHover?: boolean;
+  buttonBeforeElvl?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
@@ -97,7 +96,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   fullWidth = false,
   tagMaxWidth,
   button = false,
-  buttonOnHover = false,
+  buttonBeforeElvl = false,
   index,
   moveFn,
   isSelected,
@@ -269,16 +268,18 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   });
 
   // The tag's trailing side: optional resize/leading button (left of the elvl
-  // group, only while hovered when buttonOnHover), the elvl button group, then
-  // the action buttons (custom button + unlink). Each sits in its own divider
-  // wrapper. Passed to the generic Tag as `rightContent`.
+  // group when buttonBeforeElvl), the elvl button group, then the action
+  // buttons (custom button + unlink). Each sits in its own divider wrapper.
+  // Passed to the generic Tag as `rightContent`.
   const buttonWrapperProps = {
     $tagBorderColorKey: entity.status,
     onMouseEnter: handleButtonHovered,
     onMouseLeave: handleButtonUnhovered,
     onClick: handleBtnClick,
   };
-  const trailingButtons = buttonOnHover ? (
+  // button sits left of the elvl group when buttonBeforeElvl; otherwise it
+  // trails next to unlink.
+  const trailingButtons = buttonBeforeElvl ? (
     unlinkButton && renderUnlinkButton(unlinkButton)
   ) : (
     <>
@@ -288,7 +289,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   );
   const rightContent = (
     <>
-      {buttonOnHover && button && tagHovered && (
+      {button && buttonBeforeElvl && (
         <StyledButtonWrapper {...buttonWrapperProps}>{button}</StyledButtonWrapper>
       )}
       {elvlButtonGroup && (
@@ -377,7 +378,7 @@ function areEntityTagsEqual(
   if (prev.onDoubleClick !== next.onDoubleClick) return false;
   if (prev.statementsCount !== next.statementsCount) return false;
   if (Boolean(prev.button) !== Boolean(next.button)) return false;
-  if (prev.buttonOnHover !== next.buttonOnHover) return false;
+  if (prev.buttonBeforeElvl !== next.buttonBeforeElvl) return false;
   if (Boolean(prev.unlinkButton) !== Boolean(next.unlinkButton)) return false;
   // Compare unlinkButton onClick function reference to ensure handlers are up-to-date
   if (

@@ -387,3 +387,71 @@ export const StyledMoveAnchorFooter = styled.div`
   width: 100%;
   margin-top: ${({ theme }) => theme.space[2]};
 `;
+
+/** One anchor grid cell — sizes the tag to the column. */
+export const StyledAnchorCell = styled.div`
+  width: 100%;
+  display: flex;
+`;
+
+/**
+ * Outer wrapper for a row's anchor controls (view mode). Lays out the
+ * collapsed static elvl icon next to the hover zone below; itself carries no
+ * hover behavior.
+ */
+export const StyledAnchorControlsCluster = styled.div`
+  display: flex;
+`;
+
+/**
+ * Hover target for the kebab + expanded controls only (not the collapsed
+ * static elvl icon, which sits outside it in StyledAnchorControlsCluster).
+ * Holds a kebab hint at rest and expands to the inline resize / elvl / unlink
+ * controls on hover, so only the kebab — not the disabled elvl icon or the
+ * label — opens it, and the controls stay put while the pointer moves across
+ * them (the wrapper is the same element before and after expanding).
+ */
+export const StyledAnchorClusterHoverZone = styled.div`
+  display: flex;
+`;
+
+/** Wraps the move-anchor button with a right border divider. */
+export const StyledAnchorClusterMoveButton = styled.div`
+  display: flex;
+  border-right: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["black"]}`};
+  && button {
+    border-right-width: 0;
+  }
+`;
+
+/**
+ * Wraps the interactive elvl group inside the cluster. EntityTag's button-slot
+ * wrapper forces a thick 2px divider onto every descendant button; that is the
+ * tag-action divider and is wrong between the elvl options. Restore the elvl
+ * group's own look: a single thin divider on its left (as in the tag's native
+ * elvl slot) and no divider between the option buttons.
+ */
+export const StyledAnchorClusterElvl = styled.div`
+  display: flex;
+  border-left: ${({ theme }) => `2px solid ${theme.color["black"]}`};
+  && button {
+    border-left-width: 0;
+  }
+`;
+
+/** Wraps the unlink button with a left border divider. */
+export const StyledAnchorClusterUnlinkButton = styled.div`
+  display: flex;
+  border-left: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["black"]}`};
+  && button {
+    border-left-width: 0;
+  }
+`;
+
+/** Pushes the anchors view/edit switch to the right edge of the title row. */
+export const StyledAnchorModeSwitch = styled.div`
+  margin-left: auto;
+  margin-right: ${({ theme }) => theme.space[2]};
+  display: flex;
+  align-items: center;
+`;
