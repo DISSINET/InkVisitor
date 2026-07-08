@@ -9,5 +9,7 @@ export function useTreeQuery() {
       return res.data;
     },
     enabled: api.isLoggedIn(),
+    // refreshes the tree data (including changes of rights from admin)
+    refetchOnWindowFocus: true,
   });
 }
