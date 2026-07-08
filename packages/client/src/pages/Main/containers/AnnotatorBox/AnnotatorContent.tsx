@@ -18,7 +18,6 @@ import {
   ANNOTATOR_SELECTOR_HEIGHT,
   ANNOTATOR_TOO_SMALL_BREAKPOINT,
   COLLAPSED_TABLE_WIDTH,
-  SUGGESTER_ROW_HEIGHT,
 } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
@@ -100,7 +99,6 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   selectedDocumentIsFetching,
   selectedDocumentError,
   showStatementList,
-  userCanEdit,
   canSelectResource,
   canEditDocument,
   userData,
@@ -108,11 +106,8 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   onStatementAnchorHover,
 }) => {
   const annotatorHeight = useMemo<number>(() => {
-    // The header suggester row only renders for users with write rights; when
-    // it is absent (editors without write rights, viewers) reclaim its height.
-    const reclaimedSuggesterRow = userCanEdit ? 0 : SUGGESTER_ROW_HEIGHT;
-    return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT + reclaimedSuggesterRow;
-  }, [contentHeight, userCanEdit]);
+    return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT;
+  }, [contentHeight]);
 
   const annotatorWidth = useMemo<number>(() => {
     return showStatementList ? contentWidth - COLLAPSED_TABLE_WIDTH : contentWidth;
