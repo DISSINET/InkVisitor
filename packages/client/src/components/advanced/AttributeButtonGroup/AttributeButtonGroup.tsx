@@ -36,6 +36,10 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   iconsOnly = false,
   fullWidth = false,
 }) => {
+  // With exactly two options, the whole group acts as a single toggle:
+  // clicking any segment switches to the other option.
+  const isToggle = options.length === 2 && !canSelectMultiple;
+
   return (
     <StyledWrap>
       {disabled && !fullSizeDisabled ? (
@@ -95,7 +99,14 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 textRegular={option.selected ? false : true}
                 shape={shape}
                 onClick={() => {
-                  if ((!option.selected || canSelectMultiple) && !disabled) {
+                  if (disabled) {
+                    return;
+                  }
+                  if (isToggle) {
+                    options.find((o) => !o.selected)?.onClick();
+                    return;
+                  }
+                  if (!option.selected || canSelectMultiple) {
                     option.onClick();
                   }
                 }}

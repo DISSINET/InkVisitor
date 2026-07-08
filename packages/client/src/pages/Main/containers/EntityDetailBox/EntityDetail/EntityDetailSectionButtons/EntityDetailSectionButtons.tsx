@@ -18,9 +18,7 @@ interface EntityDetailSectionButtons {
   removeBtnDisabled: boolean;
   widthTooNarrow?: boolean;
 }
-export const EntityDetailSectionButtons: React.FC<
-  EntityDetailSectionButtons
-> = ({
+export const EntityDetailSectionButtons: React.FC<EntityDetailSectionButtons> = ({
   setShowSubmit,
   entityId,
   handleCopyFromEntity,
@@ -33,10 +31,7 @@ export const EntityDetailSectionButtons: React.FC<
 
   return (
     <>
-      <ButtonGroup
-        $height={19}
-        style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
-      >
+      <ButtonGroup $height={21} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
         <Button
           disabled={removeBtnDisabled}
           icon={<MdDeleteSweep size={18} />}
@@ -67,9 +62,7 @@ export const EntityDetailSectionButtons: React.FC<
       </ButtonGroup>
       <EntitySuggester
         categoryTypes={suggesterCategoryTypes}
-        onPicked={(entity: IEntity) =>
-          handleCopyFromEntity(entity, replaceSection)
-        }
+        onPicked={(entity: IEntity) => handleCopyFromEntity(entity, replaceSection)}
         excludedActantIds={[entityId]}
         disableCreate
         inputWidth={widthTooNarrow ? 46 : 85}

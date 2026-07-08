@@ -1,17 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import {
-  IEntity,
-  IResponseStatement,
-  IStatement,
-  IStatementData,
-} from "@inkvisitor/shared/types";
+import { IEntity, IResponseStatement, IStatement, IStatementData } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
-import {
-  DReferences,
-  DStatementActants,
-  DStatementActions,
-} from "constructors";
+import { DReferences, DStatementActants, DStatementActions } from "constructors";
 import React, { useState } from "react";
 import { FaClone, FaPlus } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
@@ -23,22 +14,14 @@ interface StatementEditorSectionButtons {
   statement: IResponseStatement;
   previousStatement: IResponseStatement | false;
   setShowSubmitSection: (
-    value: React.SetStateAction<false | "actants" | "references" | "actions">
+    value: React.SetStateAction<false | "actants" | "references" | "actions">,
   ) => void;
 
-  handleAttributeChange: (
-    changes: Partial<IStatement>,
-    instantUpdate: boolean
-  ) => void;
-  handleDataAttributeChange: (
-    changes: Partial<IStatementData>,
-    instantUpdate: boolean
-  ) => void;
+  handleAttributeChange: (changes: Partial<IStatement>, instantUpdate: boolean) => void;
+  handleDataAttributeChange: (changes: Partial<IStatementData>, instantUpdate: boolean) => void;
   editorWidthTooNarrow: boolean;
 }
-export const StatementEditorSectionButtons: React.FC<
-  StatementEditorSectionButtons
-> = ({
+export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButtons> = ({
   section,
   statement,
   previousStatement,
@@ -53,35 +36,26 @@ export const StatementEditorSectionButtons: React.FC<
   const handleCopyFromStatement = (
     selectedStatement: IResponseStatement | IStatement | false,
     section: "actions" | "actants" | "references",
-    replaceSection: boolean
+    replaceSection: boolean,
   ) => {
     if (selectedStatement) {
       switch (section) {
         case "actions":
           const newActions = replaceSection
             ? [...DStatementActions(selectedStatement.data.actions)]
-            : [
-                ...statement.data.actions,
-                ...DStatementActions(selectedStatement.data.actions),
-              ];
+            : [...statement.data.actions, ...DStatementActions(selectedStatement.data.actions)];
           handleDataAttributeChange({ actions: newActions }, true);
           return;
         case "actants":
           const newActants = replaceSection
             ? [...DStatementActants(selectedStatement.data.actants)]
-            : [
-                ...statement.data.actants,
-                ...DStatementActants(selectedStatement.data.actants),
-              ];
+            : [...statement.data.actants, ...DStatementActants(selectedStatement.data.actants)];
           handleDataAttributeChange({ actants: newActants }, true);
           return;
         case "references":
           const newReferences = replaceSection
             ? [...DReferences(selectedStatement.references)]
-            : [
-                ...statement.references,
-                ...DReferences(selectedStatement.references),
-              ];
+            : [...statement.references, ...DReferences(selectedStatement.references)];
           handleAttributeChange({ references: newReferences }, true);
           return;
       }
@@ -101,10 +75,7 @@ export const StatementEditorSectionButtons: React.FC<
 
   return (
     <>
-      <ButtonGroup
-        $height={19}
-        style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
-      >
+      <ButtonGroup $height={21} style={{ marginLeft: "0.5rem", marginRight: "1rem" }}>
         <Button
           disabled={!hasEntities()}
           icon={<MdDeleteSweep size={17} />}
@@ -141,9 +112,7 @@ export const StatementEditorSectionButtons: React.FC<
           disabled={!previousStatement}
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
-          onClick={() =>
-            handleCopyFromStatement(previousStatement, section, replaceSection)
-          }
+          onClick={() => handleCopyFromStatement(previousStatement, section, replaceSection)}
         />
       </ButtonGroup>
       <EntitySuggester
