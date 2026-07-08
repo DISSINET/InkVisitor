@@ -21,6 +21,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
@@ -120,6 +121,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
       }
     }
   }, [statementId]);
+
+  const prevTerritoryIdRef = useRef(territoryId);
+  useEffect(() => {
+    const isNewTerritory = prevTerritoryIdRef.current !== territoryId;
+    prevTerritoryIdRef.current = territoryId;
+
+    if (territoryId && isNewTerritory) {
+      dispatch(setSecondPanelExpanded(true));
+    }
+  }, [territoryId, dispatch]);
 
   const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
