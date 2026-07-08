@@ -228,7 +228,13 @@ export const StyledIconWrapper = styled.div`
   color: ${({ theme }) => theme.color["gray"][500]};
 `;
 
-export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
+// Default divider height, independent of the button/input height. Override per
+// call site via the `dividerHeight` prop.
+export const DEFAULT_DIVIDER_HEIGHT = "1.3rem";
+
+export const StyledRightContent = styled.div<{
+  $showDivider?: boolean;
+}>`
   position: absolute;
   right: 0.3rem;
   top: 0.3rem;
@@ -236,7 +242,16 @@ export const StyledRightContent = styled.div<{ $showDivider?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.15rem;
-  padding-left: ${({ $showDivider }) => ($showDivider ? "0.2rem" : "0")};
-  border-left: ${({ theme, $showDivider }) =>
-    $showDivider ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
+  padding-left: ${({ $showDivider }) => ($showDivider ? "0.4rem" : "0")};
+
+  &::before {
+    content: ${({ $showDivider }) => ($showDivider ? '""' : "none")};
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: ${DEFAULT_DIVIDER_HEIGHT};
+    width: ${({ theme }) => theme.borderWidth[1]};
+    background-color: ${({ theme }) => theme.color["gray"][300]};
+  }
 `;
