@@ -586,7 +586,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           return (
-            <ButtonGroup $noGap $borderRadius="rounded-sm">
+            <ButtonGroup $noGap>
               <Button
                 key="r"
                 icon={<IcoTrash size={14} />}
@@ -598,7 +598,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
-                shape="sharp-square"
+                shape="rounded-left-sm"
                 size={ButtonSize.Medium}
               />
               <Button
@@ -635,6 +635,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               )}
               <Button
                 icon={active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />}
+                shape="rounded-right-sm"
                 disabled={
                   !verified ||
                   userId === localStorage.getItem("userid") ||
@@ -653,7 +654,6 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                     },
                   );
                 }}
-                shape="sharp-square"
                 size={ButtonSize.Medium}
               />
             </ButtonGroup>
