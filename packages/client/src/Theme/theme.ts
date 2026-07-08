@@ -55,6 +55,7 @@ const theme = {
     plain: "#4a5568", // gray 700
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.4)",
+    modalBorder: "#e2e8f0", // gray 300
     backupDownloadOverlay: "rgba(237, 242, 247, 0.8)",
 
     tagBackground: "#fff",

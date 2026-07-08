@@ -64,7 +64,7 @@ export const StyledCard = styled(animated.div)<Card>`
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border: ${({ theme }) => theme.borderWidth["default"]} solid
-    ${({ theme }) => theme.color["gray"][400]};
+    ${({ theme }) => theme.color["modalBorder"]};
 `;
 
 interface StyledCardHeader {
