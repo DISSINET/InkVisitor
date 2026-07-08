@@ -68,7 +68,7 @@ export const AnnotatorAnchorGridRow = React.memo(
       return (
         <EntityTag
           fullWidth
-          buttonOnHover
+          buttonBeforeElvl
           button={
             onMoveAnchor ? (
               <Button
