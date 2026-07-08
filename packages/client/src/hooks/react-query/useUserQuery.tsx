@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 
-export function useUserQuery(enabled?: boolean) {
+export function useUserQuery(enabled = true) {
   const userId = localStorage.getItem("userid");
   return useQuery({
     queryKey: ["user", userId],

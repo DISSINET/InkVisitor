@@ -394,6 +394,21 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     ];
   }, [right, selectedRows, lastClickedIndex, entities]);
 
+  const hiddenColumnsFull = useMemo(
+    () =>
+      right === UserEnums.RoleMode.Read
+        ? [...HIDDEN_COLUMNS_FULL, "selection"]
+        : HIDDEN_COLUMNS_FULL,
+    [right],
+  );
+  const hiddenColumnsMinified = useMemo(
+    () =>
+      right === UserEnums.RoleMode.Read
+        ? [...HIDDEN_COLUMNS_MINIFIED, "selection"]
+        : HIDDEN_COLUMNS_MINIFIED,
+    [right],
+  );
+
   const {
     setHiddenColumns,
     getTableProps,
@@ -412,8 +427,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       initialState: {
         hiddenColumns:
           displayMode === StatementListDisplayMode.TEXT
-            ? HIDDEN_COLUMNS_MINIFIED
-            : HIDDEN_COLUMNS_FULL,
+            ? hiddenColumnsMinified
+            : hiddenColumnsFull,
       },
     },
     useExpanded,
@@ -422,13 +437,13 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   useEffect(() => {
     if (displayMode === StatementListDisplayMode.TEXT) {
-      setHiddenColumns(HIDDEN_COLUMNS_MINIFIED);
+      setHiddenColumns(hiddenColumnsMinified);
     } else {
       setTimeout(() => {
-        setHiddenColumns(HIDDEN_COLUMNS_FULL);
+        setHiddenColumns(hiddenColumnsFull);
       }, 450);
     }
-  }, [displayMode]);
+  }, [displayMode, hiddenColumnsMinified, hiddenColumnsFull]);
 
   const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
     setStatementsLocal((prevStatementsLocal) =>
