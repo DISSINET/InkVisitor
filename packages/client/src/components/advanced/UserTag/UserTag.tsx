@@ -32,7 +32,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   const { data: dataUser } = useQuery({
     queryKey: ["user-tag", userId],
     queryFn: async () => {
-      const res = await api.usersGet(userId);
+      const res = await api.usersGet(userId, { ignoreErrorToast: true });
       return res.data;
     },
     enabled: Boolean(userId),

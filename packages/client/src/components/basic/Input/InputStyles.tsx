@@ -66,7 +66,7 @@ export const StyledInput = styled.input<IValueStyle>`
         : theme.color["gray"]["400"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   padding-left: ${({ theme, $icon, $suggester }) =>
-    $icon ? "2.4rem" : $suggester ? "0.1rem" : theme.space[2]};
+    $icon ? "2.5rem" : $suggester ? "0.1rem" : theme.space[2]};
 
   padding-right: ${({ theme, $iconCount, $rightPadding }) => {
     // Explicit pixel padding (e.g. measured rightContent width) wins.
@@ -219,7 +219,8 @@ export const StyledActionButton = styled.button`
 
 export const StyledIconWrapper = styled.div`
   position: absolute;
-  left: 0.6rem;
+  left: 0;
+  width: ${({ theme }) => theme.space[13]};
   top: 0;
   bottom: 0;
   display: flex;

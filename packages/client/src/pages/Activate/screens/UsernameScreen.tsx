@@ -1,20 +1,12 @@
-import api from "api";
-import { Button, Input, ModalInputWrap } from "components";
-import React, { useState } from "react";
-import { FaUserTag } from "react-icons/fa";
-import { FiLogIn } from "react-icons/fi";
-import { TbMailFilled } from "react-icons/tb";
-import { useNavigate } from "react-router-dom";
-import {
-  StyledFaTag,
-  StyledUserActivatedDescription,
-} from "./ActivateSreensStyles";
 import {
   IErrorSignature,
   UsernameTooLongError,
   UsernameTooShortError,
   getErrorByCode,
 } from "@inkvisitor/shared/types/errors";
+import api from "api";
+import { Button, Input, ModalInputWrap } from "components";
+import useKeypress from "hooks/useKeyPress";
 import {
   StyledButtonWrap,
   StyledDescription,
@@ -22,7 +14,13 @@ import {
   StyledInputRow,
   StyledMail,
 } from "pages/AuthModalSharedStyles";
-import useKeypress from "hooks/useKeyPress";
+import React, { useState } from "react";
+import { FaUserTag } from "react-icons/fa";
+import { FiLogIn } from "react-icons/fi";
+import { TbMailFilled } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
+import { StyledFaUser, StyledUserActivatedDescription } from "./ActivateSreensStyles";
+import { UserTag } from "components/advanced";
 
 interface UsernameScreen {
   hash: string;
@@ -48,13 +46,9 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
       setError(UsernameTooLongError.message);
     } else {
       try {
-        const res = await api.activation(
-          hash,
-          password,
-          passwordRepeat,
-          username,
-          { ignoreErrorToast: true }
-        );
+        const res = await api.activation(hash, password, passwordRepeat, username, {
+          ignoreErrorToast: true,
+        });
         if (res.status === 200) {
           setContinueScreen(true);
         }
@@ -80,7 +74,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
     () => {
       !continueScreen ? handleActivation() : handleLogin();
     },
-    [continueScreen]
+    [continueScreen],
   );
 
   return (
@@ -98,8 +92,8 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           </StyledDescription>
           <ModalInputWrap>
             <StyledInputRow>
-              <StyledFaTag size={14} $isError={error !== false} />
               <Input
+                icon={<StyledFaUser size={12} $isError={error !== false} />}
                 placeholder="username"
                 onChangeFn={(text: string) => setUsername(text)}
                 value={username}
@@ -129,10 +123,12 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
         <>
           <p>User</p>
           <StyledMail>
-            <span style={{ width: "100%" }}>
-              <FaUserTag size={14} style={{ marginRight: "0.5rem" }} />
+            <span style={{ display: "flex", width: "100%" }}>
+              <FaUserTag size={14} style={{ marginRight: "0.25rem" }} />
             </span>
-            {username}
+            <b style={{ display: "flex" }}>{username}</b>
+            {/* To use UserTag we need to have the userId in the database */}
+            <UserTag userId={username} />
           </StyledMail>
           <StyledUserActivatedDescription style={{ marginBottom: "2rem" }}>
             has been activated.
