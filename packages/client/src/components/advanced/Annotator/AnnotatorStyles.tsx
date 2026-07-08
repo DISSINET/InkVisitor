@@ -387,3 +387,44 @@ export const StyledMoveAnchorFooter = styled.div`
   width: 100%;
   margin-top: ${({ theme }) => theme.space[2]};
 `;
+
+/** One anchor grid cell — sizes the tag to the column. */
+export const StyledAnchorCell = styled.div`
+  width: 100%;
+  display: flex;
+`;
+
+/**
+ * Hover target for a row's anchor controls (view mode). Holds a kebab hint at
+ * rest and expands to the inline resize / elvl / unlink controls on hover. The
+ * hover lives on this one wrapper — not the whole tag — so only the kebab (not
+ * the label) opens it, and the controls stay put while the pointer moves across
+ * them (the wrapper is the same element before and after expanding).
+ */
+export const StyledAnchorControlsCluster = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+/**
+ * Wraps the interactive elvl group inside the cluster. EntityTag's button-slot
+ * wrapper forces a thick 2px divider onto every descendant button; that is the
+ * tag-action divider and is wrong between the elvl options. Restore the elvl
+ * group's own look: a single thin divider on its left (as in the tag's native
+ * elvl slot) and no divider between the option buttons.
+ */
+export const StyledAnchorClusterElvl = styled.div`
+  display: flex;
+  border-left: ${({ theme }) => `${theme.borderWidth[1]} solid ${theme.color["black"]}`};
+  && button {
+    border-left-width: 0;
+  }
+`;
+
+/** Pushes the anchors view/edit switch to the right edge of the title row. */
+export const StyledAnchorModeSwitch = styled.div`
+  margin-left: auto;
+  margin-right: ${({ theme }) => theme.space[2]};
+  display: flex;
+  align-items: center;
+`;

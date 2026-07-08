@@ -5,7 +5,7 @@ import { AnchorOpenTagRef, MoveAnchorBoundaryResult, Tag } from "@inkvisitor/ann
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { ButtonGroup, IconWithTooltip, Loader } from "components";
+import { ButtonGroup, IconWithTooltip, Loader, SwitchGroup } from "components";
 import { Button } from "components/basic/Button/Button";
 import { useSearchParams } from "hooks";
 import useKeypress from "hooks/useKeyPress";
@@ -18,7 +18,9 @@ import {
   FaClipboard,
   FaExclamationTriangle,
   FaLongArrowAltRight,
+  FaPen,
   FaPlus,
+  FaRegEye,
 } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
 import { PiCheckBold, PiSelectionFill } from "react-icons/pi";
@@ -42,6 +44,7 @@ import {
   AnnotatorAnchorListItem,
 } from "./AnnotatorMenuAnchorListRow";
 import {
+  StyledAnchorModeSwitch,
   StyledAnnotatorAnchorListWrap,
   StyledAnnotatorDoneButton,
   StyledAnnotatorItem,
@@ -67,6 +70,7 @@ import {
 } from "./AnnotatorStyles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
 import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
+import { EntityTagById } from "../EntityTag/EntityTagById";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -371,6 +375,41 @@ export const TextAnnotatorMenu = ({
     return out;
   }, [anchors, entities]);
 
+  // Anchor controls mode: view (kebab menu + static elvl) or edit (inline
+  // resize / elvl / unlink). Persisted so the choice survives menu reopen.
+  const [anchorsEditMode, setAnchorsEditMode] = useState<boolean>(
+    () => localStorage.getItem("annotatorAnchorsEditMode") === "true",
+  );
+  const handleAnchorsEditModeChange = (edit: boolean) => {
+    setAnchorsEditMode(edit);
+    localStorage.setItem("annotatorAnchorsEditMode", String(edit));
+  };
+  // Holding Ctrl/Cmd while hovering the anchor list enables edit mode
+  // temporarily.
+  const [anchorsHovered, setAnchorsHovered] = useState(false);
+  const [modifierHeld, setModifierHeld] = useState(false);
+  useEffect(() => {
+    const handleDown = (e: KeyboardEvent) => {
+      if (e.key === "Control" || e.key === "Meta") setModifierHeld(true);
+    };
+    const handleUp = (e: KeyboardEvent) => {
+      if (e.key === "Control" || e.key === "Meta") setModifierHeld(false);
+    };
+    // Release on window blur so the mode is not stuck after Cmd/Ctrl+Tab away.
+    const handleBlur = () => setModifierHeld(false);
+    window.addEventListener("keydown", handleDown);
+    window.addEventListener("keyup", handleUp);
+    window.addEventListener("blur", handleBlur);
+    return () => {
+      window.removeEventListener("keydown", handleDown);
+      window.removeEventListener("keyup", handleUp);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, []);
+  const anchorsEditActive = anchorsEditMode || (anchorsHovered && modifierHeld);
+  // The switch only makes sense where the edit controls exist at all.
+  const showAnchorsModeSwitch = !readonly && !disableCreate;
+
   const anchorGridRowData = useMemo(
     (): AnnotatorAnchorGridRowData => ({
       items: resolvedAnchors,
@@ -381,13 +420,12 @@ export const TextAnnotatorMenu = ({
       // hidden when creation is disabled (documents page) and for users without
       // edit rights (readonly = non owner/admin/editor-with-Resource-rights).
       onMoveAnchor:
-        readonly || disableCreate || !onMoveAnchorBoundary
-          ? undefined
-          : handleMoveAnchorStart,
+        readonly || disableCreate || !onMoveAnchorBoundary ? undefined : handleMoveAnchorStart,
       readonly,
       // Disable (not hide) elvl controls where creation is disabled (documents
       // page): show the current elvl as a static icon, same as the readonly case.
       disableElvl: disableCreate,
+      editControls: anchorsEditActive,
     }),
     [
       resolvedAnchors,
@@ -398,6 +436,7 @@ export const TextAnnotatorMenu = ({
       disableCreate,
       onMoveAnchorBoundary,
       handleMoveAnchorStart,
+      anchorsEditActive,
     ],
   );
 
@@ -559,7 +598,7 @@ export const TextAnnotatorMenu = ({
                       }}
                       tooltipLabel="Create anchor for active territory"
                     />
-                    {activeTerritory && <EntityTag entity={activeTerritory} />}
+                    {activeTerritoryId && <EntityTagById entityId={activeTerritoryId} />}
                     <ElvlButtonGroup
                       border
                       value={activeTerritoryElvl}
@@ -709,7 +748,10 @@ export const TextAnnotatorMenu = ({
               )}
             </StyledAnnotatorItem>
           )}
-          <StyledAnnotatorItem>
+          <StyledAnnotatorItem
+            onMouseEnter={() => setAnchorsHovered(true)}
+            onMouseLeave={() => setAnchorsHovered(false)}
+          >
             <StyledAnnotatorItemTitle>
               <PiSelectionFill size={13} />
               Anchors in selection
@@ -722,6 +764,34 @@ export const TextAnnotatorMenu = ({
                   />
                 )}
               </div>
+              {showAnchorsModeSwitch && (
+                <StyledAnchorModeSwitch>
+                  <SwitchGroup>
+                    <Button
+                      icon={<FaRegEye size={11} />}
+                      color="info"
+                      label="view"
+                      shape="rounded-sm"
+                      noBorder
+                      inverted={anchorsEditActive}
+                      noBackground={anchorsEditActive}
+                      tooltipLabel="view mode (hold Ctrl/Cmd over the list for temporary edit)"
+                      onClick={() => handleAnchorsEditModeChange(false)}
+                    />
+                    <Button
+                      icon={<FaPen size={10} />}
+                      color="info"
+                      label="edit"
+                      shape="rounded-sm"
+                      noBorder
+                      inverted={!anchorsEditActive}
+                      noBackground={!anchorsEditActive}
+                      tooltipLabel="edit mode — show anchor controls"
+                      onClick={() => handleAnchorsEditModeChange(true)}
+                    />
+                  </SwitchGroup>
+                </StyledAnchorModeSwitch>
+              )}
             </StyledAnnotatorItemTitle>
             <StyledAnnotatorItemContent>
               <StyledAnnotatorAnchorListWrap>
@@ -737,8 +807,7 @@ export const TextAnnotatorMenu = ({
                       // First/last rows are taller by the margin; the row renders
                       // that extra as border-box padding, so the space scrolls
                       // with the content and doesn't shrink the viewport.
-                      const lastRow =
-                        Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS) - 1;
+                      const lastRow = Math.ceil(resolvedAnchors.length / ANCHOR_GRID_COLUMNS) - 1;
                       const extra =
                         (index === 0 ? ANCHOR_GRID_ROW_MARGIN : 0) +
                         (index === lastRow ? ANCHOR_GRID_ROW_MARGIN : 0);

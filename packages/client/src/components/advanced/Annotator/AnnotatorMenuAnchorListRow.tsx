@@ -1,10 +1,15 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import React from "react";
-import { FaArrowsAltH } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaArrowsAltH, FaEllipsisV, FaUnlink } from "react-icons/fa";
 import { Button } from "components/basic/Button/Button";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import {
+  StyledAnchorCell,
+  StyledAnchorClusterElvl,
+  StyledAnchorControlsCluster,
+} from "./AnnotatorStyles";
 import { Tag } from "@inkvisitor/annotator/src/lib";
 
 export const ANCHOR_GRID_COLUMNS = 2;
@@ -34,6 +39,13 @@ export type AnnotatorAnchorGridRowData = {
    * current-elvl icon) even when not fully readonly (documents page).
    */
   disableElvl?: boolean;
+  /**
+   * When false (view mode), collapse the per-anchor controls into a kebab menu
+   * next to a static current-elvl icon; when true (edit mode), show resize /
+   * elvl / unlink inline as before. Ignored where controls are hidden anyway
+   * (readonly, disableElvl).
+   */
+  editControls?: boolean;
 };
 
 export type AnnotatorAnchorGridRowProps = {
@@ -42,10 +54,159 @@ export type AnnotatorAnchorGridRowProps = {
   data: AnnotatorAnchorGridRowData;
 };
 
+type AnnotatorAnchorGridCell = {
+  item: AnnotatorAnchorListItem;
+  entity: IEntity;
+} & Pick<
+  AnnotatorAnchorGridRowData,
+  "onRemoveAnchor" | "onUpdateAnchor" | "onMoveAnchor" | "readonly" | "disableElvl" | "editControls"
+>;
+
+type AnnotatorAnchorControlsCluster = Pick<
+  AnnotatorAnchorGridCell,
+  "item" | "onRemoveAnchor" | "onUpdateAnchor" | "onMoveAnchor" | "editControls"
+>;
+
+/**
+ * The anchor row's controls, rendered in the tag's button slot. Owns its own
+ * hover state so it re-renders itself on hover — EntityTag is memoized and
+ * would not re-render when only its `button` content changes. At rest: a static
+ * current-elvl icon + a kebab hint. Expanded (kebab hover, or the menu-level
+ * edit toggle / Ctrl-hold via editControls): inline resize / interactive elvl /
+ * unlink. Kebab and the expanded controls live in one wrapper, so only the
+ * kebab — not the label — opens it and it stays open while the pointer moves
+ * across the controls.
+ */
+const AnnotatorAnchorControlsCluster: React.FC<AnnotatorAnchorControlsCluster> = ({
+  item,
+  onRemoveAnchor,
+  onUpdateAnchor,
+  onMoveAnchor,
+  editControls,
+}) => {
+  const [hovered, setHovered] = useState(false);
+  const elvlValue = item.anchor.attributes.elvl as EntityEnums.Elvl;
+  const hasElvlValue = Object.values(EntityEnums.Elvl).includes(elvlValue);
+  const open = !!editControls || hovered;
+
+  return (
+    <StyledAnchorControlsCluster
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Static current-elvl icon at a glance while collapsed. */}
+      {!open && hasElvlValue && (
+        <ElvlButtonGroup value={elvlValue} onChange={() => {}} sharpCorners disabled />
+      )}
+      {open && (
+        <>
+          {onMoveAnchor && (
+            <Button
+              icon={<FaArrowsAltH size={12} />}
+              color="info"
+              inverted
+              tooltipLabel="resize anchor span"
+              onClick={() => {
+                onMoveAnchor(item.anchor);
+              }}
+              shape="sharp-square"
+            />
+          )}
+          <StyledAnchorClusterElvl>
+            <ElvlButtonGroup
+              value={elvlValue}
+              onChange={(elvl) => {
+                onUpdateAnchor?.(item.anchor, elvl);
+              }}
+              sharpCorners
+            />
+          </StyledAnchorClusterElvl>
+          <Button
+            icon={<FaUnlink size={12} />}
+            color="plain"
+            inverted
+            tooltipLabel="unlink entity"
+            onClick={() => {
+              onRemoveAnchor?.(item.anchor);
+            }}
+            shape="sharp-square"
+          />
+        </>
+      )}
+      {/* Kebab stays last so its position is stable whether open or not. */}
+      <Button
+        icon={<FaEllipsisV size={12} />}
+        color="gray"
+        inverted
+        tooltipLabel="anchor actions"
+        shape="sharp-square"
+      />
+    </StyledAnchorControlsCluster>
+  );
+};
+
+/**
+ * One anchor's tag + controls. Where controls are available (not readonly /
+ * documents page) they live in the hover-expandable cluster; otherwise only a
+ * static current-elvl icon is shown.
+ */
+const AnnotatorAnchorGridCell: React.FC<AnnotatorAnchorGridCell> = ({
+  item,
+  entity,
+  onRemoveAnchor,
+  onUpdateAnchor,
+  onMoveAnchor,
+  readonly,
+  disableElvl,
+  editControls,
+}) => {
+  const elvlValue = item.anchor.attributes.elvl as EntityEnums.Elvl;
+  const hasElvlValue = Object.values(EntityEnums.Elvl).includes(elvlValue);
+  // Where the inline controls can exist at all (not readonly / documents page).
+  const controlsAvailable = !readonly && !disableElvl;
+
+  return (
+    <StyledAnchorCell>
+      <EntityTag
+        fullWidth
+        button={
+          controlsAvailable ? (
+            <AnnotatorAnchorControlsCluster
+              item={item}
+              onRemoveAnchor={onRemoveAnchor}
+              onUpdateAnchor={onUpdateAnchor}
+              onMoveAnchor={onMoveAnchor}
+              editControls={editControls}
+            />
+          ) : undefined
+        }
+        entity={entity}
+        elvlButtonGroup={
+          // Readonly / documents page: static current-elvl icon (the cluster,
+          // which carries elvl otherwise, is not rendered here).
+          !controlsAvailable && hasElvlValue ? (
+            <ElvlButtonGroup value={elvlValue} onChange={() => {}} sharpCorners disabled />
+          ) : (
+            false
+          )
+        }
+      />
+    </StyledAnchorCell>
+  );
+};
+
 export const AnnotatorAnchorGridRow = React.memo(
   ({ index, style, data }: AnnotatorAnchorGridRowProps) => {
-    const { items, entities, onRemoveAnchor, onUpdateAnchor, onMoveAnchor, readonly, disableElvl } =
-      data;
+    const {
+      items,
+      entities,
+      onRemoveAnchor,
+      onUpdateAnchor,
+      onMoveAnchor,
+      readonly,
+      disableElvl,
+      editControls,
+    } = data;
     const left = items[index * ANCHOR_GRID_COLUMNS];
     const right = items[index * ANCHOR_GRID_COLUMNS + 1];
 
@@ -60,55 +221,16 @@ export const AnnotatorAnchorGridRow = React.memo(
       if (!entity) {
         return null;
       }
-      const elvlValue = item.anchor.attributes.elvl as EntityEnums.Elvl;
-      // Disabled elvl shows only the current value; when there is no valid value
-      // there is nothing to show, so drop the whole slot (and its divider) rather
-      // than leave an empty elvl wrapper on the tag.
-      const showElvl = !disableElvl || Object.values(EntityEnums.Elvl).includes(elvlValue);
       return (
-        <EntityTag
-          fullWidth
-          buttonBeforeElvl
-          button={
-            onMoveAnchor ? (
-              <Button
-                icon={<FaArrowsAltH size={12} />}
-                color="info"
-                inverted
-                tooltipLabel="resize anchor span"
-                onClick={() => {
-                  onMoveAnchor(item.anchor);
-                }}
-                shape="sharp-square"
-              />
-            ) : undefined
-          }
-          unlinkButton={
-            // Hidden for readonly users and for everybody on the documents page
-            // (disableElvl), where anchors are not editable.
-            readonly || disableElvl
-              ? false
-              : {
-                  onClick: () => {
-                    onRemoveAnchor?.(item.anchor);
-                  },
-                }
-          }
+        <AnnotatorAnchorGridCell
+          item={item}
           entity={entity}
-          elvlButtonGroup={
-            showElvl ? (
-              <ElvlButtonGroup
-                value={elvlValue}
-                onChange={(elvl) => {
-                  onUpdateAnchor?.(item.anchor, elvl);
-                }}
-                sharpCorners
-                disabled={disableElvl}
-              />
-            ) : (
-              false
-            )
-          }
+          onRemoveAnchor={onRemoveAnchor}
+          onUpdateAnchor={onUpdateAnchor}
+          onMoveAnchor={onMoveAnchor}
+          readonly={readonly}
+          disableElvl={disableElvl}
+          editControls={editControls}
         />
       );
     };
