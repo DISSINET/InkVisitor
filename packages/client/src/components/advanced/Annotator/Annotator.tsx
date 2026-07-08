@@ -139,6 +139,8 @@ interface TextAnnotatorProps {
   warningsModalOpen?: boolean;
   onWarningsModalOpenChange?: (open: boolean) => void;
   onAsymmetricalAnchorCountChange?: (count: number) => void;
+  /** Fired when RAW/SEMI text edits diverge from the saved document content. */
+  onUnsavedTextEditsChange?: (hasUnsaved: boolean) => void;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -174,6 +176,7 @@ export const TextAnnotator = ({
   warningsModalOpen,
   onWarningsModalOpenChange,
   onAsymmetricalAnchorCountChange,
+  onUnsavedTextEditsChange,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -195,6 +198,10 @@ export const TextAnnotator = ({
       return localTextContent !== dataDocument?.content;
     }
   }, [localTextContent, dataDocument?.content]);
+
+  useEffect(() => {
+    onUnsavedTextEditsChange?.(isChangeMade);
+  }, [isChangeMade, onUnsavedTextEditsChange]);
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 

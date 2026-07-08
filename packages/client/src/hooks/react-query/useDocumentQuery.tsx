@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 
-export function useDocumentQuery(documentId?: string) {
+export function useDocumentQuery(
+  documentId?: string,
+  options?: { refetchOnWindowFocus?: boolean },
+) {
   return useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
@@ -12,6 +15,6 @@ export function useDocumentQuery(documentId?: string) {
       return res.data ?? undefined;
     },
     enabled: !!documentId && api.isLoggedIn(),
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
   });
 }

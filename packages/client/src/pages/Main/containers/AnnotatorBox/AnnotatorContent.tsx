@@ -69,6 +69,7 @@ interface StatementListTextAnnotator {
   userData?: IResponseUser;
 
   onStatementAnchorHover?: (statementId: string | null) => void;
+  onUnsavedTextEditsChange?: (hasUnsaved: boolean) => void;
 }
 
 export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = ({
@@ -104,6 +105,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   userData,
 
   onStatementAnchorHover,
+  onUnsavedTextEditsChange,
 }) => {
   const annotatorHeight = useMemo<number>(() => {
     return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT;
@@ -268,6 +270,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               warningsModalOpen={warningsModalOpen}
               onWarningsModalOpenChange={setWarningsModalOpen}
               onAsymmetricalAnchorCountChange={setWarningAnchorCount}
+              onUnsavedTextEditsChange={onUnsavedTextEditsChange}
             />
           )}
         </AnnotatorProvider>

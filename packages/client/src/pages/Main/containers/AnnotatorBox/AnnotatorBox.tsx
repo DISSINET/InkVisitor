@@ -59,6 +59,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   const [storedAnnotatorScrollPosition, setStoredAnnotatorScrollPosition] = useState<number | null>(
     null,
   );
+  const [hasUnsavedTextEdits, setHasUnsavedTextEdits] = useState(false);
 
   const { setAnnotator: setSingletonAnnotator } = useAnnotator();
   useEffect(() => {
@@ -132,6 +133,10 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     return selectedResource ? selectedResource.data.documentId : undefined;
   }, [selectedResource]);
 
+  useEffect(() => {
+    setHasUnsavedTextEdits(false);
+  }, [selectedDocumentId]);
+
   // Refetch the active document when territory changes so anchors are fresh.
   // Uses a ref to only fire on actual territory change, not on other dep updates.
   const prevTerritoryIdForRefetchRef = useRef<string | undefined>(undefined);
@@ -146,7 +151,9 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     data: selectedDocument,
     error: selectedDocumentError,
     isFetching: selectedDocumentIsFetching,
-  } = useDocumentQuery(selectedDocumentId);
+  } = useDocumentQuery(selectedDocumentId, {
+    refetchOnWindowFocus: !hasUnsavedTextEdits,
+  });
 
   const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) => await api.entityCreate(newStatement),
@@ -286,6 +293,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       canEditDocument={canEditDocument}
       userData={userData}
       onStatementAnchorHover={handleStatementAnchorHover}
+      onUnsavedTextEditsChange={setHasUnsavedTextEdits}
     />
   );
 };
