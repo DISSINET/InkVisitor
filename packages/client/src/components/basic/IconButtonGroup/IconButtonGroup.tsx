@@ -58,6 +58,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                 }
                 noBorder
                 inverted
+                shape={sharpCorners ? "sharp" : undefined}
                 color={option.value === value ? "primary" : "grey"}
                 onClick={() => {
                   if (option.value !== value) {
