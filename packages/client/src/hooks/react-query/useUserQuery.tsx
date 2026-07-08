@@ -11,6 +11,8 @@ export function useUserQuery(enabled?: boolean) {
       return res.data ?? undefined;
     },
     enabled: !!userId && api.isLoggedIn() && enabled,
-    staleTime: 5 * 60 * 1000,
+    // for the change of rights from admin, the user needs to refetch the user data to get the new rights
+    refetchOnWindowFocus: true,
+    staleTime: 2 * 60 * 1000,
   });
 }
