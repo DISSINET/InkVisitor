@@ -4,21 +4,13 @@ import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { IoReloadCircle } from "react-icons/io5";
 import { TbArrowForwardUp } from "react-icons/tb";
-import {
-  StyledDescription,
-  StyledEmailSent,
-  StyledTbMailFilled,
-} from "./LoginScreensStyles";
+import { StyledDescription, StyledEmailSent, StyledTbMailFilled } from "./LoginScreensStyles";
 import {
   IErrorSignature,
   InvalidEmailError,
   getErrorByCode,
 } from "@inkvisitor/shared/types/errors";
-import {
-  StyledButtonWrap,
-  StyledErrorText,
-  StyledInputRow,
-} from "pages/AuthModalSharedStyles";
+import { StyledButtonWrap, StyledErrorText, StyledInputRow } from "pages/AuthModalSharedStyles";
 import useKeypress from "hooks/useKeyPress";
 import { ButtonSize } from "types";
 
@@ -66,7 +58,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
     () => {
       handlePasswordReset();
     },
-    [emailLocal]
+    [emailLocal],
   );
 
   return (
@@ -79,8 +71,8 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <br /> to you within couple of minutes.
           </StyledDescription>
           <StyledInputRow>
-            <StyledTbMailFilled size={15} $isError={error !== false} />
             <Input
+              icon={<StyledTbMailFilled size={15} $isError={error !== false} />}
               width={200}
               placeholder="email"
               onChangeFn={(text: string) => setEmailLocal(text)}
@@ -120,10 +112,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
           <StyledEmailSent>{`A reset link was sent to email`}</StyledEmailSent>
           <StyledEmailSent>{`${emailLocal}`}</StyledEmailSent>
 
-          <BsEnvelopeArrowUpFill
-            size={24}
-            style={{ margin: "0.5rem 0 1.5rem 0" }}
-          />
+          <BsEnvelopeArrowUpFill size={24} style={{ margin: "0.5rem 0 1.5rem 0" }} />
           <Button
             label="return"
             icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}

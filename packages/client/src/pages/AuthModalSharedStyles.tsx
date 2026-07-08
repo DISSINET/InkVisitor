@@ -16,7 +16,7 @@ export const StyledDescription = styled.p`
 export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  justify-content: center;
 `;
 export const StyledButtonWrap = styled.div`
   display: flex;

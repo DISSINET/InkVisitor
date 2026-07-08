@@ -1,20 +1,20 @@
-import theme, { ThemeColor, ThemeFontSize } from "Theme/theme";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
+import { ThemeColor, ThemeFontSize } from "Theme/theme";
+import { IconWithTooltip, Tooltip } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import { MdCancel, MdCheck, MdClose } from "react-icons/md";
+import { DatePicker } from "../DatePicker/DatePicker";
 import {
   Label,
+  StyledActionButton,
+  StyledActionButtonGroup,
   StyledClearableInputButton,
+  StyledIconWrapper,
   StyledInput,
+  StyledRightContent,
   StyledTextArea,
   StyledWrapper,
-  StyledActionButtonGroup,
-  StyledActionButton,
-  StyledIconWrapper,
-  StyledRightContent,
 } from "./InputStyles";
-import { IconWithTooltip, Tooltip } from "components";
-import { DatePicker } from "../DatePicker/DatePicker";
-import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 
 interface Input {
   label?: string;

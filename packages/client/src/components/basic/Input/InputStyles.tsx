@@ -220,14 +220,19 @@ export const StyledActionButton = styled.button`
 export const StyledIconWrapper = styled.div`
   position: absolute;
   left: 0rem;
-  /* left: 0.6rem; */
-  width: ${({ theme }) => theme.space[13]};
+  width: 2.8rem;
   top: 0;
   bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.color["gray"][500]};
+
+  /* Icons passed via the icon prop are centered here; strip any margin they
+     could carry so they stay centered. */
+  svg {
+    margin: 0;
+  }
 `;
 
 // Default divider height, independent of the button/input height. Override per
