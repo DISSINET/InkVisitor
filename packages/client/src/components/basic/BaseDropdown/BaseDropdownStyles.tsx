@@ -179,6 +179,14 @@ export const StyledSelect = styled(Select)<StyledSelect>`
       margin: 0;
       overflow: hidden;
     }
+    /* focused: the input re-enters the flex flow; without this its default
+       2px margins + paddings make it taller than the compact chips, so the
+       control (and the layout around it) grows on every click into the field */
+    .react-select__control--is-focused .react-select__input-container {
+      margin: 0;
+      padding: 0;
+      line-height: 1;
+    }
   `}
   // portal menu style is in global stylesheet
 `;
