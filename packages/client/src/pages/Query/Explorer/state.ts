@@ -59,6 +59,13 @@ const exploreStateInitial: Explore.IExplore = {
               editable: true,
               params: {},
             },
+            {
+              id: "CLA",
+              name: "Classification",
+              type: Explore.EExploreColumnType.ER,
+              params: { relationType: RelationEnums.Type.Classification },
+              editable: true,
+            },
           ]
         : [],
   },
