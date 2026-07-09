@@ -17,6 +17,7 @@ import {
   cookieParserMiddleware,
   sessionMiddleware,
 } from "@middlewares/session";
+import { getAllowedOrigins } from "@common/allowedOrigins";
 import Document from "@models/document/document";
 
 (async () => {
@@ -57,7 +58,7 @@ import Document from "@models/document/document";
 
   const socketio = new SocketIO(httpServer, {
     cors: {
-      origin: true,
+      origin: getAllowedOrigins(),
       credentials: true,
     },
     path: "/socket.io/",

@@ -112,6 +112,7 @@ class Api {
 
     this.headers = {
       "Content-Type": "application/json",
+      "X-InkVisitor-Client": "1",
       //"Content-Encoding": "gzip",
     };
 
