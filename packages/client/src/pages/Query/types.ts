@@ -47,6 +47,10 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
+  // EUT:C match any entity USED in statements under the target Territory OR
+  // any descendant territory, recursively (whole subtree; server:
+  // EdgeUsedUnderChildrenTerritory in edge.ts)
+  Query.EdgeType["EUT:C"],
   // IS: (XIsInS) match any entity USED in the target Statement in ANY position
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)

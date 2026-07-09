@@ -95,13 +95,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
               }}
               strokeDasharray={extendNegative ? "6 4" : undefined}
             >
-              <line
-                x1={x}
-                x2={x}
-                y1={midY}
-                y2={QUERY_GRID_HEIGHT}
-                strokeLinecap="round"
-              />
+              <line x1={x} x2={x} y1={midY} y2={QUERY_GRID_HEIGHT} strokeLinecap="round" />
             </g>
           )}
         </g>
@@ -129,7 +123,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
           />
           <Dropdown.Single.Basic
             options={edgeTypeOptions}
-            width={200}
+            width={212}
             noDropDownIndicator
             value={edge.type}
             onChange={(newValue) => {
