@@ -753,40 +753,59 @@ function collectStatementEntityIds(stmt: RDatum): RDatum {
       ) as RValue
     )
     .add(
-      stmt("data")("actions").concatMap(function (a: RDatum) {
-        return (r.expr([a("actionId")]) as RDatum).add(
-          collectPropEntityIds(a("props")) as RValue
-        );
-      }) as RValue
+      // data.actions may be absent on a legacy/partial statement doc; an
+      // unguarded access would abort the whole ReQL expression (see inner
+      // classifications/identifications guards below)
+      r.branch(
+        stmt("data").hasFields("actions"),
+        stmt("data")("actions").concatMap(function (a: RDatum) {
+          return (r.expr([a("actionId")]) as RDatum).add(
+            collectPropEntityIds(a("props")) as RValue
+          );
+        }),
+        r.expr([] as string[])
+      ) as RValue
     )
     .add(
-      stmt("data")("actants").concatMap(function (a: RDatum) {
-        // classifications / identifications are optional on an actant row
-        // (getEntitiesIds uses ?.; the StatementActantsCI index guards the same
-        // two fields with hasFields) - an unguarded access would abort the query
-        return (r.expr([a("entityId")]) as RDatum)
-          .add(
-            r.branch(
-              a.hasFields("classifications"),
-              a("classifications").map(function (c: RDatum) {
-                return c("entityId");
-              }),
-              r.expr([] as string[])
-            ) as RValue
-          )
-          .add(
-            r.branch(
-              a.hasFields("identifications"),
-              a("identifications").map(function (ci: RDatum) {
-                return ci("entityId");
-              }),
-              r.expr([] as string[])
-            ) as RValue
-          )
-          .add(collectPropEntityIds(a("props")) as RValue);
-      }) as RValue
+      // data.actants may likewise be absent - guard before access
+      r.branch(
+        stmt("data").hasFields("actants"),
+        stmt("data")("actants").concatMap(function (a: RDatum) {
+          // classifications / identifications are optional on an actant row
+          // (getEntitiesIds uses ?.; the StatementActantsCI index guards the same
+          // two fields with hasFields) - an unguarded access would abort the query
+          return (r.expr([a("entityId")]) as RDatum)
+            .add(
+              r.branch(
+                a.hasFields("classifications"),
+                a("classifications").map(function (c: RDatum) {
+                  return c("entityId");
+                }),
+                r.expr([] as string[])
+              ) as RValue
+            )
+            .add(
+              r.branch(
+                a.hasFields("identifications"),
+                a("identifications").map(function (ci: RDatum) {
+                  return ci("entityId");
+                }),
+                r.expr([] as string[])
+              ) as RValue
+            )
+            .add(collectPropEntityIds(a("props")) as RValue);
+        }),
+        r.expr([] as string[])
+      ) as RValue
     )
-    .add(stmt("data")("tags") as RValue);
+    .add(
+      // data.tags may be absent - guard before access
+      r.branch(
+        stmt("data").hasFields("tags"),
+        stmt("data")("tags"),
+        r.expr([] as string[])
+      ) as RValue
+    );
 }
 
 /**
