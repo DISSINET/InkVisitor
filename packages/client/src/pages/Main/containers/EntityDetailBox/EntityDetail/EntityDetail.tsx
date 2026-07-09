@@ -1,4 +1,5 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
@@ -599,7 +600,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const widthTooNarrow = contentWidth < 516;
 
   const isRootTerritory = selectedDetailId === rootTerritoryId;
-  const isOwner = (localStorage.getItem("userrole") as UserEnums.Role) === UserEnums.Role.Owner;
+  const isOwner = (getStoredUserRole() as UserEnums.Role) === UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
   const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;
 

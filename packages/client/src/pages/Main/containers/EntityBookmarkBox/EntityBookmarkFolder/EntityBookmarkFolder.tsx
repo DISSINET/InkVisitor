@@ -1,4 +1,5 @@
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -121,7 +122,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
   const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = getStoredUserRole() as UserEnums.Role;
 
   const FolderIcon = empty
     ? open

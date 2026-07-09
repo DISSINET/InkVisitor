@@ -1,4 +1,5 @@
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -76,7 +77,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   const handleCreateNewStatementTemplate = (): IEntity | false => {
     if (user) {
       const newTemplate = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
+        getStoredUserRole() as UserEnums.Role,
         user.options,
         createModalEntityLabel,
         createModalEntityDetail
@@ -110,7 +111,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
 
       if (entity) {
         const templateEntity = CTemplateEntity(
-          localStorage.getItem("userrole") as UserEnums.Role,
+          getStoredUserRole() as UserEnums.Role,
           entity,
           createModalEntityLabel,
           createModalEntityDetail

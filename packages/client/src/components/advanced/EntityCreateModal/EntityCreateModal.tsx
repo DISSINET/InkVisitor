@@ -1,3 +1,4 @@
+import { getStoredUserRole } from "utils/userStorage";
 import {
   actionPartOfSpeechDict,
   conceptPartOfSpeechDict,
@@ -109,7 +110,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     },
   });
 
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = getStoredUserRole() as UserEnums.Role;
 
   // User rights validation for the parent territory is filtered in Suggester for parent territory
   const validateEntityCreation = (skipLabelCheck = false) => {

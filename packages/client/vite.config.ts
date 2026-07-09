@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, "./env", "");
+  const appEnv = env.ENV || mode;
 
   // Ensure base path starts with a slash
   const rootUrl = env.ROOT_URL || "";
@@ -28,6 +29,15 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
+      {
+        name: "inject-app-config",
+        transformIndexHtml(html) {
+          return html.replace(
+            "</head>",
+            `    <script>window.appConfig={env:${JSON.stringify(appEnv)}};</script>\n  </head>`
+          );
+        },
+      },
     ],
     resolve: {
       alias: {
@@ -94,13 +104,12 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env.ROOT_URL": JSON.stringify(env.ROOT_URL || ""),
       "process.env.APIURL": JSON.stringify(env.APIURL || ""),
+      "process.env.ENV": JSON.stringify(appEnv),
       "process.env.BUILD_TIMESTAMP": JSON.stringify(
         process.env.BUILD_TIMESTAMP || ""
       ),
       global: "globalThis",
-      ...(mode === "latest" ? {} : {
-        "window.appConfig": JSON.stringify({ env: env.ENV || mode }),
-      }),
+      "window.appConfig": JSON.stringify({ env: appEnv }),
     },
     test: {
       globals: true,

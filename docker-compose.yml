@@ -33,8 +33,7 @@ services:
     <<: *logging
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      # Identifier injected into index.html as window.appConfig.env
-      # (required — the client reads it; without ENV set the page fails to load)
+      # Instance id — session cookie name (inkvisitor.sid.<ENV>). Must match client build mode.
       ENV: ${ENV:-production}
       DOMAIN: ${DOMAIN:-localhost}
       STATIC_PATH: ${STATIC_PATH:-/}

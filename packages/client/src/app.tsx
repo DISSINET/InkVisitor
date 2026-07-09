@@ -1,4 +1,5 @@
 import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
@@ -71,7 +72,7 @@ export const RequireOwner = ({ children }: { children: React.ReactNode }) => {
   if (!api.isLoggedIn()) {
     return <Navigate to="/login" />;
   }
-  const isOwner = localStorage.getItem("userrole") === UserEnums.Role.Owner;
+  const isOwner = getStoredUserRole() === UserEnums.Role.Owner;
   return isOwner ? children : <Navigate to="/" />;
 };
 

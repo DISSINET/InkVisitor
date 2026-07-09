@@ -1,3 +1,4 @@
+import "./init-app-config";
 import * as ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { StrictMode } from "react";

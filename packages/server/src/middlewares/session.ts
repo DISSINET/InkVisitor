@@ -6,12 +6,20 @@ import { RethinkSessionStore } from "@service/rethinkSessionStore";
 const SESSION_MAX_AGE_MS =
   parseInt(process.env.SESSION_MAX_AGE || "", 10) || 86400000 * 30;
 
-const sessionSecret =
-  process.env.SESSION_SECRET || process.env.SECRET || "inkvisitor-dev-secret";
+const sessionSecret = process.env.SECRET || "inkvisitor-dev-secret";
+
+const sessionCookieSameSite =
+  (process.env.SESSION_COOKIE_SAMESITE as "lax" | "strict" | "none" | undefined) ||
+  "lax";
+
+const sessionCookieSecure =
+  process.env.HTTPS === "1" || process.env.NODE_ENV === "production";
 
 export { sessionSecret };
 
-export const sessionCookieName = "inkvisitor.sid";
+export const sessionCookieName =
+  process.env.SESSION_COOKIE_NAME ||
+  `inkvisitor.sid.${process.env.ENV || "default"}`;
 
 export const sessionStore = new RethinkSessionStore(sessionPool);
 
@@ -24,8 +32,9 @@ export const sessionMiddleware = session({
   rolling: true,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: sessionCookieSecure,
+    sameSite: sessionCookieSameSite,
+    path: "/",
     maxAge: SESSION_MAX_AGE_MS,
   },
 });

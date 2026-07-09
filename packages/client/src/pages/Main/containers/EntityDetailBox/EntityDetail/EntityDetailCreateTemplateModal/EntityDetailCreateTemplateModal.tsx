@@ -1,4 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IEntity, IResponseGeneric } from "@inkvisitor/shared/types";
 import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -68,7 +69,7 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     const templateEntity = CTemplateEntity(
-      localStorage.getItem("userrole") as UserEnums.Role,
+      getStoredUserRole() as UserEnums.Role,
       entity,
       createTemplateLabel,
     );

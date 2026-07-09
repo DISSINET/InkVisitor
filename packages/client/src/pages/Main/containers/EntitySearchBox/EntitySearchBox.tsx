@@ -1,4 +1,5 @@
 import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { entitiesDict } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, SearchEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IEntity } from "@inkvisitor/shared/types";
@@ -238,7 +239,7 @@ export const EntitySearchBox: React.FC = () => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
-  const userRole = localStorage.getItem("userrole");
+  const userRole = getStoredUserRole();
 
   const handleSetExpandedOptions = useCallback(
     (options: SearchEnums.AdvancedOption[]) => {

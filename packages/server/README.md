@@ -48,14 +48,17 @@ The `build` process transpiles typescript files to javascript.
 
 Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `ENV_FILE=production pnpm start:dist` will need `env.production`). You can use the `example.env` file as a template for creating your own `env` file, just check and modify the values here if needed:
 
-- `NODE_ENV` = environment - production/development (security vs logging)
-- `DOMAIN` = identify the instance - points to the domain where the ui should be accessible (used in emails)
+- `NODE_ENV` = environment - production/development (security vs logging). Also controls the session cookie `Secure` flag (enabled when `NODE_ENV=production`, or when `HTTPS=1`).
+- `ENV` = instance identifier (e.g. `sandbox`, `staging`, `production`). Must be unique per deployment on the same domain. Used for the session cookie name (`inkvisitor.sid.<ENV>` by default) and must match the client build mode on that instance.
+- `DOMAIN` = hostname where the UI is accessible (used in emails and as the default allowed CORS origin)
 - `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
 - `BACKUP_DIR` = directory containing the DB backup archives (mounted read-only from the `inkvisitor-backup` PVC in deployments); empty/unset disables the backups API
 - `PORT` = port which should be used for this app
-- `SECRET` = for signing short-lived download tokens
-- `SESSION_SECRET` = session cookie signing secret (defaults to `SECRET`)
+- `SECRET` = signing secret for session cookies and short-lived download tokens
 - `SESSION_MAX_AGE` = session cookie max age in milliseconds (default 30 days)
+- `SESSION_COOKIE_NAME` = optional override for the session cookie name (default `inkvisitor.sid.<ENV>`; set a unique `ENV` per instance when multiple deployments share a domain)
+- `SESSION_COOKIE_SAMESITE` = `lax` (default), `strict`, or `none`
+- `CORS_ORIGINS` = comma-separated allowed browser origins (default: derived from `DOMAIN`). Used for CORS and CSRF origin checks.
 - `SMTP_HOST` / `SMTP_PORT` = SMTP relay (e.g. Mailjet `in-v3.mailjet.com`, port `587`)
 - `SMTP_USER` / `SMTP_SECRET` = SMTP credentials (Mailjet: API key and secret key from the dashboard)
 - `MAILER_SENDER` = From address; must match a verified sender at your provider
@@ -71,9 +74,24 @@ Please refer to exported [postman collection](./postman/inkvisitor_api.postman_c
 
 The API uses HttpOnly cookie sessions stored in RethinkDB. Sign in via `POST /users/signin` with `{ "login", "password" }`; the response includes the user profile and the server sets the session cookie. Sign out via `POST /users/signout`.
 
+### Session cookies
+
+- **Name** — `inkvisitor.sid.<ENV>` by default (`SESSION_COOKIE_NAME` to override). Set a unique `ENV` per instance when several deployments share a domain so cookies do not overwrite each other.
+- **Flags** — `HttpOnly`, `SameSite` (default `lax`), `Secure` when `NODE_ENV=production` or `HTTPS=1`, path `/`.
+- **Storage** — RethinkDB session store; rolling expiry via `SESSION_MAX_AGE` (default 30 days).
+
+### CSRF protection
+
+State-changing API requests (`POST`, `PUT`, `PATCH`, `DELETE` under `/api`) require:
+
+1. The `X-InkVisitor-Client: 1` header (set automatically by the web client).
+2. An `Origin` or `Referer` header matching `DOMAIN` or `CORS_ORIGINS`.
+
+Cross-site form posts cannot set the custom header, so they cannot reuse a victim's session cookie. `SameSite=Lax` provides an additional browser-level guard.
+
 Short-lived signed `?token=` query parameters are still used for one-shot backup download URLs where a cookie cannot be sent.
 
-Tests authenticate with `getAuthenticatedAgent()` from `src/modules/testAuth.ts` (cookie jar via supertest agent).
+Tests authenticate with `getAuthenticatedAgent()` from `src/modules/testAuth.ts` (cookie jar via supertest agent). CSRF checks are skipped when `NODE_ENV=test`.
 
 ## Errors
 

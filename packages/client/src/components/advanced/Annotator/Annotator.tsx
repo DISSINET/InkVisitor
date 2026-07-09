@@ -1,3 +1,4 @@
+import { getStoredUserRole } from "utils/userStorage";
 import {
   autoUpdate,
   flip,
@@ -499,7 +500,7 @@ export const TextAnnotator = ({
           await statementCreateMutation?.mutateAsync(newStatement);
         } else {
           const newStatement: IStatement = CStatement(
-            localStorage.getItem("userrole") as UserEnums.Role,
+            getStoredUserRole() as UserEnums.Role,
             userData.options,
             text,
             "",

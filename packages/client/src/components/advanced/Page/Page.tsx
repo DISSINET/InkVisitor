@@ -1,4 +1,6 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
+import { getAppEnv } from "utils/appEnv";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader } from "components";
@@ -24,14 +26,14 @@ export const Page: React.FC<Page> = ({ children }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const lastClickedIndex: number = useAppSelector((state) => state.statementList.lastClickedIndex);
-  const userId = localStorage.getItem("userid");
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userId = getStoredUserId();
+  const userRole = getStoredUserRole() as UserEnums.Role;
   const { cleanAllParams, setLogoutState } = useSearchParams();
 
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
 
-  const environmentName = window.appConfig.env || "";
+  const environmentName = getAppEnv();
   const location = useLocation();
   const navigate = useNavigate();
 

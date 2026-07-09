@@ -1,4 +1,5 @@
 import { userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -77,7 +78,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     };
   }, []);
 
-  const currentUserRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const currentUserRole = getStoredUserRole() as UserEnums.Role;
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
@@ -271,7 +272,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           const { id, role } = row.original;
           return (
             <AttributeButtonGroup
-              disabled={id === localStorage.getItem("userid") || role === UserEnums.Role.Owner}
+              disabled={id === getStoredUserId() || role === UserEnums.Role.Owner}
               options={
                 role === UserEnums.Role.Owner
                   ? [
@@ -572,7 +573,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           let activateTooltip = "activate user";
           if (!verified) {
             activateTooltip = "cannot activate unverified user";
-          } else if (userId === localStorage.getItem("userid")) {
+          } else if (userId === getStoredUserId()) {
             activateTooltip = "cannot deactivate yourself";
           } else if (role === UserEnums.Role.Owner) {
             activateTooltip = "owner must be active";
@@ -581,7 +582,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           let deleteTooltip = "delete user";
-          if (userId === localStorage.getItem("userid")) {
+          if (userId === getStoredUserId()) {
             deleteTooltip = "cannot delete yourself";
           }
 
@@ -593,7 +594,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 color="danger"
                 tooltipLabel={deleteTooltip}
                 disabled={
-                  userId === localStorage.getItem("userid") || role === UserEnums.Role.Owner
+                  userId === getStoredUserId() || role === UserEnums.Role.Owner
                 }
                 onClick={() => {
                   setRemovingUserId(userId);
@@ -638,7 +639,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 shape="rounded-right-sm"
                 disabled={
                   !verified ||
-                  userId === localStorage.getItem("userid") ||
+                  userId === getStoredUserId() ||
                   role === UserEnums.Role.Owner
                 }
                 color={active ? "success" : "danger"}

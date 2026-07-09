@@ -1,4 +1,5 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
@@ -71,7 +72,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       const entityAfterTemplateApplied: IEntity = await applyTemplate(
         templateToApply,
         entity,
-        localStorage.getItem("userrole") as UserEnums.Role
+        getStoredUserRole() as UserEnums.Role
       );
 
       if (entityAfterTemplateApplied) {

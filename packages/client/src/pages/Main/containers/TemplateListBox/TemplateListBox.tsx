@@ -1,4 +1,5 @@
 import { entitiesDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Button, Input, Loader } from "components";
@@ -88,7 +89,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     }
   }, [removeEntityId]);
 
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = getStoredUserRole() as UserEnums.Role;
 
   return (
     <StyledBoxContent>

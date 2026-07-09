@@ -1,7 +1,8 @@
 import morgan from "morgan";
 import helmet from "helmet";
 import express, { NextFunction, Router } from "express";
-import cors from "cors";
+import { corsMiddleware } from "@middlewares/cors";
+import { csrfProtection } from "@middlewares/csrf";
 import { apiPath, apiPathOld } from "@common/constants";
 import EntitiesRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
@@ -51,7 +52,7 @@ server.use(
   })
 );
 
-server.use(cors({ origin: true, credentials: true }));
+server.use(corsMiddleware);
 
 const staticPath = process.env.STATIC_PATH;
 if (staticPath === "/") {
@@ -93,6 +94,7 @@ server.use(headersProtectionMiddleware);
 server.use(profilerMiddleware);
 server.use(cookieParserMiddleware);
 server.use(sessionMiddleware);
+server.use(csrfProtection);
 server.use(apiPath, dbMiddleware);
 
 server.use(authenticateRequest);
