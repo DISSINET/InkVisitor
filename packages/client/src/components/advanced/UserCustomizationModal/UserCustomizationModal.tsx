@@ -1,6 +1,6 @@
 import { languageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { DropdownItem, IEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
+import { DropdownItem, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
@@ -64,7 +64,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     setShowModal(true);
   }, []);
 
-  const initialValues: DataObject = useMemo(() => {
+  // captured once on mount on purpose - the user query can refetch while the
+  // modal is open (window focus, invalidations) and deliver a new object
+  // reference; recomputing here would reset the form and wipe unsaved edits
+  const [initialValues] = useState<DataObject>(() => {
     const { options, name, email } = user;
 
     return {
@@ -72,27 +75,22 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       email: email,
       defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
       defaultStatementLanguage: options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
-      searchLanguages: options.searchLanguages,
+      searchLanguages: options.searchLanguages ?? [],
       workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
       askBeforePropDelete: options.askBeforePropDelete !== false,
     };
-  }, [user]);
+  });
 
   const [data, setData] = useState<DataObject>(initialValues);
-  const [defaultTerritory, setDefaultTerritory] = useState<IEntity | null>(null);
 
   const orderedLanguageDict = useOrderedLanguageDict();
 
-  useEffect(() => {
-    setData(initialValues);
-  }, [initialValues]);
-
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
-    setData({
-      ...data,
+    setData((prev) => ({
+      ...prev,
       [key]: value,
-    });
+    }));
   };
 
   const passwordUpdateMutation = useMutation({
@@ -102,22 +100,16 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     },
   });
 
-  const {} = useQuery({
+  const queryClient = useQueryClient();
+
+  const { data: defaultTerritory } = useQuery({
     queryKey: ["territory", data.defaultTerritory],
     queryFn: async () => {
-      // defaultTerritory is set but is not loaded in local state
-      if (
-        data.defaultTerritory &&
-        (defaultTerritory === null || defaultTerritory?.id !== data.defaultTerritory)
-      ) {
-        const res = await api.entityGet(data.defaultTerritory);
-        setDefaultTerritory(res.data ?? null);
-      }
+      const res = await api.entityGet(data.defaultTerritory as string);
+      return res.data ?? null;
     },
     enabled: !!data.defaultTerritory && api.isLoggedIn(),
   });
-
-  const queryClient = useQueryClient();
 
   const updateUserMutation = useMutation({
     mutationFn: async (changes: Partial<IUser>) => await api.usersUpdate(user.id, changes),
@@ -363,7 +355,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       tooltipPosition="left"
                       unlinkButton={{
                         onClick: () => {
-                          setDefaultTerritory(null);
                           setData((prev) => ({ ...prev, defaultTerritory: "" }));
                         },
                         color: "danger",
@@ -374,7 +365,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     <EntitySuggester
                       categoryTypes={[EntityEnums.Class.Territory]}
                       onPicked={(entity) => {
-                        setDefaultTerritory(entity);
+                        queryClient.setQueryData(["territory", entity.id], entity);
                         setData((prev) => ({ ...prev, defaultTerritory: entity.id }));
                       }}
                       inputWidth="full"
