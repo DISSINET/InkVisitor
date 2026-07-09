@@ -1,4 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Tag } from "components/basic/Tag/Tag";
@@ -29,7 +30,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   disableFetch = false,
 }) => {
   const theme = useTheme();
-  const currentUserId = localStorage.getItem("userid");
+  const currentUserId = getStoredUserId();
   const color = currentUserId === userId ? "primary" : "info";
 
   const { data: dataUser } = useQuery({

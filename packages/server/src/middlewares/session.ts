@@ -11,7 +11,9 @@ const sessionSecret =
 
 export { sessionSecret };
 
-export const sessionCookieName = "inkvisitor.sid";
+export const sessionCookieName =
+  process.env.SESSION_COOKIE_NAME ||
+  `inkvisitor.sid.${process.env.ENV || "default"}`;
 
 export const sessionStore = new RethinkSessionStore(sessionPool);
 

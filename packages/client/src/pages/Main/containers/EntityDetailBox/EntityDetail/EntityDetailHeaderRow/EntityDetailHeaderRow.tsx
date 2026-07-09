@@ -1,4 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IEntity, IResponseGeneric, IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -74,7 +75,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       if (territoryParentId) {
         newInstance = await InstTemplate(
           entity,
-          localStorage.getItem("userrole") as UserEnums.Role,
+          getStoredUserRole() as UserEnums.Role,
           territoryParentId
         );
         setShowAddParentModal(false);
@@ -82,7 +83,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         toast.info("Cannot create territory without parent");
       }
     } else {
-      newInstance = await InstTemplate(entity, localStorage.getItem("userrole") as UserEnums.Role);
+      newInstance = await InstTemplate(entity, getStoredUserRole() as UserEnums.Role);
     }
 
     if (newInstance) {

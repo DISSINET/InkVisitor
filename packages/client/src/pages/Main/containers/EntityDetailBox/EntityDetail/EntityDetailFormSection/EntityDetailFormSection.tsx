@@ -1,3 +1,4 @@
+import { getStoredUserRole } from "utils/userStorage";
 import {
   actantLogicalTypeDict,
   actionPartOfSpeechDict,
@@ -122,7 +123,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     setNewLabel(entity.labels[0]);
   }, [entity.labels[0]]);
 
-  const isOwner = (localStorage.getItem("userrole") as UserEnums.Role) === UserEnums.Role.Owner;
+  const isOwner = (getStoredUserRole() as UserEnums.Role) === UserEnums.Role.Owner;
 
   const [showTActionModal, setShowTActionModal] = useState(false);
   const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(false);

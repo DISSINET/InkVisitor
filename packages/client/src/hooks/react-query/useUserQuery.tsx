@@ -1,9 +1,10 @@
 // manage user data for current user
 import { useQuery } from "@tanstack/react-query";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import api from "api";
 
 export function useUserQuery(enabled = true) {
-  const userId = localStorage.getItem("userid");
+  const userId = getStoredUserId();
   return useQuery({
     queryKey: ["user", userId],
     queryFn: async () => {

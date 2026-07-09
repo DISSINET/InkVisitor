@@ -1,4 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { Dropzone } from "components";
 import { InstTemplate } from "constructors";
@@ -42,7 +43,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   ) => {
     const newEntity = await InstTemplate(
       templateToDuplicate,
-      localStorage.getItem("userrole") as UserEnums.Role
+      getStoredUserRole() as UserEnums.Role
     );
     if (newEntity) {
       onSelected(newEntity.id);

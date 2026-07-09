@@ -1,4 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -193,7 +194,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = getStoredUserRole() as UserEnums.Role;
 
   const addStatementAtTheEndMutation = useMutation({
     mutationFn: async (newStatement: IStatement) => {

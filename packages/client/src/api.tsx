@@ -38,6 +38,12 @@ import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import {
+  clearStoredUser,
+  getStoredUserId,
+  getStoredUsername,
+  saveStoredUser,
+} from "utils/userStorage";
+import {
   EntitiesDeleteErrorResponse,
   EntitiesDeleteSuccessResponse,
   RelationsCreateErrorResponse,
@@ -335,7 +341,7 @@ class Api {
           if (!isSignInRequest) {
             // Session is no longer valid - drop stale local user state so route
             // guards (isLoggedIn) reflect reality, then bounce to login.
-            this.clearStoredUser();
+            clearStoredUser();
             // if handled by react router, then the toast could be visible
             window.location.pathname = (process.env.ROOT_URL || "") + "/login";
           }
@@ -469,21 +475,13 @@ class Api {
   // the DB-loaded user. A stale value just means the next request 401s and the
   // response interceptor clears it and redirects to login.
   isLoggedIn = () => {
-    const storedUserId = localStorage.getItem("userid");
-    const storedUsername = localStorage.getItem("username");
+    const storedUserId = getStoredUserId();
+    const storedUsername = getStoredUsername();
     return storedUserId && storedUsername ? true : false;
   };
 
-  private clearStoredUser() {
-    localStorage.removeItem("username");
-    localStorage.removeItem("userid");
-    localStorage.removeItem("userrole");
-  }
-
   saveLogin(newUserName: string, newUserId: string, newUserRole: string) {
-    localStorage.setItem("username", newUserName);
-    localStorage.setItem("userid", newUserId);
-    localStorage.setItem("userrole", newUserRole);
+    saveStoredUser(newUserName, newUserId, newUserRole);
     // Re-handshake so the server can re-evaluate role-gated channels (db:stats)
     // for the new cookie session without requiring a page refresh.
     this.reconnectWs();
@@ -538,7 +536,7 @@ class Api {
 
   async signOut() {
     const wasLoggedIn = this.isLoggedIn();
-    this.clearStoredUser();
+    clearStoredUser();
 
     // Tell the server to destroy the session (clears the cookie). Best-effort:
     // local state is already gone, and the endpoint is public so a dead session

@@ -1,4 +1,5 @@
 import React from "react";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "components";
 import { BiRefresh } from "react-icons/bi";
@@ -22,7 +23,7 @@ export const RefreshBoxButton: React.FC<RefreshBoxButton> = ({ queriesToRefresh,
       inverted
       icon={<BiRefresh />}
       onClick={async () => {
-        const uid = localStorage.getItem("userid");
+        const uid = getStoredUserId();
         await Promise.all(
           queriesToRefresh.map(async (queryToRefresh) => {
             const queryKey =

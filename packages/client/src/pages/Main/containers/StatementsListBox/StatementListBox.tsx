@@ -1,4 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import {
   IDocument,
   IEntity,
@@ -367,7 +368,7 @@ export const StatementListBox: React.FC = () => {
 
       if (newOrder) {
         const newStatement: IStatement = CStatement(
-          localStorage.getItem("userrole") as UserEnums.Role,
+          getStoredUserRole() as UserEnums.Role,
           userData.options,
           "",
           "",

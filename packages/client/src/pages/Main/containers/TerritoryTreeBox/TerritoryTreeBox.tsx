@@ -1,4 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IResponseTree, IUser } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -64,7 +65,7 @@ export const TerritoryTreeBox: React.FC = () => {
     [userData],
   );
 
-  const userId = localStorage.getItem("userid");
+  const userId = getStoredUserId();
 
   const updateUserMutation = useMutation({
     mutationFn: async (changes: Partial<IUser>) => {
@@ -80,7 +81,7 @@ export const TerritoryTreeBox: React.FC = () => {
     },
   });
 
-  const userRole = localStorage.getItem("userrole");
+  const userRole = getStoredUserRole();
   const { territoryId } = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
 

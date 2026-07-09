@@ -1,3 +1,4 @@
+import { getStoredUserRole } from "utils/userStorage";
 import {
   classesAll,
   dropdownWildCard,
@@ -191,7 +192,7 @@ const EntitySuggesterFull: React.FC<
   const { appendDetailId } = useSearchParams();
 
   // get user data
-  const userRole = localStorage.getItem("userrole");
+  const userRole = getStoredUserRole();
   const { data: user } = useUserQuery();
 
   // Suggesions query
@@ -356,7 +357,7 @@ const EntitySuggesterFull: React.FC<
   ): Promise<IEntity | false> => {
     return await InstTemplate(
       territoryToInst,
-      localStorage.getItem("userrole") as UserEnums.Role,
+      getStoredUserRole() as UserEnums.Role,
       territoryParentId,
     );
   };
@@ -379,7 +380,7 @@ const EntitySuggesterFull: React.FC<
     } else {
       newEntity = await InstTemplate(
         templateToDuplicate,
-        localStorage.getItem("userrole") as UserEnums.Role,
+        getStoredUserRole() as UserEnums.Role,
       );
     }
     if (newEntity) {

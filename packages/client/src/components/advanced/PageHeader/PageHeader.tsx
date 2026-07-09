@@ -1,4 +1,5 @@
 import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { getAppEnv } from "utils/appEnv";
 import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
@@ -51,7 +52,7 @@ interface LeftHeader {
   tempLocation: string | false;
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(({ tempLocation }) => {
-  const env = window.appConfig.env || "";
+  const env = getAppEnv();
 
   const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | build: ${
     process.env.BUILD_TIMESTAMP
@@ -331,7 +332,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     handleLogOut,
     userIsFetching = false,
   }) => {
-    const env = window.appConfig.env || "";
+    const env = getAppEnv();
 
     const dispatch = useAppDispatch();
     const selectedThemeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);

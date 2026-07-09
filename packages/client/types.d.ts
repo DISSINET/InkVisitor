@@ -7,7 +7,7 @@ declare namespace NodeJS {
 }
 
 interface Window {
-  appConfig: {
+  appConfig?: {
     env: string;
   };
   showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
