@@ -141,6 +141,12 @@ class Api {
     });
     this.ws.on("connect", () => {
       console.log("Socket.IO connected");
+      // Clear any stale -1/-2 left by a previous (possibly intentional)
+      // disconnect and sample latency immediately instead of waiting up to
+      // 5s for the interval — otherwise login/logout reconnects briefly show
+      // "Server is down".
+      this.ping = defaultPing;
+      this.pingNow();
     });
     this.ws.on("disconnect", () => {
       this.ping = -1;
@@ -162,17 +168,23 @@ class Api {
     });
 
     setInterval(() => {
-      const start = Date.now();
-
-      (this.ws as Socket).emit("ping", (ack: any) => {
-        if (ack instanceof Error) {
-          console.error("Socket ping error:", ack);
-        } else {
-          const duration = Date.now() - start;
-          this.ping = duration;
-        }
-      });
+      this.pingNow();
     }, 5000);
+  }
+
+  /** Emits a single ping and records the round-trip latency. */
+  private pingNow() {
+    if (!this.ws) return;
+    const start = Date.now();
+
+    this.ws.emit("ping", (ack: any) => {
+      if (ack instanceof Error) {
+        console.error("Socket ping error:", ack);
+      } else {
+        const duration = Date.now() - start;
+        this.ping = duration;
+      }
+    });
   }
 
   /**
@@ -490,6 +502,9 @@ class Api {
 
   private reconnectWs() {
     if (!this.ws) return;
+    // Intentional reconnect (login/logout re-handshake) — show "loading"
+    // rather than letting the disconnect handler flag "Server is down".
+    this.ping = defaultPing;
     this.ws.disconnect();
     this.ws.connect();
   }
