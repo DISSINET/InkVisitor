@@ -4,7 +4,7 @@
 		"name": "inkvisitor api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "4635186",
-		"description": "Authenticate with POST /api/v1/users/signin (login + password). Postman stores the inkvisitor.sid session cookie automatically for subsequent requests."
+		"description": "Authenticate with POST /api/v1/users/signin (login + password). Postman stores the session cookie automatically (default name: inkvisitor.sid.<ENV>)."
 	},
 	"item": [
 		{

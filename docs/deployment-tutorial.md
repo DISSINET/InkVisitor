@@ -115,13 +115,14 @@ MAILER_SENDER=noreply@your-domain.tld
 
 The variables you most commonly want to set:
 
-- `SECRET` — JWT signing key. **The default is a placeholder; replace it before going public.**
-- `DOMAIN` — used in outgoing email links.
+- `SECRET` — session signing key (and short-lived download tokens). **The default is a placeholder; replace it before going public.**
+- `DOMAIN` — hostname used in outgoing email links and as the default allowed browser origin for CORS/CSRF checks.
+- `ENV` — instance identifier (e.g. `sandbox`, `staging`, `production`). Must be unique per deployment on the same domain. Sets the session cookie name (`inkvisitor.sid.<ENV>`) and must match the client build mode for that instance.
 - `IMAGE_TAG` — pick `latest` (default), `production`, `staging`, `sandbox`, etc.
 - `DB_AUTH` — RethinkDB password (leave unset if RethinkDB has no auth). ⚠ Same secret as `DB_PASS` in the database CLI's env file — the two use different variable names.
 - `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_SECRET` / `MAILER_SENDER` — SMTP relay for outgoing mail. Leave unset to disable mail features. Mailjet example shown above.
 
-Less commonly overridden: `NODE_ENV` (default `production`), `ENV` (default `production` — server injects this as `window.appConfig.env` into the served `index.html`; required for the client to render), `STATIC_PATH` (default `/`), `PORT` (default `3000`), `DB_NAME` (default `inkvisitor`), `DB_PORT` (default `28015`), `DB_POOL_CONNECTIONS` (default `10`).
+Less commonly overridden: `NODE_ENV` (default `production`; also enables the session cookie `Secure` flag), `STATIC_PATH` (default `/`), `PORT` (default `3000`), `DB_NAME` (default `inkvisitor`), `DB_PORT` (default `28015`), `DB_POOL_CONNECTIONS` (default `10`), `SESSION_COOKIE_SAMESITE` (default `lax`), `CORS_ORIGINS` (default: derived from `DOMAIN`).
 
 ### A.2 Build the image locally
 
@@ -140,11 +141,14 @@ The client is built at **image build time**. Vite reads `packages/client/env/.en
 
 Copy [`packages/client/env/example.env`](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/env/example.env) to the matching path and fill in:
 
-- `ENV` — short identifier surfaced in the UI as the current environment (e.g. `production`, `staging`). Ignored for `ENV=latest` builds, used everywhere else.
-- `ROOT_URL` — base path the client is served from. Use empty (or `/`) for the root; use `/inkvisitor` if you serve it under a sub-path of your domain.
-- `APIURL` — full URL of the server API. **Leave empty** to make the client call back to the same origin it was loaded from (this is what makes the published `latest` image work as-is when the server hosts both the static files and the API). Set explicitly to e.g. `https://api.your-domain.tld` only if the API lives on a different host than the client.
+- `ROOT_URL` — base path the client is served from. Use empty (or `/`) for the root; use `/apps/inkvisitor-sandbox` if you serve it under a sub-path of your domain.
+- `APIURL` — full URL of the server API. **Leave empty** to make the client call back to the same origin it was loaded from (this is what makes the published `latest` image work as-is when the server hosts both the static files and the API). Set explicitly to e.g. `https://dissinet.cz/inkvisitor-server-sandbox` when the API is reached via a separate path on the same host.
 
-These three are the only variables defined in `example.env`. The client source code reads a few more (`GUEST_MODE`, `GUEST_MODE_USER`, `GUEST_MODE_PASS`, `LOGIN_TITLE`, `LOGIN_TEXT`, `LOGIN_CITATION`, `SHOW_LEGACY_ID`) which are optional UX customisations — add them to your env file if you need them. See the [client README](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/README.md) for details.
+Do **not** set `NODE_ENV` in client env files — Vite sets it automatically (`development` for `pnpm start`, `production` for `pnpm build:*`). The instance identifier (header colour, localStorage scoping) comes from the vite build **mode** (`sandbox`, `staging`, etc.) and is baked into the bundle at build time. An optional `ENV` in the client env file overrides the mode name; normally you can omit it.
+
+When `STATIC_PATH` is not `/`, the server serves the pre-built client as static files and does **not** inject `window.appConfig` into `index.html` — the client does not depend on that; configuration is baked in at build time.
+
+Set the same instance id on the **server** at runtime (`ENV=sandbox` in the server env) so the session cookie name matches the client build.
 
 #### Build the image
 

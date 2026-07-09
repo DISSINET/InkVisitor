@@ -15,6 +15,13 @@ Package uses different environments - each of them has dedicated `.env.<env>` fi
 
 See [example.env](./env/example.env) file for description of variables.
 
+Per-environment client config lives in `packages/client/env/.env.<mode>` (e.g. `.env.sandbox`). Typical entries:
+
+- `ROOT_URL` — URL path prefix where the client is hosted.
+- `APIURL` — API base URL (same origin path or full URL).
+
+Do not set `NODE_ENV` in these files. The instance id (header colour, auth localStorage keys) is taken from the vite build mode (`pnpm build:sandbox` → `sandbox`) unless you set an explicit `ENV` override.
+
 ## Development
 
 1. `pnpm install`
