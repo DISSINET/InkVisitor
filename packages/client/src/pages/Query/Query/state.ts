@@ -124,18 +124,16 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
 
       // the child node's params are edge-type specific. On a type switch, drop
       // the params the new edge type does not accept so stale entity filters
-      // don't linger. For edges that respect an entityClass, seed the picker's
-      // default class (the first allowed, else the first of all classes) so the
-      // class filter and its tooltip hint are populated immediately on switch,
-      // matching what the suggester shows - instead of staying empty until the
-      // user picks a class different from the default.
+      // don't linger. For edges that respect an entityClass, always re-seed the
+      // picker's default class (the first allowed, else the first of all
+      // classes) - a class carried over from the previous edge type must never
+      // survive the switch - so the class filter and its tooltip hint match
+      // what the suggester shows immediately on switch.
       const newTargetParams = Query.EdgeTypeTargetNodeParams[newType] ?? {};
       if (newTargetParams.entityClass) {
-        if (!edgeToUpdate.node.params.entityClasses?.length) {
-          const allowed: EntityEnums.Class[] = newTargetParams.entityClass.allowedClasses ?? [];
-          const defaultClasses = allowed.length ? allowed : classesAll;
-          edgeToUpdate.node.params.entityClasses = [defaultClasses[0]];
-        }
+        const allowed: EntityEnums.Class[] = newTargetParams.entityClass.allowedClasses ?? [];
+        const defaultClasses = allowed.length ? allowed : classesAll;
+        edgeToUpdate.node.params.entityClasses = [defaultClasses[0]];
       } else {
         edgeToUpdate.node.params.entityClasses = undefined;
       }

@@ -277,6 +277,10 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   />
                 ) : (
                   <EntitySuggester
+                    // remount on edge type switch so the category re-inits to
+                    // entityClasses[0] instead of preserving the internal
+                    // selection from the previous edge
+                    key={edgeType}
                     inputWidth={212}
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
