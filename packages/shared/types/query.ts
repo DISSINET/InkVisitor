@@ -201,6 +201,11 @@ export namespace Query {
       entityId: { allowedClasses: [] },
     },
     "R:SCL": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the superclass to entities of that class (server: EdgeCHasSuperclass)
+      entityClass: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
       entityId: {
         allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
       },
