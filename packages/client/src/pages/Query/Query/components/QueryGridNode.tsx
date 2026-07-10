@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useRef, useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import React, { useMemo } from "react";
+import { FaPlus, FaRegQuestionCircle } from "react-icons/fa";
+import { IcoQuestion, IcoTrash } from "Theme/icons";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Button, Checkbox, SwitchGroup, Tooltip } from "components";
+import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { getRelationConstrainedCategoryTypes } from "../../utils";
@@ -20,6 +20,8 @@ import {
   StyledNodeMainRow,
   StyledNodeTypeSelect,
   StyledParallelOperator,
+  StyledTooltipList,
+  StyledTooltipListItem,
 } from "./QueryStyles";
 import { useTheme } from "styled-components";
 
@@ -51,9 +53,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const theme = useTheme();
   const isValid = problems.length === 0;
 
-  const [nodeHovered, setNodeHovered] = useState(false);
-  const nodeRef = useRef<HTMLDivElement>(null);
-
   const nodeTypeOptions = Object.values(Query.NodeType).map((type) => ({
     value: type,
     label: type.toString()[0],
@@ -61,6 +60,25 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   }));
 
   const edgeType = edge?.type;
+  const edgeLabel = edgeType ? Query.EdgeTypeLabels[edgeType] : "related";
+
+  // edges whose target entity is mandatory: with an empty picker the backend
+  // matches nothing (membership is only meaningful relative to a specific
+  // territory/statement), so the generic "empty = any" hint does not apply -
+  // these get a "requires a target entity" note instead. Mirrors the
+  // `if (!id) matches nothing` guards in server/src/service/query/edge.ts.
+  const edgeRequiresTarget =
+    !!edgeType &&
+    (
+      [
+        Query.EdgeType["IS:"],
+        Query.EdgeType["I_IS:"],
+        Query.EdgeType["SUT:"],
+        Query.EdgeType["SUT:C"],
+        Query.EdgeType["EUT:"],
+        Query.EdgeType["EUT:C"],
+      ] as Query.EdgeType[]
+    ).includes(edgeType);
 
   const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
 
@@ -80,6 +98,21 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     }
     return paramEntityId.allowedClasses.length === 0 ? classesAll : paramEntityId.allowedClasses;
   }, [paramEntityId, relationConstrainedCategoryTypes]);
+
+  // class label shown in the empty-suggester hint, e.g. "Concept". The class
+  // picked in the suggester is only written back to node.params.entityClasses
+  // when the edge also has an entityClass param; for pure entityId edges it
+  // stays empty, so fall back to the picker's allowed classes
+  // (entityIdCategoryTypes) - the same set the suggester offers. Only rendered
+  // when it narrows to a single class; multiple/all classes stay generic ("entity").
+  const selectedClassLabels =
+    node.params.entityClasses && node.params.entityClasses.length > 0
+      ? node.params.entityClasses
+          .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
+          .join(", ")
+      : entityIdCategoryTypes.length === 1
+        ? entitiesDict.find((e) => e.value === entityIdCategoryTypes[0])?.label ?? ""
+        : "";
 
   const isRelationEntityPickerDisabled =
     relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
@@ -166,44 +199,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       )}
       <StyledNodeMainRow>
         <StyledGraphNode
-          ref={nodeRef}
-          onMouseEnter={() => setNodeHovered(true)}
-          onMouseLeave={() => setNodeHovered(false)}
           style={{
             backgroundColor: nodeColor,
             border: `3px solid ${nodeBorder}`,
           }}
         >
-          {!isRoot && paramEntityId && (
-            <Tooltip
-              visible={nodeHovered}
-              referenceElement={nodeRef.current}
-              content={
-                paramEntityClass ? (
-                  <>
-                    <p>
-                      [edge type] with empty suggester entity = any entity of selected class (select
-                      * for all classes).
-                    </p>
-                    <p>
-                      NOT [edge type] with empty suggester entity = not has [edge type] entity
-                      empty.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p>[edge type] with empty suggester entity = any entity.</p>
-                    <p>
-                      NOT [edge type] with empty suggester entity = not has [edge type] entity
-                      empty.
-                    </p>
-                  </>
-                )
-              }
-              position="top"
-              color="tooltipNodeBackground"
-            />
-          )}
           {/* <StyledNodeTypeSelect>
           <Dropdown.Single.Basic
             options={nodeTypeOptions}
@@ -264,6 +264,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               {isRoot === false &&
                 (dataEntity !== undefined ? (
                   <EntityTag
+                    tagMaxWidth={200}
                     entity={dataEntity}
                     onDoubleClick={() => onOpenEntityInDetail?.(dataEntity.id)}
                     unlinkButton={{
@@ -280,7 +281,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   />
                 ) : (
                   <EntitySuggester
-                    inputWidth={100}
+                    inputWidth={212}
                     categoryTypes={entityIdCategoryTypes}
                     placeholder="entity"
                     disableCreate
@@ -314,6 +315,32 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                         },
                       });
                     }}
+                    rightContent={
+                      <IconWithTooltip
+                        color="success"
+                        icon={<IcoQuestion size={11} />}
+                        tooltipPosition="top"
+                        tooltipColor="tooltipNodeBackground"
+                        tooltipLabel="Empty Entity Suggester"
+                        tooltipContent={
+                          edgeRequiresTarget ? (
+                            <p>This edge requires a target entity.</p>
+                          ) : (
+                            <StyledTooltipList>
+                              <StyledTooltipListItem>
+                                <b>Empty</b> → matches any {selectedClassLabels || "entity"} that
+                                has the "{edgeLabel}" relation
+                                {!selectedClassLabels && paramEntityClass && "; * = all classes"}
+                              </StyledTooltipListItem>
+                              <StyledTooltipListItem>
+                                <b>Empty + NOT</b> → matches nodes that have no "{edgeLabel}"
+                                relation
+                              </StyledTooltipListItem>
+                            </StyledTooltipList>
+                          )
+                        }
+                      />
+                    }
                   />
                 ))}
             </div>

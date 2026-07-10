@@ -76,6 +76,9 @@ interface Suggester {
   onConsumeExternalDrop?: () => void;
   onEmptyAddButtonClick?: () => void;
   clearableInput?: boolean;
+  // rendered inside the input's trailing slot (only when disableCreate is set,
+  // where the create button would otherwise sit)
+  rightContent?: React.ReactNode;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -121,6 +124,7 @@ export const Suggester: React.FC<Suggester> = ({
   onConsumeExternalDrop,
   onEmptyAddButtonClick,
   clearableInput = true,
+  rightContent,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -414,6 +418,8 @@ export const Suggester: React.FC<Suggester> = ({
                     }}
                     disabled={disabled}
                   />
+                ) : rightContent ? (
+                  rightContent
                 ) : (
                   button && button
                 )

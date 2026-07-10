@@ -1393,9 +1393,7 @@ export const TextAnnotator = ({
   }, [isMenuDisplayed]);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<Occurrence[] | null>(
-    null
-  );
+  const [searchOccurences, setSearchOccurences] = useState<Occurrence[] | null>(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
   const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(false);
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] = useState<boolean>(false);
@@ -1666,7 +1664,7 @@ export const TextAnnotator = ({
                   entityId={xmlMarkupAnchorHover.entityId}
                   disableTooltip={false}
                   disableDoubleClick={false}
-                  tagMaxWidth={theme.space[60]}
+                  tagMaxWidth={150}
                 />
               </div>
             </FloatingPortal>

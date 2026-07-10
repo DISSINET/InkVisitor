@@ -105,7 +105,7 @@ export const StyledFaStar = styled(FaStar)<StyledFaStar>`
 const getColor = (
   $invertedLabel: boolean,
   $isFavorited: boolean,
-  $isItalic: boolean
+  $isItalic: boolean,
 ): keyof ThemeColor => {
   if ($invertedLabel) {
     if ($isFavorited) {
@@ -124,7 +124,7 @@ interface StyledLabel {
   $isFavorited: boolean;
   $labelOnly?: boolean;
   $isItalic: boolean;
-  $maxWidth?: string;
+  $maxWidth?: number;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -142,7 +142,7 @@ export const StyledLabel = styled.div<StyledLabel>`
     theme.color.tagBorderColor[$tagBorderColorKey]};
   border-left-style: solid;
   max-width: ${({ theme, $fullWidth, $maxWidth }) =>
-    $maxWidth ? $maxWidth : $fullWidth ? "100%" : theme.space[30]};
+    $maxWidth ? `${$maxWidth}px` : $fullWidth ? "100%" : theme.space[30]};
   font-weight: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;

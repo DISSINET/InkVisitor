@@ -18,3 +18,4 @@
 - Always use theme values for colors (including black text: `theme.color["black"]`),
   font sizes, etc. Never hardcode color values — the app supports dark mode
   and hardcoded colors break it.
+- If adding icon, first check Theme/icons.ts if this or similar icon exists in our app

@@ -61,6 +61,8 @@ interface EntitySuggesterProps {
   entityCreateStatementOrder?: number;
 
   button?: React.ReactNode;
+  // rendered inside the suggester input's trailing slot (only when disableCreate)
+  rightContent?: React.ReactNode;
   preSuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -123,6 +125,7 @@ const EntitySuggesterFull: React.FC<
   entityCreateStatementOrder,
 
   button,
+  rightContent,
   preSuggestions,
 
   disableCreate = false,
@@ -512,6 +515,7 @@ const EntitySuggesterFull: React.FC<
         alwaysShowCreateModal={alwaysShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
         button={button}
+        rightContent={rightContent}
         disableTemplateInstantiation={disableTemplateInstantiation}
         isHidden={isHidden}
         externalDroppedItem={externalDroppedItem}
