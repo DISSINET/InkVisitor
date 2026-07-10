@@ -282,6 +282,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 ) : (
                   <EntitySuggester
                     inputWidth={212}
+                    suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
                     placeholder="entity"
                     disableCreate

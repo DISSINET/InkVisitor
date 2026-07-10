@@ -41,6 +41,9 @@ interface Suggester {
   categories: EntitySingleDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
+  // Explicit width for the suggestions dropdown. When unset the list matches the
+  // measured input width; set it to intentionally show a wider results list.
+  suggestionListWidth?: number;
   disableCreate?: boolean;
   disableButtons?: boolean;
   isFetching?: boolean;
@@ -90,6 +93,7 @@ export const Suggester: React.FC<Suggester> = ({
   categories,
   disabled,
   inputWidth = 100,
+  suggestionListWidth,
   disableCreate = false,
   disableButtons = false,
 
@@ -151,6 +155,10 @@ export const Suggester: React.FC<Suggester> = ({
       setResultWidth(width);
     }
   }, [isFocused]);
+
+  // Explicit override wins over the measured input width so the results list can
+  // intentionally be wider than the input.
+  const effectiveResultWidth = suggestionListWidth ?? resultWidth;
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -450,7 +458,7 @@ export const Suggester: React.FC<Suggester> = ({
             >
               {suggestions.length || (isFetching && isFocused) ? (
                 <>
-                  <StyledRelativePosition $width={resultWidth}>
+                  <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
@@ -469,7 +477,7 @@ export const Suggester: React.FC<Suggester> = ({
               {/* PRE-SUGGESTIONS */}
               {preSuggestions && preSuggestions.length > 0 && typed.length === 0 ? (
                 <>
-                  <StyledRelativePosition $width={resultWidth}>
+                  <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
