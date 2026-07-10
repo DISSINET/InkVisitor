@@ -112,14 +112,17 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   // fetches and the render falls back to `lastData` — the old, now-irrelevant
   // rows would flash until the fetch resolves. Scroll pagination keeps the same
   // stableSignature, so it still reuses lastData to avoid flicker.
+  //
+  // Done during render (not in an effect) so the clear happens before paint:
+  // an effect fires after commit, letting the stale rows flash for one frame.
+  // Setting state during render makes React discard this render and re-render
+  // synchronously with the cleared state, so nothing stale is ever committed.
   const prevStableSignatureRef = useRef(stableSignature);
-  useEffect(() => {
-    if (prevStableSignatureRef.current !== stableSignature) {
-      prevStableSignatureRef.current = stableSignature;
-      setLastData(undefined);
-      setTotal(0);
-    }
-  }, [stableSignature]);
+  if (prevStableSignatureRef.current !== stableSignature) {
+    prevStableSignatureRef.current = stableSignature;
+    setLastData(undefined);
+    setTotal(0);
+  }
 
   const [rowFocused, setRowFocused] = useState<number>(-1);
   // Keep offset/limit for the data currently rendered to avoid flashing incorrect rows
