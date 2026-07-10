@@ -232,6 +232,7 @@ export class EdgeHasSuperordinate extends SearchEdge {
 
   run(q: RStream): RStream {
     const soeEntityId = this.node.params.entityId;
+    const soeEntityClasses = this.node.params.entityClasses ?? [];
     return q.concatMap(function(entity: RDatum<IEntity>) {
       return (
         r
@@ -246,10 +247,27 @@ export class EdgeHasSuperordinate extends SearchEdge {
           .filter(function(relation: RDatum<RelationTypes.IRelation>) {
             return relation("entityIds").nth(0).eq(entity("id"));
           })
-          // check if the target entity is the desired superordinate
+          // check if the target entity is the desired superordinate; with no
+          // target id but a class filter (empty suggester + class selected),
+          // keep only relations whose superordinate is of one of the classes.
+          // A dangling superordinate id (no such entity) is null-safe and
+          // simply fails the class condition.
           .filter(function(relation: RDatum<RelationTypes.IRelation>) {
             if (soeEntityId) {
               return relation("entityIds").nth(1).eq(soeEntityId);
+            }
+            if (soeEntityClasses.length) {
+              return r
+                .table(Entity.table)
+                .get(relation("entityIds").nth(1))
+                .default(null)
+                .do(function (ent: RDatum) {
+                  return r.branch(
+                    ent,
+                    r.expr(soeEntityClasses).contains(ent("class")),
+                    false
+                  );
+                });
             }
             return true;
           })

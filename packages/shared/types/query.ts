@@ -226,6 +226,21 @@ export namespace Query {
     "R:IMP": {},
     "I_R:IMP": {},
     "R:SOE": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the superordinate to entities of that class (server: EdgeHasSuperordinate)
+      entityClass: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+          EntityEnums.Class.Person,
+          EntityEnums.Class.Being,
+        ],
+      },
       entityId: {
         allowedClasses: [
           EntityEnums.Class.Location,
