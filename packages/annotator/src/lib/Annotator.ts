@@ -96,8 +96,17 @@ const linesHosts = new WeakMap<HTMLCanvasElement, Annotator>();
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
   segmentIndex: number;
+  /** Visual line index (within the segment) where the match starts. */
   lineIndex: number;
+  /**
+   * Visual line index (within the segment) where the match ends. Equals
+   * {@link lineIndex} for a match that fits on one line, but differs when the
+   * match straddles a soft-wrap boundary.
+   */
+  endLineIndex: number;
+  /** Column of the match start on {@link lineIndex}. */
   start: number;
+  /** Exclusive column of the match end on {@link endLineIndex}. */
   end: number;
 }
 
@@ -3883,54 +3892,83 @@ export class Annotator {
    * @returns
    */
   search(toFind: string, isRegex: boolean = false, isCaseSensitive: boolean = true): Occurrence[] {
-    const occurrences = [];
+    const occurrences: Occurrence[] = [];
+    if (!toFind) {
+      return occurrences;
+    }
     const normalizedTerm = isCaseSensitive ? toFind : toFind.toLowerCase();
 
-    const collectLiteralOccurrences = (line: string, segmentIndex: number, lineIndex: number) => {
-      const normalizedLine = isCaseSensitive ? line : line.toLowerCase();
-      let startIndex = 0;
-
-      while (startIndex < normalizedLine.length) {
-        const index = normalizedLine.indexOf(normalizedTerm, startIndex);
-        if (index === -1) {
+    // Map a flat offset within a segment's joined display text back to a
+    // (visual line index, column) pair. Soft-wrap line breaks are not real
+    // characters, so a term straddling a wrap boundary is searched against the
+    // joined text and mapped back here — otherwise it would be split across two
+    // `lines[]` entries and never match (issue: search vs. line break).
+    const locate = (lineLengths: number[], offset: number, isEnd: boolean) => {
+      let lineIndex = 0;
+      let acc = 0;
+      while (lineIndex < lineLengths.length - 1) {
+        const lineLen = lineLengths[lineIndex];
+        // Start (inclusive) belongs to a line while offset >= its end boundary;
+        // exclusive end stays on the line while offset == the end boundary.
+        const pastLine = isEnd ? offset > acc + lineLen : offset >= acc + lineLen;
+        if (!pastLine) {
           break;
         }
-
-        occurrences.push({
-          segmentIndex,
-          lineIndex,
-          start: index,
-          end: index + toFind.length,
-        });
-
-        startIndex = index + 1;
+        acc += lineLen;
+        lineIndex++;
       }
+      return { lineIndex, col: offset - acc };
     };
 
-    for (const segmentI in this.text.segments) {
-      for (const lineI in this.text.segments[segmentI].lines) {
-        const line = this.text.segments[segmentI].lines[lineI];
+    for (let segmentIndex = 0; segmentIndex < this.text.segments.length; segmentIndex++) {
+      const lines = this.text.segments[segmentIndex].lines;
+      // Reconstruct the segment's display text: wrapping keeps the overflowing
+      // space as trailing whitespace on the previous line, so join("") is exact.
+      const fullText = lines.join("");
+      const lineLengths = lines.map((line) => line.length);
+      const haystack = isCaseSensitive ? fullText : fullText.toLowerCase();
 
-        if (isRegex) {
-          try {
-            const regexFlags = isCaseSensitive ? "gu" : "giu";
-            const regex = new RegExp(toFind, regexFlags);
-            let match;
-            while ((match = regex.exec(line)) !== null) {
-              occurrences.push({
-                segmentIndex: parseInt(segmentI),
-                lineIndex: parseInt(lineI),
-                start: match.index,
-                end: match.index + match[0].length,
-              });
-            }
-          } catch (error) {
-            // If regex is invalid, treat as literal string
-            collectLiteralOccurrences(line, parseInt(segmentI, 10), parseInt(lineI, 10));
+      const pushMatch = (matchStart: number, matchEnd: number) => {
+        const startPos = locate(lineLengths, matchStart, false);
+        const endPos = locate(lineLengths, matchEnd, true);
+        occurrences.push({
+          segmentIndex,
+          lineIndex: startPos.lineIndex,
+          endLineIndex: endPos.lineIndex,
+          start: startPos.col,
+          end: endPos.col,
+        });
+      };
+
+      const collectLiteral = () => {
+        let startIndex = 0;
+        while (startIndex <= haystack.length) {
+          const index = haystack.indexOf(normalizedTerm, startIndex);
+          if (index === -1) {
+            break;
           }
-        } else {
-          collectLiteralOccurrences(line, parseInt(segmentI, 10), parseInt(lineI, 10));
+          pushMatch(index, index + toFind.length);
+          startIndex = index + 1;
         }
+      };
+
+      if (isRegex) {
+        try {
+          const regex = new RegExp(toFind, isCaseSensitive ? "gu" : "giu");
+          let match;
+          while ((match = regex.exec(fullText)) !== null) {
+            pushMatch(match.index, match.index + match[0].length);
+            // Avoid an infinite loop on a zero-width match.
+            if (match[0].length === 0) {
+              regex.lastIndex++;
+            }
+          }
+        } catch (error) {
+          // If regex is invalid, treat as literal string
+          collectLiteral();
+        }
+      } else {
+        collectLiteral();
       }
     }
 
@@ -3942,17 +3980,19 @@ export class Annotator {
    * @param occurence
    */
   selectSearchOccurrence(occurence: Occurrence) {
-    const absY = this.text.segments[occurence.segmentIndex].lineStart + occurence.lineIndex;
+    const segment = this.text.segments[occurence.segmentIndex];
+    const absStartY = segment.lineStart + occurence.lineIndex;
+    const absEndY = segment.lineStart + occurence.endLineIndex;
     this.cursor.xLine = occurence.end;
-    this.cursor.yLine = absY;
+    this.cursor.yLine = absEndY;
 
     this.cursor.selectStart = {
       xLine: occurence.start,
-      yLine: absY,
+      yLine: absStartY,
     };
     this.cursor.selectEnd = {
       xLine: occurence.end,
-      yLine: absY,
+      yLine: absEndY,
     };
 
     this.scrollToLine(this.cursor.selectStart.yLine);

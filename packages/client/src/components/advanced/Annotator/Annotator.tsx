@@ -23,6 +23,7 @@ import {
   EditMode,
   editModeDisplayLabel,
   MoveAnchorBoundaryResult,
+  Occurrence,
   Tag,
   WarningType,
 } from "@inkvisitor/annotator/src/lib";
@@ -1392,9 +1393,9 @@ export const TextAnnotator = ({
   }, [isMenuDisplayed]);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<
-    { segmentIndex: number; lineIndex: number; start: number; end: number }[] | null
-  >(null);
+  const [searchOccurences, setSearchOccurences] = useState<Occurrence[] | null>(
+    null
+  );
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
   const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(false);
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] = useState<boolean>(false);

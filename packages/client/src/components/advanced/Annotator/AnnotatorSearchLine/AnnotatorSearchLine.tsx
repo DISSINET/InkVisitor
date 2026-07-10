@@ -1,4 +1,4 @@
-import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -24,14 +24,7 @@ import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
 interface AnnotatorSearchLine {
   searchTerm: string;
   setSearchTerm: (searchTerm: string) => void;
-  searchOccurences:
-    | {
-        segmentIndex: number;
-        lineIndex: number;
-        start: number;
-        end: number;
-      }[]
-    | null;
+  searchOccurences: Occurrence[] | null;
   searchActiveOccurence: number;
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   isSearchAllowed: boolean;
@@ -47,15 +40,7 @@ interface AnnotatorSearchLine {
   annotatorMode: EditMode;
   selectedText: string;
   setSearchOccurences: React.Dispatch<
-    React.SetStateAction<
-      | {
-          segmentIndex: number;
-          lineIndex: number;
-          start: number;
-          end: number;
-        }[]
-      | null
-    >
+    React.SetStateAction<Occurrence[] | null>
   >;
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
@@ -259,7 +244,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
 
           // Convert occurrence to absolute coordinates
           const absLineStart = segment.lineStart + occurrence.lineIndex;
-          const absLineEnd = absLineStart;
+          const absLineEnd = segment.lineStart + occurrence.endLineIndex;
 
           // Get segment positions for start and end
           const startSegment = annotator.text.getSegmentPosition(absLineStart, occurrence.start);
