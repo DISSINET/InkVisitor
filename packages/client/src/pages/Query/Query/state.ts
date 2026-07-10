@@ -121,6 +121,17 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         return updatedStateUpdate;
       }
       edgeToUpdate.type = newType;
+
+      // the child node's params are edge-type specific; drop the ones the new
+      // edge type does not accept so stale class/entity filters (and their
+      // tooltip hints) don't linger after a type switch
+      const newTargetParams = Query.EdgeTypeTargetNodeParams[newType] ?? {};
+      if (!newTargetParams.entityClass) {
+        edgeToUpdate.node.params.entityClasses = undefined;
+      }
+      if (!newTargetParams.entityId) {
+        edgeToUpdate.node.params.entityId = undefined;
+      }
       return updatedStateUpdate;
 
     case QueryActionType.updateEdgeLogic:

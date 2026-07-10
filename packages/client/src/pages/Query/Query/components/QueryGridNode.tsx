@@ -99,20 +99,16 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     return paramEntityId.allowedClasses.length === 0 ? classesAll : paramEntityId.allowedClasses;
   }, [paramEntityId, relationConstrainedCategoryTypes]);
 
-  // class label shown in the empty-suggester hint, e.g. "Concept". The class
-  // picked in the suggester is only written back to node.params.entityClasses
-  // when the edge also has an entityClass param; for pure entityId edges it
-  // stays empty, so fall back to the picker's allowed classes
-  // (entityIdCategoryTypes) - the same set the suggester offers. Only rendered
-  // when it narrows to a single class; multiple/all classes stay generic ("entity").
+  // class label shown in the empty-suggester hint, e.g. "Concept". Only shown for
+  // classes the user actively picked in the suggester (written back to
+  // node.params.entityClasses on entityClass edges). When the suggester offers a
+  // single forced option the class is obvious from the picker itself, so no hint.
   const selectedClassLabels =
     node.params.entityClasses && node.params.entityClasses.length > 0
       ? node.params.entityClasses
           .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
           .join(", ")
-      : entityIdCategoryTypes.length === 1
-        ? (entitiesDict.find((e) => e.value === entityIdCategoryTypes[0])?.label ?? "")
-        : "";
+      : "";
 
   const isRelationEntityPickerDisabled =
     relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
