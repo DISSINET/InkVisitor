@@ -114,6 +114,7 @@ const SETTINGS_STORAGE_KEY = "inkvisitor.annotator.settings";
 
 interface PersistedSettings {
   caretWidth?: number;
+  caretBlock?: boolean;
   highlightColor?: string;
   showFps?: boolean;
   proportional?: boolean;
@@ -288,6 +289,14 @@ export class Annotator {
 
   /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
   private caretWidth = 1;
+
+  /**
+   * Block (full char-cell) caret intent. Monospace-only: the caret spans the
+   * whole `charWidth` cell so it scales with font size. Kept as latent intent
+   * while proportional is active (the effective block gates on `!proportional`),
+   * so returning to monospace restores it. Cleared when the user picks a fixed
+   * px width. */
+  private caretBlock = false;
 
   /**
    * User-chosen selection highlight color (`#rrggbb`), or undefined to defer to
@@ -2042,13 +2051,18 @@ export class Annotator {
       {
         type: "segmented",
         label: "Cursor size",
+        // "Full" (value 0) is the block caret filling the whole char cell —
+        // monospace-only, so it's disabled while proportional font is active.
         options: [
           { label: "1px", value: 1 },
           { label: "2px", value: 2 },
           { label: "3px", value: 3 },
+          { label: "Full", value: 0, disabled: this.proportional },
         ],
-        value: this.caretWidth,
-        onChange: (px) => this.setCaretWidth(px),
+        // Block only takes effect in monospace; while proportional show the
+        // fixed px selection instead.
+        value: this.caretBlock && !this.proportional ? 0 : this.caretWidth,
+        onChange: (v) => (v === 0 ? this.setCaretBlock(true) : this.setCaretWidth(v)),
       }
     );
 
@@ -2649,7 +2663,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
-        caretWidth: this.caretWidth * this.ratio,
+        caretWidth: this.caretWidthDevicePx(),
         caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
         columnToPixelX: this.drawColumnToPixelX(),
       });
@@ -2934,9 +2948,29 @@ export class Annotator {
     return this.caretWidth;
   }
 
-  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. */
+  /**
+   * Effective collapsed-caret width in device px. A block caret (monospace only)
+   * fills the whole `charWidth` cell — already device-px so it tracks font size;
+   * otherwise the fixed px width scaled by `ratio`. */
+  private caretWidthDevicePx(): number {
+    return this.caretBlock && !this.proportional
+      ? this.charWidth
+      : this.caretWidth * this.ratio;
+  }
+
+  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. A fixed
+   *  px pick is a new intent, so it clears any block-caret mode. */
   setCaretWidth(px: number): void {
     this.caretWidth = Math.max(1, px);
+    this.caretBlock = false;
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Enable the block (full char-cell) caret and redraw. Monospace-only; while
+   *  proportional it stays latent until monospace is restored. */
+  setCaretBlock(on: boolean): void {
+    this.caretBlock = on;
     this.saveSettings();
     this.draw();
   }
@@ -2962,6 +2996,9 @@ export class Annotator {
 
     if (typeof parsed.caretWidth === "number") {
       this.caretWidth = Math.max(1, parsed.caretWidth);
+    }
+    if (typeof parsed.caretBlock === "boolean") {
+      this.caretBlock = parsed.caretBlock;
     }
     if (typeof parsed.highlightColor === "string") {
       this.highlightColor = parsed.highlightColor;
@@ -2994,6 +3031,7 @@ export class Annotator {
   /** Reset all persisted settings to their defaults, clear storage, and redraw. */
   resetSettings(): void {
     this.caretWidth = 1;
+    this.caretBlock = false;
     this.highlightColor = undefined;
     // Revert the highlight color to the host theme color (last setSelectStyle).
     this.cursor.style = { ...this.cursor.style, color: this.selectColor };
@@ -3028,6 +3066,7 @@ export class Annotator {
       }
       const data: PersistedSettings = {
         caretWidth: this.caretWidth,
+        caretBlock: this.caretBlock,
         highlightColor: this.highlightColor,
         showFps: this.showFps,
         proportional: this.proportional,
