@@ -345,9 +345,17 @@ export const Suggester: React.FC<Suggester> = ({
   // separate trailing segment. Reserve its footprint in the input width so the
   // typing area stays as roomy as before and the suggester keeps its overall size.
   const CREATE_BUTTON_WIDTH = 25;
+  // The category dropdown is narrower when only one class is available (26 vs 33,
+  // see its width prop below), so single-class suggesters would end up narrower
+  // overall than multi-class ones for the same inputWidth. Add this back to the
+  // input width in the single-class case so the overall width stays consistent
+  // regardless of class count. Finetune this value.
+  const SINGLE_CLASS_WIDTH_COMPENSATION = 7;
   const effectiveInputWidth =
-    typeof inputWidth === "number" && !disableCreate
-      ? inputWidth + CREATE_BUTTON_WIDTH
+    typeof inputWidth === "number"
+      ? inputWidth +
+        (disableCreate ? 0 : CREATE_BUTTON_WIDTH) +
+        (categories.length > 1 ? 0 : SINGLE_CLASS_WIDTH_COMPENSATION)
       : inputWidth;
 
   return (
