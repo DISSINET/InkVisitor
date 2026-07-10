@@ -49,6 +49,12 @@ interface ExplorerTable {
   /** True when criteria are set but the search has not been run yet. */
   isSearchPending?: boolean;
   queryError: Error | null;
+  /**
+   * Identity of the current query (excludes offset/limit). Changes on a new
+   * search/filter/sort/view but not on scroll pagination — used to drop stale
+   * results instead of flashing them while the new query is fetching.
+   */
+  stableSignature?: string;
   height: number;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
@@ -69,6 +75,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   isRequestEmpty,
   isSearchPending = false,
+  stableSignature,
   getCachedEntity,
   height: heightBox,
   onOpenEntityInDetail,
@@ -99,6 +106,20 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const [total, setTotal] = useState(0);
+
+  // Drop stale results the moment the query identity changes (new search /
+  // filter / sort / view). Without this, `data` is undefined while the new query
+  // fetches and the render falls back to `lastData` — the old, now-irrelevant
+  // rows would flash until the fetch resolves. Scroll pagination keeps the same
+  // stableSignature, so it still reuses lastData to avoid flicker.
+  const prevStableSignatureRef = useRef(stableSignature);
+  useEffect(() => {
+    if (prevStableSignatureRef.current !== stableSignature) {
+      prevStableSignatureRef.current = stableSignature;
+      setLastData(undefined);
+      setTotal(0);
+    }
+  }, [stableSignature]);
 
   const [rowFocused, setRowFocused] = useState<number>(-1);
   // Keep offset/limit for the data currently rendered to avoid flashing incorrect rows

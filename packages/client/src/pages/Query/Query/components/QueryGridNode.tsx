@@ -111,7 +111,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
           .join(", ")
       : entityIdCategoryTypes.length === 1
-        ? entitiesDict.find((e) => e.value === entityIdCategoryTypes[0])?.label ?? ""
+        ? (entitiesDict.find((e) => e.value === entityIdCategoryTypes[0])?.label ?? "")
         : "";
 
   const isRelationEntityPickerDisabled =
