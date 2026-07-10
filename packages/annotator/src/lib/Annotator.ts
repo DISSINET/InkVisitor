@@ -3941,6 +3941,24 @@ export class Annotator {
       };
 
       const collectLiteral = () => {
+        if (!isCaseSensitive) {
+          // Match on the original-case text via a case-insensitive regex so
+          // occurrence offsets stay aligned with `lineLengths`. Searching a
+          // lowercased haystack would desync offsets whenever toLowerCase()
+          // changes the UTF-16 length (e.g. İ→i̇, ẞ→ss), producing wrong
+          // highlights and corrupting the replace-all slice range.
+          const escaped = toFind.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(escaped, "giu");
+          let match;
+          while ((match = regex.exec(fullText)) !== null) {
+            pushMatch(match.index, match.index + match[0].length);
+            // Avoid an infinite loop on a zero-width match.
+            if (match[0].length === 0) {
+              regex.lastIndex++;
+            }
+          }
+          return;
+        }
         let startIndex = 0;
         while (startIndex <= haystack.length) {
           const index = haystack.indexOf(normalizedTerm, startIndex);
@@ -4114,6 +4132,10 @@ export class Annotator {
   }
 
   onPasteText() {
+    // Editing is disabled in HIGHLIGHT mode; paste must not mutate the document.
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
     window.navigator.clipboard
       .readText()
       .then((clipText: string) => {
@@ -4135,6 +4157,11 @@ export class Annotator {
         this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
         if (this.text.value !== before.value) {
           this.recordHistory(before, false);
+          // Notify the host app so paste marks the document dirty (enables the
+          // save button), same as a typing edit.
+          if (this.onTextChangeCb) {
+            this.onTextChangeCb(this.text.value);
+          }
         }
         this.keys.scrollCursorIntoView();
 
