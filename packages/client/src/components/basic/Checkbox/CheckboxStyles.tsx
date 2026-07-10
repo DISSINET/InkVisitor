@@ -58,9 +58,8 @@ export const StyledCheckboxWrapper = styled.span<{ $hasLabel?: boolean }>`
   cursor: pointer;
   margin-right: ${({ $hasLabel }) => ($hasLabel ? "0.2rem" : "0")};
 `;
-export const StyledLabel = styled.label<{ $bold?: boolean }>`
+export const StyledLabel = styled.label`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: ${({ theme, $bold }) => ($bold ? theme.fontWeight["bold"] : "inherit")};
   margin-left: 0.2rem;
   user-select: none;
   cursor: pointer;

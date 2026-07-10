@@ -335,9 +335,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                           ) : (
                             <StyledTooltipList>
                               <StyledTooltipListItem>
-                                <b>Empty</b> → matches any {selectedClassLabels || "entity"} that
-                                has the "{edgeLabel}" relation
-                                {!selectedClassLabels && paramEntityClass && "; * = all classes"}
+                                <b>Empty</b> → matches any entity that has the "{edgeLabel}"
+                                relation{" "}
+                                {(selectedClassLabels && `of class ${selectedClassLabels}`) || ""}
                               </StyledTooltipListItem>
                               <StyledTooltipListItem>
                                 <b>Empty + NOT</b> → matches nodes that have no "{edgeLabel}"
