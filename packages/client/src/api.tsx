@@ -1061,6 +1061,9 @@ class Api {
    * Returns unique entity IDs referenced by all statements
    * on the given territory (actants, actions, props, tags, etc.).
    */
+  // REMOVE: Unused endpoint, could be removed
+  // it was used to get territory actants for EntitySuggester in StatementEditor (home icon)
+  // but the identical list of entities exists in StatementEditor's territoryData
   async entityIdsInTerritory(
     territoryId: string,
     options?: IApiOptions,
