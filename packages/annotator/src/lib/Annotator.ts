@@ -2660,6 +2660,12 @@ export class Annotator {
     // Blink only while a collapsed caret is shown and the canvas is focused.
     this.caretBlink.sync(this.cursor.hasCaret() && this.canvasFocused);
 
+    // In HIGHLIGHT mode a collapsed caret is repainted after the highlights and
+    // anchor markers below (#2887); painting it here too would stack the
+    // semi-transparent block caret to a doubled opacity, so skip the first pass.
+    const caretRepaintsOverHighlights =
+      this.text.mode === EditMode.HIGHLIGHT && !!this.onHighlightCb && !this.cursor.isSelected();
+
     if (textSegment && !this.selectionHidden) {
       const line = this.text.getLineFromPosition(textSegment);
       if (this.cursor.xLine > line.length) {
@@ -2675,7 +2681,8 @@ export class Annotator {
         charsAtLine: this.text.charsAtLine,
         caretWidth: this.caretWidthDevicePx(),
         caretOpacity: this.caretOpacityValue(),
-        caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
+        caretVisible:
+          this.canvasFocused && this.caretBlink.isVisible() && !caretRepaintsOverHighlights,
         columnToPixelX: this.drawColumnToPixelX(),
       });
     }
@@ -2973,7 +2980,7 @@ export class Annotator {
    * so it paints mostly transparent to keep the letter under it readable; thin
    * carets stay solid (#2887). */
   private caretOpacityValue(): number {
-    return this.caretBlock && !this.proportional ? 0.3 : 1;
+    return this.caretBlock && !this.proportional ? 0.45 : 1;
   }
 
   /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. A fixed
