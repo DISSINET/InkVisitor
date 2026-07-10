@@ -37,6 +37,29 @@ export default class SearchEdge implements Query.IEdge {
   }
 }
 
+/**
+ * Intersects a precomputed candidate-id stream back into the incoming stream q:
+ * dedupes `idsStream`, coerces it to an array and emits only the ids already
+ * present in q - the subset invariant that positive matching and negation
+ * (base set minus matches) both rely on. Pass null when the edge has no usable
+ * target - the edge then matches nothing.
+ */
+function intersectIdsWithStream(q: RStream, idsStream: RStream | null): RStream {
+  const idsArray: RDatum = idsStream
+    ? (idsStream.distinct() as unknown as RDatum).coerceTo("array")
+    : r.expr([] as string[]);
+
+  return idsArray.do(function (ids: RDatum) {
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return ids.contains(e("id"));
+      })
+      .map(function (e: RDatum<IEntity>) {
+        return e("id");
+      });
+  }) as unknown as RStream;
+}
+
 export class EdgeHasClassification extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -127,28 +150,20 @@ export class EdgeSUnderChildrenT extends SearchEdge {
   run(q: RStream): RStream {
     const subtreeIds = this.subtreeTerritoryIds;
 
-    const statementIds: RDatum = subtreeIds.length
-      ? (r
-          .table(Entity.table)
-          .getAll(r.args(subtreeIds), {
-            index: DbEnums.Indexes.StatementTerritory,
-          })
-          .filter(function (e: RDatum<IEntity>) {
-            return e("class").eq(EntityEnums.Class.Statement);
-          })
-          .getField("id")
-          .distinct() as unknown as RDatum).coerceTo("array")
-      : r.expr([] as string[]);
-
-    return statementIds.do(function (ids: RDatum) {
-      return q
-        .filter(function (e: RDatum<IEntity>) {
-          return ids.contains(e("id"));
-        })
-        .map(function (e: RDatum<IEntity>) {
-          return e("id");
-        });
-    }) as unknown as RStream;
+    return intersectIdsWithStream(
+      q,
+      subtreeIds.length
+        ? (r
+            .table(Entity.table)
+            .getAll(r.args(subtreeIds), {
+              index: DbEnums.Indexes.StatementTerritory,
+            })
+            .filter(function (e: RDatum<IEntity>) {
+              return e("class").eq(EntityEnums.Class.Statement);
+            })
+            .getField("id") as unknown as RStream)
+        : null
+    );
   }
 }
 
@@ -468,7 +483,8 @@ function emitMatchingActants(
   statements: RStream,
   actantMatches: (actant: RDatum) => RValue<boolean>
 ): RStream {
-  const characterised = (
+  return intersectIdsWithStream(
+    q,
     statements
       .filter(function(e: RDatum<IEntity>) {
         return e("class").eq(EntityEnums.Class.Statement);
@@ -482,18 +498,7 @@ function emitMatchingActants(
             return a("entityId");
           });
       })
-      .distinct() as unknown as RDatum
-  ).coerceTo("array");
-
-  return characterised.do(function(ids: RDatum) {
-    return q
-      .filter(function(e: RDatum<IEntity>) {
-        return ids.contains(e("id"));
-      })
-      .map(function(e: RDatum<IEntity>) {
-        return e("id");
-      });
-  }) as unknown as RStream;
+  );
 }
 
 function runInverseStatementPropEdge(
@@ -702,35 +707,27 @@ function runStatementHasEntityEdge(
   q: RStream,
   targetId: string | undefined
 ): RStream {
-  const statementIds: RDatum = targetId
-    ? (r
-        .table(Entity.table)
-        .getAll(targetId, { index: DbEnums.Indexes.StatementEntities })
-        .union(
-          r
-            .table(Entity.table)
-            .getAll(targetId, {
-              index: DbEnums.Indexes.StatementDataProps,
-            }) as unknown as RStream
-        )
-        .filter(function (e: RDatum<IEntity>) {
-          return e("class").eq(EntityEnums.Class.Statement);
-        })
-        .map(function (e: RDatum<IEntity>) {
-          return e("id");
-        })
-        .distinct() as unknown as RDatum).coerceTo("array")
-    : r.expr([] as string[]);
-
-  return statementIds.do(function (ids: RDatum) {
-    return q
-      .filter(function (e: RDatum<IEntity>) {
-        return ids.contains(e("id"));
-      })
-      .map(function (e: RDatum<IEntity>) {
-        return e("id");
-      });
-  }) as unknown as RStream;
+  return intersectIdsWithStream(
+    q,
+    targetId
+      ? r
+          .table(Entity.table)
+          .getAll(targetId, { index: DbEnums.Indexes.StatementEntities })
+          .union(
+            r
+              .table(Entity.table)
+              .getAll(targetId, {
+                index: DbEnums.Indexes.StatementDataProps,
+              }) as unknown as RStream
+          )
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .map(function (e: RDatum<IEntity>) {
+            return e("id");
+          })
+      : null
+  );
 }
 
 export class EdgeStatementHasEntity extends SearchEdge {
@@ -844,28 +841,20 @@ function runUsedUnderTerritoryEdge(
   q: RStream,
   territoryId: string | undefined
 ): RStream {
-  const usedIds: RDatum = territoryId
-    ? (r
-        .table(Entity.table)
-        .getAll(territoryId, { index: DbEnums.Indexes.StatementTerritory })
-        .filter(function (e: RDatum<IEntity>) {
-          return e("class").eq(EntityEnums.Class.Statement);
-        })
-        .concatMap(function (stmt: RDatum) {
-          return collectStatementEntityIds(stmt);
-        })
-        .distinct() as unknown as RDatum).coerceTo("array")
-    : r.expr([] as string[]);
-
-  return usedIds.do(function (ids: RDatum) {
-    return q
-      .filter(function (e: RDatum<IEntity>) {
-        return ids.contains(e("id"));
-      })
-      .map(function (e: RDatum<IEntity>) {
-        return e("id");
-      });
-  }) as unknown as RStream;
+  return intersectIdsWithStream(
+    q,
+    territoryId
+      ? r
+          .table(Entity.table)
+          .getAll(territoryId, { index: DbEnums.Indexes.StatementTerritory })
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .concatMap(function (stmt: RDatum) {
+            return collectStatementEntityIds(stmt);
+          })
+      : null
+  );
 }
 
 export class EdgeUsedUnderTerritory extends SearchEdge {
@@ -917,30 +906,22 @@ export class EdgeUsedUnderChildrenTerritory extends SearchEdge {
   run(q: RStream): RStream {
     const subtreeIds = this.subtreeTerritoryIds;
 
-    const usedIds: RDatum = subtreeIds.length
-      ? (r
-          .table(Entity.table)
-          .getAll(r.args(subtreeIds), {
-            index: DbEnums.Indexes.StatementTerritory,
-          })
-          .filter(function (e: RDatum<IEntity>) {
-            return e("class").eq(EntityEnums.Class.Statement);
-          })
-          .concatMap(function (stmt: RDatum) {
-            return collectStatementEntityIds(stmt);
-          })
-          .distinct() as unknown as RDatum).coerceTo("array")
-      : r.expr([] as string[]);
-
-    return usedIds.do(function (ids: RDatum) {
-      return q
-        .filter(function (e: RDatum<IEntity>) {
-          return ids.contains(e("id"));
-        })
-        .map(function (e: RDatum<IEntity>) {
-          return e("id");
-        });
-    }) as unknown as RStream;
+    return intersectIdsWithStream(
+      q,
+      subtreeIds.length
+        ? r
+            .table(Entity.table)
+            .getAll(r.args(subtreeIds), {
+              index: DbEnums.Indexes.StatementTerritory,
+            })
+            .filter(function (e: RDatum<IEntity>) {
+              return e("class").eq(EntityEnums.Class.Statement);
+            })
+            .concatMap(function (stmt: RDatum) {
+              return collectStatementEntityIds(stmt);
+            })
+        : null
+    );
   }
 }
 
@@ -964,28 +945,20 @@ function runIsInStatementEdge(
   q: RStream,
   statementId: string | undefined
 ): RStream {
-  const usedIds: RDatum = statementId
-    ? (r
-        .table(Entity.table)
-        .getAll(statementId)
-        .filter(function (e: RDatum<IEntity>) {
-          return e("class").eq(EntityEnums.Class.Statement);
-        })
-        .concatMap(function (stmt: RDatum) {
-          return collectStatementEntityIds(stmt);
-        })
-        .distinct() as unknown as RDatum).coerceTo("array")
-    : r.expr([] as string[]);
-
-  return usedIds.do(function (ids: RDatum) {
-    return q
-      .filter(function (e: RDatum<IEntity>) {
-        return ids.contains(e("id"));
-      })
-      .map(function (e: RDatum<IEntity>) {
-        return e("id");
-      });
-  }) as unknown as RStream;
+  return intersectIdsWithStream(
+    q,
+    statementId
+      ? r
+          .table(Entity.table)
+          .getAll(statementId)
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .concatMap(function (stmt: RDatum) {
+            return collectStatementEntityIds(stmt);
+          })
+      : null
+  );
 }
 
 export class EdgeIsInStatement extends SearchEdge {

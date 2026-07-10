@@ -3284,10 +3284,33 @@ export class Annotator {
   }
 
   /**
+   * Nearest-following closing tag pairing with `openTag`: the first same-name
+   * closing tag after the opening tag's position, scanning forward across
+   * segments (the same rule as removeAnchorFromSelection). Returns undefined
+   * when the anchor is asymmetrical (no pairing close).
+   */
+  private findPairingCloseTag(openTag: Tag, tagName: string): Tag | undefined {
+    const segments = this.text.segments;
+    for (let i = openTag.segmentIndex; i < segments.length; i++) {
+      const candidates =
+        i === openTag.segmentIndex
+          ? segments[i].closingTags.filter((t) => t.position > openTag.position)
+          : segments[i].closingTags;
+      const closeTag = candidates.find((t) => t.getTagName() === tagName);
+      if (closeTag) {
+        return closeTag;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Resolves an anchor to its opening + pairing closing {@link Tag} against the
-   * current segments, using the same exact-then-nearest matching and
-   * nearest-following-close pairing as {@link moveAnchorBoundary}. Returns null
-   * when the anchor cannot be resolved (unknown name, or asymmetrical).
+   * current segments: the opening tag by exact (segmentIndex, position) ref
+   * match, else the nearest same-name opening tag by absolute raw distance (the
+   * ref goes stale when an earlier edit shifted raw positions); the closing tag
+   * by nearest-following-close pairing ({@link findPairingCloseTag}). Returns
+   * null when the anchor cannot be resolved (unknown name, or asymmetrical).
    */
   private resolveAnchorTags(
     tagName: string,
@@ -3325,22 +3348,11 @@ export class Annotator {
       return null;
     }
 
-    const resolvedOpenTag = openTag;
-    let closeTag: Tag | undefined;
-    for (let i = resolvedOpenTag.segmentIndex; i < segments.length; i++) {
-      const candidates =
-        i === resolvedOpenTag.segmentIndex
-          ? segments[i].closingTags.filter((t) => t.position > resolvedOpenTag.position)
-          : segments[i].closingTags;
-      closeTag = candidates.find((t) => t.getTagName() === tagName);
-      if (closeTag) {
-        break;
-      }
-    }
+    const closeTag = this.findPairingCloseTag(openTag, tagName);
     if (!closeTag) {
       return null;
     }
-    return { openTag: resolvedOpenTag, closeTag };
+    return { openTag, closeTag };
   }
 
   /**
@@ -3489,56 +3501,13 @@ export class Annotator {
   ): MoveAnchorBoundaryResult {
     const segments = this.text.segments;
 
-    // Resolve the opening tag: exact ref match, else nearest same-name opening
-    // tag by absolute raw distance (the ref goes stale when an earlier edit
-    // shifted raw positions).
-    let openTag: Tag | undefined;
-    const refSegment = segments[openTagRef.segmentIndex];
-    if (refSegment) {
-      openTag = refSegment.openingTags.find(
-        (t) => t.getTagName() === tagName && t.position === openTagRef.position
-      );
-    }
-    if (!openTag) {
-      let refAbs = openTagRef.position;
-      for (let i = 0; i < Math.min(openTagRef.segmentIndex, segments.length); i++) {
-        refAbs += segments[i].raw.length + 1;
-      }
-      let bestDistance = Infinity;
-      for (const segment of segments) {
-        for (const candidate of segment.openingTags) {
-          if (candidate.getTagName() !== tagName) {
-            continue;
-          }
-          const distance = Math.abs(candidate.getAbsoluteTagPosition(segments) - refAbs);
-          if (distance < bestDistance) {
-            bestDistance = distance;
-            openTag = candidate;
-          }
-        }
-      }
-    }
-    if (!openTag) {
+    // Resolve the anchor's opening + pairing closing tag (exact-then-nearest
+    // opening match, nearest-following-close pairing - see resolveAnchorTags).
+    const resolved = this.resolveAnchorTags(tagName, openTagRef);
+    if (!resolved) {
       return { status: "not-found" };
     }
-
-    // Pairing closing tag: nearest following same-name closing tag (same rule
-    // as removeAnchorFromSelection).
-    const resolvedOpenTag = openTag;
-    let closeTag: Tag | undefined;
-    for (let i = resolvedOpenTag.segmentIndex; i < segments.length; i++) {
-      const candidates =
-        i === resolvedOpenTag.segmentIndex
-          ? segments[i].closingTags.filter((t) => t.position > resolvedOpenTag.position)
-          : segments[i].closingTags;
-      closeTag = candidates.find((t) => t.getTagName() === tagName);
-      if (closeTag) {
-        break;
-      }
-    }
-    if (!closeTag) {
-      return { status: "not-found" };
-    }
+    const { openTag: resolvedOpenTag, closeTag } = resolved;
 
     const raw = this.text.value;
     const openAbs = resolvedOpenTag.getAbsoluteTagPosition(segments);
@@ -3612,23 +3581,10 @@ export class Annotator {
         (t) => t.getTagName() === tagName && t.position === position
       );
       if (movedOpenTag) {
-        let movedCloseTag: Tag | undefined;
-        let movedCloseSegmentIndex = -1;
-        for (let i = segmentIndex; i < newSegments.length; i++) {
-          const candidates =
-            i === segmentIndex
-              ? newSegments[i].closingTags.filter((t) => t.position > movedOpenTag.position)
-              : newSegments[i].closingTags;
-          const found = candidates.find((t) => t.getTagName() === tagName);
-          if (found) {
-            movedCloseTag = found;
-            movedCloseSegmentIndex = i;
-            break;
-          }
-        }
+        const movedCloseTag = this.findPairingCloseTag(movedOpenTag, tagName);
         if (movedCloseTag) {
           const start = movedOpenSegment.findTagParsedPosition(movedOpenTag);
-          const end = newSegments[movedCloseSegmentIndex].findTagParsedPosition(movedCloseTag);
+          const end = newSegments[movedCloseTag.segmentIndex].findTagParsedPosition(movedCloseTag);
           this.cursor.selectStart = { xLine: start.x, yLine: start.y };
           this.cursor.selectEnd = { xLine: end.x, yLine: end.y };
           this.cursor.setTrueSelectionDirection();
