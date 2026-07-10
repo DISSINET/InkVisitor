@@ -15,7 +15,9 @@ import { MenuColors, LIGHT_MENU_COLORS } from "./constants";
 export interface SegmentedSetting {
   type: "segmented";
   label: string;
-  options: { label: string; value: number }[];
+  /** A `disabled` option renders greyed and is not selectable (e.g. the block
+   *  caret "Full" segment while proportional font is active). */
+  options: { label: string; value: number; disabled?: boolean }[];
   /** Currently-selected value (must match one of `options[].value`). */
   value: number;
   onChange: (value: number) => void;
@@ -404,14 +406,18 @@ export class SettingsOverlay {
     } as Partial<CSSStyleDeclaration>);
 
     let selected = setting.value;
-    const segments: { value: number; el: HTMLElement }[] = [];
+    const segments: { value: number; el: HTMLElement; disabled: boolean }[] = [];
 
     const restyle = () => {
       for (const seg of segments) {
         const active = seg.value === selected;
         Object.assign(seg.el.style, {
           background: active ? this.colors.accent : "transparent",
-          color: active ? this.colors.accentText : this.colors.text,
+          color: seg.disabled
+            ? this.colors.disabled
+            : active
+            ? this.colors.accentText
+            : this.colors.text,
         } as Partial<CSSStyleDeclaration>);
       }
     };
@@ -421,18 +427,20 @@ export class SettingsOverlay {
       seg.textContent = opt.label;
       Object.assign(seg.style, {
         padding: "0.4rem 1rem",
-        cursor: "pointer",
+        cursor: opt.disabled ? "default" : "pointer",
         borderRadius: "3px",
         transition: "background-color 0.12s ease",
       } as Partial<CSSStyleDeclaration>);
-      seg.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        selected = opt.value;
-        restyle();
-        setting.onChange(opt.value);
-      });
-      segments.push({ value: opt.value, el: seg });
+      if (!opt.disabled) {
+        seg.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          selected = opt.value;
+          restyle();
+          setting.onChange(opt.value);
+        });
+      }
+      segments.push({ value: opt.value, el: seg, disabled: !!opt.disabled });
       group.appendChild(seg);
     }
 

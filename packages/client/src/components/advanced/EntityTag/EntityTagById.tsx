@@ -10,7 +10,7 @@ interface EntityTagByIdProps {
   entityId: string;
   entity?: IEntity;
   fullWidth?: boolean;
-  tagMaxWidth?: string;
+  tagMaxWidth?: number;
   disableTooltip?: boolean;
   unlinkButton?: UnlinkButton | false;
   disableToast?: boolean;

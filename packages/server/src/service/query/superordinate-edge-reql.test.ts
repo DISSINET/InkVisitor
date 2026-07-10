@@ -21,14 +21,20 @@ const MILAN = "loc-milan"; // subordinate to Lombardy
 const BERGAMO = "loc-bergamo"; // subordinate to Lombardy
 const ROME = "loc-rome"; // subordinate to Lazio
 const PARIS = "loc-paris"; // related to Lombardy by a NON-superordinate relation
+const FOUNDING = "evt-founding"; // an EVENT superordinate (class-filter fixture)
+const TURIN = "loc-turin"; // subordinate to the FOUNDING event
+const NAPLES = "loc-naples"; // subordinate to a MISSING (dangling) superordinate
 
 const entity = (id: string, cls = EntityEnums.Class.Location) => ({
   id,
   class: cls,
 });
-const ENTITY_FIXTURES = [LOMBARDY, LAZIO, MILAN, BERGAMO, ROME, PARIS].map((id) =>
-  entity(id)
-);
+const ENTITY_FIXTURES = [
+  ...[LOMBARDY, LAZIO, MILAN, BERGAMO, ROME, PARIS, TURIN, NAPLES].map((id) =>
+    entity(id)
+  ),
+  entity(FOUNDING, EntityEnums.Class.Event),
+];
 
 // SuperordinateEntity relation: entityIds = [subordinate, superordinate]
 const soe = (subordinate: string, superordinate: string) => ({
@@ -40,6 +46,9 @@ const RELATION_FIXTURES = [
   soe(MILAN, LOMBARDY),
   soe(BERGAMO, LOMBARDY),
   soe(ROME, LAZIO),
+  soe(TURIN, FOUNDING),
+  // dangling superordinate: entity row does not exist
+  soe(NAPLES, "missing-superordinate"),
   // a non-superordinate relation between PARIS and LOMBARDY - must be ignored
   {
     id: "rel-paris-lombardy",
@@ -49,7 +58,7 @@ const RELATION_FIXTURES = [
 ];
 
 const runEdge = (
-  targetEntityId: string | undefined,
+  nodeParams: Query.INodeParams,
   conn: Connection
 ): Promise<string[]> => {
   const edge = getEdgeInstance({
@@ -61,7 +70,7 @@ const runEdge = (
       id: "n1",
       type: Query.NodeType.E,
       operator: Query.NodeOperator.And,
-      params: targetEntityId ? { entityId: targetEntityId } : {},
+      params: nodeParams,
       edges: [],
     },
   });
@@ -107,7 +116,7 @@ describe("R:SOE (SuperordinateEntity) edge (real ReQL)", () => {
 
   test("by entity: returns the subordinates of Lombardy, not Lombardy itself", async () => {
     if (!conn) return;
-    const ids = await runEdge(LOMBARDY, conn);
+    const ids = await runEdge({ entityId: LOMBARDY }, conn);
     expect(sorted(ids)).toEqual(sorted([MILAN, BERGAMO]));
     expect(ids).not.toContain(LOMBARDY);
     expect(ids).not.toContain(ROME);
@@ -115,13 +124,39 @@ describe("R:SOE (SuperordinateEntity) edge (real ReQL)", () => {
 
   test("only the SuperordinateEntity relation type matches (Related is ignored)", async () => {
     if (!conn) return;
-    const ids = await runEdge(LOMBARDY, conn);
+    const ids = await runEdge({ entityId: LOMBARDY }, conn);
     expect(ids).not.toContain(PARIS);
   });
 
   test("no target: returns every entity that has any superordinate", async () => {
     if (!conn) return;
-    const ids = await runEdge(undefined, conn);
+    const ids = await runEdge({}, conn);
+    expect(sorted(ids)).toEqual(sorted([MILAN, BERGAMO, ROME, TURIN, NAPLES]));
+  });
+
+  test("by class: Location superordinates only (Event-superordinated and dangling excluded)", async () => {
+    if (!conn) return;
+    const ids = await runEdge(
+      { entityClasses: [EntityEnums.Class.Location] },
+      conn
+    );
     expect(sorted(ids)).toEqual(sorted([MILAN, BERGAMO, ROME]));
+    expect(ids).not.toContain(TURIN); // superordinate is an Event
+    expect(ids).not.toContain(NAPLES); // dangling superordinate fails the class check
+  });
+
+  test("by class: Event superordinates only", async () => {
+    if (!conn) return;
+    const ids = await runEdge({ entityClasses: [EntityEnums.Class.Event] }, conn);
+    expect(sorted(ids)).toEqual(sorted([TURIN]));
+  });
+
+  test("entityId wins over entityClasses when both are set", async () => {
+    if (!conn) return;
+    const ids = await runEdge(
+      { entityId: LOMBARDY, entityClasses: [EntityEnums.Class.Event] },
+      conn
+    );
+    expect(sorted(ids)).toEqual(sorted([MILAN, BERGAMO]));
   });
 });

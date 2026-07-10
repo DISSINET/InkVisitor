@@ -41,6 +41,9 @@ interface Suggester {
   categories: EntitySingleDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
+  // Explicit width for the suggestions dropdown. When unset the list matches the
+  // measured input width; set it to intentionally show a wider results list.
+  suggestionListWidth?: number;
   disableCreate?: boolean;
   disableButtons?: boolean;
   isFetching?: boolean;
@@ -76,6 +79,9 @@ interface Suggester {
   onConsumeExternalDrop?: () => void;
   onEmptyAddButtonClick?: () => void;
   clearableInput?: boolean;
+  // rendered inside the input's trailing slot (only when disableCreate is set,
+  // where the create button would otherwise sit)
+  rightContent?: React.ReactNode;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -87,6 +93,7 @@ export const Suggester: React.FC<Suggester> = ({
   categories,
   disabled,
   inputWidth = 100,
+  suggestionListWidth,
   disableCreate = false,
   disableButtons = false,
 
@@ -121,6 +128,7 @@ export const Suggester: React.FC<Suggester> = ({
   onConsumeExternalDrop,
   onEmptyAddButtonClick,
   clearableInput = true,
+  rightContent,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -147,6 +155,10 @@ export const Suggester: React.FC<Suggester> = ({
       setResultWidth(width);
     }
   }, [isFocused]);
+
+  // Explicit override wins over the measured input width so the results list can
+  // intentionally be wider than the input.
+  const effectiveResultWidth = suggestionListWidth ?? resultWidth;
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -333,9 +345,17 @@ export const Suggester: React.FC<Suggester> = ({
   // separate trailing segment. Reserve its footprint in the input width so the
   // typing area stays as roomy as before and the suggester keeps its overall size.
   const CREATE_BUTTON_WIDTH = 25;
+  // The category dropdown is narrower when only one class is available (26 vs 33,
+  // see its width prop below), so single-class suggesters would end up narrower
+  // overall than multi-class ones for the same inputWidth. Add this back to the
+  // input width in the single-class case so the overall width stays consistent
+  // regardless of class count. Finetune this value.
+  const SINGLE_CLASS_WIDTH_COMPENSATION = 7;
   const effectiveInputWidth =
-    typeof inputWidth === "number" && !disableCreate
-      ? inputWidth + CREATE_BUTTON_WIDTH
+    typeof inputWidth === "number"
+      ? inputWidth +
+        (disableCreate ? 0 : CREATE_BUTTON_WIDTH) +
+        (categories.length > 1 ? 0 : SINGLE_CLASS_WIDTH_COMPENSATION)
       : inputWidth;
 
   return (
@@ -414,6 +434,8 @@ export const Suggester: React.FC<Suggester> = ({
                     }}
                     disabled={disabled}
                   />
+                ) : rightContent ? (
+                  rightContent
                 ) : (
                   button && button
                 )
@@ -444,7 +466,7 @@ export const Suggester: React.FC<Suggester> = ({
             >
               {suggestions.length || (isFetching && isFocused) ? (
                 <>
-                  <StyledRelativePosition $width={resultWidth}>
+                  <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
@@ -463,7 +485,7 @@ export const Suggester: React.FC<Suggester> = ({
               {/* PRE-SUGGESTIONS */}
               {preSuggestions && preSuggestions.length > 0 && typed.length === 0 ? (
                 <>
-                  <StyledRelativePosition $width={resultWidth}>
+                  <StyledRelativePosition $width={effectiveResultWidth}>
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>

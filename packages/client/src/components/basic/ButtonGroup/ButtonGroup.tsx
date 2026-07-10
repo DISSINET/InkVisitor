@@ -21,8 +21,10 @@ export const ButtonGroup = styled.div.attrs({
   border-radius: ${({ $borderRadius, theme }) =>
     $borderRadius ? theme.borderRadius[$borderRadius] : "none"};
   overflow: hidden;
+  flex-shrink: 0;
   > button:not(:last-child),
   > span:not(:last-child) {
+    flex-shrink: 0;
     margin-right: ${({ $noGap, $smallGap }) => ($noGap ? 0 : $smallGap ? "0.25rem" : "0.5rem")};
   }
 `;

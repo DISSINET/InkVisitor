@@ -76,7 +76,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         newInstance = await InstTemplate(
           entity,
           getStoredUserRole() as UserEnums.Role,
-          territoryParentId
+          territoryParentId,
         );
         setShowAddParentModal(false);
       } else {
@@ -109,7 +109,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        <ButtonGroup style={{ height: "2.25rem" }}>
+        <ButtonGroup $height={22.5}>
           {userCanEdit && (
             <Button
               key="delete-entity"
@@ -240,7 +240,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               inverted
               onClick={async () => {
                 await navigator.clipboard.writeText(
-                  `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
+                  `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`,
                 );
                 toast.info("Link to detail copied to clipboard");
               }}

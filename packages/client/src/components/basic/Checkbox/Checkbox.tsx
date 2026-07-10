@@ -9,6 +9,7 @@ import {
   StyledLabel,
 } from "./CheckboxStyles";
 import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
+import { FlatThemeColor } from "Theme/theme";
 
 interface Checkbox {
   value: boolean;
@@ -18,6 +19,9 @@ interface Checkbox {
   label?: string;
   icon?: React.ReactNode;
   size?: number;
+  // paint the checked box as a plain (white) box with an accent-coloured border
+  // and check instead of the default filled "info" look (see CheckboxStyles)
+  accentColor?: FlatThemeColor;
   tooltipLabel?: string;
   tooltipContent?: React.ReactNode;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
@@ -32,6 +36,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   label,
   icon,
   size = 15,
+  accentColor,
   tooltipLabel,
   tooltipContent,
   iconOnly = false,
@@ -70,6 +75,7 @@ export const Checkbox: React.FC<Checkbox> = ({
             <StyledCheckboxIndicator
               $checked={value || indeterminate}
               $size={size}
+              $accentColor={accentColor}
               onClick={handleToggle}
             >
               {indeterminate ? (

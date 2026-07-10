@@ -96,8 +96,17 @@ const linesHosts = new WeakMap<HTMLCanvasElement, Annotator>();
 // Occurrence holds exact position of a point in text
 export interface Occurrence {
   segmentIndex: number;
+  /** Visual line index (within the segment) where the match starts. */
   lineIndex: number;
+  /**
+   * Visual line index (within the segment) where the match ends. Equals
+   * {@link lineIndex} for a match that fits on one line, but differs when the
+   * match straddles a soft-wrap boundary.
+   */
+  endLineIndex: number;
+  /** Column of the match start on {@link lineIndex}. */
   start: number;
+  /** Exclusive column of the match end on {@link endLineIndex}. */
   end: number;
 }
 
@@ -114,6 +123,7 @@ const SETTINGS_STORAGE_KEY = "inkvisitor.annotator.settings";
 
 interface PersistedSettings {
   caretWidth?: number;
+  caretBlock?: boolean;
   highlightColor?: string;
   showFps?: boolean;
   proportional?: boolean;
@@ -128,6 +138,7 @@ export interface DrawingOptions {
   charsAtLine: number;
   color?: string; // override
   caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretOpacity?: number; // collapsed-caret alpha (defaults to 1); block caret uses 0.5 so the letter under it stays readable
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
    * Minimum fill width in device px for BACKGROUND spans. When set, an empty
@@ -288,6 +299,14 @@ export class Annotator {
 
   /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
   private caretWidth = 1;
+
+  /**
+   * Block (full char-cell) caret intent. Monospace-only: the caret spans the
+   * whole `charWidth` cell so it scales with font size. Kept as latent intent
+   * while proportional is active (the effective block gates on `!proportional`),
+   * so returning to monospace restores it. Cleared when the user picks a fixed
+   * px width. */
+  private caretBlock = false;
 
   /**
    * User-chosen selection highlight color (`#rrggbb`), or undefined to defer to
@@ -683,9 +702,7 @@ export class Annotator {
     // old highlight dissolves out while the new one fades in (#2835) instead of
     // swapping instantly. Same-tag re-hovers just keep fading toward 1.
     const switching =
-      tagName !== this.hoverTagName &&
-      this.hoverRegions.length > 0 &&
-      this.hoverFade.value() > 0;
+      tagName !== this.hoverTagName && this.hoverRegions.length > 0 && this.hoverFade.value() > 0;
     const previousRegions = this.hoverRegions;
 
     this.hoverTagName = tagName;
@@ -1351,10 +1368,7 @@ export class Annotator {
     this.cursor.reconcileOffsetsFromVisual(this.text);
 
     const pt = this.pointerToVisual(e.clientX, e.clientY);
-    const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-      pt.xLine,
-      pt.yLine
-    );
+    const { offset, affinity } = this.text.offsetWithAffinityFromVisual(pt.xLine, pt.yLine);
     if (offset >= 0) {
       this.cursor.stepHeadTo(this.text, offset, affinity, true);
     }
@@ -1992,23 +2006,6 @@ export class Annotator {
     const settings: SettingControl[] = [
       {
         type: "segmented",
-        label: "Cursor size",
-        options: [
-          { label: "1px", value: 1 },
-          { label: "2px", value: 2 },
-          { label: "3px", value: 3 },
-        ],
-        value: this.caretWidth,
-        onChange: (px) => this.setCaretWidth(px),
-      },
-      {
-        type: "color",
-        label: "Highlight color",
-        value: this.getHighlightColor(),
-        onChange: (hex) => this.setHighlightColor(hex),
-      },
-      {
-        type: "segmented",
         label: "Font",
         options: [
           { label: "Proportional", value: 1 },
@@ -2024,31 +2021,60 @@ export class Annotator {
 
     // Family picker only when the host supplied options (it's the proportional
     // typeface; monospace always uses the built-in monospace font, so the picker
-    // is disabled until proportional is selected).
+    // is disabled until proportional is selected). While disabled, show the
+    // default host option (e.g. Roboto) rather than the stored proportional
+    // family the user last picked.
     if (this.fontFamilyOptions.length > 0) {
+      const displayedFontFamily = this.proportional
+        ? this.proportionalFontFamily
+        : this.fontFamilyOptions[0]?.value ?? this.proportionalFontFamily;
       settings.push({
         type: "select",
         label: "Font family",
         options: this.fontFamilyOptions,
-        value: this.proportionalFontFamily,
+        value: displayedFontFamily,
         onChange: (family) => this.setFontFamily(family),
         disabled: !this.proportional,
       });
     }
 
-    settings.push({
-      type: "segmented",
-      label: "Font size",
-      options: [
-        { label: "11", value: 11 },
-        { label: "12", value: 12 },
-        { label: "13", value: 13 },
-        { label: "14", value: 14 },
-        { label: "15", value: 15 },
-      ],
-      value: this.fontSize,
-      onChange: (px) => this.setFontSize(px),
-    });
+    settings.push(
+      {
+        type: "segmented",
+        label: "Font size",
+        options: [
+          { label: "11", value: 11 },
+          { label: "12", value: 12 },
+          { label: "13", value: 13 },
+          { label: "14", value: 14 },
+          { label: "15", value: 15 },
+        ],
+        value: this.fontSize,
+        onChange: (px) => this.setFontSize(px),
+      },
+      {
+        type: "color",
+        label: "Highlight color",
+        value: this.getHighlightColor(),
+        onChange: (hex) => this.setHighlightColor(hex),
+      },
+      {
+        type: "segmented",
+        label: "Cursor size",
+        // "Full" (value 0) is the block caret filling the whole char cell —
+        // monospace-only, so it's disabled while proportional font is active.
+        options: [
+          { label: "1px", value: 1 },
+          { label: "2px", value: 2 },
+          { label: "3px", value: 3 },
+          { label: "Full", value: 0, disabled: this.proportional },
+        ],
+        // Block only takes effect in monospace; while proportional show the
+        // fixed px selection instead.
+        value: this.caretBlock && !this.proportional ? 0 : this.caretWidth,
+        onChange: (v) => (v === 0 ? this.setCaretBlock(true) : this.setCaretWidth(v)),
+      }
+    );
 
     this.settingsOverlay.open(
       settings,
@@ -2634,6 +2660,12 @@ export class Annotator {
     // Blink only while a collapsed caret is shown and the canvas is focused.
     this.caretBlink.sync(this.cursor.hasCaret() && this.canvasFocused);
 
+    // In HIGHLIGHT mode a collapsed caret is repainted after the highlights and
+    // anchor markers below (#2887); painting it here too would stack the
+    // semi-transparent block caret to a doubled opacity, so skip the first pass.
+    const caretRepaintsOverHighlights =
+      this.text.mode === EditMode.HIGHLIGHT && !!this.onHighlightCb && !this.cursor.isSelected();
+
     if (textSegment && !this.selectionHidden) {
       const line = this.text.getLineFromPosition(textSegment);
       if (this.cursor.xLine > line.length) {
@@ -2647,8 +2679,10 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
-        caretWidth: this.caretWidth * this.ratio,
-        caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
+        caretWidth: this.caretWidthDevicePx(),
+        caretOpacity: this.caretOpacityValue(),
+        caretVisible:
+          this.canvasFocused && this.caretBlink.isVisible() && !caretRepaintsOverHighlights,
         columnToPixelX: this.drawColumnToPixelX(),
       });
     }
@@ -2884,7 +2918,8 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
-          caretWidth: this.caretWidth * this.ratio,
+          caretWidth: this.caretWidthDevicePx(),
+          caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
           columnToPixelX: this.drawColumnToPixelX(),
         });
@@ -2932,9 +2967,35 @@ export class Annotator {
     return this.caretWidth;
   }
 
-  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. */
+  /**
+   * Effective collapsed-caret width in device px. A block caret (monospace only)
+   * fills the whole `charWidth` cell — already device-px so it tracks font size;
+   * otherwise the fixed px width scaled by `ratio`. */
+  private caretWidthDevicePx(): number {
+    return this.caretBlock && !this.proportional ? this.charWidth : this.caretWidth * this.ratio;
+  }
+
+  /**
+   * Effective collapsed-caret alpha. The block caret fills the whole char cell,
+   * so it paints mostly transparent to keep the letter under it readable; thin
+   * carets stay solid (#2887). */
+  private caretOpacityValue(): number {
+    return this.caretBlock && !this.proportional ? 0.45 : 1;
+  }
+
+  /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. A fixed
+   *  px pick is a new intent, so it clears any block-caret mode. */
   setCaretWidth(px: number): void {
     this.caretWidth = Math.max(1, px);
+    this.caretBlock = false;
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Enable the block (full char-cell) caret and redraw. Monospace-only; while
+   *  proportional it stays latent until monospace is restored. */
+  setCaretBlock(on: boolean): void {
+    this.caretBlock = on;
     this.saveSettings();
     this.draw();
   }
@@ -2960,6 +3021,9 @@ export class Annotator {
 
     if (typeof parsed.caretWidth === "number") {
       this.caretWidth = Math.max(1, parsed.caretWidth);
+    }
+    if (typeof parsed.caretBlock === "boolean") {
+      this.caretBlock = parsed.caretBlock;
     }
     if (typeof parsed.highlightColor === "string") {
       this.highlightColor = parsed.highlightColor;
@@ -2992,6 +3056,7 @@ export class Annotator {
   /** Reset all persisted settings to their defaults, clear storage, and redraw. */
   resetSettings(): void {
     this.caretWidth = 1;
+    this.caretBlock = false;
     this.highlightColor = undefined;
     // Revert the highlight color to the host theme color (last setSelectStyle).
     this.cursor.style = { ...this.cursor.style, color: this.selectColor };
@@ -3001,7 +3066,7 @@ export class Annotator {
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
-    // Default to the first host-supplied option (e.g. "Sans (app)") so the
+    // Default to the first host-supplied option (e.g. "Roboto (app sans)") so the
     // picker shows a valid value; fall back to the generic when none supplied.
     this.proportionalFontFamily =
       this.fontFamilyOptions.length > 0 ? this.fontFamilyOptions[0].value : PROPORTIONAL_FONT;
@@ -3026,6 +3091,7 @@ export class Annotator {
       }
       const data: PersistedSettings = {
         caretWidth: this.caretWidth,
+        caretBlock: this.caretBlock,
         highlightColor: this.highlightColor,
         showFps: this.showFps,
         proportional: this.proportional,
@@ -3234,10 +3300,33 @@ export class Annotator {
   }
 
   /**
+   * Nearest-following closing tag pairing with `openTag`: the first same-name
+   * closing tag after the opening tag's position, scanning forward across
+   * segments (the same rule as removeAnchorFromSelection). Returns undefined
+   * when the anchor is asymmetrical (no pairing close).
+   */
+  private findPairingCloseTag(openTag: Tag, tagName: string): Tag | undefined {
+    const segments = this.text.segments;
+    for (let i = openTag.segmentIndex; i < segments.length; i++) {
+      const candidates =
+        i === openTag.segmentIndex
+          ? segments[i].closingTags.filter((t) => t.position > openTag.position)
+          : segments[i].closingTags;
+      const closeTag = candidates.find((t) => t.getTagName() === tagName);
+      if (closeTag) {
+        return closeTag;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Resolves an anchor to its opening + pairing closing {@link Tag} against the
-   * current segments, using the same exact-then-nearest matching and
-   * nearest-following-close pairing as {@link moveAnchorBoundary}. Returns null
-   * when the anchor cannot be resolved (unknown name, or asymmetrical).
+   * current segments: the opening tag by exact (segmentIndex, position) ref
+   * match, else the nearest same-name opening tag by absolute raw distance (the
+   * ref goes stale when an earlier edit shifted raw positions); the closing tag
+   * by nearest-following-close pairing ({@link findPairingCloseTag}). Returns
+   * null when the anchor cannot be resolved (unknown name, or asymmetrical).
    */
   private resolveAnchorTags(
     tagName: string,
@@ -3275,22 +3364,11 @@ export class Annotator {
       return null;
     }
 
-    const resolvedOpenTag = openTag;
-    let closeTag: Tag | undefined;
-    for (let i = resolvedOpenTag.segmentIndex; i < segments.length; i++) {
-      const candidates =
-        i === resolvedOpenTag.segmentIndex
-          ? segments[i].closingTags.filter((t) => t.position > resolvedOpenTag.position)
-          : segments[i].closingTags;
-      closeTag = candidates.find((t) => t.getTagName() === tagName);
-      if (closeTag) {
-        break;
-      }
-    }
+    const closeTag = this.findPairingCloseTag(openTag, tagName);
     if (!closeTag) {
       return null;
     }
-    return { openTag: resolvedOpenTag, closeTag };
+    return { openTag, closeTag };
   }
 
   /**
@@ -3439,56 +3517,13 @@ export class Annotator {
   ): MoveAnchorBoundaryResult {
     const segments = this.text.segments;
 
-    // Resolve the opening tag: exact ref match, else nearest same-name opening
-    // tag by absolute raw distance (the ref goes stale when an earlier edit
-    // shifted raw positions).
-    let openTag: Tag | undefined;
-    const refSegment = segments[openTagRef.segmentIndex];
-    if (refSegment) {
-      openTag = refSegment.openingTags.find(
-        (t) => t.getTagName() === tagName && t.position === openTagRef.position
-      );
-    }
-    if (!openTag) {
-      let refAbs = openTagRef.position;
-      for (let i = 0; i < Math.min(openTagRef.segmentIndex, segments.length); i++) {
-        refAbs += segments[i].raw.length + 1;
-      }
-      let bestDistance = Infinity;
-      for (const segment of segments) {
-        for (const candidate of segment.openingTags) {
-          if (candidate.getTagName() !== tagName) {
-            continue;
-          }
-          const distance = Math.abs(candidate.getAbsoluteTagPosition(segments) - refAbs);
-          if (distance < bestDistance) {
-            bestDistance = distance;
-            openTag = candidate;
-          }
-        }
-      }
-    }
-    if (!openTag) {
+    // Resolve the anchor's opening + pairing closing tag (exact-then-nearest
+    // opening match, nearest-following-close pairing - see resolveAnchorTags).
+    const resolved = this.resolveAnchorTags(tagName, openTagRef);
+    if (!resolved) {
       return { status: "not-found" };
     }
-
-    // Pairing closing tag: nearest following same-name closing tag (same rule
-    // as removeAnchorFromSelection).
-    const resolvedOpenTag = openTag;
-    let closeTag: Tag | undefined;
-    for (let i = resolvedOpenTag.segmentIndex; i < segments.length; i++) {
-      const candidates =
-        i === resolvedOpenTag.segmentIndex
-          ? segments[i].closingTags.filter((t) => t.position > resolvedOpenTag.position)
-          : segments[i].closingTags;
-      closeTag = candidates.find((t) => t.getTagName() === tagName);
-      if (closeTag) {
-        break;
-      }
-    }
-    if (!closeTag) {
-      return { status: "not-found" };
-    }
+    const { openTag: resolvedOpenTag, closeTag } = resolved;
 
     const raw = this.text.value;
     const openAbs = resolvedOpenTag.getAbsoluteTagPosition(segments);
@@ -3562,23 +3597,10 @@ export class Annotator {
         (t) => t.getTagName() === tagName && t.position === position
       );
       if (movedOpenTag) {
-        let movedCloseTag: Tag | undefined;
-        let movedCloseSegmentIndex = -1;
-        for (let i = segmentIndex; i < newSegments.length; i++) {
-          const candidates =
-            i === segmentIndex
-              ? newSegments[i].closingTags.filter((t) => t.position > movedOpenTag.position)
-              : newSegments[i].closingTags;
-          const found = candidates.find((t) => t.getTagName() === tagName);
-          if (found) {
-            movedCloseTag = found;
-            movedCloseSegmentIndex = i;
-            break;
-          }
-        }
+        const movedCloseTag = this.findPairingCloseTag(movedOpenTag, tagName);
         if (movedCloseTag) {
           const start = movedOpenSegment.findTagParsedPosition(movedOpenTag);
-          const end = newSegments[movedCloseSegmentIndex].findTagParsedPosition(movedCloseTag);
+          const end = newSegments[movedCloseTag.segmentIndex].findTagParsedPosition(movedCloseTag);
           this.cursor.selectStart = { xLine: start.x, yLine: start.y };
           this.cursor.selectEnd = { xLine: end.x, yLine: end.y };
           this.cursor.setTrueSelectionDirection();
@@ -3842,54 +3864,101 @@ export class Annotator {
    * @returns
    */
   search(toFind: string, isRegex: boolean = false, isCaseSensitive: boolean = true): Occurrence[] {
-    const occurrences = [];
+    const occurrences: Occurrence[] = [];
+    if (!toFind) {
+      return occurrences;
+    }
     const normalizedTerm = isCaseSensitive ? toFind : toFind.toLowerCase();
 
-    const collectLiteralOccurrences = (line: string, segmentIndex: number, lineIndex: number) => {
-      const normalizedLine = isCaseSensitive ? line : line.toLowerCase();
-      let startIndex = 0;
-
-      while (startIndex < normalizedLine.length) {
-        const index = normalizedLine.indexOf(normalizedTerm, startIndex);
-        if (index === -1) {
+    // Map a flat offset within a segment's joined display text back to a
+    // (visual line index, column) pair. Soft-wrap line breaks are not real
+    // characters, so a term straddling a wrap boundary is searched against the
+    // joined text and mapped back here — otherwise it would be split across two
+    // `lines[]` entries and never match (issue: search vs. line break).
+    const locate = (lineLengths: number[], offset: number, isEnd: boolean) => {
+      let lineIndex = 0;
+      let acc = 0;
+      while (lineIndex < lineLengths.length - 1) {
+        const lineLen = lineLengths[lineIndex];
+        // Start (inclusive) belongs to a line while offset >= its end boundary;
+        // exclusive end stays on the line while offset == the end boundary.
+        const pastLine = isEnd ? offset > acc + lineLen : offset >= acc + lineLen;
+        if (!pastLine) {
           break;
         }
-
-        occurrences.push({
-          segmentIndex,
-          lineIndex,
-          start: index,
-          end: index + toFind.length,
-        });
-
-        startIndex = index + 1;
+        acc += lineLen;
+        lineIndex++;
       }
+      return { lineIndex, col: offset - acc };
     };
 
-    for (const segmentI in this.text.segments) {
-      for (const lineI in this.text.segments[segmentI].lines) {
-        const line = this.text.segments[segmentI].lines[lineI];
+    for (let segmentIndex = 0; segmentIndex < this.text.segments.length; segmentIndex++) {
+      const lines = this.text.segments[segmentIndex].lines;
+      // Reconstruct the segment's display text: wrapping keeps the overflowing
+      // space as trailing whitespace on the previous line, so join("") is exact.
+      const fullText = lines.join("");
+      const lineLengths = lines.map((line) => line.length);
+      const haystack = isCaseSensitive ? fullText : fullText.toLowerCase();
 
-        if (isRegex) {
-          try {
-            const regexFlags = isCaseSensitive ? "gu" : "giu";
-            const regex = new RegExp(toFind, regexFlags);
-            let match;
-            while ((match = regex.exec(line)) !== null) {
-              occurrences.push({
-                segmentIndex: parseInt(segmentI),
-                lineIndex: parseInt(lineI),
-                start: match.index,
-                end: match.index + match[0].length,
-              });
+      const pushMatch = (matchStart: number, matchEnd: number) => {
+        const startPos = locate(lineLengths, matchStart, false);
+        const endPos = locate(lineLengths, matchEnd, true);
+        occurrences.push({
+          segmentIndex,
+          lineIndex: startPos.lineIndex,
+          endLineIndex: endPos.lineIndex,
+          start: startPos.col,
+          end: endPos.col,
+        });
+      };
+
+      const collectLiteral = () => {
+        if (!isCaseSensitive) {
+          // Match on the original-case text via a case-insensitive regex so
+          // occurrence offsets stay aligned with `lineLengths`. Searching a
+          // lowercased haystack would desync offsets whenever toLowerCase()
+          // changes the UTF-16 length (e.g. İ→i̇, ẞ→ss), producing wrong
+          // highlights and corrupting the replace-all slice range.
+          const escaped = toFind.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(escaped, "giu");
+          let match;
+          while ((match = regex.exec(fullText)) !== null) {
+            pushMatch(match.index, match.index + match[0].length);
+            // Avoid an infinite loop on a zero-width match.
+            if (match[0].length === 0) {
+              regex.lastIndex++;
             }
-          } catch (error) {
-            // If regex is invalid, treat as literal string
-            collectLiteralOccurrences(line, parseInt(segmentI, 10), parseInt(lineI, 10));
           }
-        } else {
-          collectLiteralOccurrences(line, parseInt(segmentI, 10), parseInt(lineI, 10));
+          return;
         }
+        let startIndex = 0;
+        while (startIndex <= haystack.length) {
+          const index = haystack.indexOf(normalizedTerm, startIndex);
+          if (index === -1) {
+            break;
+          }
+          pushMatch(index, index + toFind.length);
+          startIndex = index + 1;
+        }
+      };
+
+      if (isRegex) {
+        try {
+          const regex = new RegExp(toFind, isCaseSensitive ? "gu" : "giu");
+          let match;
+          while ((match = regex.exec(fullText)) !== null) {
+            pushMatch(match.index, match.index + match[0].length);
+            // Avoid an infinite loop on a zero-width match.
+            if (match[0].length === 0) {
+              regex.lastIndex++;
+            }
+          }
+        } catch (error) {
+          // If regex is invalid, treat as literal string
+          collectLiteral();
+        }
+      } else {
+        collectLiteral();
       }
     }
 
@@ -3901,17 +3970,19 @@ export class Annotator {
    * @param occurence
    */
   selectSearchOccurrence(occurence: Occurrence) {
-    const absY = this.text.segments[occurence.segmentIndex].lineStart + occurence.lineIndex;
+    const segment = this.text.segments[occurence.segmentIndex];
+    const absStartY = segment.lineStart + occurence.lineIndex;
+    const absEndY = segment.lineStart + occurence.endLineIndex;
     this.cursor.xLine = occurence.end;
-    this.cursor.yLine = absY;
+    this.cursor.yLine = absEndY;
 
     this.cursor.selectStart = {
       xLine: occurence.start,
-      yLine: absY,
+      yLine: absStartY,
     };
     this.cursor.selectEnd = {
       xLine: occurence.end,
-      yLine: absY,
+      yLine: absEndY,
     };
 
     this.scrollToLine(this.cursor.selectStart.yLine);
@@ -4033,6 +4104,10 @@ export class Annotator {
   }
 
   onPasteText() {
+    // Editing is disabled in HIGHLIGHT mode; paste must not mutate the document.
+    if (this.text.mode === EditMode.HIGHLIGHT) {
+      return;
+    }
     window.navigator.clipboard
       .readText()
       .then((clipText: string) => {
@@ -4054,6 +4129,11 @@ export class Annotator {
         this.cursor.moveToOffset(this.text, pasteAt + clipText.length);
         if (this.text.value !== before.value) {
           this.recordHistory(before, false);
+          // Notify the host app so paste marks the document dirty (enables the
+          // save button), same as a typing edit.
+          if (this.onTextChangeCb) {
+            this.onTextChangeCb(this.text.value);
+          }
         }
         this.keys.scrollCursorIntoView();
 

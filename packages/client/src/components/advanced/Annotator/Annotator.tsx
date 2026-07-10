@@ -23,6 +23,7 @@ import {
   EditMode,
   editModeDisplayLabel,
   MoveAnchorBoundaryResult,
+  Occurrence,
   Tag,
   WarningType,
 } from "@inkvisitor/annotator/src/lib";
@@ -862,10 +863,10 @@ export const TextAnnotator = ({
       // proportional-font picker). The annotator owns the choice + persistence;
       // the app just supplies the candidates, defaulting to the application font.
       a.setFontFamilyOptions([
-        { label: "Sans (app)", value: '"Roboto", sans-serif' },
+        { label: "Roboto (app sans)", value: '"Roboto", sans-serif' },
         // System option hidden for now because of inconsistent anchor highlight
-        // { label: "System", value: "system-ui, sans-serif" },
-        { label: "Serif", value: "Georgia, serif" },
+        // { label: "System UI (system sans)", value: "system-ui, sans-serif" },
+        { label: "Georgia (serif)", value: "Georgia, serif" },
       ]);
     };
 
@@ -1392,9 +1393,7 @@ export const TextAnnotator = ({
   }, [isMenuDisplayed]);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchOccurences, setSearchOccurences] = useState<
-    { segmentIndex: number; lineIndex: number; start: number; end: number }[] | null
-  >(null);
+  const [searchOccurences, setSearchOccurences] = useState<Occurrence[] | null>(null);
   const [isRegexMode, setIsRegexMode] = useState<boolean>(false);
   const [isCaseSensitiveMode, setIsCaseSensitiveMode] = useState<boolean>(false);
   const [isExtendToWholeWordMode, setIsExtendToWholeWordMode] = useState<boolean>(false);
@@ -1665,7 +1664,7 @@ export const TextAnnotator = ({
                   entityId={xmlMarkupAnchorHover.entityId}
                   disableTooltip={false}
                   disableDoubleClick={false}
-                  tagMaxWidth={theme.space[60]}
+                  tagMaxWidth={150}
                 />
               </div>
             </FloatingPortal>

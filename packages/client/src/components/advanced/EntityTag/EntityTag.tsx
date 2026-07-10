@@ -41,8 +41,7 @@ const EXPANSION_MARK = {
   },
   subordinate: {
     label: "sub",
-    tooltip:
-      "Surfaced via 'include subordinates' (subclass / subordinate / meronym / child T)",
+    tooltip: "Surfaced via 'include subordinates' (subclass / subordinate / meronym / child T)",
   },
 } as const;
 
@@ -58,7 +57,7 @@ interface EntityTag {
   showOnly?: "tag" | "label";
   fullWidth?: boolean;
   /** Override the label's max-width (e.g. theme.space value). */
-  tagMaxWidth?: string;
+  tagMaxWidth?: number;
   button?: ReactNode;
   /**
    * Render `button` before the elvl group (left of it), away from the unlink
@@ -196,11 +195,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         >
           {entity.class}
         </StyledEntityTag>
-        {mark && (
-          <StyledExpansionBadge title={mark.tooltip}>
-            {mark.label}
-          </StyledExpansionBadge>
-        )}
+        {mark && <StyledExpansionBadge title={mark.tooltip}>{mark.label}</StyledExpansionBadge>}
       </StyledTagComponentWrap>
     );
   }, [entity, isEquivalent, isSubordinate]);
@@ -294,10 +289,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       )}
       {elvlButtonGroup && (
         <StyledElvlWrapper>
-          <div
-            onMouseOver={() => setElvlHovered(true)}
-            onMouseOut={() => setElvlHovered(false)}
-          >
+          <div onMouseOver={() => setElvlHovered(true)} onMouseOut={() => setElvlHovered(false)}>
             {elvlButtonGroup}
           </div>
         </StyledElvlWrapper>

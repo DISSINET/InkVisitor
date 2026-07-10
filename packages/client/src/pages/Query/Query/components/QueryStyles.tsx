@@ -87,3 +87,18 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   padding-left: ${({ theme }) => theme.space[2]};
   margin-top: 10px;
 `;
+
+export const StyledTooltipList = styled.ul`
+  margin: 0;
+  padding-left: ${({ theme }) => theme.space[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  list-style-type: disc;
+`;
+
+export const StyledTooltipListItem = styled.li`
+  b {
+    font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  }
+`;

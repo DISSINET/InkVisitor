@@ -35,6 +35,9 @@ interface EntitySuggesterProps {
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
+  // Explicit width for the suggestions dropdown, independent of the input width.
+  // Set to intentionally show a wider results list.
+  suggestionListWidth?: number;
   openDetailOnCreate?: boolean;
   // territoryId keys the cached set of entity ids already used in the territory,
   // used to render the home icon next to suggestion list items. The cache is
@@ -61,6 +64,8 @@ interface EntitySuggesterProps {
   entityCreateStatementOrder?: number;
 
   button?: React.ReactNode;
+  // rendered inside the suggester input's trailing slot (only when disableCreate)
+  rightContent?: React.ReactNode;
   preSuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -109,6 +114,7 @@ const EntitySuggesterFull: React.FC<
   onTyped,
   placeholder = "",
   inputWidth,
+  suggestionListWidth,
   openDetailOnCreate = false,
   territoryId,
   excludedEntityClasses = [],
@@ -123,6 +129,7 @@ const EntitySuggesterFull: React.FC<
   entityCreateStatementOrder,
 
   button,
+  rightContent,
   preSuggestions,
 
   disableCreate = false,
@@ -501,6 +508,7 @@ const EntitySuggesterFull: React.FC<
         disableButtons={disableButtons}
         disableEnter={disableEnter}
         inputWidth={inputWidth}
+        suggestionListWidth={suggestionListWidth}
         isInsideTemplate={isInsideTemplate}
         territoryParentId={territoryParentId}
         userOptions={user.options}
@@ -512,6 +520,7 @@ const EntitySuggesterFull: React.FC<
         alwaysShowCreateModal={alwaysShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
         button={button}
+        rightContent={rightContent}
         disableTemplateInstantiation={disableTemplateInstantiation}
         isHidden={isHidden}
         externalDroppedItem={externalDroppedItem}

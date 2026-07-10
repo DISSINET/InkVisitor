@@ -352,7 +352,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>Territory</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <EntityTag entity={entity.entities[entity.data.territory?.territoryId]} />
+                <div style={{ display: "grid" }}>
+                  <EntityTag
+                    fullWidth
+                    entity={entity.entities[entity.data.territory?.territoryId]}
+                  />
+                </div>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}

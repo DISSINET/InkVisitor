@@ -78,15 +78,7 @@ interface UseAnnotatorSearchParams {
   isCaseSensitiveMode: boolean;
   annotatorMode: EditMode;
   setSearchOccurences: React.Dispatch<
-    React.SetStateAction<
-      | {
-          segmentIndex: number;
-          lineIndex: number;
-          start: number;
-          end: number;
-        }[]
-      | null
-    >
+    React.SetStateAction<Occurrence[] | null>
   >;
   setSearchActiveOccurence: React.Dispatch<React.SetStateAction<number>>;
   setSelectedText: React.Dispatch<React.SetStateAction<string>>;
