@@ -683,9 +683,7 @@ export class Annotator {
     // old highlight dissolves out while the new one fades in (#2835) instead of
     // swapping instantly. Same-tag re-hovers just keep fading toward 1.
     const switching =
-      tagName !== this.hoverTagName &&
-      this.hoverRegions.length > 0 &&
-      this.hoverFade.value() > 0;
+      tagName !== this.hoverTagName && this.hoverRegions.length > 0 && this.hoverFade.value() > 0;
     const previousRegions = this.hoverRegions;
 
     this.hoverTagName = tagName;
@@ -1351,10 +1349,7 @@ export class Annotator {
     this.cursor.reconcileOffsetsFromVisual(this.text);
 
     const pt = this.pointerToVisual(e.clientX, e.clientY);
-    const { offset, affinity } = this.text.offsetWithAffinityFromVisual(
-      pt.xLine,
-      pt.yLine
-    );
+    const { offset, affinity } = this.text.offsetWithAffinityFromVisual(pt.xLine, pt.yLine);
     if (offset >= 0) {
       this.cursor.stepHeadTo(this.text, offset, affinity, true);
     }
@@ -1992,23 +1987,6 @@ export class Annotator {
     const settings: SettingControl[] = [
       {
         type: "segmented",
-        label: "Cursor size",
-        options: [
-          { label: "1px", value: 1 },
-          { label: "2px", value: 2 },
-          { label: "3px", value: 3 },
-        ],
-        value: this.caretWidth,
-        onChange: (px) => this.setCaretWidth(px),
-      },
-      {
-        type: "color",
-        label: "Highlight color",
-        value: this.getHighlightColor(),
-        onChange: (hex) => this.setHighlightColor(hex),
-      },
-      {
-        type: "segmented",
         label: "Font",
         options: [
           { label: "Proportional", value: 1 },
@@ -2024,31 +2002,55 @@ export class Annotator {
 
     // Family picker only when the host supplied options (it's the proportional
     // typeface; monospace always uses the built-in monospace font, so the picker
-    // is disabled until proportional is selected).
+    // is disabled until proportional is selected). While disabled, show the
+    // default host option (e.g. Roboto) rather than the stored proportional
+    // family the user last picked.
     if (this.fontFamilyOptions.length > 0) {
+      const displayedFontFamily = this.proportional
+        ? this.proportionalFontFamily
+        : this.fontFamilyOptions[0]?.value ?? this.proportionalFontFamily;
       settings.push({
         type: "select",
         label: "Font family",
         options: this.fontFamilyOptions,
-        value: this.proportionalFontFamily,
+        value: displayedFontFamily,
         onChange: (family) => this.setFontFamily(family),
         disabled: !this.proportional,
       });
     }
 
-    settings.push({
-      type: "segmented",
-      label: "Font size",
-      options: [
-        { label: "11", value: 11 },
-        { label: "12", value: 12 },
-        { label: "13", value: 13 },
-        { label: "14", value: 14 },
-        { label: "15", value: 15 },
-      ],
-      value: this.fontSize,
-      onChange: (px) => this.setFontSize(px),
-    });
+    settings.push(
+      {
+        type: "segmented",
+        label: "Font size",
+        options: [
+          { label: "11", value: 11 },
+          { label: "12", value: 12 },
+          { label: "13", value: 13 },
+          { label: "14", value: 14 },
+          { label: "15", value: 15 },
+        ],
+        value: this.fontSize,
+        onChange: (px) => this.setFontSize(px),
+      },
+      {
+        type: "color",
+        label: "Highlight color",
+        value: this.getHighlightColor(),
+        onChange: (hex) => this.setHighlightColor(hex),
+      },
+      {
+        type: "segmented",
+        label: "Cursor size",
+        options: [
+          { label: "1px", value: 1 },
+          { label: "2px", value: 2 },
+          { label: "3px", value: 3 },
+        ],
+        value: this.caretWidth,
+        onChange: (px) => this.setCaretWidth(px),
+      }
+    );
 
     this.settingsOverlay.open(
       settings,
@@ -3001,7 +3003,7 @@ export class Annotator {
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
-    // Default to the first host-supplied option (e.g. "Sans (app)") so the
+    // Default to the first host-supplied option (e.g. "Roboto (app sans)") so the
     // picker shows a valid value; fall back to the generic when none supplied.
     this.proportionalFontFamily =
       this.fontFamilyOptions.length > 0 ? this.fontFamilyOptions[0].value : PROPORTIONAL_FONT;

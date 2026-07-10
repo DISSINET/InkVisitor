@@ -862,10 +862,10 @@ export const TextAnnotator = ({
       // proportional-font picker). The annotator owns the choice + persistence;
       // the app just supplies the candidates, defaulting to the application font.
       a.setFontFamilyOptions([
-        { label: "Sans (app)", value: '"Roboto", sans-serif' },
+        { label: "Roboto (app sans)", value: '"Roboto", sans-serif' },
         // System option hidden for now because of inconsistent anchor highlight
-        // { label: "System", value: "system-ui, sans-serif" },
-        { label: "Serif", value: "Georgia, serif" },
+        // { label: "System UI (system sans)", value: "system-ui, sans-serif" },
+        { label: "Georgia (serif)", value: "Georgia, serif" },
       ]);
     };
 
