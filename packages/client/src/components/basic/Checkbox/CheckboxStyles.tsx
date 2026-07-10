@@ -1,5 +1,5 @@
 import styled, { css, keyframes } from "styled-components";
-import { ThemeColor } from "Theme/theme";
+import { FlatThemeColor } from "Theme/theme";
 
 const checkmarkPop = keyframes`
   0% { transform: scale(0); }
@@ -19,7 +19,7 @@ interface StyledCheckboxIndicator {
   // when set, the checked box keeps a plain (white) fill and paints the border
   // and checkmark in this accent colour instead of the default filled "info" look.
   // Used e.g. by the negated query edge so the check echoes the red edge colour.
-  $accentColor?: keyof ThemeColor;
+  $accentColor?: FlatThemeColor;
 }
 export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   display: inline-flex;
