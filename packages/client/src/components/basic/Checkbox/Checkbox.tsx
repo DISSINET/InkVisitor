@@ -22,6 +22,8 @@ interface Checkbox {
   // paint the checked box as a plain (white) box with an accent-coloured border
   // and check instead of the default filled "info" look (see CheckboxStyles)
   accentColor?: keyof ThemeColor;
+  // render the label bold while the checkbox is checked (e.g. the negated "NOT" edge)
+  boldLabelWhenChecked?: boolean;
   tooltipLabel?: string;
   tooltipContent?: React.ReactNode;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
@@ -37,6 +39,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   icon,
   size = 15,
   accentColor,
+  boldLabelWhenChecked = false,
   tooltipLabel,
   tooltipContent,
   iconOnly = false,
@@ -86,7 +89,7 @@ export const Checkbox: React.FC<Checkbox> = ({
             </StyledCheckboxIndicator>
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel onClick={handleToggle}>
+            <StyledLabel onClick={handleToggle} $bold={boldLabelWhenChecked && value}>
               {label}
               {icon}
             </StyledLabel>

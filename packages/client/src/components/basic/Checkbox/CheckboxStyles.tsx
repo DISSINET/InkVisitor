@@ -28,13 +28,9 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   flex-shrink: 0;
   width: ${({ $size }) => $size}px;
   height: ${({ $size }) => $size}px;
-  border-style: solid;
-  // the accent variant sits on a coloured bg where its white fill already
-  // defines the box, so a thin border is enough (the default filled look needs
-  // the full 2px to read)
-  border-width: ${({ $accentColor }) => ($accentColor ? "1px" : "2px")};
-  border-color: ${({ theme, $checked, $accentColor }) =>
-    $checked ? theme.color[$accentColor ?? "info"] : theme.color["gray"][400]};
+  border: 2px solid
+    ${({ theme, $checked, $accentColor }) =>
+      $checked ? theme.color[$accentColor ?? "info"] : theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   background-color: ${({ theme, $checked, $accentColor }) =>
     $checked && !$accentColor ? theme.color["info"] : theme.color["white"]};
@@ -62,8 +58,9 @@ export const StyledCheckboxWrapper = styled.span<{ $hasLabel?: boolean }>`
   cursor: pointer;
   margin-right: ${({ $hasLabel }) => ($hasLabel ? "0.2rem" : "0")};
 `;
-export const StyledLabel = styled.label`
+export const StyledLabel = styled.label<{ $bold?: boolean }>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme, $bold }) => ($bold ? theme.fontWeight["bold"] : "inherit")};
   margin-left: 0.2rem;
   user-select: none;
   cursor: pointer;
