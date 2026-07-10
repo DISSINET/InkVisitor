@@ -4,6 +4,7 @@ import express, { NextFunction, Router } from "express";
 import { corsMiddleware } from "@middlewares/cors";
 import { csrfProtection } from "@middlewares/csrf";
 import { apiPath, apiPathOld } from "@common/constants";
+import { getTrustProxy } from "@common/trustProxy";
 import EntitiesRouter from "@modules/entities";
 import AuditsRouter from "@modules/audits";
 import RelationsRouter from "@modules/relations";
@@ -39,6 +40,15 @@ import timeout from "connect-timeout";
 import { pool } from "@middlewares/db";
 
 const server = express();
+
+// In every deployment the node process sits behind a TLS-terminating reverse
+// proxy, so the inbound connection is plain HTTP and req.secure is false.
+// Without this, express-session sees `cookie.secure: true` on an "insecure"
+// request and silently drops Set-Cookie, and express-rate-limit keys every
+// client to the proxy's IP. TRUST_PROXY is the hop count between the client and
+// this process; keep it exact rather than `true`, which would let anyone spoof
+// X-Forwarded-For and bypass the signin rate limit.
+server.set("trust proxy", getTrustProxy());
 
 server.use(
   compression({

@@ -54,7 +54,9 @@ const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
 // test left here that needs a DB will fail the DB-free unit run, and an
 // integration test added here will too.
 const UNIT_TEST_PATHS = [
+  "src/common/allowedOrigins.test.ts",
   "src/common/functions.test.ts",
+  "src/common/trustProxy.test.ts",
   "src/models/action/action.test.ts",
   "src/models/audit/audit.test.ts",
   "src/models/backup/backup.test.ts",
