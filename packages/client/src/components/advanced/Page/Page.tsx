@@ -15,7 +15,7 @@ import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ThemeColor } from "Theme/theme";
+import theme, { ThemeColor } from "Theme/theme";
 import { StyledPage, StyledPageContent } from "./PageStyles";
 import { useUserQuery } from "hooks/react-query";
 
@@ -34,6 +34,16 @@ export const Page: React.FC<Page> = ({ children }) => {
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
 
   const environmentName = getAppEnv();
+
+  // Env names double as theme color keys, but an env can be deployed before its
+  // color exists. Fall back rather than resolving to an undefined background.
+  const headerColor: keyof ThemeColor =
+    environmentName === "production"
+      ? "muni"
+      : environmentName in theme.color
+      ? (environmentName as keyof ThemeColor)
+      : "black";
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -136,13 +146,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       <Header
         paddingY={0}
         paddingX={10}
-        color={
-          environmentName === "production"
-            ? "muni"
-            : environmentName
-            ? (environmentName as keyof ThemeColor)
-            : "black"
-        }
+        color={headerColor}
         left={headerLeft}
         right={headerRight}
       />

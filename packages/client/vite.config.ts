@@ -109,7 +109,10 @@ export default defineConfig(({ mode }) => {
         process.env.BUILD_TIMESTAMP || ""
       ),
       global: "globalThis",
-      "window.appConfig": JSON.stringify({ env: appEnv }),
+      // NOTE: do not `define` "window.appConfig" here. `define` is a raw token
+      // substitution, so it would rewrite every read of window.appConfig into
+      // the build-time literal and make the server's runtime injection
+      // unreadable.
     },
     test: {
       globals: true,
