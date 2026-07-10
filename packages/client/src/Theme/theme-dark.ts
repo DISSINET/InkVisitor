@@ -53,7 +53,7 @@ const darkTheme = {
     primaryRGBA0: "rgba(246,246,255,0)",
     success: "#9eaad7",
     explorerHeader: "#091034",
-    warning: "#e5d088",
+    warning: "#f0c862",
     danger: "#ee8fa4",
     info: "#cbbdff",
     plain: "#b5b5b5", // inverted gray 300

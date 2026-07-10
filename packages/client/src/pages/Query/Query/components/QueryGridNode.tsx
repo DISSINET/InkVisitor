@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { FaPlus, FaRegQuestionCircle } from "react-icons/fa";
-import { IcoQuestion, IcoTrash } from "Theme/icons";
+import { IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
@@ -318,10 +318,16 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     }}
                     rightContent={
                       <IconWithTooltip
-                        color="success"
-                        icon={<IcoQuestion size={11} />}
+                        color={edgeRequiresTarget ? "warning" : "success"}
+                        icon={
+                          edgeRequiresTarget ? <IcoWarning size={12} /> : <IcoQuestion size={11} />
+                        }
                         tooltipPosition="top"
-                        tooltipColor="tooltipNodeBackground"
+                        tooltipColor={
+                          edgeRequiresTarget
+                            ? "tooltipNodeWarningBackground"
+                            : "tooltipNodeInfoBackground"
+                        }
                         tooltipLabel="Empty Entity Suggester"
                         tooltipContent={
                           edgeRequiresTarget ? (
