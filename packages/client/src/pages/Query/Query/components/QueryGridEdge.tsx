@@ -106,6 +106,9 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             key={`${edge.id}-not-${edge.logic}`}
             label="NOT"
             value={isNegative}
+            // neutral white box + dark check, reads as a control resting on the
+            // red negated edge rather than competing with it
+            accentColor="primary"
             tooltipLabel="negate this condition (find entities that do NOT match)"
             onChangeFn={(checked) => {
               const newLogic = checked ? Query.EdgeLogic.Negative : Query.EdgeLogic.Positive;
