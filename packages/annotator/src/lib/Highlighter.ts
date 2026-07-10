@@ -151,12 +151,14 @@ export default class Highlighter {
       // minFillWidth keeps a thin sliver visible, like the SELECT caret (#2885).
       ctx.fillRect(xStartPx, y, width || options.minFillWidth || width, height);
     } else if (this.hlMode === "select") {
-      // A collapsed caret (width === 0) is painted solid so it stays visible on
-      // top of anchor markers / highlights; the "color" blend only tints them
-      // and the caret vanishes (#2887). Selection spans keep the blend.
+      // A collapsed caret (width === 0) is painted source-over so it stays
+      // visible on top of anchor markers / highlights; the "color" blend only
+      // tints them and the caret vanishes (#2887). Its alpha comes from
+      // caretOpacity — the block (full-width) caret paints half transparent so
+      // the letter under it stays readable. Selection spans keep the blend.
       if (width === 0) {
         ctx.globalCompositeOperation = "source-over";
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = options.caretOpacity ?? 1;
       } else {
         ctx.globalCompositeOperation = "color";
       }

@@ -138,6 +138,7 @@ export interface DrawingOptions {
   charsAtLine: number;
   color?: string; // override
   caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretOpacity?: number; // collapsed-caret alpha (defaults to 1); block caret uses 0.5 so the letter under it stays readable
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
    * Minimum fill width in device px for BACKGROUND spans. When set, an empty
@@ -2673,6 +2674,7 @@ export class Annotator {
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
         caretWidth: this.caretWidthDevicePx(),
+        caretOpacity: this.caretOpacityValue(),
         caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
         columnToPixelX: this.drawColumnToPixelX(),
       });
@@ -2909,7 +2911,8 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
-          caretWidth: this.caretWidth * this.ratio,
+          caretWidth: this.caretWidthDevicePx(),
+          caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
           columnToPixelX: this.drawColumnToPixelX(),
         });
@@ -2962,9 +2965,15 @@ export class Annotator {
    * fills the whole `charWidth` cell — already device-px so it tracks font size;
    * otherwise the fixed px width scaled by `ratio`. */
   private caretWidthDevicePx(): number {
-    return this.caretBlock && !this.proportional
-      ? this.charWidth
-      : this.caretWidth * this.ratio;
+    return this.caretBlock && !this.proportional ? this.charWidth : this.caretWidth * this.ratio;
+  }
+
+  /**
+   * Effective collapsed-caret alpha. The block caret fills the whole char cell,
+   * so it paints mostly transparent to keep the letter under it readable; thin
+   * carets stay solid (#2887). */
+  private caretOpacityValue(): number {
+    return this.caretBlock && !this.proportional ? 0.3 : 1;
   }
 
   /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. A fixed
