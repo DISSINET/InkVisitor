@@ -181,6 +181,12 @@ export class Annotator {
   fontColor: string = "black";
   bgColor: string = "white";
 
+  /**
+   * Alpha of the block caret fill. The library has no theme, so the
+   * host sets this per theme: a dark background needs a stronger fill than a
+   * light one for the same perceived emphasis. */
+  blockCaretOpacity: number = 0.45;
+
   private _menuColors: MenuColors = LIGHT_MENU_COLORS;
   get menuColors(): MenuColors {
     return this._menuColors;
@@ -2980,7 +2986,7 @@ export class Annotator {
    * so it paints mostly transparent to keep the letter under it readable; thin
    * carets stay solid (#2887). */
   private caretOpacityValue(): number {
-    return this.caretBlock && !this.proportional ? 0.45 : 1;
+    return this.caretBlock && !this.proportional ? this.blockCaretOpacity : 1;
   }
 
   /** Set the collapsed-caret width in CSS px (e.g. 1, 2, 3) and redraw. A fixed

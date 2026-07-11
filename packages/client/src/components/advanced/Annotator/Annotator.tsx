@@ -27,7 +27,7 @@ import {
   Tag,
   WarningType,
 } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
   IEntity,
@@ -40,6 +40,7 @@ import {
   IStatement,
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
+import { useAppSelector } from "redux/hooks";
 import { Loader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
@@ -191,6 +192,9 @@ export const TextAnnotator = ({
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
+  // The theme object carries no light/dark discriminator, so read the id from
+  // the store for the few canvas values that need it (block-caret alpha).
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
 
   const { appendDetailId, statementId, selectedDetailId, setTerritoryId, setStatementId } =
     useSearchParams();
@@ -852,6 +856,9 @@ export const TextAnnotator = ({
     const applyCanvasTheme = (a: Annotator) => {
       a.fontColor = theme.color.black;
       a.bgColor = "transparent";
+      // The block caret paints over the letter; a light background needs a
+      // fainter fill than a dark one for the same readability.
+      a.blockCaretOpacity = selectedThemeId === InterfaceEnums.Theme.Dark ? 0.45 : 0.3;
       a.menuColors = {
         bg: theme.color.white,
         text: theme.color.black,
@@ -1035,7 +1042,15 @@ export const TextAnnotator = ({
     if (!dataDocumentIsFetching && !isSaving) {
       refreshAnnotator();
     }
-  }, [displayLineNumbers, hlEntities ?? [], dataDocumentIsFetching, theme, dataDocument, isSaving]);
+  }, [
+    displayLineNumbers,
+    hlEntities ?? [],
+    dataDocumentIsFetching,
+    theme,
+    selectedThemeId,
+    dataDocument,
+    isSaving,
+  ]);
 
   // Tear down an annotator instance when it is replaced or on unmount, so its
   // caret-blink interval and document listeners don't leak (#3092).
