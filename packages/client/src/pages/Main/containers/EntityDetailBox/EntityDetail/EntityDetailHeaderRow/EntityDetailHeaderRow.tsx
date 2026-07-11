@@ -109,7 +109,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        <ButtonGroup $height={22.5}>
+        <ButtonGroup $height={22.5} $disableShrink>
           {userCanEdit && (
             <Button
               key="delete-entity"
