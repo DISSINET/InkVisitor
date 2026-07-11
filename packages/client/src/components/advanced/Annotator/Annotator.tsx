@@ -143,6 +143,14 @@ interface TextAnnotatorProps {
   onAsymmetricalAnchorCountChange?: (count: number) => void;
   /** Fired when RAW/SEMI text edits diverge from the saved document content. */
   onUnsavedTextEditsChange?: (hasUnsaved: boolean) => void;
+
+  /**
+   * True while the host has collapsed the annotator box out of view (e.g. the
+   * Statement Editor is full-height). The selection menu is portaled over the
+   * whole page, so it must be hidden explicitly; the selection itself is kept,
+   * so the menu reopens once the annotator is visible again.
+   */
+  hideSelectionMenu?: boolean;
 }
 
 const ANNOTATOR_MENU_PAGE_PADDING = 4;
@@ -179,6 +187,7 @@ export const TextAnnotator = ({
   onWarningsModalOpenChange,
   onAsymmetricalAnchorCountChange,
   onUnsavedTextEditsChange,
+  hideSelectionMenu = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -1256,9 +1265,10 @@ export const TextAnnotator = ({
       annotatorMode === EditMode.HIGHLIGHT &&
       selectedText !== "" &&
       !isSelectingText &&
+      !hideSelectionMenu &&
       dataDocument !== undefined
     );
-  }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
+  }, [annotatorMode, selectedText, isSelectingText, hideSelectionMenu, dataDocument]);
 
   // #2885 — anchor-move mode. Arrow clicks edit the raw text on the canvas as a
   // live preview but are NOT saved; the user commits a whole series with Done

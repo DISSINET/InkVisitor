@@ -111,6 +111,12 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
     return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT;
   }, [contentHeight]);
 
+  // The annotator box collapses to (near) zero height when the Statement
+  // Editor box is full-height. The selection menu floats over the whole page,
+  // so hide it while the annotator is out of view — the selection is kept, and
+  // the menu reopens once the annotator is visible again.
+  const annotatorHidden = annotatorHeight <= 0;
+
   const annotatorWidth = useMemo<number>(() => {
     return showStatementList ? contentWidth - COLLAPSED_TABLE_WIDTH : contentWidth;
   }, [contentWidth, showStatementList]);
@@ -271,6 +277,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               onWarningsModalOpenChange={setWarningsModalOpen}
               onAsymmetricalAnchorCountChange={setWarningAnchorCount}
               onUnsavedTextEditsChange={onUnsavedTextEditsChange}
+              hideSelectionMenu={annotatorHidden}
             />
           )}
         </AnnotatorProvider>
