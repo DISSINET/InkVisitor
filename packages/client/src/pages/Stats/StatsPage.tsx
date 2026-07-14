@@ -5,7 +5,6 @@ import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { StatsDocumentTable } from "./StatsDocumentTable/StatsDocumentTable";
 import { EntitiesTab } from "./EntitiesTab/EntitiesTab";
-import { RelationsTab } from "./RelationsTab/RelationsTab";
 import {
   StyledStatsContent,
   StyledStatsTab,
@@ -13,10 +12,10 @@ import {
   StyledTabsContainer,
 } from "./StatsPageStyles";
 
-type StatsTab = "entities" | "documents" | "relations";
+type StatsTab = "entities" | "documents";
 
 const parseStatsTab = (tab: string | null): StatsTab =>
-  tab === "documents" ? "documents" : tab === "relations" ? "relations" : "entities";
+  tab === "documents" ? "documents" : "entities";
 
 export const StatsPage = () => {
   const navigate = useNavigate();
@@ -82,13 +81,6 @@ export const StatsPage = () => {
               >
                 Documents
               </StyledStatsTab>
-              <StyledStatsTab
-                type="button"
-                $isSelected={activeTab === "relations"}
-                onClick={() => handleTabChange("relations")}
-              >
-                Relations
-              </StyledStatsTab>
             </StyledStatsTabGroup>
           </StyledTabsContainer>
         }
@@ -101,7 +93,6 @@ export const StatsPage = () => {
               setSelectedDocument={setSelectedDocument}
             />
           )}
-          {activeTab === "relations" && <RelationsTab />}
         </StyledStatsContent>
       </Box>
     </Panel>
