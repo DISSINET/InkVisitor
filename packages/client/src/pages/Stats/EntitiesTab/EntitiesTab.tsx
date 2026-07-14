@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from "re
 import { FaCalendarPlus, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
+  AGGREGATION_LABELS,
   EVENT_TYPE_GROUPS,
   STATS_FILTER_DEBOUNCE_MS,
   USER_THRESHOLD_MAX,
@@ -403,7 +404,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
               {Object.values(Aggregation).map((agg) => (
                 <Button
                   key={agg}
-                  label={String(agg)}
+                  label={AGGREGATION_LABELS[agg]}
                   shape="rounded-sm"
                   noBorder
                   onClick={() => {

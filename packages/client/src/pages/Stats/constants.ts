@@ -1,4 +1,10 @@
-import { EventType } from "@inkvisitor/shared/types/stats";
+import { Aggregation, EventType } from "@inkvisitor/shared/types/stats";
+
+/** Display labels for the Aggregate By switch. */
+export const AGGREGATION_LABELS: Record<Aggregation, string> = {
+  [Aggregation.USER]: "user",
+  [Aggregation.ACTIVITY_TYPE]: "activity type",
+};
 
 /** Relation audit event types. */
 export const RELATION_EVENT_TYPES: EventType[] = [
