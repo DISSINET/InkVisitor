@@ -42,7 +42,7 @@ export const Timestamp: React.FC<TimestampProps> = ({
         cutSeconds,
         cutTime,
       }),
-    [value, format, locale, options, agoThreshold, cutSeconds, cutTime]
+    [value, format, locale, options, agoThreshold, cutSeconds, cutTime],
   );
 
   return (

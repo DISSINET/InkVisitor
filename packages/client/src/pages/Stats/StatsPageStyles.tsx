@@ -63,24 +63,18 @@ export const StyledEntitiesLayout = styled.div`
   overflow: hidden;
 `;
 
-interface StyledFieldGroupProps {
-  $columnCount?: number;
-}
-export const StyledFieldGroup = styled.div<StyledFieldGroupProps>`
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(${({ $columnCount = 5 }) => $columnCount}, auto);
-  align-items: end;
+export const StyledFieldGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: center;
-  gap: 5rem;
+  width: 100%;
+  column-gap: 2.5rem;
+  row-gap: 0.5rem;
   position: relative;
 
   @media (max-width: 1200px) {
-    gap: 5rem;
-  }
-
-  @media (max-width: 1000px) {
-    gap: 2rem;
+    column-gap: 2.5rem;
   }
 `;
 
@@ -88,7 +82,7 @@ export const StyledField = styled.div`
   display: grid;
   gap: 0.3rem;
   grid-template-columns: auto;
-  grid-template-rows: auto 2.5rem;
+  grid-template-rows: auto minmax(2.5rem, auto);
   justify-content: start;
   align-items: center;
 `;
@@ -110,6 +104,60 @@ export const StyledDocumentResourceWrap = styled.div`
   min-width: 0;
   max-width: 17.4rem;
   flex: 1;
+`;
+export const StyledEventTypeGroups = styled.div`
+  display: flex;
+  align-items: stretch;
+  gap: ${({ theme }) => theme.space[2]};
+  flex-wrap: wrap;
+`;
+export const StyledEventTypeGroup = styled.fieldset`
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.15rem 0.25rem 0.25rem;
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
+  min-width: 0;
+`;
+interface StyledEventTypeGroupLegend {
+  $active: boolean;
+}
+export const StyledEventTypeGroupLegend = styled.legend<StyledEventTypeGroupLegend>`
+  margin: 0 auto;
+  padding: 0 0.4rem;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme, $active }) => ($active ? theme.color["primary"] : theme.color["gray"][500])};
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+    text-decoration: underline;
+  }
+`;
+interface StyledEventTypeSubLabel {
+  $active: boolean;
+}
+export const StyledEventTypeSubLabel = styled.span<StyledEventTypeSubLabel>`
+  margin: 0 0.1rem 0 0.3rem;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme, $active }) => ($active ? theme.color["primary"] : theme.color["gray"][500])};
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+
+  &:first-of-type {
+    margin-left: 0.1rem;
+  }
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+    text-decoration: underline;
+  }
 `;
 export const StyledDateInputWrapper = styled.div`
   display: flex;
