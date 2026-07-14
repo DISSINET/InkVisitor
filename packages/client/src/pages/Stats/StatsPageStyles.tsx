@@ -74,7 +74,7 @@ export const StyledFieldGroup = styled.div`
   position: relative;
 
   @media (max-width: 1200px) {
-    column-gap: 1.5rem;
+    column-gap: 2.5rem;
   }
 `;
 
