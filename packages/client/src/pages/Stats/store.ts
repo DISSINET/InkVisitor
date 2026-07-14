@@ -19,6 +19,7 @@ export type StatsStoreAction =
   | { type: "timeUnitUpdate"; payload: TimeUnit }
   | { type: "aggregateUpdate"; payload: Aggregation }
   | { type: "eventTypeUpdate"; payload: EventType }
+  | { type: "eventTypeGroupUpdate"; payload: { types: EventType[]; active: boolean } }
   | { type: "showAggregateOptionsUpdate"; payload: boolean }
   | { type: "showDateFromRangePickerUpdate"; payload: boolean }
   | { type: "showDateToRangePickerUpdate"; payload: boolean };
@@ -64,6 +65,14 @@ export const statsReducer = (state: StatsStore, action: StatsStoreAction): Stats
         ? state.eventType.filter((type) => type !== eventTypeToHandle)
         : [...state.eventType, eventTypeToHandle];
       return { ...state, eventType: newEventTypes };
+    case "eventTypeGroupUpdate": {
+      const { types, active } = action.payload;
+      const withoutGroup = state.eventType.filter((type) => !types.includes(type));
+      return {
+        ...state,
+        eventType: active ? [...withoutGroup, ...types] : withoutGroup,
+      };
+    }
     case "showAggregateOptionsUpdate":
       return { ...state, showAggregateOptions: action.payload };
     case "showDateFromRangePickerUpdate":

@@ -8,10 +8,19 @@ import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { FaCalendarPlus, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { STATS_FILTER_DEBOUNCE_MS, USER_THRESHOLD_MAX, VISIBLE_EVENT_TYPES } from "../constants";
+import {
+  EVENT_TYPE_GROUPS,
+  STATS_FILTER_DEBOUNCE_MS,
+  USER_THRESHOLD_MAX,
+  VISIBLE_EVENT_TYPES,
+} from "../constants";
 import {
   StyledDateInputWrapper,
   StyledEntitiesLayout,
+  StyledEventTypeGroup,
+  StyledEventTypeGroupLegend,
+  StyledEventTypeGroups,
+  StyledEventTypeSubLabel,
   StyledField,
   StyledFieldGroup,
   StyledFieldLabel,
@@ -51,6 +60,21 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
   });
 
   const [usersIgnoreBelowValue, setUsersIgnoreBelowValue] = useState<number>(0);
+
+  // groups restricted to the event types selectable in this tab
+  const eventTypeGroups = useMemo(
+    () =>
+      EVENT_TYPE_GROUPS.map((group) => ({
+        ...group,
+        subgroups: group.subgroups
+          .map((subgroup) => ({
+            ...subgroup,
+            types: subgroup.types.filter(({ type }) => eventTypes.includes(type)),
+          }))
+          .filter((subgroup) => subgroup.types.length > 0),
+      })).filter((group) => group.subgroups.length > 0),
+    [eventTypes],
+  );
 
   const [data, setData] = useState<IResponseStats | undefined>(undefined);
 
@@ -284,25 +308,93 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
 
           <StyledField>
             <StyledFieldLabel>Event type</StyledFieldLabel>
-            <SwitchGroup>
-              {eventTypes.map((eventType) => (
-                <Button
-                  key={eventType}
-                  label={String(eventType)}
-                  shape="rounded-sm"
-                  noBorder
-                  onClick={() => {
-                    dispatch({
-                      type: "eventTypeUpdate",
-                      payload: eventType,
-                    });
-                  }}
-                  color={state.eventType.includes(eventType) ? "primary" : "greyer"}
-                  inverted={!state.eventType.includes(eventType)}
-                  noBackground={!state.eventType.includes(eventType)}
-                />
-              ))}
-            </SwitchGroup>
+            <StyledEventTypeGroups>
+              {eventTypeGroups.map((group) => {
+                const groupTypes = group.subgroups.flatMap((subgroup) =>
+                  subgroup.types.map(({ type }) => type),
+                );
+                const allActive = groupTypes.every((type) =>
+                  state.eventType.includes(type),
+                );
+                const someActive = groupTypes.some((type) =>
+                  state.eventType.includes(type),
+                );
+                return (
+                  <StyledEventTypeGroup key={group.label}>
+                    <StyledEventTypeGroupLegend
+                      $active={someActive}
+                      title={
+                        allActive
+                          ? `hide all ${group.label} events`
+                          : `show all ${group.label} events`
+                      }
+                      onClick={() => {
+                        dispatch({
+                          type: "eventTypeGroupUpdate",
+                          payload: {
+                            types: groupTypes,
+                            active: !allActive,
+                          },
+                        });
+                      }}
+                    >
+                      {group.label}
+                    </StyledEventTypeGroupLegend>
+                    {group.subgroups.map((subgroup, subgroupIndex) => {
+                      const subgroupTypes = subgroup.types.map(({ type }) => type);
+                      const allSubActive = subgroupTypes.every((type) =>
+                        state.eventType.includes(type),
+                      );
+                      const someSubActive = subgroupTypes.some((type) =>
+                        state.eventType.includes(type),
+                      );
+                      return (
+                        <React.Fragment key={subgroup.label ?? subgroupIndex}>
+                          {subgroup.label && (
+                            <StyledEventTypeSubLabel
+                              $active={someSubActive}
+                              title={
+                                allSubActive
+                                  ? `hide all ${subgroup.label} events`
+                                  : `show all ${subgroup.label} events`
+                              }
+                              onClick={() => {
+                                dispatch({
+                                  type: "eventTypeGroupUpdate",
+                                  payload: {
+                                    types: subgroupTypes,
+                                    active: !allSubActive,
+                                  },
+                                });
+                              }}
+                            >
+                              {subgroup.label}:
+                            </StyledEventTypeSubLabel>
+                          )}
+                          {subgroup.types.map(({ type, label }) => (
+                            <Button
+                              key={type}
+                              label={label}
+                              shape="rounded-sm"
+                              noBorder
+                              onClick={() => {
+                                dispatch({
+                                  type: "eventTypeUpdate",
+                                  payload: type,
+                                });
+                              }}
+                              color={state.eventType.includes(type) ? "primary" : "greyer"}
+                              inverted={!state.eventType.includes(type)}
+                              noBackground={!state.eventType.includes(type)}
+                            />
+                          ))}
+                        </React.Fragment>
+                      );
+                    })}
+                  </StyledEventTypeGroup>
+                );
+              })}
+            </StyledEventTypeGroups>
           </StyledField>
 
           <StyledField>
