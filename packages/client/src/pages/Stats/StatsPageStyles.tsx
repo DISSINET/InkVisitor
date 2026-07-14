@@ -63,24 +63,18 @@ export const StyledEntitiesLayout = styled.div`
   overflow: hidden;
 `;
 
-interface StyledFieldGroupProps {
-  $columnCount?: number;
-}
-export const StyledFieldGroup = styled.div<StyledFieldGroupProps>`
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(${({ $columnCount = 5 }) => $columnCount}, auto);
-  align-items: end;
+export const StyledFieldGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: center;
-  gap: 5rem;
+  width: 100%;
+  column-gap: 2.5rem;
+  row-gap: 0.5rem;
   position: relative;
 
   @media (max-width: 1200px) {
-    gap: 5rem;
-  }
-
-  @media (max-width: 1000px) {
-    gap: 2rem;
+    column-gap: 1.5rem;
   }
 `;
 
@@ -134,8 +128,7 @@ export const StyledEventTypeGroupLegend = styled.legend<StyledEventTypeGroupLege
   padding: 0 0.4rem;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme, $active }) =>
-    $active ? theme.color["primary"] : theme.color["gray"][500]};
+  color: ${({ theme, $active }) => ($active ? theme.color["primary"] : theme.color["gray"][500])};
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -152,8 +145,7 @@ export const StyledEventTypeSubLabel = styled.span<StyledEventTypeSubLabel>`
   margin: 0 0.1rem 0 0.3rem;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  color: ${({ theme, $active }) =>
-    $active ? theme.color["primary"] : theme.color["gray"][500]};
+  color: ${({ theme, $active }) => ($active ? theme.color["primary"] : theme.color["gray"][500])};
   white-space: nowrap;
   cursor: pointer;
   user-select: none;

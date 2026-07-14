@@ -9,8 +9,8 @@ export const StyledTimestamp = styled.span<StyledTimestampProps>`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
-  border: ${({ theme }) => `1px solid ${theme.color.primaryTransparent}`};
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[4]}`};
+  border: 1px solid ${({ theme }) => theme.color.primaryTransparent};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   background-color: ${({ theme }) => theme.color.invertedBg.primary};
   color: ${({ theme }) => theme.color.primary};

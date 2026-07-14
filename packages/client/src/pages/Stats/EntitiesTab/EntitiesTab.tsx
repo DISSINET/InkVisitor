@@ -6,17 +6,17 @@ import { Button, ButtonGroup, Input, Loader, SwitchGroup, Timestamp } from "comp
 import { StatsChart, StatsTable } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { FaCalendarPlus, FaUndo } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { IcoRefresh } from "Theme/icons";
 import {
   AGGREGATION_LABELS,
   EVENT_TYPE_GROUPS,
   STATS_FILTER_DEBOUNCE_MS,
+  STATS_PERIODS,
   USER_THRESHOLD_MAX,
   VISIBLE_EVENT_TYPES,
 } from "../constants";
 import {
-  StyledDateInputWrapper,
   StyledEntitiesLayout,
   StyledEventTypeGroup,
   StyledEventTypeGroupLegend,
@@ -24,6 +24,7 @@ import {
   StyledEventTypeSubLabel,
   StyledField,
   StyledFieldGroup,
+  StyledFieldInput,
   StyledFieldLabel,
   StyledResultsChart,
   StyledResultsTable,
@@ -131,7 +132,12 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
 
   const refreshStats = () => {
     setFilterDebounceEnabled(false);
-    dispatch({ type: "dateToUpdate", payload: new Date().toISOString() });
+    if (state.period === "custom") {
+      dispatch({ type: "dateToUpdate", payload: new Date().toISOString() });
+    } else {
+      // re-derive the preset range relative to now
+      dispatch({ type: "periodUpdate", payload: state.period });
+    }
   };
 
   useEffect(() => {
@@ -162,36 +168,50 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
   return (
     <>
       <StyledEntitiesLayout>
-        <StyledFieldGroup $columnCount={2}>
-          {/* Date From */}
+        <StyledFieldGroup>
+          {/* Period */}
           <StyledField>
-            <StyledFieldLabel>From Date</StyledFieldLabel>
-            {!state.showDateFromRangePicker ? (
-              <StyledDateInputWrapper>
-                <Timestamp label="From" value={state.dateFrom} />
-                <Button
-                  icon={<FaCalendarPlus />}
-                  onClick={() => {
-                    dispatch({
-                      type: "showDateFromRangePickerUpdate",
-                      payload: true,
-                    });
-                    dispatch({
-                      type: "dateFromUpdate",
-                      payload: new Date(
-                        new Date().setFullYear(new Date().getFullYear() - 5),
-                      ).toISOString(),
-                    });
-                  }}
-                  color="primary"
-                  inverted
-                  tooltipLabel="Add custom date from"
-                  noBorder
-                  noBackground
-                />
-              </StyledDateInputWrapper>
-            ) : (
-              <StyledDateInputWrapper>
+            <StyledFieldLabel>Period</StyledFieldLabel>
+            <StyledFieldInput>
+              <SwitchGroup>
+                {STATS_PERIODS.map(({ value, label }) => (
+                  <Button
+                    key={value}
+                    label={label}
+                    shape="rounded-sm"
+                    noBorder
+                    onClick={() => {
+                      dispatch({ type: "periodUpdate", payload: value });
+                    }}
+                    color={state.period === value ? "primary" : "greyer"}
+                    inverted={state.period !== value}
+                    noBackground={state.period !== value}
+                  />
+                ))}
+              </SwitchGroup>
+              <Button
+                icon={<IcoRefresh size={18} />}
+                onClick={refreshStats}
+                disabled={isLoadingStats}
+                color="primary"
+                inverted
+                tooltipLabel="Refresh – recompute the period up to now"
+                noBorder
+                noBackground
+              />
+              {state.period !== "custom" && (
+                <>
+                  <Timestamp label="from" value={state.dateFrom} cutSeconds />
+                  <Timestamp label="to" value={state.dateTo} cutSeconds />
+                </>
+              )}
+            </StyledFieldInput>
+          </StyledField>
+
+          {state.period === "custom" && (
+            <>
+              <StyledField>
+                <StyledFieldLabel>From</StyledFieldLabel>
                 <Input
                   type="datetime-local"
                   width={150}
@@ -205,54 +225,9 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     })
                   }
                 />
-                <Button
-                  icon={<FaUndo />}
-                  onClick={() => {
-                    dispatch({
-                      type: "showDateFromRangePickerUpdate",
-                      payload: false,
-                    });
-                    dispatch({
-                      type: "dateFromUpdate",
-                      payload: new Date("2000-01-01").toISOString(),
-                    });
-                  }}
-                  color="primary"
-                  inverted
-                  tooltipLabel="Reset to Since Forever"
-                  noBackground
-                />
-              </StyledDateInputWrapper>
-            )}
-          </StyledField>
-
-          {/* Date To */}
-          <StyledField>
-            <StyledFieldLabel>To Date</StyledFieldLabel>
-            {!state.showDateToRangePicker ? (
-              <StyledDateInputWrapper>
-                <Timestamp label="To" value={state.dateTo} />
-                <Button
-                  icon={<FaCalendarPlus />}
-                  onClick={() => {
-                    dispatch({
-                      type: "dateToUpdate",
-                      payload: new Date().toISOString(),
-                    });
-                    dispatch({
-                      type: "showDateToRangePickerUpdate",
-                      payload: true,
-                    });
-                  }}
-                  color="primary"
-                  inverted
-                  tooltipLabel="Add custom date to"
-                  noBorder
-                  noBackground
-                />
-              </StyledDateInputWrapper>
-            ) : (
-              <StyledDateInputWrapper>
+              </StyledField>
+              <StyledField>
+                <StyledFieldLabel>To</StyledFieldLabel>
                 <Input
                   type="datetime-local"
                   width={150}
@@ -264,26 +239,12 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     })
                   }
                 />
-                <Button
-                  icon={<FaUndo />}
-                  onClick={() => {
-                    dispatch({
-                      type: "showDateToRangePickerUpdate",
-                      payload: false,
-                    });
-                    refreshStats();
-                  }}
-                  color="primary"
-                  inverted
-                  tooltipLabel="Reset to Until Now"
-                  noBackground
-                />
-              </StyledDateInputWrapper>
-            )}
-          </StyledField>
+              </StyledField>
+            </>
+          )}
         </StyledFieldGroup>
 
-        <StyledFieldGroup style={{ marginBottom: "1rem" }}>
+        <StyledFieldGroup>
           <StyledField>
             <StyledFieldLabel>Time Unit</StyledFieldLabel>
             <SwitchGroup>
@@ -314,12 +275,8 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                 const groupTypes = group.subgroups.flatMap((subgroup) =>
                   subgroup.types.map(({ type }) => type),
                 );
-                const allActive = groupTypes.every((type) =>
-                  state.eventType.includes(type),
-                );
-                const someActive = groupTypes.some((type) =>
-                  state.eventType.includes(type),
-                );
+                const allActive = groupTypes.every((type) => state.eventType.includes(type));
+                const someActive = groupTypes.some((type) => state.eventType.includes(type));
                 return (
                   <StyledEventTypeGroup key={group.label}>
                     <StyledEventTypeGroupLegend
@@ -419,9 +376,12 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
           </StyledField>
           {state.aggregate === Aggregation.USER && (
             <StyledField>
-              <StyledFieldLabel>Ignore users below %</StyledFieldLabel>
+              <StyledFieldLabel title="Hide users whose share of the total activity is below this percentage">
+                {`Hide users < %`}
+              </StyledFieldLabel>
               <Input
                 type="number"
+                width={60}
                 value={String(usersIgnoreBelowValue)}
                 onChangeFn={(value) => {
                   const num = Number(value);
@@ -437,13 +397,6 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
               />
             </StyledField>
           )}
-
-          <Button
-            color="success"
-            label={"Refresh"}
-            disabled={isLoadingStats}
-            onClick={refreshStats}
-          />
         </StyledFieldGroup>
 
         {data && (

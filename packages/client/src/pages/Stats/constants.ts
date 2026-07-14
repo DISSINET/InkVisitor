@@ -84,6 +84,17 @@ export const EVENT_TYPE_GROUPS: EventTypeGroup[] = [
   },
 ];
 
+export type StatsPeriod = "all" | "year" | "month" | "week" | "custom";
+
+/** Date range presets for the stats filter; "custom" reveals the from/to pickers. */
+export const STATS_PERIODS: { value: StatsPeriod; label: string }[] = [
+  { value: "all", label: "all" },
+  { value: "year", label: "year" },
+  { value: "month", label: "month" },
+  { value: "week", label: "week" },
+  { value: "custom", label: "custom" },
+];
+
 export const OTHERS_KEY = "others";
 export const USER_THRESHOLD_MAX = 20;
 export const STATS_FILTER_DEBOUNCE_MS = 800;
