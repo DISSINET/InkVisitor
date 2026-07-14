@@ -381,7 +381,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
               </StyledFieldLabel>
               <Input
                 type="number"
-                width={60}
+                width={40}
                 value={String(usersIgnoreBelowValue)}
                 onChangeFn={(value) => {
                   const num = Number(value);

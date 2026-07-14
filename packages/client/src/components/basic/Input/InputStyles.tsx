@@ -99,6 +99,17 @@ export const StyledInput = styled.input<IValueStyle>`
     text-decoration: none;
   }
 
+  /* Native number spinner hidden - replaced by the custom themed stepper */
+  &[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  &[type="number"]::-webkit-inner-spin-button,
+  &[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   /* Theming for native datetime picker icon */
   &[type="datetime-local"] {
     /* Hint the UA to render internal controls in the correct scheme */
@@ -166,6 +177,53 @@ export const StyledTextArea = styled.textarea<StyledTextArea>`
   }
   &:hover {
     border-color: ${({ theme, disabled }) => (!disabled ? theme.color["info"] : "")};
+  }
+`;
+
+export const StyledNumberInputWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+export const StyledNumberStepper = styled.div`
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+`;
+
+/* Mirrors the DatePicker time stepper (StyledStepButton) look */
+export const StyledNumberStepperButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ theme }) => theme.space[6]};
+  height: ${({ theme }) => theme.space[4]};
+  border: none;
+  background: transparent;
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color["gray"][200]};
+    color: ${({ theme }) => theme.color["info"]};
+  }
+  &:focus-visible {
+    outline: 0;
+    color: ${({ theme }) => theme.color["info"]};
+  }
+
+  svg {
+    display: block;
   }
 `;
 

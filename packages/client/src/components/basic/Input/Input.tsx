@@ -3,6 +3,7 @@ import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import { IconWithTooltip, Tooltip } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import { MdCancel, MdCheck, MdClose } from "react-icons/md";
+import { RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
 import { DatePicker } from "../DatePicker/DatePicker";
 import {
   Label,
@@ -11,6 +12,9 @@ import {
   StyledClearableInputButton,
   StyledIconWrapper,
   StyledInput,
+  StyledNumberInputWrapper,
+  StyledNumberStepper,
+  StyledNumberStepperButton,
   StyledRightContent,
   StyledTextArea,
   StyledWrapper,
@@ -118,6 +122,21 @@ export const Input: React.FC<Input> = ({
   // Measure rightContent so the input reserves matching right padding (its width
   // is dynamic, e.g. a variable number of icon checkboxes) and the clearable
   // button can be offset to sit left of it.
+  // custom stepper for type="number" (native spinner is hidden)
+  const stepNumberValue = (delta: number) => {
+    const current = Number(displayValue);
+    let next = (Number.isFinite(current) ? current : 0) + delta;
+    if (typeof min === "number") {
+      next = Math.max(min, next);
+    }
+    if (typeof max === "number") {
+      next = Math.min(max, next);
+    }
+    const nextValue = String(next);
+    setDisplayValue(nextValue);
+    onChangeFn(nextValue);
+  };
+
   const internalInputRef = useRef<HTMLInputElement>(null);
   const resolvedInputRef = inputRef ?? internalInputRef;
   const rightContentRef = useRef<HTMLDivElement>(null);
@@ -359,21 +378,45 @@ export const Input: React.FC<Input> = ({
         />
       )}
       {type === "number" && (
-        <StyledInput
-          type={type}
-          min={min}
-          max={max}
-          value={displayValue}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setDisplayValue(e.currentTarget.value);
+        <StyledNumberInputWrapper>
+          <StyledInput
+            type={type}
+            min={min}
+            max={max}
+            width={width}
+            disabled={disabled}
+            $roundCorners={roundCorners}
+            $rightPadding={20}
+            value={displayValue}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setDisplayValue(e.currentTarget.value);
 
-            if (changeOnType) {
-              onChangeFn(e.currentTarget.value);
-            }
-          }}
-          $noBorder={noBorder}
-          $borderColor={borderColor}
-        />
+              if (changeOnType) {
+                onChangeFn(e.currentTarget.value);
+              }
+            }}
+            $noBorder={noBorder}
+            $borderColor={borderColor}
+          />
+          {!disabled && (
+            <StyledNumberStepper>
+              <StyledNumberStepperButton
+                type="button"
+                tabIndex={-1}
+                onClick={() => stepNumberValue(1)}
+              >
+                <RiArrowUpSLine size={12} />
+              </StyledNumberStepperButton>
+              <StyledNumberStepperButton
+                type="button"
+                tabIndex={-1}
+                onClick={() => stepNumberValue(-1)}
+              >
+                <RiArrowDownSLine size={12} />
+              </StyledNumberStepperButton>
+            </StyledNumberStepper>
+          )}
+        </StyledNumberInputWrapper>
       )}
     </StyledWrapper>
   );
