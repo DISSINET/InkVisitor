@@ -148,14 +148,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   return (
     <StyledNodeContainer>
       {hasParallelEdges && (
-        <SwitchGroup $column>
+        <SwitchGroup $column style={{ zIndex: "10" }}>
           <Button
             label="AND"
             shape="rounded-sm"
             noBorder
             inverted={node.operator !== Query.NodeOperator.And}
             noBackground={node.operator !== Query.NodeOperator.And}
-            color={node.operator === Query.NodeOperator.And ? "primary" : "greyer"}
+            color={node.operator === Query.NodeOperator.And ? "info" : "greyer"}
             tooltipLabel="match all parallel branches"
             onClick={() => {
               dispatch({
@@ -173,7 +173,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             noBorder
             inverted={node.operator !== Query.NodeOperator.Or}
             noBackground={node.operator !== Query.NodeOperator.Or}
-            color={node.operator === Query.NodeOperator.Or ? "primary" : "greyer"}
+            color={node.operator === Query.NodeOperator.Or ? "info" : "greyer"}
             tooltipLabel="match any parallel branch"
             onClick={() => {
               dispatch({

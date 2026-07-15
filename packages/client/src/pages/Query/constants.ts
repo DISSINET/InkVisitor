@@ -1,5 +1,5 @@
 export const QUERY_GRID_WIDTH = 400;
-export const QUERY_GRID_HEIGHT = 50;
+export const QUERY_GRID_HEIGHT = 59;
 
 export const QUERY_LEFT_PANEL_MIN_WIDTH = 410;
 export const QUERY_RIGHT_PANEL_MIN_WIDTH = 450;

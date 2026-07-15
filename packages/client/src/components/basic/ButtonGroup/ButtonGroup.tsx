@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { ThemeBorderRadius } from "Theme/theme";
+import { FlatThemeColor, ThemeBorderRadius } from "Theme/theme";
 
 interface ButtonGroup {
   $noGap?: boolean;
@@ -33,7 +33,7 @@ export const ButtonGroup = styled.div.attrs({
 interface SwitchGroup {
   $column?: boolean;
   $bgColor?: string;
-  $border?: boolean;
+  $borderColor?: FlatThemeColor;
 }
 export const SwitchGroup = styled.div<SwitchGroup>`
   display: inline-flex;
@@ -44,8 +44,8 @@ export const SwitchGroup = styled.div<SwitchGroup>`
   background-color: ${({ theme, $bgColor }) => $bgColor ?? theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   overflow: hidden;
-  border: ${({ theme, $border }) =>
-    $border ? `${theme.borderWidth[1]} solid ${theme.color["gray"][300]}` : "none"};
+  border: ${({ theme, $borderColor }) =>
+    $borderColor ? `${theme.borderWidth[1]} solid ${theme.color[$borderColor]}` : "none"};
 
   > button {
     margin: 0;

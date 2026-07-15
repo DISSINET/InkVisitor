@@ -105,12 +105,12 @@ export const StyledEdgeBox = styled.div<{ $color: string }>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 5px;
+  gap: 0.5rem;
   background-color: ${({ $color }) => $color};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   padding: ${({ theme }) => theme.space[1]};
-  padding-left: ${({ theme }) => theme.space[2]};
-  margin-top: 10px;
+  padding-left: ${({ theme }) => theme.space[3]};
+  margin-top: 1.4rem;
 `;
 
 export const StyledTooltipList = styled.ul`
