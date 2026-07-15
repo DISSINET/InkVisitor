@@ -69,7 +69,7 @@ export const StyledExpansionBadge = styled.div`
   justify-content: center;
   height: 0.72rem;
   padding: 0 0.12rem;
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 3px;
   background: ${({ theme }) => theme.color.white};
   color: ${({ theme }) => theme.color.black};
   font-size: 0.55rem;
