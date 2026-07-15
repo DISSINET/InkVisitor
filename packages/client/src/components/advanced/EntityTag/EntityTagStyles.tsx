@@ -59,24 +59,31 @@ export const StyledTagComponentWrap = styled.div`
 `;
 
 // small corner marker shown when an entity was surfaced via an expansion option
-// ("include equivalents" -> "eq", "include subordinates" -> "sub")
-export const StyledExpansionBadge = styled.div`
+// ("include equivalents" -> "eq", "include subordinates" -> "sub"). Solid accent
+// backgrounds (rather than white-on-white) + a white outline keep the badge
+// legible against any entity-class colour or row background.
+interface StyledExpansionBadge {
+  $variant: "equivalent" | "subordinate";
+}
+export const StyledExpansionBadge = styled.div<StyledExpansionBadge>`
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 0.72rem;
   padding: 0 0.12rem;
-  border-bottom-right-radius: 3px;
-  background: ${({ theme }) => theme.color.white};
-  color: ${({ theme }) => theme.color.black};
-  font-size: 0.55rem;
+  border-top-right-radius: 3px;
+  background: ${({ theme, $variant }) =>
+    $variant === "equivalent" ? theme.color.info : theme.color.warning};
+  color: ${({ theme, $variant }) =>
+    $variant === "equivalent" ? theme.color.white : theme.color.black};
+  font-size: 0.6rem;
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   line-height: 1;
   letter-spacing: -0.02em;
-  pointer-events: none;
+  cursor: default;
 `;
 
 interface StyledLabelWrap {

@@ -2,7 +2,7 @@ import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
-import { Button, Tag } from "components";
+import { Button, Tag, Tooltip } from "components";
 import { EntityTooltip } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -126,7 +126,9 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const [elvlHovered, setElvlHovered] = useState(false);
   const [tagHovered, setTagHovered] = useState(false);
   const [clickedOnce, setClickedOnce] = useState(false);
+  const [expansionBadgeHovered, setExpansionBadgeHovered] = useState(false);
   const referenceEl = useRef<HTMLDivElement>(null!);
+  const expansionBadgeRef = useRef<HTMLDivElement>(null);
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
 
   useEffect(() => {
@@ -195,10 +197,33 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         >
           {entity.class}
         </StyledEntityTag>
-        {mark && <StyledExpansionBadge title={mark.tooltip}>{mark.label}</StyledExpansionBadge>}
+        {mark && (
+          <StyledExpansionBadge
+            ref={expansionBadgeRef}
+            $variant={isEquivalent ? "equivalent" : "subordinate"}
+            onMouseEnter={() => {
+              setExpansionBadgeHovered(true);
+              setTagHovered(false);
+            }}
+            onMouseLeave={() => {
+              setExpansionBadgeHovered(false);
+              setTagHovered(true);
+            }}
+          >
+            {mark.label}
+          </StyledExpansionBadge>
+        )}
+        {mark && (
+          <Tooltip
+            label={mark.tooltip}
+            visible={expansionBadgeHovered}
+            referenceElement={expansionBadgeRef.current}
+            position="top"
+          />
+        )}
       </StyledTagComponentWrap>
     );
-  }, [entity, isEquivalent, isSubordinate]);
+  }, [entity, isEquivalent, isSubordinate, expansionBadgeHovered]);
 
   const labelComponent = useMemo(() => {
     return (
