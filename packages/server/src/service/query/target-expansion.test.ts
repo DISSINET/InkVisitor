@@ -2,6 +2,7 @@ import "ts-jest";
 import { r, Connection } from "rethinkdb-ts";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
+import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import { getEdgeInstance } from "./edge";
 import QuerySearch from "./search";
 import { clearQueryBaseCache } from "./query-base-cache";
@@ -264,11 +265,11 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
   // through the real request flow (run() then getResults()) and read the
   // final results.items - exactly what the /query route returns as entityIds.
   describe("root result expansion (QuerySearch getResults/getStats)", () => {
-    const runQuery = async (
+    const makeSearch = (
       params: Query.INodeParams,
       filters: Explore.IExploreSearchFilter[] = []
-    ): Promise<string[]> => {
-      const search = new QuerySearch(
+    ): QuerySearch =>
+      new QuerySearch(
         {
           id: "root",
           type: Query.NodeType.E,
@@ -284,10 +285,29 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
           offset: 0,
         }
       );
+
+    const runQuery = async (
+      params: Query.INodeParams,
+      filters: Explore.IExploreSearchFilter[] = []
+    ): Promise<string[]> => {
+      const search = makeSearch(params, filters);
       await search.run(conn);
       await search.getResults(conn);
       return search.results?.items ?? [];
     };
+
+    // same flow as runQuery, but returns the full response rows - used to
+    // assert the isEquivalent/isSubordinate provenance flags
+    const runQueryRows = async (
+      params: Query.INodeParams
+    ): Promise<IResponseQueryEntity[]> => {
+      const search = makeSearch(params);
+      await search.run(conn);
+      return search.getResults(conn);
+    };
+
+    const rowById = (rows: IResponseQueryEntity[], id: string) =>
+      rows.find((row) => row.entity.id === id);
 
     // the base-query cache is module-level and would otherwise leak identical
     // queries between tests
@@ -385,6 +405,53 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
       expect(first[0]).toEqual(TX);
       expect(sorted(first.slice(1))).toEqual(sorted([TX_CHILD, TX_GRAND]));
       expect(second).toEqual(first);
+    });
+
+    // provenance flags on the response rows: entities APPENDED by the
+    // expansion carry isSubordinate/isEquivalent so the client can badge
+    // them; direct matches carry neither field (omitted, not false)
+    test("includeSubordinates: appended rows carry isSubordinate only, the direct match neither flag", async () => {
+      const rows = await runQueryRows({
+        entityId: TX,
+        includeSubordinates: true,
+      });
+      const direct = rowById(rows, TX);
+      expect(direct).toBeDefined();
+      expect(direct).not.toHaveProperty("isEquivalent");
+      expect(direct).not.toHaveProperty("isSubordinate");
+      for (const id of [TX_CHILD, TX_GRAND]) {
+        const appended = rowById(rows, id);
+        expect(appended?.isSubordinate).toBe(true);
+        expect(appended).not.toHaveProperty("isEquivalent");
+      }
+    });
+
+    test("includeEquivalents: the appended row carries isEquivalent only, the direct match neither flag", async () => {
+      const rows = await runQueryRows({
+        entityId: CONCEPT_A,
+        includeEquivalents: true,
+      });
+      const direct = rowById(rows, CONCEPT_A);
+      expect(direct).toBeDefined();
+      expect(direct).not.toHaveProperty("isEquivalent");
+      expect(direct).not.toHaveProperty("isSubordinate");
+      const appended = rowById(rows, CONCEPT_B);
+      expect(appended?.isEquivalent).toBe(true);
+      expect(appended).not.toHaveProperty("isSubordinate");
+    });
+
+    test("a direct match that is also a subordinate of another match gets NO flag", async () => {
+      // all territories match directly, so the expansion appends nothing and
+      // no row may be flagged
+      const rows = await runQueryRows({
+        entityClasses: [EntityEnums.Class.Territory],
+        includeSubordinates: true,
+      });
+      expect(rows).toHaveLength(4);
+      for (const row of rows) {
+        expect(row).not.toHaveProperty("isEquivalent");
+        expect(row).not.toHaveProperty("isSubordinate");
+      }
     });
   });
 });

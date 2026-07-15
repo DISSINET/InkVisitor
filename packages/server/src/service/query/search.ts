@@ -31,6 +31,12 @@ export default class QuerySearch {
   results: Results<IEntity> | null;
   private readonly queryForCache: Query.INode;
   private resultsExpanded = false;
+  // ids APPENDED by expandFilteredResults (#2969), by provenance - used to
+  // stamp isEquivalent/isSubordinate on the response entities. Direct matches
+  // are never in either set; an id appended by both expansions counts as
+  // equivalent only (mirrors response-search).
+  private equivalentIds = new Set<string>();
+  private subordinateIds = new Set<string>();
 
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.queryForCache = query;
@@ -116,18 +122,21 @@ export default class QuerySearch {
     const ids = this.results.items || [];
     const seen = new Set<string>(ids);
     const expanded = [...ids];
-    const expansions: string[][] = [];
+    // equivalents first: when an id would be appended by both expansions, the
+    // equivalent provenance wins (mirrors response-search)
+    const expansions: Array<[string[], Set<string>]> = [];
     if (this.root.params.includeEquivalents) {
-      expansions.push(await getEquivalentEntityIds(db, ids));
+      expansions.push([await getEquivalentEntityIds(db, ids), this.equivalentIds]);
     }
     if (this.root.params.includeSubordinates) {
-      expansions.push(await getSubordinateEntityIds(db, ids));
+      expansions.push([await getSubordinateEntityIds(db, ids), this.subordinateIds]);
     }
-    for (const expansionIds of expansions) {
+    for (const [expansionIds, provenance] of expansions) {
       for (const id of expansionIds) {
         if (!seen.has(id)) {
           seen.add(id);
           expanded.push(id);
+          provenance.add(id);
         }
       }
     }
@@ -172,11 +181,19 @@ export default class QuerySearch {
       const rowI = filteredIds.indexOf(entity.id);
 
       if (!indices || indices.includes(rowI)) {
-        out.push({
+        const row: IResponseQueryEntity = {
           rowI,
           entity,
           columnData: await this.results!.columns(db, entity, columns),
-        });
+        };
+        // flags only on rows APPENDED by the expansion - direct matches carry
+        // neither field (#2969)
+        if (this.equivalentIds.has(entity.id)) {
+          row.isEquivalent = true;
+        } else if (this.subordinateIds.has(entity.id)) {
+          row.isSubordinate = true;
+        }
+        out.push(row);
       }
     }
 

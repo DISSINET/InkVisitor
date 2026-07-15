@@ -48,6 +48,7 @@
     "styled.d.ts",
     "types.d.ts",
     "images.d.ts",
+    "css.d.ts",
     "fonts.d.ts",
     "vitest.d.ts",
     "src/**/*.ts",
