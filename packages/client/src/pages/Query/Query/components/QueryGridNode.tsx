@@ -17,6 +17,7 @@ import { QueryAction, QueryActionType } from "../state";
 import {
   StyledGraphNode,
   StyledNodeContainer,
+  StyledNodeExpansionToggles,
   StyledNodeMainRow,
   StyledNodeTypeSelect,
   StyledParallelOperator,
@@ -33,10 +34,6 @@ interface QueryGridNodeProps {
   problems: QueryValidityProblem[];
   isRoot: boolean;
   onOpenEntityInDetail?: (entityId: string) => void;
-  // page-level expansion options (#2969): the node-edge entity picker surfaces
-  // subordinates/equivalents (badged) so they can be picked directly
-  includeEquivalents?: boolean;
-  includeSubordinates?: boolean;
 }
 
 export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
@@ -47,8 +44,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   problems,
   isRoot = false,
   onOpenEntityInDetail,
-  includeEquivalents = false,
-  includeSubordinates = false,
 }) => {
   const theme = useTheme();
   const isValid = problems.length === 0;
@@ -286,8 +281,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     categoryTypes={entityIdCategoryTypes}
                     placeholder="entity"
                     disableCreate
-                    includeEquivalents={includeEquivalents}
-                    includeSubordinates={includeSubordinates}
                     disabled={isRelationEntityPickerDisabled}
                     initCategory={
                       node.params.entityClasses?.[0] ??
@@ -351,6 +344,44 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   />
                 ))}
             </div>
+          )}
+          {!isRoot && !!paramEntityId && (
+            <StyledNodeExpansionToggles>
+              <Checkbox
+                label="EQ"
+                size={13}
+                value={node.params.includeEquivalents === true}
+                tooltipLabel="include equivalents"
+                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node's target entity."
+                onChangeFn={() => {
+                  dispatch({
+                    type: QueryActionType.updateNodeExpansionToggles,
+                    payload: {
+                      nodeId: node.id,
+                      field: "includeEquivalents",
+                      value: node.params.includeEquivalents === true ? undefined : true,
+                    },
+                  });
+                }}
+              />
+              <Checkbox
+                label="SUB"
+                size={13}
+                value={node.params.includeSubordinates === true}
+                tooltipLabel="include subordinates"
+                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node's target entity."
+                onChangeFn={() => {
+                  dispatch({
+                    type: QueryActionType.updateNodeExpansionToggles,
+                    payload: {
+                      nodeId: node.id,
+                      field: "includeSubordinates",
+                      value: node.params.includeSubordinates === true ? undefined : true,
+                    },
+                  });
+                }}
+              />
+            </StyledNodeExpansionToggles>
           )}
         </StyledGraphNode>
 

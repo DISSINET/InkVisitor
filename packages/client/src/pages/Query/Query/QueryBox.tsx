@@ -16,9 +16,6 @@ interface QueryBoxProps {
   queryError: Error | null;
   queryStateValidity: QueryValidity;
   onOpenEntityInDetail?: (entityId: string) => void;
-  // page-level expansion options (#2969), forwarded to each node's entity picker
-  includeEquivalents?: boolean;
-  includeSubordinates?: boolean;
 }
 
 export const QueryBox: React.FC<QueryBoxProps> = ({
@@ -28,8 +25,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   queryError,
   queryStateValidity,
   onOpenEntityInDetail,
-  includeEquivalents = false,
-  includeSubordinates = false,
 }) => {
   const theme = useTheme();
   const gridWeight = useMemo<number>(() => {
@@ -181,8 +176,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     (problem) => problem.source === thisCellNode.id
                   )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
-                  includeEquivalents={includeEquivalents}
-                  includeSubordinates={includeSubordinates}
                 />
               )}
               {nextCellAssociatedEdge && (

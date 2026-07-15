@@ -51,6 +51,7 @@ enum QueryActionType {
   updateNodeClass,
   updateNodeEntityId,
   updateNodeOperator,
+  updateNodeExpansionToggles,
 }
 
 type QueryAction =
@@ -85,6 +86,14 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeOperator;
       payload: { nodeId: string; newOperator: Query.NodeOperator };
+    }
+  | {
+      type: QueryActionType.updateNodeExpansionToggles;
+      payload: {
+        nodeId: string;
+        field: "includeEquivalents" | "includeSubordinates";
+        value: boolean | undefined;
+      };
     };
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
@@ -169,6 +178,14 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeOperator:
       return updateNodeOperator(state, action.payload.nodeId, action.payload.newOperator);
 
+    case QueryActionType.updateNodeExpansionToggles:
+      return updateNodeExpansionToggles(
+        state,
+        action.payload.nodeId,
+        action.payload.field,
+        action.payload.value,
+      );
+
     default:
       return state;
   }
@@ -223,6 +240,28 @@ const updateNodeOperator = (
     return updatedState;
   }
   nodeToUpdate.operator = newOperator;
+
+  return updatedState;
+};
+
+const updateNodeExpansionToggles = (
+  state: Query.INode,
+  nodeId: string,
+  field: "includeEquivalents" | "includeSubordinates",
+  value: boolean | undefined,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+
+  if (value === undefined) {
+    delete nodeToUpdate.params[field];
+  } else {
+    nodeToUpdate.params[field] = value;
+  }
 
   return updatedState;
 };

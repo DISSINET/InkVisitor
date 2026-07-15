@@ -1,5 +1,5 @@
 import { FloatingPortal } from "@floating-ui/react";
-import { Button, Checkbox } from "components";
+import { Button } from "components";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { IcoSearch } from "Theme/icons";
 import { GrClose } from "react-icons/gr";
@@ -17,7 +17,6 @@ import {
   StyledExpandedContent,
   StyledExpandedHeader,
   StyledExpandedPanel,
-  StyledExpansionOptions,
   StyledFloatingRoot,
 } from "./FloatingSearchContainerStyles";
 
@@ -39,11 +38,6 @@ interface FloatingSearchContainer {
   rightInset?: number;
   filters: Explore.IExploreSearchFilter[];
   exploreDispatch: React.Dispatch<ExploreAction>;
-  // page-level expansion options (#2969), surfaced inside the search popup
-  includeSubordinates: boolean;
-  includeEquivalents: boolean;
-  onToggleIncludeSubordinates: (value: boolean) => void;
-  onToggleIncludeEquivalents: (value: boolean) => void;
   hideButton?: boolean;
 }
 
@@ -157,10 +151,6 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   rightInset = 0,
   filters,
   exploreDispatch,
-  includeSubordinates,
-  includeEquivalents,
-  onToggleIncludeSubordinates,
-  onToggleIncludeEquivalents,
   hideButton = false,
 }) => {
   const rightInsetRef = useRef(rightInset);
@@ -406,22 +396,6 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
               </StyledExpandedHeader>
               <StyledExpandedContent>
                 <FloatingSearchForm dispatch={exploreDispatch} />
-                <StyledExpansionOptions>
-                  <Checkbox
-                    label="include subordinates"
-                    value={includeSubordinates}
-                    tooltipLabel="include subordinates"
-                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
-                    onChangeFn={onToggleIncludeSubordinates}
-                  />
-                  <Checkbox
-                    label="include equivalents"
-                    value={includeEquivalents}
-                    tooltipLabel="include equivalents"
-                    tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
-                    onChangeFn={onToggleIncludeEquivalents}
-                  />
-                </StyledExpansionOptions>
               </StyledExpandedContent>
             </StyledExpandedPanel>
           </StyledFloatingRoot>

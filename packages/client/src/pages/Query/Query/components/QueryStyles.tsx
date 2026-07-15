@@ -25,6 +25,7 @@ export const StyledParallelOperator = styled.div`
 `;
 
 export const StyledGraphNode = styled.div`
+  position: relative;
   border-radius: 25px;
   height: ${({ theme }) => theme.space[18]};
   padding: ${({ theme }) => `${theme.space[4]} ${theme.space[7]}`};
@@ -35,6 +36,30 @@ export const StyledGraphNode = styled.div`
 
   .react-select__input-container {
     color: ${({ theme }) => theme.color.white};
+  }
+`;
+
+// per-node EQ / SUB expansion checkboxes: a small pill straddling the node's
+// bottom border. The page background behind the row keeps the border line from
+// striking through the checkbox labels.
+export const StyledNodeExpansionToggles = styled.div`
+  position: absolute;
+  bottom: ${({ theme }) => theme.space["-3"]};
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: 0 ${({ theme }) => theme.space[1]};
+  background-color: ${({ theme }) => theme.color.pageBg};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  white-space: nowrap;
+
+  label {
+    font-size: ${({ theme }) => theme.fontSize["xxs"]};
+    font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+    color: ${({ theme }) => theme.color["black"]};
   }
 `;
 

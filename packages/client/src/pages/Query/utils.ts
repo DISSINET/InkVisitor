@@ -294,12 +294,28 @@ export const computeWindowUpdate = (input: WindowUpdateInput): WindowUpdate => {
 
 type Jsonish = Record<string, unknown> | unknown[] | string | number | boolean | null | undefined;
 
-export const buildStableSignature = (queryState: Jsonish, exploreState: Jsonish): string => {
+/**
+ * Page-level settings that affect the query result but live outside
+ * queryState/exploreState (e.g. the global expansion toggles). They must be part
+ * of both signatures, otherwise toggling them would neither mark the search as
+ * pending nor change the react-query cache key.
+ */
+export interface SignatureGlobalParams {
+  includeEquivalents: boolean;
+  includeSubordinates: boolean;
+}
+
+export const buildStableSignature = (
+  queryState: Jsonish,
+  exploreState: Jsonish,
+  globalParams: SignatureGlobalParams,
+): string => {
   const normalizedExplore = normalizeExplore(exploreState);
   // Deterministic stringify by sorting object keys
   const stableString = stableStringify({
     query: queryState,
     explore: normalizedExplore,
+    global: globalParams,
   });
   return hashString(stableString);
 };
@@ -322,11 +338,16 @@ const normalizeExploreForSearch = (exploreState: Jsonish): Jsonish => {
   return rest;
 };
 
-export const buildSearchSignature = (queryState: Jsonish, exploreState: Jsonish): string => {
+export const buildSearchSignature = (
+  queryState: Jsonish,
+  exploreState: Jsonish,
+  globalParams: SignatureGlobalParams,
+): string => {
   const normalizedExplore = normalizeExploreForSearch(exploreState);
   const stableString = stableStringify({
     query: queryState,
     explore: normalizedExplore,
+    global: globalParams,
   });
   return hashString(stableString);
 };

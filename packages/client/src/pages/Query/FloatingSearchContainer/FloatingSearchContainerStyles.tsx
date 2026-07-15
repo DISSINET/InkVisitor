@@ -88,16 +88,6 @@ export const StyledExpandedContent = styled.div`
   overflow-y: auto;
 `;
 
-// page-level expansion toggles (#2969), separated from the filter form above
-export const StyledExpansionOptions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[1]};
-  margin-top: ${({ theme }) => theme.space[3]};
-  padding-top: ${({ theme }) => theme.space[2]};
-  border-top: 1px solid ${({ theme }) => theme.color.blue[150]};
-`;
-
 export const StyledCloseButtonWrap = styled.span`
   display: flex;
   flex-shrink: 0;

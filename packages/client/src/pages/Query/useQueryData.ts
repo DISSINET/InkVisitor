@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { IResponseQuery, IResponseQueryEntity } from "@inkvisitor/shared/types";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
+import { deepCopy } from "utils/utils";
 import { QueryValidity } from "./types";
 import { isQueryRequestEmpty } from "./Query/utils";
 
@@ -14,6 +15,9 @@ interface UseQueryDataParams {
   queryStateValidity: QueryValidity;
   /** Only fire when this matches searchSignature (i.e. user explicitly ran the search). */
   committedSearchSignature: string | null;
+  /** Page-level result-expansion flags, sent to the server via the root node's params. */
+  globalIncludeEquivalents: boolean;
+  globalIncludeSubordinates: boolean;
 }
 
 interface UseQueryDataReturn {
@@ -35,6 +39,23 @@ interface RowCache {
 const rowCacheStore = new Map<string, RowCache>();
 
 /**
+ * Returns a copy of the query tree with the ROOT node's expansion params set to
+ * the page-level result-expansion flags — the server (`QuerySearch.run`) reads
+ * them from the root to append equivalents/subordinates of the final result
+ * entities. Non-root nodes' per-target flags are sent as-is.
+ */
+export const buildQueryWithResultExpansion = (
+  query: Query.INode,
+  globalIncludeEquivalents: boolean,
+  globalIncludeSubordinates: boolean,
+): Query.INode => {
+  const resolved = deepCopy(query);
+  resolved.params.includeEquivalents = globalIncludeEquivalents;
+  resolved.params.includeSubordinates = globalIncludeSubordinates;
+  return resolved;
+};
+
+/**
  * Clears the row cache store for all queries or a specific signature
  */
 export const clearRowCache = (signature?: string) => {
@@ -52,6 +73,8 @@ export const useQueryData = ({
   searchSignature,
   queryStateValidity,
   committedSearchSignature,
+  globalIncludeEquivalents,
+  globalIncludeSubordinates,
 }: UseQueryDataParams): UseQueryDataReturn => {
   const queryClient = useQueryClient();
 
@@ -159,7 +182,11 @@ export const useQueryData = ({
       if (!queryStateValidity.isValid || !api.isLoggedIn() || isRequestEmpty)
         return;
       const res = await api.query({
-        query: queryState,
+        query: buildQueryWithResultExpansion(
+          queryState,
+          globalIncludeEquivalents,
+          globalIncludeSubordinates,
+        ),
         explore: exploreState,
       });
 

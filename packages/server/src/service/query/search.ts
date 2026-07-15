@@ -15,6 +15,10 @@ import {
   setCachedBaseIds,
 } from "./query-base-cache";
 import { getRowIdsFilter } from "./explore-ids-filter";
+import {
+  getEquivalentEntityIds,
+  getSubordinateEntityIds,
+} from "@models/relation/functions";
 import { aggregateAuditStats } from "@models/stats/aggregate";
 import { EXPLORE_STATS_ENTITY_LIMIT } from "@inkvisitor/shared/types/stats";
 
@@ -26,6 +30,7 @@ export default class QuerySearch {
   explore: Explore.IExplore;
   results: Results<IEntity> | null;
   private readonly queryForCache: Query.INode;
+  private resultsExpanded = false;
 
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.queryForCache = query;
@@ -70,8 +75,63 @@ export default class QuerySearch {
 
     this.results = await this.root.run(db);
     const ids = this.results.items || [];
+
+    // The cache holds the RAW unexpanded query matches: the explore filters
+    // vary per request and the root-level expansion (#2969) depends on the
+    // filtered set, so both are applied per request in
+    // expandFilteredResults() - the cache-hit path above goes through the
+    // exact same step via getResults()/getStats().
     setCachedBaseIds(cacheKey, ids);
     return ids;
+  }
+
+  /**
+   * Root-level result expansion (#2969): when the root node carries the
+   * include toggles, the FINAL id list is widened with the
+   * equivalents/subordinates of the direct matches. Runs on the FILTERED
+   * result set (after applyExploreFilters and after the sort in getResults) -
+   * the expansion ids are additions, so they are NOT subject to the explore
+   * label/ids filters and must be appended after filtering. Invariants:
+   * direct matches come first with their (sorted) relative order untouched,
+   * expansion ids are appended without duplicating ids already present, and
+   * the expansion runs exactly once per request (never on itself, and not
+   * twice when both getResults and getStats execute - guarded by
+   * resultsExpanded). With both toggles off this is a no-op and no extra
+   * queries run.
+   */
+  private async expandFilteredResults(db: Connection): Promise<void> {
+    if (this.resultsExpanded) {
+      return;
+    }
+    this.resultsExpanded = true;
+
+    if (
+      !this.results ||
+      (!this.root.params.includeEquivalents &&
+        !this.root.params.includeSubordinates)
+    ) {
+      return;
+    }
+
+    const ids = this.results.items || [];
+    const seen = new Set<string>(ids);
+    const expanded = [...ids];
+    const expansions: string[][] = [];
+    if (this.root.params.includeEquivalents) {
+      expansions.push(await getEquivalentEntityIds(db, ids));
+    }
+    if (this.root.params.includeSubordinates) {
+      expansions.push(await getSubordinateEntityIds(db, ids));
+    }
+    for (const expansionIds of expansions) {
+      for (const id of expansionIds) {
+        if (!seen.has(id)) {
+          seen.add(id);
+          expanded.push(id);
+        }
+      }
+    }
+    this.results.items = expanded;
   }
 
   async getResults(
@@ -93,6 +153,10 @@ export default class QuerySearch {
     } else {
       this.results.sort(this.explore.sort);
     }
+
+    // expansion runs after the sort so the direct matches keep their sorted
+    // order and the expansion ids stay appended at the end
+    await this.expandFilteredResults(db);
 
     const filteredIds = this.results.filter(this.explore);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
@@ -140,6 +204,7 @@ export default class QuerySearch {
     }
 
     await this.results.applyExploreFilters(db, this.explore);
+    await this.expandFilteredResults(db);
     const entityIds = (this.results.items ?? []).slice(
       0,
       EXPLORE_STATS_ENTITY_LIMIT

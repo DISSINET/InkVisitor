@@ -23,6 +23,8 @@ export namespace Query {
     entityClasses?: EntityEnums.Class[];
     label?: string;
     entityId?: string;
+    includeEquivalents?: boolean;
+    includeSubordinates?: boolean;
   }
   export interface IEdgeParams { }
 
