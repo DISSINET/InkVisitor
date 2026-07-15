@@ -34,7 +34,7 @@ import {
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
-import { StyledExplorerHeaderControls } from "./ExplorerPageStyles";
+import { StyledResultExpansionButtons } from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryReducer, queryStateInitial } from "./Query/state";
@@ -623,28 +623,30 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               disableHeaderClick={!explorerBoxMaximized}
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
-                <StyledExplorerHeaderControls>
+                <ExplorerTableLabelFilter
+                  filters={exploreState.filters}
+                  dispatch={exploreStateDispatch}
+                />
+              }
+              buttons={[
+                <StyledResultExpansionButtons key="result-expansion-toggles">
                   <Checkbox
-                    label="include equivalents"
+                    label="EQ"
+                    size={13}
                     value={includeEquivalents}
                     tooltipLabel="include equivalents"
                     tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
                     onChangeFn={handleToggleIncludeEquivalents}
                   />
                   <Checkbox
-                    label="include subordinates"
+                    label="SUB"
+                    size={13}
                     value={includeSubordinates}
                     tooltipLabel="include subordinates"
                     tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
                     onChangeFn={handleToggleIncludeSubordinates}
                   />
-                  <ExplorerTableLabelFilter
-                    filters={exploreState.filters}
-                    dispatch={exploreStateDispatch}
-                  />
-                </StyledExplorerHeaderControls>
-              }
-              buttons={[
+                </StyledResultExpansionButtons>,
                 <Button
                   key="run-search"
                   tooltipLabel="run search (Enter)"
@@ -689,38 +691,36 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               disableHeaderClick
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
-                <StyledExplorerHeaderControls>
-                  <SwitchGroup key="explorer-view-mode">
-                    <Button
-                      tooltipLabel="table view"
-                      label="table"
-                      shape="rounded-sm"
-                      noBorder
-                      inverted={isStatsView}
-                      noBackground={isStatsView}
-                      color={isStatsView ? "greyer" : "primary"}
-                      icon={<BiTable />}
-                      onClick={() => {
-                        setExploreViewMode(Explore.EViewMode.Table);
-                        if (explorerBoxMinimized) restoreExplorerToHalf();
-                      }}
-                    />
-                    <Button
-                      tooltipLabel="stats view"
-                      label="stats"
-                      shape="rounded-sm"
-                      noBorder
-                      inverted={!isStatsView}
-                      noBackground={!isStatsView}
-                      color={!isStatsView ? "greyer" : "primary"}
-                      icon={<BiBarChartAlt2 />}
-                      onClick={() => {
-                        setExploreViewMode(Explore.EViewMode.Stats);
-                        if (explorerBoxMinimized) restoreExplorerToHalf();
-                      }}
-                    />
-                  </SwitchGroup>
-                </StyledExplorerHeaderControls>
+                <SwitchGroup key="explorer-view-mode">
+                  <Button
+                    tooltipLabel="table view"
+                    label="table"
+                    shape="rounded-sm"
+                    noBorder
+                    inverted={isStatsView}
+                    noBackground={isStatsView}
+                    color={isStatsView ? "greyer" : "primary"}
+                    icon={<BiTable />}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Table);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
+                  />
+                  <Button
+                    tooltipLabel="stats view"
+                    label="stats"
+                    shape="rounded-sm"
+                    noBorder
+                    inverted={!isStatsView}
+                    noBackground={!isStatsView}
+                    color={!isStatsView ? "greyer" : "primary"}
+                    icon={<BiBarChartAlt2 />}
+                    onClick={() => {
+                      setExploreViewMode(Explore.EViewMode.Stats);
+                      if (explorerBoxMinimized) restoreExplorerToHalf();
+                    }}
+                  />
+                </SwitchGroup>
               }
               buttons={[
                 <IconButton
