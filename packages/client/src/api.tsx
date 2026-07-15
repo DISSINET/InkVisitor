@@ -23,6 +23,7 @@ import {
   IResponseUser,
   ISavedQuery,
   ISavedQueryCreate,
+  ISavedQueryUpdate,
   IStatement,
   ITerritory,
   IUser,
@@ -1023,6 +1024,19 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric<ISavedQuery>>> {
     try {
       const response = await this.connection.post(`/saved-queries`, payload, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async savedQueryUpdate(
+    savedQueryId: string,
+    payload: ISavedQueryUpdate,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric<ISavedQuery>>> {
+    try {
+      const response = await this.connection.put(`/saved-queries/${savedQueryId}`, payload, options);
       return response;
     } catch (err) {
       throw this.handleError(err);

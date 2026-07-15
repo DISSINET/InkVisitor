@@ -2,31 +2,36 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { ISavedQuery, ISavedQueryCreate, Query } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Checkbox, Submit } from "components";
+import { Button, Checkbox, Input, Submit } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import {
-  IcoChevronDown,
   IcoChevronRight,
   IcoCloseMd,
+  IcoEdit,
+  IcoFolder,
   IcoFolderOpen,
+  IcoLock,
   IcoSave,
   IcoTrash,
 } from "Theme/icons";
 import { QueryAction, QueryActionType } from "../Query/state";
 import { EXAMPLE_QUERIES, IExampleQuery } from "./exampleQueries";
 import {
+  StyledChevron,
   StyledCloseButton,
-  StyledDeleteButton,
   StyledEmptyNote,
   StyledFolderCount,
   StyledFolderHeader,
+  StyledFolderIcon,
   StyledFolderList,
-  StyledNameInput,
+  StyledLockIcon,
   StyledPanel,
   StyledPanelHeader,
   StyledPanelTitle,
+  StyledQueryActions,
+  StyledQueryActionButton,
   StyledQueryName,
   StyledQueryRow,
   StyledSaveRow,
@@ -65,6 +70,8 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     shared: true,
   });
   const [deleteTarget, setDeleteTarget] = useState<ISavedQuery | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -90,6 +97,19 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     },
     onError: () => {
       toast.error("Failed to save query");
+    },
+  });
+
+  const renameMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => api.savedQueryUpdate(id, { name }),
+    onSuccess: (_data, variables) => {
+      toast.success(`Query renamed to "${variables.name}"`);
+      setEditingId(null);
+      setEditingName("");
+      queryClient.invalidateQueries({ queryKey: ["saved-queries"] });
+    },
+    onError: () => {
+      toast.error("Failed to rename query");
     },
   });
 
@@ -124,16 +144,37 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     });
     onToggleIncludeEquivalents(row.data.includeEquivalents);
     onToggleIncludeSubordinates(row.data.includeSubordinates);
-    setIsOpen(false);
-    toast.info(`Query "${row.name}" loaded`);
+  };
+
+  const startEditing = (row: ISavedQuery) => {
+    setEditingId(row.id);
+    setEditingName(row.name);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditingName("");
+  };
+
+  const acceptEditing = () => {
+    const trimmed = editingName.trim();
+    if (!editingId || !trimmed || renameMutation.isPending) {
+      return;
+    }
+    if (trimmed === savedQueries.find((q) => q.id === editingId)?.name) {
+      cancelEditing();
+      return;
+    }
+    renameMutation.mutate({ id: editingId, name: trimmed });
   };
 
   // "ownerId" only exists on real saved queries, never on example rows — used
   // as the discriminant (structural overlap between the two types means a
   // guard based on negating an "is IExampleQuery" check would narrow to
   // `never`, so check the real-query field directly instead).
-  const canDelete = (row: FolderRow): row is ISavedQuery =>
-    "ownerId" in row && (row.ownerId === userId || isAdminOrOwner);
+  // Owner can always moderate; admins may also moderate shared queries.
+  const canModerate = (row: FolderRow): row is ISavedQuery =>
+    "ownerId" in row && (row.ownerId === userId || (row.shared && isAdminOrOwner));
 
   const toggleFolder = (key: FolderKey) => {
     setOpenFolders((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -149,6 +190,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     const handleOutside = (e: MouseEvent) => {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+        cancelEditing();
       }
     };
     window.addEventListener("mousedown", handleOutside);
@@ -181,17 +223,13 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
           </StyledPanelHeader>
 
           <StyledSaveRow>
-            <StyledNameInput
+            <Input
               value={saveName}
-              aria-label="name for the current query"
               placeholder="name for the current query"
-              onChange={(e) => setSaveName(e.target.value)}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                if (e.key === "Enter") {
-                  handleSave();
-                }
-              }}
+              changeOnType
+              width="full"
+              onChangeFn={setSaveName}
+              onEnterPressFn={handleSave}
             />
             <Checkbox
               label="shared"
@@ -215,9 +253,18 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                   aria-expanded={openFolders[key]}
                   onClick={() => toggleFolder(key)}
                 >
-                  {openFolders[key] ? <IcoChevronDown size={11} /> : <IcoChevronRight size={14} />}
-                  <IcoFolderOpen size={13} />
+                  <StyledChevron $open={openFolders[key]}>
+                    <IcoChevronRight size={14} />
+                  </StyledChevron>
+                  <StyledFolderIcon>
+                    {openFolders[key] ? <IcoFolderOpen size={13} /> : <IcoFolder size={13} />}
+                  </StyledFolderIcon>
                   {label}
+                  {key === "examples" && (
+                    <StyledLockIcon title="Built-in examples cannot be edited">
+                      <IcoLock size={11} />
+                    </StyledLockIcon>
+                  )}
                   <StyledFolderCount>({rows.length})</StyledFolderCount>
                 </StyledFolderHeader>
 
@@ -225,22 +272,61 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                   (rows.length === 0 ? (
                     <StyledEmptyNote>no queries</StyledEmptyNote>
                   ) : (
-                    rows.map((row) => (
-                      <StyledQueryRow key={row.id}>
-                        <StyledQueryName type="button" onClick={() => handleLoad(row)}>
-                          {row.name}
-                        </StyledQueryName>
-                        {canDelete(row) && (
-                          <StyledDeleteButton
-                            type="button"
-                            aria-label={`Delete ${row.name}`}
-                            onClick={() => setDeleteTarget(row)}
-                          >
-                            <IcoTrash size={12} />
-                          </StyledDeleteButton>
-                        )}
-                      </StyledQueryRow>
-                    ))
+                    rows.map((row) => {
+                      const isEditing = editingId === row.id;
+
+                      if (!canModerate(row)) {
+                        return (
+                          <StyledQueryRow key={row.id}>
+                            <StyledQueryName type="button" onClick={() => handleLoad(row)}>
+                              {row.name}
+                            </StyledQueryName>
+                          </StyledQueryRow>
+                        );
+                      }
+
+                      return (
+                        <StyledQueryRow key={row.id} $editing={isEditing}>
+                          {isEditing ? (
+                            <Input
+                              value={editingName}
+                              changeOnType
+                              width="full"
+                              autoFocus
+                              onChangeFn={setEditingName}
+                              onEnterPressFn={acceptEditing}
+                              onEscapePressFn={cancelEditing}
+                              showSaveExitIcons
+                              onBlur={acceptEditing}
+                            />
+                          ) : (
+                            <StyledQueryName type="button" onClick={() => handleLoad(row)}>
+                              {row.name}
+                            </StyledQueryName>
+                          )}
+
+                          <StyledQueryActions $forceVisible={isEditing}>
+                            {!isEditing && (
+                              <StyledQueryActionButton
+                                type="button"
+                                aria-label={`Rename ${row.name}`}
+                                onClick={() => startEditing(row)}
+                              >
+                                <IcoEdit size={12} />
+                              </StyledQueryActionButton>
+                            )}
+                            <StyledQueryActionButton
+                              type="button"
+                              $danger
+                              aria-label={`Delete ${row.name}`}
+                              onClick={() => setDeleteTarget(row)}
+                            >
+                              <IcoTrash size={12} />
+                            </StyledQueryActionButton>
+                          </StyledQueryActions>
+                        </StyledQueryRow>
+                      );
+                    })
                   ))}
               </div>
             ))}

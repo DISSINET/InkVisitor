@@ -237,4 +237,58 @@ describe("Saved queries", function () {
       expect(await SavedQuery.findById(db.connection, id)).not.toBeNull();
     });
   });
+
+  describe("update", () => {
+    const create = async (
+      agent: AuthAgent,
+      name: string,
+      shared: boolean
+    ): Promise<string> => {
+      const res = await agent
+        .post(`${apiPath}/saved-queries`)
+        .send({ name, shared, data: queryData })
+        .expect(200);
+      return res.body.data.id;
+    };
+
+    it("owner can rename own query", async () => {
+      const id = await create(agentA, "A rename me", false);
+      const res = await agentA
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "A renamed" })
+        .expect(200);
+      expect(res.body.data.name).toEqual("A renamed");
+      expect((await SavedQuery.findById(db.connection, id))?.name).toEqual(
+        "A renamed"
+      );
+    });
+
+    it("rejects an empty name", async () => {
+      const id = await create(agentA, "A empty-name", false);
+      await agentA
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "   " })
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+    });
+
+    it("a viewer cannot rename another user's shared query", async () => {
+      const id = await create(agentB, "B shared unrenamable", true);
+      await agentA
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "hijacked" })
+        .expect(
+          testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
+        );
+    });
+
+    it("an admin can rename another user's shared query", async () => {
+      const id = await create(agentB, "B shared admin-renamable", true);
+      const res = await adminAgent
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "admin renamed" })
+        .expect(200);
+      expect(res.body.data.name).toEqual("admin renamed");
+    });
+  });
 });

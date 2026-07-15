@@ -66,7 +66,7 @@ import { IRequestActivationData } from "./request-activation";
 import { IRequestPasswordReset, IRequestPasswordResetData } from "./request-password-reset";
 import { IRequestQuery } from "./request-query";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
-import { ISavedQuery, ISavedQueryCreate, ISavedQueryData } from "./saved-query";
+import { ISavedQuery, ISavedQueryCreate, ISavedQueryData, ISavedQueryUpdate } from "./saved-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
 export { AuditScope };
@@ -130,6 +130,7 @@ export type {
   ISavedQuery,
   ISavedQueryCreate,
   ISavedQueryData,
+  ISavedQueryUpdate,
   IStatement,
   IStatementActant,
   IStatementAction,

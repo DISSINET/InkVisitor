@@ -18,3 +18,6 @@ export interface ISavedQuery {
 
 // POST /saved-queries payload
 export type ISavedQueryCreate = Pick<ISavedQuery, "name" | "shared" | "data">;
+
+// PUT /saved-queries/:id payload — any subset of mutable fields
+export type ISavedQueryUpdate = Partial<Pick<ISavedQuery, "name" | "shared" | "data">>;
