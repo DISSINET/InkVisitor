@@ -5,6 +5,7 @@ import { useDocumentQuery } from "./useDocumentQuery";
 import { useDocumentsQuery } from "./useDocumentsQuery";
 import { useOrderedLanguageDict } from "./useOrderedLanguageDict";
 import { useResourcesWithDocumentsQuery } from "./useResourcesWithDocumentsQuery";
+import { useSavedQueriesQuery } from "./useSavedQueriesQuery";
 import { useStatementQuery } from "./useStatementQuery";
 import { useTemplatesQuery } from "./useTemplatesQuery";
 import { useTreeQuery } from "./useTreeQuery";
@@ -20,6 +21,7 @@ export {
   useDocumentsQuery,
   useOrderedLanguageDict,
   useResourcesWithDocumentsQuery,
+  useSavedQueriesQuery,
   useStatementQuery,
   useTemplatesQuery,
   useTreeQuery,

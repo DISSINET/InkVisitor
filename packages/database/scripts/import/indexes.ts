@@ -213,4 +213,5 @@ export const DbSchemaIndexes: { [key in keyof DbSchema]: IndexDef[] } = {
   statsMaterializedMonth: materializedStatsIndexes,
   statsMaterializedWeek: materializedStatsIndexes,
   statsMaterializedYear: materializedStatsIndexes,
+  savedQueries: [],
 };

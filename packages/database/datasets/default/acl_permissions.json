@@ -318,5 +318,23 @@
     "method": "PUT",
     "roles": ["admin"],
     "public": false
+  },
+  {
+    "controller": "saved-queries",
+    "route": "",
+    "method": "GET",
+    "roles": ["*"]
+  },
+  {
+    "controller": "saved-queries",
+    "route": "",
+    "method": "POST",
+    "roles": ["*"]
+  },
+  {
+    "controller": "saved-queries",
+    "route": ":id",
+    "method": "DELETE",
+    "roles": ["*"]
   }
 ]

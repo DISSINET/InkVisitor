@@ -21,6 +21,8 @@ import {
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
+  ISavedQuery,
+  ISavedQueryCreate,
   IStatement,
   ITerritory,
   IUser,
@@ -996,6 +998,45 @@ class Api {
       document.body.removeChild(a);
     } catch (err) {
       console.log("err export", err);
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Saved queries
+   */
+
+  async savedQueriesGet(
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric<ISavedQuery[]>>> {
+    try {
+      const response = await this.connection.get(`/saved-queries`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async savedQueryCreate(
+    payload: ISavedQueryCreate,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric<ISavedQuery>>> {
+    try {
+      const response = await this.connection.post(`/saved-queries`, payload, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async savedQueryDelete(
+    savedQueryId: string,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.delete(`/saved-queries/${savedQueryId}`, options);
+      return response;
+    } catch (err) {
       throw this.handleError(err);
     }
   }

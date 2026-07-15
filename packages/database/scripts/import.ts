@@ -38,6 +38,12 @@ const materializedStatsTables = {
   },
 };
 
+const savedQueriesTables = {
+  savedQueries: {
+    tableName: "saved_queries",
+  },
+};
+
 /**
  * Scans the datasets directory and finds directories that match keys in the datasets object
  * These can be used as 'raw' datasets
@@ -117,6 +123,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
     },
     ...materializedStatsTables,
+    ...savedQueriesTables,
   },
 
   relationstest: {
@@ -190,6 +197,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
     },
     ...materializedStatsTables,
+    ...savedQueriesTables,
   },
 
   all_parsed: {
@@ -260,6 +268,7 @@ const datasets: Record<string, DbSchema> = {
       data: require("../datasets/default/documents.json"),
     },
     ...materializedStatsTables,
+    ...savedQueriesTables,
   },
 };
 
@@ -581,6 +590,7 @@ class Importer {
         tableName: "documents",
       },
       ...materializedStatsTables,
+      ...savedQueriesTables,
     };
 
     for (const entry of entries) {

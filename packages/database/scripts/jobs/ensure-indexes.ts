@@ -68,6 +68,7 @@ const TABLE_PHYSICAL_NAMES: Record<keyof DbSchema, string> = {
   statsMaterializedWeek: "stats_materialized_week",
   statsMaterializedMonth: "stats_materialized_month",
   statsMaterializedYear: "stats_materialized_year",
+  savedQueries: "saved_queries",
 };
 
 const tableNameFor = (key: keyof DbSchema): string =>

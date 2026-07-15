@@ -18,6 +18,7 @@ import PythonApiRouter from "@modules/pythondata";
 import SettingsRouter from "@modules/settings";
 import DocumentsRouter from "@modules/documents";
 import BackupsRouter from "@modules/backups";
+import SavedQueriesRouter from "@modules/saved-queries";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
@@ -155,6 +156,7 @@ router.use("/documents", DocumentsRouter);
 router.use("/pythondata", PythonApiRouter);
 router.use("/settings", SettingsRouter);
 router.use("/backups", BackupsRouter);
+router.use("/saved-queries", SavedQueriesRouter);
 
 server.all("*", catchAll);
 

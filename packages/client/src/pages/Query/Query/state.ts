@@ -3,6 +3,7 @@ import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { deepCopy } from "utils/utils";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
@@ -71,6 +72,7 @@ enum QueryActionType {
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
+  setQueryState,
 }
 
 type QueryAction =
@@ -113,6 +115,10 @@ type QueryAction =
         field: "includeEquivalents" | "includeSubordinates";
         value: boolean | undefined;
       };
+    }
+  | {
+      type: QueryActionType.setQueryState;
+      payload: { newState: Query.INode };
     };
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
@@ -204,6 +210,11 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
         action.payload.field,
         action.payload.value,
       );
+
+    case QueryActionType.setQueryState:
+      // deep clone so the loaded template (e.g. a saved query object held in
+      // the react-query cache) is never mutated by subsequent edits
+      return deepCopy(action.payload.newState);
 
     default:
       return state;

@@ -37,6 +37,7 @@ import {
 import { StyledResultExpansionButtons } from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
+import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
@@ -671,6 +672,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
               />
+              {!explorerBoxMaximized && (
+                <SavedQueriesPanel
+                  queryState={queryState}
+                  queryStateDispatch={queryStateDispatch}
+                  includeEquivalents={includeEquivalents}
+                  includeSubordinates={includeSubordinates}
+                  onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                  onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                />
+              )}
               {!explorerBoxMaximized && (
                 <ExplorerTableIdsFilter
                   filters={exploreState.filters}
