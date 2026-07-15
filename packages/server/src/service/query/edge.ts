@@ -39,8 +39,8 @@ export default class SearchEdge implements Query.IEdge {
   /**
    * Async precomputation hook, invoked by the node evaluator before run().
    * run() only composes synchronous ReQL, so anything fetched ahead of time
-   * (the expanded target-id set here, a territory-subtree closure in SUT:C /
-   * EUT:C) is resolved here. Subclasses overriding prepare() must call
+   * (the expanded target-id set here, a territory-subtree closure in SUT:C)
+   * is resolved here. Subclasses overriding prepare() must call
    * super.prepare() so the target expansion stays resolved.
    */
   async prepare(db: Connection): Promise<void> {
@@ -961,76 +961,6 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
 }
 
 /**
- * EUT:C ("used in statements under T: children"). Same broad "used" semantics
- * as EUT: (collectStatementEntityIds over candidate statements), but the
- * candidate statements come from the WHOLE subtree rooted at the target
- * territory T - T itself plus every descendant, recursively to any depth -
- * instead of the direct territory only.
- *
- * The descendant closure is resolved in prepare() via Territory.findChilds(deep)
- * exactly like SUT:C (treeCache walk in prod, live DB walk as fallback). run()
- * then pulls the subtree's statements through the StatementTerritory index,
- * collects their used ids and intersects them with the incoming stream q,
- * keeping the subset invariant that positive matching and negation rely on.
- * With no target territory the edge matches nothing.
- */
-export class EdgeUsedUnderChildrenTerritory extends SearchEdge {
-  private subtreeTerritoryIds: string[] = [];
-
-  constructor(data: Partial<Query.IEdge>) {
-    super(data);
-    this.type = Query.EdgeType["EUT:C"];
-  }
-
-  async prepare(db: Connection): Promise<void> {
-    // resolve the expanded target-id set first; the subtree closure is then
-    // built over EVERY expanded root (a single root when toggles are off)
-    await super.prepare(db);
-    const rootIds = this.targetEntityIds ?? [];
-    if (!rootIds.length) {
-      this.subtreeTerritoryIds = [];
-      return;
-    }
-
-    // findChilds(deep) returns descendants only (keyed by id) - add each root
-    // itself to cover statements sitting directly in the target territory;
-    // non-territory roots (equivalents can be any class) simply yield no childs
-    const subtree = new Set<string>(rootIds);
-    for (const rootId of rootIds) {
-      const descendants = await new Territory({ id: rootId }).findChilds(
-        db,
-        true
-      );
-      for (const id of Object.keys(descendants)) {
-        subtree.add(id);
-      }
-    }
-    this.subtreeTerritoryIds = [...subtree];
-  }
-
-  run(q: RStream): RStream {
-    const subtreeIds = this.subtreeTerritoryIds;
-
-    return intersectIdsWithStream(
-      q,
-      subtreeIds.length
-        ? r
-            .table(Entity.table)
-            .getAll(r.args(subtreeIds), {
-              index: DbEnums.Indexes.StatementTerritory,
-            })
-            .filter(function (e: RDatum<IEntity>) {
-              return e("class").eq(EntityEnums.Class.Statement);
-            })
-            .concatMap(function (stmt: RDatum) {
-              return collectStatementEntityIds(stmt);
-            })
-        : null
-    );
-  }
-}
-
-/**
  * IS: ("is in S: any position", aka XIsInS). Emits the ENTITIES USED in the
  * target Statement S in ANY position - actions + action props, actants +
  * their classifications / identifications / props, statement-level props
@@ -1189,8 +1119,6 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeSUnderChildrenT(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
-    case Query.EdgeType["EUT:C"]:
-      return new EdgeUsedUnderChildrenTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
     default:
