@@ -349,6 +349,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const rowEntityId = rowItem?.entity?.id ?? getEntityIdAtRow(index);
       const isSelected = rowEntityId ? selectedEntityIdsSet.has(rowEntityId) : false;
       const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index;
+      const isLastRow = index === total - 1;
 
       return (
         <div
@@ -357,6 +358,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             width: widthTable,
             minWidth: "100%",
             height: HEIGHT_ROW_DEFAULT,
+            ...(isLastRow
+              ? {
+                  borderBottomLeftRadius: themeContext.borderRadius.default,
+                  borderBottomRightRadius: themeContext.borderRadius.default,
+                }
+              : {}),
           }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${isSelected ? " qt-row-selected" : ""}${
             rowFocused === index ? " qt-row-focused" : ""
@@ -417,6 +424,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       rowFocused,
       getCachedEntity,
       onOpenEntityInDetail,
+      total,
     ],
   );
 
@@ -473,6 +481,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             height: heightBox - 20,
             overflowX: "auto",
             overflowY: "hidden",
+            boxSizing: "border-box",
+            paddingLeft: themeContext.space[4],
+            paddingRight: themeContext.space[4],
           } as React.CSSProperties
         }
       >
