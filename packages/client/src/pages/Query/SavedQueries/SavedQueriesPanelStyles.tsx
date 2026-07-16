@@ -22,13 +22,13 @@ export const StyledToggleButton = styled.button`
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.full};
-  background-color: ${({ theme }) => theme.color.invertedBg["success"]};
+  background-color: ${({ theme }) => theme.color.invertedBg["primary"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   cursor: pointer;
   white-space: nowrap;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
-  color: ${({ theme }) => theme.color["success"]};
+  color: ${({ theme }) => theme.color["primary"]};
   transition: box-shadow 0.2s;
   &:hover {
     box-shadow: ${({ theme }) => theme.boxShadow.normal};
@@ -45,7 +45,7 @@ export const StyledPanel = styled.div`
   min-height: 0;
   padding: 0.75rem;
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.color["invertedBg"]["success"]};
+  background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   overflow: hidden;
 `;
@@ -87,15 +87,26 @@ export const StyledSaveRow = styled.div`
 export const StyledFolderList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
   min-height: 0;
   overflow-y: auto;
+`;
+
+// each folder sits in its own framed card so the groups read as separate
+// containers against the panel background (white flips in the dark theme)
+export const StyledFolderCard = styled.div`
+  flex-shrink: 0;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid ${({ theme }) => theme.color["gray"][200]};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background-color: ${({ theme }) => theme.color["white"]};
 `;
 
 export const StyledFolderHeader = styled.button`
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  width: 100%;
   padding: 0.2rem 0;
   border: none;
   background: transparent;
@@ -166,6 +177,7 @@ export const StyledQueryName = styled.button`
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
   padding: 0;
+  outline: none;
 `;
 
 export const StyledQueryActions = styled.div<{ $forceVisible?: boolean }>`
@@ -199,7 +211,7 @@ export const StyledQueryActionButton = styled.button<{ $danger?: boolean }>`
 `;
 
 export const StyledEmptyNote = styled.div`
-  padding-left: 1.4rem;
+  padding: 0 0 0.2rem 1.4rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-style: italic;
   color: ${({ theme }) => theme.color["greyer"]};

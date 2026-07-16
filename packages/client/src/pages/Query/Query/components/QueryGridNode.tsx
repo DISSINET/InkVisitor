@@ -388,7 +388,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           <Button
             icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
             tooltipLabel="add new edge"
-            color="primary"
+            color="info"
             onClick={() => {
               dispatch({
                 type: QueryActionType.addNode,

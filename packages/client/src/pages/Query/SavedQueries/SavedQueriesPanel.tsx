@@ -22,6 +22,7 @@ import {
   StyledChevron,
   StyledCloseButton,
   StyledEmptyNote,
+  StyledFolderCard,
   StyledFolderCount,
   StyledFolderHeader,
   StyledFolderIcon,
@@ -202,7 +203,16 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     label: string;
     rows: FolderRow[];
   }[] = [
-    { key: "examples", label: "Examples", rows: EXAMPLE_QUERIES },
+    // built-in examples for testing (production import only)
+    ...(process.env.NODE_ENV === "development"
+      ? [
+          {
+            key: "examples" as const,
+            label: "Examples (dev only)",
+            rows: EXAMPLE_QUERIES as FolderRow[],
+          },
+        ]
+      : []),
     { key: "mine", label: "My queries", rows: mineQueries },
     { key: "shared", label: "Shared", rows: sharedQueries },
   ];
@@ -247,7 +257,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
 
           <StyledFolderList>
             {folders.map(({ key, label, rows }) => (
-              <div key={key}>
+              <StyledFolderCard key={key}>
                 <StyledFolderHeader
                   type="button"
                   aria-expanded={openFolders[key]}
@@ -328,7 +338,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                       );
                     })
                   ))}
-              </div>
+              </StyledFolderCard>
             ))}
           </StyledFolderList>
         </StyledPanel>

@@ -10,21 +10,6 @@ export interface IExampleQuery {
 // Placeholder examples — to be replaced with the real curated list.
 export const EXAMPLE_QUERIES: IExampleQuery[] = [
   {
-    id: "example-all-beings",
-    name: "All beings",
-    data: {
-      query: {
-        id: "root",
-        type: Query.NodeType.E,
-        params: { entityClasses: [EntityEnums.Class.Being] },
-        operator: Query.NodeOperator.And,
-        edges: [],
-      },
-      includeEquivalents: false,
-      includeSubordinates: false,
-    },
-  },
-  {
     id: "example-animals-under-T",
     name: "Animals under the Territory",
     data: {
