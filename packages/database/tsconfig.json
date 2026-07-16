@@ -3,16 +3,28 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "incremental": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "outDir": "build",
+    "rootDir": "..",
     "paths": {
-      "scripts/*": ["./scripts/*"],
-      "@common/*": ["./../server/src/common/*"],
-      "@models/*": ["./../server/src/models/*"],
-      "@service/*": ["./../server/src/service/*"]
+      "scripts/*": [
+        "./scripts/*"
+      ],
+      "src/*": [
+        "./../server/src/*"
+      ],
+      "@common/*": [
+        "./../server/src/common/*"
+      ],
+      "@models/*": [
+        "./../server/src/models/*"
+      ],
+      "@service/*": [
+        "./../server/src/service/*"
+      ]
     },
     "removeComments": true,
     "resolveJsonModule": true,
@@ -20,10 +32,23 @@
     "sourceMap": true,
     "strict": true,
     "target": "es6",
-    "typeRoots": ["node_modules/@types"],
-    "types": ["node"]
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node"
+    ]
   },
-  "exclude": ["node_modules", "build"],
-  "files": ["./../server/src/custom_typings/request.d.ts"],
-  "include": ["./../server/src/custom_typings/**/*", "./scripts/**/*.ts", "./datasets/**/*.ts"]
+  "exclude": [
+    "node_modules",
+    "build"
+  ],
+  "files": [
+    "./../server/src/custom_typings/request.d.ts"
+  ],
+  "include": [
+    "./../server/src/custom_typings/**/*",
+    "./scripts/**/*.ts",
+    "./datasets/**/*.ts"
+  ]
 }
