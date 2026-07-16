@@ -1,5 +1,4 @@
 import { nonenumerable } from "@common/decorators";
-import { AnchorsNode } from "@models/document/anchors";
 import Document from "@models/document/document";
 import { UsedRelations } from "@models/relation/relations";
 import Statement from "@models/statement/statement";
@@ -339,25 +338,10 @@ export class ResponseEntityDetail
       return;
     }
 
-    const idSet = new Set(statementIds);
-    const anchorTextsByStatement: Record<string, string[]> = {};
-
-    const docs = await Document.findByEntityIds(conn, statementIds);
-    for (const docData of docs) {
-      const doc = new Document(docData);
-      const traverse = (nodes: AnchorsNode[]) => {
-        for (const node of nodes) {
-          if (idSet.has(node.anchor)) {
-            if (!anchorTextsByStatement[node.anchor]) {
-              anchorTextsByStatement[node.anchor] = [];
-            }
-            anchorTextsByStatement[node.anchor].push(node.getShortContent());
-          }
-          traverse(node.children);
-        }
-      };
-      traverse(doc.anchors);
-    }
+    const anchorTextsByStatement = await Document.getAnchorTextsForEntities(
+      conn,
+      statementIds
+    );
 
     for (const us of this.usedInStatements) {
       const texts = anchorTextsByStatement[us.statement.id];

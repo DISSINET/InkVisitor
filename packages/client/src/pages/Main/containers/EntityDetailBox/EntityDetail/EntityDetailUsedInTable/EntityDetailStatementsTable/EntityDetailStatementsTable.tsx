@@ -11,7 +11,8 @@ import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { CellProps, Column } from "react-table";
-import { StyledShortenedText, StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
+import { TbAnchor } from "react-icons/tb";
+import { StyledAnchor, StyledShortenedText, StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
 
 type CellType = CellProps<IResponseUsedInStatement<EntityEnums.UsedInPosition>>;
 
@@ -119,7 +120,14 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
 
           let content: React.ReactNode = "";
           if (anchorText) {
-            content = <StyledShortenedText>{anchorText}</StyledShortenedText>;
+            content = (
+              <StyledShortenedText>
+                <StyledAnchor>
+                  <TbAnchor size={12} strokeWidth={2} />
+                </StyledAnchor>
+                {anchorText}
+              </StyledShortenedText>
+            );
           } else if (statementText) {
             content = (
               <StyledShortenedText>{statement.data.text}</StyledShortenedText>

@@ -324,3 +324,52 @@ describe("Document export filtering", () => {
     expect(filteredContent).toEqual("Text with <entity1>known entity</entity1> and <unknown1>unknown entity</unknown1> and another known");
   });
 });
+
+describe("Document.getAnchorTextsForEntities", function () {
+  const db = new Db();
+  // Document tag names exclude ".", so keep anchored ids dot-free.
+  const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+  const twice = new Entity({ id: tagSafeId() });
+  const once = new Entity({ id: tagSafeId() });
+  const unanchored = new Entity({ id: tagSafeId() });
+
+  const doc = new Document({
+    content: `a<${twice.id}>first</${twice.id}>b<${twice.id}>second</${twice.id}>c<${once.id}>only</${once.id}>d`,
+  });
+
+  beforeAll(async () => {
+    await db.initDb();
+    // entities must exist before preprocess so their class lands in
+    // documents.entityIds and the anchors resolve.
+    await twice.save(db.connection);
+    await once.save(db.connection);
+    await unanchored.save(db.connection);
+    await doc.preprocess(db.connection);
+    await doc.save(db.connection);
+  });
+
+  afterAll(async () => {
+    await clean(db);
+  });
+
+  test("collects every anchor span per entity, in document order", async () => {
+    const map = await Document.getAnchorTextsForEntities(db.connection, [
+      twice.id,
+      once.id,
+    ]);
+    expect(map[twice.id]).toEqual(["first", "second"]);
+    expect(map[once.id]).toEqual(["only"]);
+  });
+
+  test("omits entities without anchors", async () => {
+    const map = await Document.getAnchorTextsForEntities(db.connection, [
+      unanchored.id,
+    ]);
+    expect(map[unanchored.id]).toBeUndefined();
+  });
+
+  test("returns an empty object for empty input", async () => {
+    const map = await Document.getAnchorTextsForEntities(db.connection, []);
+    expect(map).toEqual({});
+  });
+});

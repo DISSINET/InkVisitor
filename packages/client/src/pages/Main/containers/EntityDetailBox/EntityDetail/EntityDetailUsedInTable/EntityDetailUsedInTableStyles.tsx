@@ -14,6 +14,15 @@ export const StyledShortenedText = styled.div<{ $italic?: boolean }>`
   font-size: inherit;
   font-style: ${({ $italic }) => ($italic ? "italic" : "normal")};
 `;
+export const StyledAnchor = styled.div`
+  background-color: ${({ theme }) => theme.color.blue[400]};
+  color: ${({ theme }) => theme.color.white};
+  margin-right: 5px;
+  display: inline-flex;
+  vertical-align: middle;
+  padding: 2px;
+  border-radius: 50%;
+`;
 export const StyledTagWrap = styled.div`
   display: inline-flex;
   overflow: hidden;

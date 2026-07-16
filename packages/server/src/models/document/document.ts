@@ -440,6 +440,45 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
+   * Batched anchor-text lookup: for each given entity id returns the content of
+   * every document anchor that points at it (node.anchor === id). One multi-index
+   * read + one tree traversal per document covers every id, so callers avoid a
+   * per-entity round-trip. Ids that are not anchored are absent from the result.
+   * @param db
+   * @param entityIds
+   * @returns map of entity id -> anchor contents (in document order)
+   */
+  static async getAnchorTextsForEntities(
+    db: Connection,
+    entityIds: string[]
+  ): Promise<Record<string, string[]>> {
+    const out: Record<string, string[]> = {};
+    if (!entityIds.length) {
+      return out;
+    }
+
+    const idSet = new Set(entityIds);
+    const docs = await Document.findByEntityIds(db, entityIds);
+    for (const docData of docs) {
+      const doc = new Document(docData);
+      const traverse = (nodes: AnchorsNode[]) => {
+        for (const node of nodes) {
+          if (idSet.has(node.anchor)) {
+            if (!out[node.anchor]) {
+              out[node.anchor] = [];
+            }
+            out[node.anchor].push(node.getShortContent());
+          }
+          traverse(node.children);
+        }
+      };
+      traverse(doc.anchors);
+    }
+
+    return out;
+  }
+
+  /**
    * Retrieves all documents
    * @param db Connection database connection
    * @returns Promise<IDocument[]> list of documents

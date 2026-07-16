@@ -178,13 +178,14 @@ export const StyledSelectionCheckbox = styled.div`
   display: flex;
 `;
 
-export const StyledAbbreviatedLabel = styled.div`
+export const StyledAbbreviatedLabel = styled.div<{ $italic?: boolean }>`
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: ${({ $italic }) => ($italic ? "italic" : "normal")};
 `;
 
 export const StyledAnchor = styled.div`

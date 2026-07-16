@@ -8,6 +8,7 @@ import {
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
+import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
 import { findEntityById } from "@service/shorthands";
@@ -136,6 +137,22 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
         }
 
         responseStatements.push(responseStatement);
+      }
+    }
+
+    // Batch-load each statement's document anchor spans in a single query so the
+    // statement list Text column can show them without a per-statement
+    // round-trip. The preload (prepareSync) path never fills usedInDocuments, so
+    // this is the only anchor-text source for the list; the non-preload path
+    // fills usedInDocuments too but anchorTexts stays the display-friendly field.
+    const anchorTextsByStatement = await Document.getAnchorTextsForEntities(
+      req.db.connection,
+      responseStatements.map((rs) => rs.id)
+    );
+    for (const rs of responseStatements) {
+      const texts = anchorTextsByStatement[rs.id];
+      if (texts && texts.length) {
+        rs.anchorTexts = texts;
       }
     }
 
