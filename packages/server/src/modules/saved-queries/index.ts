@@ -16,17 +16,32 @@ import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";
 
-const canModerate = (
-  existing: SavedQuery,
-  user: { id: string; hasRole: (roles: UserEnums.Role[]) => boolean }
-): boolean => {
-  const isOwner = existing.ownerId === user.id;
-  // admins may moderate the shared folder, but other users' private
-  // queries stay theirs alone
-  const isSharedModerator =
-    existing.shared &&
-    user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
-  return isOwner || isSharedModerator;
+type ModeratingUser = {
+  id: string;
+  hasRole: (roles: UserEnums.Role[]) => boolean;
+};
+
+// shared queries live in the shared folder and are managed collaboratively by
+// editors and up — a viewer cannot moderate them or mark a query as shared in
+// the first place.
+const canShare = (user: ModeratingUser): boolean =>
+  user.hasRole([
+    UserEnums.Role.Owner,
+    UserEnums.Role.Admin,
+    UserEnums.Role.Editor,
+  ]);
+
+const canModerate = (existing: SavedQuery, user: ModeratingUser): boolean => {
+  // shared queries: admins/owners moderate any, editors only the ones they
+  // created themselves. private queries stay with their owner alone (nobody
+  // else can touch another user's private query).
+  if (existing.shared) {
+    return (
+      user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]) ||
+      (existing.ownerId === user.id && canShare(user))
+    );
+  }
+  return existing.ownerId === user.id;
 };
 
 export default Router()
@@ -49,6 +64,12 @@ export default Router()
       async (request: IRequest<unknown, ISavedQueryCreate>) => {
         const user = request.getUserOrFail();
         const body = request.body;
+
+        if (body?.shared && !canShare(user)) {
+          throw new PermissionDeniedError(
+            "only an admin can create a shared saved query"
+          );
+        }
 
         const model = new SavedQuery({
           name: body?.name,
@@ -91,6 +112,12 @@ export default Router()
         }
 
         const body = request.body ?? {};
+        // a viewer may not turn their own private query into a shared one
+        if (body.shared === true && !canShare(user)) {
+          throw new PermissionDeniedError(
+            "only an admin can share a saved query"
+          );
+        }
         const next = new SavedQuery({
           ...existing,
           name: body.name !== undefined ? body.name : existing.name,

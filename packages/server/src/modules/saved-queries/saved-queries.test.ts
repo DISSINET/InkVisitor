@@ -27,10 +27,12 @@ describe("Saved queries", function () {
 
   const userAId = `test-user-a-${Math.random().toString(36).slice(2)}`;
   const userBId = `test-user-b-${Math.random().toString(36).slice(2)}`;
+  const userCId = `test-user-c-${Math.random().toString(36).slice(2)}`;
 
   let adminAgent: AuthAgent;
   let agentA: AuthAgent; // viewer
   let agentB: AuthAgent; // viewer
+  let agentC: AuthAgent; // editor
 
   const queryData: ISavedQuery["data"] = {
     query: {
@@ -65,23 +67,30 @@ describe("Saved queries", function () {
       active: true,
       verified: true,
     } as any).save(db.connection);
+    await new User({
+      id: userCId,
+      role: UserEnums.Role.Editor,
+      active: true,
+      verified: true,
+    } as any).save(db.connection);
 
     adminAgent = await getAuthenticatedAgent();
     agentA = await createAgentWithUserId(userAId);
     agentB = await createAgentWithUserId(userBId);
+    agentC = await createAgentWithUserId(userCId);
   });
 
   afterAll(async () => {
     await rethink
       .table(SavedQuery.table)
       .filter((row: any) =>
-        rethink.expr([userAId, userBId]).contains(row("ownerId"))
+        rethink.expr([userAId, userBId, userCId]).contains(row("ownerId"))
       )
       .delete()
       .run(db.connection);
     await rethink
       .table("users")
-      .getAll(userAId, userBId)
+      .getAll(userAId, userBId, userCId)
       .delete()
       .run(db.connection);
     await db.close();
@@ -121,12 +130,37 @@ describe("Saved queries", function () {
       expect(res.body.data.ownerId).toEqual(userAId);
     });
 
+    it("a viewer cannot create a shared query", async () => {
+      await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({ name: "A wants shared", shared: true, data: queryData })
+        .expect(
+          testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
+        );
+    });
+
+    it("an admin can create a shared query", async () => {
+      const res = await adminAgent
+        .post(`${apiPath}/saved-queries`)
+        .send({ name: "admin shared", shared: true, data: queryData })
+        .expect(200);
+      expect(res.body.data.shared).toBeTruthy();
+    });
+
+    it("an editor can create a shared query", async () => {
+      const res = await agentC
+        .post(`${apiPath}/saved-queries`)
+        .send({ name: "editor shared", shared: true, data: queryData })
+        .expect(200);
+      expect(res.body.data.shared).toBeTruthy();
+    });
+
     it("rejects a malformed query tree", async () => {
       await agentA
         .post(`${apiPath}/saved-queries`)
         .send({
           name: "bad tree",
-          shared: true,
+          shared: false,
           data: {
             query: {}, // no type/operator/params/edges
             includeEquivalents: false,
@@ -163,9 +197,9 @@ describe("Saved queries", function () {
         .post(`${apiPath}/saved-queries`)
         .send({ name: "B private", shared: false, data: queryData })
         .expect(200);
-      await agentB
+      await adminAgent
         .post(`${apiPath}/saved-queries`)
-        .send({ name: "B shared", shared: true, data: queryData })
+        .send({ name: "admin shared list", shared: true, data: queryData })
         .expect(200);
     });
 
@@ -174,7 +208,7 @@ describe("Saved queries", function () {
       const items: ISavedQuery[] = res.body.data;
       const names = items.map((i) => i.name);
       expect(names).toContain("A private");
-      expect(names).toContain("B shared");
+      expect(names).toContain("admin shared list");
       expect(names).not.toContain("B private");
     });
   });
@@ -208,8 +242,8 @@ describe("Saved queries", function () {
       expect(await SavedQuery.findById(db.connection, id)).toBeNull();
     });
 
-    it("a viewer cannot delete another user's shared query", async () => {
-      const id = await create(agentB, "B shared undeletable", true);
+    it("a viewer cannot delete a shared query", async () => {
+      const id = await create(adminAgent, "shared undeletable", true);
       await agentA
         .delete(`${apiPath}/saved-queries/${id}`)
         .expect(
@@ -218,13 +252,32 @@ describe("Saved queries", function () {
       expect(await SavedQuery.findById(db.connection, id)).not.toBeNull();
     });
 
-    it("an admin can delete another user's shared query", async () => {
-      const id = await create(agentB, "B shared admin-deletable", true);
+    it("an admin can delete a shared query", async () => {
+      const id = await create(adminAgent, "shared admin-deletable", true);
       await adminAgent
         .delete(`${apiPath}/saved-queries/${id}`)
         .expect(successfulGenericResponse)
         .expect(200);
       expect(await SavedQuery.findById(db.connection, id)).toBeNull();
+    });
+
+    it("an editor can delete their own shared query", async () => {
+      const id = await create(agentC, "editor shared deletable", true);
+      await agentC
+        .delete(`${apiPath}/saved-queries/${id}`)
+        .expect(successfulGenericResponse)
+        .expect(200);
+      expect(await SavedQuery.findById(db.connection, id)).toBeNull();
+    });
+
+    it("an editor cannot delete another user's shared query", async () => {
+      const id = await create(adminAgent, "admin shared undeletable", true);
+      await agentC
+        .delete(`${apiPath}/saved-queries/${id}`)
+        .expect(
+          testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
+        );
+      expect(await SavedQuery.findById(db.connection, id)).not.toBeNull();
     });
 
     it("an admin cannot delete another user's private query", async () => {
@@ -272,8 +325,8 @@ describe("Saved queries", function () {
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
-    it("a viewer cannot rename another user's shared query", async () => {
-      const id = await create(agentB, "B shared unrenamable", true);
+    it("a viewer cannot rename a shared query", async () => {
+      const id = await create(adminAgent, "shared unrenamable", true);
       await agentA
         .put(`${apiPath}/saved-queries/${id}`)
         .send({ name: "hijacked" })
@@ -282,13 +335,43 @@ describe("Saved queries", function () {
         );
     });
 
-    it("an admin can rename another user's shared query", async () => {
-      const id = await create(agentB, "B shared admin-renamable", true);
+    it("an admin can rename a shared query", async () => {
+      const id = await create(adminAgent, "shared admin-renamable", true);
       const res = await adminAgent
         .put(`${apiPath}/saved-queries/${id}`)
         .send({ name: "admin renamed" })
         .expect(200);
       expect(res.body.data.name).toEqual("admin renamed");
+    });
+
+    it("an editor can rename their own shared query", async () => {
+      const id = await create(agentC, "editor own shared", true);
+      const res = await agentC
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "editor renamed" })
+        .expect(200);
+      expect(res.body.data.name).toEqual("editor renamed");
+    });
+
+    it("an editor cannot rename another user's shared query", async () => {
+      const id = await create(adminAgent, "admin shared unrenamable", true);
+      await agentC
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "hijacked" })
+        .expect(
+          testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
+        );
+    });
+
+    it("a viewer cannot share their own private query", async () => {
+      const id = await create(agentA, "A stays private", false);
+      await agentA
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ shared: true })
+        .expect(
+          testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
+        );
+      expect((await SavedQuery.findById(db.connection, id))?.shared).toBeFalsy();
     });
   });
 });

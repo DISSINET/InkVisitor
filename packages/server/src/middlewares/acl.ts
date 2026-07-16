@@ -143,9 +143,11 @@ class Acl {
       return null;
     }
 
-    // Saved queries (Explorer page) have no seeded ACL entries. Any logged-in
-    // user may list/create; deletes are gated per-resource inside the handler
-    // (owner of the query, or Admin/Owner role).
+    // Saved queries (Explorer page) intentionally have no seeded ACL entries —
+    // the coarse ACL table cannot express their per-resource rules, so access is
+    // gated inside the handlers: any logged-in user may list/create private
+    // queries and moderate their own; sharing and moderating shared queries is
+    // restricted to Admin/Owner.
     if (controller === "saved-queries") {
       return null;
     }

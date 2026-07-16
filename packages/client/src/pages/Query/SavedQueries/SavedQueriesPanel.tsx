@@ -78,7 +78,10 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
 
   const { data: user } = useUserQuery(true);
   const userId = user?.id;
-  const isAdminOrOwner = user?.role === UserEnums.Role.Owner || user?.role === UserEnums.Role.Admin;
+  const isAdminOrOwner =
+    user?.role === UserEnums.Role.Owner || user?.role === UserEnums.Role.Admin;
+  // editors and up may create shared queries; viewers only get private ones
+  const canShare = isAdminOrOwner || user?.role === UserEnums.Role.Editor;
 
   const { data: savedQueries = [] } = useSavedQueriesQuery(isOpen);
 
@@ -173,9 +176,13 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   // as the discriminant (structural overlap between the two types means a
   // guard based on negating an "is IExampleQuery" check would narrow to
   // `never`, so check the real-query field directly instead).
-  // Owner can always moderate; admins may also moderate shared queries.
+  // Shared queries: admins/owners moderate any, editors only their own;
+  // private queries stay with their owner alone (mirrors the server rule).
   const canModerate = (row: FolderRow): row is ISavedQuery =>
-    "ownerId" in row && (row.ownerId === userId || (row.shared && isAdminOrOwner));
+    "ownerId" in row &&
+    (row.shared
+      ? isAdminOrOwner || (row.ownerId === userId && canShare)
+      : row.ownerId === userId);
 
   const toggleFolder = (key: FolderKey) => {
     setOpenFolders((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -241,11 +248,13 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
               onChangeFn={setSaveName}
               onEnterPressFn={handleSave}
             />
-            <Checkbox
-              label="shared"
-              value={saveShared}
-              onChangeFn={(value) => setSaveShared(value)}
-            />
+            {canShare && (
+              <Checkbox
+                label="shared"
+                value={saveShared}
+                onChangeFn={(value) => setSaveShared(value)}
+              />
+            )}
             <Button
               label="Save"
               icon={<IcoSave size={14} />}

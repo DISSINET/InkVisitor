@@ -96,8 +96,5 @@
 {"controller": "acls", "id": "f2647d88-9fbe-44dd-b501-b998886d074f", "method": "GET", "roles": ["admin"], "route": ""},
 {"controller": "entities", "id": "f82a0626-f2d1-4071-bd18-779e354052fc", "method": "POST", "public": false, "roles": [], "route": ":entityId/clone"},
 {"controller": "users", "id": "f999b9c1-9ce8-493f-9f6b-1f7009ed359f", "method": "PATCH", "public": true, "roles": [], "route": "active"},
-{"controller": "users", "id": "ff69ffe9-929a-416e-aa81-72d27647f95c", "method": "PATCH", "roles": ["*"], "route": ":userId/password"},
-{"controller": "saved-queries", "id": "810ab5b8-98ed-4bae-abb3-9ad856eab922", "method": "GET", "roles": ["*"], "route": ""},
-{"controller": "saved-queries", "id": "e6768761-17c1-4464-914f-6daab7fbf296", "method": "POST", "roles": ["*"], "route": ""},
-{"controller": "saved-queries", "id": "f4161e50-c348-40cf-832a-ad8338af3f69", "method": "DELETE", "roles": ["*"], "route": ":id"}
+{"controller": "users", "id": "ff69ffe9-929a-416e-aa81-72d27647f95c", "method": "PATCH", "roles": ["*"], "route": ":userId/password"}
 ]

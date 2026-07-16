@@ -7,14 +7,7 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
-import {
-  Button,
-  ContactOwnerFooting,
-  Input,
-  Modal,
-  ModalContent,
-  ModalInputWrap,
-} from "components";
+import { Button, Input, Modal, ModalContent, ModalInputWrap } from "components";
 import {
   StyledButtonWrap,
   StyledDescription,
@@ -26,14 +19,16 @@ import {
 import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { RiRotateLockLine } from "react-icons/ri";
-import {
-  TbArrowForwardUp,
-  TbLockExclamation,
-  TbLockPlus,
-  TbMailFilled,
-} from "react-icons/tb";
+import { TbArrowForwardUp, TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 import { isSafePassword } from "utils/utils";
+
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
 
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
@@ -73,11 +68,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
       setError(PasswordDoesNotMatchError.message);
     } else {
       try {
-        const res = await api.passwordSetRequest(
-          hash,
-          password,
-          passwordRepeat
-        );
+        const res = await api.passwordSetRequest(hash, password, passwordRepeat);
         if (res.status === 200) {
           setPasswordSent(true);
         }
@@ -110,17 +101,12 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                     <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
                     {email}
                   </StyledMail>
-                  <StyledDescription>
-                    {SAFE_PASSWORD_DESCRIPTION}
-                  </StyledDescription>
-                  <form>
+                  <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
+                  <StyledForm>
                     <ModalInputWrap>
                       <StyledInputRow>
-                        <TbLockPlus
-                          size={16}
-                          style={{ marginRight: "0.3rem" }}
-                        />
                         <Input
+                          icon={<TbLockPlus size={16} />}
                           type="password"
                           placeholder="new password"
                           onChangeFn={(text: string) => setPassword(text)}
@@ -135,11 +121,8 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                     </ModalInputWrap>
                     <ModalInputWrap>
                       <StyledInputRow>
-                        <TbLockExclamation
-                          size={16}
-                          style={{ marginRight: "0.3rem" }}
-                        />
                         <Input
+                          icon={<TbLockExclamation size={16} />}
                           type="password"
                           placeholder="repeat password"
                           onChangeFn={(text: string) => setPasswordRepeat(text)}
@@ -151,7 +134,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                         />
                       </StyledInputRow>
                     </ModalInputWrap>
-                  </form>
+                  </StyledForm>
                 </>
               )}
 
@@ -176,11 +159,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                 ) : (
                   <Button
                     color="success"
-                    icon={
-                      <TbArrowForwardUp
-                        style={{ transform: "rotate(180deg)" }}
-                      />
-                    }
+                    icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
                     label="back to login"
                     onClick={() => navigate("/login")}
                   />
@@ -198,9 +177,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               <RiRotateLockLine size={30} style={{ margin: "1.5rem" }} />
               <StyledButtonWrap>
                 <Button
-                  icon={
-                    <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
-                  }
+                  icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
                   label="Back to login"
                   color="success"
                   onClick={() => navigate("/login")}
