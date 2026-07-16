@@ -86,12 +86,6 @@ interface EntityTag {
   isEquivalent?: boolean;
   /** Marks the tag as surfaced via "include subordinates" (inverse SCL/SOE/HOL + child T). */
   isSubordinate?: boolean;
-  /**
-   * Document anchor span(s) of a statement, used as the label when the
-   * statement has no user-defined label (see getEntityLabel). Only meaningful
-   * for statement tags whose anchor text is loaded by the caller.
-   */
-  anchorTexts?: string[];
 }
 
 const EntityTagComponent: React.FC<EntityTag> = ({
@@ -122,7 +116,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   onDoubleClick: onDoubleClickOverride,
   isEquivalent = false,
   isSubordinate = false,
-  anchorTexts,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -135,8 +128,9 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const [clickedOnce, setClickedOnce] = useState(false);
   const referenceEl = useRef<HTMLDivElement>(null!);
   const entityLabel = useMemo(
-    () => getEntityLabel(entity, anchorTexts),
-    [entity, anchorTexts]
+    // getEntityLabel reads entity.anchorTexts (stamped by server responses)
+    () => getEntityLabel(entity),
+    [entity],
   );
 
   useEffect(() => {
@@ -398,8 +392,8 @@ function areEntityTagsEqual(
   if (prev.entity?.status !== next.entity.status) return false;
   if (prev.entity?.data?.logicalType !== next.entity?.data?.logicalType) return false;
   if (prev.entity.isTemplate !== next.entity.isTemplate) return false;
-  const prevLabel = getEntityLabel(prev.entity, prev.anchorTexts);
-  const nextLabel = getEntityLabel(next.entity, next.anchorTexts);
+  const prevLabel = getEntityLabel(prev.entity);
+  const nextLabel = getEntityLabel(next.entity);
   if (prevLabel !== nextLabel) return false;
   return true;
 }

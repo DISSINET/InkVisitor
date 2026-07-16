@@ -96,8 +96,8 @@ describe("getEntityLabel", () => {
           class: EntityEnums.Class.Statement,
           labels: ["label"],
           data: { text: "text" },
-        }),
-        ["anchor"]
+          anchorTexts: ["anchor"],
+        })
       )
     ).toBe("label");
   });
@@ -108,8 +108,8 @@ describe("getEntityLabel", () => {
           class: EntityEnums.Class.Statement,
           labels: [],
           data: { text: "text" },
-        }),
-        ["first", "second"]
+          anchorTexts: ["first", "second"],
+        })
       )
     ).toBe("first ... second");
   });

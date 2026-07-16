@@ -117,6 +117,10 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       ...entities.map((x) => ({ [x.id]: x })),
       ...anchorEntities.map((x) => ({ [x.id]: x }))
     );
+
+    // stamp document anchor spans onto statement entities so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts)
+    await Entity.applyAnchorTexts(db, this.entities);
   }
 
   /**

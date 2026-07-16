@@ -1,4 +1,4 @@
-import { UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IEntity,
   IResponseStatement,
@@ -140,19 +140,39 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       }
     }
 
-    // Batch-load each statement's document anchor spans in a single query so the
-    // statement list Text column can show them without a per-statement
-    // round-trip. The preload (prepareSync) path never fills usedInDocuments, so
-    // this is the only anchor-text source for the list; the non-preload path
-    // fills usedInDocuments too but anchorTexts stays the display-friendly field.
-    const anchorTextsByStatement = await Document.getAnchorTextsForEntities(
-      req.db.connection,
-      responseStatements.map((rs) => rs.id)
-    );
-    for (const rs of responseStatements) {
-      const texts = anchorTextsByStatement[rs.id];
-      if (texts && texts.length) {
-        rs.anchorTexts = texts;
+    // Batch-load document anchor spans in a single query for both the statement
+    // rows (their own anchorTexts display field, used by the list Text column)
+    // and any statement-class entities in the entities map (stamped for
+    // EntityTag labels; see IEntity.anchorTexts). Only the preload path needs
+    // this: prepareSync never fills usedInDocuments, so rows/map would stay
+    // bare. The non-preload path already derives both per statement inside
+    // ResponseStatement.prepare (anchorTexts from usedInDocuments, map via
+    // prepareEntities' applyAnchorTexts) - re-running the batch there would be
+    // pure duplicate work.
+    if (usePreload) {
+      const mapStatements = Object.values(this.entities).filter(
+        (e) => !!e && e.class === EntityEnums.Class.Statement
+      );
+      const anchorTextsByStatement = await Document.getAnchorTextsForEntities(
+        req.db.connection,
+        [
+          ...new Set([
+            ...responseStatements.map((rs) => rs.id),
+            ...mapStatements.map((e) => e.id),
+          ]),
+        ]
+      );
+      for (const rs of responseStatements) {
+        const texts = anchorTextsByStatement[rs.id];
+        if (texts && texts.length) {
+          rs.anchorTexts = texts;
+        }
+      }
+      for (const e of mapStatements) {
+        const texts = anchorTextsByStatement[e.id];
+        if (texts && texts.length) {
+          e.anchorTexts = texts;
+        }
       }
     }
 

@@ -101,7 +101,7 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
       {
         Header: "Text",
         Cell: ({ row }: CellType) => {
-          const { statement, anchorTexts } = row.original;
+          const { statement } = row.original;
 
           if (!statement) {
             return "";
@@ -111,7 +111,9 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
           //   1) document anchor span(s) - multiple anchors joined with " ... "
           //   2) statement text (deprecated but still in use sometimes)
           //   3) statement label - rendered italic to mark it as a label
-          const anchorText = anchorTexts
+          // anchorTexts is stamped onto the entities map by the server
+          // (Entity.applyAnchorTexts)
+          const anchorText = entities[statement.id]?.anchorTexts
             ?.map((t) => t.trim())
             .filter((t) => t)
             .join(" ... ");

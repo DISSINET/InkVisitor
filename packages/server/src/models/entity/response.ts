@@ -1,5 +1,4 @@
 import { nonenumerable } from "@common/decorators";
-import Document from "@models/document/document";
 import { UsedRelations } from "@models/relation/relations";
 import Statement from "@models/statement/statement";
 import treeCache from "@service/treeCache";
@@ -91,6 +90,10 @@ export class ResponseEntity extends Entity implements IResponseEntity {
     for (const entity of additionalEntities) {
       entities[entity.id] = entity;
     }
+
+    // stamp document anchor spans onto statement entities so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts)
+    await Entity.applyAnchorTexts(conn, entities);
 
     return entities;
   }
@@ -236,13 +239,10 @@ export class ResponseEntityDetail
       this.addLinkedEntities(ud.resourceId);
     });
 
-    // Attach document anchor spans to each used-in statement so the detail
-    // Statements table can show them as its primary "Text" fallback. Reads
-    // this.usedInStatements, populated by walkStatementsDataEntities above.
-    await this.populateUsedInStatementAnchors(conn);
-
     // populateEntitiesMap depends on the fully-accumulated linkedEntitiesIds,
-    // so it must come after every addLinkedEntities call above.
+    // so it must come after every addLinkedEntities call above. It also stamps
+    // anchorTexts onto statement entities (used-in statements included), which
+    // the detail Statements table reads for its "Text" fallback.
     this.entities = await this.populateEntitiesMap(conn);
 
     // apply casts from templates - must be done after populateEntitiesMap
@@ -320,35 +320,6 @@ export class ResponseEntityDetail
       this.addLinkedEntities(c.actantEntityId);
       this.addLinkedEntities(c.relationEntityId);
     });
-  }
-
-  /**
-   * Fills the anchorTexts field of every used-in statement with the content of
-   * the document anchors that point at that statement (node.anchor ===
-   * statement.id). A statement anchored several times yields several strings -
-   * the client joins them for display. One batched document read covers every
-   * used-in statement.
-   * @param conn
-   */
-  async populateUsedInStatementAnchors(conn: Connection): Promise<void> {
-    const statementIds = [
-      ...new Set(this.usedInStatements.map((us) => us.statement.id)),
-    ];
-    if (!statementIds.length) {
-      return;
-    }
-
-    const anchorTextsByStatement = await Document.getAnchorTextsForEntities(
-      conn,
-      statementIds
-    );
-
-    for (const us of this.usedInStatements) {
-      const texts = anchorTextsByStatement[us.statement.id];
-      if (texts && texts.length) {
-        us.anchorTexts = texts;
-      }
-    }
   }
 
   /**

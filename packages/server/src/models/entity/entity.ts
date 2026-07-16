@@ -641,6 +641,41 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   /**
+   * Stamps the response-only anchorTexts field (see IEntity.anchorTexts) onto
+   * every Statement-class entity in the given map/list, so any client surface
+   * rendering the entity (EntityTag etc.) can show its document anchor spans.
+   * One batched document read covers all statements; entities without anchors
+   * are left untouched. Never persisted - the field is not declared on the
+   * Entity model, so fillFlatObject drops it if a client echoes it back.
+   * @param conn
+   * @param entities
+   */
+  static async applyAnchorTexts(
+    conn: Connection,
+    entities: Record<string, IEntity> | IEntity[]
+  ): Promise<void> {
+    const list = Array.isArray(entities) ? entities : Object.values(entities);
+    const statements = list.filter(
+      (e): e is IEntity => !!e && e.class === EntityEnums.Class.Statement
+    );
+    if (!statements.length) {
+      return;
+    }
+
+    const anchorTextsById = await Document.getAnchorTextsForEntities(
+      conn,
+      [...new Set(statements.map((s) => s.id))]
+    );
+
+    for (const statement of statements) {
+      const texts = anchorTextsById[statement.id];
+      if (texts && texts.length) {
+        statement.anchorTexts = texts;
+      }
+    }
+  }
+
+  /**
    * Finds entities which uses this entity as a template
    * @param db
    * @returns

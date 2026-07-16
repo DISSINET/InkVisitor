@@ -16,7 +16,7 @@ import {
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
 } from "@inkvisitor/shared/types/response-detail";
-import { IStatement } from "@inkvisitor/shared/types";
+import { IEntity, IStatement } from "@inkvisitor/shared/types";
 import { prepareEntity } from "./entity.test";
 import { Db } from "@service/rethink";
 import Document from "@models/document/document";
@@ -594,7 +594,7 @@ describe("models/entity/response", function () {
     });
   });
 
-  describe("ResponseEntityDetail.populateUsedInStatementAnchors", function () {
+  describe("ResponseEntityDetail.populateEntitiesMap anchor stamping", function () {
     let db: Db;
     // Document tag names exclude ".", so keep anchored statement ids dot-free.
     const tagSafeId = () => Math.random().toString().replace(/\./g, "");
@@ -609,7 +609,7 @@ describe("models/entity/response", function () {
     });
 
     const detail = new Entity({ id: tagSafeId() });
-    let response: ResponseEntityDetail;
+    let entities: Record<string, IEntity>;
 
     beforeAll(async () => {
       db = new Db();
@@ -622,41 +622,32 @@ describe("models/entity/response", function () {
       await doc.preprocess(db.connection);
       await doc.save(db.connection);
 
-      response = new ResponseEntityDetail(detail);
-      response.usedInStatements = [
-        {
-          position: EntityEnums.UsedInPosition.Actant,
-          statement: anchoredTwice,
-        },
-        { position: EntityEnums.UsedInPosition.Actant, statement: anchoredOnce },
-        { position: EntityEnums.UsedInPosition.Actant, statement: notAnchored },
-      ];
-      await response.populateUsedInStatementAnchors(db.connection);
+      const response = new ResponseEntityDetail(detail);
+      response.addLinkedEntities([
+        anchoredTwice.id,
+        anchoredOnce.id,
+        notAnchored.id,
+      ]);
+      entities = await response.populateEntitiesMap(db.connection);
     });
 
     afterAll(async () => {
       await db.close();
     });
 
-    it("should collect both anchor spans for a statement anchored twice", () => {
-      const entry = response.usedInStatements.find(
-        (us) => us.statement.id === anchoredTwice.id
-      );
-      expect(entry?.anchorTexts).toEqual(["first span", "second span"]);
+    it("should stamp both anchor spans for a statement anchored twice", () => {
+      expect(entities[anchoredTwice.id]?.anchorTexts).toEqual([
+        "first span",
+        "second span",
+      ]);
     });
 
-    it("should collect the single anchor span for a statement anchored once", () => {
-      const entry = response.usedInStatements.find(
-        (us) => us.statement.id === anchoredOnce.id
-      );
-      expect(entry?.anchorTexts).toEqual(["only span"]);
+    it("should stamp the single anchor span for a statement anchored once", () => {
+      expect(entities[anchoredOnce.id]?.anchorTexts).toEqual(["only span"]);
     });
 
     it("should leave anchorTexts undefined for a statement without anchors", () => {
-      const entry = response.usedInStatements.find(
-        (us) => us.statement.id === notAnchored.id
-      );
-      expect(entry?.anchorTexts).toBeUndefined();
+      expect(entities[notAnchored.id]?.anchorTexts).toBeUndefined();
     });
   });
 });

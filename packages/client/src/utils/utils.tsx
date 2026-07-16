@@ -1,10 +1,5 @@
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
-import {
-  EntityEnums,
-  RelationEnums,
-  UserEnums,
-  WarningTypeEnums,
-} from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IEntity,
@@ -29,10 +24,7 @@ import { DragItem, EntityDragItem } from "types";
 export const isFirstLabelEmpty = (labels: string[]) =>
   labels ? labels.length === 0 || labels[0] === "" : true;
 
-export const getEntityLabel = (
-  entity?: IResponseEntity,
-  anchorTexts?: string[]
-) => {
+export const getEntityLabel = (entity?: IResponseEntity) => {
   if (entity?.class === EntityEnums.Class.Statement) {
     // statement label logic:
     //   [1] If a user-defined label exists, show it.
@@ -43,7 +35,9 @@ export const getEntityLabel = (
     if (label) {
       return label;
     }
-    const anchorText = anchorTexts
+    // anchorTexts is stamped onto statement entities by server responses
+    // (Entity.applyAnchorTexts on the server)
+    const anchorText = entity.anchorTexts
       ?.map((t) => t.trim())
       .filter((t) => t)
       .join(" ... ");
@@ -55,10 +49,7 @@ export const getEntityLabel = (
   // non-statement
   return (entity?.labels && entity?.labels[0]) || "no label";
 };
-export const getShortLabelByLetterCount = (
-  label: string,
-  maxLetterCount: number
-) => {
+export const getShortLabelByLetterCount = (label: string, maxLetterCount: number) => {
   const isOversized = label.length > maxLetterCount;
   return isOversized ? label.slice(0, maxLetterCount).concat("...") : label;
 };
@@ -68,10 +59,7 @@ export const isValidEntityClass = (entityClass: EntityEnums.Class) => {
 };
 
 // TODO: not used, references not in statement data interface
-export const findPositionInStatement = (
-  statement: IStatement,
-  actant: IEntity
-) => {
+export const findPositionInStatement = (statement: IStatement, actant: IEntity) => {
   if (
     statement.data.actants
       .filter((a) => a.position === EntityEnums.Position.Subject)
@@ -101,36 +89,25 @@ export const findPositionInStatement = (
   } else if (statement.data.territory?.territoryId === actant.id) {
     return "territory";
   } else if (
-    statement.data.actants.find((act) =>
-      act.props.find((p) => p.value.entityId === actant.id)
-    )
+    statement.data.actants.find((act) => act.props.find((p) => p.value.entityId === actant.id))
   ) {
     return "actant property value";
   } else if (
-    statement.data.actants.find((act) =>
-      act.props.find((p) => p.type.entityId === actant.id)
-    )
+    statement.data.actants.find((act) => act.props.find((p) => p.type.entityId === actant.id))
   ) {
     return "actant property type";
   } else if (
-    statement.data.actions.find((act) =>
-      act.props.find((p) => p.value.entityId === actant.id)
-    )
+    statement.data.actions.find((act) => act.props.find((p) => p.value.entityId === actant.id))
   ) {
     return "action property value";
   } else if (
-    statement.data.actions.find((act) =>
-      act.props.find((p) => p.type.entityId === actant.id)
-    )
+    statement.data.actions.find((act) => act.props.find((p) => p.type.entityId === actant.id))
   ) {
     return "action property type";
   }
 };
 
-export const searchTree = (
-  element: IResponseTree,
-  matchingTitle: string
-): IResponseTree | null => {
+export const searchTree = (element: IResponseTree, matchingTitle: string): IResponseTree | null => {
   if (element.territory.id === matchingTitle) {
     return element;
   } else if (element.children != null) {
@@ -146,7 +123,7 @@ export const searchTree = (
 
 export const collectTerritoryChildren = (
   element: IResponseTree,
-  childArray: string[] = []
+  childArray: string[] = [],
 ): string[] => {
   if (element.children.length) {
     element.children.map((child) => {
@@ -166,7 +143,7 @@ export const dndHoverFn = (
   index: number,
   monitor: DropTargetMonitor,
   ref: React.RefObject<HTMLDivElement | HTMLTableRowElement | null>,
-  moveFn: (dragIndex: number, hoverIndex: number) => void
+  moveFn: (dragIndex: number, hoverIndex: number) => void,
 ) => {
   if (!ref?.current) {
     return;
@@ -201,7 +178,7 @@ export const dndHoverFnHorizontal = (
   index: number,
   monitor: DropTargetMonitor,
   ref: React.RefObject<HTMLDivElement | null>,
-  moveFn: (dragIndex: number, hoverIndex: number) => void
+  moveFn: (dragIndex: number, hoverIndex: number) => void,
 ) => {
   if (!ref.current) {
     return;
@@ -232,38 +209,24 @@ export const dndHoverFnHorizontal = (
 };
 
 // Returns one more level, because there's always empty subtree array on the deepest level
-export const getRelationTreeDepth = (
-  array: EntityTooltip.ISuperclassTree[]
-): number => {
-  return (
-    1 +
-    Math.max(
-      0,
-      ...array.map(({ subtrees = [] }) => getRelationTreeDepth(subtrees))
-    )
-  );
+export const getRelationTreeDepth = (array: EntityTooltip.ISuperclassTree[]): number => {
+  return 1 + Math.max(0, ...array.map(({ subtrees = [] }) => getRelationTreeDepth(subtrees)));
 };
 
 export const getEntityRelationRules = (
   entityClass: EntityEnums.Class,
   relationTypes?: RelationEnums.Type[],
-  isTemplate: boolean = false
+  isTemplate: boolean = false,
 ): RelationEnums.Type[] => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
 
   // A and C entity classes cannot have any relations, other classes might have only Classification and Related
   if (isTemplate) {
-    if (
-      entityClass === EntityEnums.Class.Action ||
-      entityClass === EntityEnums.Class.Concept
-    ) {
+    if (entityClass === EntityEnums.Class.Action || entityClass === EntityEnums.Class.Concept) {
       return [];
     } else {
       return typesToFilter.filter((rule) => {
-        return (
-          rule === RelationEnums.Type.Classification ||
-          rule === RelationEnums.Type.Related
-        );
+        return rule === RelationEnums.Type.Classification || rule === RelationEnums.Type.Related;
       });
     }
   }
@@ -276,9 +239,7 @@ export const getEntityRelationRules = (
     ) {
       return rule;
     } else if (
-      Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
-        (pair) => pair[0] === entityClass
-      )
+      Relation.RelationRules[rule]?.allowedEntitiesPattern.some((pair) => pair[0] === entityClass)
     ) {
       return rule;
     }
@@ -287,15 +248,13 @@ export const getEntityRelationRules = (
 
 export const getRelationInvertedRules = (
   entityClass: EntityEnums.Class,
-  relationTypes?: RelationEnums.Type[]
+  relationTypes?: RelationEnums.Type[],
 ) => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
   return typesToFilter.filter((rule) => {
     if (
       Relation.RelationRules[rule]?.asymmetrical &&
-      Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
-        (pair) => pair[1] === entityClass
-      )
+      Relation.RelationRules[rule]?.allowedEntitiesPattern.some((pair) => pair[1] === entityClass)
     ) {
       return rule;
     }
@@ -363,7 +322,7 @@ export const floorNumberToOneDecimal = (numberToFloor: number) => {
 export const getUserIcon = (
   userRole: UserEnums.Role,
   // size can be determined in parent component font-size instead
-  size?: number
+  size?: number,
 ): React.ReactNode => {
   if (userRole === UserEnums.Role.Owner) {
     return <FaUserGear size={size} />;
@@ -390,7 +349,7 @@ export const isWarningTBased = (warning: IWarning) => {
 // Utility function to compute differences between two objects
 export const computeDifferences = <T extends Record<string, any>>(
   original: T,
-  current: T
+  current: T,
 ): Partial<T> => {
   const differences: Partial<T> = {};
 
@@ -438,9 +397,7 @@ export const computeDifferences = <T extends Record<string, any>>(
 };
 
 // collect all anchors that has class Statememnt
-export const collectStatementAnchors = (
-  anchors: IAnchorsNode[]
-): IAnchorsNode[] => {
+export const collectStatementAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
   return anchors.reduce((acc: any[], anchor) => {
     if (anchor.class === EntityEnums.Class.Statement) {
       acc.push(anchor);
@@ -453,9 +410,7 @@ export const collectStatementAnchors = (
 };
 
 // collect all anchors that have class Territory
-export const collectTerritoryAnchors = (
-  anchors: IAnchorsNode[]
-): IAnchorsNode[] => {
+export const collectTerritoryAnchors = (anchors: IAnchorsNode[]): IAnchorsNode[] => {
   return anchors.reduce((acc: IAnchorsNode[], anchor) => {
     if (anchor.class === EntityEnums.Class.Territory) {
       acc.push(anchor);
@@ -473,7 +428,7 @@ export const collectTerritoryAnchors = (
 // or nest, since multiple Ts can share one full-text).
 export const collectTerritoryAnchorsAtIndex = (
   anchors: IAnchorsNode[],
-  index: number
+  index: number,
 ): IAnchorsNode[] => {
   return anchors.reduce((acc: IAnchorsNode[], anchor) => {
     if (
@@ -498,7 +453,7 @@ export const collectTerritoryAnchorsAtIndex = (
 // their outermost occurrence.
 export const getTerritoryHierarchyAtIndex = (
   anchors: IAnchorsNode[],
-  index: number
+  index: number,
 ): { id: string; depth: number }[] => {
   const containing = collectTerritoryAnchorsAtIndex(anchors, index);
 
@@ -519,18 +474,14 @@ export const getTerritoryHierarchyAtIndex = (
         other !== node &&
         other.indexStart <= node.indexStart &&
         other.indexEnd >= node.indexEnd &&
-        (other.indexStart !== node.indexStart ||
-          other.indexEnd !== node.indexEnd)
+        (other.indexStart !== node.indexStart || other.indexEnd !== node.indexEnd),
     ).length;
     chain.push({ id: node.anchor, depth });
   }
   return chain;
 };
 
-export const getStatementOrderByIndex = (
-  index: number,
-  statements: IResponseStatement[]
-) => {
+export const getStatementOrderByIndex = (index: number, statements: IResponseStatement[]) => {
   let newOrder: number = EntityEnums.Order.Last;
 
   if (index + 1 > statements.length) {
@@ -540,14 +491,10 @@ export const getStatementOrderByIndex = (
     if (index < 1 && statements[0].data.territory) {
       // first one
       newOrder = EntityEnums.Order.First;
-    } else if (
-      statements[index - 1].data.territory &&
-      statements[index].data.territory
-    ) {
+    } else if (statements[index - 1].data.territory && statements[index].data.territory) {
       // somewhere between
       newOrder =
-        ((statements[index - 1].data.territory as IStatementDataTerritory)
-          .order +
+        ((statements[index - 1].data.territory as IStatementDataTerritory).order +
           (statements[index].data.territory as IStatementDataTerritory).order) /
         2;
     }
@@ -558,10 +505,7 @@ export const getStatementOrderByIndex = (
 // Mirror of getStatementOrderByIndex for Territories: given the target position
 // among sibling territories (sorted by their parent.order), compute the
 // parent.order for a new sibling inserted at that index.
-export const getTerritoryOrderByIndex = (
-  index: number,
-  siblings: ITerritory[]
-) => {
+export const getTerritoryOrderByIndex = (index: number, siblings: ITerritory[]) => {
   let newOrder: number = EntityEnums.Order.Last;
 
   if (index + 1 > siblings.length) {

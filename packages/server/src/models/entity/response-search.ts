@@ -791,6 +791,10 @@ export class ResponseSearch {
       entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
     }
 
+    // stamp document anchor spans onto statement results so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts)
+    await Entity.applyAnchorTexts(httpRequest.db.connection, entities);
+
     const out: ResponseEntity[] = [];
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
