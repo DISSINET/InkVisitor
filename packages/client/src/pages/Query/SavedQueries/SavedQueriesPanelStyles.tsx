@@ -15,7 +15,7 @@ export const StyledSavedQueriesRoot = styled.div`
   gap: 1rem;
 `;
 
-export const StyledToggleButton = styled.button`
+export const StyledToggleButton = styled.button<{ $isActive?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -23,15 +23,20 @@ export const StyledToggleButton = styled.button`
   border: none;
   border-radius: ${({ theme }) => theme.borderRadius.full};
   background-color: ${({ theme }) => theme.color.invertedBg["primary"]};
-  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  box-shadow: ${({ theme, $isActive }) =>
+    $isActive ? theme.boxShadow.normal : theme.boxShadow.high};
+  filter: ${({ $isActive }) => ($isActive ? "brightness(0.94)" : "none")};
   cursor: pointer;
   white-space: nowrap;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ theme }) => theme.color["primary"]};
-  transition: box-shadow 0.2s;
+  transition:
+    filter 0.2s,
+    box-shadow 0.2s;
   &:hover {
     box-shadow: ${({ theme }) => theme.boxShadow.normal};
+    filter: brightness(0.94);
   }
 `;
 

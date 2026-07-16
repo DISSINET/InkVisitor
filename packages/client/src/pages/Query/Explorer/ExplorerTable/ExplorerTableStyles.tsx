@@ -73,7 +73,10 @@ export const StyledHeaderColumnControls = styled.span`
   padding-left: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-width 0.15s ease, opacity 0.12s ease, padding-left 0.15s ease;
+  transition:
+    max-width 0.15s ease,
+    opacity 0.12s ease,
+    padding-left 0.15s ease;
 `;
 
 export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
@@ -301,17 +304,22 @@ export const StyledIdsFloatingRoot = styled.div`
   gap: 1rem;
 `;
 
-export const StyledIdsToggleWrapper = styled.div`
+export const StyledIdsToggleWrapper = styled.div<{ $isActive?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
   padding: 0.6rem 1.2rem;
   border-radius: ${({ theme }) => theme.borderRadius.full};
   background-color: ${({ theme }) => theme.color.invertedBg["info"]};
-  box-shadow: ${({ theme }) => theme.boxShadow.high};
-  transition: box-shadow 0.2s;
+  box-shadow: ${({ theme, $isActive }) =>
+    $isActive ? theme.boxShadow.normal : theme.boxShadow.high};
+  filter: ${({ $isActive }) => ($isActive ? "brightness(0.94)" : "none")};
+  transition:
+    filter 0.2s,
+    box-shadow 0.2s;
   &:hover {
     box-shadow: ${({ theme }) => theme.boxShadow.normal};
+    filter: brightness(0.98);
   }
 `;
 

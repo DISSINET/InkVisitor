@@ -334,7 +334,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
         </StyledIdsPanel>
       )}
 
-      <StyledIdsToggleWrapper ref={buttonRef}>
+      <StyledIdsToggleWrapper ref={buttonRef} $isActive={isOpen}>
         <StyledIdsToggleButton
           type="button"
           aria-expanded={isOpen}
