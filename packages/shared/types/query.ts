@@ -1114,6 +1114,8 @@ export namespace Explore {
     type: ExploreColumnParamValueType;
     label: string;
     isRequired: boolean;
+    /** For "entity" params: restrict the suggester to these classes. Defaults to Concept. */
+    entityClasses?: EntityEnums.Class[];
   }
 
   /** Params for column types that require configuration */
@@ -1122,6 +1124,9 @@ export namespace Explore {
   }
   export interface IExploreColumnParamsEPV {
     propertyType: string;
+  }
+  export interface IExploreColumnParamsERV {
+    resource: string;
   }
   /** Empty params for column types with no configuration */
   export type IExploreColumnParamsEmpty = Record<string, never>;
@@ -1139,7 +1144,7 @@ export namespace Explore {
     [EExploreColumnType.EPV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEPV>;
     [EExploreColumnType.EPT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.ERR]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
-    [EExploreColumnType.ERV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ERV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsERV>;
     [EExploreColumnType.ES]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.CPV]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.CPO]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
@@ -1202,9 +1207,19 @@ export namespace Explore {
     },
     [EExploreColumnType.ERV]: {
       label: "Entity Reference Values",
-      description: "Shows the value side of entity references.",
-      isDisabled: true,
-      params: {},
+      description:
+        "Shows the value side of entity references for a specific resource. The resource is a Resource entity that defines which reference values are displayed.",
+      isDisabled: false,
+      params: { resource: "" },
+      paramsDef: [
+        {
+          id: "resource",
+          type: "entity",
+          label: "Reference resource",
+          isRequired: true,
+          entityClasses: [EntityEnums.Class.Resource],
+        },
+      ],
     },
     [EExploreColumnType.ES]: {
       label: "Entity Statements",

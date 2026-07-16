@@ -266,6 +266,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         });
       }
 
+      if (column?.type === Explore.EExploreColumnType.ERV) {
+        const newEntity = deleteRef(sourceEntity, {
+          valueId: entityToRemove.id,
+        });
+
+        updateEntityMutation.mutate({
+          entityId: sourceEntity.id,
+          changes: {
+            references: newEntity.references,
+          },
+        });
+      }
+
       if (column?.type === Explore.EExploreColumnType.ERR) {
         const newEntity = deleteRef(sourceEntity, {
           resourceId: entityToRemove.id,
@@ -476,6 +489,18 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     (rowEntity: IEntity, column: Explore.IExploreColumn): React.ReactElement | null => {
       if (column.editable) {
         if (column.type === Explore.EExploreColumnType.EPV) {
+          return (
+            <EntitySuggester
+              inputWidth={74}
+              categoryTypes={classesAll}
+              onPicked={(newEntity) => {
+                handleEditColumn(rowEntity, column.id, newEntity);
+              }}
+              compactUntilHover
+            />
+          );
+        }
+        if (column.type === Explore.EExploreColumnType.ERV) {
           return (
             <EntitySuggester
               inputWidth={74}

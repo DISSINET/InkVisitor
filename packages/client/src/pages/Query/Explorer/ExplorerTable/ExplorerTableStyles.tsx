@@ -6,7 +6,7 @@ interface StyledTableWrapper {
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   position: relative;
-  margin: 0.5rem 1rem 0 1rem;
+  margin-top: 0.5rem;
   overflow: hidden;
 `;
 export const StyledRowWrapper = styled.div`
@@ -73,7 +73,10 @@ export const StyledHeaderColumnControls = styled.span`
   padding-left: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-width 0.15s ease, opacity 0.12s ease, padding-left 0.15s ease;
+  transition:
+    max-width 0.15s ease,
+    opacity 0.12s ease,
+    padding-left 0.15s ease;
 `;
 
 export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
@@ -172,7 +175,6 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   position: relative;
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
-  margin-right: 2rem;
   z-index: 20;
 `;
 

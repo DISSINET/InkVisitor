@@ -228,6 +228,25 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             break;
           }
 
+          case Explore.EExploreColumnType.ERV: {
+            const params =
+              column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ERV>;
+
+            const newRef: IReference = {
+              id: uuidv4(),
+              resource: params.resource,
+              value: newEntity.id,
+            };
+
+            updateEntityMutation.mutate({
+              entityId: rowEntity.id,
+              changes: {
+                references: [...rowEntity.references, newRef],
+              },
+            });
+            break;
+          }
+
           case Explore.EExploreColumnType.ER: {
             const params =
               column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
@@ -433,10 +452,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         });
       }, SCROLL_WINDOW_UPDATE_DEBOUNCE_MS);
     }
-  };
-
-  const handleCloseDetailsModal = () => {
-    clearAllDetailIds();
   };
 
   return (
