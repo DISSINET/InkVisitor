@@ -6,9 +6,11 @@ import { WIDTH_COLUMN_FIRST } from "../constants";
 
 const ExploreTableHeader: React.FC<{
   columns: Explore.IExploreColumn[];
+  /** Content-estimated widths per column id; static fallback when absent. */
+  columnWidths: Record<string, number>;
   onRemoveColumn: (id: string) => void;
   onMoveColumn: (fromIndex: number, toIndex: number) => void;
-}> = React.memo(({ columns, onRemoveColumn, onMoveColumn }) => {
+}> = React.memo(({ columns, columnWidths, onRemoveColumn, onMoveColumn }) => {
   return (
     <StyledHeader>
       <StyledHeaderEntityCell
@@ -26,6 +28,7 @@ const ExploreTableHeader: React.FC<{
           <ExploreTableHeaderColumn
             key={column.id}
             column={column}
+            width={columnWidths[column.id]}
             index={key}
             isFirst={key === 0}
             isLast={key === columns.length - 1}

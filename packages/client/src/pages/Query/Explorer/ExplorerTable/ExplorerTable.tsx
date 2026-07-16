@@ -22,10 +22,14 @@ import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerT
 import { StyledBody, StyledEmptyMessage, StyledTableWrapper } from "./ExplorerTableStyles";
 
 import ExploreTableHeader from "./Header/ExploreTableHeader";
+import { CELL_DISPLAY_LIMIT } from "./Cell/ExplorerCellOverflow";
 import { HEIGHT_ROW_DEFAULT, WIDTH_COLUMN_FIRST } from "./constants";
-import { getColumnWidth } from "./utils";
+import { contentSizedColumnTypes } from "./types";
+import { estimateColumnWidth, getColumnWidth } from "./utils";
 
 const OVERSCAN_ROWS = 10;
+
+const EMPTY_COLUMNS: Explore.IExploreColumn[] = [];
 
 /**
  * Debounce delay before dispatching offset/limit changes during scroll.
@@ -89,21 +93,46 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const themeContext = useTheme();
   const { detailIdArray, clearAllDetailIds, selectedDetailId } = useSearchParams();
   const [lastData, setLastData] = useState<IResponseQuery | undefined>(undefined);
+
+  const { limit, offset } = state;
+  // Stable identity for the non-table branch: `columns` is an effect dependency,
+  // and a fresh [] every render would re-fire it unconditionally.
+  const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : EMPTY_COLUMNS;
+
+  // Content-estimated widths per column id, ratcheted: a column only ever
+  // grows within one query (see estimateColumnWidth). Estimated from each
+  // loaded data window, never DOM-measured — rows are virtualized, so the
+  // viewport content varies with scroll position and measuring would jitter.
+  // Only ever shrinks by resetting on a new query (stableSignature change).
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+
   useEffect(() => {
     if (data && typeof data.total === "number") {
       setLastData(data);
       setRenderWindow({ offset: state.offset, limit: state.limit });
+
+      // Ratchet content-sized column widths from the arrived window.
+      setColumnWidths((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const col of columns) {
+          if (!contentSizedColumnTypes.has(col.type)) continue;
+          const estimated = estimateColumnWidth(col, data.entities, CELL_DISPLAY_LIMIT);
+          if (estimated > (next[col.id] ?? 0)) {
+            next[col.id] = estimated;
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
     }
-  }, [data, state.offset, state.limit]);
+  }, [data, state.offset, state.limit, columns]);
 
   const {
     entities,
     total: incomingTotal,
     entityIds,
   } = data ?? lastData ?? { entities: [], total: 0, entityIds: [] as string[] };
-
-  const { limit, offset } = state;
-  const columns = state.view.mode === Explore.EViewMode.Table ? state.view.columns : [];
 
   const [total, setTotal] = useState(0);
 
@@ -122,6 +151,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     prevStableSignatureRef.current = stableSignature;
     setLastData(undefined);
     setTotal(0);
+    // New query: restart the width ratchet so columns can size down again.
+    setColumnWidths({});
   }
 
   const [rowFocused, setRowFocused] = useState<number>(-1);
@@ -228,6 +259,25 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             break;
           }
 
+          case Explore.EExploreColumnType.ERV: {
+            const params =
+              column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ERV>;
+
+            const newRef: IReference = {
+              id: uuidv4(),
+              resource: params.resource,
+              value: newEntity.id,
+            };
+
+            updateEntityMutation.mutate({
+              entityId: rowEntity.id,
+              changes: {
+                references: [...rowEntity.references, newRef],
+              },
+            });
+            break;
+          }
+
           case Explore.EExploreColumnType.ER: {
             const params =
               column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
@@ -291,8 +341,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   );
 
   const widthTable = useMemo(() => {
-    return WIDTH_COLUMN_FIRST + columns.reduce((sum, col) => sum + getColumnWidth(col.type), 0);
-  }, [columns]);
+    return (
+      WIDTH_COLUMN_FIRST +
+      columns.reduce((sum, col) => sum + (columnWidths[col.id] ?? getColumnWidth(col.type)), 0)
+    );
+  }, [columns, columnWidths]);
 
   const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -330,6 +383,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const rowEntityId = rowItem?.entity?.id ?? getEntityIdAtRow(index);
       const isSelected = rowEntityId ? selectedEntityIdsSet.has(rowEntityId) : false;
       const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index;
+      const isLastRow = index === total - 1;
 
       return (
         <div
@@ -338,6 +392,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             width: widthTable,
             minWidth: "100%",
             height: HEIGHT_ROW_DEFAULT,
+            ...(isLastRow
+              ? {
+                  borderBottomLeftRadius: themeContext.borderRadius.default,
+                  borderBottomRightRadius: themeContext.borderRadius.default,
+                }
+              : {}),
           }}
           className={`qt-row ${isOdd ? " qt-row-odd" : ""}${isSelected ? " qt-row-selected" : ""}${
             rowFocused === index ? " qt-row-focused" : ""
@@ -373,6 +433,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               rowId={index}
               rowItem={rowItem!}
               columns={columns}
+              columnWidths={columnWidths}
               handleEditColumn={handleEditColumn}
               onRowSelect={onRowSelect}
               onRowClick={handleRowClick}
@@ -398,6 +459,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       rowFocused,
       getCachedEntity,
       onOpenEntityInDetail,
+      total,
+      columnWidths,
     ],
   );
 
@@ -435,10 +498,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     }
   };
 
-  const handleCloseDetailsModal = () => {
-    clearAllDetailIds();
-  };
-
   return (
     <StyledTableWrapper
       style={{
@@ -458,6 +517,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             height: heightBox - 20,
             overflowX: "auto",
             overflowY: "hidden",
+            boxSizing: "border-box",
+            paddingLeft: themeContext.space[4],
+            paddingRight: themeContext.space[4],
           } as React.CSSProperties
         }
       >
@@ -466,6 +528,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
           <ExploreTableHeader
             columns={columns}
+            columnWidths={columnWidths}
             onRemoveColumn={handleRemoveColumn}
             onMoveColumn={handleMoveColumn}
           />

@@ -131,6 +131,8 @@ interface ExplorerTableRowProps {
   rowId: number;
   rowItem: IResponseQueryEntity;
   columns: Explore.IExploreColumn[];
+  /** Content-estimated widths per column id; static fallback when absent. */
+  columnWidths: Record<string, number>;
   handleEditColumn: (
     entity: IEntity,
     columnId: string,
@@ -149,6 +151,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   rowId,
   rowItem,
   columns,
+  columnWidths,
   handleEditColumn,
 
   onRowSelect,
@@ -262,6 +265,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           entityId: sourceEntity.id,
           changes: {
             props: newEntity.props,
+          },
+        });
+      }
+
+      if (column?.type === Explore.EExploreColumnType.ERV) {
+        const newEntity = deleteRef(sourceEntity, {
+          valueId: entityToRemove.id,
+        });
+
+        updateEntityMutation.mutate({
+          entityId: sourceEntity.id,
+          changes: {
+            references: newEntity.references,
           },
         });
       }
@@ -487,6 +503,18 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             />
           );
         }
+        if (column.type === Explore.EExploreColumnType.ERV) {
+          return (
+            <EntitySuggester
+              inputWidth={74}
+              categoryTypes={classesAll}
+              onPicked={(newEntity) => {
+                handleEditColumn(rowEntity, column.id, newEntity);
+              }}
+              compactUntilHover
+            />
+          );
+        }
         if (column.type === Explore.EExploreColumnType.ERR) {
           return (
             <EntitySuggester
@@ -558,14 +586,15 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       </div>
 
       {columns.map((column, key) => {
+        const width = columnWidths[column.id] ?? getColumnWidth(column.type);
         return (
           <div
             key={key}
             className="qt-col"
             style={{
-              width: getColumnWidth(column.type),
-              minWidth: getColumnWidth(column.type),
-              maxWidth: getColumnWidth(column.type),
+              width,
+              minWidth: width,
+              maxWidth: width,
             }}
           >
             <StyledCellContent>
@@ -593,6 +622,8 @@ function areRowsEqual(
   if (prev.onRowClick !== next.onRowClick) return false;
   // Re-render when columns array identity changes (e.g., add/remove)
   if (prev.columns !== next.columns) return false;
+  // Re-render when the width map identity changes (ratchet grew / query reset)
+  if (prev.columnWidths !== next.columnWidths) return false;
   if (prev.rowItem !== next.rowItem) return false;
   return true;
 }

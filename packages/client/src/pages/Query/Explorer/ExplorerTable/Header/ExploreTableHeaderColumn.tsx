@@ -19,6 +19,8 @@ import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
 
 interface ExploreTableHeaderColumn {
   column: Explore.IExploreColumn;
+  /** Content-estimated width; falls back to the static width per type. */
+  width?: number;
   index: number;
   isFirst: boolean;
   isLast: boolean;
@@ -28,6 +30,7 @@ interface ExploreTableHeaderColumn {
 
 const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
   column,
+  width: dynamicWidth,
   index,
   isFirst,
   isLast,
@@ -37,7 +40,7 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
   const theme = useTheme();
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLSpanElement>(null);
-  const width = getColumnWidth(column.type);
+  const width = dynamicWidth ?? getColumnWidth(column.type);
 
   const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: Identifier | null }>({
     accept: ItemTypes.EXPLORER_COLUMN,
