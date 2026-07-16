@@ -593,4 +593,70 @@ describe("models/entity/response", function () {
       ).toEqual(territory2.id);
     });
   });
+
+  describe("ResponseEntityDetail.populateUsedInStatementAnchors", function () {
+    let db: Db;
+    // Document tag names exclude ".", so keep anchored statement ids dot-free.
+    const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+
+    const anchoredTwice = new Statement({ id: tagSafeId() });
+    const anchoredOnce = new Statement({ id: tagSafeId() });
+    const notAnchored = new Statement({ id: tagSafeId() });
+
+    const doc = new Document({
+      id: Math.random().toString(),
+      content: `start<${anchoredTwice.id}>first span</${anchoredTwice.id}>mid<${anchoredTwice.id}>second span</${anchoredTwice.id}>gap<${anchoredOnce.id}>only span</${anchoredOnce.id}>end`,
+    });
+
+    const detail = new Entity({ id: tagSafeId() });
+    let response: ResponseEntityDetail;
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      // statements must exist before preprocess so their class lands in
+      // documents.entityIds and the anchors resolve.
+      await anchoredTwice.save(db.connection);
+      await anchoredOnce.save(db.connection);
+      await notAnchored.save(db.connection);
+      await doc.preprocess(db.connection);
+      await doc.save(db.connection);
+
+      response = new ResponseEntityDetail(detail);
+      response.usedInStatements = [
+        {
+          position: EntityEnums.UsedInPosition.Actant,
+          statement: anchoredTwice,
+        },
+        { position: EntityEnums.UsedInPosition.Actant, statement: anchoredOnce },
+        { position: EntityEnums.UsedInPosition.Actant, statement: notAnchored },
+      ];
+      await response.populateUsedInStatementAnchors(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    it("should collect both anchor spans for a statement anchored twice", () => {
+      const entry = response.usedInStatements.find(
+        (us) => us.statement.id === anchoredTwice.id
+      );
+      expect(entry?.anchorTexts).toEqual(["first span", "second span"]);
+    });
+
+    it("should collect the single anchor span for a statement anchored once", () => {
+      const entry = response.usedInStatements.find(
+        (us) => us.statement.id === anchoredOnce.id
+      );
+      expect(entry?.anchorTexts).toEqual(["only span"]);
+    });
+
+    it("should leave anchorTexts undefined for a statement without anchors", () => {
+      const entry = response.usedInStatements.find(
+        (us) => us.statement.id === notAnchored.id
+      );
+      expect(entry?.anchorTexts).toBeUndefined();
+    });
+  });
 });

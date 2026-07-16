@@ -100,21 +100,35 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
       {
         Header: "Text",
         Cell: ({ row }: CellType) => {
-          const useCase = row.original;
-          const entityId = useCase.statement?.id;
-          const entity = entityId ? entities[entityId] : false;
+          const { statement, anchorTexts } = row.original;
 
-          return (
-            <>
-              {entity && entity.class === EntityEnums.Class.Statement ? (
-                <StyledTableTextGridCell>
-                  <StyledShortenedText>{entity.data.text}</StyledShortenedText>
-                </StyledTableTextGridCell>
-              ) : (
-                ""
-              )}
-            </>
-          );
+          if (!statement) {
+            return "";
+          }
+
+          // Fallback order (each used only when the one above is empty):
+          //   1) document anchor span(s) - multiple anchors joined with " ... "
+          //   2) statement text (deprecated but still in use sometimes)
+          //   3) statement label - rendered italic to mark it as a label
+          const anchorText = anchorTexts
+            ?.map((t) => t.trim())
+            .filter((t) => t)
+            .join(" ... ");
+          const statementText = statement.data.text?.trim();
+          const label = statement.labels?.[0]?.trim();
+
+          let content: React.ReactNode = "";
+          if (anchorText) {
+            content = <StyledShortenedText>{anchorText}</StyledShortenedText>;
+          } else if (statementText) {
+            content = (
+              <StyledShortenedText>{statement.data.text}</StyledShortenedText>
+            );
+          } else if (label) {
+            content = <StyledShortenedText $italic>{label}</StyledShortenedText>;
+          }
+
+          return <StyledTableTextGridCell>{content}</StyledTableTextGridCell>;
         },
       },
       {

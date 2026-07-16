@@ -1,4 +1,6 @@
 import { nonenumerable } from "@common/decorators";
+import { AnchorsNode } from "@models/document/anchors";
+import Document from "@models/document/document";
 import { UsedRelations } from "@models/relation/relations";
 import Statement from "@models/statement/statement";
 import treeCache from "@service/treeCache";
@@ -235,6 +237,11 @@ export class ResponseEntityDetail
       this.addLinkedEntities(ud.resourceId);
     });
 
+    // Attach document anchor spans to each used-in statement so the detail
+    // Statements table can show them as its primary "Text" fallback. Reads
+    // this.usedInStatements, populated by walkStatementsDataEntities above.
+    await this.populateUsedInStatementAnchors(conn);
+
     // populateEntitiesMap depends on the fully-accumulated linkedEntitiesIds,
     // so it must come after every addLinkedEntities call above.
     this.entities = await this.populateEntitiesMap(conn);
@@ -314,6 +321,50 @@ export class ResponseEntityDetail
       this.addLinkedEntities(c.actantEntityId);
       this.addLinkedEntities(c.relationEntityId);
     });
+  }
+
+  /**
+   * Fills the anchorTexts field of every used-in statement with the content of
+   * the document anchors that point at that statement (node.anchor ===
+   * statement.id). A statement anchored several times yields several strings -
+   * the client joins them for display. One batched document read covers every
+   * used-in statement.
+   * @param conn
+   */
+  async populateUsedInStatementAnchors(conn: Connection): Promise<void> {
+    const statementIds = [
+      ...new Set(this.usedInStatements.map((us) => us.statement.id)),
+    ];
+    if (!statementIds.length) {
+      return;
+    }
+
+    const idSet = new Set(statementIds);
+    const anchorTextsByStatement: Record<string, string[]> = {};
+
+    const docs = await Document.findByEntityIds(conn, statementIds);
+    for (const docData of docs) {
+      const doc = new Document(docData);
+      const traverse = (nodes: AnchorsNode[]) => {
+        for (const node of nodes) {
+          if (idSet.has(node.anchor)) {
+            if (!anchorTextsByStatement[node.anchor]) {
+              anchorTextsByStatement[node.anchor] = [];
+            }
+            anchorTextsByStatement[node.anchor].push(node.getShortContent());
+          }
+          traverse(node.children);
+        }
+      };
+      traverse(doc.anchors);
+    }
+
+    for (const us of this.usedInStatements) {
+      const texts = anchorTextsByStatement[us.statement.id];
+      if (texts && texts.length) {
+        us.anchorTexts = texts;
+      }
+    }
   }
 
   /**

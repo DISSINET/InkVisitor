@@ -50,6 +50,7 @@ export interface IResponseUsedInDocument {
 export interface IResponseUsedInStatement<PositionEnum> {
   statement: IStatement;
   position: PositionEnum;
+  anchorTexts?: string[]; // text of each document anchor whose anchor === statement.id (empty/undefined when the statement is not anchored)
 }
 
 export interface IResponseUsedInStatementProps {

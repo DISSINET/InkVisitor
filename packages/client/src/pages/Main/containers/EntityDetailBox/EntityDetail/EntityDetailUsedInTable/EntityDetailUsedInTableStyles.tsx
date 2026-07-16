@@ -5,13 +5,14 @@ export const StyledTableTextGridCell = styled.div`
   overflow: hidden;
   font-size: inherit;
 `;
-export const StyledShortenedText = styled.div`
+export const StyledShortenedText = styled.div<{ $italic?: boolean }>`
   display: inline-block;
   vertical-align: middle;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: inherit;
+  font-style: ${({ $italic }) => ($italic ? "italic" : "normal")};
 `;
 export const StyledTagWrap = styled.div`
   display: inline-flex;

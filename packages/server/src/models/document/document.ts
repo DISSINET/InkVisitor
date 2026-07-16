@@ -415,6 +415,31 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
+   * Like findByEntityId but for a set of ids - returns every document (meta,
+   * content dropped) that references any of the given entity ids. A single
+   * multi-index getAll keeps this to one round-trip instead of one per id.
+   * @param db
+   * @param entityIds
+   * @returns
+   */
+  static async findByEntityIds(
+    db: Connection,
+    entityIds: string[]
+  ): Promise<IDocumentMeta[]> {
+    if (!entityIds.length) {
+      return [];
+    }
+    const entries = await rethink
+      .table(Document.table)
+      .getAll(...entityIds, { index: DbEnums.Indexes.DocumentEntityIds })
+      .without("content")
+      .distinct()
+      .run(db);
+
+    return entries && entries.length ? (entries as IDocumentMeta[]) : [];
+  }
+
+  /**
    * Retrieves all documents
    * @param db Connection database connection
    * @returns Promise<IDocument[]> list of documents
