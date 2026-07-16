@@ -182,7 +182,9 @@ export const StatementListBox: React.FC = () => {
     return undefined;
   }, [selectedResourceId, resources]);
 
-  const { data: selectedDocument } = useDocumentQuery(selectedDocumentId);
+  const { data: selectedDocument } = useDocumentQuery(selectedDocumentId, {
+    refetchOnWindowFocus: false,
+  });
 
   const deleteStatementMutation = useMutation({
     mutationFn: async (sId: string) => await api.entityDelete(sId, { ignoreErrorToast: true }),

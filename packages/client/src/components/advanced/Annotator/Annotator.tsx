@@ -41,7 +41,7 @@ import {
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { useAppSelector } from "redux/hooks";
-import { Loader } from "components";
+import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
@@ -203,6 +203,9 @@ export const TextAnnotator = ({
 
   const [annotatorMode, setAnnotatorMode] = useState<EditMode>(EditMode.HIGHLIGHT);
   const [localTextContent, setLocalTextContent] = useState<string>("");
+  // Target mode held while the "unsaved text edits" confirm dialog is open
+  // (set when the user tries to enter HIGHLIGHT with pending text edits).
+  const [pendingModeSwitch, setPendingModeSwitch] = useState<EditMode | null>(null);
 
   const isChangeMade = useMemo<boolean>(() => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
@@ -212,7 +215,7 @@ export const TextAnnotator = ({
     } else {
       return localTextContent !== dataDocument?.content;
     }
-  }, [localTextContent, dataDocument?.content]);
+  }, [localTextContent, dataDocument?.content, annotatorMode]);
 
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);
@@ -331,10 +334,44 @@ export const TextAnnotator = ({
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
-  const handleAnnotatorModeClick = useCallback((mode: EditMode) => {
+  const applyModeSwitch = useCallback((mode: EditMode) => {
     setAnnotatorMode(mode);
     mainCanvas.current?.focus({ preventScroll: true });
   }, []);
+
+  const handleAnnotatorModeClick = useCallback(
+    (mode: EditMode) => {
+      // Entering HIGHLIGHT with unsaved text edits would silently lose them:
+      // HIGHLIGHT forces isChangeMade false, so the next refetch overwrites the
+      // canvas with server content (and the next anchor op quiet-saves the
+      // pending edits). Make the user resolve the edits before switching.
+      if (mode === EditMode.HIGHLIGHT && isChangeMade) {
+        setPendingModeSwitch(mode);
+        return;
+      }
+      applyModeSwitch(mode);
+    },
+    [isChangeMade, applyModeSwitch],
+  );
+
+  const confirmDiscardAndSwitch = useCallback(() => {
+    if (dataDocument?.content !== undefined) {
+      annotator?.updateText(dataDocument.content);
+      setLocalTextContent(dataDocument.content);
+    }
+    if (pendingModeSwitch) {
+      applyModeSwitch(pendingModeSwitch);
+    }
+    setPendingModeSwitch(null);
+  }, [annotator, dataDocument?.content, pendingModeSwitch, applyModeSwitch]);
+
+  const confirmSaveAndSwitch = useCallback(async () => {
+    await handleSaveNewContent(false);
+    if (pendingModeSwitch) {
+      applyModeSwitch(pendingModeSwitch);
+    }
+    setPendingModeSwitch(null);
+  }, [pendingModeSwitch, applyModeSwitch]);
 
   const saveScrollPositionOnScrollEnd = useDebouncedCallback(() => {
     const a = annotatorRef.current;
@@ -931,12 +968,14 @@ export const TextAnnotator = ({
         dataDocument?.id === documentId
       ) {
         if (isChangeMade) {
-          // Local edit in progress — keep the live canvas and sync the query
-          // cache so the save won't clobber local changes with the stale fetch.
-          queryClient.setQueryData<IDocument | undefined>(["document", documentId], (old) => {
-            if (!old || old.id !== documentId) return old;
-            return { ...old, content: currentContent };
-          });
+          // Local edit in progress — keep the live canvas and DON'T touch the
+          // query cache. The save posts annotator.text.value (the canvas), not
+          // the cached doc, so it can't be clobbered by the stale fetch; and
+          // leaving dataDocument.content as the true saved content keeps
+          // isChangeMade — and the save/discard buttons — honest after a
+          // background refetch. (Writing the canvas into the cache here made
+          // content === localTextContent, so the buttons went disabled as if the
+          // edits were already saved, and Discard reverted to a no-op.)
           reuseExistingInstance(currentContent);
         } else {
           // Server content is newer (e.g. another user added anchors) — update
@@ -1791,7 +1830,7 @@ export const TextAnnotator = ({
             />
           </SwitchGroup>
 
-          {canEditDocument && (
+          {canEditDocument && annotatorMode !== EditMode.HIGHLIGHT && (
             <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
               <Button
                 label="discard"
@@ -1826,6 +1865,37 @@ export const TextAnnotator = ({
           )}
         </StyledAnnotatorButtons>
       </div>
+
+      {pendingModeSwitch && (
+        <Modal
+          showModal={!!pendingModeSwitch}
+          onClose={() => setPendingModeSwitch(null)}
+          onEnterPress={confirmSaveAndSwitch}
+          disableBgClick
+          isLoading={isSaving}
+          width="auto"
+        >
+          <ModalHeader title="Unsaved text changes" />
+          <ModalContent>
+            <div>
+              You have unsaved text edits. Save or discard them before switching
+              to highlight mode.
+            </div>
+          </ModalContent>
+          <ModalFooter>
+            <ButtonGroup>
+              <Button
+                label="Cancel"
+                color="greyer"
+                inverted
+                onClick={() => setPendingModeSwitch(null)}
+              />
+              <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
+              <Button label="Save" color="info" onClick={confirmSaveAndSwitch} />
+            </ButtonGroup>
+          </ModalFooter>
+        </Modal>
+      )}
 
       {territoryCreateModalType && (
         <EntityCreateModal
