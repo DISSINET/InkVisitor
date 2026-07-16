@@ -791,10 +791,6 @@ export class ResponseSearch {
       entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
     }
 
-    // stamp document anchor spans onto statement results so tags can show
-    // them as labels (response-only field, see IEntity.anchorTexts)
-    await Entity.applyAnchorTexts(httpRequest.db.connection, entities);
-
     const out: ResponseEntity[] = [];
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
@@ -806,6 +802,13 @@ export class ResponseSearch {
       }
       out.push(response);
     }
+
+    // stamp document anchor spans onto statement results so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts). Must run
+    // on the wrapped responses: getEntityClass re-instantiates the entity via
+    // fillFlatObject, which drops undeclared fields - stamping the raw
+    // entities beforehand would be lost.
+    await Entity.applyAnchorTexts(httpRequest.db.connection, out);
 
     return out;
   }
