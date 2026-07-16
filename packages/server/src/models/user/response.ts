@@ -3,6 +3,7 @@ import { findEntityById } from "@service/shorthands";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import {
   IBookmarkFolder,
+  IEntity,
   IResponseBookmarkFolder,
   IResponseStoredTerritory,
   IResponseUser,
@@ -80,6 +81,15 @@ export class ResponseUser implements IResponseUser {
       }
       this.bookmarks.push(bookmarkResponse);
     }
+
+    // stamp document anchor spans onto bookmarked statements so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts); one
+    // batched read covers all folders
+    const bookmarkedEntities: IEntity[] = [];
+    for (const folder of this.bookmarks) {
+      bookmarkedEntities.push(...folder.entities);
+    }
+    await Entity.applyAnchorTexts(req.db.connection, bookmarkedEntities);
   }
 
   async unwindTerritories(req: IRequest): Promise<void> {

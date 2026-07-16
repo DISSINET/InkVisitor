@@ -602,14 +602,16 @@ describe("models/entity/response", function () {
     const anchoredTwice = new Statement({ id: tagSafeId() });
     const anchoredOnce = new Statement({ id: tagSafeId() });
     const notAnchored = new Statement({ id: tagSafeId() });
+    const rootStatement = new Statement({ id: tagSafeId() });
 
     const doc = new Document({
       id: Math.random().toString(),
-      content: `start<${anchoredTwice.id}>first span</${anchoredTwice.id}>mid<${anchoredTwice.id}>second span</${anchoredTwice.id}>gap<${anchoredOnce.id}>only span</${anchoredOnce.id}>end`,
+      content: `start<${anchoredTwice.id}>first span</${anchoredTwice.id}>mid<${anchoredTwice.id}>second span</${anchoredTwice.id}>gap<${anchoredOnce.id}>only span</${anchoredOnce.id}>x<${rootStatement.id}>root span</${rootStatement.id}>end`,
     });
 
     const detail = new Entity({ id: tagSafeId() });
     let entities: Record<string, IEntity>;
+    let rootResponse: ResponseEntityDetail;
 
     beforeAll(async () => {
       db = new Db();
@@ -619,6 +621,7 @@ describe("models/entity/response", function () {
       await anchoredTwice.save(db.connection);
       await anchoredOnce.save(db.connection);
       await notAnchored.save(db.connection);
+      await rootStatement.save(db.connection);
       await doc.preprocess(db.connection);
       await doc.save(db.connection);
 
@@ -629,6 +632,10 @@ describe("models/entity/response", function () {
         notAnchored.id,
       ]);
       entities = await response.populateEntitiesMap(db.connection);
+
+      // detail opened on a statement - the response root itself must be stamped
+      rootResponse = new ResponseEntityDetail(rootStatement);
+      await rootResponse.populateEntitiesMap(db.connection);
     });
 
     afterAll(async () => {
@@ -648,6 +655,12 @@ describe("models/entity/response", function () {
 
     it("should leave anchorTexts undefined for a statement without anchors", () => {
       expect(entities[notAnchored.id]?.anchorTexts).toBeUndefined();
+    });
+
+    it("should stamp the response root when the detail is a statement", () => {
+      // anchorTexts is not declared on the model class (deliberately - it must
+      // never be persisted), so read it through the response interface
+      expect((rootResponse as IEntity).anchorTexts).toEqual(["root span"]);
     });
   });
 });

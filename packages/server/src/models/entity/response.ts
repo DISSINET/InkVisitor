@@ -92,8 +92,10 @@ export class ResponseEntity extends Entity implements IResponseEntity {
     }
 
     // stamp document anchor spans onto statement entities so tags can show
-    // them as labels (response-only field, see IEntity.anchorTexts)
-    await Entity.applyAnchorTexts(conn, entities);
+    // them as labels (response-only field, see IEntity.anchorTexts). The
+    // response root itself joins the batch - when the detail/tooltip is opened
+    // on a statement, its own tag (header row, detail tab) needs the spans too.
+    await Entity.applyAnchorTexts(conn, [...Object.values(entities), this]);
 
     return entities;
   }
