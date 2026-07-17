@@ -132,7 +132,7 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
             );
           } else if (statementText) {
             content = (
-              <StyledShortenedText>{statement.data.text}</StyledShortenedText>
+              <StyledShortenedText>{statementText}</StyledShortenedText>
             );
           } else if (label) {
             content = <StyledShortenedText $italic>{label}</StyledShortenedText>;
