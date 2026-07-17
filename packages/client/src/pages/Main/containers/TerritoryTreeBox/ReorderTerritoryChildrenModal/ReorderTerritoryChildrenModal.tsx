@@ -15,7 +15,6 @@ import {
   StyledIndex,
   StyledList,
   StyledRow,
-  StyledTagWrap,
 } from "./ReorderTerritoryChildrenModalStyles";
 
 const REORDER_ITEM_TYPE = "REORDER_TERRITORY_CHILD";
@@ -67,9 +66,7 @@ const DraggableRow: React.FC<DraggableRow> = ({ child, index, moveRow }) => {
         <FaGripVertical />
       </StyledDragHandle>
       <StyledIndex>{index + 1}.</StyledIndex>
-      <StyledTagWrap>
-        <EntityTag fullWidth entity={child.territory} disableTooltip disableDrag />
-      </StyledTagWrap>
+      <EntityTag fullWidth entity={child.territory} disableTooltip disableDrag />
     </StyledRow>
   );
 };

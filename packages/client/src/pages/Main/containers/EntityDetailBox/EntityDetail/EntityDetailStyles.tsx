@@ -180,12 +180,6 @@ export const StyledDetailForm = styled.div`
   }
 `;
 
-export const StyledTagWrap = styled.div`
-  display: inline-grid;
-  overflow: hidden;
-  max-width: 100%;
-`;
-
 export const StyledPropGroupWrap = styled.div`
   overflow: auto;
   margin-bottom: ${({ theme }) => theme.space[5]};

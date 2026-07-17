@@ -15,6 +15,7 @@ export const StyledWrapper = styled.div<StyledWrapper>`
     $sharpCorners ? theme.borderRadius["none"] : theme.borderRadius["sm"]};
   overflow: ${({ $border, $warning }) => ($border || $warning ? "hidden" : "")};
   background-color: ${({ theme }) => theme.color["white"]};
+  flex-shrink: 0;
 
   &::after {
     content: ${({ $warning }) => ($warning ? '""' : "none")};

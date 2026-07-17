@@ -83,7 +83,7 @@ interface StyledLabelWrap {
   $invertedLabel: boolean;
 }
 export const StyledLabelWrap = styled.div<StyledLabelWrap>`
-  display: inline-flex;
+  display: inline-grid;
   overflow: hidden;
   background-color: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.color.tagSelectedBackground : theme.color.tagBackground};
@@ -128,7 +128,6 @@ interface StyledLabel {
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
-  vertical-align: middle;
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;

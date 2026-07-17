@@ -374,13 +374,6 @@ export const StyledMoveAnchorGroupLabel = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledMoveAnchorEntityTag = styled.div`
-  display: grid;
-  align-items: center;
-  width: 100%;
-  padding-left: ${({ theme }) => theme.space[1]};
-`;
-
 export const StyledMoveAnchorFooter = styled.div`
   display: flex;
   justify-content: flex-end;

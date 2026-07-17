@@ -33,6 +33,7 @@ import { IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../EntityTag/EntityTag";
+import { EntityTagById } from "../EntityTag/EntityTagById";
 import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
 import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
@@ -55,7 +56,6 @@ import {
   StyledAnnotatorNoAnchors,
   StyledCaretButtonWrapper,
   StyledMoveAnchorControls,
-  StyledMoveAnchorEntityTag,
   StyledMoveAnchorFooter,
   StyledMoveAnchorGroup,
   StyledMoveAnchorGroupLabel,
@@ -70,7 +70,6 @@ import {
 } from "./AnnotatorStyles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
 import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
-import { EntityTagById } from "../EntityTag/EntityTagById";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -332,6 +331,7 @@ export const TextAnnotatorMenu = ({
         </StyledStatementTargetArrow>
         <StyledStatementTargetCurrent>
           <EntityTag
+            fullWidth
             disableCopyToClipboard
             entity={selectedTargetTerritoryEntity}
             disableDoubleClick
@@ -460,9 +460,7 @@ export const TextAnnotatorMenu = ({
             Resize anchor span
           </StyledAnnotatorItemTitle>
           <StyledAnnotatorItemContent>
-            <StyledMoveAnchorEntityTag>
-              <EntityTag entity={movingEntity} fullWidth disableDrag disableDoubleClick />
-            </StyledMoveAnchorEntityTag>
+            <EntityTag entity={movingEntity} fullWidth disableDrag disableDoubleClick />
             <StyledMoveAnchorPanel>
               <StyledMoveAnchorControls>
                 <StyledMoveAnchorGroup>
@@ -601,7 +599,7 @@ export const TextAnnotatorMenu = ({
                       }}
                       tooltipLabel="Create anchor for active territory"
                     />
-                    {activeTerritoryId && <EntityTagById entityId={activeTerritoryId} />}
+                    {activeTerritoryId && <EntityTagById fullWidth entityId={activeTerritoryId} />}
                     <ElvlButtonGroup
                       border
                       value={activeTerritoryElvl}
