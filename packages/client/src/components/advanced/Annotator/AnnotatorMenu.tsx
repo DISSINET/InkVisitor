@@ -241,9 +241,11 @@ export const TextAnnotatorMenu = ({
   );
   const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
   const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
-  // While the suggester input is focused, the elvl group shows a warning ring to
-  // remind the user to check the (pre-selected) epistemic level before acting.
+  // While the suggester input is focused or hovered, the elvl group shows a
+  // warning ring to remind the user to check the (pre-selected) epistemic level
+  // before acting.
   const [suggesterFocused, setSuggesterFocused] = useState(false);
+  const [suggesterHovered, setSuggesterHovered] = useState(false);
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
 
   // The deepest leaf subT at the cursor (smallest span = innermost) is the
@@ -653,7 +655,10 @@ export const TextAnnotatorMenu = ({
               </StyledAnnotatorItemContent>
               {/* Entity Suggester */}
               <StyledAnnotatorItemContent>
-                <StyledAnnotatorItemContentLine>
+                <StyledAnnotatorItemContentLine
+                  onMouseEnter={() => setSuggesterHovered(true)}
+                  onMouseLeave={() => setSuggesterHovered(false)}
+                >
                   <EntitySuggester
                     categoryTypes={classesAnnotator}
                     statementLabelHint
@@ -685,7 +690,7 @@ export const TextAnnotatorMenu = ({
                     rightContent={
                       <ElvlButtonGroup
                         value={suggesterElvl}
-                        warning={suggesterFocused}
+                        warning={suggesterFocused || suggesterHovered}
                         onChange={(suggesterElvl) => {
                           setSuggesterElvl(suggesterElvl);
                         }}
