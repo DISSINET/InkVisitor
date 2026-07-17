@@ -687,6 +687,8 @@ export const TextAnnotatorMenu = ({
                     }
                     disableCleanTypedAfterCreate
                     onFocusChange={setSuggesterFocused}
+                    anchorElvl={suggesterElvl}
+                    onAnchorElvlChange={setSuggesterElvl}
                     rightContent={
                       <ElvlButtonGroup
                         value={suggesterElvl}

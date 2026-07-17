@@ -9,3 +9,12 @@ export const StyledNote = styled.i`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   text-align: right;
 `;
+export const StyledAnchorElvlWrap = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+export const StyledAnchorElvlLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;

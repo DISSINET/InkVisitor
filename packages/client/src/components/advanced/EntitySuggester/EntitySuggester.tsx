@@ -63,6 +63,11 @@ interface EntitySuggesterProps {
   onEntityCreateMutationSuccess?: (entity: IEntity) => void;
   entityCreateStatementOrder?: number;
 
+  // epistemic level of the anchor created for the new entity; forwarded to the
+  // EntityCreateModal so the user can pick it there without closing the modal
+  anchorElvl?: EntityEnums.Elvl;
+  onAnchorElvlChange?: (elvl: EntityEnums.Elvl) => void;
+
   button?: React.ReactNode;
   // rendered inside the suggester input's trailing slot (only when disableCreate)
   rightContent?: React.ReactNode;
@@ -135,6 +140,8 @@ const EntitySuggesterFull: React.FC<
   onCreateStatement,
   onEntityCreateMutationSuccess,
   entityCreateStatementOrder,
+  anchorElvl,
+  onAnchorElvlChange,
 
   button,
   rightContent,
@@ -601,6 +608,8 @@ const EntitySuggesterFull: React.FC<
           parentTerritory={parentTerritory}
           entityCreateStatementOrder={entityCreateStatementOrder}
           onCreateStatement={onCreateStatement}
+          anchorElvl={anchorElvl}
+          onAnchorElvlChange={onAnchorElvlChange}
         />
       )}
     </>

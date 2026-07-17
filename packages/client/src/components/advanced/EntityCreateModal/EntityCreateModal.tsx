@@ -25,12 +25,16 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, { ElvlButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { CAction, CConcept, CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
-import { StyledNote } from "./EntityCreateModalStyles";
+import {
+  StyledAnchorElvlLabel,
+  StyledAnchorElvlWrap,
+  StyledNote,
+} from "./EntityCreateModalStyles";
 import { useOrderedLanguageDict, useTemplatesQuery, useUserQuery } from "hooks/react-query";
 
 const defaultDropdownValue = "empty";
@@ -56,6 +60,12 @@ interface EntityCreateModal {
   entityCreateTerritoryOrder?: number;
 
   allowedEntityClasses?: EntityEnums.Class[];
+
+  // epistemic level of the anchor created for the new entity (annotator
+  // suggester); when provided, an ElvlButtonGroup is shown in the footer so the
+  // user can pick it without closing the modal
+  anchorElvl?: EntityEnums.Elvl;
+  onAnchorElvlChange?: (elvl: EntityEnums.Elvl) => void;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
@@ -68,6 +78,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   entityCreateStatementOrder,
   entityCreateTerritoryOrder,
   allowedEntityClasses,
+  anchorElvl,
+  onAnchorElvlChange,
 }) => {
   const entityClasses = allowedEntityClasses ? allowedEntityClasses : classesAll;
 
@@ -471,7 +483,17 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </>
           )}
         </ModalContent>
-        <ModalFooter>
+        <ModalFooter spaceBetween={anchorElvl !== undefined && !!onAnchorElvlChange}>
+          {anchorElvl !== undefined && onAnchorElvlChange && (
+            <StyledAnchorElvlWrap>
+              <StyledAnchorElvlLabel>{"anchor elvl:"}</StyledAnchorElvlLabel>
+              <ElvlButtonGroup
+                border
+                value={anchorElvl}
+                onChange={(elvl) => onAnchorElvlChange(elvl)}
+              />
+            </StyledAnchorElvlWrap>
+          )}
           <ButtonGroup>
             <Button key="cancel" label="Cancel" color="greyer" inverted onClick={closeModal} />
             <Button key="submit" label="Create" color="info" onClick={handleSubmit} />
