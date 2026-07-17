@@ -17,6 +17,8 @@ interface ElvlButtonGroup {
   value: EntityEnums.Elvl;
   onChange: (elvl: EntityEnums.Elvl) => void;
   disabled?: boolean;
+  // warning ring prompting the user to choose an elvl
+  warning?: boolean;
 }
 export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
   border = false,
@@ -24,6 +26,7 @@ export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
   value,
   onChange,
   disabled,
+  warning,
 }) => {
   return (
     <IconButtonGroup<EntityEnums.Elvl>
@@ -35,6 +38,7 @@ export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
       onChange={onChange}
       value={value}
       disabled={disabled}
+      warning={warning}
     />
   );
 };

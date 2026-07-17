@@ -242,6 +242,9 @@ export const TextAnnotatorMenu = ({
   );
   const [statementElvl, setStatementElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
   const [suggesterElvl, setSuggesterElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  // While the suggester input is focused, the elvl group shows a warning ring to
+  // remind the user to check the (pre-selected) epistemic level before acting.
+  const [suggesterFocused, setSuggesterFocused] = useState(false);
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
 
   // The deepest leaf subT at the cursor (smallest span = innermost) is the
@@ -680,10 +683,11 @@ export const TextAnnotatorMenu = ({
                       onCreateStatement && onCreateStatement(suggesterElvl, entityCreateModalProps)
                     }
                     disableCleanTypedAfterCreate
+                    onFocusChange={setSuggesterFocused}
                     rightContent={
                       <ElvlButtonGroup
-                        border
                         value={suggesterElvl}
+                        warning={suggesterFocused}
                         onChange={(suggesterElvl) => {
                           setSuggesterElvl(suggesterElvl);
                         }}

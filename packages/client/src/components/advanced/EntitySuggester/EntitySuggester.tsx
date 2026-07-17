@@ -66,6 +66,9 @@ interface EntitySuggesterProps {
   button?: React.ReactNode;
   // rendered inside the suggester input's trailing slot (only when disableCreate)
   rightContent?: React.ReactNode;
+  // notifies the parent when the input gains/loses focus (e.g. the annotator
+  // highlights the elvl group while the suggester is focused)
+  onFocusChange?: (isFocused: boolean) => void;
   preSuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -135,6 +138,7 @@ const EntitySuggesterFull: React.FC<
 
   button,
   rightContent,
+  onFocusChange,
   preSuggestions,
 
   disableCreate = false,
@@ -553,6 +557,7 @@ const EntitySuggesterFull: React.FC<
         button={button}
         rightContent={rightContent}
         disableTemplateInstantiation={disableTemplateInstantiation}
+        onFocusChange={onFocusChange}
         isHidden={isHidden}
         externalDroppedItem={externalDroppedItem}
         onConsumeExternalDrop={onConsumeExternalDrop}
