@@ -9,8 +9,8 @@
   },
   "scripts": {
     "start": "webpack serve --mode development --open --config webpack.development.js",
-    "build": "tsgo",
-    "typecheck": "tsgo --noEmit",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -35,11 +35,11 @@
     "react-dom": "^19.2.6",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.1",
-    "@typescript/native-preview": "beta",
-    "typescript": "npm:@typescript/typescript6@^6.0.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.2.1"
+    "webpack-dev-server": "^5.2.1",
+    "@typescript/native": "npm:typescript@^7.0.2"
   },
   "dependencies": {
     "lorem-ipsum": "^2.0.8"
