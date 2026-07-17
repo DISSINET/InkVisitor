@@ -553,7 +553,9 @@ export const TextAnnotator = ({
           const newStatement: IStatement = CStatement(
             getStoredUserRole() as UserEnums.Role,
             userData.options,
-            text,
+            // Statements are not meant to carry a label — the New Statement
+            // button no longer fills it with the selected text.
+            "",
             "",
             effectiveTerritoryId,
             statementId,

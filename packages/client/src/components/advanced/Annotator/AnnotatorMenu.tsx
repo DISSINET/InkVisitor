@@ -655,11 +655,12 @@ export const TextAnnotatorMenu = ({
                 <StyledAnnotatorItemContentLine>
                   <EntitySuggester
                     categoryTypes={classesAnnotator}
+                    statementLabelHint
                     initTyped={text.length > 30 ? text.substring(0, 30) : text}
                     onSelected={(newAnchorId) => {
                       onAnchorAdd(newAnchorId, suggesterElvl);
                     }}
-                    inputWidth={200}
+                    inputWidth="full"
                     openDetailOnCreate
                     parentTerritory={selectedTargetTerritoryEntity || territory}
                     onEntityCreateMutationSuccess={(entity) => {
@@ -679,13 +680,15 @@ export const TextAnnotatorMenu = ({
                       onCreateStatement && onCreateStatement(suggesterElvl, entityCreateModalProps)
                     }
                     disableCleanTypedAfterCreate
-                  />
-                  <ElvlButtonGroup
-                    border
-                    value={suggesterElvl}
-                    onChange={(suggesterElvl) => {
-                      setSuggesterElvl(suggesterElvl);
-                    }}
+                    rightContent={
+                      <ElvlButtonGroup
+                        border
+                        value={suggesterElvl}
+                        onChange={(suggesterElvl) => {
+                          setSuggesterElvl(suggesterElvl);
+                        }}
+                      />
+                    }
                   />
                 </StyledAnnotatorItemContentLine>
               </StyledAnnotatorItemContent>

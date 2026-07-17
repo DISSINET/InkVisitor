@@ -224,7 +224,9 @@ export const Suggester: React.FC<Suggester> = ({
   }, [externalDroppedItem]);
 
   const handleEnterPress = () => {
-    if (selected === -1 && typed.length > 0) {
+    // Statements are created without a label, so allow triggering create with an
+    // empty input; other classes still require at least one character.
+    if (selected === -1 && (typed.length > 0 || category === EntityEnums.Class.Statement)) {
       if (!disableCreate) {
         if (
           category === dropdownWildCard.value ||
@@ -263,7 +265,9 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const handleAddBtnClick = () => {
-    if (typed.length > 0) {
+    // Statements are created without a label, so allow triggering create with an
+    // empty input; other classes still require at least one character.
+    if (typed.length > 0 || category === EntityEnums.Class.Statement) {
       if (
         category === dropdownWildCard.value ||
         category === EntityEnums.Class.Statement ||
@@ -422,23 +426,25 @@ export const Suggester: React.FC<Suggester> = ({
               fullHeight
               clearable={clearableInput}
               rightContent={
-                !disableCreate ? (
-                  <IconButton
-                    icon={<FaPlus />}
-                    tooltipLabel="create new entity"
-                    color={buttonColorKey}
-                    noBackground
-                    noBorder
-                    onClick={() => {
-                      handleAddBtnClick();
-                    }}
-                    disabled={disabled}
-                  />
-                ) : rightContent ? (
-                  rightContent
-                ) : (
-                  button && button
-                )
+                <>
+                  {/* rightContent renders alongside the create button (e.g. the
+                      annotator's elvl group); the button fallback only applies
+                      when create is disabled and no rightContent is provided. */}
+                  {rightContent ? rightContent : disableCreate ? button && button : null}
+                  {!disableCreate && (
+                    <IconButton
+                      icon={<FaPlus />}
+                      tooltipLabel="create new entity"
+                      color={buttonColorKey}
+                      noBackground
+                      noBorder
+                      onClick={() => {
+                        handleAddBtnClick();
+                      }}
+                      disabled={disabled}
+                    />
+                  )}
+                </>
               }
             />
           </div>
