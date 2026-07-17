@@ -49,8 +49,8 @@ const darkTheme = {
     greyer: "#b5b5b5",
     text: "#c7c7c7",
     primary: "#f6f6ff",
-    primaryRGBA: "rgba(246,246,255,1)",
-    primaryRGBA0: "rgba(246,246,255,0)",
+    statementHighlight: "rgba(158,170,215,1)", // success accent, matches opened-row bar
+    statementHighlight0: "rgba(158,170,215,0)",
     success: "#9eaad7",
     explorerHeader: "#091034",
     warning: "#f0c862",

@@ -77,19 +77,25 @@ export const StyledTr = styled.tr<StyledTr>`
   td {
     transition: box-shadow 0.2s ease-in-out;
     box-shadow: ${({ theme, $isAnnotatorHovered }) => {
-      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      const c = $isAnnotatorHovered
+        ? theme.color.statementHighlight
+        : theme.color.statementHighlight0;
       return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}`;
     }};
   }
   td:first-child {
     box-shadow: ${({ theme, $isAnnotatorHovered }) => {
-      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      const c = $isAnnotatorHovered
+        ? theme.color.statementHighlight
+        : theme.color.statementHighlight0;
       return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}, inset 2px 0 0 0 ${c}`;
     }};
   }
   td:last-child {
     box-shadow: ${({ theme, $isAnnotatorHovered }) => {
-      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      const c = $isAnnotatorHovered
+        ? theme.color.statementHighlight
+        : theme.color.statementHighlight0;
       return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}, inset -2px 0 0 0 ${c}`;
     }};
   }
