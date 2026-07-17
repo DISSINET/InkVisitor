@@ -252,6 +252,9 @@ export const TextAnnotatorMenu = ({
   // (pre-selected) epistemic level before acting — same cue as the suggester.
   const [statementBtnHovered, setStatementBtnHovered] = useState(false);
   const [territoryBtnHovered, setTerritoryBtnHovered] = useState(false);
+  // A create-button hover owns the warning ring while it lasts, so the
+  // persistent suggester-focus ring steps aside — never two rings at once.
+  const createBtnHovered = statementBtnHovered || territoryBtnHovered;
 
   // The deepest leaf subT at the cursor (smallest span = innermost) is the
   // "relevant" T and the default Statement target. The active T (opened in the
@@ -706,7 +709,7 @@ export const TextAnnotatorMenu = ({
                     rightContent={
                       <ElvlButtonGroup
                         value={suggesterElvl}
-                        warning={suggesterFocused || suggesterHovered}
+                        warning={(suggesterFocused || suggesterHovered) && !createBtnHovered}
                         onChange={(suggesterElvl) => {
                           setSuggesterElvl(suggesterElvl);
                         }}
