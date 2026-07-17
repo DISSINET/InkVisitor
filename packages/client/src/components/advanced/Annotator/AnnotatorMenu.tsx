@@ -786,7 +786,9 @@ export const TextAnnotatorMenu = ({
                       inverted={anchorsEditActive}
                       noBackground={anchorsEditActive}
                       tooltipLabel="view mode"
-                      tooltipContent={<p>(hold ctrl/cmd over the list for temporary edit mode)</p>}
+                      tooltipContent={
+                        <p>(hold ctrl or cmd over the list for temporary edit mode)</p>
+                      }
                       onClick={() => handleAnchorsEditModeChange(false)}
                     />
                     <Button
