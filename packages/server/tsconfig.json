@@ -8,13 +8,26 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "outDir": "build",
+    "rootDir": "..",
     "paths": {
-      "src/*": ["./src/*"],
-      "@common/*": ["./src/common/*"],
-      "@middlewares/*": ["./src/middlewares/*"],
-      "@models/*": ["./src/models/*"],
-      "@modules/*": ["./src/modules/*"],
-      "@service/*": ["./src/service/*"]
+      "src/*": [
+        "./src/*"
+      ],
+      "@common/*": [
+        "./src/common/*"
+      ],
+      "@middlewares/*": [
+        "./src/middlewares/*"
+      ],
+      "@models/*": [
+        "./src/models/*"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
+      ],
+      "@service/*": [
+        "./src/service/*"
+      ]
     },
     "removeComments": true,
     "resolveJsonModule": true,
@@ -22,15 +35,26 @@
     "sourceMap": true,
     "strict": true,
     "target": "es6",
-    "typeRoots": ["node_modules/@types"],
-    "types": ["node", "jest"]
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ]
   },
-  "exclude": ["./src/public/", "node_modules", "build"],
+  "exclude": [
+    "./src/public/",
+    "node_modules",
+    "build"
+  ],
   "files": [
     "./src/custom_typings/request.d.ts",
     "./src/custom_typings/dotenv.d.ts"
   ],
-  "include": ["./src/**/*.ts"],
+  "include": [
+    "./src/**/*.ts"
+  ],
   "ts-node": {
     "files": true
   }

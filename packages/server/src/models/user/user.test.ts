@@ -20,9 +20,8 @@ const prepareUserData = (): IUser => {
       defaultStatementLanguage: EntityEnums.Language.English,
       searchLanguages: [],
       workingLanguages: [],
-      // server-side UserOptions defaults this to false; the field is not yet in
-      // the shared IUserOptions type, so it is cast in below.
       hideStatementElementsOrderTable: false,
+      askBeforePropDelete: true,
     } as IUser["options"],
     verified: true,
     rights: [],
@@ -131,12 +130,8 @@ describe("models/user", function () {
         expect(user1After).toBeTruthy();
         expect(user2After).toBeTruthy();
 
-        expect(JSON.stringify(user1After?.bookmarks)).toEqual(
-          JSON.stringify(user1.bookmarks)
-        );
-        expect(JSON.stringify(user2After?.bookmarks)).toEqual(
-          JSON.stringify(user2.bookmarks)
-        );
+        expect(JSON.stringify(user1After?.bookmarks)).toEqual(JSON.stringify(user1.bookmarks));
+        expect(JSON.stringify(user2After?.bookmarks)).toEqual(JSON.stringify(user2.bookmarks));
       });
     });
 
@@ -205,10 +200,7 @@ describe("models/user", function () {
 
     describe("existing id in both users", () => {
       it("should remove from both users", async () => {
-        await User.removeStoredTerritory(
-          db.connection,
-          user1.storedTerritories[0].territoryId
-        );
+        await User.removeStoredTerritory(db.connection, user1.storedTerritories[0].territoryId);
         const user1After = await User.findUserById(db.connection, user1.id);
         const user2After = await User.findUserById(db.connection, user2.id);
 
@@ -236,7 +228,7 @@ describe("models/user", function () {
     });
 
     it("should set deletedAt to current date", async () => {
-      const result = await user1.delete(db.connection)
+      const result = await user1.delete(db.connection);
       expect(result.replaced).toBe(1);
 
       // deleted
@@ -245,16 +237,13 @@ describe("models/user", function () {
 
       // user1 was soft-deleted (deletedAt set), so it must be looked up with
       // includeThrashed=true; passing false filters out thrashed users.
-      const thrashedUser1 = await User.findUserByLogin(db, user1.email, true)
+      const thrashedUser1 = await User.findUserByLogin(db, user1.email, true);
       expect(thrashedUser1).not.toBeNull();
 
       // The User constructor drops deletedAt (fillFlatObject skips fields whose
       // class default is undefined), so assert the persisted soft-delete marker
       // on the raw db row rather than the rehydrated model.
-      const rawRow = await rethink
-        .table(User.table)
-        .get(user1.id)
-        .run(db.connection);
+      const rawRow = await rethink.table(User.table).get(user1.id).run(db.connection);
       expect(rawRow).toBeTruthy();
       expect((rawRow as any).deletedAt).toBeTruthy();
     });
