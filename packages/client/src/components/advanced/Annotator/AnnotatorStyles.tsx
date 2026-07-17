@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
 
 /** Defined before viewport so the parent can target it on hover. */
@@ -424,9 +425,13 @@ export const StyledAnchorClusterMoveButton = styled.div`
  * group's own look: a single thin divider on its left (as in the tag's native
  * elvl slot) and no divider between the option buttons.
  */
-export const StyledAnchorClusterElvl = styled.div`
+interface StyledAnchorClusterElvl {
+  $tagBorderColorKey: EntityEnums.Status;
+}
+export const StyledAnchorClusterElvl = styled.div<StyledAnchorClusterElvl>`
   display: flex;
-  border-left: ${({ theme }) => `2px solid ${theme.color["black"]}`};
+  border-left: ${({ theme, $tagBorderColorKey }) =>
+    `2px solid ${theme.color.tagBorderColor[$tagBorderColorKey]}`};
   && button {
     border-left-width: 0;
   }

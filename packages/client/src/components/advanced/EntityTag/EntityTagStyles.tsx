@@ -24,12 +24,16 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   }
 `;
 
-export const StyledElvlWrapper = styled.div`
+interface StyledElvlWrapper {
+  $tagBorderColorKey: EntityEnums.Status;
+}
+export const StyledElvlWrapper = styled.div<StyledElvlWrapper>`
   display: flex;
   > div {
     border-width: 0;
     border-left-width: ${({ theme }) => theme.borderWidth[1]};
-    border-left-color: ${({ theme }) => theme.color["black"]};
+    border-left-color: ${({ theme, $tagBorderColorKey }) =>
+      theme.color.tagBorderColor[$tagBorderColorKey]};
     border-left-style: solid;
   }
 `;

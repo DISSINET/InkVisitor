@@ -381,13 +381,11 @@ export const TextAnnotatorMenu = ({
   }, [anchors, entities]);
 
   // Anchor controls mode: view (kebab menu + static elvl) or edit (inline
-  // resize / elvl / unlink). Persisted so the choice survives menu reopen.
-  const [anchorsEditMode, setAnchorsEditMode] = useState<boolean>(
-    () => localStorage.getItem("annotatorAnchorsEditMode") === "true",
-  );
+  // resize / elvl / unlink). Always starts in view mode and resets to view on
+  // menu close — not persisted across sessions.
+  const [anchorsEditMode, setAnchorsEditMode] = useState<boolean>(false);
   const handleAnchorsEditModeChange = (edit: boolean) => {
     setAnchorsEditMode(edit);
-    localStorage.setItem("annotatorAnchorsEditMode", String(edit));
   };
   // Holding Ctrl/Cmd while hovering the anchor list enables edit mode
   // temporarily.
