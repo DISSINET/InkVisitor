@@ -1910,6 +1910,10 @@ export const TextAnnotator = ({
           labelTyped={newTerritoryName}
           parentTerritory={territoryCreateParent}
           entityCreateTerritoryOrder={territoryCreateOrder}
+          // propagate the anchor elvl (from the Sibling/Child click) into the
+          // modal footer, same as the suggester → create-modal path
+          anchorElvl={territoryElvl}
+          onAnchorElvlChange={setTerritoryElvl}
           onMutationSuccess={async (entity) => {
             await handleAddAnchor(entity.id, territoryElvl);
             setTerritoryCreateModalType(false);

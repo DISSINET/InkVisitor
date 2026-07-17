@@ -344,6 +344,11 @@ export const StyledCaretButtonWrapper = styled.span`
   display: flex;
 `;
 
+/** Wraps a create button so hovering it can ring its related elvl group. */
+export const StyledElvlWarningTrigger = styled.span`
+  display: flex;
+`;
+
 // #2885 — move-anchor mode: compact panel that replaces the menu body while
 // an anchor span is being nudged with the arrow buttons.
 export const StyledMoveAnchorPanel = styled.div`

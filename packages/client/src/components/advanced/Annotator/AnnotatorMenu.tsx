@@ -55,6 +55,7 @@ import {
   StyledAnnotatorMenuDragHandle,
   StyledAnnotatorNoAnchors,
   StyledCaretButtonWrapper,
+  StyledElvlWarningTrigger,
   StyledMoveAnchorControls,
   StyledMoveAnchorFooter,
   StyledMoveAnchorGroup,
@@ -247,6 +248,10 @@ export const TextAnnotatorMenu = ({
   const [suggesterFocused, setSuggesterFocused] = useState(false);
   const [suggesterHovered, setSuggesterHovered] = useState(false);
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>(EntityEnums.Elvl.Textual);
+  // Hovering a create button rings its elvl group as a reminder to check the
+  // (pre-selected) epistemic level before acting — same cue as the suggester.
+  const [statementBtnHovered, setStatementBtnHovered] = useState(false);
+  const [territoryBtnHovered, setTerritoryBtnHovered] = useState(false);
 
   // The deepest leaf subT at the cursor (smallest span = innermost) is the
   // "relevant" T and the default Statement target. The active T (opened in the
@@ -615,19 +620,29 @@ export const TextAnnotatorMenu = ({
                 {onCreateStatement && (
                   <StyledStatementSubsection>
                     <StyledAnnotatorItemContentLine>
-                      <Button
-                        label="New Statement"
-                        tooltipLabel={`Create new Statement in ${
-                          selectedTargetTerritoryEntity
-                            ? selectedTargetTerritoryEntity.labels[0]
-                            : "the active T"
-                        }`}
-                        icon={<TbAnchor size={15} />}
-                        color="primary"
-                        onClick={() => {
-                          onCreateStatement(statementElvl, undefined, selectedTargetTerritoryId);
-                        }}
-                      />
+                      <StyledElvlWarningTrigger
+                        onMouseEnter={() => setStatementBtnHovered(true)}
+                        onMouseLeave={() => setStatementBtnHovered(false)}
+                      >
+                        <Button
+                          label="New Statement"
+                          tooltipContent={
+                            <p>
+                              Create new Statement in{" "}
+                              <strong>
+                                {selectedTargetTerritoryEntity
+                                  ? selectedTargetTerritoryEntity.labels[0]
+                                  : "the active T"}
+                              </strong>
+                            </p>
+                          }
+                          icon={<TbAnchor size={15} />}
+                          color="primary"
+                          onClick={() => {
+                            onCreateStatement(statementElvl, undefined, selectedTargetTerritoryId);
+                          }}
+                        />
+                      </StyledElvlWarningTrigger>
                       {renderTargetTrailer(
                         statementTargetPicker,
                         "Choose target territory for the new Statement",
@@ -635,6 +650,7 @@ export const TextAnnotatorMenu = ({
                       <ElvlButtonGroup
                         border
                         value={statementElvl}
+                        warning={statementBtnHovered}
                         onChange={(statementElvl) => {
                           setStatementElvl(statementElvl);
                         }}
@@ -706,7 +722,10 @@ export const TextAnnotatorMenu = ({
                     {onCreateTerritory && (
                       <StyledTerritorySubsection>
                         <StyledTerritorySubsectionTitle>territory</StyledTerritorySubsectionTitle>
-                        <StyledTerritoryButtonColumn>
+                        <StyledTerritoryButtonColumn
+                          onMouseEnter={() => setTerritoryBtnHovered(true)}
+                          onMouseLeave={() => setTerritoryBtnHovered(false)}
+                        >
                           {selectedTargetHasParentT && (
                             <Button
                               icon={<TerritorySiblingIcon />}
@@ -746,6 +765,7 @@ export const TextAnnotatorMenu = ({
                         <ElvlButtonGroup
                           border
                           value={territoryElvl}
+                          warning={territoryBtnHovered}
                           onChange={(territoryElvl) => {
                             setTerritoryElvl(territoryElvl);
                           }}
