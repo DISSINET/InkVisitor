@@ -112,9 +112,9 @@ export const StyledTr = styled.tr<StyledTr>`
     content: "";
     position: absolute;
     left: 0;
-    top: 6%;
-    bottom: 6%;
-    width: 4px;
+    top: 9%;
+    bottom: 9%;
+    width: 5px;
     border-radius: 0 10px 10px 0;
     background-color: ${({ theme }) => theme.color["success"]};
     transform: scaleX(${({ $isOpened }) => ($isOpened ? 1 : 0)});
