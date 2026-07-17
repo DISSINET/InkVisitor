@@ -61,7 +61,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                 }
                 noBorder
                 inverted
-                shape={sharpCorners ? "sharp" : "rounded-sm"}
+                shape={sharpCorners ? "sharp" : option.value === value ? "rounded-sm" : "sharp"}
                 color={option.value === value ? "primary" : "grey"}
                 onClick={() => {
                   if (option.value !== value) {

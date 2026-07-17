@@ -13,8 +13,8 @@ export const StyledWrapper = styled.div<StyledWrapper>`
     $border ? `${theme.borderWidth[1]} solid ${theme.color["grey"]}` : ""};
   border-radius: ${({ theme, $sharpCorners }) =>
     $sharpCorners ? theme.borderRadius["none"] : theme.borderRadius["sm"]};
-  overflow: ${({ $border, $warning }) => ($border || $warning ? "hidden" : "")};
-  background-color: ${({ theme }) => theme.color["white"]};
+  overflow: hidden;
+  background-color: ${({ theme }) => theme.color.invertedBg["grey"]};
   flex-shrink: 0;
 
   &::after {
