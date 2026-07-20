@@ -1420,6 +1420,10 @@ export const TextAnnotator = ({
 
       if (newSelectedOccurence) {
         annotator?.selectSearchOccurrence(newSelectedOccurence);
+      } else {
+        // The term (or a changed search option) no longer matches anything —
+        // drop the highlight left over from the previous hit.
+        annotator?.clearSelection();
       }
     }
   }, [searchActiveOccurence, searchOccurences]);

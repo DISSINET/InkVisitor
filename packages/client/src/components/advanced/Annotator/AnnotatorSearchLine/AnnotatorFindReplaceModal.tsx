@@ -288,6 +288,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
                   value={searchTerm}
                   onChangeFn={(newText: string) => setSearchTerm(newText)}
                   onEnterPressFn={goToNextOccurence}
+                  onEscapePressFn={onClose}
                   changeOnType
                   clearable
                   width="full"
@@ -314,6 +315,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
                       replaceOccurence();
                     }
                   }}
+                  onEscapePressFn={onClose}
                   changeOnType
                   clearable
                   autoFocus
