@@ -99,6 +99,7 @@ enum ExploreActionType {
   setUpdatedByFilter,
   setEditedByFilter,
   setRootValidityFilter,
+  setFilters,
   clearFloatingSearchFilters,
 }
 
@@ -112,6 +113,11 @@ const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
   Explore.SearchOption.EditedBy,
   Explore.SearchOption.RootValidity,
 ]);
+
+// how many of the filters currently applied belong to the floating search panel
+// (label and UUID filters have their own controls, so they are not counted here)
+export const countFloatingSearchFilters = (filters: Explore.IExploreSearchFilter[]): number =>
+  filters.filter((f) => floatingSearchFilterTypes.has(f.type)).length;
 
 const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Explore.IExplore => {
   switch (action.type) {
@@ -408,6 +414,19 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
           rootValidity && rootValidity !== IRequestSearchRootValidity.Any
             ? [...otherFilters, { type: Explore.SearchOption.RootValidity, rootValidity }]
             : otherFilters,
+        offset: 0,
+      };
+    }
+
+    // replaces every filter at once — used when loading a saved query, whose
+    // stored filters stand in for the whole current filter set
+    case ExploreActionType.setFilters: {
+      const { filters } = action.payload as {
+        filters: Explore.IExploreSearchFilter[];
+      };
+      return {
+        ...state,
+        filters,
         offset: 0,
       };
     }

@@ -23,6 +23,8 @@ export namespace Query {
     entityClasses?: EntityEnums.Class[];
     label?: string;
     entityId?: string;
+    includeEquivalents?: boolean;
+    includeSubordinates?: boolean;
   }
   export interface IEdgeParams { }
 
@@ -48,7 +50,6 @@ export namespace Query {
     "SUT:" = "SUT:",
     "I_SUT:" = "I_SUT:",
     "EUT:" = "EUT:",
-    "EUT:C" = "EUT:C",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
     "SUT:C" = "SUT:C",
@@ -155,9 +156,6 @@ export namespace Query {
     },
     "I_SUT:": {},
     "EUT:": {
-      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
-    },
-    "EUT:C": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
     "SUT:D": {},
@@ -441,13 +439,6 @@ export namespace Query {
       },
     ],
     "EUT:": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Territory] },
-      },
-    ],
-    "EUT:C": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
       {
         nodeType: NodeType.E,
@@ -889,7 +880,6 @@ export namespace Query {
     "SUT:": "S under T: any",
     "I_SUT:": "T has S: any",
     "EUT:": "used in statements under T",
-    "EUT:C": "used in statements under T: children",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "SUT:C": "S under T: children",

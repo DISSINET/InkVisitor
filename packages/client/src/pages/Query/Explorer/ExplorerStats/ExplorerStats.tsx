@@ -3,12 +3,9 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { StatsChart, StatsTable } from "components/advanced";
 import { Button, ButtonGroup, Loader } from "components";
-import { useDebounce, useResizeObserver } from "hooks";
+import { useResizeObserver } from "hooks";
 import React, { useEffect, useState } from "react";
-import {
-  RELATION_EVENT_TYPES,
-  STATS_FILTER_DEBOUNCE_MS,
-} from "pages/Stats/constants";
+import { RELATION_EVENT_TYPES } from "pages/Stats/constants";
 import { ExploreAction, ExploreActionType } from "../state";
 // --- Parked time filter (see the commented From/To block below) ---
 // import { Input } from "components";
@@ -92,10 +89,6 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   height,
 }) => {
   const [localStats, setLocalStats] = useState(stats);
-  const [filterDebounceEnabled, setFilterDebounceEnabled] = useState(false);
-
-  const debouncedLocalStats = useDebounce(localStats, STATS_FILTER_DEBOUNCE_MS);
-  const statsToCommit = filterDebounceEnabled ? debouncedLocalStats : localStats;
 
   const {
     ref: chartRef,
@@ -112,26 +105,16 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
     setLocalStats((prev) => ({ ...prev, ...params }));
   };
 
-  // Push filter changes to explore state (triggers query refresh).
+  // Push filter changes to explore state immediately (not debounced): the search
+  // only fires on an explicit run, and a pending debounce would leave the
+  // committed search signature stale, so the first Enter would show results that
+  // then vanish behind another "press Enter" prompt.
   useEffect(() => {
-    if (areExploreStatsParamsEqual(statsToCommit, stats)) {
+    if (areExploreStatsParamsEqual(localStats, stats)) {
       return;
     }
-    dispatch({ type: ExploreActionType.setStatsParams, payload: statsToCommit });
-  }, [statsToCommit, stats, dispatch]);
-
-  // After the first fetch settles, debounce further filter tweaks (same as Stats page).
-  useEffect(() => {
-    if (filterDebounceEnabled) {
-      return;
-    }
-    if (isFetching) {
-      return;
-    }
-    if (areExploreStatsParamsEqual(localStats, debouncedLocalStats)) {
-      setFilterDebounceEnabled(true);
-    }
-  }, [filterDebounceEnabled, isFetching, localStats, debouncedLocalStats]);
+    dispatch({ type: ExploreActionType.setStatsParams, payload: localStats });
+  }, [localStats, stats, dispatch]);
 
   // StatsChart / StatsTable only read `values`; the date window is not part of
   // the explorer stats params, so the IResponseStats date fields are placeholders.

@@ -16,9 +16,6 @@ interface QueryBoxProps {
   queryError: Error | null;
   queryStateValidity: QueryValidity;
   onOpenEntityInDetail?: (entityId: string) => void;
-  // page-level expansion options (#2969), forwarded to each node's entity picker
-  includeEquivalents?: boolean;
-  includeSubordinates?: boolean;
 }
 
 export const QueryBox: React.FC<QueryBoxProps> = ({
@@ -28,8 +25,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   queryError,
   queryStateValidity,
   onOpenEntityInDetail,
-  includeEquivalents = false,
-  includeSubordinates = false,
 }) => {
   const theme = useTheme();
   const gridWeight = useMemo<number>(() => {
@@ -72,24 +67,28 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   // on the rows in between. To keep the spine connected we (a) extend each
   // non-last sibling's vertical line full height and (b) draw a pass-through
   // vertical line in those empty "gap" rows.
-  const { extendEdgeIds, extendNegativeEdgeIds, railCells } = useMemo(() => {
+  const { extendEdgeIds, extendNegativeEdgeIds, railCells, nodeChildStubs } = useMemo(() => {
     const idToItem = new Map(nodeItems.map((n) => [n.id, n]));
     const extend = new Set<string>();
     const extendNeg = new Set<string>();
     // cellKey -> whether the segment feeds a negative sibling (paint it red)
     const rails = new Map<string, boolean>();
+    // nodeId -> whether the first child's edge is negative; a node's own row
+    // never has anything drawn in its own column, so without this the spine
+    // reads as broken between the node and the branch curve into its first child
+    const childStubs = new Map<string, boolean>();
 
     const isNeg = (e: Query.IEdge) => e.logic === Query.EdgeLogic.Negative;
 
     const traverse = (node: Query.INode) => {
+      if (node.edges.length > 0) {
+        childStubs.set(node.id, isNeg(node.edges[0]));
+      }
       if (node.edges.length > 1) {
         const colEdge = idToItem.get(node.id)?.gridX ?? 0;
         const children = node.edges
           .map((e) => ({ edge: e, row: idToItem.get(e.node.id)?.gridY }))
-          .filter(
-            (ci): ci is { edge: Query.IEdge; row: number } =>
-              ci.row !== undefined
-          );
+          .filter((ci): ci is { edge: Query.IEdge; row: number } => ci.row !== undefined);
 
         // each spine segment between two consecutive siblings feeds the lower
         // (next) sibling, so it takes that sibling's colour
@@ -115,6 +114,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       extendEdgeIds: extend,
       extendNegativeEdgeIds: extendNeg,
       railCells: rails,
+      nodeChildStubs: childStubs,
     };
   }, [state, nodeItems]);
 
@@ -133,6 +133,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
           const railKey = `${wi}-${hi}`;
           const showRail = railCells.has(railKey);
           const railNegative = railCells.get(railKey) === true;
+
+          const showChildStub = !!thisCellNode && nodeChildStubs.has(thisCellNode.id);
+          const childStubNegative = !!thisCellNode && nodeChildStubs.get(thisCellNode.id) === true;
 
           return (
             <div
@@ -161,11 +164,32 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                     x2={20}
                     y1={0}
                     y2={QUERY_GRID_HEIGHT}
-                    stroke={
-                      railNegative ? theme.color.entityA : theme.color.query2
-                    }
+                    stroke={railNegative ? theme.color.entityA : theme.color.query2}
                     strokeWidth={3}
                     strokeDasharray={railNegative ? "6 4" : undefined}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+              {showChildStub && (
+                <svg
+                  width={QUERY_GRID_WIDTH}
+                  height={QUERY_GRID_HEIGHT}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <line
+                    x1={20}
+                    x2={20}
+                    y1={QUERY_GRID_HEIGHT - 8}
+                    y2={QUERY_GRID_HEIGHT}
+                    stroke={childStubNegative ? theme.color.entityA : theme.color.query2}
+                    strokeWidth={3}
+                    strokeDasharray={childStubNegative ? "6 4" : undefined}
                     strokeLinecap="round"
                   />
                 </svg>
@@ -178,11 +202,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   dispatch={dispatch}
                   edge={associatedEdge}
                   problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === thisCellNode.id
+                    (problem) => problem.source === thisCellNode.id,
                   )}
                   onOpenEntityInDetail={onOpenEntityInDetail}
-                  includeEquivalents={includeEquivalents}
-                  includeSubordinates={includeSubordinates}
                 />
               )}
               {nextCellAssociatedEdge && (
@@ -193,11 +215,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   dispatch={dispatch}
                   edge={nextCellAssociatedEdge}
                   extendVertical={extendEdgeIds.has(nextCellAssociatedEdge.id)}
-                  extendNegative={extendNegativeEdgeIds.has(
-                    nextCellAssociatedEdge.id
-                  )}
+                  extendNegative={extendNegativeEdgeIds.has(nextCellAssociatedEdge.id)}
                   problems={queryStateValidity.problems.filter(
-                    (problem) => problem.source === nextCellAssociatedEdge.id
+                    (problem) => problem.source === nextCellAssociatedEdge.id,
                   )}
                 />
               )}

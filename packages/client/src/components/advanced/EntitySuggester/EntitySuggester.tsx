@@ -103,13 +103,6 @@ interface EntitySuggesterProps {
   disableCleanTypedAfterCreate?: boolean;
   clearableInput?: boolean;
   onEmptyAddButtonClick?: () => void;
-
-  // opt-in expansion of the suggestions with related entities (#2969), surfaced
-  // (badged) in the dropdown so they can be picked directly. Off by default, so
-  // suggesters elsewhere are unaffected; only opted-in instances (the Explorer
-  // node-edge picker) expand.
-  includeEquivalents?: boolean;
-  includeSubordinates?: boolean;
 }
 /**
  * Internal heavy component. Use the wrapper export below to optionally defer mounting.
@@ -171,8 +164,6 @@ const EntitySuggesterFull: React.FC<
   disableCleanTypedAfterCreate = false,
   onEmptyAddButtonClick,
   clearableInput = true,
-  includeEquivalents = false,
-  includeSubordinates = false,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   // Remembers the input typed under a non-Statement class so it can be restored
@@ -234,8 +225,6 @@ const EntitySuggesterFull: React.FC<
       debouncedTyped,
       selectedCategory,
       excludedEntityClasses,
-      includeEquivalents,
-      includeSubordinates,
     ],
     queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
@@ -245,8 +234,6 @@ const EntitySuggesterFull: React.FC<
             ? undefined
             : (selectedCategory as EntityEnums.Class),
         excluded: excludedEntityClasses.length ? excludedEntityClasses : undefined,
-        includeEquivalents: includeEquivalents || undefined,
-        includeSubordinates: includeSubordinates || undefined,
       });
 
       return filterSuggestions(resSuggestions.data ?? []);

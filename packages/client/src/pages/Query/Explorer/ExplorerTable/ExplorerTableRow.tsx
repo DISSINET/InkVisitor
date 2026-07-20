@@ -195,7 +195,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     },
   });
 
-  const { entity: rowEntity, columnData } = rowItem ?? {};
+  const { entity: rowEntity, columnData, isEquivalent, isSubordinate } = rowItem ?? {};
 
   const handleOpenEntityInDetail = React.useCallback(
     (entity: IEntity) => (e: React.MouseEvent) => {
@@ -581,6 +581,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             entity={rowEntity}
             fullWidth
             onDoubleClick={rowEntity ? handleOpenEntityInDetail(rowEntity) : undefined}
+            isEquivalent={isEquivalent}
+            isSubordinate={isSubordinate}
           />
         </StyledEntityTagWrap>
       </div>

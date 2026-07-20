@@ -14,6 +14,7 @@ export interface DbSchema {
   statsMaterializedWeek: TableSchema;
   statsMaterializedMonth: TableSchema;
   statsMaterializedYear: TableSchema;
+  savedQueries: TableSchema;
 }
 export interface TableSchema {
   tableName: RValue<string>;

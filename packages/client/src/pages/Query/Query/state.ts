@@ -3,6 +3,7 @@ import { Query } from "@inkvisitor/shared/types";
 import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
+import { deepCopy } from "utils/utils";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
@@ -11,7 +12,7 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: classesAll,
+          entityClasses: [EntityEnums.Class.Being],
         }
       : {
           entityClasses: classesAll,
@@ -21,23 +22,42 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? [
-          // {
-          //   type: Query.EdgeType["EP:T"],
-          //   params: {},
-          //   logic: Query.EdgeLogic.Positive,
-          //   id: "e1",
-          //   node: {
-          //     id: "n1",
-          //     type: Query.NodeType.E,
-          //     params: {
-          //       entityId: "4ce5e669-d421-40c9-b1ce-f476fdd171fe", //sex
-          //       entityClasses: [],
-          //       label: "",
-          //     },
-          //     operator: Query.NodeOperator.And,
-          //     edges: [],
-          //   },
-          // },
+          {
+            type: Query.EdgeType["EUT:"],
+            params: {},
+            logic: Query.EdgeLogic.Positive,
+            id: "e1",
+            node: {
+              id: "n1",
+              type: Query.NodeType.E,
+              params: {
+                entityId: "0172df7e-c394-4623-a7d6-cb195c49501e", //Jack London, The Call of the Wild
+                entityClasses: [],
+                label: "",
+                includeSubordinates: true,
+              },
+              operator: Query.NodeOperator.And,
+              edges: [],
+            },
+          },
+          {
+            type: Query.EdgeType["R:CLA"],
+            params: {},
+            logic: Query.EdgeLogic.Positive,
+            id: "e2",
+            node: {
+              id: "n2",
+              type: Query.NodeType.E,
+              params: {
+                entityId: "cfe8d950-94ed-4d51-b215-0f1ab0416a01", //animal
+                entityClasses: [],
+                label: "",
+                includeSubordinates: true,
+              },
+              operator: Query.NodeOperator.And,
+              edges: [],
+            },
+          },
         ]
       : [],
 };
@@ -51,6 +71,8 @@ enum QueryActionType {
   updateNodeClass,
   updateNodeEntityId,
   updateNodeOperator,
+  updateNodeExpansionToggles,
+  setQueryState,
 }
 
 type QueryAction =
@@ -85,6 +107,18 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeOperator;
       payload: { nodeId: string; newOperator: Query.NodeOperator };
+    }
+  | {
+      type: QueryActionType.updateNodeExpansionToggles;
+      payload: {
+        nodeId: string;
+        field: "includeEquivalents" | "includeSubordinates";
+        value: boolean | undefined;
+      };
+    }
+  | {
+      type: QueryActionType.setQueryState;
+      payload: { newState: Query.INode };
     };
 
 const queryReducer = (state: Query.INode, action: QueryAction) => {
@@ -169,6 +203,19 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeOperator:
       return updateNodeOperator(state, action.payload.nodeId, action.payload.newOperator);
 
+    case QueryActionType.updateNodeExpansionToggles:
+      return updateNodeExpansionToggles(
+        state,
+        action.payload.nodeId,
+        action.payload.field,
+        action.payload.value,
+      );
+
+    case QueryActionType.setQueryState:
+      // deep clone so the loaded template (e.g. a saved query object held in
+      // the react-query cache) is never mutated by subsequent edits
+      return deepCopy(action.payload.newState);
+
     default:
       return state;
   }
@@ -223,6 +270,28 @@ const updateNodeOperator = (
     return updatedState;
   }
   nodeToUpdate.operator = newOperator;
+
+  return updatedState;
+};
+
+const updateNodeExpansionToggles = (
+  state: Query.INode,
+  nodeId: string,
+  field: "includeEquivalents" | "includeSubordinates",
+  value: boolean | undefined,
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+
+  if (value === undefined) {
+    delete nodeToUpdate.params[field];
+  } else {
+    nodeToUpdate.params[field] = value;
+  }
 
   return updatedState;
 };

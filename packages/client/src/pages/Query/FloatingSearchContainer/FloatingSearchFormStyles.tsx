@@ -18,9 +18,9 @@ export const StyledRow = styled.div`
 `;
 
 export const StyledRowHeader = styled.div`
-  color: ${({ theme }) => theme.color.black};
+  color: ${({ theme }) => theme.color.gray[800]};
   margin-right: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize.xxs};
+  font-size: 1.1rem;
   text-align: right;
 `;
 

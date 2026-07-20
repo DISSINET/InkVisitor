@@ -1,13 +1,10 @@
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Checkbox, Input } from "components";
-import { useDebounce } from "hooks";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IcoSearch } from "Theme/icons";
 import { LuRegex } from "react-icons/lu";
 import { ExploreAction, ExploreActionType } from "../../state";
 import { StyledLabelFilter, StyledLabelFilterCheckboxWrapper } from "../ExplorerTableStyles";
-
-const LABEL_FILTER_DEBOUNCE_MS = 500;
 
 interface ExplorerTableLabelFilterProps {
   filters: Explore.IExploreSearchFilter[];
@@ -29,10 +26,14 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
 
   const [inputValue, setInputValue] = useState(appliedLabel);
   const [useRegex, setUseRegex] = useState(appliedUseRegex);
-  const debouncedLabel = useDebounce(inputValue, LABEL_FILTER_DEBOUNCE_MS);
+
+  // what this input last pushed into the state, so an applied filter that does
+  // not match it can be recognised as coming from elsewhere
+  const lastDispatchedRef = useRef(appliedLabel.trim());
 
   const dispatchFilter = useCallback(
     (label: string, regexMode: boolean) => {
+      lastDispatchedRef.current = label.trim();
       dispatch({
         type: ExploreActionType.setLabelFilter,
         payload: { label, useRegex: regexMode },
@@ -41,12 +42,28 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
     [dispatch],
   );
 
-  // Label text only — debounced. Regex mode toggles immediately via the checkbox.
+  // The label filter can also be set from outside the input — loading a saved
+  // query replaces the whole filter set — so adopt such a change instead of
+  // leaving a stale input that the next keystroke would push back over it.
   useEffect(() => {
-    if (debouncedLabel.trim() !== appliedLabel.trim()) {
-      dispatchFilter(debouncedLabel, useRegex);
+    if (appliedLabel.trim() !== lastDispatchedRef.current) {
+      lastDispatchedRef.current = appliedLabel.trim();
+      setInputValue(appliedLabel);
+      setUseRegex(appliedUseRegex);
     }
-  }, [debouncedLabel, appliedLabel, useRegex, dispatchFilter]);
+  }, [appliedLabel, appliedUseRegex]);
+
+  // Dispatched on every keystroke, not debounced: the search only fires on an
+  // explicit run (Run Search / Enter), so a pending debounce would leave the
+  // committed search signature stale and make the first Enter show results that
+  // then vanish behind another "press Enter" prompt.
+  const handleLabelChange = useCallback(
+    (label: string) => {
+      setInputValue(label);
+      dispatchFilter(label, useRegex);
+    },
+    [dispatchFilter, useRegex],
+  );
 
   return (
     <StyledLabelFilter data-run-on-enter="true">
@@ -57,7 +74,7 @@ const ExplorerTableLabelFilter: React.FC<ExplorerTableLabelFilterProps> = ({
         }
         changeOnType
         value={inputValue}
-        onChangeFn={setInputValue}
+        onChangeFn={handleLabelChange}
         clearable
         roundCorners
         icon={<IcoSearch />}

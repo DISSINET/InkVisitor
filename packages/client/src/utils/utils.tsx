@@ -28,13 +28,11 @@ export const getEntityLabel = (entity?: IResponseEntity) => {
   if (entity?.class === EntityEnums.Class.Statement) {
     // statement label logic:
     //   [1] If a user-defined label exists, show it.
-    //   [2] If no label but the statement has an anchor, show the anchor's text. If multiple anchors, concatenate them with " ... ".
-    //   [3] If neither label nor anchor, show the Statement text.
-    //   [4] If nothing is available, show "no label".
     const label = entity.labels && entity.labels[0];
     if (label) {
       return label;
     }
+    //   [2] If no label but the statement has an anchor, show the anchor's text. If multiple anchors, concatenate them with " ... ".
     // anchorTexts is stamped onto statement entities by server responses
     // (Entity.applyAnchorTexts on the server)
     const anchorText = entity.anchorTexts
@@ -44,6 +42,8 @@ export const getEntityLabel = (entity?: IResponseEntity) => {
     if (anchorText) {
       return anchorText;
     }
+    //   [3] If neither label nor anchor, show the Statement text.
+    //   [4] If nothing is available, show "no label".
     return entity.data.text || "no label";
   }
   // non-statement

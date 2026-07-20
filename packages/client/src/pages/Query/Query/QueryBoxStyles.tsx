@@ -10,6 +10,13 @@ interface StyledQueryBoxProps {
 export const StyledQueryBox = styled.div<StyledQueryBoxProps>`
   padding: 1rem;
   padding-top: 0.5rem;
+  // the scrolling wrapper is a column flex container, so without this the grid
+  // is stretched to the visible width and its columns spill past the padding
+  // instead of extending the scrollable area — leaving no trailing room to the
+  // right of the last node, and nothing to scroll into
+  min-width: max-content;
+  padding-right: 6rem;
+  padding-bottom: 4rem;
   display: grid;
   grid-template-columns: repeat(
     ${({ $gridWeight }) => $gridWeight + 1},

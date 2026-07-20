@@ -143,6 +143,15 @@ class Acl {
       return null;
     }
 
+    // Saved queries (Explorer page) intentionally have no seeded ACL entries —
+    // the coarse ACL table cannot express their per-resource rules, so access is
+    // gated inside the handlers: any logged-in user may list/create private
+    // queries and moderate their own; sharing and moderating shared queries is
+    // restricted to Admin/Owner.
+    if (controller === "saved-queries") {
+      return null;
+    }
+
     // The entities batch read (POST /entities/batch) is the bulk equivalent of
     // the public GET /entities/:entityId; it backs e.g. fetching the entities
     // behind a document's anchors. Allow it for any logged-in user (it has no

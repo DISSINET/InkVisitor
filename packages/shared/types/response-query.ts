@@ -5,6 +5,10 @@ import { IUser } from "./user";
 export interface IResponseQueryEntity {
   rowI?: number;
   entity: IEntity; // the actual passing entity model
+  /** Surfaced via "include equivalents" result expansion rather than a direct match (#2969). */
+  isEquivalent?: boolean;
+  /** Surfaced via "include subordinates" result expansion rather than a direct match (#2969). */
+  isSubordinate?: boolean;
   columnData: Record<
     string,
     IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]

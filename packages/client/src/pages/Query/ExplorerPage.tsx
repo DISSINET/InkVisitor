@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
-import { Box, Button, IconButton, Panel, SwitchGroup } from "components";
+import { Box, Button, Checkbox, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
@@ -34,12 +34,18 @@ import {
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
+import { StyledResultExpansionButtons } from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
+import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
 import { QueryValidity, QueryValidityProblem } from "./types";
-import { invalidateAllExplorerQueries, useQueryData } from "./useQueryData";
+import {
+  buildQueryWithResultExpansion,
+  invalidateAllExplorerQueries,
+  useQueryData,
+} from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
 
 interface ExplorerPage {}
@@ -62,9 +68,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
-  // Page-level expansion options for the whole Explorer query (#2969): mix the
-  // result entities with their equivalents (SYN/IDE/AEE) and/or subordinates
-  // (inverse SCL/SOE/HOL + child territories). Persisted across sessions.
+  // Page-level result expansion (#2969): append the equivalents (SYN/IDE/AEE)
+  // and/or subordinates (inverse SCL/SOE/HOL + child territories) of the final
+  // result entities to the Explorer results. Sent to the server via the root
+  // node's params (see buildQueryWithResultExpansion). Persisted across sessions.
   const includeSubordinatesStorageKey = "queryIncludeSubordinates";
   const includeEquivalentsStorageKey = "queryIncludeEquivalents";
   const [includeSubordinates, setIncludeSubordinates] = useState(
@@ -156,12 +163,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   };
 
   const stableSignature = useMemo(() => {
-    return buildStableSignature(queryState as any, exploreState as any);
-  }, [queryState, exploreState]);
+    return buildStableSignature(queryState as any, exploreState as any, {
+      includeEquivalents,
+      includeSubordinates,
+    });
+  }, [queryState, exploreState, includeEquivalents, includeSubordinates]);
 
   const searchSignature = useMemo(() => {
-    return buildSearchSignature(queryState as any, exploreState as any);
-  }, [queryState, exploreState]);
+    return buildSearchSignature(queryState as any, exploreState as any, {
+      includeEquivalents,
+      includeSubordinates,
+    });
+  }, [queryState, exploreState, includeEquivalents, includeSubordinates]);
 
   // No search criteria yet -> the query is not fired (see useQueryData); the
   // explorer views use this to prompt the user instead of showing empty results.
@@ -218,7 +231,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             },
           }
         : exploreState;
-    api.queryExport(queryState, exportExplore, rowIndices);
+    // export must run the same (resolved) query as the displayed results -
+    // rowIndices are positional against the server-side result order
+    api.queryExport(
+      buildQueryWithResultExpansion(queryState, includeEquivalents, includeSubordinates),
+      exportExplore,
+      rowIndices,
+    );
   };
 
   const explorerBoxMaximizedStorageKey = "queryExplorerBoxMaximized";
@@ -434,6 +453,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     searchSignature,
     queryStateValidity,
     committedSearchSignature,
+    globalIncludeEquivalents: includeEquivalents,
+    globalIncludeSubordinates: includeSubordinates,
   });
 
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
@@ -609,6 +630,28 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 />
               }
               buttons={[
+                <StyledResultExpansionButtons key="result-expansion-toggles">
+                  {/* accent colours echo the eq/sub badges on the resulting
+                      entity tags (see StyledExpansionBadge) */}
+                  <Checkbox
+                    label="EQ"
+                    size={13}
+                    accentColor="info"
+                    value={includeEquivalents}
+                    tooltipLabel="include equivalents"
+                    tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
+                    onChangeFn={handleToggleIncludeEquivalents}
+                  />
+                  <Checkbox
+                    label="SUB"
+                    size={13}
+                    accentColor="warning"
+                    value={includeSubordinates}
+                    tooltipLabel="include subordinates"
+                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
+                    onChangeFn={handleToggleIncludeSubordinates}
+                  />
+                </StyledResultExpansionButtons>,
                 <Button
                   key="run-search"
                   tooltipLabel="run search (Enter)"
@@ -632,9 +675,19 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
                 onOpenEntityInDetail={openEntityInDetail}
-                includeEquivalents={includeEquivalents}
-                includeSubordinates={includeSubordinates}
               />
+              {!explorerBoxMaximized && (
+                <SavedQueriesPanel
+                  queryState={queryState}
+                  queryStateDispatch={queryStateDispatch}
+                  includeEquivalents={includeEquivalents}
+                  includeSubordinates={includeSubordinates}
+                  onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                  onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                  exploreFilters={exploreState.filters}
+                  exploreDispatch={exploreStateDispatch}
+                />
+              )}
               {!explorerBoxMaximized && (
                 <ExplorerTableIdsFilter
                   filters={exploreState.filters}
@@ -645,10 +698,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 filters={exploreState.filters}
                 exploreDispatch={exploreStateDispatch}
                 hideButton={explorerBoxMaximized}
-                includeSubordinates={includeSubordinates}
-                includeEquivalents={includeEquivalents}
-                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
-                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
               />
             </Box>
             <Box
@@ -659,7 +708,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               disableHeaderClick
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
-                <SwitchGroup key="explorer-view-mode" style={{ marginRight: "2rem" }}>
+                <SwitchGroup key="explorer-view-mode">
                   <Button
                     tooltipLabel="table view"
                     label="table"
