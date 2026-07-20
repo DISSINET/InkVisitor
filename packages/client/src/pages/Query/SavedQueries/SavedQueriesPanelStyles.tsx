@@ -13,29 +13,14 @@ const QUERY_BULLET_GAP = "0.3rem";
 // reveal animation, the group itself is sized by its icons
 const QUERY_ACTIONS_WIDTH = "4rem";
 
-// sits directly above the UUIDs button (see StyledIdsFloatingRoot in
-// ExplorerTableStyles.tsx: bottom = 2rem + collapsed search + 1.5rem);
-// this root adds one row (~2.5rem) on top of that.
-// sits top-right; panel opens to the left of the Queries toggle button
+// sits top-right; panel opens to the left of the Queries toggle via floating-ui
 export const StyledSavedQueriesRoot = styled.div`
   position: absolute;
   right: 2rem;
   top: 4.5rem;
   // above StyledIdsFloatingRoot (161) and StyledCollapsedRoot (162), below the
-  // expanded floating search (164); z-index on the panel itself would do nothing
-  // because this root already opens its own stacking context
+  // expanded floating search (164)
   z-index: 163;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 1rem;
-  // with the panel open this root spans panel + gap + toggle, and its box would
-  // swallow clicks aimed at the floating controls behind it even though nothing
-  // is painted there; only the visible children take hits
-  pointer-events: none;
-  > * {
-    pointer-events: auto;
-  }
 `;
 
 export const StyledToggleButton = styled.button<{ $isActive?: boolean }>`
@@ -63,16 +48,15 @@ export const StyledToggleButton = styled.button<{ $isActive?: boolean }>`
   }
 `;
 
-// $maxHeight is measured from the panel's position in the viewport (see
-// SavedQueriesPanel) because the panel is absolutely positioned inside a
-// resizable Box, so its distance from the top of the screen is not fixed
-export const StyledPanel = styled.div<{ $maxHeight?: number }>`
+// Portaled into #page-content; position comes from floating-ui. maxHeight is
+// applied inline by the size middleware (content-sized until the page-content
+// floor) — do not set height here.
+export const StyledPanel = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   width: 30rem;
   max-width: calc(100vw - 4rem);
-  max-height: ${({ $maxHeight }) => ($maxHeight ? `${$maxHeight}px` : "40rem")};
   min-height: 0;
   padding: 0.75rem;
   border-radius: ${({ theme }) => theme.borderRadius.md};
@@ -81,6 +65,9 @@ export const StyledPanel = styled.div<{ $maxHeight?: number }>`
   background-color: ${({ theme }) => theme.color["blue"][50]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   overflow: hidden;
+  // same stacking as StyledSavedQueriesRoot; needed because the panel is
+  // portaled out of that root's stacking context
+  z-index: 163;
 `;
 
 export const StyledPanelHeader = styled.div`

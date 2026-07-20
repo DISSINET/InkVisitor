@@ -248,9 +248,7 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   }, [isOpen, commit, draft]);
 
   return (
-    // marked so panels sharing this right-hand column (saved queries) can
-    // measure where the floating stack starts and stop short of it
-    <StyledIdsFloatingRoot ref={rootRef} data-floating-stack="true">
+    <StyledIdsFloatingRoot ref={rootRef}>
       {isOpen && (
         <StyledIdsPanel
           style={

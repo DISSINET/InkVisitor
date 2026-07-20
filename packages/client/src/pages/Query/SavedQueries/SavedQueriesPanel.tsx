@@ -1,10 +1,12 @@
+import { FloatingPortal, autoUpdate, offset, size, useFloating } from "@floating-ui/react";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { ISavedQuery, ISavedQueryCreate, Query } from "@inkvisitor/shared/types";
+import { Explore } from "@inkvisitor/shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Checkbox, Input, Submit } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
   IcoChevronRight,
@@ -16,7 +18,6 @@ import {
   IcoSave,
   IcoTrash,
 } from "Theme/icons";
-import { Explore } from "@inkvisitor/shared/types/query";
 import { ExploreActionType } from "../Explorer/state";
 import { QueryAction, QueryActionType } from "../Query/state";
 import { EXAMPLE_QUERIES, IExampleQuery } from "./exampleQueries";
@@ -58,9 +59,11 @@ interface SavedQueriesPanel {
   exploreDispatch: React.Dispatch<any>;
 }
 
-// floor for the measured panel height, so a very short Box still leaves the
-// header, the save area and a usable strip of the folder list visible
-const MIN_PANEL_HEIGHT = 220;
+// gap between the Queries toggle and the panel (matches the old flex gap)
+const PANEL_OFFSET = 10;
+
+// inset from #page-content edges when clamping max-height (~2rem)
+const PAGE_CONTENT_PADDING = 20;
 
 // keeps names within the two lines the query rows show (see StyledQueryName);
 // matters most for shared queries, which every user sees in their list
@@ -93,8 +96,23 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
 
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
+  // Panel is portaled into #page-content and capped with maxHeight only (never
+  // height), so it stays content-sized until it hits the page-content floor.
+  const { refs, floatingStyles } = useFloating({
+    open: isOpen,
+    placement: "left-start",
+    whileElementsMounted: autoUpdate,
+    middleware: [
+      offset(PANEL_OFFSET),
+      size({
+        padding: PAGE_CONTENT_PADDING,
+        apply({ availableHeight, elements }) {
+          // maxHeight only — short lists stay short; overflow scrolls the folder list
+          elements.floating.style.maxHeight = `${Math.max(0, availableHeight)}px`;
+        },
+      }),
+    ],
+  });
 
   const { data: user } = useUserQuery(true);
   const userId = user?.id;
@@ -218,49 +236,27 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     setOpenFolders((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Close (without saving any pending draft name) when clicking outside the panel.
-  // While the delete-confirm modal is up, clicks land in its portal (outside
-  // rootRef), so suspend outside-click closing to keep the panel visible behind it.
+  // Close (without saving any pending draft name) when clicking outside the
+  // panel or toggle. The panel lives in a #page-content portal, so check both
+  // floating-ui refs. Suspend while the delete-confirm modal is up — its portal
+  // clicks would otherwise look "outside" and close the panel behind it.
   useEffect(() => {
     if (!isOpen || deleteTarget) {
       return;
     }
     const handleOutside = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const reference = refs.reference.current;
+      const inToggle = reference instanceof Element ? reference.contains(target) : false;
+      const inPanel = refs.floating.current?.contains(target) ?? false;
+      if (!inToggle && !inPanel) {
         setIsOpen(false);
         cancelEditing();
       }
     };
     window.addEventListener("mousedown", handleOutside);
     return () => window.removeEventListener("mousedown", handleOutside);
-  }, [isOpen, deleteTarget]);
-
-  // Keep the panel inside the viewport: it is absolutely positioned inside a
-  // Box the user can resize, so the space below it is measured rather than
-  // assumed. Anything that does not fit is absorbed by the scrolling folder
-  // list, leaving the header and save area always reachable.
-  useLayoutEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const updateMaxHeight = () => {
-      if (!rootRef.current) {
-        return;
-      }
-      const { top } = rootRef.current.getBoundingClientRect();
-      const bottomGap = 20; // 2rem, matching the panel's distance from other floating controls
-      // The floating stack (UUIDs button, floating search) shares this right-hand
-      // column, so the panel stops above it rather than at the viewport edge.
-      // Its height varies with the filter count badge, hence measuring over
-      // recomputing its offsets. Absent when no UUID filter is rendered.
-      const floatingStack = document.querySelector("[data-floating-stack]");
-      const floor = floatingStack?.getBoundingClientRect().top ?? window.innerHeight;
-      setMaxPanelHeight(Math.max(MIN_PANEL_HEIGHT, floor - top - bottomGap));
-    };
-    updateMaxHeight();
-    window.addEventListener("resize", updateMaxHeight);
-    return () => window.removeEventListener("resize", updateMaxHeight);
-  }, [isOpen]);
+  }, [isOpen, deleteTarget, refs.reference, refs.floating]);
 
   const folders: {
     key: FolderKey;
@@ -282,158 +278,9 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   ];
 
   return (
-    <StyledSavedQueriesRoot ref={rootRef}>
-      {isOpen && (
-        <StyledPanel $maxHeight={maxPanelHeight}>
-          <StyledPanelHeader>
-            <StyledPanelTitle>Saved queries</StyledPanelTitle>
-            <StyledCloseButton
-              type="button"
-              aria-label="Close saved queries"
-              onClick={() => setIsOpen(false)}
-            >
-              <IcoCloseMd size={16} />
-            </StyledCloseButton>
-          </StyledPanelHeader>
-
-          <StyledSaveRow>
-            <Input
-              value={saveName}
-              placeholder="name for the current query"
-              changeOnType
-              width="full"
-              maxLength={QUERY_NAME_MAX_LENGTH}
-              rightContent={
-                <StyledCharCounter>
-                  {saveName.length}/{QUERY_NAME_MAX_LENGTH}
-                </StyledCharCounter>
-              }
-              onChangeFn={setSaveName}
-              onEnterPressFn={handleSave}
-            />
-            <StyledSaveFooter>
-              {canShare && (
-                <StyledShareRow>
-                  <Checkbox
-                    label="shared with everyone"
-                    value={saveShared}
-                    onChangeFn={(value) => setSaveShared(value)}
-                  />
-                </StyledShareRow>
-              )}
-              <StyledSaveAction>
-                <Button
-                  label="Save"
-                  icon={<IcoSave size={14} />}
-                  color="info"
-                  disabled={!saveName.trim() || saveMutation.isPending}
-                  onClick={handleSave}
-                />
-              </StyledSaveAction>
-            </StyledSaveFooter>
-          </StyledSaveRow>
-
-          <StyledFolderList>
-            {folders.map(({ key, label, rows }) => (
-              <StyledFolderCard key={key}>
-                <StyledFolderHeader
-                  type="button"
-                  aria-expanded={openFolders[key]}
-                  onClick={() => toggleFolder(key)}
-                >
-                  <StyledChevron $open={openFolders[key]}>
-                    <IcoChevronRight size={14} />
-                  </StyledChevron>
-                  <StyledFolderIcon>
-                    {openFolders[key] ? <IcoFolderOpen size={13} /> : <IcoFolder size={13} />}
-                  </StyledFolderIcon>
-                  {label}
-                  {key === "examples" && (
-                    <StyledLockIcon title="Built-in examples cannot be edited">
-                      <IcoLock size={11} />
-                    </StyledLockIcon>
-                  )}
-                  <StyledFolderCount>({rows.length})</StyledFolderCount>
-                </StyledFolderHeader>
-
-                {openFolders[key] &&
-                  (rows.length === 0 ? (
-                    <StyledEmptyNote>no queries</StyledEmptyNote>
-                  ) : (
-                    rows.map((row) => {
-                      const isEditing = editingId === row.id;
-
-                      if (!canModerate(row)) {
-                        return (
-                          <StyledQueryRow key={row.id}>
-                            <StyledQueryBullet>•</StyledQueryBullet>
-                            <StyledQueryName
-                              type="button"
-                              title={row.name}
-                              onClick={() => handleLoad(row)}
-                            >
-                              {row.name}
-                            </StyledQueryName>
-                          </StyledQueryRow>
-                        );
-                      }
-
-                      return (
-                        <StyledQueryRow key={row.id} $editing={isEditing}>
-                          <StyledQueryBullet>•</StyledQueryBullet>
-                          {isEditing ? (
-                            <Input
-                              value={editingName}
-                              changeOnType
-                              width="full"
-                              maxLength={QUERY_NAME_MAX_LENGTH}
-                              autoFocus
-                              onChangeFn={setEditingName}
-                              onEnterPressFn={acceptEditing}
-                              onEscapePressFn={cancelEditing}
-                              showSaveExitIcons
-                              onBlur={acceptEditing}
-                            />
-                          ) : (
-                            <StyledQueryName
-                              type="button"
-                              title={row.name}
-                              onClick={() => handleLoad(row)}
-                            >
-                              {row.name}
-                            </StyledQueryName>
-                          )}
-
-                          <StyledQueryActions $forceVisible={isEditing}>
-                            {!isEditing && (
-                              <StyledQueryActionButton
-                                type="button"
-                                aria-label={`Rename ${row.name}`}
-                                onClick={() => startEditing(row)}
-                              >
-                                <IcoEdit size={12} />
-                              </StyledQueryActionButton>
-                            )}
-                            <StyledQueryActionButton
-                              type="button"
-                              $danger
-                              aria-label={`Delete ${row.name}`}
-                              onClick={() => setDeleteTarget(row)}
-                            >
-                              <IcoTrash size={12} />
-                            </StyledQueryActionButton>
-                          </StyledQueryActions>
-                        </StyledQueryRow>
-                      );
-                    })
-                  ))}
-              </StyledFolderCard>
-            ))}
-          </StyledFolderList>
-        </StyledPanel>
-      )}
-
+    <StyledSavedQueriesRoot>
       <StyledToggleButton
+        ref={refs.setReference}
         type="button"
         aria-expanded={isOpen}
         $isActive={isOpen}
@@ -443,6 +290,158 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
         <IcoFolderOpen size={16} />
         Queries
       </StyledToggleButton>
+
+      {isOpen && (
+        <FloatingPortal id="page-content">
+          <StyledPanel ref={refs.setFloating} style={floatingStyles}>
+            <StyledPanelHeader>
+              <StyledPanelTitle>Saved queries</StyledPanelTitle>
+              <StyledCloseButton
+                type="button"
+                aria-label="Close saved queries"
+                onClick={() => setIsOpen(false)}
+              >
+                <IcoCloseMd size={16} />
+              </StyledCloseButton>
+            </StyledPanelHeader>
+
+            <StyledSaveRow>
+              <Input
+                value={saveName}
+                placeholder="name for the current query"
+                changeOnType
+                width="full"
+                maxLength={QUERY_NAME_MAX_LENGTH}
+                rightContent={
+                  <StyledCharCounter>
+                    {saveName.length}/{QUERY_NAME_MAX_LENGTH}
+                  </StyledCharCounter>
+                }
+                onChangeFn={setSaveName}
+                onEnterPressFn={handleSave}
+              />
+              <StyledSaveFooter>
+                {canShare && (
+                  <StyledShareRow>
+                    <Checkbox
+                      label="shared with everyone"
+                      value={saveShared}
+                      onChangeFn={(value) => setSaveShared(value)}
+                    />
+                  </StyledShareRow>
+                )}
+                <StyledSaveAction>
+                  <Button
+                    label="Save"
+                    icon={<IcoSave size={14} />}
+                    color="info"
+                    disabled={!saveName.trim() || saveMutation.isPending}
+                    onClick={handleSave}
+                  />
+                </StyledSaveAction>
+              </StyledSaveFooter>
+            </StyledSaveRow>
+
+            <StyledFolderList>
+              {folders.map(({ key, label, rows }) => (
+                <StyledFolderCard key={key}>
+                  <StyledFolderHeader
+                    type="button"
+                    aria-expanded={openFolders[key]}
+                    onClick={() => toggleFolder(key)}
+                  >
+                    <StyledChevron $open={openFolders[key]}>
+                      <IcoChevronRight size={14} />
+                    </StyledChevron>
+                    <StyledFolderIcon>
+                      {openFolders[key] ? <IcoFolderOpen size={13} /> : <IcoFolder size={13} />}
+                    </StyledFolderIcon>
+                    {label}
+                    {key === "examples" && (
+                      <StyledLockIcon title="Built-in examples cannot be edited">
+                        <IcoLock size={11} />
+                      </StyledLockIcon>
+                    )}
+                    <StyledFolderCount>({rows.length})</StyledFolderCount>
+                  </StyledFolderHeader>
+
+                  {openFolders[key] &&
+                    (rows.length === 0 ? (
+                      <StyledEmptyNote>no queries</StyledEmptyNote>
+                    ) : (
+                      rows.map((row) => {
+                        const isEditing = editingId === row.id;
+
+                        if (!canModerate(row)) {
+                          return (
+                            <StyledQueryRow key={row.id}>
+                              <StyledQueryBullet>•</StyledQueryBullet>
+                              <StyledQueryName
+                                type="button"
+                                title={row.name}
+                                onClick={() => handleLoad(row)}
+                              >
+                                {row.name}
+                              </StyledQueryName>
+                            </StyledQueryRow>
+                          );
+                        }
+
+                        return (
+                          <StyledQueryRow key={row.id} $editing={isEditing}>
+                            <StyledQueryBullet>•</StyledQueryBullet>
+                            {isEditing ? (
+                              <Input
+                                value={editingName}
+                                changeOnType
+                                width="full"
+                                maxLength={QUERY_NAME_MAX_LENGTH}
+                                autoFocus
+                                onChangeFn={setEditingName}
+                                onEnterPressFn={acceptEditing}
+                                onEscapePressFn={cancelEditing}
+                                showSaveExitIcons
+                                onBlur={acceptEditing}
+                              />
+                            ) : (
+                              <StyledQueryName
+                                type="button"
+                                title={row.name}
+                                onClick={() => handleLoad(row)}
+                              >
+                                {row.name}
+                              </StyledQueryName>
+                            )}
+
+                            <StyledQueryActions $forceVisible={isEditing}>
+                              {!isEditing && (
+                                <StyledQueryActionButton
+                                  type="button"
+                                  aria-label={`Rename ${row.name}`}
+                                  onClick={() => startEditing(row)}
+                                >
+                                  <IcoEdit size={12} />
+                                </StyledQueryActionButton>
+                              )}
+                              <StyledQueryActionButton
+                                type="button"
+                                $danger
+                                aria-label={`Delete ${row.name}`}
+                                onClick={() => setDeleteTarget(row)}
+                              >
+                                <IcoTrash size={12} />
+                              </StyledQueryActionButton>
+                            </StyledQueryActions>
+                          </StyledQueryRow>
+                        );
+                      })
+                    ))}
+                </StyledFolderCard>
+              ))}
+            </StyledFolderList>
+          </StyledPanel>
+        </FloatingPortal>
+      )}
 
       <Submit
         title="Delete saved query"
