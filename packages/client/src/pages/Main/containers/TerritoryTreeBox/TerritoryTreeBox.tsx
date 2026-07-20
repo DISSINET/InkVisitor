@@ -1,12 +1,12 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IResponseTree, IUser } from "@inkvisitor/shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams } from "hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { useUserQuery } from "hooks/react-query";
+import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus, FaStar } from "react-icons/fa";
@@ -16,7 +16,9 @@ import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { ButtonSize, ITerritoryFilter } from "types";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { ITerritoryFilter } from "types";
+import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
 import { StyledNoResults, StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
@@ -29,8 +31,6 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { useTreeQuery } from "hooks/react-query/useTreeQuery";
-import { useUserQuery } from "hooks/react-query";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,

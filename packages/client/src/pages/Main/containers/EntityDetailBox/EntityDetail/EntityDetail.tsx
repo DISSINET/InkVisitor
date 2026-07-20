@@ -1,7 +1,7 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
+  DropdownItem,
   IEntity,
   IProp,
   IReference,
@@ -31,8 +31,6 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
 import { DraggedPropRowCategory } from "types";
-import { DropdownItem } from "@inkvisitor/shared/types";
-import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
 import {
   ENTITY_DETAIL_SCROLLBAR_ID,
   ENTITY_DETAIL_SCROLL_CONTAINER_ID,
@@ -40,6 +38,8 @@ import {
   usedInSectionId,
 } from "utils/deleteEntityConflict";
 import { openRestoredEntity } from "utils/openRestoredEntity";
+import { getStoredUserRole } from "utils/userStorage";
+import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -137,7 +137,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     if (!isIncompleteEntityDetail) return;
     toast.error(
       "Entity detail could not be loaded: the same query key was used for a different API response. Please contact support.",
-      { toastId: `incomplete-entity-detail-${detailId}` }
+      { toastId: `incomplete-entity-detail-${detailId}` },
     );
   }, [isIncompleteEntityDetail, detailId]);
 
@@ -156,7 +156,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const handleAskForTemplateApply = (templateIdToApply: string) => {
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
-        (template: IEntity) => template.id === templateIdToApply
+        (template: IEntity) => template.id === templateIdToApply,
       );
 
       if (templateThatIsGoingToBeApplied) {
@@ -178,7 +178,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   const templates = useMemo(
     () => allTemplates?.filter((template: IEntity) => template.class === entity?.class),
-    [allTemplates, entity?.class]
+    [allTemplates, entity?.class],
   );
 
   // refresh the template list when the user opens the dropdown, but only once
@@ -237,10 +237,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
       // read the open statement from cache (the editor already fetched it) -
       // no need to subscribe and fetch it here just for this check
-      const statement = queryClient.getQueryData<IResponseStatement>([
-        "statement",
-        statementId,
-      ]);
+      const statement = queryClient.getQueryData<IResponseStatement>(["statement", statementId]);
       if (
         statementId &&
         (statementId === entity?.id ||
@@ -323,7 +320,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
         />,
         {
           autoClose: 5000,
-        }
+        },
       );
 
       // hide selected territory if T removed
@@ -357,13 +354,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     const relationTypes = getEntityRelationRules(
       entity.class,
       RelationEnums.EntityDetailTypes,
-      entity.isTemplate
+      entity.isTemplate,
     );
     relationTypes.forEach((relationType: RelationEnums.Type) => {
       entity.relations[relationType as keyof Relation.IUsedRelations]?.connections.forEach(
         (connection: Relation.IConnection<Relation.IRelation>) => {
           relationDeleteMutation.mutate(connection.id);
-        }
+        },
       );
     });
 
@@ -444,7 +441,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
         // 3rd level
         newProps[pi1].children.forEach((prop2, pi2) => {
           newProps[pi1].children[pi2].children = newProps[pi1].children[pi2].children.filter(
-            (child) => child.id !== propId
+            (child) => child.id !== propId,
           );
         });
       });
@@ -579,7 +576,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   // Single state to manage collapsed sections
   const [collapsedSections, setCollapsedSections] = useState<Set<EntityDetailSection>>(
-    new Set([EntityDetailSection.Protocol, EntityDetailSection.Validation])
+    new Set([EntityDetailSection.Protocol, EntityDetailSection.Validation]),
   );
 
   const toggleSection = (sectionId: EntityDetailSection) => {
@@ -641,9 +638,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                       {entity.warnings
                         .filter((w) => w.position?.section === IWarningPositionSection.Entity)
                         .map((warning, key) => {
-                          return (
-                            <Message key={key} warning={warning} entities={entity.entities} />
-                          );
+                          return <Message key={key} warning={warning} entities={entity.entities} />;
                         })}
                     </StyledDetailWarnings>
                   )}
@@ -728,12 +723,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         {entity.warnings &&
                           entity.warnings
                             .filter(
-                              (w) => w.position?.section === IWarningPositionSection.Valencies
+                              (w) => w.position?.section === IWarningPositionSection.Valencies,
                             )
                             .map((warning, key) => {
                               return (
-                            <Message key={key} warning={warning} entities={entity.entities} />
-                          );
+                                <Message key={key} warning={warning} entities={entity.entities} />
+                              );
                             })}
                       </StyledDetailWarnings>
                       <StyledDetailSectionContent>
@@ -769,8 +764,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                           .filter((w) => w.position?.section === IWarningPositionSection.Relations)
                           .map((warning, key) => {
                             return (
-                            <Message key={key} warning={warning} entities={entity.entities} />
-                          );
+                              <Message key={key} warning={warning} entities={entity.entities} />
+                            );
                           })}
                       </StyledDetailWarnings>
                     )}
@@ -1043,9 +1038,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                   <EntityDetailExpandIcon
                     isExpanded={isSectionExpanded(EntityDetailSection.RelationAudits)}
                   />
-                  <StyledDetailSectionHeading>
-                    Relation audits
-                  </StyledDetailSectionHeading>
+                  <StyledDetailSectionHeading>Relation audits</StyledDetailSectionHeading>
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.RelationAudits) && (
                   <StyledDetailSectionContent>

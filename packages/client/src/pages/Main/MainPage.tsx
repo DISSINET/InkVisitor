@@ -1,5 +1,4 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -22,12 +21,10 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
-import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
-import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
-import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
-import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
@@ -43,7 +40,10 @@ import {
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
+import { getStoredUserRole } from "utils/userStorage";
 import { floorNumberToOneDecimal } from "utils/utils";
+import { RefreshBoxButton } from "./components/RefreshBoxButton";
+import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
@@ -53,9 +53,9 @@ import { MemoizedStatementListBox } from "./containers/StatementsListBox/Stateme
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
 import { useBoxLayout } from "./hooks/useBoxLayout";
-import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
+import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 

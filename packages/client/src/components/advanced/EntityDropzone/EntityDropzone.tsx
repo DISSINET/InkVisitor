@@ -1,10 +1,10 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { IEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { Dropzone } from "components";
 import { InstTemplate } from "constructors";
 import React, { ReactElement, useState } from "react";
 import { EntityDragItem } from "types";
+import { getStoredUserRole } from "utils/userStorage";
 
 interface EntityDropzone {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -39,11 +39,11 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
   const handleInstantiateTemplate = async (
-    templateToDuplicate: IEntity | IStatement | ITerritory
+    templateToDuplicate: IEntity | IStatement | ITerritory,
   ) => {
     const newEntity = await InstTemplate(
       templateToDuplicate,
-      getStoredUserRole() as UserEnums.Role
+      getStoredUserRole() as UserEnums.Role,
     );
     if (newEntity) {
       onSelected(newEntity.id);
@@ -51,10 +51,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
     }
   };
 
-  const handleDropped = (
-    newDropped: EntityDragItem,
-    instantiateTemplate?: boolean
-  ) => {
+  const handleDropped = (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
     if (!isWrongDropCategory) {
       if (instantiateTemplate && !disableTemplateInstantiation) {
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);

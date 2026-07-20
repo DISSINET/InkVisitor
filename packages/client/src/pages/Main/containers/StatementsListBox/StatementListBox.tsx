@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
+import { getStoredUserRole } from "utils/userStorage";
 import {
   IDocument,
   IEntity,

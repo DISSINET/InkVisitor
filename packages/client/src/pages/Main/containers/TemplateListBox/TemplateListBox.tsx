@@ -1,13 +1,16 @@
-import { entitiesDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Button, Input, Loader } from "components";
+import { getStoredUserRole } from "utils/userStorage";
 
 import Dropdown, { EntityTag } from "components/advanced";
+import { useDebounce } from "hooks";
 import { useTemplatesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
@@ -21,10 +24,6 @@ import {
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { useSelector } from "react-redux";
-import { useDebounce } from "hooks";
-import { useAppSelector } from "redux/hooks";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {

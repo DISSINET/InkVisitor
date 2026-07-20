@@ -1,5 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
+import { getStoredUserRole } from "utils/userStorage";
 import { IEntity, IResponseGeneric } from "@inkvisitor/shared/types";
 import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
