@@ -1,10 +1,10 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { Tag } from "components/basic/Tag/Tag";
 import { useUserByIdQuery } from "hooks/react-query";
 import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
 import { getUserIcon } from "utils/iconUtils";
+import { getStoredUserId } from "utils/userStorage";
 import { StyledUserIcon, StyledUserLabel, StyledUserTag, StyledUserTagWrap } from "./UserTagStyles";
 import { getUserLabel, getVariantColors, UserTagSize, UserTagVariant } from "./utils";
 

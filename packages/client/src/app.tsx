@@ -1,5 +1,4 @@
 import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
@@ -15,6 +14,7 @@ import {
   ActivatePage,
   BackupsPage,
   DocumentsPage,
+  ExplorerPage,
   LoginPage,
   MainPage,
   NotFoundPage,
@@ -35,7 +35,7 @@ import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
-import { ExplorerPage } from "pages";
+import { getStoredUserRole } from "utils/userStorage";
 
 const clockPerformance = (
   profilerId: any,

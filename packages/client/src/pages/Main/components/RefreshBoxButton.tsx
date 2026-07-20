@@ -1,8 +1,8 @@
-import React from "react";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "components";
+import React from "react";
 import { BiRefresh } from "react-icons/bi";
+import { getStoredUserId } from "utils/userStorage";
 
 interface RefreshBoxButton {
   queriesToRefresh: string[];
