@@ -1211,6 +1211,11 @@ export default Router()
         })
       );
 
+      // stamp document anchor spans onto statement results so tags can show
+      // them as labels (response-only field, see IEntity.anchorTexts). Must
+      // run on the wrapped responses - getEntityClass drops undeclared fields.
+      await Entity.applyAnchorTexts(request.db.connection, responses);
+
       return responses;
     })
   );

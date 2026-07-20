@@ -97,6 +97,11 @@ export default class QuerySearch {
     const filteredIds = this.results.filter(this.explore);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
 
+    // stamp document anchor spans onto statement rows so tags can show them
+    // as labels (response-only field, see IEntity.anchorTexts); page-limited
+    // input, single batched read
+    await Entity.applyAnchorTexts(db, filtered);
+
     const columns =
       this.explore.view.mode === Explore.EViewMode.Table
         ? this.explore.view.columns

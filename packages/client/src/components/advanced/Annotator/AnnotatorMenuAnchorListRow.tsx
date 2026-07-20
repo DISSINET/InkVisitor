@@ -68,7 +68,10 @@ type AnnotatorAnchorGridCell = {
 type AnnotatorAnchorControlsCluster = Pick<
   AnnotatorAnchorGridCell,
   "item" | "onRemoveAnchor" | "onUpdateAnchor" | "onMoveAnchor" | "editControls"
->;
+> & {
+  /** Entity status → colors the elvl divider like the tag's other status borders. */
+  status: EntityEnums.Status;
+};
 
 /**
  * The anchor row's controls, rendered in the tag's button slot. Owns its own
@@ -86,6 +89,7 @@ const AnnotatorAnchorControlsCluster: React.FC<AnnotatorAnchorControlsCluster> =
   onUpdateAnchor,
   onMoveAnchor,
   editControls,
+  status,
 }) => {
   const [hovered, setHovered] = useState(false);
   const elvlValue = item.anchor.attributes.elvl as EntityEnums.Elvl;
@@ -118,7 +122,7 @@ const AnnotatorAnchorControlsCluster: React.FC<AnnotatorAnchorControlsCluster> =
                 shape="sharp-square"
               />
             )}
-            <StyledAnchorClusterElvl>
+            <StyledAnchorClusterElvl $tagBorderColorKey={status}>
               <ElvlButtonGroup
                 value={elvlValue}
                 onChange={(elvl) => {
@@ -179,6 +183,7 @@ const AnnotatorAnchorGridCell: React.FC<AnnotatorAnchorGridCell> = ({
           controlsAvailable ? (
             <AnnotatorAnchorControlsCluster
               item={item}
+              status={entity.status}
               onRemoveAnchor={onRemoveAnchor}
               onUpdateAnchor={onUpdateAnchor}
               onMoveAnchor={onMoveAnchor}

@@ -77,19 +77,25 @@ export const StyledTr = styled.tr<StyledTr>`
   td {
     transition: box-shadow 0.2s ease-in-out;
     box-shadow: ${({ theme, $isAnnotatorHovered }) => {
-      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      const c = $isAnnotatorHovered
+        ? theme.color.statementHighlight
+        : theme.color.statementHighlight0;
       return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}`;
     }};
   }
   td:first-child {
     box-shadow: ${({ theme, $isAnnotatorHovered }) => {
-      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      const c = $isAnnotatorHovered
+        ? theme.color.statementHighlight
+        : theme.color.statementHighlight0;
       return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}, inset 2px 0 0 0 ${c}`;
     }};
   }
   td:last-child {
     box-shadow: ${({ theme, $isAnnotatorHovered }) => {
-      const c = $isAnnotatorHovered ? theme.color.primaryRGBA : theme.color.primaryRGBA0;
+      const c = $isAnnotatorHovered
+        ? theme.color.statementHighlight
+        : theme.color.statementHighlight0;
       return `inset 0 2px 0 0 ${c}, inset 0 -2px 0 0 ${c}, inset -2px 0 0 0 ${c}`;
     }};
   }
@@ -106,9 +112,9 @@ export const StyledTr = styled.tr<StyledTr>`
     content: "";
     position: absolute;
     left: 0;
-    top: 6%;
-    bottom: 6%;
-    width: 4px;
+    top: 9%;
+    bottom: 9%;
+    width: 5px;
     border-radius: 0 10px 10px 0;
     background-color: ${({ theme }) => theme.color["success"]};
     transform: scaleX(${({ $isOpened }) => ($isOpened ? 1 : 0)});
@@ -178,13 +184,14 @@ export const StyledSelectionCheckbox = styled.div`
   display: flex;
 `;
 
-export const StyledAbbreviatedLabel = styled.div`
+export const StyledAbbreviatedLabel = styled.div<{ $italic?: boolean }>`
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: ${({ $italic }) => ($italic ? "italic" : "normal")};
 `;
 
 export const StyledAnchor = styled.div`

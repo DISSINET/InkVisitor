@@ -2,6 +2,7 @@ import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
 import { space2 } from "Theme/theme-space-shortcut";
+import { DEFAULT_DIVIDER_HEIGHT } from "components/basic/Input/InputStyles";
 
 interface StyledSuggester {
   $marginTop?: boolean;
@@ -131,4 +132,14 @@ export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
 
 export const SuggesterHidden = styled.div`
   display: none;
+`;
+
+// vertical divider separating the injected rightContent (e.g. the annotator's
+// elvl group) from the create button inside the input's trailing slot
+export const StyledRightContentDivider = styled.div`
+  height: ${DEFAULT_DIVIDER_HEIGHT};
+  width: ${({ theme }) => theme.borderWidth[1]};
+  background-color: ${({ theme }) => theme.color["gray"][300]};
+  flex-shrink: 0;
+  margin: 0 0.1rem;
 `;

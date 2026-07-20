@@ -38,6 +38,7 @@ export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
   // usedIn?: IStatement[];
   usedInDocuments: IResponseUsedInDocument[];
+  anchorTexts?: string[]; // content of each document anchor whose anchor === statement.id (empty/undefined when the statement is not anchored)
   warnings: IWarning[];
   right?: UserEnums.RoleMode;
 }

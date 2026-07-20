@@ -89,6 +89,30 @@ describe("getEntityLabel", () => {
       )
     ).toBe("anchor text");
   });
+  it("prefers the label over anchor text and statement text", () => {
+    expect(
+      getEntityLabel(
+        asEntity({
+          class: EntityEnums.Class.Statement,
+          labels: ["label"],
+          data: { text: "text" },
+          anchorTexts: ["anchor"],
+        })
+      )
+    ).toBe("label");
+  });
+  it("uses anchor text over statement text when a statement has no label", () => {
+    expect(
+      getEntityLabel(
+        asEntity({
+          class: EntityEnums.Class.Statement,
+          labels: [],
+          data: { text: "text" },
+          anchorTexts: ["first", "second"],
+        })
+      )
+    ).toBe("first ... second");
+  });
 });
 
 describe("getShortLabelByLetterCount", () => {

@@ -11,7 +11,8 @@ import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { CellProps, Column } from "react-table";
-import { StyledShortenedText, StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
+import { TbAnchor } from "react-icons/tb";
+import { StyledAnchor, StyledShortenedText, StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
 
 type CellType = CellProps<IResponseUsedInStatement<EntityEnums.UsedInPosition>>;
 
@@ -100,21 +101,44 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
       {
         Header: "Text",
         Cell: ({ row }: CellType) => {
-          const useCase = row.original;
-          const entityId = useCase.statement?.id;
-          const entity = entityId ? entities[entityId] : false;
+          const { statement } = row.original;
 
-          return (
-            <>
-              {entity && entity.class === EntityEnums.Class.Statement ? (
-                <StyledTableTextGridCell>
-                  <StyledShortenedText>{entity.data.text}</StyledShortenedText>
-                </StyledTableTextGridCell>
-              ) : (
-                ""
-              )}
-            </>
-          );
+          if (!statement) {
+            return "";
+          }
+
+          // Fallback order (each used only when the one above is empty):
+          //   1) document anchor span(s) - multiple anchors joined with " ... "
+          //   2) statement text (deprecated but still in use sometimes)
+          //   3) statement label - rendered italic to mark it as a label
+          // anchorTexts is stamped onto the entities map by the server
+          // (Entity.applyAnchorTexts)
+          const anchorText = entities[statement.id]?.anchorTexts
+            ?.map((t) => t.trim())
+            .filter((t) => t)
+            .join(" ... ");
+          const statementText = statement.data.text?.trim();
+          const label = statement.labels?.[0]?.trim();
+
+          let content: React.ReactNode = "";
+          if (anchorText) {
+            content = (
+              <StyledShortenedText>
+                <StyledAnchor>
+                  <TbAnchor size={12} strokeWidth={2} />
+                </StyledAnchor>
+                {anchorText}
+              </StyledShortenedText>
+            );
+          } else if (statementText) {
+            content = (
+              <StyledShortenedText>{statementText}</StyledShortenedText>
+            );
+          } else if (label) {
+            content = <StyledShortenedText $italic>{label}</StyledShortenedText>;
+          }
+
+          return <StyledTableTextGridCell>{content}</StyledTableTextGridCell>;
         },
       },
       {

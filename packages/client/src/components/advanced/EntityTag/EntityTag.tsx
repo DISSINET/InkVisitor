@@ -127,7 +127,11 @@ const EntityTagComponent: React.FC<EntityTag> = ({
   const [tagHovered, setTagHovered] = useState(false);
   const [clickedOnce, setClickedOnce] = useState(false);
   const referenceEl = useRef<HTMLDivElement>(null!);
-  const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
+  const entityLabel = useMemo(
+    // getEntityLabel reads entity.anchorTexts (stamped by server responses)
+    () => getEntityLabel(entity),
+    [entity],
+  );
 
   useEffect(() => {
     if (!clickedOnce) return;
@@ -288,7 +292,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         <StyledButtonWrapper {...buttonWrapperProps}>{button}</StyledButtonWrapper>
       )}
       {elvlButtonGroup && (
-        <StyledElvlWrapper>
+        <StyledElvlWrapper $tagBorderColorKey={entity.status}>
           <div onMouseOver={() => setElvlHovered(true)} onMouseOut={() => setElvlHovered(false)}>
             {elvlButtonGroup}
           </div>

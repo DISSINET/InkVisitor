@@ -26,6 +26,7 @@ import {
   StyledAiOutlineWarning,
   StyledInputWrapper,
   StyledRelativePosition,
+  StyledRightContentDivider,
   StyledSuggester,
   StyledSuggesterList,
   SuggesterHidden,
@@ -82,6 +83,9 @@ interface Suggester {
   // rendered inside the input's trailing slot (only when disableCreate is set,
   // where the create button would otherwise sit)
   rightContent?: React.ReactNode;
+  // notifies the parent when the input gains/loses focus (e.g. the annotator
+  // highlights the elvl group while the suggester is focused)
+  onFocusChange?: (isFocused: boolean) => void;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -129,6 +133,7 @@ export const Suggester: React.FC<Suggester> = ({
   onEmptyAddButtonClick,
   clearableInput = true,
   rightContent,
+  onFocusChange,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -224,7 +229,9 @@ export const Suggester: React.FC<Suggester> = ({
   }, [externalDroppedItem]);
 
   const handleEnterPress = () => {
-    if (selected === -1 && typed.length > 0) {
+    // Statements are created without a label, so allow triggering create with an
+    // empty input; other classes still require at least one character.
+    if (selected === -1 && (typed.length > 0 || category === EntityEnums.Class.Statement)) {
       if (!disableCreate) {
         if (
           category === dropdownWildCard.value ||
@@ -263,7 +270,9 @@ export const Suggester: React.FC<Suggester> = ({
   };
 
   const handleAddBtnClick = () => {
-    if (typed.length > 0) {
+    // Statements are created without a label, so allow triggering create with an
+    // empty input; other classes still require at least one character.
+    if (typed.length > 0 || category === EntityEnums.Class.Statement) {
       if (
         category === dropdownWildCard.value ||
         category === EntityEnums.Class.Statement ||
@@ -410,10 +419,12 @@ export const Suggester: React.FC<Suggester> = ({
               roundCorners={false}
               onFocus={() => {
                 setIsFocused(true);
+                onFocusChange && onFocusChange(true);
               }}
               onBlur={() => {
                 // Comment this for debug
                 setIsFocused(false);
+                onFocusChange && onFocusChange(false);
                 setSelected(-1);
               }}
               onEnterPressFn={handleEnterPress}
@@ -422,23 +433,28 @@ export const Suggester: React.FC<Suggester> = ({
               fullHeight
               clearable={clearableInput}
               rightContent={
-                !disableCreate ? (
-                  <IconButton
-                    icon={<FaPlus />}
-                    tooltipLabel="create new entity"
-                    color={buttonColorKey}
-                    noBackground
-                    noBorder
-                    onClick={() => {
-                      handleAddBtnClick();
-                    }}
-                    disabled={disabled}
-                  />
-                ) : rightContent ? (
-                  rightContent
-                ) : (
-                  button && button
-                )
+                <>
+                  {/* rightContent renders alongside the create button (e.g. the
+                      annotator's elvl group); the button fallback only applies
+                      when create is disabled and no rightContent is provided. */}
+                  {rightContent ? rightContent : disableCreate ? button && button : null}
+                  {!disableCreate && (
+                    <>
+                      {rightContent && <StyledRightContentDivider />}
+                      <IconButton
+                        icon={<FaPlus />}
+                        tooltipLabel="create new entity"
+                        color={buttonColorKey}
+                        noBackground
+                        noBorder
+                        onClick={() => {
+                          handleAddBtnClick();
+                        }}
+                        disabled={disabled}
+                      />
+                    </>
+                  )}
+                </>
               }
             />
           </div>

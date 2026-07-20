@@ -108,15 +108,13 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
               const entity = entitiesById[anchor];
               if (entity) {
                 return (
-                  <div style={{ display: "grid" }} key={index}>
-                    <EntityTag
-                      key={`${section.key}-${anchor}-${index}`}
-                      entity={entity}
-                      disableDoubleClick
-                      disableDrag
-                      fullWidth
-                    />
-                  </div>
+                  <EntityTag
+                    key={`${section.key}-${anchor}-${index}`}
+                    entity={entity}
+                    disableDoubleClick
+                    disableDrag
+                    fullWidth
+                  />
                 );
               }
 

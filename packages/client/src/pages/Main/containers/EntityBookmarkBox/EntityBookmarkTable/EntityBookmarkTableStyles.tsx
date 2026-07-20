@@ -41,9 +41,6 @@ export const StyledTd = styled.td`
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-export const StyledTagWrap = styled.div`
-  display: grid;
-`;
 export const StyledDragHandleTd = styled.td`
   cursor: move;
 `;

@@ -269,28 +269,42 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "Text",
         accessor: "data",
         Cell: ({ row }: CellType) => {
-          const { usedInDocuments } = row.original;
+          const { anchorTexts, data, labels } = row.original;
 
-          const firstAnchorText = usedInDocuments[0]?.anchorText;
+          // Same fallback order as the entity-detail Statements table (each
+          // used only when the one above is empty):
+          //   1) document anchor span(s) - multiple joined with " ... "
+          //   2) statement text (deprecated but still in use sometimes)
+          //   3) statement label - rendered italic to mark it as a label
+          const anchorText = anchorTexts
+            ?.map((t) => t.trim())
+            .filter((t) => t)
+            .join(" ... ");
 
-          if (firstAnchorText) {
+          if (anchorText) {
             return (
               <StyledAbbreviatedLabel>
                 <StyledAnchor>
                   <TbAnchor size={12} strokeWidth={2} />
                 </StyledAnchor>
-                {firstAnchorText}
+                {anchorText}
               </StyledAbbreviatedLabel>
             );
           }
 
-          const { text } = row.original.data;
+          const text = data.text?.trim();
+          if (text) {
+            return <StyledAbbreviatedLabel>{data.text}</StyledAbbreviatedLabel>;
+          }
 
-          return (
-            <StyledAbbreviatedLabel>
-              {usedInDocuments[0]?.anchorText || text}
-            </StyledAbbreviatedLabel>
-          );
+          const label = labels?.[0]?.trim();
+          if (label) {
+            return (
+              <StyledAbbreviatedLabel $italic>{label}</StyledAbbreviatedLabel>
+            );
+          }
+
+          return <StyledAbbreviatedLabel />;
         },
       },
       {

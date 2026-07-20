@@ -42,7 +42,6 @@ import {
   StyledDetailForm,
   StyledFormWrapper,
   StyledRelativePosition,
-  StyledTagWrap,
 } from "../EntityDetailStyles";
 import { EntityDetailFormSectionAlternativeLabels } from "./EntityDetailFormSectionAlternativeLabels/EntityDetailFormSectionAlternativeLabels";
 
@@ -228,9 +227,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>Applied Template</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <StyledTagWrap>
-                  <EntityTag entity={templateApplied} fullWidth />
-                </StyledTagWrap>
+                <EntityTag entity={templateApplied} fullWidth />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -305,15 +302,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>Parent Territory</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <StyledTagWrap>
-                  <EntityTag
-                    fullWidth
-                    entity={entity.entities[entity.data.parent?.territoryId]}
-                    disableDoubleClick={entity.data.parent?.territoryId === rootTerritoryId}
-                    disableDrag={entity.data.parent?.territoryId === rootTerritoryId}
-                    disableTooltip={entity.data.parent?.territoryId === rootTerritoryId}
-                  />
-                </StyledTagWrap>
+                <EntityTag
+                  fullWidth
+                  entity={entity.entities[entity.data.parent?.territoryId]}
+                  disableDoubleClick={entity.data.parent?.territoryId === rootTerritoryId}
+                  disableDrag={entity.data.parent?.territoryId === rootTerritoryId}
+                  disableTooltip={entity.data.parent?.territoryId === rootTerritoryId}
+                />
                 {/* move to different parent territory */}
                 {entity.class === EntityEnums.Class.Territory &&
                   entity.data.parent.territoryId !== rootTerritoryId && (

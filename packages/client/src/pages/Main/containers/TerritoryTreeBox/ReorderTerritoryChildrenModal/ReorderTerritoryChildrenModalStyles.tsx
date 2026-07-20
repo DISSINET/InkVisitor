@@ -35,8 +35,3 @@ export const StyledIndex = styled.span`
   text-align: right;
   flex-shrink: 0;
 `;
-
-export const StyledTagWrap = styled.div`
-  display: grid;
-  pointer-events: none;
-`;

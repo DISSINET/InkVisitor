@@ -20,15 +20,18 @@ import LogoGACR from "assets/logos/gacr-en_rgb.png";
 import LogoERC from "assets/logos/logo_erc-flag_eum.png";
 import LogoMUNI from "assets/logos/arts-muni.png";
 import LogoEUMSMT from "assets/logos/eu_msmt.png";
+import { InterfaceEnums } from "@inkvisitor/shared/enums";
+import { useAppSelector } from "redux/hooks";
 
 interface IAcknowledgementLogo {
   src: string;
   url: string;
+  isDark?: boolean;
 }
-const AcknowledgementLogo: React.FC<IAcknowledgementLogo> = ({ src, url }) => {
+const AcknowledgementLogo: React.FC<IAcknowledgementLogo> = ({ src, url, isDark }) => {
   return (
     <a href={url} target="_blank" rel="noopener noreferrer">
-      <StyledAcknowledgementLogo src={src} />
+      <StyledAcknowledgementLogo src={src} $isDark={isDark} />
     </a>
   );
 };
@@ -80,10 +83,13 @@ const PersonWithIcon: React.FC<IPersonWithIcon> = ({ label, url }) => {
 interface IAboutPage {}
 
 export const AboutPage: React.FC<IAboutPage> = ({}) => {
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
+  const isDark = selectedThemeId === InterfaceEnums.Theme.Dark;
+
   return (
     <StyledContentWrapper>
-      <StyledContent>
-        <StyledLogo>
+      <StyledContent $isDark={isDark}>
+        <StyledLogo $isDark={isDark}>
           <img width={"100%"} src={LogoInkvisitor} />
         </StyledLogo>
 
@@ -217,10 +223,10 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
         </StyledContentSection>
 
         <StyledAcknowledgement>
-          <AcknowledgementLogo src={LogoERC.default} url="https://erc.europa.eu/homepage" />
-          <AcknowledgementLogo src={LogoGACR.default} url="https://gacr.cz/en/" />
-          <AcknowledgementLogo src={LogoMUNI.default} url="https://www.phil.muni.cz/en" />
-          <AcknowledgementLogo src={LogoEUMSMT.default} url="https://www.msmt.cz/?lang=2" />
+          <AcknowledgementLogo src={LogoERC} url="https://erc.europa.eu/homepage" isDark={isDark} />
+          <AcknowledgementLogo src={LogoGACR} url="https://gacr.cz/en/" isDark={isDark} />
+          <AcknowledgementLogo src={LogoMUNI} url="https://www.phil.muni.cz/en" isDark={isDark} />
+          <AcknowledgementLogo src={LogoEUMSMT} url="https://www.msmt.cz/?lang=2" isDark={isDark} />
         </StyledAcknowledgement>
       </StyledContent>
     </StyledContentWrapper>
