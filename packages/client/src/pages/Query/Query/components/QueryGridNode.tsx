@@ -148,7 +148,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   return (
     <StyledNodeContainer>
       {hasParallelEdges && (
-        <SwitchGroup $column style={{ zIndex: "10" }}>
+        <SwitchGroup $column $zIndex={10}>
           <Button
             label="AND"
             shape="rounded-sm"

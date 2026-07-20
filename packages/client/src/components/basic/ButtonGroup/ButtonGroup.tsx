@@ -34,6 +34,7 @@ interface SwitchGroup {
   $column?: boolean;
   $bgColor?: string;
   $borderColor?: FlatThemeColor;
+  $zIndex?: number;
 }
 export const SwitchGroup = styled.div<SwitchGroup>`
   display: inline-flex;
@@ -46,7 +47,7 @@ export const SwitchGroup = styled.div<SwitchGroup>`
   overflow: hidden;
   border: ${({ theme, $borderColor }) =>
     $borderColor ? `${theme.borderWidth[1]} solid ${theme.color[$borderColor]}` : "none"};
-
+  z-index: ${({ $zIndex }) => $zIndex ?? "auto"};
   > button {
     margin: 0;
     display: flex;
