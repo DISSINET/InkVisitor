@@ -154,13 +154,15 @@ export const StyledFolderList = styled.div`
 `;
 
 // each folder sits in its own card so the groups read as separate containers
-// resting on the tinted panel background (white flips in the dark theme)
+// resting on the tinted panel background; gray[150] rather than "white",
+// because the dark theme's white is darker than the panel and the two flattened
+// into each other there
 export const StyledFolderCard = styled.div`
   flex-shrink: 0;
   padding: 0.4rem 0.5rem;
   border: 1px solid ${({ theme }) => theme.color["gray"][200]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
-  background-color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme }) => theme.color["gray"][150]};
 `;
 
 export const StyledFolderHeader = styled.button`

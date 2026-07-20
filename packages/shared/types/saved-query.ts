@@ -1,9 +1,12 @@
-import { Query } from "./query";
+import { Explore, Query } from "./query";
 
 export interface ISavedQueryData {
   query: Query.INode; // full recursive tree — each node carries its edges
   includeEquivalents: boolean;
   includeSubordinates: boolean;
+  // Explorer-side filters (UUIDs, label, floating search) the user chose to
+  // store with the query; optional, queries saved before this existed have none
+  filters?: Explore.IExploreSearchFilter[];
 }
 
 export interface ISavedQuery {

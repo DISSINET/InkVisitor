@@ -99,6 +99,7 @@ enum ExploreActionType {
   setUpdatedByFilter,
   setEditedByFilter,
   setRootValidityFilter,
+  setFilters,
   clearFloatingSearchFilters,
 }
 
@@ -413,6 +414,19 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
           rootValidity && rootValidity !== IRequestSearchRootValidity.Any
             ? [...otherFilters, { type: Explore.SearchOption.RootValidity, rootValidity }]
             : otherFilters,
+        offset: 0,
+      };
+    }
+
+    // replaces every filter at once — used when loading a saved query, whose
+    // stored filters stand in for the whole current filter set
+    case ExploreActionType.setFilters: {
+      const { filters } = action.payload as {
+        filters: Explore.IExploreSearchFilter[];
+      };
+      return {
+        ...state,
+        filters,
         offset: 0,
       };
     }

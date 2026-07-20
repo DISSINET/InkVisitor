@@ -684,6 +684,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   includeSubordinates={includeSubordinates}
                   onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
                   onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
+                  exploreFilters={exploreState.filters}
+                  exploreDispatch={exploreStateDispatch}
                 />
               )}
               {!explorerBoxMaximized && (

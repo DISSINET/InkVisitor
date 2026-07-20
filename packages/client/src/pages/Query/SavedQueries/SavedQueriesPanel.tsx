@@ -16,6 +16,8 @@ import {
   IcoSave,
   IcoTrash,
 } from "Theme/icons";
+import { Explore } from "@inkvisitor/shared/types/query";
+import { ExploreActionType } from "../Explorer/state";
 import { QueryAction, QueryActionType } from "../Query/state";
 import { EXAMPLE_QUERIES, IExampleQuery } from "./exampleQueries";
 import {
@@ -52,6 +54,8 @@ interface SavedQueriesPanel {
   includeSubordinates: boolean;
   onToggleIncludeEquivalents: (value: boolean) => void;
   onToggleIncludeSubordinates: (value: boolean) => void;
+  exploreFilters: Explore.IExploreSearchFilter[];
+  exploreDispatch: React.Dispatch<any>;
 }
 
 // floor for the measured panel height, so a very short Box still leaves the
@@ -73,6 +77,8 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   includeSubordinates,
   onToggleIncludeEquivalents,
   onToggleIncludeSubordinates,
+  exploreFilters,
+  exploreDispatch,
 }) => {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -150,7 +156,14 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     saveMutation.mutate({
       name: trimmed,
       shared: saveShared,
-      data: { query: queryState, includeEquivalents, includeSubordinates },
+      // every Explorer filter in play (UUIDs, label, floating search) travels
+      // with the query, so loading it reproduces the whole result
+      data: {
+        query: queryState,
+        includeEquivalents,
+        includeSubordinates,
+        filters: exploreFilters,
+      },
     });
   };
 
@@ -161,6 +174,12 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     });
     onToggleIncludeEquivalents(row.data.includeEquivalents);
     onToggleIncludeSubordinates(row.data.includeSubordinates);
+    // the stored filters replace the current set: a query saved without a given
+    // filter is meant to run without it, not to inherit whatever is applied now
+    exploreDispatch({
+      type: ExploreActionType.setFilters,
+      payload: { filters: row.data.filters ?? [] },
+    });
   };
 
   const startEditing = (row: ISavedQuery) => {

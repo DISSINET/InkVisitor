@@ -30,6 +30,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
       !!this.data &&
       typeof this.data.includeEquivalents === "boolean" &&
       typeof this.data.includeSubordinates === "boolean" &&
+      (this.data.filters === undefined || Array.isArray(this.data.filters)) &&
       SavedQuery.isQueryNodeValid(this.data.query)
     );
   }
