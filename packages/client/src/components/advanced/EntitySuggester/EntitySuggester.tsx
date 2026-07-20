@@ -7,7 +7,7 @@ import {
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { wildCardChar } from "Theme/constants";
+import { STATEMENT_LABEL_NOT_RECOMMENDED, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
@@ -63,9 +63,17 @@ interface EntitySuggesterProps {
   onEntityCreateMutationSuccess?: (entity: IEntity) => void;
   entityCreateStatementOrder?: number;
 
+  // epistemic level of the anchor created for the new entity; forwarded to the
+  // EntityCreateModal so the user can pick it there without closing the modal
+  anchorElvl?: EntityEnums.Elvl;
+  onAnchorElvlChange?: (elvl: EntityEnums.Elvl) => void;
+
   button?: React.ReactNode;
   // rendered inside the suggester input's trailing slot (only when disableCreate)
   rightContent?: React.ReactNode;
+  // notifies the parent when the input gains/loses focus (e.g. the annotator
+  // highlights the elvl group while the suggester is focused)
+  onFocusChange?: (isFocused: boolean) => void;
   preSuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -87,6 +95,11 @@ interface EntitySuggesterProps {
 
   disabled?: boolean;
   isHidden?: boolean;
+  // When the selected class is Statement, empties the input and shows a gray
+  // hint placeholder ("label is not recommended for Statements"); restores the
+  // previously typed text when switching back to another class. Statements are
+  // not meant to carry a label.
+  statementLabelHint?: boolean;
   disableCleanTypedAfterCreate?: boolean;
   clearableInput?: boolean;
   onEmptyAddButtonClick?: () => void;
@@ -120,9 +133,12 @@ const EntitySuggesterFull: React.FC<
   onCreateStatement,
   onEntityCreateMutationSuccess,
   entityCreateStatementOrder,
+  anchorElvl,
+  onAnchorElvlChange,
 
   button,
   rightContent,
+  onFocusChange,
   preSuggestions,
 
   disableCreate = false,
@@ -142,6 +158,7 @@ const EntitySuggesterFull: React.FC<
 
   disabled = false,
   isHidden = false,
+  statementLabelHint = false,
   externalDroppedItem,
   onConsumeExternalDrop,
   disableCleanTypedAfterCreate = false,
@@ -149,6 +166,9 @@ const EntitySuggesterFull: React.FC<
   clearableInput = true,
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
+  // Remembers the input typed under a non-Statement class so it can be restored
+  // when the user switches away from Statement (statementLabelHint mode).
+  const preStatementTypedRef = useRef<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<
     EntityEnums.Class | EntityEnums.Extension.Any
@@ -463,7 +483,11 @@ const EntitySuggesterFull: React.FC<
         preSuggestions={
           preSuggestions && filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
         }
-        placeholder={placeholder}
+        placeholder={
+          statementLabelHint && selectedCategory === EntityEnums.Class.Statement
+            ? STATEMENT_LABEL_NOT_RECOMMENDED
+            : placeholder
+        }
         typed={typed} // input value
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
@@ -473,6 +497,24 @@ const EntitySuggesterFull: React.FC<
           onTyped && onTyped(newType);
         }}
         onChangeCategory={(option) => {
+          if (statementLabelHint) {
+            const toStatement =
+              option === EntityEnums.Class.Statement &&
+              selectedCategory !== EntityEnums.Class.Statement;
+            const fromStatement =
+              option !== EntityEnums.Class.Statement &&
+              selectedCategory === EntityEnums.Class.Statement;
+            if (toStatement) {
+              // remember the current text and clear so the hint placeholder shows
+              preStatementTypedRef.current = typed;
+              setTyped("");
+              onTyped && onTyped("");
+            } else if (fromStatement) {
+              // restore the text typed before switching to Statement
+              setTyped(preStatementTypedRef.current);
+              onTyped && onTyped(preStatementTypedRef.current);
+            }
+          }
           setSelectedCategory(option);
           onChangeCategory && onChangeCategory(option);
         }}
@@ -509,6 +551,7 @@ const EntitySuggesterFull: React.FC<
         button={button}
         rightContent={rightContent}
         disableTemplateInstantiation={disableTemplateInstantiation}
+        onFocusChange={onFocusChange}
         isHidden={isHidden}
         externalDroppedItem={externalDroppedItem}
         onConsumeExternalDrop={onConsumeExternalDrop}
@@ -552,6 +595,8 @@ const EntitySuggesterFull: React.FC<
           parentTerritory={parentTerritory}
           entityCreateStatementOrder={entityCreateStatementOrder}
           onCreateStatement={onCreateStatement}
+          anchorElvl={anchorElvl}
+          onAnchorElvlChange={onAnchorElvlChange}
         />
       )}
     </>

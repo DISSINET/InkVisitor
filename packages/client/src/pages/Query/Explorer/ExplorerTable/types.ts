@@ -42,3 +42,16 @@ export const smallColumnTypes = new Set([
   Explore.EExploreColumnType.ELI,
 ]);
 
+/**
+ * Column types whose width is estimated from cell content (entity tags +
+ * optional suggester). Fixed-control columns (status/language/POS dropdowns,
+ * user tag, plain text) keep their static widths.
+ */
+export const contentSizedColumnTypes = new Set([
+  Explore.EExploreColumnType.ER,
+  Explore.EExploreColumnType.EPV,
+  Explore.EExploreColumnType.EPT,
+  Explore.EExploreColumnType.ERR,
+  Explore.EExploreColumnType.ERV,
+]);
+

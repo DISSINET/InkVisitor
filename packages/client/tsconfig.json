@@ -41,7 +41,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "esnext",
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
   "exclude": ["node_modules", "dist", "public"],
   "include": [

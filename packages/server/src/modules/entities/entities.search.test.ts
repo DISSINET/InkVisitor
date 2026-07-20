@@ -1,4 +1,5 @@
 import { apiPath } from "@common/constants";
+import Document from "@models/document/document";
 import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/rethink";
@@ -101,6 +102,18 @@ describe("Entities search (params)", function () {
       new StatementAction({ id: action.id, actionId: action.id }),
     ];
 
+    // statement anchored in a document - its id doubles as the document tag
+    // name, which excludes ".", so keep it dot-free
+    const [, anchoredStatement] = prepareStatement();
+    anchoredStatement.labels = ["anchored-statement"];
+    anchoredStatement.id = `anchored${Math.random()
+      .toString()
+      .replace(/\./g, "")}`;
+    const doc = new Document({
+      id: Math.random().toString(),
+      content: `pre<${anchoredStatement.id}>anchor span</${anchoredStatement.id}>post`,
+    });
+
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
@@ -110,6 +123,12 @@ describe("Entities search (params)", function () {
       await entity.save(db.connection);
       await linkedEntity.save(db.connection);
       await statement.save(db.connection);
+
+      // the statement must exist before preprocess so its class lands in
+      // documents.entityIds and the anchor resolves
+      await anchoredStatement.save(db.connection);
+      await doc.preprocess(db.connection);
+      await doc.save(db.connection);
     });
 
     afterAll(async () => {
@@ -276,6 +295,24 @@ describe("Entities search (params)", function () {
               expect(res.body).toHaveLength(0);
             });
         });
+      });
+    });
+
+    describe("search returning an anchored statement", () => {
+      it("should stamp anchorTexts onto the statement result", async () => {
+        await authAgent
+          .get(`${apiPath}/entities`)
+          .query({
+            class: EntityEnums.Class.Statement,
+            label: anchoredStatement.labels[0],
+          })
+          .expect("Content-Type", /json/)
+          .expect(200)
+          .expect((res: Response) => {
+            expect(res.body).toHaveLength(1);
+            expect(res.body[0].id).toEqual(anchoredStatement.id);
+            expect(res.body[0].anchorTexts).toEqual(["anchor span"]);
+          });
       });
     });
   });

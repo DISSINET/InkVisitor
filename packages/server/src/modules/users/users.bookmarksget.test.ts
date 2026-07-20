@@ -13,6 +13,7 @@ import { getAuthenticatedAgent } from "@modules/testAuth";
 import User from "@models/user/user";
 import { IBookmarkFolder } from "@inkvisitor/shared/types";
 import { pool } from "@middlewares/db";
+import Document from "@models/document/document";
 
 describe("Users bookmarksGet", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
@@ -86,6 +87,57 @@ describe("Users bookmarksGet", function () {
         .expect((res) => {
           expect(res.body).toHaveLength(1);
           expect(res.body[0].entities).toHaveLength(1);
+        })
+        .expect(200);
+    });
+  });
+  describe("Bookmarked anchored statement", () => {
+    it("should stamp anchorTexts onto the bookmarked statement", async () => {
+      // the statement id doubles as the document tag name, which excludes
+      // ".", so keep it dot-free
+      const statementId = `anchored${Math.random()
+        .toString()
+        .replace(/\./g, "")}`;
+
+      await createEntity(
+        db,
+        new Statement({
+          id: statementId,
+          data: new StatementData({
+            territory: new StatementTerritory({ territoryId: "any" }),
+          }),
+        })
+      );
+
+      // the statement must exist before preprocess so its class lands in
+      // documents.entityIds and the anchor resolves
+      const doc = new Document({
+        id: Math.random().toString(),
+        content: `pre<${statementId}>bookmark anchor span</${statementId}>post`,
+      });
+      await doc.preprocess(db.connection);
+      await doc.save(db.connection);
+
+      const userId = Math.random().toString();
+      const user = new User({
+        id: userId,
+        bookmarks: [
+          {
+            id: "test-anchored",
+            name: "test-anchored",
+            entityIds: [statementId],
+          } as IBookmarkFolder,
+        ],
+      });
+      await user.save(db.connection);
+
+      await authAgent
+        .get(`${apiPath}/users/${userId}/bookmarks`)
+        .expect((res) => {
+          expect(res.body).toHaveLength(1);
+          expect(res.body[0].entities[0].anchorTexts).toEqual([
+            "bookmark anchor span",
+          ]);
         })
         .expect(200);
     });

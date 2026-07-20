@@ -8,6 +8,7 @@ import {
   StyledCloudEntityWrapper,
   StyledRelation,
 } from "../EntityDetailRelationTypeBlockStyles";
+import { CopyUuidsButton } from "../../CopyUuidsButton/CopyUuidsButton";
 
 interface EntityDetailCloudRelation {
   relation: Relation.IRelation;
@@ -67,6 +68,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
           onUnlink={() => handleCloudRemove()}
           originEntity={originEntity}
           disabled={!userCanEdit}
+          topRightSlot={<CopyUuidsButton uuids={relation.entityIds} />}
         >
           <StyledRelation>
             {relation.entityIds.map((relationEntityId, key) => {

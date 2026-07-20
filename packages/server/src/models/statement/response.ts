@@ -36,6 +36,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
   warnings: IWarning[];
   usedInDocuments: IResponseUsedInDocument[];
+  anchorTexts?: string[];
 
   constructor(entity: IStatement) {
     super(entity);
@@ -47,6 +48,14 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async prepare(req: IRequest, settings?: ISetting[]) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
     this.usedInDocuments = await this.findUsedInDocuments(req.db.connection);
+    // Display-friendly mirror of the statement's own anchor spans (see
+    // IResponseStatement.anchorTexts); derived from the already-loaded documents.
+    const anchorTexts = this.usedInDocuments
+      .map((d) => d.anchorText)
+      .filter((t) => t);
+    if (anchorTexts.length) {
+      this.anchorTexts = anchorTexts;
+    }
 
     await this.prepareEntities(req.db.connection);
     if (!this.isTemplate) {
@@ -108,6 +117,10 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       ...entities.map((x) => ({ [x.id]: x })),
       ...anchorEntities.map((x) => ({ [x.id]: x }))
     );
+
+    // stamp document anchor spans onto statement entities so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts)
+    await Entity.applyAnchorTexts(db, this.entities);
   }
 
   /**

@@ -313,7 +313,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         <StyledButtonWrapper {...buttonWrapperProps}>{button}</StyledButtonWrapper>
       )}
       {elvlButtonGroup && (
-        <StyledElvlWrapper>
+        <StyledElvlWrapper $tagBorderColorKey={entity.status}>
           <div onMouseOver={() => setElvlHovered(true)} onMouseOut={() => setElvlHovered(false)}>
             {elvlButtonGroup}
           </div>

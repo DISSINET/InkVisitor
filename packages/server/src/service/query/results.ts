@@ -213,6 +213,25 @@ export default class Results<T extends { id: string }> {
           out[column.id] = resources;
           break;
         }
+        // Entity Reference Values
+        case Explore.EExploreColumnType.ERV: {
+          const params =
+            column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ERV>;
+
+          const resourceId = params.resource;
+          const entityIds: Record<string, null> = {};
+
+          entity.references
+            .filter((ref) => ref.resource === resourceId)
+            .forEach((ref) => {
+              if (ref.value) {
+                entityIds[ref.value] = null;
+              }
+            });
+
+          out[column.id] = await Entity.findEntitiesByIds(db, Object.keys(entityIds));
+          break;
+        }
         // Entity Property types
         case Explore.EExploreColumnType.EPT: {
           const entities = await Entity.findEntitiesByIds(

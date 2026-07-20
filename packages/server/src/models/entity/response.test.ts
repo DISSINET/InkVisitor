@@ -16,7 +16,7 @@ import {
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
 } from "@inkvisitor/shared/types/response-detail";
-import { IStatement } from "@inkvisitor/shared/types";
+import { IEntity, IStatement } from "@inkvisitor/shared/types";
 import { prepareEntity } from "./entity.test";
 import { Db } from "@service/rethink";
 import Document from "@models/document/document";
@@ -591,6 +591,76 @@ describe("models/entity/response", function () {
       expect(
         usedInDocs.find((d) => d.resourceId === resource2.id)?.parentTerritoryId
       ).toEqual(territory2.id);
+    });
+  });
+
+  describe("ResponseEntityDetail.populateEntitiesMap anchor stamping", function () {
+    let db: Db;
+    // Document tag names exclude ".", so keep anchored statement ids dot-free.
+    const tagSafeId = () => Math.random().toString().replace(/\./g, "");
+
+    const anchoredTwice = new Statement({ id: tagSafeId() });
+    const anchoredOnce = new Statement({ id: tagSafeId() });
+    const notAnchored = new Statement({ id: tagSafeId() });
+    const rootStatement = new Statement({ id: tagSafeId() });
+
+    const doc = new Document({
+      id: Math.random().toString(),
+      content: `start<${anchoredTwice.id}>first span</${anchoredTwice.id}>mid<${anchoredTwice.id}>second span</${anchoredTwice.id}>gap<${anchoredOnce.id}>only span</${anchoredOnce.id}>x<${rootStatement.id}>root span</${rootStatement.id}>end`,
+    });
+
+    const detail = new Entity({ id: tagSafeId() });
+    let entities: Record<string, IEntity>;
+    let rootResponse: ResponseEntityDetail;
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      // statements must exist before preprocess so their class lands in
+      // documents.entityIds and the anchors resolve.
+      await anchoredTwice.save(db.connection);
+      await anchoredOnce.save(db.connection);
+      await notAnchored.save(db.connection);
+      await rootStatement.save(db.connection);
+      await doc.preprocess(db.connection);
+      await doc.save(db.connection);
+
+      const response = new ResponseEntityDetail(detail);
+      response.addLinkedEntities([
+        anchoredTwice.id,
+        anchoredOnce.id,
+        notAnchored.id,
+      ]);
+      entities = await response.populateEntitiesMap(db.connection);
+
+      // detail opened on a statement - the response root itself must be stamped
+      rootResponse = new ResponseEntityDetail(rootStatement);
+      await rootResponse.populateEntitiesMap(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    it("should stamp both anchor spans for a statement anchored twice", () => {
+      expect(entities[anchoredTwice.id]?.anchorTexts).toEqual([
+        "first span",
+        "second span",
+      ]);
+    });
+
+    it("should stamp the single anchor span for a statement anchored once", () => {
+      expect(entities[anchoredOnce.id]?.anchorTexts).toEqual(["only span"]);
+    });
+
+    it("should leave anchorTexts undefined for a statement without anchors", () => {
+      expect(entities[notAnchored.id]?.anchorTexts).toBeUndefined();
+    });
+
+    it("should stamp the response root when the detail is a statement", () => {
+      // anchorTexts is not declared on the model class (deliberately - it must
+      // never be persisted), so read it through the response interface
+      expect((rootResponse as IEntity).anchorTexts).toEqual(["root span"]);
     });
   });
 });

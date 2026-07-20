@@ -3,9 +3,9 @@ import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CellProps, Column, Row, useTable } from "react-table";
-import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
-import { StyledTable, StyledTagWrap } from "./EntityBookmarkTableStyles";
 import { IcoTrash } from "Theme/icons";
+import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
+import { StyledTable } from "./EntityBookmarkTableStyles";
 
 type CellType = CellProps<IEntity>;
 
@@ -34,48 +34,40 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
           const entity = row.original;
 
           return (
-            <StyledTagWrap>
-              <EntityTag
-                entity={entity}
-                tooltipPosition="left"
-                fullWidth
-                unlinkButton={{
-                  onClick: () => {
-                    removeBookmark(folder.id, entity.id);
-                  },
-                  tooltipLabel: "delete bookmark",
-                  icon: <IcoTrash />,
-                }}
-              />
-            </StyledTagWrap>
+            <EntityTag
+              entity={entity}
+              tooltipPosition="left"
+              fullWidth
+              unlinkButton={{
+                onClick: () => {
+                  removeBookmark(folder.id, entity.id);
+                },
+                tooltipLabel: "delete bookmark",
+                icon: <IcoTrash />,
+              }}
+            />
           );
         },
       },
     ],
-    [folder]
+    [folder],
   );
 
   const getRowId = useCallback((row: IEntity) => {
     return row.id;
   }, []);
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    visibleColumns,
-  } = useTable({
-    columns,
-    data: useMemo(() => folderEntities || [], [folderEntities]),
-    getRowId,
-  });
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } =
+    useTable({
+      columns,
+      data: useMemo(() => folderEntities || [], [folderEntities]),
+      getRowId,
+    });
 
   const updateFolderItemOrder = () => {
     updateFolderEntitys(
       folderEntities.map((a) => a.id),
-      folder.id
+      folder.id,
     );
   };
 
@@ -86,7 +78,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
           [dragIndex, 1],
           [hoverIndex, 0, prevFolderEntities[dragIndex]],
         ],
-      })
+      }),
     );
   }, []);
 

@@ -19,6 +19,10 @@ export interface IEntity {
   templateData?: object;
   createdAt?: Date;
   updatedAt?: Date;
+  // response-only, never persisted: content of each document anchor pointing
+  // at this entity (only filled for Statement-class entities in response
+  // entities maps / lists; see Entity.applyAnchorTexts on the server)
+  anchorTexts?: string[];
 }
 
 export const entityAllowedFields: Record<keyof IEntity, boolean> = {
@@ -38,4 +42,5 @@ export const entityAllowedFields: Record<keyof IEntity, boolean> = {
   templateData: true,
   createdAt: true,
   updatedAt: true,
+  anchorTexts: false, // response-only computed field, not writable
 };

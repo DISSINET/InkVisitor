@@ -7,6 +7,7 @@ import { LetterIcon } from "components";
 import { EntityTag, PaginationControls } from "components/advanced";
 import { usePagination } from "hooks/usePagination";
 import React, { useMemo } from "react";
+import { CopyUuidsButton } from "../../CopyUuidsButton/CopyUuidsButton";
 import {
   StyledHeading,
   StyledInverseRelationGroup,
@@ -62,6 +63,13 @@ export const EntityDetailInverseRelation: React.FC<
           <b>{filteredRelations.length} {relationRule.inverseLabel}</b>
           <i> - inverse of</i>
           <LetterIcon letter={relationType} color="info" />
+          {filteredRelations.length > 0 && (
+            <CopyUuidsButton
+              uuids={filteredRelations.map(
+                (relation) => relation.entityIds[0]
+              )}
+            />
+          )}
         </div>
         {showPagination && (
           <StyledPaginationWrapper

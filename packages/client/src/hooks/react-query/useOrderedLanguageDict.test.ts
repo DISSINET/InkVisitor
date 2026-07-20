@@ -56,8 +56,14 @@ describe("orderLanguageDict", () => {
     expect(germanCount).toBe(1);
   });
 
-  it("returns the plain dict order when no working languages are set", () => {
+  it("returns empty first then the plain dict remainder when no working languages are set", () => {
     const result = orderLanguageDict([]);
-    expect(result.map((i) => i.value)).toEqual(languageDict.map((i) => i.value));
+    const values = result.map((i) => i.value);
+    expect(values[0]).toBe(EntityEnums.Language.Empty);
+    expect(values.slice(1)).toEqual(
+      languageDict
+        .filter((i) => i.value !== EntityEnums.Language.Empty)
+        .map((i) => i.value),
+    );
   });
 });

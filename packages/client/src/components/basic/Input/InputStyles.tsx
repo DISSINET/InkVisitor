@@ -307,6 +307,7 @@ export const StyledRightContent = styled.div<{
   display: flex;
   align-items: center;
   gap: 0.15rem;
+  z-index: 2;
   padding-left: ${({ $showDivider }) => ($showDivider ? "0.4rem" : "0")};
 
   &::before {

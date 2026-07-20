@@ -11,6 +11,7 @@ import Statement, {
 import { Db } from "@service/rethink";
 import { pool } from "@middlewares/db";
 import { IResponseEntity } from "@inkvisitor/shared/types";
+import Document from "@models/document/document";
 
 describe("Entities batch method", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
@@ -97,6 +98,48 @@ describe("Entities batch method", function () {
           const foundIds = res.body.map((entity: IResponseEntity) => entity.id);
           expect(foundIds).toContain(statementId1);
           expect(foundIds).toContain(statementId2);
+        });
+
+      await clean(db);
+    });
+  });
+
+  describe("Anchored statement", () => {
+    it("should stamp anchorTexts onto the statement result", async () => {
+      const db = new Db();
+      await db.initDb();
+
+      // the statement id doubles as the document tag name, which excludes
+      // ".", so keep it dot-free
+      const statementId = `anchored${Math.random()
+        .toString()
+        .replace(/\./g, "")}`;
+      const statement = new Statement({
+        id: statementId,
+        data: new StatementData({
+          territory: new StatementTerritory({
+            territoryId: "test-territory-1",
+          }),
+        }),
+      });
+      await statement.save(db.connection);
+
+      // the statement must exist before preprocess so its class lands in
+      // documents.entityIds and the anchor resolves
+      const doc = new Document({
+        id: Math.random().toString(),
+        content: `pre<${statementId}>batch anchor span</${statementId}>post`,
+      });
+      await doc.preprocess(db.connection);
+      await doc.save(db.connection);
+
+      await authAgent
+        .post(`${apiPath}/entities/batch`)
+        .send({ ids: [statementId] })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.length).toBe(1);
+          expect(res.body[0].anchorTexts).toEqual(["batch anchor span"]);
         });
 
       await clean(db);

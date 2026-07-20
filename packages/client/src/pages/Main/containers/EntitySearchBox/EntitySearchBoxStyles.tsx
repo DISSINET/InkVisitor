@@ -82,10 +82,6 @@ export const StyledResultsHeader = styled.div`
 export const StyledResultHeading = styled.h6`
   width: 100%;
 `;
-export const StyledResultItem = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-`;
 export const StyledTagLoaderWrap = styled.div`
   min-height: 3rem;
 `;

@@ -1,7 +1,12 @@
 import { Button } from "components";
-import React, { ReactElement } from "react";
+import React, { ReactElement, ReactNode } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { StyledButtonWrap, StyledCloud, StyledCloudWrap } from "./CloudStyles";
+import {
+  StyledButtonWrap,
+  StyledCloud,
+  StyledCloudTopRight,
+  StyledCloudWrap,
+} from "./CloudStyles";
 import { IEntity } from "@inkvisitor/shared/types";
 
 interface Cloud {
@@ -9,16 +14,21 @@ interface Cloud {
   onUnlink: () => void;
   originEntity: IEntity | undefined;
   disabled?: boolean;
+  topRightSlot?: ReactNode;
 }
 export const Cloud: React.FC<Cloud> = ({
   children,
   onUnlink,
   originEntity,
   disabled,
+  topRightSlot,
 }) => {
   return (
     <StyledCloudWrap>
-      <StyledCloud>{children}</StyledCloud>
+      <StyledCloud $hasTopRight={!!topRightSlot}>
+        {topRightSlot && <StyledCloudTopRight>{topRightSlot}</StyledCloudTopRight>}
+        {children}
+      </StyledCloud>
       <StyledButtonWrap>
         <Button
           color="plain"

@@ -9,13 +9,13 @@ export const StyledContentWrapper = styled.div`
   background-color: ${({ theme }) => theme.color["gray"][150]};
 `;
 
-export const StyledContent = styled.div`
+export const StyledContent = styled.div<{ $isDark?: boolean }>`
   display: flex;
   flex-direction: column;
   width: 75%;
   max-width: 96rem;
   margin: ${({ theme }) => `${theme.space[8]} auto`};
-  background-color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme, $isDark }) => ($isDark ? theme.color.muni : theme.color["white"])};
   border-radius: ${({ theme }) => theme.borderRadius["lg"]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -26,7 +26,7 @@ export const StyledContent = styled.div`
   }
 `;
 
-export const StyledLogo = styled.div`
+export const StyledLogo = styled.div<{ $isDark?: boolean }>`
   display: flex;
   justify-content: center;
   background-color: ${({ theme }) => theme.color.muni};
@@ -34,6 +34,8 @@ export const StyledLogo = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius["md"]};
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  border-bottom: ${({ theme, $isDark }) =>
+    $isDark ? `1px solid ${theme.color["gray"][300]}` : "none"};
   overflow: hidden;
   margin-bottom: ${({ theme }) => theme.space[4]};
 
@@ -116,18 +118,20 @@ export const StyledAcknowledgement = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.space[6]};
-  margin-top: ${({ theme }) => theme.space[10]};
-  padding-top: ${({ theme }) => theme.space[8]};
+  justify-content: space-around;
+  padding: ${({ theme }) => theme.space[8]} 0;
   border-top: ${({ theme }) => `1px solid ${theme.color["gray"][300]}`};
 `;
 
-export const StyledAcknowledgementLogo = styled.img`
+export const StyledAcknowledgementLogo = styled.img<{ $isDark?: boolean }>`
   height: 5rem;
   width: auto;
+  box-sizing: content-box;
   filter: grayscale(1);
-  opacity: 0.65;
+  opacity: ${({ $isDark }) => ($isDark ? 0.55 : 0.65)};
+  background-color: ${({ theme, $isDark }) => ($isDark ? theme.color["gray"][800] : "transparent")};
+  padding: ${({ theme, $isDark }) => ($isDark ? theme.space[3] : 0)};
+  border-radius: ${({ theme }) => theme.borderRadius["md"]};
   transition:
     filter 0.2s ease,
     opacity 0.2s ease;

@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
 
 /** Defined before viewport so the parent can target it on hover. */
@@ -343,6 +344,11 @@ export const StyledCaretButtonWrapper = styled.span`
   display: flex;
 `;
 
+/** Wraps a create button so hovering it can ring its related elvl group. */
+export const StyledElvlWarningTrigger = styled.span`
+  display: flex;
+`;
+
 // #2885 — move-anchor mode: compact panel that replaces the menu body while
 // an anchor span is being nudged with the arrow buttons.
 export const StyledMoveAnchorPanel = styled.div`
@@ -372,13 +378,6 @@ export const StyledMoveAnchorGroupLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color.gray["600"]};
   margin-bottom: ${({ theme }) => theme.space[1]};
-`;
-
-export const StyledMoveAnchorEntityTag = styled.div`
-  display: grid;
-  align-items: center;
-  width: 100%;
-  padding-left: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledMoveAnchorFooter = styled.div`
@@ -431,9 +430,13 @@ export const StyledAnchorClusterMoveButton = styled.div`
  * group's own look: a single thin divider on its left (as in the tag's native
  * elvl slot) and no divider between the option buttons.
  */
-export const StyledAnchorClusterElvl = styled.div`
+interface StyledAnchorClusterElvl {
+  $tagBorderColorKey: EntityEnums.Status;
+}
+export const StyledAnchorClusterElvl = styled.div<StyledAnchorClusterElvl>`
   display: flex;
-  border-left: ${({ theme }) => `2px solid ${theme.color["black"]}`};
+  border-left: ${({ theme, $tagBorderColorKey }) =>
+    `2px solid ${theme.color.tagBorderColor[$tagBorderColorKey]}`};
   && button {
     border-left-width: 0;
   }

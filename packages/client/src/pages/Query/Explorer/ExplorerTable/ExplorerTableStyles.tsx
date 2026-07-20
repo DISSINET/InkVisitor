@@ -6,7 +6,7 @@ interface StyledTableWrapper {
 }
 export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   position: relative;
-  margin: 0.5rem 1rem 0 1rem;
+  margin-top: 0.5rem;
   overflow: hidden;
 `;
 export const StyledRowWrapper = styled.div`
@@ -175,7 +175,6 @@ export const StyledTableControl = styled(StyledSpaceBetween)`
   position: relative;
   padding: ${({ theme }) => theme.space[2]};
   padding-top: 0.2rem;
-  margin-right: 2rem;
   z-index: 20;
 `;
 

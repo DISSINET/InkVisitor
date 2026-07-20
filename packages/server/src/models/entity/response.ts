@@ -91,6 +91,12 @@ export class ResponseEntity extends Entity implements IResponseEntity {
       entities[entity.id] = entity;
     }
 
+    // stamp document anchor spans onto statement entities so tags can show
+    // them as labels (response-only field, see IEntity.anchorTexts). The
+    // response root itself joins the batch - when the detail/tooltip is opened
+    // on a statement, its own tag (header row, detail tab) needs the spans too.
+    await Entity.applyAnchorTexts(conn, [...Object.values(entities), this]);
+
     return entities;
   }
 
@@ -236,7 +242,9 @@ export class ResponseEntityDetail
     });
 
     // populateEntitiesMap depends on the fully-accumulated linkedEntitiesIds,
-    // so it must come after every addLinkedEntities call above.
+    // so it must come after every addLinkedEntities call above. It also stamps
+    // anchorTexts onto statement entities (used-in statements included), which
+    // the detail Statements table reads for its "Text" fallback.
     this.entities = await this.populateEntitiesMap(conn);
 
     // apply casts from templates - must be done after populateEntitiesMap
