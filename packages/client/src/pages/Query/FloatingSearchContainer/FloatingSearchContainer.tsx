@@ -1,23 +1,30 @@
 import { FloatingPortal } from "@floating-ui/react";
-import { Button } from "components";
+import { Button, Tooltip } from "components";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { IcoSearch } from "Theme/icons";
+import { IcoCloseGr, IcoSearch, IcoSubtract } from "Theme/icons";
 import { GrClose } from "react-icons/gr";
 import { floorNumberToOneDecimal } from "utils/utils";
-import { ExploreAction, ExploreActionType } from "../Explorer/state";
+import { countFloatingSearchFilters, ExploreAction, ExploreActionType } from "../Explorer/state";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { FloatingSearchForm } from "./FloatingSearchForm";
 import {
   FLOATING_SEARCH_COLLAPSED_SIZE,
   FLOATING_SEARCH_EXPANDED_WIDTH,
   FLOATING_SEARCH_PAGE_PADDING,
+  StyledBadgeClearIcon,
+  StyledBadgeCount,
+  StyledClearFiltersButton,
   StyledCloseButtonWrap,
   StyledCollapsedButton,
+  StyledCollapsedRoot,
   StyledDragHandle,
+  StyledFilterSummary,
   StyledExpandedContent,
   StyledExpandedHeader,
   StyledExpandedPanel,
+  StyledFilterCountBadge,
   StyledFloatingRoot,
+  StyledHeaderButtons,
 } from "./FloatingSearchContainerStyles";
 
 const EXPANDED_POSITION_STORAGE_KEY = "queryFloatingSearchExpandedPositionV2";
@@ -158,6 +165,9 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
 
   const hasCustomExpandedPositionRef = useRef(loadStoredExpandedPosition() !== null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [formResetKey, setFormResetKey] = useState(0);
+  const [badgeElement, setBadgeElement] = useState<HTMLElement | null>(null);
+  const [badgeTooltipVisible, setBadgeTooltipVisible] = useState(false);
   const [collapsedPosition, setCollapsedPosition] = useState<ViewportPosition>({ x: 0, y: 0 });
   const [expandedPosition, setExpandedPosition] = useState<ViewportPosition>({ x: 0, y: 0 });
 
@@ -346,10 +356,26 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
     setIsExpanded((expanded) => !expanded);
   };
 
+  // minimising keeps the filters applied; only closing discards them
+  const handleMinimize = () => {
+    setIsExpanded(false);
+  };
+
+  // drops the filters but leaves the panel open, so they can be rebuilt.
+  // The form only reads the filters when it mounts, so it is remounted through
+  // its key to pick the cleared state up - otherwise the controls would keep
+  // showing filters that are no longer applied.
+  const handleClearFilters = () => {
+    exploreDispatch({ type: ExploreActionType.clearFloatingSearchFilters });
+    setFormResetKey((key) => key + 1);
+  };
+
   const handleClose = () => {
     exploreDispatch({ type: ExploreActionType.clearFloatingSearchFilters });
     setIsExpanded(false);
   };
+
+  const activeFilterCount = countFloatingSearchFilters(filters);
 
   useEffect(() => {
     return () => {
@@ -362,15 +388,47 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   return (
     <>
       {!hideButton && (
-        <StyledCollapsedButton
-          type="button"
-          $isActive={isExpanded}
-          onClick={handleToggle}
-          aria-label={isExpanded ? "Close search panel" : "Open search panel"}
-          aria-expanded={isExpanded}
-        >
-          <IcoSearch size={22} />
-        </StyledCollapsedButton>
+        <StyledCollapsedRoot>
+          <StyledCollapsedButton
+            type="button"
+            $isActive={isExpanded}
+            onClick={handleToggle}
+            aria-label={
+              isExpanded
+                ? "Hide search panel"
+                : activeFilterCount > 0
+                  ? `Open search panel (${activeFilterCount} filters applied)`
+                  : "Open search panel"
+            }
+            aria-expanded={isExpanded}
+          >
+            <IcoSearch size={22} />
+          </StyledCollapsedButton>
+          {activeFilterCount > 0 && (
+            <StyledFilterCountBadge
+              ref={setBadgeElement}
+              type="button"
+              onClick={() => {
+                setBadgeTooltipVisible(false);
+                handleClearFilters();
+              }}
+              onMouseEnter={() => setBadgeTooltipVisible(true)}
+              onMouseLeave={() => setBadgeTooltipVisible(false)}
+              aria-label={`Clear ${activeFilterCount} applied filters`}
+            >
+              <StyledBadgeCount>{activeFilterCount}</StyledBadgeCount>
+              <StyledBadgeClearIcon>
+                <IcoCloseGr size={9} />
+              </StyledBadgeClearIcon>
+            </StyledFilterCountBadge>
+          )}
+          <Tooltip
+            label="clear the applied filters"
+            visible={badgeTooltipVisible && activeFilterCount > 0}
+            referenceElement={badgeElement}
+            position="left"
+          />
+        </StyledCollapsedRoot>
       )}
       {isExpanded && (
         <FloatingPortal id="page-content">
@@ -383,19 +441,53 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
                 >
                   <span>Search</span>
                 </StyledDragHandle>
-                <StyledCloseButtonWrap>
-                  <Button
-                    icon={<GrClose size={14} />}
-                    onClick={handleClose}
-                    noBorder
-                    color="black"
-                    noBackground
-                    inverted
-                  />
-                </StyledCloseButtonWrap>
+                {activeFilterCount > 0 && (
+                  <StyledFilterSummary>
+                    {activeFilterCount} {activeFilterCount === 1 ? "filter" : "filters"}
+                    <StyledClearFiltersButton
+                      type="button"
+                      onClick={handleClearFilters}
+                      aria-label={`Clear ${activeFilterCount} filters`}
+                    >
+                      clear
+                    </StyledClearFiltersButton>
+                  </StyledFilterSummary>
+                )}
+                <StyledHeaderButtons>
+                  <StyledCloseButtonWrap>
+                    <Button
+                      icon={<IcoSubtract size={13} />}
+                      tooltipLabel="hide the panel, keep the filters"
+                      onClick={handleMinimize}
+                      noBorder
+                      color="black"
+                      noBackground
+                      inverted
+                    />
+                  </StyledCloseButtonWrap>
+                  <StyledCloseButtonWrap>
+                    <Button
+                      icon={<GrClose size={14} />}
+                      tooltipLabel={
+                        activeFilterCount > 0
+                          ? `close and clear ${activeFilterCount} filters`
+                          : "close the panel"
+                      }
+                      onClick={handleClose}
+                      noBorder
+                      color="black"
+                      noBackground
+                      inverted
+                    />
+                  </StyledCloseButtonWrap>
+                </StyledHeaderButtons>
               </StyledExpandedHeader>
               <StyledExpandedContent>
-                <FloatingSearchForm dispatch={exploreDispatch} />
+                <FloatingSearchForm
+                  key={formResetKey}
+                  dispatch={exploreDispatch}
+                  filters={filters}
+                />
               </StyledExpandedContent>
             </StyledExpandedPanel>
           </StyledFloatingRoot>

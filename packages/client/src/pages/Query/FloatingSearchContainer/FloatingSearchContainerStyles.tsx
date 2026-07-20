@@ -15,19 +15,27 @@ export const StyledFloatingRoot = styled.div<StyledFloatingRootProps>`
   z-index: 164;
 `;
 
-export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`
+// anchors the round button together with its badge and clear control; the
+// satellites cannot live inside the button itself because a button may not
+// contain another button
+export const StyledCollapsedRoot = styled.div`
   position: absolute;
   right: 2rem;
   bottom: 2rem;
+  width: ${FLOATING_SEARCH_COLLAPSED_SIZE}px;
+  height: ${FLOATING_SEARCH_COLLAPSED_SIZE}px;
+  z-index: 162;
+`;
+
+export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${FLOATING_SEARCH_COLLAPSED_SIZE}px;
-  height: ${FLOATING_SEARCH_COLLAPSED_SIZE}px;
+  width: 100%;
+  height: 100%;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  z-index: 162;
   color: ${({ theme }) => theme.color.primary};
   background-color: ${({ theme, $isActive }) =>
     $isActive ? theme.color.blue[150] : theme.color.blue[100]};
@@ -41,6 +49,93 @@ export const StyledCollapsedButton = styled.button<{ $isActive?: boolean }>`
     background-color: ${({ theme }) => theme.color.blue[150]};
     box-shadow: ${({ theme }) => theme.boxShadow.normal};
   }
+`;
+
+// Count of filters still applied while the panel is minimised — the filters keep
+// affecting results once the panel is out of sight, so the button has to say so.
+// It doubles as the control that drops them: hovering swaps the count for a
+// cross in place, which keeps a single small target on the round button.
+export const StyledFilterCountBadge = styled.button`
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  padding: 0 0.4rem;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  background-color: ${({ theme }) => theme.color.info};
+  color: ${({ theme }) => theme.color.white};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${({ theme }) => theme.color.danger};
+  }
+`;
+
+export const StyledBadgeCount = styled.span`
+  transition: opacity 0.15s;
+
+  ${StyledFilterCountBadge}:hover &,
+  ${StyledFilterCountBadge}:focus-visible & {
+    opacity: 0;
+  }
+`;
+
+export const StyledBadgeClearIcon = styled.span`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  ${StyledFilterCountBadge}:hover &,
+  ${StyledFilterCountBadge}:focus-visible & {
+    opacity: 1;
+  }
+`;
+
+// count of applied filters shown in the panel header, with the control that
+// drops them - lets the filters be cleared without also closing the panel
+export const StyledFilterSummary = styled.span`
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color.gray[600]};
+`;
+
+export const StyledClearFiltersButton = styled.button`
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+  color: ${({ theme }) => theme.color.info};
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.color.danger};
+  }
+`;
+
+export const StyledHeaderButtons = styled.span`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
 `;
 
 export const StyledExpandedPanel = styled.div`

@@ -54,11 +54,65 @@ const datetimeLocalToDate = (value: string): Date | undefined => {
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 };
 
+const storedDateToDate = (value: string | undefined): Date | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+// The form is unmounted while the panel is minimised, so its local state has to
+// be rebuilt from the filters that are still applied - otherwise reopening the
+// panel shows empty controls while the results stay filtered.
+const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestSearch => {
+  const searchData: IRequestSearch = { ...initSearchValues };
+
+  filters.forEach((filter) => {
+    switch (filter.type) {
+      case Explore.SearchOption.Status:
+        searchData.status = filter.status;
+        break;
+      case Explore.SearchOption.Language:
+        searchData.language = filter.language;
+        break;
+      case Explore.SearchOption.CreatedAt:
+        searchData.createdAfter = storedDateToDate(filter.createdAfter);
+        searchData.createdBefore = storedDateToDate(filter.createdBefore);
+        break;
+      case Explore.SearchOption.UpdatedAt:
+        searchData.updatedAfter = storedDateToDate(filter.updatedAfter);
+        searchData.updatedBefore = storedDateToDate(filter.updatedBefore);
+        break;
+      case Explore.SearchOption.CreatedBy:
+        searchData.createdBy = filter.createdBy;
+        break;
+      case Explore.SearchOption.UpdatedBy:
+        searchData.updatedBy = filter.updatedBy;
+        break;
+      case Explore.SearchOption.EditedBy:
+        searchData.editedBy = filter.editedBy;
+        break;
+      case Explore.SearchOption.RootValidity:
+        searchData.isRootInvalid = filter.rootValidity;
+        break;
+      default:
+        // label and UUID filters have their own controls outside this panel
+        break;
+    }
+  });
+
+  return searchData;
+};
+
 interface FloatingSearchFormProps {
   dispatch: React.Dispatch<ExploreAction>;
+  filters: Explore.IExploreSearchFilter[];
 }
-export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch }) => {
-  const [searchData, setSearchData] = useState<IRequestSearch>(initSearchValues);
+export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch, filters }) => {
+  const [searchData, setSearchData] = useState<IRequestSearch>(() =>
+    filtersToSearchData(filters),
+  );
 
   const { data: users } = useUsersSimplifiedQuery();
 

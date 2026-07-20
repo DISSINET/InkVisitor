@@ -15,8 +15,8 @@ export const StyledQueryBox = styled.div<StyledQueryBoxProps>`
   // instead of extending the scrollable area — leaving no trailing room to the
   // right of the last node, and nothing to scroll into
   min-width: max-content;
-  padding-right: 7rem;
-  padding-bottom: 5rem;
+  padding-right: 6rem;
+  padding-bottom: 4rem;
   display: grid;
   grid-template-columns: repeat(
     ${({ $gridWeight }) => $gridWeight + 1},

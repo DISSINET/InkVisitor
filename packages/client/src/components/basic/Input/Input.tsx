@@ -53,6 +53,7 @@ interface Input {
   // reserve right padding inside the textarea (e.g. for an overlaid action button)
   textareaRightPadding?: number;
 
+  maxLength?: number;
   autocomplete?: string;
   required?: boolean;
   minWidth?: number;
@@ -100,6 +101,7 @@ export const Input: React.FC<Input> = ({
   roundCorners = true,
   textareaRightPadding,
 
+  maxLength,
   autocomplete = "",
   required = false,
   minWidth,
@@ -188,6 +190,7 @@ export const Input: React.FC<Input> = ({
             className="value"
             placeholder={placeholder}
             value={displayValue}
+            maxLength={maxLength}
             $icon={icon}
             onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

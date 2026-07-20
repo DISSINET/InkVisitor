@@ -35,7 +35,7 @@ const theme = {
       danger: "#FFEEEE",
       info: "#F2EBFE",
       success: "#F6F4FF",
-      primary: "#e6eafa", // blue 50
+      primary: "#E6F6FF",
       grey: "#fff",
       greyer: "#fff",
       warning: "#FFFBEA",

@@ -19,6 +19,7 @@ import {
 import { QueryAction, QueryActionType } from "../Query/state";
 import { EXAMPLE_QUERIES, IExampleQuery } from "./exampleQueries";
 import {
+  StyledCharCounter,
   StyledChevron,
   StyledCloseButton,
   StyledEmptyNote,
@@ -33,6 +34,7 @@ import {
   StyledPanelTitle,
   StyledQueryActions,
   StyledQueryActionButton,
+  StyledQueryBullet,
   StyledQueryName,
   StyledQueryRow,
   StyledSaveAction,
@@ -55,6 +57,10 @@ interface SavedQueriesPanel {
 // floor for the measured panel height, so a very short Box still leaves the
 // header, the save area and a usable strip of the folder list visible
 const MIN_PANEL_HEIGHT = 220;
+
+// keeps names within the two lines the query rows show (see StyledQueryName);
+// matters most for shared queries, which every user sees in their list
+const QUERY_NAME_MAX_LENGTH = 80;
 
 type FolderKey = "examples" | "mine" | "shared";
 
@@ -271,6 +277,12 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
               placeholder="name for the current query"
               changeOnType
               width="full"
+              maxLength={QUERY_NAME_MAX_LENGTH}
+              rightContent={
+                <StyledCharCounter>
+                  {saveName.length}/{QUERY_NAME_MAX_LENGTH}
+                </StyledCharCounter>
+              }
               onChangeFn={setSaveName}
               onEnterPressFn={handleSave}
             />
@@ -329,7 +341,12 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                       if (!canModerate(row)) {
                         return (
                           <StyledQueryRow key={row.id}>
-                            <StyledQueryName type="button" onClick={() => handleLoad(row)}>
+                            <StyledQueryBullet>•</StyledQueryBullet>
+                            <StyledQueryName
+                              type="button"
+                              title={row.name}
+                              onClick={() => handleLoad(row)}
+                            >
                               {row.name}
                             </StyledQueryName>
                           </StyledQueryRow>
@@ -338,11 +355,13 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
 
                       return (
                         <StyledQueryRow key={row.id} $editing={isEditing}>
+                          <StyledQueryBullet>•</StyledQueryBullet>
                           {isEditing ? (
                             <Input
                               value={editingName}
                               changeOnType
                               width="full"
+                              maxLength={QUERY_NAME_MAX_LENGTH}
                               autoFocus
                               onChangeFn={setEditingName}
                               onEnterPressFn={acceptEditing}
@@ -351,7 +370,11 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                               onBlur={acceptEditing}
                             />
                           ) : (
-                            <StyledQueryName type="button" onClick={() => handleLoad(row)}>
+                            <StyledQueryName
+                              type="button"
+                              title={row.name}
+                              onClick={() => handleLoad(row)}
+                            >
                               {row.name}
                             </StyledQueryName>
                           )}

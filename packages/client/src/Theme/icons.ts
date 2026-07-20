@@ -131,6 +131,8 @@ export { FiMove as IcoMove } from "react-icons/fi";
 export { GrClone as IcoCloneAlt } from "react-icons/gr";
 export { GrClose as IcoCloseGr } from "react-icons/gr";
 export { GrDocumentMissing as IcoDocumentMissing } from "react-icons/gr";
+// thin-stroke minus, pairs with IcoCloseGr in window-style headers
+export { GrSubtract as IcoSubtract } from "react-icons/gr";
 
 // hi
 export { HiClipboardList as IcoClipboardList } from "react-icons/hi";

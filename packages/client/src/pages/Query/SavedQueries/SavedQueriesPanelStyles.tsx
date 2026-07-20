@@ -4,6 +4,15 @@ import styled from "styled-components";
 // chevron (1.4) + gap (0.3) + folder icon (1.4) + gap (0.3)
 const QUERY_ROW_INDENT = "3.4rem";
 
+// bullet gutter, subtracted from the row indent so the name text keeps landing
+// on QUERY_ROW_INDENT
+const QUERY_BULLET_WIDTH = "0.8rem";
+const QUERY_BULLET_GAP = "0.3rem";
+
+// upper bound for the revealed row actions (rename + delete); only caps the
+// reveal animation, the group itself is sized by its icons
+const QUERY_ACTIONS_WIDTH = "4rem";
+
 // sits directly above the UUIDs button (see StyledIdsFloatingRoot in
 // ExplorerTableStyles.tsx: bottom = 2rem + collapsed search + 1.5rem);
 // this root adds one row (~2.5rem) on top of that.
@@ -89,6 +98,14 @@ export const StyledCloseButton = styled.button`
   &:hover {
     color: ${({ theme }) => theme.color["danger"]};
   }
+`;
+
+// sits inside the name input (as its rightContent), so the cap on the name
+// length is visible while typing rather than only when the input stops accepting
+export const StyledCharCounter = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["greyer"]};
+  padding-right: 0.2rem;
 `;
 
 export const StyledSaveRow = styled.div`
@@ -193,12 +210,16 @@ export const StyledLockIcon = styled.span`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
+// names can wrap to two lines, so rows are top-aligned (bullet and actions line
+// up with the first line) and the bullet sits in the indent gutter, keeping the
+// name text itself aligned with the folder label above it
 export const StyledQueryRow = styled.div<{ $editing?: boolean }>`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.3rem;
-  padding: 0.2rem 0.4rem 0.2rem ${QUERY_ROW_INDENT};
+  gap: ${QUERY_BULLET_GAP};
+  padding: 0.2rem 0.4rem 0.2rem
+    calc(${QUERY_ROW_INDENT} - ${QUERY_BULLET_WIDTH} - ${QUERY_BULLET_GAP});
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   background-color: ${({ theme, $editing }) =>
     $editing ? theme.color["gray"][200] : "transparent"};
@@ -207,33 +228,57 @@ export const StyledQueryRow = styled.div<{ $editing?: boolean }>`
   }
 `;
 
+// query names can get long (they describe the whole query), so the label wraps
+// to two lines before it truncates — the name input is capped (see
+// QUERY_NAME_MAX_LENGTH) so two lines cover nearly every name
+export const StyledQueryBullet = styled.span`
+  flex-shrink: 0;
+  width: ${QUERY_BULLET_WIDTH};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  line-height: 1.4;
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
 export const StyledQueryName = styled.button`
-  display: flex;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   text-overflow: ellipsis;
   border: none;
   background: transparent;
   text-align: left;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  line-height: 1.4;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
   padding: 0;
   outline: none;
 `;
 
+// collapsed to zero width (not merely transparent) while idle, so the name gets
+// the full row and only gives the space back once the actions are revealed
 export const StyledQueryActions = styled.div<{ $forceVisible?: boolean }>`
   display: inline-flex;
   align-items: center;
+  // the row is top-aligned for the bullet's sake; the actions belong to the
+  // whole row, so they centre against however many lines the name takes
+  align-self: center;
   gap: 0.4rem;
   flex-shrink: 0;
+  max-width: ${({ $forceVisible }) => ($forceVisible ? QUERY_ACTIONS_WIDTH : "0")};
+  overflow: hidden;
   opacity: ${({ $forceVisible }) => ($forceVisible ? 1 : 0)};
   pointer-events: ${({ $forceVisible }) => ($forceVisible ? "auto" : "none")};
-  transition: opacity 0.15s ease;
+  transition:
+    max-width 0.15s ease,
+    opacity 0.15s ease;
 
   ${StyledQueryRow}:hover & {
+    max-width: ${QUERY_ACTIONS_WIDTH};
     opacity: 1;
     pointer-events: auto;
   }
