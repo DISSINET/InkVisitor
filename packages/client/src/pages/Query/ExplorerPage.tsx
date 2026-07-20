@@ -631,9 +631,12 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               }
               buttons={[
                 <StyledResultExpansionButtons key="result-expansion-toggles">
+                  {/* accent colours echo the eq/sub badges on the resulting
+                      entity tags (see StyledExpansionBadge) */}
                   <Checkbox
                     label="EQ"
                     size={13}
+                    accentColor="info"
                     value={includeEquivalents}
                     tooltipLabel="include equivalents"
                     tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
@@ -642,6 +645,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   <Checkbox
                     label="SUB"
                     size={13}
+                    accentColor="warning"
                     value={includeSubordinates}
                     tooltipLabel="include subordinates"
                     tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
