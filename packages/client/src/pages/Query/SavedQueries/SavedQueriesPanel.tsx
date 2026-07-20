@@ -249,7 +249,13 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       }
       const { top } = rootRef.current.getBoundingClientRect();
       const bottomGap = 20; // 2rem, matching the panel's distance from other floating controls
-      setMaxPanelHeight(Math.max(MIN_PANEL_HEIGHT, window.innerHeight - top - bottomGap));
+      // The floating stack (UUIDs button, floating search) shares this right-hand
+      // column, so the panel stops above it rather than at the viewport edge.
+      // Its height varies with the filter count badge, hence measuring over
+      // recomputing its offsets. Absent when no UUID filter is rendered.
+      const floatingStack = document.querySelector("[data-floating-stack]");
+      const floor = floatingStack?.getBoundingClientRect().top ?? window.innerHeight;
+      setMaxPanelHeight(Math.max(MIN_PANEL_HEIGHT, floor - top - bottomGap));
     };
     updateMaxHeight();
     window.addEventListener("resize", updateMaxHeight);

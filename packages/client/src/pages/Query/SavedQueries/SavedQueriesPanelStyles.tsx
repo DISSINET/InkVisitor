@@ -21,11 +21,21 @@ export const StyledSavedQueriesRoot = styled.div`
   position: absolute;
   right: 2rem;
   top: 4.5rem;
-  z-index: 161;
+  // above StyledIdsFloatingRoot (161) and StyledCollapsedRoot (162), below the
+  // expanded floating search (164); z-index on the panel itself would do nothing
+  // because this root already opens its own stacking context
+  z-index: 163;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   gap: 1rem;
+  // with the panel open this root spans panel + gap + toggle, and its box would
+  // swallow clicks aimed at the floating controls behind it even though nothing
+  // is painted there; only the visible children take hits
+  pointer-events: none;
+  > * {
+    pointer-events: auto;
+  }
 `;
 
 export const StyledToggleButton = styled.button<{ $isActive?: boolean }>`
