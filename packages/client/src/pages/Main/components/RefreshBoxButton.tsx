@@ -26,11 +26,9 @@ export const RefreshBoxButton: React.FC<RefreshBoxButton> = ({ queriesToRefresh,
         const uid = getStoredUserId();
         await Promise.all(
           queriesToRefresh.map(async (queryToRefresh) => {
-            const queryKey =
-              queryToRefresh === "user" && uid ? ["user", uid] : [queryToRefresh];
+            const queryKey = queryToRefresh === "user" && uid ? ["user", uid] : [queryToRefresh];
             await queryClient.invalidateQueries({ queryKey });
-            await queryClient.refetchQueries({ queryKey, type: "active" });
-          })
+          }),
         );
       }}
     />
