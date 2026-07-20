@@ -36,7 +36,7 @@ const darkTheme = {
       danger: "#3D1A1A",
       info: "#1e1d3d",
       success: "#1d1d4a",
-      primary: "#0b3a59",
+      primary: "#2D324A", // blue 200
       // primary: "#0a335a",
       grey: "#1a202c",
       greyer: "#2d3748",

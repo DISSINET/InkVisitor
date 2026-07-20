@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Checkbox, Input, Submit } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import {
   IcoChevronRight,
@@ -35,8 +35,11 @@ import {
   StyledQueryActionButton,
   StyledQueryName,
   StyledQueryRow,
+  StyledSaveAction,
+  StyledSaveFooter,
   StyledSaveRow,
   StyledSavedQueriesRoot,
+  StyledShareRow,
   StyledToggleButton,
 } from "./SavedQueriesPanelStyles";
 
@@ -48,6 +51,10 @@ interface SavedQueriesPanel {
   onToggleIncludeEquivalents: (value: boolean) => void;
   onToggleIncludeSubordinates: (value: boolean) => void;
 }
+
+// floor for the measured panel height, so a very short Box still leaves the
+// header, the save area and a usable strip of the folder list visible
+const MIN_PANEL_HEIGHT = 220;
 
 type FolderKey = "examples" | "mine" | "shared";
 
@@ -75,11 +82,11 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   const [editingName, setEditingName] = useState("");
 
   const rootRef = useRef<HTMLDivElement>(null);
+  const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
 
   const { data: user } = useUserQuery(true);
   const userId = user?.id;
-  const isAdminOrOwner =
-    user?.role === UserEnums.Role.Owner || user?.role === UserEnums.Role.Admin;
+  const isAdminOrOwner = user?.role === UserEnums.Role.Owner || user?.role === UserEnums.Role.Admin;
   // editors and up may create shared queries; viewers only get private ones
   const canShare = isAdminOrOwner || user?.role === UserEnums.Role.Editor;
 
@@ -180,9 +187,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   // private queries stay with their owner alone (mirrors the server rule).
   const canModerate = (row: FolderRow): row is ISavedQuery =>
     "ownerId" in row &&
-    (row.shared
-      ? isAdminOrOwner || (row.ownerId === userId && canShare)
-      : row.ownerId === userId);
+    (row.shared ? isAdminOrOwner || (row.ownerId === userId && canShare) : row.ownerId === userId);
 
   const toggleFolder = (key: FolderKey) => {
     setOpenFolders((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -204,6 +209,27 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     window.addEventListener("mousedown", handleOutside);
     return () => window.removeEventListener("mousedown", handleOutside);
   }, [isOpen, deleteTarget]);
+
+  // Keep the panel inside the viewport: it is absolutely positioned inside a
+  // Box the user can resize, so the space below it is measured rather than
+  // assumed. Anything that does not fit is absorbed by the scrolling folder
+  // list, leaving the header and save area always reachable.
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const updateMaxHeight = () => {
+      if (!rootRef.current) {
+        return;
+      }
+      const { top } = rootRef.current.getBoundingClientRect();
+      const bottomGap = 20; // 2rem, matching the panel's distance from other floating controls
+      setMaxPanelHeight(Math.max(MIN_PANEL_HEIGHT, window.innerHeight - top - bottomGap));
+    };
+    updateMaxHeight();
+    window.addEventListener("resize", updateMaxHeight);
+    return () => window.removeEventListener("resize", updateMaxHeight);
+  }, [isOpen]);
 
   const folders: {
     key: FolderKey;
@@ -227,7 +253,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   return (
     <StyledSavedQueriesRoot ref={rootRef}>
       {isOpen && (
-        <StyledPanel>
+        <StyledPanel $maxHeight={maxPanelHeight}>
           <StyledPanelHeader>
             <StyledPanelTitle>Saved queries</StyledPanelTitle>
             <StyledCloseButton
@@ -248,20 +274,26 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
               onChangeFn={setSaveName}
               onEnterPressFn={handleSave}
             />
-            {canShare && (
-              <Checkbox
-                label="shared"
-                value={saveShared}
-                onChangeFn={(value) => setSaveShared(value)}
-              />
-            )}
-            <Button
-              label="Save"
-              icon={<IcoSave size={14} />}
-              color="info"
-              disabled={!saveName.trim() || saveMutation.isPending}
-              onClick={handleSave}
-            />
+            <StyledSaveFooter>
+              {canShare && (
+                <StyledShareRow>
+                  <Checkbox
+                    label="shared with everyone"
+                    value={saveShared}
+                    onChangeFn={(value) => setSaveShared(value)}
+                  />
+                </StyledShareRow>
+              )}
+              <StyledSaveAction>
+                <Button
+                  label="Save"
+                  icon={<IcoSave size={14} />}
+                  color="info"
+                  disabled={!saveName.trim() || saveMutation.isPending}
+                  onClick={handleSave}
+                />
+              </StyledSaveAction>
+            </StyledSaveFooter>
           </StyledSaveRow>
 
           <StyledFolderList>

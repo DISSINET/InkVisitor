@@ -67,7 +67,7 @@ export { FaClipboard as IcoClipboardFilled } from "react-icons/fa";
 export { FaClone as IcoClone } from "react-icons/fa";
 export { FaDotCircle as IcoDotCircle } from "react-icons/fa";
 export { FaDownload as IcoDownload } from "react-icons/fa";
-// export { FaEdit as IcoEdit } from "react-icons/fa";
+export { FaEdit as IcoEdit } from "react-icons/fa";
 export { FaExchangeAlt as IcoExchange } from "react-icons/fa";
 export { FaExclamationTriangle as IcoExclamation } from "react-icons/fa";
 export { FaExternalLinkAlt as IcoExternalLink } from "react-icons/fa";
@@ -228,7 +228,7 @@ export { TiWarning as IcoWarning } from "react-icons/ti";
 export { TiWarningOutline as IcoWarningTiOutline } from "react-icons/ti";
 
 // vsc
-export { VscEditCompact as IcoEdit } from "react-icons/vsc";
+// export { VscEditCompact as IcoEdit } from "react-icons/vsc";
 // export { VscEditCompact as IcoEditMd } from "react-icons/vsc";
 // export { VscEditCompact as IcoEditOutline } from "react-icons/vsc";
 export { VscClose as IcoCloseVsc } from "react-icons/vsc";
