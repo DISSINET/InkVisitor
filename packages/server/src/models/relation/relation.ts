@@ -18,8 +18,26 @@ import { EventType } from "@inkvisitor/shared/types/stats";
 import Path from "./path";
 import { findEntityById } from "@service/shorthands";
 
+/**
+ * Data beforeSave needs about a relation type as a whole: every relation of the
+ * type, for the duplicate check, and the path graph built from them, for the
+ * asymmetrical cycle check.
+ *
+ * Collecting it means a full table scan (Relation.getByType is an unindexed
+ * filter), so a caller saving many relations of one type builds the context
+ * once and hands it to each beforeSave. The context is mutable and must be kept
+ * current with registerSavedRelation as relations are saved - the checks are
+ * only as accurate as its contents.
+ */
+export interface RelationSaveContext {
+  type: RelationEnums.Type;
+  relationsOfType: IRelationModel[];
+  /** Only built for asymmetrical types - the others never consult a path. */
+  path: Path | null;
+}
+
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
-  beforeSave(request: IRequest): Promise<void>;
+  beforeSave(request: IRequest, context?: RelationSaveContext): Promise<void>;
   afterSave(request: IRequest): Promise<void>;
 }
 
@@ -191,12 +209,17 @@ export default class Relation implements IRelationModel {
    * Use this method for doing asynchronous operation/checks before the save operation
    * @param request
    */
-  async beforeSave(request: IRequest): Promise<void> {    
+  async beforeSave(
+    request: IRequest,
+    context?: RelationSaveContext
+  ): Promise<void> {
+    // a context is only usable for the type it was built for
+    const sharedContext = context?.type === this.type ? context : undefined;
+
     // check for already existing relations with same ids
-    const relationByType = await Relation.getByType(
-      request.db.connection,
-      this.type
-    );
+    const relationByType =
+      sharedContext?.relationsOfType ??
+      (await Relation.getByType(request.db.connection, this.type));
     relationByType.filter(rel => rel.id !== this.id).forEach((rel) => {
       if (this.type === RelationEnums.Type.Synonym) {
         // For SYN check if both arrays have the same length and contain the same elements
@@ -218,10 +241,13 @@ export default class Relation implements IRelationModel {
     });
 
     if (RelationTypes.RelationRules[this.type]?.asymmetrical) {
-      const pathHelper = new Path(this.type);
-      await pathHelper.build(
-        await Relation.getByType(request.db.connection, this.type)
-      );
+      let pathHelper = sharedContext?.path;
+      if (!pathHelper) {
+        pathHelper = new Path(this.type);
+        await pathHelper.build(
+          await Relation.getByType(request.db.connection, this.type)
+        );
+      }
       if (pathHelper.pathExists(this.entityIds[1], this.entityIds[0])) {
         // default message for asymetrical path err
         let message = RelationAsymetricalPathExist.message;
@@ -497,6 +523,40 @@ export default class Relation implements IRelationModel {
       .run(db);
 
     return items;
+  }
+
+  /**
+   * Loads the per-type data beforeSave needs, once, for a caller that is about
+   * to create many relations of the same type. See RelationSaveContext.
+   */
+  static async buildSaveContext(
+    db: Connection,
+    relType: RelationEnums.Type
+  ): Promise<RelationSaveContext> {
+    const relationsOfType = await Relation.getByType<IRelationModel>(db, relType);
+
+    let path: Path | null = null;
+    if (RelationTypes.RelationRules[relType]?.asymmetrical) {
+      path = new Path(relType);
+      await path.build(relationsOfType);
+    }
+
+    return { type: relType, relationsOfType, path };
+  }
+
+  /**
+   * Folds a just-saved relation into a shared context, so the duplicate and
+   * cycle checks of later saves account for it.
+   */
+  static registerSavedRelation(
+    context: RelationSaveContext,
+    relation: IRelationModel
+  ): void {
+    if (context.type !== relation.type) {
+      return;
+    }
+    context.relationsOfType.push(relation);
+    context.path?.addEntry(relation);
   }
 
   /**

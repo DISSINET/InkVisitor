@@ -12,7 +12,7 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: [EntityEnums.Class.Being],
+          entityClasses: [EntityEnums.Class.Action],
         }
       : {
           entityClasses: classesAll,
@@ -22,42 +22,42 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? [
-          {
-            type: Query.EdgeType["EUT:"],
-            params: {},
-            logic: Query.EdgeLogic.Positive,
-            id: "e1",
-            node: {
-              id: "n1",
-              type: Query.NodeType.E,
-              params: {
-                entityId: "0172df7e-c394-4623-a7d6-cb195c49501e", //Jack London, The Call of the Wild
-                entityClasses: [],
-                label: "",
-                includeSubordinates: true,
-              },
-              operator: Query.NodeOperator.And,
-              edges: [],
-            },
-          },
-          {
-            type: Query.EdgeType["R:CLA"],
-            params: {},
-            logic: Query.EdgeLogic.Positive,
-            id: "e2",
-            node: {
-              id: "n2",
-              type: Query.NodeType.E,
-              params: {
-                entityId: "cfe8d950-94ed-4d51-b215-0f1ab0416a01", //animal
-                entityClasses: [],
-                label: "",
-                includeSubordinates: true,
-              },
-              operator: Query.NodeOperator.And,
-              edges: [],
-            },
-          },
+          // {
+          //   type: Query.EdgeType["EUT:"],
+          //   params: {},
+          //   logic: Query.EdgeLogic.Positive,
+          //   id: "e1",
+          //   node: {
+          //     id: "n1",
+          //     type: Query.NodeType.E,
+          //     params: {
+          //       entityId: "0172df7e-c394-4623-a7d6-cb195c49501e", //Jack London, The Call of the Wild
+          //       entityClasses: [],
+          //       label: "",
+          //       includeSubordinates: true,
+          //     },
+          //     operator: Query.NodeOperator.And,
+          //     edges: [],
+          //   },
+          // },
+          // {
+          //   type: Query.EdgeType["R:CLA"],
+          //   params: {},
+          //   logic: Query.EdgeLogic.Positive,
+          //   id: "e2",
+          //   node: {
+          //     id: "n2",
+          //     type: Query.NodeType.E,
+          //     params: {
+          //       entityId: "cfe8d950-94ed-4d51-b215-0f1ab0416a01", //animal
+          //       entityClasses: [],
+          //       label: "",
+          //       includeSubordinates: true,
+          //     },
+          //     operator: Query.NodeOperator.And,
+          //     edges: [],
+          //   },
+          // },
         ]
       : [],
 };

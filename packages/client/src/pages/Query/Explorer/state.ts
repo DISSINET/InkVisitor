@@ -30,14 +30,6 @@ const exploreStateInitial: Explore.IExplore = {
             //     propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
             //   },
             // },
-            // all relations for testing
-            // ...RelationEnums.AllTypes.map((relationType, index) => ({
-            //   id: String(index + 2),
-            //   name: relationType,
-            //   params: { relationType },
-            //   editable: true,
-            //   type: Explore.EExploreColumnType.ER,
-            // })),
             {
               id: "dev-est",
               name: "Status",
@@ -59,13 +51,21 @@ const exploreStateInitial: Explore.IExplore = {
               editable: true,
               params: {},
             },
-            {
-              id: "CLA",
-              name: "Classification",
+            // {
+            //   id: "CLA",
+            //   name: "Classification",
+            //   type: Explore.EExploreColumnType.ER,
+            //   params: { relationType: RelationEnums.Type.Classification },
+            //   editable: true,
+            // },
+            // all relations for testing
+            ...RelationEnums.AllTypes.map((relationType, index) => ({
+              id: String(index + 2),
+              name: relationType,
+              params: { relationType },
+              editable: false,
               type: Explore.EExploreColumnType.ER,
-              params: { relationType: RelationEnums.Type.Classification },
-              editable: true,
-            },
+            })),
           ]
         : [],
   },
