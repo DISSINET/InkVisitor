@@ -1,4 +1,3 @@
-import { getStoredUserRole } from "utils/userStorage";
 import {
   autoUpdate,
   flip,
@@ -11,9 +10,10 @@ import {
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaHighlighter, FaPen, FaRegSave } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { IcoTrash } from "Theme/icons";
+import { getStoredUserRole } from "utils/userStorage";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -40,15 +40,15 @@ import {
   IStatement,
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
-import { useAppSelector } from "redux/hooks";
 import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { EntityTagById } from "components/advanced";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
 import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
-import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
+import { useAppSelector } from "redux/hooks";
 import {
   collectStatementAnchors,
   collectTerritoryAnchors,
@@ -60,7 +60,10 @@ import {
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
+import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
+import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
+import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -73,11 +76,8 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./styles";
-import { annotatorHighlight } from "./highlight";
 import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
-import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
-import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
-import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
+import { annotatorHighlight } from "./utils/highlight";
 
 interface TextAnnotatorProps {
   width: number;
