@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import { useEntitiesQuery } from "hooks/react-query";
+import { BATCH_RELATION_ELIGIBILITY_KEY, useEntitiesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { BatchActionApplyConfirm, needsBatchActionConfirm } from "./BatchActionApplyConfirm";
@@ -41,7 +41,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     data: fetchedEntities,
     isLoading: isLoadingEntities,
     isError: isEntitiesFetchError,
-  } = useEntitiesQuery("batchRelationEligibility", selectedEntityIds, {
+  } = useEntitiesQuery(BATCH_RELATION_ELIGIBILITY_KEY, selectedEntityIds, {
     enabled: !isLargeSelection,
   });
 

@@ -1,4 +1,9 @@
-import { DETAIL_TAB_ENTITIES_KEY } from "./queryKeys";
+import {
+  BATCH_RELATION_ELIGIBILITY_KEY,
+  DETAIL_TAB_ENTITIES_KEY,
+  MESSAGE_WARNING_ENTITIES_KEY,
+  WARNING_ANCHOR_ENTITIES_KEY,
+} from "./queryKeys";
 import { useAuditQuery } from "./useAuditQuery";
 import { useBookmarksQuery } from "./useBookmarksQuery";
 import { useDetailQuery } from "./useDetailQuery";
@@ -16,7 +21,10 @@ import { useUsersGetMoreQuery } from "./useUsersGetMoreQuery";
 import { useUsersSimplifiedQuery } from "./useUsersSimplifiedQuery";
 
 export {
+  BATCH_RELATION_ELIGIBILITY_KEY,
   DETAIL_TAB_ENTITIES_KEY,
+  MESSAGE_WARNING_ENTITIES_KEY,
+  WARNING_ANCHOR_ENTITIES_KEY,
   useAuditQuery,
   useBookmarksQuery,
   useDetailQuery,

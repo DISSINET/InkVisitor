@@ -4,7 +4,7 @@ import { WarningTypeEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IWarning } from "@inkvisitor/shared/types";
 import { WarningIcon } from "./WarningIcon";
 import { EntityTag } from "components/advanced";
-import { useEntitiesQuery } from "hooks/react-query";
+import { MESSAGE_WARNING_ENTITIES_KEY, useEntitiesQuery } from "hooks/react-query";
 import { EntityColors } from "types";
 import {
   StyledMessage,
@@ -56,7 +56,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   // Single batched fallback for ids missing from the provided map. The shared
   // cache key lets multiple warnings referencing the same entities dedupe.
   const { data: fetchedEntities } = useEntitiesQuery(
-    "message-warning-entities",
+    MESSAGE_WARNING_ENTITIES_KEY,
     missingEntityIds
   );
 

@@ -3,7 +3,7 @@ import { IResponseEntity } from "@inkvisitor/shared/types";
 import { ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
-import { useEntitiesQuery } from "hooks/react-query";
+import { WARNING_ANCHOR_ENTITIES_KEY, useEntitiesQuery } from "hooks/react-query";
 import React, { useMemo } from "react";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { FaScissors } from "react-icons/fa6";
@@ -82,7 +82,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   // Batch-fetch all anchor entities in a single request instead of letting each
   // EntityTagById fetch on its own. Only runs while the modal is open.
   const { data: anchorEntities, isFetching: isFetchingEntities } = useEntitiesQuery(
-    "warning-anchor-entities",
+    WARNING_ANCHOR_ENTITIES_KEY,
     anchorIds,
     { enabled: open }
   );

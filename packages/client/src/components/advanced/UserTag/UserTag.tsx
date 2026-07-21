@@ -32,7 +32,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   const currentUserId = getStoredUserId();
   const color = currentUserId === userId ? "primary" : "info";
 
-  const { data: dataUser } = useUserByIdQuery(userId, !disableFetch, true);
+  const { data: dataUser } = useUserByIdQuery(userId, !disableFetch);
 
   const variantColors = getVariantColors(theme, color, variant);
   const label = getUserLabel(dataUser, userId);
