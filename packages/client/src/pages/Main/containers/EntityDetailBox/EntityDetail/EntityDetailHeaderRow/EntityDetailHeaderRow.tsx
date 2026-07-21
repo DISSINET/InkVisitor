@@ -1,6 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
-import { IEntity, IResponseGeneric, IStatement } from "@inkvisitor/shared/types";
+import { IEntity, IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup } from "components";
@@ -11,13 +10,14 @@ import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
 import { MdCleaningServices } from "react-icons/md";
 import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
-import { StyledActantHeaderRow, StyledGrClone, StyledTagWrap } from "./EntityDetailHeaderRowStyles";
+import { IcoTrash } from "Theme/icons";
 import { ButtonSize } from "types";
+import { getStoredUserRole } from "utils/userStorage";
+import { StyledActantHeaderRow, StyledGrClone, StyledTagWrap } from "./EntityDetailHeaderRowStyles";
 
 interface EntityDetailHeaderRow {
   entity: IEntity;

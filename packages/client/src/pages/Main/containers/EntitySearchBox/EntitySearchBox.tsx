@@ -1,5 +1,4 @@
 import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { entitiesDict } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, SearchEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IEntity } from "@inkvisitor/shared/types";
@@ -25,6 +24,7 @@ import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { getStoredUserRole } from "utils/userStorage";
 import { EntitySearchAdvancedOptions } from "./EntitySearchAdvancedOptions/EntitySearchAdvancedOptions";
 import {
   StyledBoxContent,

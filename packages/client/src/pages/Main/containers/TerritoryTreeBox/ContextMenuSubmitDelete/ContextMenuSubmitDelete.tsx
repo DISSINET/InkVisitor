@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Submit, ToastWithLink } from "components";
 import { useSearchParams } from "hooks";
+import { DETAIL_TAB_ENTITIES_KEY } from "hooks/react-query";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
@@ -53,7 +54,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
             });
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             queryClient.invalidateQueries({
-              queryKey: ["detail-tab-entities"],
+              queryKey: [DETAIL_TAB_ENTITIES_KEY],
             });
             queryClient.invalidateQueries({ queryKey: ["statement"] });
           }}
@@ -67,7 +68,7 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
         setTerritoryId("");
       }
       removeDetailId(territoryActant.id);
-      queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+      queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });

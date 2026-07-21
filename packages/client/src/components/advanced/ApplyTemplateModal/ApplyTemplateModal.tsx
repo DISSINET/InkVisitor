@@ -1,5 +1,4 @@
 import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +18,7 @@ import { applyTemplate, InstRelations } from "constructors";
 import { useDetailQuery } from "hooks/react-query";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { getStoredUserRole } from "utils/userStorage";
 import { getShortLabelByLetterCount } from "utils/utils";
 
 interface ApplyTemplateModal {
@@ -58,7 +58,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       const newRelations: Relation.IRelation[] = InstRelations(
         relations,
         templateToApply.id,
-        entity.id
+        entity.id,
       );
 
       setNewRelations(newRelations);
@@ -72,7 +72,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       const entityAfterTemplateApplied: IEntity = await applyTemplate(
         templateToApply,
         entity,
-        getStoredUserRole() as UserEnums.Role
+        getStoredUserRole() as UserEnums.Role,
       );
 
       if (entityAfterTemplateApplied) {
@@ -88,10 +88,10 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
         toast.info(
           `Template "${getShortLabelByLetterCount(
             templateToApply.labels[0] || "",
-            120
+            120,
           )}" applied to ${
             entitiesDictKeys[entity.class].label
-          } "${getShortLabelByLetterCount(entity.labels[0] || "", 120)}"`
+          } "${getShortLabelByLetterCount(entity.labels[0] || "", 120)}"`,
         );
 
         updateEntityMutation.mutate(entityAfterTemplateApplied);
