@@ -77,6 +77,12 @@ interface UseAnnotatorSearchParams {
   isWholeWordOnlyMode: boolean;
   isCaseSensitiveMode: boolean;
   annotatorMode: EditMode;
+  /**
+   * Bumped to re-run the search against text the annotator changed under it
+   * (replace all). The text itself is not a dependency — searching on every
+   * keystroke in edit mode would be far too expensive.
+   */
+  searchRefreshKey?: number;
   setSearchOccurences: React.Dispatch<
     React.SetStateAction<Occurrence[] | null>
   >;
@@ -98,6 +104,7 @@ export const useAnnotatorSearch = ({
   isWholeWordOnlyMode,
   isCaseSensitiveMode,
   annotatorMode,
+  searchRefreshKey,
   setSearchOccurences,
   setSearchActiveOccurence,
   setSelectedText,
@@ -250,6 +257,7 @@ export const useAnnotatorSearch = ({
     isWholeWordOnlyMode,
     isCaseSensitiveMode,
     annotatorMode,
+    searchRefreshKey,
     setSearchOccurences,
     setSearchActiveOccurence,
     setSelectedText,

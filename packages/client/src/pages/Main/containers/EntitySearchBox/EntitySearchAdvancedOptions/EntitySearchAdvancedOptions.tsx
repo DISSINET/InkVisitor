@@ -64,7 +64,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
     hideTimeoutRef.current = window.setTimeout(() => {
       setShowPillsMenu(false);
       hideTimeoutRef.current = null;
-    }, 500);
+    }, 150);
   };
 
   useEffect(() => {

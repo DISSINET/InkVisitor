@@ -31,10 +31,10 @@ import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPan
 import { useAppDispatch } from "redux/hooks";
 import { IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
-import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../EntityTag/EntityTag";
-import { EntityTagById } from "../EntityTag/EntityTagById";
-import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../../EntityTag/EntityTag";
+import { EntityTagById } from "../../EntityTag/EntityTagById";
+import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
 import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
   ANCHOR_GRID_COLUMNS,
@@ -42,8 +42,8 @@ import {
   ANCHOR_GRID_ROW_MARGIN,
   AnnotatorAnchorGridRow,
   AnnotatorAnchorGridRowData,
-  AnnotatorAnchorListItem,
 } from "./AnnotatorMenuAnchorListRow";
+import { hasAnchorsWithoutElvl, resolveAnchors } from "./anchorList";
 import {
   StyledAnchorModeSwitch,
   StyledAnnotatorAnchorListWrap,
@@ -68,9 +68,9 @@ import {
   StyledTerritoryButtonColumn,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
-} from "./AnnotatorStyles";
-import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
-import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
+} from "../styles";
+import { AnnotatorPositionTNode, TerritoryCreateModalType } from "../types";
+import { useAnnotatorTargetPicker } from "../hooks/useAnnotatorTargetPicker";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -366,27 +366,12 @@ export const TextAnnotatorMenu = ({
       </>
     ) : null;
 
-  const someAnchorsWithoutElvl = useMemo(
-    () =>
-      anchors.some(
-        (anchor) =>
-          anchor.attributes.elvl === undefined ||
-          anchor.attributes.elvl === null ||
-          anchor.attributes.elvl === "",
-      ),
-    [anchors],
-  );
+  const someAnchorsWithoutElvl = useMemo(() => hasAnchorsWithoutElvl(anchors), [anchors]);
 
-  const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
-    const out: AnnotatorAnchorListItem[] = [];
-    for (const anchor of anchors) {
-      const anchorTagName = anchor.getTagName();
-      if (entities[anchorTagName]) {
-        out.push({ anchor, anchorTagName });
-      }
-    }
-    return out;
-  }, [anchors, entities]);
+  const resolvedAnchors = useMemo(
+    () => resolveAnchors(anchors, entities),
+    [anchors, entities],
+  );
 
   // Anchor controls mode: view (kebab menu + static elvl) or edit (inline
   // resize / elvl / unlink). Always starts in view mode and resets to view on

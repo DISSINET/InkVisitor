@@ -15,7 +15,7 @@ import {
   StyledWarningRow,
   StyledWarningsList,
   StyledWarningsListHeader,
-} from "./AnnotatorStyles";
+} from "./styles";
 
 const warningsTitle = (count: number): string =>
   `${count} asymmetrical anchor${count === 1 ? "" : "s"}`;
@@ -74,17 +74,14 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   showChip = true,
   isLoading = false,
 }) => {
-  const anchorIds = useMemo(
-    () => [...new Set(anchors.map((a) => a.tagName))],
-    [anchors]
-  );
+  const anchorIds = useMemo(() => [...new Set(anchors.map((a) => a.tagName))], [anchors]);
 
   // Batch-fetch all anchor entities in a single request instead of letting each
   // EntityTagById fetch on its own. Only runs while the modal is open.
   const { data: anchorEntities, isFetching: isFetchingEntities } = useEntitiesQuery(
     WARNING_ANCHOR_ENTITIES_KEY,
     anchorIds,
-    { enabled: open }
+    { enabled: open },
   );
 
   const entityMap = useMemo(() => {

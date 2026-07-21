@@ -1,17 +1,14 @@
 import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
-import { Button, Checkbox, IconButton, IconWithTooltip, Input, Loader } from "components";
+import { Button, Checkbox, IconWithTooltip, Input } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoSearch } from "Theme/icons";
 import { FaAnchor, FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-icons/fa";
 import { FaAnchorCircleCheck, FaExpand } from "react-icons/fa6";
-import { LuCaseSensitive, LuRegex, LuReplace, LuReplaceAll, LuWholeWord } from "react-icons/lu";
+import { LuCaseSensitive, LuRegex, LuWholeWord } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
-import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
 import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 import {
@@ -19,7 +16,9 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
-import { StyledCheckboxWrapper } from "./AnnotatorSearchLineStyles";
+import { useDocumentContentSave } from "../hooks/useDocumentContentSave";
+import { AnnotatorFindReplaceModal } from "./AnnotatorFindReplaceModal";
+import { StyledCheckboxWrapper, StyledReplaceButtonWrapper } from "./AnnotatorSearchLineStyles";
 
 interface AnnotatorSearchLine {
   searchTerm: string;
@@ -39,9 +38,9 @@ interface AnnotatorSearchLine {
   entityToAnchor: IResponseEntity | null;
   annotatorMode: EditMode;
   selectedText: string;
-  setSearchOccurences: React.Dispatch<
-    React.SetStateAction<Occurrence[] | null>
-  >;
+  setSearchOccurences: React.Dispatch<React.SetStateAction<Occurrence[] | null>>;
+  /** Re-runs the search after the annotator's text changed underneath it. */
+  refreshSearch: () => void;
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
   dataDocumentIsFetching?: boolean;
@@ -54,6 +53,10 @@ interface AnnotatorSearchLine {
   // When false, find/navigate stay available but the editing actions
   // (annotate + replace/replace-all) are hidden (read-only document).
   canEdit?: boolean;
+  // Lifted to the Annotator: while the panel is open this row unmounts, and the
+  // canvas grows into the space it leaves.
+  isFindReplaceOpen: boolean;
+  setIsFindReplaceOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   searchTerm,
@@ -75,6 +78,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   annotatorMode,
   selectedText,
   setSearchOccurences,
+  refreshSearch,
   isRegexMode,
   setIsRegexMode,
   dataDocumentIsFetching,
@@ -85,6 +89,8 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   isCaseSensitiveMode,
   setIsCaseSensitiveMode,
   canEdit = true,
+  isFindReplaceOpen,
+  setIsFindReplaceOpen,
 }) => {
   const theme = useTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -129,8 +135,23 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
     true,
   );
 
-  const [isReplacingOne, setIsReplacingOne] = useState<boolean>(false);
-  const [isReplacingAll, setIsReplacingAll] = useState<boolean>(false);
+  // Highlight mode has no replace flow — close the panel when the user switches.
+  useEffect(() => {
+    if (annotatorMode === EditMode.HIGHLIGHT) {
+      setIsFindReplaceOpen(false);
+    }
+  }, [annotatorMode]);
+
+  // The panel borrows searchInputRef for its own find field while it is open;
+  // on close the ref points back at the row's input, which takes focus so the
+  // caret does not end up on the body.
+  const wasFindReplaceOpen = useRef(isFindReplaceOpen);
+  useEffect(() => {
+    if (wasFindReplaceOpen.current && !isFindReplaceOpen) {
+      searchInputRef.current?.focus();
+    }
+    wasFindReplaceOpen.current = isFindReplaceOpen;
+  }, [isFindReplaceOpen]);
 
   const replaceSection = useMemo<boolean>(() => {
     return annotatorMode !== EditMode.HIGHLIGHT;
@@ -140,38 +161,11 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
     return contentWidth < ANNOTATOR_UNDERSIZED_BREAKPOINT;
   }, [contentWidth]);
 
-  const [replaceWith, setReplaceWith] = useState<string>("");
-
-  const queryClient = useQueryClient();
-
-  const updateDocumentMutation = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument>; successMessage?: string }) =>
-      api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
-      queryClient.invalidateQueries({ queryKey: ["document"] });
-      queryClient.invalidateQueries({ queryKey: ["documents"] });
-      if (data.successMessage) {
-        toast.info(data.successMessage);
-      }
-    },
-    onSettled: () => {
-      setIsReplacingOne(false);
-      setIsReplacingAll(false);
-    },
+  const saveDocumentContent = useDocumentContentSave({
+    annotator,
+    documentId,
+    dataDocument,
   });
-
-  const handleSaveNewContent = (successMessage?: string) => {
-    if (annotator && documentId && dataDocument) {
-      updateDocumentMutation.mutate({
-        id: documentId,
-        doc: {
-          ...dataDocument,
-          content: annotator.text.value,
-        },
-        successMessage,
-      });
-    }
-  };
 
   const goToNextOccurence = () => {
     if (searchOccurences === null) return;
@@ -190,108 +184,35 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
     return searchOccurences !== null && searchOccurences.length > 0;
   }, [searchOccurences]);
 
-  const replaceOccurence = () => {
-    setIsReplacingOne(true);
-    annotator?.onReplaceText(replaceWith);
-
-    // Store the current search state before saving
-    const currentSearchActiveOccurence = searchActiveOccurence;
-    if (searchOccurences === null) {
-      setIsReplacingOne(false);
-      return;
-    }
-    const newOccurrences = searchOccurences.filter((_, index) => index !== searchActiveOccurence);
-
-    // Calculate the new active occurrence index
-    let newActiveOccurence = currentSearchActiveOccurence;
-    if (newOccurrences.length > 0) {
-      // If we removed the last occurrence, go to the previous one
-      if (currentSearchActiveOccurence >= newOccurrences.length) {
-        newActiveOccurence = newOccurrences.length - 1;
-      }
-      // Otherwise, stay at the same index (which now points to the next occurrence)
-    } else {
-      // No more occurrences, reset to 0
-      newActiveOccurence = 0;
-    }
-
-    // Update the search state immediately
-    setSearchOccurences(newOccurrences);
-    setSearchActiveOccurence(newActiveOccurence);
-
-    // Save the content
-    handleSaveNewContent();
-  };
-
-  const replaceAllOccurences = () => {
-    setIsReplacingAll(true);
-    if (annotator && searchOccurences && searchOccurences.length > 0) {
-      try {
-        // Get the current text content
-        const currentText = annotator.text.value;
-
-        // Convert all occurrences to absolute text positions
-        // Process from end to start to avoid position shifting issues
-        const replacements: Array<{
-          startIndex: number;
-          endIndex: number;
-        }> = [];
-
-        for (const occurrence of searchOccurences) {
-          // Validate segment exists
-          const segment = annotator.text.segments[occurrence.segmentIndex];
-          if (!segment) continue;
-
-          // Convert occurrence to absolute coordinates
-          const absLineStart = segment.lineStart + occurrence.lineIndex;
-          const absLineEnd = segment.lineStart + occurrence.endLineIndex;
-
-          // Get segment positions for start and end
-          const startSegment = annotator.text.getSegmentPosition(absLineStart, occurrence.start);
-          const endSegment = annotator.text.getSegmentPosition(absLineEnd, occurrence.end);
-
-          if (startSegment && endSegment) {
-            const startIndex = annotator.text.getAbsTextIndexFromPosition(startSegment);
-            const endIndex = annotator.text.getAbsTextIndexFromPosition(endSegment);
-
-            if (startIndex >= 0 && endIndex >= 0) {
-              replacements.push({ startIndex, endIndex });
-            }
-          }
-        }
-
-        // Sort by endIndex descending to process from end to start
-        replacements.sort((a, b) => b.endIndex - a.endIndex);
-
-        // Apply all replacements to the text string
-        let newText = currentText;
-        for (const { startIndex, endIndex } of replacements) {
-          if (startIndex >= 0 && endIndex >= startIndex && endIndex <= newText.length) {
-            newText = newText.slice(0, startIndex) + replaceWith + newText.slice(endIndex);
-          }
-        }
-
-        // Update the text once with all replacements
-        annotator.updateText(newText);
-
-        // Clear search occurrences since they're all replaced
-        setSearchOccurences(null);
-        setSearchActiveOccurence(0);
-
-        // Clear the selection/highlight
-        annotator.clearSelection();
-
-        // Save the content
-        handleSaveNewContent(`${replacements.length} occurrences replaced`);
-      } catch (error) {
-        console.error("Error replacing all occurrences:", error);
-        toast.error("Failed to replace all occurrences");
-        setIsReplacingAll(false);
-      }
-    } else {
-      setIsReplacingAll(false);
-    }
-  };
+  // The panel takes the row's place: the search line unmounts so the annotator
+  // canvas can claim its height.
+  if (isFindReplaceOpen) {
+    return (
+      <AnnotatorFindReplaceModal
+        onClose={() => setIsFindReplaceOpen(false)}
+        annotator={annotator}
+        documentId={documentId}
+        dataDocument={dataDocument}
+        dataDocumentIsFetching={dataDocumentIsFetching}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        findInputRef={searchInputRef}
+        searchOccurences={searchOccurences}
+        setSearchOccurences={setSearchOccurences}
+        refreshSearch={refreshSearch}
+        searchActiveOccurence={searchActiveOccurence}
+        setSearchActiveOccurence={setSearchActiveOccurence}
+        goToNextOccurence={goToNextOccurence}
+        goToPreviousOccurence={goToPreviousOccurence}
+        isCaseSensitiveMode={isCaseSensitiveMode}
+        setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+        isWholeWordOnlyMode={isWholeWordOnlyMode}
+        setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+        isRegexMode={isRegexMode}
+        setIsRegexMode={setIsRegexMode}
+      />
+    );
+  }
 
   return (
     <StyledSearchLine $marginLeft={showStatementList}>
@@ -429,7 +350,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
 
           {canEdit && (
             <>
-              {annotatorWidthTooNarrow ? (
+              {/* {annotatorWidthTooNarrow ? (
                 searchOccurences === null ? (
                   <div style={{ width: "1rem" }} />
                 ) : (
@@ -455,7 +376,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                     },
                   ]}
                 />
-              )}
+              )} */}
 
               {!replaceSection ? (
                 <>
@@ -473,7 +394,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       onClick={() => {
                         if (entityToAnchor) {
                           annotator?.addAnchor(entityToAnchor.id);
-                          handleSaveNewContent("Anchor saved");
+                          saveDocumentContent("Anchor saved");
                           goToNextOccurence();
                         }
                       }}
@@ -498,61 +419,15 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                   )}
                 </>
               ) : (
-                <>
-                  <Input
-                    placeholder="replace with"
-                    changeOnType
-                    value={replaceWith}
-                    onChangeFn={(value: string) => {
-                      setReplaceWith(value);
-                    }}
-                    width={annotatorWidthTooNarrow ? 100 : 130}
-                    minWidth={50}
-                    clearable
+                <StyledReplaceButtonWrapper>
+                  <Button
+                    label="replace"
+                    icon={<TbReplace size={14} />}
+                    color="info"
+                    onClick={() => setIsFindReplaceOpen(true)}
+                    tooltipLabel="open find & replace"
                   />
-                  <div
-                    style={{
-                      position: "relative",
-                    }}
-                  >
-                    <IconButton
-                      color="info"
-                      tooltipLabel="replace one occurence"
-                      icon={<LuReplace size={12} />}
-                      onClick={replaceOccurence}
-                      disabled={
-                        searchOccurences === null ||
-                        searchOccurences.length === 0 ||
-                        replaceWith.length === 0 ||
-                        isReplacingOne ||
-                        isReplacingAll ||
-                        dataDocumentIsFetching
-                      }
-                    />
-                    <Loader show={isReplacingOne} size={12} noBackground />
-                  </div>
-                  <div
-                    style={{
-                      position: "relative",
-                    }}
-                  >
-                    <IconButton
-                      color="info"
-                      tooltipLabel="replace all occurences"
-                      icon={<LuReplaceAll size={12} />}
-                      onClick={replaceAllOccurences}
-                      disabled={
-                        searchOccurences === null ||
-                        searchOccurences.length === 0 ||
-                        replaceWith.length === 0 ||
-                        isReplacingOne ||
-                        isReplacingAll ||
-                        dataDocumentIsFetching
-                      }
-                    />
-                    <Loader show={isReplacingAll} size={12} noBackground />
-                  </div>
-                </>
+                </StyledReplaceButtonWrapper>
               )}
             </>
           )}

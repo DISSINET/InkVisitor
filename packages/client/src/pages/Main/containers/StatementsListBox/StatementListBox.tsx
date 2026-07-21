@@ -404,14 +404,14 @@ export const StatementListBox: React.FC = () => {
   const moveStatementsMutation = useMutation({
     mutationFn: async (data: { statements: string[]; newTerritoryId: string }) =>
       await api.statementsBatchMove(data.statements, data.newTerritoryId),
-    onSuccess: (variables, data) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       toast.info(
-        `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""} moved`,
+        `${variables.statements.length} statement${variables.statements.length > 1 ? "s" : ""} moved`,
       );
       setSelectedRows([]);
-      setTerritoryId(data.newTerritoryId);
+      setTerritoryId(variables.newTerritoryId);
     },
     onError: () => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
@@ -446,7 +446,7 @@ export const StatementListBox: React.FC = () => {
   const replaceReferencesMutation = useMutation({
     mutationFn: async (references: IReference[]) =>
       await api.statementsReferencesReplace(selectedRows, references),
-    onSuccess: (variables, references) => {
+    onSuccess: () => {
       // TODO:
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
@@ -455,7 +455,7 @@ export const StatementListBox: React.FC = () => {
   const appendReferencesMutation = useMutation({
     mutationFn: async (references: IReference[]) =>
       await api.statementsReferencesAppend(selectedRows, references),
-    onSuccess: (variables, references) => {
+    onSuccess: () => {
       // TODO:
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },

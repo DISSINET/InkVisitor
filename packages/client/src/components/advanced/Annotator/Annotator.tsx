@@ -1,4 +1,3 @@
-import { getStoredUserRole } from "utils/userStorage";
 import {
   autoUpdate,
   flip,
@@ -11,9 +10,10 @@ import {
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaHighlighter, FaPen, FaRegSave } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { IcoTrash } from "Theme/icons";
+import { getStoredUserRole } from "utils/userStorage";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -40,21 +40,15 @@ import {
   IStatement,
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
-import { useAppSelector } from "redux/hooks";
 import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { EntityTagById } from "components/advanced";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
-import {
-  useAnnotatorSearch,
-  useDebounce,
-  useDebouncedCallback,
-  useSearchParams,
-  useTheme,
-} from "hooks";
+import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
-import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
+import { useAppSelector } from "redux/hooks";
 import {
   collectStatementAnchors,
   collectTerritoryAnchors,
@@ -65,8 +59,11 @@ import {
 } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
-import TextAnnotatorMenu from "./AnnotatorMenu";
+import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
+import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
 import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
+import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
+import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorButtons,
   StyledAnnotatorMenu,
@@ -78,10 +75,9 @@ import {
   StyledMainCanvas,
   StyledScrollerCursor,
   StyledScrollerViewport,
-} from "./AnnotatorStyles";
-import { annotatorHighlight } from "./highlight";
+} from "./styles";
 import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
-import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
+import { annotatorHighlight } from "./utils/highlight";
 
 interface TextAnnotatorProps {
   width: number;
@@ -153,8 +149,6 @@ interface TextAnnotatorProps {
    */
   hideSelectionMenu?: boolean;
 }
-
-const ANNOTATOR_MENU_PAGE_PADDING = 4;
 
 export const TextAnnotator = ({
   width = 400,
@@ -331,6 +325,12 @@ export const TextAnnotator = ({
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
   const warningsPanelRef = useRef<HTMLDivElement>(null);
+
+  // The find & replace panel replaces the search line rather than sitting under
+  // it; the row it leaves behind is measured so the canvas can claim it.
+  const [isFindReplaceOpen, setIsFindReplaceOpen] = useState<boolean>(false);
+  const searchLineRef = useRef<HTMLDivElement>(null);
+  const [searchLineHeight, setSearchLineHeight] = useState<number>(0);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -598,117 +598,11 @@ export const TextAnnotator = ({
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] = useState<boolean>(false);
 
   // implementation of draggable menu
-  const [menuDragOffset, setMenuDragOffset] = useState({ x: 0, y: 0 });
-  const menuDragOffsetRef = useRef(menuDragOffset);
-  menuDragOffsetRef.current = menuDragOffset;
-
-  const menuDragSessionRef = useRef<{
-    pointerId: number;
-    startClientX: number;
-    startClientY: number;
-    originX: number;
-    originY: number;
-  } | null>(null);
-
-  const menuDragHandleRef = useRef<HTMLDivElement | null>(null);
-  const menuDragWindowListenersRef = useRef<AbortController | null>(null);
-
-  const menuDraggableRef = useRef<HTMLDivElement | null>(null);
-
-  const endMenuDrag = useCallback((ev?: { pointerId: number }) => {
-    const session = menuDragSessionRef.current;
-    if (!session) return;
-    if (ev !== undefined && ev.pointerId !== session.pointerId) return;
-
-    menuDragWindowListenersRef.current?.abort();
-    menuDragWindowListenersRef.current = null;
-
-    const el = menuDragHandleRef.current;
-    try {
-      el?.releasePointerCapture(session.pointerId);
-    } catch {
-      /* capture already released */
-    }
-    menuDragHandleRef.current = null;
-    menuDragSessionRef.current = null;
-  }, []);
-
-  const handleMenuDragPointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (e.button !== 0) return;
-      e.preventDefault();
-      menuDragWindowListenersRef.current?.abort();
-      const ac = new AbortController();
-      menuDragWindowListenersRef.current = ac;
-      const signal = ac.signal;
-      const pointerId = e.pointerId;
-
-      menuDragHandleRef.current = e.currentTarget;
-      e.currentTarget.setPointerCapture(pointerId);
-      menuDragSessionRef.current = {
-        pointerId,
-        startClientX: e.clientX,
-        startClientY: e.clientY,
-        originX: menuDragOffsetRef.current.x,
-        originY: menuDragOffsetRef.current.y,
-      };
-
-      const opts = { capture: true, signal } as const;
-      const onWindowPointerEnd = (wev: PointerEvent) => {
-        if (wev.pointerId !== pointerId) return;
-        endMenuDrag(wev);
-      };
-      window.addEventListener("pointerup", onWindowPointerEnd, opts);
-      window.addEventListener("pointercancel", onWindowPointerEnd, opts);
-      window.addEventListener("blur", () => endMenuDrag(), opts);
-      document.addEventListener(
-        "visibilitychange",
-        () => {
-          if (document.visibilityState === "hidden") endMenuDrag();
-        },
-        opts,
-      );
-    },
-    [endMenuDrag],
-  );
-
-  const handleMenuDragPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const session = menuDragSessionRef.current;
-    if (!session || e.pointerId !== session.pointerId) return;
-    e.preventDefault();
-    const page = document.getElementById("page");
-    const menuEl = menuDraggableRef.current;
-    let px = session.originX + (e.clientX - session.startClientX);
-    let py = session.originY + (e.clientY - session.startClientY);
-
-    if (page && menuEl) {
-      const pr = page.getBoundingClientRect();
-      const pad = ANNOTATOR_MENU_PAGE_PADDING;
-      const mr = menuEl.getBoundingClientRect();
-      const cur = menuDragOffsetRef.current;
-      const innerLeft = (x: number) => mr.left + (x - cur.x);
-      const innerTop = (y: number) => mr.top + (y - cur.y);
-      for (let i = 0; i < 4; i++) {
-        const l = innerLeft(px);
-        const t = innerTop(py);
-        const r = l + mr.width;
-        const b = t + mr.height;
-        if (l < pr.left + pad) px += pr.left + pad - l;
-        if (t < pr.top + pad) py += pr.top + pad - t;
-        if (r > pr.right - pad) px -= r - (pr.right - pad);
-        if (b > pr.bottom - pad) py -= b - (pr.bottom - pad);
-      }
-    }
-
-    setMenuDragOffset({ x: px, y: py });
-  }, []);
-
-  const handleMenuDragPointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      endMenuDrag(e.nativeEvent);
-    },
-    [endMenuDrag],
-  );
+  const {
+    dragHandleProps: menuDragHandleProps,
+    draggableRef: menuDraggableRef,
+    dragOffset: menuDragOffset,
+  } = useAnnotatorMenuDrag();
 
   /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
   // const handleMenuPointerDownCapture = useCallback(
@@ -1114,8 +1008,33 @@ export const TextAnnotator = ({
     return () => observer.disconnect();
   }, []);
 
-  // The canvas keeps its fixed pixel height minus whatever the panel occupies.
-  const canvasHeight = Math.max(0, height - warningsPanelHeight);
+  // Measure the search line row. It collapses to 0 while the find & replace
+  // panel stands in for it, so only real heights are kept — that last height is
+  // what the canvas claims for as long as the row is gone.
+  useEffect(() => {
+    const el = searchLineRef.current;
+    if (!el) {
+      return;
+    }
+    const update = () => {
+      const measured = el.offsetHeight;
+      if (measured > 0) {
+        setSearchLineHeight(measured);
+      }
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // The canvas keeps its fixed pixel height minus whatever the warnings panel
+  // occupies, plus the search line row while find & replace is open — the
+  // parent's height budget always reserves the row.
+  const canvasHeight = Math.max(
+    0,
+    height - warningsPanelHeight + (isFindReplaceOpen ? searchLineHeight : 0),
+  );
 
   // Resize the annotator when the width or available canvas height changes
   useEffect(() => {
@@ -1497,11 +1416,18 @@ export const TextAnnotator = ({
 
       if (newSelectedOccurence) {
         annotator?.selectSearchOccurrence(newSelectedOccurence);
+      } else {
+        // The term (or a changed search option) no longer matches anything —
+        // drop the highlight left over from the previous hit.
+        annotator?.clearSelection();
       }
     }
   }, [searchActiveOccurence, searchOccurences]);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const [searchRefreshKey, setSearchRefreshKey] = useState<number>(0);
+  const refreshSearch = useCallback(() => setSearchRefreshKey((key) => key + 1), []);
 
   // Execute search, react to width changes
   useAnnotatorSearch({
@@ -1513,6 +1439,7 @@ export const TextAnnotator = ({
     isWholeWordOnlyMode,
     isCaseSensitiveMode,
     annotatorMode,
+    searchRefreshKey,
     setSearchOccurences,
     setSearchActiveOccurence,
     setSelectedText,
@@ -1528,36 +1455,41 @@ export const TextAnnotator = ({
 
   return (
     <>
-      <AnnotatorSearchLine
-        contentWidth={width}
-        showStatementList={showStatementList ?? false}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        searchOccurences={searchOccurences}
-        searchActiveOccurence={searchActiveOccurence}
-        isSearchAllowed={isSearchAllowed}
-        annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-        setSearchActiveOccurence={setSearchActiveOccurence}
-        annotator={annotator}
-        documentId={documentId}
-        dataDocument={dataDocument || undefined}
-        setEntityToAnchor={setEntityToAnchor}
-        entityToAnchor={entityToAnchor}
-        currentAnchorExist={currentAnchorExist}
-        annotatorMode={annotatorMode}
-        selectedText={selectedText}
-        setSearchOccurences={setSearchOccurences}
-        isRegexMode={isRegexMode}
-        setIsRegexMode={setIsRegexMode}
-        dataDocumentIsFetching={dataDocumentIsFetching}
-        isExtendToWholeWordMode={isExtendToWholeWordMode}
-        setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
-        isWholeWordOnlyMode={isWholeWordOnlyMode}
-        setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
-        isCaseSensitiveMode={isCaseSensitiveMode}
-        setIsCaseSensitiveMode={setIsCaseSensitiveMode}
-        canEdit={canEditDocument}
-      />
+      <div ref={searchLineRef}>
+        <AnnotatorSearchLine
+          contentWidth={width}
+          showStatementList={showStatementList ?? false}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchOccurences={searchOccurences}
+          searchActiveOccurence={searchActiveOccurence}
+          isSearchAllowed={isSearchAllowed}
+          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          annotator={annotator}
+          documentId={documentId}
+          dataDocument={dataDocument || undefined}
+          setEntityToAnchor={setEntityToAnchor}
+          entityToAnchor={entityToAnchor}
+          currentAnchorExist={currentAnchorExist}
+          annotatorMode={annotatorMode}
+          selectedText={selectedText}
+          setSearchOccurences={setSearchOccurences}
+          refreshSearch={refreshSearch}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
+          dataDocumentIsFetching={dataDocumentIsFetching}
+          isExtendToWholeWordMode={isExtendToWholeWordMode}
+          setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
+          isWholeWordOnlyMode={isWholeWordOnlyMode}
+          setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+          isCaseSensitiveMode={isCaseSensitiveMode}
+          setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+          canEdit={canEditDocument}
+          isFindReplaceOpen={isFindReplaceOpen}
+          setIsFindReplaceOpen={setIsFindReplaceOpen}
+        />
+      </div>
 
       <div
         ref={warningsPanelRef}
@@ -1643,12 +1575,7 @@ export const TextAnnotator = ({
                 >
                   {dataDocument && (
                     <TextAnnotatorMenu
-                      menuDragHandleProps={{
-                        onPointerDown: handleMenuDragPointerDown,
-                        onPointerMove: handleMenuDragPointerMove,
-                        onPointerUp: handleMenuDragPointerUp,
-                        onPointerCancel: handleMenuDragPointerUp,
-                      }}
+                      menuDragHandleProps={menuDragHandleProps}
                       onEscapePressed={() => {
                         setSelectedText("");
                         annotator?.clearSelection();
@@ -1880,8 +1807,7 @@ export const TextAnnotator = ({
           <ModalHeader title="Unsaved text changes" />
           <ModalContent>
             <div>
-              You have unsaved text edits. Save or discard them before switching
-              to highlight mode.
+              You have unsaved text edits. Save or discard them before switching to highlight mode.
             </div>
           </ModalContent>
           <ModalFooter>

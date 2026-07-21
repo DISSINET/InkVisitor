@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree, IUser } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
+import { Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
@@ -20,7 +20,11 @@ import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
-import { StyledNoResults, StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
+import {
+  StyledNoResults,
+  StyledTreeButtonGroup,
+  StyledTreeWrapper,
+} from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import {
   filterTreeByFavorites,
@@ -249,7 +253,7 @@ export const TerritoryTreeBox: React.FC = () => {
     <>
       {showTerritoryTree && (
         <>
-          <ButtonGroup $smallGap>
+          <StyledTreeButtonGroup $smallGap>
             {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
@@ -265,8 +269,11 @@ export const TerritoryTreeBox: React.FC = () => {
               onClick={() => {
                 if (treeFilterOpen) {
                   dispatch(setFilterOpen(false));
-                  setFilteredTreeData(treeData);
-                  setFilterSettings(initFilterSettings);
+                  // starred is toggled outside the filter panel - keep it on close
+                  setFilterSettings({
+                    ...initFilterSettings,
+                    starred: filterSettings.starred,
+                  });
                   dispatch(setTreeInitialized(false));
                 } else {
                   dispatch(setFilterOpen(true));
@@ -289,7 +296,7 @@ export const TerritoryTreeBox: React.FC = () => {
               tooltipLabel="starred territories"
               tooltipPosition="right"
             />
-          </ButtonGroup>
+          </StyledTreeButtonGroup>
 
           {treeFilterOpen && (
             <TerritoryTreeFilter

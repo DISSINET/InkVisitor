@@ -8,7 +8,6 @@ import { useResizeObserver } from "./useResizeObserver";
 import { useSearchParams } from "./useSearchParamsContext";
 import { useTheme } from "./useTheme";
 import { useWindowSize } from "./useWindowSize";
-import { useAnnotatorSearch } from "./useAnnotatorSearch";
 
 export {
   useDebounce,
@@ -21,5 +20,4 @@ export {
   useResizeObserver,
   useTheme,
   useWindowSize,
-  useAnnotatorSearch,
 };

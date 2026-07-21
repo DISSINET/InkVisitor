@@ -1,4 +1,10 @@
+import { ButtonGroup } from "components";
 import styled from "styled-components";
+
+// prevents the buttons from being squashed vertically when the filter opens
+export const StyledTreeButtonGroup = styled(ButtonGroup)`
+  flex-shrink: 0;
+`;
 
 export const StyledTreeWrapper = styled.div`
   margin-top: 0.6rem;
