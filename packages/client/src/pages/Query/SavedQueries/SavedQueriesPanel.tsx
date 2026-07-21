@@ -62,8 +62,11 @@ interface SavedQueriesPanel {
 // gap between the Queries toggle and the panel (matches the old flex gap)
 const PANEL_OFFSET = 10;
 
-// inset from #page-content edges when clamping max-height (~2rem)
-const PAGE_CONTENT_PADDING = 20;
+// Inset kept when clamping max-height (~2rem). The size middleware measures
+// against the floating element's clipping ancestors; #page-content is the
+// nearest one because it sets overflow: hidden (see StyledPageContent), so in
+// practice this insets from its edges.
+const CLIPPING_INSET = 20;
 
 // keeps names within the two lines the query rows show (see StyledQueryName);
 // matters most for shared queries, which every user sees in their list
@@ -105,7 +108,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     middleware: [
       offset(PANEL_OFFSET),
       size({
-        padding: PAGE_CONTENT_PADDING,
+        padding: CLIPPING_INSET,
         apply({ availableHeight, elements }) {
           // maxHeight only — short lists stay short; overflow scrolls the folder list
           elements.floating.style.maxHeight = `${Math.max(0, availableHeight)}px`;
