@@ -8,6 +8,12 @@ interface UseExplorerControlsParams {
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
+  /**
+   * Identity of the current query (excludes offset/limit). Changes on a new
+   * search/filter/sort/view but not on scroll pagination — used to drop the
+   * sticky result below once the results it describes become irrelevant.
+   */
+  stableSignature?: string;
 }
 
 /**
@@ -23,9 +29,29 @@ export const useExplorerControls = ({
   getCachedEntity,
   onExport,
   onOpenEntitiesInDetail,
+  stableSignature,
 }: UseExplorerControlsParams) => {
-  const entityIds = data?.entityIds ?? [];
-  const total = data?.total ?? 0;
+  // `data` is undefined while a scroll-pagination window is fetching (the new
+  // offset/limit is a cache key react-query has no entry for yet). Reading the
+  // total straight off it made the row counter drop to 0 on every such fetch, so
+  // keep the last result until either a new one arrives or the query identity
+  // changes — the latter means the old totals no longer describe the search.
+  const lastResultRef = useRef<{ entityIds: string[]; total: number }>({
+    entityIds: [],
+    total: 0,
+  });
+  const prevStableSignatureRef = useRef(stableSignature);
+  if (prevStableSignatureRef.current !== stableSignature) {
+    prevStableSignatureRef.current = stableSignature;
+    lastResultRef.current = { entityIds: [], total: 0 };
+  }
+  if (data) {
+    lastResultRef.current = {
+      entityIds: data.entityIds ?? [],
+      total: data.total ?? 0,
+    };
+  }
+  const { entityIds, total } = lastResultRef.current;
 
   const [selectedEntityIds, setSelectedEntityIds] = useState<string[]>([]);
   const selectedEntityIdsSet = useMemo(

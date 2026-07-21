@@ -19,10 +19,28 @@ export default class Path {
     async build(entries: IRelationModel[]) {
         this.trees = {};
         for (const entry of entries.filter(e => e.type === this.type)) {
-            this.trees[entry.entityIds[0]] = {
-                mainId: entry.entityIds[0],
-                ids: entry.entityIds,
-            }
+            this.addEntry(entry);
+        }
+    }
+
+    /**
+     * Records a single relation in the graph, so a caller saving relations in a
+     * loop can keep one Path current rather than rebuilding it per insert.
+     *
+     * NOT additive: trees is keyed by the source id (entityIds[0]) and this
+     * OVERWRITES whatever that key held. An entity with several outgoing
+     * relations of this type therefore keeps only the last one recorded, which
+     * leaves pathExists walking an incomplete graph - it can miss a path that
+     * runs through a discarded edge. build() has the same behaviour, since it
+     * is a loop over this method.
+     */
+    addEntry(entry: IRelationModel) {
+        if (entry.type !== this.type) {
+            return;
+        }
+        this.trees[entry.entityIds[0]] = {
+            mainId: entry.entityIds[0],
+            ids: entry.entityIds,
         }
     }
 

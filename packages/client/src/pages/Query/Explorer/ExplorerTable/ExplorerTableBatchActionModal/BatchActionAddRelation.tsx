@@ -1,28 +1,25 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
+<<<<<<< HEAD
 import { useMutation } from "@tanstack/react-query";
 import theme from "Theme/theme";
+=======
+import { useMutation, useQuery } from "@tanstack/react-query";
+>>>>>>> dev
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
+import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { useEntitiesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { BatchActionApplyConfirm, needsBatchActionConfirm } from "./BatchActionApplyConfirm";
 import {
-  BatchActionApplyConfirm,
-  needsBatchActionConfirm,
-} from "./BatchActionApplyConfirm";
-import {
+  StyledBatchBodyText,
+  StyledBatchDangerText,
   StyledBatchMessage,
   StyledBatchSection,
   StyledBatchSectionLabel,
+  StyledBatchSuccessText,
   StyledBatchWarningLabel,
   StyledBatchWarningSection,
   StyledBatchWrapper,
@@ -43,15 +40,25 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
   onClose,
   onApply,
 }) => {
-  const isLargeSelection =
-    selectedEntityIds.length >= RELATION_ELIGIBILITY_FETCH_MAX;
+  const isLargeSelection = selectedEntityIds.length >= RELATION_ELIGIBILITY_FETCH_MAX;
 
   const {
     data: fetchedEntities,
     isLoading: isLoadingEntities,
     isError: isEntitiesFetchError,
+<<<<<<< HEAD
   } = useEntitiesQuery("batchRelationEligibility", selectedEntityIds, {
     enabled: !isLargeSelection,
+=======
+  } = useQuery({
+    queryKey: ["batchRelationEligibility", selectedEntityIds],
+    queryFn: async () => {
+      const res = await api.entitiesGet(selectedEntityIds);
+      return res.data;
+    },
+    enabled:
+      selectedEntityIds.length > 0 && selectedEntityIds.length < RELATION_ELIGIBILITY_FETCH_MAX,
+>>>>>>> dev
   });
 
   const selectedEntities = useMemo<IEntity[]>(() => {
@@ -61,21 +68,17 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
 
   const entityClasses = useMemo<Set<EntityEnums.Class>>(
     () => new Set(selectedEntities.map((e) => e.class)),
-    [selectedEntities]
+    [selectedEntities],
   );
 
   const firstValidType = useMemo(() => {
     if (isLargeSelection) {
       return RelationEnums.BatchTypes[0];
     }
-    return RelationEnums.BatchTypes.find((t) =>
-      isRelationTypeEligible(t, entityClasses)
-    );
+    return RelationEnums.BatchTypes.find((t) => isRelationTypeEligible(t, entityClasses));
   }, [entityClasses, isLargeSelection]);
 
-  const [relationType, setRelationType] = useState<
-    RelationEnums.Type | undefined
-  >(undefined);
+  const [relationType, setRelationType] = useState<RelationEnums.Type | undefined>(undefined);
 
   const activeType = relationType ?? firstValidType;
 
@@ -83,7 +86,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
 
   const rule = useMemo(
     () => (activeType ? Relation.RelationRules[activeType] : undefined),
-    [activeType]
+    [activeType],
   );
 
   const { validEntities, invalidEntities } = useMemo(() => {
@@ -109,9 +112,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
         if (anyPatternAllowed) {
           isValid = !rule.disabledEntities?.includes(entity.class);
         } else {
-          isValid = rule.allowedEntitiesPattern.some(
-            (pattern) => pattern[0] === entity.class
-          );
+          isValid = rule.allowedEntitiesPattern.some((pattern) => pattern[0] === entity.class);
         }
 
         if (isValid) {
@@ -121,7 +122,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
         }
         return acc;
       },
-      { validEntities: [], invalidEntities: [] }
+      { validEntities: [], invalidEntities: [] },
     );
   }, [selectedEntities, rule, isLargeSelection]);
 
@@ -141,11 +142,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (!activeType || !targetEntity) return;
-      return api.batchEntityAddRelation(
-        validEntityIds,
-        activeType,
-        targetEntity.id
-      );
+      return api.batchEntityAddRelation(validEntityIds, activeType, targetEntity.id);
     },
     onSuccess: (res) => {
       toast.success(res?.data?.message || "Relations added");
@@ -175,9 +172,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     return RelationEnums.BatchTypes.map((type) => ({
       value: type,
       label: getRelationLabel(type),
-      isDisabled: isLargeSelection
-        ? false
-        : !isRelationTypeEligible(type, entityClasses),
+      isDisabled: isLargeSelection ? false : !isRelationTypeEligible(type, entityClasses),
     }));
   }, [entityClasses, isLargeSelection]);
 
@@ -206,10 +201,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
   const allowedTargetEntityClasses = useMemo<EntityEnums.Class[]>(() => {
     // if allowedEntitiesPattern is empty, return all entity classes
     if (
-      activeType
-        ? Relation.RelationRules[activeType]?.allowedEntitiesPattern.length ===
-          0
-        : true
+      activeType ? Relation.RelationRules[activeType]?.allowedEntitiesPattern.length === 0 : true
     ) {
       return EntityEnums.PLOGESTRBV;
     }
@@ -225,171 +217,137 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
 
   const selectionCount = selectedEntityIds.length;
   const eligibilityReady =
-    isLargeSelection ||
-    (!isLoadingEntities && !isEntitiesFetchError && fetchedEntities);
+    isLargeSelection || (!isLoadingEntities && !isEntitiesFetchError && fetchedEntities);
 
   return (
     <>
-    <Modal
-      showModal
-      onClose={onClose}
-      width="fat"
-      isLoading={batchMutation.isPending}
-    >
-      <ModalHeader
-        title={`Add Relation (${selectionCount} entities)`}
-        onClose={onClose}
-      />
-      <ModalContent column enableScroll>
-        <StyledBatchWrapper>
-          {isLargeSelection && (
-            <StyledBatchWarningSection>
-              <StyledBatchWarningLabel>Large selection</StyledBatchWarningLabel>
-              <span style={{ fontSize: theme.fontSize.sm }}>
-                Relation-type eligibility (by entity class) is not evaluated for{" "}
-                {RELATION_ELIGIBILITY_FETCH_MAX} or more selected entities. The
-                chosen relation will be applied to all selected entities.
-              </span>
-            </StyledBatchWarningSection>
-          )}
-
-          {!isLargeSelection && isEntitiesFetchError && (
-            <StyledBatchWarningSection>
-              <StyledBatchWarningLabel>
-                Could not load entities
-              </StyledBatchWarningLabel>
-              <span style={{ fontSize: theme.fontSize.sm }}>
-                Failed to load selected entities for eligibility checks. Try
-                again or reduce the selection.
-              </span>
-            </StyledBatchWarningSection>
-          )}
-
-          {!isLargeSelection && isLoadingEntities && (
-            <StyledBatchSection>
-              <span style={{ fontSize: theme.fontSize.sm }}>
-                Loading selected entities…
-              </span>
-            </StyledBatchSection>
-          )}
-
-          {/* RELATION TYPE */}
-          <StyledBatchSection>
-            <StyledBatchSectionLabel>Relation type</StyledBatchSectionLabel>
-            <Dropdown.Single.Basic
-              value={activeType || null}
-              options={relationOptions}
-              onChange={(value) => {
-                setRelationType(value as RelationEnums.Type);
-                setTargetEntity(undefined);
-              }}
-              placeholder="select relation type..."
-              width="full"
-              disabled={!eligibilityReady}
-            />
-          </StyledBatchSection>
-
-          {/* APPLICABILITY WARNING */}
-          {!isLargeSelection &&
-            activeType &&
-            invalidEntities.length > 0 &&
-            eligibilityReady && (
+      <Modal showModal onClose={onClose} width="fat" isLoading={batchMutation.isPending}>
+        <ModalHeader title={`Add Relation (${selectionCount} entities)`} onClose={onClose} />
+        <ModalContent column enableScroll>
+          <StyledBatchWrapper>
+            {isLargeSelection && (
               <StyledBatchWarningSection>
-                <StyledBatchWarningLabel>
-                  Partial applicability
-                </StyledBatchWarningLabel>
-                <span style={{ fontSize: theme.fontSize.sm }}>
+                <StyledBatchWarningLabel>Large selection</StyledBatchWarningLabel>
+                <StyledBatchBodyText>
+                  Relation-type eligibility (by entity class) is not evaluated for{" "}
+                  {RELATION_ELIGIBILITY_FETCH_MAX} or more selected entities. The chosen relation
+                  will be applied to all selected entities.
+                </StyledBatchBodyText>
+              </StyledBatchWarningSection>
+            )}
+
+            {!isLargeSelection && isEntitiesFetchError && (
+              <StyledBatchWarningSection>
+                <StyledBatchWarningLabel>Could not load entities</StyledBatchWarningLabel>
+                <StyledBatchBodyText>
+                  Failed to load selected entities for eligibility checks. Try again or reduce the
+                  selection.
+                </StyledBatchBodyText>
+              </StyledBatchWarningSection>
+            )}
+
+            {!isLargeSelection && isLoadingEntities && (
+              <StyledBatchSection>
+                <StyledBatchBodyText>Loading selected entities…</StyledBatchBodyText>
+              </StyledBatchSection>
+            )}
+
+            {/* RELATION TYPE */}
+            <StyledBatchSection>
+              <StyledBatchSectionLabel>Relation type</StyledBatchSectionLabel>
+              <Dropdown.Single.Basic
+                value={activeType || null}
+                options={relationOptions}
+                onChange={(value) => {
+                  setRelationType(value as RelationEnums.Type);
+                  setTargetEntity(undefined);
+                }}
+                placeholder="select relation type..."
+                width="full"
+                disabled={!eligibilityReady}
+              />
+            </StyledBatchSection>
+
+            {/* APPLICABILITY WARNING */}
+            {!isLargeSelection && activeType && invalidEntities.length > 0 && eligibilityReady && (
+              <StyledBatchWarningSection>
+                <StyledBatchWarningLabel>Partial applicability</StyledBatchWarningLabel>
+                <StyledBatchBodyText>
                   <b>{getRelationLabel(activeType!)}</b> cannot be applied to{" "}
-                  <b>{invalidEntities.length}</b> of {selectedEntities.length}{" "}
-                  selected entities
+                  <b>{invalidEntities.length}</b> of {selectedEntities.length} selected entities
                   {" — "}
                   {Object.entries(invalidClassCounts)
                     .map(([cls, count]) => `${count}× ${cls}`)
                     .join(", ")}
                   . These will be skipped.
-                </span>
+                </StyledBatchBodyText>
                 {validEntities.length > 0 && (
-                  <span
-                    style={{
-                      fontSize: theme.fontSize.sm,
-                      color: theme.color.success,
-                    }}
-                  >
+                  <StyledBatchSuccessText>
                     <b>{validEntities.length}</b> entities are eligible.
-                  </span>
+                  </StyledBatchSuccessText>
                 )}
                 {validEntities.length === 0 && (
-                  <span
-                    style={{
-                      fontSize: theme.fontSize.sm,
-                      color: theme.color.danger,
-                      fontWeight: theme.fontWeight.bold,
-                    }}
-                  >
-                    No entities in the selection are eligible for this relation
-                    type.
-                  </span>
+                  <StyledBatchDangerText>
+                    No entities in the selection are eligible for this relation type.
+                  </StyledBatchDangerText>
                 )}
               </StyledBatchWarningSection>
             )}
 
-          {/* TARGET ENTITY */}
-          <StyledBatchSection>
-            <StyledBatchSectionLabel>Target entity</StyledBatchSectionLabel>
-            {targetEntity ? (
-              <EntityTag
-                entity={targetEntity}
-                unlinkButton={{ onClick: () => setTargetEntity(undefined) }}
-              />
-            ) : (
-              <EntitySuggester
-                onPicked={(entity) => setTargetEntity(entity)}
-                placeholder="select target entity..."
-                inputWidth="full"
-                categoryTypes={allowedTargetEntityClasses}
-                disabled={
-                  !activeType ||
-                  validEntityIds.length === 0 ||
-                  !eligibilityReady
-                }
-              />
-            )}
-          </StyledBatchSection>
+            {/* TARGET ENTITY */}
+            <StyledBatchSection>
+              <StyledBatchSectionLabel>Target entity</StyledBatchSectionLabel>
+              {targetEntity ? (
+                <EntityTag
+                  entity={targetEntity}
+                  unlinkButton={{ onClick: () => setTargetEntity(undefined) }}
+                  fullWidth
+                />
+              ) : (
+                <EntitySuggester
+                  onPicked={(entity) => setTargetEntity(entity)}
+                  placeholder="select target entity..."
+                  inputWidth="full"
+                  categoryTypes={allowedTargetEntityClasses}
+                  disabled={!activeType || validEntityIds.length === 0 || !eligibilityReady}
+                />
+              )}
+            </StyledBatchSection>
 
-          {/* SUMMARY */}
-          {message && <StyledBatchMessage>{message}</StyledBatchMessage>}
-        </StyledBatchWrapper>
-      </ModalContent>
-      <ModalFooter>
-        <ButtonGroup>
-          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
-          <Button
-            label="Apply"
-            color="primary"
-            onClick={handleApply}
-            disabled={
-              !activeType ||
-              !targetEntity ||
-              validEntityIds.length === 0 ||
-              batchMutation.isPending ||
-              !eligibilityReady ||
-              (!isLargeSelection && isEntitiesFetchError)
-            }
-          />
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal>
-    <BatchActionApplyConfirm
-      kind="relation"
-      entityCount={validEntityIds.length}
-      show={showConfirm}
-      loading={batchMutation.isPending}
-      onConfirm={() => {
-        setShowConfirm(false);
-        executeApply();
-      }}
-      onCancel={() => setShowConfirm(false)}
-    />
+            {/* SUMMARY */}
+            {message && <StyledBatchMessage>{message}</StyledBatchMessage>}
+          </StyledBatchWrapper>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+            <Button
+              label="Apply"
+              color="primary"
+              onClick={handleApply}
+              disabled={
+                !activeType ||
+                !targetEntity ||
+                validEntityIds.length === 0 ||
+                batchMutation.isPending ||
+                !eligibilityReady ||
+                (!isLargeSelection && isEntitiesFetchError)
+              }
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+      <BatchActionApplyConfirm
+        kind="relation"
+        entityCount={validEntityIds.length}
+        show={showConfirm}
+        loading={batchMutation.isPending}
+        onConfirm={() => {
+          setShowConfirm(false);
+          executeApply();
+        }}
+        onCancel={() => setShowConfirm(false)}
+      />
     </>
   );
 };

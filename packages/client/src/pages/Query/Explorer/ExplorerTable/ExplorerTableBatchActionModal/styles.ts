@@ -45,6 +45,19 @@ export const StyledBatchWarningLabel = styled(StyledBatchSectionLabel)`
   color: ${({ theme }) => theme.color.warning};
 `;
 
+export const StyledBatchBodyText = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.sm};
+`;
+
+export const StyledBatchSuccessText = styled(StyledBatchBodyText)`
+  color: ${({ theme }) => theme.color.success};
+`;
+
+export const StyledBatchDangerText = styled(StyledBatchBodyText)`
+  color: ${({ theme }) => theme.color.danger};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+`;
+
 export const StyledSelectAll = styled.div`
   display: flex;
   align-items: center;
