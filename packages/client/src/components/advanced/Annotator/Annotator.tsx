@@ -336,9 +336,6 @@ export const TextAnnotator = ({
   const [isFindReplaceOpen, setIsFindReplaceOpen] = useState<boolean>(false);
   const searchLineRef = useRef<HTMLDivElement>(null);
   const [searchLineHeight, setSearchLineHeight] = useState<number>(0);
-  // Last height the search line had while mounted — what the canvas gains once
-  // the row collapses.
-  const searchLineFullHeightRef = useRef<number>(0);
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -1016,28 +1013,32 @@ export const TextAnnotator = ({
     return () => observer.disconnect();
   }, []);
 
+  // Measure the search line row. It collapses to 0 while the find & replace
+  // panel stands in for it, so only real heights are kept — that last height is
+  // what the canvas claims for as long as the row is gone.
   useEffect(() => {
     const el = searchLineRef.current;
     if (!el) {
       return;
     }
-    const update = () => setSearchLineHeight(el.offsetHeight);
+    const update = () => {
+      const measured = el.offsetHeight;
+      if (measured > 0) {
+        setSearchLineHeight(measured);
+      }
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  if (searchLineHeight > 0) {
-    searchLineFullHeightRef.current = searchLineHeight;
-  }
-
   // The canvas keeps its fixed pixel height minus whatever the warnings panel
-  // occupies, plus the search line row when that is collapsed (find & replace
-  // open) — the parent's height budget always reserves the row.
+  // occupies, plus the search line row while find & replace is open — the
+  // parent's height budget always reserves the row.
   const canvasHeight = Math.max(
     0,
-    height - warningsPanelHeight + (searchLineFullHeightRef.current - searchLineHeight),
+    height - warningsPanelHeight + (isFindReplaceOpen ? searchLineHeight : 0),
   );
 
   // Resize the annotator when the width or available canvas height changes
