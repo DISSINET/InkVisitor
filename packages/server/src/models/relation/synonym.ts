@@ -1,5 +1,5 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import Relation from "./relation";
+import Relation, { RelationSaveContext } from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
@@ -60,8 +60,15 @@ export default class Synonym
    * New relation will be created which covers all of these ids A + B + C
    * @param request
    */
-  async beforeSave(request: IRequest): Promise<void> {
+  async beforeSave(
+    request: IRequest,
+    _context?: RelationSaveContext
+  ): Promise<void> {
     await this.findSiblings(request, RelationEnums.Type.Synonym);
+    // a shared RelationSaveContext is deliberately not passed on: the cloud
+    // merge deletes the sibling relations in afterSave, so a snapshot taken
+    // once for a run of saves would keep matching rows that no longer exist.
+    // Synonym reloads per save instead.
     await super.beforeSave(request);
   }
 

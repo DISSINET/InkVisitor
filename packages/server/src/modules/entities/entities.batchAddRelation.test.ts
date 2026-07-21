@@ -6,6 +6,7 @@ import { pool } from "@middlewares/db";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { BadParams } from "@inkvisitor/shared/types/errors";
 
 // batchAddRelation creates N relations of ONE type in a loop. beforeSave needs
 // all relations of that type for its duplicate check, and for asymmetrical
@@ -123,6 +124,27 @@ describe("Entities batchAddRelation", function () {
       expect(res.status).toEqual(200);
       expect(res.body.result).toBe(false);
       expect(await sourcesLinkedTo(a.id)).toEqual([]);
+    });
+  });
+
+  describe("a relation type outside BatchTypes", () => {
+    it("is rejected", async () => {
+      const target = await makeConcept();
+      const source = await makeConcept();
+
+      // Synonym merges clouds and deletes sibling relations while saving, so a
+      // run of saves cannot share one context - it is not a batch type
+      const res = await authAgent
+        .post(`${apiPath}/entities/batchAddRelation`)
+        .send({
+          entityIds: [source.id],
+          relationType: RelationEnums.Type.Synonym,
+          targetEntityId: target.id,
+        });
+
+      expect(res.status).toEqual(new BadParams("").statusCode());
+      expect(res.body.result).toBe(false);
+      expect(res.body.error).toEqual("BadParams");
     });
   });
 

@@ -1095,6 +1095,14 @@ export default Router()
           throw new BadParams("entityIds, relationType and targetEntityId must be provided");
         }
 
+        // BatchTypes holds the types whose save lifecycle touches nothing but
+        // the relation being saved, which is what lets the whole run share one
+        // RelationSaveContext. Cloud types (Synonym) merge and delete sibling
+        // relations as they go and are not among them.
+        if (!RelationEnums.BatchTypes.includes(relationType as RelationEnums.Type)) {
+          throw new BadParams(`relation type ${relationType} cannot be added in batch`);
+        }
+
         await request.db.lock();
 
         const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);

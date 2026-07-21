@@ -1,7 +1,6 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import theme from "Theme/theme";
 import api from "api";
 import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
@@ -9,9 +8,12 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { BatchActionApplyConfirm, needsBatchActionConfirm } from "./BatchActionApplyConfirm";
 import {
+  StyledBatchBodyText,
+  StyledBatchDangerText,
   StyledBatchMessage,
   StyledBatchSection,
   StyledBatchSectionLabel,
+  StyledBatchSuccessText,
   StyledBatchWarningLabel,
   StyledBatchWarningSection,
   StyledBatchWrapper,
@@ -215,27 +217,27 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
             {isLargeSelection && (
               <StyledBatchWarningSection>
                 <StyledBatchWarningLabel>Large selection</StyledBatchWarningLabel>
-                <span style={{ fontSize: theme.fontSize.sm }}>
+                <StyledBatchBodyText>
                   Relation-type eligibility (by entity class) is not evaluated for{" "}
                   {RELATION_ELIGIBILITY_FETCH_MAX} or more selected entities. The chosen relation
                   will be applied to all selected entities.
-                </span>
+                </StyledBatchBodyText>
               </StyledBatchWarningSection>
             )}
 
             {!isLargeSelection && isEntitiesFetchError && (
               <StyledBatchWarningSection>
                 <StyledBatchWarningLabel>Could not load entities</StyledBatchWarningLabel>
-                <span style={{ fontSize: theme.fontSize.sm }}>
+                <StyledBatchBodyText>
                   Failed to load selected entities for eligibility checks. Try again or reduce the
                   selection.
-                </span>
+                </StyledBatchBodyText>
               </StyledBatchWarningSection>
             )}
 
             {!isLargeSelection && isLoadingEntities && (
               <StyledBatchSection>
-                <span style={{ fontSize: theme.fontSize.sm }}>Loading selected entities…</span>
+                <StyledBatchBodyText>Loading selected entities…</StyledBatchBodyText>
               </StyledBatchSection>
             )}
 
@@ -259,7 +261,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
             {!isLargeSelection && activeType && invalidEntities.length > 0 && eligibilityReady && (
               <StyledBatchWarningSection>
                 <StyledBatchWarningLabel>Partial applicability</StyledBatchWarningLabel>
-                <span style={{ fontSize: theme.fontSize.sm }}>
+                <StyledBatchBodyText>
                   <b>{getRelationLabel(activeType!)}</b> cannot be applied to{" "}
                   <b>{invalidEntities.length}</b> of {selectedEntities.length} selected entities
                   {" — "}
@@ -267,27 +269,16 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
                     .map(([cls, count]) => `${count}× ${cls}`)
                     .join(", ")}
                   . These will be skipped.
-                </span>
+                </StyledBatchBodyText>
                 {validEntities.length > 0 && (
-                  <span
-                    style={{
-                      fontSize: theme.fontSize.sm,
-                      color: theme.color.success,
-                    }}
-                  >
+                  <StyledBatchSuccessText>
                     <b>{validEntities.length}</b> entities are eligible.
-                  </span>
+                  </StyledBatchSuccessText>
                 )}
                 {validEntities.length === 0 && (
-                  <span
-                    style={{
-                      fontSize: theme.fontSize.sm,
-                      color: theme.color.danger,
-                      fontWeight: theme.fontWeight.bold,
-                    }}
-                  >
+                  <StyledBatchDangerText>
                     No entities in the selection are eligible for this relation type.
-                  </span>
+                  </StyledBatchDangerText>
                 )}
               </StyledBatchWarningSection>
             )}
