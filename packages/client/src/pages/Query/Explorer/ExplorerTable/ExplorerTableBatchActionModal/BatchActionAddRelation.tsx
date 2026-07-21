@@ -1,11 +1,6 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
-<<<<<<< HEAD
 import { useMutation } from "@tanstack/react-query";
-import theme from "Theme/theme";
-=======
-import { useMutation, useQuery } from "@tanstack/react-query";
->>>>>>> dev
 import api from "api";
 import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
@@ -46,19 +41,8 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
     data: fetchedEntities,
     isLoading: isLoadingEntities,
     isError: isEntitiesFetchError,
-<<<<<<< HEAD
   } = useEntitiesQuery("batchRelationEligibility", selectedEntityIds, {
     enabled: !isLargeSelection,
-=======
-  } = useQuery({
-    queryKey: ["batchRelationEligibility", selectedEntityIds],
-    queryFn: async () => {
-      const res = await api.entitiesGet(selectedEntityIds);
-      return res.data;
-    },
-    enabled:
-      selectedEntityIds.length > 0 && selectedEntityIds.length < RELATION_ELIGIBILITY_FETCH_MAX,
->>>>>>> dev
   });
 
   const selectedEntities = useMemo<IEntity[]>(() => {
