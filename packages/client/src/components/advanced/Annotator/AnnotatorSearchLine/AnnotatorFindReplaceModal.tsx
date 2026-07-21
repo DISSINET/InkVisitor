@@ -159,23 +159,33 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
         toast.info(data.successMessage);
       }
     },
+    onError: () => {
+      toast.error("Failed to save document changes");
+    },
     onSettled: () => {
       setIsReplacingOne(false);
       setIsReplacingAll(false);
     },
   });
 
-  const handleSaveNewContent = (successMessage?: string) => {
-    if (annotator && documentId && dataDocument) {
-      updateDocumentMutation.mutate({
-        id: documentId,
-        doc: {
-          ...dataDocument,
-          content: annotator.text.value,
-        },
-        successMessage,
-      });
+  /**
+   * Saves the annotator's current text. Returns whether the mutation was
+   * dispatched: only then does onSettled run, so a caller that raised an
+   * in-progress flag must clear it itself when this returns false.
+   */
+  const handleSaveNewContent = (successMessage?: string): boolean => {
+    if (!annotator || !documentId || !dataDocument) {
+      return false;
     }
+    updateDocumentMutation.mutate({
+      id: documentId,
+      doc: {
+        ...dataDocument,
+        content: annotator.text.value,
+      },
+      successMessage,
+    });
+    return true;
   };
 
   const occurencesCount = searchOccurences?.length ?? 0;
@@ -191,11 +201,9 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
   );
 
   const replaceOccurence = () => {
-    setIsReplacingOne(true);
     annotator?.onReplaceText(replaceWith);
 
     if (searchOccurences === null) {
-      setIsReplacingOne(false);
       return;
     }
     const newOccurrences = searchOccurences.filter((_, index) => index !== searchActiveOccurence);
@@ -205,53 +213,56 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
       nextActiveOccurenceIndex(searchActiveOccurence, newOccurrences.length),
     );
 
-    handleSaveNewContent();
+    // the flag tracks a save in flight; onSettled lowers it again
+    const saveDispatched = handleSaveNewContent();
+    setIsReplacingOne(saveDispatched);
   };
 
   const replaceAllOccurences = () => {
     setShowReplaceAllSubmit(false);
-    setIsReplacingAll(true);
-    if (annotator && searchOccurences && searchOccurences.length > 0) {
-      try {
-        const currentText = annotator.text.value;
+    if (!annotator || !searchOccurences || searchOccurences.length === 0) {
+      return;
+    }
 
-        // Convert every occurrence to an absolute character range in the text.
-        const ranges: ReplaceRange[] = [];
-        for (const occurrence of searchOccurences) {
-          const segment = annotator.text.segments[occurrence.segmentIndex];
-          if (!segment) continue;
+    try {
+      const currentText = annotator.text.value;
 
-          const absLineStart = segment.lineStart + occurrence.lineIndex;
-          const absLineEnd = segment.lineStart + occurrence.endLineIndex;
+      // Convert every occurrence to an absolute character range in the text.
+      const ranges: ReplaceRange[] = [];
+      for (const occurrence of searchOccurences) {
+        const segment = annotator.text.segments[occurrence.segmentIndex];
+        if (!segment) continue;
 
-          const startSegment = annotator.text.getSegmentPosition(absLineStart, occurrence.start);
-          const endSegment = annotator.text.getSegmentPosition(absLineEnd, occurrence.end);
+        const absLineStart = segment.lineStart + occurrence.lineIndex;
+        const absLineEnd = segment.lineStart + occurrence.endLineIndex;
 
-          if (startSegment && endSegment) {
-            const startIndex = annotator.text.getAbsTextIndexFromPosition(startSegment);
-            const endIndex = annotator.text.getAbsTextIndexFromPosition(endSegment);
+        const startSegment = annotator.text.getSegmentPosition(absLineStart, occurrence.start);
+        const endSegment = annotator.text.getSegmentPosition(absLineEnd, occurrence.end);
 
-            if (startIndex >= 0 && endIndex >= 0) {
-              ranges.push({ startIndex, endIndex });
-            }
+        if (startSegment && endSegment) {
+          const startIndex = annotator.text.getAbsTextIndexFromPosition(startSegment);
+          const endIndex = annotator.text.getAbsTextIndexFromPosition(endSegment);
+
+          if (startIndex >= 0 && endIndex >= 0) {
+            ranges.push({ startIndex, endIndex });
           }
         }
-
-        annotator.updateText(applyReplacements(currentText, ranges, replaceWith));
-
-        // The replacement can itself contain the term, so the count is searched
-        // again rather than assumed to be zero.
-        setSearchActiveOccurence(0);
-        annotator.clearSelection();
-        refreshSearch();
-
-        handleSaveNewContent(`${ranges.length} occurrences replaced`);
-      } catch (error) {
-        console.error("Error replacing all occurrences:", error);
-        toast.error("Failed to replace all occurrences");
-        setIsReplacingAll(false);
       }
-    } else {
+
+      annotator.updateText(applyReplacements(currentText, ranges, replaceWith));
+
+      // The replacement can itself contain the term, so the count is searched
+      // again rather than assumed to be zero.
+      setSearchActiveOccurence(0);
+      annotator.clearSelection();
+      refreshSearch();
+
+      // the flag tracks a save in flight; onSettled lowers it again
+      const saveDispatched = handleSaveNewContent(`${ranges.length} occurrences replaced`);
+      setIsReplacingAll(saveDispatched);
+    } catch (error) {
+      console.error("Error replacing all occurrences:", error);
+      toast.error("Failed to replace all occurrences");
       setIsReplacingAll(false);
     }
   };

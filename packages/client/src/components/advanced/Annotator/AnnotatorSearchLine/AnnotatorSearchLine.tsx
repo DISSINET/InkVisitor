@@ -175,6 +175,9 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
         toast.info(data.successMessage);
       }
     },
+    onError: () => {
+      toast.error("Failed to save document changes");
+    },
   });
 
   const handleSaveNewContent = (successMessage?: string) => {
