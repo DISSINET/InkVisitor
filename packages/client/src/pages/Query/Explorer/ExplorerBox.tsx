@@ -60,6 +60,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     getCachedEntity,
     onExport,
     onOpenEntitiesInDetail,
+    stableSignature,
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
 

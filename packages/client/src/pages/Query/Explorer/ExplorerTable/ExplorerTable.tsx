@@ -464,9 +464,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     ],
   );
 
-  const handleRowsRendered = ({ startIndex, stopIndex }: any) => {
+  const handleRowsRendered = ({ startIndex }: any) => {
     const visibleStart = startIndex ?? 0;
-    const visibleEnd = stopIndex ?? visibleStart;
 
     const {
       shouldUpdate,
@@ -474,12 +473,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       limit: targetLimit,
     } = computeWindowUpdate({
       visibleStart,
-      visibleEnd,
       total,
       currentOffset: offset,
       currentLimit: limit,
-      loadedOffset: renderWindow.offset,
-      loadedCount: items.length,
       viewportHeight: heightTableBody,
       rowHeight: HEIGHT_ROW_DEFAULT,
       overscan: OVERSCAN_ROWS,

@@ -214,22 +214,25 @@ export const clampWindow = (
 };
 
 export interface WindowUpdateInput {
-  /** First/last row index currently rendered by the virtual list. */
+  /** First row index currently rendered by the virtual list. */
   visibleStart: number;
-  visibleEnd: number;
   total: number;
   /** Offset/limit currently in the explore state (the last requested window). */
   currentOffset: number;
   currentLimit: number;
-  /** Offset and row count of the data actually loaded/rendered right now. */
-  loadedOffset: number;
-  loadedCount: number;
   viewportHeight: number;
   rowHeight: number;
   overscan: number;
-  /** Minimum offset/limit delta that, on its own, justifies a refetch. */
-  minDelta?: number;
+  /** Row granularity of the fetch window (see WINDOW_CHUNK_ROWS). */
+  chunkSize?: number;
 }
+
+/**
+ * Row granularity of the paginated fetch window. Both the offset and the size of
+ * the requested window are snapped to this grid, so scrolling only triggers a
+ * refetch once per `WINDOW_CHUNK_ROWS` rows instead of continuously.
+ */
+export const WINDOW_CHUNK_ROWS = 25;
 
 export interface WindowUpdate {
   shouldUpdate: boolean;
@@ -240,49 +243,45 @@ export interface WindowUpdate {
 // Decides whether the windowed query needs to refetch a new (offset, limit) slice
 // for the rows currently in view (plus overscan).
 //
-// Crucially, it refetches whenever the visible range is NOT fully covered by the
-// loaded window — independent of `minDelta`. The old logic only refetched when the
-// change exceeded `minDelta`, so small result sets (e.g. limit:1, total:2) could
-// never grow past the initial window and the extra rows would never load.
+// The requested window is snapped to a `chunkSize` grid and sized one whole chunk
+// larger than the visible range needs. Scrolling therefore leaves the requested
+// window unchanged until the viewport crosses a chunk boundary, which is what
+// keeps pagination from firing on every single row. The previous version derived
+// the window straight from the visible range, so any scroll moved `targetEnd`
+// past the loaded end and refetched continuously.
 export const computeWindowUpdate = (input: WindowUpdateInput): WindowUpdate => {
   const {
     visibleStart,
-    visibleEnd,
     total,
     currentOffset,
     currentLimit,
-    loadedOffset,
-    loadedCount,
     viewportHeight,
     rowHeight,
     overscan,
   } = input;
-  const minDelta = input.minDelta ?? 5;
+  const chunkSize = Math.max(1, input.chunkSize ?? WINDOW_CHUNK_ROWS);
 
   if (total <= 0) {
     return { shouldUpdate: false, offset: currentOffset, limit: currentLimit };
   }
 
-  const targetStart = Math.max(0, visibleStart - overscan);
-  const targetEnd = Math.min(total - 1, visibleEnd + overscan);
-  const targetLimit = Math.max(1, targetEnd - targetStart + 1);
-
+  // Rows the viewport plus overscan can show at once, rounded up to whole chunks
+  // and padded by one more chunk so there is slack on both sides of the viewport.
   const approxVisible = Math.ceil(viewportHeight / rowHeight);
-  const maxFetch = Math.max(approxVisible + 2 * overscan, 30);
-  const cappedLimit = Math.min(targetLimit, maxFetch, total);
+  const needed = approxVisible + 2 * overscan;
+  const pageSize = Math.min(total, (Math.ceil(needed / chunkSize) + 1) * chunkSize);
 
-  const loadedStart = loadedOffset;
-  const loadedEnd = loadedOffset + loadedCount - 1;
+  // Snap the start down to the chunk grid, then pull it back from the tail so the
+  // last page is full rather than truncated.
+  const gridStart = Math.max(0, Math.floor((visibleStart - overscan) / chunkSize) * chunkSize);
+  const targetOffset = Math.min(gridStart, Math.max(0, total - pageSize));
+  const targetLimit = Math.min(pageSize, total - targetOffset);
 
-  // Visible+overscan range not yet loaded -> must fetch (fixes small result sets).
-  const notCovered = targetStart < loadedStart || targetEnd > loadedEnd;
-  // Significant re-centering/resizing of the window during scroll.
-  const offsetChanged = Math.abs(targetStart - currentOffset) >= minDelta;
-  const limitChanged = Math.abs(cappedLimit - currentLimit) >= minDelta;
+  // Only the grid-aligned window matters: within a chunk the visible range still
+  // moves but the request does not change, so nothing is dispatched.
+  const shouldUpdate = targetOffset !== currentOffset || targetLimit !== currentLimit;
 
-  const shouldUpdate = notCovered || offsetChanged || limitChanged;
-
-  return { shouldUpdate, offset: targetStart, limit: cappedLimit };
+  return { shouldUpdate, offset: targetOffset, limit: targetLimit };
 };
 
 // Builds a deterministic signature for the current query + explore configuration
