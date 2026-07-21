@@ -179,9 +179,8 @@ export default class QuerySearch {
     });
     const wantedIndices = indices ? new Set(indices) : false;
 
-    // ...but only load the rows actually being returned. Export runs unpaged
-    // (limit 0) and passes rowIndices for the selected rows, so without this we
-    // would fetch the entire result set to hand back a handful of rows.
+    // ...and load only the rows being returned. Export runs unpaged (limit 0)
+    // and picks a handful of rows out of the full result set via rowIndices.
     const idsToLoad = wantedIndices
       ? filteredIds.filter((_, i) => wantedIndices.has(i))
       : filteredIds;

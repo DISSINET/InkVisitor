@@ -19,10 +19,22 @@ export default class Path {
     async build(entries: IRelationModel[]) {
         this.trees = {};
         for (const entry of entries.filter(e => e.type === this.type)) {
-            this.trees[entry.entityIds[0]] = {
-                mainId: entry.entityIds[0],
-                ids: entry.entityIds,
-            }
+            this.addEntry(entry);
+        }
+    }
+
+    /**
+     * Adds a single relation to an already built graph. Lets a caller that
+     * creates relations in a loop keep one Path up to date instead of
+     * rebuilding it from scratch after every insert.
+     */
+    addEntry(entry: IRelationModel) {
+        if (entry.type !== this.type) {
+            return;
+        }
+        this.trees[entry.entityIds[0]] = {
+            mainId: entry.entityIds[0],
+            ids: entry.entityIds,
         }
     }
 

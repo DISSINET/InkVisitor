@@ -63,7 +63,7 @@ const exploreStateInitial: Explore.IExplore = {
               id: String(index + 2),
               name: relationType,
               params: { relationType },
-              editable: true,
+              editable: false,
               type: Explore.EExploreColumnType.ER,
             })),
           ]

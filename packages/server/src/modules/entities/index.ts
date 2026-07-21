@@ -1112,6 +1112,14 @@ export default Router()
         const errors: Record<string, string> = {};
         let created = 0;
 
+        // every relation created below shares one type, so beforeSave can work
+        // off a single shared context instead of scanning the relations table
+        // per entity
+        const saveContext = await Relation.buildSaveContext(
+          request.db.connection,
+          relationType as RelationEnums.Type
+        );
+
         for (const entityData of entities) {
           try {
             const model = getRelationClass({
@@ -1132,12 +1140,16 @@ export default Router()
               continue;
             }
 
-            await model.beforeSave(request);
+            await model.beforeSave(request, saveContext);
 
             if (!(await model.save(request.db.connection))) {
               errors[entityData.id] = "save failed";
               continue;
             }
+
+            // keep the shared context current so the next iteration's duplicate
+            // and cycle checks see this relation
+            Relation.registerSavedRelation(saveContext, model);
 
             await model.afterSave(request);
             created++;

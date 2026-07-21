@@ -321,13 +321,15 @@ export const buildStableSignature = (
 };
 
 /**
- * Column ORDER is presentational only: the server returns columnData as a
- * Record keyed by column id and the table renders it by mapping over the
- * columns in state, so reordering cannot change the data. Sorting the columns
- * by id keeps the signature stable across a reorder — otherwise dragging a
- * column header would change the cache key on every hover event of the drag,
- * evicting the row cache and refetching mid-drag. Adding, removing or editing
- * a column still changes the signature, because the ids (or their contents) do.
+ * Sorts the columns by id so that column ORDER stays out of the signature.
+ *
+ * Order is presentational only: the server returns columnData as a Record keyed
+ * by column id and the table renders it by mapping over the columns in state.
+ * Order must also stay out because a header drag dispatches a move on every
+ * hover event, and each cache key change evicts the row cache and refetches.
+ *
+ * Adding, removing or editing a column still changes the signature — the set of
+ * ids, or their contents, differ.
  */
 const normalizeExploreColumns = (view: unknown): unknown => {
   if (!view || typeof view !== "object" || Array.isArray(view)) {
