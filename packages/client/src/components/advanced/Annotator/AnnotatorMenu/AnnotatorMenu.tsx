@@ -42,8 +42,8 @@ import {
   ANCHOR_GRID_ROW_MARGIN,
   AnnotatorAnchorGridRow,
   AnnotatorAnchorGridRowData,
-  AnnotatorAnchorListItem,
 } from "./AnnotatorMenuAnchorListRow";
+import { hasAnchorsWithoutElvl, resolveAnchors } from "./anchorList";
 import {
   StyledAnchorModeSwitch,
   StyledAnnotatorAnchorListWrap,
@@ -366,27 +366,12 @@ export const TextAnnotatorMenu = ({
       </>
     ) : null;
 
-  const someAnchorsWithoutElvl = useMemo(
-    () =>
-      anchors.some(
-        (anchor) =>
-          anchor.attributes.elvl === undefined ||
-          anchor.attributes.elvl === null ||
-          anchor.attributes.elvl === "",
-      ),
-    [anchors],
-  );
+  const someAnchorsWithoutElvl = useMemo(() => hasAnchorsWithoutElvl(anchors), [anchors]);
 
-  const resolvedAnchors = useMemo((): AnnotatorAnchorListItem[] => {
-    const out: AnnotatorAnchorListItem[] = [];
-    for (const anchor of anchors) {
-      const anchorTagName = anchor.getTagName();
-      if (entities[anchorTagName]) {
-        out.push({ anchor, anchorTagName });
-      }
-    }
-    return out;
-  }, [anchors, entities]);
+  const resolvedAnchors = useMemo(
+    () => resolveAnchors(anchors, entities),
+    [anchors, entities],
+  );
 
   // Anchor controls mode: view (kebab menu + static elvl) or edit (inline
   // resize / elvl / unlink). Always starts in view mode and resets to view on
