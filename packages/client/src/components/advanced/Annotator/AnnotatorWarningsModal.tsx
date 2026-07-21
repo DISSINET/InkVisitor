@@ -1,10 +1,9 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
 import { IResponseEntity } from "@inkvisitor/shared/types";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import { ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
+import { WARNING_ANCHOR_ENTITIES_KEY, useEntitiesQuery } from "hooks/react-query";
 import React, { useMemo } from "react";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { FaScissors } from "react-icons/fa6";
@@ -82,14 +81,11 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
 
   // Batch-fetch all anchor entities in a single request instead of letting each
   // EntityTagById fetch on its own. Only runs while the modal is open.
-  const { data: anchorEntities, isFetching: isFetchingEntities } = useQuery({
-    queryKey: ["warning-anchor-entities", anchorIds],
-    queryFn: async () => {
-      const res = await api.entitiesGet(anchorIds);
-      return res.data ?? [];
-    },
-    enabled: open && anchorIds.length > 0 && api.isLoggedIn(),
-  });
+  const { data: anchorEntities, isFetching: isFetchingEntities } = useEntitiesQuery(
+    WARNING_ANCHOR_ENTITIES_KEY,
+    anchorIds,
+    { enabled: open }
+  );
 
   const entityMap = useMemo(() => {
     const map: Record<string, IResponseEntity> = {};

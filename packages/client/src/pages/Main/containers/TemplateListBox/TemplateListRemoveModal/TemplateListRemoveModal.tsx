@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Submit } from "components";
 import { useSearchParams } from "hooks";
+import { DETAIL_TAB_ENTITIES_KEY } from "hooks/react-query";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
@@ -32,7 +33,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
     onSuccess: (data, variables) => {
       if (detailIdArray.includes(removeEntityId)) {
         removeDetailId(removeEntityId);
-        queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
       entityToRemove &&
         toast.warning(

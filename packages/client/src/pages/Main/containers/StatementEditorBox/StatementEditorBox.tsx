@@ -11,7 +11,7 @@ import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 import { useAppSelector } from "redux/hooks";
 import { computeDifferences } from "utils/utils";
-import { useStatementQuery, useUserQuery } from "hooks/react-query";
+import { DETAIL_TAB_ENTITIES_KEY, useStatementQuery, useUserQuery } from "hooks/react-query";
 import { EditorBoxState } from "types";
 
 export const StatementEditorBox: React.FC = () => {
@@ -57,7 +57,7 @@ export const StatementEditorBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["audit", statementId] });
 
       if (variables.labels?.[0] !== undefined) {
-        queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
       if (statement && statement.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });

@@ -1,5 +1,4 @@
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,9 +8,10 @@ import { EntitySuggester } from "components/advanced";
 import React, { useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaFolder, FaFolderOpen, FaRegFolder, FaRegFolderOpen } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
 import { MdEdit } from "react-icons/md";
+import { IcoTrash } from "Theme/icons";
 import { DragItem, ItemTypes } from "types";
+import { getStoredUserRole } from "utils/userStorage";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
   StyledEditButtonWrap,

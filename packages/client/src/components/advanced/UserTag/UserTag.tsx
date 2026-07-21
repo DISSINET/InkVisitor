@@ -1,11 +1,10 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import { Tag } from "components/basic/Tag/Tag";
+import { useUserByIdQuery } from "hooks/react-query";
 import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
 import { getUserIcon } from "utils/iconUtils";
+import { getStoredUserId } from "utils/userStorage";
 import { StyledUserIcon, StyledUserLabel, StyledUserTag, StyledUserTagWrap } from "./UserTagStyles";
 import { getUserLabel, getVariantColors, UserTagSize, UserTagVariant } from "./utils";
 
@@ -33,14 +32,7 @@ export const UserTag: React.FC<UserTagProps> = ({
   const currentUserId = getStoredUserId();
   const color = currentUserId === userId ? "primary" : "info";
 
-  const { data: dataUser } = useQuery({
-    queryKey: ["user-tag", userId],
-    queryFn: async () => {
-      const res = await api.usersGet(userId, { ignoreErrorToast: true });
-      return res.data;
-    },
-    enabled: Boolean(userId) && !disableFetch,
-  });
+  const { data: dataUser } = useUserByIdQuery(userId, !disableFetch);
 
   const variantColors = getVariantColors(theme, color, variant);
   const label = getUserLabel(dataUser, userId);

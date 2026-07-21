@@ -453,5 +453,42 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
         expect(row).not.toHaveProperty("isSubordinate");
       }
     });
+
+    // getResults(db, indices) - the branch /query-export uses. Export runs
+    // unpaged (limit 0) and passes rowIndices for the rows the user picked, so
+    // getResults returns only those rows while rowI must keep indexing into
+    // the WHOLE filtered list. It only loads the picked rows from the db, and
+    // a wrong rowI would silently mislabel the exported file rather than throw.
+    describe("selected row indices (export path)", () => {
+      const params: Query.INodeParams = {
+        entityClasses: [EntityEnums.Class.Territory],
+      };
+
+      const runQueryRowsAt = async (
+        indices: number[]
+      ): Promise<IResponseQueryEntity[]> => {
+        const search = makeSearch(params);
+        await search.run(conn);
+        return search.getResults(conn, indices);
+      };
+
+      test("only the picked rows come back, keeping their position in the full list", async () => {
+        const all = await runQueryRows(params);
+        expect(all).toHaveLength(4);
+
+        const picked = await runQueryRowsAt([1, 3]);
+        expect(picked.map((row) => row.rowI)).toEqual([1, 3]);
+        expect(picked.map((row) => row.entity.id)).toEqual([
+          all[1].entity.id,
+          all[3].entity.id,
+        ]);
+      });
+
+      test("the picked rows are identical to the same rows of an unrestricted run", async () => {
+        const all = await runQueryRows(params);
+        const picked = await runQueryRowsAt([0, 2]);
+        expect(picked).toEqual([all[0], all[2]]);
+      });
+    });
   });
 });

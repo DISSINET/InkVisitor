@@ -1095,6 +1095,14 @@ export default Router()
           throw new BadParams("entityIds, relationType and targetEntityId must be provided");
         }
 
+        // BatchTypes holds the types whose save lifecycle touches nothing but
+        // the relation being saved, which is what lets the whole run share one
+        // RelationSaveContext. Cloud types (Synonym) merge and delete sibling
+        // relations as they go and are not among them.
+        if (!RelationEnums.BatchTypes.includes(relationType as RelationEnums.Type)) {
+          throw new BadParams(`relation type ${relationType} cannot be added in batch`);
+        }
+
         await request.db.lock();
 
         const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
@@ -1112,6 +1120,14 @@ export default Router()
         const errors: Record<string, string> = {};
         let created = 0;
 
+        // every relation created below shares one type, so beforeSave can work
+        // off a single shared context instead of scanning the relations table
+        // per entity
+        const saveContext = await Relation.buildSaveContext(
+          request.db.connection,
+          relationType as RelationEnums.Type
+        );
+
         for (const entityData of entities) {
           try {
             const model = getRelationClass({
@@ -1124,23 +1140,24 @@ export default Router()
               continue;
             }
 
-            model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
-            if (model.entities.length !== model.entityIds.length) {
-              errors[entityData.id] = "entity not found for relation";
-              continue;
-            }
+            // both sides are already loaded above - no need to re-query per entity
+            model.entities = [entityData, targetEntity];
 
             if (!model.canBeCreatedByUser(user)) {
               errors[entityData.id] = "permission denied";
               continue;
             }
 
-            await model.beforeSave(request);
+            await model.beforeSave(request, saveContext);
 
             if (!(await model.save(request.db.connection))) {
               errors[entityData.id] = "save failed";
               continue;
             }
+
+            // keep the shared context current so the next iteration's duplicate
+            // and cycle checks see this relation
+            Relation.registerSavedRelation(saveContext, model);
 
             await model.afterSave(request);
             created++;

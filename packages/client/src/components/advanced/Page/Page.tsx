@@ -1,11 +1,10 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { getAppEnv } from "utils/appEnv";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader } from "components";
 import { LeftHeader, RightHeader, UserCustomizationModal } from "components/advanced";
 import { useSearchParams } from "hooks";
+import { useUserQuery } from "hooks/react-query";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,8 +15,9 @@ import { setLastClickedIndex } from "redux/features/statementList/lastClickedInd
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme, { ThemeColor } from "Theme/theme";
+import { getAppEnv } from "utils/appEnv";
+import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { StyledPage, StyledPageContent } from "./PageStyles";
-import { useUserQuery } from "hooks/react-query";
 
 interface Page {
   children?: React.ReactNode;
@@ -41,8 +41,8 @@ export const Page: React.FC<Page> = ({ children }) => {
     environmentName === "production"
       ? "muni"
       : environmentName in theme.color
-      ? (environmentName as keyof ThemeColor)
-      : "black";
+        ? (environmentName as keyof ThemeColor)
+        : "black";
 
   const location = useLocation();
   const navigate = useNavigate();

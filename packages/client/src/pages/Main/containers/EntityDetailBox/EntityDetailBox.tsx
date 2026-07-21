@@ -1,9 +1,7 @@
 import { IResponseEntity } from "@inkvisitor/shared/types";
-import api from "api";
 import { useSearchParams } from "hooks";
-import { useDetailQuery } from "hooks/react-query";
+import { DETAIL_TAB_ENTITIES_KEY, useDetailQuery, useEntitiesQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
@@ -21,7 +19,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
   const dispatch = useAppDispatch();
   const ping: number = useAppSelector((state) => state.ping);
   const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
+    (state) => state.layout.mainPage.detailBoxState,
   );
   const detailBoxMinimized = detailBoxState === DetailBoxState.Minimized;
 
@@ -45,13 +43,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const { data, error } = useQuery({
-    queryKey: ["detail-tab-entities", detailIdArray],
-    queryFn: async () => {
-      const res = await api.entitiesGet(detailIdArray);
-      return res.data ?? [];
-    },
-    enabled: api.isLoggedIn() && detailIdArray.length > 0,
+  const { data, error } = useEntitiesQuery(DETAIL_TAB_ENTITIES_KEY, detailIdArray, {
+    staleTime: 1000 * 30, // 30 seconds
   });
 
   useEffect(() => {
@@ -95,7 +88,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
           [dragIndex, 1],
           [hoverIndex, 0, prevEntities[dragIndex]],
         ],
-      })
+      }),
     );
   }, []);
 
@@ -111,36 +104,32 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
     }
   }, [detailBoxMinimized]);
 
-  const {
-    data: entity,
-    error: entityError,
-    isFetching,
-  } = useDetailQuery(selectedDetailId);
+  const { data: entity, error: entityError, isFetching } = useDetailQuery(selectedDetailId);
 
   return (
     <>
       {entities && entities.length > 0 && (
         <StyledTabGroup>
           {entities.map((entity, key) => (
-              <EntityDetailTab
-                key={key}
-                index={key}
-                entity={entity}
-                onClick={() => {
-                  if (detailBoxMinimized) {
-                    dispatch(setDetailBoxState(DetailBoxState.Normal));
-                  }
-                  onTabOpen?.();
-                  setSelectedDetailId(entity.id);
-                }}
-                onClose={() => handleClose(entity.id)}
-                isSelected={selectedDetailId === entity.id}
-                moveRow={moveRow}
-                onDragEnd={() => {
-                  replaceDetailIds(entities.map((e) => e.id));
-                }}
-              />
-            ))}
+            <EntityDetailTab
+              key={key}
+              index={key}
+              entity={entity}
+              onClick={() => {
+                if (detailBoxMinimized) {
+                  dispatch(setDetailBoxState(DetailBoxState.Normal));
+                }
+                onTabOpen?.();
+                setSelectedDetailId(entity.id);
+              }}
+              onClose={() => handleClose(entity.id)}
+              isSelected={selectedDetailId === entity.id}
+              moveRow={moveRow}
+              onDragEnd={() => {
+                replaceDetailIds(entities.map((e) => e.id));
+              }}
+            />
+          ))}
         </StyledTabGroup>
       )}
 
@@ -153,11 +142,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
             isFetching={isFetching}
           />
         ) : (
-          <>
-            {(ping === -10 || ping >= 0) && !detailBoxMinimized && (
-              <Loader show />
-            )}
-          </>
+          <>{(ping === -10 || ping >= 0) && !detailBoxMinimized && <Loader show />}</>
         )}
       </>
     </>

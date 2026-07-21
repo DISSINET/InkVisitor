@@ -1,5 +1,4 @@
 import { userRoleDict } from "@inkvisitor/shared/dictionaries";
-import { getStoredUserId, getStoredUserRole, getStoredUsername } from "utils/userStorage";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +14,7 @@ import { toast } from "react-toastify";
 import { IcoTrash } from "Theme/icons";
 import { ButtonSize } from "types";
 import { getUserIcon } from "utils/iconUtils";
+import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import { UserListIcon } from "./UserListIcon/UserListIcon";
 import {
@@ -593,9 +593,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<IcoTrash size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
-                disabled={
-                  userId === getStoredUserId() || role === UserEnums.Role.Owner
-                }
+                disabled={userId === getStoredUserId() || role === UserEnums.Role.Owner}
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
@@ -638,9 +636,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />}
                 shape="rounded-right-sm"
                 disabled={
-                  !verified ||
-                  userId === getStoredUserId() ||
-                  role === UserEnums.Role.Owner
+                  !verified || userId === getStoredUserId() || role === UserEnums.Role.Owner
                 }
                 color={active ? "success" : "danger"}
                 tooltipLabel={activateTooltip}
