@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   applyPasteToDraft,
+  buildStableSignature,
   computeWindowUpdate,
   isViableUuidPrefix,
   mergeTokensIntoIds,
@@ -190,5 +191,57 @@ describe("isViableUuidPrefix", () => {
 
   it("rejects anything longer than a uuid", () => {
     expect(isViableUuidPrefix(`${FULL}0`)).toBe(false);
+  });
+});
+
+describe("buildStableSignature", () => {
+  const query = { id: "root", type: "E", operator: "and", params: {}, edges: [] };
+  const globals = { includeEquivalents: false, includeSubordinates: false };
+
+  const column = (id: string) => ({ id, name: id, type: "EPV", params: {} });
+
+  const explore = (columns: unknown[], extra: Record<string, unknown> = {}) => ({
+    view: { mode: "table", columns },
+    filters: [],
+    sort: undefined,
+    limit: 20,
+    offset: 0,
+    ...extra,
+  });
+
+  const sign = (exploreState: unknown) =>
+    buildStableSignature(query as any, exploreState as any, globals);
+
+  // Reordering columns must NOT change the cache key: the drag fires a move on
+  // every hover event, and a changing key evicts the row cache and refetches
+  // mid-drag.
+  it("is unchanged when columns are reordered", () => {
+    const a = sign(explore([column("c1"), column("c2"), column("c3")]));
+    const b = sign(explore([column("c3"), column("c1"), column("c2")]));
+    expect(a).toEqual(b);
+  });
+
+  it("still changes when a column is added", () => {
+    const a = sign(explore([column("c1"), column("c2")]));
+    const b = sign(explore([column("c1"), column("c2"), column("c3")]));
+    expect(a).not.toEqual(b);
+  });
+
+  it("still changes when a column is removed", () => {
+    const a = sign(explore([column("c1"), column("c2")]));
+    const b = sign(explore([column("c1")]));
+    expect(a).not.toEqual(b);
+  });
+
+  it("still changes when a column's contents change", () => {
+    const a = sign(explore([{ ...column("c1"), params: { propertyType: "p1" } }]));
+    const b = sign(explore([{ ...column("c1"), params: { propertyType: "p2" } }]));
+    expect(a).not.toEqual(b);
+  });
+
+  it("ignores the window controls but not the other explore settings", () => {
+    const base = explore([column("c1")]);
+    expect(sign({ ...base, offset: 40, limit: 50 })).toEqual(sign(base));
+    expect(sign({ ...base, filters: [{ type: "label", label: "x" }] })).not.toEqual(sign(base));
   });
 });

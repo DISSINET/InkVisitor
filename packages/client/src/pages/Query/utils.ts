@@ -320,13 +320,36 @@ export const buildStableSignature = (
   return hashString(stableString);
 };
 
+/**
+ * Column ORDER is presentational only: the server returns columnData as a
+ * Record keyed by column id and the table renders it by mapping over the
+ * columns in state, so reordering cannot change the data. Sorting the columns
+ * by id keeps the signature stable across a reorder — otherwise dragging a
+ * column header would change the cache key on every hover event of the drag,
+ * evicting the row cache and refetching mid-drag. Adding, removing or editing
+ * a column still changes the signature, because the ids (or their contents) do.
+ */
+const normalizeExploreColumns = (view: unknown): unknown => {
+  if (!view || typeof view !== "object" || Array.isArray(view)) {
+    return view;
+  }
+  const v = view as Record<string, unknown>;
+  if (!Array.isArray(v.columns)) {
+    return view;
+  }
+  const sortedColumns = [...(v.columns as Array<Record<string, unknown>>)].sort((a, b) =>
+    String(a?.id ?? "").localeCompare(String(b?.id ?? "")),
+  );
+  return { ...v, columns: sortedColumns };
+};
+
 const normalizeExplore = (exploreState: Jsonish): Jsonish => {
   if (!exploreState || typeof exploreState !== "object" || Array.isArray(exploreState)) {
     return exploreState;
   }
   const e = exploreState as Record<string, unknown>;
   const { offset: _omitOffset, limit: _omitLimit, ...rest } = e;
-  return rest;
+  return "view" in rest ? { ...rest, view: normalizeExploreColumns(rest.view) } : rest;
 };
 
 const normalizeExploreForSearch = (exploreState: Jsonish): Jsonish => {
