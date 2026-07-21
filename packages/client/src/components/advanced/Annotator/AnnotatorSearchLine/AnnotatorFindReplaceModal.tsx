@@ -9,8 +9,6 @@ import {
 } from "@floating-ui/react";
 import { Annotator, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument } from "@inkvisitor/shared/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
 import { Button, Checkbox, Input, Loader, Submit } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -18,6 +16,7 @@ import { FaTimes } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import { toast } from "react-toastify";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "../useAnnotatorMenuDrag";
+import { useDocumentContentSave } from "../useDocumentContentSave";
 import {
   StyledFindReplaceBody,
   StyledFindReplaceButtonWrap,
@@ -147,46 +146,15 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
 
   useKeypress("Escape", onClose);
 
-  const queryClient = useQueryClient();
-
-  const updateDocumentMutation = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument>; successMessage?: string }) =>
-      api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
-      queryClient.invalidateQueries({ queryKey: ["document"] });
-      queryClient.invalidateQueries({ queryKey: ["documents"] });
-      if (data.successMessage) {
-        toast.info(data.successMessage);
-      }
-    },
-    onError: () => {
-      toast.error("Failed to save document changes");
-    },
+  const saveDocumentContent = useDocumentContentSave({
+    annotator,
+    documentId,
+    dataDocument,
     onSettled: () => {
       setIsReplacingOne(false);
       setIsReplacingAll(false);
     },
   });
-
-  /**
-   * Saves the annotator's current text. Returns whether the mutation was
-   * dispatched: only then does onSettled run, so a caller that raised an
-   * in-progress flag must clear it itself when this returns false.
-   */
-  const handleSaveNewContent = (successMessage?: string): boolean => {
-    if (!annotator || !documentId || !dataDocument) {
-      return false;
-    }
-    updateDocumentMutation.mutate({
-      id: documentId,
-      doc: {
-        ...dataDocument,
-        content: annotator.text.value,
-      },
-      successMessage,
-    });
-    return true;
-  };
 
   const occurencesCount = searchOccurences?.length ?? 0;
 
@@ -214,7 +182,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
     );
 
     // the flag tracks a save in flight; onSettled lowers it again
-    const saveDispatched = handleSaveNewContent();
+    const saveDispatched = saveDocumentContent();
     setIsReplacingOne(saveDispatched);
   };
 
@@ -258,7 +226,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
       refreshSearch();
 
       // the flag tracks a save in flight; onSettled lowers it again
-      const saveDispatched = handleSaveNewContent(`${ranges.length} occurrences replaced`);
+      const saveDispatched = saveDocumentContent(`${ranges.length} occurrences replaced`);
       setIsReplacingAll(saveDispatched);
     } catch (error) {
       console.error("Error replacing all occurrences:", error);

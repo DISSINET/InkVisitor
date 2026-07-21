@@ -1,7 +1,5 @@
 import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "api";
 import { Button, Checkbox, IconWithTooltip, Input } from "components";
 import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
@@ -11,7 +9,6 @@ import { FaAnchor, FaRegArrowAltCircleDown, FaRegArrowAltCircleUp } from "react-
 import { FaAnchorCircleCheck, FaExpand } from "react-icons/fa6";
 import { LuCaseSensitive, LuRegex, LuWholeWord } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
-import { toast } from "react-toastify";
 import { useTheme } from "styled-components";
 import { ANNOTATOR_UNDERSIZED_BREAKPOINT } from "Theme/constants";
 import {
@@ -19,6 +16,7 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
+import { useDocumentContentSave } from "../useDocumentContentSave";
 import { AnnotatorFindReplaceModal } from "./AnnotatorFindReplaceModal";
 import { StyledCheckboxWrapper, StyledReplaceButtonWrapper } from "./AnnotatorSearchLineStyles";
 
@@ -163,35 +161,11 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
     return contentWidth < ANNOTATOR_UNDERSIZED_BREAKPOINT;
   }, [contentWidth]);
 
-  const queryClient = useQueryClient();
-
-  const updateDocumentMutation = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument>; successMessage?: string }) =>
-      api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
-      queryClient.invalidateQueries({ queryKey: ["document"] });
-      queryClient.invalidateQueries({ queryKey: ["documents"] });
-      if (data.successMessage) {
-        toast.info(data.successMessage);
-      }
-    },
-    onError: () => {
-      toast.error("Failed to save document changes");
-    },
+  const saveDocumentContent = useDocumentContentSave({
+    annotator,
+    documentId,
+    dataDocument,
   });
-
-  const handleSaveNewContent = (successMessage?: string) => {
-    if (annotator && documentId && dataDocument) {
-      updateDocumentMutation.mutate({
-        id: documentId,
-        doc: {
-          ...dataDocument,
-          content: annotator.text.value,
-        },
-        successMessage,
-      });
-    }
-  };
 
   const goToNextOccurence = () => {
     if (searchOccurences === null) return;
@@ -420,7 +394,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                       onClick={() => {
                         if (entityToAnchor) {
                           annotator?.addAnchor(entityToAnchor.id);
-                          handleSaveNewContent("Anchor saved");
+                          saveDocumentContent("Anchor saved");
                           goToNextOccurence();
                         }
                       }}
