@@ -1124,11 +1124,8 @@ export default Router()
               continue;
             }
 
-            model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
-            if (model.entities.length !== model.entityIds.length) {
-              errors[entityData.id] = "entity not found for relation";
-              continue;
-            }
+            // both sides are already loaded above - no need to re-query per entity
+            model.entities = [entityData, targetEntity];
 
             if (!model.canBeCreatedByUser(user)) {
               errors[entityData.id] = "permission denied";

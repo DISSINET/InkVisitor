@@ -344,19 +344,37 @@ export default class Entity implements IEntity, IDbModel {
     con: Connection,
     ids: string[]
   ): Promise<IEntity[]> {
-    if (ids.findIndex((id) => !id) !== -1) {
+    const uniqueIds = new Set<string>();
+    let hasEmptyId = false;
+    for (const id of ids) {
+      if (id) {
+        uniqueIds.add(id);
+      } else {
+        hasEmptyId = true;
+      }
+    }
+
+    if (hasEmptyId) {
       console.trace("Passed empty id to Entity.findEntitiesByIds", ids);
+    }
+
+    if (!uniqueIds.size) {
+      return [];
     }
 
     const data = await rethink
       .table(Entity.table)
-      .getAll(rethink.args(ids.filter((id) => id)))
+      .getAll(rethink.args([...uniqueIds]))
       .run(con);
+
+    const byId = new Map<string, IEntity>(
+      data.map((entity: IEntity) => [entity.id, entity])
+    );
 
     // sort data by ids
     const sortedData: IEntity[] = [];
     ids.forEach((id) => {
-      const entity = data.find((e: IEntity) => e.id === id);
+      const entity = byId.get(id);
       if (entity) {
         sortedData.push(entity);
       }

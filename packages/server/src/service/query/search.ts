@@ -168,7 +168,25 @@ export default class QuerySearch {
     await this.expandFilteredResults(db);
 
     const filteredIds = this.results.filter(this.explore);
-    const filtered = await Entity.findEntitiesByIds(db, filteredIds);
+
+    // rowI must stay the index within the WHOLE filtered list, so index all of
+    // them - first index wins, same as the former filteredIds.indexOf lookup
+    const rowIndexes = new Map<string, number>();
+    filteredIds.forEach((id, i) => {
+      if (!rowIndexes.has(id)) {
+        rowIndexes.set(id, i);
+      }
+    });
+    const wantedIndices = indices ? new Set(indices) : false;
+
+    // ...but only load the rows actually being returned. Export runs unpaged
+    // (limit 0) and passes rowIndices for the selected rows, so without this we
+    // would fetch the entire result set to hand back a handful of rows.
+    const idsToLoad = wantedIndices
+      ? filteredIds.filter((_, i) => wantedIndices.has(i))
+      : filteredIds;
+
+    const filtered = await Entity.findEntitiesByIds(db, idsToLoad);
 
     // stamp document anchor spans onto statement rows so tags can show them
     // as labels (response-only field, see IEntity.anchorTexts); page-limited
@@ -183,9 +201,9 @@ export default class QuerySearch {
     const out: IResponseQueryEntity[] = [];
 
     for (const entity of filtered) {
-      const rowI = filteredIds.indexOf(entity.id);
+      const rowI = rowIndexes.get(entity.id) ?? -1;
 
-      if (!indices || indices.includes(rowI)) {
+      if (!wantedIndices || wantedIndices.has(rowI)) {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
