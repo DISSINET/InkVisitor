@@ -29,6 +29,7 @@ import {
   StyledFindReplaceResults,
   StyledFindReplaceRow,
   StyledFindReplaceTitle,
+  StyledNoResults,
 } from "./AnnotatorFindReplaceModalStyles";
 import { applyReplacements, nextActiveOccurenceIndex, ReplaceRange } from "./replaceUtils";
 
@@ -46,6 +47,8 @@ interface AnnotatorFindReplaceModal {
 
   searchOccurences: Occurrence[] | null;
   setSearchOccurences: React.Dispatch<React.SetStateAction<Occurrence[] | null>>;
+  /** Re-runs the search after the annotator's text changed underneath it. */
+  refreshSearch: () => void;
   searchActiveOccurence: number;
   setSearchActiveOccurence: (searchActiveOccurence: number) => void;
   goToNextOccurence: () => void;
@@ -70,6 +73,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
   findInputRef,
   searchOccurences,
   setSearchOccurences,
+  refreshSearch,
   searchActiveOccurence,
   setSearchActiveOccurence,
   goToNextOccurence,
@@ -135,6 +139,11 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
       contextElement: page,
     });
   }, []);
+
+  // Focus lands on whichever field the user still has to fill in. Evaluated as
+  // the inputs mount, which FloatingPortal defers to its second render pass —
+  // the two flags are mutually exclusive, so exactly one input claims focus.
+  const focusFindInput = searchTerm.length === 0;
 
   useKeypress("Escape", onClose);
 
@@ -230,9 +239,11 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
 
         annotator.updateText(applyReplacements(currentText, ranges, replaceWith));
 
-        setSearchOccurences(null);
+        // The replacement can itself contain the term, so the count is searched
+        // again rather than assumed to be zero.
         setSearchActiveOccurence(0);
         annotator.clearSelection();
+        refreshSearch();
 
         handleSaveNewContent(`${ranges.length} occurrences replaced`);
       } catch (error) {
@@ -253,9 +264,6 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
             refs.setFloating(node);
           }}
           style={floatingStyles}
-          // Keydown inside a portal still bubbles through the React tree to the
-          // annotator wrapper, which clears the selection on Escape.
-          onKeyDown={(e) => e.stopPropagation()}
         >
           <StyledFindReplaceDraggable
             ref={draggableRef}
@@ -291,16 +299,19 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
                   onEscapePressFn={onClose}
                   changeOnType
                   clearable
+                  autoFocus={focusFindInput}
                   width="full"
                   inputRef={findInputRef}
                   placeholder="Find"
                   rightContent={
                     <StyledFindReplaceResults>
-                      {searchOccurences === null
-                        ? ""
-                        : occurencesCount === 0
-                          ? "no results"
-                          : `${searchActiveOccurence + 1} of ${occurencesCount}`}
+                      {searchOccurences === null ? (
+                        ""
+                      ) : occurencesCount === 0 ? (
+                        <StyledNoResults>no results</StyledNoResults>
+                      ) : (
+                        `${searchActiveOccurence + 1} of ${occurencesCount}`
+                      )}
                     </StyledFindReplaceResults>
                   }
                 />
@@ -318,7 +329,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
                   onEscapePressFn={onClose}
                   changeOnType
                   clearable
-                  autoFocus
+                  autoFocus={!focusFindInput}
                   width="full"
                   inputRef={replaceInputRef}
                   placeholder="Replace with"
@@ -330,16 +341,19 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
                   label="Match case"
                   value={isCaseSensitiveMode}
                   onChangeFn={(checked: boolean) => setIsCaseSensitiveMode(checked)}
+                  size={13}
                 />
                 <Checkbox
                   label="Whole word only"
                   value={isWholeWordOnlyMode}
                   onChangeFn={(checked: boolean) => setIsWholeWordOnlyMode(checked)}
+                  size={13}
                 />
                 <Checkbox
                   label="Use regular expressions"
                   value={isRegexMode}
                   onChangeFn={(checked: boolean) => setIsRegexMode(checked)}
+                  size={13}
                 />
               </StyledFindReplaceFlags>
 

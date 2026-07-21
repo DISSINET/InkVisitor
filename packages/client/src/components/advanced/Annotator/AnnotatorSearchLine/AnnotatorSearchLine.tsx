@@ -41,6 +41,8 @@ interface AnnotatorSearchLine {
   annotatorMode: EditMode;
   selectedText: string;
   setSearchOccurences: React.Dispatch<React.SetStateAction<Occurrence[] | null>>;
+  /** Re-runs the search after the annotator's text changed underneath it. */
+  refreshSearch: () => void;
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
   dataDocumentIsFetching?: boolean;
@@ -78,6 +80,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
   annotatorMode,
   selectedText,
   setSearchOccurences,
+  refreshSearch,
   isRegexMode,
   setIsRegexMode,
   dataDocumentIsFetching,
@@ -140,6 +143,17 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
       setIsFindReplaceOpen(false);
     }
   }, [annotatorMode]);
+
+  // The panel borrows searchInputRef for its own find field while it is open;
+  // on close the ref points back at the row's input, which takes focus so the
+  // caret does not end up on the body.
+  const wasFindReplaceOpen = useRef(isFindReplaceOpen);
+  useEffect(() => {
+    if (wasFindReplaceOpen.current && !isFindReplaceOpen) {
+      searchInputRef.current?.focus();
+    }
+    wasFindReplaceOpen.current = isFindReplaceOpen;
+  }, [isFindReplaceOpen]);
 
   const replaceSection = useMemo<boolean>(() => {
     return annotatorMode !== EditMode.HIGHLIGHT;
@@ -208,6 +222,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
         findInputRef={searchInputRef}
         searchOccurences={searchOccurences}
         setSearchOccurences={setSearchOccurences}
+        refreshSearch={refreshSearch}
         searchActiveOccurence={searchActiveOccurence}
         setSearchActiveOccurence={setSearchActiveOccurence}
         goToNextOccurence={goToNextOccurence}
@@ -358,7 +373,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
 
           {canEdit && (
             <>
-              {annotatorWidthTooNarrow ? (
+              {/* {annotatorWidthTooNarrow ? (
                 searchOccurences === null ? (
                   <div style={{ width: "1rem" }} />
                 ) : (
@@ -384,7 +399,7 @@ export const AnnotatorSearchLine: React.FC<AnnotatorSearchLine> = ({
                     },
                   ]}
                 />
-              )}
+              )} */}
 
               {!replaceSection ? (
                 <>

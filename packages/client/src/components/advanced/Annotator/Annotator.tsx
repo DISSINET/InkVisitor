@@ -1430,6 +1430,9 @@ export const TextAnnotator = ({
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
+  const [searchRefreshKey, setSearchRefreshKey] = useState<number>(0);
+  const refreshSearch = useCallback(() => setSearchRefreshKey((key) => key + 1), []);
+
   // Execute search, react to width changes
   useAnnotatorSearch({
     annotator,
@@ -1440,6 +1443,7 @@ export const TextAnnotator = ({
     isWholeWordOnlyMode,
     isCaseSensitiveMode,
     annotatorMode,
+    searchRefreshKey,
     setSearchOccurences,
     setSearchActiveOccurence,
     setSelectedText,
@@ -1475,6 +1479,7 @@ export const TextAnnotator = ({
           annotatorMode={annotatorMode}
           selectedText={selectedText}
           setSearchOccurences={setSearchOccurences}
+          refreshSearch={refreshSearch}
           isRegexMode={isRegexMode}
           setIsRegexMode={setIsRegexMode}
           dataDocumentIsFetching={dataDocumentIsFetching}

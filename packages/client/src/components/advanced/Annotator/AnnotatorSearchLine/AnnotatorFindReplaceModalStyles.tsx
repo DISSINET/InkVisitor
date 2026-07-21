@@ -107,3 +107,7 @@ export const StyledFindReplaceFooter = styled.div`
 export const StyledFindReplaceButtonWrap = styled.div`
   position: relative;
 `;
+
+export const StyledNoResults = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+`;

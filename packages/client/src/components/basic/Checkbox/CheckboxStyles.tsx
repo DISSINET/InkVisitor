@@ -13,6 +13,16 @@ export const StyledCheckbox = styled.div`
   align-items: center;
 `;
 
+// declared ahead of the indicator, which selects on it to share its hover state
+export const StyledLabel = styled.label`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  margin-left: 0.2rem;
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+`;
+
 interface StyledCheckboxIndicator {
   $checked: boolean;
   $size: number;
@@ -39,7 +49,9 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
     background-color 0.15s ease,
     border-color 0.15s ease; */
 
-  &:hover {
+  /* the label reads as part of the control, so it shares the box's hover state */
+  &:hover,
+  ${StyledCheckbox}:has(${StyledLabel}:hover) & {
     border-color: ${({ theme, $accentColor }) => theme.color[$accentColor ?? "info"]};
   }
 
@@ -57,14 +69,6 @@ export const StyledCheckboxWrapper = styled.span<{ $hasLabel?: boolean }>`
   display: flex;
   cursor: pointer;
   margin-right: ${({ $hasLabel }) => ($hasLabel ? "0.2rem" : "0")};
-`;
-export const StyledLabel = styled.label`
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  margin-left: 0.2rem;
-  user-select: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
 `;
 interface StyledIconOnlyCheckbox {
   $checked?: boolean;
