@@ -46,7 +46,12 @@ import {
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { useDocumentQuery, useResourcesWithDocumentsQuery, useUserQuery } from "hooks/react-query";
+import {
+  DETAIL_TAB_ENTITIES_KEY,
+  useDocumentQuery,
+  useResourcesWithDocumentsQuery,
+  useUserQuery,
+} from "hooks/react-query";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -202,7 +207,7 @@ export const StatementListBox: React.FC = () => {
               appendDetailId,
             });
             queryClient.invalidateQueries({
-              queryKey: ["detail-tab-entities"],
+              queryKey: [DETAIL_TAB_ENTITIES_KEY],
             });
             queryClient.invalidateQueries({ queryKey: ["tree"] });
             queryClient.invalidateQueries({ queryKey: ["territory"] });
@@ -215,7 +220,7 @@ export const StatementListBox: React.FC = () => {
 
       if (detailIdArray.includes(sId)) {
         removeDetailId(sId);
-        queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
       dispatch(setRowsExpanded(rowsExpanded.filter((r) => r !== sId)));
       queryClient.invalidateQueries({ queryKey: ["tree"] });

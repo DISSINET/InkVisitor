@@ -2,10 +2,9 @@ import React, { useMemo } from "react";
 
 import { WarningTypeEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IWarning } from "@inkvisitor/shared/types";
-import { useQuery } from "@tanstack/react-query";
 import { WarningIcon } from "./WarningIcon";
-import api from "api";
 import { EntityTag } from "components/advanced";
+import { useEntitiesQuery } from "hooks/react-query";
 import { EntityColors } from "types";
 import {
   StyledMessage,
@@ -56,14 +55,10 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   // Single batched fallback for ids missing from the provided map. The shared
   // cache key lets multiple warnings referencing the same entities dedupe.
-  const { data: fetchedEntities } = useQuery({
-    queryKey: ["message-warning-entities", missingEntityIds],
-    queryFn: async () => {
-      const res = await api.entitiesGet(missingEntityIds);
-      return res.data ?? [];
-    },
-    enabled: missingEntityIds.length > 0 && api.isLoggedIn(),
-  });
+  const { data: fetchedEntities } = useEntitiesQuery(
+    "message-warning-entities",
+    missingEntityIds
+  );
 
   // Provided entities plus any fetched fallbacks.
   const extendedEntities = useMemo(() => {

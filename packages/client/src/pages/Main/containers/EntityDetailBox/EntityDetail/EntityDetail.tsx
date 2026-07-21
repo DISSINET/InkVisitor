@@ -23,7 +23,7 @@ import {
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import { useIsInViewport, useSearchParams } from "hooks";
-import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
+import { DETAIL_TAB_ENTITIES_KEY, useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -263,7 +263,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
         queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       }
       if (variables.labels !== undefined) {
-        queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
       if (entity?.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });

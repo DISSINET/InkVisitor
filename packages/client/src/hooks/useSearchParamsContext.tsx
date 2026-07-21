@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
 import React, {
   createContext,
   ReactElement,
@@ -58,11 +56,7 @@ const arrJoinChar = ",";
 
 export const useSearchParams = () => useContext(SearchParamsContext);
 
-export const SearchParamsProvider = ({
-  children,
-}: {
-  children: ReactElement;
-}) => {
+export const SearchParamsProvider = ({ children }: { children: ReactElement }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -86,54 +80,31 @@ export const SearchParamsProvider = ({
   }
 
   const [territoryId, setTerritoryId] = useState<string>(
-    typeof parsedParams.territory === "string" ? parsedParams.territory : ""
+    typeof parsedParams.territory === "string" ? parsedParams.territory : "",
   );
   const [statementId, setStatementId] = useState<string>(
-    typeof parsedParams.statement === "string" ? parsedParams.statement : ""
+    typeof parsedParams.statement === "string" ? parsedParams.statement : "",
   );
   const [selectedDetailId, setSelectedDetailId] = useState<string>(
-    typeof parsedParams.selectedDetail === "string"
-      ? parsedParams.selectedDetail
-      : ""
+    typeof parsedParams.selectedDetail === "string" ? parsedParams.selectedDetail : "",
   );
 
   const [detailId, setDetailId] = useState<string>(
-    typeof parsedParams.detail === "string" ? parsedParams.detail : ""
+    typeof parsedParams.detail === "string" ? parsedParams.detail : "",
   );
-
-  const stringToBoolean = (string: string) => {
-    if (string.toLowerCase() === "true") {
-      return true;
-    } else if (string.toLowerCase() === "false") {
-      return false;
-    } else {
-      console.log("Invalid url params boolean string");
-      return null;
-    }
-  };
 
   // Editor is open by default; the URL only records the non-default (closed)
   // state via the `editorClosed` token.
   const [editorOpened, setEditorOpened] = useState<boolean>(
-    "editorClosed" in parsedParams ? false : true
+    "editorClosed" in parsedParams ? false : true,
   );
 
-  const [disablePush, setDisablePush] = useState(false);
   const isLoggingOutRef = React.useRef(false);
   const isHandlingLocationChangeRef = React.useRef(false);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
   };
-
-  const { data } = useQuery({
-    queryKey: ["detail-tab-entities", getDetailIdArray()],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({ entityIds: getDetailIdArray() });
-      return res.data;
-    },
-    enabled: api.isLoggedIn() && getDetailIdArray().length > 9,
-  });
 
   const appendDetailId = (id: string, maxCount: number = maxTabCount) => {
     const detailIdArray = getDetailIdArray();
@@ -142,15 +113,7 @@ export const SearchParamsProvider = ({
       if (detailIdArray.length < maxCount) {
         newDetailIdArray.push([...detailIdArray, id]);
       } else {
-        newDetailIdArray.push([
-          ...detailIdArray.splice(1, detailIdArray.length),
-          id,
-        ]);
-        // toast.info(
-        //   `Tab [${
-        //     data ? getEntityLabel(data[0]) : detailIdArray
-        //   }] canceled from detail`
-        // );
+        newDetailIdArray.push([...detailIdArray.splice(1, detailIdArray.length), id]);
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
@@ -170,14 +133,10 @@ export const SearchParamsProvider = ({
     } else {
       // merge with existing
       // remove already added ids and add them at the end
-      const filteredArray: string[] = detailIdArray.filter(
-        (id) => !ids.includes(id)
-      );
+      const filteredArray: string[] = detailIdArray.filter((id) => !ids.includes(id));
       newDetailIdArray = filteredArray.concat(ids);
       if (newDetailIdArray.length > maxCount) {
-        newDetailIdArray = newDetailIdArray.slice(
-          newDetailIdArray.length - maxCount
-        );
+        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - maxCount);
       }
     }
 
@@ -193,9 +152,7 @@ export const SearchParamsProvider = ({
     const detailIdArray = getDetailIdArray();
     const index = detailIdArray.indexOf(id);
 
-    const newIds = detailIdArray
-      .filter((detailId) => detailId !== id)
-      .join(arrJoinChar);
+    const newIds = detailIdArray.filter((detailId) => detailId !== id).join(arrJoinChar);
 
     if (selectedDetailId === id) {
       if (index + 1 === detailIdArray.length) {
@@ -224,11 +181,7 @@ export const SearchParamsProvider = ({
   };
 
   const handleHistoryPush = () => {
-    if (
-      !disablePush &&
-      !isLoggingOutRef.current &&
-      !isHandlingLocationChangeRef.current
-    ) {
+    if (!isLoggingOutRef.current && !isHandlingLocationChangeRef.current) {
       const hashString = params.toString();
       // Remove the = symbol for editorClosed parameter
       const cleanHash = hashString
@@ -252,29 +205,20 @@ export const SearchParamsProvider = ({
     isLoggingOutRef.current = isLoggingOut;
   };
 
-  const hasSearchParams = useMemo(
-    () => parsedParamsSearch?.hash?.length > 0,
-    [parsedParamsSearch]
-  );
+  const hasSearchParams = useMemo(() => parsedParamsSearch?.hash?.length > 0, [parsedParamsSearch]);
 
   useEffect(() => {
     // Change from the inside of the app to this state
     if (!hasSearchParams) {
-      territoryId
-        ? params.set("territory", territoryId)
-        : params.delete("territory");
-      statementId
-        ? params.set("statement", statementId)
-        : params.delete("statement");
+      territoryId ? params.set("territory", territoryId) : params.delete("territory");
+      statementId ? params.set("statement", statementId) : params.delete("statement");
 
       selectedDetailId
         ? params.set("selectedDetail", selectedDetailId)
         : params.delete("selectedDetail");
       detailId ? params.set("detail", detailId) : params.delete("detail");
 
-      editorOpened
-        ? params.delete("editorClosed")
-        : params.set("editorClosed", "");
+      editorOpened ? params.delete("editorClosed") : params.set("editorClosed", "");
 
       handleHistoryPush();
     }
@@ -285,21 +229,15 @@ export const SearchParamsProvider = ({
       const paramsTemp = new URLSearchParams(location.hash.substring(1));
       const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
-      parsedParamsTemp.territory
-        ? setTerritoryId(parsedParamsTemp.territory)
-        : setTerritoryId("");
+      parsedParamsTemp.territory ? setTerritoryId(parsedParamsTemp.territory) : setTerritoryId("");
 
-      parsedParamsTemp.statement
-        ? setStatementId(parsedParamsTemp.statement)
-        : setStatementId("");
+      parsedParamsTemp.statement ? setStatementId(parsedParamsTemp.statement) : setStatementId("");
 
       parsedParamsTemp.selectedDetail
         ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
         : setSelectedDetailId("");
 
-      parsedParamsTemp.detail
-        ? setDetailId(parsedParamsTemp.detail)
-        : setDetailId("");
+      parsedParamsTemp.detail ? setDetailId(parsedParamsTemp.detail) : setDetailId("");
 
       // Handle editorClosed parameter (editor open unless explicitly closed)
       setEditorOpened(!("editorClosed" in parsedParamsTemp));
