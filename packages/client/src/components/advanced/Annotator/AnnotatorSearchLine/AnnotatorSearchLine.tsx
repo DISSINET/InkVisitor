@@ -16,7 +16,7 @@ import {
   StyledSearchLine,
   StyledSearchResults,
 } from "../../../../pages/Main/containers/StatementsListBox/StatementListBoxStyles";
-import { useDocumentContentSave } from "../useDocumentContentSave";
+import { useDocumentContentSave } from "../hooks/useDocumentContentSave";
 import { AnnotatorFindReplaceModal } from "./AnnotatorFindReplaceModal";
 import { StyledCheckboxWrapper, StyledReplaceButtonWrapper } from "./AnnotatorSearchLineStyles";
 

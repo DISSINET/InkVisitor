@@ -45,13 +45,7 @@ import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "component
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
-import {
-  useAnnotatorSearch,
-  useDebounce,
-  useDebouncedCallback,
-  useSearchParams,
-  useTheme,
-} from "hooks";
+import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
@@ -65,7 +59,7 @@ import {
 } from "utils/utils";
 import { EntityCreateModal } from "..";
 import { useAnnotator } from "./AnnotatorContext";
-import TextAnnotatorMenu from "./AnnotatorMenu";
+import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
 import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
 import {
   StyledAnnotatorButtons,
@@ -78,11 +72,12 @@ import {
   StyledMainCanvas,
   StyledScrollerCursor,
   StyledScrollerViewport,
-} from "./AnnotatorStyles";
+} from "./styles";
 import { annotatorHighlight } from "./highlight";
 import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
-import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./useAnnotatorMenuDrag";
+import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
+import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 
 interface TextAnnotatorProps {
   width: number;

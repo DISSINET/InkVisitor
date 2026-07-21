@@ -15,8 +15,8 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import { toast } from "react-toastify";
-import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "../useAnnotatorMenuDrag";
-import { useDocumentContentSave } from "../useDocumentContentSave";
+import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "../hooks/useAnnotatorMenuDrag";
+import { useDocumentContentSave } from "../hooks/useDocumentContentSave";
 import {
   StyledFindReplaceBody,
   StyledFindReplaceButtonWrap,

@@ -31,10 +31,10 @@ import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPan
 import { useAppDispatch } from "redux/hooks";
 import { IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
-import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../EntityTag/EntityTag";
-import { EntityTagById } from "../EntityTag/EntityTagById";
-import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../../EntityTag/EntityTag";
+import { EntityTagById } from "../../EntityTag/EntityTagById";
+import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
 import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
   ANCHOR_GRID_COLUMNS,
@@ -68,9 +68,9 @@ import {
   StyledTerritoryButtonColumn,
   StyledTerritorySubsection,
   StyledTerritorySubsectionTitle,
-} from "./AnnotatorStyles";
-import { AnnotatorPositionTNode, TerritoryCreateModalType } from "./types";
-import { useAnnotatorTargetPicker } from "./useAnnotatorTargetPicker";
+} from "../styles";
+import { AnnotatorPositionTNode, TerritoryCreateModalType } from "../types";
+import { useAnnotatorTargetPicker } from "../hooks/useAnnotatorTargetPicker";
 
 interface TextAnnotatorMenuProps {
   text: string;

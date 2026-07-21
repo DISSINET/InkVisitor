@@ -1,14 +1,14 @@
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import React from "react";
-import { EntityTag } from "../EntityTag/EntityTag";
+import { EntityTag } from "../../EntityTag/EntityTag";
 import {
   StyledStatementTargetList,
   StyledStatementTargetNote,
   StyledStatementTargetOption,
   StyledStatementTargetSelector,
   StyledStatementTargetTitle,
-} from "./AnnotatorStyles";
-import { AnnotatorPositionTNode } from "./types";
+} from "../styles";
+import { AnnotatorPositionTNode } from "../types";
 
 interface AnnotatorStatementTargetPicker {
   /** The in-document subT hierarchy, outermost first with nesting depth. */

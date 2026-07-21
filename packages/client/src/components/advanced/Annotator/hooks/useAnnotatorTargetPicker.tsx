@@ -10,9 +10,9 @@ import {
 } from "@floating-ui/react";
 import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import React, { useState } from "react";
-import { AnnotatorStatementTargetPicker } from "./AnnotatorStatementTargetPicker";
-import { StyledStatementTargetPopover } from "./AnnotatorStyles";
-import { AnnotatorPositionTNode } from "./types";
+import { AnnotatorStatementTargetPicker } from "../AnnotatorMenu/AnnotatorStatementTargetPicker";
+import { StyledStatementTargetPopover } from "../styles";
+import { AnnotatorPositionTNode } from "../types";
 
 interface UseAnnotatorTargetPicker {
   hierarchy: AnnotatorPositionTNode[];

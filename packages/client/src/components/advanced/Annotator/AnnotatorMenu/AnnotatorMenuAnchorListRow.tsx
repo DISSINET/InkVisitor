@@ -3,8 +3,8 @@ import { IEntity } from "@inkvisitor/shared/types";
 import React, { useState } from "react";
 import { FaArrowsAltH, FaEllipsisV, FaUnlink } from "react-icons/fa";
 import { Button } from "components/basic/Button/Button";
-import { EntityTag } from "../EntityTag/EntityTag";
-import { ElvlButtonGroup } from "../IconButtonGroups/ElvlButtonGroup";
+import { EntityTag } from "../../EntityTag/EntityTag";
+import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
 import {
   StyledAnchorCell,
   StyledAnchorClusterElvl,
@@ -12,7 +12,7 @@ import {
   StyledAnchorClusterMoveButton,
   StyledAnchorClusterUnlinkButton,
   StyledAnchorControlsCluster,
-} from "./AnnotatorStyles";
+} from "../styles";
 import { Tag } from "@inkvisitor/annotator/src/lib";
 
 export const ANCHOR_GRID_COLUMNS = 2;
