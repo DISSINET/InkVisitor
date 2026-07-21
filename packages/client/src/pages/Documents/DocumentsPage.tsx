@@ -101,7 +101,7 @@ export const DocumentsPage: React.FC = ({}) => {
 
   const uploadDocumentMutation = useMutation({
     mutationFn: async (doc: IDocument) => api.documentUpload(doc),
-    onSuccess: (variables, data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
   });
@@ -109,7 +109,7 @@ export const DocumentsPage: React.FC = ({}) => {
   const updateDocumentMutation = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    onSuccess: (variables, data) => {
+    onSuccess: () => {
       setEditDocumentId(false);
       queryClient.invalidateQueries({ queryKey: ["documents"] });
     },

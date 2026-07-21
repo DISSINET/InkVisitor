@@ -229,12 +229,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       statements: string[];
       newTerritoryId: string;
     }) => await api.statementsBatchMove(data.statements, data.newTerritoryId),
-    onSuccess: (variables, data) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       toast.info(`statement moved`);
       // could be redirected to newTerritory
-      // setTerritoryId(data.newTerritoryId);
+      // setTerritoryId(variables.newTerritoryId);
     },
   });
 
