@@ -46,7 +46,7 @@ interface Row {
 const Row: React.FC<Row> = ({ data, index, style }) => {
   const entity = data[index];
 
-  const { setStatementId } = useSearchParams();
+  const { setStatementId, setTerritoryId } = useSearchParams();
 
   return (
     <StyledRow style={style}>
@@ -62,7 +62,13 @@ const Row: React.FC<Row> = ({ data, index, style }) => {
               inverted
               shape="sharp"
               icon={<FaEdit />}
-              onClick={() => setStatementId(entity.id)}
+              onClick={() => {
+                setStatementId(entity.id);
+                const territoryId = entity.data.territory?.territoryId;
+                if (!entity.isTemplate && territoryId) {
+                  setTerritoryId(territoryId);
+                }
+              }}
             />
           )
         }
