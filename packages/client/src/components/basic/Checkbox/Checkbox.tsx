@@ -19,9 +19,11 @@ interface Checkbox {
   label?: string;
   icon?: React.ReactNode;
   size?: number;
-  // paint the checked box as a plain (white) box with an accent-coloured border
-  // and check instead of the default filled "info" look (see CheckboxStyles)
-  accentColor?: FlatThemeColor;
+  // accent colour for the checked border and checkmark (defaults to "info")
+  color?: FlatThemeColor;
+  // when true the checked box stays a plain (white) box with a coloured check
+  // instead of the default fill (see CheckboxStyles)
+  noFill?: boolean;
   tooltipLabel?: string;
   tooltipContent?: React.ReactNode;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
@@ -35,8 +37,9 @@ export const Checkbox: React.FC<Checkbox> = ({
   onChangeFn = () => {},
   label,
   icon,
-  size = 15,
-  accentColor,
+  size = 14,
+  color = "info",
+  noFill = false,
   tooltipLabel,
   tooltipContent,
   iconOnly = false,
@@ -75,7 +78,8 @@ export const Checkbox: React.FC<Checkbox> = ({
             <StyledCheckboxIndicator
               $checked={value || indeterminate}
               $size={size}
-              $accentColor={accentColor}
+              $color={color}
+              $noFill={noFill}
               onClick={handleToggle}
             >
               {indeterminate ? (

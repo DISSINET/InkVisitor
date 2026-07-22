@@ -6,21 +6,17 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  Checkbox,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
 } from "components";
-import {
-  FaCheckSquare,
-  FaCircle,
-  FaDownload,
-  FaRegSquare,
-} from "react-icons/fa";
+import { FaCircle, FaDownload } from "react-icons/fa";
 import { MdLibraryAddCheck, MdOutlineLibraryAddCheck } from "react-icons/md";
 import { useTheme } from "styled-components";
 import { EntityColors } from "types";
-import { getShortLabelByLetterCount } from "utils/utils";
+import { DocumentTitle } from "..";
 import {
   StyledExportDocumentClassCheckbox,
   StyledExportDocumentClassLabel,
@@ -28,16 +24,12 @@ import {
   StyledExportDocumentContainer,
   StyledExportStatsSection,
 } from "./DocumentModalStyles";
-import { DocumentTitle } from "..";
 
 interface DocumentModalExport {
   document: IDocument;
   onClose: () => void;
 }
-const DocumentModalExport: React.FC<DocumentModalExport> = ({
-  onClose,
-  document,
-}) => {
+const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document }) => {
   const theme = useTheme();
   const [show, setShow] = useState(false);
 
@@ -46,11 +38,10 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({
   }, []);
 
   const [exportedClasses, setExportedClasses] = useState<EntityEnums.Class[]>(
-    Object.values(EntityEnums.Class)
+    Object.values(EntityEnums.Class),
   );
 
-  const allClassesSelected =
-    exportedClasses.length === Object.values(EntityEnums.Class).length;
+  const allClassesSelected = exportedClasses.length === Object.values(EntityEnums.Class).length;
   const atLeastOneSelected = exportedClasses.length > 0;
 
   const handleSelectAll = () => {
@@ -148,21 +139,13 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({
                   return (
                     <React.Fragment key={entityClassId}>
                       <StyledExportDocumentClassCheckbox>
-                        {selected ? (
-                          <FaCheckSquare
-                            size={25}
-                            onClick={() => {
-                              handleToggleSelectClass(entityClassId);
-                            }}
-                          />
-                        ) : (
-                          <FaRegSquare
-                            size={25}
-                            onClick={() => {
-                              handleToggleSelectClass(entityClassId);
-                            }}
-                          />
-                        )}
+                        <Checkbox
+                          value={selected}
+                          onChangeFn={() => {
+                            handleToggleSelectClass(entityClassId);
+                          }}
+                          noFill
+                        />
                       </StyledExportDocumentClassCheckbox>
                       <StyledExportDocumentClassLabel
                         $selected={selected}
@@ -174,10 +157,7 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({
                       </StyledExportDocumentClassLabel>
 
                       <StyledExportDocumentClassReference>
-                        <FaCircle
-                          color={selected ? classColor : "transparent"}
-                          size={16}
-                        />
+                        <FaCircle color={selected ? classColor : "transparent"} size={16} />
                         {classReferences.length}
                       </StyledExportDocumentClassReference>
                     </React.Fragment>
@@ -208,11 +188,7 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({
           <Button
             onClick={() => {
               if (document?.id) {
-                api.documentExport(
-                  document.id,
-                  exportedClasses,
-                  document?.title || document.id
-                );
+                api.documentExport(document.id, exportedClasses, document?.title || document.id);
               }
             }}
             icon={<FaDownload size={16} style={{ marginRight: "3px" }} />}

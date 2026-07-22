@@ -12,15 +12,11 @@ interface DocumentModalEdit {
   documentId: string;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
-  // When false the annotator opens read-only (view/search only). Editors get
-  // this for documents whose Resource is not assigned to them.
-  canEdit?: boolean;
 }
 const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   documentId,
   onClose,
   anchor,
-  canEdit = true,
 }) => {
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -46,7 +42,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
         title={
           dataDocumentIsFetching
             ? "Loading..."
-            : `Edit ${
+            : `View ${
                 dataDocument
                   ? getShortLabelByLetterCount(dataDocument.title, 90)
                   : "no label"
@@ -75,7 +71,9 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
                   );
               }}
               thisTerritoryEntityId={anchor?.entityId}
-              canEditDocument={canEdit}
+              // Documents page annotator is view/search only; editing anchors
+              // and content happens in the Main page annotator box.
+              canEditDocument={false}
               disableCreate
               // Annotator lives inside this modal; lift its body-appended
               // overlays above the modal (default lib values sit under it).

@@ -26,10 +26,13 @@ export const StyledLabel = styled.label`
 interface StyledCheckboxIndicator {
   $checked: boolean;
   $size: number;
-  // when set, the checked box keeps a plain (white) fill and paints the border
-  // and checkmark in this accent colour instead of the default filled "info" look.
-  // Used e.g. by the negated query edge so the check echoes the red edge colour.
-  $accentColor?: FlatThemeColor;
+  // accent colour for the border and checkmark when checked (defaults to "info")
+  $color: FlatThemeColor;
+  // when true the checked box stays a plain (white) box and the checkmark is
+  // painted in $color; when false (default) the box is filled with $color and
+  // the checkmark is white. Used e.g. by the negated query edge so the check
+  // echoes the red edge colour.
+  $noFill?: boolean;
 }
 export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   display: inline-flex;
@@ -39,11 +42,11 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   width: ${({ $size }) => $size}px;
   height: ${({ $size }) => $size}px;
   border: 2px solid
-    ${({ theme, $checked, $accentColor }) =>
-      $checked ? theme.color[$accentColor ?? "info"] : theme.color["gray"][400]};
+    ${({ theme, $checked, $color }) =>
+      $checked ? theme.color[$color] : theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $checked, $accentColor }) =>
-    $checked && !$accentColor ? theme.color["info"] : theme.color["white"]};
+  background-color: ${({ theme, $checked, $color, $noFill }) =>
+    $checked && !$noFill ? theme.color[$color] : theme.color["white"]};
   cursor: pointer;
   /* transition:
     background-color 0.15s ease,
@@ -52,11 +55,12 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   /* the label reads as part of the control, so it shares the box's hover state */
   &:hover,
   ${StyledCheckbox}:has(${StyledLabel}:hover) & {
-    border-color: ${({ theme, $accentColor }) => theme.color[$accentColor ?? "info"]};
+    border-color: ${({ theme, $color }) => theme.color[$color]};
   }
 
   svg {
-    color: ${({ theme, $accentColor }) => theme.color[$accentColor ?? "white"]};
+    color: ${({ theme, $color, $noFill }) =>
+      $noFill ? theme.color[$color] : theme.color["white"]};
     ${({ $checked }) =>
       $checked &&
       css`

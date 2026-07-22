@@ -636,7 +636,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   <Checkbox
                     label="EQ"
                     size={13}
-                    accentColor="info"
+                    color="info"
+                    noFill
                     value={includeEquivalents}
                     tooltipLabel="include equivalents"
                     tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
@@ -645,7 +646,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   <Checkbox
                     label="SUB"
                     size={13}
-                    accentColor="warning"
+                    color="warning"
+                    noFill
                     value={includeSubordinates}
                     tooltipLabel="include subordinates"
                     tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
