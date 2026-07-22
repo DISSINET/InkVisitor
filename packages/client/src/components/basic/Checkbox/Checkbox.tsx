@@ -55,6 +55,17 @@ export const Checkbox: React.FC<Checkbox> = ({
     onClickFn();
   };
 
+  // Space/Enter toggle the box when it holds keyboard focus, matching native
+  // checkbox behaviour (the indicator is a styled span, not an <input>).
+  const handleKeyToggle = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+      onChangeFn(!value);
+      onClickFn();
+    }
+  };
+
   return (
     <>
       {iconOnly && (
@@ -76,11 +87,16 @@ export const Checkbox: React.FC<Checkbox> = ({
         >
           <StyledCheckboxWrapper $hasLabel={!!label}>
             <StyledCheckboxIndicator
+              role="checkbox"
+              tabIndex={0}
+              aria-checked={indeterminate ? "mixed" : value}
+              aria-label={label}
               $checked={value || indeterminate}
               $size={size}
               $color={color}
               $noFill={noFill}
               onClick={handleToggle}
+              onKeyDown={handleKeyToggle}
             >
               {indeterminate ? (
                 <FaMinus size={size * 0.6} />

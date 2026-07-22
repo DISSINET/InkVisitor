@@ -52,10 +52,16 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
     background-color 0.15s ease,
     border-color 0.15s ease; */
 
-  /* the label reads as part of the control, so it shares the box's hover state */
+  /* the label reads as part of the control, so it shares the box's hover state;
+     keyboard focus reuses the same accent border cue */
   &:hover,
+  &:focus-visible,
   ${StyledCheckbox}:has(${StyledLabel}:hover) & {
     border-color: ${({ theme, $color }) => theme.color[$color]};
+  }
+
+  &:focus-visible {
+    outline: none;
   }
 
   svg {

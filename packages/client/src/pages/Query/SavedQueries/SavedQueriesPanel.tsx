@@ -289,7 +289,6 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
         $isActive={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        {/* {isOpen ? <IcoFolderOpen size={16} /> : <IcoFolder size={16} />} */}
         <IcoFolderOpen size={16} />
         Queries
       </StyledToggleButton>
@@ -314,6 +313,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                 placeholder="name for the current query"
                 changeOnType
                 width="full"
+                autoFocus
                 maxLength={QUERY_NAME_MAX_LENGTH}
                 rightContent={
                   <StyledCharCounter>
@@ -323,7 +323,16 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                 onChangeFn={setSaveName}
                 onEnterPressFn={handleSave}
               />
-              <StyledSaveFooter>
+              <StyledSaveFooter
+                onKeyDown={(e) => {
+                  // Enter while the Save button holds focus saves; the checkbox
+                  // stops its own Enter from bubbling here (see handleKeyToggle),
+                  // so tabbing checkbox -> Save -> Enter is the save path
+                  if (e.key === "Enter") {
+                    handleSave();
+                  }
+                }}
+              >
                 {canShare && (
                   <StyledShareRow>
                     <Checkbox
