@@ -50,7 +50,7 @@ export const StyledUser = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   cursor: pointer;
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  padding: 0.4rem 0.8rem;
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   transition: background-color 0.2s;
   /* same hover tint as the borderless header buttons (Menu, theme switcher) */

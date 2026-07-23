@@ -34,7 +34,7 @@ import {
 import { useIsInViewport, useSearchParams, useTheme } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
-import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
+import { AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
@@ -42,7 +42,13 @@ import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxState
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { EditorBoxState, DetailBoxState, classesEditorActants, classesEditorTags } from "types";
+import {
+  EditorBoxState,
+  DetailBoxState,
+  classesEditorActants,
+  classesEditorTags,
+  ButtonSize,
+} from "types";
 import { deepCopy, getEntityLabel, getShortLabelByLetterCount, searchTree } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -68,6 +74,7 @@ import {
   StyledMissingTerritory,
   StyledTagsList,
   StyledTagsListItem,
+  StyledToggleCaret,
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -740,17 +747,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 Warnings ({statement.warnings.length})
               </StyledEditorSectionHeading>
               <Button
-                iconRight={
-                  <AiOutlineCaretRight
-                    style={{
-                      transform: showWarnings ? `rotate(90deg)` : `rotate(0deg)`,
-                      transition: "transform 0.2s ease",
-                    }}
-                  />
-                }
+                iconRight={<StyledToggleCaret $open={showWarnings} />}
                 label={showWarnings ? "hide" : "show"}
                 onClick={() => dispatch(setShowWarnings(!showWarnings))}
                 color="warning"
+                inverted
+                size={ButtonSize.Small}
                 tooltipPosition="right"
               />
             </StyledEditorSectionHeader>
