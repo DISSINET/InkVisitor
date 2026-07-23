@@ -105,6 +105,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const isRelationEntityPickerDisabled =
     relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
 
+  // the constraint comes from the root class and the edge together, so neither
+  // named alone tells the user what to change
+  const rootClassLabels =
+    rootNode.params.entityClasses && rootNode.params.entityClasses.length > 0
+      ? rootNode.params.entityClasses
+          .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
+          .join(", ")
+      : "";
+
   const entityId = node.params.entityId;
 
   const { data: dataEntity } = useQuery({
@@ -280,7 +289,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     inputWidth={212}
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
-                    placeholder="entity"
+                    placeholder={
+                      isRelationEntityPickerDisabled ? "no class for this edge" : "entity"
+                    }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
                     initCategory={
@@ -312,19 +323,37 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     }}
                     rightContent={
                       <IconWithTooltip
-                        color={edgeRequiresTarget ? "warning" : "success"}
+                        color={
+                          edgeRequiresTarget || isRelationEntityPickerDisabled
+                            ? "warning"
+                            : "success"
+                        }
                         icon={
-                          edgeRequiresTarget ? <IcoWarning size={12} /> : <IcoQuestion size={11} />
+                          edgeRequiresTarget || isRelationEntityPickerDisabled ? (
+                            <IcoWarning size={12} />
+                          ) : (
+                            <IcoQuestion size={11} />
+                          )
                         }
                         tooltipPosition="top"
                         tooltipColor={
-                          edgeRequiresTarget
+                          edgeRequiresTarget || isRelationEntityPickerDisabled
                             ? "tooltipNodeWarningBackground"
                             : "tooltipNodeInfoBackground"
                         }
-                        tooltipLabel="Empty Entity Suggester"
+                        tooltipLabel={
+                          isRelationEntityPickerDisabled
+                            ? "No allowed target class"
+                            : "Empty Entity Suggester"
+                        }
                         tooltipContent={
-                          edgeRequiresTarget ? (
+                          isRelationEntityPickerDisabled ? (
+                            <p>
+                              The "{edgeLabel}" relation allows no target class for{" "}
+                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}.
+                              Change the root class or the edge type.
+                            </p>
+                          ) : edgeRequiresTarget ? (
                             <p>This edge requires a target entity.</p>
                           ) : (
                             <StyledTooltipList>

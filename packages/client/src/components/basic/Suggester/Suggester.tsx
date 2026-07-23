@@ -23,6 +23,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledEmptyCategory,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledRightContentDivider,
@@ -31,7 +32,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
-import { IcoPlusBold } from "Theme/icons";
+import { IcoMinus, IcoPlusBold } from "Theme/icons";
 
 interface Suggester {
   marginTop?: boolean;
@@ -367,6 +368,14 @@ export const Suggester: React.FC<Suggester> = ({
         (categories.length > 1 ? 0 : SINGLE_CLASS_WIDTH_COMPENSATION)
       : inputWidth;
 
+  const dropdownOptions = disableWildCard ? [...categories] : [dropdownWildCard, ...categories];
+  const categoryBoxWidth = categories.length > 1 ? 33 : 26;
+  // an edge that constrains the target to no class at all leaves the caller with
+  // nothing real to pass as the category, so it falls back to a placeholder
+  // class; naming that class in the control or the type bar would claim a
+  // choice the user cannot make here
+  const categoryIsOffered = dropdownOptions.some((option) => option.value === category);
+
   return (
     // div is necessary for flex to work and render the clear button properly
     <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
@@ -381,23 +390,39 @@ export const Suggester: React.FC<Suggester> = ({
           $isOver={isOver}
           $isFocused={isFocused}
           $accentColor={accentColorKey}
+          $disabled={disabled}
         >
-          <Dropdown.Single.Entity
-            value={category}
-            options={disableWildCard ? [...categories] : [dropdownWildCard, ...categories]}
-            onChange={onChangeCategory}
-            width={categories.length > 1 ? 33 : 26}
-            onFocus={() => {
-              setSelected(-1);
-              setIsFocused(true);
-            }}
-            onBlur={() => setIsFocused(false)}
-            disableTyping
-            suggester
-            disabled={disabled}
-            autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
+          {categoryIsOffered ? (
+            <Dropdown.Single.Entity
+              value={category}
+              options={dropdownOptions}
+              onChange={onChangeCategory}
+              width={categoryBoxWidth}
+              // the control is only wide enough for a single class letter, so a
+              // worded fallback would spill over the type bar and the input
+              placeholder=""
+              onFocus={() => {
+                setSelected(-1);
+                setIsFocused(true);
+              }}
+              onBlur={() => setIsFocused(false)}
+              disableTyping
+              suggester
+              disabled={disabled}
+              autoFocus={categories.length > 1 && autoFocus && !autoFocusInput}
+            />
+          ) : (
+            <StyledEmptyCategory $width={categoryBoxWidth}>
+              <IcoMinus size={9} />
+            </StyledEmptyCategory>
+          )}
+          <TypeBar
+            entityLetter={category}
+            color={categoryIsOffered ? undefined : "grey"}
+            noMargin
+            width={5}
+            dimColor={disabled}
           />
-          <TypeBar entityLetter={category} noMargin width={5} />
 
           <div
             ref={(node) => {
