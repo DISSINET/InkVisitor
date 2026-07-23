@@ -37,7 +37,7 @@ export const StyledUsername = styled.div`
 export const StyledRightHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[7]};
+  gap: ${({ theme }) => theme.space[6]};
   padding-right: ${({ theme }) => theme.space[2]};
 `;
 export const StyledThemeSwitcherWrap = styled.div`

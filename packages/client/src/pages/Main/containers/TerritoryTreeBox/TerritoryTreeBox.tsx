@@ -36,6 +36,7 @@ import {
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IcoPlusBold } from "Theme/icons";
+import { IoFilter } from "react-icons/io5";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -284,8 +285,10 @@ export const TerritoryTreeBox: React.FC = () => {
               color="success"
               inverted={!treeFilterOpen}
               fullWidth
-              icon={<BsFilter size={14} />}
-              tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
+              icon={<IoFilter size={13} />}
+              tooltipLabel={
+                treeFilterOpen ? "clear all filters" : treeWidthTooNarrow ? "filter" : ""
+              }
               tooltipPosition="right"
             />
             <Button
