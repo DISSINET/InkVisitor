@@ -182,7 +182,7 @@ export const StyledControlGroup = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
+  gap: ${({ theme }) => theme.space[3]};
   flex-shrink: 0;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`
