@@ -10,7 +10,6 @@ import { useTheme } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { List } from "react-window";
 import {
@@ -32,6 +31,7 @@ import {
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
+import { IcoPlusBold } from "Theme/icons";
 
 interface Suggester {
   marginTop?: boolean;
@@ -442,7 +442,7 @@ export const Suggester: React.FC<Suggester> = ({
                     <>
                       {rightContent && <StyledRightContentDivider />}
                       <IconButton
-                        icon={<FaPlus />}
+                        icon={<IcoPlusBold />}
                         tooltipLabel="create new entity"
                         color={buttonColorKey}
                         noBackground

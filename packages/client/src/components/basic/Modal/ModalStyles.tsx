@@ -2,7 +2,7 @@ import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
-import { space2, space4, space5, space6, space7 } from "Theme/theme-space-shortcut";
+import { space5, space6 } from "Theme/theme-space-shortcut";
 
 interface ModalWrap {
   $lowerZIndex: boolean;
@@ -77,7 +77,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   align-items: center;
   flex-shrink: 0;
   gap: 0.5rem;
-  padding: ${space4} ${space6} ${space2} ${space6};
+  padding: ${space5};
   background-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "transparent")};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -120,7 +120,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   align-items: ${({ centered }) => (centered ? "center" : "")};
   justify-content: ${({ centered }) => (centered ? "center" : "")};
-  padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space5} ${space7}`)};
+  padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space6} ${space5}`)};
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
@@ -138,7 +138,8 @@ export const StyledFooter = styled.div<StyledFooter>`
   flex-shrink: 0;
   justify-content: ${({ $spaceBetween }) => ($spaceBetween ? "space-between" : "flex-end")};
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
-  padding: ${({ theme }) => theme.space[4]};
+  padding: ${space5};
+  --button-group-gap: 0.75rem;
 `;
 
 export const StyledFooterNote = styled.div`

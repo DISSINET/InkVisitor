@@ -6,11 +6,11 @@ import { EntitySuggester } from "components/advanced";
 import { CReference } from "constructors";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import { StyledSpareRow } from "./EntityReferenceTableStyles";
+import { IcoPlus } from "Theme/icons";
 
 interface EntityReferenceTable {
   entityId: string;
@@ -195,7 +195,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (
-          <Button icon={<FaPlus />} label={"new reference"} onClick={() => handleAdd()} />
+          <Button icon={<IcoPlus />} label={"new reference"} onClick={() => handleAdd()} />
         )}
       </div>
     </React.Fragment>

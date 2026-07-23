@@ -8,7 +8,7 @@ import {
 } from "@inkvisitor/shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FOURTH_PANEL_MIN_WIDTH, wildCardChar } from "Theme/constants";
-import { IcoSearch } from "Theme/icons";
+import { IcoPlusBold, IcoSearch } from "Theme/icons";
 import api from "api";
 import { Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
@@ -20,7 +20,6 @@ import Dropdown, {
 import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -361,7 +360,7 @@ export const EntitySearchBox: React.FC = () => {
                     {userRole !== UserEnums.Role.Viewer && (
                       <Button
                         tooltipLabel="create entity"
-                        icon={<FaPlus />}
+                        icon={<IcoPlusBold />}
                         onClick={() => setShowEntityCreateModal(true)}
                         noBackground
                         noBorder

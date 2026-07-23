@@ -10,7 +10,6 @@ import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
 import { EntityDetailExpandIcon } from "../EntityDetailExpandIcon/EntityDetailExpandIcon";
@@ -22,6 +21,7 @@ import {
   StyledDetailSectionHeading,
   StyledValidationList,
 } from "../EntityDetailStyles";
+import { IcoPlus } from "Theme/icons";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -131,7 +131,7 @@ export const EntityDetailValidationSection: React.FC<
             <Button
               color="primary"
               label="rule"
-              icon={<FaPlus />}
+              icon={<IcoPlus />}
               onClick={initValidationRule}
             />
           </span>
@@ -227,7 +227,7 @@ export const EntityDetailValidationSection: React.FC<
             <Button
               color="primary"
               label="validation rule"
-              icon={<FaPlus />}
+              icon={<IcoPlus />}
               onClick={initValidationRule}
             />
           </div>

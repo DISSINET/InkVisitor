@@ -154,7 +154,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
         </StyledFolderWrapperOpenArea>
 
         <StyledFolderHeaderButtons>
-          <ButtonGroup $smallGap>
+          <ButtonGroup $gap="small">
             <StyledEditButtonWrap>
               <Button
                 key="edit"

@@ -2,6 +2,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { EntityTag } from "components/advanced";
 import React from "react";
+import { StyledNoWrap, StyledSubmitContent } from "./SubmitStyles";
 
 interface Submit {
   title?: string;
@@ -34,18 +35,25 @@ export const Submit: React.FC<Submit> = ({
         disableBgClick
         isLoading={loading}
         width="auto"
+        maxWidth={600}
       >
         <ModalHeader title={title} icon={headerIcon} />
         <ModalContent>
-          <div>
-            {text}{" "}
-            {entityToSubmit && <EntityTag entity={entityToSubmit} disableDoubleClick disableDrag />}
-          </div>
+          <StyledSubmitContent>
+            <StyledNoWrap>{text}</StyledNoWrap>
+            {entityToSubmit && (
+              <EntityTag entity={entityToSubmit} disableDoubleClick disableDrag fullWidth />
+            )}
+          </StyledSubmitContent>
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button label="Cancel" color="success" onClick={onCancel} />
-            <Button label={submitLabel} color="danger" onClick={onSubmit} />
+            <Button label="Cancel" color="info" inverted onClick={onCancel} />
+            <Button
+              label={submitLabel}
+              color="danger"
+              onClick={onSubmit}
+            />
           </ButtonGroup>
         </ModalFooter>
       </Modal>

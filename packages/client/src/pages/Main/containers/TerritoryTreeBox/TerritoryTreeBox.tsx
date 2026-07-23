@@ -9,7 +9,7 @@ import { useUserQuery } from "hooks/react-query";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsFilter } from "react-icons/bs";
-import { FaPlus, FaStar } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
@@ -35,6 +35,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { IcoPlus } from "Theme/icons";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -253,12 +254,12 @@ export const TerritoryTreeBox: React.FC = () => {
     <>
       {showTerritoryTree && (
         <>
-          <StyledTreeButtonGroup $smallGap>
+          <StyledTreeButtonGroup $gap="small">
             {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
                 iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
-                icon={<FaPlus />}
+                icon={<IcoPlus />}
                 onClick={() => setShowCreate(true)}
                 fullWidth
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}

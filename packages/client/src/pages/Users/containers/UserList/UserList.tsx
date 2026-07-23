@@ -587,7 +587,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           return (
-            <ButtonGroup $noGap>
+            <ButtonGroup $gap="no">
               <Button
                 key="r"
                 icon={<IcoTrash size={14} />}

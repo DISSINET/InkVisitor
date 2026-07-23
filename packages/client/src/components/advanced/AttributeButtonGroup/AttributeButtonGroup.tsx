@@ -1,6 +1,6 @@
 import { Button } from "components";
 import React from "react";
-import { ButtonShape } from "types";
+import { ButtonShape, ButtonSize } from "types";
 import { StyledButtonWrap, StyledPropButtonGroup, StyledWrap } from "./AttributeButtonGroupStyles";
 
 interface AttributeButtonGroup {
@@ -95,6 +95,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 }
                 noBorder
                 inverted
+                size={ButtonSize.Small}
                 color={option.selected ? "primary" : "greyer"}
                 textRegular={option.selected ? false : true}
                 shape={shape}

@@ -8,10 +8,9 @@ import Dropdown, { EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import { useTemplatesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { IcoTrashSimple } from "Theme/icons";
+import { IcoPlus, IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -97,7 +96,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
           {userRole !== UserEnums.Role.Viewer && (
             <Button
               key="add-template"
-              icon={<FaPlus />}
+              icon={<IcoPlus />}
               color="primary"
               label="new Template"
               onClick={() => {

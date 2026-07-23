@@ -21,8 +21,8 @@ import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaCaretDown, FaGripVertical, FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaCaretDown, FaGripVertical } from "react-icons/fa";
+import { IcoPlus, IcoTrash } from "Theme/icons";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -263,11 +263,11 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
-      <ButtonGroup $smallGap $height={19}>
+      <ButtonGroup $gap="small" $height={19}>
         {userCanEdit && (
           <Button
             key="a"
-            icon={<FaPlus />}
+            icon={<IcoPlus />}
             noIconMargin
             label="p"
             color="primary"
@@ -281,7 +281,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="c"
-            icon={<FaPlus />}
+            icon={<IcoPlus />}
             noIconMargin
             label="c"
             color="primary"
@@ -295,7 +295,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="i"
-            icon={<FaPlus />}
+            icon={<IcoPlus />}
             noIconMargin
             label="i"
             color="primary"

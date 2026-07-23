@@ -4,6 +4,7 @@ import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
 import React, { KeyboardEvent, MouseEventHandler, ReactElement, useState } from "react";
 import { ButtonShape, ButtonSize } from "types";
+import { useButtonDefaults } from "./ButtonDefaults";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 interface ButtonProps {
@@ -36,8 +37,8 @@ interface ButtonProps {
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  size = ButtonSize.Small,
-  shape = "rounded-sm",
+  size: sizeProp,
+  shape: shapeProp,
   tooltipLabel,
   tooltipContent,
   label = "",
@@ -47,7 +48,7 @@ export const Button: React.FC<ButtonProps> = ({
   inverted = false,
   noBorder = false,
   noBackground = false,
-  textRegular = false,
+  textRegular = true,
   disabled = false,
   color = "primary",
   textColor,
@@ -65,6 +66,11 @@ export const Button: React.FC<ButtonProps> = ({
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  const hasLabel = label.length > 0;
+  const defaults = useButtonDefaults();
+  const size = sizeProp ?? (hasLabel ? defaults.size : undefined) ?? ButtonSize.Small;
+  const shape = shapeProp ?? (hasLabel ? defaults.shape : undefined) ?? "rounded-sm";
+
   return (
     <>
       <StyledButton
@@ -79,6 +85,7 @@ export const Button: React.FC<ButtonProps> = ({
         }}
         $size={size}
         $iconButton={icon !== undefined && label?.length === 0}
+        $hasLabel={hasLabel}
         $color={color}
         $textColor={textColor}
         $borderColor={borderColor}

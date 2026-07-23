@@ -28,44 +28,52 @@ const getRadius = ($shape?: ButtonShape) => {
     return "0";
   }
 };
-const getFontSize = ($size: ButtonSize) => {
+// icons are sized in em, so the size scale drives the glyph of icon-only buttons;
+// labelled buttons keep one text size and grow through padding instead
+const getFontSize = ($size: ButtonSize, $hasLabel?: boolean) => {
+  if ($hasLabel) {
+    return $size === ButtonSize.Medium
+      ? `calc(${theme.fontSize.xs} + 0.1rem)`
+      : theme.fontSize.xs;
+  }
   switch ($size) {
     case ButtonSize.Small:
-      return "xs";
+      return theme.fontSize.xs;
     case ButtonSize.Medium:
-      return "base";
+      return theme.fontSize.base;
     case ButtonSize.Large:
-      return "lg";
+      return theme.fontSize.lg;
     case ButtonSize.ExtraLarge:
-      return "xl";
+      return theme.fontSize.xl;
   }
 };
-const getVerticalMargin = ($size: ButtonSize) => {
+const getVerticalMargin = ($size: ButtonSize, $hasLabel?: boolean) => {
   switch ($size) {
     case ButtonSize.Small:
-      return "0.25rem";
+      return $hasLabel ? "0.3rem" : "0.25rem";
     case ButtonSize.Medium:
-      return "0.3rem";
+      return $hasLabel ? "0.55rem" : "0.3rem";
     case ButtonSize.Large:
-      return "0.45rem";
+      return $hasLabel ? "0.8rem" : "0.45rem";
     case ButtonSize.ExtraLarge:
-      return "0.8rem";
+      return $hasLabel ? "1.1rem" : "0.8rem";
   }
 };
 const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
   switch ($size) {
     case ButtonSize.Small:
-      return $iconButton ? "0.25rem" : "0.5rem";
+      return $iconButton ? "0.25rem" : "0.6rem";
     case ButtonSize.Medium:
-      return $iconButton ? "0.3rem" : "0.55rem";
+      return $iconButton ? "0.3rem" : "1rem";
     case ButtonSize.Large:
-      return $iconButton ? "0.45rem" : "0.7rem";
+      return $iconButton ? "0.45rem" : "1.4rem";
     case ButtonSize.ExtraLarge:
-      return $iconButton ? "0.8rem" : "0.9rem";
+      return $iconButton ? "0.8rem" : "1.9rem";
   }
 };
 interface IButtonStyle {
   $iconButton?: boolean;
+  $hasLabel?: boolean;
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
@@ -119,12 +127,12 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     }
     return "";
   }};
-  font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
+  font-size: ${({ $size, $hasLabel }) => getFontSize($size, $hasLabel)};
   font-weight: ${({ $disabled, $textRegular }) => ($disabled ? 400 : $textRegular ? 500 : 900)};
-  padding: ${({ $iconButton, $size, $noPadding, $shape }) =>
+  padding: ${({ $iconButton, $size, $noPadding, $shape, $hasLabel }) =>
     $noPadding || $shape === "circle" || $shape === "square"
       ? "0"
-      : `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
+      : `${getVerticalMargin($size, $hasLabel)} ${getHorizontalMargin($size, $iconButton)}`};
   border-color: ${({ theme, $disabled, $color, $borderColor }) =>
     $disabled ? theme.color["gray"][400] : theme.color[$borderColor ?? $color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};

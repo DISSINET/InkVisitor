@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
-import { FaPlus, FaRegQuestionCircle } from "react-icons/fa";
-import { IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
+import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
@@ -11,20 +10,18 @@ import api from "api";
 import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
-import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { useTheme } from "styled-components";
 import { INodeItem, QueryValidityProblem } from "../../types";
+import { getRelationConstrainedCategoryTypes } from "../../utils";
 import { QueryAction, QueryActionType } from "../state";
 import {
   StyledGraphNode,
   StyledNodeContainer,
   StyledNodeExpansionToggles,
   StyledNodeMainRow,
-  StyledNodeTypeSelect,
-  StyledParallelOperator,
   StyledTooltipList,
   StyledTooltipListItem,
 } from "./QueryStyles";
-import { useTheme } from "styled-components";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -386,9 +383,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
         <div>
           <Button
-            icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+            icon={<IcoPlusBold style={{ fontSize: "16px", padding: "2px" }} />}
             tooltipLabel="add new edge"
-            color="info"
+            color="primary"
             onClick={() => {
               dispatch({
                 type: QueryActionType.addNode,

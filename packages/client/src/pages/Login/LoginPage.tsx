@@ -8,6 +8,7 @@ import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
 import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
+import { IcoRotateLock } from "Theme/icons";
 
 enum LoginMode {
   "login",
@@ -41,7 +42,7 @@ export const LoginPage: React.FC = () => {
         selected: loginMode === LoginMode.login,
       },
       {
-        icon: <IoReloadCircle />,
+        icon: <IcoRotateLock size={15} />,
         longValue: "Password reset",
         shortValue: "Password reset",
         optionDisabled: false,
@@ -114,9 +115,7 @@ export const LoginPage: React.FC = () => {
               setRedirectToMain={setRedirectToMain}
             />
           )}
-          {loginMode === LoginMode.guest && (
-            <GuestScreen setRedirectToMain={setRedirectToMain} />
-          )}
+          {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
           {loginMode === LoginMode.password && (
             <PasswordRecoverScreen
               emailLocal={emailLocal}

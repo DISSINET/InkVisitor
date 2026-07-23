@@ -4,8 +4,7 @@ import { AttributeIcon, Button, ButtonGroup, Submit } from "components";
 import { useUserQuery } from "hooks/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { IcoPlus, IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -243,7 +242,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               buttons={
                 <>
-                  <ButtonGroup $height={19} $noGap>
+                  <ButtonGroup $height={19} $gap="no">
                     {prop.logic == "2" && (
                       <Button
                         tooltipLabel="Negative logic"
@@ -266,7 +265,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                     {(level === 1 || level === 2) && userCanEdit && (
                       <Button
                         key="add"
-                        icon={<FaPlus size={8} />}
+                        icon={<IcoPlus size={8} />}
                         label="p"
                         noIconMargin
                         color="primary"

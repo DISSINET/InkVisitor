@@ -82,7 +82,9 @@ export { FaLock as IcoLock } from "react-icons/fa";
 export { FaLongArrowAltRight as IcoLongArrowRight } from "react-icons/fa";
 export { FaMinus as IcoMinus } from "react-icons/fa";
 export { FaPen as IcoPen } from "react-icons/fa";
-export { FaPlus as IcoPlus } from "react-icons/fa";
+// the fa plus is thicker than the fa6 one and holds up at the small sizes used inside
+// inputs and suggesters
+export { FaPlus as IcoPlusBold } from "react-icons/fa";
 export { FaPlusSquare as IcoPlusSquare } from "react-icons/fa";
 export { FaQuestion as IcoQuestion } from "react-icons/fa";
 export { FaRegArrowAltCircleDown as IcoArrowCircleDown } from "react-icons/fa";
@@ -109,6 +111,8 @@ export { FaUserTag as IcoUserTag } from "react-icons/fa";
 
 // fa6 — IcoTrash is the canonical trash icon; change here to swap everywhere
 export { FaTrashCan as IcoTrash } from "react-icons/fa6";
+// IcoPlus is the canonical add icon; IcoPlusBold stays for inputs and suggesters
+export { FaPlus as IcoPlus } from "react-icons/fa6";
 // simpler outline variant (no lid detail) — used where a lighter icon fits better
 export { FaTrash as IcoTrashSimple } from "react-icons/fa";
 export { FaAnchorCircleCheck as IcoAnchorCheck } from "react-icons/fa6";

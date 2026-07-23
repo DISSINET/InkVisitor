@@ -24,7 +24,6 @@ import {
 } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useEffect, useRef, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { PiSealCheckFill } from "react-icons/pi";
 import { rootTerritoryId } from "Theme/constants";
 import { deepCopy } from "utils/utils";
@@ -38,6 +37,7 @@ import {
 } from "./GlobalValidationsModalStyles";
 import { GlobalValidationsDetailRow } from "./GlobalValidationsDetailRow";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
+import { IcoPlus } from "Theme/icons";
 
 const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
   globalValidationsDict
@@ -295,7 +295,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                   <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
                   <span>
                     <Button
-                      icon={<FaPlus />}
+                      icon={<IcoPlus />}
                       label="new validation rule"
                       color="primary"
                       onClick={initValidationRule}
@@ -332,7 +332,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 </StyledValidationList>
                 <div style={{ marginTop: "2rem" }}>
                   <Button
-                    icon={<FaPlus />}
+                    icon={<IcoPlus />}
                     label="new validation rule"
                     color="primary"
                     onClick={initValidationRule}

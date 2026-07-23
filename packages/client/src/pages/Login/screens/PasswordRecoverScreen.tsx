@@ -18,6 +18,7 @@ import {
 import { StyledButtonWrap, StyledErrorText, StyledInputRow } from "pages/AuthModalSharedStyles";
 import useKeypress from "hooks/useKeyPress";
 import { ButtonSize } from "types";
+import { IcoRotateLock } from "Theme/icons";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -98,7 +99,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <div>
               <Button
                 fullWidth
-                icon={<IoReloadCircle />}
+                icon={<IcoRotateLock size={18} />}
                 label="Recover password"
                 color="success"
                 onClick={() => {

@@ -26,7 +26,6 @@ import { useIsInViewport, useSearchParams } from "hooks";
 import { DETAIL_TAB_ENTITIES_KEY, useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
@@ -69,6 +68,7 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { IcoPlus } from "Theme/icons";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -858,7 +858,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                       <Button
                         color="primary"
                         label="new metaproperty"
-                        icon={<FaPlus />}
+                        icon={<IcoPlus />}
                         onClick={() => {
                           const newProp = CMetaProp();
                           updateEntityMutation.mutate({
