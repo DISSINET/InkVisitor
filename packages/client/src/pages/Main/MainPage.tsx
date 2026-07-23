@@ -12,7 +12,7 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BiHide } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaDiagramNext } from "react-icons/fa6";
@@ -251,6 +251,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
     editorOpened,
     setEditorOpened,
   });
+
+  const restoreDetailBox = useCallback(() => {
+    dispatch(setDetailBoxState(DetailBoxState.Normal));
+  }, [dispatch]);
 
   const {
     treeSeparator,
@@ -753,7 +757,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />,
                 ]}
               >
-                <MemoizedEntityDetailBox />
+                <MemoizedEntityDetailBox
+                  isMinimized={detailBoxState === DetailBoxState.Minimized}
+                  onRestore={restoreDetailBox}
+                />
               </Box>
             )}
           </>
