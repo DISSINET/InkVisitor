@@ -282,9 +282,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   />
                 ) : (
                   <EntitySuggester
-                    // remount on edge type switch so the category re-inits to
-                    // entityClasses[0] instead of preserving the internal
-                    // selection from the previous edge
+                    // remount on edge type switch so the typed input and other
+                    // internal state don't carry over to a different edge
                     key={edgeType}
                     inputWidth={212}
                     suggestionListWidth={320}
@@ -294,15 +293,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
-                    // no entity class on the node means the wildcard is picked;
-                    // naming a class here would feed the suggester's own
-                    // selection back to it and undo the wildcard. Left
-                    // undefined, the suggester resolves the wildcard itself.
-                    // The disabled picker offers no class to resolve, so it
-                    // needs a value to render against at all.
+                    // seeds the class shown on mount / edge switch: the node's
+                    // committed class, else the first class the edge allows.
+                    // The suggester owns the selection afterwards, so a wildcard
+                    // pick (which clears entityClasses) is not re-derived here.
                     initCategory={
                       node.params.entityClasses?.[0] ??
-                      (isRelationEntityPickerDisabled ? EntityEnums.Class.Concept : undefined)
+                      entityIdCategoryTypes[0] ??
+                      EntityEnums.Class.Concept
                     }
                     onChangeCategory={(option) => {
                       if (paramEntityClass) {
