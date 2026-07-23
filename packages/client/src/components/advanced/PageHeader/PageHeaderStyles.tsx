@@ -49,6 +49,14 @@ export const StyledUser = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
+  cursor: pointer;
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
+  transition: background-color 0.2s;
+  /* same hover tint as the borderless header buttons (Menu, theme switcher) */
+  &:hover {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
 `;
 
 export const StyledMenu = styled.div`

@@ -87,6 +87,7 @@ interface IButtonStyle {
   $noPointer?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
+  $active?: boolean;
 
   $shape?: ButtonShape;
   $size: ButtonSize;
@@ -196,6 +197,15 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
       &:hover {
         background: color-mix(in srgb, currentColor 12%, transparent);
       }
+    `}
+  /* $active keeps the hover tint while a control the button owns is open (e.g.
+     a dropdown), so the button stays lit as the pointer moves onto that control */
+  ${({ $noBackground, $disabled, $active }) =>
+    $noBackground &&
+    !$disabled &&
+    $active &&
+    css`
+      background: color-mix(in srgb, currentColor 12%, transparent);
     `}
 `;
 

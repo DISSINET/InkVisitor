@@ -1,5 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { animated, config, useSpring } from "@react-spring/web";
+import { config, useSpring } from "@react-spring/web";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
@@ -18,7 +18,12 @@ import { TbSettings } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ButtonSize, IPage } from "types";
 import { MenuItem } from "./MenuItem";
-import { StyledMenuDivider, StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
+import {
+  StyledMenuDivider,
+  StyledMenuGroup,
+  StyledMenuGroupWrapper,
+  StyledMenuIcon,
+} from "./MenuStyles";
 
 const LAYOUT_KEYS = [
   "mainPageTreeSeparatorXPosition",
@@ -181,20 +186,16 @@ export const Menu: React.FC<Menu> = ({
     >
       <Button
         icon={
-          <animated.div
-            style={{
-              ...rotateMenuIcon,
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
+          <StyledMenuIcon style={rotateMenuIcon}>
             <FaBars size={14} />
-          </animated.div>
+          </StyledMenuIcon>
         }
         label="Menu"
+        noIconMargin
         size={ButtonSize.Large}
         shape="rounded-md"
         noBackground
+        active={menuOpen}
         noPointer
         textColor="headerTextColor"
         borderColor="headerChromeColor"

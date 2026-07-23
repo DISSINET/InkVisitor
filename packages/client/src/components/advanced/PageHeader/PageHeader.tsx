@@ -397,13 +397,11 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
 
           <StyledLoggedAsWrap>
             {userName.length > 0 && (
-              <StyledUser>
-                <StyledUserIconWrap onClick={() => setUserCustomizationOpen(true)}>
+              <StyledUser onClick={() => setUserCustomizationOpen(true)}>
+                <StyledUserIconWrap>
                   {getUserIcon(userRole, UserTagSize.Medium)}
                 </StyledUserIconWrap>
-                <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-                  {userName}
-                </StyledUsername>
+                <StyledUsername>{userName}</StyledUsername>
               </StyledUser>
             )}
 

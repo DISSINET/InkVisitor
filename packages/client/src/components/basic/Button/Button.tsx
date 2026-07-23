@@ -40,6 +40,9 @@ interface ButtonProps {
   dataTestId?: string;
   noPadding?: boolean;
   shape?: ButtonShape;
+  /** Keeps the noBackground hover tint applied while a control the button owns
+   * (e.g. a dropdown) is open, so it stays lit even when not directly hovered. */
+  active?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -71,6 +74,7 @@ export const Button: React.FC<ButtonProps> = ({
   hideTooltipOnClick = false,
   dataTestId,
   noPadding = false,
+  active = false,
 }) => {
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -107,6 +111,7 @@ export const Button: React.FC<ButtonProps> = ({
         $fullHeight={fullHeight}
         $disabled={disabled}
         $noPointer={noPointer}
+        $active={active}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
