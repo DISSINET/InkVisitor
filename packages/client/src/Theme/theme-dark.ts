@@ -96,6 +96,7 @@ const darkTheme = {
     "data-import": "#ff6aaf",
     "data-import-persecutio": "#8c79e0",
     development: "#6174C2",
+    // development: "#008080",
     sandbox: "#e59857",
     medhate: "#008080",
 
