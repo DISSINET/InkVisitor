@@ -195,8 +195,9 @@ export const Menu: React.FC<Menu> = ({
         size={ButtonSize.Large}
         shape="rounded-md"
         noBackground
+        noPointer
         textColor="headerTextColor"
-        borderColor="headerTextColor"
+        borderColor="headerChromeColor"
       />
       {menuOpen && (
         <StyledMenuGroupWrapper>

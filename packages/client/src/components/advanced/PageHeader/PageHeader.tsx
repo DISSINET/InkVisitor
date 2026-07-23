@@ -21,6 +21,7 @@ import packageJson from "../../../../package.json";
 import { UserTagSize } from "../UserTag/utils";
 import {
   StyledFlexColumn,
+  StyledGlobalValidationsWrap,
   StyledFlexRow,
   StyledHeader,
   StyledHeaderLogo,
@@ -363,13 +364,13 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           <StyledThemeSwitcherWrap>
             {/* the icon shows the theme the click switches to, not the current one */}
             <Button
-              icon={isDarkTheme ? <IcoLightMode /> : <IcoDarkMode />}
+              icon={isDarkTheme ? <IcoLightMode size={20} /> : <IcoDarkMode size={20} />}
               tooltipLabel={isDarkTheme ? "switch to light mode" : "switch to dark mode"}
               shape="circle"
               size={ButtonSize.Large}
               noBackground
+              noBorder
               textColor="headerTextColor"
-              borderColor="headerTextColor"
               tooltipPortalId="page"
               onClick={() =>
                 handleThemeChange(
@@ -380,29 +381,25 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           </StyledThemeSwitcherWrap>
 
           {userRole === UserEnums.Role.Owner && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginRight: "1rem",
-              }}
-            >
+            <StyledGlobalValidationsWrap>
               <Button
-                shape="rounded-lg"
+                shape="rounded-md"
+                size={ButtonSize.Large}
                 label="global validations"
                 icon={<PiSealCheckFill size={14} />}
                 onClick={() => setShowGlobalValidations(true)}
-                color="greyer"
-                inverted
+                noBackground
+                textColor="headerTextColor"
+                borderColor="headerChromeColor"
               />
-            </div>
+            </StyledGlobalValidationsWrap>
           )}
 
           <StyledLoggedAsWrap>
             {userName.length > 0 && (
               <StyledUser>
                 <StyledUserIconWrap onClick={() => setUserCustomizationOpen(true)}>
-                  {getUserIcon(userRole, UserTagSize.Large)}
+                  {getUserIcon(userRole, UserTagSize.Medium)}
                 </StyledUserIconWrap>
                 <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
                   {userName}

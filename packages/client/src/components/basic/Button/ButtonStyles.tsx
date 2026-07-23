@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import theme, { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonShape, ButtonSize } from "types";
 
@@ -84,6 +84,7 @@ interface IButtonStyle {
   $textColor?: keyof ThemeColor;
   $borderColor?: keyof ThemeColor;
   $disabled?: boolean;
+  $noPointer?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
 
@@ -172,7 +173,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
 
     return theme.color[$color];
   }};
-  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  cursor: ${({ $disabled, $noPointer }) => {
+    if ($disabled) return "not-allowed";
+    return $noPointer ? "default" : "pointer";
+  }};
   white-space: nowrap;
 
   transition:
@@ -183,6 +187,16 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   &:focus {
     outline: 0;
   }
+  /* a borderless, background-less button has no shape of its own to react with,
+     so hover tints it with its own text color and works on any backdrop */
+  ${({ $noBackground, $disabled }) =>
+    $noBackground &&
+    !$disabled &&
+    css`
+      &:hover {
+        background: color-mix(in srgb, currentColor 12%, transparent);
+      }
+    `}
 `;
 
 export const StyledButtonLabel = styled.span<{

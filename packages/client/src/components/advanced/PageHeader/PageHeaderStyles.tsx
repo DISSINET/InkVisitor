@@ -28,27 +28,27 @@ export const StyledHeaderTag = styled.div`
 export const StyledUserIconWrap = styled.div`
   display: flex;
   cursor: pointer;
-  margin-left: ${({ theme }) => theme.space[2]};
-  margin-right: ${({ theme }) => theme.space[2]};
 `;
 export const StyledUsername = styled.div`
   cursor: pointer;
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
 `;
 export const StyledRightHeader = styled.div`
   display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.space[9]};
+  padding-right: ${({ theme }) => theme.space[2]};
 `;
 export const StyledThemeSwitcherWrap = styled.div`
   display: inline-flex;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledUser = styled.div`
   display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledMenu = styled.div`
@@ -205,7 +205,11 @@ export const StyledSpace = styled.div`
 export const StyledLoggedAsWrap = styled.div`
   min-width: 3rem;
   position: relative;
-  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+`;
+/** Owner-only header action; wrapper keeps it aligned with its neighbours. */
+export const StyledGlobalValidationsWrap = styled.div`
   display: flex;
   align-items: center;
 `;

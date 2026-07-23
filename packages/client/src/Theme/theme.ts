@@ -87,6 +87,8 @@ const theme = {
 
     explorerHeader: "#6174C2",
     headerTextColor: " #fff",
+    // chrome on the header (borders, dividers) — present without competing with the text
+    headerChromeColor: "rgba(255,255,255,0.6)",
     muni: "#091034", // muni primary color
     staging: "#911111",
     "data-import": "#99004C",

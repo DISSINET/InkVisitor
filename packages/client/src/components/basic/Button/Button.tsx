@@ -22,6 +22,8 @@ interface ButtonProps {
   /** Renders the label at bold weight, e.g. to mark the selected option of a group. */
   bold?: boolean;
   disabled?: boolean;
+  /** Keeps the default cursor for buttons that react to hover rather than to a click. */
+  noPointer?: boolean;
   color?: keyof ThemeColor;
   /** Overrides only the text/icon color, leaving background and border to other props. */
   textColor?: keyof ThemeColor;
@@ -55,6 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
   textRegular = true,
   bold = false,
   disabled = false,
+  noPointer = false,
   color = "primary",
   textColor,
   borderColor,
@@ -103,6 +106,7 @@ export const Button: React.FC<ButtonProps> = ({
         $fullWidth={fullWidth}
         $fullHeight={fullHeight}
         $disabled={disabled}
+        $noPointer={noPointer}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
