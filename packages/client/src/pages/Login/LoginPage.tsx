@@ -123,6 +123,11 @@ export const LoginPage: React.FC = () => {
               setEmailLocal={setEmailLocal}
               restartScreen={restartScreen}
               setRestartScreen={setRestartScreen}
+              onReturnToLogin={() => {
+                setLoginMode(LoginMode.login);
+                setEmailLocal("");
+                setRestartScreen(false);
+              }}
             />
           )}
         </div>

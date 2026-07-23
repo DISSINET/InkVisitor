@@ -37,3 +37,9 @@ export const StyledFaLock = styled(FaLock)<StyledIcon>`
 export const StyledTbMailFilled = styled(TbMailFilled)<StyledIcon>`
   color: ${({ theme, $isError }) => ($isError ? theme.color["danger"] : "")};
 `;
+export const StyledCenterColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;

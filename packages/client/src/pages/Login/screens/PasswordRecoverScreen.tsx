@@ -4,7 +4,12 @@ import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { IoReloadCircle } from "react-icons/io5";
 import { TbArrowForwardUp } from "react-icons/tb";
-import { StyledDescription, StyledEmailSent, StyledTbMailFilled } from "./LoginScreensStyles";
+import {
+  StyledCenterColumn,
+  StyledDescription,
+  StyledEmailSent,
+  StyledTbMailFilled,
+} from "./LoginScreensStyles";
 import {
   IErrorSignature,
   InvalidEmailError,
@@ -19,12 +24,14 @@ interface PasswordRecoverScreen {
   setEmailLocal: React.Dispatch<React.SetStateAction<string>>;
   restartScreen: boolean;
   setRestartScreen: React.Dispatch<React.SetStateAction<boolean>>;
+  onReturnToLogin: () => void;
 }
 export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
   emailLocal,
   setEmailLocal,
   restartScreen,
   setRestartScreen,
+  onReturnToLogin,
 }) => {
   const [error, setError] = useState<string | false>(false);
 
@@ -108,7 +115,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
           </StyledButtonWrap>
         </>
       ) : (
-        <>
+        <StyledCenterColumn>
           <StyledEmailSent>{`A reset link was sent to email`}</StyledEmailSent>
           <StyledEmailSent>{`${emailLocal}`}</StyledEmailSent>
 
@@ -116,12 +123,9 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
           <Button
             label="return"
             icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
-            onClick={() => {
-              setRestartScreen(false);
-              setEmailLocal("");
-            }}
+            onClick={onReturnToLogin}
           />
-        </>
+        </StyledCenterColumn>
       )}
     </>
   );
