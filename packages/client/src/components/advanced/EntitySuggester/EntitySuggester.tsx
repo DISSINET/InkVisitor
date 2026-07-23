@@ -206,7 +206,7 @@ const EntitySuggesterFull: React.FC<
         ? EntityEnums.Extension.Any
         : categoryTypes[0]);
     setSelectedCategory((prev) => (prev === seed ? prev : seed));
-  }, [categoryTypes]);
+  }, [categoryTypes, disableWildCard]);
 
   const { appendDetailId } = useSearchParams();
 

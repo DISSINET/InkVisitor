@@ -126,7 +126,8 @@ export interface IPage {
     | "customize"
     | "stats"
     | "explorer"
-    | "reset-layout";
+    | "reset-layout"
+    | "global-validations";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;

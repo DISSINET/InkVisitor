@@ -7,7 +7,6 @@ import api, { HTML_CAPTURE_EVENT, HTML_CAPTURE_STORAGE_KEY, IDbStats } from "api
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useRef, useState } from "react";
-import { PiSealCheckFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
@@ -16,12 +15,11 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { IcoDarkMode, IcoLightMode } from "Theme/icons";
 import { ButtonSize } from "types";
 import { getUserIcon } from "utils/iconUtils";
-import { GlobalValidationsModal, Menu, UserTag } from "..";
+import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import { UserTagSize } from "../UserTag/utils";
 import {
   StyledFlexColumn,
-  StyledGlobalValidationsWrap,
   StyledFlexRow,
   StyledHeader,
   StyledHeaderLogo,
@@ -346,8 +344,6 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
 
     const usernameLoaded = userName.length > 0;
 
-    const [showGlobalValidations, setShowGlobalValidations] = useState(false);
-
     return (
       <>
         {env === "sandbox" && (
@@ -380,21 +376,6 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             />
           </StyledThemeSwitcherWrap>
 
-          {userRole === UserEnums.Role.Owner && (
-            <StyledGlobalValidationsWrap>
-              <Button
-                shape="rounded-md"
-                size={ButtonSize.Large}
-                label="global validations"
-                icon={<PiSealCheckFill size={14} />}
-                onClick={() => setShowGlobalValidations(true)}
-                noBackground
-                textColor="headerTextColor"
-                borderColor="headerChromeColor"
-              />
-            </StyledGlobalValidationsWrap>
-          )}
-
           <StyledLoggedAsWrap>
             {userName.length > 0 && (
               <StyledUser onClick={() => setUserCustomizationOpen(true)}>
@@ -420,10 +401,6 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             />
           </StyledMenu>
         </StyledRightHeader>
-
-        {showGlobalValidations && (
-          <GlobalValidationsModal setShowGlobalValidations={setShowGlobalValidations} />
-        )}
       </>
     );
   },

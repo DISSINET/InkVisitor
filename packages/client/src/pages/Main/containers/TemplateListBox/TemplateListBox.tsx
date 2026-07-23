@@ -100,6 +100,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
               icon={<IcoPlusBold />}
               color="primary"
               inverted
+              bold
               label="new Template"
               size={ButtonSize.Medium}
               onClick={() => {

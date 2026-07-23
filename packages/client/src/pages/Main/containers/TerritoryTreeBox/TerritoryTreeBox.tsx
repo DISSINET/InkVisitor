@@ -263,6 +263,7 @@ export const TerritoryTreeBox: React.FC = () => {
                 icon={<IcoPlusBold />}
                 onClick={() => setShowCreate(true)}
                 inverted
+                bold
                 fullWidth
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
@@ -283,6 +284,7 @@ export const TerritoryTreeBox: React.FC = () => {
                 }
               }}
               color="success"
+              bold={treeFilterOpen}
               inverted={!treeFilterOpen}
               fullWidth
               icon={<IoFilter size={13} />}

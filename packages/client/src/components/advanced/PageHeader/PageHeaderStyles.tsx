@@ -216,8 +216,3 @@ export const StyledLoggedAsWrap = styled.div`
   display: flex;
   align-items: center;
 `;
-/** Owner-only header action; wrapper keeps it aligned with its neighbours. */
-export const StyledGlobalValidationsWrap = styled.div`
-  display: flex;
-  align-items: center;
-`;

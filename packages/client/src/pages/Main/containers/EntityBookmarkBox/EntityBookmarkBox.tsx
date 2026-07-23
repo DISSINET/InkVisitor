@@ -189,6 +189,7 @@ export const EntityBookmarkBox: React.FC = () => {
           icon={<IcoPlusBold />}
           color="primary"
           inverted
+          bold
           label="bookmark folder"
           onClick={() => clickNewBookmarFolderkHandle()}
           size={ButtonSize.Medium}
@@ -241,12 +242,18 @@ export const EntityBookmarkBox: React.FC = () => {
 
         <ModalFooter>
           <ButtonGroup>
-            <Button key="cancel" label="Cancel" color="warning" onClick={closeFolderModal} />
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={closeFolderModal}
+            />
 
             <Button
               key="submit"
               label={isEditMode ? "Submit" : "Create"}
-              color="primary"
+              color="info"
               onClick={submitFolderModal}
               disabled={!editedFolderIsValid}
             />

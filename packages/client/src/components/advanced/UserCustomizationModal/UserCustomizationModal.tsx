@@ -473,7 +473,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledUserCustomizationSection>
           )}
           <ButtonGroup>
-            <Button key="cancel" label="Cancel" color="warning" inverted onClick={onClose} />
+            <Button key="cancel" label="Cancel" color="greyer" inverted onClick={onClose} />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"
