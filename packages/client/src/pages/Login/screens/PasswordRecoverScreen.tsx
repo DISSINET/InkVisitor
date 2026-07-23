@@ -110,7 +110,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
                   }
                 }}
                 disabled={emailLocal.length === 0}
-                size={ButtonSize.Medium}
+                size={ButtonSize.Large}
               />
             </div>
           </StyledButtonWrap>

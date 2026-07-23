@@ -35,7 +35,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { IcoPlus } from "Theme/icons";
+import { IcoPlusBold } from "Theme/icons";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -259,8 +259,9 @@ export const TerritoryTreeBox: React.FC = () => {
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
                 iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
-                icon={<IcoPlus />}
+                icon={<IcoPlusBold />}
                 onClick={() => setShowCreate(true)}
+                inverted
                 fullWidth
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />

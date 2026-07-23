@@ -61,6 +61,16 @@ export const SwitchGroup = styled.div<SwitchGroup>`
     display: flex;
     align-items: center;
   }
+  /* the selected option renders bold, which is wider — every label reserves its
+     bold width so the segments keep their size as the selection moves */
+  > button > span::after {
+    content: attr(data-label);
+    font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
 `;
 
 export const ButtonGroups = styled.div`

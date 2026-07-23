@@ -16,7 +16,7 @@ import {
 import { RiLayoutMasonryLine } from "react-icons/ri";
 import { TbSettings } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom";
-import { IPage } from "types";
+import { ButtonSize, IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuDivider, StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
 
@@ -192,6 +192,11 @@ export const Menu: React.FC<Menu> = ({
           </animated.div>
         }
         label="Menu"
+        size={ButtonSize.Large}
+        shape="rounded-md"
+        noBackground
+        textColor="headerTextColor"
+        borderColor="headerTextColor"
       />
       {menuOpen && (
         <StyledMenuGroupWrapper>

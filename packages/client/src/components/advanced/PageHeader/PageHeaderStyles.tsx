@@ -40,28 +40,10 @@ export const StyledRightHeader = styled.div`
   display: flex;
   align-items: center;
 `;
-export const StyledThemeSwitcher = styled.div`
-  height: 3rem;
+export const StyledThemeSwitcherWrap = styled.div`
   display: inline-flex;
-  border-radius: 1.2rem;
-  overflow: hidden;
-  cursor: pointer;
-  margin-right: 1rem;
-  border-width: 0.2rem;
-  border-style: solid;
-  border-color: ${({ theme }) => theme.color.gray["800"]};
-`;
-
-interface StyledThemeSwitcherIcon {
-  selected: boolean;
-}
-export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
-  padding: 0.5rem 0.8rem;
-  font-size: 15px;
-  transition: 0.3s all;
-  background-color: ${({ theme, selected }) =>
-    selected ? theme.color.gray[800] : theme.color.gray[600]};
-  color: ${({ theme, selected }) => (selected ? "white" : theme.color.gray[400])};
+  align-items: center;
+  margin-right: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledUser = styled.div`

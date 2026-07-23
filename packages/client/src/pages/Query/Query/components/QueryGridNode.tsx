@@ -22,6 +22,7 @@ import {
   StyledTooltipList,
   StyledTooltipListItem,
 } from "./QueryStyles";
+import { ButtonSize } from "types";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -147,12 +148,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       {hasParallelEdges && (
         <SwitchGroup $column $zIndex={10}>
           <Button
+            size={ButtonSize.Medium}
             label="AND"
             shape="rounded-sm"
             noBorder
             inverted={node.operator !== Query.NodeOperator.And}
             noBackground={node.operator !== Query.NodeOperator.And}
             color={node.operator === Query.NodeOperator.And ? "info" : "greyer"}
+            bold={node.operator === Query.NodeOperator.And}
             tooltipLabel="match all parallel branches"
             onClick={() => {
               dispatch({
@@ -165,12 +168,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
           <Button
+            size={ButtonSize.Medium}
             label="OR"
             shape="rounded-sm"
             noBorder
             inverted={node.operator !== Query.NodeOperator.Or}
             noBackground={node.operator !== Query.NodeOperator.Or}
             color={node.operator === Query.NodeOperator.Or ? "info" : "greyer"}
+            bold={node.operator === Query.NodeOperator.Or}
             tooltipLabel="match any parallel branch"
             onClick={() => {
               dispatch({

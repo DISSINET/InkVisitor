@@ -32,7 +32,7 @@ const getRadius = ($shape?: ButtonShape) => {
 // labelled buttons keep one text size and grow through padding instead
 const getFontSize = ($size: ButtonSize, $hasLabel?: boolean) => {
   if ($hasLabel) {
-    return $size === ButtonSize.Medium
+    return $size === ButtonSize.Large || $size === ButtonSize.ExtraLarge
       ? `calc(${theme.fontSize.xs} + 0.1rem)`
       : theme.fontSize.xs;
   }
@@ -52,11 +52,11 @@ const getVerticalMargin = ($size: ButtonSize, $hasLabel?: boolean) => {
     case ButtonSize.Small:
       return $hasLabel ? "0.3rem" : "0.25rem";
     case ButtonSize.Medium:
-      return $hasLabel ? "0.55rem" : "0.3rem";
+      return $hasLabel ? "0.4rem" : "0.3rem";
     case ButtonSize.Large:
-      return $hasLabel ? "0.8rem" : "0.45rem";
+      return $hasLabel ? "0.55rem" : "0.45rem";
     case ButtonSize.ExtraLarge:
-      return $hasLabel ? "1.1rem" : "0.8rem";
+      return "0.8rem";
   }
 };
 const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
@@ -64,11 +64,11 @@ const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
     case ButtonSize.Small:
       return $iconButton ? "0.25rem" : "0.6rem";
     case ButtonSize.Medium:
-      return $iconButton ? "0.3rem" : "1rem";
+      return $iconButton ? "0.3rem" : "0.8rem";
     case ButtonSize.Large:
-      return $iconButton ? "0.45rem" : "1.4rem";
+      return $iconButton ? "0.45rem" : "1rem";
     case ButtonSize.ExtraLarge:
-      return $iconButton ? "0.8rem" : "1.9rem";
+      return $iconButton ? "0.8rem" : "1.3rem";
   }
 };
 interface IButtonStyle {
@@ -78,6 +78,7 @@ interface IButtonStyle {
   $noBorder?: boolean;
   $noBackground?: boolean;
   $textRegular?: boolean;
+  $bold?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
   $textColor?: keyof ThemeColor;
@@ -128,7 +129,14 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     return "";
   }};
   font-size: ${({ $size, $hasLabel }) => getFontSize($size, $hasLabel)};
-  font-weight: ${({ $disabled, $textRegular }) => ($disabled ? 400 : $textRegular ? 500 : 900)};
+  /* the label box is exactly the font size, so padding alone decides the height
+     and a labelled button matches the square icon button of the same size */
+  line-height: 1;
+  font-weight: ${({ theme, $disabled, $bold, $textRegular }) => {
+    if ($disabled) return theme.fontWeight["normal"];
+    if ($bold) return theme.fontWeight["bold"];
+    return $textRegular ? theme.fontWeight["medium"] : theme.fontWeight["black"];
+  }};
   padding: ${({ $iconButton, $size, $noPadding, $shape, $hasLabel }) =>
     $noPadding || $shape === "circle" || $shape === "square"
       ? "0"

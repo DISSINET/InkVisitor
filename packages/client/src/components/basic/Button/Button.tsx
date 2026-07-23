@@ -19,6 +19,8 @@ interface ButtonProps {
   inverted?: boolean;
   noBorder?: boolean;
   textRegular?: boolean;
+  /** Renders the label at bold weight, e.g. to mark the selected option of a group. */
+  bold?: boolean;
   disabled?: boolean;
   color?: keyof ThemeColor;
   /** Overrides only the text/icon color, leaving background and border to other props. */
@@ -30,6 +32,8 @@ interface ButtonProps {
   // to control the height from parent
   fullHeight?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
+  /** Portal root for the tooltip, for buttons rendered outside #page-content. */
+  tooltipPortalId?: string;
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
   noPadding?: boolean;
@@ -49,6 +53,7 @@ export const Button: React.FC<ButtonProps> = ({
   noBorder = false,
   noBackground = false,
   textRegular = true,
+  bold = false,
   disabled = false,
   color = "primary",
   textColor,
@@ -59,6 +64,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   fullHeight = false,
   tooltipPosition = "bottom",
+  tooltipPortalId,
   hideTooltipOnClick = false,
   dataTestId,
   noPadding = false,
@@ -91,6 +97,7 @@ export const Button: React.FC<ButtonProps> = ({
         $borderColor={borderColor}
         $inverted={inverted}
         $textRegular={textRegular}
+        $bold={bold}
         $noBorder={noBorder}
         $noBackground={noBackground}
         $fullWidth={fullWidth}
@@ -105,7 +112,7 @@ export const Button: React.FC<ButtonProps> = ({
       >
         {icon}
         {label && (
-          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin}>
+          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin} data-label={label}>
             {label}
           </StyledButtonLabel>
         )}
@@ -119,6 +126,7 @@ export const Button: React.FC<ButtonProps> = ({
           visible={showTooltip}
           referenceElement={referenceElement}
           position={tooltipPosition}
+          portalId={tooltipPortalId}
         />
       )}
     </>

@@ -78,6 +78,7 @@ import {
 } from "./styles";
 import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { annotatorHighlight } from "./utils/highlight";
+import { ButtonSize } from "types";
 
 interface TextAnnotatorProps {
   width: number;
@@ -1701,6 +1702,7 @@ export const TextAnnotator = ({
         <StyledAnnotatorButtons>
           <SwitchGroup $bgColor={theme.color.invertedBg.success} style={{ marginTop: "0.25rem" }}>
             <Button
+              size={ButtonSize.Medium}
               key={EditMode.HIGHLIGHT}
               icon={
                 <StyledDisplayModeButtonIconWrapper
@@ -1715,11 +1717,13 @@ export const TextAnnotator = ({
               noBorder
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
               noBackground={annotatorMode !== EditMode.HIGHLIGHT}
+              bold={annotatorMode === EditMode.HIGHLIGHT}
               onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
               tooltipLabel="anchor entities"
               tooltipPosition="top"
             />
             <Button
+              size={ButtonSize.Medium}
               key={EditMode.SEMI}
               icon={
                 <StyledDisplayModeButtonIconWrapper
@@ -1734,11 +1738,13 @@ export const TextAnnotator = ({
               inverted={annotatorMode !== EditMode.SEMI}
               noBackground={annotatorMode !== EditMode.SEMI}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
+              bold={annotatorMode === EditMode.SEMI}
               onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
               tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
               tooltipPosition="top"
             />
             <Button
+              size={ButtonSize.Medium}
               key={EditMode.RAW}
               icon={
                 <StyledDisplayModeButtonIconWrapper
@@ -1753,6 +1759,7 @@ export const TextAnnotator = ({
               inverted={annotatorMode !== EditMode.RAW}
               noBackground={annotatorMode !== EditMode.RAW}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
+              bold={annotatorMode === EditMode.RAW}
               onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
               tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
               tooltipPosition="top"

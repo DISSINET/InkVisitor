@@ -7,13 +7,14 @@ import api, { HTML_CAPTURE_EVENT, HTML_CAPTURE_STORAGE_KEY, IDbStats } from "api
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useRef, useState } from "react";
-import { MdDarkMode, MdSunny } from "react-icons/md";
 import { PiSealCheckFill } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { setTheme } from "redux/features/themeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { IcoDarkMode, IcoLightMode } from "Theme/icons";
+import { ButtonSize } from "types";
 import { getUserIcon } from "utils/iconUtils";
 import { GlobalValidationsModal, Menu, UserTag } from "..";
 import packageJson from "../../../../package.json";
@@ -41,8 +42,7 @@ import {
   StyledStatsPanel,
   StyledStatsRow,
   StyledStatsWrap,
-  StyledThemeSwitcher,
-  StyledThemeSwitcherIcon,
+  StyledThemeSwitcherWrap,
   StyledUser,
   StyledUserIconWrap,
   StyledUsername,
@@ -341,6 +341,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
       dispatch(setTheme(newTheme));
       localStorage.setItem("theme", newTheme);
     };
+    const isDarkTheme = selectedThemeId === InterfaceEnums.Theme.Dark;
 
     const usernameLoaded = userName.length > 0;
 
@@ -359,22 +360,24 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           </>
         )}
         <StyledRightHeader>
-          <StyledThemeSwitcher
-            onClick={() => {
-              handleThemeChange(
-                selectedThemeId === InterfaceEnums.Theme.Light
-                  ? InterfaceEnums.Theme.Dark
-                  : InterfaceEnums.Theme.Light,
-              );
-            }}
-          >
-            <StyledThemeSwitcherIcon selected={selectedThemeId === InterfaceEnums.Theme.Light}>
-              <MdSunny />
-            </StyledThemeSwitcherIcon>
-            <StyledThemeSwitcherIcon selected={selectedThemeId === InterfaceEnums.Theme.Dark}>
-              <MdDarkMode />
-            </StyledThemeSwitcherIcon>
-          </StyledThemeSwitcher>
+          <StyledThemeSwitcherWrap>
+            {/* the icon shows the theme the click switches to, not the current one */}
+            <Button
+              icon={isDarkTheme ? <IcoLightMode /> : <IcoDarkMode />}
+              tooltipLabel={isDarkTheme ? "switch to light mode" : "switch to dark mode"}
+              shape="circle"
+              size={ButtonSize.Large}
+              noBackground
+              textColor="headerTextColor"
+              borderColor="headerTextColor"
+              tooltipPortalId="page"
+              onClick={() =>
+                handleThemeChange(
+                  isDarkTheme ? InterfaceEnums.Theme.Light : InterfaceEnums.Theme.Dark,
+                )
+              }
+            />
+          </StyledThemeSwitcherWrap>
 
           {userRole === UserEnums.Role.Owner && (
             <div

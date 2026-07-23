@@ -22,6 +22,7 @@ export const RefreshBoxButton: React.FC<RefreshBoxButton> = ({ queriesToRefresh,
       tooltipLabel="refresh data"
       inverted
       icon={<BiRefresh />}
+      shape="square"
       onClick={async () => {
         const uid = getStoredUserId();
         await Promise.all(

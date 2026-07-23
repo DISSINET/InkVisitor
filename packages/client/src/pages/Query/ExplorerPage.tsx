@@ -47,6 +47,7 @@ import {
   useQueryData,
 } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
+import { ButtonSize } from "types";
 
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
@@ -712,6 +713,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               headerComponent={
                 <SwitchGroup key="explorer-view-mode">
                   <Button
+                    size={ButtonSize.Medium}
                     tooltipLabel="table view"
                     label="table"
                     shape="rounded-sm"
@@ -724,8 +726,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       setExploreViewMode(Explore.EViewMode.Table);
                       if (explorerBoxMinimized) restoreExplorerToHalf();
                     }}
+                    bold={!isStatsView}
                   />
                   <Button
+                    size={ButtonSize.Medium}
                     tooltipLabel="stats view"
                     label="stats"
                     shape="rounded-sm"
@@ -738,6 +742,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       setExploreViewMode(Explore.EViewMode.Stats);
                       if (explorerBoxMinimized) restoreExplorerToHalf();
                     }}
+                    bold={isStatsView}
                   />
                 </SwitchGroup>
               }

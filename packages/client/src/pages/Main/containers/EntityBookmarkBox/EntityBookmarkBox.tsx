@@ -20,7 +20,8 @@ import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
 import { MdEdit } from "react-icons/md";
-import { IcoPlus, IcoTrash } from "Theme/icons";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
+import { ButtonSize } from "types";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -185,10 +186,12 @@ export const EntityBookmarkBox: React.FC = () => {
       <StyledHeader>
         <Button
           key="add"
-          icon={<IcoPlus />}
+          icon={<IcoPlusBold />}
           color="primary"
+          inverted
           label="bookmark folder"
           onClick={() => clickNewBookmarFolderkHandle()}
+          size={ButtonSize.Medium}
         />
       </StyledHeader>
       {bookmarkFolders && (

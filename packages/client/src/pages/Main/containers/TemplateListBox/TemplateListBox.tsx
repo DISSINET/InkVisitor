@@ -10,7 +10,7 @@ import { useTemplatesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { IcoPlus, IcoTrashSimple } from "Theme/icons";
+import { IcoPlusBold, IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -23,6 +23,7 @@ import {
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
+import { ButtonSize } from "types";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {
@@ -96,9 +97,11 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
           {userRole !== UserEnums.Role.Viewer && (
             <Button
               key="add-template"
-              icon={<IcoPlus />}
+              icon={<IcoPlusBold />}
               color="primary"
+              inverted
               label="new Template"
+              size={ButtonSize.Medium}
               onClick={() => {
                 handleAskCreateTemplate();
               }}

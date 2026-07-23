@@ -55,7 +55,7 @@ import { useBoxLayout } from "./hooks/useBoxLayout";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
 import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
-import { IcoPlus } from "Theme/icons";
+import { IcoPlusBold } from "Theme/icons";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -672,9 +672,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                       <Button
                         key="add"
-                        icon={<IcoPlus />}
+                        icon={<IcoPlusBold />}
                         tooltipLabel="add new statement at the end of the list"
                         color="primary"
+                        inverted
                         label="statement"
                         onClick={() => {
                           if (user) {
@@ -713,8 +714,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   <>
                     {userRole !== UserEnums.Role.Viewer && (
                       <Button
-                        icon={<IcoPlus />}
+                        icon={<IcoPlusBold />}
                         label="entity"
+                        inverted
                         onClick={() => setShowEntityCreateModal(true)}
                         tooltipLabel="create new entity"
                       />

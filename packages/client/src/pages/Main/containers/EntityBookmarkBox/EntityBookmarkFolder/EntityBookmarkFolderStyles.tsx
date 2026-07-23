@@ -66,7 +66,7 @@ export const StyledIconWrap = styled.div<StyledIconWrapProps>`
 export const StyledFolderHeaderText = styled.div<{ $open?: boolean }>`
   flex: 1;
   min-width: 0;
-  margin-left: ${({ theme }) => theme.space[3]};
+  margin-left: ${({ theme }) => theme.space[2]};
   font-weight: ${({ theme, $open }) =>
     $open ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
