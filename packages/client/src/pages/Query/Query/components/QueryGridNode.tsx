@@ -294,10 +294,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
+                    // no entity class on the node means the wildcard is picked;
+                    // naming a class here would feed the suggester's own
+                    // selection back to it and undo the wildcard. Left
+                    // undefined, the suggester resolves the wildcard itself.
+                    // The disabled picker offers no class to resolve, so it
+                    // needs a value to render against at all.
                     initCategory={
                       node.params.entityClasses?.[0] ??
-                      entityIdCategoryTypes[0] ??
-                      EntityEnums.Class.Concept
+                      (isRelationEntityPickerDisabled ? EntityEnums.Class.Concept : undefined)
                     }
                     onChangeCategory={(option) => {
                       if (paramEntityClass) {

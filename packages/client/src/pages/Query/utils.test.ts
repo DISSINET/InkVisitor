@@ -1,8 +1,11 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { describe, it, expect } from "vitest";
 import {
   applyPasteToDraft,
   buildStableSignature,
   computeWindowUpdate,
+  getSuperclassAllowedClasses,
+  getSuperordinateEntityAllowedClasses,
   isViableUuidPrefix,
   mergeTokensIntoIds,
   unparsedRemainder,
@@ -296,5 +299,50 @@ describe("buildStableSignature", () => {
     const base = explore([column("c1")]);
     expect(sign({ ...base, offset: 40, limit: 50 })).toEqual(sign(base));
     expect(sign({ ...base, filters: [{ type: "label", label: "x" }] })).not.toEqual(sign(base));
+  });
+});
+
+describe("getSuperclassAllowedClasses", () => {
+  it("narrows to the root class the relation supports", () => {
+    expect(getSuperclassAllowedClasses([EntityEnums.Class.Concept])).toEqual([
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("allows both sides when the root class is unset (all classes)", () => {
+    expect(getSuperclassAllowedClasses([])).toEqual([
+      EntityEnums.Class.Action,
+      EntityEnums.Class.Concept,
+    ]);
+    expect(getSuperclassAllowedClasses(undefined)).toEqual([
+      EntityEnums.Class.Action,
+      EntityEnums.Class.Concept,
+    ]);
+  });
+
+  it("allows nothing when the root class cannot take the relation", () => {
+    expect(getSuperclassAllowedClasses([EntityEnums.Class.Person])).toEqual([]);
+  });
+});
+
+describe("getSuperordinateEntityAllowedClasses", () => {
+  it("returns the targets of the picked root class", () => {
+    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Object])).toEqual([
+      EntityEnums.Class.Object,
+      EntityEnums.Class.Person,
+      EntityEnums.Class.Being,
+    ]);
+  });
+
+  it("allows nothing when the root class cannot take the relation", () => {
+    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Action])).toEqual([]);
+  });
+
+  it("returns every target when the root class is unset (all classes)", () => {
+    const wildcard = getSuperordinateEntityAllowedClasses([]);
+    const forObject = getSuperordinateEntityAllowedClasses([EntityEnums.Class.Object]);
+    expect(wildcard.length).toBeGreaterThan(0);
+    expect(forObject.every((c) => wildcard.includes(c))).toBe(true);
+    expect(getSuperordinateEntityAllowedClasses(undefined)).toEqual(wildcard);
   });
 });
