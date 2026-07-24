@@ -49,7 +49,7 @@
 {"controller": "tree", "id": "83f3f93f-c9ef-4d6a-b537-3da05cf17941", "method": "PATCH", "public": false, "roles": [], "route": ":territoryId/position"},
 {"controller": "relations", "id": "8589e6a3-96f4-415f-bf96-62635992b34e", "method": "DELETE", "public": false, "roles": [], "route": ":relationId"},
 {"controller": "relations", "id": "8ea62044-f1e4-4eb7-b531-3679e8ee027b", "method": "PUT", "roles": ["*"], "route": ""},
-{"controller": "statements", "id": "8f3f1480-c2de-4e38-bcca-5ef8d7d90482", "method": "PUT", "public": false, "roles": [], "route": "batch-move"},
+{"controller": "statements", "id": "8f3f1480-c2de-4e38-bcca-5ef8d7d90482", "method": "PUT", "public": false, "roles": ["*"], "route": "batch-move"},
 {"controller": "documents", "id": "8f79d118-8059-4484-8789-a418a24b0ad3", "method": "POST", "roles": ["*"], "route": ""},
 {"controller": "users", "id": "917bf296-2c6f-463a-9ace-02284a1dda91", "method": "GET", "roles": ["admin"], "route": ""},
 {"controller": "tree", "id": "91cc806e-e824-4864-9000-b808a05a2438", "method": "GET", "roles": ["*"], "route": ""},

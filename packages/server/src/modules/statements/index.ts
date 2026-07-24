@@ -24,7 +24,8 @@ import { IRequest } from "src/custom_typings/request";
 import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";
 import Relation from "@models/relation/relation";
-import { getRelationClass } from "@models/factory";
+import Territory from "@models/territory/territory";
+import { getEntityClass, getRelationClass } from "@models/factory";
 
 export default Router()
   /**
@@ -159,6 +160,29 @@ export default Router()
       );
       if (statementsCount !== statementsIds.length) {
         throw new StatementDoesNotExits("at least one statement not found", "");
+      }
+
+      const user = request.getUserOrFail();
+
+      // target territory must be editable by the acting user
+      const targetModel = getEntityClass(territory) as Territory;
+      if (!targetModel.canBeEditedByUser(user)) {
+        throw new PermissionDeniedError(
+          `cannot move statements into territory ${newTerritoryId}`
+        );
+      }
+
+      // every moved statement must be editable in its current (source) territory
+      for (const statementData of statements) {
+        if (statementData.class !== EntityEnums.Class.Statement) {
+          continue;
+        }
+        const stmtModel = new Statement({ ...(statementData as IStatement) });
+        if (!stmtModel.canBeEditedByUser(user)) {
+          throw new PermissionDeniedError(
+            `cannot move statement ${statementData.id} from its territory`
+          );
+        }
       }
 
       // Get existing statements in target territory to determine the last order
