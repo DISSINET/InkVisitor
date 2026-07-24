@@ -52,4 +52,19 @@ describe("Resource rights", () => {
       expect(res.canBeEditedByUser(admin)).toBe(true);
     });
   });
+
+  describe("template resource with a document", () => {
+    const res = makeResource("res-tmpl", "doc-2");
+    res.isTemplate = true;
+
+    it("unassigned editor can edit (template overrides document gate)", () => {
+      expect(res.canBeEditedByUser(makeUser(UserEnums.Role.Editor))).toBe(true);
+    });
+    it("unassigned editor can delete", () => {
+      expect(res.canBeDeletedByUser(makeUser(UserEnums.Role.Editor))).toBe(true);
+    });
+    it("viewer still cannot edit", () => {
+      expect(res.canBeEditedByUser(makeUser(UserEnums.Role.Viewer))).toBe(false);
+    });
+  });
 });

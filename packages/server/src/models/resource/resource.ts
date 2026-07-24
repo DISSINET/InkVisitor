@@ -52,6 +52,10 @@ class Resource extends Entity implements IResource {
     if (user.role !== UserEnums.Role.Editor) {
       return false;
     }
+    // templates are shared building blocks; any editor may edit them
+    if (this.isTemplate) {
+      return true;
+    }
     if (!this.data.documentId) {
       return true;
     }
@@ -69,6 +73,10 @@ class Resource extends Entity implements IResource {
     }
     if (user.role !== UserEnums.Role.Editor) {
       return false;
+    }
+    // templates are shared building blocks; any editor may delete them
+    if (this.isTemplate) {
+      return true;
     }
     if (!this.data.documentId) {
       return true;
