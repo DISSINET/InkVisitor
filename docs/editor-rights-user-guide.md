@@ -26,8 +26,10 @@ administrative powers are reserved for Admins and Owners.
   protect against removing large amounts of work by accident). The one exception
   is Template Territories, described below.
 
-His access to a Territory is inherited: if he can edit a Territory, he can edit
-everything nested inside it.
+His access to a Territory is inherited: edit access to a Territory also covers
+every sub-Territory and Statement within it. To stop the inheritance for one
+branch, give read access on a specific sub-Territory — that sub-Territory and
+everything below it then becomes read-only.
 
 ## Statements
 
@@ -38,12 +40,6 @@ everything nested inside it.
 - He can **move a Statement by dragging it onto another Territory in the tree**,
   but only between Territories he can edit — both the one it's leaving and the one
   it's going to. Territories he can't edit won't accept the drop.
-
-## Entities (Concepts, Persons, Objects, Actions, Values, and so on)
-
-- He can freely **create, edit, and delete** these building-block Entities.
-- These aren't tied to a single Territory, so his ability to edit them doesn't
-  depend on tree access.
 
 ## Resources
 
@@ -58,6 +54,15 @@ Document is attached:
   several people at once, so deleting it takes away Document access for all of
   them — which is why this is limited to assigned people rather than open to every
   Editor.
+
+## Other Entities (Concepts, Persons, Objects, Actions, Values, and so on)
+
+Territories, Statements, and Resources are Entity classes too, but they have their own rules.
+This section is about the remaining classes.
+
+- He can freely **create, edit, and delete** these Entities.
+- They aren't tied to a single Territory or Document, so his ability to edit them doesn't
+  depend on tree access or Resource.
 
 ## Documents and annotation
 
