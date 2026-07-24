@@ -30,6 +30,12 @@
     "roles": ["*"]
   },
   {
+    "controller": "statements",
+    "route": "batch-move",
+    "method": "PUT",
+    "roles": ["*"]
+  },
+  {
     "controller": "territories",
     "route": ":territoryId",
     "method": "GET",
