@@ -80,6 +80,7 @@ const UNIT_TEST_PATHS = [
   "src/models/stats/event-type-fold.test.ts",
   "src/models/stats/hybrid-stats.test.ts",
   "src/models/stats/stats-aggregator.test.ts",
+  "src/models/territory/territory.rights.test.ts",
   "src/service/mutex.test.ts",
   "src/service/query/explore-ids-filter.test.ts",
   "src/service/query/explore-label-filter.test.ts",
