@@ -41,8 +41,9 @@ class Resource extends Entity implements IResource {
   }
 
   /**
-   * Editors may edit a Resource only when it is assigned to them in Manage
-   * Users (annotate right). Owner/Admin always can; Viewer never.
+   * Owner/Admin always may. An Editor may edit a Resource that has no document
+   * attached; a Resource that carries a document requires the annotate right
+   * (assigned in Manage Users). Viewer never.
    */
   canBeEditedByUser(user: User): boolean {
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
@@ -51,12 +52,16 @@ class Resource extends Entity implements IResource {
     if (user.role !== UserEnums.Role.Editor) {
       return false;
     }
+    if (!this.data.documentId) {
+      return true;
+    }
     return user.hasAnnotateRightForResource(this.id);
   }
 
   /**
-   * Editors may delete a Resource only when it is assigned to them in Manage
-   * Users (annotate right). Owner/Admin always can; Viewer never.
+   * Owner/Admin always may. An Editor may delete a Resource that has no document
+   * attached; a Resource that carries a document requires the annotate right.
+   * Viewer never.
    */
   canBeDeletedByUser(user: User): boolean {
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
@@ -64,6 +69,9 @@ class Resource extends Entity implements IResource {
     }
     if (user.role !== UserEnums.Role.Editor) {
       return false;
+    }
+    if (!this.data.documentId) {
+      return true;
     }
     return user.hasAnnotateRightForResource(this.id);
   }

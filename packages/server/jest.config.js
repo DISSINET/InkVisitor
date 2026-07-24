@@ -71,6 +71,7 @@ const UNIT_TEST_PATHS = [
   "src/models/relation/path.test.ts",
   "src/models/relation/related.test.ts",
   "src/models/relation/superordinate-entity.test.ts",
+  "src/models/resource/resource.rights.test.ts",
   "src/models/statement/PositionRules.test.ts",
   // No-op own test; its DB-touching exports are only used as helpers elsewhere.
   "src/modules/common.test.ts",
