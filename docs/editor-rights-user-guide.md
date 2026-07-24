@@ -103,13 +103,13 @@ Territories and Resources. Here is what each assignment does.
   everything nested under it — including its Statements and their related
   Documents — but cannot change anything there.
 - **Write access on a Territory** — he can edit that Territory and its whole
-  subtree: edit the Territory's own detail (its entity), create, edit, and delete
+  subtree: edit the Territory's own detail (its Entity), create, edit, and delete
   Statements; add, rename, and reorder sub-Territories; and move Statements in and
   out. This applies to every sub-Territory beneath it as well. He still cannot
   delete the Territory itself. He also gets read-only visibility of the
   Territories above it, so he can navigate down to reach his assigned area.
 - **Annotate assignment on a Resource** — he can edit, annotate, export, and
-  delete that Resource entity and its linked Document. This is how you hand a specific
+  delete that Resource Entity and its linked Document. This is how you hand a specific
   Document over to the person responsible for it.
 
 Two things to keep in mind:
