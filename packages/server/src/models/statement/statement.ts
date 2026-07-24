@@ -265,6 +265,11 @@ class Statement extends Entity implements IStatement {
       return false;
     }
 
+    // templates are not bound to a territory; any editor may edit them
+    if (this.isTemplate) {
+      return true;
+    }
+
     // editors should be able to access META statements
     if (this.data.getTerritoryId() === ROOT_TERRITORY_ID) {
       return true;
@@ -330,6 +335,11 @@ class Statement extends Entity implements IStatement {
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
+    }
+
+    // templates are not bound to a territory; any editor may delete them
+    if (this.isTemplate) {
+      return true;
     }
 
     if (this.data.territory) {

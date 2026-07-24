@@ -73,6 +73,7 @@ const UNIT_TEST_PATHS = [
   "src/models/relation/superordinate-entity.test.ts",
   "src/models/resource/resource.rights.test.ts",
   "src/models/statement/PositionRules.test.ts",
+  "src/models/statement/statement.rights.test.ts",
   // No-op own test; its DB-touching exports are only used as helpers elsewhere.
   "src/modules/common.test.ts",
   // Mocks rethinkdb-ts (jest.mock) - evaluateEdges runs against an in-memory proxy.
