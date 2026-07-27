@@ -163,9 +163,9 @@ export const TerritoryTreeBox: React.FC = () => {
         }
 
         // Merge OR results (this is a simplified merge - we might need more sophisticated logic)
-        if (filteredResults.length > 0) {
-          newFilteredTreeData = filteredResults[0]; // For now, use first result
-        }
+        // every active filter came back empty, so their union is empty as well -
+        // falling through to treeData here would show the whole unfiltered tree
+        newFilteredTreeData = filteredResults.length > 0 ? filteredResults[0] : null;
       } else {
         // AND logic: apply filters sequentially
         if (filterSettings.starred && userData) {
