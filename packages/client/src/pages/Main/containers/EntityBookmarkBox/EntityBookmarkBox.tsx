@@ -9,6 +9,9 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
   Submit,
 } from "components";
 import { CBookmarkFolder } from "constructors";
@@ -226,18 +229,25 @@ export const EntityBookmarkBox: React.FC = () => {
         onEnterPress={submitFolderModal}
         width={350}
       >
-        <ModalHeader icon={<MdEdit />} title="Edit Bookmark folder" />
+        <ModalHeader
+          icon={isEditMode ? <MdEdit /> : <IcoPlusBold />}
+          title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"}
+        />
         <ModalContent>
-          <Input
-            label="new label:"
-            labelSpaceNoWrap
-            placeholder=""
-            onChangeFn={(newName: string) => setEditingFolderName(newName)}
-            value={editingFolderName}
-            changeOnType
-            autoFocus
-            width="full"
-          />
+          <ModalInputForm alignLeft>
+            <ModalInputLabel>new label:</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                labelSpaceNoWrap
+                placeholder=""
+                onChangeFn={(newName: string) => setEditingFolderName(newName)}
+                value={editingFolderName}
+                changeOnType
+                autoFocus
+                width="full"
+              />
+            </ModalInputWrap>
+          </ModalInputForm>
         </ModalContent>
 
         <ModalFooter>
@@ -247,6 +257,8 @@ export const EntityBookmarkBox: React.FC = () => {
               label="Cancel"
               color="greyer"
               inverted
+              noBackground
+              noBorder
               onClick={closeFolderModal}
             />
 

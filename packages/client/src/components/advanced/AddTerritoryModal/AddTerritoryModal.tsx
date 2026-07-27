@@ -48,6 +48,8 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
               label="Cancel"
               color="greyer"
               inverted
+              noBackground
+              noBorder
               onClick={onClose}
             />
           </ButtonGroup>

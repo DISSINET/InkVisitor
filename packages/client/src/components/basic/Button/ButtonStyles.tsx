@@ -193,7 +193,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     !$disabled &&
     css`
       &:hover {
-        background: color-mix(in srgb, currentColor 8%, transparent);
+        background: color-mix(in srgb, currentColor 10%, transparent);
       }
     `}
   /* $active keeps the hover tint while a control the button owns is open (e.g.
@@ -203,7 +203,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     !$disabled &&
     $active &&
     css`
-      background: color-mix(in srgb, currentColor 8%, transparent);
+      background: color-mix(in srgb, currentColor 10%, transparent);
     `}
 `;
 

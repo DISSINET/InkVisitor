@@ -109,7 +109,14 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+          <Button
+            label="Cancel"
+            color="greyer"
+            inverted
+            noBackground
+            noBorder
+            onClick={onClose}
+          />
           <Button
             label="Export"
             color="primary"

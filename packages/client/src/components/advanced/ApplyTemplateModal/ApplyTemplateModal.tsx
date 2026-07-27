@@ -138,6 +138,8 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
             label="Cancel"
             color="greyer"
             inverted
+            noBackground
+            noBorder
             onClick={() => {
               setShowApplyTemplateModal(false);
             }}

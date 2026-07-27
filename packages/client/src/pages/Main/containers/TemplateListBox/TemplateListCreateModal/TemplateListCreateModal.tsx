@@ -177,6 +177,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
             label="Cancel"
             color="greyer"
             inverted
+            noBackground
+            noBorder
             onClick={() => {
               handleCloseCreateModal();
             }}

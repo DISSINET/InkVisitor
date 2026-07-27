@@ -179,6 +179,8 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
             label="Cancel"
             color="greyer"
             inverted
+            noBackground
+            noBorder
             onClick={() => {
               onClose();
             }}

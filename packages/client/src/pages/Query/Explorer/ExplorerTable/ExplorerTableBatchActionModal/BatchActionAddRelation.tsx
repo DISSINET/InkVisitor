@@ -304,7 +304,14 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+            <Button
+              label="Cancel"
+              color="greyer"
+              inverted
+              noBackground
+              noBorder
+              onClick={onClose}
+            />
             <Button
               label="Apply"
               color="primary"

@@ -91,7 +91,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
 export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
   display: flex;
   flex-shrink: 0;
-  font-size: 1.8rem;
+  font-size: ${({ theme }) => theme.fontSize["lg"]};
   margin-right: 0.2rem;
   margin-bottom: 0.1rem;
   color: ${({ theme, $color }) => ($color ? theme.color[$color] : "inherit")};
@@ -103,7 +103,7 @@ export const StyledCardTitle = styled.h2<StyledCardTitle>`
   white-space: nowrap;
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
-  font-size: 1.7rem;
+  font-size: ${({ theme }) => theme.fontSize["lg"]};
 `;
 export const StyledCardContent = styled.div`
   display: flex;
@@ -167,7 +167,7 @@ export const StyledModalInputLabel = styled.p`
   justify-content: flex-end;
   align-items: center;
   white-space: nowrap;
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 interface StyledModalInputWrap {
   width?: number;

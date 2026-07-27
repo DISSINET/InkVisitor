@@ -495,7 +495,15 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </StyledAnchorElvlWrap>
           )}
           <ButtonGroup>
-            <Button key="cancel" label="Cancel" color="greyer" inverted onClick={closeModal} />
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              noBackground
+              noBorder
+              onClick={closeModal}
+            />
             <Button key="submit" label="Create" color="info" onClick={handleSubmit} />
           </ButtonGroup>
         </ModalFooter>
@@ -533,6 +541,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 label="Cancel"
                 color="greyer"
                 inverted
+                noBackground
+                noBorder
                 onClick={() => {
                   setShowApplyTemplateModal(false);
                   setTemplateToApply(false);

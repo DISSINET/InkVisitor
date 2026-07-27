@@ -117,6 +117,8 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
             label="Cancel"
             color="greyer"
             inverted
+            noBackground
+            noBorder
             onClick={() => {
               handleCancelCreateTemplate();
             }}

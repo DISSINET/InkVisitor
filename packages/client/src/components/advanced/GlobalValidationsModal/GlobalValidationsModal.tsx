@@ -210,13 +210,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     updateSettingsMutation.mutate([{ id: key, value }]);
   };
 
-  // useEffect(() => {
-  // const newSettings: Omit<ISetting, "public">[] = Object.entries(rules).map(
-  //   ([id, value]) => ({ id, value })
-  // );
-  // updateSettingsMutation.mutate(newSettings);
-  // }, [rules]);
-
   const newValidationButton = (
     <Button
       icon={<IcoPlusBold />}

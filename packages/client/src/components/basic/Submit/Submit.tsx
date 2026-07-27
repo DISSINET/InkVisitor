@@ -48,7 +48,14 @@ export const Submit: React.FC<Submit> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button label="Cancel" color="info" inverted onClick={onCancel} />
+            <Button
+              label="Cancel"
+              color="greyer"
+              inverted
+              noBackground
+              noBorder
+              onClick={onCancel}
+            />
             <Button
               label={submitLabel}
               color="danger"

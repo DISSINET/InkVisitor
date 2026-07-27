@@ -1823,6 +1823,8 @@ export const TextAnnotator = ({
                 label="Cancel"
                 color="greyer"
                 inverted
+                noBackground
+                noBorder
                 onClick={() => setPendingModeSwitch(null)}
               />
               <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
