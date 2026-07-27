@@ -119,11 +119,9 @@ const getColor = (
   $isItalic: boolean,
 ): keyof ThemeColor => {
   if ($invertedLabel) {
-    if ($isFavorited) {
-      return "warning";
-    } else {
-      return "tagSelectedColor";
-    }
+    // the star glyph already carries the favorited marker, and gold text has too
+    // little contrast against the tinted selection background
+    return "tagSelectedColor";
   } else {
     return $isItalic ? "tagItalic" : "tagColor";
   }

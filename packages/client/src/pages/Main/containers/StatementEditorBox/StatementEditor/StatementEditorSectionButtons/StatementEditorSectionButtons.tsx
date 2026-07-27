@@ -114,6 +114,7 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
           onClick={() => handleCopyFromStatement(previousStatement, section, replaceSection)}
+          shape="square"
         />
       </ButtonGroup>
       <EntitySuggester

@@ -60,8 +60,10 @@ const theme = {
 
     tagBackground: "#fff",
     tagColor: "#091034",
-    tagSelectedBackground: "#091034",
-    tagSelectedColor: "#fff",
+    // the current territory and the opened statement row are the same idea, so
+    // they share one fill - and it is a hue no button uses
+    tagSelectedBackground: "#d8ddf5", // tableOpened
+    tagSelectedColor: "#091034",
     tagItalic: "#4a5568",
 
     /* query explorer colors */
