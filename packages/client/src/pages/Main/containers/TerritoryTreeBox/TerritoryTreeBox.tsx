@@ -8,8 +8,8 @@ import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
-import { BsFilter } from "react-icons/bs";
 import { FaStar } from "react-icons/fa";
+import { IoFilter } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
@@ -17,6 +17,7 @@ import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedT
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { IcoPlusBold } from "Theme/icons";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
@@ -28,8 +29,6 @@ import {
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import { filterTreeByFilters, markNodesWithFilters } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { IcoPlusBold } from "Theme/icons";
-import { IoFilter } from "react-icons/io5";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -129,20 +128,14 @@ export const TerritoryTreeBox: React.FC = () => {
         return newFilteredTreeData;
       }
 
-      newFilteredTreeData = filterTreeByFilters(
-        treeData,
-        filterSettings,
-        userData?.storedTerritories.map((t) => t.territory.id) ?? [],
-      );
+      const favoriteIds = userData?.storedTerritories.map((t) => t.territory.id) ?? [];
 
-      // Mark tree data for highlighting
-      if (newFilteredTreeData && userData) {
-        const markedTreeData = markNodesWithFilters(
-          newFilteredTreeData,
-          filterSettings,
-          userData.storedTerritories.map((t) => t.territory.id),
-        );
-        return markedTreeData;
+      newFilteredTreeData = filterTreeByFilters(treeData, filterSettings, favoriteIds);
+
+      // Mark tree data for highlighting. Pruning and marking read the same
+      // favorites, so every surviving row carries a flag and can dim
+      if (newFilteredTreeData) {
+        return markNodesWithFilters(newFilteredTreeData, filterSettings, favoriteIds);
       }
 
       return newFilteredTreeData;

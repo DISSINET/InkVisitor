@@ -55,11 +55,7 @@ export const Submit: React.FC<Submit> = ({
         <ModalFooter>
           <ButtonGroup>
             <CancelButton onClick={onCancel} />
-            <Button
-              label={submitLabel}
-              color="danger"
-              onClick={onSubmit}
-            />
+            <Button label={submitLabel} color="danger" onClick={onSubmit} />
           </ButtonGroup>
         </ModalFooter>
       </Modal>

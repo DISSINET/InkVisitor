@@ -37,7 +37,6 @@ export { BsCardText as IcoCardText } from "react-icons/bs";
 export { BsClipboard as IcoClipboard } from "react-icons/bs";
 export { BsEnvelopeArrowUpFill as IcoEnvelopeUpload } from "react-icons/bs";
 export { BsFileTextFill as IcoFileTextFill } from "react-icons/bs";
-export { BsFilter as IcoFilter } from "react-icons/bs";
 export { BsInfoCircle as IcoInfo } from "react-icons/bs";
 export { BsShieldExclamation as IcoShieldWarning } from "react-icons/bs";
 export { BsShieldFillCheck as IcoShieldCheck } from "react-icons/bs";
