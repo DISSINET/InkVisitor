@@ -1,4 +1,4 @@
-import React, { CSSProperties, useRef, useState } from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { RESIZING_CLASS } from "Theme/constants";
 import { StyledLayoutSeparatorHorizontal } from "./SeparatorStyles";
 
@@ -44,6 +44,20 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   const dragYPosition = useRef<number>(separatorYPosition);
   const lastClientY = useRef<number>(0);
   const frame = useRef<number | null>(null);
+  // read by the unmount cleanup, which sees the state as it was at mount
+  const draggingRef = useRef(false);
+
+  // The body classes belong to the drag, not to the separator: a box that
+  // changes state mid-drag takes this component with it, and a body left marked
+  // as resizing suppresses every layout transition for the rest of the session.
+  useEffect(
+    () => () => {
+      if (draggingRef.current) {
+        document.body.classList.remove("no-select", RESIZING_CLASS);
+      }
+    },
+    [],
+  );
 
   const paintDragPosition = () => {
     frame.current = null;
@@ -61,6 +75,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
     document.body.classList.add("no-select", RESIZING_CLASS);
     dragYPosition.current = separatorYPosition;
     lastClientY.current = e.clientY;
+    draggingRef.current = true;
     setDragging(true);
   };
 
@@ -98,6 +113,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
       window.cancelAnimationFrame(frame.current);
       frame.current = null;
     }
+    draggingRef.current = false;
     setDragging(false);
     document.body.classList.remove("no-select", RESIZING_CLASS);
     window.getSelection()?.removeAllRanges();
