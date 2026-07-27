@@ -218,6 +218,11 @@ export function useVerticalSeparators() {
   });
 
   const beginSeparatorDrag = () => {
+    // A drag that dies without a commit - its separator unmounted because a
+    // panel collapsed under it - leaves the flag raised, and the effect above
+    // stops following state from then on. Seeding here means a drag always
+    // starts from the committed layout, whatever the previous one left behind.
+    dragPositions.current = separatorPositions;
     isDragging.current = true;
   };
 
