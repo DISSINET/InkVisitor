@@ -62,7 +62,14 @@ export const StyledActantWithPropsWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledExpandedRowTd = styled.td``;
+/* the expansion is content of the row above it, not another row in the stripe
+   pattern: one flat tint sets it apart, the border closes it off below */
+export const StyledExpandedRowTd = styled.td`
+  padding: 0;
+  background-color: ${({ theme }) => theme.color["gray"][150]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][300]};
+`;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
 `;
@@ -92,8 +99,7 @@ interface StyledReferenceColumn {
 }
 export const StyledReferenceColumn = styled.div<StyledReferenceColumn>`
   display: grid;
-  margin-right: ${({ theme, $marginRight }) =>
-    $marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) => ($marginRight ? theme.space[1] : "")};
 `;
 interface StyledTagWrap {
   $marginRight?: boolean;
@@ -101,8 +107,7 @@ interface StyledTagWrap {
 export const StyledTagWrap = styled.div<StyledTagWrap>`
   display: inline-flex;
   overflow: hidden;
-  margin-right: ${({ theme, $marginRight }) =>
-    $marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) => ($marginRight ? theme.space[1] : "")};
 `;
 export const StyledGrid = styled.div`
   display: grid;
