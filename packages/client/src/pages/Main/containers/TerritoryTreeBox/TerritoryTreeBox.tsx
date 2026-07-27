@@ -17,7 +17,7 @@ import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedT
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
-import { ITerritoryFilter } from "types";
+import { IExtendedResponseTree, ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
 import {
@@ -90,7 +90,7 @@ export const TerritoryTreeBox: React.FC = () => {
   );
 
   const [filterSettings, setFilterSettings] = useState<ITerritoryFilter>(initFilterSettings);
-  const [filteredTreeData, setFilteredTreeData] = useState<IResponseTree | null>();
+  const [filteredTreeData, setFilteredTreeData] = useState<IExtendedResponseTree | null>();
 
   useEffect(() => {
     if (treeData) {
@@ -225,11 +225,9 @@ export const TerritoryTreeBox: React.FC = () => {
                   dispatch(setFilterOpen(true));
                 }
               }}
-              // color marks an open filter panel; at rest the button is neutral,
-              // leaving the blue-violet family to the selected row
-              color={treeFilterOpen ? "success" : "greyer"}
+              color="success"
+              // inverted={!treeFilterOpen}
               bold={treeFilterOpen}
-              inverted={!treeFilterOpen}
               fullWidth
               icon={<IoFilter size={13} />}
               tooltipLabel={
@@ -269,6 +267,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     children={filteredTreeData.children}
                     lvl={filteredTreeData.lvl}
                     statementsCount={filteredTreeData.statementsCount}
+                    foundByRecursion={filteredTreeData.foundByRecursion}
                     initExpandedNodes={selectedTerritoryPath}
                     empty={filteredTreeData.empty}
                     storedTerritories={storedTerritoryIds}
