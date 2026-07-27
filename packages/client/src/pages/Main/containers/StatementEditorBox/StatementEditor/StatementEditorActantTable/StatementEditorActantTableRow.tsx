@@ -22,7 +22,7 @@ import { TooltipAttributes } from "pages/Main/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FaCaretDown, FaGripVertical } from "react-icons/fa";
-import { IcoPlus, IcoTrash } from "Theme/icons";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -267,11 +267,12 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="a"
-            icon={<IcoPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="p"
             color="primary"
             inverted
+            bold
             tooltipLabel="add new prop"
             onClick={() => {
               addProp(propRowId);
@@ -281,11 +282,12 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="c"
-            icon={<IcoPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="c"
             color="primary"
             inverted
+            bold
             tooltipLabel="add classification"
             onClick={() => {
               addClassification(propRowId);
@@ -295,11 +297,12 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="i"
-            icon={<IcoPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="i"
             color="primary"
             inverted
+            bold
             tooltipLabel="add identification"
             onClick={() => {
               addIdentification(propRowId);

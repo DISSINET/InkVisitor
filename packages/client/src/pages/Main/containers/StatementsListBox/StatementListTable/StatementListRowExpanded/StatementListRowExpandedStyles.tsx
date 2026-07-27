@@ -10,14 +10,17 @@ export const StyledSubRow = styled.div`
   color: ${({ theme }) => theme.color["black"]};
 `;
 
+// one step per level, so each nesting level reads as the same amount of depth.
+// The row indents by whole steps and pays the last one as padding, which leaves
+// room for the guide drawn on its left edge.
 const getIndentation = (theme: DefaultTheme, level: 1 | 2 | 3) => {
   switch (level) {
     case 1:
-      return theme.space[5];
+      return theme.space[0];
     case 2:
-      return theme.space[10];
+      return theme.space[5];
     case 3:
-      return theme.space[16];
+      return theme.space[10];
   }
 };
 interface StyledPropGridRow {
@@ -26,8 +29,13 @@ interface StyledPropGridRow {
 }
 export const StyledPropGridRow = styled.div<StyledPropGridRow>`
   margin-left: ${({ theme, $level }) => getIndentation(theme, $level)};
-  margin-bottom: ${({ theme, $disableBottomMargin }) =>
+  /* the gap between rows is padding rather than margin, so the guide runs
+     through it and the rows of one group share a single unbroken line */
+  padding-bottom: ${({ theme, $disableBottomMargin }) =>
     $disableBottomMargin ? 0 : theme.space[1]};
+  border-left: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][400]};
+  padding-left: ${({ theme }) => theme.space[5]};
   display: grid;
   grid-template-columns: auto 1fr;
   overflow: hidden;
