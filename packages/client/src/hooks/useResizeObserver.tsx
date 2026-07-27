@@ -1,5 +1,5 @@
 import { useDebouncedCallback } from "hooks";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState, useLayoutEffect } from "react";
 
 interface UseResizeObserverOptions {
   debounceDelay?: number;
@@ -13,7 +13,11 @@ interface Size {
 export const useResizeObserver = <T extends HTMLElement>({
   debounceDelay = 0,
 }: UseResizeObserverOptions = {}) => {
-  const ref = useRef<T | null>(null);
+  // The observed element arrives through a callback ref rather than a ref
+  // object, so a target that mounts later than the hook - or remounts under a
+  // condition - still reaches the effect below.
+  const [node, setNode] = useState<T | null>(null);
+  const ref = useCallback((element: T | null) => setNode(element), []);
   const animationFrameRef = useRef<number | null>(null);
   const [size, setSize] = useState<Size>({
     width: undefined,
@@ -30,8 +34,7 @@ export const useResizeObserver = <T extends HTMLElement>({
   }, debounceDelay);
 
   useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element || typeof ResizeObserver === "undefined") {
+    if (!node || typeof ResizeObserver === "undefined") {
       return;
     }
 
@@ -51,7 +54,7 @@ export const useResizeObserver = <T extends HTMLElement>({
       });
     });
 
-    resizeObserver.observe(element);
+    resizeObserver.observe(node);
 
     return () => {
       if (animationFrameRef.current !== null) {
@@ -59,7 +62,7 @@ export const useResizeObserver = <T extends HTMLElement>({
       }
       resizeObserver.disconnect();
     };
-  }, [debouncedCallback]);
+  }, [node, debouncedCallback]);
 
   return { ref, ...size };
 };

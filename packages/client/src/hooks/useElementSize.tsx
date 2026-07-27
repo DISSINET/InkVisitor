@@ -13,6 +13,9 @@ interface ElementSize {
  * The observer fires on every frame of a panel resize, so anything whose
  * response to a new size is expensive should pass a debounceDelay and settle a
  * beat after the drag instead of tracking it.
+ *
+ * The element is looked up once per id: callers render inside the element they
+ * measure, so it is in the document by the time this runs.
  */
 export const useElementSize = (
   elementId: string,
