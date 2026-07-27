@@ -86,6 +86,23 @@ export function getEffectivePanelWidths(
   return [firstWidth, secondWidth, thirdWidth, fourthWidth];
 }
 
+// Panels are sized from CSS custom properties on the document root rather than
+// from a React prop, so a separator drag can repaint the whole layout once per
+// animation frame without rendering the panel contents.
+export function panelWidthVar(panelIndex: number): string {
+  return `--panel-w-${panelIndex}`;
+}
+
+export function writePanelWidthVars(widths: number[]): void {
+  const root = document.documentElement;
+  widths.forEach((width, index) => {
+    // a non-finite length makes the whole width declaration invalid, which
+    // drops the panel to its content size
+    if (!Number.isFinite(width)) return;
+    root.style.setProperty(panelWidthVar(index), `${width / 10}rem`);
+  });
+}
+
 export function arePanelWidthsUndersized(
   widths: number[],
   expanded: boolean[] = [true, true, true, true],

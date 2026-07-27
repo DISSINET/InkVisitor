@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { PANEL_RESIZE_TRANSITION, RESIZING_CLASS } from "Theme/constants";
 import styled from "styled-components";
 
 interface StyledPanelSeparator {
@@ -20,6 +21,18 @@ export const StyledLayoutSeparatorVertical = styled(StyledPanelSeparator)`
     $show ? theme.borderWidth[4] : theme.borderWidth[2]};
   height: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
   cursor: col-resize;
+  /* a pointer drag on a touch screen scrolls the page instead of dragging */
+  touch-action: none;
+  /* --separator-x is rewritten per animation frame while dragged, so easing
+     applies to the positions the separator is handed rather than dragged to */
+  left: var(--separator-x);
+  transition:
+    opacity 0.3s ease,
+    left ${PANEL_RESIZE_TRANSITION};
+
+  body.${RESIZING_CLASS} & {
+    transition: opacity 0.3s ease;
+  }
 `;
 export const StyledLayoutSeparatorHorizontal = styled(StyledPanelSeparator)`
   height: ${({ $show, theme }) =>

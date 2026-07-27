@@ -12,7 +12,14 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BiHide } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaDiagramNext } from "react-icons/fa6";
@@ -39,6 +46,7 @@ import {
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
+import { writePanelWidthVars } from "utils/layoutUtils";
 import { getStoredUserRole } from "utils/userStorage";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
@@ -262,6 +270,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
     searchSeparator,
     onePercentOfLayoutWidth,
     isFirstRender,
+    previewTreeSeparatorXPosition,
+    previewCenterSeparatorXPosition,
+    previewSearchSeparatorXPosition,
     handleTreeSeparatorXPositionChange,
     handleCenterSeparatorXPositionChange,
     handleSearchSeparatorXPositionChange,
@@ -407,6 +418,17 @@ const MainPage: React.FC<MainPage> = ({}) => {
     return layoutWidth - firstPanelWidth - secondPanelWidth - thirdPanelWidth;
   }, [fourthPanelExpanded, firstPanelWidth, secondPanelWidth, thirdPanelWidth, layoutWidth]);
 
+  // The panels render from these variables. A separator drag overwrites them
+  // directly for the duration of the drag and lands here on drop.
+  useLayoutEffect(() => {
+    writePanelWidthVars([
+      firstPanelWidth,
+      secondPanelWidth,
+      thirdPanelWidth,
+      fourthPanelWidth,
+    ]);
+  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth]);
+
   // double check for errors after opening the panel and recalculating sizes
   useEffect(() => {
     if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
@@ -458,6 +480,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             setSeparatorXPosition={(xPosition) => {
               handleTreeSeparatorXPositionChange(xPosition);
             }}
+            applyPreview={previewTreeSeparatorXPosition}
             onMaxWidthReached={(overflow) => {
               if (thirdPanelWidth > THIRD_PANEL_MIN_WIDTH + overflow) {
                 handleCenterSeparatorXPositionChange(centerSeparator.position + overflow);
@@ -513,6 +536,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             setSeparatorXPosition={(xPosition) => {
               handleCenterSeparatorXPositionChange(xPosition);
             }}
+            applyPreview={previewCenterSeparatorXPosition}
             onMaxWidthReached={(overflow) => {
               if (panelWidths[3] > FOURTH_PANEL_MIN_WIDTH + overflow) {
                 handleSearchSeparatorXPositionChange(searchSeparator.position + overflow);
@@ -541,6 +565,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           setSeparatorXPosition={(xPosition) => {
             handleSearchSeparatorXPositionChange(xPosition);
           }}
+          applyPreview={previewSearchSeparatorXPosition}
           onMinWidthReached={(overflow) => {
             if (panelWidths[1] > SECOND_PANEL_MIN_WIDTH + overflow) {
               handleCenterSeparatorXPositionChange(centerSeparator.position - overflow);
@@ -602,7 +627,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         )}
 
       {/* FIRST PANEL */}
-      <Panel width={firstPanelWidth}>
+      <Panel width={firstPanelWidth} widthVarIndex={0}>
         <Box
           height={contentHeight}
           label="Territories"
@@ -622,7 +647,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* SECOND PANEL */}
-      <Panel width={secondPanelWidth}>
+      <Panel width={secondPanelWidth} widthVarIndex={1}>
         {secondPanelExpanded ? (
           <>
             <Box
@@ -803,7 +828,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* THIRD PANEL */}
-      <Panel width={thirdPanelWidth}>
+      <Panel width={thirdPanelWidth} widthVarIndex={2}>
         <Box
           borderColor="white"
           height={getAnnotatorBoxHeight()}
@@ -876,7 +901,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </Panel>
 
       {/* FOURTH PANEL */}
-      <Panel width={fourthPanelWidth}>
+      <Panel width={fourthPanelWidth} widthVarIndex={3}>
         <Box
           height={getFourthPanelBoxHeight("search")}
           label="Search"

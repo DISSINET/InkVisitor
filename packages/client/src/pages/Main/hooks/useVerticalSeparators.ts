@@ -14,8 +14,10 @@ import {
 } from "Theme/constants";
 import {
   arePanelWidthsUndersized,
+  getEffectivePanelWidths,
   getInitPercentPanelWidths,
   panelWidthsFromSeparators,
+  writePanelWidthVars,
 } from "utils/layoutUtils";
 import { floorNumberToOneDecimal } from "utils/utils";
 
@@ -58,6 +60,48 @@ export function useVerticalSeparators() {
       ? Number(localStorageSearchSeparatorXPosition) * onePercentOfLayoutWidth
       : MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
   );
+
+  // Each preview builds the same panel widths its handler below commits, and
+  // paints them without touching the store, so a drag costs one variable write
+  // per frame instead of a dispatch per pointer event.
+  const previewPanelWidths = (baseWidths: number[]) => {
+    writePanelWidthVars(
+      getEffectivePanelWidths(
+        baseWidths,
+        [
+          firstPanelExpanded,
+          secondPanelExpanded,
+          thirdPanelExpanded,
+          fourthPanelExpanded,
+        ],
+        layoutWidth,
+      ),
+    );
+  };
+
+  const previewTreeSeparatorXPosition = (xPosition: number) =>
+    previewPanelWidths([
+      xPosition,
+      mainPageCenterSeparatorXPosition - xPosition,
+      panelWidths[2],
+      panelWidths[3],
+    ]);
+
+  const previewCenterSeparatorXPosition = (xPosition: number) =>
+    previewPanelWidths([
+      panelWidths[0],
+      xPosition - panelWidths[0],
+      layoutWidth - panelWidths[3] - xPosition,
+      panelWidths[3],
+    ]);
+
+  const previewSearchSeparatorXPosition = (xPosition: number) =>
+    previewPanelWidths([
+      panelWidths[0],
+      panelWidths[1],
+      xPosition - mainPageCenterSeparatorXPosition,
+      layoutWidth - xPosition,
+    ]);
 
   const handleTreeSeparatorXPositionChange = (xPosition: number) => {
     const flooredXPosition = floorNumberToOneDecimal(xPosition);
@@ -299,6 +343,9 @@ export function useVerticalSeparators() {
     },
     onePercentOfLayoutWidth,
     isFirstRender,
+    previewTreeSeparatorXPosition,
+    previewCenterSeparatorXPosition,
+    previewSearchSeparatorXPosition,
     handleTreeSeparatorXPositionChange,
     handleCenterSeparatorXPositionChange,
     handleSearchSeparatorXPositionChange,

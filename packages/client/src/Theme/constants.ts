@@ -83,3 +83,11 @@ export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
   separatorXPosition: { tension: 305, friction: 21, clamp: true },
 };
+
+// eases panels and separators into a layout they were handed as a finished
+// value - a toggled panel, a dropped separator, a new window size
+export const PANEL_RESIZE_TRANSITION = "0.18s ease-out";
+// marks <body> for the duration of a separator drag. Carries no styles of its
+// own; it is the selector the resize transition opts out of, so the pointer
+// alone sets the pace while a drag is in progress.
+export const RESIZING_CLASS = "resizing";
