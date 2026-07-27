@@ -40,9 +40,12 @@ export const useElementSize = (
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
+      // Rounded down, never up: a box measured a pixel wider than it is hands
+      // that pixel to whatever is sized from it, and a layout with no slack
+      // left over then overflows and scrolls.
       debouncedSetSize({
-        width: Math.round(entry.contentRect.width),
-        height: Math.round(entry.contentRect.height),
+        width: Math.floor(entry.contentRect.width),
+        height: Math.floor(entry.contentRect.height),
       });
     });
     resizeObserver.observe(element);
