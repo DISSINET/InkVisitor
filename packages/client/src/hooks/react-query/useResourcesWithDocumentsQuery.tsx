@@ -4,6 +4,7 @@ import api from "api";
 
 export function useResourcesWithDocumentsQuery(
   enabled = true,
+  // true = refetch only if stale, "always" = refetch always
   refetchOnMount: boolean | "always" = true,
 ) {
   return useQuery({

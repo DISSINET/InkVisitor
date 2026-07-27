@@ -19,7 +19,7 @@ import { CellProps, Column, useExpanded, useRowSelect, useTable } from "react-ta
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { IcoPlus, IcoTrash } from "Theme/icons";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { ButtonSize, StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { AnchorTextTooltip } from "./AnchorTextTooltip";
@@ -370,7 +370,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     key="add-up"
                     icon={
                       <>
-                        <IcoPlus size={14} />
+                        <IcoPlusBold size={14} />
                         <BsArrowUp size={14} />
                       </>
                     }
@@ -385,7 +385,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     key="add-down"
                     icon={
                       <>
-                        <IcoPlus size={14} />
+                        <IcoPlusBold size={14} />
                         <BsArrowDown size={14} />
                       </>
                     }

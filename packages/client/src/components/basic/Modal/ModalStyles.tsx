@@ -27,6 +27,7 @@ export const StyledBackground = styled(animated.div)`
   right: 0;
   top: 0;
   background-color: ${({ theme }) => theme.color["modalBg"]};
+  backdrop-filter: blur(2px) saturate(0.9);
 `;
 
 interface Card {
