@@ -34,16 +34,13 @@ import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   COLLAPSED_PANEL_WIDTH,
-  FIRST_PANEL_MIN_WIDTH,
-  FOURTH_PANEL_MIN_WIDTH,
   fourthPanelBoxesHeightThirds,
   heightHeader,
   hiddenBoxHeight,
-  SECOND_PANEL_MIN_WIDTH,
-  THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
 import {
+  isLayoutUndersized,
   writeBoxHeightVars,
   writePanelWidthVars,
   writeSeparatorPositionVars,
@@ -434,24 +431,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
     });
   });
 
-  // double check for errors after opening the panel and recalculating sizes
+  // Rebuild the layout when the window cannot hold the panels that are open.
+  // Only then: a separator that runs out of room stops at its boundary and the
+  // layout it leaves behind is the one the user asked for, so a panel sitting on
+  // its minimum is not a reason to throw their widths away.
   useEffect(() => {
     if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
-      const isUndersized =
-        (firstPanelExpanded && firstPanelWidth < FIRST_PANEL_MIN_WIDTH) ||
-        (secondPanelExpanded && secondPanelWidth < SECOND_PANEL_MIN_WIDTH) ||
-        (thirdPanelExpanded && thirdPanelWidth < THIRD_PANEL_MIN_WIDTH) ||
-        (fourthPanelExpanded && fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH);
-
-      if (isUndersized) {
+      if (
+        isLayoutUndersized(
+          [
+            firstPanelExpanded,
+            secondPanelExpanded,
+            thirdPanelExpanded,
+            fourthPanelExpanded,
+          ],
+          layoutWidth,
+        )
+      ) {
         handleLayoutInit();
       }
     }
   }, [
-    firstPanelWidth,
-    secondPanelWidth,
-    thirdPanelWidth,
-    fourthPanelWidth,
+    layoutWidth,
     firstPanelExpanded,
     secondPanelExpanded,
     thirdPanelExpanded,

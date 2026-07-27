@@ -17,6 +17,7 @@ import {
   arePanelWidthsUndersized,
   getEffectivePanelWidths,
   getInitPercentPanelWidths,
+  isLayoutUndersized,
   panelWidthsFromSeparators,
   writePanelWidthVars,
   writeSeparatorPositionVars,
@@ -206,24 +207,14 @@ export function useVerticalSeparators() {
     return positions;
   };
 
-  // React state trails a drag by design, so the resolver reads and writes these
-  // instead. They follow state whenever a drag is not the thing moving them.
+  // React state trails a drag by design, so the resolver reads and writes this
+  // instead. Nothing reads it outside a drag, and every drag seeds it below, so
+  // a drag that dies without committing - its separator unmounted because a
+  // panel collapsed under it - leaves nothing behind that the next one inherits.
   const dragPositions = useRef<SeparatorPositions>(separatorPositions);
-  const isDragging = useRef(false);
-
-  useLayoutEffect(() => {
-    if (!isDragging.current) {
-      dragPositions.current = separatorPositions;
-    }
-  });
 
   const beginSeparatorDrag = () => {
-    // A drag that dies without a commit - its separator unmounted because a
-    // panel collapsed under it - leaves the flag raised, and the effect above
-    // stops following state from then on. Seeding here means a drag always
-    // starts from the committed layout, whatever the previous one left behind.
     dragPositions.current = separatorPositions;
-    isDragging.current = true;
   };
 
   // Paints where a drag has reached without touching the store, and answers
@@ -267,7 +258,6 @@ export function useVerticalSeparators() {
       dragPositions.current,
     );
     dragPositions.current = positions;
-    isDragging.current = false;
 
     const movedTree = positions.tree !== separatorPositions.tree;
     const movedCenter = positions.center !== separatorPositions.center;
@@ -298,10 +288,9 @@ export function useVerticalSeparators() {
 
     const widths = basePanelWidths(positions);
 
-    if (
-      expandedPanels.every(Boolean) &&
-      arePanelWidthsUndersized(widths, expandedPanels, layoutWidth)
-    ) {
+    // Only when the window cannot hold the open panels at all. A drag that ran
+    // out of room simply stopped at its boundary, which needs no telling off.
+    if (isLayoutUndersized(expandedPanels, layoutWidth)) {
       toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
     }
 

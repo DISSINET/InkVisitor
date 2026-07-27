@@ -150,6 +150,32 @@ export function writeBoxHeightVars(heights: {
   });
 }
 
+// The narrowest the window can be and still hold the layout: every expanded
+// panel at its own minimum, every collapsed one at a collapsed panel's width.
+export function minimumLayoutWidth(expanded: boolean[]): number {
+  const minWidths = [
+    FIRST_PANEL_MIN_WIDTH,
+    SECOND_PANEL_MIN_WIDTH,
+    THIRD_PANEL_MIN_WIDTH,
+    FOURTH_PANEL_MIN_WIDTH,
+  ];
+  return expanded.reduce(
+    (total, isExpanded, index) =>
+      total + (isExpanded ? minWidths[index] : COLLAPSED_PANEL_WIDTH),
+    0,
+  );
+}
+
+// Whether the window is too narrow for the panels that are open, which is the
+// one case a drag cannot answer by stopping at a boundary: there is no position
+// left that satisfies every minimum, so something has to give.
+export function isLayoutUndersized(
+  expanded: boolean[],
+  layoutWidth: number,
+): boolean {
+  return layoutWidth > 0 && layoutWidth < minimumLayoutWidth(expanded);
+}
+
 export function arePanelWidthsUndersized(
   widths: number[],
   expanded: boolean[] = [true, true, true, true],
