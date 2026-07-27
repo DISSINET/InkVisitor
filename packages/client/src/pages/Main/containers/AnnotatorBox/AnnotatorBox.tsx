@@ -9,7 +9,8 @@ import {
 } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { useSearchParams } from "hooks";
+import { boxContentId } from "components";
+import { useElementSize, useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import {
   useDocumentQuery,
@@ -30,6 +31,16 @@ interface AnnotatorBox {
 }
 
 export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
+  // The canvas needs a pixel width, and redrawing it is too expensive to do on
+  // every frame of a resize, so it settles shortly after the drag. The width
+  // prop carries it until the first measurement arrives. The height prop is
+  // measured from the box instead: it accounts for the annotator menu, which
+  // the box content this reads includes.
+  const { width: measuredWidth } = useElementSize(
+    boxContentId("Annotator"),
+    50,
+  );
+
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const { territoryId, statementId } = useSearchParams();
@@ -265,7 +276,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   return (
     <StatementListTextAnnotator
       contentHeight={height}
-      contentWidth={width}
+      contentWidth={measuredWidth ?? width}
       territoryId={territoryId}
       territory={territory}
       statementId={statementId}

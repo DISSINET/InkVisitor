@@ -103,6 +103,33 @@ export function writePanelWidthVars(widths: number[]): void {
   });
 }
 
+// The left edge of the panel at panelIndex, as a CSS length. Lets an element
+// outside the panel flow follow a drag off the same variables the panels use.
+export function panelLeftEdgeValue(panelIndex: number): string {
+  if (panelIndex < 1) return "0";
+  const widths = Array.from(
+    { length: panelIndex },
+    (_, index) => `var(${panelWidthVar(index)})`,
+  );
+  return `calc(${widths.join(" + ")})`;
+}
+
+// Boxes are sized the same way as panels, keyed by name rather than by index
+// since a panel holds a different set of them depending on what is open.
+export function boxHeightVar(boxKey: string): string {
+  return `--box-h-${boxKey}`;
+}
+
+export function writeBoxHeightVars(heights: {
+  [boxKey: string]: number | undefined;
+}): void {
+  const root = document.documentElement;
+  Object.entries(heights).forEach(([boxKey, height]) => {
+    if (height === undefined || !Number.isFinite(height)) return;
+    root.style.setProperty(boxHeightVar(boxKey), `${height / 10}rem`);
+  });
+}
+
 export function arePanelWidthsUndersized(
   widths: number[],
   expanded: boolean[] = [true, true, true, true],

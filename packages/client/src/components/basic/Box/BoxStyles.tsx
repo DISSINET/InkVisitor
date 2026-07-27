@@ -1,17 +1,29 @@
 import { animated } from "@react-spring/web";
+import { PANEL_RESIZE_TRANSITION, RESIZING_CLASS } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
+import { boxHeightVar } from "utils/layoutUtils";
 
 interface StyledBox {
-  height?: number;
+  $heightVarKey?: string;
   $isClickable?: boolean;
 }
 export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
   display: flex;
   flex-direction: column;
-  height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
+  /* the shared variable is rewritten per animation frame while a separator is
+     dragged; --box-height carries the height the box rendered with */
+  height: ${({ $heightVarKey }) =>
+    $heightVarKey !== undefined
+      ? `var(${boxHeightVar($heightVarKey)}, var(--box-height))`
+      : "var(--box-height)"};
+  transition: height ${PANEL_RESIZE_TRANSITION};
   cursor: ${({ $isClickable }) => ($isClickable ? "pointer" : "")};
+
+  body.${RESIZING_CLASS} & {
+    transition: none;
+  }
 `;
 
 interface StyledHead {

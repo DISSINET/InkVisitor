@@ -1,6 +1,5 @@
-import { useSpring } from "@react-spring/web";
-import React, { useEffect, useState, useCallback } from "react";
-import { springConfig } from "Theme/constants";
+import React, { CSSProperties, useRef, useState } from "react";
+import { RESIZING_CLASS } from "Theme/constants";
 import { StyledLayoutSeparatorHorizontal } from "./SeparatorStyles";
 
 interface LayoutSeparatorHorizontal {
@@ -9,118 +8,128 @@ interface LayoutSeparatorHorizontal {
   // set custom one related to specific page
   separatorYPosition: number;
   setSeparatorYPosition: (yPosition: number) => void;
+  // Paints the layout at a position the drag has reached but not committed.
+  // Boxes stay where they are during a drag without it.
+  applyPreview?: (yPosition: number) => void;
+  // Panel the separator spans, sizing it from that panel's width variable.
+  // Takes precedence over the width and left props.
+  panelIndex?: number;
   width?: number;
   left?: number;
   onMaxHeightReached?: () => void;
   onMinHeightReached?: () => void;
 }
+
+const separatorYValue = (yPosition: number) => `${(yPosition - 3) / 10}rem`;
+
 export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   topPositionMin,
   topPositionMax,
   separatorYPosition,
   setSeparatorYPosition,
+  applyPreview,
+  panelIndex,
   width,
   left,
   onMaxHeightReached,
   onMinHeightReached,
 }) => {
-  const [separatorYTempPosition, setSeparatorYTempPosition] = useState<
-    number | undefined
-  >(undefined);
-  const [topPosition, setTopPosition] = useState<number>(separatorYPosition);
+  const separatorRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const animatedHorizontalSeparator = useSpring({
-    top: `${(topPosition - 3) / 10}rem`,
-    ...(width !== undefined && { width: `${width / 10}rem` }),
-    ...(left !== undefined && { left: `${left / 10}rem` }),
-    config: springConfig.separatorYPosition,
-  });
+  // The position a drag has reached lives in a ref and is painted straight to
+  // the DOM: a pointermove that rendered React could not keep the boxes under
+  // the pointer.
+  const dragYPosition = useRef<number>(separatorYPosition);
+  const lastClientY = useRef<number>(0);
+  const frame = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (topPosition !== separatorYPosition && !dragging) {
-      setTopPosition(separatorYPosition);
-    }
-    window.getSelection()?.removeAllRanges();
-  }, [separatorYPosition, dragging]);
+  const paintDragPosition = () => {
+    frame.current = null;
+    separatorRef.current?.style.setProperty(
+      "--separator-y",
+      separatorYValue(dragYPosition.current),
+    );
+    applyPreview?.(dragYPosition.current);
+  };
 
-  const onMouseDown = (e: React.MouseEvent) => {
-    document.body.classList.add("no-select");
-    setSeparatorYTempPosition(e.clientY);
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // pointer capture keeps the moves coming while the pointer is off the
+    // separator, which is most of a drag
+    e.currentTarget.setPointerCapture(e.pointerId);
+    document.body.classList.add("no-select", RESIZING_CLASS);
+    dragYPosition.current = separatorYPosition;
+    lastClientY.current = e.clientY;
     setDragging(true);
   };
 
-  const onMove = useCallback(
-    (clientY: number) => {
-      if (dragging && topPosition && separatorYTempPosition) {
-        const newTopPosition = topPosition + clientY - separatorYTempPosition;
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return;
 
-        setSeparatorYTempPosition(clientY);
+    const requestedYPosition =
+      dragYPosition.current + e.clientY - lastClientY.current;
+    lastClientY.current = e.clientY;
 
-        // Clamp the new position between min and max
-        const clampedPosition = Math.min(
-          Math.max(newTopPosition, topPositionMin),
-          topPositionMax
-        );
-        setTopPosition(clampedPosition);
-
-        // Notify parent when max height is reached
-        if (clampedPosition === topPositionMax && onMaxHeightReached) {
-          onMaxHeightReached();
-        }
-        // Notify parent when min height is reached
-        if (clampedPosition === topPositionMin && onMinHeightReached) {
-          onMinHeightReached();
-        }
-      }
-    },
-    [
-      dragging,
-      topPosition,
-      separatorYTempPosition,
-      topPositionMin,
+    // Clamp the new position between min and max
+    dragYPosition.current = Math.min(
+      Math.max(requestedYPosition, topPositionMin),
       topPositionMax,
-      onMaxHeightReached,
-      onMinHeightReached,
-    ]
-  );
+    );
 
-  const onMouseMove = useCallback(
-    (e: MouseEvent) => {
-      e.preventDefault();
-      onMove(e.clientY);
-    },
-    [onMove]
-  );
+    if (frame.current === null) {
+      frame.current = window.requestAnimationFrame(paintDragPosition);
+    }
 
-  const onMouseUp = useCallback(() => {
+    // Notify parent when max height is reached
+    if (dragYPosition.current === topPositionMax && onMaxHeightReached) {
+      onMaxHeightReached();
+    }
+    // Notify parent when min height is reached
+    if (dragYPosition.current === topPositionMin && onMinHeightReached) {
+      onMinHeightReached();
+    }
+  };
+
+  const endDrag = () => {
+    if (!dragging) return;
+
+    if (frame.current !== null) {
+      window.cancelAnimationFrame(frame.current);
+      frame.current = null;
+    }
     setDragging(false);
-    document.body.classList.remove("no-select");
+    document.body.classList.remove("no-select", RESIZING_CLASS);
+    window.getSelection()?.removeAllRanges();
+
     // Apply the final position
-    if (topPosition !== separatorYPosition) {
-      setSeparatorYPosition(topPosition);
+    if (dragYPosition.current !== separatorYPosition) {
+      setSeparatorYPosition(dragYPosition.current);
     }
-  }, [topPosition, separatorYPosition, setSeparatorYPosition]);
-
-  useEffect(() => {
-    if (hovered || dragging) {
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
-
-      return () => {
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-      };
-    }
-  }, [hovered, dragging, onMouseMove, onMouseUp]);
+  };
 
   return (
     <StyledLayoutSeparatorHorizontal
-      onMouseDown={onMouseDown}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={animatedHorizontalSeparator}
+      ref={separatorRef}
+      // a render landing mid-drag would restore the pre-drag position from props
+      style={
+        {
+          "--separator-y": separatorYValue(
+            dragging ? dragYPosition.current : separatorYPosition,
+          ),
+          ...(width !== undefined && {
+            "--separator-width": `${width / 10}rem`,
+          }),
+          ...(left !== undefined && { "--separator-left": `${left / 10}rem` }),
+        } as CSSProperties
+      }
+      $panelIndex={panelIndex}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onLostPointerCapture={endDrag}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
       $show={hovered || dragging}
     />
   );

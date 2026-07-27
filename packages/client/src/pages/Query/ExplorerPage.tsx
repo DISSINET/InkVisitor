@@ -1,5 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -17,6 +25,7 @@ import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { writePanelWidthVars } from "utils/layoutUtils";
 import { floorNumberToOneDecimal } from "utils/utils";
 import {
   QUERY_BUILDER_MIN_HEIGHT,
@@ -590,11 +599,17 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
   }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
 
+  // The panels render from these variables. A separator drag overwrites them
+  // directly for the duration of the drag and lands here on drop.
+  useLayoutEffect(() => {
+    writePanelWidthVars([leftPanelWidth, detailPanelWidth]);
+  }, [leftPanelWidth, detailPanelWidth]);
+
   return (
     <>
       {queryLeftPanelExpanded && isExplorerNormal && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
-          width={leftPanelWidth}
+          panelIndex={0}
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
@@ -611,10 +626,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
             separatorXPosition={querySeparatorXPosition}
             setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
+            // the separator only renders with both panels expanded, where the
+            // left panel reaches exactly to it
+            applyPreview={(xPosition) =>
+              writePanelWidthVars([xPosition, layoutWidth - xPosition])
+            }
           />
         )}
 
-      <Panel width={leftPanelWidth}>
+      <Panel width={leftPanelWidth} widthVarIndex={0}>
         {queryLeftPanelExpanded ? (
           <>
             <Box
@@ -823,7 +843,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         )}
       </Panel>
       {isDetailOpen && (
-        <Panel width={detailPanelWidth}>
+        <Panel width={detailPanelWidth} widthVarIndex={1}>
           <Box
             label="Detail"
             borderColor="white"

@@ -1,6 +1,7 @@
 import { animated } from "@react-spring/web";
 import { PANEL_RESIZE_TRANSITION, RESIZING_CLASS } from "Theme/constants";
 import styled from "styled-components";
+import { panelLeftEdgeValue, panelWidthVar } from "utils/layoutUtils";
 
 interface StyledPanelSeparator {
   $show: boolean;
@@ -34,9 +35,35 @@ export const StyledLayoutSeparatorVertical = styled(StyledPanelSeparator)`
     transition: opacity 0.3s ease;
   }
 `;
-export const StyledLayoutSeparatorHorizontal = styled(StyledPanelSeparator)`
+interface StyledLayoutSeparatorHorizontal {
+  $panelIndex?: number;
+}
+export const StyledLayoutSeparatorHorizontal = styled(
+  StyledPanelSeparator,
+)<StyledLayoutSeparatorHorizontal>`
   height: ${({ $show, theme }) =>
     $show ? theme.borderWidth[4] : theme.borderWidth[2]};
-  width: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
   cursor: row-resize;
+  /* a pointer drag on a touch screen scrolls the page instead of dragging */
+  touch-action: none;
+  /* spanning a panel off the panel's own variables keeps the separator with it
+     through a horizontal drag, which the separator is not part of */
+  width: ${({ $panelIndex, theme }) =>
+    $panelIndex !== undefined
+      ? `var(${panelWidthVar($panelIndex)})`
+      : `var(--separator-width, calc(100% - ${theme.borderWidth[2]}))`};
+  left: ${({ $panelIndex }) =>
+    $panelIndex !== undefined
+      ? panelLeftEdgeValue($panelIndex)
+      : "var(--separator-left, 0)"};
+  top: var(--separator-y);
+  transition:
+    opacity 0.3s ease,
+    top ${PANEL_RESIZE_TRANSITION},
+    left ${PANEL_RESIZE_TRANSITION},
+    width ${PANEL_RESIZE_TRANSITION};
+
+  body.${RESIZING_CLASS} & {
+    transition: opacity 0.3s ease;
+  }
 `;

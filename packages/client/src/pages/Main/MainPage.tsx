@@ -29,9 +29,7 @@ import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxState
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
-import { setSecondPanelRealWidth } from "redux/features/layout/mainPage/secondPanelRealWidthSlice";
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
-import { setThirdPanelRealWidth } from "redux/features/layout/mainPage/thirdPanelRealWidthSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -46,7 +44,7 @@ import {
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
-import { writePanelWidthVars } from "utils/layoutUtils";
+import { writeBoxHeightVars, writePanelWidthVars } from "utils/layoutUtils";
 import { getStoredUserRole } from "utils/userStorage";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
@@ -113,9 +111,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const editorBoxState: EditorBoxState = useAppSelector(
     (state) => state.layout.mainPage.editorBoxState,
-  );
-  const thirdPanelRealWidth: number = useAppSelector(
-    (state) => state.layout.mainPage.thirdPanelRealWidth,
   );
   const prevStatementIdRef = useRef(statementId);
   useEffect(() => {
@@ -242,6 +237,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const {
     detailSeparatorY,
     editorSeparatorY,
+    previewDetailSeparatorYPosition,
+    previewEditorSeparatorYPosition,
     handleDetailSeparatorYChange,
     handleEditorSeparatorYChange,
     getStatementListBoxHeight,
@@ -367,10 +364,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     panelWidths,
   ]);
 
-  useEffect(() => {
-    dispatch(setSecondPanelRealWidth(secondPanelWidth));
-  }, [secondPanelWidth, dispatch]);
-
   const thirdPanelWidth = useMemo(() => {
     let width = !thirdPanelExpanded
       ? COLLAPSED_PANEL_WIDTH
@@ -393,10 +386,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     fourthPanelExpanded,
     panelWidths,
   ]);
-
-  useEffect(() => {
-    dispatch(setThirdPanelRealWidth(thirdPanelWidth));
-  }, [thirdPanelWidth, dispatch]);
 
   const firstPanelWidth = useMemo(() => {
     if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
@@ -428,6 +417,17 @@ const MainPage: React.FC<MainPage> = ({}) => {
       fourthPanelWidth,
     ]);
   }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth]);
+
+  // Same for the boxes a horizontal separator splits. The heights come from
+  // getters rather than memos, so every render reasserts them.
+  useLayoutEffect(() => {
+    writeBoxHeightVars({
+      statements: getStatementListBoxHeight(),
+      detail: getDetailBoxHeight(),
+      annotator: getAnnotatorBoxHeight(),
+      editor: getEditorBoxHeight(),
+    });
+  });
 
   // double check for errors after opening the panel and recalculating sizes
   useEffect(() => {
@@ -606,8 +606,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
             topPositionMax={contentHeight - hiddenBoxHeight * 2}
             separatorYPosition={detailSeparatorY}
             setSeparatorYPosition={handleDetailSeparatorYChange}
-            width={secondPanelWidth}
-            left={firstPanelWidth}
+            applyPreview={previewDetailSeparatorYPosition}
+            panelIndex={1}
           />
         )}
 
@@ -621,8 +621,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
             topPositionMax={contentHeight - hiddenBoxHeight * 2}
             separatorYPosition={editorSeparatorY}
             setSeparatorYPosition={handleEditorSeparatorYChange}
-            width={thirdPanelWidth}
-            left={firstPanelWidth + secondPanelWidth}
+            applyPreview={previewEditorSeparatorYPosition}
+            panelIndex={2}
           />
         )}
 
@@ -654,6 +654,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               label="Statements"
               borderColor="white"
               height={getStatementListBoxHeight()}
+              heightVarKey="statements"
               onHeaderClick={() => {
                 if (detailBoxState === DetailBoxState.FullHeight) {
                   dispatch(setDetailBoxState(DetailBoxState.Normal));
@@ -738,6 +739,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 onHeaderClick={handleMaximizeDetailBox}
                 disableHeaderClick={detailBoxState === DetailBoxState.FullHeight}
                 height={getDetailBoxHeight()}
+                heightVarKey="detail"
                 disableScroll
                 buttons={[
                   <>
@@ -794,6 +796,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           <>
             <Box
               height={getStatementListBoxHeight()}
+              heightVarKey="statements"
               label="Statements"
               borderColor="white"
               isExpanded={false}
@@ -803,6 +806,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             {(selectedDetailId || detailIdArray.length > 0) && (
               <Box
                 height={getDetailBoxHeight()}
+                heightVarKey="detail"
                 label="Detail"
                 borderColor="white"
                 isExpanded={false}
@@ -832,13 +836,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <Box
           borderColor="white"
           height={getAnnotatorBoxHeight()}
+          heightVarKey="annotator"
           label="Annotator"
           isExpanded={thirdPanelExpanded}
           buttons={[thirdPanelButton()]}
         >
           <MemoizedAnnotatorBox
             height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
-            width={(thirdPanelRealWidth || thirdPanelWidth) - 10}
+            width={thirdPanelWidth - 10}
           />
         </Box>
 
@@ -846,6 +851,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           <Box
             borderColor="white"
             height={getEditorBoxHeight()}
+            heightVarKey="editor"
             label="Editor"
             isExpanded={thirdPanelExpanded}
             onHeaderClick={handleMaximizeEditorBox}

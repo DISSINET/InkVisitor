@@ -13,7 +13,15 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
+import {
+  boxContentId,
+  Button,
+  CustomScrollbar,
+  Loader,
+  Message,
+  Submit,
+  ToastWithLink,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -22,12 +30,11 @@ import {
   RelationAuditTable,
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useIsInViewport, useSearchParams } from "hooks";
+import { useIsInViewport, useSearchParams, useWidthBreakpoint } from "hooks";
 import { DETAIL_TAB_ENTITIES_KEY, useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
 import { ButtonSize, DraggedPropRowCategory } from "types";
 import {
@@ -593,8 +600,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   const isSectionExpanded = (sectionId: EntityDetailSection) => !collapsedSections.has(sectionId);
 
-  const contentWidth = useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth);
-  const widthTooNarrow = contentWidth < 516;
+  const widthTooNarrow = useWidthBreakpoint(516, boxContentId("Detail"));
 
   const isRootTerritory = selectedDetailId === rootTerritoryId;
   const isOwner = (getStoredUserRole() as UserEnums.Role) === UserEnums.Role.Owner;
