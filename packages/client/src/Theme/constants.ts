@@ -51,7 +51,7 @@ export const ANNOTATOR_SELECTOR_HEIGHT = 27;
 export const ANNOTATOR_MIN_WRAP_WIDTH = COLLAPSED_PANEL_WIDTH * 2;
 // How long the annotator box has to hold a width before the canvas takes it.
 // Every width taken re-wraps the whole document.
-export const ANNOTATOR_RESIZE_DEBOUNCE_MS = 50;
+export const ANNOTATOR_RESIZE_DEBOUNCE_MS = 100;
 // vertical footprint of the suggester row in the statement list header
 // (StyledSuggesterRow: 2.5rem height + 0.6rem margin-bottom, 1rem = 10px).
 // Only rendered for users with territory write rights; when absent the

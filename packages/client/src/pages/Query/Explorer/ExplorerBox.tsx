@@ -9,6 +9,10 @@ import { ExplorerTableBatchActionModal } from "./ExplorerTable/ExplorerTableBatc
 import { ExploreAction } from "./state";
 import { useExplorerControls } from "./useExplorerControls";
 import { useInvalidateExplorerQuery } from "../useQueryData";
+import {
+  StyledExplorerColumn,
+  StyledExplorerViewArea,
+} from "./ExplorerBoxStyles";
 
 /** Height reserved for the shared control bar above the view content. */
 const CONTROL_BAR_HEIGHT = 50;
@@ -68,7 +72,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", height }}>
+      <StyledExplorerColumn>
         {!isStatsEmpty && (
           <ExplorerControlBar
             mode={state.view.mode}
@@ -102,7 +106,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           />
         )}
 
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <StyledExplorerViewArea>
           {state.view.mode === Explore.EViewMode.Stats ? (
             <ExplorerStats
               stats={state.view.stats}
@@ -136,8 +140,8 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               setIsNewColumnOpen={controls.setIsNewColumnOpen}
             />
           )}
-        </div>
-      </div>
+        </StyledExplorerViewArea>
+      </StyledExplorerColumn>
 
       {controls.isBatchModalOpen && (
         <ExplorerTableBatchActionModal
