@@ -100,9 +100,10 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
     document.body.classList.remove("no-select", RESIZING_CLASS);
     window.getSelection()?.removeAllRanges();
 
-    if (dragXPosition.current !== separatorXPosition) {
-      setSeparatorXPosition(dragXPosition.current);
-    }
+    // Unconditional: a drag that leaves this separator on its own bound can
+    // still have pushed the others, and only the caller resolving the whole
+    // layout can see that. It discards a drag that moved nothing.
+    setSeparatorXPosition(dragXPosition.current);
   };
 
   return (
