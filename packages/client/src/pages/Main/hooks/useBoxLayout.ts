@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useDebouncedCallback } from "hooks";
+import { useEffect, useRef, useState } from "react";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxStateSlice";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { BOX_SPLIT_OFFSET, hiddenBoxHeight } from "Theme/constants";
+import {
+  ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  BOX_SPLIT_OFFSET,
+  hiddenBoxHeight,
+} from "Theme/constants";
 import { DetailBoxState, EditorBoxState } from "types";
 import { writeBoxHeightVars } from "utils/layoutUtils";
 import { floorNumberToOneDecimal } from "utils/utils";
@@ -65,23 +70,48 @@ export function useBoxLayout({
     );
   }, [contentHeight]);
 
+  // A drag paints the box heights straight to their variables, which leaves out
+  // the one thing in a box that CSS cannot size: the annotator's canvas. So the
+  // position also reaches state once the drag holds still, letting the canvas
+  // resize off the same arithmetic as everything else, at the rate it takes a
+  // new width. The refs are what the pending sync reads, so a commit landing
+  // first cannot be undone by it.
+  const previewedDetailSeparatorY = useRef<number>(detailSeparatorY);
+  const previewedEditorSeparatorY = useRef<number>(editorSeparatorY);
+
+  const syncDetailSeparatorY = useDebouncedCallback(
+    () => setDetailSeparatorY(previewedDetailSeparatorY.current),
+    ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  );
+  const syncEditorSeparatorY = useDebouncedCallback(
+    () => setEditorSeparatorY(previewedEditorSeparatorY.current),
+    ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  );
+
   // Each preview builds the heights the box getters below return for the state
   // its separator is only rendered in - panel expanded, box in Normal state -
   // and paints them without touching the store, so a drag costs one variable
   // write per frame instead of a render of the box contents.
-  const previewDetailSeparatorYPosition = (yPosition: number) =>
+  const previewDetailSeparatorYPosition = (yPosition: number) => {
     writeBoxHeightVars({
       statements: yPosition,
       detail: contentHeight - yPosition,
     });
+    previewedDetailSeparatorY.current = yPosition;
+    syncDetailSeparatorY();
+  };
 
-  const previewEditorSeparatorYPosition = (yPosition: number) =>
+  const previewEditorSeparatorYPosition = (yPosition: number) => {
     writeBoxHeightVars({
       annotator: yPosition,
       editor: contentHeight - yPosition,
     });
+    previewedEditorSeparatorY.current = yPosition;
+    syncEditorSeparatorY();
+  };
 
   const handleDetailSeparatorYChange = (yPosition: number) => {
+    previewedDetailSeparatorY.current = yPosition;
     setDetailSeparatorY(yPosition);
     localStorage.setItem(
       "detailSeparatorYPercent",
@@ -90,6 +120,7 @@ export function useBoxLayout({
   };
 
   const handleEditorSeparatorYChange = (yPosition: number) => {
+    previewedEditorSeparatorY.current = yPosition;
     setEditorSeparatorY(yPosition);
     localStorage.setItem(
       "editorSeparatorYPercent",
