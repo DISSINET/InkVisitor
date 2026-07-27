@@ -178,7 +178,7 @@ export { MdChevronLeft as IcoChevronLeft } from "react-icons/md";
 export { MdChevronRight as IcoChevronRight } from "react-icons/md";
 export { MdCleaningServices as IcoClean } from "react-icons/md";
 export { MdClose as IcoCloseMd } from "react-icons/md";
-export { MdDarkMode as IcoDarkMode } from "react-icons/md";
+export { MdOutlineDarkMode as IcoDarkMode } from "react-icons/md";
 export { MdDatasetLinked as IcoDatasetLinked } from "react-icons/md";
 export { MdDeleteSweep as IcoDeleteSweep } from "react-icons/md";
 export { MdDragIndicator as IcoDragIndicator } from "react-icons/md";

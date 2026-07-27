@@ -2,10 +2,18 @@ import { FaCircle, FaDotCircle } from "react-icons/fa";
 import { animated } from "@react-spring/web";
 import styled from "styled-components";
 
-export const StyledTerritoryTagWrap = styled(animated.div)`
+interface StyledTerritoryTagWrap {
+  $dimmed?: boolean;
+}
+export const StyledTerritoryTagWrap = styled(animated.div)<StyledTerritoryTagWrap>`
   display: flex;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[1]};
+  /* rows that miss the filter recede instead of the matches being painted: the
+     indentation stays readable and selection remains the only filled row.
+     Applied through filter, since the inline opacity carries the mount spring */
+  filter: ${({ $dimmed }) => ($dimmed ? "opacity(0.35)" : "none")};
+  transition: filter 0.15s ease-in-out;
 `;
 export const StyledIconWrap = styled.div`
   cursor: pointer;

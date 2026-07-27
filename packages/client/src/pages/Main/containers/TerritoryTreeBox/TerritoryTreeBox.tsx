@@ -283,7 +283,9 @@ export const TerritoryTreeBox: React.FC = () => {
                   dispatch(setFilterOpen(true));
                 }
               }}
-              color="success"
+              // color marks an open filter panel; at rest the button is neutral,
+              // leaving the blue-violet family to the selected row
+              color={treeFilterOpen ? "success" : "greyer"}
               bold={treeFilterOpen}
               inverted={!treeFilterOpen}
               fullWidth

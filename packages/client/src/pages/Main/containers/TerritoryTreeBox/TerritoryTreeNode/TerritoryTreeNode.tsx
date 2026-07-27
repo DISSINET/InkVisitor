@@ -14,7 +14,7 @@ import {
   EntityTag,
   PaginationControls,
 } from "components/advanced";
-import { useSearchParams, useTheme } from "hooks";
+import { useSearchParams } from "hooks";
 import { usePagination } from "hooks/usePagination";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
@@ -92,7 +92,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     config: config.stiff,
   });
 
-  const theme = useTheme();
 
   useEffect(() => {
     setChildTerritories(children);
@@ -244,10 +243,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         {!tempDisabled ? (
           <StyledTerritoryTagWrap
             id={`territory${id}`}
+            // the flag is only set while a filter runs, so undefined means the
+            // tree is unfiltered and nothing recedes
+            $dimmed={foundByRecursion === false}
             style={{
-              backgroundColor: foundByRecursion
-                ? theme.color.foundByTreeFilter
-                : "",
               opacity: animatedStyle.opacity,
             }}
           >
