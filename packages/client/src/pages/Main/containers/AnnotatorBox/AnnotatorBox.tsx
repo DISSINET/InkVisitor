@@ -11,6 +11,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { boxContentId } from "components";
 import { useElementSize, useSearchParams } from "hooks";
+import {
+  ANNOTATOR_MIN_WRAP_WIDTH,
+  ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  THIRD_PANEL_MIN_WIDTH,
+} from "Theme/constants";
 import useAnnotator from "hooks/useAnnotator";
 import {
   useDocumentQuery,
@@ -31,15 +36,30 @@ interface AnnotatorBox {
 }
 
 export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
-  // The canvas needs a pixel width, and redrawing it is too expensive to do on
-  // every frame of a resize, so it settles shortly after the drag. The width
-  // prop carries it until the first measurement arrives. The height prop is
-  // measured from the box instead: it accounts for the annotator menu, which
-  // the box content this reads includes.
+  // The canvas needs a pixel width, and the box is the only thing that knows
+  // it: a drag moves the panel without telling React, and the box may also be
+  // holding a scrollbar that the panel width says nothing about. Every width
+  // taken re-wraps the whole document, so the box has to hold one for a moment
+  // before the canvas follows.
   const { width: measuredWidth } = useElementSize(
     boxContentId("Annotator"),
-    50,
+    ANNOTATOR_RESIZE_DEBOUNCE_MS,
   );
+
+  // A collapsed panel leaves the box too narrow to draw the canvas at all, and
+  // re-wrapping the document to fit that costs the same as re-wrapping it to a
+  // real width - twice, since expanding has to undo it. The last real width
+  // stands in, starting at the narrowest an expanded panel can be.
+  const [contentWidth, setContentWidth] = useState(() =>
+    Math.max(width, THIRD_PANEL_MIN_WIDTH),
+  );
+
+  useEffect(() => {
+    const nextWidth = measuredWidth ?? width;
+    if (nextWidth > ANNOTATOR_MIN_WRAP_WIDTH) {
+      setContentWidth(nextWidth);
+    }
+  }, [measuredWidth, width]);
 
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
@@ -276,7 +296,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   return (
     <StatementListTextAnnotator
       contentHeight={height}
-      contentWidth={measuredWidth ?? width}
+      contentWidth={contentWidth}
       territoryId={territoryId}
       territory={territory}
       statementId={statementId}

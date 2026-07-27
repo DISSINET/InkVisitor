@@ -1,6 +1,20 @@
 import styled from "styled-components";
 import { EntityColors } from "types";
 
+/**
+ * Everything the annotator box holds: the document line, then the annotator's
+ * own column. A full-height flex column, so the annotator column below can be
+ * handed the height the box has right now rather than the height the canvas was
+ * last drawn at.
+ */
+export const StyledAnnotatorContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+`;
+
 export const StyledWarningsListHeader = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};

@@ -66,6 +66,7 @@ import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAn
 import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorButtons,
+  StyledAnnotatorColumn,
   StyledAnnotatorMenu,
   StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
@@ -1509,12 +1510,8 @@ export const TextAnnotator = ({
         />
       </div>
 
-      <div
-        style={{
-          width,
-          position: "relative",
-          paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
-        }}
+      <StyledAnnotatorColumn
+        style={{ width, paddingLeft: ANNOTATOR_LEFT_MARGIN_PX }}
         onKeyDownCapture={(e) => {
           // Cmd/Ctrl+S saves the document. Intercept in capture so it beats the
           // browser's "save page" dialog and the canvas's own keydown. Mirrors
@@ -1800,7 +1797,7 @@ export const TextAnnotator = ({
             </ButtonGroup>
           )}
         </StyledAnnotatorButtons>
-      </div>
+      </StyledAnnotatorColumn>
 
       {pendingModeSwitch && (
         <Modal

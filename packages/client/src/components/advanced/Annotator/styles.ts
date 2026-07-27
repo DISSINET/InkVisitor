@@ -31,12 +31,34 @@ export const StyledScrollerViewport = styled.div`
   }
 `;
 
+/**
+ * The annotator's own column: canvases and the footer under them.
+ *
+ * A box resize changes the height around the canvas before the canvas is told
+ * about it, since redrawing the canvas costs a re-wrap of the document and is
+ * held back until the resize settles. The canvas region takes the height the
+ * rest of the column does not, so everything that is plain DOM keeps up with
+ * the box and only the canvas waits.
+ */
+export const StyledAnnotatorColumn = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+`;
+
 export const StyledCanvasWrapper = styled.div`
   background-color: ${({ theme }) => theme.color.white};
   padding: 2px;
   border-radius: 7px;
   display: flex;
   flex-direction: row;
+  /* the canvas keeps the pixel height it was drawn at; the space around it is
+     what a resize takes from or gives to */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 `;
 
 export const StyledMainCanvas = styled.canvas`
@@ -295,6 +317,7 @@ export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeBu
 export const StyledAnnotatorButtons = styled.div`
   display: flex;
   justify-content: space-between;
+  flex-shrink: 0;
 `;
 
 export const StyledWarningsList = styled.div`
