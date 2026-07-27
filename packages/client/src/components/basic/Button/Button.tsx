@@ -18,7 +18,6 @@ interface ButtonProps {
   noBackground?: boolean;
   inverted?: boolean;
   noBorder?: boolean;
-  textRegular?: boolean;
   /** Renders the label at bold weight, e.g. to mark the selected option of a group. */
   bold?: boolean;
   disabled?: boolean;
@@ -57,7 +56,6 @@ export const Button: React.FC<ButtonProps> = ({
   inverted = false,
   noBorder = false,
   noBackground = false,
-  textRegular = true,
   bold = false,
   disabled = false,
   noPointer = false,
@@ -103,7 +101,6 @@ export const Button: React.FC<ButtonProps> = ({
         $textColor={textColor}
         $borderColor={borderColor}
         $inverted={inverted}
-        $textRegular={textRegular}
         $bold={bold}
         $noBorder={noBorder}
         $noBackground={noBackground}

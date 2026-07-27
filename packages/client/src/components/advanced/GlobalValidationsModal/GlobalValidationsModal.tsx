@@ -217,18 +217,16 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   // updateSettingsMutation.mutate(newSettings);
   // }, [rules]);
 
-  const NewValidationButton = () => {
-    return (
-      <Button
-        icon={<IcoPlusBold />}
-        label="new validation rule"
-        color="primary"
-        bold
-        onClick={initValidationRule}
-        size={ButtonSize.Medium}
-      />
-    );
-  };
+  const newValidationButton = (
+    <Button
+      icon={<IcoPlusBold />}
+      label="new validation rule"
+      color="primary"
+      bold
+      onClick={initValidationRule}
+      size={ButtonSize.Medium}
+    />
+  );
 
   return (
     <>
@@ -291,9 +289,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 <StyledSectionHeader>
                   <b>Root T validation</b>
                   <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
-                  <span style={{ display: "flex" }}>
-                    <NewValidationButton />
-                  </span>
+                  <span style={{ display: "flex" }}>{newValidationButton}</span>
                 </StyledSectionHeader>
                 <StyledValidationList>
                   {(validations as ITerritoryValidation[])?.map((validation, key) => {
@@ -317,9 +313,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                     );
                   })}
                 </StyledValidationList>
-                <div style={{ marginTop: "2rem" }}>
-                  <NewValidationButton />
-                </div>
+                <div style={{ marginTop: "2rem" }}>{newValidationButton}</div>
               </>
             )}
 

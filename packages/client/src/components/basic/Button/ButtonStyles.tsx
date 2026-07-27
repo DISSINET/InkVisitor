@@ -77,7 +77,6 @@ interface IButtonStyle {
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
-  $textRegular?: boolean;
   $bold?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
@@ -134,10 +133,9 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   /* the label box is exactly the font size, so padding alone decides the height
      and a labelled button matches the square icon button of the same size */
   line-height: 1;
-  font-weight: ${({ theme, $disabled, $bold, $textRegular }) => {
+  font-weight: ${({ theme, $disabled, $bold }) => {
     if ($disabled) return theme.fontWeight["normal"];
-    if ($bold) return theme.fontWeight["bold"];
-    return $textRegular ? theme.fontWeight["medium"] : theme.fontWeight["black"];
+    return $bold ? theme.fontWeight["bold"] : theme.fontWeight["medium"];
   }};
   padding: ${({ $iconButton, $size, $noPadding, $shape, $hasLabel }) =>
     $noPadding || $shape === "circle" || $shape === "square"
@@ -195,7 +193,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     !$disabled &&
     css`
       &:hover {
-        background: color-mix(in srgb, currentColor 12%, transparent);
+        background: color-mix(in srgb, currentColor 8%, transparent);
       }
     `}
   /* $active keeps the hover tint while a control the button owns is open (e.g.
@@ -205,7 +203,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     !$disabled &&
     $active &&
     css`
-      background: color-mix(in srgb, currentColor 12%, transparent);
+      background: color-mix(in srgb, currentColor 8%, transparent);
     `}
 `;
 

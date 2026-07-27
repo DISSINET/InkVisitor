@@ -2,7 +2,6 @@ import api from "api";
 import { Button, Input } from "components";
 import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
-import { IoReloadCircle } from "react-icons/io5";
 import { TbArrowForwardUp } from "react-icons/tb";
 import {
   StyledCenterColumn,

@@ -37,6 +37,7 @@ interface RowRendererProps {
 }
 
 const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
+  const theme = useTheme();
   const { useCases, entities, handleEditClick, separatorHeight } = data;
   const useCase = useCases[index];
 
@@ -52,7 +53,6 @@ const RowRenderer: React.FC<RowRendererProps> = ({ index, style, data }) => {
   // Check if this is the first item
   const isFirstItem = index === 0;
   const shouldShowSeparator = isLevel1 && !isFirstItem;
-  const theme = useTheme();
 
   return (
     <div style={style}>
