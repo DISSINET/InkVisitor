@@ -114,6 +114,26 @@ export function panelLeftEdgeValue(panelIndex: number): string {
   return `calc(${widths.join(" + ")})`;
 }
 
+// A separator is positioned from a shared variable rather than from its own
+// props because a drag on one separator can push the others, and the pushed
+// ones are not the component that knows about it.
+export function separatorPositionVar(separatorKey: string): string {
+  return `--sep-x-${separatorKey}`;
+}
+
+export function writeSeparatorPositionVars(
+  positions: Record<string, number | undefined>,
+): void {
+  const root = document.documentElement;
+  Object.entries(positions).forEach(([separatorKey, xPosition]) => {
+    if (xPosition === undefined || !Number.isFinite(xPosition)) return;
+    root.style.setProperty(
+      separatorPositionVar(separatorKey),
+      `${xPosition / 10}rem`,
+    );
+  });
+}
+
 // Boxes are sized the same way as panels, keyed by name rather than by index
 // since a panel holds a different set of them depending on what is open.
 export function boxHeightVar(boxKey: string): string {

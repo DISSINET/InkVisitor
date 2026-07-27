@@ -1,7 +1,11 @@
 import { animated } from "@react-spring/web";
 import { PANEL_RESIZE_TRANSITION, RESIZING_CLASS } from "Theme/constants";
 import styled from "styled-components";
-import { panelLeftEdgeValue, panelWidthVar } from "utils/layoutUtils";
+import {
+  panelLeftEdgeValue,
+  panelWidthVar,
+  separatorPositionVar,
+} from "utils/layoutUtils";
 
 interface StyledPanelSeparator {
   $show: boolean;
@@ -17,16 +21,28 @@ export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
   transition: opacity 0.3s ease;
 `;
 
-export const StyledLayoutSeparatorVertical = styled(StyledPanelSeparator)`
+interface StyledLayoutSeparatorVertical {
+  $positionVarKey?: string;
+}
+export const StyledLayoutSeparatorVertical = styled(
+  StyledPanelSeparator,
+)<StyledLayoutSeparatorVertical>`
   width: ${({ $show, theme }) =>
     $show ? theme.borderWidth[4] : theme.borderWidth[2]};
   height: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
   cursor: col-resize;
   /* a pointer drag on a touch screen scrolls the page instead of dragging */
   touch-action: none;
-  /* --separator-x is rewritten per animation frame while dragged, so easing
-     applies to the positions the separator is handed rather than dragged to */
-  left: var(--separator-x);
+  /* The position variables are rewritten per animation frame while dragged, so
+     easing applies to the positions the separator is handed rather than the
+     ones it is dragged to. Half the line's width comes off so that it straddles
+     the panel edge it sits on. */
+  left: calc(
+    ${({ $positionVarKey }) =>
+        $positionVarKey !== undefined
+          ? `var(${separatorPositionVar($positionVarKey)}, var(--separator-x))`
+          : "var(--separator-x)"} - 0.1rem
+  );
   transition:
     opacity 0.3s ease,
     left ${PANEL_RESIZE_TRANSITION};

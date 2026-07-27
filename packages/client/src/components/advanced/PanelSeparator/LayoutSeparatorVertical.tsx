@@ -3,28 +3,28 @@ import { RESIZING_CLASS } from "Theme/constants";
 import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
 
 interface LayoutSeparatorVertical {
-  leftSideMinWidth: number;
-  leftSideMaxWidth: number;
   // set custom one related to specific page
   separatorXPosition: number;
+  // Resolves a position the pointer asks for into the one the layout allows,
+  // painting whatever else the drag moves. Runs per pointer event, so it must
+  // stay clear of React state.
+  resolveDrag: (requestedXPosition: number) => number;
+  // Commits the position the drag ended on.
   setSeparatorXPosition: (xPosition: number) => void;
-  // Paints the layout at a position the drag has reached but not committed.
-  // Panels stay where they are during a drag without it.
-  applyPreview?: (xPosition: number) => void;
-  onMaxWidthReached?: (overflow: number) => void;
-  onMinWidthReached?: (overflow: number) => void;
+  onDragStart?: () => void;
+  // Key of the shared position variable the layout writes this separator to,
+  // for pages where dragging one separator can push another.
+  positionVarKey?: string;
 }
 
-const separatorXValue = (xPosition: number) => `${(xPosition - 1) / 10}rem`;
+const separatorXValue = (xPosition: number) => `${xPosition / 10}rem`;
 
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
-  leftSideMinWidth,
-  leftSideMaxWidth,
   separatorXPosition,
+  resolveDrag,
   setSeparatorXPosition,
-  applyPreview,
-  onMaxWidthReached,
-  onMinWidthReached,
+  onDragStart,
+  positionVarKey,
 }) => {
   const separatorRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -43,7 +43,6 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
       "--separator-x",
       separatorXValue(dragXPosition.current),
     );
-    applyPreview?.(dragXPosition.current);
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -54,30 +53,23 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
     dragXPosition.current = separatorXPosition;
     lastClientX.current = e.clientX;
     setDragging(true);
+    onDragStart?.();
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
 
+    // The pointer asks for a position; the layout decides which one it gets,
+    // and the difference is discarded rather than accumulated - dragging well
+    // past a limit and back must not leave the separator owing motion.
     const requestedXPosition =
       dragXPosition.current + e.clientX - lastClientX.current;
     lastClientX.current = e.clientX;
 
-    // Clamp the new width between min and max
-    dragXPosition.current = Math.min(
-      Math.max(requestedXPosition, leftSideMinWidth),
-      leftSideMaxWidth,
-    );
+    dragXPosition.current = resolveDrag(requestedXPosition);
 
     if (frame.current === null) {
       frame.current = window.requestAnimationFrame(paintDragPosition);
-    }
-
-    // Notify parent with overflow so adjacent panels resize proportionally
-    if (requestedXPosition > leftSideMaxWidth && onMaxWidthReached) {
-      onMaxWidthReached(requestedXPosition - leftSideMaxWidth);
-    } else if (requestedXPosition < leftSideMinWidth && onMinWidthReached) {
-      onMinWidthReached(leftSideMinWidth - requestedXPosition);
     }
   };
 
@@ -92,10 +84,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
     document.body.classList.remove("no-select", RESIZING_CLASS);
     window.getSelection()?.removeAllRanges();
 
-    // Apply the final position
-    if (dragXPosition.current !== separatorXPosition) {
-      setSeparatorXPosition(dragXPosition.current);
-    }
+    setSeparatorXPosition(dragXPosition.current);
   };
 
   return (
@@ -110,6 +99,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
           ),
         } as CSSProperties
       }
+      $positionVarKey={positionVarKey}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}

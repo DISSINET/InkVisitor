@@ -622,15 +622,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         queryDetailPanelExpanded &&
         querySeparatorXPosition > 0 && (
           <LayoutSeparatorVertical
-            leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
-            leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
             separatorXPosition={querySeparatorXPosition}
-            setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
             // the separator only renders with both panels expanded, where the
             // left panel reaches exactly to it
-            applyPreview={(xPosition) =>
-              writePanelWidthVars([xPosition, layoutWidth - xPosition])
-            }
+            resolveDrag={(xPosition) => {
+              const resolved = Math.min(
+                Math.max(xPosition, QUERY_LEFT_PANEL_MIN_WIDTH),
+                layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
+              );
+              writePanelWidthVars([resolved, layoutWidth - resolved]);
+              return resolved;
+            }}
+            setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
           />
         )}
 
