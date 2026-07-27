@@ -36,11 +36,15 @@ interface AnnotatorBox {
 }
 
 export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
-  // The canvas needs a pixel width, and the box is the only thing that knows
-  // it: a drag moves the panel without telling React, and the box may also be
-  // holding a scrollbar that the panel width says nothing about. Every width
-  // taken re-wraps the whole document, so the box has to hold one for a moment
-  // before the canvas follows.
+  // The canvas needs a pixel width, and neither source has it on its own. The
+  // prop knows where the panel is heading the moment a toggle decides it, but
+  // not about a drag (which moves the panel without telling React) or about a
+  // scrollbar the box may be holding. The box knows both, but only once it has
+  // stopped moving - it is animating for most of a toggle, and every width taken
+  // re-wraps the whole document.
+  //
+  // So whichever moved last wins: a toggle lands on the target immediately and
+  // the measurement corrects it afterwards if the box turned out narrower.
   const { width: measuredWidth } = useElementSize(
     boxContentId("Annotator"),
     ANNOTATOR_RESIZE_DEBOUNCE_MS,
@@ -55,11 +59,18 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   );
 
   useEffect(() => {
-    const nextWidth = measuredWidth ?? width;
-    if (nextWidth > ANNOTATOR_MIN_WRAP_WIDTH) {
-      setContentWidth(nextWidth);
+    if (width > ANNOTATOR_MIN_WRAP_WIDTH) {
+      setContentWidth(width);
     }
-  }, [measuredWidth, width]);
+  }, [width]);
+
+  // Declared second so a drop, where both land together, ends on the measured
+  // width rather than the panel's.
+  useEffect(() => {
+    if (measuredWidth !== undefined && measuredWidth > ANNOTATOR_MIN_WRAP_WIDTH) {
+      setContentWidth(measuredWidth);
+    }
+  }, [measuredWidth]);
 
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
