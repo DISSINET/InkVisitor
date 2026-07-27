@@ -16,6 +16,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -495,15 +496,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </StyledAnchorElvlWrap>
           )}
           <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              noBackground
-              noBorder
-              onClick={closeModal}
-            />
+            <CancelButton key="cancel" onClick={closeModal} />
             <Button key="submit" label="Create" color="info" onClick={handleSubmit} />
           </ButtonGroup>
         </ModalFooter>
@@ -536,13 +529,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           </ModalContent>
           <ModalFooter>
             <ButtonGroup>
-              <Button
+              <CancelButton
                 key="cancel"
-                label="Cancel"
-                color="greyer"
-                inverted
-                noBackground
-                noBorder
                 onClick={() => {
                   setShowApplyTemplateModal(false);
                   setTemplateToApply(false);

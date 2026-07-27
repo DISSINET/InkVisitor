@@ -3,6 +3,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Loader,
   Modal,
@@ -248,15 +249,7 @@ export const EntityBookmarkBox: React.FC = () => {
 
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              noBackground
-              noBorder
-              onClick={closeFolderModal}
-            />
+            <CancelButton key="cancel" onClick={closeFolderModal} />
 
             <Button
               key="submit"

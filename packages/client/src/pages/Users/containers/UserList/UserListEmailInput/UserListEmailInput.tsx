@@ -2,7 +2,15 @@ import { IResponseGeneric, IResponseUser, IUser } from "@inkvisitor/shared/types
 import { UseMutationResult } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input, Modal, ModalContent, ModalFooter } from "components";
+import {
+  Button,
+  ButtonGroup,
+  CancelButton,
+  Input,
+  Modal,
+  ModalContent,
+  ModalFooter,
+} from "components";
 import React, { useEffect, useState } from "react";
 import { TiWarning } from "react-icons/ti";
 import { toast } from "react-toastify";
@@ -75,12 +83,7 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMut
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              label="Cancel"
-              color="greyer"
-              inverted
-              noBackground
-              noBorder
+            <CancelButton
               onClick={() => {
                 setLocalEmail(user.email);
                 setShowReactivationModal(false);

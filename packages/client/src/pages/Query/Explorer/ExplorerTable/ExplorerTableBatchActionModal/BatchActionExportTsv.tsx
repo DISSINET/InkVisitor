@@ -1,5 +1,13 @@
 import { Explore } from "@inkvisitor/shared/types/query";
-import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import {
+  Button,
+  ButtonGroup,
+  CancelButton,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import { useTheme } from "hooks";
 import React, { useMemo, useState } from "react";
 import {
@@ -109,14 +117,7 @@ export const BatchActionExportCsv: React.FC<BatchActionExportCsvProps> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button
-            label="Cancel"
-            color="greyer"
-            inverted
-            noBackground
-            noBorder
-            onClick={onClose}
-          />
+          <CancelButton onClick={onClose} />
           <Button
             label="Export"
             color="primary"

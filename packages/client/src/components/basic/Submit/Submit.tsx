@@ -1,5 +1,13 @@
 import { IEntity } from "@inkvisitor/shared/types";
-import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import {
+  Button,
+  ButtonGroup,
+  CancelButton,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import { EntityTag } from "components/advanced";
 import React from "react";
 import { StyledSubmitContent, StyledSubmitText } from "./SubmitStyles";
@@ -46,14 +54,7 @@ export const Submit: React.FC<Submit> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              label="Cancel"
-              color="greyer"
-              inverted
-              noBackground
-              noBorder
-              onClick={onCancel}
-            />
+            <CancelButton onClick={onCancel} />
             <Button
               label={submitLabel}
               color="danger"

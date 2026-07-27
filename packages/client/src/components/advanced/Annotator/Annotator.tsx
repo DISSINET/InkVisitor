@@ -40,7 +40,7 @@ import {
   IStatement,
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
-import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { CancelButton, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { EntityTagById } from "components/advanced";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
@@ -1819,14 +1819,7 @@ export const TextAnnotator = ({
           </ModalContent>
           <ModalFooter>
             <ButtonGroup>
-              <Button
-                label="Cancel"
-                color="greyer"
-                inverted
-                noBackground
-                noBorder
-                onClick={() => setPendingModeSwitch(null)}
-              />
+              <CancelButton onClick={() => setPendingModeSwitch(null)} />
               <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
               <Button label="Save" color="info" onClick={confirmSaveAndSwitch} />
             </ButtonGroup>

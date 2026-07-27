@@ -7,6 +7,7 @@ import { AxiosResponse } from "axios";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -112,13 +113,8 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button
+          <CancelButton
             key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
-            noBackground
-            noBorder
             onClick={() => {
               handleCancelCreateTemplate();
             }}

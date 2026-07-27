@@ -9,6 +9,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   IconWithTooltip,
   Input,
   Loader,
@@ -245,12 +246,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     <StyledFieldSpan>
                       <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
                       <ButtonGroup>
-                        <Button
-                          color="greyer"
-                          label="Cancel"
-                          inverted
-                          noBackground
-                          noBorder
+                        <CancelButton
                           onClick={() => {
                             setShowPasswordChange(false);
                             setNewPassword("");
@@ -475,15 +471,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledUserCustomizationSection>
           )}
           <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              noBackground
-              noBorder
-              onClick={onClose}
-            />
+            <CancelButton key="cancel" onClick={onClose} />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"

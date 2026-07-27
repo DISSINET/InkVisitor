@@ -12,6 +12,7 @@ import { AxiosResponse } from "axios";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Loader,
   Modal,
   ModalContent,
@@ -266,14 +267,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           }}
         >
           <ButtonGroup>
-            <Button
-              label="Cancel"
-              color="greyer"
-              inverted
-              noBackground
-              noBorder
-              onClick={onClose}
-            />
+            <CancelButton onClick={onClose} />
             <Button
               disabled={!newParentEntities.length || !territory}
               label={action}

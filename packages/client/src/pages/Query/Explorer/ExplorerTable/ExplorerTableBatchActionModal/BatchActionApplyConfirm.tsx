@@ -1,6 +1,7 @@
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -47,14 +48,7 @@ export const BatchActionApplyConfirm: React.FC<BatchActionApplyConfirmProps> = (
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button
-            label="Cancel"
-            color="greyer"
-            inverted
-            noBackground
-            noBorder
-            onClick={onCancel}
-          />
+          <CancelButton onClick={onCancel} />
           <Button
             label="Add"
             color="primary"

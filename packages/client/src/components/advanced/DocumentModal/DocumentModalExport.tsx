@@ -6,6 +6,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Checkbox,
   Modal,
   ModalContent,
@@ -174,13 +175,8 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
           <b>{sumAnchorsToExport}</b> anchors will be exported
         </StyledExportStatsSection>
         <ButtonGroup>
-          <Button
+          <CancelButton
             key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
-            noBackground
-            noBorder
             onClick={() => {
               onClose();
             }}
