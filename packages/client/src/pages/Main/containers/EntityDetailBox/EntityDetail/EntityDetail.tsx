@@ -29,7 +29,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
-import { DraggedPropRowCategory } from "types";
+import { ButtonSize, DraggedPropRowCategory } from "types";
 import {
   ENTITY_DETAIL_SCROLLBAR_ID,
   ENTITY_DETAIL_SCROLL_CONTAINER_ID,
@@ -68,7 +68,7 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { IcoPlus } from "Theme/icons";
+import { IcoPlusBold } from "Theme/icons";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -857,8 +857,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                     {canEditEntity && (
                       <Button
                         color="primary"
+                        inverted
+                        bold
+                        size={ButtonSize.Medium}
                         label="new metaproperty"
-                        icon={<IcoPlus />}
+                        icon={<IcoPlusBold />}
                         onClick={() => {
                           const newProp = CMetaProp();
                           updateEntityMutation.mutate({

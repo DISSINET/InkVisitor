@@ -266,7 +266,14 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           }}
         >
           <ButtonGroup>
-            <Button label="cancel" onClick={onClose} />
+            <Button
+              label="Cancel"
+              color="greyer"
+              inverted
+              noBackground
+              noBorder
+              onClick={onClose}
+            />
             <Button
               disabled={!newParentEntities.length || !territory}
               label={action}

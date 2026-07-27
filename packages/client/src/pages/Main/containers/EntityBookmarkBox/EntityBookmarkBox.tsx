@@ -22,8 +22,7 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
-import { MdEdit } from "react-icons/md";
-import { IcoPlusBold, IcoTrash } from "Theme/icons";
+import { IcoPlusBold } from "Theme/icons";
 import { ButtonSize } from "types";
 
 export const EntityBookmarkBox: React.FC = () => {
@@ -229,10 +228,7 @@ export const EntityBookmarkBox: React.FC = () => {
         onEnterPress={submitFolderModal}
         width={350}
       >
-        <ModalHeader
-          icon={isEditMode ? <MdEdit /> : <IcoPlusBold />}
-          title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"}
-        />
+        <ModalHeader title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"} />
         <ModalContent>
           <ModalInputForm alignLeft>
             <ModalInputLabel>new label:</ModalInputLabel>
@@ -275,7 +271,6 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       <Submit
-        headerIcon={<IcoTrash size={14} />}
         title={`Delete Bookmark folder ${removingFolderName}`}
         text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}

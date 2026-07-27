@@ -30,7 +30,14 @@ export const TemplateActionModal: React.FC<TemplateActionModal> = ({
       <ModalContent>Select template action..</ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="warning" onClick={onClose} />
+          <Button
+            label="Cancel"
+            color="greyer"
+            inverted
+            noBackground
+            noBorder
+            onClick={onClose}
+          />
           <Button label="Use template" color="success" onClick={onUse} />
           <Button label="Instantiate template" onClick={onInstantiate} />
         </ButtonGroup>

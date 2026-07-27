@@ -133,10 +133,17 @@ export const ReorderTerritoryChildrenModal: React.FC<ReorderTerritoryChildrenMod
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="cancel" onClick={onClose} />
           <Button
-            label="save order"
-            color="success"
+            label="Cancel"
+            color="greyer"
+            inverted
+            noBackground
+            noBorder
+            onClick={onClose}
+          />
+          <Button
+            label="Save order"
+            color="info"
             disabled={!hasChanges || reorderMutation.isPending}
             onClick={() => reorderMutation.mutate()}
           />

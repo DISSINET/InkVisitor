@@ -94,7 +94,9 @@ export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
   font-size: ${({ theme }) => theme.fontSize["lg"]};
   margin-right: 0.2rem;
   margin-bottom: 0.1rem;
-  color: ${({ theme, $color }) => ($color ? theme.color[$color] : "inherit")};
+  /* the icon labels the dialog rather than carrying its own meaning, so it stays
+     quieter than the title unless a caller asks for an accent */
+  color: ${({ theme, $color }) => ($color ? theme.color[$color] : theme.color["gray"][600])};
 `;
 interface StyledCardTitle {
   $boldTitle?: boolean;

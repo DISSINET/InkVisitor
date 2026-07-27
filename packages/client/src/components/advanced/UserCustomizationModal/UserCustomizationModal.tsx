@@ -246,9 +246,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
                       <ButtonGroup>
                         <Button
-                          color="warning"
+                          color="greyer"
                           label="Cancel"
                           inverted
+                          noBackground
+                          noBorder
                           onClick={() => {
                             setShowPasswordChange(false);
                             setNewPassword("");

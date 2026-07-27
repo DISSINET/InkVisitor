@@ -821,9 +821,7 @@ export const StatementListBox: React.FC = () => {
 
           <Submit
             title="Delete statement"
-            text={`Do you really want to delete statement [${
-              statementToDelete?.labels[0] ? statementToDelete.labels[0] : statementToDelete?.id
-            }]?`}
+            text="Do you really want to delete statement?"
             show={showSubmit}
             entityToSubmit={statementToDelete}
             onCancel={() => {

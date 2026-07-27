@@ -13,7 +13,6 @@ interface Submit {
   onCancel: () => void;
   loading?: boolean;
   submitLabel?: string;
-  headerIcon?: React.ReactNode;
 }
 export const Submit: React.FC<Submit> = ({
   title,
@@ -24,7 +23,6 @@ export const Submit: React.FC<Submit> = ({
   onCancel,
   loading = false,
   submitLabel = "Confirm",
-  headerIcon,
 }) => {
   return (
     <>
@@ -37,7 +35,7 @@ export const Submit: React.FC<Submit> = ({
         width="auto"
         maxWidth={600}
       >
-        <ModalHeader title={title} icon={headerIcon} />
+        <ModalHeader title={title} />
         <ModalContent>
           <StyledSubmitContent>
             <StyledSubmitText>{text}</StyledSubmitText>

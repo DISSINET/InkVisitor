@@ -222,7 +222,14 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         }}
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-          <Button color="warning" label="cancel" onClick={handleClose} />
+          <Button
+            label="Cancel"
+            color="greyer"
+            inverted
+            noBackground
+            noBorder
+            onClick={handleClose}
+          />
           <Button
             label="create column"
             onClick={handleCreate}

@@ -76,8 +76,11 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMut
         <ModalFooter>
           <ButtonGroup>
             <Button
-              label="cancel"
-              color="success"
+              label="Cancel"
+              color="greyer"
+              inverted
+              noBackground
+              noBorder
               onClick={() => {
                 setLocalEmail(user.email);
                 setShowReactivationModal(false);

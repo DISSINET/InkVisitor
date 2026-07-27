@@ -10,7 +10,8 @@ import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import { StyledSpareRow } from "./EntityReferenceTableStyles";
-import { IcoPlus } from "Theme/icons";
+import { IcoPlusBold } from "Theme/icons";
+import { ButtonSize } from "types";
 
 interface EntityReferenceTable {
   entityId: string;
@@ -195,7 +196,15 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (
-          <Button icon={<IcoPlus />} label={"new reference"} onClick={() => handleAdd()} />
+          <Button
+            icon={<IcoPlusBold />}
+            label={"new reference"}
+            color="primary"
+            inverted
+            bold
+            size={ButtonSize.Medium}
+            onClick={() => handleAdd()}
+          />
         )}
       </div>
     </React.Fragment>
