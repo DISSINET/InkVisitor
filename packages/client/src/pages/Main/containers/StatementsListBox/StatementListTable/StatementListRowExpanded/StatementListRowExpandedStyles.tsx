@@ -1,5 +1,5 @@
 import { BsArrowReturnRight } from "react-icons/bs";
-import styled, { useTheme } from "styled-components";
+import styled, { DefaultTheme } from "styled-components";
 
 export const StyledSubRow = styled.div`
   width: 100%;
@@ -10,15 +10,17 @@ export const StyledSubRow = styled.div`
   color: ${({ theme }) => theme.color["black"]};
 `;
 
-const getIndentation = (level: 1 | 2 | 3) => {
-  const theme = useTheme();
+// one step per level, so each nesting level reads as the same amount of depth.
+// The row indents by whole steps and pays the last one as padding, which leaves
+// room for the guide drawn on its left edge.
+const getIndentation = (theme: DefaultTheme, level: 1 | 2 | 3) => {
   switch (level) {
     case 1:
-      return theme.space[5];
+      return theme.space[0];
     case 2:
-      return theme.space[10];
+      return theme.space[5];
     case 3:
-      return theme.space[16];
+      return theme.space[10];
   }
 };
 interface StyledPropGridRow {
@@ -26,9 +28,14 @@ interface StyledPropGridRow {
   $disableBottomMargin?: boolean;
 }
 export const StyledPropGridRow = styled.div<StyledPropGridRow>`
-  margin-left: ${({ $level }) => getIndentation($level)};
-  margin-bottom: ${({ theme, $disableBottomMargin }) =>
+  margin-left: ${({ theme, $level }) => getIndentation(theme, $level)};
+  /* the gap between rows is padding rather than margin, so the guide runs
+     through it and the rows of one group share a single unbroken line */
+  padding-bottom: ${({ theme, $disableBottomMargin }) =>
     $disableBottomMargin ? 0 : theme.space[1]};
+  border-left: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][400]};
+  padding-left: ${({ theme }) => theme.space[5]};
   display: grid;
   grid-template-columns: auto 1fr;
   overflow: hidden;
@@ -63,7 +70,14 @@ export const StyledActantWithPropsWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledExpandedRowTd = styled.td``;
+/* the expansion is content of the row above it, not another row in the stripe
+   pattern: one flat tint sets it apart, the border closes it off below */
+export const StyledExpandedRowTd = styled.td`
+  padding: 0;
+  background-color: ${({ theme }) => theme.color["gray"][150]};
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][300]};
+`;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
 `;
@@ -93,8 +107,7 @@ interface StyledReferenceColumn {
 }
 export const StyledReferenceColumn = styled.div<StyledReferenceColumn>`
   display: grid;
-  margin-right: ${({ theme, $marginRight }) =>
-    $marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) => ($marginRight ? theme.space[1] : "")};
 `;
 interface StyledTagWrap {
   $marginRight?: boolean;
@@ -102,8 +115,7 @@ interface StyledTagWrap {
 export const StyledTagWrap = styled.div<StyledTagWrap>`
   display: inline-flex;
   overflow: hidden;
-  margin-right: ${({ theme, $marginRight }) =>
-    $marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) => ($marginRight ? theme.space[1] : "")};
 `;
 export const StyledGrid = styled.div`
   display: grid;

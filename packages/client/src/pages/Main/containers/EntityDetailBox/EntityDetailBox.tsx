@@ -7,21 +7,23 @@ import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 import update from "immutability-helper";
 import { Loader } from "components";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
-import { DetailBoxState } from "types";
+import { useAppSelector } from "redux/hooks";
 
 interface EntityDetailBox {
   onTabOpen?: () => void;
   maxTabs?: number;
+  // the host page owns the minimized state; a minimized box renders neither
+  // content nor loader, and only `onRestore` can bring it back
+  isMinimized?: boolean;
+  onRestore?: () => void;
 }
-export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs = 10 }) => {
-  const dispatch = useAppDispatch();
+export const EntityDetailBox: React.FC<EntityDetailBox> = ({
+  onTabOpen,
+  maxTabs = 10,
+  isMinimized = false,
+  onRestore,
+}) => {
   const ping: number = useAppSelector((state) => state.ping);
-  const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState,
-  );
-  const detailBoxMinimized = detailBoxState === DetailBoxState.Minimized;
 
   const {
     detailIdArray,
@@ -95,14 +97,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
   // delay of show content for fluent animation on open
   const [showContent, setShowContent] = useState(false);
   useEffect(() => {
-    if (!detailBoxMinimized) {
+    if (!isMinimized) {
       setTimeout(() => {
         setShowContent(true);
       }, 500);
     } else {
       setShowContent(false);
     }
-  }, [detailBoxMinimized]);
+  }, [isMinimized]);
 
   const { data: entity, error: entityError, isFetching } = useDetailQuery(selectedDetailId);
 
@@ -116,8 +118,8 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
               index={key}
               entity={entity}
               onClick={() => {
-                if (detailBoxMinimized) {
-                  dispatch(setDetailBoxState(DetailBoxState.Normal));
+                if (isMinimized) {
+                  onRestore?.();
                 }
                 onTabOpen?.();
                 setSelectedDetailId(entity.id);
@@ -142,7 +144,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({ onTabOpen, maxTabs 
             isFetching={isFetching}
           />
         ) : (
-          <>{(ping === -10 || ping >= 0) && !detailBoxMinimized && <Loader show />}</>
+          <>{(ping === -10 || ping >= 0) && !isMinimized && <Loader show />}</>
         )}
       </>
     </>

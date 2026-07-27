@@ -1,7 +1,6 @@
 import { Button, Input } from "components";
 import React, { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { ButtonSize } from "types";
 import { StyledDeleteButton, StyledRow } from "./MultiInputStyles";
 
@@ -79,7 +78,15 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disa
 
       {!disabled && (
         <div style={{ paddingTop: displayValues.length > 0 ? "0.5rem" : "" }}>
-          <Button icon={<FaPlus />} label={"new note"} onClick={() => handleAdd()} />
+          <Button
+            icon={<IcoPlusBold />}
+            label={"new note"}
+            color="primary"
+            inverted
+            bold
+            size={ButtonSize.Medium}
+            onClick={() => handleAdd()}
+          />
         </div>
       )}
     </>

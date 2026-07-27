@@ -1,5 +1,5 @@
 import { FaGripVertical } from "react-icons/fa";
-import styled, { useTheme } from "styled-components";
+import styled, { DefaultTheme } from "styled-components";
 
 interface StyledGrid {
   $tempDisabled?: boolean;
@@ -33,8 +33,7 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
-const getIndentation = (level: 0 | 1 | 2 | 3, $lowIdent?: boolean) => {
-  const theme = useTheme();
+const getIndentation = (theme: DefaultTheme, level: 0 | 1 | 2 | 3, $lowIdent?: boolean) => {
   switch (level) {
     case 0:
       return 0;
@@ -54,7 +53,8 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   display: inline-flex;
   margin: ${({ theme }) => theme.space[1]};
   align-items: center;
-  margin-left: ${({ $level = 0, $lowIdent = false }) => getIndentation($level, $lowIdent)};
+  margin-left: ${({ theme, $level = 0, $lowIdent = false }) =>
+    getIndentation(theme, $level, $lowIdent)};
   padding-right: 0.3rem;
 `;
 

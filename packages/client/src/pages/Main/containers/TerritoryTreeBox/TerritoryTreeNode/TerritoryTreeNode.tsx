@@ -2,19 +2,11 @@ import { config, useSpring } from "@react-spring/web";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { ITerritory, IUser } from "@inkvisitor/shared/types";
 import { IParentTerritory } from "@inkvisitor/shared/types/territory";
-import {
-  UseMutationResult,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
-import {
-  EntityDropzone,
-  EntityTag,
-  PaginationControls,
-} from "components/advanced";
-import { useSearchParams, useTheme } from "hooks";
+import { EntityDropzone, EntityTag, PaginationControls } from "components/advanced";
+import { useSearchParams } from "hooks";
 import { usePagination } from "hooks/usePagination";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
@@ -70,7 +62,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 }) => {
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
-    (state) => state.layout.mainPage.detailBoxState
+    (state) => state.layout.mainPage.detailBoxState,
   );
   const treeInitialized = useAppSelector((state) => state.treeInitialized);
   const queryClient = useQueryClient();
@@ -81,9 +73,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
-  const [childTerritories, setChildTerritories] = useState<
-    IExtendedResponseTree[]
-  >([]);
+  const [childTerritories, setChildTerritories] = useState<IExtendedResponseTree[]>([]);
 
   const animatedStyle = useSpring({
     opacity: contextMenuOpen ? 0.6 : 1,
@@ -92,17 +82,13 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     config: config.stiff,
   });
 
-  const theme = useTheme();
-
   useEffect(() => {
     setChildTerritories(children);
   }, [children]);
 
   useEffect(() => {
     if (!treeInitialized) {
-      const shouldExpand = initExpandedNodes.some(
-        (node) => node === territory.id
-      );
+      const shouldExpand = initExpandedNodes.some((node) => node === territory.id);
       if (shouldExpand) {
         setIsExpanded(true);
       } else if (territoryId === territory.id) {
@@ -123,7 +109,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           [dragIndex, 1],
           [hoverIndex, 0, childTerritories[dragIndex]],
         ],
-      })
+      }),
     );
   }, []);
 
@@ -140,9 +126,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     },
   });
 
-  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.draggedEntity
-  );
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector((state) => state.draggedEntity);
 
   const [tempDisabled, setTempDisabled] = useState(false);
   const [hideChildTerritories, setHideChildTerritories] = useState(false);
@@ -150,8 +134,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   useEffect(() => {
     if (
       draggedEntity.parentId &&
-      draggedEntity.parentId !==
-        (territory.data.parent as IParentTerritory).territoryId &&
+      draggedEntity.parentId !== (territory.data.parent as IParentTerritory).territoryId &&
       draggedEntity.parentId !== propId
     ) {
       if (draggedEntity.lvl && draggedEntity.lvl > lvl) {
@@ -180,9 +163,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   // is the path of ancestors to the selected territory; territoryId is the
   // selected territory itself (when it is a direct child here).
   const targetChildIndex = childTerritories.findIndex(
-    (child) =>
-      child.territory.id === territoryId ||
-      initExpandedNodes.includes(child.territory.id)
+    (child) => child.territory.id === territoryId || initExpandedNodes.includes(child.territory.id),
   );
 
   // Pagination hook
@@ -202,9 +183,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   });
 
   // Use all children when pagination is disabled (level 0), otherwise use paginated children
-  const childrenToRender = showPagination
-    ? paginatedChildren
-    : childTerritories;
+  const childrenToRender = showPagination ? paginatedChildren : childTerritories;
 
   const handleMenuOpen = useCallback(() => {
     setContextMenuOpen(true);
@@ -225,10 +204,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, [hasChildren, territoryId, detailBoxState]);
 
   const moveStatementsMutation = useMutation({
-    mutationFn: async (data: {
-      statements: string[];
-      newTerritoryId: string;
-    }) => await api.statementsBatchMove(data.statements, data.newTerritoryId),
+    mutationFn: async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchMove(data.statements, data.newTerritoryId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -244,10 +221,10 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         {!tempDisabled ? (
           <StyledTerritoryTagWrap
             id={`territory${id}`}
+            // the flag is only set while a filter runs, so undefined means the
+            // tree is unfiltered and nothing recedes
+            $dimmed={foundByRecursion === false}
             style={{
-              backgroundColor: foundByRecursion
-                ? theme.color.foundByTreeFilter
-                : "",
               opacity: animatedStyle.opacity,
             }}
           >

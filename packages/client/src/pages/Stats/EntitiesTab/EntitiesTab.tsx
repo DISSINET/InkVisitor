@@ -8,6 +8,7 @@ import { useDebounce, useResizeObserver } from "hooks";
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoRefresh } from "Theme/icons";
+import { ButtonSize } from "types";
 import {
   AGGREGATION_LABELS,
   EVENT_TYPE_GROUPS,
@@ -179,6 +180,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     key={value}
                     label={label}
                     shape="rounded-sm"
+                    size={ButtonSize.Medium}
                     noBorder
                     onClick={() => {
                       dispatch({ type: "periodUpdate", payload: value });
@@ -253,6 +255,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                   key={unit}
                   label={String(unit)}
                   shape="rounded-sm"
+                  size={ButtonSize.Medium}
                   noBorder
                   onClick={() => {
                     dispatch({
@@ -334,6 +337,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                               key={type}
                               label={label}
                               shape="rounded-sm"
+                              size={ButtonSize.Medium}
                               noBorder
                               onClick={() => {
                                 dispatch({
@@ -363,6 +367,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                   key={agg}
                   label={AGGREGATION_LABELS[agg]}
                   shape="rounded-sm"
+                  size={ButtonSize.Medium}
                   noBorder
                   onClick={() => {
                     dispatch({ type: "aggregateUpdate", payload: agg });

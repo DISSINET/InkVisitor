@@ -1,6 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import {
+  Button,
+  ButtonGroup,
+  CancelButton,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useRef, useState } from "react";
@@ -133,10 +141,10 @@ export const ReorderTerritoryChildrenModal: React.FC<ReorderTerritoryChildrenMod
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="cancel" onClick={onClose} />
+          <CancelButton onClick={onClose} />
           <Button
-            label="save order"
-            color="success"
+            label="Save order"
+            color="info"
             disabled={!hasChanges || reorderMutation.isPending}
             onClick={() => reorderMutation.mutate()}
           />

@@ -1,6 +1,7 @@
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -30,7 +31,7 @@ export const TemplateActionModal: React.FC<TemplateActionModal> = ({
       <ModalContent>Select template action..</ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="warning" onClick={onClose} />
+          <CancelButton onClick={onClose} />
           <Button label="Use template" color="success" onClick={onUse} />
           <Button label="Instantiate template" onClick={onInstantiate} />
         </ButtonGroup>

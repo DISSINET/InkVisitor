@@ -36,6 +36,9 @@ interface Tooltip {
   disabled?: boolean;
   disableAutoPosition?: boolean;
   onMouseLeave?: () => void;
+  /** Portal root. #page-content is overflow:hidden and starts below the header,
+   * so anything anchored outside it needs a wider root such as #page. */
+  portalId?: string;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   // essential
@@ -56,6 +59,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   disabled = false,
   disableAutoPosition = false,
   onMouseLeave = () => {},
+  portalId = "page-content",
 }) => {
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
     null
@@ -111,7 +115,7 @@ export const Tooltip: React.FC<Tooltip> = ({
     <>
       {!disabled && (showTooltip || tooltipHovered) && (
         <>
-          <FloatingPortal id="page-content">
+          <FloatingPortal id={portalId}>
             <StyledContainer
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}

@@ -21,8 +21,8 @@ import { useSearchParams, useTheme } from "hooks";
 import { TooltipAttributes } from "pages/Main/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaCaretDown, FaGripVertical, FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaCaretDown, FaGripVertical } from "react-icons/fa";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -263,15 +263,16 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
-      <ButtonGroup $smallGap $height={19}>
+      <ButtonGroup $gap="small" $height={19}>
         {userCanEdit && (
           <Button
             key="a"
-            icon={<FaPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="p"
             color="primary"
             inverted
+            bold
             tooltipLabel="add new prop"
             onClick={() => {
               addProp(propRowId);
@@ -281,11 +282,12 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="c"
-            icon={<FaPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="c"
             color="primary"
             inverted
+            bold
             tooltipLabel="add classification"
             onClick={() => {
               addClassification(propRowId);
@@ -295,11 +297,12 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
         {userCanEdit && (
           <Button
             key="i"
-            icon={<FaPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="i"
             color="primary"
             inverted
+            bold
             tooltipLabel="add identification"
             onClick={() => {
               addIdentification(propRowId);

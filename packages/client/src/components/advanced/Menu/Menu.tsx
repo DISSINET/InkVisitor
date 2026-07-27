@@ -1,5 +1,5 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { animated, config, useSpring } from "@react-spring/web";
+import { config, useSpring } from "@react-spring/web";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
@@ -13,12 +13,19 @@ import {
   FaSearchengin,
   FaUsers,
 } from "react-icons/fa";
+import { PiSealCheckFill } from "react-icons/pi";
 import { RiLayoutMasonryLine } from "react-icons/ri";
 import { TbSettings } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom";
-import { IPage } from "types";
+import { ButtonSize, IPage } from "types";
+import { GlobalValidationsModal } from "../GlobalValidationsModal/GlobalValidationsModal";
 import { MenuItem } from "./MenuItem";
-import { StyledMenuDivider, StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
+import {
+  StyledMenuDivider,
+  StyledMenuGroup,
+  StyledMenuGroupWrapper,
+  StyledMenuIcon,
+} from "./MenuStyles";
 
 const LAYOUT_KEYS = [
   "mainPageTreeSeparatorXPosition",
@@ -53,6 +60,7 @@ export const Menu: React.FC<Menu> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const [showGlobalValidations, setShowGlobalValidations] = useState<boolean>(false);
 
   const navPages: IPage[] = [
     { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen size={16} /> },
@@ -120,6 +128,15 @@ export const Menu: React.FC<Menu> = ({
 
   const toolsPages: IPage[] = [
     {
+      id: "global-validations",
+      label: "Global validations",
+      color: "info",
+      href: false,
+      owner: true,
+      icon: <PiSealCheckFill size={17} />,
+      onClick: () => setShowGlobalValidations(true),
+    },
+    {
       id: "backups",
       label: "Backups",
       color: "info",
@@ -172,56 +189,63 @@ export const Menu: React.FC<Menu> = ({
   const filteredToolsPages = filterByRole(toolsPages);
 
   return (
-    <div
-      id="#hover-me"
-      style={{ position: "relative" }}
-      onClick={() => setMenuOpen(!menuOpen)}
-      onMouseLeave={() => setMenuOpen(false)}
-      onMouseEnter={() => setMenuOpen(true)}
-    >
-      <Button
-        icon={
-          <animated.div
-            style={{
-              ...rotateMenuIcon,
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <FaBars size={14} />
-          </animated.div>
-        }
-        label="Menu"
-      />
-      {menuOpen && (
-        <StyledMenuGroupWrapper>
-          <StyledMenuGroup>
-            {renderPages(navPages)}
+    <>
+      <div
+        id="#hover-me"
+        style={{ position: "relative" }}
+        onClick={() => setMenuOpen(!menuOpen)}
+        onMouseLeave={() => setMenuOpen(false)}
+        onMouseEnter={() => setMenuOpen(true)}
+      >
+        <Button
+          icon={
+            <StyledMenuIcon style={rotateMenuIcon}>
+              <FaBars size={14} />
+            </StyledMenuIcon>
+          }
+          label="Menu"
+          noIconMargin
+          size={ButtonSize.Large}
+          shape="rounded-md"
+          noBackground
+          active={menuOpen}
+          noPointer
+          textColor="headerTextColor"
+          borderColor="headerChromeColor"
+        />
+        {menuOpen && (
+          <StyledMenuGroupWrapper>
+            <StyledMenuGroup>
+              {renderPages(navPages)}
 
-            {filteredSettingsPages.length > 0 && (
-              <>
-                <StyledMenuDivider />
-                {renderPages(settingsPages)}
-              </>
-            )}
+              {filteredSettingsPages.length > 0 && (
+                <>
+                  <StyledMenuDivider />
+                  {renderPages(settingsPages)}
+                </>
+              )}
 
-            {filteredToolsPages.length > 0 && (
-              <>
-                <StyledMenuDivider />
-                {renderPages(toolsPages)}
-              </>
-            )}
+              {filteredToolsPages.length > 0 && (
+                <>
+                  <StyledMenuDivider />
+                  {renderPages(toolsPages)}
+                </>
+              )}
 
-            <StyledMenuDivider />
-            <MenuItem
-              label="Log out"
-              icon={<BiLogOut size={18} />}
-              color="danger"
-              onClick={() => handleLogOut()}
-            />
-          </StyledMenuGroup>
-        </StyledMenuGroupWrapper>
+              <StyledMenuDivider />
+              <MenuItem
+                label="Log out"
+                icon={<BiLogOut size={18} />}
+                color="danger"
+                onClick={() => handleLogOut()}
+              />
+            </StyledMenuGroup>
+          </StyledMenuGroupWrapper>
+        )}
+      </div>
+      {showGlobalValidations && (
+        <GlobalValidationsModal setShowGlobalValidations={setShowGlobalValidations} />
       )}
-    </div>
+    </>
   );
 };

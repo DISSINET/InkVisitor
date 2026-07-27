@@ -22,6 +22,7 @@ interface InputWrapper {
   $hasButton: boolean;
   $isFocused?: boolean;
   $accentColor: keyof ThemeColor;
+  $disabled?: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   position: relative;
@@ -30,10 +31,15 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   width: 100%;
   height: 2.5rem;
   background-color: ${({ theme }) => theme.color["white"]};
+  /* the class dropdown, the type bar and the input are welded into one field,
+     so the disabled hatch is painted once here and the children stay
+     transparent - a hatch per child restarts the pattern at every boundary */
+  background: ${({ $disabled, theme }) => ($disabled ? theme.background["stripes"] : "")};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "")};
   border-style: solid;
   border-width: 0.1rem;
-  border-color: ${({ $isFocused, $accentColor, theme }) =>
-    $isFocused ? String(theme.color[$accentColor]) : theme.color["gray"]["500"]};
+  border-color: ${({ $isFocused, $disabled, $accentColor, theme }) =>
+    $isFocused && !$disabled ? String(theme.color[$accentColor]) : theme.color["gray"]["500"]};
   border-radius: ${({ theme }) => theme.borderRadius["input"]};
   overflow: hidden;
 
@@ -48,14 +54,17 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   }
 
   &:hover {
-    border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
+    border-color: ${({ $disabled, $accentColor, theme }) =>
+      $disabled ? theme.color["gray"]["500"] : String(theme.color[$accentColor])};
     &::after {
-      border-color: ${({ $accentColor, theme }) => String(theme.color[$accentColor])};
+      border-color: ${({ $disabled, $accentColor, theme }) =>
+        $disabled ? "transparent" : String(theme.color[$accentColor])};
     }
   }
 
-  ${({ $isFocused, $accentColor, theme }) =>
+  ${({ $isFocused, $disabled, $accentColor, theme }) =>
     $isFocused &&
+    !$disabled &&
     `
     &::after {
       border-color: ${String(theme.color[$accentColor])};
@@ -66,10 +75,41 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
     /* border-color: transparent !important; */
     border-color: transparent !important;
   }
+
+  /* the class control is sized for a single letter; anything longer is clipped
+     here so it cannot reach the type bar and the input next to it */
+  .react-select__value-container {
+    overflow: hidden;
+    flex-wrap: nowrap;
+  }
+
+  ${({ $disabled, theme }) =>
+    $disabled &&
+    `
+    input[type="text"],
+    .react-select__control,
+    .react-select__control--is-disabled {
+      background: transparent !important;
+    }
+    input[type="text"]::placeholder {
+      color: ${theme.color["gray"]["600"]};
+    }
+  `}
   select {
     border-right-width: 0;
   }
 `;
+/* Stands in for the class dropdown when no class is on offer, so the field keeps
+   the class-box / type-bar / input silhouette that marks it as a suggester. */
+export const StyledEmptyCategory = styled.div<{ $width: number }>`
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: ${({ $width }) => $width}px;
+  color: ${({ theme }) => theme.color["gray"]["600"]};
+`;
+
 export const StyledSuggesterList = styled.div`
   /* Rendered in a #page-content portal that forms no stacking context, so this
      competes at the body level with the modal wrap (z 500). Match the other

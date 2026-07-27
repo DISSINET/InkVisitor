@@ -12,10 +12,9 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BiHide } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa";
 import { FaDiagramNext } from "react-icons/fa6";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscClose, VscCloseAll } from "react-icons/vsc";
@@ -56,6 +55,7 @@ import { useBoxLayout } from "./hooks/useBoxLayout";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
 import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
+import { IcoPlusBold } from "Theme/icons";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -251,6 +251,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
     editorOpened,
     setEditorOpened,
   });
+
+  const restoreDetailBox = useCallback(() => {
+    dispatch(setDetailBoxState(DetailBoxState.Normal));
+  }, [dispatch]);
 
   const {
     treeSeparator,
@@ -672,9 +676,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     <ButtonGroup style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
                       <Button
                         key="add"
-                        icon={<FaPlus />}
+                        icon={<IcoPlusBold />}
                         tooltipLabel="add new statement at the end of the list"
                         color="primary"
+                        inverted
                         label="statement"
                         onClick={() => {
                           if (user) {
@@ -713,8 +718,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   <>
                     {userRole !== UserEnums.Role.Viewer && (
                       <Button
-                        icon={<FaPlus />}
+                        icon={<IcoPlusBold />}
                         label="entity"
+                        inverted
+                        bold
                         onClick={() => setShowEntityCreateModal(true)}
                         tooltipLabel="create new entity"
                       />
@@ -751,7 +758,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   />,
                 ]}
               >
-                <MemoizedEntityDetailBox />
+                <MemoizedEntityDetailBox
+                  isMinimized={detailBoxState === DetailBoxState.Minimized}
+                  onRestore={restoreDetailBox}
+                />
               </Box>
             )}
           </>

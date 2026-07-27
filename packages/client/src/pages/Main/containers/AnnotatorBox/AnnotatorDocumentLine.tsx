@@ -321,7 +321,6 @@ const StatementListDocumentLine: React.FC<StatementListDocumentLine> = ({
         width="auto"
       >
         <ModalHeader
-          icon={<FaHighlighter />}
           title="Highlight settings"
           onClose={() => setShowHighlightModal(false)}
         />

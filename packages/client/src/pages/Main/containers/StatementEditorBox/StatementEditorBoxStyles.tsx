@@ -1,4 +1,11 @@
+import { AiOutlineCaretRight } from "react-icons/ai";
 import styled from "styled-components";
+
+// caret points right when collapsed, rotates down when the section is open
+export const StyledToggleCaret = styled(AiOutlineCaretRight)<{ $open: boolean }>`
+  transform: rotate(${({ $open }) => ($open ? "90deg" : "0deg")});
+  transition: transform 0.2s ease;
+`;
 
 export const StyledGrid = styled.div`
   display: grid;

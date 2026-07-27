@@ -2,203 +2,35 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree } from "@inkvisitor/shared/types";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
 
-// Filter WITH STATEMENTS
-export function filterTreeWithStatements(
-  node: IResponseTree | null
-): IResponseTree | null {
-  if (!node) {
-    return null;
-  }
-
-  const hasDescendantWithStatements = node.children.some((child) =>
-    hasNodeWithStatementsRecursively(child)
-  );
-
-  if (node.statementsCount > 0 || hasDescendantWithStatements) {
-    const filteredChildren = node.children
-      .map((child) =>
-        // stop recursion with this condition to keep children of filtered nodes
-        child.statementsCount > 0 ? child : filterTreeWithStatements(child)
-      )
-      .filter((filteredChild) => filteredChild !== null);
-
-    return {
-      ...node,
-      children: filteredChildren,
-    } as IResponseTree;
-  }
-
-  return null;
-}
-
-function hasNodeWithStatementsRecursively(node: IResponseTree | null): boolean {
-  if (!node) {
-    return false;
-  }
-  if (node.statementsCount > 0) {
-    return true;
-  }
-  return node.children.some((child) => hasNodeWithStatementsRecursively(child));
-}
-
-// Filter EDITOR RIGHTS
-export function filterTreeWithWriteRights(
-  node: IResponseTree | null
-): IResponseTree | null {
-  if (!node) {
-    return null;
-  }
-
-  const hasWriteDescendant = node.children.some((child) =>
-    hasWriteRightRecursively(child)
-  );
-
-  if (node.right === UserEnums.RoleMode.Write || hasWriteDescendant) {
-    const filteredChildren = node.children
-      .map((child) =>
-        child.right === UserEnums.RoleMode.Write
-          ? child
-          : filterTreeWithWriteRights(child)
-      )
-      .filter((filteredChild) => filteredChild !== null);
-
-    return { ...node, children: filteredChildren } as IResponseTree;
-  }
-
-  return null;
-}
-
-function hasWriteRightRecursively(node: IResponseTree | null): boolean {
-  if (!node) {
-    return false;
-  }
-  if (node.right === UserEnums.RoleMode.Write) {
-    return true;
-  }
-  return node.children.some((child) => hasWriteRightRecursively(child));
-}
-
-// filter FAVORITED
-export function filterTreeByFavorites(
+/**
+ * Prunes the tree to the nodes the filter settings select, honouring the AND/OR
+ * operator through the same predicate that drives highlighting. A match is kept
+ * with its subtree intact; a non-match survives only while it still has a
+ * surviving descendant, so the path to a match stays walkable.
+ */
+export function filterTreeByFilters(
   node: IResponseTree | null,
+  filters: ITerritoryFilter,
   favoriteIds: string[]
 ): IResponseTree | null {
   if (!node) {
     return null;
   }
 
-  const hasFavoriteDescendant = node.children.some((child) =>
-    hasFavoriteRecursively(child, favoriteIds)
-  );
-
-  if (favoriteIds.includes(node.territory.id) || hasFavoriteDescendant) {
-    const filteredChildren = node.children
-      .map((child) =>
-        favoriteIds.includes(child.territory.id)
-          ? child
-          : filterTreeByFavorites(child, favoriteIds)
-      )
-      .filter((filteredChild) => filteredChild !== null);
-
-    return { ...node, children: filteredChildren } as IResponseTree;
+  // a match keeps its subtree whole, so the children under a hit stay browsable
+  if (isNodeMatchingFilters(node, filters, favoriteIds)) {
+    return node;
   }
 
-  return null;
-}
-
-function hasFavoriteRecursively(
-  node: IResponseTree | null,
-  favoriteIds: string[]
-): boolean {
-  if (!node) {
-    return false;
-  }
-
-  if (favoriteIds.includes(node.territory.id)) {
-    return true;
-  }
-
-  return node.children.some((child) =>
-    hasFavoriteRecursively(child, favoriteIds)
-  );
-}
-
-// Filter BY LABEL
-export function filterTreeByLabel(
-  node: IResponseTree | null,
-  targetLabel: string
-): IResponseTree | null {
-  if (!node) {
-    return null;
-  }
-
-  const hasLabelDescendant = node.children.some((child) =>
-    hasLabelRecursively(child, targetLabel)
-  );
-
-  if (
-    node.territory.labels[0]
-      .toLowerCase()
-      .includes(targetLabel.toLowerCase()) ||
-    hasLabelDescendant
-  ) {
-    const filteredChildren = node.children
-      .map((child) =>
-        child.territory.labels[0]
-          .toLowerCase()
-          .includes(targetLabel.toLowerCase())
-          ? child
-          : filterTreeByLabel(child, targetLabel)
-      )
-      .filter((filteredChild) => filteredChild !== null);
-
-    return { ...node, children: filteredChildren } as IResponseTree;
-  }
-
-  return null;
-}
-
-function hasLabelRecursively(
-  node: IResponseTree | null,
-  targetLabel: string
-): boolean {
-  if (!node) {
-    return false;
-  }
-
-  if (
-    node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase())
-  ) {
-    return true;
-  }
-
-  return node.children.some((child) => hasLabelRecursively(child, targetLabel));
-}
-
-// Filter WITH SUBTERRITORIES (first level only)
-export function filterTreeWithSubterritories(
-  node: IResponseTree | null
-): IResponseTree | null {
-  if (!node) {
-    return null;
-  }
-
-  // For first level territories (direct children of root), check if they have sub-territories
   const filteredChildren = node.children
-    .map((child) => {
-      // If this child has sub-territories, keep it with all its children
-      if (child.children.length > 0) {
-        return child;
-      }
-      // If this child has no sub-territories, filter it out
-      return null;
-    })
-    .filter((filteredChild) => filteredChild !== null);
+    .map((child) => filterTreeByFilters(child, filters, favoriteIds))
+    .filter((child): child is IResponseTree => child !== null);
 
-  return {
-    ...node,
-    children: filteredChildren,
-  } as IResponseTree;
+  if (filteredChildren.length > 0) {
+    return { ...node, children: filteredChildren } as IResponseTree;
+  }
+
+  return null;
 }
 
 export function markNodesWithFilters(

@@ -7,6 +7,7 @@ import { AxiosResponse } from "axios";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -133,11 +134,8 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button
+          <CancelButton
             key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
             onClick={() => {
               setShowApplyTemplateModal(false);
             }}

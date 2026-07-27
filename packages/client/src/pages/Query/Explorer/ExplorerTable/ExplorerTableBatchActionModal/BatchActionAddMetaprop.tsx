@@ -12,6 +12,7 @@ import {
   AttributeIcon,
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -300,7 +301,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+          <CancelButton onClick={onClose} />
           <Button
             label="Apply"
             color="primary"

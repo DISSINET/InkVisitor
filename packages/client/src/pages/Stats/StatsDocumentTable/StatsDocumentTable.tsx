@@ -4,12 +4,12 @@ import { IResponseAudit } from "@inkvisitor/shared/types/response-audit";
 import { IResponseEntity } from "@inkvisitor/shared/types/response-entity";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
-import { BaseDropdown, Loader, Table, Timestamp } from "components";
+import { BaseDropdown, Loader, Table, Timestamp, Tooltip } from "components";
 import { EmptyEntityTag, EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
 import { useDocumentsQuery, useResourcesWithDocumentsQuery } from "hooks/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Column } from "react-table";
 import {
   StyledDocumentChangeFallback,
@@ -19,6 +19,7 @@ import {
   StyledDocumentChangesTags,
   StyledDocumentEmptyState,
   StyledDocumentInfoText,
+  StyledDocumentChangesOverflow,
   StyledDocumentResourceWrap,
   StyledDocumentRow,
   StyledDocumentsLayout,
@@ -63,10 +64,39 @@ const getChangeSections = (
     .filter((section) => section.anchors.length > 0);
 };
 
+/** A single edit can touch hundreds of anchors; the rest are counted, not listed. */
+const MAX_VISIBLE_ANCHORS = 5;
+
+const AnchorsOverflowCount: React.FC<{ total: number }> = ({ total }) => {
+  const [referenceElement, setReferenceElement] = useState<HTMLSpanElement | null>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  return (
+    <>
+      <StyledDocumentChangesOverflow
+        ref={setReferenceElement}
+        onMouseEnter={() => setTooltipVisible(true)}
+        onMouseLeave={() => setTooltipVisible(false)}
+      >
+        {`… +${total - MAX_VISIBLE_ANCHORS}`}
+      </StyledDocumentChangesOverflow>
+      <Tooltip
+        label={`${total} anchors changed`}
+        visible={tooltipVisible}
+        referenceElement={referenceElement}
+      />
+    </>
+  );
+};
+
 const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
   const sections = useMemo(() => getChangeSections(changes), [changes]);
+  // only the listed anchors are fetched below, so the cap bounds the queries too
   const anchorIds = useMemo(
-    () => Array.from(new Set(sections.flatMap((section) => section.anchors))),
+    () =>
+      Array.from(
+        new Set(sections.flatMap((section) => section.anchors.slice(0, MAX_VISIBLE_ANCHORS))),
+      ),
     [sections],
   );
 
@@ -104,7 +134,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
         <StyledDocumentChangesRow key={section.key}>
           <StyledDocumentChangesLabel>{section.label}</StyledDocumentChangesLabel>
           <StyledDocumentChangesTags>
-            {section.anchors.map((anchor, index) => {
+            {section.anchors.slice(0, MAX_VISIBLE_ANCHORS).map((anchor, index) => {
               const entity = entitiesById[anchor];
               if (entity) {
                 return (
@@ -125,6 +155,9 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
               );
             })}
           </StyledDocumentChangesTags>
+          {section.anchors.length > MAX_VISIBLE_ANCHORS && (
+            <AnchorsOverflowCount total={section.anchors.length} />
+          )}
         </StyledDocumentChangesRow>
       ))}
     </StyledDocumentChangesList>

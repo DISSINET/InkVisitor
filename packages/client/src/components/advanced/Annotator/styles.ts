@@ -289,7 +289,7 @@ export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeBu
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0 0.5rem" : "")};
+  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0.1rem 0.5rem" : "")};
 `;
 
 export const StyledAnnotatorButtons = styled.div`

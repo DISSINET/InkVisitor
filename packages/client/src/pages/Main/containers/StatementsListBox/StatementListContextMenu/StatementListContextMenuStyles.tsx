@@ -23,4 +23,9 @@ export const StyledContextBtnGroup = styled(animated.div)`
   overflow: hidden;
   z-index: 100;
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  /* a floating menu is its own target: the items get a comfortable hit area
+     regardless of the size each button asks for */
+  > button {
+    padding: 0.4rem;
+  }
 `;

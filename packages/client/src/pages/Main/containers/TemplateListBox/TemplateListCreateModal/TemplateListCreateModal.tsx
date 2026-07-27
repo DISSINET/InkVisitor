@@ -7,6 +7,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -172,11 +173,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button
+          <CancelButton
             key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
             onClick={() => {
               handleCloseCreateModal();
             }}

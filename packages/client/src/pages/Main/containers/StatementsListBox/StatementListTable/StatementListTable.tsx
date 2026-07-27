@@ -13,20 +13,19 @@ import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
-import { FaClone, FaPlus } from "react-icons/fa";
-import { TbAnchor } from "react-icons/tb";
+import { FaClone } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
 import { CellProps, Column, useExpanded, useRowSelect, useTable } from "react-table";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { IcoTrash } from "Theme/icons";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { ButtonSize, StatementListDisplayMode, StatementOrderCorrection } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
+import { AnchorTextTooltip } from "./AnchorTextTooltip";
 import { StatementListRow } from "./StatementListRow";
 import {
   StyledAbbreviatedLabel,
-  StyledAnchor,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledSelectionCheckbox,
@@ -284,9 +283,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           if (anchorText) {
             return (
               <StyledAbbreviatedLabel>
-                <StyledAnchor>
-                  <TbAnchor size={12} strokeWidth={2} />
-                </StyledAnchor>
+                <AnchorTextTooltip anchorText={anchorText} />
                 {anchorText}
               </StyledAbbreviatedLabel>
             );
@@ -373,7 +370,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     key="add-up"
                     icon={
                       <>
-                        <FaPlus size={14} />
+                        <IcoPlusBold size={14} />
                         <BsArrowUp size={14} />
                       </>
                     }
@@ -388,7 +385,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     key="add-down"
                     icon={
                       <>
-                        <FaPlus size={14} />
+                        <IcoPlusBold size={14} />
                         <BsArrowDown size={14} />
                       </>
                     }

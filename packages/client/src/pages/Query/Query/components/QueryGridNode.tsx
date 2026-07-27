@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
-import { FaPlus, FaRegQuestionCircle } from "react-icons/fa";
-import { IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
+import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
@@ -11,20 +10,19 @@ import api from "api";
 import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
-import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { useTheme } from "styled-components";
 import { INodeItem, QueryValidityProblem } from "../../types";
+import { getRelationConstrainedCategoryTypes } from "../../utils";
 import { QueryAction, QueryActionType } from "../state";
 import {
   StyledGraphNode,
   StyledNodeContainer,
   StyledNodeExpansionToggles,
   StyledNodeMainRow,
-  StyledNodeTypeSelect,
-  StyledParallelOperator,
   StyledTooltipList,
   StyledTooltipListItem,
 } from "./QueryStyles";
-import { useTheme } from "styled-components";
+import { ButtonSize } from "types";
 
 interface QueryGridNodeProps {
   node: INodeItem;
@@ -107,6 +105,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const isRelationEntityPickerDisabled =
     relationConstrainedCategoryTypes !== null && relationConstrainedCategoryTypes.length === 0;
 
+  // the constraint comes from the root class and the edge together, so neither
+  // named alone tells the user what to change
+  const rootClassLabels =
+    rootNode.params.entityClasses && rootNode.params.entityClasses.length > 0
+      ? rootNode.params.entityClasses
+          .map((c) => entitiesDict.find((e) => e.value === c)?.label ?? c)
+          .join(", ")
+      : "";
+
   const entityId = node.params.entityId;
 
   const { data: dataEntity } = useQuery({
@@ -150,12 +157,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       {hasParallelEdges && (
         <SwitchGroup $column $zIndex={10}>
           <Button
+            size={ButtonSize.Medium}
             label="AND"
             shape="rounded-sm"
             noBorder
             inverted={node.operator !== Query.NodeOperator.And}
             noBackground={node.operator !== Query.NodeOperator.And}
             color={node.operator === Query.NodeOperator.And ? "info" : "greyer"}
+            bold={node.operator === Query.NodeOperator.And}
             tooltipLabel="match all parallel branches"
             onClick={() => {
               dispatch({
@@ -168,12 +177,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             }}
           />
           <Button
+            size={ButtonSize.Medium}
             label="OR"
             shape="rounded-sm"
             noBorder
             inverted={node.operator !== Query.NodeOperator.Or}
             noBackground={node.operator !== Query.NodeOperator.Or}
             color={node.operator === Query.NodeOperator.Or ? "info" : "greyer"}
+            bold={node.operator === Query.NodeOperator.Or}
             tooltipLabel="match any parallel branch"
             onClick={() => {
               dispatch({
@@ -271,16 +282,21 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   />
                 ) : (
                   <EntitySuggester
-                    // remount on edge type switch so the category re-inits to
-                    // entityClasses[0] instead of preserving the internal
-                    // selection from the previous edge
+                    // remount on edge type switch so the typed input and other
+                    // internal state don't carry over to a different edge
                     key={edgeType}
                     inputWidth={212}
                     suggestionListWidth={320}
                     categoryTypes={entityIdCategoryTypes}
-                    placeholder="entity"
+                    placeholder={
+                      isRelationEntityPickerDisabled ? "no class for this edge" : "entity"
+                    }
                     disableCreate
                     disabled={isRelationEntityPickerDisabled}
+                    // seeds the class shown on mount / edge switch: the node's
+                    // committed class, else the first class the edge allows.
+                    // The suggester owns the selection afterwards, so a wildcard
+                    // pick (which clears entityClasses) is not re-derived here.
                     initCategory={
                       node.params.entityClasses?.[0] ??
                       entityIdCategoryTypes[0] ??
@@ -310,19 +326,37 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     }}
                     rightContent={
                       <IconWithTooltip
-                        color={edgeRequiresTarget ? "warning" : "success"}
+                        color={
+                          edgeRequiresTarget || isRelationEntityPickerDisabled
+                            ? "warning"
+                            : "success"
+                        }
                         icon={
-                          edgeRequiresTarget ? <IcoWarning size={12} /> : <IcoQuestion size={11} />
+                          edgeRequiresTarget || isRelationEntityPickerDisabled ? (
+                            <IcoWarning size={12} />
+                          ) : (
+                            <IcoQuestion size={11} />
+                          )
                         }
                         tooltipPosition="top"
                         tooltipColor={
-                          edgeRequiresTarget
+                          edgeRequiresTarget || isRelationEntityPickerDisabled
                             ? "tooltipNodeWarningBackground"
                             : "tooltipNodeInfoBackground"
                         }
-                        tooltipLabel="Empty Entity Suggester"
+                        tooltipLabel={
+                          isRelationEntityPickerDisabled
+                            ? "No allowed target class"
+                            : "Empty Entity Suggester"
+                        }
                         tooltipContent={
-                          edgeRequiresTarget ? (
+                          isRelationEntityPickerDisabled ? (
+                            <p>
+                              The "{edgeLabel}" relation allows no target class for{" "}
+                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}.
+                              Change the root class or the edge type.
+                            </p>
+                          ) : edgeRequiresTarget ? (
                             <p>This edge requires a target entity.</p>
                           ) : (
                             <StyledTooltipList>
@@ -386,9 +420,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
         <div>
           <Button
-            icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+            icon={<IcoPlusBold style={{ fontSize: "16px", padding: "2px" }} />}
             tooltipLabel="add new edge"
-            color="info"
+            color="primary"
             onClick={() => {
               dispatch({
                 type: QueryActionType.addNode,

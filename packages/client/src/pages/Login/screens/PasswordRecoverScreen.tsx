@@ -2,7 +2,6 @@ import api from "api";
 import { Button, Input } from "components";
 import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
-import { IoReloadCircle } from "react-icons/io5";
 import { TbArrowForwardUp } from "react-icons/tb";
 import {
   StyledCenterColumn,
@@ -18,6 +17,7 @@ import {
 import { StyledButtonWrap, StyledErrorText, StyledInputRow } from "pages/AuthModalSharedStyles";
 import useKeypress from "hooks/useKeyPress";
 import { ButtonSize } from "types";
+import { IcoRotateLock } from "Theme/icons";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -98,7 +98,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <div>
               <Button
                 fullWidth
-                icon={<IoReloadCircle />}
+                icon={<IcoRotateLock size={18} />}
                 label="Recover password"
                 color="success"
                 onClick={() => {
@@ -109,7 +109,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
                   }
                 }}
                 disabled={emailLocal.length === 0}
-                size={ButtonSize.Medium}
+                size={ButtonSize.Large}
               />
             </div>
           </StyledButtonWrap>

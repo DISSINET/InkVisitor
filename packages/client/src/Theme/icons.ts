@@ -37,7 +37,6 @@ export { BsCardText as IcoCardText } from "react-icons/bs";
 export { BsClipboard as IcoClipboard } from "react-icons/bs";
 export { BsEnvelopeArrowUpFill as IcoEnvelopeUpload } from "react-icons/bs";
 export { BsFileTextFill as IcoFileTextFill } from "react-icons/bs";
-export { BsFilter as IcoFilter } from "react-icons/bs";
 export { BsInfoCircle as IcoInfo } from "react-icons/bs";
 export { BsShieldExclamation as IcoShieldWarning } from "react-icons/bs";
 export { BsShieldFillCheck as IcoShieldCheck } from "react-icons/bs";
@@ -82,7 +81,9 @@ export { FaLock as IcoLock } from "react-icons/fa";
 export { FaLongArrowAltRight as IcoLongArrowRight } from "react-icons/fa";
 export { FaMinus as IcoMinus } from "react-icons/fa";
 export { FaPen as IcoPen } from "react-icons/fa";
-export { FaPlus as IcoPlus } from "react-icons/fa";
+// the fa plus is thicker than the fa6 one and holds up at the small sizes used inside
+// inputs, suggesters and context menus
+export { FaPlus as IcoPlusBold } from "react-icons/fa";
 export { FaPlusSquare as IcoPlusSquare } from "react-icons/fa";
 export { FaQuestion as IcoQuestion } from "react-icons/fa";
 export { FaRegArrowAltCircleDown as IcoArrowCircleDown } from "react-icons/fa";
@@ -109,6 +110,8 @@ export { FaUserTag as IcoUserTag } from "react-icons/fa";
 
 // fa6 — IcoTrash is the canonical trash icon; change here to swap everywhere
 export { FaTrashCan as IcoTrash } from "react-icons/fa6";
+// IcoPlus is the canonical add icon; IcoPlusBold covers small-size buttons
+export { FaPlus as IcoPlus } from "react-icons/fa6";
 // simpler outline variant (no lid detail) — used where a lighter icon fits better
 export { FaTrash as IcoTrashSimple } from "react-icons/fa";
 export { FaAnchorCircleCheck as IcoAnchorCheck } from "react-icons/fa6";
@@ -174,7 +177,7 @@ export { MdChevronLeft as IcoChevronLeft } from "react-icons/md";
 export { MdChevronRight as IcoChevronRight } from "react-icons/md";
 export { MdCleaningServices as IcoClean } from "react-icons/md";
 export { MdClose as IcoCloseMd } from "react-icons/md";
-export { MdDarkMode as IcoDarkMode } from "react-icons/md";
+export { MdOutlineDarkMode as IcoDarkMode } from "react-icons/md";
 export { MdDatasetLinked as IcoDatasetLinked } from "react-icons/md";
 export { MdDeleteSweep as IcoDeleteSweep } from "react-icons/md";
 export { MdDragIndicator as IcoDragIndicator } from "react-icons/md";

@@ -4,6 +4,7 @@ import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
 import React, { KeyboardEvent, MouseEventHandler, ReactElement, useState } from "react";
 import { ButtonShape, ButtonSize } from "types";
+import { useButtonDefaults } from "./ButtonDefaults";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 interface ButtonProps {
@@ -17,8 +18,11 @@ interface ButtonProps {
   noBackground?: boolean;
   inverted?: boolean;
   noBorder?: boolean;
-  textRegular?: boolean;
+  /** Renders the label at bold weight, e.g. to mark the selected option of a group. */
+  bold?: boolean;
   disabled?: boolean;
+  /** Keeps the default cursor for buttons that react to hover rather than to a click. */
+  noPointer?: boolean;
   color?: keyof ThemeColor;
   /** Overrides only the text/icon color, leaving background and border to other props. */
   textColor?: keyof ThemeColor;
@@ -29,15 +33,20 @@ interface ButtonProps {
   // to control the height from parent
   fullHeight?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
+  /** Portal root for the tooltip, for buttons rendered outside #page-content. */
+  tooltipPortalId?: string;
   hideTooltipOnClick?: boolean;
   dataTestId?: string;
   noPadding?: boolean;
   shape?: ButtonShape;
+  /** Keeps the noBackground hover tint applied while a control the button owns
+   * (e.g. a dropdown) is open, so it stays lit even when not directly hovered. */
+  active?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  size = ButtonSize.Small,
-  shape = "rounded-sm",
+  size: sizeProp,
+  shape: shapeProp,
   tooltipLabel,
   tooltipContent,
   label = "",
@@ -47,8 +56,9 @@ export const Button: React.FC<ButtonProps> = ({
   inverted = false,
   noBorder = false,
   noBackground = false,
-  textRegular = false,
+  bold = false,
   disabled = false,
+  noPointer = false,
   color = "primary",
   textColor,
   borderColor,
@@ -58,12 +68,19 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   fullHeight = false,
   tooltipPosition = "bottom",
+  tooltipPortalId,
   hideTooltipOnClick = false,
   dataTestId,
   noPadding = false,
+  active = false,
 }) => {
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const hasLabel = label.length > 0;
+  const defaults = useButtonDefaults();
+  const size = sizeProp ?? (hasLabel ? defaults.size : undefined) ?? ButtonSize.Small;
+  const shape = shapeProp ?? (hasLabel ? defaults.shape : undefined) ?? "rounded-sm";
 
   return (
     <>
@@ -79,16 +96,19 @@ export const Button: React.FC<ButtonProps> = ({
         }}
         $size={size}
         $iconButton={icon !== undefined && label?.length === 0}
+        $hasLabel={hasLabel}
         $color={color}
         $textColor={textColor}
         $borderColor={borderColor}
         $inverted={inverted}
-        $textRegular={textRegular}
+        $bold={bold}
         $noBorder={noBorder}
         $noBackground={noBackground}
         $fullWidth={fullWidth}
         $fullHeight={fullHeight}
         $disabled={disabled}
+        $noPointer={noPointer}
+        $active={active}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
@@ -98,7 +118,7 @@ export const Button: React.FC<ButtonProps> = ({
       >
         {icon}
         {label && (
-          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin}>
+          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin} data-label={label}>
             {label}
           </StyledButtonLabel>
         )}
@@ -112,6 +132,7 @@ export const Button: React.FC<ButtonProps> = ({
           visible={showTooltip}
           referenceElement={referenceElement}
           position={tooltipPosition}
+          portalId={tooltipPortalId}
         />
       )}
     </>
