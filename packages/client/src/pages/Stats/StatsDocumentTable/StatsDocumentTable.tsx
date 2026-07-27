@@ -4,12 +4,12 @@ import { IResponseAudit } from "@inkvisitor/shared/types/response-audit";
 import { IResponseEntity } from "@inkvisitor/shared/types/response-entity";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import api from "api";
-import { BaseDropdown, Loader, Table, Timestamp } from "components";
+import { BaseDropdown, Loader, Table, Timestamp, Tooltip } from "components";
 import { EmptyEntityTag, EntityTag } from "components/advanced";
 import { UserTag } from "components/advanced/UserTag/UserTag";
 import { useResizeObserver } from "hooks";
 import { useDocumentsQuery, useResourcesWithDocumentsQuery } from "hooks/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Column } from "react-table";
 import {
   StyledDocumentChangeFallback,
@@ -66,6 +66,28 @@ const getChangeSections = (
 
 /** A single edit can touch hundreds of anchors; the rest are counted, not listed. */
 const MAX_VISIBLE_ANCHORS = 5;
+
+const AnchorsOverflowCount: React.FC<{ total: number }> = ({ total }) => {
+  const [referenceElement, setReferenceElement] = useState<HTMLSpanElement | null>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  return (
+    <>
+      <StyledDocumentChangesOverflow
+        ref={setReferenceElement}
+        onMouseEnter={() => setTooltipVisible(true)}
+        onMouseLeave={() => setTooltipVisible(false)}
+      >
+        {`… +${total - MAX_VISIBLE_ANCHORS}`}
+      </StyledDocumentChangesOverflow>
+      <Tooltip
+        label={`${total} anchors changed`}
+        visible={tooltipVisible}
+        referenceElement={referenceElement}
+      />
+    </>
+  );
+};
 
 const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
   const sections = useMemo(() => getChangeSections(changes), [changes]);
@@ -134,9 +156,7 @@ const AuditChangesCell: React.FC<{ changes: object }> = ({ changes }) => {
             })}
           </StyledDocumentChangesTags>
           {section.anchors.length > MAX_VISIBLE_ANCHORS && (
-            <StyledDocumentChangesOverflow title={`${section.anchors.length} anchors changed`}>
-              {`… +${section.anchors.length - MAX_VISIBLE_ANCHORS}`}
-            </StyledDocumentChangesOverflow>
+            <AnchorsOverflowCount total={section.anchors.length} />
           )}
         </StyledDocumentChangesRow>
       ))}

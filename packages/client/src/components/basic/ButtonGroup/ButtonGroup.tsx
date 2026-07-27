@@ -63,7 +63,7 @@ export const SwitchGroup = styled.div<SwitchGroup>`
   }
   /* the selected option renders bold, which is wider — every label reserves its
      bold width so the segments keep their size as the selection moves */
-  > button > span::after {
+  > button > span[data-label]::after {
     content: attr(data-label);
     font-weight: ${({ theme }) => theme.fontWeight["bold"]};
     display: block;
