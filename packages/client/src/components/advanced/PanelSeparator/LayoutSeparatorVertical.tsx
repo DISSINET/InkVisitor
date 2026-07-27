@@ -1,5 +1,4 @@
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
-import { RESIZING_CLASS } from "Theme/constants";
 import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
 
 interface LayoutSeparatorVertical {
@@ -45,7 +44,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
   useEffect(
     () => () => {
       if (draggingRef.current) {
-        document.body.classList.remove("no-select", RESIZING_CLASS);
+        document.body.classList.remove("no-select");
       }
     },
     [],
@@ -63,7 +62,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
     // pointer capture keeps the moves coming while the pointer is off the
     // separator, which is most of a drag
     e.currentTarget.setPointerCapture(e.pointerId);
-    document.body.classList.add("no-select", RESIZING_CLASS);
+    document.body.classList.add("no-select");
     dragXPosition.current = separatorXPosition;
     lastClientX.current = e.clientX;
     draggingRef.current = true;
@@ -97,7 +96,7 @@ export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
     }
     draggingRef.current = false;
     setDragging(false);
-    document.body.classList.remove("no-select", RESIZING_CLASS);
+    document.body.classList.remove("no-select");
     window.getSelection()?.removeAllRanges();
 
     // Unconditional: a drag that leaves this separator on its own bound can

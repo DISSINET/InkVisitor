@@ -93,12 +93,12 @@ export function panelWidthVar(panelIndex: number): string {
   return `--panel-w-${panelIndex}`;
 }
 
-export function writePanelWidthVars(widths: number[]): void {
+export function writePanelWidthVars(widths: (number | undefined)[]): void {
   const root = document.documentElement;
   widths.forEach((width, index) => {
     // a non-finite length makes the whole width declaration invalid, which
     // drops the panel to its content size
-    if (!Number.isFinite(width)) return;
+    if (width === undefined || !Number.isFinite(width)) return;
     root.style.setProperty(panelWidthVar(index), `${width / 10}rem`);
   });
 }
@@ -152,7 +152,7 @@ export function writeBoxHeightVars(heights: {
 
 // The narrowest the window can be and still hold the layout: every expanded
 // panel at its own minimum, every collapsed one at a collapsed panel's width.
-export function minimumLayoutWidth(expanded: boolean[]): number {
+function minimumLayoutWidth(expanded: boolean[]): number {
   const minWidths = [
     FIRST_PANEL_MIN_WIDTH,
     SECOND_PANEL_MIN_WIDTH,

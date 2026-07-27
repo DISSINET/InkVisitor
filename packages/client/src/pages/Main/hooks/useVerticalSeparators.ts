@@ -19,9 +19,11 @@ import {
   getInitPercentPanelWidths,
   isLayoutUndersized,
   panelWidthsFromSeparators,
-  writePanelWidthVars,
-  writeSeparatorPositionVars,
 } from "utils/layoutUtils";
+import {
+  setPanelWidthVars,
+  setSeparatorPositionVars,
+} from "utils/layoutTransition";
 import { floorNumberToOneDecimal } from "utils/utils";
 
 export type VerticalSeparatorKey = "tree" | "center" | "search";
@@ -230,8 +232,8 @@ export function useVerticalSeparators() {
     );
     dragPositions.current = positions;
 
-    writeSeparatorPositionVars(positions);
-    writePanelWidthVars(
+    setSeparatorPositionVars(positions);
+    setPanelWidthVars(
       getEffectivePanelWidths(
         basePanelWidths(positions),
         expandedPanels,

@@ -1,5 +1,4 @@
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
-import { RESIZING_CLASS } from "Theme/constants";
 import { StyledLayoutSeparatorHorizontal } from "./SeparatorStyles";
 
 interface LayoutSeparatorHorizontal {
@@ -12,15 +11,14 @@ interface LayoutSeparatorHorizontal {
   // Boxes stay where they are during a drag without it.
   applyPreview?: (yPosition: number) => void;
   // Panel the separator spans, sizing it from that panel's width variable.
-  // Takes precedence over the width and left props.
   panelIndex?: number;
-  width?: number;
-  left?: number;
-  onMaxHeightReached?: () => void;
-  onMinHeightReached?: () => void;
+  // Box the separator sits under, positioning it from that box's height
+  // variable. The box and the separator move together that way, including
+  // through a spring, since the height is what the separator's position is.
+  boxHeightVarKey?: string;
 }
 
-const separatorYValue = (yPosition: number) => `${(yPosition - 3) / 10}rem`;
+const separatorYValue = (yPosition: number) => `${yPosition / 10}rem`;
 
 export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   topPositionMin,
@@ -29,10 +27,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   setSeparatorYPosition,
   applyPreview,
   panelIndex,
-  width,
-  left,
-  onMaxHeightReached,
-  onMinHeightReached,
+  boxHeightVarKey,
 }) => {
   const separatorRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -53,7 +48,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
   useEffect(
     () => () => {
       if (draggingRef.current) {
-        document.body.classList.remove("no-select", RESIZING_CLASS);
+        document.body.classList.remove("no-select");
       }
     },
     [],
@@ -72,7 +67,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
     // pointer capture keeps the moves coming while the pointer is off the
     // separator, which is most of a drag
     e.currentTarget.setPointerCapture(e.pointerId);
-    document.body.classList.add("no-select", RESIZING_CLASS);
+    document.body.classList.add("no-select");
     dragYPosition.current = separatorYPosition;
     lastClientY.current = e.clientY;
     draggingRef.current = true;
@@ -96,14 +91,6 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
       frame.current = window.requestAnimationFrame(paintDragPosition);
     }
 
-    // Notify parent when max height is reached
-    if (dragYPosition.current === topPositionMax && onMaxHeightReached) {
-      onMaxHeightReached();
-    }
-    // Notify parent when min height is reached
-    if (dragYPosition.current === topPositionMin && onMinHeightReached) {
-      onMinHeightReached();
-    }
   };
 
   const endDrag = () => {
@@ -115,7 +102,7 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
     }
     draggingRef.current = false;
     setDragging(false);
-    document.body.classList.remove("no-select", RESIZING_CLASS);
+    document.body.classList.remove("no-select");
     window.getSelection()?.removeAllRanges();
 
     // Apply the final position
@@ -133,13 +120,10 @@ export const LayoutSeparatorHorizontal: React.FC<LayoutSeparatorHorizontal> = ({
           "--separator-y": separatorYValue(
             dragging ? dragYPosition.current : separatorYPosition,
           ),
-          ...(width !== undefined && {
-            "--separator-width": `${width / 10}rem`,
-          }),
-          ...(left !== undefined && { "--separator-left": `${left / 10}rem` }),
         } as CSSProperties
       }
       $panelIndex={panelIndex}
+      $boxHeightVarKey={boxHeightVarKey}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}

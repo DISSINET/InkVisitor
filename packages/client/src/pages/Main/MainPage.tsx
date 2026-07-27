@@ -39,12 +39,12 @@ import {
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
+import { isLayoutUndersized } from "utils/layoutUtils";
 import {
-  isLayoutUndersized,
-  writeBoxHeightVars,
-  writePanelWidthVars,
-  writeSeparatorPositionVars,
-} from "utils/layoutUtils";
+  animateBoxHeightVars,
+  animatePanelWidthVars,
+  animateSeparatorPositionVars,
+} from "utils/layoutTransition";
 import { getStoredUserRole } from "utils/userStorage";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
@@ -407,7 +407,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
-    writePanelWidthVars([
+    animatePanelWidthVars([
       firstPanelWidth,
       secondPanelWidth,
       thirdPanelWidth,
@@ -417,17 +417,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   // Same for the separators, which a drag on any one of them can move.
   useLayoutEffect(() => {
-    writeSeparatorPositionVars(separatorPositions);
+    animateSeparatorPositionVars(separatorPositions);
   }, [separatorPositions.tree, separatorPositions.center, separatorPositions.search]);
 
   // Same for the boxes a horizontal separator splits. The heights come from
   // getters rather than memos, so every render reasserts them.
   useLayoutEffect(() => {
-    writeBoxHeightVars({
+    animateBoxHeightVars({
       statements: getStatementListBoxHeight(),
       detail: getDetailBoxHeight(),
       annotator: getAnnotatorBoxHeight(),
       editor: getEditorBoxHeight(),
+      search: getFourthPanelBoxHeight("search"),
+      bookmarks: getFourthPanelBoxHeight("bookmarks"),
+      templates: getFourthPanelBoxHeight("templates"),
     });
   });
 
@@ -512,6 +515,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             setSeparatorYPosition={handleDetailSeparatorYChange}
             applyPreview={previewDetailSeparatorYPosition}
             panelIndex={1}
+            boxHeightVarKey="statements"
           />
         )}
 
@@ -527,6 +531,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             setSeparatorYPosition={handleEditorSeparatorYChange}
             applyPreview={previewEditorSeparatorYPosition}
             panelIndex={2}
+            boxHeightVarKey="annotator"
           />
         )}
 
@@ -814,6 +819,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <Panel width={fourthPanelWidth} widthVarIndex={3}>
         <Box
           height={getFourthPanelBoxHeight("search")}
+          heightVarKey="search"
           label="Search"
           color="white"
           isExpanded={fourthPanelExpanded}
@@ -832,6 +838,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         </Box>
         <Box
           height={getFourthPanelBoxHeight("bookmarks")}
+          heightVarKey="bookmarks"
           label="Bookmarks"
           color="white"
           isExpanded={fourthPanelExpanded}
@@ -847,6 +854,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         </Box>
         <Box
           height={getFourthPanelBoxHeight("templates")}
+          heightVarKey="templates"
           label="Templates"
           color="white"
           isExpanded={fourthPanelExpanded}

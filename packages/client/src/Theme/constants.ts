@@ -90,10 +90,6 @@ export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
 };
 
-// eases panels and separators into a layout they were handed as a finished
-// value - a toggled panel, a dropped separator, a new window size
-export const PANEL_RESIZE_TRANSITION = "0.7s cubic-bezier(0.76, -0.01, 0, 1.07)";
-// marks <body> for the duration of a separator drag. Carries no styles of its
-// own; it is the selector the resize transition opts out of, so the pointer
-// alone sets the pace while a drag is in progress.
-export const RESIZING_CLASS = "resizing";
+// Panels, boxes and separators are all sized from CSS variables, which a drag
+// writes per frame and a toggle springs through springConfig.panelExpand. There
+// is nothing left for CSS to ease.

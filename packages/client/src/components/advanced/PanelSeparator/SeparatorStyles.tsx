@@ -1,7 +1,6 @@
-import { animated } from "@react-spring/web";
-import { PANEL_RESIZE_TRANSITION, RESIZING_CLASS } from "Theme/constants";
 import styled from "styled-components";
 import {
+  boxHeightVar,
   panelLeftEdgeValue,
   panelWidthVar,
   separatorPositionVar,
@@ -10,7 +9,7 @@ import {
 interface StyledPanelSeparator {
   $show: boolean;
 }
-export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
+export const StyledPanelSeparator = styled.div<StyledPanelSeparator>`
   position: absolute;
   background-color: ${({ theme }) => theme.color["success"]};
   background-color: ${({ $show, theme }) =>
@@ -33,9 +32,8 @@ export const StyledLayoutSeparatorVertical = styled(
   cursor: col-resize;
   /* a pointer drag on a touch screen scrolls the page instead of dragging */
   touch-action: none;
-  /* The position variables are rewritten per animation frame while dragged, so
-     easing applies to the positions the separator is handed rather than the
-     ones it is dragged to. Half the line's width comes off so that it straddles
+  /* The position variable carries every frame of both a drag and a spring, so
+     nothing is eased here. Half the line's width comes off so that it straddles
      the panel edge it sits on. */
   left: calc(
     ${({ $positionVarKey }) =>
@@ -43,16 +41,10 @@ export const StyledLayoutSeparatorVertical = styled(
           ? `var(${separatorPositionVar($positionVarKey)}, var(--separator-x))`
           : "var(--separator-x)"} - 0.1rem
   );
-  transition:
-    opacity 0.3s ease,
-    left ${PANEL_RESIZE_TRANSITION};
-
-  body.${RESIZING_CLASS} & {
-    transition: opacity 0.3s ease;
-  }
 `;
 interface StyledLayoutSeparatorHorizontal {
   $panelIndex?: number;
+  $boxHeightVarKey?: string;
 }
 export const StyledLayoutSeparatorHorizontal = styled(
   StyledPanelSeparator,
@@ -62,24 +54,19 @@ export const StyledLayoutSeparatorHorizontal = styled(
   cursor: row-resize;
   /* a pointer drag on a touch screen scrolls the page instead of dragging */
   touch-action: none;
-  /* spanning a panel off the panel's own variables keeps the separator with it
-     through a horizontal drag, which the separator is not part of */
+  /* Every edge comes from the variables of what it borders - the panel it spans
+     and the box it sits under - so the separator travels with them, spring and
+     all. Half the line's height comes off so that it straddles the box edge. */
   width: ${({ $panelIndex, theme }) =>
     $panelIndex !== undefined
       ? `var(${panelWidthVar($panelIndex)})`
-      : `var(--separator-width, calc(100% - ${theme.borderWidth[2]}))`};
+      : `calc(100% - ${theme.borderWidth[2]})`};
   left: ${({ $panelIndex }) =>
-    $panelIndex !== undefined
-      ? panelLeftEdgeValue($panelIndex)
-      : "var(--separator-left, 0)"};
-  top: var(--separator-y);
-  transition:
-    opacity 0.3s ease,
-    top ${PANEL_RESIZE_TRANSITION},
-    left ${PANEL_RESIZE_TRANSITION},
-    width ${PANEL_RESIZE_TRANSITION};
-
-  body.${RESIZING_CLASS} & {
-    transition: opacity 0.3s ease;
-  }
+    $panelIndex !== undefined ? panelLeftEdgeValue($panelIndex) : "0"};
+  top: calc(
+    ${({ $boxHeightVarKey }) =>
+        $boxHeightVarKey !== undefined
+          ? `var(${boxHeightVar($boxHeightVarKey)}, var(--separator-y))`
+          : "var(--separator-y)"} - 0.3rem
+  );
 `;

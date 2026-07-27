@@ -5,7 +5,7 @@ import { setStatementListOpened } from "redux/features/layout/mainPage/statement
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { BOX_SPLIT_OFFSET, hiddenBoxHeight } from "Theme/constants";
 import { DetailBoxState, EditorBoxState } from "types";
-import { writeBoxHeightVars } from "utils/layoutUtils";
+import { setBoxHeightVars } from "utils/layoutTransition";
 import { floorNumberToOneDecimal } from "utils/utils";
 
 interface UseBoxLayoutParams {
@@ -72,13 +72,13 @@ export function useBoxLayout({
   // through the handlers below, which is where anything a box holds that CSS
   // cannot size - the annotator's canvas - picks the new height up.
   const previewDetailSeparatorYPosition = (yPosition: number) =>
-    writeBoxHeightVars({
+    setBoxHeightVars({
       statements: yPosition,
       detail: contentHeight - yPosition,
     });
 
   const previewEditorSeparatorYPosition = (yPosition: number) =>
-    writeBoxHeightVars({
+    setBoxHeightVars({
       annotator: yPosition,
       editor: contentHeight - yPosition,
     });
