@@ -101,7 +101,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
               color="primary"
               inverted
               bold
-              label="new Template"
+              label="new template"
               size={ButtonSize.Medium}
               onClick={() => {
                 handleAskCreateTemplate();
