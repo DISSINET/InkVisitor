@@ -92,9 +92,15 @@ export const StyledExpansionBadge = styled.div<StyledExpansionBadge>`
 
 interface StyledLabelWrap {
   $invertedLabel: boolean;
+  $isFavorited?: boolean;
 }
 export const StyledLabelWrap = styled.div<StyledLabelWrap>`
   display: inline-grid;
+  /* the star keeps its intrinsic width and the label takes the rest; the 0 floor
+     lets the label shrink below its content so the ellipsis can appear */
+  grid-template-columns: ${({ $isFavorited }) =>
+    $isFavorited ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)"};
+  align-items: center;
   overflow: hidden;
   background-color: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.color.tagSelectedBackground : theme.color.tagBackground};

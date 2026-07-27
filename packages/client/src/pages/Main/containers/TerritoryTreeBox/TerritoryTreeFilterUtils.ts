@@ -201,6 +201,35 @@ export function filterTreeWithSubterritories(
   } as IResponseTree;
 }
 
+/**
+ * Prunes the tree to the nodes the filter settings select, honouring the AND/OR
+ * operator through the same predicate that drives highlighting. A node survives
+ * when it matches itself or when it still has a surviving descendant, so the
+ * path to a match stays walkable.
+ */
+export function filterTreeByFilters(
+  node: IResponseTree | null,
+  filters: ITerritoryFilter,
+  favoriteIds: string[]
+): IResponseTree | null {
+  if (!node) {
+    return null;
+  }
+
+  const filteredChildren = node.children
+    .map((child) => filterTreeByFilters(child, filters, favoriteIds))
+    .filter((child): child is IResponseTree => child !== null);
+
+  if (
+    filteredChildren.length > 0 ||
+    isNodeMatchingFilters(node, filters, favoriteIds)
+  ) {
+    return { ...node, children: filteredChildren } as IResponseTree;
+  }
+
+  return null;
+}
+
 export function markNodesWithFilters(
   node: IResponseTree,
   filters: ITerritoryFilter,

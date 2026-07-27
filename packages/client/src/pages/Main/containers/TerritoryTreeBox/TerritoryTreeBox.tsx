@@ -26,14 +26,7 @@ import {
   StyledTreeWrapper,
 } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
-import {
-  filterTreeByFavorites,
-  filterTreeByLabel,
-  filterTreeWithStatements,
-  filterTreeWithSubterritories,
-  filterTreeWithWriteRights,
-  markNodesWithFilters,
-} from "./TerritoryTreeFilterUtils";
+import { filterTreeByFilters, markNodesWithFilters } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 import { IcoPlusBold } from "Theme/icons";
 import { IoFilter } from "react-icons/io5";
@@ -130,68 +123,17 @@ export const TerritoryTreeBox: React.FC = () => {
         return newFilteredTreeData;
       }
 
-      if (filterSettings.operator === "or") {
-        // OR logic: apply each filter independently and merge results
-        const filteredResults: (IResponseTree | null)[] = [];
-
-        if (filterSettings.starred && userData) {
-          const starredTreeData = filterTreeByFavorites(
-            treeData,
-            userData.storedTerritories.map((t) => t.territory.id),
-          );
-          if (starredTreeData) filteredResults.push(starredTreeData);
-        }
-
-        if (filterSettings.editorRights) {
-          const editorRightsTreeData = filterTreeWithWriteRights(treeData);
-          if (editorRightsTreeData) filteredResults.push(editorRightsTreeData);
-        }
-
-        if (filterSettings.withStatements) {
-          const withStatementsTreeData = filterTreeWithStatements(treeData);
-          if (withStatementsTreeData) filteredResults.push(withStatementsTreeData);
-        }
-
-        if (filterSettings.withSubterritories) {
-          const withSubterritoriesTreeData = filterTreeWithSubterritories(treeData);
-          if (withSubterritoriesTreeData) filteredResults.push(withSubterritoriesTreeData);
-        }
-
-        if (filterSettings.filter.length > 0) {
-          const labelFilterTreeData = filterTreeByLabel(treeData, filterSettings.filter);
-          if (labelFilterTreeData) filteredResults.push(labelFilterTreeData);
-        }
-
-        // Merge OR results (this is a simplified merge - we might need more sophisticated logic)
-        // every active filter came back empty, so their union is empty as well -
-        // falling through to treeData here would show the whole unfiltered tree
-        newFilteredTreeData = filteredResults.length > 0 ? filteredResults[0] : null;
-      } else {
-        // AND logic: apply filters sequentially
-        if (filterSettings.starred && userData) {
-          const starredTreeData = filterTreeByFavorites(
-            newFilteredTreeData,
-            userData.storedTerritories.map((t) => t.territory.id),
-          );
-          newFilteredTreeData = starredTreeData;
-        }
-        if (filterSettings.editorRights) {
-          const editorRightsTreeData = filterTreeWithWriteRights(newFilteredTreeData);
-          newFilteredTreeData = editorRightsTreeData;
-        }
-        if (filterSettings.withStatements) {
-          const withStatementsTreeData = filterTreeWithStatements(newFilteredTreeData);
-          newFilteredTreeData = withStatementsTreeData;
-        }
-        if (filterSettings.withSubterritories) {
-          const withSubterritoriesTreeData = filterTreeWithSubterritories(newFilteredTreeData);
-          newFilteredTreeData = withSubterritoriesTreeData;
-        }
-        if (filterSettings.filter.length > 0) {
-          const labelFilterTreeData = filterTreeByLabel(newFilteredTreeData, filterSettings.filter);
-          newFilteredTreeData = labelFilterTreeData;
-        }
+      // the starred filter needs the user's favorites, so until they load it
+      // would select nothing - show the unfiltered tree rather than "No results"
+      if (filterSettings.starred && !userData) {
+        return newFilteredTreeData;
       }
+
+      newFilteredTreeData = filterTreeByFilters(
+        treeData,
+        filterSettings,
+        userData?.storedTerritories.map((t) => t.territory.id) ?? [],
+      );
 
       // Mark tree data for highlighting
       if (newFilteredTreeData && userData) {
