@@ -2,6 +2,7 @@ import { EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { Button, Checkbox, Input } from "components";
 import React from "react";
 import { FaTimes } from "react-icons/fa";
+import { MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
 import {
   IcoAnchor,
   IcoArrowCircleDown,
@@ -81,6 +82,17 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   // breaking a typing run.
   const refocusInput = () => findInputRef.current?.focus();
 
+  // A query below the hook's threshold never runs, so it would otherwise leave
+  // the counter blank with nothing to say why.
+  const resultsLabel =
+    searchTerm.length > 0 && searchTerm.length < MIN_SEARCH_TERM_LENGTH
+      ? `min ${MIN_SEARCH_TERM_LENGTH} characters`
+      : searchOccurences === null
+        ? ""
+        : occurencesCount === 0
+          ? "no results"
+          : `${searchActiveOccurence + 1} of ${occurencesCount}`;
+
   return (
     <StyledAnnotatorSearchBarWrap>
       <StyledAnnotatorSearchBar>
@@ -92,6 +104,7 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
             onEscapePressFn={onClose}
             changeOnType
             autoFocus
+            compact
             width="full"
             minWidth={110}
             inputRef={findInputRef}
@@ -143,13 +156,7 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
           />
         </StyledSearchBarInput>
 
-        <StyledSearchBarResults>
-          {searchOccurences === null
-            ? ""
-            : occurencesCount === 0
-              ? "no results"
-              : `${searchActiveOccurence + 1} of ${occurencesCount}`}
-        </StyledSearchBarResults>
+        <StyledSearchBarResults>{resultsLabel}</StyledSearchBarResults>
 
         <StyledSearchBarNav>
           <Button
