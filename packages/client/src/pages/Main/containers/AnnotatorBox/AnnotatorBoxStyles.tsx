@@ -81,14 +81,25 @@ export const StyledAnnotatorHeaderTitle = styled.div`
   align-items: center;
   flex-shrink: 1;
   min-width: 2rem;
+  max-width: 16rem;
   overflow: hidden;
 `;
 
+/**
+ * StyledHead styles the box label as an uppercase Muni caption. The document
+ * title and resource tag are content rather than caption, so they opt back out
+ * of everything that cascades from it.
+ */
 export const StyledAnnotatorHeader = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   min-width: 0;
+  font-family: "Roboto", sans-serif;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  line-height: normal;
+  text-transform: none;
 `;
 
 export const StyledHighlightPopover = styled.div`

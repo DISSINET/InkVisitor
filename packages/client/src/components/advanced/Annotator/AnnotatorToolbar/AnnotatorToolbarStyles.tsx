@@ -18,7 +18,7 @@ export const StyledAnnotatorToolbar = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
-  opacity: 0.9;
+  opacity: 0.5;
   transition: opacity 0.3s;
 
   &:hover,
