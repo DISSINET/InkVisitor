@@ -265,7 +265,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                           <FaLongArrowAltRight />
                         </StyledLocateAnchorIcon>
                       }
-                      tooltipLabel="locate anchor"
+                      tooltipLabel="scroll to where the open territory is anchored in this text"
                       inverted
                       onClick={() => {
                         if (territoryId) {
@@ -275,7 +275,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                       color="warning"
                     />
                   ) : (
-                    <TbAnchorOff title="no anchor for T" />
+                    <TbAnchorOff title="the open territory is not anchored in this text" />
                   )}
                   {warningAnchorCount > 0 &&
                     canEditDocument &&
