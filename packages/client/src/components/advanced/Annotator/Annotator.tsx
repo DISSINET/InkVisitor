@@ -51,6 +51,7 @@ import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
 import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
+import useKeypress from "hooks/useKeyPress";
 import { useAppSelector } from "redux/hooks";
 import {
   collectStatementAnchors,
@@ -61,10 +62,12 @@ import {
   searchTree,
 } from "utils/utils";
 import { EntityCreateModal } from "..";
-import { resolveEditActions } from "./annotatorChrome";
+import { FindPanel, resolveEditActions, resolveFindPanel } from "./annotatorChrome";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
-import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
+import { AnnotatorFindPanel } from "./AnnotatorSearchLine/AnnotatorFindPanel";
+import { AnnotatorFindReplaceModal } from "./AnnotatorSearchLine/AnnotatorFindReplaceModal";
+import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorSequentialAnchorPanel";
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
@@ -332,13 +335,11 @@ export const TextAnnotator = ({
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const lines = useRef<HTMLCanvasElement>(null);
-  const warningsPanelRef = useRef<HTMLDivElement>(null);
 
-  // The find & replace panel replaces the search line rather than sitting under
-  // it; the row it leaves behind is measured so the canvas can claim it.
-  const [isFindReplaceOpen, setIsFindReplaceOpen] = useState<boolean>(false);
-  const searchLineRef = useRef<HTMLDivElement>(null);
-  const [searchLineHeight, setSearchLineHeight] = useState<number>(0);
+  const [isFindOpen, setIsFindOpen] = useState(false);
+  const [isSequentialAnchoringOpen, setIsSequentialAnchoringOpen] = useState(false);
+  const findInputRef = useRef<HTMLInputElement | null>(null);
+
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -428,11 +429,6 @@ export const TextAnnotator = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asymmetricalAnchors.length]);
-
-  // Rendered height of the warnings chip (incl. its bottom gap). The canvas has
-  // a fixed pixel height fed by the parent, so the chip's height must be
-  // subtracted from it to keep the bottom controls visible (#2601).
-  const [warningsPanelHeight, setWarningsPanelHeight] = useState<number>(0);
 
   /** XML (RAW) mode: pointer over `<entityId>` / `</entityId>` markup → preview chip at cursor */
   const [xmlMarkupAnchorHover, setXmlMarkupAnchorHover] = useState<{
@@ -1003,46 +999,9 @@ export const TextAnnotator = ({
     };
   }, [annotator]);
 
-  // Measure the warnings panel so the canvas can give up exactly its height.
-  useEffect(() => {
-    const el = warningsPanelRef.current;
-    if (!el) {
-      return;
-    }
-    const update = () => setWarningsPanelHeight(el.offsetHeight);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Measure the search line row. It collapses to 0 while the find & replace
-  // panel stands in for it, so only real heights are kept — that last height is
-  // what the canvas claims for as long as the row is gone.
-  useEffect(() => {
-    const el = searchLineRef.current;
-    if (!el) {
-      return;
-    }
-    const update = () => {
-      const measured = el.offsetHeight;
-      if (measured > 0) {
-        setSearchLineHeight(measured);
-      }
-    };
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // The canvas keeps its fixed pixel height minus whatever the warnings panel
-  // occupies, plus the search line row while find & replace is open — the
-  // parent's height budget always reserves the row.
-  const canvasHeight = Math.max(
-    0,
-    height - warningsPanelHeight + (isFindReplaceOpen ? searchLineHeight : 0),
-  );
+  // The canvas is the only thing the height budget pays for — the toolbar
+  // overlays it and the find panels are portalled out of the layout.
+  const canvasHeight = Math.max(0, height);
 
   // Resize the annotator when the width or available canvas height changes
   useEffect(() => {
@@ -1457,6 +1416,51 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  const goToNextOccurence = useCallback(() => {
+    if (searchOccurences === null || searchOccurences.length === 0) return;
+    setSearchActiveOccurence((searchActiveOccurence + 1) % searchOccurences.length);
+  }, [searchOccurences, searchActiveOccurence]);
+
+  const goToPreviousOccurence = useCallback(() => {
+    if (searchOccurences === null || searchOccurences.length === 0) return;
+    setSearchActiveOccurence(
+      (searchActiveOccurence - 1 + searchOccurences.length) % searchOccurences.length,
+    );
+  }, [searchOccurences, searchActiveOccurence]);
+
+  // Ctrl/Cmd+F opens the find panel for the current mode, or focuses the input
+  // of whichever panel is already open. ctrlKeyCombo is true so it fires
+  // page-wide rather than only when the canvas holds focus.
+  useKeypress(
+    "f",
+    () => {
+      if (!isSearchAllowed) return;
+      if (isFindOpen) {
+        findInputRef.current?.focus();
+        findInputRef.current?.select();
+      } else {
+        setIsFindOpen(true);
+      }
+    },
+    [isSearchAllowed, isFindOpen],
+    true,
+  );
+
+  useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
+    isSearchAllowed,
+    goToNextOccurence,
+  ]);
+
+  useKeypress(
+    "F3",
+    () => isSearchAllowed && goToPreviousOccurence(),
+    [isSearchAllowed, goToPreviousOccurence],
+    false,
+    true,
+  );
+
+  const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSequentialAnchoringOpen);
+
   const editActions = resolveEditActions({
     canEditDocument,
     mode: annotatorMode,
@@ -1472,41 +1476,82 @@ export const TextAnnotator = ({
 
   return (
     <>
-      <div ref={searchLineRef}>
-        <AnnotatorSearchLine
-          contentWidth={width}
-          showStatementList={showStatementList ?? false}
+      {findPanel === FindPanel.Find && (
+        <AnnotatorFindPanel
+          onClose={() => setIsFindOpen(false)}
+          onOpenSequentialAnchoring={() => setIsSequentialAnchoringOpen(true)}
+          canEdit={canEditDocument}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          findInputRef={findInputRef}
           searchOccurences={searchOccurences}
           searchActiveOccurence={searchActiveOccurence}
-          isSearchAllowed={isSearchAllowed}
-          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-          setSearchActiveOccurence={setSearchActiveOccurence}
+          goToNextOccurence={goToNextOccurence}
+          goToPreviousOccurence={goToPreviousOccurence}
+          isCaseSensitiveMode={isCaseSensitiveMode}
+          setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+          isExtendToWholeWordMode={isExtendToWholeWordMode}
+          setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
+        />
+      )}
+
+      {findPanel === FindPanel.SequentialAnchor && (
+        <AnnotatorSequentialAnchorPanel
+          onBack={() => setIsSequentialAnchoringOpen(false)}
+          onClose={() => {
+            setIsSequentialAnchoringOpen(false);
+            setIsFindOpen(false);
+          }}
+          annotator={annotator}
+          documentId={documentId}
+          dataDocument={dataDocument}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          findInputRef={findInputRef}
+          searchOccurences={searchOccurences}
+          searchActiveOccurence={searchActiveOccurence}
+          goToNextOccurence={goToNextOccurence}
+          goToPreviousOccurence={goToPreviousOccurence}
+          isCaseSensitiveMode={isCaseSensitiveMode}
+          setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+          isExtendToWholeWordMode={isExtendToWholeWordMode}
+          setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
+          entityToAnchor={entityToAnchor}
+          setEntityToAnchor={setEntityToAnchor}
+          currentAnchorExist={currentAnchorExist}
+          selectedText={selectedText}
+        />
+      )}
+
+      {findPanel === FindPanel.FindReplace && (
+        <AnnotatorFindReplaceModal
+          onClose={() => setIsFindOpen(false)}
           annotator={annotator}
           documentId={documentId}
           dataDocument={dataDocument || undefined}
-          setEntityToAnchor={setEntityToAnchor}
-          entityToAnchor={entityToAnchor}
-          currentAnchorExist={currentAnchorExist}
-          annotatorMode={annotatorMode}
-          selectedText={selectedText}
+          dataDocumentIsFetching={dataDocumentIsFetching}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          findInputRef={findInputRef}
+          searchOccurences={searchOccurences}
           setSearchOccurences={setSearchOccurences}
           refreshSearch={refreshSearch}
-          isRegexMode={isRegexMode}
-          setIsRegexMode={setIsRegexMode}
-          dataDocumentIsFetching={dataDocumentIsFetching}
-          isExtendToWholeWordMode={isExtendToWholeWordMode}
-          setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
-          isWholeWordOnlyMode={isWholeWordOnlyMode}
-          setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+          searchActiveOccurence={searchActiveOccurence}
+          setSearchActiveOccurence={setSearchActiveOccurence}
+          goToNextOccurence={goToNextOccurence}
+          goToPreviousOccurence={goToPreviousOccurence}
           isCaseSensitiveMode={isCaseSensitiveMode}
           setIsCaseSensitiveMode={setIsCaseSensitiveMode}
-          canEdit={canEditDocument}
-          isFindReplaceOpen={isFindReplaceOpen}
-          setIsFindReplaceOpen={setIsFindReplaceOpen}
+          isWholeWordOnlyMode={isWholeWordOnlyMode}
+          setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+          isRegexMode={isRegexMode}
+          setIsRegexMode={setIsRegexMode}
         />
-      </div>
+      )}
 
       <AnnotatorWarningsModal
         anchors={asymmetricalAnchors}
@@ -1717,6 +1762,8 @@ export const TextAnnotator = ({
             }}
             onSave={() => handleSaveNewContent(false)}
             isSavePending={isSaving || isSavingWithoutRefresh}
+            isSearchAllowed={isSearchAllowed}
+            onFindClick={() => setIsFindOpen(true)}
             warningChip={
               !hideWarningChip && asymmetricalAnchors.length > 0 ? (
                 <WarningsChip

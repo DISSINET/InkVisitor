@@ -6,7 +6,7 @@ import { BsFileTextFill } from "react-icons/bs";
 import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { HiCodeBracket } from "react-icons/hi2";
 import { useTheme } from "styled-components";
-import { IcoUndo } from "Theme/icons";
+import { IcoSearch, IcoUndo } from "Theme/icons";
 import {
   StyledAnnotatorToolbar,
   StyledAnnotatorToolbarButtonWrap,
@@ -25,6 +25,9 @@ interface AnnotatorToolbar {
   onSave: () => void;
   isSavePending: boolean;
 
+  isSearchAllowed: boolean;
+  onFindClick: () => void;
+
   /** Warnings chip, when this host has not supplied its own. */
   warningChip?: ReactNode;
   /** Host-specific controls — highlight classes, locate anchor, warnings. */
@@ -40,6 +43,8 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   onDiscard,
   onSave,
   isSavePending,
+  isSearchAllowed,
+  onFindClick,
   warningChip,
   toolbarExtras,
 }) => {
@@ -76,6 +81,19 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
           canEditDocument ? "display and edit XML" : "display XML",
         )}
       </SwitchGroup>
+
+      {isSearchAllowed && (
+        <Button
+          icon={<IcoSearch />}
+          color="info"
+          inverted
+          onClick={onFindClick}
+          tooltipLabel={
+            annotatorMode === EditMode.HIGHLIGHT ? "find (Ctrl+F)" : "find & replace (Ctrl+F)"
+          }
+          tooltipPosition="top"
+        />
+      )}
 
       {warningChip}
 
