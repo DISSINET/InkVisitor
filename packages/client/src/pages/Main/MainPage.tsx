@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IStatement } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Box, Button, ButtonGroup, IconButton, Panel } from "components";
+import { Box, boxContentId, Button, ButtonGroup, IconButton, Panel } from "components";
 import {
   EntityCreateModal,
   LayoutSeparatorHorizontal,
@@ -13,6 +13,7 @@ import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -195,6 +196,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+
+  // The annotator Box's label + header content live in AnnotatorBox (it owns
+  // the resource/document data they're built from); this page only owns the
+  // Box itself, so AnnotatorBox reports what to show through onHeaderChange.
+  const [annotatorHeader, setAnnotatorHeader] = useState<{
+    label: string;
+    component: ReactNode;
+  }>({ label: "Annotator", component: null });
 
   const userRole = getStoredUserRole() as UserEnums.Role;
 
@@ -757,13 +766,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
           borderColor="white"
           height={getAnnotatorBoxHeight()}
           heightVarKey="annotator"
-          label="Annotator"
+          label={annotatorHeader.label}
+          headerComponent={annotatorHeader.component}
+          contentId={boxContentId("Annotator")}
           isExpanded={thirdPanelExpanded}
           buttons={[thirdPanelButton()]}
         >
           <MemoizedAnnotatorBox
             height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
             width={thirdPanelWidth - 10}
+            onHeaderChange={setAnnotatorHeader}
           />
         </Box>
 

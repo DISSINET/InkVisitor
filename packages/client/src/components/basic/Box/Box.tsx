@@ -33,6 +33,9 @@ interface Box {
   onHeaderClick?: () => void;
   disableHeaderClick?: boolean;
   disableScroll?: boolean;
+  /** DOM id for the content element. Defaults to one derived from the label,
+      which only holds while the label is fixed. */
+  contentId?: string;
 }
 
 export const Box: React.FC<Box> = ({
@@ -49,6 +52,7 @@ export const Box: React.FC<Box> = ({
   onHeaderClick,
   disableHeaderClick = false,
   disableScroll = false,
+  contentId,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
   const [showContentLabel, setShowContentLabel] = useState<boolean>(!isExpanded);
@@ -101,7 +105,7 @@ export const Box: React.FC<Box> = ({
         )}
       </StyledHead>
       <StyledContent
-        id={boxContentId(label)}
+        id={contentId ?? boxContentId(label)}
         $color={color}
         $borderColor={borderColor}
         $noFrame={noFrame}

@@ -63,3 +63,48 @@ export const StyledInfoText = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   color: ${({ theme }) => theme.color["info"]};
 `;
+
+/**
+ * The resource tag holds a fixed width so the title is the only item that
+ * shrinks — StyledLabel in the Box header already ellipsises, and the resource
+ * identity matters more than the last characters of the title.
+ */
+export const StyledAnnotatorHeaderResource = styled.div`
+  display: flex;
+  flex-shrink: 0;
+  max-width: 11.5rem;
+`;
+
+export const StyledAnnotatorHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  min-width: 0;
+`;
+
+export const StyledHighlightPopover = styled.div`
+  z-index: 100;
+  padding: ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
+  background-color: ${({ theme }) => theme.color.white};
+  box-shadow: ${({ theme }) => theme.boxShadow.high};
+`;
+
+/** Reference anchor for the highlight popover trigger. Button doesn't forward
+    refs, so this plain wrapper carries the DOM node floating-ui positions against. */
+export const StyledHighlightTrigger = styled.div`
+  display: flex;
+`;
+
+export const StyledLocateAnchorIcon = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const StyledEmptyStateWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: ${({ theme }) => theme.space[8]};
+`;
