@@ -20,6 +20,8 @@ import { BsInfoCircle } from "react-icons/bs";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
+import { ButtonSize } from "types";
+import { TOOLBAR_ICON_SIZE } from "components/advanced/Annotator/AnnotatorToolbar/AnnotatorToolbarStyles";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
 import { AnnotatorHighlightPopover } from "./AnnotatorHighlightPopover";
@@ -259,11 +261,11 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                   )}
                   {activeTHasAnchor ? (
                     <Button
-                      label=""
-                      iconRight={
+                      size={ButtonSize.Medium}
+                      icon={
                         <StyledLocateAnchorIcon>
-                          <TbAnchor />
-                          <FaLongArrowAltRight />
+                          <TbAnchor size={TOOLBAR_ICON_SIZE} />
+                          <FaLongArrowAltRight size={TOOLBAR_ICON_SIZE} />
                         </StyledLocateAnchorIcon>
                       }
                       tooltipLabel="locate territory opened in tree"
@@ -283,6 +285,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                     selectedResource !== false &&
                     selectedResource?.data?.documentId && (
                       <WarningsChip
+                        size={ButtonSize.Medium}
                         count={warningAnchorCount}
                         onClick={() => setWarningsModalOpen(true)}
                       />

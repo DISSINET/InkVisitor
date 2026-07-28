@@ -7,6 +7,13 @@ import styled from "styled-components";
 export const TOOLBAR_GUTTER_PX = 4;
 
 /**
+ * Icons in the action cluster are sized here rather than per call site: a
+ * button's height follows its content, so mixed glyph sizes give mismatched
+ * buttons even at one ButtonSize.
+ */
+export const TOOLBAR_ICON_SIZE = 15;
+
+/**
  * Spans the canvas so its two clusters can sit at opposite ends, but paints
  * nothing itself and takes no pointer events — the text between the clusters
  * stays visible and clickable. The canvas is a fixed-size element the annotator

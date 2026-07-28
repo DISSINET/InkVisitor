@@ -22,7 +22,7 @@ export const StyledAnnotatorSearchBarWrap = styled.div`
   top: 2px;
   left: ${TOOLBAR_GUTTER_PX}px;
   /* the scroller viewport sits in the last 10px of the wrapper's width */
-  right: ${TOOLBAR_GUTTER_PX + 2}px;
+  right: ${TOOLBAR_GUTTER_PX + 12}px;
   z-index: 20;
   display: flex;
   justify-content: flex-end;

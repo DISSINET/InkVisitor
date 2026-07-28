@@ -14,6 +14,7 @@ import {
   StyledAnnotatorToolbarCluster,
   StyledAnnotatorToolbarGroup,
   StyledDisplayModeButtonIconWrapper,
+  TOOLBAR_ICON_SIZE,
 } from "./AnnotatorToolbarStyles";
 
 interface AnnotatorToolbar {
@@ -93,7 +94,8 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       <StyledAnnotatorToolbarCluster>
         {isSearchAllowed && (
           <Button
-            icon={<IcoSearch size={16} />}
+            size={ButtonSize.Medium}
+            icon={<IcoSearch size={TOOLBAR_ICON_SIZE} />}
             color="info"
             inverted
             onClick={onFindClick}
@@ -113,9 +115,11 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
         {editActionsVisible && (
           <StyledAnnotatorToolbarGroup>
             <Button
+              size={ButtonSize.Medium}
+              shape="square"
               color="greyer"
               inverted
-              icon={<IcoUndo />}
+              icon={<IcoUndo size={TOOLBAR_ICON_SIZE} />}
               disabled={editActionsDisabled}
               onClick={onDiscard}
               tooltipLabel="discard unsaved changes"
@@ -123,8 +127,10 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
             />
             <StyledAnnotatorToolbarButtonWrap>
               <Button
+                size={ButtonSize.Medium}
+                shape="square"
                 color="info"
-                icon={<FaRegSave size={14} />}
+                icon={<FaRegSave size={TOOLBAR_ICON_SIZE} />}
                 disabled={editActionsDisabled}
                 onClick={onSave}
                 tooltipLabel="save document (Ctrl+S)"
