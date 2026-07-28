@@ -6,6 +6,7 @@ import { BsFileTextFill } from "react-icons/bs";
 import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { HiCodeBracket } from "react-icons/hi2";
 import { useTheme } from "styled-components";
+import { ButtonSize } from "types";
 import { IcoSearch, IcoUndo } from "Theme/icons";
 import {
   StyledAnnotatorToolbar,
@@ -57,6 +58,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   const modeButton = (mode: EditMode, icon: ReactNode, tooltipLabel: string) => (
     <Button
       key={mode}
+      size={ButtonSize.Medium}
       icon={<StyledDisplayModeButtonIconWrapper>{icon}</StyledDisplayModeButtonIconWrapper>}
       color="success"
       shape="rounded-sm"
@@ -74,15 +76,15 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
     <StyledAnnotatorToolbar>
       <StyledAnnotatorToolbarCluster>
         <SwitchGroup $bgColor={theme.color.invertedBg.success}>
-          {modeButton(EditMode.HIGHLIGHT, <FaHighlighter size={11} />, "anchor entities")}
+          {modeButton(EditMode.HIGHLIGHT, <FaHighlighter size={13} />, "anchor entities")}
           {modeButton(
             EditMode.SEMI,
-            <BsFileTextFill size={11} />,
+            <BsFileTextFill size={13} />,
             canEditDocument ? "edit plain text" : "view plain text",
           )}
           {modeButton(
             EditMode.RAW,
-            <HiCodeBracket size={11} />,
+            <HiCodeBracket size={13} />,
             canEditDocument ? "display and edit XML" : "display XML",
           )}
         </SwitchGroup>

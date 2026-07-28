@@ -10,7 +10,8 @@ import styled from "styled-components";
 export const StyledAnnotatorToolbar = styled.div`
   position: absolute;
   left: ${({ theme }) => theme.space[2]};
-  right: ${({ theme }) => theme.space[2]};
+  /* clears the 10px scroller viewport parked against the wrapper's right edge */
+  right: ${({ theme }) => theme.space[8]};
   bottom: ${({ theme }) => theme.space[4]};
   z-index: 20;
   display: flex;
