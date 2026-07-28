@@ -75,7 +75,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   return (
     <StyledAnnotatorToolbar>
       <StyledAnnotatorToolbarCluster>
-        <SwitchGroup $column $bgColor={theme.color.invertedBg.success}>
+        <SwitchGroup $bgColor={theme.color.invertedBg.success}>
           {modeButton(EditMode.HIGHLIGHT, <FaHighlighter size={13} />, "anchor entities")}
           {modeButton(
             EditMode.SEMI,

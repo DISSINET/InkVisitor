@@ -43,6 +43,9 @@ export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
 // Height of the Box header row. StyledHead sets its own height from this, and
 // callers subtract it from a box's height to get the height of its content.
 export const BOX_HEADER_HEIGHT = 32;
+// Frame drawn around a Box's content (borderWidth[4] in StyledContent). Content
+// is border-box, so a caller sizing something to fill a Box pays for it twice.
+export const BOX_CONTENT_BORDER_PX = 4;
 // A collapsed panel leaves the annotator box narrower than this, and an
 // expanded one is never anywhere near it (THIRD_PANEL_MIN_WIDTH away). Widths
 // below it are the collapsed state, which the canvas is not drawn at.

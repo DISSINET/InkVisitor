@@ -13,6 +13,7 @@ import { AxiosResponse } from "axios";
 import { Button } from "components";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
+import { CANVAS_WRAPPER_PADDING_PX } from "components/advanced/Annotator/styles";
 import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -102,8 +103,10 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   onUnsavedTextEditsChange,
 }) => {
   // The canvas is the only thing in the box content — the toolbar overlays it
-  // and the find panels are portalled out of the layout.
-  const annotatorHeight = contentHeight;
+  // and the find panels are portalled out of the layout. The wrapper insets it,
+  // and the canvas is a fixed pixel size rather than a box that could shrink to
+  // fit, so that inset comes out of the height it is given.
+  const annotatorHeight = contentHeight - 2 * CANVAS_WRAPPER_PADDING_PX;
 
   // The annotator box collapses to (near) zero height when the Statement
   // Editor box is full-height. The selection menu floats over the whole page,

@@ -37,6 +37,7 @@ import {
   COLLAPSED_PANEL_WIDTH,
   fourthPanelBoxesHeightThirds,
   BOX_HEADER_HEIGHT,
+  BOX_CONTENT_BORDER_PX,
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
@@ -769,7 +770,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           buttons={[thirdPanelButton()]}
         >
           <MemoizedAnnotatorBox
-            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - BOX_HEADER_HEIGHT)}
+            height={Math.max(
+              0,
+              (getAnnotatorBoxHeight() ?? 0) - BOX_HEADER_HEIGHT - 2 * BOX_CONTENT_BORDER_PX,
+            )}
             width={thirdPanelWidth - 10}
             onHeaderChange={setAnnotatorHeader}
           />

@@ -47,10 +47,13 @@ export const StyledAnnotatorColumn = styled.div`
   padding-left: ${ANNOTATOR_LEFT_MARGIN_PX}px;
 `;
 
+/** Inset of the canvases inside their wrapper; the height budget must pay for it. */
+export const CANVAS_WRAPPER_PADDING_PX = 2;
+
 export const StyledCanvasWrapper = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color.white};
-  padding: 2px;
+  padding: ${CANVAS_WRAPPER_PADDING_PX}px;
   border-radius: 7px;
   display: flex;
   flex-direction: row;
