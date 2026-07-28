@@ -420,19 +420,32 @@ const MainPage: React.FC<MainPage> = ({}) => {
     animateSeparatorPositionVars(separatorPositions);
   }, [separatorPositions.tree, separatorPositions.center, separatorPositions.search]);
 
-  // Same for the boxes a horizontal separator splits. The heights come from
-  // getters rather than memos, so every render reasserts them.
+  // Same for the boxes a horizontal separator splits, and for the fourth
+  // panel's stack. The heights come from getters rather than memos, so the
+  // effect has to name the values themselves: reasserting them on a render that
+  // had nothing to do with them - a query settling, a ping - would spring the
+  // boxes back to the committed layout while a drag is holding them elsewhere.
+  const boxHeights = {
+    statements: getStatementListBoxHeight(),
+    detail: getDetailBoxHeight(),
+    annotator: getAnnotatorBoxHeight(),
+    editor: getEditorBoxHeight(),
+    search: getFourthPanelBoxHeight("search"),
+    bookmarks: getFourthPanelBoxHeight("bookmarks"),
+    templates: getFourthPanelBoxHeight("templates"),
+  };
+
   useLayoutEffect(() => {
-    animateBoxHeightVars({
-      statements: getStatementListBoxHeight(),
-      detail: getDetailBoxHeight(),
-      annotator: getAnnotatorBoxHeight(),
-      editor: getEditorBoxHeight(),
-      search: getFourthPanelBoxHeight("search"),
-      bookmarks: getFourthPanelBoxHeight("bookmarks"),
-      templates: getFourthPanelBoxHeight("templates"),
-    });
-  });
+    animateBoxHeightVars(boxHeights);
+  }, [
+    boxHeights.statements,
+    boxHeights.detail,
+    boxHeights.annotator,
+    boxHeights.editor,
+    boxHeights.search,
+    boxHeights.bookmarks,
+    boxHeights.templates,
+  ]);
 
   // Rebuild the layout when the window cannot hold the panels that are open.
   // Only then: a separator that runs out of room stops at its boundary and the

@@ -45,9 +45,12 @@ class LayoutTransition {
       return;
     }
 
+    const { target } = this;
     const current = this.currentValues();
-    if (!current) {
-      // The first layout is not a transition - there is nothing to travel from.
+    // Nothing to travel from: either the first layout, or a different set of
+    // variables than the last caller wrote - another page's panels, whose widths
+    // these are not a continuation of.
+    if (!target || !current || !sameKeys(target, values)) {
       this.set(values);
       return;
     }
@@ -95,12 +98,13 @@ class LayoutTransition {
   }
 }
 
-const sameValues = (a: LayoutValues, b: LayoutValues): boolean => {
+const sameKeys = (a: LayoutValues, b: LayoutValues): boolean => {
   const keys = Object.keys(b);
-  return (
-    keys.length === Object.keys(a).length && keys.every((key) => a[key] === b[key])
-  );
+  return keys.length === Object.keys(a).length && keys.every((key) => key in a);
 };
+
+const sameValues = (a: LayoutValues, b: LayoutValues): boolean =>
+  sameKeys(a, b) && Object.keys(b).every((key) => a[key] === b[key]);
 
 // Panel widths arrive as a list, keyed here by index - which is what their
 // variables are named after anyway.
