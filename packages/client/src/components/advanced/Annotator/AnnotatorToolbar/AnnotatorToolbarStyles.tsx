@@ -34,7 +34,7 @@ export const StyledAnnotatorToolbarCluster = styled.div`
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   pointer-events: auto;
-  opacity: 0.5;
+  opacity: 0.8;
   transition: opacity 0.3s;
 
   &:hover,
