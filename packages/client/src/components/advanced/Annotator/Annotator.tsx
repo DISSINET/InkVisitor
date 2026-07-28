@@ -9,10 +9,16 @@ import {
 } from "@floating-ui/react";
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { FaHighlighter, FaRegSave } from "react-icons/fa";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "react-toastify";
-import { IcoTrash } from "Theme/icons";
 import { getStoredUserRole } from "utils/userStorage";
 import { v4 as uuidv4 } from "uuid";
 
@@ -21,7 +27,6 @@ import {
   Annotator,
   AsymmetricalAnchor,
   EditMode,
-  editModeDisplayLabel,
   MoveAnchorBoundaryResult,
   Occurrence,
   Tag,
@@ -43,11 +48,9 @@ import { AxiosResponse } from "axios";
 import { CancelButton, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { EntityTagById } from "components/advanced";
 import { Button } from "components/basic/Button/Button";
-import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
+import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
 import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
-import { BsFileTextFill } from "react-icons/bs";
-import { HiCodeBracket } from "react-icons/hi2";
 import { useAppSelector } from "redux/hooks";
 import {
   collectStatementAnchors,
@@ -58,19 +61,19 @@ import {
   searchTree,
 } from "utils/utils";
 import { EntityCreateModal } from "..";
+import { resolveEditActions } from "./annotatorChrome";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
 import { AnnotatorSearchLine } from "./AnnotatorSearchLine/AnnotatorSearchLine";
-import { AnnotatorWarningsModal } from "./AnnotatorWarningsModal";
+import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
+import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
 import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
-  StyledAnnotatorButtons,
   StyledAnnotatorColumn,
   StyledAnnotatorMenu,
   StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
-  StyledDisplayModeButtonIconWrapper,
   StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -79,7 +82,6 @@ import {
 } from "./styles";
 import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { annotatorHighlight } from "./utils/highlight";
-import { ButtonSize } from "types";
 
 interface TextAnnotatorProps {
   width: number;
@@ -150,6 +152,9 @@ interface TextAnnotatorProps {
    * so the menu reopens once the annotator is visible again.
    */
   hideSelectionMenu?: boolean;
+
+  /** Host-specific toolbar controls, rendered in the canvas toolbar. */
+  toolbarExtras?: ReactNode;
 }
 
 export const TextAnnotator = ({
@@ -185,6 +190,7 @@ export const TextAnnotator = ({
   onAsymmetricalAnchorCountChange,
   onUnsavedTextEditsChange,
   hideSelectionMenu = false,
+  toolbarExtras,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -1451,6 +1457,15 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  const editActions = resolveEditActions({
+    canEditDocument,
+    mode: annotatorMode,
+    isChangeMade,
+    isSaving,
+    isSavingWithoutRefresh,
+    dataDocumentIsFetching: Boolean(dataDocumentIsFetching),
+  });
+
   if (dataDocumentError) {
     return <StyledInfoText>Error loading document: {dataDocumentError.message}</StyledInfoText>;
   }
@@ -1493,22 +1508,15 @@ export const TextAnnotator = ({
         />
       </div>
 
-      <div
-        ref={warningsPanelRef}
-        style={{
-          paddingBottom: !hideWarningChip && asymmetricalAnchors.length > 0 ? "0.5rem" : 0,
-        }}
-      >
-        <AnnotatorWarningsModal
-          anchors={asymmetricalAnchors}
-          onUnlink={onRemoveAsymmetricalAnchor}
-          onScrollTo={onScrollToAsymmetricalAnchor}
-          open={warningsOpen}
-          onOpenChange={setWarningsOpen}
-          showChip={!hideWarningChip}
-          isLoading={isSaving || isSavingWithoutRefresh}
-        />
-      </div>
+      <AnnotatorWarningsModal
+        anchors={asymmetricalAnchors}
+        onUnlink={onRemoveAsymmetricalAnchor}
+        onScrollTo={onScrollToAsymmetricalAnchor}
+        open={warningsOpen}
+        onOpenChange={setWarningsOpen}
+        showChip={false}
+        isLoading={isSaving || isSavingWithoutRefresh}
+      />
 
       <StyledAnnotatorColumn
         style={{ width }}
@@ -1555,7 +1563,7 @@ export const TextAnnotator = ({
           }
         }}
       >
-        <StyledCanvasWrapper style={{ position: "relative" }}>
+        <StyledCanvasWrapper>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
               <StyledAnnotatorMenu
@@ -1694,109 +1702,32 @@ export const TextAnnotator = ({
           </StyledScrollerViewport>
 
           <Loader show={dataDocumentIsFetching} size={40} />
-        </StyledCanvasWrapper>
 
-        <StyledAnnotatorButtons>
-          <SwitchGroup $bgColor={theme.color.invertedBg.success} style={{ marginTop: "0.25rem" }}>
-            <Button
-              size={ButtonSize.Medium}
-              key={EditMode.HIGHLIGHT}
-              icon={
-                <StyledDisplayModeButtonIconWrapper
-                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                >
-                  <FaHighlighter size={11} />
-                </StyledDisplayModeButtonIconWrapper>
+          <AnnotatorToolbar
+            annotatorMode={annotatorMode}
+            onModeClick={handleAnnotatorModeClick}
+            canEditDocument={canEditDocument}
+            editActionsVisible={editActions.visible}
+            editActionsDisabled={editActions.disabled}
+            onDiscard={() => {
+              if (dataDocument?.content) {
+                annotator?.updateText(dataDocument.content);
+                setLocalTextContent(dataDocument.content);
               }
-              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.HIGHLIGHT] : ""}
-              color="success"
-              shape="rounded-sm"
-              noBorder
-              inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              noBackground={annotatorMode !== EditMode.HIGHLIGHT}
-              bold={annotatorMode === EditMode.HIGHLIGHT}
-              onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
-              tooltipLabel="anchor entities"
-              tooltipPosition="top"
-            />
-            <Button
-              size={ButtonSize.Medium}
-              key={EditMode.SEMI}
-              icon={
-                <StyledDisplayModeButtonIconWrapper
-                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                >
-                  <BsFileTextFill size={11} />
-                </StyledDisplayModeButtonIconWrapper>
-              }
-              color="success"
-              shape="rounded-sm"
-              noBorder
-              inverted={annotatorMode !== EditMode.SEMI}
-              noBackground={annotatorMode !== EditMode.SEMI}
-              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
-              bold={annotatorMode === EditMode.SEMI}
-              onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
-              tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
-              tooltipPosition="top"
-            />
-            <Button
-              size={ButtonSize.Medium}
-              key={EditMode.RAW}
-              icon={
-                <StyledDisplayModeButtonIconWrapper
-                  $annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-                >
-                  <HiCodeBracket size={11} />
-                </StyledDisplayModeButtonIconWrapper>
-              }
-              color="success"
-              shape="rounded-sm"
-              noBorder
-              inverted={annotatorMode !== EditMode.RAW}
-              noBackground={annotatorMode !== EditMode.RAW}
-              label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
-              bold={annotatorMode === EditMode.RAW}
-              onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
-              tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
-              tooltipPosition="top"
-            />
-          </SwitchGroup>
-
-          {canEditDocument && annotatorMode !== EditMode.HIGHLIGHT && (
-            <ButtonGroup $marginTop style={{ marginLeft: "0.5rem" }}>
-              <Button
-                label="discard"
-                color="greyer"
-                inverted
-                icon={<IcoTrash />}
-                disabled={
-                  !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
-                }
-                onClick={() => {
-                  if (dataDocument?.content) {
-                    annotator?.updateText(dataDocument?.content);
-                    setLocalTextContent(dataDocument.content);
-                  }
-                }}
-              />
-              <span style={{ display: "flex", position: "relative" }}>
-                <Button
-                  label="save"
-                  color="info"
-                  icon={<FaRegSave size={14} />}
-                  disabled={
-                    !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching
-                  }
-                  onClick={() => {
-                    handleSaveNewContent(false);
-                  }}
+            }}
+            onSave={() => handleSaveNewContent(false)}
+            isSavePending={isSaving || isSavingWithoutRefresh}
+            warningChip={
+              !hideWarningChip && asymmetricalAnchors.length > 0 ? (
+                <WarningsChip
+                  count={asymmetricalAnchors.length}
+                  onClick={() => setWarningsOpen(true)}
                 />
-                <Loader show={isSaving || isSavingWithoutRefresh} size={14} />
-              </span>
-            </ButtonGroup>
-          )}
-        </StyledAnnotatorButtons>
+              ) : undefined
+            }
+            toolbarExtras={toolbarExtras}
+          />
+        </StyledCanvasWrapper>
       </StyledAnnotatorColumn>
 
       {pendingModeSwitch && (

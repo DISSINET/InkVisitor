@@ -48,6 +48,7 @@ export const StyledAnnotatorColumn = styled.div`
 `;
 
 export const StyledCanvasWrapper = styled.div`
+  position: relative;
   background-color: ${({ theme }) => theme.color.white};
   padding: 2px;
   border-radius: 7px;
@@ -296,21 +297,6 @@ export const StyledStatementTargetInfo = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-style: italic;
   white-space: nowrap;
-`;
-
-interface StyledDisplayModeButtonIconWrapper {
-  $annotatorWidthTooNarrow?: boolean;
-}
-export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0.1rem 0.5rem" : "")};
-`;
-
-export const StyledAnnotatorButtons = styled.div`
-  display: flex;
-  justify-content: space-between;
 `;
 
 export const StyledWarningsList = styled.div`
