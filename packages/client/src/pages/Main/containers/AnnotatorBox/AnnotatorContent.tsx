@@ -1,4 +1,4 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -246,9 +246,16 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               onAsymmetricalAnchorCountChange={setWarningAnchorCount}
               onUnsavedTextEditsChange={onUnsavedTextEditsChange}
               hideSelectionMenu={annotatorHidden}
-              toolbarExtras={
+              toolbarExtras={(annotatorMode) => (
                 <>
-                  <AnnotatorHighlightPopover hlEntities={hlEntities} setHlEntities={setHlEntities} />
+                  {/* Entity classes are only painted in highlight mode, so the
+                      picker has nothing to act on in the text-editing modes. */}
+                  {annotatorMode === EditMode.HIGHLIGHT && (
+                    <AnnotatorHighlightPopover
+                      hlEntities={hlEntities}
+                      setHlEntities={setHlEntities}
+                    />
+                  )}
                   {activeTHasAnchor ? (
                     <Button
                       label=""
@@ -280,7 +287,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                       />
                     )}
                 </>
-              }
+              )}
             />
           )}
         </AnnotatorProvider>

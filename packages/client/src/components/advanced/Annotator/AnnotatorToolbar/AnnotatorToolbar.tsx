@@ -31,8 +31,11 @@ interface AnnotatorToolbar {
 
   /** Warnings chip, when this host has not supplied its own. */
   warningChip?: ReactNode;
-  /** Host-specific controls — highlight classes, locate anchor, warnings. */
-  toolbarExtras?: ReactNode;
+  /**
+   * Host-specific controls — highlight classes, locate anchor, warnings.
+   * Receives the mode so a host can scope a control to the mode it applies to.
+   */
+  toolbarExtras?: (annotatorMode: EditMode) => ReactNode;
 }
 
 export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
@@ -88,7 +91,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       <StyledAnnotatorToolbarCluster>
         {isSearchAllowed && (
           <Button
-            icon={<IcoSearch />}
+            icon={<IcoSearch size={16} />}
             color="info"
             inverted
             onClick={onFindClick}
@@ -102,7 +105,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
         {warningChip}
 
         {toolbarExtras && (
-          <StyledAnnotatorToolbarGroup>{toolbarExtras}</StyledAnnotatorToolbarGroup>
+          <StyledAnnotatorToolbarGroup>{toolbarExtras(annotatorMode)}</StyledAnnotatorToolbarGroup>
         )}
 
         {editActionsVisible && (

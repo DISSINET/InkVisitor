@@ -44,11 +44,11 @@ export const AnnotatorHighlightPopover: React.FC<AnnotatorHighlightPopover> = ({
     <>
       <StyledHighlightTrigger ref={refs.setReference} {...getReferenceProps()}>
         <Button
-          icon={<IcoHighlighter size={14} />}
+          icon={<IcoHighlighter size={16} />}
           color="info"
           inverted
           onClick={() => setOpen((isOpen) => !isOpen)}
-          tooltipLabel="highlight entity classes"
+          tooltipLabel="choose entity classes to highlight"
           tooltipPosition="top"
         />
       </StyledHighlightTrigger>

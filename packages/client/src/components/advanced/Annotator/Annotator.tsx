@@ -160,7 +160,7 @@ interface TextAnnotatorProps {
   hideSelectionMenu?: boolean;
 
   /** Host-specific toolbar controls, rendered in the canvas toolbar. */
-  toolbarExtras?: ReactNode;
+  toolbarExtras?: (annotatorMode: EditMode) => ReactNode;
 }
 
 export const TextAnnotator = ({
