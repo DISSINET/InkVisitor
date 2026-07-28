@@ -261,7 +261,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                   )}
                   {activeTHasAnchor ? (
                     <Button
-                      size={ButtonSize.Medium}
+                      size={ButtonSize.Small}
                       icon={
                         <StyledLocateAnchorIcon>
                           <TbAnchor size={TOOLBAR_ICON_SIZE} />
@@ -285,7 +285,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                     selectedResource !== false &&
                     selectedResource?.data?.documentId && (
                       <WarningsChip
-                        size={ButtonSize.Medium}
+                        size={ButtonSize.Small}
                         count={warningAnchorCount}
                         onClick={() => setWarningsModalOpen(true)}
                       />

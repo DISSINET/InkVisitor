@@ -11,7 +11,7 @@ export const TOOLBAR_GUTTER_PX = 4;
  * button's height follows its content, so mixed glyph sizes give mismatched
  * buttons even at one ButtonSize.
  */
-export const TOOLBAR_ICON_SIZE = 15;
+export const TOOLBAR_ICON_SIZE = 13;
 
 /**
  * Spans the canvas so its two clusters can sit at opposite ends, but paints

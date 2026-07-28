@@ -59,7 +59,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   const modeButton = (mode: EditMode, icon: ReactNode, tooltipLabel: string) => (
     <Button
       key={mode}
-      size={ButtonSize.Medium}
+      size={ButtonSize.Small}
       icon={<StyledDisplayModeButtonIconWrapper>{icon}</StyledDisplayModeButtonIconWrapper>}
       color="success"
       shape="rounded-sm"
@@ -77,15 +77,15 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
     <StyledAnnotatorToolbar>
       <StyledAnnotatorToolbarCluster>
         <SwitchGroup $bgColor={theme.color.invertedBg.success}>
-          {modeButton(EditMode.HIGHLIGHT, <FaHighlighter size={13} />, "anchor entities")}
+          {modeButton(EditMode.HIGHLIGHT, <FaHighlighter size={TOOLBAR_ICON_SIZE} />, "anchor entities")}
           {modeButton(
             EditMode.SEMI,
-            <BsFileTextFill size={13} />,
+            <BsFileTextFill size={TOOLBAR_ICON_SIZE} />,
             canEditDocument ? "edit plain text" : "view plain text",
           )}
           {modeButton(
             EditMode.RAW,
-            <HiCodeBracket size={13} />,
+            <HiCodeBracket size={TOOLBAR_ICON_SIZE} />,
             canEditDocument ? "display and edit XML" : "display XML",
           )}
         </SwitchGroup>
@@ -94,7 +94,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       <StyledAnnotatorToolbarCluster>
         {isSearchAllowed && (
           <Button
-            size={ButtonSize.Medium}
+            size={ButtonSize.Small}
             icon={<IcoSearch size={TOOLBAR_ICON_SIZE} />}
             color="info"
             inverted
@@ -115,7 +115,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
         {editActionsVisible && (
           <StyledAnnotatorToolbarGroup>
             <Button
-              size={ButtonSize.Medium}
+              size={ButtonSize.Small}
               shape="square"
               color="greyer"
               inverted
@@ -127,7 +127,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
             />
             <StyledAnnotatorToolbarButtonWrap>
               <Button
-                size={ButtonSize.Medium}
+                size={ButtonSize.Small}
                 shape="square"
                 color="info"
                 icon={<FaRegSave size={TOOLBAR_ICON_SIZE} />}
