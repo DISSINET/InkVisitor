@@ -338,7 +338,7 @@ export const TextAnnotator = ({
   const lines = useRef<HTMLCanvasElement>(null);
 
   const [isFindOpen, setIsFindOpen] = useState(false);
-  const [isSequentialAnchoringOpen, setIsSequentialAnchoringOpen] = useState(false);
+  const [isSecondStepOpen, setIsSecondStepOpen] = useState(false);
   const findInputRef = useRef<HTMLInputElement | null>(null);
 
   const annotatorRef = useRef<Annotator | null>(null);
@@ -1203,7 +1203,7 @@ export const TextAnnotator = ({
   // view-only variant: clipboard + anchors in selection, no create/edit.
   const isMenuReadOnly = !canEditDocument;
 
-  const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSequentialAnchoringOpen);
+  const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
   const isMenuDisplayed = useMemo<boolean>(
     () =>
@@ -1482,9 +1482,9 @@ export const TextAnnotator = ({
     <>
       {findPanel === FindPanel.SequentialAnchor && (
         <AnnotatorSequentialAnchorPanel
-          onBack={() => setIsSequentialAnchoringOpen(false)}
+          onBack={() => setIsSecondStepOpen(false)}
           onClose={() => {
-            setIsSequentialAnchoringOpen(false);
+            setIsSecondStepOpen(false);
             setIsFindOpen(false);
           }}
           annotator={annotator}
@@ -1512,8 +1512,9 @@ export const TextAnnotator = ({
 
       {findPanel === FindPanel.FindReplace && (
         <AnnotatorFindReplaceModal
+          onBack={() => setIsSecondStepOpen(false)}
           onClose={() => {
-            setIsSequentialAnchoringOpen(false);
+            setIsSecondStepOpen(false);
             setIsFindOpen(false);
           }}
           annotator={annotator}
@@ -1738,7 +1739,7 @@ export const TextAnnotator = ({
             <AnnotatorSearchBar
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
-              onOpenSecondStep={() => setIsSequentialAnchoringOpen(true)}
+              onOpenSecondStep={() => setIsSecondStepOpen(true)}
               canEdit={canEditDocument}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}

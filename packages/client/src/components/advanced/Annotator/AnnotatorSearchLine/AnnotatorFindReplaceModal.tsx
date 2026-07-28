@@ -17,6 +17,7 @@ import { applyReplacements, nextActiveOccurenceIndex, ReplaceRange } from "./rep
 
 interface AnnotatorFindReplaceModal {
   onClose: () => void;
+  onBack: () => void;
   annotator: Annotator | null;
   documentId?: string;
   dataDocument?: IDocument;
@@ -46,6 +47,7 @@ interface AnnotatorFindReplaceModal {
 
 export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
   onClose,
+  onBack,
   annotator,
   documentId = undefined,
   dataDocument,
@@ -174,6 +176,8 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
         title="Find & replace"
         onClose={onClose}
         closeTooltipLabel="close find & replace (Esc)"
+      onBack={onBack}
+      backTooltipLabel="back to search"
       >
         <StyledFindReplaceRow>
           <Input
