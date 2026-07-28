@@ -62,7 +62,12 @@ import {
   searchTree,
 } from "utils/utils";
 import { EntityCreateModal } from "..";
-import { FindPanel, resolveEditActions, resolveFindPanel } from "./annotatorChrome";
+import {
+  FindPanel,
+  resolveEditActions,
+  resolveFindPanel,
+  shouldShowSelectionMenu,
+} from "./annotatorChrome";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
 import { AnnotatorFindPanel } from "./AnnotatorSearchLine/AnnotatorFindPanel";
@@ -1202,15 +1207,20 @@ export const TextAnnotator = ({
   // view-only variant: clipboard + anchors in selection, no create/edit.
   const isMenuReadOnly = !canEditDocument;
 
-  const isMenuDisplayed = useMemo<boolean>(() => {
-    return (
-      annotatorMode === EditMode.HIGHLIGHT &&
-      selectedText !== "" &&
-      !isSelectingText &&
-      !hideSelectionMenu &&
-      dataDocument !== undefined
-    );
-  }, [annotatorMode, selectedText, isSelectingText, hideSelectionMenu, dataDocument]);
+  const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSequentialAnchoringOpen);
+
+  const isMenuDisplayed = useMemo<boolean>(
+    () =>
+      shouldShowSelectionMenu({
+        mode: annotatorMode,
+        selectedText,
+        isSelectingText,
+        hideSelectionMenu: Boolean(hideSelectionMenu),
+        hasDocument: dataDocument !== undefined,
+        findPanel,
+      }),
+    [annotatorMode, selectedText, isSelectingText, hideSelectionMenu, dataDocument, findPanel],
+  );
 
   // #2885 — anchor-move mode. Arrow clicks edit the raw text on the canvas as a
   // live preview but are NOT saved; the user commits a whole series with Done
@@ -1458,8 +1468,6 @@ export const TextAnnotator = ({
     false,
     true,
   );
-
-  const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSequentialAnchoringOpen);
 
   const editActions = resolveEditActions({
     canEditDocument,
