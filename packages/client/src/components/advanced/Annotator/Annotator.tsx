@@ -93,7 +93,6 @@ import { annotatorHighlight } from "./utils/highlight";
 
 interface TextAnnotatorProps {
   width: number;
-  annotatorWidthTooNarrow?: boolean;
   height: number;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
@@ -111,7 +110,6 @@ interface TextAnnotatorProps {
   dataDocument?: IDocument;
   dataDocumentIsFetching: boolean;
   dataDocumentError: Error | null;
-  showStatementList?: boolean;
 
   statementCreateMutation?: UseMutationResult<
     AxiosResponse<IResponseGeneric<IStatement>, any>,
@@ -167,7 +165,6 @@ interface TextAnnotatorProps {
 
 export const TextAnnotator = ({
   width = 400,
-  annotatorWidthTooNarrow = false,
   height = 500,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
@@ -183,7 +180,6 @@ export const TextAnnotator = ({
   dataDocument,
   dataDocumentIsFetching = false,
   dataDocumentError,
-  showStatementList,
 
   statementCreateMutation = undefined,
   userData,

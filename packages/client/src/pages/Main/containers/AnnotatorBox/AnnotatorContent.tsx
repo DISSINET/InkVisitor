@@ -19,7 +19,6 @@ import { BsInfoCircle } from "react-icons/bs";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
-import { ANNOTATOR_TOO_SMALL_BREAKPOINT, COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
 import { AnnotatorHighlightPopover } from "./AnnotatorHighlightPopover";
@@ -61,7 +60,6 @@ interface StatementListTextAnnotator {
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
 
-  showStatementList: boolean;
   // Territory write right - also drives the header suggester row visibility,
   // so when false the annotator reclaims that row's height.
   userCanEdit: boolean;
@@ -97,7 +95,6 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   selectedDocumentId,
   selectedDocumentIsFetching,
   selectedDocumentError,
-  showStatementList,
   canEditDocument,
   userData,
 
@@ -113,14 +110,6 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   // so hide it while the annotator is out of view — the selection is kept, and
   // the menu reopens once the annotator is visible again.
   const annotatorHidden = annotatorHeight <= 0;
-
-  const annotatorWidth = useMemo<number>(() => {
-    return showStatementList ? contentWidth - COLLAPSED_TABLE_WIDTH : contentWidth;
-  }, [contentWidth, showStatementList]);
-
-  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
-    return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
-  }, [annotatorWidth]);
 
   // Asymmetrical-anchor warnings (#2601): the chip lives next to the document
   // title, but the modal + unlink/scroll handlers stay inside the annotator, so
@@ -231,8 +220,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
         <AnnotatorProvider>
           {selectedDocumentId && selectedDocument && (
             <TextAnnotator
-              width={annotatorWidth}
-              annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+              width={contentWidth}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
@@ -248,7 +236,6 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               dataDocument={selectedDocument ?? undefined}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
-              showStatementList={showStatementList}
               userData={userData}
               canEditDocument={canEditDocument}
               territoryId={territoryId}

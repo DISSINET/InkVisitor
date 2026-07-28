@@ -362,7 +362,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
       selectedDocumentIsFetching={selectedDocumentIsFetching}
       selectedDocumentError={selectedDocumentError}
       selectedResource={selectedResource}
-      showStatementList={false}
       userCanEdit={userCanEdit}
       canEditDocument={canEditDocument}
       userData={userData}
