@@ -31,6 +31,7 @@ import {
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
+  SEARCH_SCROLL_CONTEXT_ROWS,
   VIEWPORT_END_BUFFER_ROWS,
   VIEWPORT_START_BUFFER_ROWS,
   LIGHT_MENU_COLORS,
@@ -3822,8 +3823,12 @@ export class Annotator {
     );
   }
 
-  scrollToLine(absLine: number) {
-    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+  /**
+   * @param lineOffset shifts the target row; negative values leave context above,
+   *   which the start buffer allows even at the very top of the document.
+   */
+  scrollToLine(absLine: number, lineOffset: number = 0) {
+    this.viewport.scrollTo(absLine + lineOffset, this.scrollExtentLineCount());
     this.draw();
   }
 
@@ -4005,7 +4010,7 @@ export class Annotator {
       yLine: absEndY,
     };
 
-    this.scrollToLine(this.cursor.selectStart.yLine);
+    this.scrollToLine(this.cursor.selectStart.yLine, -SEARCH_SCROLL_CONTEXT_ROWS);
     this.draw();
 
     // Manually trigger onSelectText callback for search-based selections

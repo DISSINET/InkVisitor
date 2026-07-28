@@ -34,6 +34,13 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
  * the canvas top be scrolled past it like any other line.
  */
 export const VIEWPORT_START_BUFFER_ROWS = 1;
+
+/**
+ * Rows of context kept above a search hit when scrolling to it. The client
+ * floats a search bar over the top of the canvas, so a hit landing on the first
+ * visible row would sit behind it.
+ */
+export const SEARCH_SCROLL_CONTEXT_ROWS = 1;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**
