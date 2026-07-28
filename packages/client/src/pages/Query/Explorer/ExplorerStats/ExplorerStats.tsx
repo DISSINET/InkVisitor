@@ -16,6 +16,7 @@ import {
   StyledChartWrapper,
   StyledConfigStrip,
   StyledEmptyMessage,
+  StyledEventTypeGroup,
   StyledField,
   StyledFieldLabel,
   StyledStatsHeader,
@@ -229,7 +230,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   key={unit}
                   label={String(unit)}
                   shape="rounded-sm"
-                  size={ButtonSize.Medium}
+                  size={ButtonSize.Small}
                   noBorder
                   onClick={() => setParams({ timeUnit: unit })}
                   color={active ? "primary" : "greyer"}
@@ -243,7 +244,10 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Event type</StyledFieldLabel>
-          <SwitchGroup>
+          {/* any subset of the types can be on at once, so these are separate
+              outlined chips - a shared track would read as pick-one like the
+              filters beside it */}
+          <StyledEventTypeGroup $gap="small">
             {VISIBLE_EVENT_TYPES.map((eventType) => {
               const active = localStats.eventType.includes(eventType);
               return (
@@ -251,8 +255,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   key={eventType}
                   label={String(eventType)}
                   shape="rounded-sm"
-                  size={ButtonSize.Medium}
-                  noBorder
+                  size={ButtonSize.Small}
                   onClick={() =>
                     setParams({
                       eventType: active
@@ -266,7 +269,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                 />
               );
             })}
-          </SwitchGroup>
+          </StyledEventTypeGroup>
         </StyledField>
 
         <StyledField>
@@ -279,7 +282,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   key={agg}
                   label={String(agg)}
                   shape="rounded-sm"
-                  size={ButtonSize.Medium}
+                  size={ButtonSize.Small}
                   noBorder
                   onClick={() => setParams({ aggregateBy: agg })}
                   color={active ? "primary" : "greyer"}

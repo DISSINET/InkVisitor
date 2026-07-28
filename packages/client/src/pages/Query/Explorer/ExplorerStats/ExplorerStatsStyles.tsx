@@ -1,3 +1,4 @@
+import { ButtonGroup } from "components";
 import styled from "styled-components";
 
 export const StyledStatsLayout = styled.div`
@@ -50,6 +51,13 @@ export const StyledDateInputWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
+`;
+
+/** Multi-select stats filter. The padding matches the track inset a SwitchGroup
+ *  puts around its segments, so every field in the strip is the same height and
+ *  their labels sit on one line. */
+export const StyledEventTypeGroup = styled(ButtonGroup)`
+  padding: 0.25rem;
 `;
 
 export const StyledFieldLabel = styled.div`
