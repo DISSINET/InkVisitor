@@ -72,16 +72,16 @@ export function useBoxLayout({
   // through the handlers below, which is where anything a box holds that CSS
   // cannot size - the annotator's canvas - picks the new height up.
   const previewDetailSeparatorYPosition = (yPosition: number) =>
-    setBoxHeightVars({
-      statements: yPosition,
-      detail: contentHeight - yPosition,
-    });
+    setBoxHeightVars(
+      { statements: yPosition, detail: contentHeight - yPosition },
+      "mainPage",
+    );
 
   const previewEditorSeparatorYPosition = (yPosition: number) =>
-    setBoxHeightVars({
-      annotator: yPosition,
-      editor: contentHeight - yPosition,
-    });
+    setBoxHeightVars(
+      { annotator: yPosition, editor: contentHeight - yPosition },
+      "mainPage",
+    );
 
   const handleDetailSeparatorYChange = (yPosition: number) => {
     setDetailSeparatorY(yPosition);

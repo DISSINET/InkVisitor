@@ -407,17 +407,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
-    animatePanelWidthVars([
-      firstPanelWidth,
-      secondPanelWidth,
-      thirdPanelWidth,
-      fourthPanelWidth,
-    ]);
+    animatePanelWidthVars(
+      [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth],
+      "mainPage",
+    );
   }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth]);
 
   // Same for the separators, which a drag on any one of them can move.
   useLayoutEffect(() => {
-    animateSeparatorPositionVars(separatorPositions);
+    animateSeparatorPositionVars(separatorPositions, "mainPage");
   }, [separatorPositions.tree, separatorPositions.center, separatorPositions.search]);
 
   // Same for the boxes a horizontal separator splits, and for the fourth
@@ -436,7 +434,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   useLayoutEffect(() => {
-    animateBoxHeightVars(boxHeights);
+    animateBoxHeightVars(boxHeights, "mainPage");
   }, [
     boxHeights.statements,
     boxHeights.detail,

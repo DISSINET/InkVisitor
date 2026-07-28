@@ -9,6 +9,17 @@ import {
 type LayoutValues = Record<string, number | undefined>;
 
 /**
+ * Which layout a set of values belongs to.
+ *
+ * The variables are global and keyed by position, so the same variable is a
+ * different panel on a different page - MainPage's tree panel and the query
+ * page's left panel are both "panel 0". Values continue from the same owner's
+ * values and from nobody else's; interpolating across owners would animate
+ * between two things that were never the same thing.
+ */
+export type LayoutOwner = "mainPage" | "explorerPage";
+
+/**
  * Springs a family of layout CSS variables towards a target.
  *
  * The variables have two writers, wanting different things. A drag knows the
@@ -23,35 +34,41 @@ type LayoutValues = Record<string, number | undefined>;
  */
 class LayoutTransition {
   private readonly progress = new SpringValue(1);
+  private owner: LayoutOwner | undefined;
   private from: LayoutValues | undefined;
   private target: LayoutValues | undefined;
 
   constructor(private readonly write: (values: LayoutValues) => void) {}
 
   /** Put the variables at these values now, ending any animation. */
-  set(values: LayoutValues): void {
+  set(values: LayoutValues, owner: LayoutOwner): void {
     this.progress.stop();
     this.progress.set(1);
+    this.owner = owner;
     this.from = values;
     this.target = values;
     this.write(values);
   }
 
   /** Spring the variables from wherever they are to these values. */
-  animate(values: LayoutValues): void {
+  animate(values: LayoutValues, owner: LayoutOwner): void {
     // Callers reassert their target on every render, and restarting the spring
     // from a fraction of the way through would leave it never arriving.
-    if (this.target && sameValues(this.target, values)) {
+    if (this.owner === owner && this.target && sameValues(this.target, values)) {
       return;
     }
 
     const { target } = this;
     const current = this.currentValues();
-    // Nothing to travel from: either the first layout, or a different set of
-    // variables than the last caller wrote - another page's panels, whose widths
-    // these are not a continuation of.
-    if (!target || !current || !sameKeys(target, values)) {
-      this.set(values);
+    // Nothing to travel from: the first layout, another layout's values in these
+    // variables, or a different set of variables than the last caller wrote.
+    if (
+      this.owner !== owner ||
+      !target ||
+      !current ||
+      !sameKeys(target, values)
+    ) {
+      this.set(values, owner);
       return;
     }
 
@@ -117,20 +134,32 @@ const panelWidths = new LayoutTransition((values) =>
 const boxHeights = new LayoutTransition(writeBoxHeightVars);
 const separatorPositions = new LayoutTransition(writeSeparatorPositionVars);
 
-export const animatePanelWidthVars = (widths: (number | undefined)[]): void =>
-  panelWidths.animate(byIndex(widths));
+export const animatePanelWidthVars = (
+  widths: (number | undefined)[],
+  owner: LayoutOwner,
+): void => panelWidths.animate(byIndex(widths), owner);
 
-export const setPanelWidthVars = (widths: (number | undefined)[]): void =>
-  panelWidths.set(byIndex(widths));
+export const setPanelWidthVars = (
+  widths: (number | undefined)[],
+  owner: LayoutOwner,
+): void => panelWidths.set(byIndex(widths), owner);
 
-export const animateBoxHeightVars = (heights: LayoutValues): void =>
-  boxHeights.animate(heights);
+export const animateBoxHeightVars = (
+  heights: LayoutValues,
+  owner: LayoutOwner,
+): void => boxHeights.animate(heights, owner);
 
-export const setBoxHeightVars = (heights: LayoutValues): void =>
-  boxHeights.set(heights);
+export const setBoxHeightVars = (
+  heights: LayoutValues,
+  owner: LayoutOwner,
+): void => boxHeights.set(heights, owner);
 
-export const animateSeparatorPositionVars = (positions: LayoutValues): void =>
-  separatorPositions.animate(positions);
+export const animateSeparatorPositionVars = (
+  positions: LayoutValues,
+  owner: LayoutOwner,
+): void => separatorPositions.animate(positions, owner);
 
-export const setSeparatorPositionVars = (positions: LayoutValues): void =>
-  separatorPositions.set(positions);
+export const setSeparatorPositionVars = (
+  positions: LayoutValues,
+  owner: LayoutOwner,
+): void => separatorPositions.set(positions, owner);

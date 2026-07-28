@@ -232,13 +232,14 @@ export function useVerticalSeparators() {
     );
     dragPositions.current = positions;
 
-    setSeparatorPositionVars(positions);
+    setSeparatorPositionVars(positions, "mainPage");
     setPanelWidthVars(
       getEffectivePanelWidths(
         basePanelWidths(positions),
         expandedPanels,
         layoutWidth,
       ),
+      "mainPage",
     );
 
     return positions[separator];

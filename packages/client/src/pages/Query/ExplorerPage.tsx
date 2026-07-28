@@ -607,15 +607,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
-    animatePanelWidthVars([leftPanelWidth, detailPanelWidth]);
+    animatePanelWidthVars([leftPanelWidth, detailPanelWidth], "explorerPage");
   }, [leftPanelWidth, detailPanelWidth]);
 
   // Same for the two boxes the horizontal separator splits.
   useLayoutEffect(() => {
-    animateBoxHeightVars({
-      queryBuilder: querySeparatorYPosition,
-      explorer: contentHeight - querySeparatorYPosition,
-    });
+    animateBoxHeightVars(
+      {
+        queryBuilder: querySeparatorYPosition,
+        explorer: contentHeight - querySeparatorYPosition,
+      },
+      "explorerPage",
+    );
   }, [querySeparatorYPosition, contentHeight]);
 
   return (
@@ -625,10 +628,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
           panelIndex={0}
           boxHeightVarKey="queryBuilder"
           applyPreview={(yPosition) =>
-            setBoxHeightVars({
-              queryBuilder: yPosition,
-              explorer: contentHeight - yPosition,
-            })
+            setBoxHeightVars(
+              {
+                queryBuilder: yPosition,
+                explorer: contentHeight - yPosition,
+              },
+              "explorerPage",
+            )
           }
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
@@ -650,7 +656,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 Math.max(xPosition, QUERY_LEFT_PANEL_MIN_WIDTH),
                 layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
               );
-              setPanelWidthVars([resolved, layoutWidth - resolved]);
+              setPanelWidthVars([resolved, layoutWidth - resolved], "explorerPage");
               return resolved;
             }}
             setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
