@@ -213,9 +213,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               <StyledEmptyState>
                 <GrDocumentMissing size="23" />
               </StyledEmptyState>
-              <StyledEmptyState>
-                {"This Resource does not have any document"}
-              </StyledEmptyState>
+              <StyledEmptyState>{"This Resource does not have any document"}</StyledEmptyState>
             </StyledEmptyStateWrap>
           )}
 
@@ -268,7 +266,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
                           <FaLongArrowAltRight />
                         </StyledLocateAnchorIcon>
                       }
-                      tooltipLabel="scroll to where the open territory is anchored in this text"
+                      tooltipLabel="locate territory opened in tree"
                       inverted
                       onClick={() => {
                         if (territoryId) {
