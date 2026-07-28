@@ -4,20 +4,7 @@ import styled from "styled-components";
  * Gap between a floating cluster and the edge of the canvas it sits over. One
  * value for all sides so the clusters read as equally inset.
  */
-export const TOOLBAR_GUTTER_PX = 12;
-
-/**
- * The mode cluster is a column narrow enough to sit inside the 50px line-number
- * gutter, so it is inset only enough to clear the canvas edge — that way it
- * covers line numbers rather than text.
- */
-const TOOLBAR_LEFT_GUTTER_PX = 2;
-
-/**
- * The scroller viewport occupies the last stretch of the wrapper's width, so a
- * right offset has to clear it before the gutter starts counting.
- */
-const SCROLLER_WIDTH_PX = 10;
+export const TOOLBAR_GUTTER_PX = 4;
 
 /**
  * Spans the canvas so its two clusters can sit at opposite ends, but paints
@@ -28,8 +15,8 @@ const SCROLLER_WIDTH_PX = 10;
  */
 export const StyledAnnotatorToolbar = styled.div`
   position: absolute;
-  left: ${TOOLBAR_LEFT_GUTTER_PX}px;
-  right: ${TOOLBAR_GUTTER_PX + SCROLLER_WIDTH_PX}px;
+  left: ${TOOLBAR_GUTTER_PX}px;
+  right: ${TOOLBAR_GUTTER_PX + 12}px;
   bottom: ${TOOLBAR_GUTTER_PX}px;
   z-index: 20;
   display: flex;
