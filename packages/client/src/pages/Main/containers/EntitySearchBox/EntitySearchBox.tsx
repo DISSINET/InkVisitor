@@ -17,12 +17,7 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import {
-  useDebounce,
-  useResizeObserver,
-  useSearchParams,
-  useWidthBreakpoint,
-} from "hooks";
+import { useDebounce, useResizeObserver, useSearchParams, useWidthBreakpoint } from "hooks";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
@@ -132,12 +127,10 @@ export const EntitySearchBox: React.FC = () => {
     isFetching,
     isPending,
   } = useQuery({
-    queryKey: [
-      "search",
-      {
-        searchData: JSON.stringify(debouncedValues),
-      },
-    ],
+    // react-query hashes the key by value with object keys sorted, so the fresh
+    // object the debounce produces on every keystroke only misses the cache when
+    // a filter actually changed (no need to manually stringify here)
+    queryKey: ["search", debouncedValues],
     queryFn: async () => {
       // if (debouncedValues.usedTemplate === "Any") {
       //   const { usedTemplate, ...filters } = debouncedValues;
@@ -342,10 +335,7 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [expandedOptions.includes(SearchEnums.AdvancedOption.Territory)]);
 
-  const isUndersized = useWidthBreakpoint(
-    FOURTH_PANEL_MIN_WIDTH + 10,
-    boxContentId("Search"),
-  );
+  const isUndersized = useWidthBreakpoint(FOURTH_PANEL_MIN_WIDTH + 10, boxContentId("Search"));
 
   return (
     <>
