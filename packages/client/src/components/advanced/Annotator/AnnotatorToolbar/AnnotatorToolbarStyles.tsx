@@ -1,6 +1,18 @@
 import styled from "styled-components";
 
 /**
+ * Gap between a floating cluster and the edge of the canvas it sits over. One
+ * value for all sides so the clusters read as equally inset.
+ */
+export const TOOLBAR_GUTTER_PX = 12;
+
+/**
+ * The scroller viewport occupies the last stretch of the wrapper's width, so a
+ * right offset has to clear it before the gutter starts counting.
+ */
+const SCROLLER_WIDTH_PX = 10;
+
+/**
  * Spans the canvas so its two clusters can sit at opposite ends, but paints
  * nothing itself and takes no pointer events — the text between the clusters
  * stays visible and clickable. The canvas is a fixed-size element the annotator
@@ -9,10 +21,9 @@ import styled from "styled-components";
  */
 export const StyledAnnotatorToolbar = styled.div`
   position: absolute;
-  left: ${({ theme }) => theme.space[2]};
-  /* clears the 10px scroller viewport parked against the wrapper's right edge */
-  right: ${({ theme }) => theme.space[8]};
-  bottom: ${({ theme }) => theme.space[4]};
+  left: ${TOOLBAR_GUTTER_PX}px;
+  right: ${TOOLBAR_GUTTER_PX + SCROLLER_WIDTH_PX}px;
+  bottom: ${TOOLBAR_GUTTER_PX}px;
   z-index: 20;
   display: flex;
   align-items: center;

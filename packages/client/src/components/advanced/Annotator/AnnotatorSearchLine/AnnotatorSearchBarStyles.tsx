@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { TOOLBAR_GUTTER_PX } from "../AnnotatorToolbar/AnnotatorToolbarStyles";
 
 /**
  * Sits over the top-right of the canvas. The canvas is a fixed-size element the
@@ -9,9 +10,9 @@ import styled from "styled-components";
  */
 export const StyledAnnotatorSearchBar = styled.div`
   position: absolute;
-  top: ${({ theme }) => theme.space[2]};
-  /* clears the 10px scroller viewport parked against the wrapper's right edge */
-  right: ${({ theme }) => theme.space[8]};
+  top: ${TOOLBAR_GUTTER_PX}px;
+  /* the scroller viewport sits in the last 10px of the wrapper's width */
+  right: ${TOOLBAR_GUTTER_PX + 10}px;
   z-index: 20;
   display: flex;
   align-items: center;
