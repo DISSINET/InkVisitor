@@ -11,6 +11,7 @@ import {
 import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Button } from "components";
+import { TOOLBAR_ICON_SIZE } from "components/advanced/Annotator/AnnotatorToolbar/AnnotatorToolbarStyles";
 import Dropdown from "components/advanced";
 import React, { useState } from "react";
 import { IcoHighlighter } from "Theme/icons";
@@ -44,7 +45,7 @@ export const AnnotatorHighlightPopover: React.FC<AnnotatorHighlightPopover> = ({
     <>
       <StyledHighlightTrigger ref={refs.setReference} {...getReferenceProps()}>
         <Button
-          icon={<IcoHighlighter size={16} />}
+          icon={<IcoHighlighter size={TOOLBAR_ICON_SIZE} />}
           color="info"
           inverted
           onClick={() => setOpen((isOpen) => !isOpen)}
