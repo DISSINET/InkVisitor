@@ -14,7 +14,7 @@ export const StyledStatsHeader = styled.div`
   justify-content: center;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.color.primary};
+  color: ${({ theme }) => theme.color.gray[600]};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
 `;
 
