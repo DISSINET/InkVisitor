@@ -40,13 +40,6 @@ export const StyledAnnotatorSearchBar = styled.div`
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
   pointer-events: auto;
-  opacity: 0.8;
-  transition: opacity 0.3s;
-
-  &:hover,
-  &:focus-within {
-    opacity: 1;
-  }
 `;
 
 /** Yields first when the bar runs out of room; the buttons keep their size. */

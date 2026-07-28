@@ -11,7 +11,7 @@ import { Button } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { ReactNode, useLayoutEffect, useMemo } from "react";
 import { FaTimes } from "react-icons/fa";
-import { MdDragIndicator } from "react-icons/md";
+import { MdChevronLeft, MdDragIndicator } from "react-icons/md";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "../hooks/useAnnotatorMenuDrag";
 import {
   StyledFloatingPanelBody,
@@ -25,8 +25,9 @@ interface AnnotatorFloatingPanel {
   title: string;
   onClose: () => void;
   closeTooltipLabel: string;
-  /** Rendered left of the title, inside the drag handle — e.g. a back arrow. */
-  titlePrefix?: ReactNode;
+  /** When given, a back button sits beside close and returns to the prior step. */
+  onBack?: () => void;
+  backTooltipLabel?: string;
   children: ReactNode;
 }
 
@@ -34,7 +35,8 @@ export const AnnotatorFloatingPanel: React.FC<AnnotatorFloatingPanel> = ({
   title,
   onClose,
   closeTooltipLabel,
-  titlePrefix,
+  onBack,
+  backTooltipLabel,
   children,
 }) => {
   const { dragHandleProps, draggableRef, dragOffset } = useAnnotatorMenuDrag();
@@ -106,9 +108,20 @@ export const AnnotatorFloatingPanel: React.FC<AnnotatorFloatingPanel> = ({
                 preventDefault()s, which would swallow clicks on the close
                 button if it sat inside the draggable area. */}
             <StyledFloatingPanelTitle {...dragHandleProps}>
-              {titlePrefix ?? <MdDragIndicator size={16} />}
+              <MdDragIndicator size={16} />
               {title}
             </StyledFloatingPanelTitle>
+            {onBack && (
+              <Button
+                icon={<MdChevronLeft size={16} />}
+                color="primary"
+                inverted
+                noBorder
+                noBackground
+                onClick={onBack}
+                tooltipLabel={backTooltipLabel}
+              />
+            )}
             <Button
               icon={<FaTimes size={12} />}
               color="primary"

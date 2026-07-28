@@ -182,9 +182,7 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
             color="info"
             onClick={onOpenSecondStep}
             tooltipLabel={
-              isHighlightMode
-                ? "anchor each match to one entity, one match at a time"
-                : "open find & replace"
+              isHighlightMode ? "open sequential anchoring" : "open find & replace"
             }
             tooltipPosition="bottom"
           />

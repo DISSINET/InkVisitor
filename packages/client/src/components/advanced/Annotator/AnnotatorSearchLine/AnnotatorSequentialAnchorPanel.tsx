@@ -80,18 +80,8 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
       title="Sequential anchoring"
       onClose={onClose}
       closeTooltipLabel="close sequential anchoring (Esc)"
-      titlePrefix={
-        <IcoChevronLeft
-          size={16}
-          // The title is also the drag handle: its onPointerDown captures the
-          // pointer and preventDefault()s, which suppresses the click a
-          // descendant would otherwise receive. Stop it here so the back arrow
-          // stays clickable.
-          onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-          onClick={onBack}
-          title="back to find"
-        />
-      }
+      onBack={onBack}
+      backTooltipLabel="back to search"
     >
       <AnnotatorFindControls
         onClose={onClose}
