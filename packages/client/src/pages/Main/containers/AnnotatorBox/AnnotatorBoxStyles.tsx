@@ -1,6 +1,11 @@
 import styled from "styled-components";
 import { EntityColors } from "types";
 
+/** Everything the annotator box holds: the document line, then the annotator. */
+export const StyledAnnotatorContent = styled.div`
+  width: 100%;
+`;
+
 export const StyledWarningsListHeader = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};

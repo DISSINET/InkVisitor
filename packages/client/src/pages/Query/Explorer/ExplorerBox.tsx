@@ -9,9 +9,10 @@ import { ExplorerTableBatchActionModal } from "./ExplorerTable/ExplorerTableBatc
 import { ExploreAction } from "./state";
 import { useExplorerControls } from "./useExplorerControls";
 import { useInvalidateExplorerQuery } from "../useQueryData";
-
-/** Height reserved for the shared control bar above the view content. */
-const CONTROL_BAR_HEIGHT = 50;
+import {
+  StyledExplorerColumn,
+  StyledExplorerViewArea,
+} from "./ExplorerBoxStyles";
 
 interface ExplorerBoxProps {
   state: Explore.IExplore;
@@ -23,7 +24,6 @@ interface ExplorerBoxProps {
   /** True when criteria are set but the search has not been run yet. */
   isSearchPending?: boolean;
   queryError: Error | null;
-  height: number;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
@@ -41,7 +41,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   isRequestEmpty = false,
   isSearchPending = false,
   queryError,
-  height,
   onExport,
   stableSignature,
   getCachedEntity,
@@ -64,11 +63,9 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
 
-  const contentHeight = Math.max(0, height - CONTROL_BAR_HEIGHT);
-
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", height }}>
+      <StyledExplorerColumn>
         {!isStatsEmpty && (
           <ExplorerControlBar
             mode={state.view.mode}
@@ -102,7 +99,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           />
         )}
 
-        <div style={{ flex: 1, minHeight: 0 }}>
+        <StyledExplorerViewArea>
           {state.view.mode === Explore.EViewMode.Stats ? (
             <ExplorerStats
               stats={state.view.stats}
@@ -113,7 +110,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               isRequestEmpty={isRequestEmpty}
               isSearchPending={isSearchPending}
               isFetching={isQueryFetching}
-              height={isStatsEmpty ? height : contentHeight}
             />
           ) : (
             <ExplorerTable
@@ -125,7 +121,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               isSearchPending={isSearchPending}
               stableSignature={stableSignature}
               queryError={queryError}
-              height={contentHeight}
               getCachedEntity={getCachedEntity}
               onOpenEntityInDetail={onOpenEntityInDetail}
               selectedEntityIdsSet={controls.selectedEntityIdsSet}
@@ -136,8 +131,8 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               setIsNewColumnOpen={controls.setIsNewColumnOpen}
             />
           )}
-        </div>
-      </div>
+        </StyledExplorerViewArea>
+      </StyledExplorerColumn>
 
       {controls.isBatchModalOpen && (
         <ExplorerTableBatchActionModal

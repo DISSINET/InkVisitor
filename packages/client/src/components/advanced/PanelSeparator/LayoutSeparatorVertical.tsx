@@ -1,119 +1,129 @@
-import { useSpring } from "@react-spring/web";
-import React, { useEffect, useState, useCallback } from "react";
-import { springConfig } from "Theme/constants";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { StyledLayoutSeparatorVertical } from "./SeparatorStyles";
 
 interface LayoutSeparatorVertical {
-  leftSideMinWidth: number;
-  leftSideMaxWidth: number;
   // set custom one related to specific page
   separatorXPosition: number;
+  // Resolves a position the pointer asks for into the one the layout allows,
+  // painting whatever else the drag moves. Runs per pointer event, so it must
+  // stay clear of React state.
+  resolveDrag: (requestedXPosition: number) => number;
+  // Commits the position the drag ended on.
   setSeparatorXPosition: (xPosition: number) => void;
-  onMaxWidthReached?: (overflow: number) => void;
-  onMinWidthReached?: (overflow: number) => void;
+  onDragStart?: () => void;
+  // Key of the shared position variable the layout writes this separator to,
+  // for pages where dragging one separator can push another.
+  positionVarKey?: string;
 }
+
+const separatorXValue = (xPosition: number) => `${xPosition / 10}rem`;
+
 export const LayoutSeparatorVertical: React.FC<LayoutSeparatorVertical> = ({
-  leftSideMinWidth,
-  leftSideMaxWidth,
   separatorXPosition,
+  resolveDrag,
   setSeparatorXPosition,
-  onMaxWidthReached,
-  onMinWidthReached,
+  onDragStart,
+  positionVarKey,
 }) => {
-  const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
-    number | undefined
-  >(undefined);
-  const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
+  const separatorRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const animatedVerticalSeparator = useSpring({
-    left: `${(leftWidth - 1) / 10}rem`,
-    config: springConfig.separatorXPosition,
-  });
+  // The position a drag has reached lives in a ref and is painted straight to
+  // the DOM: a pointermove that rendered React could not keep the panels under
+  // the pointer.
+  const dragXPosition = useRef<number>(separatorXPosition);
+  const lastClientX = useRef<number>(0);
+  const frame = useRef<number | null>(null);
+  // read by the unmount cleanup, which sees the state as it was at mount
+  const draggingRef = useRef(false);
 
-  useEffect(() => {
-    if (leftWidth !== separatorXPosition && !dragging) {
-      setLeftWidth(separatorXPosition);
-    }
-    window.getSelection()?.removeAllRanges();
-  }, [separatorXPosition, dragging]);
-
-  const onMouseDown = (e: React.MouseEvent) => {
-    document.body.classList.add("no-select");
-    setSeparatorXTempPosition(e.clientX);
-    setDragging(true);
-  };
-
-  const onMove = useCallback(
-    (clientX: number) => {
-      if (dragging && leftWidth && separatorXTempPosition) {
-        const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
-
-        setSeparatorXTempPosition(clientX);
-
-        // Clamp the new width between min and max
-        const clampedWidth = Math.min(
-          Math.max(newLeftWidth, leftSideMinWidth),
-          leftSideMaxWidth
-        );
-        setLeftWidth(clampedWidth);
-
-        // Notify parent with overflow so adjacent panels resize proportionally
-        if (clampedWidth === leftSideMaxWidth && newLeftWidth > leftSideMaxWidth && onMaxWidthReached) {
-          onMaxWidthReached(newLeftWidth - leftSideMaxWidth);
-        }
-        if (clampedWidth === leftSideMinWidth && newLeftWidth < leftSideMinWidth && onMinWidthReached) {
-          onMinWidthReached(leftSideMinWidth - newLeftWidth);
-        }
+  // The body classes belong to the drag, not to the separator: a panel that
+  // collapses mid-drag takes this component with it, and a body left marked
+  // as resizing suppresses every layout transition for the rest of the session.
+  useEffect(
+    () => () => {
+      if (draggingRef.current) {
+        document.body.classList.remove("no-select");
       }
     },
-    [
-      dragging,
-      leftWidth,
-      separatorXTempPosition,
-      leftSideMinWidth,
-      leftSideMaxWidth,
-      onMaxWidthReached,
-      onMinWidthReached,
-    ]
+    [],
   );
 
-  const onMouseMove = useCallback(
-    (e: MouseEvent) => {
-      e.preventDefault();
-      onMove(e.clientX);
-    },
-    [onMove]
-  );
+  const paintDragPosition = () => {
+    frame.current = null;
+    separatorRef.current?.style.setProperty(
+      "--separator-x",
+      separatorXValue(dragXPosition.current),
+    );
+  };
 
-  const onMouseUp = useCallback(() => {
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // pointer capture keeps the moves coming while the pointer is off the
+    // separator, which is most of a drag
+    e.currentTarget.setPointerCapture(e.pointerId);
+    document.body.classList.add("no-select");
+    dragXPosition.current = separatorXPosition;
+    lastClientX.current = e.clientX;
+    draggingRef.current = true;
+    setDragging(true);
+    onDragStart?.();
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return;
+
+    // The pointer asks for a position; the layout decides which one it gets,
+    // and the difference is discarded rather than accumulated - dragging well
+    // past a limit and back must not leave the separator owing motion.
+    const requestedXPosition =
+      dragXPosition.current + e.clientX - lastClientX.current;
+    lastClientX.current = e.clientX;
+
+    dragXPosition.current = resolveDrag(requestedXPosition);
+
+    if (frame.current === null) {
+      frame.current = window.requestAnimationFrame(paintDragPosition);
+    }
+  };
+
+  const endDrag = () => {
+    if (!dragging) return;
+
+    if (frame.current !== null) {
+      window.cancelAnimationFrame(frame.current);
+      frame.current = null;
+    }
+    draggingRef.current = false;
     setDragging(false);
     document.body.classList.remove("no-select");
-    // Apply the final position
-    if (leftWidth !== separatorXPosition) {
-      setSeparatorXPosition(leftWidth);
-    }
-  }, [leftWidth, separatorXPosition, setSeparatorXPosition]);
+    window.getSelection()?.removeAllRanges();
 
-  useEffect(() => {
-    if (hovered || dragging) {
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
-
-      return () => {
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-      };
-    }
-  }, [hovered, dragging, onMouseMove, onMouseUp]);
+    // Unconditional: a drag that leaves this separator on its own bound can
+    // still have pushed the others, and only the caller resolving the whole
+    // layout can see that. It discards a drag that moved nothing.
+    setSeparatorXPosition(dragXPosition.current);
+  };
 
   return (
     <StyledLayoutSeparatorVertical
-      onMouseDown={onMouseDown}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={animatedVerticalSeparator}
+      ref={separatorRef}
+      // a render landing mid-drag (a neighbour panel absorbing overflow) would
+      // restore the pre-drag position from props
+      style={
+        {
+          "--separator-x": separatorXValue(
+            dragging ? dragXPosition.current : separatorXPosition,
+          ),
+        } as CSSProperties
+      }
+      $positionVarKey={positionVarKey}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onLostPointerCapture={endDrag}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
       $show={hovered || dragging}
     />
   );

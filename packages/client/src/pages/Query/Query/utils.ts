@@ -33,6 +33,14 @@ export const getAllNodes = (node: Query.INode): Query.INode[] => {
  * Such a request would scan the whole database, so the explorer skips it instead
  * of firing it automatically (e.g. on page load with the default root node).
  */
+/**
+ * A stats view with every event type switched off aggregates nothing, so the
+ * request can only come back empty - there is no point sending it.
+ */
+export const isStatsRequestEmpty = (explore: Explore.IExplore): boolean =>
+  explore.view.mode === Explore.EViewMode.Stats &&
+  explore.view.stats.eventType.length === 0;
+
 export const isQueryRequestEmpty = (
   query: Query.INode,
   explore: Explore.IExplore,

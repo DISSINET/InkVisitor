@@ -27,6 +27,9 @@ class Scroller {
       throw new Error("Runner for Scroller not found");
     }
     this.runner = runner as HTMLDivElement;
+    // A runner shorter than this is too small to grab. Left to CSS rather than
+    // folded into the percentage, so the size stays a pure share of the track.
+    this.runner.style.minHeight = `${MIN_RUNNER_HEIGHT_PX}px`;
 
     this.element.onmousedown = this.onBarDown.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
@@ -55,17 +58,14 @@ class Scroller {
       target.focus({ preventScroll: true });
     }, 0);
   }
+  /**
+   * Size the runner as a share of the track. Kept as a percentage rather than
+   * resolved to pixels here: the track's height is animated (a panel opening,
+   * a box resize) and a percentage stays right through that without anyone
+   * having to recompute it.
+   */
   setRunnerSize(percentSize: number): void {
-    const clampedPercent = Math.min(100, percentSize);
-    const containerHeight = this.element.clientHeight;
-
-    if (containerHeight > 0) {
-      const minPercent = (MIN_RUNNER_HEIGHT_PX / containerHeight) * 100;
-      const finalPercent = Math.max(clampedPercent, minPercent);
-      this.runner.style.height = `${Math.min(100, finalPercent)}%`;
-    } else {
-      this.runner.style.height = `${clampedPercent}%`;
-    }
+    this.runner.style.height = `${Math.min(100, Math.max(0, percentSize))}%`;
   }
 
   // convert px value to percentage considering the available height of the runner
@@ -109,9 +109,13 @@ class Scroller {
       percentage = Math.min(100, (startLine * 100) / scrollableLines);
     }
 
-    const availableHeight =
-      this.element.clientHeight - this.runner.clientHeight;
-    this.runner.style["top"] = `${(availableHeight / 100) * percentage}px`;
+    // Position as a share of the track, pulling the runner back by the same
+    // share of its own height: at 0% its top edge sits at the track's, at 100%
+    // its bottom edge does, whatever height either ended up with. Expressed in
+    // percentages so an animated track height needs no recomputation - `top`
+    // resolves against the track, the translate against the runner itself.
+    this.runner.style.top = `${percentage}%`;
+    this.runner.style.setProperty("translate", `0 -${percentage}%`);
   }
 
   /**

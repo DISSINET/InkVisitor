@@ -10,14 +10,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FOURTH_PANEL_MIN_WIDTH, wildCardChar } from "Theme/constants";
 import { IcoPlusBold, IcoSearch } from "Theme/icons";
 import api from "api";
-import { Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
+import { boxContentId, Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntityCreateModal,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import { useDebounce, useResizeObserver, useSearchParams } from "hooks";
+import { useDebounce, useResizeObserver, useSearchParams, useWidthBreakpoint } from "hooks";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
@@ -127,12 +127,10 @@ export const EntitySearchBox: React.FC = () => {
     isFetching,
     isPending,
   } = useQuery({
-    queryKey: [
-      "search",
-      {
-        searchData: JSON.stringify(debouncedValues),
-      },
-    ],
+    // react-query hashes the key by value with object keys sorted, so the fresh
+    // object the debounce produces on every keystroke only misses the cache when
+    // a filter actually changed (no need to manually stringify here)
+    queryKey: ["search", debouncedValues],
     queryFn: async () => {
       // if (debouncedValues.usedTemplate === "Any") {
       //   const { usedTemplate, ...filters } = debouncedValues;
@@ -337,10 +335,7 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [expandedOptions.includes(SearchEnums.AdvancedOption.Territory)]);
 
-  const panelWidths = useAppSelector((state) => state.layout.mainPage.panelWidths);
-  const isUndersized = useMemo(() => {
-    return panelWidths[3] < FOURTH_PANEL_MIN_WIDTH + 10;
-  }, [panelWidths]);
+  const isUndersized = useWidthBreakpoint(FOURTH_PANEL_MIN_WIDTH + 10, boxContentId("Search"));
 
   return (
     <>

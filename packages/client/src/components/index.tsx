@@ -1,5 +1,5 @@
 import { AttributeIcon } from "./basic/AttributeIcon/AttributeIcon";
-import { Box } from "./basic/Box/Box";
+import { Box, boxContentId } from "./basic/Box/Box";
 import { Button } from "./basic/Button/Button";
 import { CancelButton } from "./basic/Button/CancelButton";
 import { IconButton } from "./basic/Button/IconButton";
@@ -51,6 +51,7 @@ export {
   AttributeIcon,
   BaseDropdown,
   Box,
+  boxContentId,
   BundleButtonGroup,
   Button,
   ButtonGroup,

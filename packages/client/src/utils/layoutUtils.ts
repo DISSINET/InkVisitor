@@ -86,6 +86,96 @@ export function getEffectivePanelWidths(
   return [firstWidth, secondWidth, thirdWidth, fourthWidth];
 }
 
+// Panels are sized from CSS custom properties on the document root rather than
+// from a React prop, so a separator drag can repaint the whole layout once per
+// animation frame without rendering the panel contents.
+export function panelWidthVar(panelIndex: number): string {
+  return `--panel-w-${panelIndex}`;
+}
+
+export function writePanelWidthVars(widths: (number | undefined)[]): void {
+  const root = document.documentElement;
+  widths.forEach((width, index) => {
+    // a non-finite length makes the whole width declaration invalid, which
+    // drops the panel to its content size
+    if (width === undefined || !Number.isFinite(width)) return;
+    root.style.setProperty(panelWidthVar(index), `${width / 10}rem`);
+  });
+}
+
+// The left edge of the panel at panelIndex, as a CSS length. Lets an element
+// outside the panel flow follow a drag off the same variables the panels use.
+export function panelLeftEdgeValue(panelIndex: number): string {
+  if (panelIndex < 1) return "0";
+  const widths = Array.from(
+    { length: panelIndex },
+    (_, index) => `var(${panelWidthVar(index)})`,
+  );
+  return `calc(${widths.join(" + ")})`;
+}
+
+// A separator is positioned from a shared variable rather than from its own
+// props because a drag on one separator can push the others, and the pushed
+// ones are not the component that knows about it.
+export function separatorPositionVar(separatorKey: string): string {
+  return `--sep-x-${separatorKey}`;
+}
+
+export function writeSeparatorPositionVars(
+  positions: Record<string, number | undefined>,
+): void {
+  const root = document.documentElement;
+  Object.entries(positions).forEach(([separatorKey, xPosition]) => {
+    if (xPosition === undefined || !Number.isFinite(xPosition)) return;
+    root.style.setProperty(
+      separatorPositionVar(separatorKey),
+      `${xPosition / 10}rem`,
+    );
+  });
+}
+
+// Boxes are sized the same way as panels, keyed by name rather than by index
+// since a panel holds a different set of them depending on what is open.
+export function boxHeightVar(boxKey: string): string {
+  return `--box-h-${boxKey}`;
+}
+
+export function writeBoxHeightVars(heights: {
+  [boxKey: string]: number | undefined;
+}): void {
+  const root = document.documentElement;
+  Object.entries(heights).forEach(([boxKey, height]) => {
+    if (height === undefined || !Number.isFinite(height)) return;
+    root.style.setProperty(boxHeightVar(boxKey), `${height / 10}rem`);
+  });
+}
+
+// The narrowest the window can be and still hold the layout: every expanded
+// panel at its own minimum, every collapsed one at a collapsed panel's width.
+function minimumLayoutWidth(expanded: boolean[]): number {
+  const minWidths = [
+    FIRST_PANEL_MIN_WIDTH,
+    SECOND_PANEL_MIN_WIDTH,
+    THIRD_PANEL_MIN_WIDTH,
+    FOURTH_PANEL_MIN_WIDTH,
+  ];
+  return expanded.reduce(
+    (total, isExpanded, index) =>
+      total + (isExpanded ? minWidths[index] : COLLAPSED_PANEL_WIDTH),
+    0,
+  );
+}
+
+// Whether the window is too narrow for the panels that are open, which is the
+// one case a drag cannot answer by stopping at a boundary: there is no position
+// left that satisfies every minimum, so something has to give.
+export function isLayoutUndersized(
+  expanded: boolean[],
+  layoutWidth: number,
+): boolean {
+  return layoutWidth > 0 && layoutWidth < minimumLayoutWidth(expanded);
+}
+
 export function arePanelWidthsUndersized(
   widths: number[],
   expanded: boolean[] = [true, true, true, true],

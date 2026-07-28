@@ -2,21 +2,18 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree, IUser } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, CustomScrollbar, Loader } from "components";
+import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useWidthBreakpoint } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { IoFilter } from "react-icons/io5";
-import { useSelector } from "react-redux";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
 import { IcoPlusBold } from "Theme/icons";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
@@ -42,16 +39,6 @@ export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.firstPanelExpanded,
   );
-  const secondPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.secondPanelExpanded,
-  );
-  const thirdPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.thirdPanelExpanded,
-  );
-  const fourthPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelExpanded,
-  );
-
   const queryClient = useQueryClient();
 
   const { data: treeData, isFetching } = useTreeQuery();
@@ -153,25 +140,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeFilterOpen: boolean = useAppSelector((state) => state.territoryTree.filterOpen);
 
-  const basePanelWidth = useSelector(selectPanelWidth(0));
-  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
-
-  const treeWidth = useMemo(() => {
-    if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
-    if (!secondPanelExpanded && !thirdPanelExpanded && !fourthPanelExpanded) {
-      return layoutWidth - 3 * COLLAPSED_PANEL_WIDTH;
-    }
-    return basePanelWidth;
-  }, [
-    firstPanelExpanded,
-    secondPanelExpanded,
-    thirdPanelExpanded,
-    fourthPanelExpanded,
-    layoutWidth,
-    basePanelWidth,
-  ]);
-
-  const treeWidthTooNarrow = treeWidth < 160;
+  const treeWidthTooNarrow = useWidthBreakpoint(160, boxContentId("Territories"));
 
   // delay of show content for fluent animation on open
   const [showTerritoryTree, setShowTerritoryTree] = useState(true);

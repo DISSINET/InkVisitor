@@ -59,7 +59,6 @@ interface ExplorerTable {
    * results instead of flashing them while the new query is fetching.
    */
   stableSignature?: string;
-  height: number;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
 
@@ -81,7 +80,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isSearchPending = false,
   stableSignature,
   getCachedEntity,
-  height: heightBox,
   onOpenEntityInDetail,
   selectedEntityIdsSet,
   rowLastClicked,
@@ -307,14 +305,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [columns],
   );
 
-  const {
-    ref: contentRef,
-    width: contentWidth,
-    height: contentHeight,
-  } = useResizeObserver<HTMLDivElement>();
+  const { ref: contentRef, width: contentWidth } =
+    useResizeObserver<HTMLDivElement>();
 
-  const headerHeight = 50;
-  const heightTableBody = heightBox - headerHeight;
+  // The rows fill the body, so the window of rows worth fetching is measured
+  // from it. Zero until the first measurement lands, which computeWindowUpdate
+  // reads as "one overscan's worth" - and it is only called once rows render.
+  const { ref: bodyRef, height: heightTableBody = 0 } =
+    useResizeObserver<HTMLDivElement>();
 
   const handleRowClick = useCallback((rowId: number) => {
     setRowFocused((current) => (current === rowId ? -1 : rowId));
@@ -495,12 +493,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   return (
-    <StyledTableWrapper
-      style={{
-        height: heightBox - 20,
-      }}
-      ref={contentRef}
-    >
+    <StyledTableWrapper ref={contentRef}>
       <div
         style={
           {
@@ -510,7 +503,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             "--qt-row-border": themeContext.color.gray[300],
             width: contentWidth,
             minWidth: "100%",
-            height: heightBox - 20,
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
             overflowX: "auto",
             overflowY: "hidden",
             boxSizing: "border-box",
@@ -520,7 +515,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         }
       >
         {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
-        <div style={{ width: widthTable, minWidth: "100%" }}>
+        {/* The column the header and the body stack in. It has to be the flex
+            container of both, since the body takes the height the header leaves
+            and react-window sizes the rows to that. */}
+        <div
+          style={{
+            width: widthTable,
+            minWidth: "100%",
+            display: "flex",
+            flexDirection: "column",
+            flex: "1 1 auto",
+            minHeight: 0,
+          }}
+        >
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
           <ExploreTableHeader
             columns={columns}
@@ -530,11 +537,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           />
 
           {/* BODY (List handles Y; shares X with header via parent Scrollbar) */}
-          <StyledBody
-            style={{
-              height: heightTableBody,
-            }}
-          >
+          <StyledBody ref={bodyRef}>
             {isRequestEmpty ? (
               <StyledEmptyMessage>
                 Create a query or add a search filter first to see the matching entities.

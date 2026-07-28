@@ -14,7 +14,7 @@ import {
 import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EDITOR_TOO_SMALL_BREAKPOINT, excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
-import { Button, Input, Message, MultiInput, Submit } from "components";
+import { boxContentId, Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
@@ -31,7 +31,12 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useIsInViewport, useSearchParams, useTheme } from "hooks";
+import {
+  useIsInViewport,
+  useSearchParams,
+  useTheme,
+  useWidthBreakpoint,
+} from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
@@ -567,9 +572,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }, timeout);
   };
 
-  const editorWidth = useAppSelector((state) => state.layout.mainPage.thirdPanelRealWidth);
-
-  const editorWidthTooNarrow = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
+  const editorWidthTooNarrow = useWidthBreakpoint(
+    EDITOR_TOO_SMALL_BREAKPOINT,
+    boxContentId("Editor"),
+  );
 
   return (
     <>

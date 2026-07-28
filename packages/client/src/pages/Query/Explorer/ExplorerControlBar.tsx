@@ -150,7 +150,8 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
             onClick={() => newColumn.setIsNewColumnOpen(!newColumn.isNewColumnOpen)}
           />
         )}
-        <Loader loaderStyle="beat" show={isQueryFetching} size={7} />
+        {/* Table only - the stats view carries its own loader over the chart. */}
+        <Loader loaderStyle="beat" show={isTable && isQueryFetching} size={7} />
       </StyledControlGroup>
     </StyledTableControl>
   );
