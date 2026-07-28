@@ -33,14 +33,15 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
  * could never scroll clear of; this headroom lets a floating UI bar pinned to
  * the canvas top be scrolled past it like any other line.
  */
-export const VIEWPORT_START_BUFFER_ROWS = 1;
+export const VIEWPORT_START_BUFFER_ROWS = 2;
 
 /**
  * Rows of context kept above a search hit when scrolling to it. The client
  * floats a search bar over the top of the canvas, so a hit landing on the first
- * visible row would sit behind it.
+ * visible row would sit behind it. Two rows because the bar stands ~34px tall
+ * against a LINE_HEIGHT of 23 — one row does not clear it.
  */
-export const SEARCH_SCROLL_CONTEXT_ROWS = 1;
+export const SEARCH_SCROLL_CONTEXT_ROWS = 2;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**
