@@ -70,7 +70,7 @@ import {
 } from "./annotatorChrome";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
-import { AnnotatorFindPanel } from "./AnnotatorSearchLine/AnnotatorFindPanel";
+import { AnnotatorSearchBar } from "./AnnotatorSearchLine/AnnotatorSearchBar";
 import { AnnotatorFindReplaceModal } from "./AnnotatorSearchLine/AnnotatorFindReplaceModal";
 import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorSequentialAnchorPanel";
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
@@ -1480,27 +1480,6 @@ export const TextAnnotator = ({
 
   return (
     <>
-      {findPanel === FindPanel.Find && (
-        <AnnotatorFindPanel
-          onClose={() => setIsFindOpen(false)}
-          onOpenSequentialAnchoring={() => setIsSequentialAnchoringOpen(true)}
-          canEdit={canEditDocument}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          findInputRef={findInputRef}
-          searchOccurences={searchOccurences}
-          searchActiveOccurence={searchActiveOccurence}
-          goToNextOccurence={goToNextOccurence}
-          goToPreviousOccurence={goToPreviousOccurence}
-          isCaseSensitiveMode={isCaseSensitiveMode}
-          setIsCaseSensitiveMode={setIsCaseSensitiveMode}
-          isExtendToWholeWordMode={isExtendToWholeWordMode}
-          setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
-          isRegexMode={isRegexMode}
-          setIsRegexMode={setIsRegexMode}
-        />
-      )}
-
       {findPanel === FindPanel.SequentialAnchor && (
         <AnnotatorSequentialAnchorPanel
           onBack={() => setIsSequentialAnchoringOpen(false)}
@@ -1533,7 +1512,10 @@ export const TextAnnotator = ({
 
       {findPanel === FindPanel.FindReplace && (
         <AnnotatorFindReplaceModal
-          onClose={() => setIsFindOpen(false)}
+          onClose={() => {
+            setIsSequentialAnchoringOpen(false);
+            setIsFindOpen(false);
+          }}
           annotator={annotator}
           documentId={documentId}
           dataDocument={dataDocument || undefined}
@@ -1751,6 +1733,30 @@ export const TextAnnotator = ({
           </StyledScrollerViewport>
 
           <Loader show={dataDocumentIsFetching} size={40} />
+
+          {findPanel === FindPanel.Bar && (
+            <AnnotatorSearchBar
+              annotatorMode={annotatorMode}
+              onClose={() => setIsFindOpen(false)}
+              onOpenSecondStep={() => setIsSequentialAnchoringOpen(true)}
+              canEdit={canEditDocument}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              findInputRef={findInputRef}
+              searchOccurences={searchOccurences}
+              searchActiveOccurence={searchActiveOccurence}
+              goToNextOccurence={goToNextOccurence}
+              goToPreviousOccurence={goToPreviousOccurence}
+              isCaseSensitiveMode={isCaseSensitiveMode}
+              setIsCaseSensitiveMode={setIsCaseSensitiveMode}
+              isExtendToWholeWordMode={isExtendToWholeWordMode}
+              setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
+              isWholeWordOnlyMode={isWholeWordOnlyMode}
+              setIsWholeWordOnlyMode={setIsWholeWordOnlyMode}
+              isRegexMode={isRegexMode}
+              setIsRegexMode={setIsRegexMode}
+            />
+          )}
 
           <AnnotatorToolbar
             annotatorMode={annotatorMode}

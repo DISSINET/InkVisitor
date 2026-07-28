@@ -1,31 +1,33 @@
 import { EditMode } from "@inkvisitor/annotator/src/lib";
 
-/** Which floating find panel is open. At most one is mounted at a time. */
+/** Which floating search surface is mounted. At most one at a time. */
 export enum FindPanel {
   None = "none",
-  Find = "find",
+  Bar = "bar",
   SequentialAnchor = "sequential-anchor",
   FindReplace = "find-replace",
 }
 
 /**
- * Find and replace belongs to the text-editing modes and sequential anchoring to
- * highlight mode, so the mode picks the panel and the two open flags only say
- * how far in the user has gone. Both flags survive a mode switch, which is what
- * lets a user leave anchoring, edit the XML and come back mid-batch.
+ * Search is two steps: the bar finds matches in every mode, and the second step
+ * acts on them — sequential anchoring in highlight mode, find and replace in the
+ * text-editing ones. So the first flag says whether search is open at all and
+ * the second how far in the user has gone; the mode only picks which second step
+ * they get. Both flags survive a mode switch, which is what lets a user leave
+ * anchoring, edit the XML and come back mid-batch.
  */
 export const resolveFindPanel = (
   mode: EditMode,
   isFindOpen: boolean,
-  isSequentialAnchoringOpen: boolean,
+  isSecondStepOpen: boolean,
 ): FindPanel => {
   if (!isFindOpen) {
     return FindPanel.None;
   }
-  if (mode !== EditMode.HIGHLIGHT) {
-    return FindPanel.FindReplace;
+  if (!isSecondStepOpen) {
+    return FindPanel.Bar;
   }
-  return isSequentialAnchoringOpen ? FindPanel.SequentialAnchor : FindPanel.Find;
+  return mode === EditMode.HIGHLIGHT ? FindPanel.SequentialAnchor : FindPanel.FindReplace;
 };
 
 interface SelectionMenuState {

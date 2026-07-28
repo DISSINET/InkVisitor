@@ -13,24 +13,23 @@ describe("resolveFindPanel", () => {
     expect(resolveFindPanel(EditMode.RAW, false, false)).toBe(FindPanel.None);
   });
 
-  it("opens plain find in highlight mode", () => {
-    expect(resolveFindPanel(EditMode.HIGHLIGHT, true, false)).toBe(FindPanel.Find);
+  it("opens the bar first in every mode", () => {
+    expect(resolveFindPanel(EditMode.HIGHLIGHT, true, false)).toBe(FindPanel.Bar);
+    expect(resolveFindPanel(EditMode.SEMI, true, false)).toBe(FindPanel.Bar);
+    expect(resolveFindPanel(EditMode.RAW, true, false)).toBe(FindPanel.Bar);
   });
 
-  it("opens sequential anchoring in highlight mode once requested", () => {
+  it("makes the second step sequential anchoring in highlight mode", () => {
     expect(resolveFindPanel(EditMode.HIGHLIGHT, true, true)).toBe(FindPanel.SequentialAnchor);
   });
 
-  it("opens find & replace in the text and xml modes", () => {
-    expect(resolveFindPanel(EditMode.SEMI, true, false)).toBe(FindPanel.FindReplace);
-    expect(resolveFindPanel(EditMode.RAW, true, false)).toBe(FindPanel.FindReplace);
-  });
-
-  it("shows find & replace rather than anchoring when the mode is not highlight", () => {
+  it("makes the second step find & replace in the text and xml modes", () => {
+    expect(resolveFindPanel(EditMode.SEMI, true, true)).toBe(FindPanel.FindReplace);
     expect(resolveFindPanel(EditMode.RAW, true, true)).toBe(FindPanel.FindReplace);
   });
 
-  it("restores sequential anchoring when the mode returns to highlight", () => {
+  it("swaps which second step is shown when the mode changes under it", () => {
+    expect(resolveFindPanel(EditMode.RAW, true, true)).toBe(FindPanel.FindReplace);
     expect(resolveFindPanel(EditMode.HIGHLIGHT, true, true)).toBe(FindPanel.SequentialAnchor);
   });
 });
@@ -74,8 +73,8 @@ describe("shouldShowSelectionMenu", () => {
     expect(shouldShowSelectionMenu({ ...base, findPanel: FindPanel.SequentialAnchor })).toBe(false);
   });
 
-  it("still shows while plain find is open", () => {
-    expect(shouldShowSelectionMenu({ ...base, findPanel: FindPanel.Find })).toBe(true);
+  it("still shows while only the search bar is open", () => {
+    expect(shouldShowSelectionMenu({ ...base, findPanel: FindPanel.Bar })).toBe(true);
   });
 });
 

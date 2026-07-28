@@ -1,6 +1,6 @@
 import { Occurrence } from "@inkvisitor/annotator/src/lib";
 import { Button, Checkbox, Input } from "components";
-import React, { ReactNode } from "react";
+import React from "react";
 import {
   StyledFindReplaceFlags,
   StyledFindReplaceFooter,
@@ -27,9 +27,6 @@ interface AnnotatorFindControls {
   setIsExtendToWholeWordMode: React.Dispatch<React.SetStateAction<boolean>>;
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
-
-  /** Buttons appended to the Previous/Next footer, e.g. Find's "Sequential anchoring". */
-  footerExtra?: ReactNode;
 }
 
 /**
@@ -52,7 +49,6 @@ export const AnnotatorFindControls: React.FC<AnnotatorFindControls> = ({
   setIsExtendToWholeWordMode,
   isRegexMode,
   setIsRegexMode,
-  footerExtra,
 }) => {
   const occurencesCount = searchOccurences?.length ?? 0;
 
@@ -124,7 +120,6 @@ export const AnnotatorFindControls: React.FC<AnnotatorFindControls> = ({
           onClick={goToNextOccurence}
           disabled={occurencesCount === 0}
         />
-        {footerExtra}
       </StyledFindReplaceFooter>
     </>
   );
