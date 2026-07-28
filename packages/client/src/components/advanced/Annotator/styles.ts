@@ -1,5 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
+import { ANNOTATOR_LEFT_MARGIN_PX } from "./types";
 
 /** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
@@ -42,6 +43,8 @@ export const StyledScrollerViewport = styled.div`
  */
 export const StyledAnnotatorColumn = styled.div`
   position: relative;
+  /* wTextArea reserves this same margin when it sizes the canvas */
+  padding-left: ${ANNOTATOR_LEFT_MARGIN_PX}px;
 `;
 
 export const StyledCanvasWrapper = styled.div`

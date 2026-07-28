@@ -11,11 +11,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { boxContentId } from "components";
 import { useElementSize, useSearchParams } from "hooks";
-import {
-  ANNOTATOR_MIN_WRAP_WIDTH,
-  ANNOTATOR_RESIZE_DEBOUNCE_MS,
-  THIRD_PANEL_MIN_WIDTH,
-} from "Theme/constants";
 import useAnnotator from "hooks/useAnnotator";
 import {
   useDocumentQuery,
@@ -27,6 +22,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { setSelectedResourceId } from "redux/features/statementAnnotator/selectedResourceIdSlice";
 import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import {
+  ANNOTATOR_MIN_WRAP_WIDTH,
+  ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  THIRD_PANEL_MIN_WIDTH,
+} from "Theme/constants";
 import { StatementListTextAnnotator } from "./AnnotatorContent";
 import { resolveAnnotatorResourceId } from "./resolveAnnotatorResourceId";
 
@@ -58,14 +58,16 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     Math.max(width, THIRD_PANEL_MIN_WIDTH),
   );
 
+  // An effect per source, each firing only when its own source moved, which is
+  // what makes the last mover the winner. The measurement always moves last:
+  // it is published from a timer, so it lands in a render of its own, after the
+  // prop that provoked it.
   useEffect(() => {
     if (width > ANNOTATOR_MIN_WRAP_WIDTH) {
       setContentWidth(width);
     }
   }, [width]);
 
-  // Declared second so a drop, where both land together, ends on the measured
-  // width rather than the panel's.
   useEffect(() => {
     if (measuredWidth !== undefined && measuredWidth > ANNOTATOR_MIN_WRAP_WIDTH) {
       setContentWidth(measuredWidth);

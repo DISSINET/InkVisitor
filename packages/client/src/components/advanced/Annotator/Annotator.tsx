@@ -1511,7 +1511,7 @@ export const TextAnnotator = ({
       </div>
 
       <StyledAnnotatorColumn
-        style={{ width, paddingLeft: ANNOTATOR_LEFT_MARGIN_PX }}
+        style={{ width }}
         onKeyDownCapture={(e) => {
           // Cmd/Ctrl+S saves the document. Intercept in capture so it beats the
           // browser's "save page" dialog and the canvas's own keydown. Mirrors
