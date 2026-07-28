@@ -48,12 +48,6 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
 
   return (
     <StyledAnnotatorHeader>
-      {selectedDocument && (
-        <StyledAnnotatorHeaderTitle>
-          <DocumentTitle title={selectedDocument.title} width="full" noMargin />
-        </StyledAnnotatorHeaderTitle>
-      )}
-
       {!selectedResource && (
         <div onFocus={onResourcePickerFocus}>
           <EntitySuggester
@@ -101,12 +95,20 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
         </StyledAnnotatorHeaderResource>
       )}
 
-      {selectedDocumentIsFetching && !selectedDocument && (
-        <StyledLoadingDocument>
-          <Loader show size={16} />
-          <StyledInfoText>Loading</StyledInfoText>
-        </StyledLoadingDocument>
-      )}
+      {/* Both occupy the same slot after the resource: the loader stands in for
+          the title until the document it names has arrived. */}
+      <StyledAnnotatorHeaderTitle>
+        {selectedDocument ? (
+          <DocumentTitle title={selectedDocument.title} width="full" noMargin />
+        ) : (
+          selectedDocumentIsFetching && (
+            <StyledLoadingDocument>
+              <Loader show size={16} />
+              <StyledInfoText>Loading</StyledInfoText>
+            </StyledLoadingDocument>
+          )
+        )}
+      </StyledAnnotatorHeaderTitle>
 
       {showExportModal && selectedDocument && (
         <DocumentModalExport

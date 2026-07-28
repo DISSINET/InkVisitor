@@ -1,16 +1,31 @@
 import styled from "styled-components";
 
 /**
- * Sits over the bottom-left of the canvas, above the line-number gutter. The
- * canvas is a fixed-size element the annotator library draws into, and any
- * change to its height re-wraps the whole document — so the toolbar overlays it
- * rather than taking a row of its own.
+ * Spans the canvas so its two clusters can sit at opposite ends, but paints
+ * nothing itself and takes no pointer events — the text between the clusters
+ * stays visible and clickable. The canvas is a fixed-size element the annotator
+ * library draws into, and any change to its height re-wraps the whole document,
+ * so the toolbar overlays it rather than taking a row of its own.
  */
 export const StyledAnnotatorToolbar = styled.div`
   position: absolute;
   left: ${({ theme }) => theme.space[2]};
-  bottom: ${({ theme }) => theme.space[2]};
+  right: ${({ theme }) => theme.space[2]};
+  bottom: ${({ theme }) => theme.space[4]};
   z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.space[2]};
+  pointer-events: none;
+`;
+
+/**
+ * One cluster of the toolbar. Changing what the canvas shows (the edit modes)
+ * and acting on what it shows are different jobs, so they get separate pills at
+ * opposite ends rather than one undifferentiated strip.
+ */
+export const StyledAnnotatorToolbarCluster = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
@@ -18,6 +33,7 @@ export const StyledAnnotatorToolbar = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
+  pointer-events: auto;
   opacity: 0.5;
   transition: opacity 0.3s;
 
