@@ -60,7 +60,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               dataDocumentIsFetching={dataDocumentIsFetching}
               dataDocumentError={errorDocument}
               width={965}
-              height={windowHeight - 203}
+              height={windowHeight - 145}
               displayLineNumbers={true}
               hlEntities={[EntityEnums.Class.Territory]}
               forwardAnnotator={(newAnnotator) => {

@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 import { boxHeightVar } from "utils/layoutUtils";
@@ -32,7 +33,7 @@ export const StyledHead = styled.div<StyledHead>`
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[2]};
-  height: 3.2rem;
+  height: ${BOX_HEADER_HEIGHT / 10}rem;
   background-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "")};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${({ theme }) => theme.space[2]};

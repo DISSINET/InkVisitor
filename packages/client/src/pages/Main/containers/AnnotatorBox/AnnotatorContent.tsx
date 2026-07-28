@@ -19,11 +19,7 @@ import { BsInfoCircle } from "react-icons/bs";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TbAnchor, TbAnchorOff } from "react-icons/tb";
-import {
-  ANNOTATOR_SELECTOR_HEIGHT,
-  ANNOTATOR_TOO_SMALL_BREAKPOINT,
-  COLLAPSED_TABLE_WIDTH,
-} from "Theme/constants";
+import { ANNOTATOR_TOO_SMALL_BREAKPOINT, COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
 import { AnnotatorHighlightPopover } from "./AnnotatorHighlightPopover";
@@ -108,9 +104,9 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   onStatementAnchorHover,
   onUnsavedTextEditsChange,
 }) => {
-  const annotatorHeight = useMemo<number>(() => {
-    return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT;
-  }, [contentHeight]);
+  // The canvas is the only thing in the box content — the toolbar overlays it
+  // and the find panels are portalled out of the layout.
+  const annotatorHeight = contentHeight;
 
   // The annotator box collapses to (near) zero height when the Statement
   // Editor box is full-height. The selection menu floats over the whole page,

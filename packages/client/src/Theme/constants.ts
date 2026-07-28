@@ -43,8 +43,9 @@ export const ANNOTATOR_TOO_SMALL_BREAKPOINT = 580;
 export const ANNOTATOR_UNDERSIZED_BREAKPOINT = 490;
 // breakpoint for editor width too small
 export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
-// height of class selector for highlight in annotator
-export const ANNOTATOR_SELECTOR_HEIGHT = 27;
+// Height of the Box header row. StyledHead sets its own height from this, and
+// callers subtract it from a box's height to get the height of its content.
+export const BOX_HEADER_HEIGHT = 32;
 // A collapsed panel leaves the annotator box narrower than this, and an
 // expanded one is never anywhere near it (THIRD_PANEL_MIN_WIDTH away). Widths
 // below it are the collapsed state, which the canvas is not drawn at.

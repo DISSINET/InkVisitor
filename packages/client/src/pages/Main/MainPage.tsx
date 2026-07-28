@@ -36,7 +36,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   COLLAPSED_PANEL_WIDTH,
   fourthPanelBoxesHeightThirds,
-  heightHeader,
+  BOX_HEADER_HEIGHT,
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
@@ -773,7 +773,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           buttons={[thirdPanelButton()]}
         >
           <MemoizedAnnotatorBox
-            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
+            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - BOX_HEADER_HEIGHT)}
             width={thirdPanelWidth - 10}
             onHeaderChange={setAnnotatorHeader}
           />
