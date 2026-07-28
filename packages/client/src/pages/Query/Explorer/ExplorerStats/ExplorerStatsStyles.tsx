@@ -1,11 +1,11 @@
 import styled from "styled-components";
 
-export const StyledStatsLayout = styled.div<{ $height?: number }>`
+export const StyledStatsLayout = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[4]};
   padding: ${({ theme }) => theme.space[4]};
-  height: ${({ $height }) => ($height ? `${$height}px` : "100%")};
+  height: 100%;
   overflow: auto;
 `;
 

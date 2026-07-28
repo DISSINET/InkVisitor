@@ -20,6 +20,7 @@ export const StyledRowWrapper = styled.div`
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
+  flex-shrink: 0;
   height: ${({ theme }) => theme.space[12]};
   background-color: ${({ theme }) => theme.color["explorerHeader"]};
   color: ${({ theme }) => theme.color["headerTextColor"]};

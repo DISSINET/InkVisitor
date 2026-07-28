@@ -838,7 +838,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             >
               <MemoizedExplorerBox
                 state={exploreState}
-                height={contentHeight - querySeparatorYPosition}
                 dispatch={exploreStateDispatch}
                 data={queryData}
                 isQueryFetching={queryIsFetching}

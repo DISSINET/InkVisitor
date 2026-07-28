@@ -74,7 +74,6 @@ interface ExplorerStatsProps {
   /** True when criteria are set but the search has not been run yet. */
   isSearchPending?: boolean;
   isFetching: boolean;
-  height: number;
 }
 
 export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
@@ -86,7 +85,6 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   isRequestEmpty,
   isSearchPending = false,
   isFetching,
-  height,
 }) => {
   const [localStats, setLocalStats] = useState(stats);
 
@@ -132,7 +130,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
   if (isRequestEmpty) {
     return (
-      <StyledStatsLayout $height={height}>
+      <StyledStatsLayout>
         <StyledEmptyMessage>
           Create a query or add a search filter first to see statistics for the matching entities.
         </StyledEmptyMessage>
@@ -142,7 +140,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
   if (isSearchPending) {
     return (
-      <StyledStatsLayout $height={height}>
+      <StyledStatsLayout>
         <StyledEmptyMessage>
           Run the search to see statistics for the matching entities. (Enter)
         </StyledEmptyMessage>
@@ -151,7 +149,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   }
 
   return (
-    <StyledStatsLayout $height={height}>
+    <StyledStatsLayout>
       <StyledStatsHeader>
         Statistics for current search results
         {typeof total === "number" ? ` — ${total} entities` : ""}

@@ -14,9 +14,6 @@ import {
   StyledExplorerViewArea,
 } from "./ExplorerBoxStyles";
 
-/** Height reserved for the shared control bar above the view content. */
-const CONTROL_BAR_HEIGHT = 50;
-
 interface ExplorerBoxProps {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
@@ -27,7 +24,6 @@ interface ExplorerBoxProps {
   /** True when criteria are set but the search has not been run yet. */
   isSearchPending?: boolean;
   queryError: Error | null;
-  height: number;
   onExport: (rowsSelected: number[], selectedColumnIds?: string[]) => void;
   stableSignature?: string;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
@@ -45,7 +41,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   isRequestEmpty = false,
   isSearchPending = false,
   queryError,
-  height,
   onExport,
   stableSignature,
   getCachedEntity,
@@ -67,8 +62,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
     stableSignature,
   });
   const invalidateExplorerQuery = useInvalidateExplorerQuery(stableSignature);
-
-  const contentHeight = Math.max(0, height - CONTROL_BAR_HEIGHT);
 
   return (
     <>
@@ -117,7 +110,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               isRequestEmpty={isRequestEmpty}
               isSearchPending={isSearchPending}
               isFetching={isQueryFetching}
-              height={isStatsEmpty ? height : contentHeight}
             />
           ) : (
             <ExplorerTable
@@ -129,7 +121,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
               isSearchPending={isSearchPending}
               stableSignature={stableSignature}
               queryError={queryError}
-              height={contentHeight}
               getCachedEntity={getCachedEntity}
               onOpenEntityInDetail={onOpenEntityInDetail}
               selectedEntityIdsSet={controls.selectedEntityIdsSet}

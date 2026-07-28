@@ -59,7 +59,6 @@ interface ExplorerTable {
    * results instead of flashing them while the new query is fetching.
    */
   stableSignature?: string;
-  height: number;
   getCachedEntity?: (rowIndex: number) => IResponseQueryEntity | undefined;
   onOpenEntityInDetail?: (entityId: string) => void;
 
@@ -81,7 +80,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isSearchPending = false,
   stableSignature,
   getCachedEntity,
-  height: heightBox,
   onOpenEntityInDetail,
   selectedEntityIdsSet,
   rowLastClicked,
@@ -311,8 +309,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     useResizeObserver<HTMLDivElement>();
 
   // The rows fill the body, so the window of rows worth fetching is measured
-  // from it rather than derived from a height the layout no longer uses.
-  const { ref: bodyRef, height: heightTableBody = heightBox } =
+  // from it. Zero until the first measurement lands, which computeWindowUpdate
+  // reads as "one overscan's worth" - and it is only called once rows render.
+  const { ref: bodyRef, height: heightTableBody = 0 } =
     useResizeObserver<HTMLDivElement>();
 
   const handleRowClick = useCallback((rowId: number) => {
@@ -516,7 +515,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         }
       >
         {/* HEADER (sticky at top of vertical area, shared horizontal scroll) */}
-        <div style={{ width: widthTable, minWidth: "100%" }}>
+        {/* The column the header and the body stack in. It has to be the flex
+            container of both, since the body takes the height the header leaves
+            and react-window sizes the rows to that. */}
+        <div
+          style={{
+            width: widthTable,
+            minWidth: "100%",
+            display: "flex",
+            flexDirection: "column",
+            flex: "1 1 auto",
+            minHeight: 0,
+          }}
+        >
           {/* Alternatively, use the memoized header component below to minimize re-renders */}
           <ExploreTableHeader
             columns={columns}
