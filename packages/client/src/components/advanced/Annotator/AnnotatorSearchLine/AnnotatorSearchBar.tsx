@@ -14,7 +14,9 @@ import {
 } from "Theme/icons";
 import {
   StyledAnnotatorSearchBar,
+  StyledAnnotatorSearchBarWrap,
   StyledSearchBarFlags,
+  StyledSearchBarInput,
   StyledSearchBarNav,
   StyledSearchBarResults,
 } from "./AnnotatorSearchBarStyles";
@@ -80,120 +82,125 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   const refocusInput = () => findInputRef.current?.focus();
 
   return (
-    <StyledAnnotatorSearchBar>
-      <Input
-        value={searchTerm}
-        onChangeFn={(newText: string) => setSearchTerm(newText)}
-        onEnterPressFn={goToNextOccurence}
-        onEscapePressFn={onClose}
-        changeOnType
-        autoFocus
-        width={200}
-        inputRef={findInputRef}
-        roundCorners
-        placeholder="search"
-        rightContent={
-          <StyledSearchBarFlags>
-            <Checkbox
-              iconOnly
-              value={isCaseSensitiveMode}
-              onChangeFn={setIsCaseSensitiveMode}
-              onClickFn={refocusInput}
-              icon={<IcoCaseSensitive size={16} />}
-              tooltipLabel="match case"
-              tooltipPosition="bottom"
-            />
-            {isHighlightMode ? (
-              <Checkbox
-                iconOnly
-                value={isExtendToWholeWordMode}
-                onChangeFn={setIsExtendToWholeWordMode}
-                onClickFn={refocusInput}
-                icon={<IcoExpandFull size={12} />}
-                tooltipLabel="extend to whole word(s)"
-                tooltipPosition="bottom"
-              />
-            ) : (
-              <Checkbox
-                iconOnly
-                value={isWholeWordOnlyMode}
-                onChangeFn={setIsWholeWordOnlyMode}
-                onClickFn={refocusInput}
-                icon={<IcoWholeWord size={16} />}
-                tooltipLabel="whole word only"
-                tooltipPosition="bottom"
-              />
-            )}
-            <Checkbox
-              iconOnly
-              value={isRegexMode}
-              onChangeFn={setIsRegexMode}
-              onClickFn={refocusInput}
-              icon={<IcoRegex size={14} />}
-              tooltipLabel="use regular expressions"
-              tooltipPosition="bottom"
-            />
-          </StyledSearchBarFlags>
-        }
-      />
+    <StyledAnnotatorSearchBarWrap>
+      <StyledAnnotatorSearchBar>
+        <StyledSearchBarInput>
+          <Input
+            value={searchTerm}
+            onChangeFn={(newText: string) => setSearchTerm(newText)}
+            onEnterPressFn={goToNextOccurence}
+            onEscapePressFn={onClose}
+            changeOnType
+            autoFocus
+            width="full"
+            minWidth={110}
+            inputRef={findInputRef}
+            roundCorners
+            placeholder="search"
+            rightContent={
+              <StyledSearchBarFlags>
+                <Checkbox
+                  iconOnly
+                  value={isCaseSensitiveMode}
+                  onChangeFn={setIsCaseSensitiveMode}
+                  onClickFn={refocusInput}
+                  icon={<IcoCaseSensitive size={16} />}
+                  tooltipLabel="match case"
+                  tooltipPosition="bottom"
+                />
+                {isHighlightMode ? (
+                  <Checkbox
+                    iconOnly
+                    value={isExtendToWholeWordMode}
+                    onChangeFn={setIsExtendToWholeWordMode}
+                    onClickFn={refocusInput}
+                    icon={<IcoExpandFull size={12} />}
+                    tooltipLabel="extend to whole word(s)"
+                    tooltipPosition="bottom"
+                  />
+                ) : (
+                  <Checkbox
+                    iconOnly
+                    value={isWholeWordOnlyMode}
+                    onChangeFn={setIsWholeWordOnlyMode}
+                    onClickFn={refocusInput}
+                    icon={<IcoWholeWord size={16} />}
+                    tooltipLabel="whole word only"
+                    tooltipPosition="bottom"
+                  />
+                )}
+                <Checkbox
+                  iconOnly
+                  value={isRegexMode}
+                  onChangeFn={setIsRegexMode}
+                  onClickFn={refocusInput}
+                  icon={<IcoRegex size={14} />}
+                  tooltipLabel="use regular expressions"
+                  tooltipPosition="bottom"
+                />
+              </StyledSearchBarFlags>
+            }
+          />
+        </StyledSearchBarInput>
 
-      <StyledSearchBarResults>
-        {searchOccurences === null
-          ? ""
-          : occurencesCount === 0
-            ? "no results"
-            : `${searchActiveOccurence + 1} of ${occurencesCount}`}
-      </StyledSearchBarResults>
+        <StyledSearchBarResults>
+          {searchOccurences === null
+            ? ""
+            : occurencesCount === 0
+              ? "no results"
+              : `${searchActiveOccurence + 1} of ${occurencesCount}`}
+        </StyledSearchBarResults>
 
-      <StyledSearchBarNav>
+        <StyledSearchBarNav>
+          <Button
+            icon={<IcoArrowCircleUp />}
+            color="info"
+            inverted
+            noBorder
+            onClick={goToPreviousOccurence}
+            disabled={occurencesCount === 0}
+            tooltipLabel="previous occurence"
+            tooltipContent={<p>(Shift + F3)</p>}
+            tooltipPosition="bottom"
+          />
+          <Button
+            icon={<IcoArrowCircleDown />}
+            color="info"
+            inverted
+            noBorder
+            onClick={goToNextOccurence}
+            disabled={occurencesCount === 0}
+            tooltipLabel="next occurence"
+            tooltipContent={<p>(F3)</p>}
+            tooltipPosition="bottom"
+          />
+        </StyledSearchBarNav>
+
+        {canEdit && (
+          <Button
+            icon={isHighlightMode ? <IcoAnchor /> : <IcoReplaceTb />}
+            color="info"
+            onClick={onOpenSecondStep}
+            tooltipLabel={
+              isHighlightMode
+                ? "anchor each match to one entity, one match at a time"
+                : "open find & replace"
+            }
+            tooltipPosition="bottom"
+          />
+        )}
+
         <Button
-          icon={<IcoArrowCircleUp />}
-          color="info"
+          icon={<FaTimes size={12} />}
+          color="primary"
           inverted
           noBorder
-          onClick={goToPreviousOccurence}
-          disabled={occurencesCount === 0}
-          tooltipLabel="previous occurence"
-          tooltipContent={<p>(Shift + F3)</p>}
+          noBackground
+          onClick={onClose}
+          tooltipLabel="close search (Esc)"
           tooltipPosition="bottom"
         />
-        <Button
-          icon={<IcoArrowCircleDown />}
-          color="info"
-          inverted
-          noBorder
-          onClick={goToNextOccurence}
-          disabled={occurencesCount === 0}
-          tooltipLabel="next occurence"
-          tooltipContent={<p>(F3)</p>}
-          tooltipPosition="bottom"
-        />
-      </StyledSearchBarNav>
-
-      {canEdit && (
-        <Button
-          icon={isHighlightMode ? <IcoAnchor /> : <IcoReplaceTb />}
-          color="info"
-          onClick={onOpenSecondStep}
-          tooltipLabel={
-            isHighlightMode
-              ? "anchor each match to one entity, one match at a time"
-              : "open find & replace"
-          }
-          tooltipPosition="bottom"
-        />
-      )}
-
-      <Button
-        icon={<FaTimes size={12} />}
-        color="primary"
-        inverted
-        noBorder
-        noBackground
-        onClick={onClose}
-        tooltipLabel="close search (Esc)"
-        tooltipPosition="bottom"
-      />
-    </StyledAnnotatorSearchBar>
+      </StyledAnnotatorSearchBar>
+    </StyledAnnotatorSearchBarWrap>
   );
 };
