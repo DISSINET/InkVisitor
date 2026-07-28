@@ -2,7 +2,7 @@ import { animated, useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import { ButtonGroup } from "components";
-import React, { ReactNode, useState } from "react";
+import React, { CSSProperties, ReactNode, useState } from "react";
 import {
   StyledBox,
   StyledHeaderComponentWrap,
@@ -13,11 +13,18 @@ import {
   StyledVerticalText,
 } from "./BoxStyles";
 
+// Id the box content is reachable by from outside the React tree, for
+// scrolling into it and for measuring the width its content has to work with.
+export const boxContentId = (label: string) => `box-content-${label.toLowerCase()}`;
+
 interface Box {
   label?: string;
   color?: keyof ThemeColor;
   borderColor?: keyof ThemeColor;
   height?: number;
+  // Key of the shared height variable a separator drag writes this box to.
+  // Boxes without one are sized from the height prop alone.
+  heightVarKey?: string;
   noFrame?: boolean;
   isExpanded?: boolean;
   headerComponent?: ReactNode;
@@ -33,6 +40,7 @@ export const Box: React.FC<Box> = ({
   color,
   borderColor,
   height = 0,
+  heightVarKey,
   noFrame = false,
   isExpanded = true,
   headerComponent,
@@ -48,7 +56,6 @@ export const Box: React.FC<Box> = ({
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
-    boxHeight: `${height / 10}rem`,
     onRest: () => {
       isExpanded ? setShowContentLabel(false) : setHideContent(true);
     },
@@ -60,8 +67,12 @@ export const Box: React.FC<Box> = ({
 
   return (
     <StyledBox
-      style={{ height: animatedExpand.boxHeight as any }}
-      height={height}
+      style={
+        {
+          "--box-height": height ? `${height / 10}rem` : "100%",
+        } as CSSProperties
+      }
+      $heightVarKey={heightVarKey}
       onClick={() => !isExpanded && onHeaderClick && onHeaderClick()}
       $isClickable={!isExpanded && onHeaderClick !== undefined}
     >
@@ -90,7 +101,7 @@ export const Box: React.FC<Box> = ({
         )}
       </StyledHead>
       <StyledContent
-        id={`box-content-${label.toLowerCase()}`}
+        id={boxContentId(label)}
         $color={color}
         $borderColor={borderColor}
         $noFrame={noFrame}

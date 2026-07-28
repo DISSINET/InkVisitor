@@ -8,6 +8,11 @@ export const StyledTableWrapper = styled.div<StyledTableWrapper>`
   position: relative;
   margin-top: 0.5rem;
   overflow: hidden;
+  /* Takes the height the box has right now rather than the height a prop last
+     said it had, so a resize reaches the table as it happens. What the table
+     needs a number for - the row window - is measured from here. */
+  flex: 1 1 auto;
+  min-height: 0;
 `;
 export const StyledRowWrapper = styled.div`
   display: block;
@@ -15,6 +20,7 @@ export const StyledRowWrapper = styled.div`
 export const StyledHeader = styled.div`
   display: flex;
   z-index: 1;
+  flex-shrink: 0;
   height: ${({ theme }) => theme.space[12]};
   background-color: ${({ theme }) => theme.color["explorerHeader"]};
   color: ${({ theme }) => theme.color["headerTextColor"]};
@@ -117,7 +123,12 @@ export const StyledHeaderEntityCell = styled.div`
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.14);
 `;
 
-export const StyledBody = styled.div``;
+/* Fills what the header leaves. react-window sizes its rows to this, so the
+   viewport follows a resize without anyone subtracting a header height. */
+export const StyledBody = styled.div`
+  flex: 1 1 auto;
+  min-height: 0;
+`;
 
 export const StyledEmptyMessage = styled.div`
   padding: ${({ theme }) => theme.space[6]};
@@ -182,7 +193,7 @@ export const StyledControlGroup = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
+  gap: ${({ theme }) => theme.space[3]};
   flex-shrink: 0;
 `;
 export const StyledTableFooter = styled(StyledSpaceBetween)`

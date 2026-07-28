@@ -1,5 +1,12 @@
+import { animated } from "@react-spring/web";
 import { InvertedBgColor } from "Theme/theme";
 import styled from "styled-components";
+
+export const StyledMenuIcon = styled(animated.div)`
+  display: flex;
+  align-items: center;
+  margin-right: ${({ theme }) => theme.space[2]};
+`;
 
 export const StyledMenuGroupWrapper = styled.div`
   position: absolute;

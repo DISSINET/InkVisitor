@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { Button, ButtonGroup, Checkbox, Input } from "components";
+import { Button, ButtonGroup, CancelButton, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -222,7 +222,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         }}
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-          <Button color="warning" label="cancel" onClick={handleClose} />
+          <CancelButton onClick={handleClose} />
           <Button
             label="create column"
             onClick={handleCreate}

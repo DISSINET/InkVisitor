@@ -1,5 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -17,6 +25,12 @@ import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import {
+  animateBoxHeightVars,
+  animatePanelWidthVars,
+  setBoxHeightVars,
+  setPanelWidthVars,
+} from "utils/layoutTransition";
 import { floorNumberToOneDecimal } from "utils/utils";
 import {
   QUERY_BUILDER_MIN_HEIGHT,
@@ -47,6 +61,7 @@ import {
   useQueryData,
 } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
+import { ButtonSize } from "types";
 
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
@@ -589,11 +604,38 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
   }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
 
+  // The panels render from these variables. A separator drag overwrites them
+  // directly for the duration of the drag and lands here on drop.
+  useLayoutEffect(() => {
+    animatePanelWidthVars([leftPanelWidth, detailPanelWidth], "explorerPage");
+  }, [leftPanelWidth, detailPanelWidth]);
+
+  // Same for the two boxes the horizontal separator splits.
+  useLayoutEffect(() => {
+    animateBoxHeightVars(
+      {
+        queryBuilder: querySeparatorYPosition,
+        explorer: contentHeight - querySeparatorYPosition,
+      },
+      "explorerPage",
+    );
+  }, [querySeparatorYPosition, contentHeight]);
+
   return (
     <>
       {queryLeftPanelExpanded && isExplorerNormal && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
-          width={leftPanelWidth}
+          panelIndex={0}
+          boxHeightVarKey="queryBuilder"
+          applyPreview={(yPosition) =>
+            setBoxHeightVars(
+              {
+                queryBuilder: yPosition,
+                explorer: contentHeight - yPosition,
+              },
+              "explorerPage",
+            )
+          }
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
@@ -606,20 +648,29 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         queryDetailPanelExpanded &&
         querySeparatorXPosition > 0 && (
           <LayoutSeparatorVertical
-            leftSideMinWidth={QUERY_LEFT_PANEL_MIN_WIDTH}
-            leftSideMaxWidth={layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH}
             separatorXPosition={querySeparatorXPosition}
+            // the separator only renders with both panels expanded, where the
+            // left panel reaches exactly to it
+            resolveDrag={(xPosition) => {
+              const resolved = Math.min(
+                Math.max(xPosition, QUERY_LEFT_PANEL_MIN_WIDTH),
+                layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
+              );
+              setPanelWidthVars([resolved, layoutWidth - resolved], "explorerPage");
+              return resolved;
+            }}
             setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
           />
         )}
 
-      <Panel width={leftPanelWidth}>
+      <Panel width={leftPanelWidth} widthVarIndex={0}>
         {queryLeftPanelExpanded ? (
           <>
             <Box
               noFrame
               borderColor="white"
               height={querySeparatorYPosition}
+              heightVarKey="queryBuilder"
               label="Query Builder"
               disableHeaderClick={!explorerBoxMaximized}
               onHeaderClick={handleMaximizeExplorerBox}
@@ -706,12 +757,14 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               noFrame
               borderColor="white"
               height={contentHeight - querySeparatorYPosition}
+              heightVarKey="explorer"
               label="Explorer"
               disableHeaderClick
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
                 <SwitchGroup key="explorer-view-mode">
                   <Button
+                    size={ButtonSize.Medium}
                     tooltipLabel="table view"
                     label="table"
                     shape="rounded-sm"
@@ -724,8 +777,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       setExploreViewMode(Explore.EViewMode.Table);
                       if (explorerBoxMinimized) restoreExplorerToHalf();
                     }}
+                    bold={!isStatsView}
                   />
                   <Button
+                    size={ButtonSize.Medium}
                     tooltipLabel="stats view"
                     label="stats"
                     shape="rounded-sm"
@@ -738,6 +793,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       setExploreViewMode(Explore.EViewMode.Stats);
                       if (explorerBoxMinimized) restoreExplorerToHalf();
                     }}
+                    bold={isStatsView}
                   />
                 </SwitchGroup>
               }
@@ -782,7 +838,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             >
               <MemoizedExplorerBox
                 state={exploreState}
-                height={contentHeight - querySeparatorYPosition}
                 dispatch={exploreStateDispatch}
                 data={queryData}
                 isQueryFetching={queryIsFetching}
@@ -818,7 +873,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         )}
       </Panel>
       {isDetailOpen && (
-        <Panel width={detailPanelWidth}>
+        <Panel width={detailPanelWidth} widthVarIndex={1}>
           <Box
             label="Detail"
             borderColor="white"

@@ -6,8 +6,8 @@ import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import { Button } from "components";
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaStar } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaStar } from "react-icons/fa";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { TbArrowsSort } from "react-icons/tb";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import { ReorderTerritoryChildrenModal } from "../ReorderTerritoryChildrenModal/ReorderTerritoryChildrenModal";
@@ -105,7 +105,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                     key="add"
                     tooltipLabel="add child territory"
                     tooltipPosition="top"
-                    icon={<FaPlus size={14} />}
+                    icon={<IcoPlusBold size={14} />}
                     color="info"
                     shape="sharp-square"
                     size={ButtonSize.Medium}

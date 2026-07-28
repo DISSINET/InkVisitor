@@ -19,7 +19,6 @@ import {
   FaExclamationTriangle,
   FaLongArrowAltRight,
   FaPen,
-  FaPlus,
   FaRegEye,
 } from "react-icons/fa";
 import { MdDragIndicator, MdOutlineDone } from "react-icons/md";
@@ -29,7 +28,7 @@ import { TbAnchor } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch } from "redux/hooks";
-import { IcoTrash } from "Theme/icons";
+import { IcoPlus, IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
 import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
 import { EntityTag } from "../../EntityTag/EntityTag";
@@ -468,7 +467,7 @@ export const TextAnnotatorMenu = ({
                     />
                   )}
                   <StyledMoveAnchorGroupLabel>start</StyledMoveAnchorGroupLabel>
-                  <ButtonGroup $smallGap>
+                  <ButtonGroup $gap="small">
                     <Button
                       icon={<FaChevronLeft size={13} />}
                       color="primary"
@@ -495,7 +494,7 @@ export const TextAnnotatorMenu = ({
                     />
                   )}
                   <StyledMoveAnchorGroupLabel>end</StyledMoveAnchorGroupLabel>
-                  <ButtonGroup $smallGap>
+                  <ButtonGroup $gap="small">
                     <Button
                       icon={<FaChevronLeft size={13} />}
                       color="primary"
@@ -576,7 +575,7 @@ export const TextAnnotatorMenu = ({
           {!disableCreate && (
             <StyledAnnotatorItem>
               <StyledAnnotatorItemTitle>
-                <FaPlus size={13} />
+                <IcoPlus size={13} />
                 Create Anchors
               </StyledAnnotatorItemTitle>
               {/* Active Territory */}
@@ -797,6 +796,7 @@ export const TextAnnotatorMenu = ({
                       tooltipContent={
                         <p>(hold ctrl or cmd over the list for temporary edit mode)</p>
                       }
+                      bold={!anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(false)}
                     />
                     <Button
@@ -808,6 +808,7 @@ export const TextAnnotatorMenu = ({
                       inverted={!anchorsEditActive}
                       noBackground={!anchorsEditActive}
                       tooltipLabel="edit mode — show anchor controls"
+                      bold={anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(true)}
                     />
                   </SwitchGroup>

@@ -1,5 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
+import { ANNOTATOR_LEFT_MARGIN_PX } from "./types";
 
 /** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
@@ -29,6 +30,21 @@ export const StyledScrollerViewport = styled.div`
   &:hover ${StyledScrollerCursor}, &:active ${StyledScrollerCursor} {
     background-color: ${({ theme }) => theme.color.gray[700]};
   }
+`;
+
+/**
+ * The annotator's own column: canvases and the footer under them.
+ *
+ * Sized by its content rather than by the box, so the footer sits directly
+ * under the canvas and the two move together when a resize settles. Stretching
+ * it to the box instead would leave the difference between the canvas height
+ * and the box height as dead space, and hand a drag's shrink to the rows of
+ * plain DOM before the canvas knows about it.
+ */
+export const StyledAnnotatorColumn = styled.div`
+  position: relative;
+  /* wTextArea reserves this same margin when it sizes the canvas */
+  padding-left: ${ANNOTATOR_LEFT_MARGIN_PX}px;
 `;
 
 export const StyledCanvasWrapper = styled.div`
@@ -289,7 +305,7 @@ export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeBu
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0 0.5rem" : "")};
+  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0.1rem 0.5rem" : "")};
 `;
 
 export const StyledAnnotatorButtons = styled.div`

@@ -6,10 +6,7 @@ import {
 } from "@inkvisitor/shared/enums/warning";
 import { IEntity, IResponseGeneric } from "@inkvisitor/shared/types";
 import { ISetting } from "@inkvisitor/shared/types/settings";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@inkvisitor/shared/types/territory";
+import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
@@ -24,10 +21,12 @@ import {
 } from "components";
 import { ValidationRule } from "components/advanced";
 import React, { useEffect, useRef, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { PiSealCheckFill } from "react-icons/pi";
 import { rootTerritoryId } from "Theme/constants";
+import { IcoPlusBold } from "Theme/icons";
+import { ButtonSize } from "types";
 import { deepCopy } from "utils/utils";
+import { GlobalValidationsDetailRow } from "./GlobalValidationsDetailRow";
 import {
   StyledBlockSeparator,
   StyledGridForm,
@@ -36,15 +35,15 @@ import {
   StyledValidationCount,
   StyledValidationList,
 } from "./GlobalValidationsModalStyles";
-import { GlobalValidationsDetailRow } from "./GlobalValidationsDetailRow";
 import { GlobalValidationsSettingsRow } from "./GlobalValidationsSettingsRow";
 
-const initialRulesState: Record<ValidationKey, boolean> = Object.keys(
-  globalValidationsDict
-).reduce((acc, key) => {
-  acc[key as ValidationKey] = true;
-  return acc;
-}, {} as Record<ValidationKey, boolean>);
+const initialRulesState: Record<ValidationKey, boolean> = Object.keys(globalValidationsDict).reduce(
+  (acc, key) => {
+    acc[key as ValidationKey] = true;
+    return acc;
+  },
+  {} as Record<ValidationKey, boolean>,
+);
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -149,9 +148,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     },
   });
 
-  const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
-    false
-  );
+  const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(false);
 
   const initValidationRule = () => {
     if (!rootTerritory) {
@@ -170,17 +167,14 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     updateEntityMutation.mutate({
       data: {
         validations: (validations as ITerritoryValidation[])?.filter(
-          (_, index) => index !== indexToRemove
+          (_, index) => index !== indexToRemove,
         ),
       },
     });
     setTempIndexToRemove(false);
   };
 
-  const handleUpdateValidation = (
-    key: number,
-    changes: Partial<ITerritoryValidation>
-  ) => {
+  const handleUpdateValidation = (key: number, changes: Partial<ITerritoryValidation>) => {
     const validationsCopy = deepCopy(validations as ITerritoryValidation[]);
     const updatedObject: ITerritoryValidation = {
       ...validationsCopy[key],
@@ -199,8 +193,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
   };
 
   const settingsKeyVal = (key: ValidationKey) => {
-    return settings?.find((setting: ISetting) => setting.id === key)
-      ?.value as boolean;
+    return settings?.find((setting: ISetting) => setting.id === key)?.value as boolean;
   };
 
   const toggleRule = (key: ValidationKey) => {
@@ -217,20 +210,20 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     updateSettingsMutation.mutate([{ id: key, value }]);
   };
 
-  // useEffect(() => {
-  // const newSettings: Omit<ISetting, "public">[] = Object.entries(rules).map(
-  //   ([id, value]) => ({ id, value })
-  // );
-  // updateSettingsMutation.mutate(newSettings);
-  // }, [rules]);
+  const newValidationButton = (
+    <Button
+      icon={<IcoPlusBold />}
+      label="new validation rule"
+      color="primary"
+      bold
+      onClick={initValidationRule}
+      size={ButtonSize.Medium}
+    />
+  );
 
   return (
     <>
-      <Modal
-        showModal={showModal}
-        onClose={() => setShowGlobalValidations(false)}
-        width={650}
-      >
+      <Modal showModal={showModal} onClose={() => setShowGlobalValidations(false)} width={650}>
         <ModalHeader
           title="Global validations"
           icon={<PiSealCheckFill size={20} style={{ marginTop: "-2px" }} />}
@@ -240,9 +233,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         <ModalContent column enableScroll>
           <div ref={modalContentRef}>
             <StyledGridForm>
-              <StyledGridSectionHeading>
-                Valency validations
-              </StyledGridSectionHeading>
+              <StyledGridSectionHeading>Valency validations</StyledGridSectionHeading>
               <div />
               {valencyKeys.map((val, key) => (
                 <GlobalValidationsSettingsRow
@@ -253,9 +244,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 />
               ))}
 
-              <StyledGridSectionHeading>
-                Entity validations
-              </StyledGridSectionHeading>
+              <StyledGridSectionHeading>Entity validations</StyledGridSectionHeading>
               <div />
               {entityKeys.map((val, key) =>
                 val === "validation_DM" ? (
@@ -271,7 +260,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                     active={settingsKeyVal(val)}
                     toggleRule={() => toggleRule(val)}
                   />
-                )
+                ),
               )}
 
               {/* <StyledGridSectionHeading>
@@ -293,51 +282,31 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 <StyledSectionHeader>
                   <b>Root T validation</b>
                   <StyledValidationCount>{`${validations?.length} Root T validations`}</StyledValidationCount>
-                  <span>
-                    <Button
-                      icon={<FaPlus />}
-                      label="new validation rule"
-                      color="primary"
-                      onClick={initValidationRule}
-                    />
-                  </span>
+                  <span style={{ display: "flex" }}>{newValidationButton}</span>
                 </StyledSectionHeader>
                 <StyledValidationList>
-                  {(validations as ITerritoryValidation[])?.map(
-                    (validation, key) => {
-                      return (
-                        <React.Fragment key={key}>
-                          <ValidationRule
-                            key={key}
-                            validation={validation}
-                            entities={rootTerritory.entities}
-                            updateValidationRule={(
-                              changes: Partial<ITerritoryValidation>
-                            ) => {
-                              handleUpdateValidation(key, changes);
-                            }}
-                            removeValidationRule={() => {
-                              setTempIndexToRemove(key);
-                            }}
-                            isInsideTemplate={false}
-                            userCanEdit
-                          />
-                          {key !== validations.length - 1 && (
-                            <StyledBlockSeparator />
-                          )}
-                        </React.Fragment>
-                      );
-                    }
-                  )}
+                  {(validations as ITerritoryValidation[])?.map((validation, key) => {
+                    return (
+                      <React.Fragment key={key}>
+                        <ValidationRule
+                          key={key}
+                          validation={validation}
+                          entities={rootTerritory.entities}
+                          updateValidationRule={(changes: Partial<ITerritoryValidation>) => {
+                            handleUpdateValidation(key, changes);
+                          }}
+                          removeValidationRule={() => {
+                            setTempIndexToRemove(key);
+                          }}
+                          isInsideTemplate={false}
+                          userCanEdit
+                        />
+                        {key !== validations.length - 1 && <StyledBlockSeparator />}
+                      </React.Fragment>
+                    );
+                  })}
                 </StyledValidationList>
-                <div style={{ marginTop: "2rem" }}>
-                  <Button
-                    icon={<FaPlus />}
-                    label="new validation rule"
-                    color="primary"
-                    onClick={initValidationRule}
-                  />
-                </div>
+                <div style={{ marginTop: "2rem" }}>{newValidationButton}</div>
               </>
             )}
 
@@ -346,11 +315,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              color="success"
-              label="done"
-              onClick={() => setShowGlobalValidations(false)}
-            />
+            <Button color="primary" label="Done" onClick={() => setShowGlobalValidations(false)} />
           </ButtonGroup>
         </ModalFooter>
       </Modal>
@@ -360,8 +325,7 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
         title="Remove validation rule"
         text="Do you really want to remove this validation rule?"
         onSubmit={() => {
-          tempIndexToRemove !== false &&
-            removeValidationRule(tempIndexToRemove);
+          tempIndexToRemove !== false && removeValidationRule(tempIndexToRemove);
         }}
         onCancel={() => setTempIndexToRemove(false)}
       />

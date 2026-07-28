@@ -2,7 +2,15 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { useMutation } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import {
+  Button,
+  ButtonGroup,
+  CancelButton,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { BATCH_RELATION_ELIGIBILITY_KEY, useEntitiesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
@@ -304,7 +312,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+            <CancelButton onClick={onClose} />
             <Button
               label="Apply"
               color="primary"

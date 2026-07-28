@@ -233,7 +233,27 @@ export const StyledDocumentChangesLabel = styled.span`
 `;
 export const StyledDocumentChangesTags = styled.div`
   display: flex;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
+  flex: 1;
+  overflow: hidden;
+  /* one row only — the row height is fixed. tags give up their natural width
+     down to a readable floor, and the row clips rather than growing taller */
+  > * {
+    min-width: 5rem;
+    max-width: 20rem;
+  }
+`;
+export const StyledDocumentChangesOverflow = styled.span`
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 0;
+  padding-left: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color.gray[600]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  font-style: italic;
 `;
 export const StyledDocumentChangeFallback = styled.span`
   display: inline-flex;

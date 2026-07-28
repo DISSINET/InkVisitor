@@ -4,10 +4,11 @@ import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import { DReferences, DStatementActants, DStatementActions } from "constructors";
 import React, { useState } from "react";
-import { FaClone, FaPlus } from "react-icons/fa";
+import { FaClone } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./StatementEditorSectionButtonsStyles";
 import { MdDeleteSweep } from "react-icons/md";
+import { IcoPlus } from "Theme/icons";
 
 interface StatementEditorSectionButtons {
   section: "actions" | "actants" | "references";
@@ -93,8 +94,8 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
               shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
-              icon: editorWidthTooNarrow ? <FaPlus /> : undefined,
-              shortIcon: <FaPlus />,
+              icon: editorWidthTooNarrow ? <IcoPlus /> : undefined,
+              shortIcon: <IcoPlus />,
             },
             {
               longValue: "replace",
@@ -113,6 +114,7 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
           onClick={() => handleCopyFromStatement(previousStatement, section, replaceSection)}
+          shape="square"
         />
       </ButtonGroup>
       <EntitySuggester

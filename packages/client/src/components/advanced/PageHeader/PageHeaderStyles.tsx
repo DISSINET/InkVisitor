@@ -28,45 +28,35 @@ export const StyledHeaderTag = styled.div`
 export const StyledUserIconWrap = styled.div`
   display: flex;
   cursor: pointer;
-  margin-left: ${({ theme }) => theme.space[2]};
-  margin-right: ${({ theme }) => theme.space[2]};
 `;
 export const StyledUsername = styled.div`
   cursor: pointer;
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
 `;
 export const StyledRightHeader = styled.div`
   display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.space[6]};
+  padding-right: ${({ theme }) => theme.space[2]};
 `;
-export const StyledThemeSwitcher = styled.div`
-  height: 3rem;
+export const StyledThemeSwitcherWrap = styled.div`
   display: inline-flex;
-  border-radius: 1.2rem;
-  overflow: hidden;
-  cursor: pointer;
-  margin-right: 1rem;
-  border-width: 0.2rem;
-  border-style: solid;
-  border-color: ${({ theme }) => theme.color.gray["800"]};
-`;
-
-interface StyledThemeSwitcherIcon {
-  selected: boolean;
-}
-export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
-  padding: 0.5rem 0.8rem;
-  font-size: 15px;
-  transition: 0.3s all;
-  background-color: ${({ theme, selected }) =>
-    selected ? theme.color.gray[800] : theme.color.gray[600]};
-  color: ${({ theme, selected }) => (selected ? "white" : theme.color.gray[400])};
+  align-items: center;
 `;
 
 export const StyledUser = styled.div`
   display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
+  transition: background-color 0.2s;
+  /* same hover tint as the borderless header buttons (Menu, theme switcher) */
+  &:hover {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
 `;
 
 export const StyledMenu = styled.div`
@@ -223,7 +213,6 @@ export const StyledSpace = styled.div`
 export const StyledLoggedAsWrap = styled.div`
   min-width: 3rem;
   position: relative;
-  margin-right: 1rem;
   display: flex;
   align-items: center;
 `;

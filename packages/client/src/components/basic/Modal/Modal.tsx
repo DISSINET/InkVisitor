@@ -2,6 +2,8 @@ import { config, useSpring } from "@react-spring/web";
 import { ThemeColor } from "Theme/theme";
 import { Loader } from "components";
 import React, { FC, ReactNode } from "react";
+import { ButtonSize } from "types";
+import { ButtonDefaultsProvider } from "../Button/ButtonDefaults";
 import { ModalKeyPress } from "./ModalKeyPress";
 import {
   StyledBackground,
@@ -198,7 +200,9 @@ export const ModalFooter: FC<ModalFooter> = ({
   return (
     <StyledFooter $column={column} $spaceBetween={spaceBetween}>
       {note && <StyledFooterNote>{note}</StyledFooterNote>}
-      {children}
+      <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md">
+        {children}
+      </ButtonDefaultsProvider>
     </StyledFooter>
   );
 };

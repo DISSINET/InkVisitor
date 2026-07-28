@@ -1,4 +1,5 @@
 import React from "react";
+import { ThemeColor } from "Theme/theme";
 import { EntityColors } from "types";
 import { StyledTypeBar } from "./TypeBarStyles";
 
@@ -8,6 +9,8 @@ interface TypeBar {
   isTemplate?: boolean;
   dimColor?: boolean;
   width?: number;
+  /** Paints the bar in a fixed colour, for fields that carry no entity class. */
+  color?: keyof ThemeColor;
 }
 export const TypeBar: React.FC<TypeBar> = ({
   entityLetter,
@@ -15,10 +18,11 @@ export const TypeBar: React.FC<TypeBar> = ({
   isTemplate = false,
   dimColor = false,
   width = 3,
+  color,
 }) => {
   return (
     <StyledTypeBar
-      $entity={EntityColors[entityLetter]?.color ?? "transparent"}
+      $entity={color ?? EntityColors[entityLetter]?.color ?? "transparent"}
       $noMargin={noMargin}
       $isTemplate={isTemplate}
       $dimColor={dimColor}

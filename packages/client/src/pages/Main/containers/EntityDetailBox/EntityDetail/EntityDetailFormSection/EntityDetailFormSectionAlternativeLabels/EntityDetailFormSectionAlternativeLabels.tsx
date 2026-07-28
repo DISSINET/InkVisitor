@@ -1,6 +1,5 @@
 import { Input, IconWithTooltip, Button } from "components";
 import React, { useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { IoStar } from "react-icons/io5";
 import { MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -19,6 +18,7 @@ import {
 import { IResponseGeneric, IEntity, IResponseDetail } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
+import { IcoPlus } from "Theme/icons";
 
 interface EntityDetailFormSectionAlternativeLabels {
   entity: IResponseDetail;
@@ -147,7 +147,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
             <Button
               disabled={newAltLabel.length === 0 || entity.labels.includes(newAltLabel)}
               color="black"
-              icon={<FaPlus />}
+              icon={<IcoPlus />}
               onClick={() => {
                 updateEntityMutation.mutate({
                   labels: [...entity.labels, newAltLabel],
@@ -166,7 +166,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
               newAltLabel.length === 0 || entity.labels.includes(newAltLabel)
             }
             color="black"
-            icon={<FaPlus />}
+            icon={<IcoPlus />}
             onClick={() => {
               updateEntityMutation.mutate({
                 labels: [...entity.labels, newAltLabel],

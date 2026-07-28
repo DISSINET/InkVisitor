@@ -16,9 +16,9 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
-import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
+import { boxContentId, CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useWidthBreakpoint } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -613,7 +613,10 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const contentWidth = useAppSelector((state) => state.layout.mainPage.secondPanelRealWidth);
+  const contentWidthTooNarrow = useWidthBreakpoint(
+    SECOND_PANEL_MIN_WIDTH + 60,
+    boxContentId("Statements"),
+  );
   const contentHeight = useAppSelector((state) => state.layout.contentHeight);
 
   // adds object orderCorrection to each statement with info about the order in the list vs the annotator
@@ -715,12 +718,9 @@ export const StatementListBox: React.FC = () => {
     autoOrderStatementsMutation.isPending ||
     (statementListOpened && !enableStatementListLoader);
 
-  const tableWidth = useMemo(() => {
-    if (isListNonEmpty || statementListTableIsLoading) {
-      return contentWidth - 8;
-    }
-    return 0;
-  }, [contentWidth, isListNonEmpty, statementListTableIsLoading]);
+  // The scroller fills the box, except with nothing in the list to scroll.
+  const tableWidth =
+    isListNonEmpty || statementListTableIsLoading ? undefined : 0;
 
   return (
     <StyledStatementListBox>
@@ -741,7 +741,7 @@ export const StatementListBox: React.FC = () => {
             deleteStatementsMutation={deleteStatementsMutation}
             relationsCreateMutation={relationsCreateMutation}
             favoritedTerritoryIds={favoritedTerritoryIds}
-            contentWidthTooNarrow={contentWidth < SECOND_PANEL_MIN_WIDTH + 60}
+            contentWidthTooNarrow={contentWidthTooNarrow}
             statementsWithOrder={statementsWithOrder}
             autoOrderStatementsMutation={autoOrderStatementsMutation}
           />
@@ -821,9 +821,7 @@ export const StatementListBox: React.FC = () => {
 
           <Submit
             title="Delete statement"
-            text={`Do you really want to delete statement [${
-              statementToDelete?.labels[0] ? statementToDelete.labels[0] : statementToDelete?.id
-            }]?`}
+            text="Do you really want to delete statement?"
             show={showSubmit}
             entityToSubmit={statementToDelete}
             onCancel={() => {

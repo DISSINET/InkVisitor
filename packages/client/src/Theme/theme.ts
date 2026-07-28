@@ -60,8 +60,10 @@ const theme = {
 
     tagBackground: "#fff",
     tagColor: "#091034",
-    tagSelectedBackground: "#091034",
-    tagSelectedColor: "#fff",
+    // the current territory and the opened statement row are the same idea, so
+    // they share one fill - and it is a hue no button uses
+    tagSelectedBackground: "#d8ddf5", // tableOpened
+    tagSelectedColor: "#091034",
     tagItalic: "#4a5568",
 
     /* query explorer colors */
@@ -75,7 +77,6 @@ const theme = {
 
     treeNodeRead: "#718096",
     treeNodeWrite: "#2d3748",
-    foundByTreeFilter: "#b4c0e8",
 
     tableOddRow: "#eef0fa",
     tableEvenRow: "#fff",
@@ -87,11 +88,14 @@ const theme = {
 
     explorerHeader: "#6174C2",
     headerTextColor: " #fff",
+    // chrome on the header (borders, dividers) — present without competing with the text
+    headerChromeColor: "rgba(255,255,255,0.6)",
     muni: "#091034", // muni primary color
     staging: "#911111",
     "data-import": "#99004C",
     "data-import-persecutio": "#380099",
     development: "#6174C2",
+    // development: "#091034",
     sandbox: "#CB6E17",
     medhate: "#006666",
 

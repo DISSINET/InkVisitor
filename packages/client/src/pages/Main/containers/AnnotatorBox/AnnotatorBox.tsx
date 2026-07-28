@@ -9,7 +9,8 @@ import {
 } from "@inkvisitor/shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { useSearchParams } from "hooks";
+import { boxContentId } from "components";
+import { useElementSize, useSearchParams } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import {
   useDocumentQuery,
@@ -21,6 +22,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { setSelectedResourceId } from "redux/features/statementAnnotator/selectedResourceIdSlice";
 import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import {
+  ANNOTATOR_MIN_WRAP_WIDTH,
+  ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  THIRD_PANEL_MIN_WIDTH,
+} from "Theme/constants";
 import { StatementListTextAnnotator } from "./AnnotatorContent";
 import { resolveAnnotatorResourceId } from "./resolveAnnotatorResourceId";
 
@@ -30,6 +36,44 @@ interface AnnotatorBox {
 }
 
 export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
+  // The canvas needs a pixel width, and neither source has it on its own. The
+  // prop knows where the panel is heading the moment a toggle decides it, but
+  // not about a drag (which moves the panel without telling React) or about a
+  // scrollbar the box may be holding. The box knows both, but only once it has
+  // stopped moving - it is animating for most of a toggle, and every width taken
+  // re-wraps the whole document.
+  //
+  // So whichever moved last wins: a toggle lands on the target immediately and
+  // the measurement corrects it afterwards if the box turned out narrower.
+  const { width: measuredWidth } = useElementSize(
+    boxContentId("Annotator"),
+    ANNOTATOR_RESIZE_DEBOUNCE_MS,
+  );
+
+  // A collapsed panel leaves the box too narrow to draw the canvas at all, and
+  // re-wrapping the document to fit that costs the same as re-wrapping it to a
+  // real width - twice, since expanding has to undo it. The last real width
+  // stands in, starting at the narrowest an expanded panel can be.
+  const [contentWidth, setContentWidth] = useState(() =>
+    Math.max(width, THIRD_PANEL_MIN_WIDTH),
+  );
+
+  // An effect per source, each firing only when its own source moved, which is
+  // what makes the last mover the winner. The measurement always moves last:
+  // it is published from a timer, so it lands in a render of its own, after the
+  // prop that provoked it.
+  useEffect(() => {
+    if (width > ANNOTATOR_MIN_WRAP_WIDTH) {
+      setContentWidth(width);
+    }
+  }, [width]);
+
+  useEffect(() => {
+    if (measuredWidth !== undefined && measuredWidth > ANNOTATOR_MIN_WRAP_WIDTH) {
+      setContentWidth(measuredWidth);
+    }
+  }, [measuredWidth]);
+
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const { territoryId, statementId } = useSearchParams();
@@ -265,7 +309,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
   return (
     <StatementListTextAnnotator
       contentHeight={height}
-      contentWidth={width}
+      contentWidth={contentWidth}
       territoryId={territoryId}
       territory={territory}
       statementId={statementId}

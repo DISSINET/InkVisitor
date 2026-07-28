@@ -18,6 +18,7 @@ import {
   StyledTableControl,
 } from "./ExplorerTable/ExplorerTableStyles";
 import { BatchAction, batchOptions, restrictedBatchActions } from "./ExplorerTable/types";
+import { ButtonSize } from "types";
 
 /** Row-selection + batch-action controls. Only meaningful for the table view
  * (the stats view has no row selection), so this block is optional. */
@@ -103,20 +104,18 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
     <StyledTableControl>
       {isTable && selection ? (
         <StyledControlGroup>
-          <div
-            style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-          >
-            {renderHeaderCheckBox(selection)}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+            <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+              {renderHeaderCheckBox(selection)}
+            </div>
+            <StyledCounter>{`${selection.selectedCount}/${selection.rowsTotal}`}</StyledCounter>
           </div>
-          <StyledCounter>{`${selection.selectedCount}/${selection.rowsTotal}`}</StyledCounter>
           <Dropdown.Single.Basic
             width={140}
             disabled={selection.selectedCount === 0}
             value={selection.batchActionSelected}
             onChange={(selectedOption) => {
-              const newSelectedAction = batchOptions.find(
-                (o) => o.value === selectedOption,
-              )?.value;
+              const newSelectedAction = batchOptions.find((o) => o.value === selectedOption)?.value;
               if (newSelectedAction) {
                 selection.setBatchActionSelected(newSelectedAction);
               }
@@ -131,6 +130,7 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
             inverted
             onClick={selection.onApplyBatchAction}
             disabled={selection.selectedCount === 0}
+            size={ButtonSize.Medium}
           />
         </StyledControlGroup>
       ) : (
@@ -147,12 +147,11 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
             label="new column"
             color="primary"
             inverted={!newColumn.isNewColumnOpen}
-            onClick={() =>
-              newColumn.setIsNewColumnOpen(!newColumn.isNewColumnOpen)
-            }
+            onClick={() => newColumn.setIsNewColumnOpen(!newColumn.isNewColumnOpen)}
           />
         )}
-        <Loader loaderStyle="beat" show={isQueryFetching} size={7} />
+        {/* Table only - the stats view carries its own loader over the chart. */}
+        <Loader loaderStyle="beat" show={isTable && isQueryFetching} size={7} />
       </StyledControlGroup>
     </StyledTableControl>
   );

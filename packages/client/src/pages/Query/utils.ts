@@ -9,6 +9,10 @@ export const getSuperclassAllowedClasses = (
   rootEntityClasses: EntityEnums.Class[] | undefined,
 ): EntityEnums.Class[] => {
   const rootClasses = rootEntityClasses ?? [];
+  // an unset root class is the wildcard, so the edge constrains on its own
+  if (rootClasses.length === 0) {
+    return [...SUPERCLASS_ENTITY_CLASSES];
+  }
   return SUPERCLASS_ENTITY_CLASSES.filter((c) => rootClasses.includes(c));
 };
 
@@ -20,6 +24,15 @@ export const getSuperordinateEntityAllowedClasses = (
     Relation.RelationRules[RelationEnums.Type.SuperordinateEntity]?.allowedEntitiesPattern ?? [];
   const rootClasses = rootEntityClasses ?? [];
   const allowed = new Set<EntityEnums.Class>();
+
+  // an unset root class is the wildcard: every source class of the relation is
+  // still in play, so the targets of all of them are allowed
+  if (rootClasses.length === 0) {
+    for (const [, targetClass] of pattern) {
+      allowed.add(targetClass);
+    }
+    return [...allowed];
+  }
 
   for (const rootClass of rootClasses) {
     for (const [sourceClass, targetClass] of pattern) {

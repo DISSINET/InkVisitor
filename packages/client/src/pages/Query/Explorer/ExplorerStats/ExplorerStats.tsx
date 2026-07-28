@@ -2,11 +2,12 @@ import { IResponseStats } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
 import { StatsChart, StatsTable } from "components/advanced";
-import { Button, ButtonGroup, Loader } from "components";
-import { useResizeObserver } from "hooks";
+import { Button, Loader, SwitchGroup } from "components";
+import { useDebounce, useResizeObserver } from "hooks";
 import React, { useEffect, useState } from "react";
-import { RELATION_EVENT_TYPES } from "pages/Stats/constants";
+import { RELATION_EVENT_TYPES, STATS_FILTER_DEBOUNCE_MS } from "pages/Stats/constants";
 import { ExploreAction, ExploreActionType } from "../state";
+import { ButtonSize } from "types";
 // --- Parked time filter (see the commented From/To block below) ---
 // import { Input } from "components";
 // import { FaUndo } from "react-icons/fa";
@@ -15,6 +16,7 @@ import {
   StyledChartWrapper,
   StyledConfigStrip,
   StyledEmptyMessage,
+  StyledEventTypeGroup,
   StyledField,
   StyledFieldLabel,
   StyledStatsHeader,
@@ -74,7 +76,6 @@ interface ExplorerStatsProps {
   /** True when criteria are set but the search has not been run yet. */
   isSearchPending?: boolean;
   isFetching: boolean;
-  height: number;
 }
 
 export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
@@ -86,7 +87,6 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   isRequestEmpty,
   isSearchPending = false,
   isFetching,
-  height,
 }) => {
   const [localStats, setLocalStats] = useState(stats);
 
@@ -105,16 +105,26 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
     setLocalStats((prev) => ({ ...prev, ...params }));
   };
 
-  // Push filter changes to explore state immediately (not debounced): the search
-  // only fires on an explicit run, and a pending debounce would leave the
-  // committed search signature stale, so the first Enter would show results that
-  // then vanish behind another "press Enter" prompt.
+
+  // Let the filters settle before the stats are refetched, so a few clicks in a
+  // row cost one request rather than one each. Safe to defer: these params reach
+  // the data query key but not the search signature (buildSearchSignature drops
+  // `view`), so a pending change cannot leave a run of the search stale.
+  // Answers to the switches rather than to the committed params, so turning the
+  // last one off says so at once instead of after the debounce.
+  const hasNoEventTypes = localStats.eventType.length === 0;
+
+  const debouncedLocalStats = useDebounce(localStats, STATS_FILTER_DEBOUNCE_MS);
+
   useEffect(() => {
-    if (areExploreStatsParamsEqual(localStats, stats)) {
+    if (areExploreStatsParamsEqual(debouncedLocalStats, stats)) {
       return;
     }
-    dispatch({ type: ExploreActionType.setStatsParams, payload: localStats });
-  }, [localStats, stats, dispatch]);
+    dispatch({
+      type: ExploreActionType.setStatsParams,
+      payload: debouncedLocalStats,
+    });
+  }, [debouncedLocalStats, stats, dispatch]);
 
   // StatsChart / StatsTable only read `values`; the date window is not part of
   // the explorer stats params, so the IResponseStats date fields are placeholders.
@@ -132,7 +142,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
   if (isRequestEmpty) {
     return (
-      <StyledStatsLayout $height={height}>
+      <StyledStatsLayout>
         <StyledEmptyMessage>
           Create a query or add a search filter first to see statistics for the matching entities.
         </StyledEmptyMessage>
@@ -142,7 +152,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
   if (isSearchPending) {
     return (
-      <StyledStatsLayout $height={height}>
+      <StyledStatsLayout>
         <StyledEmptyMessage>
           Run the search to see statistics for the matching entities. (Enter)
         </StyledEmptyMessage>
@@ -151,7 +161,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
   }
 
   return (
-    <StyledStatsLayout $height={height}>
+    <StyledStatsLayout>
       <StyledStatsHeader>
         Statistics for current search results
         {typeof total === "number" ? ` — ${total} entities` : ""}
@@ -212,27 +222,40 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Time Unit</StyledFieldLabel>
-          <ButtonGroup $noGap>
-            {Object.values(TimeUnit).map((unit) => (
-              <Button
-                key={unit}
-                label={String(unit)}
-                onClick={() => setParams({ timeUnit: unit })}
-                color={localStats.timeUnit === unit ? "primary" : "grey"}
-              />
-            ))}
-          </ButtonGroup>
+          <SwitchGroup>
+            {Object.values(TimeUnit).map((unit) => {
+              const active = localStats.timeUnit === unit;
+              return (
+                <Button
+                  key={unit}
+                  label={String(unit)}
+                  shape="rounded-sm"
+                  size={ButtonSize.Small}
+                  noBorder
+                  onClick={() => setParams({ timeUnit: unit })}
+                  color={active ? "primary" : "greyer"}
+                  inverted={!active}
+                  noBackground={!active}
+                />
+              );
+            })}
+          </SwitchGroup>
         </StyledField>
 
         <StyledField>
           <StyledFieldLabel>Event type</StyledFieldLabel>
-          <ButtonGroup $noGap>
+          {/* any subset of the types can be on at once, so these are separate
+              outlined chips - a shared track would read as pick-one like the
+              filters beside it */}
+          <StyledEventTypeGroup $gap="small">
             {VISIBLE_EVENT_TYPES.map((eventType) => {
               const active = localStats.eventType.includes(eventType);
               return (
                 <Button
                   key={eventType}
                   label={String(eventType)}
+                  shape="rounded-sm"
+                  size={ButtonSize.Small}
                   onClick={() =>
                     setParams({
                       eventType: active
@@ -240,45 +263,63 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                         : [...localStats.eventType, eventType],
                     })
                   }
-                  color={active ? "primary" : "grey"}
+                  color={active ? "primary" : "greyer"}
+                  inverted={!active}
+                  noBackground={!active}
                 />
               );
             })}
-          </ButtonGroup>
+          </StyledEventTypeGroup>
         </StyledField>
 
         <StyledField>
           <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-          <ButtonGroup $noGap>
-            {Object.values(Aggregation).map((agg) => (
-              <Button
-                key={agg}
-                label={String(agg)}
-                onClick={() => setParams({ aggregateBy: agg })}
-                color={localStats.aggregateBy === agg ? "primary" : "grey"}
-              />
-            ))}
-          </ButtonGroup>
+          <SwitchGroup>
+            {Object.values(Aggregation).map((agg) => {
+              const active = localStats.aggregateBy === agg;
+              return (
+                <Button
+                  key={agg}
+                  label={String(agg)}
+                  shape="rounded-sm"
+                  size={ButtonSize.Small}
+                  noBorder
+                  onClick={() => setParams({ aggregateBy: agg })}
+                  color={active ? "primary" : "greyer"}
+                  inverted={!active}
+                  noBackground={!active}
+                />
+              );
+            })}
+          </SwitchGroup>
         </StyledField>
       </StyledConfigStrip>
 
-      <StyledChartWrapper ref={chartRef}>
-        <StatsChart
-          data={statsData}
-          width={chartWidth ? Math.max(0, chartWidth - 20) : 0}
-          height={chartHeight ? Math.max(0, chartHeight) : 0}
-        />
-      </StyledChartWrapper>
+      {hasNoEventTypes ? (
+        <StyledEmptyMessage>
+          No results — every event type is switched off.
+        </StyledEmptyMessage>
+      ) : (
+        <>
+          <StyledChartWrapper ref={chartRef}>
+            <StatsChart
+              data={statsData}
+              width={chartWidth ? Math.max(0, chartWidth - 20) : 0}
+              height={chartHeight ? Math.max(0, chartHeight) : 0}
+            />
+          </StyledChartWrapper>
 
-      <StyledTableWrapper ref={tableRef}>
-        <StatsTable
-          data={statsData}
-          width={tableWidth ? Math.max(0, tableWidth - 20) : 0}
-          height={tableHeight ? Math.max(0, tableHeight) : 0}
-        />
-      </StyledTableWrapper>
+          <StyledTableWrapper ref={tableRef}>
+            <StatsTable
+              data={statsData}
+              width={tableWidth ? Math.max(0, tableWidth - 20) : 0}
+              height={tableHeight ? Math.max(0, tableHeight) : 0}
+            />
+          </StyledTableWrapper>
 
-      <Loader show={isFetching} />
+          <Loader show={isFetching} />
+        </>
+      )}
     </StyledStatsLayout>
   );
 };

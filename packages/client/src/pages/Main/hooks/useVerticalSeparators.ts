@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
 import { setPanelWidthsPercent } from "redux/features/layout/mainPage/panelWidthsPercentSlice";
 import {
+  COLLAPSED_PANEL_WIDTH,
   FIRST_PANEL_MIN_WIDTH,
   FOURTH_PANEL_MIN_WIDTH,
   MAIN_PAGE_CENTER_SEPARATOR_X_PERCENT_POSITION,
@@ -14,10 +15,26 @@ import {
 } from "Theme/constants";
 import {
   arePanelWidthsUndersized,
+  getEffectivePanelWidths,
   getInitPercentPanelWidths,
+  isLayoutUndersized,
   panelWidthsFromSeparators,
 } from "utils/layoutUtils";
+import {
+  setPanelWidthVars,
+  setSeparatorPositionVars,
+} from "utils/layoutTransition";
 import { floorNumberToOneDecimal } from "utils/utils";
+
+export type VerticalSeparatorKey = "tree" | "center" | "search";
+
+// The x of each panel edge that can be dragged. A type rather than an interface
+// so it satisfies the keyed signature the variable writers take.
+export type SeparatorPositions = {
+  tree: number;
+  center: number;
+  search: number;
+};
 
 export function useVerticalSeparators() {
   const dispatch = useAppDispatch();
@@ -59,109 +76,228 @@ export function useVerticalSeparators() {
       : MAIN_PAGE_SEARCH_SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth,
   );
 
-  const handleTreeSeparatorXPositionChange = (xPosition: number) => {
-    const flooredXPosition = floorNumberToOneDecimal(xPosition);
-    const clampedXPosition = Math.max(flooredXPosition, FIRST_PANEL_MIN_WIDTH);
+  const expandedPanels = [
+    firstPanelExpanded,
+    secondPanelExpanded,
+    thirdPanelExpanded,
+    fourthPanelExpanded,
+  ];
 
-    if (
-      firstPanelExpanded &&
-      secondPanelExpanded &&
-      thirdPanelExpanded &&
-      fourthPanelExpanded &&
-      flooredXPosition < FIRST_PANEL_MIN_WIDTH
-    ) {
+  const separatorPositions: SeparatorPositions = {
+    tree: mainPageTreeSeparatorXPosition,
+    center: mainPageCenterSeparatorXPosition,
+    search: mainPageSearchSeparatorXPosition,
+  };
+
+  const basePanelWidths = (positions: SeparatorPositions) => [
+    positions.tree,
+    positions.center - positions.tree,
+    positions.search - positions.center,
+    layoutWidth - positions.search,
+  ];
+
+  // How far a separator travels before it starts pushing its neighbours.
+  const separatorBounds = (
+    separator: VerticalSeparatorKey,
+    positions: SeparatorPositions,
+  ): { min: number; max: number } => {
+    const widths = basePanelWidths(positions);
+
+    switch (separator) {
+      case "tree":
+        return {
+          min: FIRST_PANEL_MIN_WIDTH,
+          max: secondPanelExpanded
+            ? thirdPanelExpanded || fourthPanelExpanded
+              ? positions.center - SECOND_PANEL_MIN_WIDTH
+              : layoutWidth - 2 * COLLAPSED_PANEL_WIDTH - SECOND_PANEL_MIN_WIDTH
+            : thirdPanelExpanded
+              ? positions.search - THIRD_PANEL_MIN_WIDTH - COLLAPSED_PANEL_WIDTH
+              : layoutWidth -
+                (fourthPanelExpanded ? widths[3] : COLLAPSED_PANEL_WIDTH) -
+                2 * COLLAPSED_PANEL_WIDTH,
+        };
+      case "center":
+        return {
+          min:
+            (firstPanelExpanded ? positions.tree : COLLAPSED_PANEL_WIDTH) +
+            SECOND_PANEL_MIN_WIDTH,
+          max: thirdPanelExpanded
+            ? fourthPanelExpanded
+              ? layoutWidth - widths[3] - THIRD_PANEL_MIN_WIDTH
+              : layoutWidth - COLLAPSED_PANEL_WIDTH - THIRD_PANEL_MIN_WIDTH
+            : layoutWidth - COLLAPSED_PANEL_WIDTH - FOURTH_PANEL_MIN_WIDTH,
+        };
+      case "search":
+        return {
+          min:
+            (secondPanelExpanded
+              ? positions.center
+              : (firstPanelExpanded ? widths[0] : COLLAPSED_PANEL_WIDTH) +
+                COLLAPSED_PANEL_WIDTH) +
+            (thirdPanelExpanded ? THIRD_PANEL_MIN_WIDTH : COLLAPSED_PANEL_WIDTH),
+          max: layoutWidth - FOURTH_PANEL_MIN_WIDTH,
+        };
+    }
+  };
+
+  // Resolves a position the pointer asks for into the layout it produces: the
+  // dragged separator against its bounds, and the neighbours it pushes moved by
+  // whatever the pointer asked for past them. A function of the positions it is
+  // handed, so a drag can run it per pointer event against where the drag
+  // already is, and the drop can run it once more for the same answer.
+  const resolveSeparatorDrag = (
+    separator: VerticalSeparatorKey,
+    requestedXPosition: number,
+    from: SeparatorPositions,
+  ): SeparatorPositions => {
+    const bounds = separatorBounds(separator, from);
+    const overflow = Math.max(0, requestedXPosition - bounds.max);
+    const underflow = Math.max(0, bounds.min - requestedXPosition);
+    const positions = { ...from };
+
+    if (overflow > 0) {
+      const widths = basePanelWidths(from);
+      const effectiveWidths = getEffectivePanelWidths(
+        widths,
+        expandedPanels,
+        layoutWidth,
+      );
+
+      if (separator === "tree") {
+        if (effectiveWidths[2] > THIRD_PANEL_MIN_WIDTH + overflow) {
+          positions.center = from.center + overflow;
+        } else if (effectiveWidths[3] > FOURTH_PANEL_MIN_WIDTH + overflow) {
+          positions.center = from.center + overflow;
+          if (thirdPanelExpanded) {
+            positions.search = from.search + overflow;
+          }
+        }
+      } else if (
+        separator === "center" &&
+        widths[3] > FOURTH_PANEL_MIN_WIDTH + overflow
+      ) {
+        positions.search = from.search + overflow;
+      }
+    }
+
+    if (underflow > 0) {
+      const widths = basePanelWidths(from);
+
+      if (separator === "center") {
+        if (widths[0] > FIRST_PANEL_MIN_WIDTH + underflow) {
+          positions.tree = from.tree - underflow;
+        }
+      } else if (separator === "search") {
+        if (widths[1] > SECOND_PANEL_MIN_WIDTH + underflow) {
+          positions.center = from.center - underflow;
+        } else if (widths[0] > FIRST_PANEL_MIN_WIDTH + underflow) {
+          positions.center = from.center - underflow;
+          positions.tree = from.tree - underflow;
+        }
+      }
+    }
+
+    // Neighbours that moved out of the way free the dragged separator to keep
+    // following the pointer, so its own limit is only final once they have.
+    const pushedBounds = separatorBounds(separator, positions);
+    positions[separator] = Math.min(
+      Math.max(requestedXPosition, pushedBounds.min),
+      pushedBounds.max,
+    );
+
+    return positions;
+  };
+
+  // React state trails a drag by design, so the resolver reads and writes this
+  // instead. Nothing reads it outside a drag, and every drag seeds it below, so
+  // a drag that dies without committing - its separator unmounted because a
+  // panel collapsed under it - leaves nothing behind that the next one inherits.
+  const dragPositions = useRef<SeparatorPositions>(separatorPositions);
+
+  const beginSeparatorDrag = () => {
+    dragPositions.current = separatorPositions;
+  };
+
+  // Paints where a drag has reached without touching the store, and answers
+  // with the position the dragged separator is allowed to be at.
+  const previewSeparatorDrag = (
+    separator: VerticalSeparatorKey,
+    requestedXPosition: number,
+  ): number => {
+    const positions = resolveSeparatorDrag(
+      separator,
+      requestedXPosition,
+      dragPositions.current,
+    );
+    dragPositions.current = positions;
+
+    setSeparatorPositionVars(positions, "mainPage");
+    setPanelWidthVars(
+      getEffectivePanelWidths(
+        basePanelWidths(positions),
+        expandedPanels,
+        layoutWidth,
+      ),
+      "mainPage",
+    );
+
+    return positions[separator];
+  };
+
+  const persistSeparatorXPosition = (storageKey: string, xPosition: number) =>
+    localStorage.setItem(
+      storageKey,
+      floorNumberToOneDecimal(xPosition / onePercentOfLayoutWidth).toString(),
+    );
+
+  const commitSeparatorDrag = (
+    separator: VerticalSeparatorKey,
+    requestedXPosition: number,
+  ) => {
+    const positions = resolveSeparatorDrag(
+      separator,
+      requestedXPosition,
+      dragPositions.current,
+    );
+    dragPositions.current = positions;
+
+    const movedTree = positions.tree !== separatorPositions.tree;
+    const movedCenter = positions.center !== separatorPositions.center;
+    const movedSearch = positions.search !== separatorPositions.search;
+
+    if (!movedTree && !movedCenter && !movedSearch) {
+      return;
+    }
+
+    if (movedTree) {
+      setMainPageTreeSeparatorXPosition(positions.tree);
+      persistSeparatorXPosition("mainPageTreeSeparatorXPosition", positions.tree);
+    }
+    if (movedCenter) {
+      setMainPageCenterSeparatorXPosition(positions.center);
+      persistSeparatorXPosition(
+        "mainPageCenterSeparatorXPosition",
+        positions.center,
+      );
+    }
+    if (movedSearch) {
+      setMainPageSearchSeparatorXPosition(positions.search);
+      persistSeparatorXPosition(
+        "mainPageSearchSeparatorXPosition",
+        positions.search,
+      );
+    }
+
+    const widths = basePanelWidths(positions);
+
+    // Only when the window cannot hold the open panels at all. A drag that ran
+    // out of room simply stopped at its boundary, which needs no telling off.
+    if (isLayoutUndersized(expandedPanels, layoutWidth)) {
       toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
     }
 
-    if (mainPageTreeSeparatorXPosition !== clampedXPosition) {
-      setMainPageTreeSeparatorXPosition(clampedXPosition);
-
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        clampedXPosition / onePercentOfLayoutWidth,
-      );
-      localStorage.setItem("mainPageTreeSeparatorXPosition", separatorXPercentPosition.toString());
-
-      dispatch(
-        setPanelWidths([
-          clampedXPosition,
-          floorNumberToOneDecimal(mainPageCenterSeparatorXPosition - clampedXPosition),
-          panelWidths[2],
-          panelWidths[3],
-        ]),
-      );
-    }
-  };
-
-  const handleCenterSeparatorXPositionChange = (xPosition: number) => {
-    if (mainPageCenterSeparatorXPosition !== xPosition) {
-      const secondPanelWidth = xPosition - panelWidths[0];
-      const thirdPanelWidth = layoutWidth - panelWidths[3] - xPosition;
-
-      if (
-        firstPanelExpanded &&
-        secondPanelExpanded &&
-        thirdPanelExpanded &&
-        fourthPanelExpanded &&
-        (secondPanelWidth < SECOND_PANEL_MIN_WIDTH || thirdPanelWidth < THIRD_PANEL_MIN_WIDTH)
-      ) {
-        toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
-      }
-
-      setMainPageCenterSeparatorXPosition(xPosition);
-
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfLayoutWidth,
-      );
-      localStorage.setItem(
-        "mainPageCenterSeparatorXPosition",
-        separatorXPercentPosition.toString(),
-      );
-
-      dispatch(
-        setPanelWidths([
-          panelWidths[0],
-          floorNumberToOneDecimal(secondPanelWidth),
-          floorNumberToOneDecimal(thirdPanelWidth),
-          panelWidths[3],
-        ]),
-      );
-    }
-  };
-
-  const handleSearchSeparatorXPositionChange = (xPosition: number) => {
-    if (mainPageSearchSeparatorXPosition !== xPosition) {
-      const thirdPanelWidth = xPosition - mainPageCenterSeparatorXPosition;
-      const fourthPanelWidth = layoutWidth - xPosition;
-
-      if (
-        firstPanelExpanded &&
-        secondPanelExpanded &&
-        thirdPanelExpanded &&
-        fourthPanelExpanded &&
-        (thirdPanelWidth < THIRD_PANEL_MIN_WIDTH || fourthPanelWidth < FOURTH_PANEL_MIN_WIDTH)
-      ) {
-        toast.info("The interface is undersized. Lower the zoom or collapse one of the panels.");
-      }
-
-      setMainPageSearchSeparatorXPosition(xPosition);
-
-      const separatorXPercentPosition = floorNumberToOneDecimal(
-        xPosition / onePercentOfLayoutWidth,
-      );
-      localStorage.setItem(
-        "mainPageSearchSeparatorXPosition",
-        separatorXPercentPosition.toString(),
-      );
-
-      dispatch(
-        setPanelWidths([
-          panelWidths[0],
-          panelWidths[1],
-          floorNumberToOneDecimal(thirdPanelWidth),
-          floorNumberToOneDecimal(fourthPanelWidth),
-        ]),
-      );
-    }
+    dispatch(setPanelWidths(widths.map(floorNumberToOneDecimal)));
   };
 
   const handleSeparatorLayoutInit = () => {
@@ -299,9 +435,10 @@ export function useVerticalSeparators() {
     },
     onePercentOfLayoutWidth,
     isFirstRender,
-    handleTreeSeparatorXPositionChange,
-    handleCenterSeparatorXPositionChange,
-    handleSearchSeparatorXPositionChange,
+    separatorPositions,
+    beginSeparatorDrag,
+    previewSeparatorDrag,
+    commitSeparatorDrag,
     handleLayoutInit,
   };
 }

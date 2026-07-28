@@ -47,7 +47,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
   const renderIcons = () => {
     return (
       <ButtonGroup
-        $noGap
+        $gap="no"
         onMouseDown={(e) => {
           // Prevent input blur when clicking buttons
           e.preventDefault();

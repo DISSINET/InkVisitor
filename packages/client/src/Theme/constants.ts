@@ -45,6 +45,13 @@ export const ANNOTATOR_UNDERSIZED_BREAKPOINT = 490;
 export const EDITOR_TOO_SMALL_BREAKPOINT = 480;
 // height of class selector for highlight in annotator
 export const ANNOTATOR_SELECTOR_HEIGHT = 27;
+// A collapsed panel leaves the annotator box narrower than this, and an
+// expanded one is never anywhere near it (THIRD_PANEL_MIN_WIDTH away). Widths
+// below it are the collapsed state, which the canvas is not drawn at.
+export const ANNOTATOR_MIN_WRAP_WIDTH = COLLAPSED_PANEL_WIDTH * 2;
+// How long the annotator box has to hold a width before the canvas takes it.
+// Every width taken re-wraps the whole document.
+export const ANNOTATOR_RESIZE_DEBOUNCE_MS = 100;
 // vertical footprint of the suggester row in the statement list header
 // (StyledSuggesterRow: 2.5rem height + 0.6rem margin-bottom, 1rem = 10px).
 // Only rendered for users with territory write rights; when absent the
@@ -81,5 +88,8 @@ export const STATEMENT_LABEL_NOT_RECOMMENDED = "label is not recommended for Sta
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
-  separatorXPosition: { tension: 305, friction: 21, clamp: true },
 };
+
+// Panels, boxes and separators are all sized from CSS variables, which a drag
+// writes per frame and a toggle springs through springConfig.panelExpand. There
+// is nothing left for CSS to ease.

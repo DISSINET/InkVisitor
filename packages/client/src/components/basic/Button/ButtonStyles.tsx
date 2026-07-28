@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import theme, { InvertedBgColor, ThemeColor } from "Theme/theme";
 import { ButtonShape, ButtonSize } from "types";
 
@@ -28,26 +28,33 @@ const getRadius = ($shape?: ButtonShape) => {
     return "0";
   }
 };
-const getFontSize = ($size: ButtonSize) => {
+// icons are sized in em, so the size scale drives the glyph of icon-only buttons;
+// labelled buttons keep one text size and grow through padding instead
+const getFontSize = ($size: ButtonSize, $hasLabel?: boolean) => {
+  if ($hasLabel) {
+    return $size === ButtonSize.Large || $size === ButtonSize.ExtraLarge
+      ? `calc(${theme.fontSize.xs} + 0.1rem)`
+      : theme.fontSize.xs;
+  }
   switch ($size) {
     case ButtonSize.Small:
-      return "xs";
+      return theme.fontSize.xs;
     case ButtonSize.Medium:
-      return "base";
+      return theme.fontSize.base;
     case ButtonSize.Large:
-      return "lg";
+      return theme.fontSize.lg;
     case ButtonSize.ExtraLarge:
-      return "xl";
+      return theme.fontSize.xl;
   }
 };
-const getVerticalMargin = ($size: ButtonSize) => {
+const getVerticalMargin = ($size: ButtonSize, $hasLabel?: boolean) => {
   switch ($size) {
     case ButtonSize.Small:
-      return "0.25rem";
+      return $hasLabel ? "0.3rem" : "0.25rem";
     case ButtonSize.Medium:
-      return "0.3rem";
+      return $hasLabel ? "0.4rem" : "0.3rem";
     case ButtonSize.Large:
-      return "0.45rem";
+      return $hasLabel ? "0.55rem" : "0.45rem";
     case ButtonSize.ExtraLarge:
       return "0.8rem";
   }
@@ -55,28 +62,31 @@ const getVerticalMargin = ($size: ButtonSize) => {
 const getHorizontalMargin = ($size: ButtonSize, $iconButton?: boolean) => {
   switch ($size) {
     case ButtonSize.Small:
-      return $iconButton ? "0.25rem" : "0.5rem";
+      return $iconButton ? "0.25rem" : "0.6rem";
     case ButtonSize.Medium:
-      return $iconButton ? "0.3rem" : "0.55rem";
+      return $iconButton ? "0.3rem" : "0.8rem";
     case ButtonSize.Large:
-      return $iconButton ? "0.45rem" : "0.7rem";
+      return $iconButton ? "0.45rem" : "1rem";
     case ButtonSize.ExtraLarge:
-      return $iconButton ? "0.8rem" : "0.9rem";
+      return $iconButton ? "0.8rem" : "1.3rem";
   }
 };
 interface IButtonStyle {
   $iconButton?: boolean;
+  $hasLabel?: boolean;
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
-  $textRegular?: boolean;
+  $bold?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
   $textColor?: keyof ThemeColor;
   $borderColor?: keyof ThemeColor;
   $disabled?: boolean;
+  $noPointer?: boolean;
   $noPadding?: boolean;
   $fullHeight?: boolean;
+  $active?: boolean;
 
   $shape?: ButtonShape;
   $size: ButtonSize;
@@ -119,12 +129,18 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     }
     return "";
   }};
-  font-size: ${({ theme, $size }) => theme.fontSize[getFontSize($size)]};
-  font-weight: ${({ $disabled, $textRegular }) => ($disabled ? 400 : $textRegular ? 500 : 900)};
-  padding: ${({ $iconButton, $size, $noPadding, $shape }) =>
+  font-size: ${({ $size, $hasLabel }) => getFontSize($size, $hasLabel)};
+  /* the label box is exactly the font size, so padding alone decides the height
+     and a labelled button matches the square icon button of the same size */
+  line-height: 1;
+  font-weight: ${({ theme, $disabled, $bold }) => {
+    if ($disabled) return theme.fontWeight["normal"];
+    return $bold ? theme.fontWeight["bold"] : theme.fontWeight["medium"];
+  }};
+  padding: ${({ $iconButton, $size, $noPadding, $shape, $hasLabel }) =>
     $noPadding || $shape === "circle" || $shape === "square"
       ? "0"
-      : `${getVerticalMargin($size)} ${getHorizontalMargin($size, $iconButton)}`};
+      : `${getVerticalMargin($size, $hasLabel)} ${getHorizontalMargin($size, $iconButton)}`};
   border-color: ${({ theme, $disabled, $color, $borderColor }) =>
     $disabled ? theme.color["gray"][400] : theme.color[$borderColor ?? $color]};
   border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
@@ -156,7 +172,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
 
     return theme.color[$color];
   }};
-  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  cursor: ${({ $disabled, $noPointer }) => {
+    if ($disabled) return "not-allowed";
+    return $noPointer ? "default" : "pointer";
+  }};
   white-space: nowrap;
 
   transition:
@@ -167,6 +186,25 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   &:focus {
     outline: 0;
   }
+  /* a borderless, background-less button has no shape of its own to react with,
+     so hover tints it with its own text color and works on any backdrop */
+  ${({ $noBackground, $disabled }) =>
+    $noBackground &&
+    !$disabled &&
+    css`
+      &:hover {
+        background: color-mix(in srgb, currentColor 10%, transparent);
+      }
+    `}
+  /* $active keeps the hover tint while a control the button owns is open (e.g.
+     a dropdown), so the button stays lit as the pointer moves onto that control */
+  ${({ $noBackground, $disabled, $active }) =>
+    $noBackground &&
+    !$disabled &&
+    $active &&
+    css`
+      background: color-mix(in srgb, currentColor 10%, transparent);
+    `}
 `;
 
 export const StyledButtonLabel = styled.span<{

@@ -5,6 +5,7 @@ import { setStatementListOpened } from "redux/features/layout/mainPage/statement
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { BOX_SPLIT_OFFSET, hiddenBoxHeight } from "Theme/constants";
 import { DetailBoxState, EditorBoxState } from "types";
+import { setBoxHeightVars } from "utils/layoutTransition";
 import { floorNumberToOneDecimal } from "utils/utils";
 
 interface UseBoxLayoutParams {
@@ -63,6 +64,24 @@ export function useBoxLayout({
         : contentHeight / 2 - BOX_SPLIT_OFFSET,
     );
   }, [contentHeight]);
+
+  // Each preview builds the heights the box getters below return for the state
+  // its separator is only rendered in - panel expanded, box in Normal state -
+  // and paints them without touching the store, so a drag costs one variable
+  // write per frame instead of a render of the box contents. The drop commits
+  // through the handlers below, which is where anything a box holds that CSS
+  // cannot size - the annotator's canvas - picks the new height up.
+  const previewDetailSeparatorYPosition = (yPosition: number) =>
+    setBoxHeightVars(
+      { statements: yPosition, detail: contentHeight - yPosition },
+      "mainPage",
+    );
+
+  const previewEditorSeparatorYPosition = (yPosition: number) =>
+    setBoxHeightVars(
+      { annotator: yPosition, editor: contentHeight - yPosition },
+      "mainPage",
+    );
 
   const handleDetailSeparatorYChange = (yPosition: number) => {
     setDetailSeparatorY(yPosition);
@@ -198,6 +217,8 @@ export function useBoxLayout({
   return {
     detailSeparatorY,
     editorSeparatorY,
+    previewDetailSeparatorYPosition,
+    previewEditorSeparatorYPosition,
     handleDetailSeparatorYChange,
     handleEditorSeparatorYChange,
     getStatementListBoxHeight,

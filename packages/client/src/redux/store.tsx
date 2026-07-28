@@ -7,8 +7,6 @@ import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelB
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
 import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 import secondPanelExpandedSlice from "./features/layout/mainPage/secondPanelExpandedSlice";
-import secondPanelRealWidthSlice from "./features/layout/mainPage/secondPanelRealWidthSlice";
-import thirdPanelRealWidthSlice from "./features/layout/mainPage/thirdPanelRealWidthSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
 import pingSlice from "./features/pingSlice";
 import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
@@ -80,8 +78,6 @@ const store: Store = configureStore({
         fourthPanelExpanded: fourthPanelExpandedSlice,
         fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
         statementListOpened: statementListOpenedSlice,
-        secondPanelRealWidth: secondPanelRealWidthSlice,
-        thirdPanelRealWidth: thirdPanelRealWidthSlice,
         detailBoxState: detailBoxStateSlice,
         editorBoxState: editorBoxStateSlice,
       }),

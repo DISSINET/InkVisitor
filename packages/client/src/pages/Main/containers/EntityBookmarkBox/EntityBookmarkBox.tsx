@@ -3,25 +3,28 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Loader,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
   Submit,
 } from "components";
 import { CBookmarkFolder } from "constructors";
 import { useBookmarksQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { StyledContent, StyledFolderList, StyledHeader } from "./EntityBookmarkBoxStyles";
 import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
-import { MdEdit } from "react-icons/md";
-import { IcoTrash } from "Theme/icons";
+import { IcoPlusBold } from "Theme/icons";
+import { ButtonSize } from "types";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
@@ -186,10 +189,13 @@ export const EntityBookmarkBox: React.FC = () => {
       <StyledHeader>
         <Button
           key="add"
-          icon={<FaPlus />}
+          icon={<IcoPlusBold />}
           color="primary"
+          inverted
+          bold
           label="bookmark folder"
           onClick={() => clickNewBookmarFolderkHandle()}
+          size={ButtonSize.Medium}
         />
       </StyledHeader>
       {bookmarkFolders && (
@@ -223,28 +229,32 @@ export const EntityBookmarkBox: React.FC = () => {
         onEnterPress={submitFolderModal}
         width={350}
       >
-        <ModalHeader icon={<MdEdit />} title="Edit Bookmark folder" />
+        <ModalHeader title={isEditMode ? "Edit Bookmark folder" : "New Bookmark folder"} />
         <ModalContent>
-          <Input
-            label="new label:"
-            labelSpaceNoWrap
-            placeholder=""
-            onChangeFn={(newName: string) => setEditingFolderName(newName)}
-            value={editingFolderName}
-            changeOnType
-            autoFocus
-            width="full"
-          />
+          <ModalInputForm alignLeft>
+            <ModalInputLabel>new label:</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                labelSpaceNoWrap
+                placeholder=""
+                onChangeFn={(newName: string) => setEditingFolderName(newName)}
+                value={editingFolderName}
+                changeOnType
+                autoFocus
+                width="full"
+              />
+            </ModalInputWrap>
+          </ModalInputForm>
         </ModalContent>
 
         <ModalFooter>
           <ButtonGroup>
-            <Button key="cancel" label="Cancel" color="warning" onClick={closeFolderModal} />
+            <CancelButton key="cancel" onClick={closeFolderModal} />
 
             <Button
               key="submit"
               label={isEditMode ? "Submit" : "Create"}
-              color="primary"
+              color="info"
               onClick={submitFolderModal}
               disabled={!editedFolderIsValid}
             />
@@ -254,7 +264,6 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       <Submit
-        headerIcon={<IcoTrash size={14} />}
         title={`Delete Bookmark folder ${removingFolderName}`}
         text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}

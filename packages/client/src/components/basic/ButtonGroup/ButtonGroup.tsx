@@ -1,9 +1,16 @@
 import styled from "styled-components";
 import { FlatThemeColor, ThemeBorderRadius } from "Theme/theme";
 
+export type ButtonGroupGap = "no" | "small" | "large";
+
+const gapSize: Record<ButtonGroupGap, string> = {
+  no: "0",
+  small: "0.25rem",
+  large: "0.75rem",
+};
+
 interface ButtonGroup {
-  $noGap?: boolean;
-  $smallGap?: boolean;
+  $gap?: ButtonGroupGap;
   $column?: boolean;
   $marginBottom?: boolean;
   $marginTop?: boolean;
@@ -26,7 +33,8 @@ export const ButtonGroup = styled.div.attrs({
   > button:not(:last-child),
   > span:not(:last-child) {
     flex-shrink: ${({ $disableShrink }) => ($disableShrink ? 0 : "")};
-    margin-right: ${({ $noGap, $smallGap }) => ($noGap ? 0 : $smallGap ? "0.25rem" : "0.5rem")};
+    /* an ancestor may set --button-group-gap to change the default for its area */
+    margin-right: ${({ $gap }) => ($gap ? gapSize[$gap] : "var(--button-group-gap, 0.5rem)")};
   }
 `;
 
@@ -52,6 +60,16 @@ export const SwitchGroup = styled.div<SwitchGroup>`
     margin: 0;
     display: flex;
     align-items: center;
+  }
+  /* the selected option renders bold, which is wider — every label reserves its
+     bold width so the segments keep their size as the selection moves */
+  > button > span[data-label]::after {
+    content: attr(data-label);
+    font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 `;
 

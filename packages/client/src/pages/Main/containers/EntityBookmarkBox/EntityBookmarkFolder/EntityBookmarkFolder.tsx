@@ -10,7 +10,7 @@ import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaFolder, FaFolderOpen, FaRegFolder, FaRegFolderOpen } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { IcoTrash } from "Theme/icons";
-import { DragItem, ItemTypes } from "types";
+import { ButtonSize, DragItem, ItemTypes } from "types";
 import { getStoredUserRole } from "utils/userStorage";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
@@ -154,11 +154,11 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
         </StyledFolderWrapperOpenArea>
 
         <StyledFolderHeaderButtons>
-          <ButtonGroup $smallGap>
+          <ButtonGroup $gap="small">
             <StyledEditButtonWrap>
               <Button
                 key="edit"
-                icon={<MdEdit size={18} />}
+                icon={<MdEdit size={16} />}
                 inverted
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
@@ -166,6 +166,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
                 }}
                 noBackground
                 noBorder
+                shape="square"
+                size={ButtonSize.Medium}
               />
             </StyledEditButtonWrap>
             <StyledRemoveButtonWrap>
@@ -179,6 +181,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
                 }}
                 noBackground
                 noBorder
+                shape="square"
+                size={ButtonSize.Medium}
               />
             </StyledRemoveButtonWrap>
           </ButtonGroup>

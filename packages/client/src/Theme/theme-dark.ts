@@ -64,8 +64,8 @@ const darkTheme = {
 
     tagBackground: "#091034",
     tagColor: "#EBF0FA",
-    tagSelectedBackground: "#f6f6ff",
-    tagSelectedColor: "#091034",
+    tagSelectedBackground: "#2e3f7a", // tableSelection - tableOpened is too close to the page
+    tagSelectedColor: "#EBF0FA",
     tagItalic: "#D1DAEF",
 
     treeNodeRead: "#718096",
@@ -96,6 +96,7 @@ const darkTheme = {
     "data-import": "#ff6aaf",
     "data-import-persecutio": "#8c79e0",
     development: "#6174C2",
+    // development: "#008080",
     sandbox: "#e59857",
     medhate: "#008080",
 

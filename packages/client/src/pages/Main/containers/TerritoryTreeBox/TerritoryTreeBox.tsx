@@ -2,22 +2,20 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree, IUser } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, CustomScrollbar, Loader } from "components";
+import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useSearchParams, useWidthBreakpoint } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
-import { BsFilter } from "react-icons/bs";
-import { FaPlus, FaStar } from "react-icons/fa";
-import { useSelector } from "react-redux";
-import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { FaStar } from "react-icons/fa";
+import { IoFilter } from "react-icons/io5";
 import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
-import { ITerritoryFilter } from "types";
+import { IcoPlusBold } from "Theme/icons";
+import { IExtendedResponseTree, ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
 import {
@@ -26,14 +24,7 @@ import {
   StyledTreeWrapper,
 } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
-import {
-  filterTreeByFavorites,
-  filterTreeByLabel,
-  filterTreeWithStatements,
-  filterTreeWithSubterritories,
-  filterTreeWithWriteRights,
-  markNodesWithFilters,
-} from "./TerritoryTreeFilterUtils";
+import { filterTreeByFilters, markNodesWithFilters } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 
 const initFilterSettings: ITerritoryFilter = {
@@ -48,16 +39,6 @@ export const TerritoryTreeBox: React.FC = () => {
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.mainPage.firstPanelExpanded,
   );
-  const secondPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.secondPanelExpanded,
-  );
-  const thirdPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.thirdPanelExpanded,
-  );
-  const fourthPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.fourthPanelExpanded,
-  );
-
   const queryClient = useQueryClient();
 
   const { data: treeData, isFetching } = useTreeQuery();
@@ -95,7 +76,7 @@ export const TerritoryTreeBox: React.FC = () => {
   );
 
   const [filterSettings, setFilterSettings] = useState<ITerritoryFilter>(initFilterSettings);
-  const [filteredTreeData, setFilteredTreeData] = useState<IResponseTree | null>();
+  const [filteredTreeData, setFilteredTreeData] = useState<IExtendedResponseTree | null>();
 
   useEffect(() => {
     if (treeData) {
@@ -128,77 +109,20 @@ export const TerritoryTreeBox: React.FC = () => {
         return newFilteredTreeData;
       }
 
-      if (filterSettings.operator === "or") {
-        // OR logic: apply each filter independently and merge results
-        const filteredResults: (IResponseTree | null)[] = [];
-
-        if (filterSettings.starred && userData) {
-          const starredTreeData = filterTreeByFavorites(
-            treeData,
-            userData.storedTerritories.map((t) => t.territory.id),
-          );
-          if (starredTreeData) filteredResults.push(starredTreeData);
-        }
-
-        if (filterSettings.editorRights) {
-          const editorRightsTreeData = filterTreeWithWriteRights(treeData);
-          if (editorRightsTreeData) filteredResults.push(editorRightsTreeData);
-        }
-
-        if (filterSettings.withStatements) {
-          const withStatementsTreeData = filterTreeWithStatements(treeData);
-          if (withStatementsTreeData) filteredResults.push(withStatementsTreeData);
-        }
-
-        if (filterSettings.withSubterritories) {
-          const withSubterritoriesTreeData = filterTreeWithSubterritories(treeData);
-          if (withSubterritoriesTreeData) filteredResults.push(withSubterritoriesTreeData);
-        }
-
-        if (filterSettings.filter.length > 0) {
-          const labelFilterTreeData = filterTreeByLabel(treeData, filterSettings.filter);
-          if (labelFilterTreeData) filteredResults.push(labelFilterTreeData);
-        }
-
-        // Merge OR results (this is a simplified merge - we might need more sophisticated logic)
-        if (filteredResults.length > 0) {
-          newFilteredTreeData = filteredResults[0]; // For now, use first result
-        }
-      } else {
-        // AND logic: apply filters sequentially
-        if (filterSettings.starred && userData) {
-          const starredTreeData = filterTreeByFavorites(
-            newFilteredTreeData,
-            userData.storedTerritories.map((t) => t.territory.id),
-          );
-          newFilteredTreeData = starredTreeData;
-        }
-        if (filterSettings.editorRights) {
-          const editorRightsTreeData = filterTreeWithWriteRights(newFilteredTreeData);
-          newFilteredTreeData = editorRightsTreeData;
-        }
-        if (filterSettings.withStatements) {
-          const withStatementsTreeData = filterTreeWithStatements(newFilteredTreeData);
-          newFilteredTreeData = withStatementsTreeData;
-        }
-        if (filterSettings.withSubterritories) {
-          const withSubterritoriesTreeData = filterTreeWithSubterritories(newFilteredTreeData);
-          newFilteredTreeData = withSubterritoriesTreeData;
-        }
-        if (filterSettings.filter.length > 0) {
-          const labelFilterTreeData = filterTreeByLabel(newFilteredTreeData, filterSettings.filter);
-          newFilteredTreeData = labelFilterTreeData;
-        }
+      // the starred filter needs the user's favorites, so until they load it
+      // would select nothing - show the unfiltered tree rather than "No results"
+      if (filterSettings.starred && !userData) {
+        return newFilteredTreeData;
       }
 
-      // Mark tree data for highlighting
-      if (newFilteredTreeData && userData) {
-        const markedTreeData = markNodesWithFilters(
-          newFilteredTreeData,
-          filterSettings,
-          userData.storedTerritories.map((t) => t.territory.id),
-        );
-        return markedTreeData;
+      const favoriteIds = userData?.storedTerritories.map((t) => t.territory.id) ?? [];
+
+      newFilteredTreeData = filterTreeByFilters(treeData, filterSettings, favoriteIds);
+
+      // Mark tree data for highlighting. Pruning and marking read the same
+      // favorites, so every surviving row carries a flag and can dim
+      if (newFilteredTreeData) {
+        return markNodesWithFilters(newFilteredTreeData, filterSettings, favoriteIds);
       }
 
       return newFilteredTreeData;
@@ -216,25 +140,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeFilterOpen: boolean = useAppSelector((state) => state.territoryTree.filterOpen);
 
-  const basePanelWidth = useSelector(selectPanelWidth(0));
-  const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
-
-  const treeWidth = useMemo(() => {
-    if (!firstPanelExpanded) return COLLAPSED_PANEL_WIDTH;
-    if (!secondPanelExpanded && !thirdPanelExpanded && !fourthPanelExpanded) {
-      return layoutWidth - 3 * COLLAPSED_PANEL_WIDTH;
-    }
-    return basePanelWidth;
-  }, [
-    firstPanelExpanded,
-    secondPanelExpanded,
-    thirdPanelExpanded,
-    fourthPanelExpanded,
-    layoutWidth,
-    basePanelWidth,
-  ]);
-
-  const treeWidthTooNarrow = treeWidth < 160;
+  const treeWidthTooNarrow = useWidthBreakpoint(160, boxContentId("Territories"));
 
   // delay of show content for fluent animation on open
   const [showTerritoryTree, setShowTerritoryTree] = useState(true);
@@ -253,13 +159,15 @@ export const TerritoryTreeBox: React.FC = () => {
     <>
       {showTerritoryTree && (
         <>
-          <StyledTreeButtonGroup $smallGap>
+          <StyledTreeButtonGroup $gap="small">
             {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
                 iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
-                icon={<FaPlus />}
+                icon={<IcoPlusBold />}
                 onClick={() => setShowCreate(true)}
+                inverted
+                bold
                 fullWidth
                 tooltipLabel={treeWidthTooNarrow ? "create new territory" : ""}
               />
@@ -280,10 +188,13 @@ export const TerritoryTreeBox: React.FC = () => {
                 }
               }}
               color="success"
-              inverted={!treeFilterOpen}
+              // inverted={!treeFilterOpen}
+              bold={treeFilterOpen}
               fullWidth
-              icon={<BsFilter size={14} />}
-              tooltipLabel={treeWidthTooNarrow ? "filter" : ""}
+              icon={<IoFilter size={13} />}
+              tooltipLabel={
+                treeFilterOpen ? "clear all filters" : treeWidthTooNarrow ? "filter" : ""
+              }
               tooltipPosition="right"
             />
             <Button
@@ -318,6 +229,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     children={filteredTreeData.children}
                     lvl={filteredTreeData.lvl}
                     statementsCount={filteredTreeData.statementsCount}
+                    foundByRecursion={filteredTreeData.foundByRecursion}
                     initExpandedNodes={selectedTerritoryPath}
                     empty={filteredTreeData.empty}
                     storedTerritories={storedTerritoryIds}

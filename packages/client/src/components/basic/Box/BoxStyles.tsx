@@ -1,16 +1,22 @@
 import { animated } from "@react-spring/web";
 import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
+import { boxHeightVar } from "utils/layoutUtils";
 
 interface StyledBox {
-  height?: number;
+  $heightVarKey?: string;
   $isClickable?: boolean;
 }
-export const StyledBox = styled(animated.div)<StyledBox>`
+export const StyledBox = styled.div<StyledBox>`
   position: relative;
   display: flex;
   flex-direction: column;
-  height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
+  /* The shared variable carries every frame of both a drag and a spring, so
+     nothing is eased here; --box-height is the height the box rendered with. */
+  height: ${({ $heightVarKey }) =>
+    $heightVarKey !== undefined
+      ? `var(${boxHeightVar($heightVarKey)}, var(--box-height))`
+      : "var(--box-height)"};
   cursor: ${({ $isClickable }) => ($isClickable ? "pointer" : "")};
 `;
 
@@ -21,7 +27,7 @@ interface StyledHead {
   $isExpanded: boolean;
   $hasHeaderClick: boolean;
 }
-export const StyledHead = styled(animated.div)<StyledHead>`
+export const StyledHead = styled.div<StyledHead>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,7 +77,7 @@ interface StyledContent {
   $borderColor?: keyof ThemeColor;
   $isExpanded: boolean;
 }
-export const StyledContent = styled(animated.div)<StyledContent>`
+export const StyledContent = styled.div<StyledContent>`
   display: flex;
   flex-direction: column;
   overflow-y: auto;

@@ -14,7 +14,7 @@ import {
 import { UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EDITOR_TOO_SMALL_BREAKPOINT, excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
-import { Button, Input, Message, MultiInput, Submit } from "components";
+import { boxContentId, Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
@@ -31,10 +31,15 @@ import {
   CStatementActant,
   CStatementAction,
 } from "constructors";
-import { useIsInViewport, useSearchParams, useTheme } from "hooks";
+import {
+  useIsInViewport,
+  useSearchParams,
+  useTheme,
+  useWidthBreakpoint,
+} from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
-import { AiOutlineCaretRight, AiOutlineWarning } from "react-icons/ai";
+import { AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
@@ -42,7 +47,13 @@ import { setEditorBoxState } from "redux/features/layout/mainPage/editorBoxState
 import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { EditorBoxState, DetailBoxState, classesEditorActants, classesEditorTags } from "types";
+import {
+  EditorBoxState,
+  DetailBoxState,
+  classesEditorActants,
+  classesEditorTags,
+  ButtonSize,
+} from "types";
 import { deepCopy, getEntityLabel, getShortLabelByLetterCount, searchTree } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
@@ -68,6 +79,7 @@ import {
   StyledMissingTerritory,
   StyledTagsList,
   StyledTagsListItem,
+  StyledToggleCaret,
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
@@ -560,9 +572,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }, timeout);
   };
 
-  const editorWidth = useAppSelector((state) => state.layout.mainPage.thirdPanelRealWidth);
-
-  const editorWidthTooNarrow = editorWidth < EDITOR_TOO_SMALL_BREAKPOINT;
+  const editorWidthTooNarrow = useWidthBreakpoint(
+    EDITOR_TOO_SMALL_BREAKPOINT,
+    boxContentId("Editor"),
+  );
 
   return (
     <>
@@ -740,17 +753,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 Warnings ({statement.warnings.length})
               </StyledEditorSectionHeading>
               <Button
-                iconRight={
-                  <AiOutlineCaretRight
-                    style={{
-                      transform: showWarnings ? `rotate(90deg)` : `rotate(0deg)`,
-                      transition: "transform 0.2s ease",
-                    }}
-                  />
-                }
+                iconRight={<StyledToggleCaret $open={showWarnings} />}
                 label={showWarnings ? "hide" : "show"}
                 onClick={() => dispatch(setShowWarnings(!showWarnings))}
                 color="warning"
+                inverted
+                size={ButtonSize.Small}
                 tooltipPosition="right"
               />
             </StyledEditorSectionHeader>

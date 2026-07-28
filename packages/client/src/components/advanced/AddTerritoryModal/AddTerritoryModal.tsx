@@ -2,6 +2,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -43,13 +44,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={onClose}
-            />
+            <CancelButton key="cancel" onClick={onClose} />
           </ButtonGroup>
         </ModalFooter>
       </Modal>

@@ -87,6 +87,8 @@ interface EntitySuggesterProps {
   autoFocusInput?: boolean;
 
   initTyped?: string;
+  // seeds the class selection on mount and when the allowed classes change; the
+  // suggester owns the live selection between those points
   initCategory?: EntityEnums.Class;
   // not necessary to base functionality, use wisely
   externalTyped?: string;
@@ -192,20 +194,19 @@ const EntitySuggesterFull: React.FC<
     });
   }, [categoryTypes]);
 
+  // Seed the class selection on mount and whenever the allowed classes change
+  // (an edge switch or a root-class change). It deliberately does NOT depend on
+  // initCategory: picking the wildcard clears the node's entityClasses, which
+  // flips initCategory back to a concrete class, and re-seeding on that would
+  // overwrite the wildcard the user just chose.
   useEffect(() => {
-    if (initCategory) {
-      if (selectedCategory !== initCategory) {
-        setSelectedCategory(initCategory);
-      }
-    } else {
-      const firstValidCategory =
-        !disableWildCard && categoryTypes.length > 1 ? EntityEnums.Extension.Any : categoryTypes[0];
-
-      if (selectedCategory !== firstValidCategory) {
-        setSelectedCategory(firstValidCategory);
-      }
-    }
-  }, [initCategory, categoryTypes]);
+    const seed =
+      initCategory ??
+      (!disableWildCard && categoryTypes.length > 1
+        ? EntityEnums.Extension.Any
+        : categoryTypes[0]);
+    setSelectedCategory((prev) => (prev === seed ? prev : seed));
+  }, [categoryTypes, disableWildCard]);
 
   const { appendDetailId } = useSearchParams();
 

@@ -2,7 +2,7 @@ import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
-import { space2, space4, space5, space6, space7 } from "Theme/theme-space-shortcut";
+import { space5, space6 } from "Theme/theme-space-shortcut";
 
 interface ModalWrap {
   $lowerZIndex: boolean;
@@ -27,6 +27,7 @@ export const StyledBackground = styled(animated.div)`
   right: 0;
   top: 0;
   background-color: ${({ theme }) => theme.color["modalBg"]};
+  backdrop-filter: blur(2px) saturate(0.9);
 `;
 
 interface Card {
@@ -77,7 +78,7 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   align-items: center;
   flex-shrink: 0;
   gap: 0.5rem;
-  padding: ${space4} ${space6} ${space2} ${space6};
+  padding: ${space5};
   background-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "transparent")};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -90,10 +91,12 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
 export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
   display: flex;
   flex-shrink: 0;
-  font-size: 1.8rem;
+  font-size: ${({ theme }) => theme.fontSize["lg"]};
   margin-right: 0.2rem;
   margin-bottom: 0.1rem;
-  color: ${({ theme, $color }) => ($color ? theme.color[$color] : "inherit")};
+  /* the icon labels the dialog rather than carrying its own meaning, so it stays
+     quieter than the title unless a caller asks for an accent */
+  color: ${({ theme, $color }) => ($color ? theme.color[$color] : theme.color["gray"][600])};
 `;
 interface StyledCardTitle {
   $boldTitle?: boolean;
@@ -102,7 +105,7 @@ export const StyledCardTitle = styled.h2<StyledCardTitle>`
   white-space: nowrap;
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
-  font-size: 1.7rem;
+  font-size: ${({ theme }) => theme.fontSize["lg"]};
 `;
 export const StyledCardContent = styled.div`
   display: flex;
@@ -120,7 +123,7 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   align-items: ${({ centered }) => (centered ? "center" : "")};
   justify-content: ${({ centered }) => (centered ? "center" : "")};
-  padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space5} ${space7}`)};
+  padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space6} ${space5}`)};
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
@@ -138,7 +141,8 @@ export const StyledFooter = styled.div<StyledFooter>`
   flex-shrink: 0;
   justify-content: ${({ $spaceBetween }) => ($spaceBetween ? "space-between" : "flex-end")};
   flex-direction: ${({ $column }) => ($column ? "column" : "row")};
-  padding: ${({ theme }) => theme.space[4]};
+  padding: ${space5};
+  --button-group-gap: 0.75rem;
 `;
 
 export const StyledFooterNote = styled.div`
@@ -165,7 +169,7 @@ export const StyledModalInputLabel = styled.p`
   justify-content: flex-end;
   align-items: center;
   white-space: nowrap;
-  font-size: 1.3rem;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 interface StyledModalInputWrap {
   width?: number;

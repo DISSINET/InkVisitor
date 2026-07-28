@@ -5,7 +5,7 @@ import { Explore, Query } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { deepCopy } from "utils/utils";
 import { QueryValidity } from "./types";
-import { isQueryRequestEmpty } from "./Query/utils";
+import { isQueryRequestEmpty, isStatsRequestEmpty } from "./Query/utils";
 
 interface UseQueryDataParams {
   queryState: Query.INode;
@@ -154,6 +154,13 @@ export const useQueryData = ({
     [queryState, exploreState],
   );
 
+  // Every event type switched off in the stats view: the aggregation would be
+  // empty, so the view says so instead and nothing is requested.
+  const hasNoEventTypes = useMemo(
+    () => isStatsRequestEmpty(exploreState),
+    [exploreState],
+  );
+
   const queryKey = useMemo(
     () => ["query", stableSignature, { offset: exploreState.offset, limit: exploreState.limit }],
     [stableSignature, exploreState.offset, exploreState.limit],
@@ -179,7 +186,12 @@ export const useQueryData = ({
       //   `🔄 Fetching rows [${exploreState.offset}-${exploreState.offset + exploreState.limit - 1}]`,
       // );
 
-      if (!queryStateValidity.isValid || !api.isLoggedIn() || isRequestEmpty)
+      if (
+        !queryStateValidity.isValid ||
+        !api.isLoggedIn() ||
+        isRequestEmpty ||
+        hasNoEventTypes
+      )
         return;
       const res = await api.query({
         query: buildQueryWithResultExpansion(
@@ -213,6 +225,7 @@ export const useQueryData = ({
       queryStateValidity.isValid &&
       api.isLoggedIn() &&
       !isRequestEmpty &&
+      !hasNoEventTypes &&
       committedSearchSignature === searchSignature,
   });
 

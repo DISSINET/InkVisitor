@@ -6,6 +6,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Checkbox,
   Modal,
   ModalContent,
@@ -71,35 +72,33 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
     }, 0);
   }, [exportedClasses]);
 
-  const SelectAllComponent = useCallback(() => {
-    return (
-      <React.Fragment>
-        <>
-          {!allClassesSelected ? (
-            <MdLibraryAddCheck
-              onClick={() => {
-                handleSelectAll();
-              }}
-            />
-          ) : (
-            <MdOutlineLibraryAddCheck
-              onClick={() => {
-                handleUnselectAll();
-              }}
-            />
-          )}
-        </>
-        <StyledExportDocumentClassLabel
-          $selected={false}
-          onClick={() => {
-            !allClassesSelected ? handleSelectAll() : handleUnselectAll();
-          }}
-        >
-          {!allClassesSelected ? "Select all" : "Deselect all"}
-        </StyledExportDocumentClassLabel>
-      </React.Fragment>
-    );
-  }, [allClassesSelected]);
+  const selectAllToggle = (
+    <React.Fragment>
+      <>
+        {!allClassesSelected ? (
+          <MdLibraryAddCheck
+            onClick={() => {
+              handleSelectAll();
+            }}
+          />
+        ) : (
+          <MdOutlineLibraryAddCheck
+            onClick={() => {
+              handleUnselectAll();
+            }}
+          />
+        )}
+      </>
+      <StyledExportDocumentClassLabel
+        $selected={false}
+        onClick={() => {
+          !allClassesSelected ? handleSelectAll() : handleUnselectAll();
+        }}
+      >
+        {!allClassesSelected ? "Select all" : "Deselect all"}
+      </StyledExportDocumentClassLabel>
+    </React.Fragment>
+  );
 
   return (
     <Modal width={500} showModal={show} onClose={onClose}>
@@ -116,7 +115,7 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
           {document && (
             <div>
               <StyledExportDocumentContainer>
-                <SelectAllComponent /> <span></span>
+                {selectAllToggle} <span></span>
                 {/* <StyledExportDocumentContainerTH key={"1"}>
                 Entity type
               </StyledExportDocumentContainerTH>
@@ -163,7 +162,7 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
                     </React.Fragment>
                   );
                 })}
-                <SelectAllComponent />
+                {selectAllToggle}
                 <span></span>
               </StyledExportDocumentContainer>
             </div>
@@ -176,11 +175,8 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
           <b>{sumAnchorsToExport}</b> anchors will be exported
         </StyledExportStatsSection>
         <ButtonGroup>
-          <Button
+          <CancelButton
             key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
             onClick={() => {
               onClose();
             }}

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaPlus } from "react-icons/fa";
 
 import api from "api";
 import { Button, ButtonGroup, Input } from "components";
 import { StyledUserEditorForm, StyledUtils } from "./UserListStyles";
 import { IResponseUser } from "@inkvisitor/shared/types";
+import { IcoPlus } from "Theme/icons";
 
 interface UsersUtils {
   users: IResponseUser[];
@@ -61,7 +61,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
               : "please enter a valid mail first"
           }
           disabled={!validNewUserEmail()}
-          icon={<FaPlus />}
+          icon={<IcoPlus />}
           color="primary"
           onClick={() => {
             if (!users.some((user) => user.email === newUserEmail)) {

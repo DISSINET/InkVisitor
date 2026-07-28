@@ -5,6 +5,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -138,7 +139,7 @@ export const BatchActionAddReference: React.FC<
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="greyer" inverted onClick={onClose} />
+          <CancelButton onClick={onClose} />
           <Button
             label="Apply"
             color="primary"

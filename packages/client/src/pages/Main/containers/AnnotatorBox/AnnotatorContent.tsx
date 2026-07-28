@@ -21,6 +21,7 @@ import {
 } from "Theme/constants";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
+import { StyledAnnotatorContent } from "./AnnotatorBoxStyles";
 import StatementListDocumentLine from "./AnnotatorDocumentLine";
 
 interface StatementListTextAnnotator {
@@ -205,7 +206,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
 
   return (
     <>
-      <div style={{ width: "100%" }}>
+      <StyledAnnotatorContent>
         <StatementListDocumentLine
           selectedResource={selectedResource}
           setSelectedResourceId={setSelectedResourceId}
@@ -281,7 +282,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
             />
           )}
         </AnnotatorProvider>
-      </div>
+      </StyledAnnotatorContent>
     </>
   );
 };

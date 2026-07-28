@@ -88,7 +88,9 @@ interface EntityTag {
   isSubordinate?: boolean;
 }
 
-const EntityTagComponent: React.FC<EntityTag> = ({
+// the tag renders nothing without an entity; the check lives in the outer
+// component so this one can call its hooks unconditionally
+const EntityTagInner: React.FC<EntityTag> = ({
   entity,
   parentId,
   showOnly,
@@ -165,11 +167,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
     setTagHovered(false);
   }, []);
 
-  if (entity === undefined || !entity) {
-    return <></>;
-  }
-
-  const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
+  const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
     return (
       <Button
         key="d"
@@ -181,7 +179,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
         shape="sharp"
       />
     );
-  }, []);
+  };
 
   const tagComponent = useMemo(() => {
     const mark = isEquivalent
@@ -227,7 +225,7 @@ const EntityTagComponent: React.FC<EntityTag> = ({
 
   const labelComponent = useMemo(() => {
     return (
-      <StyledLabelWrap $invertedLabel={isSelected ?? false}>
+      <StyledLabelWrap $invertedLabel={isSelected ?? false} $isFavorited={isFavorited ?? false}>
         {isFavorited && (
           <StyledStarWrap>
             <StyledFaStar />
@@ -247,6 +245,24 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       </StyledLabelWrap>
     );
   }, [entity, entityLabel, isSelected, isFavorited, showOnly, fullWidth, tagMaxWidth]);
+
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector((state) => state.draggedEntity);
+
+  const [isDragging, canDrag, drag, drop] = useDragDrop({
+    entity,
+    isTemplate: entity.isTemplate ?? false,
+    isDiscouraged: entity.status === EntityEnums.Status.Discouraged,
+    propId: entity.id,
+    entityClass: entity.class,
+    disableDrag,
+    index: index ?? -1,
+    lvl,
+    updateOrderFn: updateOrderFn ?? (() => {}),
+    draggedEntity,
+    dispatch,
+    moveFn,
+    ref: referenceEl,
+  });
 
   if (!isValidEntityClass(entity.class)) {
     // labels needs to have length and first label needs to be non-empty
@@ -268,24 +284,6 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       </StyledEntityTagWrap>
     );
   }
-
-  const draggedEntity: DraggedEntityReduxItem = useAppSelector((state) => state.draggedEntity);
-
-  const [isDragging, canDrag, drag, drop] = useDragDrop({
-    entity,
-    isTemplate: entity.isTemplate ?? false,
-    isDiscouraged: entity.status === EntityEnums.Status.Discouraged,
-    propId: entity.id,
-    entityClass: entity.class,
-    disableDrag,
-    index: index ?? -1,
-    lvl,
-    updateOrderFn: updateOrderFn ?? (() => {}),
-    draggedEntity,
-    dispatch,
-    moveFn,
-    ref: referenceEl,
-  });
 
   // The tag's trailing side: optional resize/leading button (left of the elvl
   // group when buttonBeforeElvl), the elvl button group, then the action
@@ -377,6 +375,13 @@ const EntityTagComponent: React.FC<EntityTag> = ({
       />
     </StyledEntityTagWrap>
   );
+};
+
+const EntityTagComponent: React.FC<EntityTag> = (props) => {
+  if (!props.entity) {
+    return <></>;
+  }
+  return <EntityTagInner {...props} />;
 };
 
 function areEntityTagsEqual(

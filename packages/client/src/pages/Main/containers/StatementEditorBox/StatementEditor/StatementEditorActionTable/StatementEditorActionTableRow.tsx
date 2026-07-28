@@ -21,8 +21,8 @@ import { TooltipAttributes } from "pages/Main/containers";
 import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
-import { FaGripVertical, FaPlus } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
+import { FaGripVertical } from "react-icons/fa";
+import { IcoPlusBold, IcoTrash } from "Theme/icons";
 import { FaCaretDown } from "react-icons/fa6";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -205,15 +205,16 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
-      <ButtonGroup $smallGap $height={19}>
+      <ButtonGroup $gap="small" $height={19}>
         {userCanEdit && (
           <Button
             key="a"
-            icon={<FaPlus />}
+            icon={<IcoPlusBold />}
             noIconMargin
             label="p"
             color="primary"
             inverted
+            bold
             tooltipLabel="add new prop"
             onClick={() => {
               addProp(rowId);

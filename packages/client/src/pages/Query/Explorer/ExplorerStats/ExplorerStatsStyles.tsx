@@ -1,11 +1,12 @@
+import { ButtonGroup } from "components";
 import styled from "styled-components";
 
-export const StyledStatsLayout = styled.div<{ $height?: number }>`
+export const StyledStatsLayout = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[4]};
   padding: ${({ theme }) => theme.space[4]};
-  height: ${({ $height }) => ($height ? `${$height}px` : "100%")};
+  height: 100%;
   overflow: auto;
 `;
 
@@ -14,7 +15,7 @@ export const StyledStatsHeader = styled.div`
   justify-content: center;
   align-items: center;
   font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.color.primary};
+  color: ${({ theme }) => theme.color.gray[600]};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
 `;
 
@@ -50,6 +51,13 @@ export const StyledDateInputWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
+`;
+
+/** Multi-select stats filter. The padding matches the track inset a SwitchGroup
+ *  puts around its segments, so every field in the strip is the same height and
+ *  their labels sit on one line. */
+export const StyledEventTypeGroup = styled(ButtonGroup)`
+  padding: 0.25rem;
 `;
 
 export const StyledFieldLabel = styled.div`

@@ -40,7 +40,7 @@ import {
   IStatement,
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
-import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { CancelButton, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { EntityTagById } from "components/advanced";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup, SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
@@ -66,6 +66,7 @@ import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAn
 import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorButtons,
+  StyledAnnotatorColumn,
   StyledAnnotatorMenu,
   StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
@@ -78,6 +79,7 @@ import {
 } from "./styles";
 import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { annotatorHighlight } from "./utils/highlight";
+import { ButtonSize } from "types";
 
 interface TextAnnotatorProps {
   width: number;
@@ -1508,12 +1510,8 @@ export const TextAnnotator = ({
         />
       </div>
 
-      <div
-        style={{
-          width,
-          position: "relative",
-          paddingLeft: ANNOTATOR_LEFT_MARGIN_PX,
-        }}
+      <StyledAnnotatorColumn
+        style={{ width }}
         onKeyDownCapture={(e) => {
           // Cmd/Ctrl+S saves the document. Intercept in capture so it beats the
           // browser's "save page" dialog and the canvas's own keydown. Mirrors
@@ -1701,6 +1699,7 @@ export const TextAnnotator = ({
         <StyledAnnotatorButtons>
           <SwitchGroup $bgColor={theme.color.invertedBg.success} style={{ marginTop: "0.25rem" }}>
             <Button
+              size={ButtonSize.Medium}
               key={EditMode.HIGHLIGHT}
               icon={
                 <StyledDisplayModeButtonIconWrapper
@@ -1715,11 +1714,13 @@ export const TextAnnotator = ({
               noBorder
               inverted={annotatorMode !== EditMode.HIGHLIGHT}
               noBackground={annotatorMode !== EditMode.HIGHLIGHT}
+              bold={annotatorMode === EditMode.HIGHLIGHT}
               onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
               tooltipLabel="anchor entities"
               tooltipPosition="top"
             />
             <Button
+              size={ButtonSize.Medium}
               key={EditMode.SEMI}
               icon={
                 <StyledDisplayModeButtonIconWrapper
@@ -1734,11 +1735,13 @@ export const TextAnnotator = ({
               inverted={annotatorMode !== EditMode.SEMI}
               noBackground={annotatorMode !== EditMode.SEMI}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
+              bold={annotatorMode === EditMode.SEMI}
               onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
               tooltipLabel={canEditDocument ? "edit plain text" : "view plain text"}
               tooltipPosition="top"
             />
             <Button
+              size={ButtonSize.Medium}
               key={EditMode.RAW}
               icon={
                 <StyledDisplayModeButtonIconWrapper
@@ -1753,6 +1756,7 @@ export const TextAnnotator = ({
               inverted={annotatorMode !== EditMode.RAW}
               noBackground={annotatorMode !== EditMode.RAW}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
+              bold={annotatorMode === EditMode.RAW}
               onClick={() => handleAnnotatorModeClick(EditMode.RAW)}
               tooltipLabel={canEditDocument ? "display and edit XML" : "display XML"}
               tooltipPosition="top"
@@ -1793,7 +1797,7 @@ export const TextAnnotator = ({
             </ButtonGroup>
           )}
         </StyledAnnotatorButtons>
-      </div>
+      </StyledAnnotatorColumn>
 
       {pendingModeSwitch && (
         <Modal
@@ -1812,12 +1816,7 @@ export const TextAnnotator = ({
           </ModalContent>
           <ModalFooter>
             <ButtonGroup>
-              <Button
-                label="Cancel"
-                color="greyer"
-                inverted
-                onClick={() => setPendingModeSwitch(null)}
-              />
+              <CancelButton onClick={() => setPendingModeSwitch(null)} />
               <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
               <Button label="Save" color="info" onClick={confirmSaveAndSwitch} />
             </ButtonGroup>

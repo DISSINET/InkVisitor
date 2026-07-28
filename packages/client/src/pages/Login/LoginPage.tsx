@@ -2,12 +2,13 @@ import { ContactOwnerFooting, Modal } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
-import { IoEnter, IoReloadCircle } from "react-icons/io5";
+import { IoEnter } from "react-icons/io5";
 import { Navigate } from "react-router-dom";
 import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
 import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
+import { IcoRotateLock } from "Theme/icons";
 
 enum LoginMode {
   "login",
@@ -41,7 +42,7 @@ export const LoginPage: React.FC = () => {
         selected: loginMode === LoginMode.login,
       },
       {
-        icon: <IoReloadCircle />,
+        icon: <IcoRotateLock size={15} />,
         longValue: "Password reset",
         shortValue: "Password reset",
         optionDisabled: false,
@@ -114,9 +115,7 @@ export const LoginPage: React.FC = () => {
               setRedirectToMain={setRedirectToMain}
             />
           )}
-          {loginMode === LoginMode.guest && (
-            <GuestScreen setRedirectToMain={setRedirectToMain} />
-          )}
+          {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
           {loginMode === LoginMode.password && (
             <PasswordRecoverScreen
               emailLocal={emailLocal}

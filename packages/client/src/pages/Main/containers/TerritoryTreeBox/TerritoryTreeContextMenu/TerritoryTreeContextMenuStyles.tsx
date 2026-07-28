@@ -14,6 +14,11 @@ export const StyledContextButtonGroup = styled(animated.div)`
   border-radius: ${({ theme }) => theme.borderRadius["rounded-sm"]};
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+  /* a floating menu is its own target: the items get a comfortable hit area
+     regardless of the size each button asks for */
+  > button {
+    padding: 0.4rem;
+  }
 `;
 
 export const StyledCgMenuBoxed = styled(CgMenuBoxed)`

@@ -4,10 +4,10 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { MdDeleteSweep } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./EntityDetailSectionButtonsStyles";
+import { IcoPlus } from "Theme/icons";
 
 interface EntityDetailSectionButtons {
   setShowSubmit: (value: React.SetStateAction<boolean>) => void;
@@ -48,7 +48,7 @@ export const EntityDetailSectionButtons: React.FC<EntityDetailSectionButtons> = 
               shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
-              shortIcon: <FaPlus />,
+              shortIcon: <IcoPlus />,
             },
             {
               longValue: "replace",

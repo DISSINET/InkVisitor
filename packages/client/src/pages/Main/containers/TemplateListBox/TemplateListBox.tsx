@@ -8,10 +8,9 @@ import Dropdown, { EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import { useTemplatesQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { IcoTrashSimple } from "Theme/icons";
+import { IcoPlusBold, IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -24,6 +23,7 @@ import {
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
+import { ButtonSize } from "types";
 
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {
@@ -97,9 +97,12 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
           {userRole !== UserEnums.Role.Viewer && (
             <Button
               key="add-template"
-              icon={<FaPlus />}
+              icon={<IcoPlusBold />}
               color="primary"
-              label="new Template"
+              inverted
+              bold
+              label="new template"
+              size={ButtonSize.Medium}
               onClick={() => {
                 handleAskCreateTemplate();
               }}
