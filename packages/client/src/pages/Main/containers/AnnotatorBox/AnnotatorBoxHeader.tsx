@@ -1,13 +1,19 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
 import { Button, Loader } from "components";
-import { DocumentModalExport, EntitySuggester, EntityTag } from "components/advanced";
+import {
+  DocumentModalExport,
+  DocumentTitle,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import React, { useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   StyledAnnotatorHeader,
   StyledAnnotatorHeaderResource,
+  StyledAnnotatorHeaderTitle,
   StyledInfoText,
   StyledLoadingDocument,
 } from "./AnnotatorBoxStyles";
@@ -24,10 +30,9 @@ interface AnnotatorBoxHeader {
 }
 
 /**
- * Resource identity for the annotator Box header: the suggester when no
- * resource is picked yet, otherwise the resource tag with its export/unlink
- * buttons. The document title itself is not rendered here — it is the Box's
- * label, so StyledLabel's own ellipsis handles it.
+ * Document identity for the annotator Box header, sitting beside the box label:
+ * the document title, then the resource — a suggester until one is picked,
+ * after that the resource tag with its export/unlink buttons.
  */
 export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
   selectedResource,
@@ -43,6 +48,12 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
 
   return (
     <StyledAnnotatorHeader>
+      {selectedDocument && (
+        <StyledAnnotatorHeaderTitle>
+          <DocumentTitle title={selectedDocument.title} width="full" noMargin />
+        </StyledAnnotatorHeaderTitle>
+      )}
+
       {!selectedResource && (
         <div onFocus={onResourcePickerFocus}>
           <EntitySuggester

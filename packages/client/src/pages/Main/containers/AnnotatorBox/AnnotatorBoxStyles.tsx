@@ -75,6 +75,15 @@ export const StyledAnnotatorHeaderResource = styled.div`
   max-width: 11.5rem;
 `;
 
+/** The one item that yields when the header runs out of room. */
+export const StyledAnnotatorHeaderTitle = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 2rem;
+  overflow: hidden;
+`;
+
 export const StyledAnnotatorHeader = styled.div`
   display: flex;
   align-items: center;

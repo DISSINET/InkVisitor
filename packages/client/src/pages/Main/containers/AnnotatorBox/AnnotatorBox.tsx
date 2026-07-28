@@ -35,7 +35,7 @@ interface AnnotatorBox {
   height: number;
   width: number;
   /** Reported upward because MainPage owns the Box whose header this fills. */
-  onHeaderChange: (header: { label: string; component: ReactNode }) => void;
+  onHeaderChange: (header: ReactNode) => void;
 }
 
 export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderChange }) => {
@@ -309,31 +309,28 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
     }
   };
 
-  // MainPage owns the Box that hosts this header, so the label + header
-  // element are reported upward rather than rendered here. `component` is a
-  // fresh element every render; if it (or an inline callback) joined this
-  // dependency list, MainPage's setState from onHeaderChange would re-render
-  // this (memoized) box, rebuild the element and refire this effect - forever.
-  // Depending only on the data the header is built from keeps it finite.
+  // MainPage owns the Box that hosts this header, so the header element is
+  // reported upward rather than rendered here. It is a fresh element every
+  // render; if it (or an inline callback) joined this dependency list,
+  // MainPage's setState from onHeaderChange would re-render this (memoized)
+  // box, rebuild the element and refire this effect - forever. Depending only
+  // on the data the header is built from keeps it finite.
   useEffect(() => {
-    onHeaderChange({
-      label: selectedDocument?.title ?? "Annotator",
-      component: (
-        <AnnotatorBoxHeader
-          selectedResource={selectedResource}
-          setSelectedResourceId={(id) => {
-            userPickedRef.current = true;
-            dispatch(setSelectedResourceId(id));
-          }}
-          selectedDocument={selectedDocument}
-          selectedDocumentIsFetching={selectedDocumentIsFetching}
-          resources={resources || []}
-          onResourcePickerFocus={() => refetchResources()}
-          canSelectResource={canSelectResource}
-          canEditDocument={canEditDocument}
-        />
-      ),
-    });
+    onHeaderChange(
+      <AnnotatorBoxHeader
+        selectedResource={selectedResource}
+        setSelectedResourceId={(id) => {
+          userPickedRef.current = true;
+          dispatch(setSelectedResourceId(id));
+        }}
+        selectedDocument={selectedDocument}
+        selectedDocumentIsFetching={selectedDocumentIsFetching}
+        resources={resources || []}
+        onResourcePickerFocus={() => refetchResources()}
+        canSelectResource={canSelectResource}
+        canEditDocument={canEditDocument}
+      />,
+    );
   }, [
     selectedDocument,
     selectedDocumentIsFetching,
