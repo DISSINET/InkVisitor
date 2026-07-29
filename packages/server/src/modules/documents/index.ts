@@ -16,6 +16,7 @@ import {
 } from "@inkvisitor/shared/types";
 import {
   BadParams,
+  DocumentChangedConcurrently,
   DocumentDoesNotExist,
   InternalServerError,
   ModelNotValidError,
@@ -27,6 +28,7 @@ import { Connection, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
+import { contentFingerprint } from "@inkvisitor/shared/utils/content-fingerprint";
 
 /**
  * Whether the user may edit/delete/export the given document. Owner/Admin
@@ -368,6 +370,19 @@ export default Router()
       );
       if (!existingDocument) {
         throw DocumentDoesNotExist.forId(documentId);
+      }
+
+      // The client sends the fingerprint of the content its edit was built on.
+      // A mismatch means another write landed in between, and merging this one
+      // would drop that user's text or anchors - both live in the same content
+      // string. Absent header means an unchecked write (create/export paths,
+      // older clients).
+      const baseFingerprint = request.headers?.["x-inkvisitor-document-base"];
+      if (
+        typeof baseFingerprint === "string" &&
+        baseFingerprint !== contentFingerprint(existingDocument.content)
+      ) {
+        throw new DocumentChangedConcurrently();
       }
 
       await existingDocument.preprocess(request.db.connection);
