@@ -50,6 +50,12 @@
       "import": "./dictionaries/*.ts",
       "require": "./dist/dictionaries/*.js",
       "default": "./dist/dictionaries/*.js"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "import": "./utils/*.ts",
+      "require": "./dist/utils/*.js",
+      "default": "./dist/utils/*.js"
     }
   },
   "devDependencies": {
