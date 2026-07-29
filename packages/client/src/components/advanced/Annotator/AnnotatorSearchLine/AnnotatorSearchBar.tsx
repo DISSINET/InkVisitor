@@ -2,17 +2,16 @@ import { EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { Button, Checkbox, Input } from "components";
 import React from "react";
 import { FaTimes } from "react-icons/fa";
-import { MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
+import { HiOutlineArrowDown, HiOutlineArrowUp } from "react-icons/hi";
 import {
   IcoAnchor,
-  IcoArrowCircleDown,
-  IcoArrowCircleUp,
   IcoCaseSensitive,
   IcoExpandFull,
   IcoRegex,
   IcoReplaceTb,
   IcoWholeWord,
 } from "Theme/icons";
+import { MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorSearchBar,
   StyledAnnotatorSearchBarWrap,
@@ -159,7 +158,7 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
 
         <StyledSearchBarNav>
           <Button
-            icon={<IcoArrowCircleUp />}
+            icon={<HiOutlineArrowUp />}
             color="info"
             inverted
             noBorder
@@ -170,7 +169,7 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
             tooltipPosition="bottom"
           />
           <Button
-            icon={<IcoArrowCircleDown />}
+            icon={<HiOutlineArrowDown />}
             color="info"
             inverted
             noBorder
@@ -187,9 +186,7 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
             icon={isHighlightMode ? <IcoAnchor /> : <IcoReplaceTb />}
             color="info"
             onClick={onOpenSecondStep}
-            tooltipLabel={
-              isHighlightMode ? "open sequential anchoring" : "open find & replace"
-            }
+            tooltipLabel={isHighlightMode ? "open sequential anchoring" : "open find & replace"}
             tooltipPosition="bottom"
           />
         )}
