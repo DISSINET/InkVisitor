@@ -249,6 +249,15 @@ export const TextAnnotator = ({
   // anchors included, so every write from here would be lost.
   const canEditNow = canEditDocument && !lockedByOther;
 
+  // The lock was given up on the user's behalf after a long silence. Their edits
+  // are still on the canvas, so the only thing that changed is that somebody
+  // else may now write - and the next remote write raises the conflict banner.
+  useEffect(() => {
+    if (lockAutoReleased) {
+      toast.info("Editing lock released - others can now edit this document");
+    }
+  }, [lockAutoReleased]);
+
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);
   }, [isChangeMade, onUnsavedTextEditsChange]);
@@ -1909,6 +1918,48 @@ export const TextAnnotator = ({
               <CancelButton onClick={() => setPendingModeSwitch(null)} />
               <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
               <Button label="Save" color="info" onClick={confirmSaveAndSwitch} />
+            </ButtonGroup>
+          </ModalFooter>
+        </Modal>
+      )}
+
+      {idlePromptOpen && (
+        <Modal
+          showModal={idlePromptOpen}
+          onClose={continueEditing}
+          onEnterPress={continueEditing}
+          disableBgClick
+          isLoading={isSaving}
+          width="auto"
+        >
+          <ModalHeader title="Still editing?" />
+          <ModalContent>
+            <div>
+              You have unsaved changes, and nobody else can edit this document while you do.
+            </div>
+          </ModalContent>
+          <ModalFooter>
+            <ButtonGroup>
+              <Button label="Continue editing" color="greyer" onClick={continueEditing} />
+              <Button
+                label="Discard"
+                color="danger"
+                onClick={() => {
+                  continueEditing();
+                  if (dataDocument?.content !== undefined) {
+                    annotator?.updateText(dataDocument.content);
+                    setLocalTextContent(dataDocument.content);
+                  }
+                }}
+              />
+              <Button
+                label="Save"
+                color="info"
+                onClick={() => {
+                  continueEditing();
+                  requestSave();
+                }}
+              />
             </ButtonGroup>
           </ModalFooter>
         </Modal>
