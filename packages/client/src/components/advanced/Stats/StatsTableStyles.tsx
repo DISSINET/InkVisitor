@@ -10,9 +10,21 @@ interface StyledTableContainer {
 }
 export const StyledTableContainer = styled.div<StyledTableContainer>`
   /* display: flex; */
-  width: ${({ $width }) => $width}px;
-  height: ${({ $height }) => $height}px;
+  /* $width/$height are the space the layout offers, not the space the table
+     needs: the box hugs the table and scrolls only past the offer. the self
+     alignment opts out of the stretch a grid or flex parent would impose */
+  align-self: start;
+  justify-self: start;
+  width: fit-content;
+  height: fit-content;
+  max-width: ${({ $width }) => $width}px;
+  max-height: ${({ $height }) => $height}px;
   overflow: auto;
+  /* the box is exactly as wide as the table, so a vertical scrollbar drawn
+     inside it would push the table into a horizontal scroll of its own */
+  scrollbar-gutter: stable;
+  /* cells that are not pinned stay transparent, so the surface comes from here */
+  background: ${({ theme }) => theme.color.gray[100]};
   border: 1px solid ${({ theme }) => theme.color.gray[200]};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   color: ${({ theme }) => theme.color.gray[900]};
@@ -42,11 +54,11 @@ interface StyledTh {
   $stickyOffset?: number;
 }
 export const StyledTh = styled.th<StyledTh>`
-  background: ${({ theme }) => theme.color.gray[100]};
+  background: ${({ theme }) => theme.color.gray[200]};
   padding: ${({ theme }) => theme.space[2]};
   text-align: left;
   font-weight: ${({ theme }) => theme.fontWeight.bold};
-  border-bottom: 2px solid ${({ theme }) => theme.color.gray[200]};
+  border-bottom: 2px solid ${({ theme }) => theme.color.gray[400]};
   white-space: nowrap;
   font-size: 14px;
   width: ${COLUMN_WIDTH}px;
@@ -68,25 +80,27 @@ interface StyledTd {
 }
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
-  border-bottom: 1px solid ${({ theme }) => theme.color.gray[200]};
+  border-bottom: 1px solid
+    ${({ theme, $isTotalRow }) =>
+      $isTotalRow ? theme.color.gray[400] : theme.color.gray[200]};
   width: ${COLUMN_WIDTH}px;
   font-size: 13px;
   white-space: nowrap;
+  font-weight: ${({ theme, $isTotalRow, $isSticky }) =>
+    $isTotalRow || $isSticky ? theme.fontWeight.bold : theme.fontWeight.normal};
+  /* the two pinned columns scroll over the rest of the row, so they carry an
+     opaque fill; the totals row keeps its own fill across all of its cells */
+  background: ${({ theme, $isTotalRow, $isSticky }) => {
+    if ($isTotalRow) return theme.color.gray[300];
+    if ($isSticky) return theme.color.gray[100];
+    return "transparent";
+  }};
 
-  ${({ $isTotalRow, theme }) =>
-    $isTotalRow &&
-    `
-    background: ${theme.color.gray[150]};
-    font-weight: ${theme.fontWeight.bold};
-    `}
-
-  ${({ $isSticky, $stickyOffset = 0, theme }) =>
+  ${({ $isSticky, $stickyOffset = 0 }) =>
     $isSticky &&
     `
     position: sticky;
     left: ${$stickyOffset}px;
-    background: ${theme.color.gray[100]};
     z-index: 1;
-    font-weight: ${theme.fontWeight.bold};
     `}
 `;
