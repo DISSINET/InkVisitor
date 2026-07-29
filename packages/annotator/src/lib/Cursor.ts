@@ -614,9 +614,8 @@ export default class Cursor
   }
 
   /**
-   * Reset the cursor properties - removes highlighting / cursor pointer
-   */
-  /**
+   * Resets the cursor properties - removes highlighting / cursor pointer.
+   *
    * selectStart/selectEnd are derived from anchor/head, and anything that
    * re-derives them (a resize, a re-wrap) reinstates whatever the offsets still
    * say — so collapsing the offsets is what actually clears a selection.

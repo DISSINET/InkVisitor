@@ -31,8 +31,8 @@ import {
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
-  SEARCH_SCROLL_TOP_CLEARANCE_PX,
   VIEWPORT_END_BUFFER_ROWS,
+  VIEWPORT_START_BUFFER_ROWS,
   LIGHT_MENU_COLORS,
   MenuColors,
 } from "./constants";
@@ -3836,15 +3836,6 @@ export class Annotator {
   }
 
   /**
-   * Scrolls so the given line is drawn `clearancePx` below the top of the canvas.
-   * setScrollPosition takes a fractional line and derives the sub-line pixel
-   * offset from it, so a clearance that is not a whole number of rows lands
-   * exactly rather than being rounded up to the next one.
-   *
-   * lineHeight is in canvas buffer units, so the CSS-pixel clearance is scaled
-   * by the same ratio before the two are compared.
-   */
-  /**
    * Opens or closes headroom above line 1, so a floating bar pinned to the
    * canvas top can be scrolled clear of it. Only worth having while such a bar
    * is on screen — otherwise it is blank rows a user can scroll into for no
@@ -3859,17 +3850,6 @@ export class Annotator {
       this.viewport.lineStart = 0 - rows;
       this.viewport.scrollOffsetY = 0;
     }
-    this.draw();
-  }
-
-  scrollToLineWithTopClearance(absLine: number, clearancePx: number) {
-    const clearanceLines = (clearancePx * this.ratio) / this.lineHeight;
-    this.viewport.setScrollPosition(
-      absLine - clearanceLines,
-      0,
-      this.lineHeight,
-      this.scrollExtentLineCount()
-    );
     this.draw();
   }
 
@@ -4051,10 +4031,10 @@ export class Annotator {
       yLine: absEndY,
     };
 
-    this.scrollToLineWithTopClearance(
-      this.cursor.selectStart.yLine,
-      SEARCH_SCROLL_TOP_CLEARANCE_PX
-    );
+    // A hit landing on the first visible row would sit behind the bar the
+    // client floats over the canvas top. The headroom that bar is given is the
+    // same distance, so the two agree by construction.
+    this.scrollToLine(this.cursor.selectStart.yLine, -VIEWPORT_START_BUFFER_ROWS);
     this.draw();
 
     // Manually trigger onSelectText callback for search-based selections

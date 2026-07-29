@@ -35,17 +35,11 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
  *
  * Applied through Annotator.setTopScrollBuffer only while such a bar is open —
  * with no bar on screen the rows are empty space with nothing to reveal.
+ *
+ * Doubles as the clearance kept above a search hit: what the bar covers is what
+ * a hit has to be scrolled clear of, so one distance serves both.
  */
 export const VIEWPORT_START_BUFFER_ROWS = 2;
-
-/**
- * Space kept above a search hit when scrolling to it, in CSS pixels. The client
- * floats a search bar over the top of the canvas; a hit landing on the first
- * visible row would sit behind it. Expressed in pixels rather than rows because
- * the bar's height is not a whole number of rows — the viewport's sub-line
- * offset covers the remainder.
- */
-export const SEARCH_SCROLL_TOP_CLEARANCE_PX = 38;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**
