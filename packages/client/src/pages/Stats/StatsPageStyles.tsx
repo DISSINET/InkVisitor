@@ -1,3 +1,4 @@
+import { reserveBoldLabelWidth } from "components";
 import styled from "styled-components";
 
 export const StyledTabsContainer = styled.div`
@@ -119,6 +120,7 @@ export const StyledEventTypeGroup = styled.fieldset`
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   min-width: 0;
+  ${reserveBoldLabelWidth}
 `;
 interface StyledEventTypeGroupLegend {
   $active: boolean;

@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { FlatThemeColor, ThemeBorderRadius } from "Theme/theme";
 
 export type ButtonGroupGap = "no" | "small" | "large";
@@ -39,6 +39,19 @@ export const ButtonGroup = styled.div.attrs({
   }
 `;
 
+/** For groups whose selected option renders bold, which is wider: every label
+ * reserves its bold width so the buttons keep their size as the selection moves. */
+export const reserveBoldLabelWidth = css`
+  > button > span[data-label]::after {
+    content: attr(data-label);
+    font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+`;
+
 interface StyledSwitchGroup {
   $column?: boolean;
   $bgColor?: string;
@@ -66,16 +79,7 @@ const StyledSwitchGroup = styled.div<StyledSwitchGroup>`
     position: relative;
     z-index: 1;
   }
-  /* the selected option renders bold, which is wider — every label reserves its
-     bold width so the segments keep their size as the selection moves */
-  > button > span[data-label]::after {
-    content: attr(data-label);
-    font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-    display: block;
-    height: 0;
-    overflow: hidden;
-    visibility: hidden;
-  }
+  ${reserveBoldLabelWidth}
 `;
 
 interface PillRect {

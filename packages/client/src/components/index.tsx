@@ -3,7 +3,12 @@ import { Box, boxContentId } from "./basic/Box/Box";
 import { Button } from "./basic/Button/Button";
 import { CancelButton } from "./basic/Button/CancelButton";
 import { IconButton } from "./basic/Button/IconButton";
-import { ButtonGroup, ButtonGroups, SwitchGroup } from "./basic/ButtonGroup/ButtonGroup";
+import {
+  ButtonGroup,
+  ButtonGroups,
+  SwitchGroup,
+  reserveBoldLabelWidth,
+} from "./basic/ButtonGroup/ButtonGroup";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Cloud } from "./basic/Cloud/Cloud";
 import { DatePicker } from "./basic/DatePicker/DatePicker";
@@ -85,6 +90,7 @@ export {
   Panel,
   Submit,
   SwitchGroup,
+  reserveBoldLabelWidth,
   Suggester,
   Table,
   Tag,
