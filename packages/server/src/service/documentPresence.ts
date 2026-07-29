@@ -153,6 +153,35 @@ export function emitDocumentChanged(params: {
   });
 }
 
+interface LockHolder {
+  userId: string;
+  userName: string;
+  socketId: string;
+}
+
+/**
+ * Looks up the socket's session user once per connection. Callers await this
+ * rather than blocking listener registration on it - socket.io delivers
+ * "connection" and then dispatches incoming packets through a plain
+ * EventEmitter with no buffering, so any socket.on() added after an await
+ * misses events that arrive before that await resolves.
+ */
+async function resolveLockHolder(
+  userId: string,
+  socketId: string
+): Promise<LockHolder | null> {
+  const db = await pool.acquire();
+  try {
+    const user = await User.findUserById(db.connection, userId);
+    if (!user) {
+      return null;
+    }
+    return { userId, userName: user.name, socketId };
+  } finally {
+    await pool.release(db);
+  }
+}
+
 /**
  * Registers the document presence protocol on the Socket.IO server and starts
  * the TTL sweeper. Sockets without a session are ignored - an anonymous socket
@@ -161,60 +190,58 @@ export function emitDocumentChanged(params: {
 export function startDocumentPresence(socketio: SocketIO): NodeJS.Timeout {
   io = socketio;
 
-  socketio.on("connection", async (socket: Socket) => {
+  socketio.on("connection", (socket: Socket) => {
     const request = socket.request as import("express").Request;
     const userId = request.session?.userId;
     if (!userId) {
       return;
     }
 
-    let userName = "";
-    const db = await pool.acquire();
-    try {
-      const user = await User.findUserById(db.connection, userId);
-      if (!user) {
-        return;
-      }
-      userName = user.name;
-    } finally {
-      await pool.release(db);
-    }
+    const holder = resolveLockHolder(userId, socket.id);
 
-    socket.on("document:watch", ({ documentId }: { documentId?: string }) => {
+    socket.on("document:watch", async ({ documentId }: { documentId?: string }) => {
       if (!documentId) return;
+      if (!(await holder)) return;
       socket.join(documentRoom(documentId));
       socket.emit("document:lock", { documentId, lock: getDocumentLock(documentId) });
     });
 
-    socket.on("document:unwatch", ({ documentId }: { documentId?: string }) => {
+    socket.on("document:unwatch", async ({ documentId }: { documentId?: string }) => {
       if (!documentId) return;
+      if (!(await holder)) return;
       releaseDocumentLock(documentId, socket.id);
       socket.leave(documentRoom(documentId));
     });
 
     socket.on(
       "document:edit:start",
-      (
+      async (
         { documentId }: { documentId?: string },
         callback?: (result: { granted: boolean }) => void
       ) => {
         if (!documentId) return;
-        const granted = claimDocumentLock(documentId, {
-          userId,
-          userName,
-          socketId: socket.id,
-        });
+        const resolved = await holder;
+        if (!resolved) {
+          callback?.({ granted: false });
+          return;
+        }
+        const granted = claimDocumentLock(documentId, resolved);
         callback?.({ granted });
       }
     );
 
-    socket.on("document:edit:heartbeat", ({ documentId }: { documentId?: string }) => {
-      if (!documentId) return;
-      extendDocumentLock(documentId, socket.id);
-    });
+    socket.on(
+      "document:edit:heartbeat",
+      async ({ documentId }: { documentId?: string }) => {
+        if (!documentId) return;
+        if (!(await holder)) return;
+        extendDocumentLock(documentId, socket.id);
+      }
+    );
 
-    socket.on("document:edit:end", ({ documentId }: { documentId?: string }) => {
+    socket.on("document:edit:end", async ({ documentId }: { documentId?: string }) => {
       if (!documentId) return;
+      if (!(await holder)) return;
       releaseDocumentLock(documentId, socket.id);
     });
 
