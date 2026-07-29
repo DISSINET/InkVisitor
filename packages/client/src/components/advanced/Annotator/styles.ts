@@ -1,6 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
-import { ANNOTATOR_LEFT_MARGIN_PX } from "./types";
 
 /** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
@@ -49,13 +48,13 @@ export const StyledAnnotatorColumn = styled.div`
 export const CANVAS_WRAPPER_PADDING_PX = 2;
 
 interface StyledCanvasWrapperProps {
-  $noBorderRadius?: number;
+  $noBorderRadius?: boolean;
 }
 export const StyledCanvasWrapper = styled.div<StyledCanvasWrapperProps>`
   position: relative;
   background-color: ${({ theme }) => theme.color.white};
   padding: ${CANVAS_WRAPPER_PADDING_PX}px;
-  border-radius: 7px;
+  border-radius: ${({ $noBorderRadius }) => ($noBorderRadius ? 0 : "7px")};
   display: flex;
   flex-direction: row;
 `;

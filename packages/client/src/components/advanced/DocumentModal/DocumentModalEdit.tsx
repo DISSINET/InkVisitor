@@ -76,7 +76,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({ documentId, onClose, a
                 dataDocumentIsFetching={dataDocumentIsFetching}
                 dataDocumentError={errorDocument}
                 width={Math.max(0, slotWidth)}
-                height={windowHeight - 136}
+                height={windowHeight - 135}
                 displayLineNumbers={true}
                 hlEntities={[EntityEnums.Class.Territory]}
                 forwardAnnotator={(newAnnotator) => {
@@ -91,6 +91,7 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({ documentId, onClose, a
                 // Annotator lives inside this modal; lift its body-appended
                 // overlays above the modal (default lib values sit under it).
                 overlayZIndex={{ contextMenu: 700, settingsOverlay: 650 }}
+                noBorderRadius
               />
             </AnnotatorProvider>
           ) : (

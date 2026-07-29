@@ -71,8 +71,8 @@ import {
 } from "./annotatorChrome";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu/AnnotatorMenu";
-import { AnnotatorSearchBar } from "./AnnotatorSearchLine/AnnotatorSearchBar";
 import { AnnotatorFindReplaceModal } from "./AnnotatorSearchLine/AnnotatorFindReplaceModal";
+import { AnnotatorSearchBar } from "./AnnotatorSearchLine/AnnotatorSearchBar";
 import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorSequentialAnchorPanel";
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
@@ -89,12 +89,13 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./styles";
-import { ANNOTATOR_LEFT_MARGIN_PX, RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
 import { annotatorHighlight } from "./utils/highlight";
 
 interface TextAnnotatorProps {
   width: number;
   height: number;
+  noBorderRadius?: boolean;
   displayLineNumbers: boolean;
   hlEntities?: EntityEnums.Class[];
   documentId?: string;
@@ -167,6 +168,7 @@ interface TextAnnotatorProps {
 export const TextAnnotator = ({
   width = 400,
   height = 500,
+  noBorderRadius = false,
   displayLineNumbers = true,
   hlEntities = Object.values(EntityEnums.Class),
   documentId = undefined,
@@ -320,7 +322,7 @@ export const TextAnnotator = ({
   });
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL - ANNOTATOR_LEFT_MARGIN_PX);
+  const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
@@ -1209,9 +1211,7 @@ export const TextAnnotator = ({
   // Headroom above line 1 exists so the search bar can be scrolled clear of it;
   // with the bar closed those rows are blank space with nothing behind them.
   useEffect(() => {
-    annotator?.setTopScrollBuffer(
-      findPanel === FindPanel.Bar ? VIEWPORT_START_BUFFER_ROWS : 0,
-    );
+    annotator?.setTopScrollBuffer(findPanel === FindPanel.Bar ? VIEWPORT_START_BUFFER_ROWS : 0);
   }, [annotator, findPanel]);
 
   const isMenuDisplayed = useMemo<boolean>(
@@ -1604,7 +1604,7 @@ export const TextAnnotator = ({
           }
         }}
       >
-        <StyledCanvasWrapper>
+        <StyledCanvasWrapper $noBorderRadius={noBorderRadius}>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
               <StyledAnnotatorMenu
