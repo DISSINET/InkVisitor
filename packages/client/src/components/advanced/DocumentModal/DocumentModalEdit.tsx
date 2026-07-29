@@ -13,11 +13,7 @@ interface DocumentModalEdit {
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
 }
-const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
-  documentId,
-  onClose,
-  anchor,
-}) => {
+const DocumentModalEdit: React.FC<DocumentModalEdit> = ({ documentId, onClose, anchor }) => {
   const [show, setShow] = useState(false);
   useEffect(() => {
     setShow(true);
@@ -31,27 +27,17 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
   } = useDocumentQuery(documentId);
 
   return (
-    <Modal
-      width={1000}
-      showModal={show}
-      onClose={onClose}
-      fullHeight
-      lowerZIndex
-    >
+    <Modal width={1000} showModal={show} onClose={onClose} fullHeight lowerZIndex>
       <ModalHeader
         title={
           dataDocumentIsFetching
             ? "Loading..."
-            : `View ${
-                dataDocument
-                  ? getShortLabelByLetterCount(dataDocument.title, 90)
-                  : "no label"
-              }`
+            : `${dataDocument ? getShortLabelByLetterCount(dataDocument.title, 90) : "no label"}`
         }
         onClose={onClose}
       />
 
-      <ModalContent column>
+      <ModalContent column noPadding>
         {document ? (
           <AnnotatorProvider>
             <TextAnnotator
@@ -59,16 +45,13 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({
               dataDocument={dataDocument}
               dataDocumentIsFetching={dataDocumentIsFetching}
               dataDocumentError={errorDocument}
-              width={965}
-              height={windowHeight - 145}
+              width={998}
+              height={windowHeight - 136}
               displayLineNumbers={true}
               hlEntities={[EntityEnums.Class.Territory]}
               forwardAnnotator={(newAnnotator) => {
                 anchor?.entityId &&
-                  newAnnotator?.scrollToAnchor(
-                    anchor?.entityId,
-                    anchor?.occurence || 0
-                  );
+                  newAnnotator?.scrollToAnchor(anchor?.entityId, anchor?.occurence || 0);
               }}
               thisTerritoryEntityId={anchor?.entityId}
               // Documents page annotator is view/search only; editing anchors
