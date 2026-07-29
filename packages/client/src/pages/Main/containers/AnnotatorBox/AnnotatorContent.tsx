@@ -1,4 +1,4 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
+import { Annotator, EditMode } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
@@ -10,19 +10,26 @@ import {
 } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
+import { Button } from "components";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
+import { CANVAS_WRAPPER_PADDING_PX } from "components/advanced/Annotator/styles";
+import { WarningsChip } from "components/advanced/Annotator/AnnotatorWarningsModal";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import {
-  ANNOTATOR_SELECTOR_HEIGHT,
-  ANNOTATOR_TOO_SMALL_BREAKPOINT,
-  COLLAPSED_TABLE_WIDTH,
-} from "Theme/constants";
+import { FaLongArrowAltRight } from "react-icons/fa";
+import { GrDocumentMissing } from "react-icons/gr";
+import { TbAnchor, TbAnchorOff } from "react-icons/tb";
+import { ButtonSize } from "types";
+import { TOOLBAR_ICON_SIZE } from "components/advanced/Annotator/AnnotatorToolbar/AnnotatorToolbarStyles";
 import { collectStatementAnchors } from "utils/utils";
 import { StyledEmptyState } from "../StatementsListBox/StatementListBoxStyles";
-import { StyledAnnotatorContent } from "./AnnotatorBoxStyles";
-import StatementListDocumentLine from "./AnnotatorDocumentLine";
+import { AnnotatorHighlightPopover } from "./AnnotatorHighlightPopover";
+import {
+  StyledAnnotatorContent,
+  StyledEmptyStateWrap,
+  StyledLocateAnchorIcon,
+} from "./AnnotatorBoxStyles";
 
 interface StatementListTextAnnotator {
   // it's faster than the territory entity so it's better to pass territoryId separately
@@ -50,21 +57,15 @@ interface StatementListTextAnnotator {
 
   selectedDocument?: IDocument;
   selectedResource: IResponseEntity | false;
-  resources?: IResponseEntity[];
-  onResourcePickerFocus?: () => void;
-  setSelectedResourceId: (id: string | false) => void;
 
   // useQuery for selectedDocument
   selectedDocumentId?: string;
   selectedDocumentIsFetching: boolean;
   selectedDocumentError: Error | null;
 
-  showStatementList: boolean;
   // Territory write right - also drives the header suggester row visibility,
   // so when false the annotator reclaims that row's height.
   userCanEdit: boolean;
-  // Editor/admin/owner may load any Resource to view + search.
-  canSelectResource: boolean;
   // Whether the loaded document may be edited (anchors/text/replace/annotate).
   canEditDocument: boolean;
   userData?: IResponseUser;
@@ -93,38 +94,27 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
 
   selectedDocument,
   selectedResource,
-  resources,
-  onResourcePickerFocus,
-  setSelectedResourceId,
 
   selectedDocumentId,
   selectedDocumentIsFetching,
   selectedDocumentError,
-  showStatementList,
-  canSelectResource,
   canEditDocument,
   userData,
 
   onStatementAnchorHover,
   onUnsavedTextEditsChange,
 }) => {
-  const annotatorHeight = useMemo<number>(() => {
-    return contentHeight - 33 - ANNOTATOR_SELECTOR_HEIGHT;
-  }, [contentHeight]);
+  // The canvas is the only thing in the box content — the toolbar overlays it
+  // and the find panels are portalled out of the layout. The wrapper insets it,
+  // and the canvas is a fixed pixel size rather than a box that could shrink to
+  // fit, so that inset comes out of the height it is given.
+  const annotatorHeight = contentHeight - 2 * CANVAS_WRAPPER_PADDING_PX;
 
   // The annotator box collapses to (near) zero height when the Statement
   // Editor box is full-height. The selection menu floats over the whole page,
   // so hide it while the annotator is out of view — the selection is kept, and
   // the menu reopens once the annotator is visible again.
   const annotatorHidden = annotatorHeight <= 0;
-
-  const annotatorWidth = useMemo<number>(() => {
-    return showStatementList ? contentWidth - COLLAPSED_TABLE_WIDTH : contentWidth;
-  }, [contentWidth, showStatementList]);
-
-  const annotatorWidthTooNarrow = useMemo<boolean>(() => {
-    return annotatorWidth < ANNOTATOR_TOO_SMALL_BREAKPOINT;
-  }, [annotatorWidth]);
 
   // Asymmetrical-anchor warnings (#2601): the chip lives next to the document
   // title, but the modal + unlink/scroll handlers stay inside the annotator, so
@@ -207,52 +197,33 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
   return (
     <>
       <StyledAnnotatorContent>
-        <StatementListDocumentLine
-          selectedResource={selectedResource}
-          setSelectedResourceId={setSelectedResourceId}
-          selectedDocumentIsFetching={selectedDocumentIsFetching}
-          selectedDocument={selectedDocument}
-          activeTHasAnchor={activeTHasAnchor}
-          annotator={annotator}
-          territoryId={territoryId}
-          resources={resources || []}
-          onResourcePickerFocus={onResourcePickerFocus}
-          showStatementList={showStatementList}
-          canSelectResource={canSelectResource}
-          canEditDocument={canEditDocument}
-          annotatorWidthTooNarrow={annotatorWidthTooNarrow}
-          contentWidth={contentWidth}
-          setHlEntities={setHlEntities}
-          hlEntities={hlEntities}
-          warningCount={warningAnchorCount}
-          onOpenWarnings={() => setWarningsModalOpen(true)}
-        />
-
         {!selectedDocumentId && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "2rem",
-            }}
-          >
+          <StyledEmptyStateWrap>
             <StyledEmptyState>
               <BsInfoCircle size="23" />
             </StyledEmptyState>
             <StyledEmptyState>
               {"No document selected yet. Pick a resource from the resource suggester"}
             </StyledEmptyState>
-          </div>
+          </StyledEmptyStateWrap>
         )}
+
+        {selectedResource !== false &&
+          !selectedDocumentIsFetching &&
+          selectedResource.data.documentId === undefined && (
+            <StyledEmptyStateWrap>
+              <StyledEmptyState>
+                <GrDocumentMissing size="23" />
+              </StyledEmptyState>
+              <StyledEmptyState>{"This Resource does not have any document"}</StyledEmptyState>
+            </StyledEmptyStateWrap>
+          )}
 
         {/* Annotator */}
         <AnnotatorProvider>
           {selectedDocumentId && selectedDocument && (
             <TextAnnotator
-              width={annotatorWidth}
-              annotatorWidthTooNarrow={annotatorWidthTooNarrow}
+              width={contentWidth - 4}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
@@ -268,7 +239,6 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               dataDocument={selectedDocument ?? undefined}
               dataDocumentIsFetching={selectedDocumentIsFetching}
               dataDocumentError={selectedDocumentError}
-              showStatementList={showStatementList}
               userData={userData}
               canEditDocument={canEditDocument}
               territoryId={territoryId}
@@ -279,6 +249,49 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               onAsymmetricalAnchorCountChange={setWarningAnchorCount}
               onUnsavedTextEditsChange={onUnsavedTextEditsChange}
               hideSelectionMenu={annotatorHidden}
+              toolbarExtras={(annotatorMode) => (
+                <>
+                  {/* Entity classes are only painted in highlight mode, so the
+                      picker has nothing to act on in the text-editing modes. */}
+                  {annotatorMode === EditMode.HIGHLIGHT && (
+                    <AnnotatorHighlightPopover
+                      hlEntities={hlEntities}
+                      setHlEntities={setHlEntities}
+                    />
+                  )}
+                  {activeTHasAnchor ? (
+                    <Button
+                      size={ButtonSize.Small}
+                      icon={
+                        <StyledLocateAnchorIcon>
+                          <TbAnchor size={TOOLBAR_ICON_SIZE} />
+                          <FaLongArrowAltRight size={TOOLBAR_ICON_SIZE} />
+                        </StyledLocateAnchorIcon>
+                      }
+                      tooltipLabel="locate territory opened in tree"
+                      inverted
+                      onClick={() => {
+                        if (territoryId) {
+                          annotator?.scrollToAnchor(territoryId);
+                        }
+                      }}
+                      color="warning"
+                    />
+                  ) : (
+                    <TbAnchorOff title="the open territory is not anchored in this text" />
+                  )}
+                  {warningAnchorCount > 0 &&
+                    canEditDocument &&
+                    selectedResource !== false &&
+                    selectedResource?.data?.documentId && (
+                      <WarningsChip
+                        size={ButtonSize.Small}
+                        count={warningAnchorCount}
+                        onClick={() => setWarningsModalOpen(true)}
+                      />
+                    )}
+                </>
+              )}
             />
           )}
         </AnnotatorProvider>

@@ -32,6 +32,7 @@ import {
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
+  VIEWPORT_START_BUFFER_ROWS,
   LIGHT_MENU_COLORS,
   MenuColors,
 } from "./constants";
@@ -1052,10 +1053,13 @@ export class Annotator {
       this.scrollExtentLineCount()
     );
 
-    this.scroller?.setRunnerSize((this.viewport.noLines / this.scrollExtentLineCount()) * 100);
+    // The track spans startBuffer rows above line 0 too, so the runner's
+    // share of it is measured against the full buffered extent.
+    const scrollTrackLines = this.scrollExtentLineCount() + this.viewport.startBuffer;
+    this.scroller?.setRunnerSize((this.viewport.noLines / scrollTrackLines) * 100);
 
     this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / this.scrollExtentLineCount()) * 100)
+      Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100)
     );
 
     if (this.settingsOverlay.isOpen) {
@@ -2390,10 +2394,16 @@ export class Annotator {
     this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
-      const scrollableLines = Math.max(0, this.scrollExtentLineCount() - viewportLines);
+      // The track's top (percentage 0) is -startBuffer, not line 0, so both the
+      // distance it spans and the line it resolves to are offset by startBuffer.
+      const scrollableLines = Math.max(
+        0,
+        this.scrollExtentLineCount() + this.viewport.startBuffer - viewportLines
+      );
       const scrollablePx = scrollableLines * this.lineHeight;
       const targetPx = (percentage / 100) * scrollablePx;
-      const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
+      const targetLineFrac =
+        (scrollablePx > 0 ? targetPx / this.lineHeight : 0) - this.viewport.startBuffer;
 
       this.viewport.setScrollPosition(
         targetLineFrac,
@@ -2403,9 +2413,10 @@ export class Annotator {
       );
       this.draw();
     });
-    this.scroller?.setRunnerSize((this.viewport.noLines / this.scrollExtentLineCount()) * 100);
+    const scrollTrackLines = this.scrollExtentLineCount() + this.viewport.startBuffer;
+    this.scroller?.setRunnerSize((this.viewport.noLines / scrollTrackLines) * 100);
 
-    const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
+    const viewportSize = this.viewport.noLines / scrollTrackLines;
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
     scrollerHosts.set(scrollerDiv, this);
   }
@@ -2943,10 +2954,14 @@ export class Annotator {
     this.ctx.restore();
 
     if (this.scroller) {
+      // Shifted into the track's own coordinates, whose zero is -startBuffer
+      // rather than line 0 — the same frame the drag handler resolves a
+      // percentage in, so dragging to a position and reading it back agree.
+      const startBuffer = this.viewport.startBuffer;
       this.scroller.update(
-        this.viewport.lineStart,
-        this.viewport.lineEnd,
-        this.scrollExtentLineCount(),
+        this.viewport.lineStart + startBuffer,
+        this.viewport.lineEnd + startBuffer,
+        this.scrollExtentLineCount() + startBuffer,
         this.viewport.scrollOffsetY,
         this.lineHeight
       );
@@ -3811,8 +3826,30 @@ export class Annotator {
     );
   }
 
-  scrollToLine(absLine: number) {
-    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+  /**
+   * @param lineOffset shifts the target row; negative values leave context above,
+   *   which the start buffer allows even at the very top of the document.
+   */
+  scrollToLine(absLine: number, lineOffset: number = 0) {
+    this.viewport.scrollTo(absLine + lineOffset, this.scrollExtentLineCount());
+    this.draw();
+  }
+
+  /**
+   * Opens or closes headroom above line 1, so a floating bar pinned to the
+   * canvas top can be scrolled clear of it. Only worth having while such a bar
+   * is on screen — otherwise it is blank rows a user can scroll into for no
+   * reason — so closing it also pulls the viewport back down to line 0.
+   */
+  setTopScrollBuffer(rows: number) {
+    if (this.viewport.startBuffer === rows) {
+      return;
+    }
+    this.viewport.startBuffer = rows;
+    if (this.viewport.lineStart < 0 - rows) {
+      this.viewport.lineStart = 0 - rows;
+      this.viewport.scrollOffsetY = 0;
+    }
     this.draw();
   }
 
@@ -3849,9 +3886,12 @@ export class Annotator {
     this.runWarningChecks();
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
-    // doesn't snap the viewport to the top of a line.
+    // doesn't snap the viewport to the top of a line. The lower bound mirrors
+    // Viewport's own -startBuffer clamp, so a position parked in the start
+    // buffer is preserved across a text update the same as any other line.
     const maxLineStart = Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines);
-    const clampedLineStart = Math.max(0, Math.min(positionBeforeChange, maxLineStart));
+    const minLineStart = 0 - this.viewport.startBuffer;
+    const clampedLineStart = Math.max(minLineStart, Math.min(positionBeforeChange, maxLineStart));
     const desiredLineStart = clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
 
     this.viewport.setScrollPosition(
@@ -3991,7 +4031,10 @@ export class Annotator {
       yLine: absEndY,
     };
 
-    this.scrollToLine(this.cursor.selectStart.yLine);
+    // A hit landing on the first visible row would sit behind the bar the
+    // client floats over the canvas top. The headroom that bar is given is the
+    // same distance, so the two agree by construction.
+    this.scrollToLine(this.cursor.selectStart.yLine, -VIEWPORT_START_BUFFER_ROWS);
     this.draw();
 
     // Manually trigger onSelectText callback for search-based selections
