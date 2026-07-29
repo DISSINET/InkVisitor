@@ -460,12 +460,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
       if (
         isLayoutUndersized(
-          [
-            firstPanelExpanded,
-            secondPanelExpanded,
-            thirdPanelExpanded,
-            fourthPanelExpanded,
-          ],
+          [firstPanelExpanded, secondPanelExpanded, thirdPanelExpanded, fourthPanelExpanded],
           layoutWidth,
         )
       ) {
@@ -772,7 +767,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           <MemoizedAnnotatorBox
             height={Math.max(
               0,
-              (getAnnotatorBoxHeight() ?? 0) - BOX_HEADER_HEIGHT - 2 * BOX_CONTENT_BORDER_PX,
+              (getAnnotatorBoxHeight() ?? 0) - BOX_HEADER_HEIGHT - 1.5 * BOX_CONTENT_BORDER_PX,
             )}
             width={thirdPanelWidth - 10}
             onHeaderChange={setAnnotatorHeader}

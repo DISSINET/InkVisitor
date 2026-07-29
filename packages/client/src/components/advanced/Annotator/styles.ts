@@ -43,14 +43,15 @@ export const StyledScrollerViewport = styled.div`
  */
 export const StyledAnnotatorColumn = styled.div`
   position: relative;
-  /* wTextArea reserves this same margin when it sizes the canvas */
-  padding-left: ${ANNOTATOR_LEFT_MARGIN_PX}px;
 `;
 
 /** Inset of the canvases inside their wrapper; the height budget must pay for it. */
 export const CANVAS_WRAPPER_PADDING_PX = 2;
 
-export const StyledCanvasWrapper = styled.div`
+interface StyledCanvasWrapperProps {
+  $noBorderRadius: number;
+}
+export const StyledCanvasWrapper = styled.div<StyledCanvasWrapperProps>`
   position: relative;
   background-color: ${({ theme }) => theme.color.white};
   padding: ${CANVAS_WRAPPER_PADDING_PX}px;

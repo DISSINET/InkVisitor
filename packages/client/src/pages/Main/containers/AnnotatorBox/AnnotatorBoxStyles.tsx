@@ -3,6 +3,9 @@ import { EntityColors } from "types";
 
 /** Everything the annotator box holds: the document line, then the annotator. */
 export const StyledAnnotatorContent = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
 `;
 

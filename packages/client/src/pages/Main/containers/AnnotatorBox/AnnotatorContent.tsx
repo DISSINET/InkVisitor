@@ -223,7 +223,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
         <AnnotatorProvider>
           {selectedDocumentId && selectedDocument && (
             <TextAnnotator
-              width={contentWidth}
+              width={contentWidth - 4}
               hlEntities={hlEntities}
               forwardAnnotator={(newAnnotator) => {
                 setAnnotator(newAnnotator);
