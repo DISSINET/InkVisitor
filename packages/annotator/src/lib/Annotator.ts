@@ -2954,10 +2954,14 @@ export class Annotator {
     this.ctx.restore();
 
     if (this.scroller) {
+      // Shifted into the track's own coordinates, whose zero is -startBuffer
+      // rather than line 0 — the same frame the drag handler resolves a
+      // percentage in, so dragging to a position and reading it back agree.
+      const startBuffer = this.viewport.startBuffer;
       this.scroller.update(
-        this.viewport.lineStart,
-        this.viewport.lineEnd,
-        this.scrollExtentLineCount(),
+        this.viewport.lineStart + startBuffer,
+        this.viewport.lineEnd + startBuffer,
+        this.scrollExtentLineCount() + startBuffer,
         this.viewport.scrollOffsetY,
         this.lineHeight
       );
