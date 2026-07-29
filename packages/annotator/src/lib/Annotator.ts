@@ -33,7 +33,6 @@ import {
   SELECTION_HANDLE_KNOB_RADIUS_PX,
   SEARCH_SCROLL_TOP_CLEARANCE_PX,
   VIEWPORT_END_BUFFER_ROWS,
-  VIEWPORT_START_BUFFER_ROWS,
   LIGHT_MENU_COLORS,
   MenuColors,
 } from "./constants";
@@ -464,7 +463,7 @@ export class Annotator {
 
     const noLinesViewport = this.viewportFullRowCount() + 1;
 
-    this.viewport = new Viewport(0, noLinesViewport, VIEWPORT_START_BUFFER_ROWS);
+    this.viewport = new Viewport(0, noLinesViewport);
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
@@ -3841,6 +3840,24 @@ export class Annotator {
    * lineHeight is in canvas buffer units, so the CSS-pixel clearance is scaled
    * by the same ratio before the two are compared.
    */
+  /**
+   * Opens or closes headroom above line 1, so a floating bar pinned to the
+   * canvas top can be scrolled clear of it. Only worth having while such a bar
+   * is on screen — otherwise it is blank rows a user can scroll into for no
+   * reason — so closing it also pulls the viewport back down to line 0.
+   */
+  setTopScrollBuffer(rows: number) {
+    if (this.viewport.startBuffer === rows) {
+      return;
+    }
+    this.viewport.startBuffer = rows;
+    if (this.viewport.lineStart < 0 - rows) {
+      this.viewport.lineStart = 0 - rows;
+      this.viewport.scrollOffsetY = 0;
+    }
+    this.draw();
+  }
+
   scrollToLineWithTopClearance(absLine: number, clearancePx: number) {
     const clearanceLines = (clearancePx * this.ratio) / this.lineHeight;
     this.viewport.setScrollPosition(

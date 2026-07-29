@@ -56,11 +56,13 @@ export const StyledAnnotatorToolbarCluster = styled.div`
   }
 `;
 
-/** Groups the controls a single host contributes, so gaps read as groups. */
+/**
+ * Keeps a host's controls together in source without introducing a nesting level
+ * that would space them differently: display:contents drops the wrapper from
+ * layout, so every control in the cluster sits on the cluster's one gap.
+ */
 export const StyledAnnotatorToolbarGroup = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[1]};
+  display: contents;
 `;
 
 /** Wraps the save button so its Loader can be absolutely positioned over it. */

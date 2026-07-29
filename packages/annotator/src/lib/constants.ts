@@ -32,6 +32,9 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
  * at the end of the document. Line 1 is the one line a lineStart minimum of 0
  * could never scroll clear of; this headroom lets a floating UI bar pinned to
  * the canvas top be scrolled past it like any other line.
+ *
+ * Applied through Annotator.setTopScrollBuffer only while such a bar is open —
+ * with no bar on screen the rows are empty space with nothing to reveal.
  */
 export const VIEWPORT_START_BUFFER_ROWS = 2;
 

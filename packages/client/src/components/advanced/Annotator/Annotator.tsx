@@ -30,6 +30,7 @@ import {
   MoveAnchorBoundaryResult,
   Occurrence,
   Tag,
+  VIEWPORT_START_BUFFER_ROWS,
   WarningType,
 } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
@@ -1204,6 +1205,14 @@ export const TextAnnotator = ({
   const isMenuReadOnly = !canEditDocument;
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
+
+  // Headroom above line 1 exists so the search bar can be scrolled clear of it;
+  // with the bar closed those rows are blank space with nothing behind them.
+  useEffect(() => {
+    annotator?.setTopScrollBuffer(
+      findPanel === FindPanel.Bar ? VIEWPORT_START_BUFFER_ROWS : 0,
+    );
+  }, [annotator, findPanel]);
 
   const isMenuDisplayed = useMemo<boolean>(
     () =>
