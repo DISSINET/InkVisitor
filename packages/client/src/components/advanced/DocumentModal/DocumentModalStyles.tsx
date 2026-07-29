@@ -28,7 +28,7 @@ export const StyledExportDocumentClassLabel = styled.div<StyledExportDocumentCla
 export const StyledExportDocumentClassReference = styled.div`
   display: inline-flex;
   text-align: center;
-  wrap: nowrap;
+  white-space: nowrap;
   gap: ${({ theme }) => theme.space[1]};
   overflow: hidden;
   text-overflow: ellipsis;
@@ -37,7 +37,7 @@ export const StyledExportDocumentClassReference = styled.div`
 export const StyledExportDocumentContainerTH = styled.div`
   display: inline-flex;
   align-items: center;
-  text-wrap: nowrap;
+  white-space: nowrap;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 
@@ -63,7 +63,6 @@ export const StyledExportDocumentButton = styled.div`
 
 export const StyledExportStatsSection = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: 1rem;
   font-style: italic;
 `;
 

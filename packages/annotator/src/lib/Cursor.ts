@@ -616,14 +616,22 @@ export default class Cursor
   /**
    * Reset the cursor properties - removes highlighting / cursor pointer
    */
+  /**
+   * selectStart/selectEnd are derived from anchor/head, and anything that
+   * re-derives them (a resize, a re-wrap) reinstates whatever the offsets still
+   * say — so collapsing the offsets is what actually clears a selection.
+   */
   reset() {
+    this.anchor = this.head;
     this.selectStart = undefined;
     this.selectEnd = undefined;
     this.xLine = -1;
     this.yLine = -1;
   }
 
+  /** Drops the selection but leaves the caret where it is. */
   resetHighlight() {
+    this.anchor = this.head;
     this.selectStart = undefined;
     this.selectEnd = undefined;
   }
