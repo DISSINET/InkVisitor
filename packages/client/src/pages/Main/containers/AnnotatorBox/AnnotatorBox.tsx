@@ -340,6 +340,12 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
     canEditDocument,
   ]);
 
+  // The header outlives this component otherwise: the Box it fills belongs to
+  // MainPage, so an unmount here would leave it describing a resource nothing
+  // has loaded. Kept apart from the effect above so a data change re-reports
+  // rather than clearing and re-setting.
+  useEffect(() => () => onHeaderChange(null), []);
+
   return (
     <StatementListTextAnnotator
       contentHeight={height}
