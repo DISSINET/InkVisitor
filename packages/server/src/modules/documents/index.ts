@@ -29,6 +29,7 @@ import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
 import { contentFingerprint } from "@inkvisitor/shared/utils/content-fingerprint";
+import * as documentPresence from "@service/documentPresence";
 
 /**
  * Whether the user may edit/delete/export the given document. Owner/Admin
@@ -447,6 +448,16 @@ export default Router()
           auditData,
           auditType
         );
+        const author = request.getUserOrFail();
+        const originSocketId = request.headers?.["x-inkvisitor-socket-id"];
+        documentPresence.emitDocumentChanged({
+          documentId,
+          userId: author.id,
+          userName: author.name,
+          eventType: auditType,
+          originSocketId:
+            typeof originSocketId === "string" ? originSocketId : undefined,
+        });
         return {
           result: true,
         };

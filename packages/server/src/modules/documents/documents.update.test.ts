@@ -13,6 +13,8 @@ import { successfulGenericResponse } from "@modules/common.test";
 import Document from "@models/document/document";
 import { pool } from "@middlewares/db";
 import { contentFingerprint } from "@inkvisitor/shared/utils/content-fingerprint";
+import * as documentPresence from "@service/documentPresence";
+import { EventType } from "@inkvisitor/shared/types/stats";
 
 describe("modules/documents UPDATE", function () {
   let authAgent: Awaited<ReturnType<typeof getAuthenticatedAgent>>;
@@ -132,6 +134,64 @@ describe("modules/documents UPDATE", function () {
 
       const stored = await Document.getDocumentById(db.connection, document.id);
       expect(stored?.content).toEqual("unchecked content");
+    });
+  });
+
+  describe("change broadcast", () => {
+    const db = new Db();
+
+    beforeAll(async () => {
+      await db.initDb();
+    });
+
+    afterAll(async () => {
+      await clean(db);
+      jest.restoreAllMocks();
+    });
+
+    it("announces an anchor addition as ANCHOR_ADD, excluding the origin socket", async () => {
+      const emitSpy = jest
+        .spyOn(documentPresence, "emitDocumentChanged")
+        .mockImplementation(() => undefined);
+
+      const document = new Document({ content: "plain text here", title: "bcast-anchor" });
+      await document.save(db.connection);
+
+      await authAgent
+        .put(`${apiPath}/documents/${document.id}`)
+        .set("x-inkvisitor-socket-id", "socket-abc")
+        .send({ content: "plain <T1>text</T1> here" })
+        .expect(successfulGenericResponse);
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentId: document.id,
+          eventType: EventType.ANCHOR_ADD,
+          originSocketId: "socket-abc",
+        })
+      );
+    });
+
+    it("announces a plain text change as TEXT_EDIT", async () => {
+      const emitSpy = jest
+        .spyOn(documentPresence, "emitDocumentChanged")
+        .mockImplementation(() => undefined);
+
+      const document = new Document({ content: "plain text here", title: "bcast-text" });
+      await document.save(db.connection);
+
+      await authAgent
+        .put(`${apiPath}/documents/${document.id}`)
+        .send({ content: "plain text here, extended" })
+        .expect(successfulGenericResponse);
+
+      expect(emitSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentId: document.id,
+          eventType: EventType.TEXT_EDIT,
+          originSocketId: undefined,
+        })
+      );
     });
   });
 });
