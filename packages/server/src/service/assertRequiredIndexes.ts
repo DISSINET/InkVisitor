@@ -28,6 +28,11 @@ const REQUIRED: RequiredIndex[] = [
   })),
   {
     table: "entities",
+    index: DbEnums.Indexes.EntityReferences,
+    usedBy: "Entity.findUsedInReferences (entity-detail reference backlinks)",
+  },
+  {
+    table: "entities",
     index: DbEnums.Indexes.StatementTerritory,
     usedBy: "Statement.findStatementsInTerritory (territory statements list)",
   },

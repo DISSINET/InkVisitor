@@ -70,6 +70,7 @@ import {
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
+import { EntityDetailReferencesTable } from "./EntityDetailUsedInTable/EntityDetailReferencesTable/EntityDetailReferencesTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
@@ -1006,6 +1007,36 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         perPage={10}
                       />
                     )}
+
+                    {/* usedIn references - only an R can be a reference resource */}
+                    {!entity.isTemplate &&
+                      entity.class === EntityEnums.Class.Resource && (
+                        <EntityDetailReferencesTable
+                          title={{
+                            singular: "Reference",
+                            plural: "References",
+                          }}
+                          entities={entity.entities}
+                          useCases={entity.usedInReferences}
+                          key="Reference"
+                          perPage={10}
+                        />
+                      )}
+
+                    {/* usedIn reference parts - only a V can be a reference value */}
+                    {!entity.isTemplate &&
+                      entity.class === EntityEnums.Class.Value && (
+                        <EntityDetailReferencesTable
+                          title={{
+                            singular: "Reference part",
+                            plural: "Reference parts",
+                          }}
+                          entities={entity.entities}
+                          useCases={entity.usedInReferenceParts}
+                          key="ReferencePart"
+                          perPage={10}
+                        />
+                      )}
 
                     {!entity.isTemplate && (
                       <EntityDetailUsedInDocumentsTable

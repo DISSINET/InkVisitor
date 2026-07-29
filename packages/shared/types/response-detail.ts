@@ -22,6 +22,9 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[]; // statement.data.actants[].identifications + from usedInStatements field if actant.entityId = detailId
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
+  usedInReferences: IResponseUsedInReference[]; // all entities, where the detail id is the reference resource - only R entities can sit there
+  usedInReferenceParts: IResponseUsedInReference[]; // all entities, where the detail id is the reference value - only V entities can sit there
+
   usedAsTemplate?: string[];
 
   relations: Relation.IUsedRelations;
@@ -64,6 +67,15 @@ export interface IResponseUsedInMetaProp {
   typeId: string;
   valueId: string;
   originId: string; // what entity is the detail id used for
+}
+
+// one entry per reference row of the origin entity that names the detail id,
+// on either side - the same row shows up in usedInReferences and in
+// usedInReferenceParts when resource and value are the same entity
+export interface IResponseUsedInReference {
+  originId: string; // entity carrying the reference row
+  resourceId: string; // reference.resource
+  valueId: string; // reference.value
 }
 
 export interface IResponseUsedInStatementIdentification {
