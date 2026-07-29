@@ -66,3 +66,18 @@ export const StyledExportStatsSection = styled.div`
   padding: 1rem;
   font-style: italic;
 `;
+
+/**
+ * The annotator's slot in the document modal. Fills the modal body so its
+ * measured width is the space the canvas actually has, rather than the modal
+ * width minus a hand-tuned allowance for the body's own chrome.
+ */
+export const StyledDocumentModalAnnotator = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+`;
