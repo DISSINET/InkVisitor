@@ -207,9 +207,17 @@ class Api {
     };
   }
 
-  /** Fires an event. Silently dropped while the socket is down. */
-  wsEmit(event: string, payload: unknown): void {
-    this.ws?.emit(event, payload);
+  /**
+   * Fires an event. Silently dropped while the socket is down.
+   * @param ack Socket.IO acknowledgement; it must be the last argument on the
+   * wire, so it is only appended when the caller wants a reply.
+   */
+  wsEmit(event: string, payload: unknown, ack?: (response: any) => void): void {
+    if (ack) {
+      this.ws?.emit(event, payload, ack);
+    } else {
+      this.ws?.emit(event, payload);
+    }
   }
 
   /**
