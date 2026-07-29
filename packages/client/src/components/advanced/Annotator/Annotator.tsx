@@ -1697,7 +1697,12 @@ export const TextAnnotator = ({
         </StyledCanvasWrapper>
 
         <StyledAnnotatorButtons>
-          <SwitchGroup $bgColor={theme.color.invertedBg.success} style={{ marginTop: "0.25rem" }}>
+          <SwitchGroup
+            $bgColor={theme.color.invertedBg.success}
+            style={{ marginTop: "0.25rem" }}
+            pillColor="success"
+            activeIndex={[EditMode.HIGHLIGHT, EditMode.SEMI, EditMode.RAW].indexOf(annotatorMode)}
+          >
             <Button
               size={ButtonSize.Medium}
               key={EditMode.HIGHLIGHT}
@@ -1712,8 +1717,10 @@ export const TextAnnotator = ({
               color="success"
               shape="rounded-sm"
               noBorder
-              inverted={annotatorMode !== EditMode.HIGHLIGHT}
-              noBackground={annotatorMode !== EditMode.HIGHLIGHT}
+              inverted
+              noBackground
+              textColor={annotatorMode === EditMode.HIGHLIGHT ? "white" : undefined}
+              noHoverBackground={annotatorMode === EditMode.HIGHLIGHT}
               bold={annotatorMode === EditMode.HIGHLIGHT}
               onClick={() => handleAnnotatorModeClick(EditMode.HIGHLIGHT)}
               tooltipLabel="anchor entities"
@@ -1732,8 +1739,10 @@ export const TextAnnotator = ({
               color="success"
               shape="rounded-sm"
               noBorder
-              inverted={annotatorMode !== EditMode.SEMI}
-              noBackground={annotatorMode !== EditMode.SEMI}
+              inverted
+              noBackground
+              textColor={annotatorMode === EditMode.SEMI ? "white" : undefined}
+              noHoverBackground={annotatorMode === EditMode.SEMI}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.SEMI] : ""}
               bold={annotatorMode === EditMode.SEMI}
               onClick={() => handleAnnotatorModeClick(EditMode.SEMI)}
@@ -1753,8 +1762,10 @@ export const TextAnnotator = ({
               color="success"
               shape="rounded-sm"
               noBorder
-              inverted={annotatorMode !== EditMode.RAW}
-              noBackground={annotatorMode !== EditMode.RAW}
+              inverted
+              noBackground
+              textColor={annotatorMode === EditMode.RAW ? "white" : undefined}
+              noHoverBackground={annotatorMode === EditMode.RAW}
               label={!annotatorWidthTooNarrow ? editModeDisplayLabel[EditMode.RAW] : ""}
               bold={annotatorMode === EditMode.RAW}
               onClick={() => handleAnnotatorModeClick(EditMode.RAW)}

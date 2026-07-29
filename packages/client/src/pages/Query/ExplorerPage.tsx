@@ -762,15 +762,17 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               disableHeaderClick
               onHeaderClick={handleMaximizeExplorerBox}
               headerComponent={
-                <SwitchGroup key="explorer-view-mode">
+                <SwitchGroup key="explorer-view-mode" activeIndex={isStatsView ? 1 : 0}>
                   <Button
                     size={ButtonSize.Medium}
                     tooltipLabel="table view"
                     label="table"
                     shape="rounded-sm"
                     noBorder
-                    inverted={isStatsView}
-                    noBackground={isStatsView}
+                    inverted
+                    noBackground
+                    textColor={isStatsView ? undefined : "white"}
+                    noHoverBackground={!isStatsView}
                     color={isStatsView ? "greyer" : "primary"}
                     icon={<BiTable />}
                     onClick={() => {
@@ -785,8 +787,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     label="stats"
                     shape="rounded-sm"
                     noBorder
-                    inverted={!isStatsView}
-                    noBackground={!isStatsView}
+                    inverted
+                    noBackground
+                    textColor={isStatsView ? "white" : undefined}
+                    noHoverBackground={isStatsView}
                     color={!isStatsView ? "greyer" : "primary"}
                     icon={<BiBarChartAlt2 />}
                     onClick={() => {

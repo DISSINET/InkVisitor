@@ -174,23 +174,30 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
           <StyledField>
             <StyledFieldLabel>Period</StyledFieldLabel>
             <StyledFieldInput>
-              <SwitchGroup>
-                {STATS_PERIODS.map(({ value, label }) => (
-                  <Button
-                    key={value}
-                    label={label}
-                    shape="rounded-sm"
-                    size={ButtonSize.Medium}
-                    noBorder
-                    onClick={() => {
-                      dispatch({ type: "periodUpdate", payload: value });
-                    }}
-                    color={state.period === value ? "primary" : "greyer"}
-                    inverted={state.period !== value}
-                    noBackground={state.period !== value}
-                    bold={state.period === value}
-                  />
-                ))}
+              <SwitchGroup
+                activeIndex={STATS_PERIODS.findIndex(({ value }) => value === state.period)}
+              >
+                {STATS_PERIODS.map(({ value, label }) => {
+                  const active = state.period === value;
+                  return (
+                    <Button
+                      key={value}
+                      label={label}
+                      shape="rounded-sm"
+                      size={ButtonSize.Medium}
+                      noBorder
+                      onClick={() => {
+                        dispatch({ type: "periodUpdate", payload: value });
+                      }}
+                      color={active ? "primary" : "greyer"}
+                      inverted
+                      noBackground
+                      textColor={active ? "white" : undefined}
+                      noHoverBackground={active}
+                      bold={active}
+                    />
+                  );
+                })}
               </SwitchGroup>
               <Button
                 icon={<IcoRefresh size={18} />}
@@ -250,26 +257,31 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
         <StyledFieldGroup>
           <StyledField>
             <StyledFieldLabel>Time Unit</StyledFieldLabel>
-            <SwitchGroup>
-              {Object.values(TimeUnit).map((unit) => (
-                <Button
-                  key={unit}
-                  label={String(unit)}
-                  shape="rounded-sm"
-                  size={ButtonSize.Medium}
-                  noBorder
-                  onClick={() => {
-                    dispatch({
-                      type: "timeUnitUpdate",
-                      payload: unit as TimeUnit,
-                    });
-                  }}
-                  color={state.timeUnit === unit ? "primary" : "greyer"}
-                  inverted={state.timeUnit !== unit}
-                  noBackground={state.timeUnit !== unit}
-                  bold={state.timeUnit === unit}
-                />
-              ))}
+            <SwitchGroup activeIndex={Object.values(TimeUnit).indexOf(state.timeUnit)}>
+              {Object.values(TimeUnit).map((unit) => {
+                const active = state.timeUnit === unit;
+                return (
+                  <Button
+                    key={unit}
+                    label={String(unit)}
+                    shape="rounded-sm"
+                    size={ButtonSize.Medium}
+                    noBorder
+                    onClick={() => {
+                      dispatch({
+                        type: "timeUnitUpdate",
+                        payload: unit as TimeUnit,
+                      });
+                    }}
+                    color={active ? "primary" : "greyer"}
+                    inverted
+                    noBackground
+                    textColor={active ? "white" : undefined}
+                    noHoverBackground={active}
+                    bold={active}
+                  />
+                );
+              })}
             </SwitchGroup>
           </StyledField>
 
@@ -364,23 +376,28 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
 
           <StyledField>
             <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-            <SwitchGroup>
-              {Object.values(Aggregation).map((agg) => (
-                <Button
-                  key={agg}
-                  label={AGGREGATION_LABELS[agg]}
-                  shape="rounded-sm"
-                  size={ButtonSize.Medium}
-                  noBorder
-                  onClick={() => {
-                    dispatch({ type: "aggregateUpdate", payload: agg });
-                  }}
-                  color={state.aggregate === agg ? "primary" : "greyer"}
-                  inverted={state.aggregate !== agg}
-                  noBackground={state.aggregate !== agg}
-                  bold={state.aggregate === agg}
-                />
-              ))}
+            <SwitchGroup activeIndex={Object.values(Aggregation).indexOf(state.aggregate)}>
+              {Object.values(Aggregation).map((agg) => {
+                const active = state.aggregate === agg;
+                return (
+                  <Button
+                    key={agg}
+                    label={AGGREGATION_LABELS[agg]}
+                    shape="rounded-sm"
+                    size={ButtonSize.Medium}
+                    noBorder
+                    onClick={() => {
+                      dispatch({ type: "aggregateUpdate", payload: agg });
+                    }}
+                    color={active ? "primary" : "greyer"}
+                    inverted
+                    noBackground
+                    textColor={active ? "white" : undefined}
+                    noHoverBackground={active}
+                    bold={active}
+                  />
+                );
+              })}
             </SwitchGroup>
           </StyledField>
           {state.aggregate === Aggregation.USER && (
