@@ -381,7 +381,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
           </StyledField>
           {state.aggregate === Aggregation.USER && (
             <StyledField>
-              <StyledFieldLabel title="Hide users whose share of the total activity is below this percentage">
+              <StyledFieldLabel title="Hide users whose share of the total activity is below this percentage - their audits are left out of the totals as well">
                 {`Hide users < %`}
               </StyledFieldLabel>
               <Input
