@@ -8,7 +8,7 @@ import {
   useFloating,
 } from "@floating-ui/react";
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
-import api from "api";
+import api, { isDocumentChangedConcurrently } from "api";
 import React, {
   ReactNode,
   useCallback,
@@ -84,6 +84,8 @@ import {
   StyledAnnotatorMenu,
   StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
+  StyledConflictBanner,
+  StyledConflictBannerText,
   StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -302,8 +304,11 @@ export const TextAnnotator = ({
   );
 
   const updateDocumentMutation = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
-      api.documentUpdate(data.id, data.doc),
+    mutationFn: async (data: {
+      id: string;
+      doc: Partial<IDocument>;
+      baseContent?: string;
+    }) => api.documentUpdate(data.id, data.doc, undefined, data.baseContent),
     onSuccess: (_data, variables) => {
       mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
@@ -311,6 +316,15 @@ export const TextAnnotator = ({
       toast.info("Document content saved");
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      setSaveRejected(false);
+    },
+    onError: (error) => {
+      if (isDocumentChangedConcurrently(error)) {
+        setSaveRejected(true);
+        toast.error("Document changed on the server - your edits were not saved");
+        return;
+      }
+      toast.error("Failed to save document changes");
     },
     onSettled: () => {
       setIsSaving(false);
@@ -319,8 +333,11 @@ export const TextAnnotator = ({
   });
 
   const updateDocumentMutationQuiet = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
-      api.documentUpdate(data.id, data.doc),
+    mutationFn: async (data: {
+      id: string;
+      doc: Partial<IDocument>;
+      baseContent?: string;
+    }) => api.documentUpdate(data.id, data.doc, undefined, data.baseContent),
     onSuccess: (_data, variables) => {
       mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
@@ -328,11 +345,19 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
     },
-    onError: () => {
+    onError: (error) => {
       // The instant anchor save failed, so the cache was never merged and now
       // trails the live canvas. Surface the failure (otherwise silent in quiet
       // mode) and refetch so the canvas reconciles to true server state instead
       // of a later dep change clobbering it with stale content.
+      if (isDocumentChangedConcurrently(error)) {
+        // The anchor's offsets were computed against content the server no
+        // longer holds, so replaying it could land the anchor on a different
+        // span. The refetched text goes back to the user to re-select.
+        toast.error("Anchor not saved - the document had changed. Try again.");
+        queryClient.invalidateQueries({ queryKey: ["document"] });
+        return;
+      }
       toast.error("Failed to save document changes");
       queryClient.invalidateQueries({ queryKey: ["document"] });
     },
@@ -626,6 +651,11 @@ export const TextAnnotator = ({
   // e.g. when updating an anchor elvl
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] = useState<boolean>(false);
 
+  // Set when the server refused a save because the stored content had moved.
+  const [saveRejected, setSaveRejected] = useState<boolean>(false);
+  // Open while the user confirms a save that will overwrite somebody's changes.
+  const [pendingOverwriteSave, setPendingOverwriteSave] = useState<boolean>(false);
+
   // implementation of draggable menu
   const {
     dragHandleProps: menuDragHandleProps,
@@ -656,6 +686,7 @@ export const TextAnnotator = ({
   const handleSaveNewContent = async (
     quiet: boolean,
     skipRefresh: boolean = false,
+    force: boolean = false,
   ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
@@ -672,7 +703,23 @@ export const TextAnnotator = ({
           ...dataDocument,
           content: annotator.text.value,
         },
+        // A forced save is one the user confirmed after being shown what it
+        // overwrites, so the server's staleness check must not veto it.
+        baseContent: force ? undefined : dataDocument?.content,
       });
+    }
+  };
+
+  /**
+   * Entry point for every user-initiated (non-quiet) save. A pending conflict
+   * routes through a confirm first, so the toolbar button and Ctrl+S cannot
+   * diverge on whether an overwrite was acknowledged.
+   */
+  const requestSave = () => {
+    if (remoteChange || saveRejected) {
+      setPendingOverwriteSave(true);
+    } else {
+      handleSaveNewContent(false);
     }
   };
 
@@ -1597,7 +1644,7 @@ export const TextAnnotator = ({
               !isSavingWithoutRefresh &&
               !dataDocumentIsFetching
             ) {
-              handleSaveNewContent(false);
+              requestSave();
             }
             return;
           }
@@ -1625,6 +1672,29 @@ export const TextAnnotator = ({
           }
         }}
       >
+        {(remoteChange || saveRejected) && isChangeMade && (
+          <StyledConflictBanner>
+            <StyledConflictBannerText>
+              {remoteChange
+                ? `${remoteChange.userName} changed this document. Your save will overwrite their changes.`
+                : "This document changed on the server. Your save will overwrite those changes."}
+            </StyledConflictBannerText>
+            <Button
+              label="Reload & lose my edits"
+              color="danger"
+              onClick={() => {
+                reloadRemote();
+                setSaveRejected(false);
+              }}
+            />
+            <Button
+              label="Keep editing"
+              color="greyer"
+              onClick={() => dismissRemoteChange()}
+            />
+          </StyledConflictBanner>
+        )}
+
         <StyledCanvasWrapper $noBorderRadius={noBorderRadius}>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
@@ -1802,7 +1872,7 @@ export const TextAnnotator = ({
                 setLocalTextContent(dataDocument.content);
               }
             }}
-            onSave={() => handleSaveNewContent(false)}
+            onSave={requestSave}
             isSavePending={isSaving || isSavingWithoutRefresh}
             isSearchAllowed={isSearchAllowed}
             onFindClick={() => setIsFindOpen(true)}
@@ -1839,6 +1909,39 @@ export const TextAnnotator = ({
               <CancelButton onClick={() => setPendingModeSwitch(null)} />
               <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
               <Button label="Save" color="info" onClick={confirmSaveAndSwitch} />
+            </ButtonGroup>
+          </ModalFooter>
+        </Modal>
+      )}
+
+      {pendingOverwriteSave && (
+        <Modal
+          showModal={pendingOverwriteSave}
+          onClose={() => setPendingOverwriteSave(false)}
+          disableBgClick
+          isLoading={isSaving}
+          width="auto"
+        >
+          <ModalHeader title="Overwrite the other changes?" />
+          <ModalContent>
+            <div>
+              Somebody else changed this document while you were editing. Saving keeps your
+              version and discards theirs.
+            </div>
+          </ModalContent>
+          <ModalFooter>
+            <ButtonGroup>
+              <CancelButton onClick={() => setPendingOverwriteSave(false)} />
+              <Button
+                label="Overwrite"
+                color="danger"
+                onClick={() => {
+                  setPendingOverwriteSave(false);
+                  setSaveRejected(false);
+                  dismissRemoteChange();
+                  handleSaveNewContent(false, false, true);
+                }}
+              />
             </ButtonGroup>
           </ModalFooter>
         </Modal>
