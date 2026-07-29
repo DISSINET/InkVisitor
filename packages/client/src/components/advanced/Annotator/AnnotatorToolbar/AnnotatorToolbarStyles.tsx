@@ -45,7 +45,9 @@ export const StyledAnnotatorToolbarCluster = styled.div`
   padding: ${({ theme }) => theme.space[1]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   background-color: ${({ theme }) => theme.color.blue[100]};
-  box-shadow: ${({ theme }) => theme.boxShadow.high};
+  box-shadow:
+    2px 5px 10px hsla(0, 0%, 0%, 0.15),
+    2px 5px 10px hsla(0, 0%, 0%, 0.05);
   pointer-events: auto;
   opacity: 0.8;
   transition: opacity 0.3s;

@@ -49,7 +49,7 @@ export const StyledAnnotatorColumn = styled.div`
 export const CANVAS_WRAPPER_PADDING_PX = 2;
 
 interface StyledCanvasWrapperProps {
-  $noBorderRadius: number;
+  $noBorderRadius?: number;
 }
 export const StyledCanvasWrapper = styled.div<StyledCanvasWrapperProps>`
   position: relative;
