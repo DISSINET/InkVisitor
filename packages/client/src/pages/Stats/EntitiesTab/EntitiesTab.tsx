@@ -188,6 +188,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     color={state.period === value ? "primary" : "greyer"}
                     inverted={state.period !== value}
                     noBackground={state.period !== value}
+                    bold={state.period === value}
                   />
                 ))}
               </SwitchGroup>
@@ -266,6 +267,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                   color={state.timeUnit === unit ? "primary" : "greyer"}
                   inverted={state.timeUnit !== unit}
                   noBackground={state.timeUnit !== unit}
+                  bold={state.timeUnit === unit}
                 />
               ))}
             </SwitchGroup>
@@ -348,6 +350,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                               color={state.eventType.includes(type) ? "primary" : "greyer"}
                               inverted={!state.eventType.includes(type)}
                               noBackground={!state.eventType.includes(type)}
+                              bold={state.eventType.includes(type)}
                             />
                           ))}
                         </React.Fragment>
@@ -375,6 +378,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                   color={state.aggregate === agg ? "primary" : "greyer"}
                   inverted={state.aggregate !== agg}
                   noBackground={state.aggregate !== agg}
+                  bold={state.aggregate === agg}
                 />
               ))}
             </SwitchGroup>
