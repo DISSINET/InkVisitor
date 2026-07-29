@@ -58,8 +58,6 @@ interface Input {
   required?: boolean;
   minWidth?: number;
   fullHeight?: boolean;
-  /** Shorter field for dense chrome, e.g. a bar floating over content. */
-  compact?: boolean;
   clearable?: boolean;
   showSaveExitIcons?: boolean;
 
@@ -108,7 +106,6 @@ export const Input: React.FC<Input> = ({
   required = false,
   minWidth,
   fullHeight = false,
-  compact = false,
   clearable = false,
   showSaveExitIcons = false,
   min,
@@ -189,7 +186,6 @@ export const Input: React.FC<Input> = ({
             type={type}
             width={width}
             $fullHeight={fullHeight}
-            $compact={compact}
             autoFocus={autoFocus}
             className="value"
             placeholder={placeholder}

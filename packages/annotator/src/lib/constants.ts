@@ -36,12 +36,13 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
 export const VIEWPORT_START_BUFFER_ROWS = 2;
 
 /**
- * Rows of context kept above a search hit when scrolling to it. The client
- * floats a search bar over the top of the canvas, so a hit landing on the first
- * visible row would sit behind it. Two rows because the bar stands ~34px tall
- * against a LINE_HEIGHT of 23 — one row does not clear it.
+ * Space kept above a search hit when scrolling to it, in CSS pixels. The client
+ * floats a search bar over the top of the canvas; a hit landing on the first
+ * visible row would sit behind it. Expressed in pixels rather than rows because
+ * the bar's height is not a whole number of rows — the viewport's sub-line
+ * offset covers the remainder.
  */
-export const SEARCH_SCROLL_CONTEXT_ROWS = 2;
+export const SEARCH_SCROLL_TOP_CLEARANCE_PX = 38;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**

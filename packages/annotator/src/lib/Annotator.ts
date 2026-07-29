@@ -31,7 +31,7 @@ import {
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
-  SEARCH_SCROLL_CONTEXT_ROWS,
+  SEARCH_SCROLL_TOP_CLEARANCE_PX,
   VIEWPORT_END_BUFFER_ROWS,
   VIEWPORT_START_BUFFER_ROWS,
   LIGHT_MENU_COLORS,
@@ -3833,6 +3833,26 @@ export class Annotator {
   }
 
   /**
+   * Scrolls so the given line is drawn `clearancePx` below the top of the canvas.
+   * setScrollPosition takes a fractional line and derives the sub-line pixel
+   * offset from it, so a clearance that is not a whole number of rows lands
+   * exactly rather than being rounded up to the next one.
+   *
+   * lineHeight is in canvas buffer units, so the CSS-pixel clearance is scaled
+   * by the same ratio before the two are compared.
+   */
+  scrollToLineWithTopClearance(absLine: number, clearancePx: number) {
+    const clearanceLines = (clearancePx * this.ratio) / this.lineHeight;
+    this.viewport.setScrollPosition(
+      absLine - clearanceLines,
+      0,
+      this.lineHeight,
+      this.scrollExtentLineCount()
+    );
+    this.draw();
+  }
+
+  /**
    * Returns the absolute character index in raw text that corresponds to the start of the viewport (first visible character at the top of the canvas).
    */
   getViewportStartInRawText(): number {
@@ -4010,7 +4030,10 @@ export class Annotator {
       yLine: absEndY,
     };
 
-    this.scrollToLine(this.cursor.selectStart.yLine, -SEARCH_SCROLL_CONTEXT_ROWS);
+    this.scrollToLineWithTopClearance(
+      this.cursor.selectStart.yLine,
+      SEARCH_SCROLL_TOP_CLEARANCE_PX
+    );
     this.draw();
 
     // Manually trigger onSelectText callback for search-based selections

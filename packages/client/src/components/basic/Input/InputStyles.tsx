@@ -16,7 +16,6 @@ interface IValueStyle {
   $roundCorners?: boolean;
   $icon?: React.ReactNode;
   $rightPadding?: number;
-  $compact?: boolean;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {
@@ -50,8 +49,7 @@ export const Label = styled.span<{ $labelSpaceNoWrap: boolean }>`
   white-space: ${({ $labelSpaceNoWrap }) => ($labelSpaceNoWrap ? "nowrap" : "normal")};
 `;
 export const StyledInput = styled.input<IValueStyle>`
-  height: ${({ $fullHeight, $compact, theme }) =>
-    $fullHeight ? "100%" : $compact ? theme.space[8] : theme.space[10]};
+  height: ${({ $fullHeight, theme }) => ($fullHeight ? "100%" : theme.space[10])};
   text-align: left;
   border-style: solid;
   border-radius: ${({ $roundCorners, theme }) => ($roundCorners ? theme.borderRadius.input : "0")};

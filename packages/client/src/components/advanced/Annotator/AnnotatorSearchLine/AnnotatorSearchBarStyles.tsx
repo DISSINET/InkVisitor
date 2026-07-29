@@ -35,7 +35,7 @@ export const StyledAnnotatorSearchBar = styled.div`
   min-width: 0;
   max-width: 100%;
   gap: ${({ theme }) => theme.space[1]};
-  padding: 0 ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[1]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};

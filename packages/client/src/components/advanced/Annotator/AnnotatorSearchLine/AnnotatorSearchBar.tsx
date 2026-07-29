@@ -104,7 +104,6 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
             onEscapePressFn={onClose}
             changeOnType
             autoFocus
-            compact
             width="full"
             minWidth={110}
             inputRef={findInputRef}
