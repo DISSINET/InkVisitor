@@ -4,10 +4,12 @@ import { useMemo } from "react";
 import { Column, useTable } from "react-table";
 import {
   TABLE_PADDING,
+  TOTAL_KEY,
   getDataCategories,
   transformDataForTable,
 } from "./statsViz.utils";
 import {
+  COLUMN_WIDTH,
   StyledEmptyState,
   StyledTable,
   StyledTableContainer,
@@ -57,6 +59,15 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
         accessor: "timeKey",
         width: 200,
       },
+      {
+        Header: "Total",
+        accessor: TOTAL_KEY,
+        Cell: ({ value }: { value: number | string }) => value,
+        id: TOTAL_KEY,
+        width: 200,
+        minWidth: 200,
+        maxWidth: 200,
+      },
       ...dataCategories.map((category) => ({
         Header: category,
         accessor: category,
@@ -99,7 +110,8 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
                     <StyledTh
                       key={key}
                       {...restHeaderProps}
-                      $isSticky={index === 0}
+                      $isSticky={index <= 1}
+                      $stickyOffset={index * COLUMN_WIDTH}
                     >
                       {column.render("Header")}
                     </StyledTh>
@@ -113,6 +125,8 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
           {rows.map((row) => {
             prepareRow(row);
             const { key, ...restRowProps } = row.getRowProps();
+            // transformDataForTable puts the totals row first
+            const isTotalRow = row.index === 0;
             return (
               <tr key={key} {...restRowProps}>
                 {row.cells.map((cell, index) => {
@@ -121,7 +135,9 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
                     <StyledTd
                       key={key}
                       {...restCellProps}
-                      $isSticky={index === 0}
+                      $isSticky={index <= 1}
+                      $stickyOffset={index * COLUMN_WIDTH}
+                      $isTotalRow={isTotalRow}
                     >
                       {cell.render("Cell")}
                     </StyledTd>

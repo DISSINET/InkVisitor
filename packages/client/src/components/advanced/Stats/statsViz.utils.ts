@@ -4,7 +4,13 @@ import { schemeTableau10 } from "d3";
 import { useTheme } from "styled-components";
 
 export const OTHERS_KEY = "others";
+/** Row key of the column holding the sum over all categories of a time bucket. */
+export const TOTAL_KEY = "__total";
 export const TABLE_PADDING = 30;
+
+/** `12 [3.45%]` - the share is relative to the grand total of the table. */
+export const formatValueWithShare = (value: number, grandTotal: number): string =>
+  `${value} [${grandTotal > 0 ? ((value / grandTotal) * 100).toFixed(2) : "0.00"}%]`;
 
 export const getNonEmptyUsers = (
   userKeyMap: Record<string, string>,
@@ -100,8 +106,11 @@ export const calculateSumsAndPercentages = (
   // Calculate sums
   Object.values(values).forEach((timeValues) => {
     if (aggregateBy === Aggregation.USER) {
-      Object.entries(userKeyMap).forEach(([userId, userName]) => {
-        sums[userName] = (sums[userName] || 0) + (timeValues[userId] || 0);
+      // buckets are keyed by user id, except the "others" bucket, which already
+      // carries its own display key
+      Object.entries(timeValues).forEach(([key, value]) => {
+        const category = userKeyMap[key] ?? key;
+        sums[category] = (sums[category] || 0) + value;
       });
     } else {
       categories.forEach((category) => {
@@ -110,12 +119,16 @@ export const calculateSumsAndPercentages = (
     }
   });
 
-  // Calculate grand total and percentages
-  const grandTotal = Object.values(sums).reduce((acc, val) => acc + val, 0);
+  // Calculate grand total and percentages. Only categories that get a column
+  // count, so the total row, the total column and the grand total add up.
+  const grandTotal = categories.reduce(
+    (acc, category) => acc + (sums[category] || 0),
+    0
+  );
   const sumsWithPercentages = Object.fromEntries(
     Object.entries(sums).map(([key, value]) => [
       key,
-      `${value} [${Math.round((value / grandTotal) * 100)}%]`,
+      formatValueWithShare(value, grandTotal),
     ])
   );
 
@@ -128,7 +141,7 @@ export const transformDataForTable = (
   aggregateBy: Aggregation,
   userKeyMap: Record<string, string>
 ) => {
-  const { sumsWithPercentages } = calculateSumsAndPercentages(
+  const { sumsWithPercentages, grandTotal } = calculateSumsAndPercentages(
     values,
     categories,
     aggregateBy,
@@ -156,6 +169,11 @@ export const transformDataForTable = (
       });
     }
 
+    row[TOTAL_KEY] = formatValueWithShare(
+      categories.reduce((acc, category) => acc + Number(row[category] || 0), 0),
+      grandTotal
+    );
+
     return row;
   });
 
@@ -163,6 +181,7 @@ export const transformDataForTable = (
   rows.unshift({
     timeKey: "Total",
     ...sumsWithPercentages,
+    [TOTAL_KEY]: String(grandTotal),
   });
 
   return rows;

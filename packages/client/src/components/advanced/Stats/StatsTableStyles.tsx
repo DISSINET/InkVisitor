@@ -1,5 +1,9 @@
 import styled from "styled-components";
 
+// `table-layout: fixed` takes the column widths from the header row, so this is
+// also the offset the second sticky column is pinned at
+export const COLUMN_WIDTH = 150;
+
 interface StyledTableContainer {
   $height: number;
   $width: number;
@@ -35,6 +39,7 @@ export const StyledTable = styled.table<StyledTable>`
 
 interface StyledTh {
   $isSticky?: boolean;
+  $stickyOffset?: number;
 }
 export const StyledTh = styled.th<StyledTh>`
   background: ${({ theme }) => theme.color.gray[100]};
@@ -44,32 +49,42 @@ export const StyledTh = styled.th<StyledTh>`
   border-bottom: 2px solid ${({ theme }) => theme.color.gray[200]};
   white-space: nowrap;
   font-size: 14px;
-  width: 150px;
+  width: ${COLUMN_WIDTH}px;
   position: sticky;
   top: 0;
   z-index: 1;
-  ${({ $isSticky }) =>
+  ${({ $isSticky, $stickyOffset = 0 }) =>
     $isSticky &&
     `
-    left: 0;
+    left: ${$stickyOffset}px;
     z-index: 2;
     `}
 `;
 
 interface StyledTd {
   $isSticky?: boolean;
+  $stickyOffset?: number;
+  $isTotalRow?: boolean;
 }
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
   border-bottom: 1px solid ${({ theme }) => theme.color.gray[200]};
-  width: 100px;
+  width: ${COLUMN_WIDTH}px;
   font-size: 13px;
+  white-space: nowrap;
 
-  ${({ $isSticky, theme }) =>
+  ${({ $isTotalRow, theme }) =>
+    $isTotalRow &&
+    `
+    background: ${theme.color.gray[150]};
+    font-weight: ${theme.fontWeight.bold};
+    `}
+
+  ${({ $isSticky, $stickyOffset = 0, theme }) =>
     $isSticky &&
     `
     position: sticky;
-    left: 0;
+    left: ${$stickyOffset}px;
     background: ${theme.color.gray[100]};
     z-index: 1;
     font-weight: ${theme.fontWeight.bold};
