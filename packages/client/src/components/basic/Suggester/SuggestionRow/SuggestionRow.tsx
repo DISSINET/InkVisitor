@@ -59,6 +59,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             inverted
             noBorder
             noBackground
+            noHoverBackground
             color="black"
             key="link entity"
             noIconMargin
@@ -76,6 +77,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             inverted
             noBorder
             noBackground
+            noHoverBackground
             onClick={() => {
               // onPick template inside nonTemplate
               onPick(entity, true);
@@ -90,6 +92,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
             inverted
             noBorder
             noBackground
+            noHoverBackground
             onClick={() => {
               // onPick template entity
               onPick(entity);

@@ -16,6 +16,9 @@ interface ButtonProps {
   iconRight?: React.ReactNode | EntityEnums.Operator;
   noIconMargin?: boolean;
   noBackground?: boolean;
+  /** Drops the noBackground hover tint, for buttons whose container already
+   * reacts to hover on its own. */
+  noHoverBackground?: boolean;
   inverted?: boolean;
   noBorder?: boolean;
   /** Renders the label at bold weight, e.g. to mark the selected option of a group. */
@@ -56,6 +59,7 @@ export const Button: React.FC<ButtonProps> = ({
   inverted = false,
   noBorder = false,
   noBackground = false,
+  noHoverBackground = false,
   bold = false,
   disabled = false,
   noPointer = false,
@@ -104,6 +108,7 @@ export const Button: React.FC<ButtonProps> = ({
         $bold={bold}
         $noBorder={noBorder}
         $noBackground={noBackground}
+        $noHoverBackground={noHoverBackground}
         $fullWidth={fullWidth}
         $fullHeight={fullHeight}
         $disabled={disabled}

@@ -77,6 +77,7 @@ interface IButtonStyle {
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
+  $noHoverBackground?: boolean;
   $bold?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
@@ -188,8 +189,9 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   }
   /* a borderless, background-less button has no shape of its own to react with,
      so hover tints it with its own text color and works on any backdrop */
-  ${({ $noBackground, $disabled }) =>
+  ${({ $noBackground, $noHoverBackground, $disabled }) =>
     $noBackground &&
+    !$noHoverBackground &&
     !$disabled &&
     css`
       &:hover {
