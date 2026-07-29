@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 
+/** Shorter queries match too much of a document to be worth running. */
+export const MIN_SEARCH_TERM_LENGTH = 3;
+
 const UNICODE_WORD_CHAR_CLASS = "[\\p{L}\\p{M}\\p{N}_]";
 const UNICODE_WORD_START_BOUNDARY = `(?<!${UNICODE_WORD_CHAR_CLASS})`;
 const UNICODE_WORD_END_BOUNDARY = `(?!${UNICODE_WORD_CHAR_CLASS})`;
@@ -149,7 +152,7 @@ export const useAnnotatorSearch = ({
       return;
     }
 
-    if (debouncedSearchTerm.length <= 2) {
+    if (debouncedSearchTerm.length < MIN_SEARCH_TERM_LENGTH) {
       const termChanged = searchTermRef.current !== debouncedSearchTerm;
       setSearchOccurences(null);
       setSearchActiveOccurence(0);

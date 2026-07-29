@@ -28,7 +28,7 @@ export const StyledExportDocumentClassLabel = styled.div<StyledExportDocumentCla
 export const StyledExportDocumentClassReference = styled.div`
   display: inline-flex;
   text-align: center;
-  wrap: nowrap;
+  white-space: nowrap;
   gap: ${({ theme }) => theme.space[1]};
   overflow: hidden;
   text-overflow: ellipsis;
@@ -37,7 +37,7 @@ export const StyledExportDocumentClassReference = styled.div`
 export const StyledExportDocumentContainerTH = styled.div`
   display: inline-flex;
   align-items: center;
-  text-wrap: nowrap;
+  white-space: nowrap;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 
@@ -63,6 +63,23 @@ export const StyledExportDocumentButton = styled.div`
 
 export const StyledExportStatsSection = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  padding: 1rem;
   font-style: italic;
+`;
+
+/**
+ * The annotator's slot in the document modal. Fills the modal body so its
+ * measured width is the space the canvas actually has, rather than the modal
+ * width minus a hand-tuned allowance for the body's own chrome.
+ */
+export const StyledDocumentModalAnnotator = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+  overflow: hidden;
 `;
