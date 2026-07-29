@@ -52,6 +52,7 @@ import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
 import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
+import { useDocumentPresence } from "hooks/useDocumentPresence";
 import useKeypress from "hooks/useKeyPress";
 import { useAppSelector } from "redux/hooks";
 import {
@@ -225,6 +226,26 @@ export const TextAnnotator = ({
       return localTextContent !== dataDocument?.content;
     }
   }, [localTextContent, dataDocument?.content, annotatorMode]);
+
+  const {
+    lockedByOther,
+    lockHolderName,
+    remoteChange,
+    reloadRemote,
+    dismissRemoteChange,
+    idlePromptOpen,
+    continueEditing,
+    lockAutoReleased,
+  } = useDocumentPresence({
+    documentId,
+    isChangeMade,
+    localTextContent,
+    canEditDocument,
+  });
+
+  // Another user is mid-edit; their save rewrites the whole content string,
+  // anchors included, so every write from here would be lost.
+  const canEditNow = canEditDocument && !lockedByOther;
 
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);
@@ -1204,7 +1225,7 @@ export const TextAnnotator = ({
   // When the document is read-only (e.g. an Editor viewing an unassigned
   // document) the selection menu still appears, but only as a minimal,
   // view-only variant: clipboard + anchors in selection, no create/edit.
-  const isMenuReadOnly = !canEditDocument;
+  const isMenuReadOnly = !canEditNow;
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
@@ -1475,7 +1496,7 @@ export const TextAnnotator = ({
   );
 
   const editActions = resolveEditActions({
-    canEditDocument,
+    canEditDocument: canEditNow,
     mode: annotatorMode,
     isChangeMade,
     isSaving,
@@ -1570,7 +1591,7 @@ export const TextAnnotator = ({
             e.preventDefault();
             e.stopPropagation();
             if (
-              canEditDocument &&
+              canEditNow &&
               isChangeMade &&
               !isSaving &&
               !isSavingWithoutRefresh &&
@@ -1582,7 +1603,7 @@ export const TextAnnotator = ({
           }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
-          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+          if (!canEditNow && annotatorMode !== EditMode.HIGHLIGHT) {
             const isEditingKey =
               (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
               e.key === "Backspace" ||
@@ -1749,7 +1770,7 @@ export const TextAnnotator = ({
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
               onOpenSecondStep={() => setIsSecondStepOpen(true)}
-              canEdit={canEditDocument}
+              canEdit={canEditNow}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               findInputRef={findInputRef}
@@ -1771,7 +1792,8 @@ export const TextAnnotator = ({
           <AnnotatorToolbar
             annotatorMode={annotatorMode}
             onModeClick={handleAnnotatorModeClick}
-            canEditDocument={canEditDocument}
+            canEditDocument={canEditNow}
+            lockHolderName={lockedByOther ? lockHolderName : null}
             editActionsVisible={editActions.visible}
             editActionsDisabled={editActions.disabled}
             onDiscard={() => {
