@@ -472,7 +472,7 @@ export const StyledConflictBanner = styled.div`
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
   background-color: ${({ theme }) => theme.color["warningMessage"]};
   border-bottom: 1px solid ${({ theme }) => theme.color["warningBorder"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme }) => theme.color["warningMessageText"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 
@@ -488,6 +488,6 @@ export const StyledAnnotatorLockNotice = styled.div`
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
   border-radius: ${({ theme }) => theme.borderRadius.default};
   background-color: ${({ theme }) => theme.color["warningMessage"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme }) => theme.color["warningMessageText"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

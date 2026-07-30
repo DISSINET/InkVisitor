@@ -140,7 +140,7 @@ export const StyledAnnotatorHeaderLock = styled.div`
   padding: ${({ theme }) => `0 ${theme.space[2]}`};
   border-radius: ${({ theme }) => theme.borderRadius.default};
   background-color: ${({ theme }) => theme.color["warningMessage"]};
-  color: ${({ theme }) => theme.color["black"]};
+  color: ${({ theme }) => theme.color["warningMessageText"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   white-space: nowrap;
 `;
