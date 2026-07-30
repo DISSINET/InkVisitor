@@ -276,6 +276,17 @@ export const TextAnnotator = ({
   // anchors included, so every write from here would be lost.
   const canEditNow = canEditDocument && !lockedByOther;
 
+  // A locked-out user cannot save, so their text has nowhere to go once the lock
+  // holder writes: take the holder's version. Clearing the edited flag is what
+  // makes the fetched content win — the refresh effect keeps the local canvas
+  // while it believes the divergence is unsaved typing.
+  useEffect(() => {
+    if (remoteChange && lockedByOther) {
+      setUserEditedText(false);
+      reloadRemote();
+    }
+  }, [remoteChange, lockedByOther, reloadRemote]);
+
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);
   }, [isChangeMade, onUnsavedTextEditsChange]);
@@ -1725,7 +1736,18 @@ export const TextAnnotator = ({
           }
         }}
       >
-        {(remoteChange || saveRejected) && isChangeMade && (
+        {/* Concurrent edits are never merged, so a locked-out user gets a heads-up
+            rather than a choice: their text is replaced the moment the holder
+            saves, and offering Save would overwrite the holder's work. */}
+        {lockedByOther && isChangeMade && (
+          <StyledConflictBanner>
+            <StyledConflictBannerText>
+              {`${lockHolderName ?? "Somebody else"} is editing the text. Your unsaved changes will be replaced by their version when they save.`}
+            </StyledConflictBannerText>
+          </StyledConflictBanner>
+        )}
+
+        {(remoteChange || saveRejected) && isChangeMade && !lockedByOther && (
           <StyledConflictBanner>
             <StyledConflictBannerText>
               {remoteChange
@@ -1736,6 +1758,7 @@ export const TextAnnotator = ({
               label="Reload & lose my edits"
               color="danger"
               onClick={() => {
+                setUserEditedText(false);
                 reloadRemote();
                 setSaveRejected(false);
               }}
