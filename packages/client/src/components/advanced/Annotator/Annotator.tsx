@@ -265,7 +265,6 @@ export const TextAnnotator = ({
     dismissRemoteChange,
     idlePromptOpen,
     continueEditing,
-    lockAutoReleased,
   } = useDocumentPresence({
     documentId,
     isChangeMade,
@@ -276,15 +275,6 @@ export const TextAnnotator = ({
   // Another user is mid-edit; their save rewrites the whole content string,
   // anchors included, so every write from here would be lost.
   const canEditNow = canEditDocument && !lockedByOther;
-
-  // The lock was given up on the user's behalf after a long silence. Their edits
-  // are still on the canvas, so the only thing that changed is that somebody
-  // else may now write - and the next remote write raises the conflict banner.
-  useEffect(() => {
-    if (lockAutoReleased) {
-      toast.info("Editing lock released - others can now edit this document");
-    }
-  }, [lockAutoReleased]);
 
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);

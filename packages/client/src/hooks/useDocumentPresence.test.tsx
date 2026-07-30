@@ -303,25 +303,51 @@ describe("useDocumentPresence", () => {
 
     act(() => vi.advanceTimersByTime(1_000));
     expect(result.current.idlePromptOpen).toBe(true);
-    expect(result.current.lockAutoReleased).toBe(false);
   });
 
-  it("releases the lock when the idle prompt is ignored", () => {
+  it("keeps the lock while the idle prompt waits, however long it is ignored", () => {
     const { result } = setup({ isChangeMade: true });
 
     act(() => vi.advanceTimersByTime(60_000));
     expect(result.current.idlePromptOpen).toBe(true);
+
+    // Unanswered for another five minutes: the text is still unsaved, so handing
+    // the document to somebody else would strand it.
+    act(() => vi.advanceTimersByTime(300_000));
+
+    expect(ws.count("document:edit:end")).toBe(0);
+    expect(result.current.idlePromptOpen).toBe(true);
+    expect(result.current.lockedByOther).toBe(false);
+  });
+
+  it("keeps heartbeating while the idle prompt waits, so the server TTL cannot expire the lock", () => {
+    setup({ isChangeMade: true });
+
+    act(() => vi.advanceTimersByTime(60_000));
+    const beforeWait = ws.count("document:edit:heartbeat");
+
+    act(() => vi.advanceTimersByTime(60_000));
+
+    expect(ws.count("document:edit:heartbeat")).toBeGreaterThan(beforeWait);
+  });
+
+  it("releases the lock once the edits are resolved", () => {
+    const { rerender } = setup({ isChangeMade: true });
+
+    act(() => vi.advanceTimersByTime(60_000));
     expect(ws.count("document:edit:end")).toBe(0);
 
-    act(() => vi.advanceTimersByTime(60_000));
+    // Save and Discard both land here: they clear the local edits.
+    act(() => {
+      rerender({
+        documentId: DOC,
+        isChangeMade: false,
+        localTextContent: "text",
+        canEditDocument: true,
+      });
+    });
 
     expect(ws.payloads("document:edit:end")).toEqual([{ documentId: DOC }]);
-    expect(result.current.lockAutoReleased).toBe(true);
-    expect(result.current.idlePromptOpen).toBe(false);
-
-    const heartbeats = ws.count("document:edit:heartbeat");
-    act(() => vi.advanceTimersByTime(60_000));
-    expect(ws.count("document:edit:heartbeat")).toBe(heartbeats);
   });
 
   it("restarts the idle countdown on typing", () => {
@@ -349,7 +375,6 @@ describe("useDocumentPresence", () => {
 
     act(() => vi.advanceTimersByTime(59_000));
     expect(result.current.idlePromptOpen).toBe(false);
-    expect(result.current.lockAutoReleased).toBe(false);
   });
 
   it("resets presence state when the document changes", () => {
