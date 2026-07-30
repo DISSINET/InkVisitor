@@ -219,15 +219,37 @@ export const TextAnnotator = ({
   // (set when the user tries to enter HIGHLIGHT with pending text edits).
   const [pendingModeSwitch, setPendingModeSwitch] = useState<EditMode | null>(null);
 
+  // Whether localTextContent got there by the user typing rather than by a sync
+  // from the server. A content diff alone cannot tell the two apart: it also goes
+  // true when a remote save moves dataDocument under a canvas nobody touched —
+  // which happens to anyone holding SEMI/RAW open while another user saves.
+  // The annotator lib only fires onTextChanged for real edits (typing, paste,
+  // undo/redo); updateText does not, so this stays honest.
+  const [userEditedText, setUserEditedText] = useState<boolean>(false);
+
+  /** Adopts server-owned text as the canvas's baseline, clearing the dirty flag. */
+  const syncTextFromDocument = useCallback((content: string) => {
+    setLocalTextContent(content);
+    setUserEditedText(false);
+  }, []);
+
   const isChangeMade = useMemo<boolean>(() => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
       // Don't track text changes in highlight mode where it's not relevant
       // anchors are updated instantly and elvl is being added under the hood
       return false;
-    } else {
-      return localTextContent !== dataDocument?.content;
     }
-  }, [localTextContent, dataDocument?.content, annotatorMode]);
+    if (!canEditDocument || !userEditedText) {
+      return false;
+    }
+    return localTextContent !== dataDocument?.content;
+  }, [
+    localTextContent,
+    dataDocument?.content,
+    annotatorMode,
+    canEditDocument,
+    userEditedText,
+  ]);
 
   const {
     lockedByOther,
@@ -326,6 +348,9 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       setSaveRejected(false);
+      // The canvas is now what the server holds, so a later refetch that moves
+      // dataDocument must not be mistaken for unsaved local typing.
+      setUserEditedText(false);
     },
     onError: (error) => {
       if (isDocumentChangedConcurrently(error)) {
@@ -353,6 +378,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      setUserEditedText(false);
     },
     onError: (error) => {
       // The instant anchor save failed, so the cache was never merged and now
@@ -425,13 +451,19 @@ export const TextAnnotator = ({
   const confirmDiscardAndSwitch = useCallback(() => {
     if (dataDocument?.content !== undefined) {
       annotator?.updateText(dataDocument.content);
-      setLocalTextContent(dataDocument.content);
+      syncTextFromDocument(dataDocument.content);
     }
     if (pendingModeSwitch) {
       applyModeSwitch(pendingModeSwitch);
     }
     setPendingModeSwitch(null);
-  }, [annotator, dataDocument?.content, pendingModeSwitch, applyModeSwitch]);
+  }, [
+    annotator,
+    dataDocument?.content,
+    pendingModeSwitch,
+    applyModeSwitch,
+    syncTextFromDocument,
+  ]);
 
   const confirmSaveAndSwitch = useCallback(async () => {
     await handleSaveNewContent(false);
@@ -908,7 +940,12 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    const reuseExistingInstance = (contentForLocalState: string = newContent) => {
+    // fromServer distinguishes adopting the fetched document from holding on to
+    // the user's own in-progress canvas; only the former clears the dirty flag.
+    const reuseExistingInstance = (
+      contentForLocalState: string = newContent,
+      fromServer: boolean = true,
+    ) => {
       if (!annotator) return;
       applyCanvasTheme(annotator);
 
@@ -929,7 +966,9 @@ export const TextAnnotator = ({
       registerAnchorHover(annotator);
       registerAnchorTagMarkupHover(annotator);
 
-      if (localTextContent !== contentForLocalState) {
+      if (fromServer) {
+        syncTextFromDocument(contentForLocalState);
+      } else if (localTextContent !== contentForLocalState) {
         setLocalTextContent(contentForLocalState);
       }
 
@@ -957,7 +996,7 @@ export const TextAnnotator = ({
           // background refetch. (Writing the canvas into the cache here made
           // content === localTextContent, so the buttons went disabled as if the
           // edits were already saved, and Discard reverted to a no-op.)
-          reuseExistingInstance(currentContent);
+          reuseExistingInstance(currentContent, false);
         } else {
           // Server content is newer (e.g. another user added anchors) — update
           // the annotator's text in place, preserving scroll position.
@@ -1018,6 +1057,7 @@ export const TextAnnotator = ({
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
+      setUserEditedText(true);
       // Keyboard edits (typing/backspace) mutate the text without running the
       // lib's warning checks (only paste/replace/anchor ops do). Re-validate
       // here so broken anchors surface immediately while editing (#2601).
@@ -1038,7 +1078,7 @@ export const TextAnnotator = ({
 
     // Set initial text content
     const initialContent = dataDocument?.content ?? "no text";
-    setLocalTextContent(initialContent);
+    syncTextFromDocument(initialContent);
 
     // Ensure the initial render uses the current mode (e.g. HIGHLIGHT hides XML tags).
     // Otherwise we may briefly draw in RAW mode and show tags on first load.
@@ -1878,7 +1918,7 @@ export const TextAnnotator = ({
             onDiscard={() => {
               if (dataDocument?.content) {
                 annotator?.updateText(dataDocument.content);
-                setLocalTextContent(dataDocument.content);
+                syncTextFromDocument(dataDocument.content);
               }
             }}
             onSave={requestSave}
@@ -1948,7 +1988,7 @@ export const TextAnnotator = ({
                   continueEditing();
                   if (dataDocument?.content !== undefined) {
                     annotator?.updateText(dataDocument.content);
-                    setLocalTextContent(dataDocument.content);
+                    syncTextFromDocument(dataDocument.content);
                   }
                 }}
               />
