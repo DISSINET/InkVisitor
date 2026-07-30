@@ -305,30 +305,64 @@ describe("useDocumentPresence", () => {
     expect(result.current.idlePromptOpen).toBe(true);
   });
 
-  it("keeps the lock while the idle prompt waits, however long it is ignored", () => {
+  it("counts down to the release while the idle prompt is open", () => {
+    const { result } = setup({ isChangeMade: true });
+
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(result.current.idleSecondsRemaining).toBe(600);
+
+    act(() => vi.advanceTimersByTime(90_000));
+    expect(result.current.idleSecondsRemaining).toBe(510);
+  });
+
+  it("keeps the lock for ten minutes of an unanswered prompt, then hands it back", () => {
     const { result } = setup({ isChangeMade: true });
 
     act(() => vi.advanceTimersByTime(60_000));
     expect(result.current.idlePromptOpen).toBe(true);
 
-    // Unanswered for another five minutes: the text is still unsaved, so handing
-    // the document to somebody else would strand it.
-    act(() => vi.advanceTimersByTime(300_000));
-
+    act(() => vi.advanceTimersByTime(599_000));
     expect(ws.count("document:edit:end")).toBe(0);
-    expect(result.current.idlePromptOpen).toBe(true);
-    expect(result.current.lockedByOther).toBe(false);
+
+    act(() => vi.advanceTimersByTime(1_000));
+
+    expect(ws.payloads("document:edit:end")).toEqual([{ documentId: DOC }]);
+    expect(result.current.lockAutoReleased).toBe(true);
+    expect(result.current.idlePromptOpen).toBe(false);
+    expect(result.current.idleSecondsRemaining).toBeNull();
   });
 
-  it("keeps heartbeating while the idle prompt waits, so the server TTL cannot expire the lock", () => {
+  it("keeps heartbeating while the prompt waits, then stops once the lock is handed back", () => {
     setup({ isChangeMade: true });
 
     act(() => vi.advanceTimersByTime(60_000));
-    const beforeWait = ws.count("document:edit:heartbeat");
+    const duringPrompt = ws.count("document:edit:heartbeat");
 
     act(() => vi.advanceTimersByTime(60_000));
+    expect(ws.count("document:edit:heartbeat")).toBeGreaterThan(duringPrompt);
 
-    expect(ws.count("document:edit:heartbeat")).toBeGreaterThan(beforeWait);
+    act(() => vi.advanceTimersByTime(540_000));
+    const afterRelease = ws.count("document:edit:heartbeat");
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(ws.count("document:edit:heartbeat")).toBe(afterRelease);
+  });
+
+  it("reclaims the lock when the user comes back and types", () => {
+    const { rerender } = setup({ isChangeMade: true });
+
+    act(() => vi.advanceTimersByTime(660_000));
+    const claimsBefore = ws.count("document:edit:start");
+
+    act(() => {
+      rerender({
+        documentId: DOC,
+        isChangeMade: true,
+        localTextContent: "typed again",
+        canEditDocument: true,
+      });
+    });
+
+    expect(ws.count("document:edit:start")).toBe(claimsBefore + 1);
   });
 
   it("releases the lock once the edits are resolved", () => {

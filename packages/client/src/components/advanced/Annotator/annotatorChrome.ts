@@ -83,3 +83,11 @@ export const resolveEditActions = ({
   visible: canEditDocument && mode !== EditMode.HIGHLIGHT,
   disabled: !isChangeMade || isSaving || isSavingWithoutRefresh || dataDocumentIsFetching,
 });
+
+/** Countdown as m:ss, for the idle prompt's footer note. */
+export const formatCountdown = (totalSeconds: number): string => {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const minutes = Math.floor(safe / 60);
+  const seconds = safe % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+};

@@ -66,6 +66,7 @@ import {
 import { EntityCreateModal } from "..";
 import {
   FindPanel,
+  formatCountdown,
   resolveEditActions,
   resolveFindPanel,
   shouldShowSelectionMenu,
@@ -265,6 +266,7 @@ export const TextAnnotator = ({
     dismissRemoteChange,
     idlePromptOpen,
     continueEditing,
+    idleSecondsRemaining,
   } = useDocumentPresence({
     documentId,
     isChangeMade,
@@ -2005,7 +2007,13 @@ export const TextAnnotator = ({
               You have unsaved changes, and nobody else can edit this document while you do.
             </div>
           </ModalContent>
-          <ModalFooter>
+          <ModalFooter
+            note={
+              idleSecondsRemaining !== null
+                ? `Unlocking for others in ${formatCountdown(idleSecondsRemaining)}`
+                : undefined
+            }
+          >
             <ButtonGroup>
               <Button label="Continue editing" color="greyer" onClick={continueEditing} />
               <Button

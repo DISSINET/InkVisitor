@@ -6,6 +6,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const HEARTBEAT_INTERVAL_MS = 20_000;
 /** Silence after which the holder is asked whether it is still editing. */
 const IDLE_PROMPT_MS = 60_000;
+/**
+ * Grace period after the prompt before the lock is handed back. A sleeping or
+ * disconnected machine loses the lock anyway, so holding it indefinitely behind
+ * an unanswered prompt buys nothing and blocks everyone else.
+ */
+const IDLE_RELEASE_MS = 600_000;
 
 interface DocumentLock {
   userId: string;
@@ -28,6 +34,10 @@ export interface DocumentPresence {
   dismissRemoteChange: () => void;
   idlePromptOpen: boolean;
   continueEditing: () => void;
+  /** Seconds left before the lock is handed back; null unless the prompt is open. */
+  idleSecondsRemaining: number | null;
+  /** The idle prompt went unanswered and the lock was given up. */
+  lockAutoReleased: boolean;
 }
 
 /**
@@ -52,6 +62,10 @@ export function useDocumentPresence({
     null
   );
   const [idlePromptOpen, setIdlePromptOpen] = useState(false);
+  const [lockAutoReleased, setLockAutoReleased] = useState(false);
+  const [idleSecondsRemaining, setIdleSecondsRemaining] = useState<number | null>(
+    null
+  );
   /** Bumped by continueEditing to restart the idle countdown. */
   const [idleResetToken, setIdleResetToken] = useState(0);
 
@@ -94,6 +108,8 @@ export function useDocumentPresence({
       setLockGranted(false);
       setRemoteChange(null);
       setIdlePromptOpen(false);
+      setIdleSecondsRemaining(null);
+      setLockAutoReleased(false);
     };
   }, [documentId]);
 
@@ -161,38 +177,83 @@ export function useDocumentPresence({
       api.wsEmit("document:edit:end", { documentId });
       setLockGranted(false);
       setIdlePromptOpen(false);
+      setIdleSecondsRemaining(null);
+      setLockAutoReleased(false);
     };
   }, [documentId, canEditDocument, isChangeMade, claimLock]);
 
   useEffect(() => {
-    if (!documentId || !lockGranted) {
+    if (!documentId || !lockGranted || lockAutoReleased) {
       return;
     }
     const interval = setInterval(() => {
       api.wsEmit("document:edit:heartbeat", { documentId });
     }, HEARTBEAT_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [documentId, lockGranted]);
+  }, [documentId, lockGranted, lockAutoReleased]);
 
   // localTextContent is a dependency because a keystroke is what restarts the
-  // countdown. The prompt only nudges: the lock is held until the user answers
-  // it, so unsaved text is never left behind by a document nobody has locked.
-  // Save and Discard both clear isChangeMade, which is what releases the lock.
+  // countdown. The release timer and its tick are started from inside the prompt
+  // timer, so opening the prompt does not itself restart anything.
   useEffect(() => {
-    if (!documentId || !lockGranted) {
+    if (!documentId || !lockGranted || lockAutoReleased) {
       return;
     }
+    let releaseTimer: ReturnType<typeof setTimeout> | undefined;
+    let tick: ReturnType<typeof setInterval> | undefined;
+
     const promptTimer = setTimeout(() => {
+      const releaseAt = Date.now() + IDLE_RELEASE_MS;
       setIdlePromptOpen(true);
+      setIdleSecondsRemaining(Math.ceil(IDLE_RELEASE_MS / 1000));
+
+      tick = setInterval(() => {
+        setIdleSecondsRemaining(
+          Math.max(0, Math.ceil((releaseAt - Date.now()) / 1000))
+        );
+      }, 1000);
+
+      releaseTimer = setTimeout(() => {
+        api.wsEmit("document:edit:end", { documentId });
+        setIdlePromptOpen(false);
+        setIdleSecondsRemaining(null);
+        setLockGranted(false);
+        setLockAutoReleased(true);
+      }, IDLE_RELEASE_MS);
     }, IDLE_PROMPT_MS);
 
-    return () => clearTimeout(promptTimer);
-  }, [documentId, lockGranted, localTextContent, idleResetToken]);
+    return () => {
+      clearTimeout(promptTimer);
+      if (releaseTimer) {
+        clearTimeout(releaseTimer);
+      }
+      if (tick) {
+        clearInterval(tick);
+      }
+    };
+  }, [documentId, lockGranted, lockAutoReleased, localTextContent, idleResetToken]);
 
   const continueEditing = useCallback(() => {
     setIdlePromptOpen(false);
+    setIdleSecondsRemaining(null);
     setIdleResetToken((token) => token + 1);
   }, []);
+
+  // Typing after the prompt went unanswered is the user coming back. The claim
+  // effect cannot notice - none of its inputs changed when the lock was dropped -
+  // so without this the rest of the session would edit unprotected.
+  const textAtAutoReleaseRef = useRef(localTextContent);
+  useEffect(() => {
+    if (!lockAutoReleased) {
+      textAtAutoReleaseRef.current = localTextContent;
+      return;
+    }
+    if (localTextContent === textAtAutoReleaseRef.current) {
+      return;
+    }
+    setLockAutoReleased(false);
+    claimLock();
+  }, [localTextContent, lockAutoReleased, claimLock]);
 
   const dismissRemoteChange = useCallback(() => {
     setRemoteChange(null);
@@ -213,5 +274,7 @@ export function useDocumentPresence({
     dismissRemoteChange,
     idlePromptOpen,
     continueEditing,
+    idleSecondsRemaining,
+    lockAutoReleased,
   };
 }
