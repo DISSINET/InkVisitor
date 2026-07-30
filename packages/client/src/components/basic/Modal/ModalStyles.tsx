@@ -146,12 +146,15 @@ export const StyledFooter = styled.div<StyledFooter>`
 `;
 
 export const StyledFooterNote = styled.div`
+  /* The footer is justify-content: flex-end; the auto margin is what claims the
+     free space and pins the note to the left edge. Its gap from the buttons has
+     to be padding, since a second margin-right would cancel the auto. */
   margin-right: auto;
+  padding-right: ${({ theme }) => theme.space[4]};
   align-self: center;
   text-align: left;
   color: ${({ theme }) => theme.color["gray"][500]};
   font-size: 1.1rem;
-  margin-right: ${({ theme }) => theme.space[4]};
 `;
 
 interface StyledModalInputForm {

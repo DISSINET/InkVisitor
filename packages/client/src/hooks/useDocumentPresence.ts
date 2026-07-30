@@ -5,13 +5,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /** Kept well under the server's 60s lock TTL. */
 const HEARTBEAT_INTERVAL_MS = 20_000;
 /** Silence after which the holder is asked whether it is still editing. */
-const IDLE_PROMPT_MS = 60_000;
+export const IDLE_PROMPT_MS = 60_000;
 /**
  * Grace period after the prompt before the lock is handed back. A sleeping or
  * disconnected machine loses the lock anyway, so holding it indefinitely behind
  * an unanswered prompt buys nothing and blocks everyone else.
+ *
+ * Shortened in development so the release can be exercised without a ten-minute
+ * wait; the countdown in the prompt reads from the same constant.
  */
-const IDLE_RELEASE_MS = 600_000;
+export const IDLE_RELEASE_MS =
+  process.env.NODE_ENV === "development" ? 60_000 : 600_000;
 
 interface DocumentLock {
   userId: string;

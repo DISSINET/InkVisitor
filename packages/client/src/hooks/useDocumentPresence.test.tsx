@@ -3,6 +3,8 @@ import { act, renderHook } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  IDLE_PROMPT_MS,
+  IDLE_RELEASE_MS,
   UseDocumentPresence,
   useDocumentPresence,
 } from "./useDocumentPresence";
@@ -309,19 +311,19 @@ describe("useDocumentPresence", () => {
     const { result } = setup({ isChangeMade: true });
 
     act(() => vi.advanceTimersByTime(60_000));
-    expect(result.current.idleSecondsRemaining).toBe(600);
+    expect(result.current.idleSecondsRemaining).toBe(IDLE_RELEASE_MS / 1000);
 
-    act(() => vi.advanceTimersByTime(90_000));
-    expect(result.current.idleSecondsRemaining).toBe(510);
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(result.current.idleSecondsRemaining).toBe(IDLE_RELEASE_MS / 1000 - 30);
   });
 
-  it("keeps the lock for ten minutes of an unanswered prompt, then hands it back", () => {
+  it("keeps the lock for the whole grace period, then hands it back", () => {
     const { result } = setup({ isChangeMade: true });
 
     act(() => vi.advanceTimersByTime(60_000));
     expect(result.current.idlePromptOpen).toBe(true);
 
-    act(() => vi.advanceTimersByTime(599_000));
+    act(() => vi.advanceTimersByTime(IDLE_RELEASE_MS - 1_000));
     expect(ws.count("document:edit:end")).toBe(0);
 
     act(() => vi.advanceTimersByTime(1_000));
@@ -341,7 +343,7 @@ describe("useDocumentPresence", () => {
     act(() => vi.advanceTimersByTime(60_000));
     expect(ws.count("document:edit:heartbeat")).toBeGreaterThan(duringPrompt);
 
-    act(() => vi.advanceTimersByTime(540_000));
+    act(() => vi.advanceTimersByTime(IDLE_RELEASE_MS - 60_000));
     const afterRelease = ws.count("document:edit:heartbeat");
     act(() => vi.advanceTimersByTime(60_000));
     expect(ws.count("document:edit:heartbeat")).toBe(afterRelease);
@@ -350,7 +352,7 @@ describe("useDocumentPresence", () => {
   it("reclaims the lock when the user comes back and types", () => {
     const { rerender } = setup({ isChangeMade: true });
 
-    act(() => vi.advanceTimersByTime(660_000));
+    act(() => vi.advanceTimersByTime(IDLE_PROMPT_MS + IDLE_RELEASE_MS));
     const claimsBefore = ws.count("document:edit:start");
 
     act(() => {
