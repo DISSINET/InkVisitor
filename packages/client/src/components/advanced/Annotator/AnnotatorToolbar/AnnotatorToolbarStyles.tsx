@@ -77,13 +77,3 @@ export const StyledDisplayModeButtonIconWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
-
-/**
- * Centers the lock glyph on the cluster's button row. Its color comes from the
- * IconWithTooltip that wraps the glyph, so this only owns spacing.
- */
-export const StyledLockIndicator = styled.div`
-  display: flex;
-  align-items: center;
-  padding: ${({ theme }) => `0 ${theme.space[1]}`};
-`;

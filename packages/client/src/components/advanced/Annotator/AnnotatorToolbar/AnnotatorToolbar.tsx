@@ -1,5 +1,5 @@
 import { EditMode } from "@inkvisitor/annotator/src/lib";
-import { Button, IconWithTooltip, Loader } from "components";
+import { Button, Loader } from "components";
 import { SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import React, { ReactNode } from "react";
 import { BsFileTextFill } from "react-icons/bs";
@@ -7,14 +7,13 @@ import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { HiCodeBracket } from "react-icons/hi2";
 import { useTheme } from "styled-components";
 import { ButtonSize } from "types";
-import { IcoLock, IcoSearch, IcoUndo } from "Theme/icons";
+import { IcoSearch, IcoUndo } from "Theme/icons";
 import {
   StyledAnnotatorToolbar,
   StyledAnnotatorToolbarButtonWrap,
   StyledAnnotatorToolbarCluster,
   StyledAnnotatorToolbarGroup,
   StyledDisplayModeButtonIconWrapper,
-  StyledLockIndicator,
   TOOLBAR_ICON_SIZE,
 } from "./AnnotatorToolbarStyles";
 
@@ -22,8 +21,6 @@ interface AnnotatorToolbar {
   annotatorMode: EditMode;
   onModeClick: (mode: EditMode) => void;
   canEditDocument: boolean;
-  /** Name of the user currently holding the document's edit lock, if any. */
-  lockHolderName?: string | null;
 
   editActionsVisible: boolean;
   editActionsDisabled: boolean;
@@ -47,7 +44,6 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   annotatorMode,
   onModeClick,
   canEditDocument,
-  lockHolderName,
   editActionsVisible,
   editActionsDisabled,
   onDiscard,
@@ -96,17 +92,6 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       </StyledAnnotatorToolbarCluster>
 
       <StyledAnnotatorToolbarCluster>
-        {lockHolderName && (
-          <StyledLockIndicator>
-            <IconWithTooltip
-              icon={<IcoLock size={TOOLBAR_ICON_SIZE} />}
-              color="warning"
-              tooltipLabel={`${lockHolderName} is editing this document`}
-              tooltipPosition="top"
-            />
-          </StyledLockIndicator>
-        )}
-
         {isSearchAllowed && (
           <Button
             size={ButtonSize.Small}

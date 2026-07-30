@@ -155,6 +155,11 @@ interface TextAnnotatorProps {
   onAsymmetricalAnchorCountChange?: (count: number) => void;
   /** Fired when RAW/SEMI text edits diverge from the saved document content. */
   onUnsavedTextEditsChange?: (hasUnsaved: boolean) => void;
+  /**
+   * Name of the user holding the document's edit lock, or null. Reported upward
+   * because the Box header that shows it belongs to a different tree.
+   */
+  onLockHolderChange?: (lockHolderName: string | null) => void;
 
   /**
    * True while the host has collapsed the annotator box out of view (e.g. the
@@ -199,6 +204,7 @@ export const TextAnnotator = ({
   onWarningsModalOpenChange,
   onAsymmetricalAnchorCountChange,
   onUnsavedTextEditsChange,
+  onLockHolderChange,
   hideSelectionMenu = false,
   toolbarExtras,
 }: TextAnnotatorProps) => {
@@ -283,6 +289,14 @@ export const TextAnnotator = ({
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);
   }, [isChangeMade, onUnsavedTextEditsChange]);
+
+  useEffect(() => {
+    onLockHolderChange?.(lockedByOther ? lockHolderName : null);
+  }, [lockedByOther, lockHolderName, onLockHolderChange]);
+
+  // The Box header lives on past this component, so a lock it was told about
+  // would keep showing after the annotator is gone.
+  useEffect(() => () => onLockHolderChange?.(null), [onLockHolderChange]);
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
@@ -1788,6 +1802,7 @@ export const TextAnnotator = ({
                         isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(false)
                       }
                       readonly={isMenuReadOnly}
+                      lockedByName={lockedByOther ? lockHolderName : null}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
                         await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
@@ -1912,7 +1927,6 @@ export const TextAnnotator = ({
             annotatorMode={annotatorMode}
             onModeClick={handleAnnotatorModeClick}
             canEditDocument={canEditNow}
-            lockHolderName={lockedByOther ? lockHolderName : null}
             editActionsVisible={editActions.visible}
             editActionsDisabled={editActions.disabled}
             onDiscard={() => {

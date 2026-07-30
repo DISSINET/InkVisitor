@@ -479,3 +479,15 @@ export const StyledConflictBanner = styled.div`
 export const StyledConflictBannerText = styled.span`
   flex-grow: 1;
 `;
+
+export const StyledAnnotatorLockNotice = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.default};
+  background-color: ${({ theme }) => theme.color["warningMessage"]};
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;

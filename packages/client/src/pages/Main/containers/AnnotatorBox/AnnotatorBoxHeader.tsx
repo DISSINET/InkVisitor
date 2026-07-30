@@ -10,8 +10,10 @@ import {
 import React, { useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { IcoLock } from "Theme/icons";
 import {
   StyledAnnotatorHeader,
+  StyledAnnotatorHeaderLock,
   StyledAnnotatorHeaderResource,
   StyledAnnotatorHeaderTitle,
   StyledInfoText,
@@ -27,6 +29,8 @@ interface AnnotatorBoxHeader {
   onResourcePickerFocus?: () => void;
   canSelectResource: boolean;
   canEditDocument: boolean;
+  /** Name of the user holding the document's edit lock, or null when it is free. */
+  lockHolderName?: string | null;
 }
 
 /**
@@ -43,6 +47,7 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
   onResourcePickerFocus,
   canSelectResource,
   canEditDocument,
+  lockHolderName = null,
 }) => {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
 
@@ -109,6 +114,13 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
           )
         )}
       </StyledAnnotatorHeaderTitle>
+
+      {lockHolderName && (
+        <StyledAnnotatorHeaderLock title={`${lockHolderName} is editing this document`}>
+          <IcoLock size={11} />
+          <span>{lockHolderName} is editing</span>
+        </StyledAnnotatorHeaderLock>
+      )}
 
       {showExportModal && selectedDocument && (
         <DocumentModalExport

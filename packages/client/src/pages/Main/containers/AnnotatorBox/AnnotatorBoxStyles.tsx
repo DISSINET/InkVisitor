@@ -131,3 +131,16 @@ export const StyledEmptyStateWrap = styled.div`
   justify-content: center;
   margin-top: ${({ theme }) => theme.space[8]};
 `;
+
+export const StyledAnnotatorHeaderLock = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => `0 ${theme.space[2]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.default};
+  background-color: ${({ theme }) => theme.color["warningMessage"]};
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  white-space: nowrap;
+`;
