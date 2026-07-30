@@ -368,6 +368,9 @@ export const TextAnnotator = ({
       // The canvas is now what the server holds, so a later refetch that moves
       // dataDocument must not be mistaken for unsaved local typing.
       setUserEditedText(false);
+      // A pending receipt has been resolved by this write; leaving it set would
+      // re-raise the conflict banner the next time the user types.
+      dismissRemoteChange();
     },
     onError: (error) => {
       if (isDocumentChangedConcurrently(error)) {
@@ -396,6 +399,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       setUserEditedText(false);
+      dismissRemoteChange();
     },
     onError: (error) => {
       // The instant anchor save failed, so the cache was never merged and now

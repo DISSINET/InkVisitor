@@ -41,6 +41,17 @@ function makeFakeIo() {
   return { on: jest.fn() } as unknown as { on: jest.Mock };
 }
 
+/**
+ * Fake io that records how a broadcast was addressed, so a test can tell
+ * `to(room).emit(...)` apart from `to(room).except(socket).emit(...)`.
+ */
+function makeBroadcastingIo() {
+  const emit = jest.fn();
+  const except = jest.fn(() => ({ emit }));
+  const to = jest.fn(() => ({ emit, except }));
+  return { io: { on: jest.fn(), to }, to, except, emit };
+}
+
 /** Bare fake standing in for a Socket.IO socket: records every `on` registration. */
 function makeFakeSocket(id: string, userId: string | undefined) {
   return {
@@ -159,6 +170,48 @@ describe("service/documentPresence", () => {
 
     expect(getDocumentLock("doc-1", t0 + LOCK_TTL_MS)).toBeNull();
     expect(getDocumentLock("doc-2", t0 + LOCK_TTL_MS)).not.toBeNull();
+  });
+
+  describe("lock broadcasts", () => {
+    let sweepTimer: NodeJS.Timeout;
+
+    afterEach(() => {
+      clearInterval(sweepTimer);
+    });
+
+    it("leaves the claiming socket out of its own claim broadcast", () => {
+      const { io, to, except, emit } = makeBroadcastingIo();
+      sweepTimer = startDocumentPresence(io as never);
+
+      claimDocumentLock("doc-1", alice);
+
+      expect(to).toHaveBeenCalledWith("document:doc-1");
+      // The claimer learns the outcome from its edit:start ack. Telling it again
+      // races that ack and briefly names it as somebody else holding the lock.
+      expect(except).toHaveBeenCalledWith("s-1");
+      expect(emit).toHaveBeenCalledWith("document:lock", {
+        documentId: "doc-1",
+        lock: { userId: "u-alice", userName: "Alice" },
+      });
+    });
+
+    it("tells the whole room when a lock is released", () => {
+      const { io, to, except, emit } = makeBroadcastingIo();
+      sweepTimer = startDocumentPresence(io as never);
+
+      claimDocumentLock("doc-1", alice);
+      except.mockClear();
+      emit.mockClear();
+
+      releaseDocumentLock("doc-1", alice.socketId);
+
+      expect(to).toHaveBeenCalledWith("document:doc-1");
+      expect(except).not.toHaveBeenCalled();
+      expect(emit).toHaveBeenCalledWith("document:lock", {
+        documentId: "doc-1",
+        lock: null,
+      });
+    });
   });
 
   describe("startDocumentPresence connection handler", () => {

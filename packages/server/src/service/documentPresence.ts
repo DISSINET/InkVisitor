@@ -54,8 +54,19 @@ export function getDocumentLock(
   return { userId: entry.userId, userName: entry.userName };
 }
 
-function broadcastLock(documentId: string): void {
-  io?.to(documentRoom(documentId)).emit("document:lock", {
+/**
+ * @param exceptSocketId a socket that already learns the outcome from its own
+ * ack. Telling it again races that ack: the broadcast names it as the holder
+ * while its `granted` flag is still false, which reads as "somebody else is
+ * editing" for as long as the round trip takes.
+ */
+function broadcastLock(documentId: string, exceptSocketId?: string): void {
+  if (!io) {
+    return;
+  }
+  const room = io.to(documentRoom(documentId));
+  const target = exceptSocketId ? room.except(exceptSocketId) : room;
+  target.emit("document:lock", {
     documentId,
     lock: getDocumentLock(documentId),
   });
@@ -76,7 +87,7 @@ export function claimDocumentLock(
     return false;
   }
   locks.set(documentId, { ...holder, expiresAt: now + LOCK_TTL_MS });
-  broadcastLock(documentId);
+  broadcastLock(documentId, holder.socketId);
   return true;
 }
 
