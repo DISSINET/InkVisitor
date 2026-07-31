@@ -23,10 +23,10 @@ interface StyledAuditColumn {
 export const StyledAuditColumn = styled.div<StyledAuditColumn>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
+  column-gap: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize.xs};
   flex-wrap: ${({ $wrap }) => ($wrap ? "wrap" : "nowrap")};
-  height: 2rem;
+  min-height: 2rem;
   svg {
     flex-shrink: 0;
   }
