@@ -25,7 +25,10 @@ export const getInvalidDeleteErrorData = (
   ) {
     return null;
   }
-  return { type: data.type === "document" ? "document" : "entity", ids: data.ids };
+  // unknown/legacy discriminants collapse to the generic "entity" conflict
+  const type =
+    data.type === "document" || data.type === "reference" ? data.type : "entity";
+  return { type, ids: data.ids };
 };
 
 export interface DeleteEntityConflict {
@@ -70,6 +73,9 @@ export const scrollToUsedInSection = (entityId: string): void => {
  *   detail "Used in documents" table is where the blocking anchors can be
  *   removed. Document ids are NOT entities and cannot be opened in entity
  *   detail (doing so was the original bug).
+ * - "reference" conflicts -> open the entity the user tried to delete; its
+ *   detail "Used in" References / Reference parts tables list every entity
+ *   whose references block the delete.
  */
 export const resolveDeleteEntityConflict = (
   data: IInvalidDeleteErrorData,
@@ -82,6 +88,15 @@ export const resolveDeleteEntityConflict = (
       message: `Cannot delete — anchored to ${count} document${
         count === 1 ? "" : "s"
       }. Click to review anchors in detail.`,
+    };
+  }
+  if (data.type === "reference") {
+    const count = data.ids.length;
+    return {
+      targetId: deletedEntityId,
+      message: `Cannot delete — used as a reference in ${count} entit${
+        count === 1 ? "y" : "ies"
+      }. Click to review.`,
     };
   }
   return {

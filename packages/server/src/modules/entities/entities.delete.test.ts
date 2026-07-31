@@ -11,6 +11,8 @@ import Territory from "@models/territory/territory";
 import Classification from "@models/relation/classification";
 import Person from "@models/person/person";
 import Concept from "@models/concept/concept";
+import Resource from "@models/resource/resource";
+import Value from "@models/value/value";
 import { pool } from "@middlewares/db";
 import Statement, { StatementActant } from "@models/statement/statement";
 import { link } from "fs";
@@ -96,6 +98,56 @@ describe("Entities delete - single entity", function () {
       });
     });
   });
+
+  describe("entity used in another entity's references", () => {
+    const db = new Db();
+    const rand = Math.random().toString();
+    const resourceEntity = new Resource({ id: `R-ref-${rand}` });
+    const valueEntity = new Value({ id: `V-ref-${rand}` });
+    const referencingEntity = new Person({
+      id: `P-ref-${rand}`,
+      references: [
+        { id: `ref-${rand}`, resource: resourceEntity.id, value: valueEntity.id },
+      ],
+    });
+
+    beforeAll(async () => {
+      await db.initDb();
+      await resourceEntity.save(db.connection);
+      await valueEntity.save(db.connection);
+      await referencingEntity.save(db.connection);
+    });
+
+    afterAll(async () => await clean(db));
+
+    it("should block deleting the reference resource with a \"reference\" conflict", async () => {
+      const res = await authAgent
+        .delete(`${apiPath}/entities/${resourceEntity.id}`)
+        .expect("Content-Type", /json/)
+        .expect(
+          testErroneousResponse.bind(undefined, new InvalidDeleteError(""))
+        );
+
+      expect(res.body.data).toEqual({
+        type: "reference",
+        ids: [referencingEntity.id],
+      });
+    });
+
+    it("should block deleting the reference value with a \"reference\" conflict", async () => {
+      const res = await authAgent
+        .delete(`${apiPath}/entities/${valueEntity.id}`)
+        .expect("Content-Type", /json/)
+        .expect(
+          testErroneousResponse.bind(undefined, new InvalidDeleteError(""))
+        );
+
+      expect(res.body.data).toEqual({
+        type: "reference",
+        ids: [referencingEntity.id],
+      });
+    });
+  });
 });
 
 describe("Entities delete - batch", function () {
@@ -121,6 +173,14 @@ describe("Entities delete - batch", function () {
       new StatementActant({ id: dependentUponEntity1.id, entityId: dependentUponEntity1.id }),
     ];
 
+    const referencedResource = new Resource({ id: `R4-${rand}` });
+    const referencingPerson = new Person({
+      id: `P4-${rand}`,
+      references: [
+        { id: `ref4-${rand}`, resource: referencedResource.id, value: "" },
+      ],
+    });
+
     const dependentUponEntity2 = new Concept({ id: `C3-${rand}` });
     const linkedStatement2 = new Statement({ id: `S3-${rand}` });
     linkedStatement2.data.actants = [
@@ -137,6 +197,8 @@ describe("Entities delete - batch", function () {
       await conceptEntity.save(db.connection);
       await dependentUponEntity1.save(db.connection);
       await linkedStatement1.save(db.connection);
+      await referencedResource.save(db.connection);
+      await referencingPerson.save(db.connection);
       await dependentUponEntity2.save(db.connection);
       await linkedStatement2.save(db.connection);
       await linkedStatement3.save(db.connection);
@@ -170,6 +232,20 @@ describe("Entities delete - batch", function () {
 
       const deletedEntity2 = await findEntityById(db, linkedStatement1.id);
       expect(deletedEntity2).toBeNull();
+    });
+
+    test("should delete a reference resource together with its referencing entity in one batch", async () => {
+      await authAgent
+        .delete(`${apiPath}/entities/`)
+        .send({ entityIds: [referencedResource.id, referencingPerson.id] })
+        .expect("Content-Type", /json/)
+        .expect(200);
+
+      const deletedResource = await findEntityById(db, referencedResource.id);
+      expect(deletedResource).toBeNull();
+
+      const deletedPerson = await findEntityById(db, referencingPerson.id);
+      expect(deletedPerson).toBeNull();
     });
 
     test("should return a 200 code with successful response when deleting 2 self-dependent entities, with one entity linked to persisting entity", async () => {

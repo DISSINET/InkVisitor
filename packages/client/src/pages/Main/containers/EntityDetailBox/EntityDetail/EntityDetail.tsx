@@ -952,6 +952,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         useCases={entity.usedInMetaProps}
                         key="MetaProp"
                         perPage={10}
+                        equalColumnsSize
                       />
                     )}
 
@@ -1009,34 +1010,32 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                     )}
 
                     {/* usedIn references - only an R can be a reference resource */}
-                    {!entity.isTemplate &&
-                      entity.class === EntityEnums.Class.Resource && (
-                        <EntityDetailReferencesTable
-                          title={{
-                            singular: "Reference",
-                            plural: "References",
-                          }}
-                          entities={entity.entities}
-                          useCases={entity.usedInReferences}
-                          key="Reference"
-                          perPage={10}
-                        />
-                      )}
+                    {!entity.isTemplate && entity.class === EntityEnums.Class.Resource && (
+                      <EntityDetailReferencesTable
+                        title={{
+                          singular: "Reference",
+                          plural: "References",
+                        }}
+                        entities={entity.entities}
+                        useCases={entity.usedInReferences}
+                        key="Reference"
+                        perPage={10}
+                      />
+                    )}
 
                     {/* usedIn reference parts - only a V can be a reference value */}
-                    {!entity.isTemplate &&
-                      entity.class === EntityEnums.Class.Value && (
-                        <EntityDetailReferencesTable
-                          title={{
-                            singular: "Reference part",
-                            plural: "Reference parts",
-                          }}
-                          entities={entity.entities}
-                          useCases={entity.usedInReferenceParts}
-                          key="ReferencePart"
-                          perPage={10}
-                        />
-                      )}
+                    {!entity.isTemplate && entity.class === EntityEnums.Class.Value && (
+                      <EntityDetailReferencesTable
+                        title={{
+                          singular: "Reference part",
+                          plural: "Reference parts",
+                        }}
+                        entities={entity.entities}
+                        useCases={entity.usedInReferenceParts}
+                        key="ReferencePart"
+                        perPage={10}
+                      />
+                    )}
 
                     {!entity.isTemplate && (
                       <EntityDetailUsedInDocumentsTable

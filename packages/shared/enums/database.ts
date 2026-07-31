@@ -21,5 +21,6 @@ export namespace DbEnums {
     Indexes.StatementDataProps,
     Indexes.StatementEntities,
     Indexes.StatementActantsCI,
+    Indexes.EntityReferences,
   ]
 }
