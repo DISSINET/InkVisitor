@@ -347,6 +347,13 @@ export class Annotator {
   /** Draw a ¶ at the end of each paragraph (Word's "formatting marks"). */
   private showParagraphMarks = false;
 
+  /**
+   * Paragraph marks found while painting the text, drawn once the anchor markers
+   * are down so each can be placed clear of them. Anchor points in the same
+   * scroll-translated space the text pass uses; emptied at the top of each frame.
+   */
+  private pendingParagraphMarks: { x: number; y: number }[] = [];
+
   /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
   private showFps = false;
   private lastFrameTime = 0;
@@ -2724,43 +2731,64 @@ export class Annotator {
   }
 
   /**
-   * Paragraph mark (#2076) at the end of a paragraph's last line, stroked in the
-   * text colour at reduced opacity so it reads as chrome. `x` is where the line's
-   * text ends and `y` its vertical middle; the mark is pulled back inside the
-   * canvas when a full-width line would push it past the right edge.
-   *
-   * The shape is a pilcrow: two stems under a bar that overhangs the trailing
-   * one, with a solid bowl on the leading stem — a half disc, its flat side
-   * lying along that stem. Every measure derives from the line height, so it
-   * scales with the font without depending on it.
-   *
-   * The bowl is filled and the lines stroked, in two passes: one path carrying
-   * both would lay the fill and the stroke over each other, and at this alpha
-   * the overlap reads as a darker rim.
+   * Where a paragraph mark sits and how big each of its parts is, for an anchor
+   * point `x` (the end of the line's text), `y` (the line's vertical middle) and
+   * a rightward `shiftX` used to dodge an anchor marker. The mark is pulled back
+   * inside the canvas when a full-width line would push it past the right edge,
+   * which also caps how far a shift can carry it.
    */
-  private drawParagraphMark(x: number, y: number): void {
+  private paragraphMarkGeometry(x: number, y: number, shiftX: number) {
     const h = PARAGRAPH_MARK_HEIGHT_RATIO * this.lineHeight;
     const bowlR = PARAGRAPH_MARK_BOWL_RATIO * h;
     const stemGap = PARAGRAPH_MARK_STEM_GAP_RATIO * h;
     const overhang = PARAGRAPH_MARK_OVERHANG_RATIO * stemGap;
     const lineWidth = PARAGRAPH_MARK_LINE_WIDTH_PX * this.ratio;
-    // A stroke straddles its line, so the bowl clears the stem and the cap by
-    // half of one to sit against their edges rather than their centres.
+    // A part straddles its line, so the bowl clears the stem and the cap by half
+    // of one to sit against their edges rather than their centres.
     const half = lineWidth / 2;
     const capLead = PARAGRAPH_MARK_CAP_LEAD_PX * this.ratio;
     const markW = bowlR + half + stemGap + overhang;
 
     const left = Math.min(
-      x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth,
+      x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth + shiftX,
       this.width - markW
     );
-    const stemX = left + bowlR + half; // the bowl hangs off this stem's left side
-    const rightX = stemX + stemGap;
     const top = y - h / 2;
-    const bottom = top + h;
+    return {
+      h,
+      bowlR,
+      stemGap,
+      overhang,
+      lineWidth,
+      half,
+      capLead,
+      markW,
+      left,
+      top,
+      stemX: left + bowlR + half, // the bowl hangs off this stem's left side
+      rightX: left + bowlR + half + stemGap,
+      bottom: top + h,
+    };
+  }
+
+  /**
+   * Paragraph mark (#2076) at the end of a paragraph's last line, in the text
+   * colour at reduced opacity so it reads as chrome.
+   *
+   * The shape is a pilcrow: two stems under a bar that overhangs the trailing
+   * one, with a solid bowl on the leading stem — a half disc, its flat side
+   * lying along that stem. Every measure derives from the line height, so it
+   * scales with the font without depending on it.
+   */
+  private drawParagraphMark(x: number, y: number, shiftX: number = 0): void {
+    const { bowlR, overhang, half, capLead, top, stemX, rightX, bottom } =
+      this.paragraphMarkGeometry(x, y, shiftX);
 
     this.ctx.save();
     this.ctx.globalAlpha = PARAGRAPH_MARK_ALPHA;
+    // The highlight passes run before this one and leave their blend mode
+    // behind, so the mark states its own rather than inheriting one.
+    this.ctx.globalCompositeOperation = "source-over";
     this.ctx.fillStyle = this.fontColor;
 
     // One path, one fill. Painting the parts separately lays them over each
@@ -2784,7 +2812,7 @@ export class Annotator {
     rect(stemX - half, top - half, stemX + half, bottom);
     rect(rightX - half, top - half, rightX + half, bottom);
     // The foot is off for now.
-    // rect(stemX - overhang, bottom - lineWidth, rightX + overhang, bottom);
+    // rect(stemX - overhang, bottom - 2 * half, rightX + overhang, bottom);
 
     // The bowl, its flat side on the stem's left edge and its top on the cap's.
     // Canvas angles run with y pointing down, so sweeping forwards from PI/2 to
@@ -2798,6 +2826,46 @@ export class Annotator {
 
     this.ctx.fill();
     this.ctx.restore();
+  }
+
+  /**
+   * Draw the paragraph marks held over from the text pass, each nudged right
+   * until it clears the anchor markers drawn this frame (#2076). A paragraph
+   * ending where a Territory anchor does — an empty paragraph between sections
+   * is the common one, since both marks then sit at the left margin — would
+   * otherwise land the two glyphs on top of each other. The anchor marker
+   * carries a hover target and is the meaningful one, so the mark gives way.
+   */
+  private drawPendingParagraphMarks(): void {
+    for (const mark of this.pendingParagraphMarks) {
+      let shiftX = 0;
+      // One marker cleared per pass, so the bound is their number. A mark held
+      // at the right edge cannot move, which ends the search rather than
+      // spinning on a marker it can never clear.
+      for (let pass = 0; pass <= this.anchorMarkerHitboxes.length; pass++) {
+        const { left, top, markW, h } = this.paragraphMarkGeometry(
+          mark.x,
+          mark.y,
+          shiftX
+        );
+        const clash = this.anchorMarkerHitboxes.find(
+          (hb) =>
+            left < hb.x + hb.w &&
+            left + markW > hb.x &&
+            top < hb.y + hb.h &&
+            top + h > hb.y
+        );
+        if (!clash) {
+          break;
+        }
+        const clearOf = clash.x + clash.w;
+        if (clearOf <= left) {
+          break;
+        }
+        shiftX += clearOf - left;
+      }
+      this.drawParagraphMark(mark.x, mark.y, shiftX);
+    }
   }
 
   /**
@@ -2816,6 +2884,7 @@ export class Annotator {
     // #2887 — clear last frame's marker hover targets; the HIGHLIGHT draw below
     // repopulates them. Cleared unconditionally so RAW/SEMI frames leave none.
     this.anchorMarkerHitboxes = [];
+    this.pendingParagraphMarks = [];
 
     this.syncLineNumbersCanvasToMain();
 
@@ -2847,7 +2916,12 @@ export class Annotator {
         absLine < this.text.noLines &&
         this.text.isParagraphEnd(absLine)
       ) {
-        this.drawParagraphMark(originPx + this.lineWidthPx(absLine), y);
+        // Held over: the marks are placed against the anchor markers, which are
+        // not drawn until later in this frame.
+        this.pendingParagraphMarks.push({
+          x: originPx + this.lineWidthPx(absLine),
+          y,
+        });
       }
     }
 
@@ -3134,6 +3208,10 @@ export class Annotator {
     if (!this.selectionHidden) {
       this.drawSelectionHandles();
     }
+
+    // Last inside the translated context: the anchor markers are down by now, so
+    // each mark can be placed clear of them (#2076).
+    this.drawPendingParagraphMarks();
 
     this.ctx.restore();
 
