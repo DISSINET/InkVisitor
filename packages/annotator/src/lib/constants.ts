@@ -121,16 +121,16 @@ export const PARAGRAPH_MARK_ALPHA = 0.35;
 /** Gap between the last character of a paragraph and its mark, in char widths. */
 export const PARAGRAPH_MARK_GAP_RATIO = 0.5;
 /** Total height of the mark as a fraction of one line height. */
-export const PARAGRAPH_MARK_HEIGHT_RATIO = 0.62;
+export const PARAGRAPH_MARK_HEIGHT_RATIO = 0.5;
 /** Radius of the mark's bowl as a fraction of its height: a bowl half as deep as the stems. */
 export const PARAGRAPH_MARK_BOWL_RATIO = 0.25;
 /** Distance between the mark's two stems as a fraction of its height. */
-export const PARAGRAPH_MARK_STEM_GAP_RATIO = 0.16;
-/** How far the foot runs past each stem, as a fraction of the gap between them. */
-export const PARAGRAPH_MARK_FOOT_OVERHANG_RATIO = 0.3;
-/** How far the top bar runs past the trailing stem, as a fraction of that same gap. */
-export const PARAGRAPH_MARK_CAP_OVERHANG_RATIO = 0.5;
-/** Stroke width of the mark, in CSS px (scaled by ratio at draw time). */
+export const PARAGRAPH_MARK_STEM_GAP_RATIO = 0.2;
+/** How far the top bar runs past the trailing stem, as a fraction of the gap between them. */
+export const PARAGRAPH_MARK_OVERHANG_RATIO = 0.6;
+/** How far the top bar reaches past the bowl's leading edge, in CSS px (scaled by ratio at draw time). */
+export const PARAGRAPH_MARK_CAP_LEAD_PX = 1;
+/** Thickness of the mark's stems and cap, in CSS px (scaled by ratio at draw time). */
 export const PARAGRAPH_MARK_LINE_WIDTH_PX = 1;
 
 /** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */

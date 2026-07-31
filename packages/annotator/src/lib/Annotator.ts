@@ -31,11 +31,11 @@ import {
   PARAGRAPH_INDENT_EM,
   PARAGRAPH_MARK_ALPHA,
   PARAGRAPH_MARK_BOWL_RATIO,
-  PARAGRAPH_MARK_CAP_OVERHANG_RATIO,
-  PARAGRAPH_MARK_FOOT_OVERHANG_RATIO,
+  PARAGRAPH_MARK_CAP_LEAD_PX,
   PARAGRAPH_MARK_GAP_RATIO,
   PARAGRAPH_MARK_HEIGHT_RATIO,
   PARAGRAPH_MARK_LINE_WIDTH_PX,
+  PARAGRAPH_MARK_OVERHANG_RATIO,
   PARAGRAPH_MARK_STEM_GAP_RATIO,
   SELECTION_EDGE_SCROLL_SPEED,
   SELECTION_HANDLE_BAR_WIDTH_PX,
@@ -2729,51 +2729,74 @@ export class Annotator {
    * text ends and `y` its vertical middle; the mark is pulled back inside the
    * canvas when a full-width line would push it past the right edge.
    *
-   * The shape is a pilcrow: the two stems capped by a bar at the top and
-   * standing on a foot, each running a little past the trailing stem, with a
-   * bowl hung off the leading one — a half circle, its ends meeting that stem
-   * where the bar and the curve part company. Every measure derives from the
-   * line height, so it scales with the font without depending on it.
+   * The shape is a pilcrow: two stems under a bar that overhangs the trailing
+   * one, with a solid bowl on the leading stem — a half disc, its flat side
+   * lying along that stem. Every measure derives from the line height, so it
+   * scales with the font without depending on it.
+   *
+   * The bowl is filled and the lines stroked, in two passes: one path carrying
+   * both would lay the fill and the stroke over each other, and at this alpha
+   * the overlap reads as a darker rim.
    */
   private drawParagraphMark(x: number, y: number): void {
     const h = PARAGRAPH_MARK_HEIGHT_RATIO * this.lineHeight;
     const bowlR = PARAGRAPH_MARK_BOWL_RATIO * h;
     const stemGap = PARAGRAPH_MARK_STEM_GAP_RATIO * h;
-    const footOverhang = PARAGRAPH_MARK_FOOT_OVERHANG_RATIO * stemGap;
-    const capOverhang = PARAGRAPH_MARK_CAP_OVERHANG_RATIO * stemGap;
-    // The foot's left overhang stays within the bowl, so the width is set by
-    // whichever of the two reaches further right.
-    const markW =
-      bowlR + stemGap + Math.max(footOverhang, capOverhang);
+    const overhang = PARAGRAPH_MARK_OVERHANG_RATIO * stemGap;
+    const lineWidth = PARAGRAPH_MARK_LINE_WIDTH_PX * this.ratio;
+    // A stroke straddles its line, so the bowl clears the stem and the cap by
+    // half of one to sit against their edges rather than their centres.
+    const half = lineWidth / 2;
+    const capLead = PARAGRAPH_MARK_CAP_LEAD_PX * this.ratio;
+    const markW = bowlR + half + stemGap + overhang;
 
     const left = Math.min(
       x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth,
       this.width - markW
     );
-    const stemX = left + bowlR; // the bowl hangs off this stem's left side
+    const stemX = left + bowlR + half; // the bowl hangs off this stem's left side
     const rightX = stemX + stemGap;
     const top = y - h / 2;
     const bottom = top + h;
 
     this.ctx.save();
     this.ctx.globalAlpha = PARAGRAPH_MARK_ALPHA;
-    this.ctx.strokeStyle = this.fontColor;
-    this.ctx.lineWidth = PARAGRAPH_MARK_LINE_WIDTH_PX * this.ratio;
-    this.ctx.lineCap = "round";
+    this.ctx.fillStyle = this.fontColor;
+
+    // One path, one fill. Painting the parts separately lays them over each
+    // other wherever they meet, and two passes at this alpha compound into a
+    // dark spot at every junction. Filling the union paints each pixel once, so
+    // the parts may overlap freely — which is what lets the cap reach out over
+    // the bowl and close the notch its curve leaves.
+    //
+    // Under the nonzero fill rule the subpaths must wind the same way or an
+    // overlap cancels to a hole, so every one of them runs clockwise on screen.
+    const rect = (x0: number, y0: number, x1: number, y1: number) => {
+      this.ctx.moveTo(x0, y0);
+      this.ctx.lineTo(x1, y0);
+      this.ctx.lineTo(x1, y1);
+      this.ctx.lineTo(x0, y1);
+      this.ctx.closePath();
+    };
+
     this.ctx.beginPath();
-    this.ctx.moveTo(stemX, top);
-    this.ctx.lineTo(rightX + capOverhang, top);
-    this.ctx.moveTo(stemX, top);
-    this.ctx.lineTo(stemX, bottom);
-    this.ctx.moveTo(rightX, top);
-    this.ctx.lineTo(rightX, bottom);
-    this.ctx.moveTo(stemX - footOverhang, bottom);
-    this.ctx.lineTo(rightX + footOverhang, bottom);
-    // The bowl. Canvas angles run with y pointing down, so sweeping forwards
-    // from PI/2 to -PI/2 passes through PI — bulging left, away from the stems.
-    this.ctx.moveTo(stemX, top + 2 * bowlR);
-    this.ctx.arc(stemX, top + bowlR, bowlR, Math.PI / 2, -Math.PI / 2, false);
-    this.ctx.stroke();
+    rect(stemX - capLead, top - half, rightX + overhang, top + half);
+    rect(stemX - half, top - half, stemX + half, bottom);
+    rect(rightX - half, top - half, rightX + half, bottom);
+    // The foot is off for now.
+    // rect(stemX - overhang, bottom - lineWidth, rightX + overhang, bottom);
+
+    // The bowl, its flat side on the stem's left edge and its top on the cap's.
+    // Canvas angles run with y pointing down, so sweeping forwards from PI/2 to
+    // -PI/2 passes through PI — bulging left, away from the stems, and winding
+    // with the rectangles; the close then runs back up the flat side.
+    const bowlCx = stemX - half;
+    const bowlCy = top - half + bowlR;
+    this.ctx.moveTo(bowlCx, bowlCy + bowlR);
+    this.ctx.arc(bowlCx, bowlCy, bowlR, Math.PI / 2, -Math.PI / 2, false);
+    this.ctx.closePath();
+
+    this.ctx.fill();
     this.ctx.restore();
   }
 
