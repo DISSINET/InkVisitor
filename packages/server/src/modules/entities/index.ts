@@ -18,6 +18,7 @@ import {
   IProp,
   IPropSpec,
   IReference,
+  IResourceData,
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
@@ -542,6 +543,27 @@ export default Router()
               ids: docs.map((d) => d.id),
             });
             continue;
+          }
+
+          // a Resource owning a document (data.documentId) must have it
+          // detached first, else the document would be orphaned. A dangling
+          // documentId (document row already gone) does not block.
+          if (entity.class === EntityEnums.Class.Resource) {
+            const ownedDocId = (entity.data as Partial<IResourceData>)
+              ?.documentId;
+            if (
+              ownedDocId &&
+              (await Document.getDocumentById(req.db.connection, ownedDocId))
+            ) {
+              out.result = false;
+              out.data[entity.id] = new InvalidDeleteError(
+                `Cannot be deleted while a document is attached (${ownedDocId})`
+              ).withData<IInvalidDeleteErrorData>({
+                type: "attachedDocument",
+                ids: [ownedDocId],
+              });
+              continue;
+            }
           }
 
           const model = getEntityClass(entity);

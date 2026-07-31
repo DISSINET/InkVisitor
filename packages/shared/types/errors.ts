@@ -327,13 +327,23 @@ class InvalidDeleteError extends CustomError {
  * from its references array (as reference.resource or reference.value) - the
  * client then opens the target's own detail, whose "Used in" reference tables
  * list every blocker.
+ * "attachedDocument" blocks deleting a Resource that owns a document
+ * (resource.data.documentId) - the document must be detached in the resource's
+ * detail form first, else it would be orphaned. A Resource can only be deleted
+ * from its own detail, so the client shows just the plain error message with
+ * no navigation toast.
  */
-export type InvalidDeleteConflictType = "entity" | "document" | "reference";
+export type InvalidDeleteConflictType =
+  | "entity"
+  | "document"
+  | "reference"
+  | "attachedDocument";
 
 /**
  * Shape carried by InvalidDeleteError.withData() when an entity cannot be
  * deleted because it is still referenced. `ids` are entity ids when
- * type === "entity" | "reference" and document ids when type === "document".
+ * type === "entity" | "reference" and document ids when
+ * type === "document" | "attachedDocument".
  */
 export interface IInvalidDeleteErrorData {
   type: InvalidDeleteConflictType;

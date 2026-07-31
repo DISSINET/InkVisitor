@@ -27,7 +27,11 @@ export const getInvalidDeleteErrorData = (
   }
   // unknown/legacy discriminants collapse to the generic "entity" conflict
   const type =
-    data.type === "document" || data.type === "reference" ? data.type : "entity";
+    data.type === "document" ||
+    data.type === "reference" ||
+    data.type === "attachedDocument"
+      ? data.type
+      : "entity";
   return { type, ids: data.ids };
 };
 
@@ -120,6 +124,12 @@ export const handleDeleteEntityError = (
 ): boolean => {
   const data = getInvalidDeleteErrorData(error);
   if (!data) {
+    return false;
+  }
+  // an attached document blocks deletion only of a Resource, and a Resource
+  // can only be deleted from its own (already open) detail - a click-to-open
+  // toast adds nothing, so the api layer's plain error toast handles it
+  if (data.type === "attachedDocument") {
     return false;
   }
   const { targetId, message } = resolveDeleteEntityConflict(data, deletedEntityId);

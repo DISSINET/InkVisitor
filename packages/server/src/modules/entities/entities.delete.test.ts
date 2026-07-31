@@ -13,6 +13,7 @@ import Person from "@models/person/person";
 import Concept from "@models/concept/concept";
 import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
+import Document from "@models/document/document";
 import { pool } from "@middlewares/db";
 import Statement, { StatementActant } from "@models/statement/statement";
 import { link } from "fs";
@@ -146,6 +147,58 @@ describe("Entities delete - single entity", function () {
         type: "reference",
         ids: [referencingEntity.id],
       });
+    });
+  });
+
+  describe("resource owning a document", () => {
+    const db = new Db();
+    const rand = Math.random().toString();
+    const document = new Document({
+      id: `doc-${rand}`,
+      content: "owned content",
+      createdAt: new Date(),
+    });
+    const resourceData = { url: "", partValueLabel: "", partValueBaseURL: "" };
+    const owningResource = new Resource({
+      id: `R-doc-${rand}`,
+      data: { ...resourceData, documentId: document.id },
+    });
+    const danglingResource = new Resource({
+      id: `R-dangling-${rand}`,
+      data: { ...resourceData, documentId: `doc-gone-${rand}` },
+    });
+
+    beforeAll(async () => {
+      await db.initDb();
+      await document.save(db.connection);
+      await owningResource.save(db.connection);
+      await danglingResource.save(db.connection);
+    });
+
+    afterAll(async () => await clean(db));
+
+    it("should block deleting the resource with an \"attachedDocument\" conflict", async () => {
+      const res = await authAgent
+        .delete(`${apiPath}/entities/${owningResource.id}`)
+        .expect("Content-Type", /json/)
+        .expect(
+          testErroneousResponse.bind(undefined, new InvalidDeleteError(""))
+        );
+
+      expect(res.body.data).toEqual({
+        type: "attachedDocument",
+        ids: [document.id],
+      });
+    });
+
+    it("should allow deleting a resource whose documentId points to a missing document", async () => {
+      await authAgent
+        .delete(`${apiPath}/entities/${danglingResource.id}`)
+        .expect("Content-Type", /json/)
+        .expect(200);
+
+      const deleted = await findEntityById(db, danglingResource.id);
+      expect(deleted).toBeNull();
     });
   });
 });

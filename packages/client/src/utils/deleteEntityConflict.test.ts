@@ -74,6 +74,17 @@ describe("getInvalidDeleteErrorData", () => {
     });
   });
 
+  it("preserves the attachedDocument discriminant", () => {
+    const error = {
+      error: "InvalidDeleteError",
+      data: { type: "attachedDocument", ids: ["doc-1"] } as IInvalidDeleteErrorData,
+    };
+    expect(getInvalidDeleteErrorData(error)).toEqual({
+      type: "attachedDocument",
+      ids: ["doc-1"],
+    });
+  });
+
   it("collapses an unknown discriminant to entity", () => {
     const error = {
       error: "InvalidDeleteError",
@@ -148,6 +159,7 @@ describe("resolveDeleteEntityConflict", () => {
       ).message
     ).toContain("2 entities");
   });
+
 });
 
 describe("usedInSectionId", () => {
@@ -232,6 +244,17 @@ describe("handleDeleteEntityError", () => {
     // document conflict opens the entity being deleted, not the document id
     expect(appendDetailId).toHaveBeenCalledWith("entity-1");
     expect(scrollTo).toHaveBeenCalled();
+  });
+
+  it("declines an attachedDocument conflict so the api layer's plain error toast handles it", () => {
+    const handled = handleDeleteEntityError(
+      { error: "InvalidDeleteError", data: { type: "attachedDocument", ids: ["doc-1"] } },
+      "entity-1",
+      vi.fn()
+    );
+    expect(handled).toBe(false);
+    expect(toast.info).not.toHaveBeenCalled();
+    expect(toast.warning).not.toHaveBeenCalled();
   });
 
   it("on click opens the first conflicting entity for an entity conflict (warning variant)", () => {
