@@ -1,6 +1,5 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
-import { ANNOTATOR_LEFT_MARGIN_PX } from "./types";
 
 /** Defined before viewport so the parent can target it on hover. */
 export const StyledScrollerCursor = styled.div`
@@ -43,14 +42,19 @@ export const StyledScrollerViewport = styled.div`
  */
 export const StyledAnnotatorColumn = styled.div`
   position: relative;
-  /* wTextArea reserves this same margin when it sizes the canvas */
-  padding-left: ${ANNOTATOR_LEFT_MARGIN_PX}px;
 `;
 
-export const StyledCanvasWrapper = styled.div`
+/** Inset of the canvases inside their wrapper; the height budget must pay for it. */
+export const CANVAS_WRAPPER_PADDING_PX = 2;
+
+interface StyledCanvasWrapperProps {
+  $noBorderRadius?: boolean;
+}
+export const StyledCanvasWrapper = styled.div<StyledCanvasWrapperProps>`
+  position: relative;
   background-color: ${({ theme }) => theme.color.white};
-  padding: 2px;
-  border-radius: 7px;
+  padding: ${CANVAS_WRAPPER_PADDING_PX}px;
+  border-radius: ${({ $noBorderRadius }) => ($noBorderRadius ? 0 : "7px")};
   display: flex;
   flex-direction: row;
 `;
@@ -296,21 +300,6 @@ export const StyledStatementTargetInfo = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-style: italic;
   white-space: nowrap;
-`;
-
-interface StyledDisplayModeButtonIconWrapper {
-  $annotatorWidthTooNarrow?: boolean;
-}
-export const StyledDisplayModeButtonIconWrapper = styled.div<StyledDisplayModeButtonIconWrapper>`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: ${({ $annotatorWidthTooNarrow }) => ($annotatorWidthTooNarrow ? "0.1rem 0.5rem" : "")};
-`;
-
-export const StyledAnnotatorButtons = styled.div`
-  display: flex;
-  justify-content: space-between;
 `;
 
 export const StyledWarningsList = styled.div`

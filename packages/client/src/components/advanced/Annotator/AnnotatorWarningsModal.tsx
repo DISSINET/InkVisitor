@@ -1,5 +1,6 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
 import { IResponseEntity } from "@inkvisitor/shared/types";
+import { TOOLBAR_ICON_SIZE } from "./AnnotatorToolbar/AnnotatorToolbarStyles";
 import { ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
@@ -28,12 +29,14 @@ const issuesFoundLabel = (count: number): string =>
  * opens the warnings modal. Exported so it can be rendered next to the document
  * title (outside the annotator) while the modal stays inside the annotator.
  */
-export const WarningsChip: React.FC<{ count: number; onClick: () => void }> = ({
-  count,
-  onClick,
-}) => (
+export const WarningsChip: React.FC<{
+  count: number;
+  onClick: () => void;
+  size?: ButtonSize;
+}> = ({ count, onClick, size }) => (
   <Button
-    icon={<FaExclamationTriangle size={13} />}
+    size={size}
+    icon={<FaExclamationTriangle size={TOOLBAR_ICON_SIZE} />}
     label={String(count)}
     textColor="warningText"
     color="warningMessage"

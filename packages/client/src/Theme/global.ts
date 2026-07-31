@@ -30,6 +30,19 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
   .no-select {
     user-select: none;
   }
+  /*
+    React Query devtools. Its own sizes are multiples of --tsqd-font-size, which
+    it writes inline on its root (hence the !important to outrank that), but the
+    elements it leaves untokenized inherit font-size — and would land on the
+    62.5% html size above, a third smaller than the panel is drawn for. Both
+    declarations carry one size; raise it to enlarge the whole panel.
+  */
+  .tsqd-parent-container {
+    font-size: 16px;
+  }
+  .tsqd-parent-container [style*="--tsqd-font-size"] {
+    --tsqd-font-size: 16px !important;
+  }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
     line-height: 1.3;

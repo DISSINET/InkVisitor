@@ -26,6 +26,20 @@ export const LINE_HEIGHT = 23;
 
 /** Extra empty rows after the last text line; scrollable, no line numbers in the gutter. */
 export const VIEWPORT_END_BUFFER_ROWS = 3;
+
+/**
+ * Extra rows scrollable above the first line, mirroring VIEWPORT_END_BUFFER_ROWS
+ * at the end of the document. Line 1 is the one line a lineStart minimum of 0
+ * could never scroll clear of; this headroom lets a floating UI bar pinned to
+ * the canvas top be scrolled past it like any other line.
+ *
+ * Applied through Annotator.setTopScrollBuffer only while such a bar is open —
+ * with no bar on screen the rows are empty space with nothing to reveal.
+ *
+ * Doubles as the clearance kept above a search hit: what the bar covers is what
+ * a hit has to be scrolled clear of, so one distance serves both.
+ */
+export const VIEWPORT_START_BUFFER_ROWS = 2;
 export const DEFAULT_FONT_SIZE = 13;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**
