@@ -30,8 +30,13 @@ import {
   PARAGRAPH_INDENT_DEFAULT,
   PARAGRAPH_INDENT_EM,
   PARAGRAPH_MARK_ALPHA,
+  PARAGRAPH_MARK_BOWL_RATIO,
+  PARAGRAPH_MARK_CAP_OVERHANG_RATIO,
+  PARAGRAPH_MARK_FOOT_OVERHANG_RATIO,
   PARAGRAPH_MARK_GAP_RATIO,
-  PARAGRAPH_MARK_GLYPH,
+  PARAGRAPH_MARK_HEIGHT_RATIO,
+  PARAGRAPH_MARK_LINE_WIDTH_PX,
+  PARAGRAPH_MARK_STEM_GAP_RATIO,
   SELECTION_EDGE_SCROLL_SPEED,
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
@@ -2719,22 +2724,57 @@ export class Annotator {
   }
 
   /**
-   * Paragraph mark (#2076) at the end of a paragraph's last line, in the text
-   * colour at reduced opacity so it reads as chrome. `x` is where the line's
-   * text ends; the glyph is pulled back inside the canvas when a full-width line
-   * would push it past the right edge. Assumes the caller has set the text font
-   * and the `middle` baseline, as the main draw loop does.
+   * Paragraph mark (#2076) at the end of a paragraph's last line, stroked in the
+   * text colour at reduced opacity so it reads as chrome. `x` is where the line's
+   * text ends and `y` its vertical middle; the mark is pulled back inside the
+   * canvas when a full-width line would push it past the right edge.
+   *
+   * The shape is a pilcrow: the two stems capped by a bar at the top and
+   * standing on a foot, each running a little past the trailing stem, with a
+   * bowl hung off the leading one — a half circle, its ends meeting that stem
+   * where the bar and the curve part company. Every measure derives from the
+   * line height, so it scales with the font without depending on it.
    */
   private drawParagraphMark(x: number, y: number): void {
-    const glyphW = this.ctx.measureText(PARAGRAPH_MARK_GLYPH).width;
-    const markX = Math.min(
+    const h = PARAGRAPH_MARK_HEIGHT_RATIO * this.lineHeight;
+    const bowlR = PARAGRAPH_MARK_BOWL_RATIO * h;
+    const stemGap = PARAGRAPH_MARK_STEM_GAP_RATIO * h;
+    const footOverhang = PARAGRAPH_MARK_FOOT_OVERHANG_RATIO * stemGap;
+    const capOverhang = PARAGRAPH_MARK_CAP_OVERHANG_RATIO * stemGap;
+    // The foot's left overhang stays within the bowl, so the width is set by
+    // whichever of the two reaches further right.
+    const markW =
+      bowlR + stemGap + Math.max(footOverhang, capOverhang);
+
+    const left = Math.min(
       x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth,
-      this.width - glyphW
+      this.width - markW
     );
-    const prevAlpha = this.ctx.globalAlpha;
+    const stemX = left + bowlR; // the bowl hangs off this stem's left side
+    const rightX = stemX + stemGap;
+    const top = y - h / 2;
+    const bottom = top + h;
+
+    this.ctx.save();
     this.ctx.globalAlpha = PARAGRAPH_MARK_ALPHA;
-    this.ctx.fillText(PARAGRAPH_MARK_GLYPH, markX, y);
-    this.ctx.globalAlpha = prevAlpha;
+    this.ctx.strokeStyle = this.fontColor;
+    this.ctx.lineWidth = PARAGRAPH_MARK_LINE_WIDTH_PX * this.ratio;
+    this.ctx.lineCap = "round";
+    this.ctx.beginPath();
+    this.ctx.moveTo(stemX, top);
+    this.ctx.lineTo(rightX + capOverhang, top);
+    this.ctx.moveTo(stemX, top);
+    this.ctx.lineTo(stemX, bottom);
+    this.ctx.moveTo(rightX, top);
+    this.ctx.lineTo(rightX, bottom);
+    this.ctx.moveTo(stemX - footOverhang, bottom);
+    this.ctx.lineTo(rightX + footOverhang, bottom);
+    // The bowl. Canvas angles run with y pointing down, so sweeping forwards
+    // from PI/2 to -PI/2 passes through PI — bulging left, away from the stems.
+    this.ctx.moveTo(stemX, top + 2 * bowlR);
+    this.ctx.arc(stemX, top + bowlR, bowlR, Math.PI / 2, -Math.PI / 2, false);
+    this.ctx.stroke();
+    this.ctx.restore();
   }
 
   /**

@@ -110,12 +110,28 @@ export const PARAGRAPH_INDENT_MAX_RATIO = 0.25;
  * host that needs it off.
  */
 export const PARAGRAPH_INDENT_DEFAULT = true;
-/** Glyph drawn at the end of a paragraph while paragraph marks are shown. */
-export const PARAGRAPH_MARK_GLYPH = "¶";
+/**
+ * The end-of-paragraph mark is stroked as a path rather than set as the "¶"
+ * character: a text glyph arrives at the weight of whatever font is active
+ * (the monospace face draws a heavy, slab-sided one) and shifts with every
+ * font setting, where a path keeps one thin, quiet shape everywhere.
+ */
 /** Opacity of the paragraph mark, so it reads as chrome rather than as text. */
 export const PARAGRAPH_MARK_ALPHA = 0.35;
 /** Gap between the last character of a paragraph and its mark, in char widths. */
 export const PARAGRAPH_MARK_GAP_RATIO = 0.5;
+/** Total height of the mark as a fraction of one line height. */
+export const PARAGRAPH_MARK_HEIGHT_RATIO = 0.62;
+/** Radius of the mark's bowl as a fraction of its height: a bowl half as deep as the stems. */
+export const PARAGRAPH_MARK_BOWL_RATIO = 0.25;
+/** Distance between the mark's two stems as a fraction of its height. */
+export const PARAGRAPH_MARK_STEM_GAP_RATIO = 0.16;
+/** How far the foot runs past each stem, as a fraction of the gap between them. */
+export const PARAGRAPH_MARK_FOOT_OVERHANG_RATIO = 0.3;
+/** How far the top bar runs past the trailing stem, as a fraction of that same gap. */
+export const PARAGRAPH_MARK_CAP_OVERHANG_RATIO = 0.5;
+/** Stroke width of the mark, in CSS px (scaled by ratio at draw time). */
+export const PARAGRAPH_MARK_LINE_WIDTH_PX = 1;
 
 /** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
