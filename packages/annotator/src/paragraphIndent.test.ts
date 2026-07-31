@@ -51,6 +51,20 @@ describe("which lines carry the indent", () => {
     expect(t.lineXOrigin(t.segments[2].lineStart)).toBe(4);
   });
 
+  test("a single leading space is incidental and the paragraph still indents", () => {
+    // One space is a typo, not hand-typed indentation; two spaces or a tab are.
+    const t = mkText("first\n one space lead\n  two spaces\n\ttab lead", 4);
+    expect(t.lineXOrigin(t.segments[1].lineStart)).toBe(4);
+    expect(t.lineXOrigin(t.segments[2].lineStart)).toBe(0);
+    expect(t.lineXOrigin(t.segments[3].lineStart)).toBe(0);
+  });
+
+  test("a whitespace-only paragraph is empty, not single-space-led", () => {
+    const t = mkText("first\n \nthird", 4);
+    expect(t.lineXOrigin(t.segments[1].lineStart)).toBe(0);
+    expect(t.lineXOrigin(t.segments[2].lineStart)).toBe(4);
+  });
+
   test("markup does not change where a paragraph sits", () => {
     // The paragraph's raw text starts with a tag, its parsed text with a space.
     // Both modes read the parsed text, so switching mode never shifts the line.

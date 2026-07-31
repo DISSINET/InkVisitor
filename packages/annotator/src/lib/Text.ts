@@ -234,6 +234,12 @@ export class Segment {
    * Empty unless a proportional measurer is active (monospace path is untouched).
    */
   linePrefixes: number[][] = [];
+  /**
+   * First-line indent (#2076) in wrap-budget units, as applied by the last
+   * wrap. Kept here so draw-time reads see the exact value (including the
+   * width cap) the segment's lines were wrapped against.
+   */
+  indent: number = 0;
   segmentIndex: number = -1; // index of this segment in the text
 
   /**
@@ -421,11 +427,13 @@ class Text {
    * Indent applied to a paragraph's first line. Three paragraphs get none:
    * - the document's first, which has nothing above it to be confused with (the
    *   same reason typesetting leaves an opening paragraph flush);
-   * - one whose text already begins with whitespace, since some documents were
-   *   written with the indent typed in as spaces and would otherwise double it;
-   * - one with no text at all, which has no start to mark. A blank line, or a
-   *   line holding only an anchor tag, would otherwise show its caret, selection
-   *   sliver and anchor markers nudged off the text column.
+   * - one whose text already begins with hand-typed indentation — a tab, or a
+   *   run of two or more whitespace chars — since some documents were written
+   *   with the indent typed in and would otherwise double it. A single leading
+   *   space is incidental typing, not layout, and still gets the indent;
+   * - one with no text beyond whitespace, which has no start to mark. A blank
+   *   line, or a line holding only an anchor tag, would otherwise show its
+   *   caret, selection sliver and anchor markers nudged off the text column.
    *
    * The decision reads the segment's PARSED text in every mode, so a paragraph
    * sits at the same x whichever mode the document is viewed in: markup is
@@ -433,11 +441,13 @@ class Text {
    */
   private indentForSegment(segment: Segment): number {
     const text = segment.parsed;
+    const leadingWs = /^\s+/.exec(text)?.[0];
+    const handIndented = leadingWs !== undefined && leadingWs !== " ";
     if (
       !this.paragraphIndent ||
       segment.segmentIndex === 0 ||
-      text === "" ||
-      /^\s/.test(text)
+      !text.trim() ||
+      handIndented
     ) {
       return 0;
     }
@@ -449,8 +459,9 @@ class Text {
 
   /**
    * Full width available to a visual line, in the unit the active mode wraps in
-   * — device px under a {@link measurer}, character columns otherwise. Mirrors
-   * the `maxWidth` {@link calculateLines} wraps against.
+   * — device px under a {@link measurer}, character columns otherwise. The
+   * `maxWidth` {@link calculateLines} wraps against, and the base the paragraph
+   * indent cap is taken from.
    */
   private wrapBudget(): number {
     return this.measurer
@@ -463,6 +474,8 @@ class Text {
    * paragraph indent on a paragraph's first line, 0 on its soft-wrapped
    * continuations. Everything drawn on the line — the text, the caret, selection
    * and anchor rects — is shifted by it, and mouse x is un-shifted by it.
+   * Reads the indent stored on the segment by {@link calculateLines}, so it is
+   * always the value the lines were actually wrapped against.
    */
   lineXOrigin(absLine: number): number {
     if (!this.paragraphIndent) {
@@ -471,10 +484,7 @@ class Text {
     const segment = this.segments.find(
       (s) => s.lineStart <= absLine && s.lineEndExclusive > absLine
     );
-    if (!segment || absLine !== segment.lineStart) {
-      return 0;
-    }
-    return this.indentForSegment(segment);
+    return segment && absLine === segment.lineStart ? segment.indent : 0;
   }
 
   /**
@@ -646,9 +656,7 @@ class Text {
     const widthOf = measurer
       ? (s: string) => additiveWidth(s, measurer)
       : (s: string) => s.length;
-    const maxWidth = measurer
-      ? Math.max(1, this.maxPixelWidth ?? Infinity)
-      : Math.max(1, this.charsAtLine);
+    const maxWidth = this.wrapBudget();
     // Largest code-unit count of `s` whose measured width fits `budget`.
     // Monospace reduces to min(len, budget) — i.e. the legacy `maxLen - used`.
     // Iterates code units (s[n]) like the prefix table; grapheme-aware splitting
@@ -736,12 +744,18 @@ class Text {
       // The paragraph's first visual line starts at the indent, so it has that
       // much less room; the wrapped continuations get the full width. Read as a
       // function of how many lines are already pushed so it follows pushLine.
-      const indent = this.indentForSegment(segment);
+      // Stored on the segment so draw-time lineXOrigin reads the same value.
+      const indent = (segment.indent = this.indentForSegment(segment));
       const lineBudget = () =>
         maxWidth - (segment.lines.length === 0 ? indent : 0);
 
       let currentLine: string[] = [];
       let currentLineLength = 0;
+      // Budget of the line a unit lands on after an optional pushLine: a push
+      // leaves the indented first line behind, so anything moved down gets the
+      // full width.
+      const budgetAfterPush = () =>
+        currentLineLength > 0 ? maxWidth : lineBudget();
       const pushLine = () => {
         segment.lines.push(currentLine.join(""));
         currentLine = [];
@@ -770,10 +784,7 @@ class Text {
           continue;
         }
 
-        // Budget of the line this unit would land on: a push leaves line 0
-        // behind, so the fresh line is a full-width continuation.
-        const targetBudget = currentLineLength > 0 ? maxWidth : lineBudget();
-        if (widthOf(cell.text) <= targetBudget) {
+        if (widthOf(cell.text) <= budgetAfterPush()) {
           // Move the whole unit down to a fresh line.
           if (currentLineLength > 0) pushLine();
           appendStr(cell.text);
@@ -790,8 +801,7 @@ class Text {
           // against the full width and then appended to the indented line would
           // run past the right edge before any break — visible in XML mode,
           // where a tag carrying a UUID is long enough to sit in that gap.
-          const partBudget = currentLineLength > 0 ? maxWidth : lineBudget();
-          if (part.atomic && widthOf(part.text) <= partBudget) {
+          if (part.atomic && widthOf(part.text) <= budgetAfterPush()) {
             if (
               currentLineLength > 0 &&
               currentLineLength + widthOf(part.text) > lineBudget()
