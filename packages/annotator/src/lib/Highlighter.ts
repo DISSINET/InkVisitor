@@ -169,7 +169,16 @@ export default class Highlighter {
         ctx.globalCompositeOperation = "color";
       }
       // width === 0 means a collapsed caret; honor the configured caret width.
-      ctx.fillRect(xStartPx, y, width || options.caretWidth || 1, height);
+      if (width === 0) {
+        // A caret parked in a line's trailing wrap margin — pushed further by
+        // the paragraph indent (#2076) — can land past the canvas edge; pin it
+        // to the edge so it stays visible (mirrors drawParagraphMark).
+        const caretW = options.caretWidth || 1;
+        const caretX = Math.min(xStartPx, ctx.canvas.width - caretW);
+        ctx.fillRect(caretX, y, caretW, height);
+      } else {
+        ctx.fillRect(xStartPx, y, width, height);
+      }
     }
   }
 

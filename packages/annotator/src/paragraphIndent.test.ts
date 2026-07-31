@@ -7,6 +7,7 @@
  * and its wrapped continuations stay flush left.
  */
 import { Annotator } from "./lib/Annotator";
+import Cursor from "./lib/Cursor";
 import Text from "./lib/Text";
 import { EditMode, PARAGRAPH_INDENT_MAX_RATIO } from "./lib/constants";
 
@@ -231,5 +232,46 @@ describe("paragraph marks", () => {
     expect(a.getShowParagraphMarks()).toBe(false);
     a.setShowParagraphMarks(true);
     expect(a.getShowParagraphMarks()).toBe(true);
+  });
+});
+
+describe("caret at the canvas edge", () => {
+  /** drawLine with a recording ctx; returns the fillRect calls. */
+  const paintCaret = (
+    col: number,
+    lineXOrigin?: (absLine: number) => number
+  ): number[][] => {
+    const calls: number[][] = [];
+    const ctx = {
+      canvas: { width: 200 },
+      fillRect: (...args: number[]) => calls.push(args),
+      globalAlpha: 1,
+      globalCompositeOperation: "source-over",
+    } as unknown as CanvasRenderingContext2D;
+    const cursor = new Cursor(1);
+    // Collapsed caret: xStart === xEnd on the SELECT highlighter.
+    cursor.drawLine(
+      ctx,
+      0,
+      col,
+      col,
+      { charWidth: 10, lineHeight: 20, charsAtLine: 20, caretWidth: 2, lineXOrigin },
+      0
+    );
+    return calls;
+  };
+
+  test("a margin caret pushed past the edge by the indent is pinned inside", () => {
+    // Column 19 of a 20-col canvas at charWidth 10, shifted 50px by the
+    // indent: 240px on a 200px canvas — drawn pinned at width - caretWidth.
+    const calls = paintCaret(19, () => 50);
+    expect(calls).toHaveLength(1);
+    expect(calls[0][0]).toBe(200 - 2);
+    expect(calls[0][2]).toBe(2);
+  });
+
+  test("a caret inside the canvas is not moved by the pin", () => {
+    const calls = paintCaret(3, () => 50);
+    expect(calls[0][0]).toBe(3 * 10 + 50);
   });
 });
