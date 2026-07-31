@@ -33,13 +33,13 @@ export const StyledAuditColumn = styled.div<StyledAuditColumn>`
   ${({ $wrap }) =>
     $wrap &&
     css`
-      // the icon carries the single-line column height on the first flex line,
-      // so it keeps the vertical position of the icons in the other columns
-      // while the label wraps onto the lines below it
+      // the icon sits where it would sit in a single-line column - offset by
+      // half of the space the 2rem line leaves around it - so it keeps the
+      // vertical position of the icons in the other columns without the rest of
+      // that line pushing the wrapped label down
       > :first-child {
         align-self: flex-start;
-        align-items: center;
-        min-height: 2rem;
+        margin-top: calc((2rem - 1em) / 2);
       }
     `}
 `;
