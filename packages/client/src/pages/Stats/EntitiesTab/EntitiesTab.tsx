@@ -1,11 +1,11 @@
 import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, SwitchGroup, Timestamp } from "components";
+import { Button, Input, Loader, SwitchGroup, Timestamp } from "components";
 import { StatsChart, StatsTable } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoRefresh } from "Theme/icons";
 import { ButtonSize } from "types";
@@ -187,6 +187,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                       size={ButtonSize.Medium}
                       noBorder
                       onClick={() => {
+                        setFilterDebounceEnabled(false);
                         dispatch({ type: "periodUpdate", payload: value });
                       }}
                       color={active ? "primary" : "greyer"}
@@ -268,6 +269,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     size={ButtonSize.Medium}
                     noBorder
                     onClick={() => {
+                      setFilterDebounceEnabled(false);
                       dispatch({
                         type: "timeUnitUpdate",
                         payload: unit as TimeUnit,
@@ -387,6 +389,10 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     size={ButtonSize.Medium}
                     noBorder
                     onClick={() => {
+                      // a switch click is a single deliberate change, so the
+                      // fetch fires right away; the debounce guards typing, and
+                      // re-arms once it catches up with this request
+                      setFilterDebounceEnabled(false);
                       dispatch({ type: "aggregateUpdate", payload: agg });
                     }}
                     color={active ? "primary" : "greyer"}
