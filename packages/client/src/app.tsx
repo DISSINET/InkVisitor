@@ -123,10 +123,8 @@ export const App: React.FC = () => {
       <ThemeProvider theme={themeConfig}>
         <GlobalStyle theme={themeConfig} />
         <QueryClientProvider client={queryClient}>
-          <div style={{ fontSize: "16px" }}>
-            {/* fontSize zooms query devtools to normal size */}
-            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
-          </div>
+          {/* sized by the .tsqd-parent-container rules in Theme/global.ts */}
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>
