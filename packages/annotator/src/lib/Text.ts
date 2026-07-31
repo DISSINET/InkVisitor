@@ -418,22 +418,27 @@ class Text {
   }
 
   /**
-   * Display text of a segment: the text {@link calculateLines} wraps and
-   * {@link getLine} returns — raw in RAW mode, tag-free in HIGHLIGHT/SEMI.
-   */
-  private displayTextOf(segment: Segment): string {
-    return this.mode === EditMode.RAW ? segment.raw : segment.parsed;
-  }
-
-  /**
-   * Indent applied to a paragraph's first line. Two paragraphs get none:
+   * Indent applied to a paragraph's first line. Three paragraphs get none:
    * - the document's first, which has nothing above it to be confused with (the
    *   same reason typesetting leaves an opening paragraph flush);
    * - one whose text already begins with whitespace, since some documents were
-   *   written with the indent typed in as spaces and would otherwise double it.
+   *   written with the indent typed in as spaces and would otherwise double it;
+   * - one with no text at all, which has no start to mark. A blank line, or a
+   *   line holding only an anchor tag, would otherwise show its caret, selection
+   *   sliver and anchor markers nudged off the text column.
+   *
+   * The decision reads the segment's PARSED text in every mode, so a paragraph
+   * sits at the same x whichever mode the document is viewed in: markup is
+   * structure, not the prose the indent marks the start of.
    */
-  private indentForSegment(segmentIndex: number, displayText: string): number {
-    if (!this.paragraphIndent || segmentIndex === 0 || /^\s/.test(displayText)) {
+  private indentForSegment(segment: Segment): number {
+    const text = segment.parsed;
+    if (
+      !this.paragraphIndent ||
+      segment.segmentIndex === 0 ||
+      text === "" ||
+      /^\s/.test(text)
+    ) {
       return 0;
     }
     return Math.min(
@@ -469,10 +474,7 @@ class Text {
     if (!segment || absLine !== segment.lineStart) {
       return 0;
     }
-    return this.indentForSegment(
-      segment.segmentIndex,
-      this.displayTextOf(segment)
-    );
+    return this.indentForSegment(segment);
   }
 
   /**
@@ -734,7 +736,7 @@ class Text {
       // The paragraph's first visual line starts at the indent, so it has that
       // much less room; the wrapped continuations get the full width. Read as a
       // function of how many lines are already pushed so it follows pushLine.
-      const indent = this.indentForSegment(segmentIndex, text);
+      const indent = this.indentForSegment(segment);
       const lineBudget = () =>
         maxWidth - (segment.lines.length === 0 ? indent : 0);
 
@@ -782,7 +784,14 @@ class Text {
         // fits on a line, but a tag longer than the line is still broken — with
         // no horizontal scroll, an unsplit over-long tag would run off the edge.
         for (const part of cell.parts) {
-          if (part.atomic && widthOf(part.text) <= maxWidth) {
+          // "Fits on a line" is judged against the line the part would land on:
+          // the indented first line of a paragraph holds less than the
+          // full-width continuation a pushLine would open. A tag measured
+          // against the full width and then appended to the indented line would
+          // run past the right edge before any break — visible in XML mode,
+          // where a tag carrying a UUID is long enough to sit in that gap.
+          const partBudget = currentLineLength > 0 ? maxWidth : lineBudget();
+          if (part.atomic && widthOf(part.text) <= partBudget) {
             if (
               currentLineLength > 0 &&
               currentLineLength + widthOf(part.text) > lineBudget()

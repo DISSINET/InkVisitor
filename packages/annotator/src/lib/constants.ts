@@ -103,7 +103,12 @@ export const PARAGRAPH_INDENT_EM = 2;
  * with room for a word or two; the cap keeps the paragraph readable there.
  */
 export const PARAGRAPH_INDENT_MAX_RATIO = 0.25;
-/** Whether the first-line indent is on for a user who has never chosen. */
+/**
+ * Whether paragraphs are indented. On: the indent answers a question the reader
+ * would otherwise have no way to answer, so it is not a matter of taste and
+ * carries no user-facing toggle — `Annotator.setParagraphIndent` is there for a
+ * host that needs it off.
+ */
 export const PARAGRAPH_INDENT_DEFAULT = true;
 /** Glyph drawn at the end of a paragraph while paragraph marks are shown. */
 export const PARAGRAPH_MARK_GLYPH = "¶";

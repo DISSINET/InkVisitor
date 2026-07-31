@@ -135,7 +135,6 @@ interface PersistedSettings {
   proportional?: boolean;
   fontFamily?: string;
   fontSize?: number;
-  paragraphIndent?: boolean;
   showParagraphMarks?: boolean;
 }
 
@@ -489,9 +488,7 @@ export class Annotator {
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
-    // Wrapping depends on the indent, so apply the default before the first
-    // draw; loadSettings below re-wraps again only if the user stored the
-    // opposite choice.
+    // Wrapping depends on the indent, so it is in place before the first draw.
     this.text.setParagraphIndent(this.paragraphIndentUnits());
 
     this.cursor = new Cursor(this.ratio, 0, 0);
@@ -2077,10 +2074,6 @@ export class Annotator {
     items.push({ separator: true });
     items.push(
       {
-        label: `${this.paragraphIndent ? "✓ " : ""}Indent paragraphs`,
-        onClick: () => this.setParagraphIndent(!this.paragraphIndent),
-      },
-      {
         label: `${this.showParagraphMarks ? "✓ " : ""}Show paragraph marks`,
         onClick: () => this.setShowParagraphMarks(!this.showParagraphMarks),
       },
@@ -2152,26 +2145,6 @@ export class Annotator {
         label: "Highlight color",
         value: this.getHighlightColor(),
         onChange: (hex) => this.setHighlightColor(hex),
-      },
-      {
-        type: "segmented",
-        label: "Indent paragraphs",
-        options: [
-          { label: "On", value: 1 },
-          { label: "Off", value: 0 },
-        ],
-        value: this.paragraphIndent ? 1 : 0,
-        onChange: (v) => this.setParagraphIndent(v === 1),
-      },
-      {
-        type: "segmented",
-        label: "Paragraph marks",
-        options: [
-          { label: "On", value: 1 },
-          { label: "Off", value: 0 },
-        ],
-        value: this.showParagraphMarks ? 1 : 0,
-        onChange: (v) => this.setShowParagraphMarks(v === 1),
       },
       {
         type: "segmented",
@@ -3204,20 +3177,9 @@ export class Annotator {
     if (typeof parsed.showParagraphMarks === "boolean") {
       this.showParagraphMarks = parsed.showParagraphMarks;
     }
-    // Paragraph indent (#2076). It feeds the wrap budget, so it is applied by
-    // the same applyFontChange re-wrap as the font settings below — which runs
-    // whenever this differs from the default, even if no font setting is stored.
-    let fontChanged = false;
-    if (
-      typeof parsed.paragraphIndent === "boolean" &&
-      parsed.paragraphIndent !== this.paragraphIndent
-    ) {
-      this.paragraphIndent = parsed.paragraphIndent;
-      fontChanged = true;
-    }
-
     // Font settings (#2487). Set the fields first, then re-derive font/layout
     // once (no redraw — the constructor draws right after loadSettings).
+    let fontChanged = false;
     if (typeof parsed.fontSize === "number") {
       this.fontSize = Math.max(1, parsed.fontSize);
       fontChanged = true;
@@ -3245,9 +3207,6 @@ export class Annotator {
     this.showFps = false;
     this.lastFrameTime = 0;
     this.fps = 0;
-    // Paragraph rendering back to defaults (#2076); applyFontChange below
-    // re-derives the indent in wrap units and re-wraps.
-    this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
     this.showParagraphMarks = false;
     // Font settings back to defaults (#2487).
     this.proportional = false;
@@ -3283,7 +3242,6 @@ export class Annotator {
         proportional: this.proportional,
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
-        paragraphIndent: this.paragraphIndent,
         showParagraphMarks: this.showParagraphMarks,
       };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
@@ -3336,14 +3294,14 @@ export class Annotator {
   /**
    * Toggle the paragraph first-line indent. The indent shortens the first line's
    * wrap budget, so this re-wraps the document; the caret is carried through the
-   * re-wrap by its document offset. Persisted.
+   * re-wrap by its document offset. Not stored — the indent is on for everyone
+   * (see {@link PARAGRAPH_INDENT_DEFAULT}), and this is the host's way out.
    */
   setParagraphIndent(on: boolean): void {
     this.paragraphIndent = on;
     this.cursor.reconcileOffsetsFromVisual(this.text);
     this.text.setParagraphIndent(this.paragraphIndentUnits());
     this.cursor.syncVisualFromOffset(this.text);
-    this.saveSettings();
     this.draw();
   }
 

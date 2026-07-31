@@ -51,11 +51,29 @@ describe("which lines carry the indent", () => {
     expect(t.lineXOrigin(t.segments[2].lineStart)).toBe(4);
   });
 
-  test("the suppression follows the mode's display text, not the raw markup", () => {
+  test("markup does not change where a paragraph sits", () => {
     // The paragraph's raw text starts with a tag, its parsed text with a space.
+    // Both modes read the parsed text, so switching mode never shifts the line.
     const value = "first\n<x>    tagged then spaces</x>";
-    expect(mkText(value, 4, EditMode.RAW).lineXOrigin(1)).toBe(4);
+    expect(mkText(value, 4, EditMode.RAW).lineXOrigin(1)).toBe(0);
     expect(mkText(value, 4, EditMode.HIGHLIGHT).lineXOrigin(1)).toBe(0);
+  });
+
+  test("a paragraph holding only an anchor tag is flush in every mode", () => {
+    // What line 3177 of a real document looks like: one anchor tag, no prose.
+    const value = "first\n</f4fc7fb6-c0b4-4caa-997a-0d0d7754494a>\nthird";
+    for (const mode of [EditMode.RAW, EditMode.HIGHLIGHT, EditMode.SEMI]) {
+      const t = mkText(value, 4, mode);
+      expect(t.lineXOrigin(t.segments[1].lineStart)).toBe(0);
+      expect(t.lineXOrigin(t.segments[2].lineStart)).toBe(4);
+    }
+  });
+
+  test("an empty paragraph is not indented", () => {
+    const t = mkText("first\n\n\nfourth paragraph", 4);
+    expect(t.lineXOrigin(1)).toBe(0);
+    expect(t.lineXOrigin(2)).toBe(0);
+    expect(t.lineXOrigin(3)).toBe(4);
   });
 
   test("no indent reported while the setting is off", () => {
@@ -97,6 +115,22 @@ describe("wrapping around the indent", () => {
     const t = mkText("first\nab wordthatisfifteen", 6);
     expect(t.segments[1].lines[0].trimEnd()).toBe("ab");
     expect(t.segments[1].lines[1]).toBe("wordthatisfifteen");
+  });
+
+  test("a tag too wide for the indented line is broken, not run off the edge", () => {
+    // 16 chars: fits a full 20-wide line but not the 15 left after the indent —
+    // the window where a tag measured against the full width would be appended
+    // to the indented line and overhang it. In XML mode, where every anchor is
+    // a tag carrying an id, that window is where the long ones land.
+    const tag = '<person id="12">';
+    const t = mkText(`first\n${tag}name`, 5);
+    const seg = t.segments[1];
+    seg.lines.forEach((line, i) => {
+      const origin = t.lineXOrigin(seg.lineStart + i);
+      expect(origin + line.trimEnd().length).toBeLessThanOrEqual(MAXLEN);
+    });
+    // The pieces still reconstruct the paragraph exactly.
+    expect(seg.lines.join("")).toBe(`${tag}name`);
   });
 
   test("an indent wider than a quarter of the line is capped", () => {
