@@ -1,9 +1,5 @@
 import styled from "styled-components";
 
-// `table-layout: fixed` takes the column widths from the header row, so this is
-// also the offset the second sticky column is pinned at
-export const COLUMN_WIDTH = 150;
-
 interface StyledTableContainer {
   $height: number;
   $width: number;
@@ -11,10 +7,10 @@ interface StyledTableContainer {
 export const StyledTableContainer = styled.div<StyledTableContainer>`
   /* display: flex; */
   /* $width/$height are the space the layout offers, not the space the table
-     needs: the box hugs the table and scrolls only past the offer. the self
-     alignment opts out of the stretch a grid or flex parent would impose */
-  align-self: start;
-  justify-self: start;
+     needs: the box hugs the table and scrolls only past the offer. the auto
+     inline margins split any leftover, so a small table sits horizontally
+     centered in the offer while staying pinned to its top */
+  margin: 0 auto;
   width: fit-content;
   height: fit-content;
   max-width: ${({ $width }) => $width}px;
@@ -40,13 +36,10 @@ export const StyledEmptyState = styled.div<StyledTableContainer>`
   font-size: ${({ theme }) => theme.fontSize.base};
 `;
 
-interface StyledTable {
-  $width: number;
-}
-export const StyledTable = styled.table<StyledTable>`
+/* auto table layout: every column takes the width of its widest cell, header
+   or body — the nowrap on cells is what keeps that width single-line */
+export const StyledTable = styled.table`
   border-collapse: collapse;
-  width: ${({ $width }) => $width}px;
-  table-layout: fixed;
 `;
 
 interface StyledTh {
@@ -54,14 +47,15 @@ interface StyledTh {
   $stickyOffset?: number;
 }
 export const StyledTh = styled.th<StyledTh>`
-  background: ${({ theme }) => theme.color.gray[200]};
-  padding: ${({ theme }) => theme.space[2]};
+  background: ${({ theme }) => theme.color.tableHeaderBg};
+  /* the wide inline padding is the breathing room between content-sized
+     columns */
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
   text-align: left;
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   border-bottom: 2px solid ${({ theme }) => theme.color.gray[400]};
   white-space: nowrap;
   font-size: 14px;
-  width: ${COLUMN_WIDTH}px;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -79,11 +73,10 @@ interface StyledTd {
   $isTotalRow?: boolean;
 }
 export const StyledTd = styled.td<StyledTd>`
-  padding: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[4]}`};
   border-bottom: 1px solid
     ${({ theme, $isTotalRow }) =>
       $isTotalRow ? theme.color.gray[400] : theme.color.gray[200]};
-  width: ${COLUMN_WIDTH}px;
   font-size: 13px;
   white-space: nowrap;
   font-weight: ${({ theme, $isTotalRow, $isSticky }) =>

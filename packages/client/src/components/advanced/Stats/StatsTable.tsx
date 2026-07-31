@@ -1,15 +1,13 @@
 import { IResponseStats } from "@inkvisitor/shared/types";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Column, useTable } from "react-table";
 import {
-  TABLE_PADDING,
   TOTAL_KEY,
   getDataCategories,
   transformDataForTable,
 } from "./statsViz.utils";
 import {
-  COLUMN_WIDTH,
   StyledEmptyState,
   StyledTable,
   StyledTableContainer,
@@ -57,25 +55,18 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
       {
         Header: "Time",
         accessor: "timeKey",
-        width: 200,
       },
       {
         Header: "Total",
         accessor: TOTAL_KEY,
         Cell: ({ value }: { value: number | string }) => value,
         id: TOTAL_KEY,
-        width: 200,
-        minWidth: 200,
-        maxWidth: 200,
       },
       ...dataCategories.map((category) => ({
         Header: category,
         accessor: category,
         Cell: ({ value }: { value: number | string }) => value,
         id: category,
-        width: 200,
-        minWidth: 200,
-        maxWidth: 200,
       })),
     ],
     [dataCategories]
@@ -87,6 +78,23 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
       data: tableData,
     });
 
+  // columns size to their content, so the offset the second pinned column
+  // sticks at is whatever width the first column rendered — measured live,
+  // since new data re-lays it out
+  const firstColRef = useRef<HTMLTableCellElement>(null);
+  const [firstColWidth, setFirstColWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = firstColRef.current;
+    if (!el) {
+      return;
+    }
+    const update = () => setFirstColWidth(el.offsetWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [dataCategories]);
+
   if (dataCategories.length === 0) {
     return (
       <StyledEmptyState $height={height} $width={width}>
@@ -97,7 +105,7 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
 
   return (
     <StyledTableContainer $height={height} $width={width}>
-      <StyledTable {...getTableProps()} $width={width - TABLE_PADDING}>
+      <StyledTable {...getTableProps()}>
         <thead>
           {headerGroups.map((headerGroup) => {
             const { key, ...restHeaderGroupProps } =
@@ -110,8 +118,9 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
                     <StyledTh
                       key={key}
                       {...restHeaderProps}
+                      ref={index === 0 ? firstColRef : undefined}
                       $isSticky={index <= 1}
-                      $stickyOffset={index * COLUMN_WIDTH}
+                      $stickyOffset={index === 0 ? 0 : firstColWidth}
                     >
                       {column.render("Header")}
                     </StyledTh>
@@ -136,7 +145,7 @@ export const StatsTable = ({ data, height, width }: StatsTableProps) => {
                       key={key}
                       {...restCellProps}
                       $isSticky={index <= 1}
-                      $stickyOffset={index * COLUMN_WIDTH}
+                      $stickyOffset={index === 0 ? 0 : firstColWidth}
                       $isTotalRow={isTotalRow}
                     >
                       {cell.render("Cell")}

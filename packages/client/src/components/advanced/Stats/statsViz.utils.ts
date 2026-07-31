@@ -6,7 +6,6 @@ import { useTheme } from "styled-components";
 export const OTHERS_KEY = "others";
 /** Row key of the column holding the sum over all categories of a time bucket. */
 export const TOTAL_KEY = "__total";
-export const TABLE_PADDING = 30;
 
 /** `12 [3.45%]` - the share is relative to the grand total of the table. */
 export const formatValueWithShare = (value: number, grandTotal: number): string =>

@@ -180,9 +180,6 @@ export const StyledResultsChart = styled.div`
 
 export const StyledResultsTable = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: ${(props) => props.theme.space[5]};
   width: 100%;
   height: 100%;
   /* Allow shrinking inside CSS Grid */
