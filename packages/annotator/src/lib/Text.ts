@@ -470,6 +470,36 @@ class Text {
   }
 
   /**
+   * Index of the segment holding absolute visual line `absLine`, or -1 when the
+   * line is outside `[0, noLines)`. Binary search: {@link calculateLines} lays
+   * segments out contiguously and ordered by `lineStart`, and these lookups run
+   * per visible line per frame, where a linear scan of a many-thousand-paragraph
+   * document is measurable.
+   */
+  private segmentIndexForLine(absLine: number): number {
+    let lo = 0;
+    let hi = this.segments.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const s = this.segments[mid];
+      if (s.lineEndExclusive <= absLine) {
+        lo = mid + 1;
+      } else if (s.lineStart > absLine) {
+        hi = mid - 1;
+      } else {
+        return mid;
+      }
+    }
+    return -1;
+  }
+
+  /** The segment holding absolute visual line `absLine`, or undefined. */
+  private segmentForLine(absLine: number): Segment | undefined {
+    const i = this.segmentIndexForLine(absLine);
+    return i === -1 ? undefined : this.segments[i];
+  }
+
+  /**
    * Horizontal origin of an absolute visual line, in wrap-budget units: the
    * paragraph indent on a paragraph's first line, 0 on its soft-wrapped
    * continuations. Everything drawn on the line — the text, the caret, selection
@@ -481,9 +511,7 @@ class Text {
     if (!this.paragraphIndent) {
       return 0;
     }
-    const segment = this.segments.find(
-      (s) => s.lineStart <= absLine && s.lineEndExclusive > absLine
-    );
+    const segment = this.segmentForLine(absLine);
     return segment && absLine === segment.lineStart ? segment.indent : 0;
   }
 
@@ -493,9 +521,7 @@ class Text {
    * document's final paragraph ends there even without a trailing newline.
    */
   isParagraphEnd(absLine: number): boolean {
-    const segment = this.segments.find(
-      (s) => s.lineStart <= absLine && s.lineEndExclusive > absLine
-    );
+    const segment = this.segmentForLine(absLine);
     return !!segment && absLine === segment.lineEndExclusive - 1;
   }
 
@@ -516,9 +542,7 @@ class Text {
    */
   private prefixForLine(absLine: number): number[] | undefined {
     const clamped = Math.max(0, Math.min(absLine, Math.max(0, this.noLines - 1)));
-    const segment = this.segments.find(
-      (s) => s.lineStart <= clamped && s.lineEndExclusive > clamped
-    );
+    const segment = this.segmentForLine(clamped);
     return segment?.linePrefixes[clamped - segment.lineStart];
   }
 
@@ -566,16 +590,13 @@ class Text {
    */
   getLine(lineIndex: number): string {
     // Find the segment that contains the line
-    const segmentIndex = this.segments.findIndex(
-      (s) => s.lineStart <= lineIndex && s.lineEndExclusive > lineIndex
-    );
+    const segment = this.segmentForLine(lineIndex);
 
-    if (segmentIndex === -1) {
+    if (!segment) {
       return "";
     }
 
     // Calculate the relative line index within the segment
-    const segment = this.segments[segmentIndex];
     const relativeLineIndex = lineIndex - segment.lineStart;
 
     // Return the line from the segment
@@ -1361,9 +1382,7 @@ class Text {
       }
     }
 
-    const segmentIndex = this.segments.findLastIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEndExclusive > absLineIndex
-    );
+    const segmentIndex = this.segmentIndexForLine(absLineIndex);
 
     if (segmentIndex === -1) {
       return null;
