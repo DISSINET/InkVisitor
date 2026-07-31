@@ -17,14 +17,16 @@ interface RequiredIndex {
 }
 
 const REQUIRED: RequiredIndex[] = [
-  // The entity-detail response (ResponseEntityDetail.prepare) reaches all of
-  // these via getAll(): Entity.findUsedInProps plus Statement.getLinkedEntities
-  // / findByDataPropsId / findByDataActantsCI. Reuse the canonical entity-id
-  // reference set so any index added there is covered here automatically.
+  // The entity-detail response (ResponseEntityDetail.prepare) and the delete
+  // guard (Entity.getUsedByEntity) reach all of these via getAll():
+  // Entity.findUsedInProps / findUsedInReferences plus
+  // Statement.getLinkedEntities / findByDataPropsId / findByDataActantsCI.
+  // Reuse the canonical entity-id reference set so any index added there is
+  // covered here automatically.
   ...DbEnums.EntityIdReferenceIndexes.map((index) => ({
     table: "entities",
     index,
-    usedBy: "entity-detail response (getAll)",
+    usedBy: "entity-detail response / delete guard (getAll)",
   })),
   {
     table: "entities",

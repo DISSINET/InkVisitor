@@ -399,6 +399,20 @@ export const StyledAnchorCell = styled.div`
 `;
 
 /**
+ * Wraps the open-Statement-in-editor button inside the tag's button slot;
+ * visible only while the pointer is over the anchor cell, so the extra action
+ * does not crowd every Statement tag at rest. Visibility is CSS-driven from
+ * the cell because EntityTag memoizes on the button slot's presence, not its
+ * content — React state in the cell would never reach a mounted slot.
+ */
+export const StyledAnchorOpenStatementButton = styled.div`
+  display: none;
+  ${StyledAnchorCell}:hover & {
+    display: flex;
+  }
+`;
+
+/**
  * Outer wrapper for a row's anchor controls (view mode). Lays out the
  * collapsed static elvl icon next to the hover zone below; itself carries no
  * hover behavior.

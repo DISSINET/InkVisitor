@@ -6,6 +6,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import {
   IEntity,
   IProp,
+  IReference,
   IResponseDetail,
   IResponseEntity,
   IResponseUsedInMetaProp,
@@ -16,6 +17,7 @@ import {
 } from "@inkvisitor/shared/types";
 import {
   IResponseUsedInDocument,
+  IResponseUsedInReference,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
@@ -131,6 +133,8 @@ export class ResponseEntityDetail
   usedInDocuments: IResponseUsedInDocument[];
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
+  usedInReferences: IResponseUsedInReference[];
+  usedInReferenceParts: IResponseUsedInReference[];
 
   relations: UsedRelations;
   warnings: IWarning[];
@@ -143,6 +147,8 @@ export class ResponseEntityDetail
     this.usedInMetaProps = [];
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
+    this.usedInReferences = [];
+    this.usedInReferenceParts = [];
     this.relations = new UsedRelations(entity.id, entity.class);
     this.warnings = [];
     this.usedInDocuments = [];
@@ -186,6 +192,7 @@ export class ResponseEntityDetail
         Statement.findByDataActantsCI(conn, this.id),
         this.findUsedInDocuments(conn),
         warningsPromise,
+        Entity.findUsedInReferences(conn, this.id),
       ]),
       this.relations.prepare(req, RelationEnums.AllTypes),
     ]);
@@ -197,10 +204,15 @@ export class ResponseEntityDetail
       actantsCIStatements,
       usedInDocuments,
       warnings,
+      usedInReferencesEntities,
     ] = data;
 
     for (const entity of usedInPropsEntities) {
       this.walkEntityProps(entity.id, entity.props);
+    }
+
+    for (const entity of usedInReferencesEntities) {
+      this.walkEntityReferences(entity.id, entity.references);
     }
 
     this.walkStatementsDataEntities(linkedEntities);
@@ -395,6 +407,39 @@ export class ResponseEntityDetail
       if (prop.children.length) {
         this.walkEntityProps(originId, prop.children);
       }
+    }
+  }
+
+  /**
+   * Splits the reference rows of one origin entity into the two backlink
+   * lists - usedInReferences for rows pointing at this entity as the resource,
+   * usedInReferenceParts for rows pointing at it as the value.
+   * @param originId entity carrying the references
+   * @param references
+   */
+  walkEntityReferences(originId: string, references: IReference[]) {
+    for (const reference of references) {
+      const isResource = reference.resource === this.id;
+      const isValue = reference.value === this.id;
+
+      if (!isResource && !isValue) {
+        continue;
+      }
+
+      const useCase: IResponseUsedInReference = {
+        originId,
+        resourceId: reference.resource,
+        valueId: reference.value,
+      };
+
+      if (isResource) {
+        this.usedInReferences.push(useCase);
+      }
+      if (isValue) {
+        this.usedInReferenceParts.push(useCase);
+      }
+
+      this.addLinkedEntities([originId, reference.resource, reference.value]);
     }
   }
 

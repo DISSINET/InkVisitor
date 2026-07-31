@@ -28,6 +28,16 @@ export const StyledRow = styled.div`
 export const StyledCellMerge = styled.div`
   grid-column: 1 / -1;
 `;
+// all option rows share these tracks, so the label column is as wide as the
+// widest label and every input gets the same remaining width
+export const StyledOptionRows = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+`;
+export const StyledOptionRow = styled(StyledRow)`
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+`;
 export const StyledAdvancedOptions = styled.div`
   display: flex;
   align-items: center;
