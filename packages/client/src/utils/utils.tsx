@@ -173,6 +173,51 @@ export const dndHoverFn = (
   item.index = hoverIndex;
 };
 
+// Variant of dndHoverFn for rows of uneven height: dragging downwards swaps as
+// soon as the dragged row's top edge reaches the top edge of the row below.
+// Dragging upwards swaps once the cursor is a quarter into the row above,
+// instead of the halfway point dndHoverFn uses.
+const UPWARDS_HOVER_RATIO = 0.75;
+export const dndHoverFnTopEdgeDown = (
+  item: EntityDragItem | DragItem,
+  index: number,
+  monitor: DropTargetMonitor,
+  ref: React.RefObject<HTMLDivElement | HTMLTableRowElement | null>,
+  moveFn: (dragIndex: number, hoverIndex: number) => void,
+) => {
+  if (!ref?.current) {
+    return;
+  }
+
+  const dragIndex: number = item.index;
+  const hoverIndex: number | undefined = index;
+
+  if (dragIndex === hoverIndex || hoverIndex === undefined) {
+    return;
+  }
+
+  const hoverBoundingRect = ref.current.getBoundingClientRect();
+
+  if (dragIndex < hoverIndex) {
+    // top-left corner of the dragged preview
+    const sourceOffset = monitor.getSourceClientOffset();
+    if (!sourceOffset || sourceOffset.y < hoverBoundingRect.top) {
+      return;
+    }
+  } else {
+    const hoverThresholdY =
+      (hoverBoundingRect.bottom - hoverBoundingRect.top) * UPWARDS_HOVER_RATIO;
+    const clientOffset = monitor.getClientOffset();
+    const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+    if (hoverClientY > hoverThresholdY) {
+      return;
+    }
+  }
+
+  moveFn(dragIndex, hoverIndex);
+  item.index = hoverIndex;
+};
+
 export const dndHoverFnHorizontal = (
   item: EntityDragItem | DragItem,
   index: number,
