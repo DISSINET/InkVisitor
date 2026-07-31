@@ -2,9 +2,13 @@ import styled from "styled-components";
 
 interface StyledTable {
   $noBorder: boolean;
+  $equalColumns: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
   width: 100%;
+  /* fixed layout splits the width evenly between columns regardless of
+   content length; cells rely on their own overflow handling */
+  table-layout: ${({ $equalColumns }) => ($equalColumns ? "fixed" : "auto")};
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};

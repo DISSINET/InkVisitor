@@ -1,8 +1,13 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { IResponseUsedInReference } from "@inkvisitor/shared/types/response-detail";
-import { Table } from "components";
+import { Button, Table } from "components";
+import { EntityTag } from "components/advanced";
+import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
+import { FaEdit } from "react-icons/fa";
 import { CellProps, Column } from "react-table";
+import { StyledTableTextGridCell } from "../EntityDetailUsedInTableStyles";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
 
 type CellType = CellProps<IResponseUsedInReference>;
@@ -13,9 +18,14 @@ interface EntityDetailReferencesTable {
   useCases: IResponseUsedInReference[];
   perPage?: number;
 }
-export const EntityDetailReferencesTable: React.FC<
-  EntityDetailReferencesTable
-> = ({ title, entities, useCases, perPage = 5 }) => {
+export const EntityDetailReferencesTable: React.FC<EntityDetailReferencesTable> = ({
+  title,
+  entities,
+  useCases,
+  perPage = 5,
+}) => {
+  const { setStatementId, setTerritoryId } = useSearchParams();
+
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
   const columns = useMemo<Column<IResponseUsedInReference>[]>(
@@ -26,7 +36,36 @@ export const EntityDetailReferencesTable: React.FC<
           const useCase = row.original;
           const entityId = useCase.originId;
           const entity = entityId ? entities[entityId] : false;
-          return <>{entity && renderEntityTag(entity)}</>;
+          return (
+            <>
+              {entity && (
+                <StyledTableTextGridCell>
+                  <EntityTag
+                    fullWidth
+                    entity={entity}
+                    button={
+                      entity.class === EntityEnums.Class.Statement && (
+                        <Button
+                          tooltipLabel="open Statement in editor"
+                          color="plain"
+                          inverted
+                          shape="sharp"
+                          icon={<FaEdit />}
+                          onClick={() => {
+                            setStatementId(entity.id);
+                            const territoryId = entity.data.territory?.territoryId;
+                            if (!entity.isTemplate && territoryId) {
+                              setTerritoryId(territoryId);
+                            }
+                          }}
+                        />
+                      )
+                    }
+                  />
+                </StyledTableTextGridCell>
+              )}
+            </>
+          );
         },
       },
       {
@@ -48,17 +87,12 @@ export const EntityDetailReferencesTable: React.FC<
         },
       },
     ],
-    [entities]
+    [entities],
   );
 
   return (
     <>
-      <Table
-        columns={columns}
-        data={data}
-        entityTitle={title}
-        perPage={perPage}
-      />
+      <Table columns={columns} data={data} entityTitle={title} perPage={perPage} equalColumns />
     </>
   );
 };
