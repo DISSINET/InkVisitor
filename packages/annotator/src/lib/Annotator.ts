@@ -27,6 +27,11 @@ import {
   HighlightMode,
   HOVER_DEBOUNCE_MS,
   LINE_HEIGHT,
+  PARAGRAPH_INDENT_DEFAULT,
+  PARAGRAPH_INDENT_EM,
+  PARAGRAPH_MARK_ALPHA,
+  PARAGRAPH_MARK_GAP_RATIO,
+  PARAGRAPH_MARK_GLYPH,
   SELECTION_EDGE_SCROLL_SPEED,
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
@@ -130,6 +135,8 @@ interface PersistedSettings {
   proportional?: boolean;
   fontFamily?: string;
   fontSize?: number;
+  paragraphIndent?: boolean;
+  showParagraphMarks?: boolean;
 }
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
@@ -154,6 +161,12 @@ export interface DrawingOptions {
    * `col * charWidth`. Absent on the monospace path.
    */
   columnToPixelX?: (absLine: number, col: number) => number;
+  /**
+   * Horizontal origin of a visual line in device px — the paragraph indent
+   * (#2076) on a paragraph's first line, 0 elsewhere. Column 0 of that line sits
+   * here, so every rect drawn on it is shifted by this much.
+   */
+  lineXOrigin?: (absLine: number) => number;
 }
 
 export interface Selected {
@@ -321,6 +334,15 @@ export class Annotator {
    */
   private highlightColor: string | undefined = undefined;
 
+  /**
+   * Indent the first visual line of every paragraph (#2076). Left-aligned text
+   * gives no other cue whether a break is a paragraph or a soft wrap.
+   */
+  private paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
+
+  /** Draw a ¶ at the end of each paragraph (Word's "formatting marks"). */
+  private showParagraphMarks = false;
+
   /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
   private showFps = false;
   private lastFrameTime = 0;
@@ -467,6 +489,10 @@ export class Annotator {
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
+    // Wrapping depends on the indent, so apply the default before the first
+    // draw; loadSettings below re-wraps again only if the user stored the
+    // opposite choice.
+    this.text.setParagraphIndent(this.paragraphIndentUnits());
 
     this.cursor = new Cursor(this.ratio, 0, 0);
 
@@ -899,7 +925,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
 
     // Clamp to valid line range
@@ -971,7 +998,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
 
     tempCursor.yLine = Math.max(0, Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1)));
@@ -1170,6 +1198,10 @@ export class Annotator {
     if (this.lines) {
       this.lines.lineHeight = this.lineHeight;
     }
+    // The indent is expressed in ems and in the wrap unit of the active mode, so
+    // both a size change and a monospace/proportional switch re-derive it. Set
+    // before the re-wrap below, which is what consumes it.
+    this.text.paragraphIndent = this.paragraphIndentUnits();
     // Rebuild (or clear) the prefix tables for the new font; recalculates lines.
     this.text.setMeasurer(
       this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
@@ -1259,13 +1291,54 @@ export class Annotator {
   }
 
   /**
+   * Paragraph indent (#2076) in the unit {@link Text} wraps in: device px under
+   * a proportional measurer, whole character columns on the monospace grid
+   * (rounded, at least one column so the indent never vanishes at small sizes).
+   * 0 while the setting is off.
+   */
+  private paragraphIndentUnits(): number {
+    if (!this.paragraphIndent) {
+      return 0;
+    }
+    const px = PARAGRAPH_INDENT_EM * this.fontSize * this.ratio;
+    if (this.proportional) {
+      return px;
+    }
+    return this.charWidth > 0 ? Math.max(1, Math.round(px / this.charWidth)) : 0;
+  }
+
+  /**
+   * Device-px horizontal origin of a visual line: {@link Text.lineXOrigin} in
+   * wrap units, converted the same way a column is (identity in proportional,
+   * `× charWidth` on the monospace grid).
+   */
+  private lineXOriginPx(absLine: number): number {
+    const origin = this.text.lineXOrigin(absLine);
+    if (origin === 0) {
+      return 0;
+    }
+    return this.proportional ? origin : origin * this.charWidth;
+  }
+
+  /**
+   * The line-origin resolver to put on DrawingOptions / pass to a hit-test, or
+   * undefined while no paragraph is indented (so the callee keeps its plain
+   * x=0 path). Mirror of {@link drawColumnToPixelX}.
+   */
+  private drawLineXOrigin(): ((absLine: number) => number) | undefined {
+    return this.paragraphIndent ? (absLine) => this.lineXOriginPx(absLine) : undefined;
+  }
+
+  /**
    * Device-px x of a selection-handle boundary point (#3108).
    * Proportional uses measured offsets; monospace keeps `col * charWidth`.
    */
   private handleX(pt: IAbsCoordinates): number {
-    return this.proportional
-      ? this.text.columnToPixelX(pt.yLine, pt.xLine)
-      : pt.xLine * this.charWidth;
+    return (
+      (this.proportional
+        ? this.text.columnToPixelX(pt.yLine, pt.xLine)
+        : pt.xLine * this.charWidth) + this.lineXOriginPx(pt.yLine)
+    );
   }
 
   /**
@@ -1342,7 +1415,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -1438,7 +1512,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     return this.text.clampVisual(tmp.xLine, tmp.yLine);
   }
@@ -1931,7 +2006,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -2001,6 +2077,15 @@ export class Annotator {
     items.push({ separator: true });
     items.push(
       {
+        label: `${this.paragraphIndent ? "✓ " : ""}Indent paragraphs`,
+        onClick: () => this.setParagraphIndent(!this.paragraphIndent),
+      },
+      {
+        label: `${this.showParagraphMarks ? "✓ " : ""}Show paragraph marks`,
+        onClick: () => this.setShowParagraphMarks(!this.showParagraphMarks),
+      },
+      { separator: true },
+      {
         label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
         onClick: () => this.setShowFps(!this.showFps),
       },
@@ -2067,6 +2152,26 @@ export class Annotator {
         label: "Highlight color",
         value: this.getHighlightColor(),
         onChange: (hex) => this.setHighlightColor(hex),
+      },
+      {
+        type: "segmented",
+        label: "Indent paragraphs",
+        options: [
+          { label: "On", value: 1 },
+          { label: "Off", value: 0 },
+        ],
+        value: this.paragraphIndent ? 1 : 0,
+        onChange: (v) => this.setParagraphIndent(v === 1),
+      },
+      {
+        type: "segmented",
+        label: "Paragraph marks",
+        options: [
+          { label: "On", value: 1 },
+          { label: "Off", value: 0 },
+        ],
+        value: this.showParagraphMarks ? 1 : 0,
+        onChange: (v) => this.setShowParagraphMarks(v === 1),
       },
       {
         type: "segmented",
@@ -2497,7 +2602,8 @@ export class Annotator {
 
     const columnToPixelX = this.drawColumnToPixelX();
     const toPx = (yLine: number, xLine: number): number =>
-      columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth;
+      (columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth) +
+      this.lineXOriginPx(yLine);
 
     // Only rows the main text renderer paints are eligible; a marker whose
     // endpoint is off-screen is simply skipped (a multi-screen territory shows
@@ -2632,6 +2738,32 @@ export class Annotator {
     return null;
   }
 
+  /** Device-px width of the text on an absolute visual line. */
+  private lineWidthPx(absLine: number): number {
+    return this.proportional
+      ? this.text.pixelWidthOfLine(absLine)
+      : this.text.getLine(absLine).length * this.charWidth;
+  }
+
+  /**
+   * Paragraph mark (#2076) at the end of a paragraph's last line, in the text
+   * colour at reduced opacity so it reads as chrome. `x` is where the line's
+   * text ends; the glyph is pulled back inside the canvas when a full-width line
+   * would push it past the right edge. Assumes the caller has set the text font
+   * and the `middle` baseline, as the main draw loop does.
+   */
+  private drawParagraphMark(x: number, y: number): void {
+    const glyphW = this.ctx.measureText(PARAGRAPH_MARK_GLYPH).width;
+    const markX = Math.min(
+      x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth,
+      this.width - glyphW
+    );
+    const prevAlpha = this.ctx.globalAlpha;
+    this.ctx.globalAlpha = PARAGRAPH_MARK_ALPHA;
+    this.ctx.fillText(PARAGRAPH_MARK_GLYPH, markX, y);
+    this.ctx.globalAlpha = prevAlpha;
+  }
+
   /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
@@ -2667,8 +2799,19 @@ export class Annotator {
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
+      const absLine = this.viewport.lineStart + renderLine;
+      const originPx = this.lineXOriginPx(absLine);
+      const y = (renderLine + 0.5) * this.lineHeight;
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
+        this.ctx.fillText(textLine, originPx, y);
+      }
+      if (
+        this.showParagraphMarks &&
+        absLine >= 0 &&
+        absLine < this.text.noLines &&
+        this.text.isParagraphEnd(absLine)
+      ) {
+        this.drawParagraphMark(originPx + this.lineWidthPx(absLine), y);
       }
     }
 
@@ -2701,6 +2844,7 @@ export class Annotator {
         caretVisible:
           this.canvasFocused && this.caretBlink.isVisible() && !caretRepaintsOverHighlights,
         columnToPixelX: this.drawColumnToPixelX(),
+        lineXOrigin: this.drawLineXOrigin(),
       });
     }
 
@@ -2728,6 +2872,7 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
       this.hoverHighlighter.style.opacity = baseHoverOpacity;
@@ -2866,6 +3011,7 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
 
@@ -2917,6 +3063,7 @@ export class Annotator {
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
               columnToPixelX: this.drawColumnToPixelX(),
+              lineXOrigin: this.drawLineXOrigin(),
               // Keep newline-only lines of the resized span visible (#2885).
               minFillWidth: this.caretWidth * this.ratio,
             });
@@ -2939,6 +3086,7 @@ export class Annotator {
           caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
     }
@@ -3053,10 +3201,23 @@ export class Annotator {
     if (typeof parsed.showFps === "boolean") {
       this.showFps = parsed.showFps;
     }
+    if (typeof parsed.showParagraphMarks === "boolean") {
+      this.showParagraphMarks = parsed.showParagraphMarks;
+    }
+    // Paragraph indent (#2076). It feeds the wrap budget, so it is applied by
+    // the same applyFontChange re-wrap as the font settings below — which runs
+    // whenever this differs from the default, even if no font setting is stored.
+    let fontChanged = false;
+    if (
+      typeof parsed.paragraphIndent === "boolean" &&
+      parsed.paragraphIndent !== this.paragraphIndent
+    ) {
+      this.paragraphIndent = parsed.paragraphIndent;
+      fontChanged = true;
+    }
 
     // Font settings (#2487). Set the fields first, then re-derive font/layout
     // once (no redraw — the constructor draws right after loadSettings).
-    let fontChanged = false;
     if (typeof parsed.fontSize === "number") {
       this.fontSize = Math.max(1, parsed.fontSize);
       fontChanged = true;
@@ -3084,6 +3245,10 @@ export class Annotator {
     this.showFps = false;
     this.lastFrameTime = 0;
     this.fps = 0;
+    // Paragraph rendering back to defaults (#2076); applyFontChange below
+    // re-derives the indent in wrap units and re-wraps.
+    this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
+    this.showParagraphMarks = false;
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
@@ -3118,6 +3283,8 @@ export class Annotator {
         proportional: this.proportional,
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
+        paragraphIndent: this.paragraphIndent,
+        showParagraphMarks: this.showParagraphMarks,
       };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
     } catch {
@@ -3157,6 +3324,40 @@ export class Annotator {
   setHighlightColor(hex: string): void {
     this.highlightColor = hex;
     this.cursor.style = { ...this.cursor.style, color: hex };
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Whether the paragraph first-line indent is on (#2076). */
+  getParagraphIndent(): boolean {
+    return this.paragraphIndent;
+  }
+
+  /**
+   * Toggle the paragraph first-line indent. The indent shortens the first line's
+   * wrap budget, so this re-wraps the document; the caret is carried through the
+   * re-wrap by its document offset. Persisted.
+   */
+  setParagraphIndent(on: boolean): void {
+    this.paragraphIndent = on;
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+    this.text.setParagraphIndent(this.paragraphIndentUnits());
+    this.cursor.syncVisualFromOffset(this.text);
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Whether the end-of-paragraph ¶ marks are shown (#2076). */
+  getShowParagraphMarks(): boolean {
+    return this.showParagraphMarks;
+  }
+
+  /**
+   * Toggle the ¶ mark drawn at the end of each paragraph. Purely painted over
+   * the existing layout — no re-wrap. Persisted.
+   */
+  setShowParagraphMarks(show: boolean): void {
+    this.showParagraphMarks = show;
     this.saveSettings();
     this.draw();
   }

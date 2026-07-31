@@ -85,6 +85,33 @@ export const DARK_MENU_COLORS: MenuColors = {
   buttonBg: "#2d3748",
 };
 
+/**
+ * Paragraph rendering (#2076). A paragraph is one segment of {@link Text} — the
+ * span between two hard newlines — and every other visual line inside it is a
+ * soft wrap. Left-aligned text gives no signal which of the two a line break is,
+ * so the first visual line of each paragraph is indented; the wrapped
+ * continuations stay flush left and the contrast marks the boundary. The
+ * renderer draws on a fixed line grid (one {@link LINE_HEIGHT} per visual line,
+ * relied on by scrolling, hit-testing and the gutter), so the horizontal axis is
+ * where a paragraph can be marked without paying for variable line boxes.
+ */
+/** First-line indent of a paragraph, in ems of the current font size. */
+export const PARAGRAPH_INDENT_EM = 2;
+/**
+ * Ceiling on the indent as a fraction of the wrap budget. A narrow panel or a
+ * large font can make the nominal indent most of a line, leaving a first line
+ * with room for a word or two; the cap keeps the paragraph readable there.
+ */
+export const PARAGRAPH_INDENT_MAX_RATIO = 0.25;
+/** Whether the first-line indent is on for a user who has never chosen. */
+export const PARAGRAPH_INDENT_DEFAULT = true;
+/** Glyph drawn at the end of a paragraph while paragraph marks are shown. */
+export const PARAGRAPH_MARK_GLYPH = "¶";
+/** Opacity of the paragraph mark, so it reads as chrome rather than as text. */
+export const PARAGRAPH_MARK_ALPHA = 0.35;
+/** Gap between the last character of a paragraph and its mark, in char widths. */
+export const PARAGRAPH_MARK_GAP_RATIO = 0.5;
+
 /** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 
