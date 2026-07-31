@@ -135,6 +135,9 @@ const entitiesIndexes: IndexDef[] = [
             ref("resource").default(""),
             ref("value").default(""),
           ])
+          // a reference row is created before either side is picked, so empty
+          // sides are common - they would all pile up under a single "" key
+          .filter((id: RDatum) => id.ne(""))
           .distinct()
       );
     },
