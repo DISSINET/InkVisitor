@@ -1,8 +1,9 @@
-import { Button, Input } from "components";
-import React, { useEffect, useState } from "react";
-import { IcoPlusBold, IcoTrash } from "Theme/icons";
+import { Button } from "components";
+import update from "immutability-helper";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { IcoPlusBold } from "Theme/icons";
 import { ButtonSize } from "types";
-import { StyledDeleteButton, StyledRow } from "./MultiInputStyles";
+import { MultiInputRow } from "./MultiInputRow";
 
 interface MultiInput {
   values: string[];
@@ -16,6 +17,13 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disa
     const newDisplayValues = values.map((v) => v || "");
     setDisplayValues(newDisplayValues);
   }, [values]);
+
+  // the drop handler fires outside of React's render, so the order it needs to
+  // persist is read from a ref rather than from the state closure
+  const displayValuesRef = useRef(displayValues);
+  useEffect(() => {
+    displayValuesRef.current = displayValues;
+  }, [displayValues]);
 
   const sendChanges = (newValues: string[]) => {
     if (JSON.stringify(newValues) !== JSON.stringify(displayValues)) {
@@ -42,37 +50,33 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disa
     sendChanges(newValues);
   };
 
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setDisplayValues((prevValues) =>
+      update(prevValues, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevValues[dragIndex]],
+        ],
+      }),
+    );
+  }, []);
+
   return (
     <>
       {displayValues?.map((value, key) => {
         return (
-          <StyledRow key={key}>
-            <Input
-              key={key}
-              disabled={disabled}
-              type="textarea"
-              onChangeFn={(newValue: string) => {
-                handleChange(key, newValue);
-              }}
-              width={width}
-              value={value}
-              textareaRightPadding={!disabled ? 12 : undefined}
-            />
-            {!disabled && (
-              <StyledDeleteButton>
-                <Button
-                  color="danger"
-                  inverted
-                  noBorder
-                  noBackground
-                  size={ButtonSize.Small}
-                  icon={<IcoTrash />}
-                  tooltipLabel="delete note"
-                  onClick={() => handleDelete(key)}
-                />
-              </StyledDeleteButton>
-            )}
-          </StyledRow>
+          <MultiInputRow
+            key={key}
+            index={key}
+            value={value}
+            width={width}
+            disabled={disabled}
+            hasOrder={displayValues.length > 1}
+            onChange={(newValue: string) => handleChange(key, newValue)}
+            onDelete={() => handleDelete(key)}
+            moveRow={moveRow}
+            updateOrderFn={() => onChange(displayValuesRef.current)}
+          />
         );
       })}
 

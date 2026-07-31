@@ -85,7 +85,10 @@ export const Box: React.FC<Box> = ({
         onClick={() => !disableHeaderClick && onHeaderClick && onHeaderClick()}
       >
         {!hideContent && isExpanded && <StyledLabel style={animatedExpand}>{label}</StyledLabel>}
-        {headerComponent && (
+        {/* Follows the label rather than the buttons: a collapsed box is a
+            narrow strip with room for its controls, not for content about what
+            it holds. */}
+        {headerComponent && isExpanded && (
           <StyledHeaderComponentWrap $isExpanded={isExpanded} $flexGrow>
             {headerComponent}
           </StyledHeaderComponentWrap>

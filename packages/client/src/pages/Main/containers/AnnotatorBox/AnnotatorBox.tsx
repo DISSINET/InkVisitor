@@ -18,7 +18,7 @@ import {
   useResourcesWithDocumentsQuery,
   useUserQuery,
 } from "hooks/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { setSelectedResourceId } from "redux/features/statementAnnotator/selectedResourceIdSlice";
 import { setHoveredStatementId } from "redux/features/statementAnnotator/hoveredStatementIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -27,15 +27,18 @@ import {
   ANNOTATOR_RESIZE_DEBOUNCE_MS,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
+import { AnnotatorBoxHeader } from "./AnnotatorBoxHeader";
 import { StatementListTextAnnotator } from "./AnnotatorContent";
 import { resolveAnnotatorResourceId } from "./resolveAnnotatorResourceId";
 
 interface AnnotatorBox {
   height: number;
   width: number;
+  /** Reported upward because MainPage owns the Box whose header this fills. */
+  onHeaderChange: (header: ReactNode) => void;
 }
 
-export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
+export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderChange }) => {
   // The canvas needs a pixel width, and neither source has it on its own. The
   // prop knows where the panel is heading the moment a toggle decides it, but
   // not about a drag (which moves the panel without telling React) or about a
@@ -306,6 +309,43 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
     }
   };
 
+  // MainPage owns the Box that hosts this header, so the header element is
+  // reported upward rather than rendered here. It is a fresh element every
+  // render; if it (or an inline callback) joined this dependency list,
+  // MainPage's setState from onHeaderChange would re-render this (memoized)
+  // box, rebuild the element and refire this effect - forever. Depending only
+  // on the data the header is built from keeps it finite.
+  useEffect(() => {
+    onHeaderChange(
+      <AnnotatorBoxHeader
+        selectedResource={selectedResource}
+        setSelectedResourceId={(id) => {
+          userPickedRef.current = true;
+          dispatch(setSelectedResourceId(id));
+        }}
+        selectedDocument={selectedDocument}
+        selectedDocumentIsFetching={selectedDocumentIsFetching}
+        resources={resources || []}
+        onResourcePickerFocus={() => refetchResources()}
+        canSelectResource={canSelectResource}
+        canEditDocument={canEditDocument}
+      />,
+    );
+  }, [
+    selectedDocument,
+    selectedDocumentIsFetching,
+    selectedResource,
+    resources,
+    canSelectResource,
+    canEditDocument,
+  ]);
+
+  // The header outlives this component otherwise: the Box it fills belongs to
+  // MainPage, so an unmount here would leave it describing a resource nothing
+  // has loaded. Kept apart from the effect above so a data change re-reports
+  // rather than clearing and re-setting.
+  useEffect(() => () => onHeaderChange(null), []);
+
   return (
     <StatementListTextAnnotator
       contentHeight={height}
@@ -325,15 +365,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width }) => {
       selectedDocumentIsFetching={selectedDocumentIsFetching}
       selectedDocumentError={selectedDocumentError}
       selectedResource={selectedResource}
-      resources={resources}
-      onResourcePickerFocus={() => refetchResources()}
-      setSelectedResourceId={(id) => {
-        userPickedRef.current = true;
-        dispatch(setSelectedResourceId(id));
-      }}
-      showStatementList={false}
       userCanEdit={userCanEdit}
-      canSelectResource={canSelectResource}
       canEditDocument={canEditDocument}
       userData={userData}
       onStatementAnchorHover={handleStatementAnchorHover}

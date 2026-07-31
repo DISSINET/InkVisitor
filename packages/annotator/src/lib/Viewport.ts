@@ -8,10 +8,27 @@ export default class Viewport {
   noLines: number;
   /** Pixel offset for smooth scroll (same units as line height). Content is translated by -scrollOffsetY. */
   scrollOffsetY: number = 0;
+  /**
+   * How far below 0 lineStart may go (e.g. VIEWPORT_START_BUFFER_ROWS), so the
+   * lower clamp everywhere below is -startBuffer rather than a bare 0. Zero by
+   * default: a Viewport with no configured buffer has no room below line 0.
+   */
+  startBuffer: number;
 
-  constructor(lineStart: number, lineEnd: number) {
+  constructor(lineStart: number, lineEnd: number, startBuffer: number = 0) {
     this.lineStart = lineStart;
     this.noLines = lineEnd;
+    this.startBuffer = startBuffer;
+  }
+
+  /**
+   * Smallest permissible lineStart, written as `0 - startBuffer` rather than
+   * unary `-startBuffer` so a zero buffer produces +0, not the -0 that
+   * Object.is-based equality (Jest's toBe, React's dependency comparisons)
+   * treats as a different value from 0.
+   */
+  private get minLineStart(): number {
+    return 0 - this.startBuffer;
   }
 
   get lineEnd(): number {
@@ -40,7 +57,7 @@ export default class Viewport {
       this.scrollOffsetY -= lineHeight;
       this.lineStart += 1;
     }
-    while (this.scrollOffsetY < 0 && this.lineStart > 0) {
+    while (this.scrollOffsetY < 0 && this.lineStart > this.minLineStart) {
       this.scrollOffsetY += lineHeight;
       this.lineStart -= 1;
     }
@@ -69,10 +86,10 @@ export default class Viewport {
    * @param step
    */
   scrollUp(step: number) {
-    if (this.lineStart - step >= 0) {
+    if (this.lineStart - step >= this.minLineStart) {
       this.lineStart -= step;
     } else {
-      this.lineStart = 0;
+      this.lineStart = this.minLineStart;
     }
     this.scrollOffsetY = 0;
   }
@@ -105,7 +122,10 @@ export default class Viewport {
   ) {
     // maxLines is a total line count; the last valid line index is (maxLines - 1)
     const maxStart = Math.max(0, maxLines - 1 - this.noLines);
-    this.lineStart = Math.max(0, Math.min(maxStart, Math.floor(lineStart)));
+    this.lineStart = Math.max(
+      this.minLineStart,
+      Math.min(maxStart, Math.floor(lineStart))
+    );
     const frac = lineStart - this.lineStart;
     this.scrollOffsetY = Math.max(
       0,
