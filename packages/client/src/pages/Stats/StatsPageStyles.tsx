@@ -1,3 +1,4 @@
+import { reserveBoldLabelWidth } from "components";
 import styled from "styled-components";
 
 export const StyledTabsContainer = styled.div`
@@ -119,6 +120,7 @@ export const StyledEventTypeGroup = styled.fieldset`
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["rounded-md"]};
   min-width: 0;
+  ${reserveBoldLabelWidth}
 `;
 interface StyledEventTypeGroupLegend {
   $active: boolean;
@@ -178,9 +180,6 @@ export const StyledResultsChart = styled.div`
 
 export const StyledResultsTable = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: ${(props) => props.theme.space[5]};
   width: 100%;
   height: 100%;
   /* Allow shrinking inside CSS Grid */

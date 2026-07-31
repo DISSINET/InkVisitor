@@ -64,8 +64,10 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       color="success"
       shape="rounded-sm"
       noBorder
-      inverted={annotatorMode !== mode}
-      noBackground={annotatorMode !== mode}
+      inverted
+      noBackground
+      textColor={annotatorMode === mode ? "white" : undefined}
+      noHoverBackground={annotatorMode === mode}
       bold={annotatorMode === mode}
       onClick={() => onModeClick(mode)}
       tooltipLabel={tooltipLabel}
@@ -76,7 +78,11 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   return (
     <StyledAnnotatorToolbar>
       <StyledAnnotatorToolbarCluster>
-        <SwitchGroup $bgColor={theme.color.invertedBg.success}>
+        <SwitchGroup
+          $bgColor={theme.color.invertedBg.success}
+          pillColor="success"
+          activeIndex={[EditMode.HIGHLIGHT, EditMode.SEMI, EditMode.RAW].indexOf(annotatorMode)}
+        >
           {modeButton(EditMode.HIGHLIGHT, <FaHighlighter size={TOOLBAR_ICON_SIZE} />, "anchor entities")}
           {modeButton(
             EditMode.SEMI,

@@ -783,15 +783,17 @@ export const TextAnnotatorMenu = ({
               </div>
               {showAnchorsModeSwitch && (
                 <StyledAnchorModeSwitch>
-                  <SwitchGroup>
+                  <SwitchGroup pillColor="info" activeIndex={anchorsEditActive ? 1 : 0}>
                     <Button
                       icon={<FaRegEye size={11} />}
                       color="info"
                       label="view"
                       shape="rounded-sm"
                       noBorder
-                      inverted={anchorsEditActive}
-                      noBackground={anchorsEditActive}
+                      inverted
+                      noBackground
+                      textColor={anchorsEditActive ? undefined : "white"}
+                      noHoverBackground={!anchorsEditActive}
                       tooltipLabel="view mode"
                       tooltipContent={
                         <p>(hold ctrl or cmd over the list for temporary edit mode)</p>
@@ -805,8 +807,10 @@ export const TextAnnotatorMenu = ({
                       label="edit"
                       shape="rounded-sm"
                       noBorder
-                      inverted={!anchorsEditActive}
-                      noBackground={!anchorsEditActive}
+                      inverted
+                      noBackground
+                      textColor={anchorsEditActive ? "white" : undefined}
+                      noHoverBackground={anchorsEditActive}
                       tooltipLabel="edit mode — show anchor controls"
                       bold={anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(true)}

@@ -1,11 +1,11 @@
 import { IRequestStats, IResponseStats } from "@inkvisitor/shared/types";
 import { Aggregation, EventType, TimeUnit } from "@inkvisitor/shared/types/stats";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, SwitchGroup, Timestamp } from "components";
+import { Button, Input, Loader, SwitchGroup, Timestamp } from "components";
 import { StatsChart, StatsTable } from "components/advanced";
 import { useDebounce, useResizeObserver } from "hooks";
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoRefresh } from "Theme/icons";
 import { ButtonSize } from "types";
@@ -174,22 +174,31 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
           <StyledField>
             <StyledFieldLabel>Period</StyledFieldLabel>
             <StyledFieldInput>
-              <SwitchGroup>
-                {STATS_PERIODS.map(({ value, label }) => (
-                  <Button
-                    key={value}
-                    label={label}
-                    shape="rounded-sm"
-                    size={ButtonSize.Medium}
-                    noBorder
-                    onClick={() => {
-                      dispatch({ type: "periodUpdate", payload: value });
-                    }}
-                    color={state.period === value ? "primary" : "greyer"}
-                    inverted={state.period !== value}
-                    noBackground={state.period !== value}
-                  />
-                ))}
+              <SwitchGroup
+                activeIndex={STATS_PERIODS.findIndex(({ value }) => value === state.period)}
+              >
+                {STATS_PERIODS.map(({ value, label }) => {
+                  const active = state.period === value;
+                  return (
+                    <Button
+                      key={value}
+                      label={label}
+                      shape="rounded-sm"
+                      size={ButtonSize.Medium}
+                      noBorder
+                      onClick={() => {
+                        setFilterDebounceEnabled(false);
+                        dispatch({ type: "periodUpdate", payload: value });
+                      }}
+                      color={active ? "primary" : "greyer"}
+                      inverted
+                      noBackground
+                      textColor={active ? "white" : undefined}
+                      noHoverBackground={active}
+                      bold={active}
+                    />
+                  );
+                })}
               </SwitchGroup>
               <Button
                 icon={<IcoRefresh size={18} />}
@@ -249,25 +258,32 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
         <StyledFieldGroup>
           <StyledField>
             <StyledFieldLabel>Time Unit</StyledFieldLabel>
-            <SwitchGroup>
-              {Object.values(TimeUnit).map((unit) => (
-                <Button
-                  key={unit}
-                  label={String(unit)}
-                  shape="rounded-sm"
-                  size={ButtonSize.Medium}
-                  noBorder
-                  onClick={() => {
-                    dispatch({
-                      type: "timeUnitUpdate",
-                      payload: unit as TimeUnit,
-                    });
-                  }}
-                  color={state.timeUnit === unit ? "primary" : "greyer"}
-                  inverted={state.timeUnit !== unit}
-                  noBackground={state.timeUnit !== unit}
-                />
-              ))}
+            <SwitchGroup activeIndex={Object.values(TimeUnit).indexOf(state.timeUnit)}>
+              {Object.values(TimeUnit).map((unit) => {
+                const active = state.timeUnit === unit;
+                return (
+                  <Button
+                    key={unit}
+                    label={String(unit)}
+                    shape="rounded-sm"
+                    size={ButtonSize.Medium}
+                    noBorder
+                    onClick={() => {
+                      setFilterDebounceEnabled(false);
+                      dispatch({
+                        type: "timeUnitUpdate",
+                        payload: unit as TimeUnit,
+                      });
+                    }}
+                    color={active ? "primary" : "greyer"}
+                    inverted
+                    noBackground
+                    textColor={active ? "white" : undefined}
+                    noHoverBackground={active}
+                    bold={active}
+                  />
+                );
+              })}
             </SwitchGroup>
           </StyledField>
 
@@ -348,6 +364,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                               color={state.eventType.includes(type) ? "primary" : "greyer"}
                               inverted={!state.eventType.includes(type)}
                               noBackground={!state.eventType.includes(type)}
+                              bold={state.eventType.includes(type)}
                             />
                           ))}
                         </React.Fragment>
@@ -361,27 +378,37 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
 
           <StyledField>
             <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-            <SwitchGroup>
-              {Object.values(Aggregation).map((agg) => (
-                <Button
-                  key={agg}
-                  label={AGGREGATION_LABELS[agg]}
-                  shape="rounded-sm"
-                  size={ButtonSize.Medium}
-                  noBorder
-                  onClick={() => {
-                    dispatch({ type: "aggregateUpdate", payload: agg });
-                  }}
-                  color={state.aggregate === agg ? "primary" : "greyer"}
-                  inverted={state.aggregate !== agg}
-                  noBackground={state.aggregate !== agg}
-                />
-              ))}
+            <SwitchGroup activeIndex={Object.values(Aggregation).indexOf(state.aggregate)}>
+              {Object.values(Aggregation).map((agg) => {
+                const active = state.aggregate === agg;
+                return (
+                  <Button
+                    key={agg}
+                    label={AGGREGATION_LABELS[agg]}
+                    shape="rounded-sm"
+                    size={ButtonSize.Medium}
+                    noBorder
+                    onClick={() => {
+                      // a switch click is a single deliberate change, so the
+                      // fetch fires right away; the debounce guards typing, and
+                      // re-arms once it catches up with this request
+                      setFilterDebounceEnabled(false);
+                      dispatch({ type: "aggregateUpdate", payload: agg });
+                    }}
+                    color={active ? "primary" : "greyer"}
+                    inverted
+                    noBackground
+                    textColor={active ? "white" : undefined}
+                    noHoverBackground={active}
+                    bold={active}
+                  />
+                );
+              })}
             </SwitchGroup>
           </StyledField>
           {state.aggregate === Aggregation.USER && (
             <StyledField>
-              <StyledFieldLabel title="Hide users whose share of the total activity is below this percentage">
+              <StyledFieldLabel title="Hide users whose share of the total activity is below this percentage - their audits are left out of the totals as well">
                 {`Hide users < %`}
               </StyledFieldLabel>
               <Input
