@@ -141,6 +141,7 @@ interface PersistedSettings {
   fontFamily?: string;
   fontSize?: number;
   showParagraphMarks?: boolean;
+  paragraphIndent?: boolean;
 }
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
@@ -2152,6 +2153,16 @@ export class Annotator {
         onChange: (px) => this.setFontSize(px),
       },
       {
+        type: "segmented",
+        label: "Paragraph indent",
+        options: [
+          { label: "Off", value: 0 },
+          { label: "On", value: 1 },
+        ],
+        value: this.paragraphIndent ? 1 : 0,
+        onChange: (v) => this.setParagraphIndent(v === 1),
+      },
+      {
         type: "color",
         label: "Highlight color",
         value: this.getHighlightColor(),
@@ -3323,6 +3334,12 @@ export class Annotator {
     // Font settings (#2487). Set the fields first, then re-derive font/layout
     // once (no redraw — the constructor draws right after loadSettings).
     let fontChanged = false;
+    // The indent feeds the wrap the same way the font does, so it shares the
+    // re-derive below rather than carrying its own re-wrap.
+    if (typeof parsed.paragraphIndent === "boolean") {
+      this.paragraphIndent = parsed.paragraphIndent;
+      fontChanged = true;
+    }
     if (typeof parsed.fontSize === "number") {
       this.fontSize = Math.max(1, parsed.fontSize);
       fontChanged = true;
@@ -3351,6 +3368,7 @@ export class Annotator {
     this.lastFrameTime = 0;
     this.fps = 0;
     this.showParagraphMarks = false;
+    this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
@@ -3386,6 +3404,7 @@ export class Annotator {
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
         showParagraphMarks: this.showParagraphMarks,
+        paragraphIndent: this.paragraphIndent,
       };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
     } catch {
@@ -3437,14 +3456,15 @@ export class Annotator {
   /**
    * Toggle the paragraph first-line indent. The indent shortens the first line's
    * wrap budget, so this re-wraps the document; the caret is carried through the
-   * re-wrap by its document offset. Not stored — the indent is on for everyone
-   * (see {@link PARAGRAPH_INDENT_DEFAULT}), and this is the host's way out.
+   * re-wrap by its document offset. Persisted; on by default
+   * (see {@link PARAGRAPH_INDENT_DEFAULT}).
    */
   setParagraphIndent(on: boolean): void {
     this.paragraphIndent = on;
     this.cursor.reconcileOffsetsFromVisual(this.text);
     this.text.setParagraphIndent(this.paragraphIndentUnits());
     this.cursor.syncVisualFromOffset(this.text);
+    this.saveSettings();
     this.draw();
   }
 

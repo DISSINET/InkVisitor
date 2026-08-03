@@ -105,9 +105,9 @@ export const PARAGRAPH_INDENT_EM = 2;
 export const PARAGRAPH_INDENT_MAX_RATIO = 0.25;
 /**
  * Whether paragraphs are indented. On: the indent answers a question the reader
- * would otherwise have no way to answer, so it is not a matter of taste and
- * carries no user-facing toggle — `Annotator.setParagraphIndent` is there for a
- * host that needs it off.
+ * would otherwise have no way to answer — which line breaks are paragraph
+ * boundaries — so it starts enabled; the settings overlay carries the opt-out,
+ * and `Annotator.setParagraphIndent` is the same switch for a host.
  */
 export const PARAGRAPH_INDENT_DEFAULT = true;
 /**
