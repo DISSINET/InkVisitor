@@ -85,8 +85,8 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
             color="info"
             tooltipLabel={
               selectedCount > 1
-                ? `export ${selectedCount} selected documents as one .zip`
-                : "export the selected document"
+                ? `set up the export of ${selectedCount} selected documents`
+                : "set up the export of the selected document"
             }
             onClick={onExportSelected}
           />
