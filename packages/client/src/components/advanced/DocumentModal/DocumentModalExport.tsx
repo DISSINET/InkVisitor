@@ -135,7 +135,7 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, documents
 
   return (
     <Modal width={500} showModal={show} onClose={onClose}>
-      {/* <ModalHeader
+      <ModalHeader
         title={isBatch ? `Export ${documents.length} documents` : `Export document`}
         content={
           isBatch ? undefined : (
@@ -144,7 +144,7 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, documents
             </StyledExportHeaderTitle>
           )
         }
-      /> */}
+      />
       <ModalContent enableScroll>
         <div>
           {isBatch && (
