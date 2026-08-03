@@ -13,6 +13,8 @@ import { DrawingOptions } from "./lib/Annotator";
 const mkCtx = () => {
   const rects: number[][] = [];
   const ctx = {
+    // Wide enough that the caret edge pin never engages in these tests.
+    canvas: { width: 10000 },
     fillRect: (x: number, y: number, w: number, h: number) =>
       rects.push([x, y, w, h]),
     fillStyle: "",

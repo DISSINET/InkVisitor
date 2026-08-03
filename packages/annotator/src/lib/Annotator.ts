@@ -1,19 +1,5 @@
-import Cursor, { DIRECTION } from "./Cursor";
-import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
-import History, { HistorySnapshot } from "./History";
-import { ContextMenu, ContextMenuItem } from "./ContextMenu";
-import { CaretBlink } from "./CaretBlink";
-import { ResizePulse } from "./ResizePulse";
-import { HoverHighlightFade } from "./HoverHighlightFade";
-import { SettingsOverlay, SettingControl } from "./SettingsOverlay";
-import Keys from "./Keys";
-import { Lines } from "./Lines";
-import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
 import { drawAnchorMarker } from "./AnchorMarker";
-import { CanvasMeasurer } from "./TextMeasurer";
-import Viewport from "./Viewport";
-import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
+import { CaretBlink } from "./CaretBlink";
 import {
   ANCHOR_MARKER_ARM_H_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
@@ -22,20 +8,44 @@ import {
   ANCHOR_MARKER_STACK_STEP_PX,
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
-  PROPORTIONAL_FONT,
   EditMode,
   HighlightMode,
   HOVER_DEBOUNCE_MS,
+  LIGHT_MENU_COLORS,
   LINE_HEIGHT,
+  MenuColors,
+  PARAGRAPH_INDENT_DEFAULT,
+  PARAGRAPH_INDENT_EM,
+  PARAGRAPH_MARK_ALPHA,
+  PARAGRAPH_MARK_BOWL_RATIO,
+  PARAGRAPH_MARK_CAP_LEAD_PX,
+  PARAGRAPH_MARK_GAP_RATIO,
+  PARAGRAPH_MARK_HEIGHT_RATIO,
+  PARAGRAPH_MARK_LINE_WIDTH_PX,
+  PARAGRAPH_MARK_OVERHANG_RATIO,
+  PARAGRAPH_MARK_STEM_GAP_RATIO,
+  PROPORTIONAL_FONT,
   SELECTION_EDGE_SCROLL_SPEED,
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
   VIEWPORT_START_BUFFER_ROWS,
-  LIGHT_MENU_COLORS,
-  MenuColors,
 } from "./constants";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import Cursor, { DIRECTION } from "./Cursor";
+import Highlighter, { CursorStyle, IAbsCoordinates } from "./Highlighter";
+import History, { HistorySnapshot } from "./History";
+import { HoverHighlightFade } from "./HoverHighlightFade";
+import Keys from "./Keys";
+import { Lines } from "./Lines";
+import { ResizePulse } from "./ResizePulse";
+import Scroller from "./Scroller";
+import { SettingControl, SettingsOverlay } from "./SettingsOverlay";
+import Text, { SegmentPosition, Tag } from "./Text";
+import { CanvasMeasurer } from "./TextMeasurer";
+import Viewport from "./Viewport";
+import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -130,6 +140,8 @@ interface PersistedSettings {
   proportional?: boolean;
   fontFamily?: string;
   fontSize?: number;
+  showParagraphMarks?: boolean;
+  paragraphIndent?: boolean;
 }
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
@@ -154,6 +166,12 @@ export interface DrawingOptions {
    * `col * charWidth`. Absent on the monospace path.
    */
   columnToPixelX?: (absLine: number, col: number) => number;
+  /**
+   * Horizontal origin of a visual line in device px — the paragraph indent
+   * (#2076) on a paragraph's first line, 0 elsewhere. Column 0 of that line sits
+   * here, so every rect drawn on it is shifted by this much.
+   */
+  lineXOrigin?: (absLine: number) => number;
 }
 
 export interface Selected {
@@ -321,6 +339,22 @@ export class Annotator {
    */
   private highlightColor: string | undefined = undefined;
 
+  /**
+   * Indent the first visual line of every paragraph (#2076). Left-aligned text
+   * gives no other cue whether a break is a paragraph or a soft wrap.
+   */
+  private paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
+
+  /** Draw a ¶ at the end of each paragraph (Word's "formatting marks"). */
+  private showParagraphMarks = false;
+
+  /**
+   * Paragraph marks found while painting the text, drawn once the anchor markers
+   * are down so each can be placed clear of them. Anchor points in the same
+   * scroll-translated space the text pass uses; emptied at the top of each frame.
+   */
+  private pendingParagraphMarks: { x: number; y: number }[] = [];
+
   /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
   private showFps = false;
   private lastFrameTime = 0;
@@ -349,6 +383,7 @@ export class Annotator {
     y: number;
     w: number;
     h: number;
+    kind: "start" | "end";
     tag: Tag;
   }[] = [];
 
@@ -467,6 +502,8 @@ export class Annotator {
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
+    // Wrapping depends on the indent, so it is in place before the first draw.
+    this.text.setParagraphIndent(this.paragraphIndentUnits());
 
     this.cursor = new Cursor(this.ratio, 0, 0);
 
@@ -899,7 +936,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
 
     // Clamp to valid line range
@@ -971,7 +1009,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
 
     tempCursor.yLine = Math.max(0, Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1)));
@@ -1058,9 +1097,7 @@ export class Annotator {
     const scrollTrackLines = this.scrollExtentLineCount() + this.viewport.startBuffer;
     this.scroller?.setRunnerSize((this.viewport.noLines / scrollTrackLines) * 100);
 
-    this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100)
-    );
+    this.scroller?.setViewportSize(Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100));
 
     if (this.settingsOverlay.isOpen) {
       this.settingsOverlay.reposition(this.element);
@@ -1170,6 +1207,10 @@ export class Annotator {
     if (this.lines) {
       this.lines.lineHeight = this.lineHeight;
     }
+    // The indent is expressed in ems and in the wrap unit of the active mode, so
+    // both a size change and a monospace/proportional switch re-derive it. Set
+    // before the re-wrap below, which is what consumes it.
+    this.text.paragraphIndent = this.paragraphIndentUnits();
     // Rebuild (or clear) the prefix tables for the new font; recalculates lines.
     this.text.setMeasurer(
       this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
@@ -1259,13 +1300,54 @@ export class Annotator {
   }
 
   /**
+   * Paragraph indent (#2076) in the unit {@link Text} wraps in: device px under
+   * a proportional measurer, whole character columns on the monospace grid
+   * (rounded, at least one column so the indent never vanishes at small sizes).
+   * 0 while the setting is off.
+   */
+  private paragraphIndentUnits(): number {
+    if (!this.paragraphIndent) {
+      return 0;
+    }
+    const px = PARAGRAPH_INDENT_EM * this.fontSize * this.ratio;
+    if (this.proportional) {
+      return px;
+    }
+    return this.charWidth > 0 ? Math.max(1, Math.round(px / this.charWidth)) : 0;
+  }
+
+  /**
+   * Device-px horizontal origin of a visual line: {@link Text.lineXOrigin} in
+   * wrap units, converted the same way a column is (identity in proportional,
+   * `× charWidth` on the monospace grid).
+   */
+  private lineXOriginPx(absLine: number): number {
+    const origin = this.text.lineXOrigin(absLine);
+    if (origin === 0) {
+      return 0;
+    }
+    return this.proportional ? origin : origin * this.charWidth;
+  }
+
+  /**
+   * The line-origin resolver to put on DrawingOptions / pass to a hit-test, or
+   * undefined while no paragraph is indented (so the callee keeps its plain
+   * x=0 path). Mirror of {@link drawColumnToPixelX}.
+   */
+  private drawLineXOrigin(): ((absLine: number) => number) | undefined {
+    return this.paragraphIndent ? (absLine) => this.lineXOriginPx(absLine) : undefined;
+  }
+
+  /**
    * Device-px x of a selection-handle boundary point (#3108).
    * Proportional uses measured offsets; monospace keeps `col * charWidth`.
    */
   private handleX(pt: IAbsCoordinates): number {
-    return this.proportional
-      ? this.text.columnToPixelX(pt.yLine, pt.xLine)
-      : pt.xLine * this.charWidth;
+    return (
+      (this.proportional
+        ? this.text.columnToPixelX(pt.yLine, pt.xLine)
+        : pt.xLine * this.charWidth) + this.lineXOriginPx(pt.yLine)
+    );
   }
 
   /**
@@ -1342,7 +1424,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -1438,7 +1521,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     return this.text.clampVisual(tmp.xLine, tmp.yLine);
   }
@@ -1931,7 +2015,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -2001,6 +2086,11 @@ export class Annotator {
     items.push({ separator: true });
     items.push(
       {
+        label: `${this.showParagraphMarks ? "✓ " : ""}Show paragraph marks`,
+        onClick: () => this.setShowParagraphMarks(!this.showParagraphMarks),
+      },
+      { separator: true },
+      {
         label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
         onClick: () => this.setShowFps(!this.showFps),
       },
@@ -2061,6 +2151,16 @@ export class Annotator {
         ],
         value: this.fontSize,
         onChange: (px) => this.setFontSize(px),
+      },
+      {
+        type: "segmented",
+        label: "Paragraph indent",
+        options: [
+          { label: "Off", value: 0 },
+          { label: "On", value: 1 },
+        ],
+        value: this.paragraphIndent ? 1 : 0,
+        onChange: (v) => this.setParagraphIndent(v === 1),
       },
       {
         type: "color",
@@ -2497,7 +2597,8 @@ export class Annotator {
 
     const columnToPixelX = this.drawColumnToPixelX();
     const toPx = (yLine: number, xLine: number): number =>
-      columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth;
+      (columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth) +
+      this.lineXOriginPx(yLine);
 
     // Only rows the main text renderer paints are eligible; a marker whose
     // endpoint is off-screen is simply skipped (a multi-screen territory shows
@@ -2604,6 +2705,7 @@ export class Annotator {
           y: box.y - pad,
           w: box.w + 2 * pad,
           h: box.h + 2 * pad,
+          kind: p.kind,
           tag: p.tag,
         });
       }
@@ -2632,6 +2734,153 @@ export class Annotator {
     return null;
   }
 
+  /** Device-px width of the text on an absolute visual line. */
+  private lineWidthPx(absLine: number): number {
+    return this.proportional
+      ? this.text.pixelWidthOfLine(absLine)
+      : this.text.getLine(absLine).length * this.charWidth;
+  }
+
+  /**
+   * Where a paragraph mark sits and how big each of its parts is, for an anchor
+   * point `x` (the end of the line's text), `y` (the line's vertical middle) and
+   * a rightward `shiftX` used to dodge an anchor marker. The mark is pulled back
+   * inside the canvas when a full-width line would push it past the right edge,
+   * which also caps how far a shift can carry it.
+   */
+  private paragraphMarkGeometry(x: number, y: number, shiftX: number) {
+    const h = PARAGRAPH_MARK_HEIGHT_RATIO * this.lineHeight;
+    const bowlR = PARAGRAPH_MARK_BOWL_RATIO * h;
+    const stemGap = PARAGRAPH_MARK_STEM_GAP_RATIO * h;
+    const overhang = PARAGRAPH_MARK_OVERHANG_RATIO * stemGap;
+    const lineWidth = PARAGRAPH_MARK_LINE_WIDTH_PX * this.ratio;
+    // A part straddles its line, so the bowl clears the stem and the cap by half
+    // of one to sit against their edges rather than their centres.
+    const half = lineWidth / 2;
+    const capLead = PARAGRAPH_MARK_CAP_LEAD_PX * this.ratio;
+    const markW = bowlR + half + stemGap + overhang;
+
+    const left = Math.min(
+      x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth + shiftX,
+      this.width - markW
+    );
+    const top = y - h / 2;
+    return {
+      h,
+      bowlR,
+      stemGap,
+      overhang,
+      lineWidth,
+      half,
+      capLead,
+      markW,
+      left,
+      top,
+      stemX: left + bowlR + half, // the bowl hangs off this stem's left side
+      rightX: left + bowlR + half + stemGap,
+      bottom: top + h,
+    };
+  }
+
+  /**
+   * Paragraph mark (#2076) at the end of a paragraph's last line, in the text
+   * colour at reduced opacity so it reads as chrome.
+   *
+   * The shape is a pilcrow: two stems under a bar that overhangs the trailing
+   * one, with a solid bowl on the leading stem — a half disc, its flat side
+   * lying along that stem. Every measure derives from the line height, so it
+   * scales with the font without depending on it.
+   */
+  private drawParagraphMark(x: number, y: number, shiftX: number = 0): void {
+    const { bowlR, overhang, half, capLead, top, stemX, rightX, bottom } =
+      this.paragraphMarkGeometry(x, y, shiftX);
+
+    this.ctx.save();
+    this.ctx.globalAlpha = PARAGRAPH_MARK_ALPHA;
+    // The highlight passes run before this one and leave their blend mode
+    // behind, so the mark states its own rather than inheriting one.
+    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.fillStyle = this.fontColor;
+
+    // One path, one fill. Painting the parts separately lays them over each
+    // other wherever they meet, and two passes at this alpha compound into a
+    // dark spot at every junction. Filling the union paints each pixel once, so
+    // the parts may overlap freely — which is what lets the cap reach out over
+    // the bowl and close the notch its curve leaves.
+    //
+    // Under the nonzero fill rule the subpaths must wind the same way or an
+    // overlap cancels to a hole, so every one of them runs clockwise on screen.
+    const rect = (x0: number, y0: number, x1: number, y1: number) => {
+      this.ctx.moveTo(x0, y0);
+      this.ctx.lineTo(x1, y0);
+      this.ctx.lineTo(x1, y1);
+      this.ctx.lineTo(x0, y1);
+      this.ctx.closePath();
+    };
+
+    this.ctx.beginPath();
+    rect(stemX - capLead, top - half, rightX + overhang, top + half);
+    rect(stemX - half, top - half, stemX + half, bottom);
+    rect(rightX - half, top - half, rightX + half, bottom);
+    // The foot is off for now.
+    // rect(stemX - overhang, bottom - 2 * half, rightX + overhang, bottom);
+
+    // The bowl, its flat side on the stem's left edge and its top on the cap's.
+    // Canvas angles run with y pointing down, so sweeping forwards from PI/2 to
+    // -PI/2 passes through PI — bulging left, away from the stems, and winding
+    // with the rectangles; the close then runs back up the flat side.
+    const bowlCx = stemX - half;
+    const bowlCy = top - half + bowlR;
+    this.ctx.moveTo(bowlCx, bowlCy + bowlR);
+    this.ctx.arc(bowlCx, bowlCy, bowlR, Math.PI / 2, -Math.PI / 2, false);
+    this.ctx.closePath();
+
+    this.ctx.fill();
+    this.ctx.restore();
+  }
+
+  /**
+   * Draw the paragraph marks held over from the text pass, each nudged right
+   * until it clears the anchor markers drawn this frame (#2076). A paragraph
+   * ending where a Territory anchor does — an empty paragraph between sections
+   * is the common one, since both marks then sit at the left margin — would
+   * otherwise land the two glyphs on top of each other. The anchor marker
+   * carries a hover target and is the meaningful one, so the mark gives way.
+   */
+  private drawPendingParagraphMarks(): void {
+    for (const mark of this.pendingParagraphMarks) {
+      let shiftX = 0;
+      // One marker cleared per pass, so the bound is their number.
+      for (let pass = 0; pass <= this.anchorMarkerHitboxes.length; pass++) {
+        const { left, top, markW, h } = this.paragraphMarkGeometry(mark.x, mark.y, shiftX);
+        // The geometry pins `left` at the right edge, so a mark held there
+        // cannot move — no shift clears a marker it may still overlap.
+        if (left >= this.width - markW) {
+          break;
+        }
+        // Only end markers (┘) push the mark aside. A start marker (┌) opens
+        // toward the text, so the mark reads fine inside its corner, and
+        // dodging it would indent the marks at territory openings while the
+        // plain ones stay at the margin — an uneven column of pilcrows.
+        const clash = this.anchorMarkerHitboxes.find(
+          (hb) =>
+            hb.kind === "end" &&
+            left < hb.x + hb.w &&
+            left + markW > hb.x &&
+            top < hb.y + hb.h &&
+            top + h > hb.y
+        );
+        if (!clash) {
+          break;
+        }
+        // A clash overlaps the mark, so its right edge always lies past `left`
+        // and the shift below is strictly positive.
+        shiftX += clash.x + clash.w - left;
+      }
+      this.drawParagraphMark(mark.x, mark.y, shiftX);
+    }
+  }
+
   /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
@@ -2648,6 +2897,7 @@ export class Annotator {
     // #2887 — clear last frame's marker hover targets; the HIGHLIGHT draw below
     // repopulates them. Cleared unconditionally so RAW/SEMI frames leave none.
     this.anchorMarkerHitboxes = [];
+    this.pendingParagraphMarks = [];
 
     this.syncLineNumbersCanvasToMain();
 
@@ -2667,8 +2917,24 @@ export class Annotator {
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
+      const absLine = this.viewport.lineStart + renderLine;
+      const originPx = this.lineXOriginPx(absLine);
+      const y = (renderLine + 0.5) * this.lineHeight;
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
+        this.ctx.fillText(textLine, originPx, y);
+      }
+      if (
+        this.showParagraphMarks &&
+        absLine >= 0 &&
+        absLine < this.text.noLines &&
+        this.text.isParagraphEnd(absLine)
+      ) {
+        // Held over: the marks are placed against the anchor markers, which are
+        // not drawn until later in this frame.
+        this.pendingParagraphMarks.push({
+          x: originPx + this.lineWidthPx(absLine),
+          y,
+        });
       }
     }
 
@@ -2701,6 +2967,7 @@ export class Annotator {
         caretVisible:
           this.canvasFocused && this.caretBlink.isVisible() && !caretRepaintsOverHighlights,
         columnToPixelX: this.drawColumnToPixelX(),
+        lineXOrigin: this.drawLineXOrigin(),
       });
     }
 
@@ -2728,6 +2995,7 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
       this.hoverHighlighter.style.opacity = baseHoverOpacity;
@@ -2866,6 +3134,7 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
 
@@ -2917,6 +3186,7 @@ export class Annotator {
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
               columnToPixelX: this.drawColumnToPixelX(),
+              lineXOrigin: this.drawLineXOrigin(),
               // Keep newline-only lines of the resized span visible (#2885).
               minFillWidth: this.caretWidth * this.ratio,
             });
@@ -2939,6 +3209,7 @@ export class Annotator {
           caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
     }
@@ -2950,6 +3221,10 @@ export class Annotator {
     if (!this.selectionHidden) {
       this.drawSelectionHandles();
     }
+
+    // Last inside the translated context: the anchor markers are down by now, so
+    // each mark can be placed clear of them (#2076).
+    this.drawPendingParagraphMarks();
 
     this.ctx.restore();
 
@@ -3053,10 +3328,18 @@ export class Annotator {
     if (typeof parsed.showFps === "boolean") {
       this.showFps = parsed.showFps;
     }
-
+    if (typeof parsed.showParagraphMarks === "boolean") {
+      this.showParagraphMarks = parsed.showParagraphMarks;
+    }
     // Font settings (#2487). Set the fields first, then re-derive font/layout
     // once (no redraw — the constructor draws right after loadSettings).
     let fontChanged = false;
+    // The indent feeds the wrap the same way the font does, so it shares the
+    // re-derive below rather than carrying its own re-wrap.
+    if (typeof parsed.paragraphIndent === "boolean") {
+      this.paragraphIndent = parsed.paragraphIndent;
+      fontChanged = true;
+    }
     if (typeof parsed.fontSize === "number") {
       this.fontSize = Math.max(1, parsed.fontSize);
       fontChanged = true;
@@ -3084,6 +3367,8 @@ export class Annotator {
     this.showFps = false;
     this.lastFrameTime = 0;
     this.fps = 0;
+    this.showParagraphMarks = false;
+    this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
@@ -3118,6 +3403,8 @@ export class Annotator {
         proportional: this.proportional,
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
+        showParagraphMarks: this.showParagraphMarks,
+        paragraphIndent: this.paragraphIndent,
       };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
     } catch {
@@ -3157,6 +3444,41 @@ export class Annotator {
   setHighlightColor(hex: string): void {
     this.highlightColor = hex;
     this.cursor.style = { ...this.cursor.style, color: hex };
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Whether the paragraph first-line indent is on (#2076). */
+  getParagraphIndent(): boolean {
+    return this.paragraphIndent;
+  }
+
+  /**
+   * Toggle the paragraph first-line indent. The indent shortens the first line's
+   * wrap budget, so this re-wraps the document; the caret is carried through the
+   * re-wrap by its document offset. Persisted; on by default
+   * (see {@link PARAGRAPH_INDENT_DEFAULT}).
+   */
+  setParagraphIndent(on: boolean): void {
+    this.paragraphIndent = on;
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+    this.text.setParagraphIndent(this.paragraphIndentUnits());
+    this.cursor.syncVisualFromOffset(this.text);
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Whether the end-of-paragraph ¶ marks are shown (#2076). */
+  getShowParagraphMarks(): boolean {
+    return this.showParagraphMarks;
+  }
+
+  /**
+   * Toggle the ¶ mark drawn at the end of each paragraph. Purely painted over
+   * the existing layout — no re-wrap. Persisted.
+   */
+  setShowParagraphMarks(show: boolean): void {
+    this.showParagraphMarks = show;
     this.saveSettings();
     this.draw();
   }

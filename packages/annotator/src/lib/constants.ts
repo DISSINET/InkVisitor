@@ -85,6 +85,54 @@ export const DARK_MENU_COLORS: MenuColors = {
   buttonBg: "#2d3748",
 };
 
+/**
+ * Paragraph rendering (#2076). A paragraph is one segment of {@link Text} — the
+ * span between two hard newlines — and every other visual line inside it is a
+ * soft wrap. Left-aligned text gives no signal which of the two a line break is,
+ * so the first visual line of each paragraph is indented; the wrapped
+ * continuations stay flush left and the contrast marks the boundary. The
+ * renderer draws on a fixed line grid (one {@link LINE_HEIGHT} per visual line,
+ * relied on by scrolling, hit-testing and the gutter), so the horizontal axis is
+ * where a paragraph can be marked without paying for variable line boxes.
+ */
+/** First-line indent of a paragraph, in ems of the current font size. */
+export const PARAGRAPH_INDENT_EM = 2;
+/**
+ * Ceiling on the indent as a fraction of the wrap budget. A narrow panel or a
+ * large font can make the nominal indent most of a line, leaving a first line
+ * with room for a word or two; the cap keeps the paragraph readable there.
+ */
+export const PARAGRAPH_INDENT_MAX_RATIO = 0.25;
+/**
+ * Whether paragraphs are indented. On: the indent answers a question the reader
+ * would otherwise have no way to answer — which line breaks are paragraph
+ * boundaries — so it starts enabled; the settings overlay carries the opt-out,
+ * and `Annotator.setParagraphIndent` is the same switch for a host.
+ */
+export const PARAGRAPH_INDENT_DEFAULT = true;
+/**
+ * The end-of-paragraph mark is stroked as a path rather than set as the "¶"
+ * character: a text glyph arrives at the weight of whatever font is active
+ * (the monospace face draws a heavy, slab-sided one) and shifts with every
+ * font setting, where a path keeps one thin, quiet shape everywhere.
+ */
+/** Opacity of the paragraph mark, so it reads as chrome rather than as text. */
+export const PARAGRAPH_MARK_ALPHA = 0.35;
+/** Gap between the last character of a paragraph and its mark, in char widths. */
+export const PARAGRAPH_MARK_GAP_RATIO = 0.5;
+/** Total height of the mark as a fraction of one line height. */
+export const PARAGRAPH_MARK_HEIGHT_RATIO = 0.5;
+/** Radius of the mark's bowl as a fraction of its height: a bowl half as deep as the stems. */
+export const PARAGRAPH_MARK_BOWL_RATIO = 0.25;
+/** Distance between the mark's two stems as a fraction of its height. */
+export const PARAGRAPH_MARK_STEM_GAP_RATIO = 0.2;
+/** How far the top bar runs past the trailing stem, as a fraction of the gap between them. */
+export const PARAGRAPH_MARK_OVERHANG_RATIO = 0.6;
+/** How far the top bar reaches past the bowl's leading edge, in CSS px (scaled by ratio at draw time). */
+export const PARAGRAPH_MARK_CAP_LEAD_PX = 1;
+/** Thickness of the mark's stems and cap, in CSS px (scaled by ratio at draw time). */
+export const PARAGRAPH_MARK_LINE_WIDTH_PX = 1;
+
 /** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 

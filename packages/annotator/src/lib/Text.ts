@@ -1,6 +1,6 @@
 import Viewport from "./Viewport";
 import { IAbsCoordinates, IRelativeCoordinates } from "./Highlighter";
-import { EditMode } from "./constants";
+import { EditMode, PARAGRAPH_INDENT_MAX_RATIO } from "./constants";
 import {
   closingTagRegex,
   createOpeningTagRegex,
@@ -234,6 +234,12 @@ export class Segment {
    * Empty unless a proportional measurer is active (monospace path is untouched).
    */
   linePrefixes: number[][] = [];
+  /**
+   * First-line indent (#2076) in wrap-budget units, as applied by the last
+   * wrap. Kept here so draw-time reads see the exact value (including the
+   * width cap) the segment's lines were wrapped against.
+   */
+  indent: number = 0;
   segmentIndex: number = -1; // index of this segment in the text
 
   /**
@@ -356,6 +362,15 @@ class Text {
    * when a {@link measurer} is active. Undefined means "no width limit".
    */
   maxPixelWidth?: number;
+  /**
+   * First-line indent of a paragraph (#2076), in the same unit as the wrap
+   * budget: device px while a {@link measurer} is active, character columns on
+   * the monospace grid. 0 disables the indent. The caller converts to that unit
+   * (see `Annotator.paragraphIndentUnits`), which keeps this one number valid
+   * both for shortening the first line's wrap budget and — via
+   * {@link lineXOrigin} — for placing everything drawn on that line.
+   */
+  paragraphIndent: number = 0;
 
   /**
    * Creates a new Text instance from raw text content.
@@ -400,6 +415,117 @@ class Text {
   }
 
   /**
+   * Set the paragraph first-line indent (#2076) in wrap-budget units and
+   * re-wrap — the indent shortens that line, so the break positions move with it.
+   */
+  setParagraphIndent(indent: number) {
+    this.paragraphIndent = indent;
+    this.calculateLines();
+  }
+
+  /**
+   * Indent applied to a paragraph's first line. Three paragraphs get none:
+   * - the document's first, which has nothing above it to be confused with (the
+   *   same reason typesetting leaves an opening paragraph flush);
+   * - one whose text already begins with hand-typed indentation — a tab, or a
+   *   run of two or more whitespace chars — since some documents were written
+   *   with the indent typed in and would otherwise double it. A single leading
+   *   space is incidental typing, not layout, and still gets the indent;
+   * - one with no text beyond whitespace, which has no start to mark. A blank
+   *   line, or a line holding only an anchor tag, would otherwise show its
+   *   caret, selection sliver and anchor markers nudged off the text column.
+   *
+   * The decision reads the segment's PARSED text in every mode, so a paragraph
+   * sits at the same x whichever mode the document is viewed in: markup is
+   * structure, not the prose the indent marks the start of.
+   */
+  private indentForSegment(segment: Segment): number {
+    const text = segment.parsed;
+    const leadingWs = /^\s+/.exec(text)?.[0];
+    const handIndented = leadingWs !== undefined && leadingWs !== " ";
+    if (
+      !this.paragraphIndent ||
+      segment.segmentIndex === 0 ||
+      !text.trim() ||
+      handIndented
+    ) {
+      return 0;
+    }
+    return Math.min(
+      this.paragraphIndent,
+      Math.floor(this.wrapBudget() * PARAGRAPH_INDENT_MAX_RATIO)
+    );
+  }
+
+  /**
+   * Full width available to a visual line, in the unit the active mode wraps in
+   * — device px under a {@link measurer}, character columns otherwise. The
+   * `maxWidth` {@link calculateLines} wraps against, and the base the paragraph
+   * indent cap is taken from.
+   */
+  private wrapBudget(): number {
+    return this.measurer
+      ? Math.max(1, this.maxPixelWidth ?? Infinity)
+      : Math.max(1, this.charsAtLine);
+  }
+
+  /**
+   * Index of the segment holding absolute visual line `absLine`, or -1 when the
+   * line is outside `[0, noLines)`. Binary search: {@link calculateLines} lays
+   * segments out contiguously and ordered by `lineStart`, and these lookups run
+   * per visible line per frame, where a linear scan of a many-thousand-paragraph
+   * document is measurable.
+   */
+  private segmentIndexForLine(absLine: number): number {
+    let lo = 0;
+    let hi = this.segments.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const s = this.segments[mid];
+      if (s.lineEndExclusive <= absLine) {
+        lo = mid + 1;
+      } else if (s.lineStart > absLine) {
+        hi = mid - 1;
+      } else {
+        return mid;
+      }
+    }
+    return -1;
+  }
+
+  /** The segment holding absolute visual line `absLine`, or undefined. */
+  private segmentForLine(absLine: number): Segment | undefined {
+    const i = this.segmentIndexForLine(absLine);
+    return i === -1 ? undefined : this.segments[i];
+  }
+
+  /**
+   * Horizontal origin of an absolute visual line, in wrap-budget units: the
+   * paragraph indent on a paragraph's first line, 0 on its soft-wrapped
+   * continuations. Everything drawn on the line — the text, the caret, selection
+   * and anchor rects — is shifted by it, and mouse x is un-shifted by it.
+   * Reads the indent stored on the segment by {@link calculateLines}, so it is
+   * always the value the lines were actually wrapped against.
+   */
+  lineXOrigin(absLine: number): number {
+    if (!this.paragraphIndent) {
+      return 0;
+    }
+    const segment = this.segmentForLine(absLine);
+    return segment && absLine === segment.lineStart ? segment.indent : 0;
+  }
+
+  /**
+   * Does `absLine` hold the end of a paragraph, i.e. is it the last visual line
+   * of its segment? True for the last line of the document as well — the
+   * document's final paragraph ends there even without a trailing newline.
+   */
+  isParagraphEnd(absLine: number): boolean {
+    const segment = this.segmentForLine(absLine);
+    return !!segment && absLine === segment.lineEndExclusive - 1;
+  }
+
+  /**
    * Update the proportional wrap budget (device px) and re-wrap.
    * Used on resize; no-op effect on the monospace path.
    */
@@ -416,9 +542,7 @@ class Text {
    */
   private prefixForLine(absLine: number): number[] | undefined {
     const clamped = Math.max(0, Math.min(absLine, Math.max(0, this.noLines - 1)));
-    const segment = this.segments.find(
-      (s) => s.lineStart <= clamped && s.lineEndExclusive > clamped
-    );
+    const segment = this.segmentForLine(clamped);
     return segment?.linePrefixes[clamped - segment.lineStart];
   }
 
@@ -466,16 +590,13 @@ class Text {
    */
   getLine(lineIndex: number): string {
     // Find the segment that contains the line
-    const segmentIndex = this.segments.findIndex(
-      (s) => s.lineStart <= lineIndex && s.lineEndExclusive > lineIndex
-    );
+    const segment = this.segmentForLine(lineIndex);
 
-    if (segmentIndex === -1) {
+    if (!segment) {
       return "";
     }
 
     // Calculate the relative line index within the segment
-    const segment = this.segments[segmentIndex];
     const relativeLineIndex = lineIndex - segment.lineStart;
 
     // Return the line from the segment
@@ -556,9 +677,7 @@ class Text {
     const widthOf = measurer
       ? (s: string) => additiveWidth(s, measurer)
       : (s: string) => s.length;
-    const maxWidth = measurer
-      ? Math.max(1, this.maxPixelWidth ?? Infinity)
-      : Math.max(1, this.charsAtLine);
+    const maxWidth = this.wrapBudget();
     // Largest code-unit count of `s` whose measured width fits `budget`.
     // Monospace reduces to min(len, budget) — i.e. the legacy `maxLen - used`.
     // Iterates code units (s[n]) like the prefix table; grapheme-aware splitting
@@ -643,8 +762,21 @@ class Text {
           cells.push({ text: t.text, space: t.space, parts: [t] });
         }
       }
+      // The paragraph's first visual line starts at the indent, so it has that
+      // much less room; the wrapped continuations get the full width. Read as a
+      // function of how many lines are already pushed so it follows pushLine.
+      // Stored on the segment so draw-time lineXOrigin reads the same value.
+      const indent = (segment.indent = this.indentForSegment(segment));
+      const lineBudget = () =>
+        maxWidth - (segment.lines.length === 0 ? indent : 0);
+
       let currentLine: string[] = [];
       let currentLineLength = 0;
+      // Budget of the line a unit lands on after an optional pushLine: a push
+      // leaves the indented first line behind, so anything moved down gets the
+      // full width.
+      const budgetAfterPush = () =>
+        currentLineLength > 0 ? maxWidth : lineBudget();
       const pushLine = () => {
         segment.lines.push(currentLine.join(""));
         currentLine = [];
@@ -658,7 +790,7 @@ class Text {
       for (let ci = 0; ci < cells.length; ci++) {
         const cell = cells[ci];
 
-        if (currentLineLength + widthOf(cell.text) <= maxWidth) {
+        if (currentLineLength + widthOf(cell.text) <= lineBudget()) {
           appendStr(cell.text);
           continue;
         }
@@ -673,7 +805,7 @@ class Text {
           continue;
         }
 
-        if (widthOf(cell.text) <= maxWidth) {
+        if (widthOf(cell.text) <= budgetAfterPush()) {
           // Move the whole unit down to a fresh line.
           if (currentLineLength > 0) pushLine();
           appendStr(cell.text);
@@ -684,19 +816,25 @@ class Text {
         // fits on a line, but a tag longer than the line is still broken — with
         // no horizontal scroll, an unsplit over-long tag would run off the edge.
         for (const part of cell.parts) {
-          if (part.atomic && widthOf(part.text) <= maxWidth) {
+          // "Fits on a line" is judged against the line the part would land on:
+          // the indented first line of a paragraph holds less than the
+          // full-width continuation a pushLine would open. A tag measured
+          // against the full width and then appended to the indented line would
+          // run past the right edge before any break — visible in XML mode,
+          // where a tag carrying a UUID is long enough to sit in that gap.
+          if (part.atomic && widthOf(part.text) <= budgetAfterPush()) {
             if (
               currentLineLength > 0 &&
-              currentLineLength + widthOf(part.text) > maxWidth
+              currentLineLength + widthOf(part.text) > lineBudget()
             )
               pushLine();
             appendStr(part.text);
           } else {
             let s = part.text;
-            while (currentLineLength + widthOf(s) > maxWidth) {
+            while (currentLineLength + widthOf(s) > lineBudget()) {
               // Chars that still fit the remaining budget; force at least one on
               // an empty line so an over-wide glyph can't loop forever (#narrow).
-              const fit = charsThatFit(s, maxWidth - currentLineLength);
+              const fit = charsThatFit(s, lineBudget() - currentLineLength);
               const take = currentLineLength === 0 ? Math.max(1, fit) : fit;
               if (take > 0) {
                 appendStr(s.slice(0, take));
@@ -1244,9 +1382,7 @@ class Text {
       }
     }
 
-    const segmentIndex = this.segments.findLastIndex(
-      (s) => s.lineStart <= absLineIndex && s.lineEndExclusive > absLineIndex
-    );
+    const segmentIndex = this.segmentIndexForLine(absLineIndex);
 
     if (segmentIndex === -1) {
       return null;

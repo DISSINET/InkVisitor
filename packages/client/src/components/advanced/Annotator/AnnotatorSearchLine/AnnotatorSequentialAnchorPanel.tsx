@@ -1,7 +1,8 @@
 import { Annotator, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
 import { Button } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../../EntityTag/EntityTag";
 import React from "react";
 import { useTheme } from "styled-components";
 import { IcoAnchor, IcoAnchorCheck, IcoChevronLeft } from "Theme/icons";
