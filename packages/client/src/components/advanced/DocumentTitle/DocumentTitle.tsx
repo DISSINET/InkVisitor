@@ -33,7 +33,7 @@ export const DocumentTitle: React.FC<DocumentTitle> = ({
         }}
         $noMargin={noMargin}
       >
-        <TiDocumentText size={16} style={{ marginRight: "0.2rem", flexShrink: "0" }} />
+        <TiDocumentText size={16} style={{ flexShrink: "0" }} />
 
         <StyledDocumentTitle>{title}</StyledDocumentTitle>
       </StyledDocumentTag>

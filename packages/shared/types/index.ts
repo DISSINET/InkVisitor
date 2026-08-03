@@ -55,7 +55,7 @@ import {
   IResponseUserResourceRight,
 } from "./response-user";
 
-import { IDocument, IDocumentMeta } from "./document";
+import { IDocument, IDocumentExport, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseStats } from "./response-stats";
@@ -84,6 +84,7 @@ export type {
   IBookmarkFolder,
   IConcept,
   IDocument,
+  IDocumentExport,
   IDocumentMeta,
   IEntity,
   IEvent,

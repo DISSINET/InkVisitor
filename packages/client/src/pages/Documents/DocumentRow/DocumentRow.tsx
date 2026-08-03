@@ -3,7 +3,7 @@ import { IDocument, IResponseEntity } from "@inkvisitor/shared/types";
 import { UseMutationResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input } from "components";
+import { Button, ButtonGroup, Checkbox, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
@@ -15,8 +15,10 @@ import {
   StyledActionsCell,
   StyledCount,
   StyledCountTag,
+  StyledDisabledSelect,
   StyledDocumentRow,
   StyledReference,
+  StyledSelectCell,
   StyledTitle,
   StyledTitleWrap,
 } from "../DocumentsPageStyles";
@@ -27,6 +29,8 @@ interface DocumentRow {
   // Owner/Admin always; Editor only when this document's Resource is assigned.
   // When false the row is view-only (no export/edit/delete/resource changes).
   canManage: boolean;
+  selected: boolean;
+  onToggleSelected: (id: string) => void;
   handleDocumentEdit: (id: string) => void;
   handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
@@ -47,6 +51,8 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   document,
   resource,
   canManage,
+  selected,
+  onToggleSelected,
   handleDocumentEdit,
   handleDocumentExport,
   setDocToDelete,
@@ -108,6 +114,24 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   return (
     <StyledDocumentRow>
+      <StyledSelectCell>
+        {canManage ? (
+          <Checkbox
+            value={selected}
+            onChangeFn={() => onToggleSelected(document.id)}
+            tooltipLabel={selected ? "deselect document" : "select document for export"}
+            noFill
+          />
+        ) : (
+          <StyledDisabledSelect>
+            <Checkbox
+              value={false}
+              tooltipLabel="you are not assigned to this resource"
+              noFill
+            />
+          </StyledDisabledSelect>
+        )}
+      </StyledSelectCell>
       <StyledTitleWrap ref={titleRef} onClick={canManage ? setEditMode : undefined}>
         {canManage && editMode ? (
           <Input

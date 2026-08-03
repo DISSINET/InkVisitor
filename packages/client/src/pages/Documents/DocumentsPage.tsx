@@ -4,14 +4,22 @@ import { v4 as uuidv4 } from "uuid";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IDocument } from "@inkvisitor/shared/types";
 import api from "api";
-import { Loader, Submit } from "components";
+import { Button, Loader, Submit } from "components";
 import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
 import {
   useDocumentsQuery,
   useResourcesWithDocumentsQuery,
   useUserQuery,
 } from "hooks/react-query";
-import React, { ChangeEvent, useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { FaDownload } from "react-icons/fa";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import { DocumentsTableHeader } from "./DocumentsTableHeader";
 import {
@@ -22,6 +30,8 @@ import {
   StyledGridScrollArea,
   StyledHeading,
   StyledInputWrap,
+  StyledSelectionBar,
+  StyledSelectionCount,
 } from "./DocumentsPageStyles";
 import { compareDocuments } from "./utils";
 import { DocumentSortField, DocumentSortState, DocumentWithResource } from "./types";
@@ -154,8 +164,48 @@ export const DocumentsPage: React.FC = ({}) => {
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const [exportedDocumentId, setExportedDocumentId] = useState<string | false>(false);
-  const exportedDocument = documents?.find((doc) => doc.id === exportedDocumentId);
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+
+  const exportableIds = useMemo(
+    () =>
+      sortedDocumentsWithResources
+        .filter((item) => canManageDocument(item.resource ? item.resource.id : false))
+        .map((item) => item.document.id),
+    [sortedDocumentsWithResources, canManageDocument]
+  );
+
+  // a selected document may disappear (deleted here or elsewhere) or lose its
+  // resource assignment, which takes the export right with it
+  useEffect(() => {
+    setSelectedDocumentIds((current) => {
+      const kept = current.filter((id) => exportableIds.includes(id));
+      return kept.length === current.length ? current : kept;
+    });
+  }, [exportableIds]);
+
+  const handleToggleSelected = useCallback((id: string) => {
+    setSelectedDocumentIds((current) =>
+      current.includes(id) ? current.filter((selectedId) => selectedId !== id) : [...current, id]
+    );
+  }, []);
+
+  const handleToggleSelectAll = useCallback(
+    (selected: boolean) => {
+      setSelectedDocumentIds(selected ? exportableIds : []);
+    },
+    [exportableIds]
+  );
+
+  const [exportedDocumentIds, setExportedDocumentIds] = useState<string[] | false>(false);
+  const exportedDocuments = useMemo(
+    () =>
+      exportedDocumentIds
+        ? exportedDocumentIds
+            .map((id) => documents?.find((doc) => doc.id === id))
+            .filter((doc): doc is IDocument => !!doc)
+        : [],
+    [exportedDocumentIds, documents]
+  );
 
   const [editedDocumentId, setEditedDocumentId] = useState<string | false>(false);
 
@@ -163,12 +213,12 @@ export const DocumentsPage: React.FC = ({}) => {
     setEditedDocumentId(id);
   };
   const handleDocumentExport = (id: string) => {
-    setExportedDocumentId(id);
+    setExportedDocumentIds([id]);
   };
 
   const handleModalClose = () => {
     setEditedDocumentId(false);
-    setExportedDocumentId(false);
+    setExportedDocumentIds(false);
   };
 
   const documentDeleteMutation = useMutation({
@@ -200,9 +250,47 @@ export const DocumentsPage: React.FC = ({}) => {
         <StyledBoxWrap>
           <StyledBackground>
             <StyledHeading>Documents</StyledHeading>
+            <StyledSelectionBar>
+              <Button
+                icon={<FaDownload />}
+                color="primary"
+                inverted
+                disabled={selectedDocumentIds.length === 0}
+                label={`export selected (${selectedDocumentIds.length})`}
+                tooltipLabel={
+                  selectedDocumentIds.length > 1
+                    ? "export the selected documents as one .zip"
+                    : "export the selected document"
+                }
+                onClick={() => setExportedDocumentIds(selectedDocumentIds)}
+              />
+              {selectedDocumentIds.length > 0 && (
+                <>
+                  <StyledSelectionCount>
+                    {selectedDocumentIds.length} of {exportableIds.length} selected
+                  </StyledSelectionCount>
+                  <Button
+                    color="greyer"
+                    inverted
+                    label="clear"
+                    onClick={() => setSelectedDocumentIds([])}
+                  />
+                </>
+              )}
+            </StyledSelectionBar>
             <StyledGridScrollArea>
               <StyledGrid>
-                <DocumentsTableHeader sort={sort} onSort={handleSort} />
+                <DocumentsTableHeader
+                  sort={sort}
+                  onSort={handleSort}
+                  allSelected={
+                    exportableIds.length > 0 &&
+                    selectedDocumentIds.length === exportableIds.length
+                  }
+                  someSelected={selectedDocumentIds.length > 0}
+                  hasExportableDocuments={exportableIds.length > 0}
+                  onToggleSelectAll={handleToggleSelectAll}
+                />
                 {sortedDocumentsWithResources.map((documentWithResource: DocumentWithResource) => {
                   const documentId = documentWithResource.document.id;
                   return (
@@ -211,6 +299,8 @@ export const DocumentsPage: React.FC = ({}) => {
                       document={documentWithResource.document}
                       resource={documentWithResource.resource}
                       canManage={canManageDocument(documentWithResource.resource ? documentWithResource.resource.id : false)}
+                      selected={selectedDocumentIds.includes(documentId)}
+                      onToggleSelected={handleToggleSelected}
                       handleDocumentEdit={handleDocumentEdit}
                       handleDocumentExport={handleDocumentExport}
                       setDocToDelete={setDocToDelete}
@@ -248,8 +338,8 @@ export const DocumentsPage: React.FC = ({}) => {
           onClose={handleModalClose}
         />
       )}
-      {exportedDocumentId && exportedDocument && (
-        <DocumentModalExport document={exportedDocument} onClose={handleModalClose} />
+      {exportedDocuments.length > 0 && (
+        <DocumentModalExport documents={exportedDocuments} onClose={handleModalClose} />
       )}
 
       <Submit

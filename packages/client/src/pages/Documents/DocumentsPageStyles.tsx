@@ -61,7 +61,8 @@ export const StyledGridScrollArea = styled.div`
 `;
 
 /** Shared by header + body so column tracks align in one grid */
-export const documentsGridColumns = "minmax(18rem, 1fr) auto minmax(10rem, 17.4rem) max-content";
+export const documentsGridColumns =
+  "max-content minmax(18rem, 1fr) auto minmax(10rem, 17.4rem) max-content";
 
 const stickyHeaderCell = css`
   position: sticky;
@@ -134,6 +135,44 @@ export const StyledSortIndicator = styled.span`
 export const StyledActionsCell = styled.div`
   display: flex;
   align-items: center;
+`;
+
+export const StyledSelectCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem 0 0.8rem;
+`;
+
+export const StyledSelectHeaderCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem 0 0.8rem;
+  ${stickyHeaderCell}
+`;
+
+/** Disabled rows keep the box in place so the column stays aligned */
+export const StyledDisabledSelect = styled.div`
+  opacity: 0.4;
+  cursor: not-allowed;
+`;
+
+export const StyledSelectionBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[3]};
+  flex-shrink: 0;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  padding-left: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
+export const StyledSelectionCount = styled.span`
+  color: ${({ theme }) => theme.color["gray"][700]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  white-space: nowrap;
 `;
 
 export const StyledTitleWrap = styled.div`

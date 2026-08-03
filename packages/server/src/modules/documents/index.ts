@@ -8,6 +8,7 @@ import User from "@models/user/user";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import {
   IDocument,
+  IDocumentExport,
   IDocumentMeta,
   IResponseAudit,
   IResponseGeneric,
@@ -26,7 +27,7 @@ import { Router } from "express";
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
-import { createOpeningTagRegex, closingTagRegex } from "@common/regex";
+import { filterDocumentContent } from "./export";
 
 /**
  * Whether the user may edit/delete/export the given document. Owner/Admin
@@ -187,85 +188,90 @@ export default Router()
       throw new PermissionDeniedError("document cannot be exported");
     }
 
-    const openingTagRegex = createOpeningTagRegex();
-    const closingTagRegexInstance = closingTagRegex;
-
-    let filteredContent = document.content;
-    let match;
-
-    while ((match = openingTagRegex.exec(document.content)) !== null) {
-      const fullTag = match[0];
-      const tagContent = match[1];
-      const entityId = tagContent.split(/\s+/)[0];
-
-      let validEntityClass = false;
-      let isUnknownEntity = true;
-
-      exportedEntities.forEach((entityClass) => {
-        if (document.entityIds[entityClass]) {
-          document.entityIds[entityClass].forEach((id) => {
-            if (id === entityId) {
-              validEntityClass = true;
-              isUnknownEntity = false;
-            }
-          });
-        }
-      });
-
-      Object.values(EntityEnums.Class).forEach((entityClass) => {
-        if (document.entityIds[entityClass]) {
-          document.entityIds[entityClass].forEach((id) => {
-            if (id === entityId) {
-              isUnknownEntity = false;
-            }
-          });
-        }
-      });
-
-      if (!validEntityClass && !isUnknownEntity) {
-        filteredContent = filteredContent.replace(fullTag, "");
-      }
-    }
-
-    while ((match = closingTagRegexInstance.exec(document.content)) !== null) {
-      const fullTag = match[0];
-      const entityId = match[1];
-
-      let validEntityClass = false;
-      let isUnknownEntity = true;
-
-      exportedEntities.forEach((entityClass) => {
-        if (document.entityIds[entityClass]) {
-          document.entityIds[entityClass].forEach((id) => {
-            if (id === entityId) {
-              validEntityClass = true;
-              isUnknownEntity = false;
-            }
-          });
-        }
-      });
-
-      // Also check all entity classes to determine if this is an unknown entity
-      Object.values(EntityEnums.Class).forEach((entityClass) => {
-        if (document.entityIds[entityClass]) {
-          document.entityIds[entityClass].forEach((id) => {
-            if (id === entityId) {
-              isUnknownEntity = false;
-            }
-          });
-        }
-      });
-
-      // Keep the tag if it's in exported entities OR if it's an unknown entity
-      if (!validEntityClass && !isUnknownEntity) {
-        // Remove the closing tag if entity is not in exported entities and is not unknown
-        filteredContent = filteredContent.replace(fullTag, "");
-      }
-    }
+    const filteredContent = filterDocumentContent(document, exportedEntities);
 
     res.setHeader("content-type", "text/plain");
     res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
     res.send(filteredContent);
+  })
+  /**
+   * @openapi
+   * /documents/export-batch:
+   *   post:
+   *     description: Returns the exported content of multiple documents at once
+   *     tags:
+   *       - documents
+   *     requestBody:
+   *       description: Ids of the documents and the entity classes to keep
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               documentIds:
+   *                 type: array
+   *                 items:
+   *                   type: string
+   *               exportedEntities:
+   *                 type: array
+   *                 items:
+   *                   type: string
+   *     responses:
+   *       200:
+   *         description: Returns a list of exported documents
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/IDocumentExport"
+   */
+  .post("/export-batch", async (request: IRequest, res: any, next: any) => {
+    try {
+      const documentIds = request.body.documentIds as string[];
+      const exportedEntities = request.body
+        .exportedEntities as EntityEnums.Class[];
+
+      if (!Array.isArray(documentIds) || !documentIds.length) {
+        throw new BadParams("document ids have to be set");
+      }
+
+      const user = request.getUserOrFail();
+      const exports: IDocumentExport[] = [];
+
+      // a single unexportable document fails the whole batch - a partial
+      // archive would silently omit documents the user asked for
+      for (const documentId of documentIds) {
+        const document = await Document.getDocumentById(
+          request.db.connection,
+          documentId
+        );
+
+        if (!document) {
+          throw DocumentDoesNotExist.forId(documentId);
+        }
+
+        if (
+          !(await userCanManageDocument(
+            request.db.connection,
+            documentId,
+            user
+          ))
+        ) {
+          throw new PermissionDeniedError("document cannot be exported");
+        }
+
+        exports.push({
+          id: document.id,
+          title: document.title,
+          content: filterDocumentContent(document, exportedEntities),
+        });
+      }
+
+      res.json(exports);
+    } catch (err) {
+      next(err);
+    }
   })
   /**
    * @openapi

@@ -3,6 +3,7 @@ import {
   EntityTooltip,
   IAudit,
   IDocument,
+  IDocumentExport,
   IEntity,
   IReference,
   IRequestQuery,
@@ -40,6 +41,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
+import { buildDocumentsZip } from "utils/documentExportZip";
 import {
   clearStoredUser,
   getStoredUserId,
@@ -89,6 +91,19 @@ type IFilterDocuments = {
  */
 export const HTML_CAPTURE_STORAGE_KEY = "inkvisitor:htmlResponseCaptures";
 export const HTML_CAPTURE_EVENT = "inkvisitor:html-capture";
+
+const triggerDownload = (blob: Blob, fileName: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+};
 
 class Api {
   private baseUrl: string;
@@ -1682,17 +1697,32 @@ class Api {
         { responseType: "blob" },
       );
 
-      const url = window.URL.createObjectURL(response.data);
-      const a = document.createElement("a");
+      triggerDownload(response.data, `${fileName}.txt`);
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
 
-      a.href = url;
-      a.download = `${fileName}.txt`;
-      document.body.appendChild(a);
-      a.click();
+  /**
+   * Downloads several documents as one archive. The anchor classes to keep are
+   * the same for every document of the batch; the server rejects the whole
+   * request when any of the documents may not be exported by this user.
+   */
+  async documentsExportZip(
+    documentIds: string[],
+    exportedEntities: EntityEnums.Class[],
+    zipFileName: string,
+  ): Promise<void> {
+    try {
+      const response = await this.connection.post<IDocumentExport[]>(
+        `/documents/export-batch`,
+        {
+          documentIds,
+          exportedEntities,
+        },
+      );
 
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      triggerDownload(await buildDocumentsZip(response.data), zipFileName);
     } catch (err) {
       throw this.handleError(err);
     }
