@@ -7,7 +7,7 @@ import {
   StyledStatementTargetTitle,
 } from "../styles";
 import { AnnotatorPositionTNode } from "../types";
-import { EntityTag } from "components/advanced";
+import { EntityTag } from "../../EntityTag/EntityTag";
 
 interface AnnotatorStatementTargetPicker {
   /** The in-document subT hierarchy, outermost first with nesting depth. */

@@ -66,7 +66,10 @@ import {
 } from "../styles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "../types";
 import { useAnnotatorTargetPicker } from "../hooks/useAnnotatorTargetPicker";
-import { EntitySuggester, EntityTag, EntityTagById, ElvlButtonGroup } from "components/advanced";
+import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../../EntityTag/EntityTag";
+import { EntityTagById } from "../../EntityTag/EntityTagById";
+import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
 
 interface TextAnnotatorMenuProps {
   text: string;
