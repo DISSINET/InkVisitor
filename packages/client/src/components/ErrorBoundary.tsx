@@ -26,6 +26,16 @@ const quips = [
   "This worked on someone's machine at some point.",
   "An undefined walked into a bar. There was no bar.",
   "The good news: the boundary caught it. The bad news: everything else.",
+  "TypeScript said this could not happen.",
+  "Nobody expects the null entity class.",
+  "The data shape changed. Nobody told the view.",
+  "Every state was handled. This was not one of them.",
+  "One of these components was lying about its props.",
+  "The render finished, just not the way anyone wanted.",
+  "This is precisely why we have boundaries.",
+  "Type safety got us this far.",
+  "Somewhere between the store and the screen, hope was lost.",
+  "This entity classified itself. Recursively.",
 ];
 
 // componentStack lists frames innermost first, so its top line names the
