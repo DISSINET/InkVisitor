@@ -1,19 +1,5 @@
-import Cursor, { DIRECTION } from "./Cursor";
-import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
-import History, { HistorySnapshot } from "./History";
-import { ContextMenu, ContextMenuItem } from "./ContextMenu";
-import { CaretBlink } from "./CaretBlink";
-import { ResizePulse } from "./ResizePulse";
-import { HoverHighlightFade } from "./HoverHighlightFade";
-import { SettingsOverlay, SettingControl } from "./SettingsOverlay";
-import Keys from "./Keys";
-import { Lines } from "./Lines";
-import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
 import { drawAnchorMarker } from "./AnchorMarker";
-import { CanvasMeasurer } from "./TextMeasurer";
-import Viewport from "./Viewport";
-import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
+import { CaretBlink } from "./CaretBlink";
 import {
   ANCHOR_MARKER_ARM_H_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
@@ -22,11 +8,12 @@ import {
   ANCHOR_MARKER_STACK_STEP_PX,
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
-  PROPORTIONAL_FONT,
   EditMode,
   HighlightMode,
   HOVER_DEBOUNCE_MS,
+  LIGHT_MENU_COLORS,
   LINE_HEIGHT,
+  MenuColors,
   PARAGRAPH_INDENT_DEFAULT,
   PARAGRAPH_INDENT_EM,
   PARAGRAPH_MARK_ALPHA,
@@ -37,15 +24,28 @@ import {
   PARAGRAPH_MARK_LINE_WIDTH_PX,
   PARAGRAPH_MARK_OVERHANG_RATIO,
   PARAGRAPH_MARK_STEM_GAP_RATIO,
+  PROPORTIONAL_FONT,
   SELECTION_EDGE_SCROLL_SPEED,
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
   VIEWPORT_START_BUFFER_ROWS,
-  LIGHT_MENU_COLORS,
-  MenuColors,
 } from "./constants";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import Cursor, { DIRECTION } from "./Cursor";
+import Highlighter, { CursorStyle, IAbsCoordinates } from "./Highlighter";
+import History, { HistorySnapshot } from "./History";
+import { HoverHighlightFade } from "./HoverHighlightFade";
+import Keys from "./Keys";
+import { Lines } from "./Lines";
+import { ResizePulse } from "./ResizePulse";
+import Scroller from "./Scroller";
+import { SettingControl, SettingsOverlay } from "./SettingsOverlay";
+import Text, { SegmentPosition, Tag } from "./Text";
+import { CanvasMeasurer } from "./TextMeasurer";
+import Viewport from "./Viewport";
+import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -382,6 +382,7 @@ export class Annotator {
     y: number;
     w: number;
     h: number;
+    kind: "start" | "end";
     tag: Tag;
   }[] = [];
 
@@ -1095,9 +1096,7 @@ export class Annotator {
     const scrollTrackLines = this.scrollExtentLineCount() + this.viewport.startBuffer;
     this.scroller?.setRunnerSize((this.viewport.noLines / scrollTrackLines) * 100);
 
-    this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100)
-    );
+    this.scroller?.setViewportSize(Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100));
 
     if (this.settingsOverlay.isOpen) {
       this.settingsOverlay.reposition(this.element);
@@ -2695,6 +2694,7 @@ export class Annotator {
           y: box.y - pad,
           w: box.w + 2 * pad,
           h: box.h + 2 * pad,
+          kind: p.kind,
           tag: p.tag,
         });
       }
@@ -2839,17 +2839,21 @@ export class Annotator {
   private drawPendingParagraphMarks(): void {
     for (const mark of this.pendingParagraphMarks) {
       let shiftX = 0;
-      // One marker cleared per pass, so the bound is their number. A mark held
-      // at the right edge cannot move, which ends the search rather than
-      // spinning on a marker it can never clear.
+      // One marker cleared per pass, so the bound is their number.
       for (let pass = 0; pass <= this.anchorMarkerHitboxes.length; pass++) {
-        const { left, top, markW, h } = this.paragraphMarkGeometry(
-          mark.x,
-          mark.y,
-          shiftX
-        );
+        const { left, top, markW, h } = this.paragraphMarkGeometry(mark.x, mark.y, shiftX);
+        // The geometry pins `left` at the right edge, so a mark held there
+        // cannot move — no shift clears a marker it may still overlap.
+        if (left >= this.width - markW) {
+          break;
+        }
+        // Only end markers (┘) push the mark aside. A start marker (┌) opens
+        // toward the text, so the mark reads fine inside its corner, and
+        // dodging it would indent the marks at territory openings while the
+        // plain ones stay at the margin — an uneven column of pilcrows.
         const clash = this.anchorMarkerHitboxes.find(
           (hb) =>
+            hb.kind === "end" &&
             left < hb.x + hb.w &&
             left + markW > hb.x &&
             top < hb.y + hb.h &&
@@ -2858,11 +2862,9 @@ export class Annotator {
         if (!clash) {
           break;
         }
-        const clearOf = clash.x + clash.w;
-        if (clearOf <= left) {
-          break;
-        }
-        shiftX += clearOf - left;
+        // A clash overlaps the mark, so its right edge always lies past `left`
+        // and the shift below is strictly positive.
+        shiftX += clash.x + clash.w - left;
       }
       this.drawParagraphMark(mark.x, mark.y, shiftX);
     }
