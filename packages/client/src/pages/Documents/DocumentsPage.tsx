@@ -29,6 +29,7 @@ import {
   StyledGrid,
   StyledGridScrollArea,
   StyledHeading,
+  StyledHeadingRow,
   StyledInputWrap,
   StyledSelectionBar,
   StyledSelectionCount,
@@ -249,35 +250,37 @@ export const DocumentsPage: React.FC = ({}) => {
       <StyledContent>
         <StyledBoxWrap>
           <StyledBackground>
-            <StyledHeading>Documents</StyledHeading>
-            <StyledSelectionBar>
-              <Button
-                icon={<FaDownload />}
-                color="primary"
-                inverted
-                disabled={selectedDocumentIds.length === 0}
-                label={`export selected (${selectedDocumentIds.length})`}
-                tooltipLabel={
-                  selectedDocumentIds.length > 1
-                    ? "export the selected documents as one .zip"
-                    : "export the selected document"
-                }
-                onClick={() => setExportedDocumentIds(selectedDocumentIds)}
-              />
-              {selectedDocumentIds.length > 0 && (
-                <>
-                  <StyledSelectionCount>
-                    {selectedDocumentIds.length} of {exportableIds.length} selected
-                  </StyledSelectionCount>
-                  <Button
-                    color="greyer"
-                    inverted
-                    label="clear"
-                    onClick={() => setSelectedDocumentIds([])}
-                  />
-                </>
-              )}
-            </StyledSelectionBar>
+            <StyledHeadingRow>
+              <StyledHeading>Documents</StyledHeading>
+              <StyledSelectionBar>
+                <Button
+                  icon={<FaDownload />}
+                  color="primary"
+                  inverted
+                  disabled={selectedDocumentIds.length === 0}
+                  label={`export selected (${selectedDocumentIds.length})`}
+                  tooltipLabel={
+                    selectedDocumentIds.length > 1
+                      ? "export the selected documents as one .zip"
+                      : "export the selected document"
+                  }
+                  onClick={() => setExportedDocumentIds(selectedDocumentIds)}
+                />
+                {selectedDocumentIds.length > 0 && (
+                  <>
+                    <StyledSelectionCount>
+                      {selectedDocumentIds.length} of {exportableIds.length} selected
+                    </StyledSelectionCount>
+                    <Button
+                      color="greyer"
+                      inverted
+                      label="clear"
+                      onClick={() => setSelectedDocumentIds([])}
+                    />
+                  </>
+                )}
+              </StyledSelectionBar>
+            </StyledHeadingRow>
             <StyledGridScrollArea>
               <StyledGrid>
                 <DocumentsTableHeader

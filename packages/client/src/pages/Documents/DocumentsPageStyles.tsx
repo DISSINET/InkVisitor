@@ -158,13 +158,20 @@ export const StyledDisabledSelect = styled.div`
   cursor: not-allowed;
 `;
 
+/** Page heading and the selection actions share one row */
+export const StyledHeadingRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[4]};
+  flex-shrink: 0;
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
 export const StyledSelectionBar = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[3]};
-  flex-shrink: 0;
-  margin-bottom: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
@@ -203,7 +210,6 @@ export const StyledHeading = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["lg"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[1]};
 `;
 
