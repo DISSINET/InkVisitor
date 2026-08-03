@@ -1,9 +1,12 @@
-import { Checkbox } from "components";
+import { Button, Checkbox } from "components";
 import React from "react";
+import { FaDownload } from "react-icons/fa";
 import { DocumentSortField, DocumentSortState } from "./types";
 import {
+  StyledActionsHeaderCell,
+  StyledBulkExportCount,
+  StyledBulkExportWrap,
   StyledGridHeader,
-  StyledHeaderCell,
   StyledSelectHeaderCell,
   StyledSortableHeaderCell,
   StyledSortIndicator,
@@ -17,6 +20,8 @@ type DocumentsTableHeaderProps = {
   someSelected: boolean;
   hasExportableDocuments: boolean;
   onToggleSelectAll: (selected: boolean) => void;
+  selectedCount: number;
+  onExportSelected: () => void;
 };
 
 const SortableHeader: React.FC<{
@@ -29,8 +34,8 @@ const SortableHeader: React.FC<{
   const title = !isActive
     ? `Sort by ${label}`
     : sort.direction === "asc"
-    ? `Sort ${label} descending`
-    : `Clear sort`;
+      ? `Sort ${label} descending`
+      : `Clear sort`;
 
   return (
     <StyledSortableHeaderCell
@@ -56,6 +61,8 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
   someSelected,
   hasExportableDocuments,
   onToggleSelectAll,
+  selectedCount,
+  onExportSelected,
 }) => (
   <StyledGridHeader>
     <StyledSelectHeaderCell>
@@ -70,7 +77,23 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
       )}
     </StyledSelectHeaderCell>
     <SortableHeader field="documentName" label="Name" sort={sort} onSort={onSort} />
-    <StyledHeaderCell></StyledHeaderCell>
+    <StyledActionsHeaderCell>
+      {selectedCount > 0 && (
+        <StyledBulkExportWrap>
+          <Button
+            icon={<FaDownload />}
+            color="info"
+            tooltipLabel={
+              selectedCount > 1
+                ? `export ${selectedCount} selected documents as one .zip`
+                : "export the selected document"
+            }
+            onClick={onExportSelected}
+          />
+          <StyledBulkExportCount>{selectedCount}</StyledBulkExportCount>
+        </StyledBulkExportWrap>
+      )}
+    </StyledActionsHeaderCell>
     <SortableHeader field="resourceLabel" label="Label" sort={sort} onSort={onSort} />
     <SortableHeader field="anchorCount" label="Anchors" sort={sort} onSort={onSort} />
   </StyledGridHeader>

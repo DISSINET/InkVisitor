@@ -116,19 +116,10 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     <StyledDocumentRow>
       <StyledSelectCell>
         {canManage ? (
-          <Checkbox
-            value={selected}
-            onChangeFn={() => onToggleSelected(document.id)}
-            tooltipLabel={selected ? "deselect document" : "select document for export"}
-            noFill
-          />
+          <Checkbox value={selected} onChangeFn={() => onToggleSelected(document.id)} noFill />
         ) : (
           <StyledDisabledSelect>
-            <Checkbox
-              value={false}
-              tooltipLabel="you are not assigned to this resource"
-              noFill
-            />
+            <Checkbox value={false} tooltipLabel="you are not assigned to this resource" noFill />
           </StyledDisabledSelect>
         )}
       </StyledSelectCell>
