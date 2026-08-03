@@ -70,25 +70,15 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
       border-color: ${String(theme.color[$accentColor])};
     }
   `}
-  input[type="text"],
-  .react-select__control {
+  input[type="text"] {
     /* border-color: transparent !important; */
     border-color: transparent !important;
-  }
-
-  /* the class control is sized for a single letter; anything longer is clipped
-     here so it cannot reach the type bar and the input next to it */
-  .react-select__value-container {
-    overflow: hidden;
-    flex-wrap: nowrap;
   }
 
   ${({ $disabled, theme }) =>
     $disabled &&
     `
-    input[type="text"],
-    .react-select__control,
-    .react-select__control--is-disabled {
+    input[type="text"] {
       background: transparent !important;
     }
     input[type="text"]::placeholder {
