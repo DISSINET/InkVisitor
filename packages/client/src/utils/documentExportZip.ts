@@ -29,11 +29,12 @@ export const buildZipEntryNames = (
   });
 };
 
+/** Date first, so exports of several days sort by name into chronological order */
 export const zipFileNameForDate = (date: Date): string => {
   const pad = (value: number) => String(value).padStart(2, "0");
-  return `documents-export-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
-  )}.zip`;
+  )}-documents-export.zip`;
 };
 
 export const buildDocumentsZip = async (documents: IDocumentExport[]): Promise<Blob> => {

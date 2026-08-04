@@ -38,7 +38,7 @@ describe("buildZipEntryNames", () => {
 });
 
 describe("zipFileNameForDate", () => {
-  it("pads month and day", () => {
-    expect(zipFileNameForDate(new Date(2026, 7, 3))).toBe("documents-export-2026-08-03.zip");
+  it("leads with the padded date", () => {
+    expect(zipFileNameForDate(new Date(2026, 7, 3))).toBe("2026-08-03-documents-export.zip");
   });
 });

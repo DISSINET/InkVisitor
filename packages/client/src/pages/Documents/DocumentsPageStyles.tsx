@@ -53,7 +53,9 @@ export const StyledDocumentsColumn = styled.div`
   min-height: 0;
   padding: ${({ theme }) => theme.space[4]};
   background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
 `;
 
 /** Grows only as far as the rows need, then scrolls within what is left */
@@ -83,10 +85,14 @@ const stickyHeaderCell = css`
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
+/**
+ * Cells stretch to the full row height so a row-wide fill has no gaps; each
+ * cell centers its own content vertically.
+ */
 export const StyledGrid = styled.div`
   display: grid;
   grid-template-columns: ${documentsGridColumns};
-  align-items: center;
+  align-items: stretch;
   min-width: min-content;
   margin-bottom: 0.5rem;
   padding-right: 0.5rem;
@@ -96,8 +102,26 @@ export const StyledGridHeader = styled.div`
   display: contents;
 `;
 
+/**
+ * Cells are grid items of the shared grid, so the row itself lays out nothing
+ * and the hover fill has to be painted on the cells it contains.
+ */
 export const StyledDocumentRow = styled.div`
   display: contents;
+
+  &:hover > * {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
+
+  &:hover > *:first-child {
+    border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
+    border-bottom-left-radius: ${({ theme }) => theme.borderRadius["default"]};
+  }
+
+  &:hover > *:last-child {
+    border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
+    border-bottom-right-radius: ${({ theme }) => theme.borderRadius["default"]};
+  }
 `;
 
 export const StyledSortableHeaderCell = styled.button<{ $active?: boolean }>`
@@ -190,6 +214,8 @@ export const StyledDisabledSelect = styled.div`
 `;
 
 export const StyledTitleWrap = styled.div`
+  display: flex;
+  align-items: center;
   min-width: 0;
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -207,6 +233,7 @@ export const StyledTitle = styled.div`
 `;
 export const StyledReference = styled.div`
   display: grid;
+  align-items: center;
   min-width: 0;
   max-width: 17.4rem;
   position: relative;
@@ -215,7 +242,8 @@ export const StyledReference = styled.div`
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  display: inline-flex;
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
   padding: 0.5rem 1rem;
