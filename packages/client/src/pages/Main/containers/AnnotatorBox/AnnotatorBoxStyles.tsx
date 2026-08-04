@@ -68,23 +68,24 @@ export const StyledInfoText = styled.div`
 `;
 
 /**
- * The resource tag holds a fixed width so the title is the only item that
- * shrinks — StyledLabel in the Box header already ellipsises, and the resource
- * identity matters more than the last characters of the title.
+ * Resource tag and title size to their content when the header has room (no
+ * cap — a wide box shows the full labels) and shrink when it doesn't. The
+ * resource floor is high because resource identity matters more than the last
+ * characters of the title; the Box label is protected separately
+ * (shrinkLabel={false} on the Annotator Box), so neither can cover it.
  */
 export const StyledAnnotatorHeaderResource = styled.div`
   display: flex;
-  flex-shrink: 0;
-  max-width: 11.5rem;
+  flex-shrink: 1;
+  min-width: 11.5rem;
 `;
 
-/** The one item that yields when the header runs out of room. */
+/** The item that yields furthest when the header runs out of room. */
 export const StyledAnnotatorHeaderTitle = styled.div`
   display: flex;
   align-items: center;
   flex-shrink: 1;
   min-width: 2rem;
-  max-width: 16rem;
   overflow: hidden;
 `;
 
