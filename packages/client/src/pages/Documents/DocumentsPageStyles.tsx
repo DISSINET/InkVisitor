@@ -60,7 +60,6 @@ export const StyledDocumentsColumn = styled.div`
 
 /** Grows only as far as the rows need, then scrolls within what is left */
 export const StyledGridScrollArea = styled.div`
-  padding-right: 0.5rem;
   flex: 0 1 auto;
   min-height: 0;
   width: 100%;
@@ -80,7 +79,7 @@ const stickyHeaderCell = css`
   top: 0;
   z-index: 1;
   background: ${({ theme }) => theme.color["white"]};
-  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
   min-height: 2.5rem;
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
@@ -95,7 +94,6 @@ export const StyledGrid = styled.div`
   align-items: stretch;
   min-width: min-content;
   margin-bottom: 0.5rem;
-  padding-right: 0.5rem;
 `;
 
 export const StyledGridHeader = styled.div`

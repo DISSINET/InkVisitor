@@ -73,7 +73,6 @@ export const StyledDownloadOverlayLink = styled.a`
 
 /** Grows only as far as the rows need, then scrolls within what is left */
 export const StyledGridScrollArea = styled.div`
-  padding-right: 0.5rem;
   flex: 0 1 auto;
   min-height: 0;
   width: 100%;
@@ -93,7 +92,6 @@ export const StyledGrid = styled.div`
   align-items: stretch;
   min-width: min-content;
   margin-bottom: 0.5rem;
-  padding-right: 0.5rem;
 `;
 
 export const StyledGridHeader = styled.div`
@@ -131,7 +129,7 @@ export const StyledHeaderCell = styled.div<{ $alignRight?: boolean }>`
   justify-content: ${({ $alignRight }) => ($alignRight ? "flex-end" : "flex-start")};
   min-height: 2.5rem;
   background: ${({ theme }) => theme.color["white"]};
-  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
   margin-bottom: ${({ theme }) => theme.space[2]};
   padding: 0.5rem 1rem;
   color: ${({ theme }) => theme.color["gray"][700]};
