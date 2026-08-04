@@ -12,5 +12,10 @@
     "skipLibCheck": true,
     "strict": true
   },
-  "include": ["types/**/*.ts", "enums/**/*.ts", "dictionaries/**/*.ts"]
+  "include": [
+    "types/**/*.ts",
+    "enums/**/*.ts",
+    "dictionaries/**/*.ts",
+    "constants/**/*.ts"
+  ]
 }

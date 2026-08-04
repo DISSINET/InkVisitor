@@ -44,5 +44,7 @@ export const buildDocumentsZip = async (documents: IDocumentExport[]): Promise<B
     zip.file(names[index], document.content);
   });
 
-  return zip.generateAsync({ type: "blob" });
+  // entries are plain text, which deflates several times over; JSZip stores
+  // them uncompressed unless asked
+  return zip.generateAsync({ type: "blob", compression: "DEFLATE" });
 };

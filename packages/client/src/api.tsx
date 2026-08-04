@@ -36,6 +36,7 @@ import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
+import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { defaultPing } from "Theme/constants";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
@@ -1707,6 +1708,11 @@ class Api {
    * Downloads several documents as one archive. The anchor classes to keep are
    * the same for every document of the batch; the server rejects the whole
    * request when any of the documents may not be exported by this user.
+   *
+   * The selection is sent in requests of MAX_DOCUMENTS_EXPORT_BATCH documents -
+   * the size the server accepts - one after another, so the server holds one
+   * chunk at a time. A rejected chunk aborts the whole export before any
+   * archive is built.
    */
   async documentsExportZip(
     documentIds: string[],
@@ -1714,15 +1720,21 @@ class Api {
     zipFileName: string,
   ): Promise<void> {
     try {
-      const response = await this.connection.post<IDocumentExport[]>(
-        `/documents/export-batch`,
-        {
-          documentIds,
-          exportedEntities,
-        },
-      );
+      const exports: IDocumentExport[] = [];
 
-      triggerDownload(await buildDocumentsZip(response.data), zipFileName);
+      for (let i = 0; i < documentIds.length; i += MAX_DOCUMENTS_EXPORT_BATCH) {
+        const response = await this.connection.post<IDocumentExport[]>(
+          `/documents/export-batch`,
+          {
+            documentIds: documentIds.slice(i, i + MAX_DOCUMENTS_EXPORT_BATCH),
+            exportedEntities,
+          },
+        );
+
+        exports.push(...response.data);
+      }
+
+      triggerDownload(await buildDocumentsZip(exports), zipFileName);
     } catch (err) {
       throw this.handleError(err);
     }

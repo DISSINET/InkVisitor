@@ -50,6 +50,12 @@
       "import": "./dictionaries/*.ts",
       "require": "./dist/dictionaries/*.js",
       "default": "./dist/dictionaries/*.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "import": "./constants/index.ts",
+      "require": "./dist/constants/index.js",
+      "default": "./dist/constants/index.js"
     }
   },
   "devDependencies": {

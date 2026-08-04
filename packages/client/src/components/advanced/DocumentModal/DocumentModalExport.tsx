@@ -89,19 +89,35 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, documents
     );
   }, [exportedClasses, anchorsPerClass]);
 
-  const handleExport = () => {
-    if (!documents.length) {
+  // a batch is a server round trip per 50 documents plus zipping in the
+  // browser, so the export runs to completion before the modal reacts
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    if (!documents.length || isExporting) {
       return;
     }
-    if (documents.length === 1) {
-      const [document] = documents;
-      api.documentExport(document.id, exportedClasses, document.title || document.id);
-    } else {
-      api.documentsExportZip(
-        documents.map((document) => document.id),
-        exportedClasses,
-        zipFileNameForDate(new Date()),
-      );
+    setIsExporting(true);
+    try {
+      if (documents.length === 1) {
+        const [document] = documents;
+        await api.documentExport(
+          document.id,
+          exportedClasses,
+          document.title || document.id,
+        );
+      } else {
+        await api.documentsExportZip(
+          documents.map((document) => document.id),
+          exportedClasses,
+          zipFileNameForDate(new Date()),
+        );
+      }
+      onClose();
+    } catch {
+      // the api response interceptor already reports the failure; the modal
+      // stays open so the selection can be exported again
+      setIsExporting(false);
     }
   };
 
@@ -250,8 +266,11 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, documents
             />
             <Button
               onClick={handleExport}
+              disabled={isExporting}
               icon={<FaDownload size={14} style={{ marginRight: "3px" }} />}
-              label={isBatch ? `export .zip` : `export`}
+              label={
+                isExporting ? `exporting...` : isBatch ? `export .zip` : `export`
+              }
               color="info"
             />
           </ButtonGroup>

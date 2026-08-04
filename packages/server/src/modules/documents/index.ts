@@ -23,6 +23,7 @@ import {
   PermissionDeniedError,
 } from "@inkvisitor/shared/types/errors";
 import { EventType } from "@inkvisitor/shared/types/stats";
+import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { Router } from "express";
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
@@ -47,6 +48,37 @@ async function userCanManageDocument(
   }
   const resource = await Resource.findByDocumentId(conn, documentId);
   return !!resource && user.hasAnnotateRightForResource(resource.id);
+}
+
+/**
+ * Subset of the given documents the user may manage, by the same rules as
+ * userCanManageDocument. The Editor branch resolves the whole list through one
+ * Resource lookup - that lookup filters on the unindexed data.documentId, so a
+ * per-document call would walk the entity table once per id.
+ */
+async function documentsManageableByUser(
+  conn: Connection,
+  documentIds: string[],
+  user: User
+): Promise<Set<string>> {
+  if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+    return new Set(documentIds);
+  }
+  if (user.role !== UserEnums.Role.Editor) {
+    return new Set();
+  }
+
+  const resources = await Resource.findByDocumentIds(conn, documentIds);
+  const manageable = new Set<string>();
+
+  for (const resource of resources) {
+    const documentId = resource.data.documentId;
+    if (documentId && user.hasAnnotateRightForResource(resource.id)) {
+      manageable.add(documentId);
+    }
+  }
+
+  return manageable;
 }
 
 export default Router()
@@ -163,36 +195,47 @@ export default Router()
       return document;
     })
   )
-  .post("/export", async (request: IRequest, res: any) => {
-    const id = request.body.documentId;
-    const exportedEntities = request.body
-      .exportedEntities as EntityEnums.Class[];
+  // express 4 does not catch a rejected handler promise, so everything that
+  // may throw goes through next(err) - a bare throw would leave the request
+  // hanging instead of returning the error response
+  .post("/export", async (request: IRequest, res: any, next: any) => {
+    try {
+      const id = request.body.documentId;
+      const exportedEntities = request.body
+        .exportedEntities as EntityEnums.Class[];
 
-    if (!id) {
-      throw new BadParams("document id has to be set");
+      if (!id) {
+        throw new BadParams("document id has to be set");
+      }
+
+      if (!Array.isArray(exportedEntities)) {
+        throw new BadParams("exported entities have to be set");
+      }
+
+      const document = await Document.getDocumentById(request.db.connection, id);
+
+      if (!document) {
+        throw DocumentDoesNotExist.forId(id);
+      }
+
+      if (
+        !(await userCanManageDocument(
+          request.db.connection,
+          id,
+          request.getUserOrFail()
+        ))
+      ) {
+        throw new PermissionDeniedError("document cannot be exported");
+      }
+
+      const filteredContent = filterDocumentContent(document, exportedEntities);
+
+      res.setHeader("content-type", "text/plain");
+      res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
+      res.send(filteredContent);
+    } catch (err) {
+      next(err);
     }
-
-    const document = await Document.getDocumentById(request.db.connection, id);
-
-    if (!document) {
-      throw DocumentDoesNotExist.forId(id);
-    }
-
-    if (
-      !(await userCanManageDocument(
-        request.db.connection,
-        id,
-        request.getUserOrFail()
-      ))
-    ) {
-      throw new PermissionDeniedError("document cannot be exported");
-    }
-
-    const filteredContent = filterDocumentContent(document, exportedEntities);
-
-    res.setHeader("content-type", "text/plain");
-    res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
-    res.send(filteredContent);
   })
   /**
    * @openapi
@@ -236,28 +279,46 @@ export default Router()
         throw new BadParams("document ids have to be set");
       }
 
+      // the whole batch is held in memory here and again as one JSON payload,
+      // so the size the client may ask for in one go is capped
+      if (documentIds.length > MAX_DOCUMENTS_EXPORT_BATCH) {
+        throw new BadParams(
+          `at most ${MAX_DOCUMENTS_EXPORT_BATCH} documents can be exported at once`
+        );
+      }
+
+      if (!Array.isArray(exportedEntities)) {
+        throw new BadParams("exported entities have to be set");
+      }
+
       const user = request.getUserOrFail();
       const exports: IDocumentExport[] = [];
 
+      const documents = await Document.findDocumentsByIds(
+        request.db.connection,
+        documentIds
+      );
+      const documentsById = new Map(
+        documents.map((document) => [document.id, document])
+      );
+      const manageableIds = await documentsManageableByUser(
+        request.db.connection,
+        documentIds,
+        user
+      );
+
       // a single unexportable document fails the whole batch - a partial
-      // archive would silently omit documents the user asked for
+      // archive would silently omit documents the user asked for.
+      // Iterating the requested ids keeps the response in the order asked for
+      // (findDocumentsByIds does not guarantee one).
       for (const documentId of documentIds) {
-        const document = await Document.getDocumentById(
-          request.db.connection,
-          documentId
-        );
+        const document = documentsById.get(documentId);
 
         if (!document) {
           throw DocumentDoesNotExist.forId(documentId);
         }
 
-        if (
-          !(await userCanManageDocument(
-            request.db.connection,
-            documentId,
-            user
-          ))
-        ) {
+        if (!manageableIds.has(documentId)) {
           throw new PermissionDeniedError("document cannot be exported");
         }
 

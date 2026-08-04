@@ -6,6 +6,7 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { pool } from "@middlewares/db";
 import Document from "@models/document/document";
+import Resource from "@models/resource/resource";
 import User from "@models/user/user";
 import { Db } from "@service/rethink";
 import { clean, testErroneousResponse } from "@modules/common.test";
@@ -15,6 +16,7 @@ import {
   AuthAgent,
 } from "@modules/testAuth";
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { v4 as uuidv4 } from "uuid";
 
 describe("modules/documents export-batch", function () {
@@ -51,24 +53,61 @@ describe("modules/documents export-batch", function () {
   } as any);
 
   const editorId = uuidv4();
+  const annotatorId = uuidv4();
+
+  const resourceAId = uuidv4();
+  const resourceBId = uuidv4();
 
   let adminAgent: AuthAgent;
   let editorAgent: AuthAgent;
+  let annotatorAgent: AuthAgent;
 
   beforeAll(async () => {
     await db.initDb();
     await documentA.save(db.connection);
     await documentB.save(db.connection);
     await documentC.save(db.connection);
+
+    // one resource per document - the Editor branch of the permission check
+    // resolves a document through the resource that links to it. Built here:
+    // a document only has its id once it is saved.
+    await new Resource({
+      id: resourceAId,
+      class: EntityEnums.Class.Resource,
+      data: { documentId: documentA.id },
+    } as any).save(db.connection);
+    await new Resource({
+      id: resourceBId,
+      class: EntityEnums.Class.Resource,
+      data: { documentId: documentB.id },
+    } as any).save(db.connection);
+    await new Resource({
+      id: uuidv4(),
+      class: EntityEnums.Class.Resource,
+      data: { documentId: documentC.id },
+    } as any).save(db.connection);
+
     await new User({
       id: editorId,
       role: UserEnums.Role.Editor,
       active: true,
       verified: true,
     } as any).save(db.connection);
+    await new User({
+      id: annotatorId,
+      role: UserEnums.Role.Editor,
+      active: true,
+      verified: true,
+      // the right's `territory` field carries the Resource id for Annotate
+      rights: [
+        { territory: resourceAId, mode: UserEnums.RoleMode.Annotate },
+        { territory: resourceBId, mode: UserEnums.RoleMode.Annotate },
+      ],
+    } as any).save(db.connection);
 
     adminAgent = await getAuthenticatedAgent();
     editorAgent = await createAgentWithUserId(editorId);
+    annotatorAgent = await createAgentWithUserId(annotatorId);
   });
 
   afterAll(async () => {
@@ -122,6 +161,32 @@ describe("modules/documents export-batch", function () {
       .expect(400);
   });
 
+  it("should return a BadParams error above the batch size limit", async () => {
+    await adminAgent
+      .post(`${apiPath}/documents/export-batch`)
+      .send({
+        documentIds: new Array(MAX_DOCUMENTS_EXPORT_BATCH + 1).fill(
+          documentA.id
+        ),
+        exportedEntities: [EntityEnums.Class.Person],
+      })
+      .expect(400);
+  });
+
+  it("should return a BadParams error for a missing exportedEntities list", async () => {
+    await adminAgent
+      .post(`${apiPath}/documents/export-batch`)
+      .send({ documentIds: [documentA.id] })
+      .expect(400);
+  });
+
+  it("should return a BadParams error for a missing exportedEntities list in /export", async () => {
+    await adminAgent
+      .post(`${apiPath}/documents/export`)
+      .send({ documentId: documentA.id })
+      .expect(400);
+  });
+
   it("should return a DocumentDoesNotExist error for an unknown id", async () => {
     await adminAgent
       .post(`${apiPath}/documents/export-batch`)
@@ -155,6 +220,31 @@ describe("modules/documents export-batch", function () {
       .post(`${apiPath}/documents/export-batch`)
       .send({
         documentIds: [documentA.id],
+        exportedEntities: [EntityEnums.Class.Person],
+      })
+      .expect(
+        testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
+      );
+  });
+
+  it("should allow an editor the documents whose resources are assigned", async () => {
+    await annotatorAgent
+      .post(`${apiPath}/documents/export-batch`)
+      .send({
+        documentIds: [documentA.id, documentB.id],
+        exportedEntities: [EntityEnums.Class.Person],
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveLength(2);
+      });
+  });
+
+  it("should deny an editor a batch mixing an assigned and an unassigned document", async () => {
+    await annotatorAgent
+      .post(`${apiPath}/documents/export-batch`)
+      .send({
+        documentIds: [documentA.id, documentC.id],
         exportedEntities: [EntityEnums.Class.Person],
       })
       .expect(
