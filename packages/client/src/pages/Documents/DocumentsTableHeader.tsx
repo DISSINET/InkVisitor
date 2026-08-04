@@ -78,21 +78,22 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
     </StyledSelectHeaderCell>
     <SortableHeader field="documentName" label="Name" sort={sort} onSort={onSort} />
     <StyledActionsHeaderCell>
-      {selectedCount > 0 && (
-        <StyledBulkExportWrap>
-          <Button
-            icon={<FaDownload />}
-            color="info"
-            tooltipLabel={
-              selectedCount > 1
+      <StyledBulkExportWrap>
+        <Button
+          icon={<FaDownload />}
+          color="info"
+          disabled={selectedCount === 0}
+          tooltipLabel={
+            selectedCount === 0
+              ? "select documents to export"
+              : selectedCount > 1
                 ? `set up the export of ${selectedCount} selected documents`
                 : "set up the export of the selected document"
-            }
-            onClick={onExportSelected}
-          />
-          <StyledBulkExportCount>{selectedCount}</StyledBulkExportCount>
-        </StyledBulkExportWrap>
-      )}
+          }
+          onClick={onExportSelected}
+        />
+        {selectedCount > 0 && <StyledBulkExportCount>{selectedCount}</StyledBulkExportCount>}
+      </StyledBulkExportWrap>
     </StyledActionsHeaderCell>
     <SortableHeader field="resourceLabel" label="Label" sort={sort} onSort={onSort} />
     <SortableHeader field="anchorCount" label="Anchors" sort={sort} onSort={onSort} />
