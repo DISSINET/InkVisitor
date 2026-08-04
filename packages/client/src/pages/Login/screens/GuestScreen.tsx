@@ -7,7 +7,6 @@ import {
   StyledErrorText,
 } from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
-import { IoEnter } from "react-icons/io5";
 import { useAppDispatch } from "redux/hooks";
 import { ButtonSize } from "types";
 
@@ -49,9 +48,9 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
       </StyledDescription>
       <StyledButtonWrap>
         <Button
-          icon={<IoEnter />}
           label="Enter"
           color="success"
+          fullWidth
           onClick={() => handleEnter()}
           size={ButtonSize.Large}
         />

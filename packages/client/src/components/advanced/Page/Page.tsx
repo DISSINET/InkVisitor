@@ -47,12 +47,14 @@ export const Page: React.FC<Page> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const disableRightHeader: boolean =
+  // Auth pages render a branded modal of their own, so the app header (logo,
+  // version, user chrome) stays hidden there entirely.
+  const isAuthRoute: boolean =
     location.pathname === "/login" ||
     location.pathname === "/activate" ||
     location.pathname === "/password_reset";
 
-  const { data: user, isFetching: isFetchingUser, isPaused } = useUserQuery(!disableRightHeader);
+  const { data: user, isFetching: isFetchingUser, isPaused } = useUserQuery(!isAuthRoute);
 
   const toastId = React.useRef<Id | null>(null);
   const notify = () => (toastId.current = toast.dark("you're offline", { autoClose: false }));
@@ -110,7 +112,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   const headerLeft = useMemo(() => <LeftHeader tempLocation={tempLocation} />, [tempLocation]);
 
   const headerRight = useMemo<undefined | React.ReactNode>(() => {
-    if (disableRightHeader) {
+    if (isAuthRoute) {
       return undefined;
     }
     return (
@@ -125,7 +127,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         userIsFetching={isFetchingUser}
       />
     );
-  }, [user?.name, userRole, isFetchingUser, tempLocation, disableRightHeader]);
+  }, [user?.name, userRole, isFetchingUser, tempLocation, isAuthRoute]);
 
   const handleClick = useCallback(() => {
     if (lastClickedIndex !== -1) {
@@ -143,15 +145,19 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   return (
     <StyledPage onClick={handleClick} id="page">
-      <Header
-        paddingY={0}
-        paddingX={10}
-        color={headerColor}
-        left={headerLeft}
-        right={headerRight}
-      />
+      {!isAuthRoute && (
+        <Header
+          paddingY={0}
+          paddingX={10}
+          color={headerColor}
+          left={headerLeft}
+          right={headerRight}
+        />
+      )}
 
-      <StyledPageContent id="page-content">{contentEl}</StyledPageContent>
+      <StyledPageContent id="page-content" $fullHeight={isAuthRoute}>
+        {contentEl}
+      </StyledPageContent>
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal user={user} onClose={() => setUserCustomizationOpen(false)} />
