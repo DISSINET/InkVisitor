@@ -1,13 +1,18 @@
 import { IErrorSignature, NetworkError, getErrorByCode } from "@inkvisitor/shared/types/errors";
 import api from "api";
 import { Button, Input } from "components";
-import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
+import {
+  StyledErrorText,
+  StyledErrorWrap,
+  StyledForm,
+  StyledInputRow,
+  StyledLinkButton,
+  StyledSubmitWrap,
+} from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
-import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StyledFaLock, StyledInputRow, StyledTbMailFilled } from "./LoginScreensStyles";
-import useKeypress from "hooks/useKeyPress";
+import { StyledFaLock, StyledTbMailFilled } from "./LoginScreensStyles";
 import { ButtonSize } from "types";
 
 interface LoginScreen {
@@ -16,6 +21,7 @@ interface LoginScreen {
   password: string;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
   setRedirectToMain: React.Dispatch<React.SetStateAction<boolean>>;
+  onPasswordReset: () => void;
 }
 export const LoginScreen: React.FC<LoginScreen> = ({
   usernameLocal,
@@ -23,6 +29,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   password,
   setPassword,
   setRedirectToMain,
+  onPasswordReset,
 }) => {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<{ title?: string; message: string } | false>(false);
@@ -57,21 +64,21 @@ export const LoginScreen: React.FC<LoginScreen> = ({
     }
   };
 
-  useKeypress(
-    "Enter",
-    () => {
-      handleLogIn();
-    },
-    [usernameLocal, password],
-  );
-
   return (
     <>
-      <form>
+      {/* The Button below has no type, so it acts as the native submit button;
+          Enter in either input submits through the same path. */}
+      <StyledForm
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleLogIn();
+        }}
+      >
         <StyledInputRow>
           <Input
-            icon={<StyledTbMailFilled size={14} $isError={error !== false} />}
-            width={200}
+            icon={<StyledTbMailFilled size={15} $isError={error !== false} />}
+            width="full"
+            fullHeight
             autocomplete="username"
             placeholder="email or username"
             onChangeFn={(text: string) => setUsernameLocal(text)}
@@ -83,8 +90,9 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         </StyledInputRow>
         <StyledInputRow>
           <Input
-            icon={<StyledFaLock size={12} $isError={error !== false} />}
-            width={200}
+            icon={<StyledFaLock size={13} $isError={error !== false} />}
+            width="full"
+            fullHeight
             autocomplete="current-password"
             type="password"
             placeholder="password"
@@ -94,28 +102,25 @@ export const LoginScreen: React.FC<LoginScreen> = ({
             borderColor={error !== false ? "danger" : undefined}
           />
         </StyledInputRow>
-      </form>
 
-      {error !== false && (
-        <div style={{ marginTop: "0.5rem" }}>
-          {error.title && (
-            <StyledErrorText>
-              <b>{error.title}</b>
-            </StyledErrorText>
-          )}
-          <StyledErrorText>{error.message}</StyledErrorText>
-        </div>
-      )}
+        {error !== false && (
+          <StyledErrorWrap>
+            {error.title && (
+              <StyledErrorText>
+                <b>{error.title}</b>
+              </StyledErrorText>
+            )}
+            <StyledErrorText>{error.message}</StyledErrorText>
+          </StyledErrorWrap>
+        )}
 
-      <StyledButtonWrap>
-        <Button
-          icon={<FiLogIn />}
-          label="Log In"
-          color="success"
-          onClick={() => handleLogIn()}
-          size={ButtonSize.Large}
-        />
-      </StyledButtonWrap>
+        <StyledSubmitWrap>
+          <Button label="Log In" color="success" fullWidth size={ButtonSize.Large} />
+        </StyledSubmitWrap>
+        <StyledLinkButton type="button" onClick={onPasswordReset}>
+          Forgot password?
+        </StyledLinkButton>
+      </StyledForm>
     </>
   );
 };

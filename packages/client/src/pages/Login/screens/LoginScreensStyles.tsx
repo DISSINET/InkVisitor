@@ -8,17 +8,11 @@ export const StyledDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   margin-bottom: 1rem;
 `;
-
-export const StyledInputRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-`;
 export const StyledEmailSent = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledEmailSentIconWrap = styled.div`
+  margin: 0.5rem 0 1.5rem 0;
 `;
 export const StyledAnimatedIconWrap = styled(animated.div)`
   margin-top: 1rem;
@@ -36,10 +30,4 @@ export const StyledFaLock = styled(FaLock)<StyledIcon>`
 `;
 export const StyledTbMailFilled = styled(TbMailFilled)<StyledIcon>`
   color: ${({ theme, $isError }) => ($isError ? theme.color["danger"] : "")};
-`;
-export const StyledCenterColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 `;

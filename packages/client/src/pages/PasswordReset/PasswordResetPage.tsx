@@ -7,27 +7,33 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
-import { Button, Input, Modal, ModalContent, ModalInputWrap } from "components";
+import { Button, Input, Modal } from "components";
+import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import {
   StyledButtonWrap,
+  StyledCenterColumn,
+  StyledContentWrap,
   StyledDescription,
   StyledErrorText,
+  StyledErrorWrap,
+  StyledForm,
   StyledInputRow,
+  StyledLogoBand,
   StyledMail,
+  StyledMailIcon,
+  StyledSubmitWrap,
   StyledText,
 } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
-import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { RiRotateLockLine } from "react-icons/ri";
-import { TbArrowForwardUp, TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
+import { TbArrowForwardUp, TbLockExclamation, TbLockPlus } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { isSafePassword } from "utils/utils";
+import { ButtonSize } from "types";
 
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+const StyledResetDoneIconWrap = styled.div`
+  margin: 1.5rem;
 `;
 
 interface PasswordResetPage {}
@@ -90,104 +96,117 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   return (
     <div>
-      <Modal showModal disableBgClick width={320} onEnterPress={handleReset}>
-        <ModalContent column centered>
+      <Modal showModal disableBgClick width={320} noBorder>
+        <StyledLogoBand>
+          <img src={LogoInkvisitor} alt="InkVisitor" />
+        </StyledLogoBand>
+        <StyledContentWrap>
           {!passwordSent ? (
             <>
-              {hashOk && (
+              {hashOk ? (
                 <>
-                  <p>Enter a new safe password for the user</p>
+                  <StyledText>Enter a new safe password for the user</StyledText>
                   <StyledMail>
-                    <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+                    <StyledMailIcon size={14} />
                     {email}
                   </StyledMail>
                   <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
-                  <StyledForm>
-                    <ModalInputWrap>
-                      <StyledInputRow>
-                        <Input
-                          icon={<TbLockPlus size={16} />}
-                          type="password"
-                          placeholder="new password"
-                          onChangeFn={(text: string) => setPassword(text)}
-                          value={password}
-                          changeOnType
-                          autoFocus
-                          autocomplete="new-password"
-                          required
-                          borderColor={error !== false ? "danger" : undefined}
-                        />
-                      </StyledInputRow>
-                    </ModalInputWrap>
-                    <ModalInputWrap>
-                      <StyledInputRow>
-                        <Input
-                          icon={<TbLockExclamation size={16} />}
-                          type="password"
-                          placeholder="repeat password"
-                          onChangeFn={(text: string) => setPasswordRepeat(text)}
-                          value={passwordRepeat}
-                          changeOnType
-                          autocomplete="new-password"
-                          required
-                          borderColor={error !== false ? "danger" : undefined}
-                        />
-                      </StyledInputRow>
-                    </ModalInputWrap>
+                  <StyledForm
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleReset();
+                    }}
+                  >
+                    <StyledInputRow>
+                      <Input
+                        icon={<TbLockPlus size={15} />}
+                        width="full"
+                        fullHeight
+                        type="password"
+                        placeholder="new password"
+                        onChangeFn={(text: string) => setPassword(text)}
+                        value={password}
+                        changeOnType
+                        autoFocus
+                        autocomplete="new-password"
+                        required
+                        borderColor={error !== false ? "danger" : undefined}
+                      />
+                    </StyledInputRow>
+                    <StyledInputRow>
+                      <Input
+                        icon={<TbLockExclamation size={15} />}
+                        width="full"
+                        fullHeight
+                        type="password"
+                        placeholder="repeat password"
+                        onChangeFn={(text: string) => setPasswordRepeat(text)}
+                        value={passwordRepeat}
+                        changeOnType
+                        autocomplete="new-password"
+                        required
+                        borderColor={error !== false ? "danger" : undefined}
+                      />
+                    </StyledInputRow>
+
+                    {error !== false && (
+                      <StyledErrorWrap>
+                        <StyledErrorText>{error}</StyledErrorText>
+                      </StyledErrorWrap>
+                    )}
+
+                    <StyledSubmitWrap>
+                      <Button
+                        disabled={
+                          error === UnsafePasswordError.message ||
+                          error === PasswordDoesNotMatchError.message ||
+                          password.length === 0 ||
+                          passwordRepeat.length === 0
+                        }
+                        fullWidth
+                        label="Reset Password"
+                        color="success"
+                        size={ButtonSize.Large}
+                      />
+                    </StyledSubmitWrap>
                   </StyledForm>
                 </>
+              ) : (
+                <>
+                  {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+                  <StyledButtonWrap>
+                    <Button
+                      color="success"
+                      icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
+                      label="back to login"
+                      onClick={() => navigate("/login")}
+                    />
+                  </StyledButtonWrap>
+                </>
               )}
-
-              <div style={{ minHeight: "2rem" }}>
-                {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-              </div>
-
-              <StyledButtonWrap>
-                {hashOk ? (
-                  <Button
-                    disabled={
-                      error === UnsafePasswordError.message ||
-                      error === PasswordDoesNotMatchError.message ||
-                      password.length === 0 ||
-                      passwordRepeat.length === 0
-                    }
-                    icon={<BsEnvelopeArrowUpFill />}
-                    label="Reset Password"
-                    color="success"
-                    onClick={handleReset}
-                  />
-                ) : (
-                  <Button
-                    color="success"
-                    icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
-                    label="back to login"
-                    onClick={() => navigate("/login")}
-                  />
-                )}
-              </StyledButtonWrap>
             </>
           ) : (
-            <>
+            <StyledCenterColumn>
               <StyledText>{`The password for the user`}</StyledText>
               <StyledMail>
-                <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+                <StyledMailIcon size={14} />
                 {`${email}`}
               </StyledMail>
               <StyledText>{"was changed."}</StyledText>
-              <RiRotateLockLine size={30} style={{ margin: "1.5rem" }} />
-              <StyledButtonWrap>
-                <Button
-                  icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
-                  label="Back to login"
-                  color="success"
-                  onClick={() => navigate("/login")}
-                />
-              </StyledButtonWrap>
-            </>
+              <StyledResetDoneIconWrap>
+                <RiRotateLockLine size={30} />
+              </StyledResetDoneIconWrap>
+              <Button
+                icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
+                label="Back to login"
+                color="success"
+                onClick={() => navigate("/login")}
+              />
+            </StyledCenterColumn>
           )}
 
           {/* <ContactOwnerFooting /> */}
-        </ModalContent>
+        </StyledContentWrap>
       </Modal>
     </div>
   );
