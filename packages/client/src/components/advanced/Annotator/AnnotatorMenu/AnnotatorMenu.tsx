@@ -798,7 +798,7 @@ export const TextAnnotatorMenu = ({
                       tooltipContent={
                         <p>(hold ctrl or cmd over the list for temporary edit mode)</p>
                       }
-                      bold={!anchorsEditActive}
+                      textRegular={anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(false)}
                     />
                     <Button
@@ -812,7 +812,7 @@ export const TextAnnotatorMenu = ({
                       textColor={anchorsEditActive ? "white" : undefined}
                       noHoverBackground={anchorsEditActive}
                       tooltipLabel="edit mode — show anchor controls"
-                      bold={anchorsEditActive}
+                      textRegular={!anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(true)}
                     />
                   </SwitchGroup>

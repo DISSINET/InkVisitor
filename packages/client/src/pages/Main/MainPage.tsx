@@ -670,7 +670,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
                         icon={<IcoPlusBold />}
                         label="entity"
                         inverted
-                        bold
                         onClick={() => setShowEntityCreateModal(true)}
                         tooltipLabel="create new entity"
                       />

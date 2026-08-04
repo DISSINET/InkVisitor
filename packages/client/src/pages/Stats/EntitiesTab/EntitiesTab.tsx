@@ -195,7 +195,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                       noBackground
                       textColor={active ? "white" : undefined}
                       noHoverBackground={active}
-                      bold={active}
+                      textRegular={!active}
                     />
                   );
                 })}
@@ -280,7 +280,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     noBackground
                     textColor={active ? "white" : undefined}
                     noHoverBackground={active}
-                    bold={active}
+                    textRegular={!active}
                   />
                 );
               })}
@@ -364,7 +364,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                               color={state.eventType.includes(type) ? "primary" : "greyer"}
                               inverted={!state.eventType.includes(type)}
                               noBackground={!state.eventType.includes(type)}
-                              bold={state.eventType.includes(type)}
+                              textRegular={!state.eventType.includes(type)}
                             />
                           ))}
                         </React.Fragment>
@@ -400,7 +400,7 @@ export const EntitiesTab: React.FC<EntitiesTab> = ({ eventTypes = VISIBLE_EVENT_
                     noBackground
                     textColor={active ? "white" : undefined}
                     noHoverBackground={active}
-                    bold={active}
+                    textRegular={!active}
                   />
                 );
               })}

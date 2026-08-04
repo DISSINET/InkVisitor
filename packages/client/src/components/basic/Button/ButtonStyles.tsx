@@ -78,7 +78,7 @@ interface IButtonStyle {
   $noBorder?: boolean;
   $noBackground?: boolean;
   $noHoverBackground?: boolean;
-  $bold?: boolean;
+  $textRegular?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
   $textColor?: keyof ThemeColor;
@@ -134,9 +134,9 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   /* the label box is exactly the font size, so padding alone decides the height
      and a labelled button matches the square icon button of the same size */
   line-height: 1;
-  font-weight: ${({ theme, $disabled, $bold }) => {
+  font-weight: ${({ theme, $disabled, $textRegular }) => {
     if ($disabled) return theme.fontWeight["normal"];
-    return $bold ? theme.fontWeight["bold"] : theme.fontWeight["medium"];
+    return $textRegular ? theme.fontWeight["medium"] : theme.fontWeight["bold"];
   }};
   padding: ${({ $iconButton, $size, $noPadding, $shape, $hasLabel }) =>
     $noPadding || $shape === "circle" || $shape === "square"

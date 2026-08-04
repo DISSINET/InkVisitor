@@ -192,7 +192,6 @@ export const EntityBookmarkBox: React.FC = () => {
           icon={<IcoPlusBold />}
           color="primary"
           inverted
-          bold
           label="bookmark folder"
           onClick={() => clickNewBookmarFolderkHandle()}
           size={ButtonSize.Medium}

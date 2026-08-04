@@ -97,7 +97,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 inverted
                 size={ButtonSize.Small}
                 color={option.selected ? "primary" : "greyer"}
-                bold={option.selected}
+                textRegular={!option.selected}
                 shape={shape}
                 onClick={() => {
                   if (disabled) {

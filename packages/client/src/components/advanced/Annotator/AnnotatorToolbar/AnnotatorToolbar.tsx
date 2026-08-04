@@ -68,7 +68,7 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       noBackground
       textColor={annotatorMode === mode ? "white" : undefined}
       noHoverBackground={annotatorMode === mode}
-      bold={annotatorMode === mode}
+      textRegular={annotatorMode !== mode}
       onClick={() => onModeClick(mode)}
       tooltipLabel={tooltipLabel}
       tooltipPosition="top"
