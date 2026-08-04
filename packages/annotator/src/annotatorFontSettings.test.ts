@@ -85,6 +85,16 @@ describe("Annotator line spacing", () => {
     expect(b.lineHeight).toBeCloseTo(b.fontSize * 1.4 * b.ratio);
   });
 
+  test("line-spacing change reuses every segment's wrap in proportional mode", () => {
+    const a = mk("abc def ghi\n\njkl mno pqr");
+    a.setProportional(true, '"Roboto", sans-serif');
+    // Spacing feeds row height, not wrap: the memoized wrap (keyed on measurer
+    // identity among others) must survive, so each segment keeps its lines array.
+    const linesBefore = a.text.segments.map((s) => s.lines);
+    a.setLineHeightRatio(2);
+    a.text.segments.forEach((s, i) => expect(s.lines).toBe(linesBefore[i]));
+  });
+
   test("resetSettings restores the default spacing", () => {
     const a = mk("abc");
     const defaultLineHeight = a.lineHeight;

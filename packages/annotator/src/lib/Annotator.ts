@@ -1172,7 +1172,7 @@ export class Annotator {
       if (ratioChanged) {
         // Prefix widths are measured in device px off the font string, so they
         // belong to the ratio they were built at.
-        this.text.setMeasurer(new CanvasMeasurer(this.ctx, this.font), this.width);
+        this.text.setMeasurer(this.measurerForFont(), this.width);
       }
       this.text.maxPixelWidth = this.width;
     }
@@ -1285,6 +1285,24 @@ export class Annotator {
   }
 
   /**
+   * The current font's CanvasMeasurer, one instance per font string. Segment
+   * wrap memoization keys on measurer identity ({@link Text}.wrappedFor), so a
+   * fresh instance forces a full re-wrap even when no wrap input moved — e.g.
+   * a line-spacing change. Reuse also keeps the per-string width cache warm.
+   */
+  private measurerCache?: { font: string; measurer: CanvasMeasurer };
+
+  private measurerForFont(): CanvasMeasurer {
+    if (this.measurerCache?.font !== this.font) {
+      this.measurerCache = {
+        font: this.font,
+        measurer: new CanvasMeasurer(this.ctx, this.font),
+      };
+    }
+    return this.measurerCache.measurer;
+  }
+
+  /**
    * Re-derive everything that depends on the font (string, line height, average
    * char width, char budget, viewport rows, measurer) after a font/mode change,
    * preserving the caret through the re-wrap, then redraw. Shared by
@@ -1312,7 +1330,7 @@ export class Annotator {
     this.text.paragraphIndent = this.paragraphIndentUnits();
     // Rebuild (or clear) the prefix tables for the new font; recalculates lines.
     this.text.setMeasurer(
-      this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
+      this.proportional ? this.measurerForFont() : undefined,
       this.proportional ? this.width : undefined
     );
 
