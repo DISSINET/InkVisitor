@@ -34,6 +34,13 @@ import {
   VIEWPORT_START_BUFFER_ROWS,
 } from "./constants";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import {
+  SHORTCUT_COPY,
+  SHORTCUT_OPTIONS,
+  SHORTCUT_PARAGRAPH_MARKS,
+  SHORTCUT_PASTE,
+  shortcutLabel,
+} from "./shortcuts";
 import Cursor, { DIRECTION } from "./Cursor";
 import Highlighter, { CursorStyle, IAbsCoordinates } from "./Highlighter";
 import History, { HistorySnapshot } from "./History";
@@ -2245,12 +2252,14 @@ export class Annotator {
     if (this.isHighlighting()) {
       items.push({
         label: "Copy",
+        shortcut: shortcutLabel(SHORTCUT_COPY),
         onClick: () => this.onCopyText(),
       });
     }
 
     items.push({
       label: "Paste",
+      shortcut: shortcutLabel(SHORTCUT_PASTE),
       onClick: () => this.onPasteText(),
     });
 
@@ -2258,7 +2267,8 @@ export class Annotator {
     items.push(
       {
         label: `${this.showParagraphMarks ? "✓ " : ""}Show paragraph marks`,
-        onClick: () => this.setShowParagraphMarks(!this.showParagraphMarks),
+        shortcut: shortcutLabel(SHORTCUT_PARAGRAPH_MARKS),
+        onClick: () => this.toggleParagraphMarks(),
       },
       { separator: true },
       {
@@ -2266,14 +2276,23 @@ export class Annotator {
         onClick: () => this.setShowFps(!this.showFps),
       },
       { separator: true },
-      { label: "Options…", onClick: () => this.openSettings() }
+      {
+        label: "Options…",
+        shortcut: shortcutLabel(SHORTCUT_OPTIONS),
+        onClick: () => this.openSettings(),
+      }
     );
 
     return items;
   }
 
+  /** Flip the ¶ formatting marks on or off. */
+  toggleParagraphMarks(): void {
+    this.setShowParagraphMarks(!this.showParagraphMarks);
+  }
+
   /** Open the settings overlay with the current options. */
-  private openSettings(): void {
+  openSettings(): void {
     const settings: SettingControl[] = [
       {
         type: "segmented",
