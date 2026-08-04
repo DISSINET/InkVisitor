@@ -152,6 +152,15 @@ export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 /** Pixels to raise the underline above the bottom of the line band (UNDERLINE mode). Larger = smaller margin below text. */
 export const UNDERLINE_OFFSET_PX = 2;
 
+/**
+ * #2325 — a BACKGROUND span leaves this many CSS px unpainted at its right end
+ * (scaled by the device pixel ratio at draw time). Two same-colour anchors that
+ * touch with no whitespace between them would otherwise fuse into one block;
+ * the unpainted sliver lets the layer underneath show through as a separator.
+ * Applied only at the span's true end, never at soft-wrap row edges.
+ */
+export const HIGHLIGHT_SPAN_END_GAP_PX = 1;
+
 /** Fraction of one line height scrolled per frame while the pointer is outside the canvas (smooth autoscroll). */
 export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
 
