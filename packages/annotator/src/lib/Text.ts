@@ -249,9 +249,10 @@ export class Segment {
    * edit cost one paragraph's wrap instead of the whole document's
    * (see {@link Text.calculateLines}).
    *
-   * String fields compare by identity: an edit replaces the segment's strings,
-   * so an untouched segment still holds the exact objects recorded here, and
-   * the check never scans text.
+   * The string fields make this cheap: an untouched segment still holds the
+   * exact string objects recorded here, which === resolves by reference before
+   * looking at characters. Only the edited segment's strings are actually
+   * walked, and that cost is bounded by the one paragraph.
    */
   wrappedFor?: {
     text: string;
@@ -1834,8 +1835,6 @@ class Text {
       return;
     }
 
-    this.dirtySegment = segmentPos.segmentIndex;
-
     let indexPos = segmentPos.rawTextIndex;
     for (let i = 0; i < segmentPos.segmentIndex; i++) {
       indexPos++; // each segment should receive +1 character no matter what (newline)
@@ -1848,6 +1847,8 @@ class Text {
     if (deleteAt < 0 || deleteAt >= this.value.length) {
       return; // document edge — nothing on that side to delete
     }
+
+    this.dirtySegment = segmentPos.segmentIndex;
     this.value =
       this.value.slice(0, deleteAt) + this.value.slice(deleteAt + 1);
 
