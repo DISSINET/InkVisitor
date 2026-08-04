@@ -294,6 +294,21 @@ export class Annotator {
   lastSelectedText?: Selected;
   ratio: number = 1;
 
+  /**
+   * Device px per CSS px the host asked for. The live {@link ratio} is this or
+   * the display's `devicePixelRatio`, whichever is larger, so a host that wants
+   * supersampling on a 1× display keeps it while browser zoom (which raises the
+   * DPR) still gets a backing store at its own resolution.
+   */
+  private readonly baseRatio: number;
+
+  /**
+   * Media query matching exactly the current `devicePixelRatio`. It reports the
+   * move away from that one value, so each change re-arms a query built from
+   * the new DPR.
+   */
+  private dprQuery?: MediaQueryList;
+
   previousRenderViewportLineStart: number;
 
   private lastSelectPointer: { cx: number; cy: number } | null = null;
@@ -480,7 +495,8 @@ export class Annotator {
       throw new Error("Cannot get 2d context");
     }
 
-    this.ratio = ratio;
+    this.baseRatio = ratio;
+    this.ratio = this.effectiveRatio();
     this.font = this.composeFont();
 
     this.lineHeight = this.lineHeightForSize(this.fontSize);
@@ -523,6 +539,8 @@ export class Annotator {
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
+
+    this.watchDevicePixelRatio();
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
@@ -1053,7 +1071,64 @@ export class Annotator {
     this.onAnchorTagHoverCb(null, null);
   }
 
+  /** Live device px per CSS px: the host's request, floored by the display DPR. */
+  private effectiveRatio(): number {
+    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    return Math.max(this.baseRatio, dpr);
+  }
+
+  /**
+   * Re-seed everything derived from `ratio`: Cursor and Highlighter hold their
+   * own copies for hit-testing, and the font string and line height are device-px
+   * values. Layout (backing store, re-wrap, redraw) is left to the caller.
+   */
+  private applyRatio(ratio: number): boolean {
+    if (!Number.isFinite(ratio) || ratio <= 0 || ratio === this.ratio) {
+      return false;
+    }
+    this.ratio = ratio;
+    this.cursor.ratio = ratio;
+    this.scratchCursor.ratio = ratio;
+    this.hoverHighlighter.ratio = ratio;
+    this.font = this.composeFont();
+    this.lineHeight = this.lineHeightForSize(this.fontSize);
+    return true;
+  }
+
+  /**
+   * Follow `devicePixelRatio`, which browser zoom changes: a backing store built
+   * for the old value is resampled by the compositor and the text goes soft.
+   * A `resolution` query matches one DPR only, so the handler re-arms itself
+   * against the new value before re-laying out.
+   */
+  private watchDevicePixelRatio(): void {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+    const dpr = window.devicePixelRatio || 1;
+    this.dprQuery = window.matchMedia(`(resolution: ${dpr}dppx)`);
+    this.dprQuery.addEventListener?.("change", this.boundOnDevicePixelRatioChange);
+  }
+
+  private unwatchDevicePixelRatio(): void {
+    this.dprQuery?.removeEventListener?.("change", this.boundOnDevicePixelRatioChange);
+    this.dprQuery = undefined;
+  }
+
+  private readonly boundOnDevicePixelRatioChange = (): void => {
+    this.unwatchDevicePixelRatio();
+    if (this.destroyed) {
+      return;
+    }
+    this.watchDevicePixelRatio();
+    this.onCanvasResize();
+  };
+
   onCanvasResize() {
+    // Zoom can move the DPR without any other notice, and every size below is
+    // derived from the ratio.
+    const ratioChanged = this.applyRatio(this.effectiveRatio());
+
     this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
@@ -1075,6 +1150,11 @@ export class Annotator {
     // Keep the proportional wrap budget in sync with the new width
     // before the re-wrap (updateCharsAtLine triggers calculateLines once).
     if (this.proportional) {
+      if (ratioChanged) {
+        // Prefix widths are measured in device px off the font string, so they
+        // belong to the ratio they were built at.
+        this.text.setMeasurer(new CanvasMeasurer(this.ctx, this.font), this.width);
+      }
       this.text.maxPixelWidth = this.width;
     }
     this.text.updateCharsAtLine(charsAtLine);
@@ -1958,6 +2038,8 @@ export class Annotator {
     document.removeEventListener("mousemove", this.onDocumentSelectMove);
     document.removeEventListener("mouseup", this.onDocumentSelectUp);
 
+    this.unwatchDevicePixelRatio();
+
     this.element.onwheel = null;
     this.element.onmousedown = null;
     this.element.onkeydown = null;
@@ -2215,6 +2297,12 @@ export class Annotator {
    * @param e
    */
   onWheel(e: WheelEvent) {
+    // A trackpad pinch and ctrl+wheel both arrive as wheel events with ctrlKey
+    // set; the browser turns them into page zoom only if the default runs.
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+
     const deltaBufferPx = e.deltaY * this.ratio;
     this.viewport.addScrollOffset(deltaBufferPx, this.lineHeight, this.scrollExtentLineCount());
 
