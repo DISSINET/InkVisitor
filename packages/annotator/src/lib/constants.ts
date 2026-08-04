@@ -24,10 +24,17 @@ export enum HighlightMode {
 }
 /**
  * Line height as a multiple of the font size (a CSS unitless line-height; for
- * scale: Google Docs defaults to 1.15, CSS `normal` is ~1.2). 23/13 keeps the
- * historical fixed 23px grid at the default 13px font.
+ * scale: Google Docs defaults to 1.15, CSS `normal` is ~1.2). 23/13 is the
+ * ratio of the historical fixed grid (23px lines, 13px font).
  */
 export const DEFAULT_LINE_HEIGHT_RATIO = 23 / 13;
+
+/**
+ * Collapsed-caret width in CSS px. 2px (the Docs/VS Code convention) rather
+ * than the native 1px: the caret must stay findable over the colored anchor
+ * highlights and hover fades this canvas paints behind the text.
+ */
+export const DEFAULT_CARET_WIDTH_PX = 2;
 
 /** Extra empty rows after the last text line; scrollable, no line numbers in the gutter. */
 export const VIEWPORT_END_BUFFER_ROWS = 3;
@@ -45,7 +52,8 @@ export const VIEWPORT_END_BUFFER_ROWS = 3;
  * a hit has to be scrolled clear of, so one distance serves both.
  */
 export const VIEWPORT_START_BUFFER_ROWS = 2;
-export const DEFAULT_FONT_SIZE = 13;
+/** Logical font size in CSS px (one of the sizes the settings overlay offers). */
+export const DEFAULT_FONT_SIZE = 14;
 export const DEFAULT_FONT = '"Roboto Mono", monospace';
 /**
  * Fallback font family used when proportional mode is enabled without

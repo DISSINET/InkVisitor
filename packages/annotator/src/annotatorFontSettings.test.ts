@@ -20,11 +20,11 @@ afterEach(() => localStorage.clear());
 describe("Annotator font size", () => {
   test("setFontSize updates the size, the font string, and scales line height", () => {
     const a = mk("abc");
-    const baseLineHeight = a.lineHeight; // 13px default
+    const baseLineHeight = a.lineHeight; // 14px default
     a.setFontSize(15);
     expect(a.fontSize).toBe(15);
     expect(a.font).toContain(`${15 * a.ratio}px`);
-    expect(a.lineHeight).toBeCloseTo(baseLineHeight * (15 / 13));
+    expect(a.lineHeight).toBeCloseTo(baseLineHeight * (15 / 14));
   });
 
   test("font size persists across a proportional toggle (font string keeps the size)", () => {
@@ -91,6 +91,55 @@ describe("Annotator line spacing", () => {
     a.setLineHeightRatio(1.15);
     a.resetSettings();
     expect(a.lineHeight).toBeCloseTo(defaultLineHeight);
+  });
+});
+
+describe("proportional-by-default for hosted instances", () => {
+  const HOST_OPTIONS = [
+    { label: "Roboto", value: '"Roboto", sans-serif' },
+    { label: "Serif", value: "Georgia, serif" },
+  ];
+
+  test("bare instance (no host font) stays monospace", () => {
+    const a = mk("abc");
+    expect(a.proportional).toBe(false);
+  });
+
+  test("supplying host fonts adopts proportional with the first family", () => {
+    const a = mk("abc");
+    a.setFontFamilyOptions(HOST_OPTIONS);
+    expect(a.proportional).toBe(true);
+    expect(a.font).toContain('"Roboto", sans-serif');
+  });
+
+  test("adoption is not persisted as an explicit choice", () => {
+    const a = mk("abc");
+    a.setFontFamilyOptions(HOST_OPTIONS);
+    expect(localStorage.getItem("inkvisitor.annotator.settings")).toBeNull();
+  });
+
+  test("a stored monospace choice survives the host handing over fonts", () => {
+    const a = mk("abc");
+    a.setProportional(false); // explicit user choice, persisted
+    const b = mk("abc");
+    b.setFontFamilyOptions(HOST_OPTIONS);
+    expect(b.proportional).toBe(false);
+    expect(b.font).toContain("Roboto Mono");
+  });
+
+  test("resetSettings on a hosted instance returns to proportional", () => {
+    const a = mk("abc");
+    a.setFontFamilyOptions(HOST_OPTIONS);
+    a.setProportional(false);
+    a.resetSettings();
+    expect(a.proportional).toBe(true);
+  });
+
+  test("resetSettings on a bare instance returns to monospace", () => {
+    const a = mk("abc");
+    a.setProportional(true);
+    a.resetSettings();
+    expect(a.proportional).toBe(false);
   });
 });
 
@@ -167,7 +216,7 @@ describe("font settings persistence", () => {
     a.setFontSize(15);
     a.resetSettings();
     expect(a.proportional).toBe(false);
-    expect(a.fontSize).toBe(13);
+    expect(a.fontSize).toBe(14);
     expect(a.font).toContain("Roboto Mono");
     expect(a.text.segments[0].linePrefixes).toEqual([]);
   });

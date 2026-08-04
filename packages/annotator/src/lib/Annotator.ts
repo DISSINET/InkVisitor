@@ -12,6 +12,7 @@ import {
   HighlightMode,
   HOVER_DEBOUNCE_MS,
   LIGHT_MENU_COLORS,
+  DEFAULT_CARET_WIDTH_PX,
   DEFAULT_LINE_HEIGHT_RATIO,
   MenuColors,
   PARAGRAPH_INDENT_DEFAULT,
@@ -151,7 +152,7 @@ export interface DrawingOptions {
   lineHeight: number;
   charsAtLine: number;
   color?: string; // override
-  caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretWidth?: number; // collapsed-caret width in device px (drawing fallback: 1)
   caretOpacity?: number; // collapsed-caret alpha (defaults to 1); block caret uses 0.5 so the letter under it stays readable
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
@@ -223,17 +224,25 @@ export class Annotator {
 
   charWidth: number = 0;
   /**
-   * Proportional feature flag (default off). When on, the rendered font switches
-   * to a proportional family and text layout, draw (caret/selection rects),
+   * Proportional text flag. When on, the rendered font switches to a
+   * proportional family and text layout, draw (caret/selection rects),
    * wrapping, mouse hit-test, drag handles, and vertical goal-column all use
    * measured glyph widths via a CanvasMeasurer instead of the monospace grid.
    *
-   * Functionally complete, verified by the proportional test suites. Exposed to
-   * users as an OPT-IN (the client's font toggle calls {@link setProportional});
-   * the annotator default stays monospace. Flipping the default ON for everyone
-   * is the one deliberately-not-done step.
+   * The bare library defaults to monospace (tests and the standalone demo
+   * depend on the fixed grid). A HOSTED annotator defaults to proportional:
+   * {@link setFontFamilyOptions} — the host handing over its font — adopts
+   * proportional for users with no stored `proportional` choice. A stored
+   * setting, either value, always wins.
    */
   proportional: boolean = false;
+
+  /**
+   * Whether loadSettings found an explicit stored `proportional` value. Guards
+   * the proportional-by-default adoption in {@link setFontFamilyOptions} so an
+   * explicit monospace choice survives new sessions.
+   */
+  private hasStoredProportionalChoice = false;
 
   /**
    * Line height as a multiple of the font size (a CSS unitless line-height).
@@ -346,7 +355,7 @@ export class Annotator {
   } | null = null;
 
   /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
-  private caretWidth = 1;
+  private caretWidth = DEFAULT_CARET_WIDTH_PX;
 
   /**
    * Block (full char-cell) caret intent. Monospace-only: the caret spans the
@@ -510,6 +519,8 @@ export class Annotator {
     this.lineHeight = this.lineHeightForSize(this.fontSize);
 
     this.ctx = ctx;
+    // Before the first measureText: measurement and paint must share one shaping mode.
+    this.disableTextShaping();
     this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
@@ -1366,16 +1377,31 @@ export class Annotator {
    * Host-supplied font-family options shown in the Options-modal dropdown. When
    * the user hasn't chosen a family yet (still the built-in fallback), default to
    * the first option so the picker shows a valid value matching the host font.
+   *
+   * Handing over a font also opts the instance into proportional-by-default: a
+   * hosted annotator renders prose, and the host font (e.g. Roboto) is the
+   * reading face. Only users with no stored `proportional` choice are switched;
+   * the adoption itself is not persisted, so it keeps applying (or a future
+   * default keeps applying) until the user picks something explicitly.
    */
   setFontFamilyOptions(options: { label: string; value: string }[]) {
     this.fontFamilyOptions = options;
-    if (options.length > 0 && this.proportionalFontFamily === PROPORTIONAL_FONT) {
+    if (options.length === 0) {
+      return;
+    }
+    let rebuild = false;
+    if (!this.hasStoredProportionalChoice && !this.proportional) {
+      this.proportional = true; // hosted default; deliberately not persisted
+      rebuild = true;
+    }
+    if (this.proportionalFontFamily === PROPORTIONAL_FONT) {
       this.proportionalFontFamily = options[0].value;
-      // If proportional is already active, the rendered font + measurer were
-      // built from the old (fallback) family — rebuild them for the new default.
-      if (this.proportional) {
-        this.applyFontChange();
-      }
+      // An already-proportional instance has its rendered font + measurer
+      // built from the fallback family — they must follow the new default.
+      rebuild = rebuild || this.proportional;
+    }
+    if (rebuild) {
+      this.applyFontChange();
     }
   }
 
@@ -1469,6 +1495,29 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Turn off kerning and ligatures on the canvas. The proportional caret math
+   * is additive — per-code-unit widths summed into prefix tables — while a line
+   * is painted with one whole-run fillText; any cross-glyph shaping makes the
+   * painted line narrower than the table says and the caret drifts into the
+   * following glyph. With shaping off, both sides use plain advance widths and
+   * agree exactly. Browsers without these flags keep the (small) drift.
+   * Re-applied every frame because ctx.reset() restores the defaults.
+   */
+  private disableTextShaping(): void {
+    const ctx = this.ctx as CanvasRenderingContext2D & {
+      fontKerning?: string;
+      textRendering?: string;
+    };
+    if ("fontKerning" in ctx) {
+      ctx.fontKerning = "none";
+    }
+    // optimizeSpeed also disables ligatures (fi/fl), which fontKerning cannot.
+    if ("textRendering" in ctx) {
+      ctx.textRendering = "optimizeSpeed";
+    }
   }
 
   /**
@@ -3025,6 +3074,8 @@ export class Annotator {
     this.syncLineNumbersCanvasToMain();
 
     this.ctx.reset();
+    // reset() clears the shaping flags along with everything else.
+    this.disableTextShaping();
 
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
@@ -3477,6 +3528,7 @@ export class Annotator {
     }
     if (typeof parsed.proportional === "boolean") {
       this.proportional = parsed.proportional;
+      this.hasStoredProportionalChoice = true;
       fontChanged = true;
     }
     if (fontChanged) {
@@ -3486,7 +3538,7 @@ export class Annotator {
 
   /** Reset all persisted settings to their defaults, clear storage, and redraw. */
   resetSettings(): void {
-    this.caretWidth = 1;
+    this.caretWidth = DEFAULT_CARET_WIDTH_PX;
     this.caretBlock = false;
     this.highlightColor = undefined;
     // Revert the highlight color to the host theme color (last setSelectStyle).
@@ -3496,8 +3548,10 @@ export class Annotator {
     this.fps = 0;
     this.showParagraphMarks = false;
     this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
-    // Font settings back to defaults (#2487).
-    this.proportional = false;
+    // Font settings back to defaults (#2487): hosted instances (font options
+    // supplied) default to proportional, the bare library to monospace.
+    this.proportional = this.fontFamilyOptions.length > 0;
+    this.hasStoredProportionalChoice = false;
     this.fontSize = DEFAULT_FONT_SIZE;
     this.lineHeightRatio = DEFAULT_LINE_HEIGHT_RATIO;
     // Default to the first host-supplied option (e.g. "Roboto (app sans)") so the
@@ -3513,7 +3567,7 @@ export class Annotator {
       // ignore storage errors
     }
 
-    // Re-derive font/layout to the monospace defaults and redraw.
+    // Re-derive font/layout to the defaults and redraw.
     this.applyFontChange();
   }
 
