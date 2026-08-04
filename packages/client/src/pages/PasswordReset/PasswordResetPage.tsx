@@ -8,7 +8,7 @@ import {
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import { Button, Input, Modal } from "components";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
+import { AuthLogoBand } from "pages/AuthLogoBand";
 import {
   StyledButtonWrap,
   StyledCenterColumn,
@@ -18,7 +18,6 @@ import {
   StyledErrorWrap,
   StyledForm,
   StyledInputRow,
-  StyledLogoBand,
   StyledMail,
   StyledMailIcon,
   StyledSubmitWrap,
@@ -97,9 +96,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   return (
     <div>
       <Modal showModal disableBgClick width={320} noBorder>
-        <StyledLogoBand>
-          <img src={LogoInkvisitor} alt="InkVisitor" />
-        </StyledLogoBand>
+        <AuthLogoBand />
         <StyledContentWrap>
           {!passwordSent ? (
             <>

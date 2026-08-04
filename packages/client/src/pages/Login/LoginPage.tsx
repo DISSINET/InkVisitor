@@ -1,11 +1,12 @@
+import { animated, config, useSpring } from "@react-spring/web";
 import { ContactOwnerFooting, Modal } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { IoEnter } from "react-icons/io5";
 import { Navigate } from "react-router-dom";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
-import { StyledContentWrap, StyledLogoBand } from "pages/AuthModalSharedStyles";
+import { AuthLogoBand } from "pages/AuthLogoBand";
+import { StyledContentWrap } from "pages/AuthModalSharedStyles";
 import {
   StyledAttrBtnGroupWrap,
   StyledLoginCitation,
@@ -20,6 +21,17 @@ enum LoginMode {
   "password",
   "guest",
 }
+
+// Remounted (via key) whenever the mode changes, so each screen eases in
+// instead of swapping instantly.
+const ScreenFade: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const spring = useSpring({
+    from: { opacity: 0, transform: "translateY(0.5rem)" },
+    to: { opacity: 1, transform: "translateY(0rem)" },
+    config: config.stiff,
+  });
+  return <animated.div style={spring}>{children}</animated.div>;
+};
 
 export const LoginPage: React.FC = () => {
   const isGuestAccess = process.env.GUEST_MODE === "1";
@@ -70,9 +82,7 @@ export const LoginPage: React.FC = () => {
     <Navigate to="/" />
   ) : (
     <Modal showModal disableBgClick width={320} noBorder>
-      <StyledLogoBand>
-        <img src={LogoInkvisitor} alt="InkVisitor" />
-      </StyledLogoBand>
+      <AuthLogoBand />
       <StyledContentWrap>
         {loginTitle && <h4>{loginTitle}</h4>}
         {loginText && <StyledLoginText>{loginText}</StyledLoginText>}
@@ -82,30 +92,32 @@ export const LoginPage: React.FC = () => {
             <AttributeButtonGroup options={pageOptions} paddingX fullWidth />
           </StyledAttrBtnGroupWrap>
         )}
-        {loginMode === LoginMode.login && (
-          <LoginScreen
-            usernameLocal={usernameLocal}
-            setUsernameLocal={setUsernameLocal}
-            password={password}
-            setPassword={setPassword}
-            setRedirectToMain={setRedirectToMain}
-            onPasswordReset={() => setLoginMode(LoginMode.password)}
-          />
-        )}
-        {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
-        {loginMode === LoginMode.password && (
-          <PasswordRecoverScreen
-            emailLocal={emailLocal}
-            setEmailLocal={setEmailLocal}
-            restartScreen={restartScreen}
-            setRestartScreen={setRestartScreen}
-            onReturnToLogin={() => {
-              setLoginMode(LoginMode.login);
-              setEmailLocal("");
-              setRestartScreen(false);
-            }}
-          />
-        )}
+        <ScreenFade key={loginMode}>
+          {loginMode === LoginMode.login && (
+            <LoginScreen
+              usernameLocal={usernameLocal}
+              setUsernameLocal={setUsernameLocal}
+              password={password}
+              setPassword={setPassword}
+              setRedirectToMain={setRedirectToMain}
+              onPasswordReset={() => setLoginMode(LoginMode.password)}
+            />
+          )}
+          {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
+          {loginMode === LoginMode.password && (
+            <PasswordRecoverScreen
+              emailLocal={emailLocal}
+              setEmailLocal={setEmailLocal}
+              restartScreen={restartScreen}
+              setRestartScreen={setRestartScreen}
+              onReturnToLogin={() => {
+                setLoginMode(LoginMode.login);
+                setEmailLocal("");
+                setRestartScreen(false);
+              }}
+            />
+          )}
+        </ScreenFade>
         {/* <ContactOwnerFooting /> */}
       </StyledContentWrap>
     </Modal>

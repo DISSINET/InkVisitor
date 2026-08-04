@@ -5,12 +5,11 @@ import {
 } from "@inkvisitor/shared/types/errors";
 import api from "api";
 import { Button, Modal } from "components";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
+import { AuthLogoBand } from "pages/AuthLogoBand";
 import {
   StyledButtonWrap,
   StyledContentWrap,
   StyledErrorText,
-  StyledLogoBand,
 } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
 import { TbArrowForwardUp } from "react-icons/tb";
@@ -51,9 +50,7 @@ const ActivatePage: React.FC = ({}) => {
   return (
     <div>
       <Modal showModal disableBgClick width={320} noBorder>
-        <StyledLogoBand>
-          <img src={LogoInkvisitor} alt="InkVisitor" />
-        </StyledLogoBand>
+        <AuthLogoBand />
         <StyledContentWrap>
           {hashOk && (
             <>

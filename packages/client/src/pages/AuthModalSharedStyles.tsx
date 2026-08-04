@@ -8,13 +8,13 @@ export const StyledLogoBand = styled.div`
   justify-content: center;
   align-items: center;
   background-color: ${({ theme }) => theme.color["muni"]};
-  padding: ${({ theme }) => `${theme.space[8]} ${theme.space[10]}`};
+  padding: ${({ theme }) => `${theme.space[7]} ${theme.space[6]}`};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 
   img {
     width: 100%;
-    max-width: 20rem;
+    max-width: 26rem;
   }
 `;
 export const StyledContentWrap = styled.div`
@@ -48,6 +48,21 @@ export const StyledSubmitWrap = styled.div`
   display: flex;
   width: 100%;
   margin-top: ${({ theme }) => theme.space[2]};
+`;
+export const StyledShowPasswordButton = styled.button`
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-right: ${({ theme }) => theme.space[1]};
+  cursor: pointer;
+  color: ${({ theme }) => theme.color["gray"][500]};
+
+  &:hover,
+  &:focus-visible {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
 `;
 export const StyledLinkButton = styled.button`
   align-self: center;

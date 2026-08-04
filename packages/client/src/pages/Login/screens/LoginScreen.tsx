@@ -7,9 +7,11 @@ import {
   StyledForm,
   StyledInputRow,
   StyledLinkButton,
+  StyledShowPasswordButton,
   StyledSubmitWrap,
 } from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
+import { RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledFaLock, StyledTbMailFilled } from "./LoginScreensStyles";
@@ -33,6 +35,8 @@ export const LoginScreen: React.FC<LoginScreen> = ({
 }) => {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<{ title?: string; message: string } | false>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const ping: number = useAppSelector((state) => state.ping);
 
@@ -40,6 +44,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
     if (ping === -1 || ping === -2) {
       setError({ title: NetworkError.title, message: NetworkError.message });
     } else {
+      setIsLoggingIn(true);
       try {
         const res = await api.signIn(usernameLocal, password, {
           ignoreErrorToast: true,
@@ -60,6 +65,8 @@ export const LoginScreen: React.FC<LoginScreen> = ({
                 message: errorTemp.message,
               },
         );
+      } finally {
+        setIsLoggingIn(false);
       }
     }
   };
@@ -94,12 +101,22 @@ export const LoginScreen: React.FC<LoginScreen> = ({
             width="full"
             fullHeight
             autocomplete="current-password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="password"
             onChangeFn={(text: string) => setPassword(text)}
             value={password}
             changeOnType
             borderColor={error !== false ? "danger" : undefined}
+            rightContent={
+              <StyledShowPasswordButton
+                type="button"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <RiEyeOffLine size={15} /> : <RiEyeLine size={15} />}
+              </StyledShowPasswordButton>
+            }
           />
         </StyledInputRow>
 
@@ -115,7 +132,13 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         )}
 
         <StyledSubmitWrap>
-          <Button label="Log In" color="success" fullWidth size={ButtonSize.Large} />
+          <Button
+            label={isLoggingIn ? "Logging In…" : "Log In"}
+            color="success"
+            fullWidth
+            disabled={isLoggingIn}
+            size={ButtonSize.Large}
+          />
         </StyledSubmitWrap>
         <StyledLinkButton type="button" onClick={onPasswordReset}>
           Forgot password?
