@@ -12,6 +12,14 @@ export interface IAnchorsNode {
   indexEnd: number; // End index of the anchor in the document
 }
 
+// one document of a batch export - content already stripped of the anchors
+// whose entity class was left out
+export interface IDocumentExport {
+  id: string;
+  title: string;
+  content: string;
+}
+
 // added content for completion
 export interface IDocument {
   id: string;

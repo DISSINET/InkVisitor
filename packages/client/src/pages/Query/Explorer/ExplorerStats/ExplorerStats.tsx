@@ -238,7 +238,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   noBackground
                   textColor={active ? "white" : undefined}
                   noHoverBackground={active}
-                  bold={active}
+                  textRegular={!active}
                 />
               );
             })}
@@ -269,7 +269,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   color={active ? "primary" : "greyer"}
                   inverted={!active}
                   noBackground={!active}
-                  bold={active}
+                  textRegular={!active}
                 />
               );
             })}
@@ -294,7 +294,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   noBackground
                   textColor={active ? "white" : undefined}
                   noHoverBackground={active}
-                  bold={active}
+                  textRegular={!active}
                 />
               );
             })}

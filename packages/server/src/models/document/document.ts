@@ -372,9 +372,11 @@ export default class Document implements IDocument, IDbModel {
     db: Connection,
     documentIds: string[]
   ): Promise<Document[]> {
+    // r.args spreads the list into getAll's key arguments - a bare array is
+    // read as one key and matches nothing
     const entries = await rethink
       .table(Document.table)
-      .getAll(documentIds)
+      .getAll(rethink.args(documentIds))
       .run(db);
 
     return entries && entries.length ? entries.map((d) => new Document(d)) : [];

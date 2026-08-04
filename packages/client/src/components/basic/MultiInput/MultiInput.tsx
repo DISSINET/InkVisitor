@@ -87,7 +87,6 @@ export const MultiInput: React.FC<MultiInput> = ({ values, onChange, width, disa
             label={"new note"}
             color="primary"
             inverted
-            bold
             size={ButtonSize.Medium}
             onClick={() => handleAdd()}
           />

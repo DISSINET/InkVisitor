@@ -11,7 +11,7 @@ export const StyledDocumentTag = styled.div<{
   background-color: ${({ theme }) => theme.color["blue"][400]};
   padding: ${({ theme, $size }) =>
     $size === "sm"
-      ? theme.space[1] + " " + theme.space[2]
+      ? theme.space[1] + " " + theme.space[3]
       : $size === "md"
         ? theme.space[1] + " " + theme.space[3]
         : theme.space[1] + " " + theme.space[4]};
@@ -28,6 +28,7 @@ export const StyledDocumentTag = styled.div<{
   cursor: copy;
   max-width: ${({ $width }) => ($width === "full" ? "100%" : `${$width / 10}rem`)};
   overflow: hidden !important;
+  gap: ${({ theme }) => theme.space[1]};
 `;
 
 /**

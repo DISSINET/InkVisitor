@@ -865,7 +865,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                       <Button
                         color="primary"
                         inverted
-                        bold
                         size={ButtonSize.Medium}
                         label="new metaproperty"
                         icon={<IcoPlusBold />}

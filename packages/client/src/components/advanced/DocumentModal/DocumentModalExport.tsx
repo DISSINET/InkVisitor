@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IDocument } from "@inkvisitor/shared/types";
@@ -17,20 +17,28 @@ import { FaCircle, FaDownload } from "react-icons/fa";
 import { MdLibraryAddCheck, MdOutlineLibraryAddCheck } from "react-icons/md";
 import { useTheme } from "styled-components";
 import { EntityColors } from "types";
+import { zipFileNameForDate } from "utils/documentExportZip";
 import { DocumentTitle } from "..";
+import { IcoChevronDown, IcoChevronRight } from "Theme/icons";
 import {
   StyledExportDocumentClassCheckbox,
   StyledExportDocumentClassLabel,
   StyledExportDocumentClassReference,
   StyledExportDocumentContainer,
+  StyledExportDocumentsToggle,
+  StyledExportFooterActions,
+  StyledExportHeaderTitle,
+  StyledExportInfoText,
   StyledExportStatsSection,
+  StyledExportTitleList,
 } from "./DocumentModalStyles";
 
 interface DocumentModalExport {
-  document: IDocument;
+  // one shared class selection applies to every document of the batch
+  documents: IDocument[];
   onClose: () => void;
 }
-const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document }) => {
+const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, documents }) => {
   const theme = useTheme();
   const [show, setShow] = useState(false);
 
@@ -42,8 +50,10 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
     Object.values(EntityEnums.Class),
   );
 
+  const isBatch = documents.length > 1;
+  const [showDocumentList, setShowDocumentList] = useState(false);
+
   const allClassesSelected = exportedClasses.length === Object.values(EntityEnums.Class).length;
-  const atLeastOneSelected = exportedClasses.length > 0;
 
   const handleSelectAll = () => {
     setExportedClasses(Object.values(EntityEnums.Class));
@@ -61,16 +71,55 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
     }
   };
 
+  const anchorsPerClass = useMemo<Record<string, number>>(() => {
+    const counts: Record<string, number> = {};
+    Object.values(EntityEnums.Class).forEach((entityClass) => {
+      counts[entityClass] = documents.reduce(
+        (acc, document) => acc + (document.entityIds[entityClass]?.length ?? 0),
+        0,
+      );
+    });
+    return counts;
+  }, [documents]);
+
   const sumAnchorsToExport = useMemo<number>(() => {
-    return exportedClasses.reduce((acc, entityClass) => {
-      const anchors = document?.entityIds[entityClass];
-      if (anchors) {
-        return acc + anchors.length;
+    return exportedClasses.reduce(
+      (acc, entityClass) => acc + (anchorsPerClass[entityClass] ?? 0),
+      0,
+    );
+  }, [exportedClasses, anchorsPerClass]);
+
+  // a batch is a server round trip per 50 documents plus zipping in the
+  // browser, so the export runs to completion before the modal reacts
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    if (!documents.length || isExporting) {
+      return;
+    }
+    setIsExporting(true);
+    try {
+      if (documents.length === 1) {
+        const [document] = documents;
+        await api.documentExport(
+          document.id,
+          exportedClasses,
+          document.title || document.id,
+        );
       } else {
-        return acc;
+        await api.documentsExportZip(
+          documents.map((document) => document.id),
+          exportedClasses,
+          zipFileNameForDate(new Date()),
+        );
       }
-    }, 0);
-  }, [exportedClasses]);
+      onClose();
+    } catch {
+      // the api response interceptor already reports the failure; the modal
+      // stays open so the selection can be exported again
+      setIsExporting(false);
+    }
+  };
 
   const selectAllToggle = (
     <React.Fragment>
@@ -103,20 +152,49 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
   return (
     <Modal width={500} showModal={show} onClose={onClose}>
       <ModalHeader
-        title={`Export document`}
+        title={isBatch ? `Export ${documents.length} documents` : `Export document`}
         content={
-          <div style={{ display: "grid" }}>
-            <DocumentTitle title={document.title} />
-          </div>
+          isBatch ? undefined : (
+            <StyledExportHeaderTitle>
+              <DocumentTitle title={documents[0].title} />
+            </StyledExportHeaderTitle>
+          )
         }
       />
       <ModalContent enableScroll>
         <div>
-          {document && (
-            <div>
-              <StyledExportDocumentContainer>
-                {selectAllToggle} <span></span>
-                {/* <StyledExportDocumentContainerTH key={"1"}>
+          {isBatch && (
+            <>
+              <StyledExportDocumentsToggle
+                type="button"
+                onClick={() => setShowDocumentList(!showDocumentList)}
+              >
+                {showDocumentList ? <IcoChevronDown /> : <IcoChevronRight />}
+                {showDocumentList ? "hide document titles" : "show document titles"}
+              </StyledExportDocumentsToggle>
+              {showDocumentList && (
+                <StyledExportTitleList>
+                  {documents.map((document) => (
+                    <DocumentTitle
+                      key={document.id}
+                      title={document.title}
+                      size="sm"
+                      width={220}
+                      noMargin
+                    />
+                  ))}
+                </StyledExportTitleList>
+              )}
+              <StyledExportInfoText>
+                The same anchor selection applies to all {documents.length} documents.
+                <br />
+                The counts below are summed across them.
+              </StyledExportInfoText>
+            </>
+          )}
+          <StyledExportDocumentContainer>
+            {selectAllToggle} <span></span>
+            {/* <StyledExportDocumentContainerTH key={"1"}>
                 Entity type
               </StyledExportDocumentContainerTH>
               <StyledExportDocumentContainerTH
@@ -125,73 +203,78 @@ const DocumentModalExport: React.FC<DocumentModalExport> = ({ onClose, document 
               <StyledExportDocumentContainerTH key={"3"}>
                 Document Anchors
               </StyledExportDocumentContainerTH> */}
-                {Object.values(EntityEnums.Class).map((entityClassId) => {
-                  const classItem = EntityColors[entityClassId];
-                  const classLabel = classItem?.label || entityClassId;
+            {Object.values(EntityEnums.Class).map((entityClassId) => {
+              const classItem = EntityColors[entityClassId];
+              const classLabel = classItem?.label || entityClassId;
 
-                  const classColorName = classItem?.color || "black";
-                  const classColor = theme.color[classColorName] as string;
+              const classColorName = classItem?.color || "black";
+              const classColor = theme.color[classColorName] as string;
 
-                  const selected = exportedClasses.includes(entityClassId);
-                  const classReferences = document?.entityIds[entityClassId];
+              const selected = exportedClasses.includes(entityClassId);
 
-                  return (
-                    <React.Fragment key={entityClassId}>
-                      <StyledExportDocumentClassCheckbox>
-                        <Checkbox
-                          value={selected}
-                          onChangeFn={() => {
-                            handleToggleSelectClass(entityClassId);
-                          }}
-                          noFill
-                        />
-                      </StyledExportDocumentClassCheckbox>
-                      <StyledExportDocumentClassLabel
-                        $selected={selected}
-                        onClick={() => {
-                          handleToggleSelectClass(entityClassId);
-                        }}
-                      >
-                        {classLabel}
-                      </StyledExportDocumentClassLabel>
+              return (
+                <React.Fragment key={entityClassId}>
+                  <StyledExportDocumentClassCheckbox>
+                    <Checkbox
+                      value={selected}
+                      onChangeFn={() => {
+                        handleToggleSelectClass(entityClassId);
+                      }}
+                      noFill
+                    />
+                  </StyledExportDocumentClassCheckbox>
+                  <StyledExportDocumentClassLabel
+                    $selected={selected}
+                    onClick={() => {
+                      handleToggleSelectClass(entityClassId);
+                    }}
+                  >
+                    {classLabel}
+                  </StyledExportDocumentClassLabel>
 
-                      <StyledExportDocumentClassReference>
-                        <FaCircle color={selected ? classColor : "transparent"} size={16} />
-                        {classReferences.length}
-                      </StyledExportDocumentClassReference>
-                    </React.Fragment>
-                  );
-                })}
-                {selectAllToggle}
-                <span></span>
-              </StyledExportDocumentContainer>
-            </div>
-          )}
-          {!document && <div>Document not found</div>}
+                  <StyledExportDocumentClassReference>
+                    <FaCircle color={selected ? classColor : "transparent"} size={16} />
+                    {anchorsPerClass[entityClassId]}
+                  </StyledExportDocumentClassReference>
+                </React.Fragment>
+              );
+            })}
+            {selectAllToggle}
+            <span></span>
+          </StyledExportDocumentContainer>
         </div>
       </ModalContent>
       <ModalFooter spaceBetween>
         <StyledExportStatsSection>
-          <b>{sumAnchorsToExport}</b> anchors will be exported
+          {isBatch ? (
+            <>
+              <b>{sumAnchorsToExport}</b> anchors from <b>{documents.length}</b> documents
+            </>
+          ) : (
+            <>
+              <b>{sumAnchorsToExport}</b> anchors will be exported
+            </>
+          )}
         </StyledExportStatsSection>
-        <ButtonGroup>
-          <CancelButton
-            key="cancel"
-            onClick={() => {
-              onClose();
-            }}
-          />
-          <Button
-            onClick={() => {
-              if (document?.id) {
-                api.documentExport(document.id, exportedClasses, document?.title || document.id);
+        <StyledExportFooterActions>
+          <ButtonGroup>
+            <CancelButton
+              key="cancel"
+              onClick={() => {
+                onClose();
+              }}
+            />
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              icon={<FaDownload size={14} style={{ marginRight: "3px" }} />}
+              label={
+                isExporting ? `exporting...` : isBatch ? `export .zip` : `export`
               }
-            }}
-            icon={<FaDownload size={16} style={{ marginRight: "3px" }} />}
-            label={`export`}
-            color="info"
-          />
-        </ButtonGroup>
+              color="info"
+            />
+          </ButtonGroup>
+        </StyledExportFooterActions>
       </ModalFooter>
     </Modal>
   );

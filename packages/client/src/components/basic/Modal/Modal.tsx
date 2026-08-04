@@ -200,7 +200,7 @@ export const ModalFooter: FC<ModalFooter> = ({
   return (
     <StyledFooter $column={column} $spaceBetween={spaceBetween}>
       {note && <StyledFooterNote>{note}</StyledFooterNote>}
-      <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md">
+      <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md" textRegular>
         {children}
       </ButtonDefaultsProvider>
     </StyledFooter>

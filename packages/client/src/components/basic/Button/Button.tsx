@@ -21,8 +21,10 @@ interface ButtonProps {
   noHoverBackground?: boolean;
   inverted?: boolean;
   noBorder?: boolean;
-  /** Renders the label at bold weight, e.g. to mark the selected option of a group. */
-  bold?: boolean;
+  /** Renders the label at the regular weight rather than the default bold, e.g.
+   * for the unselected options of a group whose selected one is marked by its
+   * weight. Left unset, a surrounding ButtonDefaultsProvider decides. */
+  textRegular?: boolean;
   disabled?: boolean;
   /** Keeps the default cursor for buttons that react to hover rather than to a click. */
   noPointer?: boolean;
@@ -60,7 +62,7 @@ export const Button: React.FC<ButtonProps> = ({
   noBorder = false,
   noBackground = false,
   noHoverBackground = false,
-  bold = false,
+  textRegular: textRegularProp,
   disabled = false,
   noPointer = false,
   color = "primary",
@@ -85,6 +87,7 @@ export const Button: React.FC<ButtonProps> = ({
   const defaults = useButtonDefaults();
   const size = sizeProp ?? (hasLabel ? defaults.size : undefined) ?? ButtonSize.Small;
   const shape = shapeProp ?? (hasLabel ? defaults.shape : undefined) ?? "rounded-sm";
+  const textRegular = textRegularProp ?? defaults.textRegular ?? false;
 
   return (
     <>
@@ -105,7 +108,7 @@ export const Button: React.FC<ButtonProps> = ({
         $textColor={textColor}
         $borderColor={borderColor}
         $inverted={inverted}
-        $bold={bold}
+        $textRegular={textRegular}
         $noBorder={noBorder}
         $noBackground={noBackground}
         $noHoverBackground={noHoverBackground}

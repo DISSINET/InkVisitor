@@ -4,6 +4,7 @@ import { ButtonShape, ButtonSize } from "types";
 interface ButtonDefaults {
   size?: ButtonSize;
   shape?: ButtonShape;
+  textRegular?: boolean;
 }
 
 const ButtonDefaultsContext = createContext<ButtonDefaults>({});
@@ -13,9 +14,10 @@ const ButtonDefaultsContext = createContext<ButtonDefaults>({});
 export const ButtonDefaultsProvider: React.FC<ButtonDefaults & { children?: ReactNode }> = ({
   size,
   shape,
+  textRegular,
   children,
 }) => {
-  const value = useMemo(() => ({ size, shape }), [size, shape]);
+  const value = useMemo(() => ({ size, shape, textRegular }), [size, shape, textRegular]);
   return (
     <ButtonDefaultsContext.Provider value={value}>{children}</ButtonDefaultsContext.Provider>
   );

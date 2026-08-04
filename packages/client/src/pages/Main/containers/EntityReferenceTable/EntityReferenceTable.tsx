@@ -201,7 +201,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             label={"new reference"}
             color="primary"
             inverted
-            bold
             size={ButtonSize.Medium}
             onClick={() => handleAdd()}
           />
