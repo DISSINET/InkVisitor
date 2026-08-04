@@ -225,7 +225,12 @@ const EntityTagInner: React.FC<EntityTag> = ({
 
   const labelComponent = useMemo(() => {
     return (
-      <StyledLabelWrap $invertedLabel={isSelected ?? false} $isFavorited={isFavorited ?? false}>
+      <StyledLabelWrap
+        $invertedLabel={isSelected ?? false}
+        $isFavorited={isFavorited ?? false}
+        $tagBorderColorKey={entity.status}
+        $labelOnly={showOnly === "label"}
+      >
         {isFavorited && (
           <StyledStarWrap>
             <StyledFaStar />
@@ -233,8 +238,6 @@ const EntityTagInner: React.FC<EntityTag> = ({
         )}
         <StyledLabel
           $invertedLabel={isSelected ?? false}
-          $tagBorderColorKey={entity.status}
-          $labelOnly={showOnly === "label"}
           $fullWidth={fullWidth}
           $maxWidth={tagMaxWidth}
           $isFavorited={isFavorited ?? false}
