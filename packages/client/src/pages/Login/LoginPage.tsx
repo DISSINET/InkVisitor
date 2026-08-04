@@ -7,11 +7,7 @@ import { IoEnter } from "react-icons/io5";
 import { Navigate } from "react-router-dom";
 import { AuthLogoBand } from "pages/AuthLogoBand";
 import { StyledContentWrap } from "pages/AuthModalSharedStyles";
-import {
-  StyledAttrBtnGroupWrap,
-  StyledLoginCitation,
-  StyledLoginText,
-} from "./LoginPageStyles";
+import { StyledAttrBtnGroupWrap, StyledLoginCitation, StyledLoginText } from "./LoginPageStyles";
 import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
@@ -22,17 +18,6 @@ enum LoginMode {
   "guest",
 }
 
-// Remounted (via key) whenever the mode changes, so each screen eases in
-// instead of swapping instantly.
-const ScreenFade: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const spring = useSpring({
-    from: { opacity: 0, transform: "translateY(0.5rem)" },
-    to: { opacity: 1, transform: "translateY(0rem)" },
-    config: config.stiff,
-  });
-  return <animated.div style={spring}>{children}</animated.div>;
-};
-
 export const LoginPage: React.FC = () => {
   const isGuestAccess = process.env.GUEST_MODE === "1";
 
@@ -41,7 +26,7 @@ export const LoginPage: React.FC = () => {
   const [emailLocal, setEmailLocal] = useState("");
 
   const [loginMode, setLoginMode] = useState<LoginMode>(
-    isGuestAccess ? LoginMode.guest : LoginMode.login,
+    isGuestAccess ? LoginMode.guest : LoginMode.login
   );
   const [restartScreen, setRestartScreen] = useState(false);
   const [redirectToMain, setRedirectToMain] = useState(false);
@@ -71,7 +56,7 @@ export const LoginPage: React.FC = () => {
         selected: loginMode === LoginMode.guest,
       },
     ],
-    [loginMode],
+    [loginMode]
   );
 
   const loginTitle = process.env.LOGIN_TITLE;
@@ -92,32 +77,30 @@ export const LoginPage: React.FC = () => {
             <AttributeButtonGroup options={pageOptions} paddingX fullWidth />
           </StyledAttrBtnGroupWrap>
         )}
-        <ScreenFade key={loginMode}>
-          {loginMode === LoginMode.login && (
-            <LoginScreen
-              usernameLocal={usernameLocal}
-              setUsernameLocal={setUsernameLocal}
-              password={password}
-              setPassword={setPassword}
-              setRedirectToMain={setRedirectToMain}
-              onPasswordReset={() => setLoginMode(LoginMode.password)}
-            />
-          )}
-          {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
-          {loginMode === LoginMode.password && (
-            <PasswordRecoverScreen
-              emailLocal={emailLocal}
-              setEmailLocal={setEmailLocal}
-              restartScreen={restartScreen}
-              setRestartScreen={setRestartScreen}
-              onReturnToLogin={() => {
-                setLoginMode(LoginMode.login);
-                setEmailLocal("");
-                setRestartScreen(false);
-              }}
-            />
-          )}
-        </ScreenFade>
+        {loginMode === LoginMode.login && (
+          <LoginScreen
+            usernameLocal={usernameLocal}
+            setUsernameLocal={setUsernameLocal}
+            password={password}
+            setPassword={setPassword}
+            setRedirectToMain={setRedirectToMain}
+            onPasswordReset={() => setLoginMode(LoginMode.password)}
+          />
+        )}
+        {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
+        {loginMode === LoginMode.password && (
+          <PasswordRecoverScreen
+            emailLocal={emailLocal}
+            setEmailLocal={setEmailLocal}
+            restartScreen={restartScreen}
+            setRestartScreen={setRestartScreen}
+            onReturnToLogin={() => {
+              setLoginMode(LoginMode.login);
+              setEmailLocal("");
+              setRestartScreen(false);
+            }}
+          />
+        )}
         {/* <ContactOwnerFooting /> */}
       </StyledContentWrap>
     </Modal>

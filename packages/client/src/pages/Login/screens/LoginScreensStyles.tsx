@@ -6,7 +6,7 @@ import styled from "styled-components";
 export const StyledDescription = styled.p`
   text-align: center;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 `;
 export const StyledEmailSent = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
