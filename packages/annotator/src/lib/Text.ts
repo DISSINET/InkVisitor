@@ -36,7 +36,9 @@ export class Tag {
   readonly position: number; // raw position in segment text
   readonly relativeParsedPosition: number; // relative position in parsed segment text
   readonly closing?: boolean;
-  readonly segmentIndex: number; // index of the segment containing this tag
+  // Index of the segment containing this tag. Written by Text.prepareSegments
+  // when segment reuse shifts the segment (and its tags) to a new position.
+  segmentIndex: number;
 
   private tagContent: string; // div id="12"
   attributes: Record<string, string>;
@@ -240,6 +242,27 @@ export class Segment {
    * width cap) the segment's lines were wrapped against.
    */
   indent: number = 0;
+  /**
+   * The inputs {@link lines} (and {@link linePrefixes}, {@link indent}) were
+   * computed from. While every field still matches, a recalc keeps the wrapped
+   * lines and only renumbers the segment's line range — this is what makes an
+   * edit cost one paragraph's wrap instead of the whole document's
+   * (see {@link Text.calculateLines}).
+   *
+   * The string fields make this cheap: an untouched segment still holds the
+   * exact string objects recorded here, which === resolves by reference before
+   * looking at characters. Only the edited segment's strings are actually
+   * walked, and that cost is bounded by the one paragraph.
+   */
+  wrappedFor?: {
+    text: string;
+    parsed: string;
+    isFirst: boolean;
+    mode: EditMode;
+    budget: number;
+    paragraphIndent: number;
+    measurer?: TextMeasurer;
+  };
   segmentIndex: number = -1; // index of this segment in the text
 
   /**
@@ -631,12 +654,54 @@ class Text {
    * This method is called when the text content changes.
    */
   prepareSegments() {
-    const segmentsArray = this.value.split("\n");
-    const segments: Segment[] = [];
+    const parts = this.value.split("\n");
+    const old = this.segments;
 
-    for (let i = 0; i < segmentsArray.length; i++) {
-      const segmentText = segmentsArray[i];
-      segments.push(new Segment(segmentText, i));
+    // An edit leaves every paragraph before and after it untouched, so the old
+    // segment objects are reused for the longest matching head and tail and only
+    // the middle is re-parsed. Reuse carries each segment's raw/parsed string
+    // objects along, which is what lets calculateLines keep its wrapped lines
+    // (see Segment.wrappedFor). The scans compare strings, but unequal ones
+    // diverge within a paragraph, so only the reused text is ever fully read.
+    let head = 0;
+    const shared = Math.min(parts.length, old.length);
+    while (head < shared && old[head].raw === parts[head]) {
+      head++;
+    }
+    let tail = 0;
+    const maxTail = shared - head;
+    while (
+      tail < maxTail &&
+      old[old.length - 1 - tail].raw === parts[parts.length - 1 - tail]
+    ) {
+      tail++;
+    }
+
+    const segments: Segment[] = new Array(parts.length);
+    for (let i = 0; i < head; i++) {
+      segments[i] = old[i];
+    }
+    for (let i = parts.length - tail; i < parts.length; i++) {
+      segments[i] = old[old.length - parts.length + i];
+    }
+    for (let i = head; i < parts.length - tail; i++) {
+      segments[i] = new Segment(parts[i], i);
+    }
+
+    // A reused tail segment may sit at a shifted index. Tags carry their own
+    // copy of it (getAbsoluteTagPosition sums the segments before theirs), so
+    // they are restamped together.
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      if (segment.segmentIndex !== i) {
+        segment.segmentIndex = i;
+        for (const tag of segment.openingTags) {
+          tag.segmentIndex = i;
+        }
+        for (const tag of segment.closingTags) {
+          tag.segmentIndex = i;
+        }
+      }
     }
 
     this.segments = segments;
@@ -716,12 +781,32 @@ class Text {
         segmentIndex === 0
           ? 0
           : this.segments[segmentIndex - 1].lineEndExclusive;
-      segment.lines = [];
 
       let text = segment.raw;
       if (this.mode === EditMode.HIGHLIGHT || this.mode === EditMode.SEMI) {
         text = segment.parsed;
       }
+
+      // The segment's lines are a pure function of these inputs; while all of
+      // them match the recorded ones, the wrap (and the prefix tables built
+      // from it) is kept and only the line numbering above moves. `parsed` is
+      // an input even in RAW mode — indentForSegment reads it — but it never
+      // changes without `raw` changing alongside.
+      const cached = segment.wrappedFor;
+      if (
+        cached &&
+        cached.text === text &&
+        cached.parsed === segment.parsed &&
+        cached.isFirst === (segment.segmentIndex === 0) &&
+        cached.mode === this.mode &&
+        cached.budget === maxWidth &&
+        cached.paragraphIndent === this.paragraphIndent &&
+        cached.measurer === measurer
+      ) {
+        segment.lineEndExclusive = segment.lineStart + segment.lines.length;
+        continue;
+      }
+      segment.lines = [];
 
       // Word wrapping like a normal text editor (issues #2780 / follow-up).
       //
@@ -860,6 +945,16 @@ class Text {
       segment.linePrefixes = measurer
         ? segment.lines.map((line) => buildPrefixWidths(line, measurer))
         : [];
+
+      segment.wrappedFor = {
+        text,
+        parsed: segment.parsed,
+        isFirst: segment.segmentIndex === 0,
+        mode: this.mode,
+        budget: maxWidth,
+        paragraphIndent: this.paragraphIndent,
+        measurer,
+      };
     }
 
     this.noLines = this.segments.reduce<number>(
@@ -1740,21 +1835,32 @@ class Text {
       return;
     }
 
-    this.dirtySegment = segmentPos.segmentIndex;
-
     let indexPos = segmentPos.rawTextIndex;
     for (let i = 0; i < segmentPos.segmentIndex; i++) {
       indexPos++; // each segment should receive +1 character no matter what (newline)
       indexPos += this.segments[i].raw.length;
     }
 
-    this.value = this.value.slice(0, indexPos - 1) + this.value.slice(indexPos);
+    // The character removed from {@link value}: the one before the cursor going
+    // backward (Backspace), the one under it going forward (Delete).
+    const deleteAt = forwardChar ? indexPos : indexPos - 1;
+    if (deleteAt < 0 || deleteAt >= this.value.length) {
+      return; // document edge — nothing on that side to delete
+    }
+
+    this.dirtySegment = segmentPos.segmentIndex;
+    this.value =
+      this.value.slice(0, deleteAt) + this.value.slice(deleteAt + 1);
 
     const segment = this.segments[segmentPos.segmentIndex];
 
-    if (!segment.raw) {
-      this.prepareSegments();
-    } else if (segmentPos.rawTextIndex) {
+    // A delete landing inside the segment's own text is spliced in place; one
+    // landing on a boundary newline joins two segments, so the segment list is
+    // re-split from the updated value.
+    const inSegment = forwardChar
+      ? segmentPos.rawTextIndex < segment.raw.length
+      : segmentPos.rawTextIndex > 0;
+    if (inSegment) {
       const xAlterPos = segmentPos.rawTextIndex - (forwardChar ? 0 : 1);
       segment.raw =
         segment.raw.slice(0, xAlterPos) + segment.raw.slice(xAlterPos + 1);

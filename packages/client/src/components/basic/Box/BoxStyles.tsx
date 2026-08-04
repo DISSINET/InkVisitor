@@ -64,10 +64,18 @@ export const StyledHead = styled.div<StyledHead>`
     $noFrame || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
-export const StyledLabel = styled(animated.div)`
+interface StyledLabel {
+  $shrinkLabel: boolean;
+}
+/**
+ * A shrinkable label cedes its space to the header content and buttons (some
+ * boxes need the buttons to win over the caption); a protected one always
+ * shows the full caption and the content yields instead.
+ */
+export const StyledLabel = styled(animated.div)<StyledLabel>`
   display: block;
-  min-width: 0;
-  flex-shrink: 1;
+  min-width: ${({ $shrinkLabel }) => ($shrinkLabel ? "0" : "fit-content")};
+  flex-shrink: ${({ $shrinkLabel }) => ($shrinkLabel ? 1 : 0)};
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;
@@ -82,6 +90,10 @@ export const StyledHeaderComponentWrap = styled.div<StyledHeaderComponentWrap>`
   align-items: center;
   width: ${({ $isExpanded }) => ($isExpanded ? "auto" : "100%")};
   flex-grow: ${({ $flexGrow }) => ($flexGrow ? 1 : 0)};
+  /* The growing wrap holds ellipsizing content, which needs permission to
+     shrink below its natural width; the buttons wrap keeps min-width: auto so
+     the buttons are never crushed. */
+  min-width: ${({ $flexGrow }) => ($flexGrow ? "0" : "auto")};
 `;
 interface StyledContent {
   $noFrame: boolean;

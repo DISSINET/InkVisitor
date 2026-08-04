@@ -12,7 +12,8 @@ import {
   HighlightMode,
   HOVER_DEBOUNCE_MS,
   LIGHT_MENU_COLORS,
-  LINE_HEIGHT,
+  DEFAULT_CARET_WIDTH_PX,
+  DEFAULT_LINE_HEIGHT_RATIO,
   MenuColors,
   PARAGRAPH_INDENT_DEFAULT,
   PARAGRAPH_INDENT_EM,
@@ -140,6 +141,7 @@ interface PersistedSettings {
   proportional?: boolean;
   fontFamily?: string;
   fontSize?: number;
+  lineHeightRatio?: number;
   showParagraphMarks?: boolean;
   paragraphIndent?: boolean;
 }
@@ -150,7 +152,7 @@ export interface DrawingOptions {
   lineHeight: number;
   charsAtLine: number;
   color?: string; // override
-  caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretWidth?: number; // collapsed-caret width in device px (drawing fallback: 1)
   caretOpacity?: number; // collapsed-caret alpha (defaults to 1); block caret uses 0.5 so the letter under it stays readable
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
@@ -222,18 +224,33 @@ export class Annotator {
 
   charWidth: number = 0;
   /**
-   * Proportional feature flag (default off). When on, the rendered font switches
-   * to a proportional family and text layout, draw (caret/selection rects),
+   * Proportional text flag. When on, the rendered font switches to a
+   * proportional family and text layout, draw (caret/selection rects),
    * wrapping, mouse hit-test, drag handles, and vertical goal-column all use
    * measured glyph widths via a CanvasMeasurer instead of the monospace grid.
    *
-   * Functionally complete, verified by the proportional test suites. Exposed to
-   * users as an OPT-IN (the client's font toggle calls {@link setProportional});
-   * the annotator default stays monospace. Flipping the default ON for everyone
-   * is the one deliberately-not-done step.
+   * The bare library defaults to monospace (tests and the standalone demo
+   * depend on the fixed grid). A HOSTED annotator defaults to proportional:
+   * {@link setFontFamilyOptions} — the host handing over its font — adopts
+   * proportional for users with no stored `proportional` choice. A stored
+   * setting, either value, always wins.
    */
   proportional: boolean = false;
-  lineHeight: number = LINE_HEIGHT;
+
+  /**
+   * Whether loadSettings found an explicit stored `proportional` value. Guards
+   * the proportional-by-default adoption in {@link setFontFamilyOptions} so an
+   * explicit monospace choice survives new sessions.
+   */
+  private hasStoredProportionalChoice = false;
+
+  /**
+   * Line height as a multiple of the font size (a CSS unitless line-height).
+   * User-adjustable via the settings overlay; persisted.
+   */
+  lineHeightRatio: number = DEFAULT_LINE_HEIGHT_RATIO;
+  /** Row height in device px; every visual line occupies exactly this much. */
+  lineHeight: number;
 
   inputText: string = "";
 
@@ -294,6 +311,21 @@ export class Annotator {
   lastSelectedText?: Selected;
   ratio: number = 1;
 
+  /**
+   * Device px per CSS px the host asked for. The live {@link ratio} is this or
+   * the display's `devicePixelRatio`, whichever is larger, so a host that wants
+   * supersampling on a 1× display keeps it while browser zoom (which raises the
+   * DPR) still gets a backing store at its own resolution.
+   */
+  private readonly baseRatio: number;
+
+  /**
+   * Media query matching exactly the current `devicePixelRatio`. It reports the
+   * move away from that one value, so each change re-arms a query built from
+   * the new DPR.
+   */
+  private dprQuery?: MediaQueryList;
+
   previousRenderViewportLineStart: number;
 
   private lastSelectPointer: { cx: number; cy: number } | null = null;
@@ -323,7 +355,7 @@ export class Annotator {
   } | null = null;
 
   /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
-  private caretWidth = 1;
+  private caretWidth = DEFAULT_CARET_WIDTH_PX;
 
   /**
    * Block (full char-cell) caret intent. Monospace-only: the caret spans the
@@ -480,12 +512,15 @@ export class Annotator {
       throw new Error("Cannot get 2d context");
     }
 
-    this.ratio = ratio;
+    this.baseRatio = ratio;
+    this.ratio = this.effectiveRatio();
     this.font = this.composeFont();
 
     this.lineHeight = this.lineHeightForSize(this.fontSize);
 
     this.ctx = ctx;
+    // Before the first measureText: measurement and paint must share one shaping mode.
+    this.disableTextShaping();
     this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
@@ -523,6 +558,8 @@ export class Annotator {
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
+
+    this.watchDevicePixelRatio();
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
@@ -1053,7 +1090,64 @@ export class Annotator {
     this.onAnchorTagHoverCb(null, null);
   }
 
+  /** Live device px per CSS px: the host's request, floored by the display DPR. */
+  private effectiveRatio(): number {
+    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    return Math.max(this.baseRatio, dpr);
+  }
+
+  /**
+   * Re-seed everything derived from `ratio`: Cursor and Highlighter hold their
+   * own copies for hit-testing, and the font string and line height are device-px
+   * values. Layout (backing store, re-wrap, redraw) is left to the caller.
+   */
+  private applyRatio(ratio: number): boolean {
+    if (!Number.isFinite(ratio) || ratio <= 0 || ratio === this.ratio) {
+      return false;
+    }
+    this.ratio = ratio;
+    this.cursor.ratio = ratio;
+    this.scratchCursor.ratio = ratio;
+    this.hoverHighlighter.ratio = ratio;
+    this.font = this.composeFont();
+    this.lineHeight = this.lineHeightForSize(this.fontSize);
+    return true;
+  }
+
+  /**
+   * Follow `devicePixelRatio`, which browser zoom changes: a backing store built
+   * for the old value is resampled by the compositor and the text goes soft.
+   * A `resolution` query matches one DPR only, so the handler re-arms itself
+   * against the new value before re-laying out.
+   */
+  private watchDevicePixelRatio(): void {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+    const dpr = window.devicePixelRatio || 1;
+    this.dprQuery = window.matchMedia(`(resolution: ${dpr}dppx)`);
+    this.dprQuery.addEventListener?.("change", this.boundOnDevicePixelRatioChange);
+  }
+
+  private unwatchDevicePixelRatio(): void {
+    this.dprQuery?.removeEventListener?.("change", this.boundOnDevicePixelRatioChange);
+    this.dprQuery = undefined;
+  }
+
+  private readonly boundOnDevicePixelRatioChange = (): void => {
+    this.unwatchDevicePixelRatio();
+    if (this.destroyed) {
+      return;
+    }
+    this.watchDevicePixelRatio();
+    this.onCanvasResize();
+  };
+
   onCanvasResize() {
+    // Zoom can move the DPR without any other notice, and every size below is
+    // derived from the ratio.
+    const ratioChanged = this.applyRatio(this.effectiveRatio());
+
     this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
@@ -1075,6 +1169,11 @@ export class Annotator {
     // Keep the proportional wrap budget in sync with the new width
     // before the re-wrap (updateCharsAtLine triggers calculateLines once).
     if (this.proportional) {
+      if (ratioChanged) {
+        // Prefix widths are measured in device px off the font string, so they
+        // belong to the ratio they were built at.
+        this.text.setMeasurer(this.measurerForFont(), this.width);
+      }
       this.text.maxPixelWidth = this.width;
     }
     this.text.updateCharsAtLine(charsAtLine);
@@ -1180,9 +1279,27 @@ export class Annotator {
     return `${this.fontSize * this.ratio}px ${family}`;
   }
 
-  /** Line height (device px) scaled with the font size off the LINE_HEIGHT base. */
+  /** Line height (device px): font size × the user-adjustable spacing multiple. */
   private lineHeightForSize(size: number): number {
-    return LINE_HEIGHT * (size / DEFAULT_FONT_SIZE) * this.ratio;
+    return size * this.lineHeightRatio * this.ratio;
+  }
+
+  /**
+   * The current font's CanvasMeasurer, one instance per font string. Segment
+   * wrap memoization keys on measurer identity ({@link Text}.wrappedFor), so a
+   * fresh instance forces a full re-wrap even when no wrap input moved — e.g.
+   * a line-spacing change. Reuse also keeps the per-string width cache warm.
+   */
+  private measurerCache?: { font: string; measurer: CanvasMeasurer };
+
+  private measurerForFont(): CanvasMeasurer {
+    if (this.measurerCache?.font !== this.font) {
+      this.measurerCache = {
+        font: this.font,
+        measurer: new CanvasMeasurer(this.ctx, this.font),
+      };
+    }
+    return this.measurerCache.measurer;
   }
 
   /**
@@ -1213,7 +1330,7 @@ export class Annotator {
     this.text.paragraphIndent = this.paragraphIndentUnits();
     // Rebuild (or clear) the prefix tables for the new font; recalculates lines.
     this.text.setMeasurer(
-      this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
+      this.proportional ? this.measurerForFont() : undefined,
       this.proportional ? this.width : undefined
     );
 
@@ -1242,6 +1359,9 @@ export class Annotator {
    */
   setProportional(on: boolean, fontFamily?: string) {
     this.proportional = on;
+    // This IS an explicit stored choice — the adoption in setFontFamilyOptions
+    // must not override it when the host re-supplies its fonts (theme change).
+    this.hasStoredProportionalChoice = true;
     if (fontFamily !== undefined) {
       this.proportionalFontFamily = fontFamily;
     }
@@ -1264,19 +1384,45 @@ export class Annotator {
   }
 
   /**
+   * Set the line spacing as a multiple of the font size (a CSS unitless
+   * line-height). Values below 1 would overlap the fixed line grid, so they
+   * are clamped. Persisted.
+   */
+  setLineHeightRatio(ratio: number) {
+    this.lineHeightRatio = Math.max(1, ratio);
+    this.applyFontChange();
+    this.saveSettings();
+  }
+
+  /**
    * Host-supplied font-family options shown in the Options-modal dropdown. When
    * the user hasn't chosen a family yet (still the built-in fallback), default to
    * the first option so the picker shows a valid value matching the host font.
+   *
+   * Handing over a font also opts the instance into proportional-by-default: a
+   * hosted annotator renders prose, and the host font (e.g. Roboto) is the
+   * reading face. Only users with no stored `proportional` choice are switched;
+   * the adoption itself is not persisted, so it keeps applying (or a future
+   * default keeps applying) until the user picks something explicitly.
    */
   setFontFamilyOptions(options: { label: string; value: string }[]) {
     this.fontFamilyOptions = options;
-    if (options.length > 0 && this.proportionalFontFamily === PROPORTIONAL_FONT) {
+    if (options.length === 0) {
+      return;
+    }
+    let rebuild = false;
+    if (!this.hasStoredProportionalChoice && !this.proportional) {
+      this.proportional = true; // hosted default; deliberately not persisted
+      rebuild = true;
+    }
+    if (this.proportionalFontFamily === PROPORTIONAL_FONT) {
       this.proportionalFontFamily = options[0].value;
-      // If proportional is already active, the rendered font + measurer were
-      // built from the old (fallback) family — rebuild them for the new default.
-      if (this.proportional) {
-        this.applyFontChange();
-      }
+      // An already-proportional instance has its rendered font + measurer
+      // built from the fallback family — they must follow the new default.
+      rebuild = rebuild || this.proportional;
+    }
+    if (rebuild) {
+      this.applyFontChange();
     }
   }
 
@@ -1370,6 +1516,29 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Turn off kerning and ligatures on the canvas. The proportional caret math
+   * is additive — per-code-unit widths summed into prefix tables — while a line
+   * is painted with one whole-run fillText; any cross-glyph shaping makes the
+   * painted line narrower than the table says and the caret drifts into the
+   * following glyph. With shaping off, both sides use plain advance widths and
+   * agree exactly. Browsers without these flags keep the (small) drift.
+   * Re-applied every frame because ctx.reset() restores the defaults.
+   */
+  private disableTextShaping(): void {
+    const ctx = this.ctx as CanvasRenderingContext2D & {
+      fontKerning?: string;
+      textRendering?: string;
+    };
+    if ("fontKerning" in ctx) {
+      ctx.fontKerning = "none";
+    }
+    // optimizeSpeed also disables ligatures (fi/fl), which fontKerning cannot.
+    if ("textRendering" in ctx) {
+      ctx.textRendering = "optimizeSpeed";
+    }
   }
 
   /**
@@ -1958,6 +2127,8 @@ export class Annotator {
     document.removeEventListener("mousemove", this.onDocumentSelectMove);
     document.removeEventListener("mouseup", this.onDocumentSelectUp);
 
+    this.unwatchDevicePixelRatio();
+
     this.element.onwheel = null;
     this.element.onmousedown = null;
     this.element.onkeydown = null;
@@ -2154,6 +2325,22 @@ export class Annotator {
       },
       {
         type: "segmented",
+        label: "Line spacing",
+        // Multiples of the font size (not of the font's own line box, which is
+        // what word processors scale — their "1.15" is ≈1.4 here). Word labels
+        // sidestep that mismatch. Anchor markers and underlines draw inside the
+        // row box, so nothing tighter than Compact is offered. "Normal" is
+        // 23/13, the historical fixed grid.
+        options: [
+          { label: "Compact", value: 1.4 },
+          { label: "Normal", value: DEFAULT_LINE_HEIGHT_RATIO },
+          { label: "Wide", value: 2.1 },
+        ],
+        value: this.lineHeightRatio,
+        onChange: (v) => this.setLineHeightRatio(v),
+      },
+      {
+        type: "segmented",
         label: "Paragraph indent",
         options: [
           { label: "Off", value: 0 },
@@ -2215,6 +2402,12 @@ export class Annotator {
    * @param e
    */
   onWheel(e: WheelEvent) {
+    // A trackpad pinch and ctrl+wheel both arrive as wheel events with ctrlKey
+    // set; the browser turns them into page zoom only if the default runs.
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+
     const deltaBufferPx = e.deltaY * this.ratio;
     this.viewport.addScrollOffset(deltaBufferPx, this.lineHeight, this.scrollExtentLineCount());
 
@@ -2902,6 +3095,8 @@ export class Annotator {
     this.syncLineNumbersCanvasToMain();
 
     this.ctx.reset();
+    // reset() clears the shaping flags along with everything else.
+    this.disableTextShaping();
 
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
@@ -3344,12 +3539,17 @@ export class Annotator {
       this.fontSize = Math.max(1, parsed.fontSize);
       fontChanged = true;
     }
+    if (typeof parsed.lineHeightRatio === "number") {
+      this.lineHeightRatio = Math.max(1, parsed.lineHeightRatio);
+      fontChanged = true;
+    }
     if (typeof parsed.fontFamily === "string") {
       this.proportionalFontFamily = parsed.fontFamily;
       fontChanged = true;
     }
     if (typeof parsed.proportional === "boolean") {
       this.proportional = parsed.proportional;
+      this.hasStoredProportionalChoice = true;
       fontChanged = true;
     }
     if (fontChanged) {
@@ -3359,7 +3559,7 @@ export class Annotator {
 
   /** Reset all persisted settings to their defaults, clear storage, and redraw. */
   resetSettings(): void {
-    this.caretWidth = 1;
+    this.caretWidth = DEFAULT_CARET_WIDTH_PX;
     this.caretBlock = false;
     this.highlightColor = undefined;
     // Revert the highlight color to the host theme color (last setSelectStyle).
@@ -3369,9 +3569,12 @@ export class Annotator {
     this.fps = 0;
     this.showParagraphMarks = false;
     this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
-    // Font settings back to defaults (#2487).
-    this.proportional = false;
+    // Font settings back to defaults (#2487): hosted instances (font options
+    // supplied) default to proportional, the bare library to monospace.
+    this.proportional = this.fontFamilyOptions.length > 0;
+    this.hasStoredProportionalChoice = false;
     this.fontSize = DEFAULT_FONT_SIZE;
+    this.lineHeightRatio = DEFAULT_LINE_HEIGHT_RATIO;
     // Default to the first host-supplied option (e.g. "Roboto (app sans)") so the
     // picker shows a valid value; fall back to the generic when none supplied.
     this.proportionalFontFamily =
@@ -3385,7 +3588,7 @@ export class Annotator {
       // ignore storage errors
     }
 
-    // Re-derive font/layout to the monospace defaults and redraw.
+    // Re-derive font/layout to the defaults and redraw.
     this.applyFontChange();
   }
 
@@ -3403,6 +3606,7 @@ export class Annotator {
         proportional: this.proportional,
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
+        lineHeightRatio: this.lineHeightRatio,
         showParagraphMarks: this.showParagraphMarks,
         paragraphIndent: this.paragraphIndent,
       };

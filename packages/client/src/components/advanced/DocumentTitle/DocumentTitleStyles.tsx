@@ -30,12 +30,40 @@ export const StyledDocumentTag = styled.div<{
   overflow: hidden !important;
 `;
 
+/**
+ * Middle ellipsis via two spans: the head carries the ellipsis and absorbs
+ * virtually all shrinkage (flex-shrink 999), so the tail — the distinctive
+ * suffix of a document name — stays effectively whole until the head is
+ * fully collapsed.
+ */
 export const StyledDocumentTitle = styled.div`
-  display: block;
+  display: flex;
   overflow: hidden !important;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   min-width: 0;
 
   flex-shrink: 1;
+`;
+
+export const StyledTitleHead = styled.span`
+  flex: 0 999 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* pre, not nowrap: a split can land beside a space, which nowrap would collapse */
+  white-space: pre;
+  /* Room for one character plus the "…" — a fully collapsed head would render
+     nothing and the tail alone would read as the complete title. */
+  min-width: 2ch;
+`;
+
+/*
+ * The tail's shrink share is a sub-pixel fraction (its scaled flex factor is
+ * ~1/10000 of the head's), but any overflow at all makes text-overflow:
+ * ellipsis drop whole characters to fit the "…" — the characters this span
+ * exists to preserve. Clipping instead loses only that invisible sliver.
+ */
+export const StyledTitleTail = styled.span`
+  flex: 0 1 auto;
+  overflow: hidden;
+  white-space: pre;
+  min-width: 0;
 `;
