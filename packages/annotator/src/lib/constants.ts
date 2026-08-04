@@ -22,7 +22,12 @@ export enum HighlightMode {
    */
   ANCHOR = "anchor",
 }
-export const LINE_HEIGHT = 23;
+/**
+ * Line height as a multiple of the font size (a CSS unitless line-height; for
+ * scale: Google Docs defaults to 1.15, CSS `normal` is ~1.2). 23/13 keeps the
+ * historical fixed 23px grid at the default 13px font.
+ */
+export const DEFAULT_LINE_HEIGHT_RATIO = 23 / 13;
 
 /** Extra empty rows after the last text line; scrollable, no line numbers in the gutter. */
 export const VIEWPORT_END_BUFFER_ROWS = 3;
@@ -91,7 +96,7 @@ export const DARK_MENU_COLORS: MenuColors = {
  * soft wrap. Left-aligned text gives no signal which of the two a line break is,
  * so the first visual line of each paragraph is indented; the wrapped
  * continuations stay flush left and the contrast marks the boundary. The
- * renderer draws on a fixed line grid (one {@link LINE_HEIGHT} per visual line,
+ * renderer draws on a fixed line grid (one line height per visual line,
  * relied on by scrolling, hit-testing and the gutter), so the horizontal axis is
  * where a paragraph can be marked without paying for variable line boxes.
  */

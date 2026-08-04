@@ -56,6 +56,44 @@ describe("Annotator font family", () => {
   });
 });
 
+describe("Annotator line spacing", () => {
+  test("setLineHeightRatio scales the line height off the font size", () => {
+    const a = mk("abc");
+    a.setLineHeightRatio(1.15);
+    expect(a.lineHeightRatio).toBe(1.15);
+    expect(a.lineHeight).toBeCloseTo(a.fontSize * 1.15 * a.ratio);
+  });
+
+  test("ratios below 1 clamp to 1 (lines never overlap)", () => {
+    const a = mk("abc");
+    a.setLineHeightRatio(0.5);
+    expect(a.lineHeightRatio).toBe(1);
+  });
+
+  test("line spacing and font size compose", () => {
+    const a = mk("abc");
+    a.setLineHeightRatio(2);
+    a.setFontSize(15);
+    expect(a.lineHeight).toBeCloseTo(15 * 2 * a.ratio);
+  });
+
+  test("persists and restores across construction", () => {
+    const a = mk("abc");
+    a.setLineHeightRatio(1.4);
+    const b = mk("abc");
+    expect(b.lineHeightRatio).toBe(1.4);
+    expect(b.lineHeight).toBeCloseTo(b.fontSize * 1.4 * b.ratio);
+  });
+
+  test("resetSettings restores the default spacing", () => {
+    const a = mk("abc");
+    const defaultLineHeight = a.lineHeight;
+    a.setLineHeightRatio(1.15);
+    a.resetSettings();
+    expect(a.lineHeight).toBeCloseTo(defaultLineHeight);
+  });
+});
+
 describe("font family options", () => {
   test("setFontFamilyOptions defaults the family to the first option when untouched", () => {
     const a = mk("abc");

@@ -1,4 +1,4 @@
-import { DEFAULT_FONT, DEFAULT_FONT_SIZE, LINE_HEIGHT } from "./constants";
+import { DEFAULT_FONT, DEFAULT_FONT_SIZE } from "./constants";
 import Viewport from "./Viewport";
 
 /**
@@ -10,14 +10,15 @@ export class Lines {
   // cached canvas contex
   ctx: CanvasRenderingContext2D;
 
-  // TODO: different font, different sizes
-  font: string = `${DEFAULT_FONT_SIZE}px ${DEFAULT_FONT}`;
+  // font and lineHeight are seeded in the constructor and then re-copied from
+  // the owning Annotator on every draw() — the Annotator's values are the truth.
+  font: string;
   fontColor: string = "black";
 
   bgColor: string = "white";
 
   charWidth: number = 0;
-  lineHeight: number = LINE_HEIGHT;
+  lineHeight: number;
   ratio: number = 1;
 
   // size for virtual area inside the canvas element
@@ -44,7 +45,7 @@ export class Lines {
     this.fontColor = this.element.style.color || "black";
 
     this.charWidth = charWidth;
-    // Buffer-space line height (LINE_HEIGHT * ratio), same as Annotator.
+    // Buffer-space line height (device px), same value the Annotator draws with.
     this.lineHeight = lineHeight;
     this.font = `${DEFAULT_FONT_SIZE * ratio}px ${DEFAULT_FONT}`;
   }

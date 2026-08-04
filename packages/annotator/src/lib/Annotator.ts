@@ -12,7 +12,7 @@ import {
   HighlightMode,
   HOVER_DEBOUNCE_MS,
   LIGHT_MENU_COLORS,
-  LINE_HEIGHT,
+  DEFAULT_LINE_HEIGHT_RATIO,
   MenuColors,
   PARAGRAPH_INDENT_DEFAULT,
   PARAGRAPH_INDENT_EM,
@@ -140,6 +140,7 @@ interface PersistedSettings {
   proportional?: boolean;
   fontFamily?: string;
   fontSize?: number;
+  lineHeightRatio?: number;
   showParagraphMarks?: boolean;
   paragraphIndent?: boolean;
 }
@@ -233,7 +234,14 @@ export class Annotator {
    * is the one deliberately-not-done step.
    */
   proportional: boolean = false;
-  lineHeight: number = LINE_HEIGHT;
+
+  /**
+   * Line height as a multiple of the font size (a CSS unitless line-height).
+   * User-adjustable via the settings overlay; persisted.
+   */
+  lineHeightRatio: number = DEFAULT_LINE_HEIGHT_RATIO;
+  /** Row height in device px; every visual line occupies exactly this much. */
+  lineHeight: number;
 
   inputText: string = "";
 
@@ -1260,9 +1268,9 @@ export class Annotator {
     return `${this.fontSize * this.ratio}px ${family}`;
   }
 
-  /** Line height (device px) scaled with the font size off the LINE_HEIGHT base. */
+  /** Line height (device px): font size × the user-adjustable spacing multiple. */
   private lineHeightForSize(size: number): number {
-    return LINE_HEIGHT * (size / DEFAULT_FONT_SIZE) * this.ratio;
+    return size * this.lineHeightRatio * this.ratio;
   }
 
   /**
@@ -1339,6 +1347,17 @@ export class Annotator {
   /** Set the logical font size in CSS px; scales line height. Persisted. */
   setFontSize(px: number) {
     this.fontSize = Math.max(1, px);
+    this.applyFontChange();
+    this.saveSettings();
+  }
+
+  /**
+   * Set the line spacing as a multiple of the font size (a CSS unitless
+   * line-height). Values below 1 would overlap the fixed line grid, so they
+   * are clamped. Persisted.
+   */
+  setLineHeightRatio(ratio: number) {
+    this.lineHeightRatio = Math.max(1, ratio);
     this.applyFontChange();
     this.saveSettings();
   }
@@ -2233,6 +2252,22 @@ export class Annotator {
         ],
         value: this.fontSize,
         onChange: (px) => this.setFontSize(px),
+      },
+      {
+        type: "segmented",
+        label: "Line spacing",
+        // Multiples of the font size (not of the font's own line box, which is
+        // what word processors scale — their "1.15" is ≈1.4 here). Word labels
+        // sidestep that mismatch. Anchor markers and underlines draw inside the
+        // row box, so nothing tighter than Compact is offered. "Normal" is
+        // 23/13, the historical fixed grid.
+        options: [
+          { label: "Compact", value: 1.4 },
+          { label: "Normal", value: DEFAULT_LINE_HEIGHT_RATIO },
+          { label: "Wide", value: 2.1 },
+        ],
+        value: this.lineHeightRatio,
+        onChange: (v) => this.setLineHeightRatio(v),
       },
       {
         type: "segmented",
@@ -3432,6 +3467,10 @@ export class Annotator {
       this.fontSize = Math.max(1, parsed.fontSize);
       fontChanged = true;
     }
+    if (typeof parsed.lineHeightRatio === "number") {
+      this.lineHeightRatio = Math.max(1, parsed.lineHeightRatio);
+      fontChanged = true;
+    }
     if (typeof parsed.fontFamily === "string") {
       this.proportionalFontFamily = parsed.fontFamily;
       fontChanged = true;
@@ -3460,6 +3499,7 @@ export class Annotator {
     // Font settings back to defaults (#2487).
     this.proportional = false;
     this.fontSize = DEFAULT_FONT_SIZE;
+    this.lineHeightRatio = DEFAULT_LINE_HEIGHT_RATIO;
     // Default to the first host-supplied option (e.g. "Roboto (app sans)") so the
     // picker shows a valid value; fall back to the generic when none supplied.
     this.proportionalFontFamily =
@@ -3491,6 +3531,7 @@ export class Annotator {
         proportional: this.proportional,
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
+        lineHeightRatio: this.lineHeightRatio,
         showParagraphMarks: this.showParagraphMarks,
         paragraphIndent: this.paragraphIndent,
       };
