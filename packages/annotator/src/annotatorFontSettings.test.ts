@@ -118,6 +118,15 @@ describe("proportional-by-default for hosted instances", () => {
     expect(localStorage.getItem("inkvisitor.annotator.settings")).toBeNull();
   });
 
+  test("a same-session monospace choice survives the host re-supplying fonts", () => {
+    const a = mk("abc");
+    a.setFontFamilyOptions(HOST_OPTIONS); // adopted proportional
+    a.setProportional(false); // user picks monospace in this session
+    a.setFontFamilyOptions(HOST_OPTIONS); // e.g. theme change re-applies host fonts
+    expect(a.proportional).toBe(false);
+    expect(a.font).toContain("Roboto Mono");
+  });
+
   test("a stored monospace choice survives the host handing over fonts", () => {
     const a = mk("abc");
     a.setProportional(false); // explicit user choice, persisted

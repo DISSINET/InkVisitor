@@ -1341,6 +1341,9 @@ export class Annotator {
    */
   setProportional(on: boolean, fontFamily?: string) {
     this.proportional = on;
+    // This IS an explicit stored choice — the adoption in setFontFamilyOptions
+    // must not override it when the host re-supplies its fonts (theme change).
+    this.hasStoredProportionalChoice = true;
     if (fontFamily !== undefined) {
       this.proportionalFontFamily = fontFamily;
     }
