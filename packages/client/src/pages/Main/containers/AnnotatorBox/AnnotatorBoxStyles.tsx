@@ -69,18 +69,22 @@ export const StyledInfoText = styled.div`
 
 /**
  * Resource tag and title size to their content when the header has room (no
- * cap — a wide box shows the full labels) and shrink when it doesn't. The
- * resource floor is high because resource identity matters more than the last
- * characters of the title; the Box label is protected separately
- * (shrinkLabel={false} on the Annotator Box), so neither can cover it.
+ * cap — a wide box shows the full labels) and shrink when it doesn't. The Box
+ * label is protected separately (shrinkLabel={false} on the Annotator Box), so
+ * neither can cover it.
+ *
+ * The resource's high flex-shrink makes it yield ahead of the title; flex
+ * would otherwise shrink both proportionally and the min-width would never be
+ * reached. In practice the tag bottoms out at its fixed parts (class chip +
+ * export/unlink buttons + a couple of label chars), above this floor.
  */
 export const StyledAnnotatorHeaderResource = styled.div`
   display: flex;
-  flex-shrink: 1;
-  min-width: 11.5rem;
+  flex-shrink: 3;
+  min-width: 9rem;
 `;
 
-/** The item that yields furthest when the header runs out of room. */
+/** Shrinks last, but yields furthest once the resource has bottomed out. */
 export const StyledAnnotatorHeaderTitle = styled.div`
   display: flex;
   align-items: center;
