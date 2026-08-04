@@ -3,6 +3,7 @@ import Text from "./Text";
 import Viewport from "./Viewport";
 import {
   HIGHLIGHT_HEIGHT_RATIO,
+  HIGHLIGHT_SPAN_END_GAP_PX,
   HighlightMode,
   UNDERLINE_OFFSET_PX,
 } from "./constants";
@@ -104,7 +105,8 @@ export default class Highlighter {
     xStart: number,
     xEnd: number,
     options: DrawingOptions,
-    absLine?: number
+    absLine?: number,
+    isSpanEnd?: boolean
   ) {
     const { charWidth, lineHeight, color: colorOverride, columnToPixelX } =
       options;
@@ -155,7 +157,13 @@ export default class Highlighter {
       // width === 0 is an empty (newline-only) line in the span. Without a floor
       // it paints nothing, so a resized anchor vanishes across runs of newlines.
       // minFillWidth keeps a thin sliver visible, like the SELECT caret (#2885).
-      ctx.fillRect(xStartPx, y, width || options.minFillWidth || width, height);
+      const fillWidth = width || options.minFillWidth || width;
+      // The span's final row stops a hair short of its right edge, so two
+      // same-colour anchors that touch stay visually separate (#2325). The
+      // empty-line sliver is exempt — nothing sits next to it on its line.
+      const gap = HIGHLIGHT_SPAN_END_GAP_PX * this.ratio;
+      const inset = isSpanEnd && width > gap ? gap : 0;
+      ctx.fillRect(xStartPx, y, fillWidth - inset, height);
     } else if (this.hlMode === "select") {
       // A collapsed caret (width === 0) is painted source-over so it stays
       // visible on top of anchor markers / highlights; the "color" blend only
@@ -202,7 +210,14 @@ export default class Highlighter {
         [hStart, hEnd] = [hEnd, hStart];
       }
 
-      const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
+      const rowsToDraw: {
+        rowI: number;
+        start: number;
+        end: number;
+        // The row carrying the span's true right end — the only row that takes
+        // the span-end gap (#2325); soft-wrap rows must stay flush.
+        isSpanEnd?: boolean;
+      }[] = [];
 
       // Use the same line count as the main text renderer to avoid off-by-one
       // issues where the last visible line has no highlight.
@@ -255,9 +270,15 @@ export default class Highlighter {
                 rowI: i,
                 start: hStart.xLine,
                 end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
+                isSpanEnd: hStart.yLine === hEnd.yLine,
               });
             } else if (hEnd.yLine === currY) {
-              rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
+              rowsToDraw.push({
+                rowI: i,
+                start: 0,
+                end: hEnd.xLine,
+                isSpanEnd: true,
+              });
             } else {
               rowsToDraw.push({
                 rowI: i,
@@ -276,7 +297,8 @@ export default class Highlighter {
           row.start,
           row.end,
           drawingOptions,
-          viewport.lineStart + row.rowI
+          viewport.lineStart + row.rowI,
+          row.isSpanEnd
         );
         //this.xLine = row.end
         // this.yLine = row.rowI
