@@ -18,7 +18,7 @@ import {
   ModalFooter,
   Toggle,
 } from "components";
-import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
@@ -35,6 +35,7 @@ import {
   StyledRightsGrid,
   StyledRightsLabel,
   StyledRightsWrap,
+  StyledRoleBadge,
   StyledSectionTitle,
   StyledSectionTitleIcon,
   StyledUserCustomization,
@@ -412,35 +413,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledSectionTitle>
               <StyledRightsGrid>
                 <StyledRightsLabel>Role</StyledRightsLabel>
-                <AttributeButtonGroup
-                  disabled
-                  options={[
-                    {
-                      longValue: userRoleDict[0].label,
-                      shortValue: userRoleDict[0].label,
-                      selected: role === userRoleDict[0].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[1].label,
-                      shortValue: userRoleDict[1].label,
-                      selected: role === userRoleDict[1].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[2].label,
-                      shortValue: userRoleDict[2].label,
-                      selected: role === userRoleDict[2].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[3].label,
-                      shortValue: userRoleDict[3].label,
-                      selected: role === userRoleDict[3].value,
-                      onClick: () => {},
-                    },
-                  ]}
-                />
+                <StyledRightsWrap>
+                  <StyledRoleBadge>
+                    {userRoleDict.find((r) => r.value === role)?.label ?? role}
+                  </StyledRoleBadge>
+                </StyledRightsWrap>
 
                 <StyledRightsLabel>Read</StyledRightsLabel>
                 <StyledRightsWrap>
