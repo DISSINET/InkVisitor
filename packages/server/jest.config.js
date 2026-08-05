@@ -64,6 +64,7 @@ const UNIT_TEST_PATHS = [
   "src/models/document/anchors.audit.test.ts",
   "src/models/document/anchors.tagdiff.test.ts",
   "src/models/document/anchors.test.ts",
+  "src/models/entity/entity.rights.test.ts",
   "src/models/entity/response-search-root-validity.test.ts",
   "src/models/factory.test.ts",
   "src/models/relation/classification.test.ts",
