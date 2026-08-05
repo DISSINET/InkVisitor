@@ -18,6 +18,7 @@ import { FaHome } from "react-icons/fa";
 import { LuScanSearch } from "react-icons/lu";
 import {
   ButtonSize,
+  EntityColors,
   EntityDragItem,
   EntitySingleDropdownItem,
   SuggesterItemToCreate,
@@ -719,6 +720,12 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     return <EntitySuggesterFull {...rest} />;
   }
 
+  // a suggester bound to a single class can say which one before it is opened;
+  // one offering a choice has no class to stand for
+  const soleCategory = rest.categoryTypes?.length === 1 ? rest.categoryTypes[0] : undefined;
+  const minifiedColor =
+    (soleCategory && EntityColors[soleCategory]?.color) || ("primary" as const);
+
   return (
     <div
       ref={containerRef}
@@ -737,7 +744,7 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
         <Button
           tooltipLabel="Open suggester"
           icon={<LuScanSearch />}
-          color="primary"
+          color={minifiedColor}
           shape="rounded-lg"
           size={ButtonSize.Medium}
           // inverted
