@@ -609,6 +609,8 @@ const EntitySuggesterFull: React.FC<
 /**
  * Wrapper that can defer mounting the heavy suggester until user interaction.
  * compactUntilHover: when true, show a small button; mount full suggester on hover/click.
+ * Once mounted it stays mounted while it holds focus or typed text, so the
+ * pointer can leave to reach the suggestion list without collapsing it.
  */
 export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHover?: boolean }> = ({
   compactUntilHover = false,
@@ -618,6 +620,16 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasTypedText, setHasTypedText] = useState(false);
+  // the delayed minify closes over the state of the render that scheduled it,
+  // so it reads these refs for the values current when it fires
+  const keepMountedRef = useRef(false);
+  const isHoveredRef = useRef(false);
+
+  useEffect(() => {
+    keepMountedRef.current = isFocused || hasTypedText;
+  }, [isFocused, hasTypedText]);
 
   const isDropValid = (item: EntityDragItem): boolean => {
     const {
@@ -672,6 +684,30 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     }
   };
 
+  /** Collapse back to the button unless the suggester is in use when the delay expires */
+  const scheduleMinify = () => {
+    clearHideTimeout();
+    hideTimeoutRef.current = setTimeout(() => {
+      hideTimeoutRef.current = null;
+      if (!keepMountedRef.current && !isHoveredRef.current) {
+        setIsMinified(true);
+      }
+    }, 1000);
+  };
+
+  const handleFocusChange = (focused: boolean) => {
+    setIsFocused(focused);
+    rest.onFocusChange?.(focused);
+    if (!focused) {
+      scheduleMinify();
+    }
+  };
+
+  const handleTyped = (typed: string) => {
+    setHasTypedText(typed.length > 0);
+    rest.onTyped?.(typed);
+  };
+
   useEffect(() => {
     if (containerRef.current) {
       drop(containerRef);
@@ -687,14 +723,13 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     <div
       ref={containerRef}
       onMouseEnter={() => {
+        isHoveredRef.current = true;
         clearHideTimeout();
         setIsMinified(false);
       }}
       onMouseLeave={() => {
-        clearHideTimeout();
-        hideTimeoutRef.current = setTimeout(() => {
-          setIsMinified(true);
-        }, 1000);
+        isHoveredRef.current = false;
+        scheduleMinify();
       }}
       style={{ display: "inline-flex", alignItems: "center" }}
     >
@@ -711,6 +746,8 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       ) : (
         <EntitySuggesterFull
           {...rest}
+          onFocusChange={handleFocusChange}
+          onTyped={handleTyped}
           externalDroppedItem={pendingDropItem}
           onConsumeExternalDrop={() => setPendingDropItem(null)}
         />
