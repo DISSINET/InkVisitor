@@ -357,6 +357,12 @@ class Territory extends Entity implements ITerritoryModel {
       return true;
     }
 
+    // templates live outside the tree, so no tree right exists to derive; they
+    // are readable by everyone, like the other template classes
+    if (this.isTemplate) {
+      return true;
+    }
+
     return !!treeCache.getRightForTerritory(this.id, user.rights);
   }
 
@@ -366,15 +372,13 @@ class Territory extends Entity implements ITerritoryModel {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
-    }
-
-    // templates live outside the tree, so no tree right exists to derive; any
-    // editor has access to territory templates
-    if (this.isTemplate) {
-      return true;
     }
 
     const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
@@ -394,15 +398,13 @@ class Territory extends Entity implements ITerritoryModel {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
-    }
-
-    // templates live outside the tree, so no tree right exists to derive; any
-    // editor has access to territory templates
-    if (this.isTemplate) {
-      return true;
     }
 
     // in case of create - no id provided yet
@@ -435,8 +437,7 @@ class Territory extends Entity implements ITerritoryModel {
       return true;
     }
 
-    // templates are shared building blocks; any editor may delete them
-    if (user.role === UserEnums.Role.Editor && this.isTemplate) {
+    if (this.isTemplateWritableByUser(user)) {
       return true;
     }
 

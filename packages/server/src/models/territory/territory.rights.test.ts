@@ -36,7 +36,16 @@ describe("Territory template rights", () => {
   it("viewer cannot edit a template territory", () => {
     expect(tmpl.canBeEditedByUser(viewer)).toBe(false);
   });
+  it("viewer cannot delete a template territory", () => {
+    expect(tmpl.canBeDeletedByUser(viewer)).toBe(false);
+  });
   it("admin can edit a template territory", () => {
     expect(tmpl.canBeEditedByUser(admin)).toBe(true);
+  });
+  it("editor without any tree right can view a template territory", () => {
+    expect(tmpl.canBeViewedByUser(editor)).toBe(true);
+  });
+  it("viewer can view a template territory", () => {
+    expect(tmpl.canBeViewedByUser(viewer)).toBe(true);
   });
 });

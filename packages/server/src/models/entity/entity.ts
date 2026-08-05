@@ -207,6 +207,16 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   /**
+   * Templates sit outside the territory tree and carry no document, so the
+   * scoping rules of the concrete Entity classes have nothing to derive an
+   * answer from. Any user who may write at all may create, edit and delete a
+   * template of any class.
+   */
+  protected isTemplateWritableByUser(user: User): boolean {
+    return !!this.isTemplate && user.role !== UserEnums.Role.Viewer;
+  }
+
+  /**
    * getUserRoleMode returns derived user role mode for this instance.
    * By default this method counts with default right to view - helps with
    * performance.

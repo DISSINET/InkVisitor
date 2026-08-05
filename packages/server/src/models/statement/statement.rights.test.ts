@@ -29,7 +29,13 @@ describe("Statement template rights", () => {
   it("editor can delete a template statement", () => {
     expect(tmpl.canBeDeletedByUser(editor)).toBe(true);
   });
+  it("editor can create a template statement", () => {
+    expect(tmpl.canBeCreatedByUser(editor)).toBe(true);
+  });
   it("viewer cannot edit a template statement", () => {
     expect(tmpl.canBeEditedByUser(viewer)).toBe(false);
+  });
+  it("viewer cannot delete a template statement", () => {
+    expect(tmpl.canBeDeletedByUser(viewer)).toBe(false);
   });
 });

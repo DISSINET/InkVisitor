@@ -260,14 +260,13 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
-    }
-
-    // templates are not bound to a territory; any editor may edit them
-    if (this.isTemplate) {
-      return true;
     }
 
     // editors should be able to access META statements
@@ -332,14 +331,13 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
-    }
-
-    // templates are not bound to a territory; any editor may delete them
-    if (this.isTemplate) {
-      return true;
     }
 
     if (this.data.territory) {
