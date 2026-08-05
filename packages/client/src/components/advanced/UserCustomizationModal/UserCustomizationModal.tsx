@@ -144,6 +144,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const { role, rights } = user;
   const { name, email, defaultLanguage, defaultStatementLanguage } = data;
 
+  // A Viewer never creates entities, edits statements or deletes props, so the
+  // options read only on those paths are left out. Working languages stays - it
+  // orders the language dropdown in the search boxes, which a Viewer does use.
+  const isViewer = role === UserEnums.Role.Viewer;
+
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
     [rights],
@@ -287,39 +292,43 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledSectionTitle>
 
               <StyledFieldGrid>
-                <StyledFieldLabel>Default label language</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Dropdown.Single.Basic
-                    width="full"
-                    value={defaultLanguage}
-                    onChange={(newValue) => handleChange("defaultLanguage", newValue)}
-                    options={orderedLanguageDict}
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Default language used for labeling entities."
-                  />
-                </StyledFieldHelp>
+                {!isViewer && (
+                  <>
+                    <StyledFieldLabel>Default label language</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Dropdown.Single.Basic
+                        width="full"
+                        value={defaultLanguage}
+                        onChange={(newValue) => handleChange("defaultLanguage", newValue)}
+                        options={orderedLanguageDict}
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp>
+                      <IconWithTooltip
+                        color="success"
+                        icon={<FaQuestion />}
+                        tooltipLabel="Default language used for labeling entities."
+                      />
+                    </StyledFieldHelp>
 
-                <StyledFieldLabel>Default source language</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Dropdown.Single.Basic
-                    width="full"
-                    value={defaultStatementLanguage}
-                    onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
-                    options={orderedLanguageDict}
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Dominant language of the source texts being coded into statements"
-                  />
-                </StyledFieldHelp>
+                    <StyledFieldLabel>Default source language</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Dropdown.Single.Basic
+                        width="full"
+                        value={defaultStatementLanguage}
+                        onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
+                        options={orderedLanguageDict}
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp>
+                      <IconWithTooltip
+                        color="success"
+                        icon={<FaQuestion />}
+                        tooltipLabel="Dominant language of the source texts being coded into statements"
+                      />
+                    </StyledFieldHelp>
+                  </>
+                )}
 
                 <StyledFieldLabel>Working languages</StyledFieldLabel>
                 <StyledFieldControl>
@@ -373,21 +382,25 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 </StyledFieldControl>
                 <StyledFieldHelp />
 
-                <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Toggle
-                    value={data.askBeforePropDelete}
-                    onChange={(value) => handleChange("askBeforePropDelete", value)}
-                    // hideLabels
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Show a confirmation before deleting a metaprop that has child properties, since they would be deleted too."
-                  />
-                </StyledFieldHelp>
+                {!isViewer && (
+                  <>
+                    <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Toggle
+                        value={data.askBeforePropDelete}
+                        onChange={(value) => handleChange("askBeforePropDelete", value)}
+                        // hideLabels
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp>
+                      <IconWithTooltip
+                        color="success"
+                        icon={<FaQuestion />}
+                        tooltipLabel="Show a confirmation before deleting a metaprop that has child properties, since they would be deleted too."
+                      />
+                    </StyledFieldHelp>
+                  </>
+                )}
               </StyledFieldGrid>
             </StyledUserCustomizationSection>
             <StyledUserCustomizationSection>
