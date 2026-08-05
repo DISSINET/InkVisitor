@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { MdOutlineCheckBox, MdOutlineCheckBoxOutlineBlank } from "react-icons/md";
 
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import {
@@ -11,6 +10,7 @@ import {
 import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
+import { Checkbox } from "components";
 import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanced";
 import { deleteProp, deleteRef } from "constructors";
 import { useOrderedLanguageDict } from "hooks/react-query";
@@ -82,10 +82,7 @@ const EditableCellValue: React.FC<{
   }
 
   return (
-    <StyledEditableCellValue
-      data-no-row-click="true"
-      onClick={() => setEditing(true)}
-    >
+    <StyledEditableCellValue data-no-row-click="true" onClick={() => setEditing(true)}>
       {value || " "}
     </StyledEditableCellValue>
   );
@@ -137,7 +134,7 @@ interface ExplorerTableRowProps {
     entity: IEntity,
     columnId: string,
     newEntity: IEntity,
-    relationType?: RelationEnums.Type,
+    relationType?: RelationEnums.Type
   ) => void;
 
   onRowSelect: (rowId: number, isWithShift?: boolean) => void;
@@ -161,12 +158,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   isLastClicked = false,
   onOpenEntityInDetail,
 }) => {
-  const handleCheckboxClick = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onRowSelect(rowId, (e as React.MouseEvent).shiftKey);
+  const handleCheckboxChange = React.useCallback(
+    (value: boolean, e?: React.MouseEvent) => {
+      onRowSelect(rowId, e?.shiftKey);
     },
-    [onRowSelect, rowId],
+    [onRowSelect, rowId]
   );
 
   const handleRowClick = React.useCallback(
@@ -179,7 +175,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
       onRowClick(rowId);
     },
-    [onRowClick, rowId],
+    [onRowClick, rowId]
   );
 
   const queryClient = useQueryClient();
@@ -205,7 +201,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         onOpenEntityInDetail?.(entity.id);
       }
     },
-    [onOpenEntityInDetail],
+    [onOpenEntityInDetail]
   );
 
   const relationUpdateMutation = useMutation({
@@ -307,7 +303,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         } else {
           // OTHER RELATIONS
           const relation = relations.data.find((relation) =>
-            relation.entityIds.includes(entityToRemove.id),
+            relation.entityIds.includes(entityToRemove.id)
           );
           const relationId = relation?.id;
           if (relationId) {
@@ -316,14 +312,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         }
       }
     },
-    [columns, updateEntityMutation],
+    [columns, updateEntityMutation]
   );
 
   const renderCellValue = React.useCallback(
     (
       cellValue: IEntity | number | string | IUser,
       recordEntity: IEntity,
-      column: Explore.IExploreColumn,
+      column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (typeof (cellValue as IEntity)?.class !== "undefined") {
         return (
@@ -343,9 +339,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         );
       } else if (typeof (cellValue as IUser)?.email !== "undefined") {
         // is type IUser[]
-        return (
-          <UserTag userId={(cellValue as IUser).id} />
-        );
+        return <UserTag userId={(cellValue as IUser).id} />;
       } else {
         if (column.editable) {
           if (column.type === Explore.EExploreColumnType.ELI) {
@@ -453,14 +447,14 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }
     },
-    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation, orderedLanguageDict],
+    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation, orderedLanguageDict]
   );
 
   const renderCell = React.useCallback(
     (
       recordEntity: IEntity,
       cellData: IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[],
-      column: Explore.IExploreColumn,
+      column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
         return (
@@ -485,7 +479,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue],
+    [renderCellValue]
   );
 
   const renderEditSection = React.useCallback(
@@ -536,7 +530,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           const { showSuggester, categoryTypes } = getRelationSuggesterConfig(
             params.relationType,
             rowEntity.class,
-            { hasExistingRelation },
+            { hasExistingRelation }
           );
           if (!showSuggester) {
             return null;
@@ -555,14 +549,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
       return null;
     },
-    [columnData, handleEditColumn],
+    [columnData, handleEditColumn]
   );
 
   return (
-    <StyledRowInner
-      className="qt-row-inner"
-      onClick={handleRowClick}
-    >
+    <StyledRowInner className="qt-row-inner" onClick={handleRowClick}>
       <div
         className="qt-col"
         style={{
@@ -571,9 +562,15 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           maxWidth: WIDTH_COLUMN_FIRST,
         }}
       >
-        <StyledCheckboxWrapper onClick={handleCheckboxClick}>
+        <StyledCheckboxWrapper>
           {isLastClicked && <StyledFocusedCircle />}
-          {isSelected ? <MdOutlineCheckBox /> : <MdOutlineCheckBoxOutlineBlank />}
+          <Checkbox
+            value={isSelected}
+            color="primary"
+            noFill
+            size={15}
+            onChangeFn={handleCheckboxChange}
+          />
         </StyledCheckboxWrapper>
 
         <StyledEntityTagWrap data-no-row-click="true">
@@ -612,7 +609,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
 function areRowsEqual(
   prev: Readonly<React.ComponentProps<typeof ExplorerTableRow>>,
-  next: Readonly<React.ComponentProps<typeof ExplorerTableRow>>,
+  next: Readonly<React.ComponentProps<typeof ExplorerTableRow>>
 ) {
   if (prev.rowId !== next.rowId) return false;
   const prevEntityId = prev.rowItem?.entity.id;
