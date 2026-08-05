@@ -3,7 +3,7 @@ import Text from "./Text";
 import Viewport from "./Viewport";
 import {
   HIGHLIGHT_HEIGHT_RATIO,
-  HIGHLIGHT_SPAN_END_GAP_PX,
+  HIGHLIGHT_SPAN_EDGE_GAP_PX,
   HighlightMode,
   UNDERLINE_OFFSET_PX,
 } from "./constants";
@@ -28,6 +28,16 @@ export const defaultStyle: CursorStyle = {
 
 // Relative coordinates point to position relative to viewport - first line is topmost rendered line
 export interface IRelativeCoordinates extends IAbsCoordinates {}
+
+/**
+ * Which outer edges of a span a drawn row carries (#2325). A row of a wrapped
+ * span holds the start on its first line and the end on its last; the lines
+ * between hold neither, and their edges are soft wraps rather than span bounds.
+ */
+export interface SpanEdges {
+  start?: boolean;
+  end?: boolean;
+}
 
 /**
  * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
@@ -106,7 +116,7 @@ export default class Highlighter {
     xEnd: number,
     options: DrawingOptions,
     absLine?: number,
-    isSpanEnd?: boolean
+    spanEdges?: SpanEdges
   ) {
     const { charWidth, lineHeight, color: colorOverride, columnToPixelX } =
       options;
@@ -141,6 +151,19 @@ export default class Highlighter {
     ctx.fillStyle = colorOverride || this.style.color;
     ctx.globalAlpha = this.style.opacity;
 
+    // An entity span stops a hair short of each of its own outer edges, so two
+    // same-colour anchors that touch stay visually separate (#2325). Only the
+    // anchor visuals (background fill, underline) take the gaps; the selection
+    // and the focus veil are single spans with nothing to be told apart from.
+    // A span narrower than the gaps it would give up keeps its full width — the
+    // insets may never meet and invert the rect.
+    const edgeGap = HIGHLIGHT_SPAN_EDGE_GAP_PX * this.ratio;
+    const wantStart = spanEdges?.start ? edgeGap : 0;
+    const wantEnd = spanEdges?.end ? edgeGap : 0;
+    const insetFits = width > wantStart + wantEnd;
+    const startInset = insetFits ? wantStart : 0;
+    const endInset = insetFits ? wantEnd : 0;
+
     if (this.hlMode === "focus") {
       // source-over (not xor): xor over opaque text just fades by alpha and
       // ignores the fill colour, so the veil could never be tinted. source-over
@@ -151,19 +174,25 @@ export default class Highlighter {
       ctx.globalCompositeOperation = "multiply";
       const offsetPx = UNDERLINE_OFFSET_PX * this.ratio;
       const underlineY = (relLine + 1) * lineHeight - height - offsetPx;
-      ctx.fillRect(xStartPx, underlineY, width, height);
+      ctx.fillRect(
+        xStartPx + startInset,
+        underlineY,
+        width - startInset - endInset,
+        height
+      );
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
       // width === 0 is an empty (newline-only) line in the span. Without a floor
       // it paints nothing, so a resized anchor vanishes across runs of newlines.
       // minFillWidth keeps a thin sliver visible, like the SELECT caret (#2885).
+      // The sliver takes no edge gaps — nothing sits next to it on its line.
       const fillWidth = width || options.minFillWidth || width;
-      // The span's final row stops a hair short of its right edge, so two
-      // same-colour anchors that touch stay visually separate (#2325). The
-      // empty-line sliver is exempt — nothing sits next to it on its line.
-      const gap = HIGHLIGHT_SPAN_END_GAP_PX * this.ratio;
-      const inset = isSpanEnd && width > gap ? gap : 0;
-      ctx.fillRect(xStartPx, y, fillWidth - inset, height);
+      ctx.fillRect(
+        xStartPx + startInset,
+        y,
+        fillWidth - startInset - endInset,
+        height
+      );
     } else if (this.hlMode === "select") {
       // A collapsed caret (width === 0) is painted source-over so it stays
       // visible on top of anchor markers / highlights; the "color" blend only
@@ -214,9 +243,9 @@ export default class Highlighter {
         rowI: number;
         start: number;
         end: number;
-        // The row carrying the span's true right end — the only row that takes
-        // the span-end gap (#2325); soft-wrap rows must stay flush.
-        isSpanEnd?: boolean;
+        // Which of the span's outer edges this row carries (#2325); the edges a
+        // row does not carry are soft wraps and must stay flush.
+        edges?: SpanEdges;
       }[] = [];
 
       // Use the same line count as the main text renderer to avoid off-by-one
@@ -270,14 +299,14 @@ export default class Highlighter {
                 rowI: i,
                 start: hStart.xLine,
                 end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
-                isSpanEnd: hStart.yLine === hEnd.yLine,
+                edges: { start: true, end: hStart.yLine === hEnd.yLine },
               });
             } else if (hEnd.yLine === currY) {
               rowsToDraw.push({
                 rowI: i,
                 start: 0,
                 end: hEnd.xLine,
-                isSpanEnd: true,
+                edges: { end: true },
               });
             } else {
               rowsToDraw.push({
@@ -298,7 +327,7 @@ export default class Highlighter {
           row.end,
           drawingOptions,
           viewport.lineStart + row.rowI,
-          row.isSpanEnd
+          row.edges
         );
         //this.xLine = row.end
         // this.yLine = row.rowI

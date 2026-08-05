@@ -153,13 +153,14 @@ export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 export const UNDERLINE_OFFSET_PX = 2;
 
 /**
- * #2325 — a BACKGROUND span leaves this many CSS px unpainted at its right end
- * (scaled by the device pixel ratio at draw time). Two same-colour anchors that
- * touch with no whitespace between them would otherwise fuse into one block;
- * the unpainted sliver lets the layer underneath show through as a separator.
- * Applied only at the span's true end, never at soft-wrap row edges.
+ * #2325 — an entity span (BACKGROUND fill, UNDERLINE) leaves this many CSS px
+ * unpainted at each of its outer edges, scaled by the device pixel ratio at
+ * draw time. Two same-colour anchors can meet with no whitespace character
+ * between them; each giving up its own edge parts them by twice this value, so
+ * the layer underneath shows through as a separator and the pair reads as two
+ * anchors. Applied only at a span's true start/end, never at soft-wrap edges.
  */
-export const HIGHLIGHT_SPAN_END_GAP_PX = 1;
+export const HIGHLIGHT_SPAN_EDGE_GAP_PX = 1;
 
 /** Fraction of one line height scrolled per frame while the pointer is outside the canvas (smooth autoscroll). */
 export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
