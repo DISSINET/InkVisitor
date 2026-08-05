@@ -3,7 +3,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Loader, Submit } from "components";
+import { Box, Button, ButtonGroup, Loader, RoleBadge, Submit } from "components";
 import { AttributeButtonGroup } from "components/advanced";
 import { useResourcesWithDocumentsQuery, useUsersGetMoreQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +17,7 @@ import { UserListIdentityCell } from "./UserListIdentityCell/UserListIdentityCel
 import {
   ROW_FLASH_CLEAR_AFTER_MS,
   StyledEmptyCell,
+  StyledRoleBadgeWrap,
   StyledTable,
   StyledTableWrapper,
   StyledTerritoryColumnAllLabel,
@@ -28,7 +29,12 @@ import { UserListRightsCell } from "./UserListRightsCell/UserListRightsCell";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListToolbar } from "./UserListToolbar/UserListToolbar";
 import { UsersUtils } from "./UsersUtils";
-import { emptyUserListFilters, filterUsers, UserListFilters } from "./userListFilter";
+import {
+  emptyUserListFilters,
+  filterUsers,
+  hasActiveUserListFilters,
+  UserListFilters,
+} from "./userListFilter";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -75,7 +81,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
-  const { data: users, isFetching } = useUsersGetMoreQuery();
+  const { data: users, isFetching, isLoading } = useUsersGetMoreQuery();
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
@@ -211,15 +217,20 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         id: "Role",
         Cell: ({ row }: CellType) => {
           const { id, role } = row.original;
-          // owner is not an assignable role: an owner row offers only owner,
-          // every other row offers the roles below it in userRoleDict
-          const roleOptions =
-            role === UserEnums.Role.Owner ? userRoleDict.slice(0, 1) : userRoleDict.slice(1);
+
+          // an owner keeps the role for good, and nobody demotes themselves, so
+          // those rows state the role rather than offering a control
+          if (id === getStoredUserId() || role === UserEnums.Role.Owner) {
+            return (
+              <StyledRoleBadgeWrap>
+                <RoleBadge role={role} />
+              </StyledRoleBadgeWrap>
+            );
+          }
 
           return (
             <AttributeButtonGroup
-              disabled={id === getStoredUserId() || role === UserEnums.Role.Owner}
-              options={roleOptions.map((roleOption) => ({
+              options={userRoleDict.slice(1).map((roleOption) => ({
                 longValue: roleOption.label,
                 shortValue: roleOption.label,
                 selected: role === roleOption.value,
@@ -430,6 +441,13 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     [canVerifyManually, scheduleRowFlash, resourcesWithDocuments, localUsers],
   );
 
+  // an empty body during the first fetch is not yet an empty result
+  const emptyBodyMessage = isLoading
+    ? "loading users..."
+    : hasActiveUserListFilters(filters)
+      ? "no users match the filter"
+      : "no users";
+
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } =
     useTable({
       columns,
@@ -438,14 +456,20 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     });
 
   return (
-    <>
-      <UserListToolbar
-        filters={filters}
-        onFiltersChange={setFilters}
-        filteredCount={filteredUsers.length}
-        totalCount={localUsers.length}
-      />
-
+    <Box
+      label="Users"
+      disableHeaderClick
+      disableScroll
+      headerComponent={
+        <UserListToolbar
+          filters={filters}
+          onFiltersChange={setFilters}
+          filteredCount={filteredUsers.length}
+          totalCount={localUsers.length}
+          actions={<UsersUtils users={localUsers} />}
+        />
+      }
+    >
       <StyledTableWrapper>
         <StyledTable {...getTableProps()}>
           <StyledTHead>
@@ -460,32 +484,29 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             ))}
           </StyledTHead>
           <tbody {...getTableBodyProps()}>
-            {rows.length === 0 ? (
+            {rows.map((row: Row<IResponseUser>, i: number) => {
+              prepareRow(row);
+              return (
+                <UserListTableRow
+                  index={i}
+                  row={row}
+                  flash={rowFlash?.userId === row.original.id ? rowFlash.kind : false}
+                  key={row.id}
+                />
+              );
+            })}
+
+            {rows.length === 0 && (
               <tr>
                 <StyledEmptyCell colSpan={visibleColumns.length}>
-                  no users match the filter
+                  {emptyBodyMessage}
                 </StyledEmptyCell>
               </tr>
-            ) : (
-              rows.map((row: Row<IResponseUser>, i: number) => {
-                prepareRow(row);
-                return (
-                  <UserListTableRow
-                    index={i}
-                    row={row}
-                    flash={rowFlash?.userId === row.original.id ? rowFlash.kind : false}
-                    key={row.id}
-                  />
-                );
-              })
             )}
           </tbody>
         </StyledTable>
         <Loader show={isFetching} />
       </StyledTableWrapper>
-
-      {/* NEW USER | TEST EMAIL */}
-      <UsersUtils users={localUsers} />
 
       <Submit
         title={`Deleting user ${removingUser ? removingUser.name : ""}`}
@@ -497,6 +518,6 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         }}
         loading={removeUserMutation.isPending}
       />
-    </>
+    </Box>
   );
 });

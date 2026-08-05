@@ -1,8 +1,23 @@
 import { IResponseUser } from "@inkvisitor/shared/types";
 import React from "react";
 import { Row } from "react-table";
-import { StyledTd, StyledTr, UserListRowFlash } from "../UserListStyles";
+import {
+  StyledTd,
+  StyledTr,
+  UserListRoleAccent,
+  UserListRowFlash,
+} from "../UserListStyles";
 import { UserEnums } from "@inkvisitor/shared/enums";
+
+const roleAccent = (role: UserEnums.Role): UserListRoleAccent => {
+  if (role === UserEnums.Role.Owner) {
+    return "owner";
+  }
+  if (role === UserEnums.Role.Admin) {
+    return "admin";
+  }
+  return false;
+};
 
 interface UserListTableRow {
   row: Row<IResponseUser>;
@@ -16,16 +31,16 @@ export const UserListTableRow: React.FC<UserListTableRow> = ({
   flash = false,
 }) => {
   return (
-    <StyledTr
-      {...row.getRowProps()}
-      key={index}
-      $isOwner={row.original.role === UserEnums.Role.Owner}
-      $isAdmin={row.original.role === UserEnums.Role.Admin}
-      $isOdd={Boolean(index % 2)}
-    >
+    <StyledTr {...row.getRowProps()} key={index} $isOdd={Boolean(index % 2)}>
       {row.cells.map((cell, key) => {
         return (
-          <StyledTd {...cell.getCellProps()} key={key} $flash={flash}>
+          <StyledTd
+            {...cell.getCellProps()}
+            key={key}
+            $flash={flash}
+            $roleAccent={roleAccent(row.original.role)}
+            $isInactive={!row.original.active}
+          >
             {cell.render("Cell")}
           </StyledTd>
         );

@@ -736,12 +736,11 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       {isMinified ? (
         <Button
           tooltipLabel="Open suggester"
-          icon={<LuScanSearch color="black" />}
-          color="gray"
+          icon={<LuScanSearch />}
+          color="primary"
           shape="rounded-lg"
           size={ButtonSize.Medium}
           // inverted
-          noBorder
         />
       ) : (
         <EntitySuggesterFull

@@ -1,4 +1,4 @@
-import { languageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { languageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
@@ -16,6 +16,7 @@ import {
   Modal,
   ModalContent,
   ModalFooter,
+  RoleBadge,
   Toggle,
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
@@ -35,7 +36,6 @@ import {
   StyledRightsGrid,
   StyledRightsLabel,
   StyledRightsWrap,
-  StyledRoleBadge,
   StyledSectionTitle,
   StyledSectionTitleIcon,
   StyledUserCustomization,
@@ -414,9 +414,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <StyledRightsGrid>
                 <StyledRightsLabel>Role</StyledRightsLabel>
                 <StyledRightsWrap>
-                  <StyledRoleBadge>
-                    {userRoleDict.find((r) => r.value === role)?.label ?? role}
-                  </StyledRoleBadge>
+                  <RoleBadge role={role} />
                 </StyledRightsWrap>
 
                 <StyledRightsLabel>Read</StyledRightsLabel>

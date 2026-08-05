@@ -7,6 +7,7 @@ import { IcoClose, IcoSearch } from "Theme/icons";
 import { ButtonSize } from "types";
 import {
   StyledToolbar,
+  StyledToolbarActions,
   StyledToolbarClear,
   StyledToolbarCount,
   StyledToolbarGroup,
@@ -22,6 +23,8 @@ interface UserListToolbar {
   onFiltersChange: (filters: UserListFilters) => void;
   filteredCount: number;
   totalCount: number;
+  /** page actions, kept in the centred cluster rather than at the box edge */
+  actions?: React.ReactNode;
 }
 
 export const UserListToolbar: React.FC<UserListToolbar> = ({
@@ -29,6 +32,7 @@ export const UserListToolbar: React.FC<UserListToolbar> = ({
   onFiltersChange,
   filteredCount,
   totalCount,
+  actions,
 }) => {
   // owner is skipped: at most one user holds it and it is never assignable
   const roleOptions: { value: UserEnums.Role | null; label: string }[] = [
@@ -81,6 +85,8 @@ export const UserListToolbar: React.FC<UserListToolbar> = ({
             />
           )}
         </StyledToolbarClear>
+
+        {actions && <StyledToolbarActions>{actions}</StyledToolbarActions>}
       </StyledToolbarGroup>
     </StyledToolbar>
   );

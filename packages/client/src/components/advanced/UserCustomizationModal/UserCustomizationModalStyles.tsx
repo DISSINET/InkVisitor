@@ -103,16 +103,3 @@ export const StyledRightsLabel = styled.div`
   color: ${({ theme }) => theme.color["gray"][700]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-
-// the role is assigned elsewhere (Manage Users), so it reads as a value here -
-// no border or affordance that would suggest it can be changed
-export const StyledRoleBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[3]}`};
-  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
-  background-color: ${({ theme }) => theme.color["gray"][200]};
-  color: ${({ theme }) => theme.color["gray"][800]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  line-height: 1.4;
-`;

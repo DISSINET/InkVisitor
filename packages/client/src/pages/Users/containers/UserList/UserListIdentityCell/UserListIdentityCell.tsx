@@ -36,7 +36,7 @@ export const UserListIdentityCell: React.FC<UserListIdentityCell> = ({
   userMutation,
 }) => {
   const [editing, setEditing] = useState<"name" | "email" | null>(null);
-  const { name, email, role, active, verified } = user;
+  const { name, email, role, verified } = user;
 
   // the owner's name and email are theirs alone to change; an admin manages
   // everything else about the account
@@ -69,7 +69,7 @@ export const UserListIdentityCell: React.FC<UserListIdentityCell> = ({
   );
 
   return (
-    <StyledUserNameColumn $active={active} $verified={verified}>
+    <StyledUserNameColumn $verified={verified}>
       <StyledUserNameColumnIcon>
         <UserListIcon
           icon={
