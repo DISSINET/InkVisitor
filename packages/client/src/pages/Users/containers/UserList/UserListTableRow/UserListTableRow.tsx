@@ -22,11 +22,10 @@ export const UserListTableRow: React.FC<UserListTableRow> = ({
       $isOwner={row.original.role === UserEnums.Role.Owner}
       $isAdmin={row.original.role === UserEnums.Role.Admin}
       $isOdd={Boolean(index % 2)}
-      $flash={flash}
     >
       {row.cells.map((cell, key) => {
         return (
-          <StyledTd {...cell.getCellProps()} key={key}>
+          <StyledTd {...cell.getCellProps()} key={key} $flash={flash}>
             {cell.render("Cell")}
           </StyledTd>
         );
