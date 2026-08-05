@@ -11,10 +11,15 @@ interface EntityDetailMetaPropsTable {
   entities: { [key: string]: IEntity };
   useCases: IResponseUsedInMetaProp[];
   perPage?: number;
+  equalColumnsSize?: boolean;
 }
-export const EntityDetailMetaPropsTable: React.FC<
-  EntityDetailMetaPropsTable
-> = ({ title, entities, useCases, perPage = 5 }) => {
+export const EntityDetailMetaPropsTable: React.FC<EntityDetailMetaPropsTable> = ({
+  title,
+  entities,
+  useCases,
+  perPage = 5,
+  equalColumnsSize = false,
+}) => {
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
   const columns = useMemo<Column<IResponseUsedInMetaProp>[]>(
@@ -47,7 +52,7 @@ export const EntityDetailMetaPropsTable: React.FC<
         },
       },
     ],
-    [entities]
+    [entities],
   );
 
   return (
@@ -57,6 +62,7 @@ export const EntityDetailMetaPropsTable: React.FC<
         data={data}
         entityTitle={title}
         perPage={perPage}
+        equalColumns={equalColumnsSize}
       />
     </>
   );

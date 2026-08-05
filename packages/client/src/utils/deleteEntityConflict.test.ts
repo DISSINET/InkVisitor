@@ -62,6 +62,39 @@ describe("getInvalidDeleteErrorData", () => {
     expect(getInvalidDeleteErrorData(undefined)).toBeNull();
     expect(getInvalidDeleteErrorData("oops")).toBeNull();
   });
+
+  it("preserves the reference discriminant", () => {
+    const error = {
+      error: "InvalidDeleteError",
+      data: { type: "reference", ids: ["e-1"] } as IInvalidDeleteErrorData,
+    };
+    expect(getInvalidDeleteErrorData(error)).toEqual({
+      type: "reference",
+      ids: ["e-1"],
+    });
+  });
+
+  it("preserves the attachedDocument discriminant", () => {
+    const error = {
+      error: "InvalidDeleteError",
+      data: { type: "attachedDocument", ids: ["doc-1"] } as IInvalidDeleteErrorData,
+    };
+    expect(getInvalidDeleteErrorData(error)).toEqual({
+      type: "attachedDocument",
+      ids: ["doc-1"],
+    });
+  });
+
+  it("collapses an unknown discriminant to entity", () => {
+    const error = {
+      error: "InvalidDeleteError",
+      data: { type: "banana", ids: ["e-1"] },
+    };
+    expect(getInvalidDeleteErrorData(error)).toEqual({
+      type: "entity",
+      ids: ["e-1"],
+    });
+  });
 });
 
 describe("resolveDeleteEntityConflict", () => {
@@ -103,6 +136,30 @@ describe("resolveDeleteEntityConflict", () => {
     );
     expect(result.message).toContain("3 documents");
   });
+
+  it("opens the entity being deleted for a reference conflict", () => {
+    const result = resolveDeleteEntityConflict(
+      { type: "reference", ids: ["ref-origin-1", "ref-origin-2"] },
+      deletedEntityId
+    );
+    // its own detail's "Used in" reference tables list every blocker
+    expect(result.targetId).toBe(deletedEntityId);
+    expect(result.message.toLowerCase()).toContain("reference");
+  });
+
+  it("uses singular/plural wording for reference conflicts", () => {
+    expect(
+      resolveDeleteEntityConflict({ type: "reference", ids: ["o1"] }, deletedEntityId)
+        .message
+    ).toContain("1 entity");
+    expect(
+      resolveDeleteEntityConflict(
+        { type: "reference", ids: ["o1", "o2"] },
+        deletedEntityId
+      ).message
+    ).toContain("2 entities");
+  });
+
 });
 
 describe("usedInSectionId", () => {
@@ -187,6 +244,17 @@ describe("handleDeleteEntityError", () => {
     // document conflict opens the entity being deleted, not the document id
     expect(appendDetailId).toHaveBeenCalledWith("entity-1");
     expect(scrollTo).toHaveBeenCalled();
+  });
+
+  it("declines an attachedDocument conflict so the api layer's plain error toast handles it", () => {
+    const handled = handleDeleteEntityError(
+      { error: "InvalidDeleteError", data: { type: "attachedDocument", ids: ["doc-1"] } },
+      "entity-1",
+      vi.fn()
+    );
+    expect(handled).toBe(false);
+    expect(toast.info).not.toHaveBeenCalled();
+    expect(toast.warning).not.toHaveBeenCalled();
   });
 
   it("on click opens the first conflicting entity for an entity conflict (warning variant)", () => {

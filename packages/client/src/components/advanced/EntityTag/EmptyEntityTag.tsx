@@ -25,10 +25,9 @@ export const EmptyEntityTag: React.FC<EmptyEntityTag> = ({ label }) => {
           </StyledEntityTag>
         }
         labelComponent={
-          <StyledLabelWrap $invertedLabel={false}>
+          <StyledLabelWrap $invertedLabel={false} $tagBorderColorKey={EntityEnums.Status.Approved}>
             <StyledLabel
               $isItalic={true}
-              $tagBorderColorKey={EntityEnums.Status.Approved}
               $invertedLabel={false}
               $fullWidth={false}
               $isFavorited={false}

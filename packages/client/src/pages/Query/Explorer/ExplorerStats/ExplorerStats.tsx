@@ -222,7 +222,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Time Unit</StyledFieldLabel>
-          <SwitchGroup>
+          <SwitchGroup activeIndex={Object.values(TimeUnit).indexOf(localStats.timeUnit)}>
             {Object.values(TimeUnit).map((unit) => {
               const active = localStats.timeUnit === unit;
               return (
@@ -234,8 +234,11 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   noBorder
                   onClick={() => setParams({ timeUnit: unit })}
                   color={active ? "primary" : "greyer"}
-                  inverted={!active}
-                  noBackground={!active}
+                  inverted
+                  noBackground
+                  textColor={active ? "white" : undefined}
+                  noHoverBackground={active}
+                  textRegular={!active}
                 />
               );
             })}
@@ -266,6 +269,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   color={active ? "primary" : "greyer"}
                   inverted={!active}
                   noBackground={!active}
+                  textRegular={!active}
                 />
               );
             })}
@@ -274,7 +278,7 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
 
         <StyledField>
           <StyledFieldLabel>Aggregate By</StyledFieldLabel>
-          <SwitchGroup>
+          <SwitchGroup activeIndex={Object.values(Aggregation).indexOf(localStats.aggregateBy)}>
             {Object.values(Aggregation).map((agg) => {
               const active = localStats.aggregateBy === agg;
               return (
@@ -286,8 +290,11 @@ export const ExplorerStats: React.FC<ExplorerStatsProps> = ({
                   noBorder
                   onClick={() => setParams({ aggregateBy: agg })}
                   color={active ? "primary" : "greyer"}
-                  inverted={!active}
-                  noBackground={!active}
+                  inverted
+                  noBackground
+                  textColor={active ? "white" : undefined}
+                  noHoverBackground={active}
+                  textRegular={!active}
                 />
               );
             })}

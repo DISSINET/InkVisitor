@@ -77,7 +77,8 @@ interface IButtonStyle {
   $fullWidth?: boolean;
   $noBorder?: boolean;
   $noBackground?: boolean;
-  $bold?: boolean;
+  $noHoverBackground?: boolean;
+  $textRegular?: boolean;
   $inverted: boolean;
   $color: keyof ThemeColor;
   $textColor?: keyof ThemeColor;
@@ -133,9 +134,9 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   /* the label box is exactly the font size, so padding alone decides the height
      and a labelled button matches the square icon button of the same size */
   line-height: 1;
-  font-weight: ${({ theme, $disabled, $bold }) => {
+  font-weight: ${({ theme, $disabled, $textRegular }) => {
     if ($disabled) return theme.fontWeight["normal"];
-    return $bold ? theme.fontWeight["bold"] : theme.fontWeight["medium"];
+    return $textRegular ? theme.fontWeight["medium"] : theme.fontWeight["bold"];
   }};
   padding: ${({ $iconButton, $size, $noPadding, $shape, $hasLabel }) =>
     $noPadding || $shape === "circle" || $shape === "square"
@@ -188,8 +189,9 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   }
   /* a borderless, background-less button has no shape of its own to react with,
      so hover tints it with its own text color and works on any backdrop */
-  ${({ $noBackground, $disabled }) =>
+  ${({ $noBackground, $noHoverBackground, $disabled }) =>
     $noBackground &&
+    !$noHoverBackground &&
     !$disabled &&
     css`
       &:hover {

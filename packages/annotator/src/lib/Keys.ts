@@ -1,6 +1,11 @@
 import { EditMode } from "./constants";
 import Cursor from "./Cursor";
 import { HistorySnapshot } from "./History";
+import {
+  SHORTCUT_OPTIONS,
+  SHORTCUT_PARAGRAPH_MARKS,
+  matchesShortcut,
+} from "./shortcuts";
 import Text, { CaretAffinity } from "./Text";
 import Viewport from "./Viewport";
 
@@ -57,6 +62,9 @@ export interface AnnotatorCallbacks {
   recordHistory(before: HistorySnapshot, coalesce: boolean): void;
   undo(): void;
   redo(): void;
+  // context-menu commands that also carry a keyboard shortcut
+  toggleParagraphMarks(): void;
+  openSettings(): void;
 }
 
 export default class Keys {
@@ -905,6 +913,17 @@ export default class Keys {
 
     // Any real key activity makes the caret solid immediately (#3092).
     this.annotator.resetCaretBlink();
+
+    // View commands mirroring the context menu. They touch neither the document
+    // nor the caret, so they return before the edit/history bookkeeping below.
+    if (matchesShortcut(e, SHORTCUT_PARAGRAPH_MARKS)) {
+      this.annotator.toggleParagraphMarks();
+      return;
+    }
+    if (matchesShortcut(e, SHORTCUT_OPTIONS)) {
+      this.annotator.openSettings();
+      return;
+    }
 
     let key: Key = e.key as Key;
     // Snapshot to fire onTextChangeCb only when the document actually changes.

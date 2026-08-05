@@ -13,6 +13,7 @@ import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -35,7 +36,8 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   COLLAPSED_PANEL_WIDTH,
   fourthPanelBoxesHeightThirds,
-  heightHeader,
+  BOX_HEADER_HEIGHT,
+  BOX_CONTENT_BORDER_PX,
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
@@ -195,6 +197,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+
+  // The annotator Box's header content lives in AnnotatorBox (it owns the
+  // resource/document data it is built from); this page only owns the Box
+  // itself, so AnnotatorBox reports what to show through onHeaderChange.
+  const [annotatorHeader, setAnnotatorHeader] = useState<ReactNode>(null);
 
   const userRole = getStoredUserRole() as UserEnums.Role;
 
@@ -453,12 +460,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     if (layoutWidth > 0 && panelWidths.length && !isFirstRender.current) {
       if (
         isLayoutUndersized(
-          [
-            firstPanelExpanded,
-            secondPanelExpanded,
-            thirdPanelExpanded,
-            fourthPanelExpanded,
-          ],
+          [firstPanelExpanded, secondPanelExpanded, thirdPanelExpanded, fourthPanelExpanded],
           layoutWidth,
         )
       ) {
@@ -668,7 +670,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
                         icon={<IcoPlusBold />}
                         label="entity"
                         inverted
-                        bold
                         onClick={() => setShowEntityCreateModal(true)}
                         tooltipLabel="create new entity"
                       />
@@ -758,12 +759,20 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={getAnnotatorBoxHeight()}
           heightVarKey="annotator"
           label="Annotator"
+          headerComponent={annotatorHeader}
+          // Document identity fills the free header space; the caption and the
+          // panel button stay visible, so the header content yields, not them.
+          shrinkLabel={false}
           isExpanded={thirdPanelExpanded}
           buttons={[thirdPanelButton()]}
         >
           <MemoizedAnnotatorBox
-            height={Math.max(0, (getAnnotatorBoxHeight() ?? 0) - heightHeader)}
+            height={Math.max(
+              0,
+              (getAnnotatorBoxHeight() ?? 0) - BOX_HEADER_HEIGHT - 1.5 * BOX_CONTENT_BORDER_PX,
+            )}
             width={thirdPanelWidth - 10}
+            onHeaderChange={setAnnotatorHeader}
           />
         </Box>
 

@@ -30,6 +30,8 @@ interface Table<TData extends object> {
   // Don't combine with fullWidthColumn (see CSS)
   firstColumnMinWidth?: boolean;
   lastColumnMinWidth?: boolean;
+  // Splits the table width evenly between all columns
+  equalColumns?: boolean;
   onRowClick?: (row: Row<TData>) => void;
 }
 
@@ -47,6 +49,7 @@ export const Table: React.FC<Table<any>> = ({
   fullWidthColumn = 0,
   firstColumnMinWidth = false,
   lastColumnMinWidth = false,
+  equalColumns = false,
 
   onRowClick,
 }) => {
@@ -148,7 +151,11 @@ export const Table: React.FC<Table<any>> = ({
     <>
       {!disablePaging && renderPagination("top")}
       <StyledTableContainer>
-        <StyledTable {...getTableProps()} $noBorder={noBorder}>
+        <StyledTable
+          {...getTableProps()}
+          $noBorder={noBorder}
+          $equalColumns={equalColumns}
+        >
           {!disableHeader && data.length > 0 && (
             <StyledTHead $noBorder={noBorder}>
               {headerGroups.map((headerGroup, key) => (

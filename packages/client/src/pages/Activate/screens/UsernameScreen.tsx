@@ -5,22 +5,26 @@ import {
   getErrorByCode,
 } from "@inkvisitor/shared/types/errors";
 import api from "api";
-import { Button, Input, ModalInputWrap } from "components";
+import { Button, Input } from "components";
 import useKeypress from "hooks/useKeyPress";
 import {
-  StyledButtonWrap,
+  StyledCenterColumn,
   StyledDescription,
   StyledErrorText,
+  StyledErrorWrap,
+  StyledForm,
   StyledInputRow,
   StyledMail,
+  StyledMailIcon,
+  StyledSubmitWrap,
+  StyledText,
 } from "pages/AuthModalSharedStyles";
 import React, { useState } from "react";
-import { FaUserTag } from "react-icons/fa";
 import { FiLogIn } from "react-icons/fi";
-import { TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import { StyledFaUser, StyledUserActivatedDescription } from "./ActivateSreensStyles";
 import { UserTag } from "components/advanced";
+import { ButtonSize } from "types";
 
 interface UsernameScreen {
   hash: string;
@@ -69,10 +73,14 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
     }
   };
 
+  // The activation form handles Enter natively; the continue screen has no
+  // form, so Enter is wired up separately there.
   useKeypress(
     "Enter",
     () => {
-      !continueScreen ? handleActivation() : handleLogin();
+      if (continueScreen) {
+        handleLogin();
+      }
     },
     [continueScreen],
   );
@@ -81,66 +89,69 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
     <>
       {!continueScreen ? (
         <>
-          <p>Choose username for user</p>
+          <StyledText>Choose username for user</StyledText>
           <StyledMail>
-            <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+            <StyledMailIcon size={14} />
             {email}
           </StyledMail>
           <StyledDescription>
             The username has to be unique and <br />
             between 4 and 20 characters long.
           </StyledDescription>
-          <ModalInputWrap>
+          <StyledForm
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleActivation();
+            }}
+          >
             <StyledInputRow>
               <Input
-                icon={<StyledFaUser size={12} $isError={error !== false} />}
+                icon={<StyledFaUser size={13} $isError={error !== false} />}
+                width="full"
+                fullHeight
                 placeholder="username"
                 onChangeFn={(text: string) => setUsername(text)}
                 value={username}
                 changeOnType
                 autoFocus
                 required
-                borderColor={error !== false ? "danger" : "primary"}
+                borderColor={error !== false ? "danger" : undefined}
               />
             </StyledInputRow>
-          </ModalInputWrap>
 
-          <div style={{ minHeight: "2rem" }}>
-            {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-          </div>
+            {error !== false && (
+              <StyledErrorWrap>
+                <StyledErrorText>{error}</StyledErrorText>
+              </StyledErrorWrap>
+            )}
 
-          <StyledButtonWrap>
-            <Button
-              disabled={username.length < 2}
-              icon={<FaUserTag />}
-              label="Set username"
-              color="success"
-              onClick={handleActivation}
-            />
-          </StyledButtonWrap>
+            <StyledSubmitWrap>
+              <Button
+                disabled={username.length < 2}
+                fullWidth
+                label="Set username"
+                color="success"
+                size={ButtonSize.Large}
+              />
+            </StyledSubmitWrap>
+          </StyledForm>
         </>
       ) : (
-        <>
-          <p>User</p>
+        <StyledCenterColumn>
+          <StyledText>User</StyledText>
           <StyledMail>
             {/* To use UserTag we need to have the userId in the database */}
             <UserTag userId={username} />
           </StyledMail>
-          <StyledUserActivatedDescription style={{ marginBottom: "2rem" }}>
-            has been activated.
-          </StyledUserActivatedDescription>
-          <StyledUserActivatedDescription style={{ marginBottom: "1rem" }}>
-            We wish you happy coding.
-          </StyledUserActivatedDescription>
-          <StyledButtonWrap>
-            <Button
-              icon={<FiLogIn />}
-              label="login continue"
-              color="success"
-              onClick={handleLogin}
-            />
-          </StyledButtonWrap>
-        </>
+          <StyledUserActivatedDescription>has been activated.</StyledUserActivatedDescription>
+          <StyledUserActivatedDescription>We wish you happy coding.</StyledUserActivatedDescription>
+          <Button
+            icon={<FiLogIn />}
+            label="login continue"
+            color="success"
+            onClick={handleLogin}
+          />
+        </StyledCenterColumn>
       )}
     </>
   );

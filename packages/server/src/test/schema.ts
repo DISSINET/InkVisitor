@@ -127,6 +127,25 @@ const entitiesIndexes: IndexDef[] = [
   ),
   def(DbEnums.Indexes.EntityUsedTemplate),
   def(
+    DbEnums.Indexes.EntityReferences,
+    function (row: RDatum) {
+      return r.branch(
+        row.hasFields("references").not(),
+        [] as unknown as RValue,
+        row("references")
+          .concatMap((ref: RDatum) => [
+            ref("resource").default(""),
+            ref("value").default(""),
+          ])
+          // a reference row is created before either side is picked, so empty
+          // sides are common - they would all pile up under a single "" key
+          .filter((id: RDatum) => id.ne(""))
+          .distinct()
+      );
+    },
+    { multi: true }
+  ),
+  def(
     DbEnums.Indexes.StatementActantsCI,
     function (row: RDatum) {
       return row("data")("actants")

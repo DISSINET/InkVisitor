@@ -241,6 +241,25 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   /**
+   * Finds entities linking entityId from their references array - matches both
+   * sides of the reference row, the resource and the value.
+   * @param db
+   * @param entityId
+   * @returns list of entities carrying such a reference
+   */
+  static async findUsedInReferences(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<IEntity[]> {
+    // Uses the `references.entityIds` multi-index (see
+    // packages/database/scripts/import/indexes.ts).
+    return await rethink
+      .table(Entity.table)
+      .getAll(entityId, { index: DbEnums.Indexes.EntityReferences })
+      .run(db);
+  }
+
+  /**
    * Returns entity ids that are present in data fields
    * @returns list of ids
    */

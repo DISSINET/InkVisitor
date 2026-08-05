@@ -1,4 +1,4 @@
-import { ButtonGroup } from "components";
+import { ButtonGroup, reserveBoldLabelWidth } from "components";
 import styled from "styled-components";
 
 export const StyledStatsLayout = styled.div`
@@ -58,6 +58,7 @@ export const StyledDateInputWrapper = styled.div`
  *  their labels sit on one line. */
 export const StyledEventTypeGroup = styled(ButtonGroup)`
   padding: 0.25rem;
+  ${reserveBoldLabelWidth}
 `;
 
 export const StyledFieldLabel = styled.div`

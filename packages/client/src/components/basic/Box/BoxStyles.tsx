@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { BOX_HEADER_HEIGHT } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 import { boxHeightVar } from "utils/layoutUtils";
@@ -32,7 +33,7 @@ export const StyledHead = styled.div<StyledHead>`
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.space[2]};
-  height: 3.2rem;
+  height: ${BOX_HEADER_HEIGHT / 10}rem;
   background-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "")};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${({ theme }) => theme.space[2]};
@@ -42,20 +43,39 @@ export const StyledHead = styled.div<StyledHead>`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-style: normal;
   text-transform: uppercase;
-  border-left-color: ${({ theme, $borderColor }) =>
-    $borderColor ? theme.color[$borderColor] : theme.color["gray"][200]};
+  /* The side borders exist to meet the panel separator. A collapsed panel has
+     no separator to meet, so they would just be a line drawn on the collapsed
+     strip. */
+  border-left-color: ${({ theme, $borderColor, $isExpanded }) =>
+    !$isExpanded
+      ? "transparent"
+      : $borderColor
+        ? theme.color[$borderColor]
+        : theme.color["gray"][200]};
   border-left-style: solid;
-  border-right-color: ${({ theme, $borderColor }) =>
-    $borderColor ? theme.color[$borderColor] : theme.color["gray"][200]};
+  border-right-color: ${({ theme, $borderColor, $isExpanded }) =>
+    !$isExpanded
+      ? "transparent"
+      : $borderColor
+        ? theme.color[$borderColor]
+        : theme.color["gray"][200]};
   border-right-style: solid;
   border-width: ${({ theme, $noFrame, $isExpanded }) =>
     $noFrame || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
   cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
-export const StyledLabel = styled(animated.div)`
+interface StyledLabel {
+  $shrinkLabel: boolean;
+}
+/**
+ * A shrinkable label cedes its space to the header content and buttons (some
+ * boxes need the buttons to win over the caption); a protected one always
+ * shows the full caption and the content yields instead.
+ */
+export const StyledLabel = styled(animated.div)<StyledLabel>`
   display: block;
-  min-width: 0;
-  flex-shrink: 1;
+  min-width: ${({ $shrinkLabel }) => ($shrinkLabel ? "0" : "fit-content")};
+  flex-shrink: ${({ $shrinkLabel }) => ($shrinkLabel ? 1 : 0)};
   white-space: nowrap;
   overflow: hidden !important;
   text-overflow: ellipsis;
@@ -70,6 +90,10 @@ export const StyledHeaderComponentWrap = styled.div<StyledHeaderComponentWrap>`
   align-items: center;
   width: ${({ $isExpanded }) => ($isExpanded ? "auto" : "100%")};
   flex-grow: ${({ $flexGrow }) => ($flexGrow ? 1 : 0)};
+  /* The growing wrap holds ellipsizing content, which needs permission to
+     shrink below its natural width; the buttons wrap keeps min-width: auto so
+     the buttons are never crushed. */
+  min-width: ${({ $flexGrow }) => ($flexGrow ? "0" : "auto")};
 `;
 interface StyledContent {
   $noFrame: boolean;

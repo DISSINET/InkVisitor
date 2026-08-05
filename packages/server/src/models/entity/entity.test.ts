@@ -321,6 +321,39 @@ describe("test Entity.getUsedByEntity", function () {
       ).resolves.toHaveLength(0);
     });
   });
+
+  describe("entity linked only through references", () => {
+    const db = new Db();
+    const resource = new Entity({ id: Math.random().toString() });
+    const value = new Entity({ id: Math.random().toString() });
+    const referencingEntity = new Entity({ id: Math.random().toString() });
+    referencingEntity.references.push(
+      new Reference({ id: "ref1", resource: resource.id, value: value.id })
+    );
+
+    beforeAll(async () => {
+      await db.initDb();
+      await resource.save(db.connection);
+      await value.save(db.connection);
+      await referencingEntity.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should find the referencing entity for the reference resource", async () => {
+      const dependencies = await resource.getUsedByEntity(db.connection);
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0].id).toEqual(referencingEntity.id);
+    });
+
+    it("should find the referencing entity for the reference value", async () => {
+      const dependencies = await value.getUsedByEntity(db.connection);
+      expect(dependencies).toHaveLength(1);
+      expect(dependencies[0].id).toEqual(referencingEntity.id);
+    });
+  });
 });
 
 describe("test Entity.getEntitiesIds", function () {

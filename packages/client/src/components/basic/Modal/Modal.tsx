@@ -38,6 +38,9 @@ interface Modal {
   isLoading?: boolean;
   fullHeight?: boolean;
   lowerZIndex?: boolean;
+  /** Drops the card border in favor of a shadow, for cards whose content
+   * bleeds to the edge (e.g. the auth pages' logo band). */
+  noBorder?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -52,6 +55,7 @@ export const Modal: FC<Modal> = ({
   isLoading = false,
   fullHeight = false,
   lowerZIndex = false,
+  noBorder = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -81,6 +85,7 @@ export const Modal: FC<Modal> = ({
                 maxWidth={maxWidth}
                 isLoading={isLoading}
                 fullHeight={fullHeight}
+                noBorder={noBorder}
               >
                 {children}
               </ModalCard>
@@ -104,6 +109,7 @@ interface ModalCard {
   animatedMount: any;
   isLoading?: boolean;
   fullHeight: boolean;
+  noBorder?: boolean;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
@@ -112,9 +118,16 @@ export const ModalCard: FC<ModalCard> = ({
   animatedMount,
   isLoading,
   fullHeight,
+  noBorder,
 }) => {
   return (
-    <StyledCard style={animatedMount} width={width} $maxWidth={maxWidth} $fullHeight={fullHeight}>
+    <StyledCard
+      style={animatedMount}
+      width={width}
+      $maxWidth={maxWidth}
+      $fullHeight={fullHeight}
+      $noBorder={noBorder}
+    >
       {children}
       <Loader show={isLoading} size={36} />
     </StyledCard>
@@ -200,7 +213,7 @@ export const ModalFooter: FC<ModalFooter> = ({
   return (
     <StyledFooter $column={column} $spaceBetween={spaceBetween}>
       {note && <StyledFooterNote>{note}</StyledFooterNote>}
-      <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md">
+      <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md" textRegular>
         {children}
       </ButtonDefaultsProvider>
     </StyledFooter>

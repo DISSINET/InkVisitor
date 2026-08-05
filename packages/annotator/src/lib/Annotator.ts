@@ -1,19 +1,5 @@
-import Cursor, { DIRECTION } from "./Cursor";
-import Highlighter, { IAbsCoordinates, CursorStyle } from "./Highlighter";
-import History, { HistorySnapshot } from "./History";
-import { ContextMenu, ContextMenuItem } from "./ContextMenu";
-import { CaretBlink } from "./CaretBlink";
-import { ResizePulse } from "./ResizePulse";
-import { HoverHighlightFade } from "./HoverHighlightFade";
-import { SettingsOverlay, SettingControl } from "./SettingsOverlay";
-import Keys from "./Keys";
-import { Lines } from "./Lines";
-import Scroller from "./Scroller";
-import Text, { Tag, SegmentPosition, CaretAffinity } from "./Text";
 import { drawAnchorMarker } from "./AnchorMarker";
-import { CanvasMeasurer } from "./TextMeasurer";
-import Viewport from "./Viewport";
-import { AsymmetricalAnchor, Warnings, WarningData } from "./warnings";
+import { CaretBlink } from "./CaretBlink";
 import {
   ANCHOR_MARKER_ARM_H_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
@@ -22,19 +8,52 @@ import {
   ANCHOR_MARKER_STACK_STEP_PX,
   DEFAULT_FONT,
   DEFAULT_FONT_SIZE,
-  PROPORTIONAL_FONT,
   EditMode,
   HighlightMode,
   HOVER_DEBOUNCE_MS,
-  LINE_HEIGHT,
+  LIGHT_MENU_COLORS,
+  DEFAULT_CARET_WIDTH_PX,
+  DEFAULT_LINE_HEIGHT_RATIO,
+  MenuColors,
+  PARAGRAPH_INDENT_DEFAULT,
+  PARAGRAPH_INDENT_EM,
+  PARAGRAPH_MARK_ALPHA,
+  PARAGRAPH_MARK_BOWL_RATIO,
+  PARAGRAPH_MARK_CAP_LEAD_PX,
+  PARAGRAPH_MARK_GAP_RATIO,
+  PARAGRAPH_MARK_HEIGHT_RATIO,
+  PARAGRAPH_MARK_LINE_WIDTH_PX,
+  PARAGRAPH_MARK_OVERHANG_RATIO,
+  PARAGRAPH_MARK_STEM_GAP_RATIO,
+  PROPORTIONAL_FONT,
   SELECTION_EDGE_SCROLL_SPEED,
   SELECTION_HANDLE_BAR_WIDTH_PX,
   SELECTION_HANDLE_GRAB_CHAR_FACTOR,
   SELECTION_HANDLE_KNOB_RADIUS_PX,
   VIEWPORT_END_BUFFER_ROWS,
-  LIGHT_MENU_COLORS,
-  MenuColors,
+  VIEWPORT_START_BUFFER_ROWS,
 } from "./constants";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import {
+  SHORTCUT_COPY,
+  SHORTCUT_OPTIONS,
+  SHORTCUT_PARAGRAPH_MARKS,
+  SHORTCUT_PASTE,
+  shortcutLabel,
+} from "./shortcuts";
+import Cursor, { DIRECTION } from "./Cursor";
+import Highlighter, { CursorStyle, IAbsCoordinates } from "./Highlighter";
+import History, { HistorySnapshot } from "./History";
+import { HoverHighlightFade } from "./HoverHighlightFade";
+import Keys from "./Keys";
+import { Lines } from "./Lines";
+import { ResizePulse } from "./ResizePulse";
+import Scroller from "./Scroller";
+import { SettingControl, SettingsOverlay } from "./SettingsOverlay";
+import Text, { SegmentPosition, Tag } from "./Text";
+import { CanvasMeasurer } from "./TextMeasurer";
+import Viewport from "./Viewport";
+import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 
 // Updated regex to properly handle tags with attributes
 // Opening tags: <tagname attr="value"> or <tagname>
@@ -129,6 +148,9 @@ interface PersistedSettings {
   proportional?: boolean;
   fontFamily?: string;
   fontSize?: number;
+  lineHeightRatio?: number;
+  showParagraphMarks?: boolean;
+  paragraphIndent?: boolean;
 }
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
@@ -137,7 +159,7 @@ export interface DrawingOptions {
   lineHeight: number;
   charsAtLine: number;
   color?: string; // override
-  caretWidth?: number; // collapsed-caret width in device px (defaults to 1)
+  caretWidth?: number; // collapsed-caret width in device px (drawing fallback: 1)
   caretOpacity?: number; // collapsed-caret alpha (defaults to 1); block caret uses 0.5 so the letter under it stays readable
   caretVisible?: boolean; // blink phase: skip painting the collapsed caret when false (#3092)
   /**
@@ -153,6 +175,12 @@ export interface DrawingOptions {
    * `col * charWidth`. Absent on the monospace path.
    */
   columnToPixelX?: (absLine: number, col: number) => number;
+  /**
+   * Horizontal origin of a visual line in device px — the paragraph indent
+   * (#2076) on a paragraph's first line, 0 elsewhere. Column 0 of that line sits
+   * here, so every rect drawn on it is shifted by this much.
+   */
+  lineXOrigin?: (absLine: number) => number;
 }
 
 export interface Selected {
@@ -203,18 +231,33 @@ export class Annotator {
 
   charWidth: number = 0;
   /**
-   * Proportional feature flag (default off). When on, the rendered font switches
-   * to a proportional family and text layout, draw (caret/selection rects),
+   * Proportional text flag. When on, the rendered font switches to a
+   * proportional family and text layout, draw (caret/selection rects),
    * wrapping, mouse hit-test, drag handles, and vertical goal-column all use
    * measured glyph widths via a CanvasMeasurer instead of the monospace grid.
    *
-   * Functionally complete, verified by the proportional test suites. Exposed to
-   * users as an OPT-IN (the client's font toggle calls {@link setProportional});
-   * the annotator default stays monospace. Flipping the default ON for everyone
-   * is the one deliberately-not-done step.
+   * The bare library defaults to monospace (tests and the standalone demo
+   * depend on the fixed grid). A HOSTED annotator defaults to proportional:
+   * {@link setFontFamilyOptions} — the host handing over its font — adopts
+   * proportional for users with no stored `proportional` choice. A stored
+   * setting, either value, always wins.
    */
   proportional: boolean = false;
-  lineHeight: number = LINE_HEIGHT;
+
+  /**
+   * Whether loadSettings found an explicit stored `proportional` value. Guards
+   * the proportional-by-default adoption in {@link setFontFamilyOptions} so an
+   * explicit monospace choice survives new sessions.
+   */
+  private hasStoredProportionalChoice = false;
+
+  /**
+   * Line height as a multiple of the font size (a CSS unitless line-height).
+   * User-adjustable via the settings overlay; persisted.
+   */
+  lineHeightRatio: number = DEFAULT_LINE_HEIGHT_RATIO;
+  /** Row height in device px; every visual line occupies exactly this much. */
+  lineHeight: number;
 
   inputText: string = "";
 
@@ -275,6 +318,21 @@ export class Annotator {
   lastSelectedText?: Selected;
   ratio: number = 1;
 
+  /**
+   * Device px per CSS px the host asked for. The live {@link ratio} is this or
+   * the display's `devicePixelRatio`, whichever is larger, so a host that wants
+   * supersampling on a 1× display keeps it while browser zoom (which raises the
+   * DPR) still gets a backing store at its own resolution.
+   */
+  private readonly baseRatio: number;
+
+  /**
+   * Media query matching exactly the current `devicePixelRatio`. It reports the
+   * move away from that one value, so each change re-arms a query built from
+   * the new DPR.
+   */
+  private dprQuery?: MediaQueryList;
+
   previousRenderViewportLineStart: number;
 
   private lastSelectPointer: { cx: number; cy: number } | null = null;
@@ -304,7 +362,7 @@ export class Annotator {
   } | null = null;
 
   /** Collapsed-caret width in CSS px (scaled by ratio at draw time). */
-  private caretWidth = 1;
+  private caretWidth = DEFAULT_CARET_WIDTH_PX;
 
   /**
    * Block (full char-cell) caret intent. Monospace-only: the caret spans the
@@ -319,6 +377,22 @@ export class Annotator {
    * the host theme set via setSelectStyle. When set it wins over the theme.
    */
   private highlightColor: string | undefined = undefined;
+
+  /**
+   * Indent the first visual line of every paragraph (#2076). Left-aligned text
+   * gives no other cue whether a break is a paragraph or a soft wrap.
+   */
+  private paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
+
+  /** Draw a ¶ at the end of each paragraph (Word's "formatting marks"). */
+  private showParagraphMarks = false;
+
+  /**
+   * Paragraph marks found while painting the text, drawn once the anchor markers
+   * are down so each can be placed clear of them. Anchor points in the same
+   * scroll-translated space the text pass uses; emptied at the top of each frame.
+   */
+  private pendingParagraphMarks: { x: number; y: number }[] = [];
 
   /** Debug FPS counter — smoothed frames-per-second of draw() calls. */
   private showFps = false;
@@ -348,6 +422,7 @@ export class Annotator {
     y: number;
     w: number;
     h: number;
+    kind: "start" | "end";
     tag: Tag;
   }[] = [];
 
@@ -444,12 +519,15 @@ export class Annotator {
       throw new Error("Cannot get 2d context");
     }
 
-    this.ratio = ratio;
+    this.baseRatio = ratio;
+    this.ratio = this.effectiveRatio();
     this.font = this.composeFont();
 
     this.lineHeight = this.lineHeightForSize(this.fontSize);
 
     this.ctx = ctx;
+    // Before the first measureText: measurement and paint must share one shaping mode.
+    this.disableTextShaping();
     this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
@@ -466,6 +544,8 @@ export class Annotator {
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
+    // Wrapping depends on the indent, so it is in place before the first draw.
+    this.text.setParagraphIndent(this.paragraphIndentUnits());
 
     this.cursor = new Cursor(this.ratio, 0, 0);
 
@@ -485,6 +565,8 @@ export class Annotator {
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
+
+    this.watchDevicePixelRatio();
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
@@ -898,7 +980,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
 
     // Clamp to valid line range
@@ -970,7 +1053,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
 
     tempCursor.yLine = Math.max(0, Math.min(tempCursor.yLine, Math.max(0, this.text.noLines - 1)));
@@ -1013,7 +1097,64 @@ export class Annotator {
     this.onAnchorTagHoverCb(null, null);
   }
 
+  /** Live device px per CSS px: the host's request, floored by the display DPR. */
+  private effectiveRatio(): number {
+    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    return Math.max(this.baseRatio, dpr);
+  }
+
+  /**
+   * Re-seed everything derived from `ratio`: Cursor and Highlighter hold their
+   * own copies for hit-testing, and the font string and line height are device-px
+   * values. Layout (backing store, re-wrap, redraw) is left to the caller.
+   */
+  private applyRatio(ratio: number): boolean {
+    if (!Number.isFinite(ratio) || ratio <= 0 || ratio === this.ratio) {
+      return false;
+    }
+    this.ratio = ratio;
+    this.cursor.ratio = ratio;
+    this.scratchCursor.ratio = ratio;
+    this.hoverHighlighter.ratio = ratio;
+    this.font = this.composeFont();
+    this.lineHeight = this.lineHeightForSize(this.fontSize);
+    return true;
+  }
+
+  /**
+   * Follow `devicePixelRatio`, which browser zoom changes: a backing store built
+   * for the old value is resampled by the compositor and the text goes soft.
+   * A `resolution` query matches one DPR only, so the handler re-arms itself
+   * against the new value before re-laying out.
+   */
+  private watchDevicePixelRatio(): void {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+    const dpr = window.devicePixelRatio || 1;
+    this.dprQuery = window.matchMedia(`(resolution: ${dpr}dppx)`);
+    this.dprQuery.addEventListener?.("change", this.boundOnDevicePixelRatioChange);
+  }
+
+  private unwatchDevicePixelRatio(): void {
+    this.dprQuery?.removeEventListener?.("change", this.boundOnDevicePixelRatioChange);
+    this.dprQuery = undefined;
+  }
+
+  private readonly boundOnDevicePixelRatioChange = (): void => {
+    this.unwatchDevicePixelRatio();
+    if (this.destroyed) {
+      return;
+    }
+    this.watchDevicePixelRatio();
+    this.onCanvasResize();
+  };
+
   onCanvasResize() {
+    // Zoom can move the DPR without any other notice, and every size below is
+    // derived from the ratio.
+    const ratioChanged = this.applyRatio(this.effectiveRatio());
+
     this.width = Number(this.element.style.width.replace("px", "")) * this.ratio;
     this.height = Number(this.element.style.height.replace("px", "")) * this.ratio;
 
@@ -1035,6 +1176,11 @@ export class Annotator {
     // Keep the proportional wrap budget in sync with the new width
     // before the re-wrap (updateCharsAtLine triggers calculateLines once).
     if (this.proportional) {
+      if (ratioChanged) {
+        // Prefix widths are measured in device px off the font string, so they
+        // belong to the ratio they were built at.
+        this.text.setMeasurer(this.measurerForFont(), this.width);
+      }
       this.text.maxPixelWidth = this.width;
     }
     this.text.updateCharsAtLine(charsAtLine);
@@ -1052,11 +1198,12 @@ export class Annotator {
       this.scrollExtentLineCount()
     );
 
-    this.scroller?.setRunnerSize((this.viewport.noLines / this.scrollExtentLineCount()) * 100);
+    // The track spans startBuffer rows above line 0 too, so the runner's
+    // share of it is measured against the full buffered extent.
+    const scrollTrackLines = this.scrollExtentLineCount() + this.viewport.startBuffer;
+    this.scroller?.setRunnerSize((this.viewport.noLines / scrollTrackLines) * 100);
 
-    this.scroller?.setViewportSize(
-      Math.min(100, (this.viewport.noLines / this.scrollExtentLineCount()) * 100)
-    );
+    this.scroller?.setViewportSize(Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100));
 
     if (this.settingsOverlay.isOpen) {
       this.settingsOverlay.reposition(this.element);
@@ -1139,9 +1286,27 @@ export class Annotator {
     return `${this.fontSize * this.ratio}px ${family}`;
   }
 
-  /** Line height (device px) scaled with the font size off the LINE_HEIGHT base. */
+  /** Line height (device px): font size × the user-adjustable spacing multiple. */
   private lineHeightForSize(size: number): number {
-    return LINE_HEIGHT * (size / DEFAULT_FONT_SIZE) * this.ratio;
+    return size * this.lineHeightRatio * this.ratio;
+  }
+
+  /**
+   * The current font's CanvasMeasurer, one instance per font string. Segment
+   * wrap memoization keys on measurer identity ({@link Text}.wrappedFor), so a
+   * fresh instance forces a full re-wrap even when no wrap input moved — e.g.
+   * a line-spacing change. Reuse also keeps the per-string width cache warm.
+   */
+  private measurerCache?: { font: string; measurer: CanvasMeasurer };
+
+  private measurerForFont(): CanvasMeasurer {
+    if (this.measurerCache?.font !== this.font) {
+      this.measurerCache = {
+        font: this.font,
+        measurer: new CanvasMeasurer(this.ctx, this.font),
+      };
+    }
+    return this.measurerCache.measurer;
   }
 
   /**
@@ -1166,9 +1331,13 @@ export class Annotator {
     if (this.lines) {
       this.lines.lineHeight = this.lineHeight;
     }
+    // The indent is expressed in ems and in the wrap unit of the active mode, so
+    // both a size change and a monospace/proportional switch re-derive it. Set
+    // before the re-wrap below, which is what consumes it.
+    this.text.paragraphIndent = this.paragraphIndentUnits();
     // Rebuild (or clear) the prefix tables for the new font; recalculates lines.
     this.text.setMeasurer(
-      this.proportional ? new CanvasMeasurer(this.ctx, this.font) : undefined,
+      this.proportional ? this.measurerForFont() : undefined,
       this.proportional ? this.width : undefined
     );
 
@@ -1197,6 +1366,9 @@ export class Annotator {
    */
   setProportional(on: boolean, fontFamily?: string) {
     this.proportional = on;
+    // This IS an explicit stored choice — the adoption in setFontFamilyOptions
+    // must not override it when the host re-supplies its fonts (theme change).
+    this.hasStoredProportionalChoice = true;
     if (fontFamily !== undefined) {
       this.proportionalFontFamily = fontFamily;
     }
@@ -1219,19 +1391,45 @@ export class Annotator {
   }
 
   /**
+   * Set the line spacing as a multiple of the font size (a CSS unitless
+   * line-height). Values below 1 would overlap the fixed line grid, so they
+   * are clamped. Persisted.
+   */
+  setLineHeightRatio(ratio: number) {
+    this.lineHeightRatio = Math.max(1, ratio);
+    this.applyFontChange();
+    this.saveSettings();
+  }
+
+  /**
    * Host-supplied font-family options shown in the Options-modal dropdown. When
    * the user hasn't chosen a family yet (still the built-in fallback), default to
    * the first option so the picker shows a valid value matching the host font.
+   *
+   * Handing over a font also opts the instance into proportional-by-default: a
+   * hosted annotator renders prose, and the host font (e.g. Roboto) is the
+   * reading face. Only users with no stored `proportional` choice are switched;
+   * the adoption itself is not persisted, so it keeps applying (or a future
+   * default keeps applying) until the user picks something explicitly.
    */
   setFontFamilyOptions(options: { label: string; value: string }[]) {
     this.fontFamilyOptions = options;
-    if (options.length > 0 && this.proportionalFontFamily === PROPORTIONAL_FONT) {
+    if (options.length === 0) {
+      return;
+    }
+    let rebuild = false;
+    if (!this.hasStoredProportionalChoice && !this.proportional) {
+      this.proportional = true; // hosted default; deliberately not persisted
+      rebuild = true;
+    }
+    if (this.proportionalFontFamily === PROPORTIONAL_FONT) {
       this.proportionalFontFamily = options[0].value;
-      // If proportional is already active, the rendered font + measurer were
-      // built from the old (fallback) family — rebuild them for the new default.
-      if (this.proportional) {
-        this.applyFontChange();
-      }
+      // An already-proportional instance has its rendered font + measurer
+      // built from the fallback family — they must follow the new default.
+      rebuild = rebuild || this.proportional;
+    }
+    if (rebuild) {
+      this.applyFontChange();
     }
   }
 
@@ -1255,13 +1453,54 @@ export class Annotator {
   }
 
   /**
+   * Paragraph indent (#2076) in the unit {@link Text} wraps in: device px under
+   * a proportional measurer, whole character columns on the monospace grid
+   * (rounded, at least one column so the indent never vanishes at small sizes).
+   * 0 while the setting is off.
+   */
+  private paragraphIndentUnits(): number {
+    if (!this.paragraphIndent) {
+      return 0;
+    }
+    const px = PARAGRAPH_INDENT_EM * this.fontSize * this.ratio;
+    if (this.proportional) {
+      return px;
+    }
+    return this.charWidth > 0 ? Math.max(1, Math.round(px / this.charWidth)) : 0;
+  }
+
+  /**
+   * Device-px horizontal origin of a visual line: {@link Text.lineXOrigin} in
+   * wrap units, converted the same way a column is (identity in proportional,
+   * `× charWidth` on the monospace grid).
+   */
+  private lineXOriginPx(absLine: number): number {
+    const origin = this.text.lineXOrigin(absLine);
+    if (origin === 0) {
+      return 0;
+    }
+    return this.proportional ? origin : origin * this.charWidth;
+  }
+
+  /**
+   * The line-origin resolver to put on DrawingOptions / pass to a hit-test, or
+   * undefined while no paragraph is indented (so the callee keeps its plain
+   * x=0 path). Mirror of {@link drawColumnToPixelX}.
+   */
+  private drawLineXOrigin(): ((absLine: number) => number) | undefined {
+    return this.paragraphIndent ? (absLine) => this.lineXOriginPx(absLine) : undefined;
+  }
+
+  /**
    * Device-px x of a selection-handle boundary point (#3108).
    * Proportional uses measured offsets; monospace keeps `col * charWidth`.
    */
   private handleX(pt: IAbsCoordinates): number {
-    return this.proportional
-      ? this.text.columnToPixelX(pt.yLine, pt.xLine)
-      : pt.xLine * this.charWidth;
+    return (
+      (this.proportional
+        ? this.text.columnToPixelX(pt.yLine, pt.xLine)
+        : pt.xLine * this.charWidth) + this.lineXOriginPx(pt.yLine)
+    );
   }
 
   /**
@@ -1284,6 +1523,29 @@ export class Annotator {
     this.ctx.font = this.font;
     const textW = this.ctx.measureText(txt).width;
     this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * Turn off kerning and ligatures on the canvas. The proportional caret math
+   * is additive — per-code-unit widths summed into prefix tables — while a line
+   * is painted with one whole-run fillText; any cross-glyph shaping makes the
+   * painted line narrower than the table says and the caret drifts into the
+   * following glyph. With shaping off, both sides use plain advance widths and
+   * agree exactly. Browsers without these flags keep the (small) drift.
+   * Re-applied every frame because ctx.reset() restores the defaults.
+   */
+  private disableTextShaping(): void {
+    const ctx = this.ctx as CanvasRenderingContext2D & {
+      fontKerning?: string;
+      textRendering?: string;
+    };
+    if ("fontKerning" in ctx) {
+      ctx.fontKerning = "none";
+    }
+    // optimizeSpeed also disables ligatures (fi/fl), which fontKerning cannot.
+    if ("textRendering" in ctx) {
+      ctx.textRendering = "optimizeSpeed";
+    }
   }
 
   /**
@@ -1338,7 +1600,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -1434,7 +1697,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     return this.text.clampVisual(tmp.xLine, tmp.yLine);
   }
@@ -1870,6 +2134,8 @@ export class Annotator {
     document.removeEventListener("mousemove", this.onDocumentSelectMove);
     document.removeEventListener("mouseup", this.onDocumentSelectUp);
 
+    this.unwatchDevicePixelRatio();
+
     this.element.onwheel = null;
     this.element.onmousedown = null;
     this.element.onkeydown = null;
@@ -1927,7 +2193,8 @@ export class Annotator {
       this.charWidth,
       this.viewport.scrollOffsetY,
       this.viewport.lineStart,
-      this.proportionalHitTest()
+      this.proportionalHitTest(),
+      this.drawLineXOrigin()
     );
     this.cursor.yLine = Math.max(
       0,
@@ -1985,30 +2252,47 @@ export class Annotator {
     if (this.isHighlighting()) {
       items.push({
         label: "Copy",
+        shortcut: shortcutLabel(SHORTCUT_COPY),
         onClick: () => this.onCopyText(),
       });
     }
 
     items.push({
       label: "Paste",
+      shortcut: shortcutLabel(SHORTCUT_PASTE),
       onClick: () => this.onPasteText(),
     });
 
     items.push({ separator: true });
     items.push(
       {
+        label: `${this.showParagraphMarks ? "✓ " : ""}Show paragraph marks`,
+        shortcut: shortcutLabel(SHORTCUT_PARAGRAPH_MARKS),
+        onClick: () => this.toggleParagraphMarks(),
+      },
+      { separator: true },
+      {
         label: `${this.showFps ? "✓ " : ""}Show FPS counter`,
         onClick: () => this.setShowFps(!this.showFps),
       },
       { separator: true },
-      { label: "Options…", onClick: () => this.openSettings() }
+      {
+        label: "Options…",
+        shortcut: shortcutLabel(SHORTCUT_OPTIONS),
+        onClick: () => this.openSettings(),
+      }
     );
 
     return items;
   }
 
+  /** Flip the ¶ formatting marks on or off. */
+  toggleParagraphMarks(): void {
+    this.setShowParagraphMarks(!this.showParagraphMarks);
+  }
+
   /** Open the settings overlay with the current options. */
-  private openSettings(): void {
+  openSettings(): void {
     const settings: SettingControl[] = [
       {
         type: "segmented",
@@ -2057,6 +2341,32 @@ export class Annotator {
         ],
         value: this.fontSize,
         onChange: (px) => this.setFontSize(px),
+      },
+      {
+        type: "segmented",
+        label: "Line spacing",
+        // Multiples of the font size (not of the font's own line box, which is
+        // what word processors scale — their "1.15" is ≈1.4 here). Word labels
+        // sidestep that mismatch. Anchor markers and underlines draw inside the
+        // row box, so nothing tighter than Compact is offered. "Normal" is
+        // 23/13, the historical fixed grid.
+        options: [
+          { label: "Compact", value: 1.4 },
+          { label: "Normal", value: DEFAULT_LINE_HEIGHT_RATIO },
+          { label: "Wide", value: 2.1 },
+        ],
+        value: this.lineHeightRatio,
+        onChange: (v) => this.setLineHeightRatio(v),
+      },
+      {
+        type: "segmented",
+        label: "Paragraph indent",
+        options: [
+          { label: "Off", value: 0 },
+          { label: "On", value: 1 },
+        ],
+        value: this.paragraphIndent ? 1 : 0,
+        onChange: (v) => this.setParagraphIndent(v === 1),
       },
       {
         type: "color",
@@ -2111,6 +2421,12 @@ export class Annotator {
    * @param e
    */
   onWheel(e: WheelEvent) {
+    // A trackpad pinch and ctrl+wheel both arrive as wheel events with ctrlKey
+    // set; the browser turns them into page zoom only if the default runs.
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+
     const deltaBufferPx = e.deltaY * this.ratio;
     this.viewport.addScrollOffset(deltaBufferPx, this.lineHeight, this.scrollExtentLineCount());
 
@@ -2390,10 +2706,16 @@ export class Annotator {
     this.scroller.setFocusTarget(this.element);
     this.scroller.onChange((percentage: number) => {
       const viewportLines = this.viewport.lineEnd - this.viewport.lineStart;
-      const scrollableLines = Math.max(0, this.scrollExtentLineCount() - viewportLines);
+      // The track's top (percentage 0) is -startBuffer, not line 0, so both the
+      // distance it spans and the line it resolves to are offset by startBuffer.
+      const scrollableLines = Math.max(
+        0,
+        this.scrollExtentLineCount() + this.viewport.startBuffer - viewportLines
+      );
       const scrollablePx = scrollableLines * this.lineHeight;
       const targetPx = (percentage / 100) * scrollablePx;
-      const targetLineFrac = scrollablePx > 0 ? targetPx / this.lineHeight : 0;
+      const targetLineFrac =
+        (scrollablePx > 0 ? targetPx / this.lineHeight : 0) - this.viewport.startBuffer;
 
       this.viewport.setScrollPosition(
         targetLineFrac,
@@ -2403,9 +2725,10 @@ export class Annotator {
       );
       this.draw();
     });
-    this.scroller?.setRunnerSize((this.viewport.noLines / this.scrollExtentLineCount()) * 100);
+    const scrollTrackLines = this.scrollExtentLineCount() + this.viewport.startBuffer;
+    this.scroller?.setRunnerSize((this.viewport.noLines / scrollTrackLines) * 100);
 
-    const viewportSize = this.viewport.noLines / this.scrollExtentLineCount();
+    const viewportSize = this.viewport.noLines / scrollTrackLines;
     this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
     scrollerHosts.set(scrollerDiv, this);
   }
@@ -2486,7 +2809,8 @@ export class Annotator {
 
     const columnToPixelX = this.drawColumnToPixelX();
     const toPx = (yLine: number, xLine: number): number =>
-      columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth;
+      (columnToPixelX ? columnToPixelX(yLine, xLine) : xLine * this.charWidth) +
+      this.lineXOriginPx(yLine);
 
     // Only rows the main text renderer paints are eligible; a marker whose
     // endpoint is off-screen is simply skipped (a multi-screen territory shows
@@ -2593,6 +2917,7 @@ export class Annotator {
           y: box.y - pad,
           w: box.w + 2 * pad,
           h: box.h + 2 * pad,
+          kind: p.kind,
           tag: p.tag,
         });
       }
@@ -2621,6 +2946,153 @@ export class Annotator {
     return null;
   }
 
+  /** Device-px width of the text on an absolute visual line. */
+  private lineWidthPx(absLine: number): number {
+    return this.proportional
+      ? this.text.pixelWidthOfLine(absLine)
+      : this.text.getLine(absLine).length * this.charWidth;
+  }
+
+  /**
+   * Where a paragraph mark sits and how big each of its parts is, for an anchor
+   * point `x` (the end of the line's text), `y` (the line's vertical middle) and
+   * a rightward `shiftX` used to dodge an anchor marker. The mark is pulled back
+   * inside the canvas when a full-width line would push it past the right edge,
+   * which also caps how far a shift can carry it.
+   */
+  private paragraphMarkGeometry(x: number, y: number, shiftX: number) {
+    const h = PARAGRAPH_MARK_HEIGHT_RATIO * this.lineHeight;
+    const bowlR = PARAGRAPH_MARK_BOWL_RATIO * h;
+    const stemGap = PARAGRAPH_MARK_STEM_GAP_RATIO * h;
+    const overhang = PARAGRAPH_MARK_OVERHANG_RATIO * stemGap;
+    const lineWidth = PARAGRAPH_MARK_LINE_WIDTH_PX * this.ratio;
+    // A part straddles its line, so the bowl clears the stem and the cap by half
+    // of one to sit against their edges rather than their centres.
+    const half = lineWidth / 2;
+    const capLead = PARAGRAPH_MARK_CAP_LEAD_PX * this.ratio;
+    const markW = bowlR + half + stemGap + overhang;
+
+    const left = Math.min(
+      x + PARAGRAPH_MARK_GAP_RATIO * this.charWidth + shiftX,
+      this.width - markW
+    );
+    const top = y - h / 2;
+    return {
+      h,
+      bowlR,
+      stemGap,
+      overhang,
+      lineWidth,
+      half,
+      capLead,
+      markW,
+      left,
+      top,
+      stemX: left + bowlR + half, // the bowl hangs off this stem's left side
+      rightX: left + bowlR + half + stemGap,
+      bottom: top + h,
+    };
+  }
+
+  /**
+   * Paragraph mark (#2076) at the end of a paragraph's last line, in the text
+   * colour at reduced opacity so it reads as chrome.
+   *
+   * The shape is a pilcrow: two stems under a bar that overhangs the trailing
+   * one, with a solid bowl on the leading stem — a half disc, its flat side
+   * lying along that stem. Every measure derives from the line height, so it
+   * scales with the font without depending on it.
+   */
+  private drawParagraphMark(x: number, y: number, shiftX: number = 0): void {
+    const { bowlR, overhang, half, capLead, top, stemX, rightX, bottom } =
+      this.paragraphMarkGeometry(x, y, shiftX);
+
+    this.ctx.save();
+    this.ctx.globalAlpha = PARAGRAPH_MARK_ALPHA;
+    // The highlight passes run before this one and leave their blend mode
+    // behind, so the mark states its own rather than inheriting one.
+    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.fillStyle = this.fontColor;
+
+    // One path, one fill. Painting the parts separately lays them over each
+    // other wherever they meet, and two passes at this alpha compound into a
+    // dark spot at every junction. Filling the union paints each pixel once, so
+    // the parts may overlap freely — which is what lets the cap reach out over
+    // the bowl and close the notch its curve leaves.
+    //
+    // Under the nonzero fill rule the subpaths must wind the same way or an
+    // overlap cancels to a hole, so every one of them runs clockwise on screen.
+    const rect = (x0: number, y0: number, x1: number, y1: number) => {
+      this.ctx.moveTo(x0, y0);
+      this.ctx.lineTo(x1, y0);
+      this.ctx.lineTo(x1, y1);
+      this.ctx.lineTo(x0, y1);
+      this.ctx.closePath();
+    };
+
+    this.ctx.beginPath();
+    rect(stemX - capLead, top - half, rightX + overhang, top + half);
+    rect(stemX - half, top - half, stemX + half, bottom);
+    rect(rightX - half, top - half, rightX + half, bottom);
+    // The foot is off for now.
+    // rect(stemX - overhang, bottom - 2 * half, rightX + overhang, bottom);
+
+    // The bowl, its flat side on the stem's left edge and its top on the cap's.
+    // Canvas angles run with y pointing down, so sweeping forwards from PI/2 to
+    // -PI/2 passes through PI — bulging left, away from the stems, and winding
+    // with the rectangles; the close then runs back up the flat side.
+    const bowlCx = stemX - half;
+    const bowlCy = top - half + bowlR;
+    this.ctx.moveTo(bowlCx, bowlCy + bowlR);
+    this.ctx.arc(bowlCx, bowlCy, bowlR, Math.PI / 2, -Math.PI / 2, false);
+    this.ctx.closePath();
+
+    this.ctx.fill();
+    this.ctx.restore();
+  }
+
+  /**
+   * Draw the paragraph marks held over from the text pass, each nudged right
+   * until it clears the anchor markers drawn this frame (#2076). A paragraph
+   * ending where a Territory anchor does — an empty paragraph between sections
+   * is the common one, since both marks then sit at the left margin — would
+   * otherwise land the two glyphs on top of each other. The anchor marker
+   * carries a hover target and is the meaningful one, so the mark gives way.
+   */
+  private drawPendingParagraphMarks(): void {
+    for (const mark of this.pendingParagraphMarks) {
+      let shiftX = 0;
+      // One marker cleared per pass, so the bound is their number.
+      for (let pass = 0; pass <= this.anchorMarkerHitboxes.length; pass++) {
+        const { left, top, markW, h } = this.paragraphMarkGeometry(mark.x, mark.y, shiftX);
+        // The geometry pins `left` at the right edge, so a mark held there
+        // cannot move — no shift clears a marker it may still overlap.
+        if (left >= this.width - markW) {
+          break;
+        }
+        // Only end markers (┘) push the mark aside. A start marker (┌) opens
+        // toward the text, so the mark reads fine inside its corner, and
+        // dodging it would indent the marks at territory openings while the
+        // plain ones stay at the margin — an uneven column of pilcrows.
+        const clash = this.anchorMarkerHitboxes.find(
+          (hb) =>
+            hb.kind === "end" &&
+            left < hb.x + hb.w &&
+            left + markW > hb.x &&
+            top < hb.y + hb.h &&
+            top + h > hb.y
+        );
+        if (!clash) {
+          break;
+        }
+        // A clash overlaps the mark, so its right edge always lies past `left`
+        // and the shift below is strictly positive.
+        shiftX += clash.x + clash.w - left;
+      }
+      this.drawParagraphMark(mark.x, mark.y, shiftX);
+    }
+  }
+
   /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
@@ -2637,10 +3109,13 @@ export class Annotator {
     // #2887 — clear last frame's marker hover targets; the HIGHLIGHT draw below
     // repopulates them. Cleared unconditionally so RAW/SEMI frames leave none.
     this.anchorMarkerHitboxes = [];
+    this.pendingParagraphMarks = [];
 
     this.syncLineNumbersCanvasToMain();
 
     this.ctx.reset();
+    // reset() clears the shaping flags along with everything else.
+    this.disableTextShaping();
 
     this.ctx.fillStyle = this.bgColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
@@ -2656,8 +3131,24 @@ export class Annotator {
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
+      const absLine = this.viewport.lineStart + renderLine;
+      const originPx = this.lineXOriginPx(absLine);
+      const y = (renderLine + 0.5) * this.lineHeight;
       if (textLine) {
-        this.ctx.fillText(textLine, 0, (renderLine + 0.5) * this.lineHeight);
+        this.ctx.fillText(textLine, originPx, y);
+      }
+      if (
+        this.showParagraphMarks &&
+        absLine >= 0 &&
+        absLine < this.text.noLines &&
+        this.text.isParagraphEnd(absLine)
+      ) {
+        // Held over: the marks are placed against the anchor markers, which are
+        // not drawn until later in this frame.
+        this.pendingParagraphMarks.push({
+          x: originPx + this.lineWidthPx(absLine),
+          y,
+        });
       }
     }
 
@@ -2690,6 +3181,7 @@ export class Annotator {
         caretVisible:
           this.canvasFocused && this.caretBlink.isVisible() && !caretRepaintsOverHighlights,
         columnToPixelX: this.drawColumnToPixelX(),
+        lineXOrigin: this.drawLineXOrigin(),
       });
     }
 
@@ -2717,6 +3209,7 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
       this.hoverHighlighter.style.opacity = baseHoverOpacity;
@@ -2855,6 +3348,7 @@ export class Annotator {
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
 
@@ -2906,6 +3400,7 @@ export class Annotator {
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
               columnToPixelX: this.drawColumnToPixelX(),
+              lineXOrigin: this.drawLineXOrigin(),
               // Keep newline-only lines of the resized span visible (#2885).
               minFillWidth: this.caretWidth * this.ratio,
             });
@@ -2928,6 +3423,7 @@ export class Annotator {
           caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
           columnToPixelX: this.drawColumnToPixelX(),
+          lineXOrigin: this.drawLineXOrigin(),
         });
       }
     }
@@ -2940,13 +3436,21 @@ export class Annotator {
       this.drawSelectionHandles();
     }
 
+    // Last inside the translated context: the anchor markers are down by now, so
+    // each mark can be placed clear of them (#2076).
+    this.drawPendingParagraphMarks();
+
     this.ctx.restore();
 
     if (this.scroller) {
+      // Shifted into the track's own coordinates, whose zero is -startBuffer
+      // rather than line 0 — the same frame the drag handler resolves a
+      // percentage in, so dragging to a position and reading it back agree.
+      const startBuffer = this.viewport.startBuffer;
       this.scroller.update(
-        this.viewport.lineStart,
-        this.viewport.lineEnd,
-        this.scrollExtentLineCount(),
+        this.viewport.lineStart + startBuffer,
+        this.viewport.lineEnd + startBuffer,
+        this.scrollExtentLineCount() + startBuffer,
         this.viewport.scrollOffsetY,
         this.lineHeight
       );
@@ -3038,12 +3542,24 @@ export class Annotator {
     if (typeof parsed.showFps === "boolean") {
       this.showFps = parsed.showFps;
     }
-
+    if (typeof parsed.showParagraphMarks === "boolean") {
+      this.showParagraphMarks = parsed.showParagraphMarks;
+    }
     // Font settings (#2487). Set the fields first, then re-derive font/layout
     // once (no redraw — the constructor draws right after loadSettings).
     let fontChanged = false;
+    // The indent feeds the wrap the same way the font does, so it shares the
+    // re-derive below rather than carrying its own re-wrap.
+    if (typeof parsed.paragraphIndent === "boolean") {
+      this.paragraphIndent = parsed.paragraphIndent;
+      fontChanged = true;
+    }
     if (typeof parsed.fontSize === "number") {
       this.fontSize = Math.max(1, parsed.fontSize);
+      fontChanged = true;
+    }
+    if (typeof parsed.lineHeightRatio === "number") {
+      this.lineHeightRatio = Math.max(1, parsed.lineHeightRatio);
       fontChanged = true;
     }
     if (typeof parsed.fontFamily === "string") {
@@ -3052,6 +3568,7 @@ export class Annotator {
     }
     if (typeof parsed.proportional === "boolean") {
       this.proportional = parsed.proportional;
+      this.hasStoredProportionalChoice = true;
       fontChanged = true;
     }
     if (fontChanged) {
@@ -3061,7 +3578,7 @@ export class Annotator {
 
   /** Reset all persisted settings to their defaults, clear storage, and redraw. */
   resetSettings(): void {
-    this.caretWidth = 1;
+    this.caretWidth = DEFAULT_CARET_WIDTH_PX;
     this.caretBlock = false;
     this.highlightColor = undefined;
     // Revert the highlight color to the host theme color (last setSelectStyle).
@@ -3069,9 +3586,14 @@ export class Annotator {
     this.showFps = false;
     this.lastFrameTime = 0;
     this.fps = 0;
-    // Font settings back to defaults (#2487).
-    this.proportional = false;
+    this.showParagraphMarks = false;
+    this.paragraphIndent = PARAGRAPH_INDENT_DEFAULT;
+    // Font settings back to defaults (#2487): hosted instances (font options
+    // supplied) default to proportional, the bare library to monospace.
+    this.proportional = this.fontFamilyOptions.length > 0;
+    this.hasStoredProportionalChoice = false;
     this.fontSize = DEFAULT_FONT_SIZE;
+    this.lineHeightRatio = DEFAULT_LINE_HEIGHT_RATIO;
     // Default to the first host-supplied option (e.g. "Roboto (app sans)") so the
     // picker shows a valid value; fall back to the generic when none supplied.
     this.proportionalFontFamily =
@@ -3085,7 +3607,7 @@ export class Annotator {
       // ignore storage errors
     }
 
-    // Re-derive font/layout to the monospace defaults and redraw.
+    // Re-derive font/layout to the defaults and redraw.
     this.applyFontChange();
   }
 
@@ -3103,6 +3625,9 @@ export class Annotator {
         proportional: this.proportional,
         fontFamily: this.proportionalFontFamily,
         fontSize: this.fontSize,
+        lineHeightRatio: this.lineHeightRatio,
+        showParagraphMarks: this.showParagraphMarks,
+        paragraphIndent: this.paragraphIndent,
       };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(data));
     } catch {
@@ -3142,6 +3667,41 @@ export class Annotator {
   setHighlightColor(hex: string): void {
     this.highlightColor = hex;
     this.cursor.style = { ...this.cursor.style, color: hex };
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Whether the paragraph first-line indent is on (#2076). */
+  getParagraphIndent(): boolean {
+    return this.paragraphIndent;
+  }
+
+  /**
+   * Toggle the paragraph first-line indent. The indent shortens the first line's
+   * wrap budget, so this re-wraps the document; the caret is carried through the
+   * re-wrap by its document offset. Persisted; on by default
+   * (see {@link PARAGRAPH_INDENT_DEFAULT}).
+   */
+  setParagraphIndent(on: boolean): void {
+    this.paragraphIndent = on;
+    this.cursor.reconcileOffsetsFromVisual(this.text);
+    this.text.setParagraphIndent(this.paragraphIndentUnits());
+    this.cursor.syncVisualFromOffset(this.text);
+    this.saveSettings();
+    this.draw();
+  }
+
+  /** Whether the end-of-paragraph ¶ marks are shown (#2076). */
+  getShowParagraphMarks(): boolean {
+    return this.showParagraphMarks;
+  }
+
+  /**
+   * Toggle the ¶ mark drawn at the end of each paragraph. Purely painted over
+   * the existing layout — no re-wrap. Persisted.
+   */
+  setShowParagraphMarks(show: boolean): void {
+    this.showParagraphMarks = show;
     this.saveSettings();
     this.draw();
   }
@@ -3811,8 +4371,30 @@ export class Annotator {
     );
   }
 
-  scrollToLine(absLine: number) {
-    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+  /**
+   * @param lineOffset shifts the target row; negative values leave context above,
+   *   which the start buffer allows even at the very top of the document.
+   */
+  scrollToLine(absLine: number, lineOffset: number = 0) {
+    this.viewport.scrollTo(absLine + lineOffset, this.scrollExtentLineCount());
+    this.draw();
+  }
+
+  /**
+   * Opens or closes headroom above line 1, so a floating bar pinned to the
+   * canvas top can be scrolled clear of it. Only worth having while such a bar
+   * is on screen — otherwise it is blank rows a user can scroll into for no
+   * reason — so closing it also pulls the viewport back down to line 0.
+   */
+  setTopScrollBuffer(rows: number) {
+    if (this.viewport.startBuffer === rows) {
+      return;
+    }
+    this.viewport.startBuffer = rows;
+    if (this.viewport.lineStart < 0 - rows) {
+      this.viewport.lineStart = 0 - rows;
+      this.viewport.scrollOffsetY = 0;
+    }
     this.draw();
   }
 
@@ -3849,9 +4431,12 @@ export class Annotator {
     this.runWarningChecks();
 
     // Preserve fluent scroll offset (deltaY) so updating text (e.g. discard)
-    // doesn't snap the viewport to the top of a line.
+    // doesn't snap the viewport to the top of a line. The lower bound mirrors
+    // Viewport's own -startBuffer clamp, so a position parked in the start
+    // buffer is preserved across a text update the same as any other line.
     const maxLineStart = Math.max(0, this.scrollExtentLineCount() - 1 - this.viewport.noLines);
-    const clampedLineStart = Math.max(0, Math.min(positionBeforeChange, maxLineStart));
+    const minLineStart = 0 - this.viewport.startBuffer;
+    const clampedLineStart = Math.max(minLineStart, Math.min(positionBeforeChange, maxLineStart));
     const desiredLineStart = clampedLineStart + (scrollOffsetBeforeChange || 0) / this.lineHeight;
 
     this.viewport.setScrollPosition(
@@ -3991,7 +4576,10 @@ export class Annotator {
       yLine: absEndY,
     };
 
-    this.scrollToLine(this.cursor.selectStart.yLine);
+    // A hit landing on the first visible row would sit behind the bar the
+    // client floats over the canvas top. The headroom that bar is given is the
+    // same distance, so the two agree by construction.
+    this.scrollToLine(this.cursor.selectStart.yLine, -VIEWPORT_START_BUFFER_ROWS);
     this.draw();
 
     // Manually trigger onSelectText callback for search-based selections

@@ -93,6 +93,66 @@ describe("models/entity/response", function () {
     });
   });
 
+  describe("test ResponseEntityDetail.walkEntityReferences", function () {
+    const resource = new Entity({ id: "R1" });
+    const value = new Entity({ id: "V1" });
+    const origin = "origin";
+
+    const references = [
+      { id: "ref1", resource: resource.id, value: value.id },
+      { id: "ref2", resource: "R2", value: "V2" },
+    ];
+
+    describe("detail entity used as the reference resource", () => {
+      const response = new ResponseEntityDetail(resource);
+      response.walkEntityReferences(origin, references);
+
+      it("should add the matching row to usedInReferences", () => {
+        expect(response.usedInReferences).toEqual([
+          { originId: origin, resourceId: resource.id, valueId: value.id },
+        ]);
+      });
+
+      it("should leave usedInReferenceParts empty", () => {
+        expect(response.usedInReferenceParts).toEqual([]);
+      });
+
+      it("should add both sides of the row to linkedEntitiesIds map", () => {
+        expect(Object.keys(response.linkedEntitiesIds)).toEqual([
+          origin,
+          resource.id,
+          value.id,
+        ]);
+      });
+    });
+
+    describe("detail entity used as the reference value", () => {
+      const response = new ResponseEntityDetail(value);
+      response.walkEntityReferences(origin, references);
+
+      it("should add the matching row to usedInReferenceParts", () => {
+        expect(response.usedInReferenceParts).toEqual([
+          { originId: origin, resourceId: resource.id, valueId: value.id },
+        ]);
+      });
+
+      it("should leave usedInReferences empty", () => {
+        expect(response.usedInReferences).toEqual([]);
+      });
+    });
+
+    describe("detail entity not present in any reference row", () => {
+      const response = new ResponseEntityDetail(new Entity({ id: "X" }));
+      response.walkEntityReferences(origin, references);
+
+      it("should add nothing", () => {
+        expect(response.usedInReferences).toEqual([]);
+        expect(response.usedInReferenceParts).toEqual([]);
+        expect(Object.keys(response.linkedEntitiesIds)).toEqual([]);
+      });
+    });
+  });
+
   describe("test ResponseEntityDetail.walkStatementsDataEntities", function () {
     const entity = new Entity({ id: "1" });
 

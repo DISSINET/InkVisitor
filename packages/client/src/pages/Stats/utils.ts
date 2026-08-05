@@ -1,5 +1,4 @@
 import { IRequestStats } from "@inkvisitor/shared/types";
-import { OTHERS_KEY } from "./constants";
 
 export const areStatsRequestsEqual = (a: IRequestStats, b: IRequestStats): boolean =>
   a.fromDate === b.fromDate &&
@@ -9,6 +8,11 @@ export const areStatsRequestsEqual = (a: IRequestStats, b: IRequestStats): boole
   a.eventType.length === b.eventType.length &&
   a.eventType.every((event, index) => event === b.eventType[index]);
 
+/**
+ * Drops users whose share of the whole activity is below the threshold. Their
+ * counts leave the data entirely, so the totals and shares shown afterwards
+ * describe the remaining users only.
+ */
 export const applyUserThreshold = (
   values: Record<string, Record<string, number>>,
   thresholdPercent: number
@@ -51,17 +55,11 @@ export const applyUserThreshold = (
   timeKeys.forEach((timeKey) => {
     const bucket = values[timeKey];
     const out: Record<string, number> = {};
-    let others = 0;
     Object.entries(bucket).forEach(([user, value]) => {
-      if (ignored.has(user)) {
-        others += value;
-      } else {
+      if (!ignored.has(user)) {
         out[user] = value;
       }
     });
-    if (others > 0) {
-      out[OTHERS_KEY] = others;
-    }
     next[timeKey] = out;
   });
 
