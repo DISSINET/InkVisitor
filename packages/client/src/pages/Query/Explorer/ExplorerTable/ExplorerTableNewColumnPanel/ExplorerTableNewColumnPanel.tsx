@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Button, ButtonGroup, CancelButton, Checkbox, Input } from "components";
@@ -17,6 +17,7 @@ import {
   StyledPanel,
   StyledValue,
 } from "./ExplorerTableNewColumnPanelStyles";
+import { getStoredUserRole } from "utils/userStorage";
 
 interface Props {
   open: boolean;
@@ -41,6 +42,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState(initial.type);
   const [editable, setEditable] = useState<boolean>(initial.editable);
+  const isViewer = getStoredUserRole() === UserEnums.Role.Viewer;
   const [paramValues, setParamValues] = useState<Record<string, unknown>>({});
 
   const paramsDef = Explore.EExploreColumnTypeConfig[type].paramsDef ?? [];
@@ -202,17 +204,22 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             <StyledValue>{renderParamField(def)}</StyledValue>
           </React.Fragment>
         ))}
-        <StyledLabel>
-          <span style={{ display: "inline-flex", alignItems: "center" }}>
-            Editable
-            <span style={{ marginLeft: "0.3rem" }}>
-              <MdOutlineEdit size={14} />
-            </span>
-          </span>
-        </StyledLabel>
-        <StyledValue>
-          <Checkbox value={editable} onChangeFn={(v) => setEditable(v)} />
-        </StyledValue>
+        {/* an editable column would render read-only cells for a Viewer anyway */}
+        {!isViewer && (
+          <>
+            <StyledLabel>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>
+                Editable
+                <span style={{ marginLeft: "0.3rem" }}>
+                  <MdOutlineEdit size={14} />
+                </span>
+              </span>
+            </StyledLabel>
+            <StyledValue>
+              <Checkbox value={editable} onChangeFn={(v) => setEditable(v)} />
+            </StyledValue>
+          </>
+        )}
       </StyledContent>
       <span
         style={{

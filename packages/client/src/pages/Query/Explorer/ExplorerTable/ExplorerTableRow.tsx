@@ -15,10 +15,11 @@ import Dropdown, { EntitySuggester, EntityTag, UserTag } from "components/advanc
 import { deleteProp, deleteRef } from "constructors";
 import { useOrderedLanguageDict } from "hooks/react-query";
 
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
+import { getStoredUserRole } from "utils/userStorage";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
 import {
   StyledAltLabelAddInput,
@@ -182,6 +183,15 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   const orderedLanguageDict = useOrderedLanguageDict();
 
+  // A Viewer's writes are rejected by the server for every entity class, so an
+  // editable column renders as a plain value for them - no dropdown, no
+  // suggester, no unlink button.
+  const isColumnEditable = React.useCallback(
+    (column: Explore.IExploreColumn) =>
+      column.editable && getStoredUserRole() !== UserEnums.Role.Viewer,
+    []
+  );
+
   const updateEntityMutation = useMutation({
     mutationFn: async (variables: { entityId: string; changes: Partial<IEntity> }) =>
       await api.entityUpdate(variables.entityId, variables.changes),
@@ -328,7 +338,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               entity={cellValue as IEntity}
               onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
               unlinkButton={
-                column.editable && {
+                isColumnEditable(column) && {
                   onClick: () => {
                     handleUnlinkEntity(recordEntity, cellValue as IEntity, column.id);
                   },
@@ -341,7 +351,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         // is type IUser[]
         return <UserTag userId={(cellValue as IUser).id} />;
       } else {
-        if (column.editable) {
+        if (isColumnEditable(column)) {
           if (column.type === Explore.EExploreColumnType.ELI) {
             return (
               <EditableCellValue
@@ -447,7 +457,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return <StyledCellValue>{cellValue as string}</StyledCellValue>;
       }
     },
-    [handleUnlinkEntity, handleOpenEntityInDetail, updateEntityMutation, orderedLanguageDict]
+    [
+      handleUnlinkEntity,
+      handleOpenEntityInDetail,
+      updateEntityMutation,
+      orderedLanguageDict,
+      isColumnEditable,
+    ]
   );
 
   const renderCell = React.useCallback(
@@ -484,7 +500,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   const renderEditSection = React.useCallback(
     (rowEntity: IEntity, column: Explore.IExploreColumn): React.ReactElement | null => {
-      if (column.editable) {
+      if (isColumnEditable(column)) {
         if (column.type === Explore.EExploreColumnType.EPV) {
           return (
             <EntitySuggester
@@ -549,7 +565,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       }
       return null;
     },
-    [columnData, handleEditColumn]
+    [columnData, handleEditColumn, isColumnEditable]
   );
 
   return (
