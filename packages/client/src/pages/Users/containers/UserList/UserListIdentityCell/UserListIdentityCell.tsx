@@ -1,3 +1,4 @@
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseGeneric, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -5,6 +6,7 @@ import { UserTagSize } from "components/advanced/UserTag/utils";
 import React, { useState } from "react";
 import { FaEnvelopeOpenText } from "react-icons/fa";
 import { getUserIcon } from "utils/iconUtils";
+import { getStoredUserId } from "utils/userStorage";
 import { UserListEmailInput } from "../UserListEmailInput/UserListEmailInput";
 import { UserListIcon } from "../UserListIcon/UserListIcon";
 import {
@@ -36,12 +38,26 @@ export const UserListIdentityCell: React.FC<UserListIdentityCell> = ({
   const [editing, setEditing] = useState<"name" | "email" | null>(null);
   const { name, email, role, active, verified } = user;
 
-  const editOnKey = (target: "name" | "email") => (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setEditing(target);
-    }
-  };
+  // the owner's name and email are theirs alone to change; an admin manages
+  // everything else about the account
+  const canEdit = role !== UserEnums.Role.Owner || getStoredUserId() === user.id;
+
+  /** Props that turn a text line into a click-to-edit target, empty when read-only */
+  const editProps = (target: "name" | "email") =>
+    canEdit
+      ? {
+          title: "click to edit",
+          role: "button",
+          tabIndex: 0,
+          onClick: () => setEditing(target),
+          onKeyDown: (event: React.KeyboardEvent) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setEditing(target);
+            }
+          },
+        }
+      : { $readOnly: true };
 
   const emailInput = (
     <UserListEmailInput
@@ -74,15 +90,7 @@ export const UserListIdentityCell: React.FC<UserListIdentityCell> = ({
           {editing === "email" ? (
             emailInput
           ) : (
-            <StyledEditableName
-              title="click to edit"
-              role="button"
-              tabIndex={0}
-              onClick={() => setEditing("email")}
-              onKeyDown={editOnKey("email")}
-            >
-              {email}
-            </StyledEditableName>
+            <StyledEditableName {...editProps("email")}>{email}</StyledEditableName>
           )}
         </StyledNotActiveText>
       ) : (
@@ -96,29 +104,13 @@ export const UserListIdentityCell: React.FC<UserListIdentityCell> = ({
               onDone={() => setEditing(null)}
             />
           ) : (
-            <StyledEditableName
-              title="click to edit"
-              role="button"
-              tabIndex={0}
-              onClick={() => setEditing("name")}
-              onKeyDown={editOnKey("name")}
-            >
-              {name}
-            </StyledEditableName>
+            <StyledEditableName {...editProps("name")}>{name}</StyledEditableName>
           )}
 
           {editing === "email" ? (
             emailInput
           ) : (
-            <StyledEditableText
-              title="click to edit"
-              role="button"
-              tabIndex={0}
-              onClick={() => setEditing("email")}
-              onKeyDown={editOnKey("email")}
-            >
-              {email}
-            </StyledEditableText>
+            <StyledEditableText {...editProps("email")}>{email}</StyledEditableText>
           )}
         </StyledUserNameColumnText>
       )}

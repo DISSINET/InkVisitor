@@ -35,7 +35,7 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({
 }) => {
   const [showReactivationModal, setShowReactivationModal] = useState(false);
 
-  const [localEmail, setLocalEmail] = useState("");
+  const [localEmail, setLocalEmail] = useState(user.email);
 
   useEffect(() => {
     if (user) {
@@ -68,18 +68,20 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({
           onDone?.();
         }}
         onBlur={() => {
+          if (localEmail === user.email) {
+            onDone?.();
+            return;
+          }
           if (user.verified) {
             userMutation.mutate({
               id: user.id,
               email: localEmail,
             });
             onDone?.();
-          } else if (user.email !== localEmail) {
+          } else {
             // the reactivation modal lives in this component, so editing stays
             // open until the modal is answered
             setShowReactivationModal(true);
-          } else {
-            onDone?.();
           }
         }}
         roundCorners
@@ -116,7 +118,7 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({
               }}
             />
             <Button
-              label="submit"
+              label="Submit"
               color="danger"
               onClick={() => {
                 updateEmail(localEmail);

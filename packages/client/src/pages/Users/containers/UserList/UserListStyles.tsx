@@ -319,13 +319,16 @@ export const StyledEmptyCell = styled.td`
   color: ${({ theme }) => theme.color["gray"][600]};
 `;
 
-export const StyledEditableText = styled.span`
+interface StyledEditableText {
+  $readOnly?: boolean;
+}
+export const StyledEditableText = styled.span<StyledEditableText>`
   width: fit-content;
   max-width: 100%;
   padding: 0 ${({ theme }) => theme.space[1]};
   margin-left: -${({ theme }) => theme.space[1]};
   border-radius: ${({ theme }) => theme.borderRadius.default};
-  cursor: text;
+  cursor: ${({ $readOnly }) => ($readOnly ? "default" : "text")};
   /* an address that outruns the column is cut rather than wrapped, so every row
      keeps the same two-line height */
   white-space: nowrap;
@@ -334,7 +337,8 @@ export const StyledEditableText = styled.span`
 
   &:hover,
   &:focus-visible {
-    outline: 1px dashed ${({ theme }) => theme.color["gray"][450]};
+    outline: ${({ theme, $readOnly }) =>
+      $readOnly ? "none" : `1px dashed ${theme.color["gray"][450]}`};
   }
 `;
 
