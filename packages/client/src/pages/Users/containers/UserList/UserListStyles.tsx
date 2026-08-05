@@ -26,6 +26,19 @@ const rowDeactivateFlash = keyframes`
   }
 `;
 
+/** Same timing as activate; violet-toned (role change) */
+const rowRoleFlash = keyframes`
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(191, 173, 255, 0);
+  }
+  42% {
+    box-shadow: inset 0 0 0 9999px rgba(191, 173, 255, 0.40);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(191, 173, 255, 0);
+  }
+`;
+
 export const ROW_FLASH_DELAY_MS = 200;
 export const ROW_FLASH_DURATION_MS = 1750;
 /** Clear React flash state shortly after CSS animation ends */
@@ -71,7 +84,7 @@ export const StyledTh = styled.th`
     inset 0 -1px 0 ${({ theme }) => theme.color["gray"][400]};
 `;
 
-export type UserListRowFlash = "activate" | "deactivate" | false;
+export type UserListRowFlash = "activate" | "deactivate" | "role" | false;
 
 interface StyledTr {
   $isOdd?: boolean;
@@ -102,6 +115,12 @@ export const StyledTr = styled.tr<StyledTr>`
     $flash === "deactivate" &&
     css`
       animation: ${rowDeactivateFlash} ${ROW_FLASH_DURATION_MS}ms ease-out ${ROW_FLASH_DELAY_MS}ms
+        forwards;
+    `}
+  ${({ $flash }) =>
+    $flash === "role" &&
+    css`
+      animation: ${rowRoleFlash} ${ROW_FLASH_DURATION_MS}ms ease-out ${ROW_FLASH_DELAY_MS}ms
         forwards;
     `}
 

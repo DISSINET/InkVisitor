@@ -270,60 +270,32 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         id: "Role",
         Cell: ({ row }: CellType) => {
           const { id, role } = row.original;
+          // owner is not an assignable role: an owner row offers only owner,
+          // every other row offers the roles below it in userRoleDict
+          const roleOptions =
+            role === UserEnums.Role.Owner ? userRoleDict.slice(0, 1) : userRoleDict.slice(1);
+
           return (
             <AttributeButtonGroup
               disabled={id === getStoredUserId() || role === UserEnums.Role.Owner}
-              options={
-                role === UserEnums.Role.Owner
-                  ? [
-                      {
-                        longValue: userRoleDict[0].label,
-                        shortValue: userRoleDict[0].label,
-                        selected: role === userRoleDict[0].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[0].value,
-                          });
-                        },
+              options={roleOptions.map((roleOption) => ({
+                longValue: roleOption.label,
+                shortValue: roleOption.label,
+                selected: role === roleOption.value,
+                onClick: () => {
+                  if (role === roleOption.value) {
+                    return;
+                  }
+                  userMutation.mutate(
+                    { id: id, role: roleOption.value },
+                    {
+                      onSuccess: () => {
+                        scheduleRowFlash(id, "role");
                       },
-                    ]
-                  : [
-                      {
-                        longValue: userRoleDict[1].label,
-                        shortValue: userRoleDict[1].label,
-                        selected: role === userRoleDict[1].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[1].value,
-                          });
-                        },
-                      },
-                      {
-                        longValue: userRoleDict[2].label,
-                        shortValue: userRoleDict[2].label,
-                        selected: role === userRoleDict[2].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[2].value,
-                          });
-                        },
-                      },
-                      {
-                        longValue: userRoleDict[3].label,
-                        shortValue: userRoleDict[3].label,
-                        selected: role === userRoleDict[3].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[3].value,
-                          });
-                        },
-                      },
-                    ]
-              }
+                    },
+                  );
+                },
+              }))}
             />
           );
         },
