@@ -224,7 +224,7 @@ export const StyledCheckboxWrapper = styled.div`
   justify-content: center;
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
-  margin-right: 0.1rem;
+  margin-right: 0.5rem;
   cursor: pointer;
   z-index: 2;
 `;
