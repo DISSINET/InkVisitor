@@ -30,11 +30,19 @@ describe("entities delete - editor rights", () => {
     await db.initDb();
 
     const seeded = (defaultAcl as Array<Record<string, unknown>>).filter(
-      (row) => row.controller === "entities" && row.method === "DELETE"
+      (row) =>
+        row.controller === "entities" &&
+        (row.method === "DELETE" || row.route === ":entityId/restore")
     );
     await rethink
       .table("acl_permissions")
-      .filter({ controller: "entities", method: "DELETE" })
+      .filter((row: any) =>
+        row("controller")
+          .eq("entities")
+          .and(
+            row("method").eq("DELETE").or(row("route").eq(":entityId/restore"))
+          )
+      )
       .delete()
       .run(db.connection);
     await rethink.table("acl_permissions").insert(seeded).run(db.connection);
@@ -85,6 +93,23 @@ describe("entities delete - editor rights", () => {
     await editorAgent.delete(`${apiPath}/entities/${concept.id}`).expect(200);
 
     expect(await findEntityById(db, concept.id)).toBeFalsy();
+  });
+
+  it("editor may restore a template territory they deleted", async () => {
+    // the delete toast offers a Restore link, so the pair has to be reachable
+    // by whoever was allowed to delete in the first place
+    const template = new Territory({ id: `T-tmpl-${Math.random()}` } as any);
+    template.isTemplate = true;
+    await template.save(db.connection);
+
+    // the delete route writes the deletion audit that restore reads back
+    await editorAgent.delete(`${apiPath}/entities/${template.id}`).expect(200);
+    expect(await findEntityById(db, template.id)).toBeFalsy();
+
+    await editorAgent
+      .post(`${apiPath}/entities/${template.id}/restore`)
+      .expect(200);
+    expect(await findEntityById(db, template.id)).toBeTruthy();
   });
 
   it("viewer may not delete a template entity", async () => {

@@ -87,7 +87,7 @@ export const StyledInlineAction = styled.div`
 export const StyledRightsWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.space[1]};
+  gap: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledRightsGrid = styled.div`

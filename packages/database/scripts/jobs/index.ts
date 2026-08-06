@@ -13,7 +13,7 @@ import fixMissingAuditTypeJob from "./fix-missing-audit-type";
 import replaceAuditsPolymorphicJob from "./replace-audits-polymorphic";
 import ensureIndexesJob from "./ensure-indexes";
 import createSavedQueriesTableJob from "./create-saved-queries-table";
-import fixEntityDeleteAclJob from "./fix-entity-delete-acl";
+import fixEditorEntityAclJob from "./fix-editor-entity-acl";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -32,7 +32,7 @@ const alljobs: Record<string, IJob> = {
   replaceAuditsPolymorphicJob,
   ensureIndexesJob,
   createSavedQueriesTableJob,
-  fixEntityDeleteAclJob,
+  fixEditorEntityAclJob,
 };
 
 export default alljobs;

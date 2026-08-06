@@ -4,7 +4,7 @@ import { IEntity, IStatement } from "@inkvisitor/shared/types";
 interface RestoreNavigators {
   setTerritoryId: (id: string) => void;
   setStatementId: (id: string) => void;
-  appendDetailId: (id: string) => void;
+  appendDetailId: (id: string, maxCount?: number) => void;
 }
 
 export type RestoreTarget =
@@ -67,7 +67,9 @@ export const openRestoredEntity = (
         nav.setStatementId(target.id);
         break;
       default:
-        nav.appendDetailId(target.id);
+        // undoing a delete adds the entity back as one more tab at the end and
+        // leaves every other tab standing, so the tab cap never evicts here
+        nav.appendDetailId(target.id, Infinity);
     }
   }, 0);
 };

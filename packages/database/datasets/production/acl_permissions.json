@@ -5,6 +5,7 @@
 {"controller": "documents", "id": "06cfcda8-05c7-4c3e-b7a6-2a2529ead051", "method": "PUT", "roles": ["*"], "route": ""},
 {"controller": "audits", "id": "0c050b5b-c0ae-4b20-8100-674d4726fc71", "method": "GET", "roles": ["*"], "route": ""},
 {"controller": "entities", "id": "0c81a0fb-0922-4c3d-8c22-a535cc85c78f", "method": "DELETE", "public": false, "roles": ["editor"], "route": ":entityId?"},
+{"controller": "entities", "id": "3f6b2c1e-9a4d-4f70-b8e5-1d0c7a2b6e94", "method": "POST", "public": false, "roles": ["editor"], "route": ":entityId/restore"},
 {"controller": "stats", "id": "0f41bd6d-31a4-4c2d-8a06-4250e1c07789", "method": "GET", "roles": ["admin"], "route": ""},
 {"controller": "users", "id": "14f81a60-a5ee-41d3-94e5-253a3573a53b", "method": "GET", "roles": ["admin"], "route": "administration"},
 {"controller": "relations", "id": "1990d748-d567-4cc1-84a5-224faa25ffc7", "method": "DELETE", "roles": ["*"], "route": ""},
@@ -94,7 +95,7 @@
 {"controller": "users", "id": "ed74a6d5-7042-4dbd-95c5-bb22038dc151", "method": "DELETE", "roles": ["admin"], "route": ":userId"},
 {"controller": "users", "id": "eee04de2-97ce-400a-ba7d-ba048c9b349e", "method": "POST", "public": true, "roles": [], "route": "signin"},
 {"controller": "acls", "id": "f2647d88-9fbe-44dd-b501-b998886d074f", "method": "GET", "roles": ["admin"], "route": ""},
-{"controller": "entities", "id": "f82a0626-f2d1-4071-bd18-779e354052fc", "method": "POST", "public": false, "roles": [], "route": ":entityId/clone"},
+{"controller": "entities", "id": "f82a0626-f2d1-4071-bd18-779e354052fc", "method": "POST", "public": false, "roles": ["editor"], "route": ":entityId/clone"},
 {"controller": "users", "id": "f999b9c1-9ce8-493f-9f6b-1f7009ed359f", "method": "PATCH", "public": true, "roles": [], "route": "active"},
 {"controller": "users", "id": "ff69ffe9-929a-416e-aa81-72d27647f95c", "method": "PATCH", "roles": ["*"], "route": ":userId/password"}
 ]

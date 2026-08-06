@@ -1,6 +1,6 @@
 import { languageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { DropdownItem, IResponseUser, IUser } from "@inkvisitor/shared/types";
+import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
@@ -41,7 +41,6 @@ import {
   StyledUserCustomization,
   StyledUserCustomizationSection,
 } from "./UserCustomizationModalStyles";
-import { UserRightItem } from "./UserRightItem/UserRightItem";
 
 interface DataObject {
   name: string;
@@ -142,7 +141,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   };
 
-  const { role, rights } = user;
+  const { role, rights, territoryRights } = user;
   const { name, email, defaultLanguage, defaultStatementLanguage } = data;
 
   // A Viewer never creates entities, edits statements or deletes props, so the
@@ -150,13 +149,32 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   // orders the language dropdown in the search boxes, which a Viewer does use.
   const isViewer = role === UserEnums.Role.Viewer;
 
-  const readRights = useMemo(
-    () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
-    [rights],
+  // territoryRights carries the Territory entities already resolved, so the
+  // rights entries are only needed for the read/write split. An entity can be
+  // absent when the right outlives the Territory it names.
+  const territoryByRight = useMemo(() => {
+    const byId = new Map<string, IResponseEntity>();
+    (territoryRights ?? []).forEach(({ territory }) => {
+      if (territory?.id) {
+        byId.set(territory.id, territory);
+      }
+    });
+    return byId;
+  }, [territoryRights]);
+
+  const territoriesForMode = (mode: UserEnums.RoleMode) =>
+    rights
+      .filter((r) => r.mode === mode)
+      .map((r) => territoryByRight.get(r.territory))
+      .filter((territory): territory is IResponseEntity => !!territory);
+
+  const readTerritories = useMemo(
+    () => territoriesForMode(UserEnums.RoleMode.Read),
+    [rights, territoryByRight],
   );
-  const writeRights = useMemo(
-    () => rights.filter((r) => r.mode === UserEnums.RoleMode.Write),
-    [rights],
+  const writeTerritories = useMemo(
+    () => territoriesForMode(UserEnums.RoleMode.Write),
+    [rights, territoryByRight],
   );
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -168,6 +186,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       <Modal
         showModal={showModal}
         width="auto"
+        maxWidth={440}
         onEnterPress={handleSubmit}
         onClose={onClose}
         isLoading={updateUserMutation.isPending}
@@ -420,8 +439,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <StyledRightsLabel>Read</StyledRightsLabel>
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? readRights.map((right, key) => (
-                        <UserRightItem key={key} territoryId={right.territory} />
+                    ? readTerritories.map((territory) => (
+                        <EntityTag key={territory.id} entity={territory} />
                       ))
                     : "all"}
                 </StyledRightsWrap>
@@ -429,16 +448,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <StyledRightsLabel>Write</StyledRightsLabel>
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? writeRights.map((right, key) => (
-                        <UserRightItem key={key} territoryId={right.territory} />
+                    ? writeTerritories.map((territory) => (
+                        <EntityTag key={territory.id} entity={territory} />
                       ))
                     : "all"}
                 </StyledRightsWrap>
 
                 <StyledRightsLabel>Annotate</StyledRightsLabel>
                 <StyledRightsWrap>
-                  {/* resourceRights ships the Resource entities already resolved,
-                      so these render without the per-id fetch UserRightItem does */}
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? (user.resourceRights ?? []).map(({ resource }) => (
                         <EntityTag key={resource.id} entity={resource} />
