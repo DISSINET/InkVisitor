@@ -504,6 +504,18 @@ export const StatementListBox: React.FC = () => {
       setSelectedRows(selectedRows.filter((r) => !deletedIds.includes(r)));
       dispatch(setRowsExpanded(rowsExpanded.filter((r) => !deletedIds.includes(r))));
 
+      // a detail tab left pointing at a deleted statement re-requests
+      // /entities/:id/detail, which answers EntityDoesNotExist
+      deletedIds.forEach((deletedId) => {
+        if (detailIdArray.includes(deletedId)) {
+          removeDetailId(deletedId);
+        }
+        queryClient.removeQueries({ queryKey: ["entity", deletedId] });
+      });
+      if (deletedIds.some((deletedId) => detailIdArray.includes(deletedId))) {
+        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["tree"],
       });

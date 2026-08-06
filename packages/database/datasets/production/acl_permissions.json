@@ -4,7 +4,7 @@
 {"controller": "statements", "id": "06cce676-01b9-4bc3-a362-e3f14deba7ac", "method": "GET", "roles": ["*"], "route": ":statementId"},
 {"controller": "documents", "id": "06cfcda8-05c7-4c3e-b7a6-2a2529ead051", "method": "PUT", "roles": ["*"], "route": ""},
 {"controller": "audits", "id": "0c050b5b-c0ae-4b20-8100-674d4726fc71", "method": "GET", "roles": ["*"], "route": ""},
-{"controller": "entities", "id": "0c81a0fb-0922-4c3d-8c22-a535cc85c78f", "method": "DELETE", "public": false, "roles": [], "route": ":entityId?"},
+{"controller": "entities", "id": "0c81a0fb-0922-4c3d-8c22-a535cc85c78f", "method": "DELETE", "public": false, "roles": ["editor"], "route": ":entityId?"},
 {"controller": "stats", "id": "0f41bd6d-31a4-4c2d-8a06-4250e1c07789", "method": "GET", "roles": ["admin"], "route": ""},
 {"controller": "users", "id": "14f81a60-a5ee-41d3-94e5-253a3573a53b", "method": "GET", "roles": ["admin"], "route": "administration"},
 {"controller": "relations", "id": "1990d748-d567-4cc1-84a5-224faa25ffc7", "method": "DELETE", "roles": ["*"], "route": ""},

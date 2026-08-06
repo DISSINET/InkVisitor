@@ -434,6 +434,17 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       ))
                     : "all"}
                 </StyledRightsWrap>
+
+                <StyledRightsLabel>Annotate</StyledRightsLabel>
+                <StyledRightsWrap>
+                  {/* resourceRights ships the Resource entities already resolved,
+                      so these render without the per-id fetch UserRightItem does */}
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
+                    ? (user.resourceRights ?? []).map(({ resource }) => (
+                        <EntityTag key={resource.id} entity={resource} />
+                      ))
+                    : "all"}
+                </StyledRightsWrap>
               </StyledRightsGrid>
             </StyledUserCustomizationSection>
 

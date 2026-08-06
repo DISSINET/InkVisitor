@@ -205,9 +205,9 @@
   },
   {
     "controller": "entities",
-    "route": ":entityId",
+    "route": ":entityId?",
     "method": "DELETE",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "entities",
