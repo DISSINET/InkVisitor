@@ -264,6 +264,18 @@
     "roles": ["*"]
   },
   {
+    "controller": "relations",
+    "route": ":relationId?",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "relations",
+    "route": ":relationId",
+    "method": "DELETE",
+    "roles": ["editor"]
+  },
+  {
     "controller": "documents",
     "route": "",
     "method": "GET",

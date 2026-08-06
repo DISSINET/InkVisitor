@@ -31,10 +31,25 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   // seeded permissively in the datasets from the start, but a database built
   // before that carries the auto-created roles:[] row and refuses drag-move
   { controller: "statements", method: "PUT", route: "batch-move" },
+  // the seeded relations rows cover the collection endpoints ("" for bulk
+  // create/update/delete); editing or deleting one relation by id goes through
+  // its own route, which had no row of its own
+  { controller: "relations", method: "PUT", route: ":relationId?" },
+  { controller: "relations", method: "DELETE", route: ":relationId" },
 ];
 
+// read-only routes any signed-in user may reach - kept apart because they are
+// granted to every role, not just the editor
+const READ_ROUTES: Array<{ controller: string; method: string; route: string }> =
+  [{ controller: "territories", method: "GET", route: ":territoryId/statements" }];
+
 const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
-  for (const { controller, method, route } of ROUTES) {
+  const targets = [
+    ...ROUTES.map((r) => ({ ...r, roles: ROLES })),
+    ...READ_ROUTES.map((r) => ({ ...r, roles: ["*"] })),
+  ];
+
+  for (const { controller, method, route, roles } of targets) {
     const rows: any[] = await r
       .table("acl_permissions")
       .filter({ controller, method, route })
@@ -47,7 +62,7 @@ const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
           controller,
           method,
           route,
-          roles: ROLES,
+          roles,
           public: false,
         })
         .run(db);
@@ -56,17 +71,17 @@ const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
     }
 
     const stale = rows.filter(
-      (row) => !ROLES.every((role) => (row.roles ?? []).includes(role))
+      (row) => !roles.every((role) => (row.roles ?? []).includes(role))
     );
     if (!stale.length) {
-      console.log(`${controller} ${method} "${route}" already grants the editor`);
+      console.log(`${controller} ${method} "${route}" already grants ${roles.join(", ")}`);
       continue;
     }
 
     await r
       .table("acl_permissions")
       .getAll(...stale.map((row) => row.id))
-      .update({ roles: ROLES })
+      .update({ roles })
       .run(db);
     console.log(
       `Updated ${stale.length} acl_permissions row(s) for ${controller} ${method} "${route}"`
