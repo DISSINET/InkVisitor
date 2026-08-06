@@ -37,8 +37,8 @@ everything below it then becomes read-only.
   assigned edit access to**. In other Territories he can read but not edit
   Statements.
 - He can **read Statements** in any Territory he has read or write access to.
-- He can **move a Statement by dragging it onto another Territory in the tree**,
-  but only between Territories he can edit — both the one it's leaving and the one
+- He can **move a Statement by dragging it onto another Territory in the tree**,  
+  but only between Territories he can edit — both the one it's leaving and the one  
   it's going to. Territories he can't edit won't accept the drop.
 
 ## Resources
@@ -64,20 +64,53 @@ This section is about the remaining classes.
 - They aren't tied to a single Territory or Document, so his ability to edit them doesn't
   depend on tree access or Resource.
 
+## Relations
+
+Relations are the links between two Entities — synonyms, classifications, and so
+on. An Editor can **create, edit, and delete any Relation**. Like the Entities
+above, Relations are not tied to a Territory, so this does not depend on his tree
+access.
+
 ## Documents and annotation
 
-- He can **read** Documents.
-- He can **edit and annotate a Document** when its Resource has been assigned to
+Editor:
+
+- can **read** Documents
+- can **edit and annotate a Document** when its Resource has been assigned to  
   him. Documents he isn't assigned to open in read-only mode.
 
 ## Templates
 
-Templates are reusable starting points for new Entities, Statements, or
-Territories. An Editor:
+Editor:
 
-- can **create new Templates**;
-- can **edit and delete Templates** — any Template, not only the ones he made.
-- can **apply any Template** to quickly create new content from it.
+- can **create new Templates**
+- can **edit and delete Templates** — any Template, not only the ones he made
+- can **apply any Template**
+
+## Explorer
+
+The Explorer (Query page) is open to an Editor: he can build and run queries,
+add columns, and edit values directly in the table — Status, Label language,
+Part of speech, Legacy ID, Detail, and alternative labels — on any Entity he is
+allowed to edit.
+
+Of the batch actions offered above the results, he may use only:
+
+- **open in detail**
+- **copy UUIDs to clipboard**
+
+The rest — **export as TSV**, **add new metaproperty**, **add new reference**,
+and **add new relation** — are reserved for Admins and Owners, because they act
+on a whole selection at once with no per-Entity confirmation.
+
+Saved queries follow the same split: he can create and manage **his own private
+queries**, while sharing a query with everyone, and moderating shared ones, stays
+with Admins and Owners.
+
+## Statistics
+
+An Editor can open the **Statistics** page. It only aggregates data he can
+already reach, so it is not restricted further.
 
 ## What an Editor cannot do
 
@@ -88,6 +121,8 @@ These stay with Admins and Owners:
 - **Delete entire (non-Template) Territories** — even ones he has edit access to.
   Editing a Territory's contents is allowed; removing the whole Territory is not.
 - **See the administration/user-management screens.**
+- **Run the restricted Explorer batch actions** listed above.
+- **Open Backups**, and (Owner only) **Global validations**.
 
 He can always manage **his own** account: change his password, his display
 options, and his bookmarks.

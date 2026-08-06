@@ -43,6 +43,21 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
 const READ_ROUTES: Array<{ controller: string; method: string; route: string }> =
   [{ controller: "territories", method: "GET", route: ":territoryId/statements" }];
 
+// rows the ACL layer wrote for routes that no longer exist - nothing deletes a
+// permission once its route is gone, so they linger and misrepresent what the
+// server actually exposes
+const REMOVED_ROUTES: Array<{
+  controller: string;
+  method: string;
+  route: string;
+}> = [
+  {
+    controller: "statements",
+    method: "PUT",
+    route: ":statementId/elementsOrders",
+  },
+];
+
 const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
   const targets = [
     ...ROUTES.map((r) => ({ ...r, roles: ROLES })),
@@ -86,6 +101,19 @@ const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
     console.log(
       `Updated ${stale.length} acl_permissions row(s) for ${controller} ${method} "${route}"`
     );
+  }
+
+  for (const { controller, method, route } of REMOVED_ROUTES) {
+    const result = await r
+      .table("acl_permissions")
+      .filter({ controller, method, route })
+      .delete()
+      .run(db);
+    if (result.deleted) {
+      console.log(
+        `Deleted ${result.deleted} acl_permissions row(s) for removed route ${controller} ${method} "${route}"`
+      );
+    }
   }
 };
 

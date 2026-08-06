@@ -86,7 +86,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
-      (refuseReadOnlySource && newHoverred.sourceIsReadOnly) ||
+      (refuseReadOnlySource && newHoverred.entityIsReadOnly) ||
       (newHoverred.isTemplate &&
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||

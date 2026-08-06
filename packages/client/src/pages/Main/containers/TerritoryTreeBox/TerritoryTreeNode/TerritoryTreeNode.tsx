@@ -254,6 +254,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
             >
               <EntityTag
                 entity={territory}
+                entityIsReadOnly={right === UserEnums.RoleMode.Read}
                 parentId={parent.territoryId}
                 lvl={lvl}
                 isSelected={isSelected}

@@ -171,11 +171,11 @@ export interface EntityDragItem extends DragItem {
   isTemplate: boolean;
   isDiscouraged: boolean;
   /**
-   * Set when the tag was dragged out of a container the user may only read.
-   * Only drop targets that would move the entity out of it care - linking it
-   * somewhere else stays allowed.
+   * Set when the user may only read this entity. Drop targets opt in to acting
+   * on it: one that moves the entity refuses to lift it, one that treats it as
+   * a destination refuses to land there. Merely linking it stays allowed.
    */
-  sourceIsReadOnly?: boolean;
+  entityIsReadOnly?: boolean;
 }
 export interface DraggedEntityReduxItem {
   index?: number;

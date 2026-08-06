@@ -444,6 +444,9 @@ const EntitySuggesterFull: React.FC<
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
       excludedEntityClasses.includes(newHoverred.entityClass) ||
+      // the suggester picks a destination the user has to be able to write,
+      // the same rule filterEditorRights applies to the typed suggestions
+      (filterEditorRights && newHoverred.entityIsReadOnly) ||
       // Is T or S template inside S template
       ((newHoverred.entityClass === EntityEnums.Class.Territory ||
         newHoverred.entityClass === EntityEnums.Class.Statement) &&
@@ -641,10 +644,12 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       isInsideStatement = false,
       disabled = false,
       categoryTypes = classesAll,
+      filterEditorRights = false,
     } = rest;
 
     if (disabled) return false;
     if (item.isDiscouraged) return false;
+    if (filterEditorRights && item.entityIsReadOnly) return false;
     if (disableTemplatesAccept && item.isTemplate) return false;
     if (excludedActantIds.includes(item.id)) return false;
     if (excludedEntityClasses.includes(item.entityClass)) return false;

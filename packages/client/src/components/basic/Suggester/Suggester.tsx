@@ -384,13 +384,16 @@ export const Suggester: React.FC<Suggester> = ({
   return (
     // div is necessary for flex to work and render the clear button properly
     <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
+      {/* the drop ref covers the warning icon too - a pointer crossing onto it
+          would otherwise leave the target, hide the icon, and land back on the
+          target, flickering for as long as it hovers there */}
       <StyledSuggester
+        ref={dropRef}
         $marginTop={marginTop}
         $fullWidth={inputWidth === "full"}
         $isFocused={isFocused}
       >
         <StyledInputWrapper
-          ref={dropRef}
           $hasButton={!disableCreate}
           $isOver={isOver}
           $isFocused={isFocused}

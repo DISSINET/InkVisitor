@@ -204,7 +204,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               <EntityTag
                 entity={statement}
                 showOnly="tag"
-                sourceIsReadOnly={right === UserEnums.RoleMode.Read}
+                entityIsReadOnly={right === UserEnums.RoleMode.Read}
               />
             </StyledTagCellWrap>
           );

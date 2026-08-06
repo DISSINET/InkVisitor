@@ -223,6 +223,12 @@
   },
   {
     "controller": "entities",
+    "route": "query-export",
+    "method": "POST",
+    "roles": ["admin"]
+  },
+  {
+    "controller": "entities",
     "route": ":entityId/detail",
     "method": "GET",
     "roles": ["*"]
