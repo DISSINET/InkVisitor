@@ -134,8 +134,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     }
   }
   .react-select__clear-indicator {
-    padding: ${({ userDropdown }) => (userDropdown ? "0" : "0.2rem")};
-    color: ${({ theme }) => theme.color["primary"]};
+    padding: ${({ userDropdown }) => (userDropdown ? "0" : "0 0.2rem")};
   }
   .react-select__indicator-separator {
     display: none;
@@ -194,6 +193,18 @@ export const StyledSelect = styled(Select)<StyledSelect>`
 export const StyledFaChevronDown = styled(FaChevronDown)<{ $suggester?: boolean }>`
   margin-right: ${({ $suggester }) => ($suggester ? "0.3rem" : "0.4rem")};
   /* margin-bottom: ${({ $suggester }) => ($suggester ? "0.10rem" : "0")}; */
+`;
+
+// same cross the multi value chips carry, in the size they render it at
+export const StyledClearIconWrap = styled.div`
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["black"]};
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
 `;
 
 export const StyledValueIconWrap = styled.div`

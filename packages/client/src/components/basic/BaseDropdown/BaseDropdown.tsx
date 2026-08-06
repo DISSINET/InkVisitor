@@ -6,6 +6,7 @@ import { Loader, Tooltip } from "components";
 import React, { useState } from "react";
 import {
   ActionMeta,
+  ClearIndicatorProps,
   ControlProps,
   DropdownIndicatorProps,
   MultiValueProps,
@@ -15,6 +16,7 @@ import {
   components,
 } from "react-select";
 import {
+  StyledClearIconWrap,
   StyledFaChevronDown,
   StyledSelect,
   StyledSelectWrapper,
@@ -112,6 +114,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
     MultiValue,
     ValueContainer,
     DropdownIndicator: SuggesterDropdownIndicator,
+    ClearIndicator,
     Control,
     MenuPortal,
   };
@@ -242,6 +245,16 @@ const SingleValue = (props: SingleValueProps): React.ReactElement => {
 
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   return <components.Option {...props} />;
+};
+
+const ClearIndicator = (props: ClearIndicatorProps): React.ReactElement => {
+  return (
+    <components.ClearIndicator {...props}>
+      <StyledClearIconWrap>
+        <components.CrossIcon size={14} />
+      </StyledClearIconWrap>
+    </components.ClearIndicator>
+  );
 };
 
 const ValueContainer = ({

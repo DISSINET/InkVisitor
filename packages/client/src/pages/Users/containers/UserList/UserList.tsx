@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, ButtonGroup, Loader, RoleBadge, Submit } from "components";
 import { AttributeButtonGroup } from "components/advanced";
-import { useResourcesWithDocumentsQuery, useUsersGetMoreQuery } from "hooks/react-query";
+import { useUsersGetMoreQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaKey, FaToggleOff, FaToggleOn, FaUserCheck } from "react-icons/fa";
 import { CellProps, Column, Row, useTable } from "react-table";
@@ -25,6 +25,7 @@ import {
   StyledTHead,
   UserListRowFlash,
 } from "./UserListStyles";
+import { UserListResourceRightsCell } from "./UserListRightsCell/UserListResourceRightsCell";
 import { UserListRightsCell } from "./UserListRightsCell/UserListRightsCell";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UserListToolbar } from "./UserListToolbar/UserListToolbar";
@@ -196,8 +197,6 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     return row.id;
   }, []);
 
-  const { data: resourcesWithDocuments } = useResourcesWithDocumentsQuery();
-
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
       {
@@ -321,18 +320,13 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           }
 
           return (
-            <UserListRightsCell
-              entityClass={EntityEnums.Class.Resource}
+            <UserListResourceRightsCell
               assignedIds={rights
                 .filter((right: IUserRight) => isAnnotateRight(right))
                 .map((right) => right.territory)}
               entities={resourceRights?.map((right) => right.resource)}
-              placeholder="assign a resource"
-              invalidLabel="invalid R"
-              removeTooltip="remove resource from rights"
               onAdd={(resourceId) => addResourceRightToUser(row.original, resourceId)}
               onRemove={(resourceId) => removeResourceRightFromUser(row.original, resourceId)}
-              preSuggestions={resourcesWithDocuments}
             />
           );
         },
@@ -438,7 +432,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash, resourcesWithDocuments, localUsers],
+    [canVerifyManually, scheduleRowFlash, localUsers],
   );
 
   // an empty body during the first fetch is not yet an empty result
