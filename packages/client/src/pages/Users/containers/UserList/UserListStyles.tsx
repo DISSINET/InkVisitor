@@ -182,6 +182,11 @@ export const StyledTd = styled.td<StyledTd>`
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   vertical-align: middle;
+  /* Controls inside a cell (the suggester's focus ring and create button, an
+     input's action buttons) carry their own z-index and none of the wrappers
+     around them form a stacking context, so those values would compete with the
+     sticky header at table level. Each cell contains its own. */
+  isolation: isolate;
   /* the row owns the colour for every state, including hover; a sticky cell
      needs an opaque one of its own to cover the columns sliding under it */
   background: inherit;

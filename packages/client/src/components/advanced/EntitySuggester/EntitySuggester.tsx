@@ -752,6 +752,11 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       ) : (
         <EntitySuggesterFull
           {...rest}
+          // the field appears under the pointer, so it is already the thing the
+          // user is aiming at - typing goes to the input, not to the class
+          // dropdown that would otherwise take the focus on a multi-class field
+          autoFocus
+          autoFocusInput
           onFocusChange={handleFocusChange}
           onTyped={handleTyped}
           externalDroppedItem={pendingDropItem}
