@@ -12,11 +12,7 @@ import {
   StyledToolbarCount,
   StyledToolbarGroup,
 } from "../UserListStyles";
-import {
-  emptyUserListFilters,
-  hasActiveUserListFilters,
-  UserListFilters,
-} from "../userListFilter";
+import { emptyUserListFilters, hasActiveUserListFilters, UserListFilters } from "../userListFilter";
 
 interface UserListToolbar {
   filters: UserListFilters;
@@ -77,7 +73,8 @@ export const UserListToolbar: React.FC<UserListToolbar> = ({
           {hasActiveUserListFilters(filters) && (
             <Button
               icon={<IcoClose />}
-              color="danger"
+              inverted
+              noBackground
               noBorder
               tooltipLabel="clear all filters"
               size={ButtonSize.Medium}

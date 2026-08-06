@@ -280,13 +280,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
     handleLayoutInit,
   } = useVerticalSeparators();
 
-  const { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel } =
-    usePanelToggles({
-      treeSeparator,
-      centerSeparator,
-      searchSeparator,
-      onePercentOfLayoutWidth,
-    });
+  const {
+    toggleFirstPanel,
+    toggleSecondPanel,
+    toggleThirdPanel,
+    toggleFourthPanel,
+    expandThirdPanelLayout,
+  } = usePanelToggles({
+    treeSeparator,
+    centerSeparator,
+    searchSeparator,
+    onePercentOfLayoutWidth,
+  });
+
+  const prevThirdPanelExpandedRef = useRef(thirdPanelExpanded);
+  useEffect(() => {
+    const wasExpanded = prevThirdPanelExpandedRef.current;
+    prevThirdPanelExpandedRef.current = thirdPanelExpanded;
+
+    if (!wasExpanded && thirdPanelExpanded) {
+      expandThirdPanelLayout();
+    }
+  }, [thirdPanelExpanded]);
 
   const firstPanelButton = () => (
     <IconButton

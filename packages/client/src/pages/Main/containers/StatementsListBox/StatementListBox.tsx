@@ -24,6 +24,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
@@ -802,6 +803,10 @@ export const StatementListBox: React.FC = () => {
                       statements={statementsWithOrder}
                       handleRowClick={(rowId: string) => {
                         dispatch(setShowWarnings(false));
+                        // the editor the click opens lives in the third panel,
+                        // and re-clicking the selected row leaves statementId
+                        // untouched, so expansion cannot ride on its change
+                        dispatch(setThirdPanelExpanded(true));
                         if (statementId !== rowId) {
                           setStatementId(rowId);
                         } else {
