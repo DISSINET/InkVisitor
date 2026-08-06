@@ -22,6 +22,7 @@ import {
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
+  ITerritory,
   IUser,
   Relation as RelationType,
   RequestSearch,
@@ -37,11 +38,13 @@ import {
   InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
+  TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
 import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
+import Territory from "@models/territory/territory";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
 import {
@@ -413,6 +416,15 @@ export default Router()
         throw new EntityDoesNotExist(`entity with id ${entityId} does not exist`, entityId);
       }
 
+      // the id is copied out rather than held by reference: the merge below
+      // writes the update into existingEntity, mutating the parent object itself
+      const parentIdBeforeUpdate =
+        existingEntity.class === EntityEnums.Class.Territory &&
+        (existingEntity as ITerritory).data?.parent
+          ? ((existingEntity as ITerritory).data.parent as { territoryId: string })
+              .territoryId
+          : undefined;
+
       // get correct IDbModel implementation
       const model = getEntityClass({
         ...mergeDeep(existingEntity, entityData),
@@ -427,6 +439,39 @@ export default Router()
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be saved");
+      }
+
+      // Re-parenting a Territory through this route is the same operation the
+      // tree position route performs, and needs the same right on the branch it
+      // lands in: canBeEditedByUser derives the right for the moved Territory
+      // alone, which says nothing about where it is going.
+      if (existingEntity.class === EntityEnums.Class.Territory) {
+        const newParent = (model as Territory).data.parent;
+        const newParentId = newParent ? newParent.territoryId : undefined;
+        if (
+          newParentId &&
+          newParentId !== parentIdBeforeUpdate
+        ) {
+          const parentData = await findEntityById<ITerritory>(
+            request.db,
+            newParentId
+          );
+          if (!parentData || parentData.class !== EntityEnums.Class.Territory) {
+            throw new TerritoryDoesNotExits(
+              `territory ${newParentId} was not found`,
+              newParentId
+            );
+          }
+          if (
+            !new Territory(parentData).canBeEditedByUser(
+              request.getUserOrFail()
+            )
+          ) {
+            throw new PermissionDeniedError(
+              `cannot move territory under ${newParentId}`
+            );
+          }
+        }
       }
 
       await model.beforeSave(request.db.connection);

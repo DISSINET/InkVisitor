@@ -440,7 +440,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? readTerritories.map((territory) => (
-                        <EntityTag key={territory.id} entity={territory} />
+                        <EntityTag fullWidth key={territory.id} entity={territory} />
                       ))
                     : "all"}
                 </StyledRightsWrap>
@@ -449,7 +449,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? writeTerritories.map((territory) => (
-                        <EntityTag key={territory.id} entity={territory} />
+                        <EntityTag fullWidth key={territory.id} entity={territory} />
                       ))
                     : "all"}
                 </StyledRightsWrap>
@@ -458,7 +458,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <StyledRightsWrap>
                   {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
                     ? (user.resourceRights ?? []).map(({ resource }) => (
-                        <EntityTag key={resource.id} entity={resource} />
+                        <EntityTag fullWidth key={resource.id} entity={resource} />
                       ))
                     : "all"}
                 </StyledRightsWrap>

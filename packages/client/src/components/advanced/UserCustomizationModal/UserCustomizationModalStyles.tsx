@@ -84,10 +84,19 @@ export const StyledInlineAction = styled.div`
   justify-content: flex-start;
 `;
 
+export const StyledRightsLabel = styled.div`
+  margin-top: 0.1rem;
+  justify-self: end;
+  align-self: start;
+  color: ${({ theme }) => theme.color["gray"][700]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
 export const StyledRightsWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[2]};
+  max-width: 23.5rem;
 `;
 
 export const StyledRightsGrid = styled.div`
@@ -96,10 +105,4 @@ export const StyledRightsGrid = styled.div`
   align-items: center;
   row-gap: ${({ theme }) => theme.space[3]};
   column-gap: ${({ theme }) => theme.space[3]};
-`;
-
-export const StyledRightsLabel = styled.div`
-  justify-self: end;
-  color: ${({ theme }) => theme.color["gray"][700]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
