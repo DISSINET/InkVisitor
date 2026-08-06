@@ -142,6 +142,12 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const treeWidthTooNarrow = useWidthBreakpoint(160, boxContentId("Territories"));
 
+  const canCreateTerritory =
+    userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner;
+  // the breakpoint is sized for the full row; without the create button beside
+  // it the filter label still fits, so only a crowded row drops it
+  const hideFilterLabel = treeWidthTooNarrow && canCreateTerritory;
+
   // delay of show content for fluent animation on open
   const [showTerritoryTree, setShowTerritoryTree] = useState(true);
 
@@ -160,7 +166,7 @@ export const TerritoryTreeBox: React.FC = () => {
       {showTerritoryTree && (
         <>
           <StyledTreeButtonGroup $gap="small">
-            {(userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) && (
+            {canCreateTerritory && (
               <Button
                 label={!treeWidthTooNarrow ? "new" : ""}
                 iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
@@ -172,7 +178,7 @@ export const TerritoryTreeBox: React.FC = () => {
               />
             )}
             <Button
-              label={!treeWidthTooNarrow ? "filter" : ""}
+              label={!hideFilterLabel ? "filter" : ""}
               onClick={() => {
                 if (treeFilterOpen) {
                   dispatch(setFilterOpen(false));
@@ -192,7 +198,7 @@ export const TerritoryTreeBox: React.FC = () => {
               fullWidth
               icon={<IoFilter size={13} />}
               tooltipLabel={
-                treeFilterOpen ? "clear all filters" : treeWidthTooNarrow ? "filter" : ""
+                treeFilterOpen ? "clear all filters" : hideFilterLabel ? "filter" : ""
               }
               tooltipPosition="right"
             />
