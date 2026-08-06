@@ -24,31 +24,34 @@ const ROLES = ["editor"];
  * The datasets now seed all three, but that only reaches databases built by a
  * fresh import - this repairs the ones already in service.
  */
-const ROUTES: Array<{ method: string; route: string }> = [
-  { method: "DELETE", route: ":entityId?" },
-  { method: "POST", route: ":entityId/restore" },
-  { method: "POST", route: ":entityId/clone" },
+const ROUTES: Array<{ controller: string; method: string; route: string }> = [
+  { controller: "entities", method: "DELETE", route: ":entityId?" },
+  { controller: "entities", method: "POST", route: ":entityId/restore" },
+  { controller: "entities", method: "POST", route: ":entityId/clone" },
+  // seeded permissively in the datasets from the start, but a database built
+  // before that carries the auto-created roles:[] row and refuses drag-move
+  { controller: "statements", method: "PUT", route: "batch-move" },
 ];
 
 const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
-  for (const { method, route } of ROUTES) {
+  for (const { controller, method, route } of ROUTES) {
     const rows: any[] = await r
       .table("acl_permissions")
-      .filter({ controller: "entities", method, route })
+      .filter({ controller, method, route })
       .run(db);
 
     if (!rows.length) {
       await r
         .table("acl_permissions")
         .insert({
-          controller: "entities",
+          controller,
           method,
           route,
           roles: ROLES,
           public: false,
         })
         .run(db);
-      console.log(`Inserted acl_permissions row for entities ${method} "${route}"`);
+      console.log(`Inserted acl_permissions row for ${controller} ${method} "${route}"`);
       continue;
     }
 
@@ -56,7 +59,7 @@ const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
       (row) => !ROLES.every((role) => (row.roles ?? []).includes(role))
     );
     if (!stale.length) {
-      console.log(`entities ${method} "${route}" already grants the editor`);
+      console.log(`${controller} ${method} "${route}" already grants the editor`);
       continue;
     }
 
@@ -66,7 +69,7 @@ const fixEditorEntityAclJob: IJob = async (db: Connection): Promise<void> => {
       .update({ roles: ROLES })
       .run(db);
     console.log(
-      `Updated ${stale.length} acl_permissions row(s) for entities ${method} "${route}"`
+      `Updated ${stale.length} acl_permissions row(s) for ${controller} ${method} "${route}"`
     );
   }
 };

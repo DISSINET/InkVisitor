@@ -33,7 +33,7 @@
     "controller": "statements",
     "route": "batch-move",
     "method": "PUT",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "territories",

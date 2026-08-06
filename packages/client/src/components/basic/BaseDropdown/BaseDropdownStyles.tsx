@@ -195,7 +195,7 @@ export const StyledFaChevronDown = styled(FaChevronDown)<{ $suggester?: boolean 
   /* margin-bottom: ${({ $suggester }) => ($suggester ? "0.10rem" : "0")}; */
 `;
 
-// same cross the multi value chips carry, in the size they render it at
+// same cross the selected multi values carry, in the size they render it at
 export const StyledClearIconWrap = styled.div`
   display: flex;
   align-items: center;
