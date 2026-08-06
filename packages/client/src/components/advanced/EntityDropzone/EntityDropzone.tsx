@@ -26,6 +26,12 @@ interface EntityDropzone {
    * all, which reads as though the drag simply missed.
    */
   refuseDrop?: boolean;
+  /**
+   * Set on targets that move the entity rather than link it: a statement can
+   * only leave a territory the user may write, so one dragged out of a
+   * read-only territory is refused wherever it lands.
+   */
+  refuseReadOnlySource?: boolean;
 }
 export const EntityDropzone: React.FC<EntityDropzone> = ({
   categoryTypes,
@@ -42,6 +48,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   children,
   disabled,
   refuseDrop,
+  refuseReadOnlySource,
 }) => {
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
   const rejectsDrop = isWrongDropCategory || !!refuseDrop;
@@ -79,6 +86,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
+      (refuseReadOnlySource && newHoverred.sourceIsReadOnly) ||
       (newHoverred.isTemplate &&
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||

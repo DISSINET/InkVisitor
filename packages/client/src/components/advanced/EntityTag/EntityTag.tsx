@@ -70,6 +70,8 @@ interface EntityTag {
   disableTooltip?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
+  /** the entity sits in a container the user may only read - see EntityDragItem */
+  sourceIsReadOnly?: boolean;
   disableCopyToClipboard?: boolean;
   tooltipPosition?: Placement;
   updateOrderFn?: (item: EntityDragItem) => void;
@@ -103,6 +105,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isSelected,
   disableTooltip = false,
   disableDrag = false,
+  sourceIsReadOnly,
   disableDoubleClick = false,
   disableCopyToClipboard = false,
   tooltipPosition,
@@ -255,6 +258,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
     entity,
     isTemplate: entity.isTemplate ?? false,
     isDiscouraged: entity.status === EntityEnums.Status.Discouraged,
+    sourceIsReadOnly,
     propId: entity.id,
     entityClass: entity.class,
     disableDrag,

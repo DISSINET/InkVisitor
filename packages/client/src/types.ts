@@ -170,6 +170,12 @@ export interface EntityDragItem extends DragItem {
   entityClass: EntityEnums.Class;
   isTemplate: boolean;
   isDiscouraged: boolean;
+  /**
+   * Set when the tag was dragged out of a container the user may only read.
+   * Only drop targets that would move the entity out of it care - linking it
+   * somewhere else stays allowed.
+   */
+  sourceIsReadOnly?: boolean;
 }
 export interface DraggedEntityReduxItem {
   index?: number;

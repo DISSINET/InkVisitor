@@ -248,6 +248,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               disableTemplatesAccept
               categoryTypes={[EntityEnums.Class.Statement]}
               refuseDrop={right === UserEnums.RoleMode.Read}
+              refuseReadOnlySource
               // ideally statements in current T
               // excludedActantIds={[territory.data]}
             >
