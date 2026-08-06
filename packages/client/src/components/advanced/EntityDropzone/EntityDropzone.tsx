@@ -20,6 +20,12 @@ interface EntityDropzone {
 
   children: ReactElement;
   disabled?: boolean;
+  /**
+   * Refuses the drop while still registering as a target, so hovering it warns
+   * the way a wrong entity class does. `disabled` instead leaves no target at
+   * all, which reads as though the drag simply missed.
+   */
+  refuseDrop?: boolean;
 }
 export const EntityDropzone: React.FC<EntityDropzone> = ({
   categoryTypes,
@@ -35,8 +41,10 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
 
   children,
   disabled,
+  refuseDrop,
 }) => {
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
+  const rejectsDrop = isWrongDropCategory || !!refuseDrop;
 
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory,
@@ -52,7 +60,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   };
 
   const handleDropped = (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
-    if (!isWrongDropCategory) {
+    if (!rejectsDrop) {
       if (instantiateTemplate && !disableTemplateInstantiation) {
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);
       } else {
@@ -92,7 +100,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
         handleHoverred(newHoverred);
       }}
       isInsideTemplate={isInsideTemplate}
-      isWrongDropCategory={isWrongDropCategory}
+      isWrongDropCategory={rejectsDrop}
       disabled={disabled}
     >
       {children}
