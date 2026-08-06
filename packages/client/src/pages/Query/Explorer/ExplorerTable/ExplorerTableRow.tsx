@@ -19,7 +19,6 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
-import { getStoredUserRole } from "utils/userStorage";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
 import {
   StyledAltLabelAddInput,
@@ -183,13 +182,15 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
 
   const orderedLanguageDict = useOrderedLanguageDict();
 
-  // A Viewer's writes are rejected by the server for every entity class, so an
-  // editable column renders as a plain value for them - no dropdown, no
-  // suggester, no unlink button.
+  // Every editable cell writes to the row's own entity - even one showing a
+  // related entity edits this row's props - so the row's mode decides them all.
+  // Without a write mode the cells render as plain values: no dropdown, no
+  // suggester, no unlink button. A Viewer resolves to Read on every class, and
+  // a Territory, Statement or Resource the editor has no right to does too.
+  const rowIsEditable = rowItem?.right !== UserEnums.RoleMode.Read;
   const isColumnEditable = React.useCallback(
-    (column: Explore.IExploreColumn) =>
-      column.editable && getStoredUserRole() !== UserEnums.Role.Viewer,
-    []
+    (column: Explore.IExploreColumn) => column.editable && rowIsEditable,
+    [rowIsEditable]
   );
 
   const updateEntityMutation = useMutation({

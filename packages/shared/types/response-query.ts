@@ -1,3 +1,4 @@
+import { UserEnums } from "../enums";
 import { Query, Explore } from "./query";
 import { IEntity } from "./entity";
 import { IUser } from "./user";
@@ -5,6 +6,12 @@ import { IUser } from "./user";
 export interface IResponseQueryEntity {
   rowI?: number;
   entity: IEntity; // the actual passing entity model
+  /**
+   * The requesting user's mode for this row's entity, derived the same way as
+   * IResponseEntity.right. Editable columns act on the row entity, so this is
+   * what decides whether its cells render as controls or as plain values.
+   */
+  right?: UserEnums.RoleMode;
   /** Surfaced via "include equivalents" result expansion rather than a direct match (#2969). */
   isEquivalent?: boolean;
   /** Surfaced via "include subordinates" result expansion rather than a direct match (#2969). */

@@ -893,6 +893,15 @@ export default Router()
 
       const results = await querySearch.getResults(request.db.connection);
 
+      // The table renders editable cells for a row only when its entity may be
+      // edited, so each row carries the mode the same rules produce elsewhere.
+      // Every path behind it reads the in-memory tree cache or the entity's own
+      // fields, so this costs no further queries.
+      const queryUser = request.getUserOrFail();
+      for (const row of results) {
+        row.right = getEntityClass({ ...row.entity }).getUserRoleMode(queryUser);
+      }
+
       const entityIds = querySearch.results?.items ?? [];
 
       return {

@@ -75,9 +75,9 @@ access.
 
 Editor:
 
-- can **read** Documents
-- can **edit and annotate a Document** when its Resource has been assigned to  
-  him. Documents he isn't assigned to open in read-only mode.
+- can **read** all Documents
+- can **edit, annotate, export and delete a Document** when its Resource has been assigned to  
+  him
 
 ## Templates
 
@@ -90,9 +90,24 @@ Editor:
 ## Explorer
 
 The Explorer (Query page) is open to an Editor: he can build and run queries,
-add columns, and edit values directly in the table — Status, Label language,
-Part of speech, Legacy ID, Detail, and alternative labels — on any Entity he is
-allowed to edit.
+add columns, and edit some values directly in the table — Status, Label
+language, Part of speech, Legacy ID, Detail, and alternative labels.
+
+**Searching is not the same as editing.** A query can return Entities from
+anywhere, including parts of the tree he has no access to. The table applies the
+same rules as the rest of the app, row by row:
+
+- a **Territory** row is editable only where he has edit access;
+- a **Statement** row only when he can edit the Territory it sits in;
+- a **Resource** row only when it has no Document, or when that Resource has been
+  assigned to him;
+- **other Entities** (Concepts, Persons, and so on) are always editable.
+
+Rows he cannot edit still appear, with their values shown as plain text instead
+of editable fields, so a query still returns the full picture — he simply cannot
+change what is outside his scope. This applies to every editable column,
+including the ones that add or unlink related Entities, since those edit the row
+Entity itself.
 
 Of the batch actions offered above the results, he may use only:
 
