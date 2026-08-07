@@ -187,7 +187,12 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
   // Without a write mode the cells render as plain values: no dropdown, no
   // suggester, no unlink button. A Viewer resolves to Read on every class, and
   // a Territory, Statement or Resource the editor has no right to does too.
-  const rowIsEditable = rowItem?.right !== UserEnums.RoleMode.Read;
+  // A write mode has to be present to unlock the cells: `right` is optional on
+  // the response, and a row that arrived without one (a response cached before
+  // the field existed, a producer that does not stamp it) grants nothing.
+  const rowIsEditable =
+    rowItem?.right === UserEnums.RoleMode.Write ||
+    rowItem?.right === UserEnums.RoleMode.Admin;
   const isColumnEditable = React.useCallback(
     (column: Explore.IExploreColumn) => column.editable && rowIsEditable,
     [rowIsEditable]
