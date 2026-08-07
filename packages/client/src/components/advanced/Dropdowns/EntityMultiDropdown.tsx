@@ -1,11 +1,9 @@
 import { allEntities, empty } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
+import { DropdownItem } from "@inkvisitor/shared/types";
+import { IcoCheckboxChecked, IcoCheckboxUnchecked } from "Theme/icons";
 import { BaseDropdown } from "components";
-import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
-import { useTheme } from "hooks";
 import React from "react";
-import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
-import { components, MultiValueProps, OptionProps, ValueContainerProps } from "react-select";
 import { EntityColors } from "types";
 import {
   StyledEntityMultiValue,
@@ -14,7 +12,7 @@ import {
   StyledOptionIconWrap,
   StyledOptionRow,
 } from "./DropdownStyles";
-import { DropdownItem } from "@inkvisitor/shared/types";
+import { resolveEntityMultiChange } from "./selectAllLogic";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -23,16 +21,11 @@ interface EntityMultiDropdown<T = string> {
   options: { value: T; label: string; info?: string }[];
   placeholder?: string;
   noOptionsMessage?: string;
-
-  disableAny?: boolean;
   disableEmpty?: boolean;
   disableTyping?: boolean;
   disabled?: boolean;
-
   isClearable?: boolean;
   limitSelectedItems?: number;
-
-  loggerId?: string;
   closeMenuOnSelect?: boolean;
   shortLabel?: boolean;
 }
@@ -43,199 +36,99 @@ export const EntityMultiDropdown = <T extends string>({
   options,
   placeholder,
   noOptionsMessage,
-
-  disableAny = false,
   disableEmpty = false,
   disableTyping = false,
   disabled,
-
   isClearable = true,
   limitSelectedItems,
-
-  loggerId,
   closeMenuOnSelect = true,
   shortLabel = false,
 }: EntityMultiDropdown<T>) => {
-  const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
+  const generalValues: DropdownItem[] = disableEmpty
+    ? [allEntities]
+    : [empty, allEntities];
 
-  const getAnyEquivalentValues = (): T[] => {
-    const items: DropdownItem[] = [];
-    if (!disableEmpty) {
-      items.push(empty);
+  const allOptionsSelected = options.every((option) =>
+    value.includes(option.value as T)
+  );
+
+  // ANY is lit iff every real class is selected; other options by membership
+  const selectedOptions = generalValues.concat(options).filter((o) => {
+    if (o.value === allEntities.value) {
+      return allOptionsSelected;
     }
-    if (!disableAny) {
-      items.push(allEntities);
-    }
-    items.push(...options);
-    return getValues(items);
-  };
+    return value.includes(o.value as T);
+  });
 
-  const applyChange = (nextValues: T[]) => {
-    onChange(nextValues);
-  };
-
-  const generalValues = [];
-  if (!disableEmpty) {
-    generalValues.push(empty);
-  }
-  if (!disableAny) {
-    generalValues.push(allEntities);
-  }
+  /* chips exclude ANY; when exactly one chip would overflow the limit, show
+     it instead of "+1 more" (pre-rewrite behavior) */
+  const chipCount = selectedOptions.filter(
+    (o) => o.value !== allEntities.value
+  ).length;
+  const overflow = limitSelectedItems
+    ? chipCount - limitSelectedItems
+    : 0;
+  const effectiveChipLimit = limitSelectedItems
+    ? overflow === 1
+      ? limitSelectedItems + 1
+      : limitSelectedItems
+    : undefined;
 
   return (
     <BaseDropdown
-      entityDropdown
+      multi
       width={width}
-      isMulti
-      isClearable={isClearable}
+      clearable={isClearable}
       options={[...generalValues, ...options]}
-      value={(() => {
-        const allOptionsSelected = options.every((option) => value.includes(option.value as T));
-
-        return generalValues.concat(options).filter((o) => {
-          // For "any" option, check if all options are selected
-          if (o.value === allEntities.value) {
-            return allOptionsSelected;
-          }
-          // For other options, check if they're in the value array
-          return value.includes(o.value as T);
-        });
-      })()}
-      onChange={(selectedOptions, event) => {
-        const selected = selectedOptions ?? [];
-        const allClassesSelected = options.every((option) => selected.includes(option));
-        // (possible to add && !disableEmpty for possibility to turn off empty)
-        const includesEmpty = selected.includes(empty);
-        const includesAny = selected.includes(allEntities);
-
-        // when something is selected = at least one option
-        if (selected.length > 0) {
-          if (allClassesSelected && event?.action === "deselect-option") {
-            // empty was deselected
-            if (includesAny) {
-              return applyChange(getValues(selected));
-            }
-            // ANY was deselected
-            else {
-              return applyChange(includesEmpty ? [empty.value as T] : []);
-            }
-          }
-          // when all option selected (ANY is clicked)
-          else if (selected[selected.length - 1].value === allEntities.value) {
-            return applyChange(getAnyEquivalentValues());
-          }
-          // all are selected without ANY -> highlight also ANY option (direct click on ANY is resolved earlier)
-          else if (allClassesSelected && event?.action === "select-option") {
-            return applyChange(getAnyEquivalentValues());
-          }
-          // something was deselected from all selected (need to deselect ANY)
-          else if (event?.action === "deselect-option" && includesAny && !allClassesSelected) {
-            const result = selected.filter((option) => option.value !== allEntities.value);
-            return applyChange(getValues(result));
-          }
-        }
-        return applyChange(getValues(selected));
-      }}
+      value={selectedOptions}
+      onChange={(selected, meta) =>
+        onChange(
+          resolveEntityMultiChange<T>({
+            selected,
+            action: meta.action,
+            options,
+            disableEmpty,
+          })
+        )
+      }
       placeholder={placeholder}
       noOptionsMessage={noOptionsMessage}
-      disableTyping={disableTyping}
+      searchable={!disableTyping}
       disabled={disabled}
-      loggerId={loggerId}
-      customComponents={{
-        Option,
-        MultiValue: MultiValue as typeof components.MultiValue,
-        ValueContainer,
-      }}
-      limitSelectedItems={limitSelectedItems}
       closeMenuOnSelect={closeMenuOnSelect}
-      shortLabel={shortLabel}
-    />
-  );
-};
-
-const ValueContainer = ({
-  children,
-  ...props
-}: { children: any } & ValueContainerProps<any, any, any> & {
-    selectProps: StyledSelect;
-  }): React.ReactElement => {
-  const theme = useTheme();
-
-  const currentValues: DropdownItem[] = [...props.getValue()];
-  let toBeRendered = children;
-
-  if (currentValues.length > 0) {
-    // filter ANY out of the values array
-    const filteredChildren = children[0].filter(
-      (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`,
-    );
-
-    const limit = props.selectProps.limitSelectedItems;
-    // Show limited number of entities and add ellipsis if there are more
-    const remainingCount = limit ? filteredChildren.length - limit : 0;
-
-    // If there's only 1 remaining, show it instead of "+1 more"
-    // Only show "+X more" when there are 2 or more remaining
-    const visibleChildren = limit
-      ? filteredChildren.slice(0, remainingCount === 1 ? limit + 1 : limit)
-      : filteredChildren;
-    const displayRemainingCount = remainingCount > 1 ? remainingCount : 0;
-
-    toBeRendered = [
-      [
-        ...visibleChildren,
-        ...(displayRemainingCount > 0
-          ? [
-              <div
-                key="ellipsis"
-                style={{
-                  padding: "0.2rem 0.2rem 0.2rem 0.3rem",
-                  color: theme.color.primary,
-                }}
-              >
-                +{displayRemainingCount} more
-              </div>,
-            ]
-          : []),
-      ],
-      children[1],
-    ];
-  }
-
-  return <components.ValueContainer {...props}>{toBeRendered}</components.ValueContainer>;
-};
-
-const MultiValue = (props: any): React.ReactElement => {
-  const shortLabel = props.selectProps?.shortLabel;
-
-  return (
-    <components.MultiValue {...props}>
-      <StyledEntityMultiValue $color={EntityColors[props.data.value]?.color ?? "transparent"}>
-        {shortLabel ? props.data.value : props.data.label}
-      </StyledEntityMultiValue>
-    </components.MultiValue>
-  );
-};
-
-const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  const isEntityClass = Object.values(EntityEnums.Class).includes(props.value);
-  return (
-    <components.Option {...props}>
-      <StyledOptionRow>
-        <StyledOptionIconWrap>
-          {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
-        </StyledOptionIconWrap>
-        <StyledEntityOptionClass>{isEntityClass && props.value}</StyledEntityOptionClass>
-        <StyledEntityValue
-          color={
-            props.value === EntityEnums.Extension.Empty
-              ? "transparent"
-              : (EntityColors[props.value]?.color ?? "transparent")
-          }
+      hiddenChipValues={[allEntities.value]}
+      chipLimit={effectiveChipLimit}
+      renderChip={(o) => (
+        <StyledEntityMultiValue
+          $color={EntityColors[o.value]?.color ?? "transparent"}
         >
-          {isEntityClass ? props.label : <i>{props.label}</i>}
-        </StyledEntityValue>
-      </StyledOptionRow>
-    </components.Option>
+          {shortLabel ? o.value : o.label}
+        </StyledEntityMultiValue>
+      )}
+      renderOption={(o, { selected }) => {
+        const isEntityClass = Object.values(EntityEnums.Class).includes(
+          o.value as EntityEnums.Class
+        );
+        return (
+          <StyledOptionRow>
+            <StyledOptionIconWrap>
+              {selected ? <IcoCheckboxChecked /> : <IcoCheckboxUnchecked />}
+            </StyledOptionIconWrap>
+            <StyledEntityOptionClass>
+              {isEntityClass && o.value}
+            </StyledEntityOptionClass>
+            <StyledEntityValue
+              color={
+                o.value === EntityEnums.Extension.Empty
+                  ? "transparent"
+                  : (EntityColors[o.value]?.color ?? "transparent")
+              }
+            >
+              {isEntityClass ? o.label : <i>{o.label}</i>}
+            </StyledEntityValue>
+          </StyledOptionRow>
+        );
+      }}
+    />
   );
 };

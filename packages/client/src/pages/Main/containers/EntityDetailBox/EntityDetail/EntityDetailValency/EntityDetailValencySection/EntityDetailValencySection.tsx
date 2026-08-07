@@ -178,11 +178,6 @@ export const EntityDetailValencySection: React.FC<
       <StyledLabelInputWrapper>
         <StyledLabel>Entity type</StyledLabel>
         <Dropdown.Multi.Entity
-          loggerId={
-            relationType === RelationEnums.Type.SubjectSemantics
-              ? "subject-entity-type"
-              : ""
-          }
           disabled={!userCanEdit}
           options={entitiesDict}
           value={getEntityTypeValue() ?? []}
