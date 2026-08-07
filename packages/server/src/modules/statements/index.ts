@@ -301,6 +301,17 @@ export default Router()
         throw new StatementDoesNotExits("at least one statement not found", "");
       }
 
+      // The copies land in the target, so that is what has to be writable. The
+      // sources are only read - being able to see a statement is enough to take
+      // a copy of it into a territory of one's own.
+      if (
+        !new Territory({ ...territory }).canBeEditedByUser(req.getUserOrFail())
+      ) {
+        throw new PermissionDeniedError(
+          `cannot copy statements into territory ${newTerritoryId}`
+        );
+      }
+
       // Get existing statements in target territory to determine the last order
       const existingStatements = await Statement.findStatementsInTerritory(
         req.db.connection,

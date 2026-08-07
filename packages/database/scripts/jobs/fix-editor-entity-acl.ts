@@ -31,6 +31,7 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   // seeded permissively in the datasets from the start, but a database built
   // before that carries the auto-created roles:[] row and refuses drag-move
   { controller: "statements", method: "PUT", route: "batch-move" },
+  { controller: "statements", method: "POST", route: "batch-copy" },
   // the seeded relations rows cover the collection endpoints ("" for bulk
   // create/update/delete); editing or deleting one relation by id goes through
   // its own route, which had no row of its own

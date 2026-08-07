@@ -295,6 +295,19 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
+   * Predicate for testing if the user can create the statement entry.
+   * A Statement lands in a Territory, so creating one is a write to that
+   * Territory and answers to the same right as editing it - the base Entity
+   * rule (anyone but a Viewer) would let an Editor drop statements into a
+   * branch he may only read, whether through a plain create or a clone.
+   * @param user
+   * @returns boolean representing the access
+   */
+  canBeCreatedByUser(user: User): boolean {
+    return this.canBeEditedByUser(user);
+  }
+
+  /**
    * Predicate for testing if the user can at least view statement
    * @param user
    * @returns boolean representing the access

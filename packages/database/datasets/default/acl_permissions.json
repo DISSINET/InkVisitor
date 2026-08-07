@@ -36,6 +36,12 @@
     "roles": ["editor"]
   },
   {
+    "controller": "statements",
+    "route": "batch-copy",
+    "method": "POST",
+    "roles": ["editor"]
+  },
+  {
     "controller": "territories",
     "route": ":territoryId",
     "method": "GET",

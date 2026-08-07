@@ -52,6 +52,8 @@ export const StyledFieldGrid = styled.div`
 
 export const StyledFieldLabel = styled.label`
   justify-self: end;
+  align-self: start;
+  margin-top: 0.4rem;
   text-align: right;
   color: ${({ theme }) => theme.color["gray"][700]};
   font-size: 1.3rem;
@@ -60,6 +62,7 @@ export const StyledFieldLabel = styled.label`
 
 export const StyledFieldControl = styled.div`
   min-width: 0;
+  min-height: 2.5rem;
   display: flex;
   align-items: center;
 `;
@@ -85,17 +88,17 @@ export const StyledInlineAction = styled.div`
 `;
 
 export const StyledRightsLabel = styled.div`
-  margin-top: 0.1rem;
+  margin-top: 0.2rem;
   justify-self: end;
   align-self: start;
   color: ${({ theme }) => theme.color["gray"][700]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: 1.3rem;
 `;
 
 export const StyledRightsWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.space[2]};
+  gap: ${({ theme }) => theme.space[1]};
   max-width: 23.5rem;
 `;
 
