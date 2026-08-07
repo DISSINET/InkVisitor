@@ -779,7 +779,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       setExploreViewMode(Explore.EViewMode.Table);
                       if (explorerBoxMinimized) restoreExplorerToHalf();
                     }}
-                    bold={!isStatsView}
+                    textRegular={isStatsView}
                   />
                   <Button
                     size={ButtonSize.Medium}
@@ -797,7 +797,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       setExploreViewMode(Explore.EViewMode.Stats);
                       if (explorerBoxMinimized) restoreExplorerToHalf();
                     }}
-                    bold={isStatsView}
+                    textRegular={!isStatsView}
                   />
                 </SwitchGroup>
               }

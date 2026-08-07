@@ -1,19 +1,20 @@
 import { PasswordDoesNotMatchError, UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
-import { Button, Input, ModalInputWrap } from "components";
+import { Button, Input } from "components";
 import {
-  StyledButtonWrap,
   StyledDescription,
   StyledErrorText,
+  StyledErrorWrap,
+  StyledForm,
   StyledInputRow,
   StyledMail,
+  StyledMailIcon,
+  StyledSubmitWrap,
+  StyledText,
 } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
-import { FaUserPlus } from "react-icons/fa";
-import { TbMailFilled } from "react-icons/tb";
 import { isSafePassword } from "utils/utils";
-import { StyledForm, StyledTbLockExclamation, StyledTbLockPlus } from "./ActivateSreensStyles";
-import useKeypress from "hooks/useKeyPress";
+import { StyledTbLockExclamation, StyledTbLockPlus } from "./ActivateSreensStyles";
 import { ButtonSize } from "types";
 
 interface PasswordScreen {
@@ -52,74 +53,73 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
     }
   };
 
-  useKeypress(
-    "Enter",
-    () => {
-      handleContinue();
-    },
-    [],
-  );
-
   return (
     <>
-      <p>Enter a safe password to activate the user</p>
+      <StyledText>Enter a safe password to activate the user</StyledText>
       <StyledMail>
-        <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+        <StyledMailIcon size={14} />
         {email}
       </StyledMail>
       <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
-      <StyledForm>
-        <ModalInputWrap>
-          <StyledInputRow>
-            <Input
-              icon={<StyledTbLockPlus size={16} $isError={error !== false} />}
-              type="password"
-              placeholder="new password"
-              onChangeFn={(text: string) => setPassword(text)}
-              value={password}
-              changeOnType
-              autoFocus
-              autocomplete="new-password"
-              required
-              borderColor={error !== false ? "danger" : "primary"}
-            />
-          </StyledInputRow>
-        </ModalInputWrap>
-        <ModalInputWrap>
-          <StyledInputRow>
-            <Input
-              icon={<StyledTbLockExclamation size={16} $isError={error !== false} />}
-              type="password"
-              placeholder="repeat password"
-              onChangeFn={(text: string) => setPasswordRepeat(text)}
-              value={passwordRepeat}
-              changeOnType
-              autocomplete="new-password"
-              required
-              borderColor={error !== false ? "danger" : "primary"}
-            />
-          </StyledInputRow>
-        </ModalInputWrap>
+      <StyledForm
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleContinue();
+        }}
+      >
+        <StyledInputRow>
+          <Input
+            icon={<StyledTbLockPlus size={15} $isError={error !== false} />}
+            width="full"
+            fullHeight
+            type="password"
+            placeholder="new password"
+            onChangeFn={(text: string) => setPassword(text)}
+            value={password}
+            changeOnType
+            autoFocus
+            autocomplete="new-password"
+            required
+            borderColor={error !== false ? "danger" : undefined}
+          />
+        </StyledInputRow>
+        <StyledInputRow>
+          <Input
+            icon={<StyledTbLockExclamation size={15} $isError={error !== false} />}
+            width="full"
+            fullHeight
+            type="password"
+            placeholder="repeat password"
+            onChangeFn={(text: string) => setPasswordRepeat(text)}
+            value={passwordRepeat}
+            changeOnType
+            autocomplete="new-password"
+            required
+            borderColor={error !== false ? "danger" : undefined}
+          />
+        </StyledInputRow>
+
+        {error !== false && (
+          <StyledErrorWrap>
+            <StyledErrorText>{error}</StyledErrorText>
+          </StyledErrorWrap>
+        )}
+
+        <StyledSubmitWrap>
+          <Button
+            disabled={
+              error === UnsafePasswordError.message ||
+              error === PasswordDoesNotMatchError.message ||
+              password.length === 0 ||
+              passwordRepeat.length === 0
+            }
+            fullWidth
+            label="Activate user"
+            color="success"
+            size={ButtonSize.Large}
+          />
+        </StyledSubmitWrap>
       </StyledForm>
-
-      <div style={{ minHeight: "2rem" }}>
-        {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-      </div>
-
-      <StyledButtonWrap>
-        <Button
-          disabled={
-            error === UnsafePasswordError.message ||
-            error === PasswordDoesNotMatchError.message ||
-            password.length === 0 ||
-            passwordRepeat.length === 0
-          }
-          icon={<FaUserPlus />}
-          label="Activate user"
-          color="success"
-          onClick={handleContinue}
-        />
-      </StyledButtonWrap>
     </>
   );
 };

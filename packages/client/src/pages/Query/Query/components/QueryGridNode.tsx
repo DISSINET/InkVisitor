@@ -171,7 +171,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             textColor={node.operator === Query.NodeOperator.And ? "white" : undefined}
             noHoverBackground={node.operator === Query.NodeOperator.And}
             color={node.operator === Query.NodeOperator.And ? "info" : "greyer"}
-            bold={node.operator === Query.NodeOperator.And}
+            textRegular={node.operator !== Query.NodeOperator.And}
             tooltipLabel="match all parallel branches"
             onClick={() => {
               dispatch({
@@ -193,7 +193,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             textColor={node.operator === Query.NodeOperator.Or ? "white" : undefined}
             noHoverBackground={node.operator === Query.NodeOperator.Or}
             color={node.operator === Query.NodeOperator.Or ? "info" : "greyer"}
-            bold={node.operator === Query.NodeOperator.Or}
+            textRegular={node.operator !== Query.NodeOperator.Or}
             tooltipLabel="match any parallel branch"
             onClick={() => {
               dispatch({

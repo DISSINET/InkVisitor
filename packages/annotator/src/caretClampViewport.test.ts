@@ -18,6 +18,8 @@ function setup(value: string): Annotator {
 function drawCaretX(a: Annotator, charWidth: number): number[] {
   const calls: number[] = [];
   const ctx = {
+    // 800 CSS px viewport at ratio 1, same as the mocked canvas element.
+    canvas: { width: 800 },
     fillStyle: "",
     globalAlpha: 1,
     globalCompositeOperation: "",

@@ -214,7 +214,6 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             label="p"
             color="primary"
             inverted
-            bold
             tooltipLabel="add new prop"
             onClick={() => {
               addProp(rowId);

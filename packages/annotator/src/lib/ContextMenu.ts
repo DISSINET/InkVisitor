@@ -11,6 +11,8 @@ import { MenuColors, LIGHT_MENU_COLORS } from "./constants";
 export interface ContextMenuItem {
   /** Text shown for the row. Ignored when `separator` is true. */
   label?: string;
+  /** Keyboard shortcut shown greyed at the row's trailing edge, e.g. "⇧⌘8". */
+  shortcut?: string;
   /** Invoked on click; the menu closes automatically afterwards. */
   onClick?: () => void;
   /** Render a horizontal divider instead of a clickable row. */
@@ -73,8 +75,13 @@ export class ContextMenu {
       }
 
       const row = document.createElement("div");
-      row.textContent = item.label ?? "";
       Object.assign(row.style, {
+        display: "flex",
+        alignItems: "center",
+        // The gap keeps the shortcut off the label even in the widest row; the
+        // rest of the space is pushed between them so shortcuts share an edge.
+        gap: "24px",
+        justifyContent: "space-between",
         padding: "5px 14px",
         cursor: item.disabled ? "default" : "pointer",
         color: item.disabled ? this.colors.disabled : "inherit",
@@ -82,6 +89,20 @@ export class ContextMenu {
         borderRadius: "4px",
         transition: "background-color 0.2s ease",
       } as Partial<CSSStyleDeclaration>);
+
+      const label = document.createElement("span");
+      label.textContent = item.label ?? "";
+      row.appendChild(label);
+
+      if (item.shortcut) {
+        const shortcut = document.createElement("span");
+        shortcut.textContent = item.shortcut;
+        Object.assign(shortcut.style, {
+          color: this.colors.disabled,
+          fontSize: "12px",
+        } as Partial<CSSStyleDeclaration>);
+        row.appendChild(shortcut);
+      }
 
       if (!item.disabled) {
         row.addEventListener("mouseenter", () => {

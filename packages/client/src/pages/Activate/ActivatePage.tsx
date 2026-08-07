@@ -4,8 +4,13 @@ import {
   getErrorByCode,
 } from "@inkvisitor/shared/types/errors";
 import api from "api";
-import { Button, Modal, ModalContent } from "components";
-import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
+import { Button, Modal } from "components";
+import { AuthLogoBand } from "pages/AuthLogoBand";
+import {
+  StyledButtonWrap,
+  StyledContentWrap,
+  StyledErrorText,
+} from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
 import { TbArrowForwardUp } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
@@ -44,8 +49,9 @@ const ActivatePage: React.FC = ({}) => {
 
   return (
     <div>
-      <Modal showModal disableBgClick width={350}>
-        <ModalContent column centered>
+      <Modal showModal disableBgClick width={320} noBorder>
+        <AuthLogoBand />
+        <StyledContentWrap>
           {hashOk && (
             <>
               {!usernameScreen ? (
@@ -89,7 +95,7 @@ const ActivatePage: React.FC = ({}) => {
           )}
 
           {/* <ContactOwnerFooting /> */}
-        </ModalContent>
+        </StyledContentWrap>
       </Modal>
     </div>
   );

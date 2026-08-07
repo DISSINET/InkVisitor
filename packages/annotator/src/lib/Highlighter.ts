@@ -3,6 +3,7 @@ import Text from "./Text";
 import Viewport from "./Viewport";
 import {
   HIGHLIGHT_HEIGHT_RATIO,
+  HIGHLIGHT_SPAN_EDGE_GAP_PX,
   HighlightMode,
   UNDERLINE_OFFSET_PX,
 } from "./constants";
@@ -27,6 +28,16 @@ export const defaultStyle: CursorStyle = {
 
 // Relative coordinates point to position relative to viewport - first line is topmost rendered line
 export interface IRelativeCoordinates extends IAbsCoordinates {}
+
+/**
+ * Which outer edges of a span a drawn row carries (#2325). A row of a wrapped
+ * span holds the start on its first line and the end on its last; the lines
+ * between hold neither, and their edges are soft wraps rather than span bounds.
+ */
+export interface SpanEdges {
+  start?: boolean;
+  end?: boolean;
+}
 
 /**
  * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
@@ -104,7 +115,8 @@ export default class Highlighter {
     xStart: number,
     xEnd: number,
     options: DrawingOptions,
-    absLine?: number
+    absLine?: number,
+    spanEdges?: SpanEdges
   ) {
     const { charWidth, lineHeight, color: colorOverride, columnToPixelX } =
       options;
@@ -114,8 +126,14 @@ export default class Highlighter {
       columnToPixelX && absLine !== undefined
         ? (col: number) => columnToPixelX(absLine, col)
         : (col: number) => col * charWidth;
-    const xStartPx = toPx(xStart);
-    const width = toPx(xEnd) - xStartPx;
+    // Column 0 of an indented paragraph line sits at the indent, not at x=0
+    // (#2076). A shift, so the span's width is unaffected.
+    const originPx =
+      options.lineXOrigin && absLine !== undefined
+        ? options.lineXOrigin(absLine)
+        : 0;
+    const xStartPx = toPx(xStart) + originPx;
+    const width = toPx(xEnd) - toPx(xStart);
     // const height = this.hlMode === HighlightMode.UNDERLINE ? 3 : lineHeight;
 
     const isNarrowHighlight =
@@ -133,6 +151,19 @@ export default class Highlighter {
     ctx.fillStyle = colorOverride || this.style.color;
     ctx.globalAlpha = this.style.opacity;
 
+    // An entity span stops a hair short of each of its own outer edges, so two
+    // same-colour anchors that touch stay visually separate (#2325). Only the
+    // anchor visuals (background fill, underline) take the gaps; the selection
+    // and the focus veil are single spans with nothing to be told apart from.
+    // A span narrower than the gaps it would give up keeps its full width — the
+    // insets may never meet and invert the rect.
+    const edgeGap = HIGHLIGHT_SPAN_EDGE_GAP_PX * this.ratio;
+    const wantStart = spanEdges?.start ? edgeGap : 0;
+    const wantEnd = spanEdges?.end ? edgeGap : 0;
+    const insetFits = width > wantStart + wantEnd;
+    const startInset = insetFits ? wantStart : 0;
+    const endInset = insetFits ? wantEnd : 0;
+
     if (this.hlMode === "focus") {
       // source-over (not xor): xor over opaque text just fades by alpha and
       // ignores the fill colour, so the veil could never be tinted. source-over
@@ -143,13 +174,25 @@ export default class Highlighter {
       ctx.globalCompositeOperation = "multiply";
       const offsetPx = UNDERLINE_OFFSET_PX * this.ratio;
       const underlineY = (relLine + 1) * lineHeight - height - offsetPx;
-      ctx.fillRect(xStartPx, underlineY, width, height);
+      ctx.fillRect(
+        xStartPx + startInset,
+        underlineY,
+        width - startInset - endInset,
+        height
+      );
     } else if (this.hlMode === "background") {
       ctx.globalCompositeOperation = "multiply";
       // width === 0 is an empty (newline-only) line in the span. Without a floor
       // it paints nothing, so a resized anchor vanishes across runs of newlines.
       // minFillWidth keeps a thin sliver visible, like the SELECT caret (#2885).
-      ctx.fillRect(xStartPx, y, width || options.minFillWidth || width, height);
+      // The sliver takes no edge gaps — nothing sits next to it on its line.
+      const fillWidth = width || options.minFillWidth || width;
+      ctx.fillRect(
+        xStartPx + startInset,
+        y,
+        fillWidth - startInset - endInset,
+        height
+      );
     } else if (this.hlMode === "select") {
       // A collapsed caret (width === 0) is painted source-over so it stays
       // visible on top of anchor markers / highlights; the "color" blend only
@@ -163,7 +206,16 @@ export default class Highlighter {
         ctx.globalCompositeOperation = "color";
       }
       // width === 0 means a collapsed caret; honor the configured caret width.
-      ctx.fillRect(xStartPx, y, width || options.caretWidth || 1, height);
+      if (width === 0) {
+        // A caret parked in a line's trailing wrap margin — pushed further by
+        // the paragraph indent (#2076) — can land past the canvas edge; pin it
+        // to the edge so it stays visible (mirrors drawParagraphMark).
+        const caretW = options.caretWidth || 1;
+        const caretX = Math.min(xStartPx, ctx.canvas.width - caretW);
+        ctx.fillRect(caretX, y, caretW, height);
+      } else {
+        ctx.fillRect(xStartPx, y, width, height);
+      }
     }
   }
 
@@ -187,7 +239,14 @@ export default class Highlighter {
         [hStart, hEnd] = [hEnd, hStart];
       }
 
-      const rowsToDraw: { rowI: number; start: number; end: number }[] = [];
+      const rowsToDraw: {
+        rowI: number;
+        start: number;
+        end: number;
+        // Which of the span's outer edges this row carries (#2325); the edges a
+        // row does not carry are soft wraps and must stay flush.
+        edges?: SpanEdges;
+      }[] = [];
 
       // Use the same line count as the main text renderer to avoid off-by-one
       // issues where the last visible line has no highlight.
@@ -240,9 +299,15 @@ export default class Highlighter {
                 rowI: i,
                 start: hStart.xLine,
                 end: hStart.yLine === hEnd.yLine ? hEnd.xLine : lastCharX,
+                edges: { start: true, end: hStart.yLine === hEnd.yLine },
               });
             } else if (hEnd.yLine === currY) {
-              rowsToDraw.push({ rowI: i, start: 0, end: hEnd.xLine });
+              rowsToDraw.push({
+                rowI: i,
+                start: 0,
+                end: hEnd.xLine,
+                edges: { end: true },
+              });
             } else {
               rowsToDraw.push({
                 rowI: i,
@@ -261,7 +326,8 @@ export default class Highlighter {
           row.start,
           row.end,
           drawingOptions,
-          viewport.lineStart + row.rowI
+          viewport.lineStart + row.rowI,
+          row.edges
         );
         //this.xLine = row.end
         // this.yLine = row.rowI

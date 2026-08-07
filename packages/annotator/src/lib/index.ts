@@ -5,6 +5,7 @@ export * from "./Text";
 export * from "./Annotator";
 export * from "./ContextMenu";
 export * from "./SettingsOverlay";
+export * from "./shortcuts";
 export * from "./warnings";
 
 import { LoremIpsum } from "lorem-ipsum";

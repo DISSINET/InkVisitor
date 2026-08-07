@@ -1,18 +1,13 @@
-import React, { useContext } from "react";
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-  MdOutlineIndeterminateCheckBox,
-} from "react-icons/md";
+import React from "react";
 import { TbColumnInsertRight } from "react-icons/tb";
 
-import { Button, Loader } from "components";
+import { Button, Checkbox, Loader } from "components";
 import Dropdown from "components/advanced";
 
 import { Explore } from "@inkvisitor/shared/types/query";
-import { ThemeContext } from "styled-components";
 import { ExploreAction } from "./state";
 import {
+  StyledBatchSelect,
   StyledCounter,
   StyledControlGroup,
   StyledTableControl,
@@ -63,39 +58,28 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
   selection,
   newColumn,
 }) => {
-  const themeContext = useContext(ThemeContext);
   const isTable = mode === Explore.EViewMode.Table;
 
   const renderHeaderCheckBox = (sel: ExplorerSelectionControls) => {
-    const size = 18;
-    if (sel.isAllCurrentSelected) {
-      return (
-        <MdOutlineCheckBox
-          color={themeContext?.color.primary}
-          size={size}
-          onClick={() => {
-            sel.onAllRowsSelect(false);
-            sel.setRowLastClicked(-1);
-          }}
-        />
-      );
-    } else if (sel.hasPartialSelection || sel.selectedCount > 0) {
-      return (
-        <MdOutlineIndeterminateCheckBox
-          color={themeContext?.color.primary}
-          size={size}
-          onClick={() => {
-            sel.onAllRowsSelect(false);
-            sel.setRowLastClicked(-1);
-          }}
-        />
-      );
-    }
+    const hasAnySelection =
+      sel.isAllCurrentSelected || sel.hasPartialSelection || sel.selectedCount > 0;
+
     return (
-      <MdOutlineCheckBoxOutlineBlank
-        color={themeContext?.color.primary}
-        size={size}
-        onClick={() => sel.onAllRowsSelect(true)}
+      <Checkbox
+        value={sel.isAllCurrentSelected}
+        indeterminate={!sel.isAllCurrentSelected && hasAnySelection}
+        color="primary"
+        noFill
+        size={15}
+        onChangeFn={() => {
+          // any selection at all clears it; only an empty selection selects the page
+          if (hasAnySelection) {
+            sel.onAllRowsSelect(false);
+            sel.setRowLastClicked(-1);
+          } else {
+            sel.onAllRowsSelect(true);
+          }
+        }}
       />
     );
   };
@@ -104,12 +88,10 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
     <StyledTableControl>
       {isTable && selection ? (
         <StyledControlGroup>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-              {renderHeaderCheckBox(selection)}
-            </div>
+          <StyledBatchSelect>
+            {renderHeaderCheckBox(selection)}
             <StyledCounter>{`${selection.selectedCount}/${selection.rowsTotal}`}</StyledCounter>
-          </div>
+          </StyledBatchSelect>
           <Dropdown.Single.Basic
             width={140}
             disabled={selection.selectedCount === 0}
@@ -121,7 +103,7 @@ const ExplorerControlBar: React.FC<ExplorerControlBarProps> = ({
               }
             }}
             options={batchOptions.filter(
-              (o) => selection.canBatchEdit || !restrictedBatchActions.has(o.value),
+              (o) => selection.canBatchEdit || !restrictedBatchActions.has(o.value)
             )}
           />
           <Button

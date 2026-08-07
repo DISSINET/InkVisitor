@@ -670,7 +670,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
                         icon={<IcoPlusBold />}
                         label="entity"
                         inverted
-                        bold
                         onClick={() => setShowEntityCreateModal(true)}
                         tooltipLabel="create new entity"
                       />
@@ -761,6 +760,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           heightVarKey="annotator"
           label="Annotator"
           headerComponent={annotatorHeader}
+          // Document identity fills the free header space; the caption and the
+          // panel button stay visible, so the header content yields, not them.
+          shrinkLabel={false}
           isExpanded={thirdPanelExpanded}
           buttons={[thirdPanelButton()]}
         >

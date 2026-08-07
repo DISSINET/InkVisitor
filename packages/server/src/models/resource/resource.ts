@@ -3,7 +3,7 @@ import Entity from "@models/entity/entity";
 import User from "@models/user/user";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResource, IResourceData } from "@inkvisitor/shared/types/resource";
-import { Connection, r as rethink } from "rethinkdb-ts";
+import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
 
 class ResourceData implements IResourceData, IModel {
   url = "";
@@ -90,6 +90,33 @@ class Resource extends Entity implements IResource {
       .run(conn);
 
     return result && result.length ? (result[0] as IResource) : null;
+  }
+
+  /**
+   * Resources linking to any of the given documents. data.documentId is not
+   * indexed, so this walks the whole entity table - one walk for the whole
+   * list instead of one per document id.
+   * @param conn Connection database connection
+   * @param docIds string[] list of document ids
+   * @returns Promise<IResource[]> matching resources
+   */
+  static async findByDocumentIds(
+    conn: Connection,
+    docIds: string[]
+  ): Promise<IResource[]> {
+    if (!docIds.length) {
+      return [];
+    }
+
+    const result = await rethink
+      .table(Entity.table)
+      .filter({ class: EntityEnums.Class.Resource })
+      .filter((row: RDatum) =>
+        rethink.expr(docIds).contains(row("data")("documentId").default(""))
+      )
+      .run(conn);
+
+    return (result || []) as IResource[];
   }
 }
 

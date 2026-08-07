@@ -272,7 +272,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
             label="p"
             color="primary"
             inverted
-            bold
             tooltipLabel="add new prop"
             onClick={() => {
               addProp(propRowId);
@@ -287,7 +286,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
             label="c"
             color="primary"
             inverted
-            bold
             tooltipLabel="add classification"
             onClick={() => {
               addClassification(propRowId);
@@ -302,7 +300,6 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
             label="i"
             color="primary"
             inverted
-            bold
             tooltipLabel="add identification"
             onClick={() => {
               addIdentification(propRowId);

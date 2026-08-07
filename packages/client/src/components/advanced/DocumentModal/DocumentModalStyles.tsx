@@ -64,6 +64,63 @@ export const StyledExportDocumentButton = styled.div`
 export const StyledExportStatsSection = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-style: italic;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: ${({ theme }) => theme.space[4]};
+`;
+
+/** Keeps the footer buttons at their natural width while the note wraps */
+export const StyledExportFooterActions = styled.div`
+  flex-shrink: 0;
+`;
+
+/**
+ * Titles of a batch export. The tags wrap and keep their content width, so a
+ * handful of short titles takes one row instead of a column of full-width bars.
+ */
+export const StyledExportTitleList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[2]};
+  max-height: 9rem;
+  overflow-y: auto;
+  margin-top: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+/** Single-document export: the one title next to the modal's heading */
+export const StyledExportHeaderTitle = styled.div`
+  display: grid;
+`;
+
+export const StyledExportDocumentsToggle = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: ${({ theme }) => theme.color["black"]};
+  font-family: inherit;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.color["primary"]};
+    outline-offset: 2px;
+  }
+`;
+
+export const StyledExportInfoText = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[3]};
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-style: italic;
 `;
 
 /**

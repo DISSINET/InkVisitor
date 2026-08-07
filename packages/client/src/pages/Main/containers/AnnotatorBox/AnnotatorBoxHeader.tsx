@@ -112,7 +112,7 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
 
       {showExportModal && selectedDocument && (
         <DocumentModalExport
-          document={selectedDocument}
+          documents={[selectedDocument]}
           onClose={() => setShowExportModal(false)}
         />
       )}

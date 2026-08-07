@@ -9,9 +9,9 @@ export const StyledPage = styled.div<StyledPage>`
   flex-direction: column;
 `;
 
-export const StyledPageContent = styled.div`
+export const StyledPageContent = styled.div<{ $fullHeight?: boolean }>`
   width: 100%;
-  height: calc(100% - ${heightHeader / 10}rem);
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : `calc(100% - ${heightHeader / 10}rem)`)};
   overflow: hidden;
   display: flex;
   position: relative;
