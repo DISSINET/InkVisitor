@@ -477,3 +477,31 @@ export const StyledAnchorModeSwitch = styled.div`
   display: flex;
   align-items: center;
 `;
+
+export const StyledConflictBanner = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
+  background-color: ${({ theme }) => theme.color["warningMessage"]};
+  border-bottom: 1px solid ${({ theme }) => theme.color["warningBorder"]};
+  color: ${({ theme }) => theme.color["warningMessageText"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledConflictBannerText = styled.span`
+  flex-grow: 1;
+`;
+
+export const StyledAnnotatorLockNotice = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  margin: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.default};
+  background-color: ${({ theme }) => theme.color["warningMessage"]};
+  color: ${({ theme }) => theme.color["warningMessageText"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;

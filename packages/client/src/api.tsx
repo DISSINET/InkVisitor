@@ -1,4 +1,5 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { contentFingerprint } from "@inkvisitor/shared/utils/content-fingerprint";
 import {
   EntityTooltip,
   IAudit,
@@ -206,6 +207,47 @@ class Api {
     });
   }
 
+  /** Socket id of the live connection, undefined while disconnected. */
+  wsId(): string | undefined {
+    return this.ws?.id;
+  }
+
+  /**
+   * Subscribes to a websocket event.
+   * @returns an unsubscribe function; calling it twice is safe
+   */
+  wsOn(event: string, handler: (payload: any) => void): () => void {
+    this.ws?.on(event, handler);
+    return () => {
+      this.ws?.off(event, handler);
+    };
+  }
+
+  /**
+   * Fires an event. Silently dropped while the socket is down.
+   * @param ack Socket.IO acknowledgement; it must be the last argument on the
+   * wire, so it is only appended when the caller wants a reply.
+   */
+  wsEmit(event: string, payload: unknown, ack?: (response: any) => void): void {
+    if (ack) {
+      this.ws?.emit(event, payload, ack);
+    } else {
+      this.ws?.emit(event, payload);
+    }
+  }
+
+  /**
+   * Subscribes to (re)connections. A reconnect arrives with a new socket id and
+   * no server-side room membership, so subscribers must restore both.
+   * @returns an unsubscribe function
+   */
+  wsOnConnect(handler: () => void): () => void {
+    this.ws?.on("connect", handler);
+    return () => {
+      this.ws?.off("connect", handler);
+    };
+  }
+
   /**
    * Uses default request interceptors — adds a per-request correlation id and
    * cache-busting headers for paths that previously returned HTML. Auth is not
@@ -219,6 +261,13 @@ class Api {
       // confirm whether the request ever reached Node at all.
       if (!config.headers["x-inkvisitor-request-id"]) {
         config.headers["x-inkvisitor-request-id"] = uuidv4();
+      }
+
+      // Lets the server leave the originating tab out of the change broadcast
+      // it triggers. A second tab of the same user still receives it.
+      const socketId = this.wsId();
+      if (socketId) {
+        config.headers["x-inkvisitor-socket-id"] = socketId;
       }
 
       // Bust browser/proxy cache for URLs that previously returned HTML
@@ -1797,15 +1846,27 @@ class Api {
   }
 
   /**
-   * Document update
+   * Document update.
+   * @param baseContent the content the caller's edit was derived from. Sent as
+   * a fingerprint so the server can refuse the write if the stored content has
+   * moved on. Omit to write unconditionally - the deliberate-overwrite path.
    */
   async documentUpdate(
     documentId: string,
     document: Partial<IDocument>,
     options?: IApiOptions,
+    baseContent?: string,
   ): Promise<AxiosResponse<IDocument>> {
     try {
-      const response = await this.connection.put(`/documents/${documentId}`, document, options);
+      const response = await this.connection.put(`/documents/${documentId}`, document, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          ...(baseContent !== undefined
+            ? { "x-inkvisitor-document-base": contentFingerprint(baseContent) }
+            : {}),
+        },
+      });
       return response;
     } catch (err) {
       throw this.handleError(err);
@@ -1975,3 +2036,12 @@ apiSingleton.useDefaultRequestInterceptors();
 apiSingleton.useDefaultResponseInterceptors();
 
 export default apiSingleton;
+
+/**
+ * A rejected document write, refused because the stored content moved after the
+ * client loaded it. The thrown value is the API error payload, not an Error.
+ */
+export const isDocumentChangedConcurrently = (err: unknown): boolean =>
+  typeof err === "object" &&
+  err !== null &&
+  (err as { error?: unknown }).error === "DocumentChangedConcurrently";

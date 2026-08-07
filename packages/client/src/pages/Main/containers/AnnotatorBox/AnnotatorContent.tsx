@@ -72,6 +72,7 @@ interface StatementListTextAnnotator {
 
   onStatementAnchorHover?: (statementId: string | null) => void;
   onUnsavedTextEditsChange?: (hasUnsaved: boolean) => void;
+  onLockHolderChange?: (lockHolderName: string | null) => void;
 }
 
 export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = ({
@@ -103,6 +104,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
 
   onStatementAnchorHover,
   onUnsavedTextEditsChange,
+  onLockHolderChange,
 }) => {
   // The canvas is the only thing in the box content — the toolbar overlays it
   // and the find panels are portalled out of the layout. The wrapper insets it,
@@ -248,6 +250,7 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               onWarningsModalOpenChange={setWarningsModalOpen}
               onAsymmetricalAnchorCountChange={setWarningAnchorCount}
               onUnsavedTextEditsChange={onUnsavedTextEditsChange}
+              onLockHolderChange={onLockHolderChange}
               hideSelectionMenu={annotatorHidden}
               toolbarExtras={(annotatorMode) => (
                 <>

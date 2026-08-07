@@ -8,7 +8,7 @@ import {
   useFloating,
 } from "@floating-ui/react";
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from "@tanstack/react-query";
-import api from "api";
+import api, { isDocumentChangedConcurrently } from "api";
 import React, {
   ReactNode,
   useCallback,
@@ -52,6 +52,7 @@ import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";
 import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
+import { useDocumentPresence } from "hooks/useDocumentPresence";
 import useKeypress from "hooks/useKeyPress";
 import { useAppSelector } from "redux/hooks";
 import {
@@ -65,6 +66,7 @@ import {
 import { EntityCreateModal } from "..";
 import {
   FindPanel,
+  formatCountdown,
   resolveEditActions,
   resolveFindPanel,
   shouldShowSelectionMenu,
@@ -83,6 +85,8 @@ import {
   StyledAnnotatorMenu,
   StyledAnnotatorMenuDraggable,
   StyledCanvasWrapper,
+  StyledConflictBanner,
+  StyledConflictBannerText,
   StyledInfoText,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -152,6 +156,11 @@ interface TextAnnotatorProps {
   onAsymmetricalAnchorCountChange?: (count: number) => void;
   /** Fired when RAW/SEMI text edits diverge from the saved document content. */
   onUnsavedTextEditsChange?: (hasUnsaved: boolean) => void;
+  /**
+   * Name of the user holding the document's edit lock, or null. Reported upward
+   * because the Box header that shows it belongs to a different tree.
+   */
+  onLockHolderChange?: (lockHolderName: string | null) => void;
 
   /**
    * True while the host has collapsed the annotator box out of view (e.g. the
@@ -196,6 +205,7 @@ export const TextAnnotator = ({
   onWarningsModalOpenChange,
   onAsymmetricalAnchorCountChange,
   onUnsavedTextEditsChange,
+  onLockHolderChange,
   hideSelectionMenu = false,
   toolbarExtras,
 }: TextAnnotatorProps) => {
@@ -216,19 +226,80 @@ export const TextAnnotator = ({
   // (set when the user tries to enter HIGHLIGHT with pending text edits).
   const [pendingModeSwitch, setPendingModeSwitch] = useState<EditMode | null>(null);
 
+  // Whether localTextContent got there by the user typing rather than by a sync
+  // from the server. A content diff alone cannot tell the two apart: it also goes
+  // true when a remote save moves dataDocument under a canvas nobody touched —
+  // which happens to anyone holding SEMI/RAW open while another user saves.
+  // The annotator lib only fires onTextChanged for real edits (typing, paste,
+  // undo/redo); updateText does not, so this stays honest.
+  const [userEditedText, setUserEditedText] = useState<boolean>(false);
+
+  /** Adopts server-owned text as the canvas's baseline, clearing the dirty flag. */
+  const syncTextFromDocument = useCallback((content: string) => {
+    setLocalTextContent(content);
+    setUserEditedText(false);
+  }, []);
+
   const isChangeMade = useMemo<boolean>(() => {
     if (annotatorMode === EditMode.HIGHLIGHT) {
       // Don't track text changes in highlight mode where it's not relevant
       // anchors are updated instantly and elvl is being added under the hood
       return false;
-    } else {
-      return localTextContent !== dataDocument?.content;
     }
-  }, [localTextContent, dataDocument?.content, annotatorMode]);
+    if (!canEditDocument || !userEditedText) {
+      return false;
+    }
+    return localTextContent !== dataDocument?.content;
+  }, [
+    localTextContent,
+    dataDocument?.content,
+    annotatorMode,
+    canEditDocument,
+    userEditedText,
+  ]);
+
+  const {
+    lockedByOther,
+    lockHolderName,
+    remoteChange,
+    reloadRemote,
+    dismissRemoteChange,
+    idlePromptOpen,
+    continueEditing,
+    idleSecondsRemaining,
+  } = useDocumentPresence({
+    documentId,
+    isChangeMade,
+    localTextContent,
+    canEditDocument,
+  });
+
+  // Another user is mid-edit; their save rewrites the whole content string,
+  // anchors included, so every write from here would be lost.
+  const canEditNow = canEditDocument && !lockedByOther;
+
+  // A locked-out user cannot save, so their text has nowhere to go once the lock
+  // holder writes: take the holder's version. Clearing the edited flag is what
+  // makes the fetched content win — the refresh effect keeps the local canvas
+  // while it believes the divergence is unsaved typing.
+  useEffect(() => {
+    if (remoteChange && lockedByOther) {
+      setUserEditedText(false);
+      reloadRemote();
+    }
+  }, [remoteChange, lockedByOther, reloadRemote]);
 
   useEffect(() => {
     onUnsavedTextEditsChange?.(isChangeMade);
   }, [isChangeMade, onUnsavedTextEditsChange]);
+
+  useEffect(() => {
+    onLockHolderChange?.(lockedByOther ? lockHolderName : null);
+  }, [lockedByOther, lockHolderName, onLockHolderChange]);
+
+  // The Box header lives on past this component, so a lock it was told about
+  // would keep showing after the annotator is gone.
+  useEffect(() => () => onLockHolderChange?.(null), [onLockHolderChange]);
 
   const [territoryElvl, setTerritoryElvl] = useState<EntityEnums.Elvl>();
 
@@ -281,8 +352,11 @@ export const TextAnnotator = ({
   );
 
   const updateDocumentMutation = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
-      api.documentUpdate(data.id, data.doc),
+    mutationFn: async (data: {
+      id: string;
+      doc: Partial<IDocument>;
+      baseContent?: string;
+    }) => api.documentUpdate(data.id, data.doc, undefined, data.baseContent),
     onSuccess: (_data, variables) => {
       mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
@@ -290,6 +364,21 @@ export const TextAnnotator = ({
       toast.info("Document content saved");
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      setSaveRejected(false);
+      // The canvas is now what the server holds, so a later refetch that moves
+      // dataDocument must not be mistaken for unsaved local typing.
+      setUserEditedText(false);
+      // A pending receipt has been resolved by this write; leaving it set would
+      // re-raise the conflict banner the next time the user types.
+      dismissRemoteChange();
+    },
+    onError: (error) => {
+      if (isDocumentChangedConcurrently(error)) {
+        setSaveRejected(true);
+        toast.error("Document changed on the server - your edits were not saved");
+        return;
+      }
+      toast.error("Failed to save document changes");
     },
     onSettled: () => {
       setIsSaving(false);
@@ -298,20 +387,33 @@ export const TextAnnotator = ({
   });
 
   const updateDocumentMutationQuiet = useMutation({
-    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
-      api.documentUpdate(data.id, data.doc),
+    mutationFn: async (data: {
+      id: string;
+      doc: Partial<IDocument>;
+      baseContent?: string;
+    }) => api.documentUpdate(data.id, data.doc, undefined, data.baseContent),
     onSuccess: (_data, variables) => {
       mergeSavedDocumentIntoCache(variables);
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      setUserEditedText(false);
+      dismissRemoteChange();
     },
-    onError: () => {
+    onError: (error) => {
       // The instant anchor save failed, so the cache was never merged and now
       // trails the live canvas. Surface the failure (otherwise silent in quiet
       // mode) and refetch so the canvas reconciles to true server state instead
       // of a later dep change clobbering it with stale content.
+      if (isDocumentChangedConcurrently(error)) {
+        // The anchor's offsets were computed against content the server no
+        // longer holds, so replaying it could land the anchor on a different
+        // span. The refetched text goes back to the user to re-select.
+        toast.error("Anchor not saved - the document had changed. Try again.");
+        queryClient.invalidateQueries({ queryKey: ["document"] });
+        return;
+      }
       toast.error("Failed to save document changes");
       queryClient.invalidateQueries({ queryKey: ["document"] });
     },
@@ -370,13 +472,19 @@ export const TextAnnotator = ({
   const confirmDiscardAndSwitch = useCallback(() => {
     if (dataDocument?.content !== undefined) {
       annotator?.updateText(dataDocument.content);
-      setLocalTextContent(dataDocument.content);
+      syncTextFromDocument(dataDocument.content);
     }
     if (pendingModeSwitch) {
       applyModeSwitch(pendingModeSwitch);
     }
     setPendingModeSwitch(null);
-  }, [annotator, dataDocument?.content, pendingModeSwitch, applyModeSwitch]);
+  }, [
+    annotator,
+    dataDocument?.content,
+    pendingModeSwitch,
+    applyModeSwitch,
+    syncTextFromDocument,
+  ]);
 
   const confirmSaveAndSwitch = useCallback(async () => {
     await handleSaveNewContent(false);
@@ -605,6 +713,11 @@ export const TextAnnotator = ({
   // e.g. when updating an anchor elvl
   const [isSavingWithoutRefresh, setIsSavingWithoutRefresh] = useState<boolean>(false);
 
+  // Set when the server refused a save because the stored content had moved.
+  const [saveRejected, setSaveRejected] = useState<boolean>(false);
+  // Open while the user confirms a save that will overwrite somebody's changes.
+  const [pendingOverwriteSave, setPendingOverwriteSave] = useState<boolean>(false);
+
   // implementation of draggable menu
   const {
     dragHandleProps: menuDragHandleProps,
@@ -635,6 +748,7 @@ export const TextAnnotator = ({
   const handleSaveNewContent = async (
     quiet: boolean,
     skipRefresh: boolean = false,
+    force: boolean = false,
   ): Promise<void> => {
     if (annotator && documentId) {
       if (skipRefresh) {
@@ -651,7 +765,23 @@ export const TextAnnotator = ({
           ...dataDocument,
           content: annotator.text.value,
         },
+        // A forced save is one the user confirmed after being shown what it
+        // overwrites, so the server's staleness check must not veto it.
+        baseContent: force ? undefined : dataDocument?.content,
       });
+    }
+  };
+
+  /**
+   * Entry point for every user-initiated (non-quiet) save. A pending conflict
+   * routes through a confirm first, so the toolbar button and Ctrl+S cannot
+   * diverge on whether an overwrite was acknowledged.
+   */
+  const requestSave = () => {
+    if (remoteChange || saveRejected) {
+      setPendingOverwriteSave(true);
+    } else {
+      handleSaveNewContent(false);
     }
   };
 
@@ -831,7 +961,12 @@ export const TextAnnotator = ({
     const currentContent = annotator?.text?.value;
     const newContent = dataDocument?.content ?? "no text";
 
-    const reuseExistingInstance = (contentForLocalState: string = newContent) => {
+    // fromServer distinguishes adopting the fetched document from holding on to
+    // the user's own in-progress canvas; only the former clears the dirty flag.
+    const reuseExistingInstance = (
+      contentForLocalState: string = newContent,
+      fromServer: boolean = true,
+    ) => {
       if (!annotator) return;
       applyCanvasTheme(annotator);
 
@@ -852,7 +987,9 @@ export const TextAnnotator = ({
       registerAnchorHover(annotator);
       registerAnchorTagMarkupHover(annotator);
 
-      if (localTextContent !== contentForLocalState) {
+      if (fromServer) {
+        syncTextFromDocument(contentForLocalState);
+      } else if (localTextContent !== contentForLocalState) {
         setLocalTextContent(contentForLocalState);
       }
 
@@ -880,7 +1017,7 @@ export const TextAnnotator = ({
           // background refetch. (Writing the canvas into the cache here made
           // content === localTextContent, so the buttons went disabled as if the
           // edits were already saved, and Discard reverted to a no-op.)
-          reuseExistingInstance(currentContent);
+          reuseExistingInstance(currentContent, false);
         } else {
           // Server content is newer (e.g. another user added anchors) — update
           // the annotator's text in place, preserving scroll position.
@@ -941,6 +1078,7 @@ export const TextAnnotator = ({
 
     newAnnotator.onTextChanged((text) => {
       setLocalTextContent(text);
+      setUserEditedText(true);
       // Keyboard edits (typing/backspace) mutate the text without running the
       // lib's warning checks (only paste/replace/anchor ops do). Re-validate
       // here so broken anchors surface immediately while editing (#2601).
@@ -961,7 +1099,7 @@ export const TextAnnotator = ({
 
     // Set initial text content
     const initialContent = dataDocument?.content ?? "no text";
-    setLocalTextContent(initialContent);
+    syncTextFromDocument(initialContent);
 
     // Ensure the initial render uses the current mode (e.g. HIGHLIGHT hides XML tags).
     // Otherwise we may briefly draw in RAW mode and show tags on first load.
@@ -1204,7 +1342,7 @@ export const TextAnnotator = ({
   // When the document is read-only (e.g. an Editor viewing an unassigned
   // document) the selection menu still appears, but only as a minimal,
   // view-only variant: clipboard + anchors in selection, no create/edit.
-  const isMenuReadOnly = !canEditDocument;
+  const isMenuReadOnly = !canEditNow;
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
@@ -1475,7 +1613,7 @@ export const TextAnnotator = ({
   );
 
   const editActions = resolveEditActions({
-    canEditDocument,
+    canEditDocument: canEditNow,
     mode: annotatorMode,
     isChangeMade,
     isSaving,
@@ -1570,19 +1708,19 @@ export const TextAnnotator = ({
             e.preventDefault();
             e.stopPropagation();
             if (
-              canEditDocument &&
+              canEditNow &&
               isChangeMade &&
               !isSaving &&
               !isSavingWithoutRefresh &&
               !dataDocumentIsFetching
             ) {
-              handleSaveNewContent(false);
+              requestSave();
             }
             return;
           }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
-          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+          if (!canEditNow && annotatorMode !== EditMode.HIGHLIGHT) {
             const isEditingKey =
               (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
               e.key === "Backspace" ||
@@ -1604,6 +1742,41 @@ export const TextAnnotator = ({
           }
         }}
       >
+        {/* Concurrent edits are never merged, so a locked-out user gets a heads-up
+            rather than a choice: their text is replaced the moment the holder
+            saves, and offering Save would overwrite the holder's work. */}
+        {lockedByOther && isChangeMade && (
+          <StyledConflictBanner>
+            <StyledConflictBannerText>
+              {`${lockHolderName ?? "Somebody else"} is editing the text. Your unsaved changes will be replaced by their version when they save.`}
+            </StyledConflictBannerText>
+          </StyledConflictBanner>
+        )}
+
+        {(remoteChange || saveRejected) && isChangeMade && !lockedByOther && (
+          <StyledConflictBanner>
+            <StyledConflictBannerText>
+              {remoteChange
+                ? `${remoteChange.userName} changed this document. Your save will overwrite their changes.`
+                : "This document changed on the server. Your save will overwrite those changes."}
+            </StyledConflictBannerText>
+            <Button
+              label="Reload & lose my edits"
+              color="danger"
+              onClick={() => {
+                setUserEditedText(false);
+                reloadRemote();
+                setSaveRejected(false);
+              }}
+            />
+            <Button
+              label="Keep editing"
+              color="greyer"
+              onClick={() => dismissRemoteChange()}
+            />
+          </StyledConflictBanner>
+        )}
+
         <StyledCanvasWrapper $noBorderRadius={noBorderRadius}>
           {isMenuDisplayed && (
             <FloatingPortal id="page">
@@ -1648,6 +1821,7 @@ export const TextAnnotator = ({
                         isMenuReadOnly ? undefined : () => endMoveAnchorRef.current(false)
                       }
                       readonly={isMenuReadOnly}
+                      lockedByName={lockedByOther ? lockHolderName : null}
                       activeTerritoryId={thisTerritoryEntityId}
                       onCreateActiveTAnchor={async (elvl) => {
                         await handleAddAnchor(thisTerritoryEntityId ?? "", elvl);
@@ -1749,7 +1923,7 @@ export const TextAnnotator = ({
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
               onOpenSecondStep={() => setIsSecondStepOpen(true)}
-              canEdit={canEditDocument}
+              canEdit={canEditNow}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               findInputRef={findInputRef}
@@ -1771,16 +1945,16 @@ export const TextAnnotator = ({
           <AnnotatorToolbar
             annotatorMode={annotatorMode}
             onModeClick={handleAnnotatorModeClick}
-            canEditDocument={canEditDocument}
+            canEditDocument={canEditNow}
             editActionsVisible={editActions.visible}
             editActionsDisabled={editActions.disabled}
             onDiscard={() => {
               if (dataDocument?.content) {
                 annotator?.updateText(dataDocument.content);
-                setLocalTextContent(dataDocument.content);
+                syncTextFromDocument(dataDocument.content);
               }
             }}
-            onSave={() => handleSaveNewContent(false)}
+            onSave={requestSave}
             isSavePending={isSaving || isSavingWithoutRefresh}
             isSearchAllowed={isSearchAllowed}
             onFindClick={() => setIsFindOpen(true)}
@@ -1817,6 +1991,87 @@ export const TextAnnotator = ({
               <CancelButton onClick={() => setPendingModeSwitch(null)} />
               <Button label="Discard" color="danger" onClick={confirmDiscardAndSwitch} />
               <Button label="Save" color="info" onClick={confirmSaveAndSwitch} />
+            </ButtonGroup>
+          </ModalFooter>
+        </Modal>
+      )}
+
+      {idlePromptOpen && (
+        <Modal
+          showModal={idlePromptOpen}
+          onClose={continueEditing}
+          onEnterPress={continueEditing}
+          disableBgClick
+          isLoading={isSaving}
+          width="auto"
+        >
+          <ModalHeader title="Still editing?" />
+          <ModalContent>
+            <div>
+              You have unsaved changes, and nobody else can edit this document while you do.
+            </div>
+          </ModalContent>
+          <ModalFooter
+            note={
+              idleSecondsRemaining !== null
+                ? `Unlocking for others in ${formatCountdown(idleSecondsRemaining)}`
+                : undefined
+            }
+          >
+            <ButtonGroup>
+              <Button label="Continue editing" color="greyer" onClick={continueEditing} />
+              <Button
+                label="Discard"
+                color="danger"
+                onClick={() => {
+                  continueEditing();
+                  if (dataDocument?.content !== undefined) {
+                    annotator?.updateText(dataDocument.content);
+                    syncTextFromDocument(dataDocument.content);
+                  }
+                }}
+              />
+              <Button
+                label="Save"
+                color="info"
+                onClick={() => {
+                  continueEditing();
+                  requestSave();
+                }}
+              />
+            </ButtonGroup>
+          </ModalFooter>
+        </Modal>
+      )}
+
+      {pendingOverwriteSave && (
+        <Modal
+          showModal={pendingOverwriteSave}
+          onClose={() => setPendingOverwriteSave(false)}
+          disableBgClick
+          isLoading={isSaving}
+          width="auto"
+        >
+          <ModalHeader title="Overwrite the other changes?" />
+          <ModalContent>
+            <div>
+              Somebody else changed this document while you were editing. Saving keeps your
+              version and discards theirs.
+            </div>
+          </ModalContent>
+          <ModalFooter>
+            <ButtonGroup>
+              <CancelButton onClick={() => setPendingOverwriteSave(false)} />
+              <Button
+                label="Overwrite"
+                color="danger"
+                onClick={() => {
+                  setPendingOverwriteSave(false);
+                  setSaveRejected(false);
+                  dismissRemoteChange();
+                  handleSaveNewContent(false, false, true);
+                }}
+              />
             </ButtonGroup>
           </ModalFooter>
         </Modal>

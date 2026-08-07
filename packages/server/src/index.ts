@@ -10,6 +10,7 @@ import "@service/mailer";
 import { Db } from "@service/rethink";
 import { CronService } from "@service/cron";
 import { startDbStatsEmitter } from "@service/dbStats";
+import { startDocumentPresence } from "@service/documentPresence";
 import { startCacheInvalidators } from "@service/changefeedInvalidator";
 import { assertRequiredIndexes } from "@service/assertRequiredIndexes";
 import { ensureSessionsTable } from "@service/rethinkSessionStore";
@@ -74,6 +75,7 @@ import Document from "@models/document/document";
   });
 
   startDbStatsEmitter(socketio);
+  startDocumentPresence(socketio);
 
   httpServer.listen(port, () => {
     console.log(

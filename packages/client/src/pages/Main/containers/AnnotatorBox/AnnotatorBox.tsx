@@ -107,6 +107,8 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
     null,
   );
   const [hasUnsavedTextEdits, setHasUnsavedTextEdits] = useState(false);
+  // Reported up from the annotator so the Box header can show the lock.
+  const [lockHolderName, setLockHolderName] = useState<string | null>(null);
 
   const { setAnnotator: setSingletonAnnotator } = useAnnotator();
   useEffect(() => {
@@ -329,6 +331,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
         onResourcePickerFocus={() => refetchResources()}
         canSelectResource={canSelectResource}
         canEditDocument={canEditDocument}
+        lockHolderName={lockHolderName}
       />,
     );
   }, [
@@ -338,6 +341,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
     resources,
     canSelectResource,
     canEditDocument,
+    lockHolderName,
   ]);
 
   // The header outlives this component otherwise: the Box it fills belongs to
@@ -370,6 +374,7 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
       userData={userData}
       onStatementAnchorHover={handleStatementAnchorHover}
       onUnsavedTextEditsChange={setHasUnsavedTextEdits}
+      onLockHolderChange={setLockHolderName}
     />
   );
 };

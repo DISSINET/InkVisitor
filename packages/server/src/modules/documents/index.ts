@@ -17,6 +17,7 @@ import {
 } from "@inkvisitor/shared/types";
 import {
   BadParams,
+  DocumentChangedConcurrently,
   DocumentDoesNotExist,
   InternalServerError,
   ModelNotValidError,
@@ -28,6 +29,8 @@ import { Router } from "express";
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
+import { contentFingerprint } from "@inkvisitor/shared/utils/content-fingerprint";
+import * as documentPresence from "@service/documentPresence";
 import { filterDocumentContent } from "./export";
 
 /**
@@ -437,6 +440,19 @@ export default Router()
         throw DocumentDoesNotExist.forId(documentId);
       }
 
+      // The client sends the fingerprint of the content its edit was built on.
+      // A mismatch means another write landed in between, and merging this one
+      // would drop that user's text or anchors - both live in the same content
+      // string. Absent header means an unchecked write (create/export paths,
+      // older clients).
+      const baseFingerprint = request.headers?.["x-inkvisitor-document-base"];
+      if (
+        typeof baseFingerprint === "string" &&
+        baseFingerprint !== contentFingerprint(existingDocument.content)
+      ) {
+        throw new DocumentChangedConcurrently();
+      }
+
       await existingDocument.preprocess(request.db.connection);
       const oldOrderedList = AnchorsNode.getOrderedAnchorListFromTree(
         existingDocument.anchors
@@ -499,6 +515,16 @@ export default Router()
           auditData,
           auditType
         );
+        const author = request.getUserOrFail();
+        const originSocketId = request.headers?.["x-inkvisitor-socket-id"];
+        documentPresence.emitDocumentChanged({
+          documentId,
+          userId: author.id,
+          userName: author.name,
+          eventType: auditType,
+          originSocketId:
+            typeof originSocketId === "string" ? originSocketId : undefined,
+        });
         return {
           result: true,
         };
