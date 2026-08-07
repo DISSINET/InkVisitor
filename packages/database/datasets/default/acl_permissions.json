@@ -42,6 +42,12 @@
     "roles": ["editor"]
   },
   {
+    "controller": "statements",
+    "route": "batch-reorder",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
     "controller": "territories",
     "route": ":territoryId",
     "method": "GET",

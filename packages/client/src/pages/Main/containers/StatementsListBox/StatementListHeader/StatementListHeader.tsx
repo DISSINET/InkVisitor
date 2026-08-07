@@ -349,7 +349,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 <Button
                   icon={<FaArrowDownShortWide />}
                   onClick={() => autoOrderStatementsMutation.mutate()}
-                  color="success"
+                  // reorders the list on click, so it carries the same colour as
+                  // the other acting buttons rather than the one the filter
+                  // toggle uses for opening a panel
+                  color="primary"
+                  inverted
                   tooltipLabel="auto order statements"
                   tooltipContent={
                     hasAnchoredStatementsOutOfOrder ? (

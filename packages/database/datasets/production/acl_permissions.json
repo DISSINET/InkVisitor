@@ -74,6 +74,7 @@
 {"controller": "relations", "id": "c3965472-91ad-43f8-af4d-0d01d01fa812", "method": "POST", "roles": ["*"], "route": ""},
 {"controller": "documents", "id": "c414dbf7-f7ff-451d-9c6c-67526e263746", "method": "PUT", "public": false, "roles": [], "route": ":documentId"},
 {"controller": "statements", "id": "c6a18039-3e21-4fda-9b66-d5cd86f3481e", "method": "POST", "public": false, "roles": ["editor"], "route": "batch-copy"},
+{"controller": "statements", "id": "c4a17e92-5b83-4d16-9f27-6e0b3a8d51fc", "method": "PUT", "public": false, "roles": ["editor"], "route": "batch-reorder"},
 {"controller": "entities", "id": "c6f60ecf-57a2-472a-a043-c77d52f66605", "method": "PUT", "roles": ["*"], "route": ":entityId"},
 {"controller": "relations", "id": "cab7b716-357e-43dd-9b64-835958a8c132", "method": "DELETE", "roles": ["*"], "route": ""},
 {"controller": "documents", "id": "cfde3da2-9be7-4495-9c0c-a887761442d4", "method": "POST", "roles": ["*"], "route": ""},

@@ -32,6 +32,7 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   // before that carries the auto-created roles:[] row and refuses drag-move
   { controller: "statements", method: "PUT", route: "batch-move" },
   { controller: "statements", method: "POST", route: "batch-copy" },
+  { controller: "statements", method: "PUT", route: "batch-reorder" },
   // the seeded relations rows cover the collection endpoints ("" for bulk
   // create/update/delete); editing or deleting one relation by id goes through
   // its own route, which had no row of its own

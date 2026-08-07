@@ -452,6 +452,19 @@ export default Router()
         throw new StatementDoesNotExits("at least one statement not found", "");
       }
 
+      // Reordering rewrites each statement's position within its territory, so
+      // every one of them has to be editable. The payload may name statements
+      // from more than one territory, so each is checked on its own.
+      const reorderUser = request.getUserOrFail();
+      for (const statementData of statements) {
+        const model = new Statement({ ...(statementData as IStatement) });
+        if (!model.canBeEditedByUser(reorderUser)) {
+          throw new PermissionDeniedError(
+            `cannot reorder statement ${statementData.id}`
+          );
+        }
+      }
+
       const currentOrderById = new Map(
         statements.map((s) => [s.id, (s as IStatement).data.territory?.order])
       );
