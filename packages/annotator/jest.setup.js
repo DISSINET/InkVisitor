@@ -11,8 +11,11 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-// Mock getContext for canvas
-HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
+// Mock getContext for canvas. Plain function (not arrow) so `this` is the
+// canvas element — real contexts expose it as ctx.canvas.
+HTMLCanvasElement.prototype.getContext = jest.fn(function () {
+  return {
+  canvas: this,
   fillRect: jest.fn(),
   fillText: jest.fn(),
   measureText: jest.fn(() => ({ width: 100 })),
@@ -36,7 +39,8 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
   globalAlpha: 1,
   globalCompositeOperation: 'source-over',
   reset: jest.fn(),
-}));
+  };
+});
 
 // Mock canvas dimensions
 Object.defineProperty(HTMLCanvasElement.prototype, 'width', {

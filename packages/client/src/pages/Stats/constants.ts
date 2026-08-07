@@ -95,7 +95,6 @@ export const STATS_PERIODS: { value: StatsPeriod; label: string }[] = [
   { value: "custom", label: "custom" },
 ];
 
-export const OTHERS_KEY = "others";
 export const USER_THRESHOLD_MAX = 20;
 export const STATS_FILTER_DEBOUNCE_MS = 800;
 

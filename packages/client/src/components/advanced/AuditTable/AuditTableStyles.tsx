@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 interface StyledAuditTable {
   $columns: number;
@@ -23,13 +23,25 @@ interface StyledAuditColumn {
 export const StyledAuditColumn = styled.div<StyledAuditColumn>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.space[2]};
+  column-gap: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize.xs};
   flex-wrap: ${({ $wrap }) => ($wrap ? "wrap" : "nowrap")};
-  height: 2rem;
+  min-height: 2rem;
   svg {
     flex-shrink: 0;
   }
+  ${({ $wrap }) =>
+    $wrap &&
+    css`
+      // the icon sits where it would sit in a single-line column - offset by
+      // half of the space the 2rem line leaves around it - so it keeps the
+      // vertical position of the icons in the other columns without the rest of
+      // that line pushing the wrapped label down
+      > :first-child {
+        align-self: flex-start;
+        margin-top: calc((2rem - 1em) / 2);
+      }
+    `}
 `;
 export const StyledAuditEllipsis = styled.div`
   grid-column: 1 / -1;

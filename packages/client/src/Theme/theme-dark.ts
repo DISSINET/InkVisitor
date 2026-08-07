@@ -31,6 +31,7 @@ const darkTheme = {
       800: "#edf2f7",
       900: "#f7fafc",
     },
+    tableHeaderBg: "#2d3748",
     invertedBg: {
       plain: "#2d3748",
       danger: "#3D1A1A",

@@ -55,6 +55,12 @@ const clockPerformance = (
   });
 };
 
+// throws during render, which is the only kind of failure an error boundary
+// catches — event handlers and async callbacks bypass it
+const CrashTest = () => {
+  throw new Error("Deliberate crash from /crash — ErrorBoundary preview route.");
+};
+
 export const PublicPath = (props: any) => {
   const loggedIn = !api.isLoggedIn();
   if (loggedIn) {
@@ -115,24 +121,31 @@ export const App: React.FC = () => {
   }, [debouncedWidth]);
 
   return (
-    <ErrorBoundary>
+    <ThemeProvider theme={themeConfig}>
       <Helmet>
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
       </Helmet>
-      <ThemeProvider theme={themeConfig}>
-        <GlobalStyle theme={themeConfig} />
+      {/* outside the boundary: the fallback replaces everything inside it, and
+          without the global reset it would render at the browser's default
+          font and root size */}
+      <GlobalStyle theme={themeConfig} />
+      {/* inside the provider so its fallback can reach the theme; an error
+          thrown above this point belongs to App's own render and no boundary
+          rendered by App could catch it anyway */}
+      <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <div style={{ fontSize: "16px" }}>
-            {/* fontSize zooms query devtools to normal size */}
-            <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
-          </div>
+          {/* sized by the .tsqd-parent-container rules in Theme/global.ts */}
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>
                 <Page>
                   <Routes>
                     {/* PUBLIC */}
+                    {process.env.NODE_ENV === "development" && (
+                      <Route path="/crash" element={<CrashTest />} />
+                    )}
                     <Route
                       path="/login"
                       element={
@@ -232,7 +245,7 @@ export const App: React.FC = () => {
             </BrowserRouter>
           </DndProvider>
         </QueryClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 };

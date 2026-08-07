@@ -34,6 +34,7 @@ interface Card {
   width: "full" | "fat" | "normal" | "auto" | number;
   $fullHeight: boolean;
   $maxWidth?: number;
+  $noBorder?: boolean;
 }
 const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
@@ -64,8 +65,11 @@ export const StyledCard = styled(animated.div)<Card>`
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  border: ${({ theme }) => theme.borderWidth["default"]} solid
-    ${({ theme }) => theme.color["modalBorder"]};
+  border: ${({ theme, $noBorder }) =>
+    $noBorder
+      ? "none"
+      : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
+  box-shadow: ${({ theme, $noBorder }) => ($noBorder ? theme.boxShadow["high"] : "")};
 `;
 
 interface StyledCardHeader {

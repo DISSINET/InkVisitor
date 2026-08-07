@@ -30,6 +30,12 @@ interface Box {
   headerComponent?: ReactNode;
   buttons?: ReactNode[];
   children?: ReactNode;
+  /**
+   * When false, the box label never shrinks — header content and buttons yield
+   * instead. Default true: the label cedes space (some boxes need the header
+   * buttons to win over the caption at narrow widths).
+   */
+  shrinkLabel?: boolean;
   onHeaderClick?: () => void;
   disableHeaderClick?: boolean;
   disableScroll?: boolean;
@@ -46,6 +52,7 @@ export const Box: React.FC<Box> = ({
   headerComponent,
   buttons,
   children,
+  shrinkLabel = true,
   onHeaderClick,
   disableHeaderClick = false,
   disableScroll = false,
@@ -84,7 +91,11 @@ export const Box: React.FC<Box> = ({
         $hasHeaderClick={onHeaderClick !== undefined && !disableHeaderClick && isExpanded}
         onClick={() => !disableHeaderClick && onHeaderClick && onHeaderClick()}
       >
-        {!hideContent && isExpanded && <StyledLabel style={animatedExpand}>{label}</StyledLabel>}
+        {!hideContent && isExpanded && (
+          <StyledLabel $shrinkLabel={shrinkLabel} style={animatedExpand}>
+            {label}
+          </StyledLabel>
+        )}
         {/* Follows the label rather than the buttons: a collapsed box is a
             narrow strip with room for its controls, not for content about what
             it holds. */}

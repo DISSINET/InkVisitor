@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { TbArrowForwardUp } from "react-icons/tb";
 import {
-  StyledCenterColumn,
   StyledDescription,
   StyledEmailSent,
+  StyledEmailSentIconWrap,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
 import {
@@ -14,10 +14,16 @@ import {
   InvalidEmailError,
   getErrorByCode,
 } from "@inkvisitor/shared/types/errors";
-import { StyledButtonWrap, StyledErrorText, StyledInputRow } from "pages/AuthModalSharedStyles";
-import useKeypress from "hooks/useKeyPress";
+import {
+  StyledCenterColumn,
+  StyledErrorText,
+  StyledErrorWrap,
+  StyledForm,
+  StyledInputRow,
+  StyledLinkButton,
+  StyledSubmitWrap,
+} from "pages/AuthModalSharedStyles";
 import { ButtonSize } from "types";
-import { IcoRotateLock } from "Theme/icons";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -60,14 +66,6 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
     }
   }, [emailLocal]);
 
-  useKeypress(
-    "Enter",
-    () => {
-      handlePasswordReset();
-    },
-    [emailLocal],
-  );
-
   return (
     <>
       {!restartScreen ? (
@@ -77,49 +75,58 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <br /> A link to reset your password will be sent
             <br /> to you within couple of minutes.
           </StyledDescription>
-          <StyledInputRow>
-            <Input
-              icon={<StyledTbMailFilled size={15} $isError={error !== false} />}
-              width={200}
-              placeholder="email"
-              onChangeFn={(text: string) => setEmailLocal(text)}
-              value={emailLocal}
-              changeOnType
-              autoFocus
-              borderColor={error !== false ? "danger" : undefined}
-            />
-          </StyledInputRow>
+          <StyledForm
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (validateEmail(emailLocal)) {
+                handlePasswordReset();
+              } else {
+                setError(InvalidEmailError.message);
+              }
+            }}
+          >
+            <StyledInputRow>
+              <Input
+                icon={<StyledTbMailFilled size={15} $isError={error !== false} />}
+                width="full"
+                fullHeight
+                placeholder="email"
+                onChangeFn={(text: string) => setEmailLocal(text)}
+                value={emailLocal}
+                changeOnType
+                autoFocus
+                borderColor={error !== false ? "danger" : undefined}
+              />
+            </StyledInputRow>
 
-          <div style={{ minHeight: "2rem" }}>
-            {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-          </div>
+            {error !== false && (
+              <StyledErrorWrap>
+                <StyledErrorText>{error}</StyledErrorText>
+              </StyledErrorWrap>
+            )}
 
-          <StyledButtonWrap>
-            <div>
+            <StyledSubmitWrap>
               <Button
                 fullWidth
-                icon={<IcoRotateLock size={18} />}
                 label="Recover password"
                 color="success"
-                onClick={() => {
-                  if (validateEmail(emailLocal)) {
-                    handlePasswordReset();
-                  } else {
-                    setError(InvalidEmailError.message);
-                  }
-                }}
                 disabled={emailLocal.length === 0}
                 size={ButtonSize.Large}
               />
-            </div>
-          </StyledButtonWrap>
+            </StyledSubmitWrap>
+            <StyledLinkButton type="button" onClick={onReturnToLogin}>
+              Back to Log In
+            </StyledLinkButton>
+          </StyledForm>
         </>
       ) : (
         <StyledCenterColumn>
           <StyledEmailSent>{`A reset link was sent to email`}</StyledEmailSent>
           <StyledEmailSent>{`${emailLocal}`}</StyledEmailSent>
 
-          <BsEnvelopeArrowUpFill size={24} style={{ margin: "0.5rem 0 1.5rem 0" }} />
+          <StyledEmailSentIconWrap>
+            <BsEnvelopeArrowUpFill size={24} />
+          </StyledEmailSentIconWrap>
           <Button
             label="return"
             icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}

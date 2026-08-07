@@ -30,6 +30,8 @@ import {
   StyledCellMerge,
   StyledDropdownWithTypeBar,
   StyledNoResults,
+  StyledOptionRow,
+  StyledOptionRows,
   StyledOptions,
   StyledPill,
   StyledPillCloseIcon,
@@ -377,9 +379,9 @@ export const EntitySearchBox: React.FC = () => {
           />
 
           {/* ADVANCED OPTIONS */}
-          <>
+          <StyledOptionRows>
             {expandedOptions.includes(SearchEnums.AdvancedOption.Class) && (
-              <StyledRow>
+              <StyledOptionRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Class)}
                 <Dropdown.Single.Entity
                   placeholder={""}
@@ -392,11 +394,11 @@ export const EntitySearchBox: React.FC = () => {
                     });
                   }}
                 />
-              </StyledRow>
+              </StyledOptionRow>
             )}
 
             {expandedOptions.includes(SearchEnums.AdvancedOption.Status) && (
-              <StyledRow>
+              <StyledOptionRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Status)}
                 <StyledDropdownWithTypeBar>
                   <Dropdown.Single.Basic
@@ -412,11 +414,11 @@ export const EntitySearchBox: React.FC = () => {
                   />
                   <TypeBar entityLetter={classOption} noMargin width={4} />
                 </StyledDropdownWithTypeBar>
-              </StyledRow>
+              </StyledOptionRow>
             )}
 
             {expandedOptions.includes(SearchEnums.AdvancedOption.Language) && (
-              <StyledRow>
+              <StyledOptionRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Language)}
                 <StyledDropdownWithTypeBar>
                   <Dropdown.Single.Basic
@@ -435,7 +437,7 @@ export const EntitySearchBox: React.FC = () => {
                   />
                   <TypeBar entityLetter={classOption} noMargin width={4} />
                 </StyledDropdownWithTypeBar>
-              </StyledRow>
+              </StyledOptionRow>
             )}
 
             {/* NOT USED NOW */}
@@ -453,7 +455,7 @@ export const EntitySearchBox: React.FC = () => {
               />
             </StyledRow> */}
             {expandedOptions.includes(SearchEnums.AdvancedOption.Territory) && (
-              <StyledRow>
+              <StyledOptionRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.Territory)}
                 {territoryEntity ? (
                   <>
@@ -490,10 +492,10 @@ export const EntitySearchBox: React.FC = () => {
                     />
                   </div>
                 )}
-              </StyledRow>
+              </StyledOptionRow>
             )}
             {territoryEntity && (
-              <StyledRow>
+              <StyledOptionRow>
                 <StyledRowHeader>Territory children</StyledRowHeader>
                 <AttributeButtonGroup
                   options={[
@@ -515,10 +517,10 @@ export const EntitySearchBox: React.FC = () => {
                     },
                   ]}
                 />
-              </StyledRow>
+              </StyledOptionRow>
             )}
             {expandedOptions.includes(SearchEnums.AdvancedOption.CoOccurrence) && (
-              <StyledRow>
+              <StyledOptionRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.CoOccurrence)}
                 {cooccurrenceEntity ? (
                   <EntityTag
@@ -561,10 +563,10 @@ export const EntitySearchBox: React.FC = () => {
                     />
                   </div>
                 )}
-              </StyledRow>
+              </StyledOptionRow>
             )}
             {expandedOptions.includes(SearchEnums.AdvancedOption.ReferencedTo) && (
-              <StyledRow>
+              <StyledOptionRow>
                 {renderOptionLabel(SearchEnums.AdvancedOption.ReferencedTo)}
                 {referencedTo ? (
                   <EntityTag
@@ -591,9 +593,9 @@ export const EntitySearchBox: React.FC = () => {
                     placeholder="resource"
                   />
                 )}
-              </StyledRow>
+              </StyledOptionRow>
             )}
-          </>
+          </StyledOptionRows>
           {/* )} */}
         </StyledOptions>
 

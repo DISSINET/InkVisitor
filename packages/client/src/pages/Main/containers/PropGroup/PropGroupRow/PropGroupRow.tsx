@@ -270,7 +270,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         noIconMargin
                         color="primary"
                         inverted
-                        bold
                         tooltipLabel="add child prop"
                         onClick={() => {
                           addProp(prop.id);

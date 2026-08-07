@@ -16,4 +16,13 @@ export const StyledLoaderWrap = styled.div<StyledLoaderWrap>`
   background-color: ${({ theme, $noBackground }) =>
     !$noBackground ? theme.color["primaryTransparent"] : ""};
   z-index: 20;
+
+  /* react-spinners staggers its dots with an animation-delay, but writes an
+     inline animation-fill-mode: forwards — a dot still inside its delay holds
+     its untransformed size instead of the 0% keyframe. only !important beats
+     that inline style */
+  /* (Workaround for doubled Loader bug) */
+  > span > span {
+    animation-fill-mode: both !important;
+  }
 `;

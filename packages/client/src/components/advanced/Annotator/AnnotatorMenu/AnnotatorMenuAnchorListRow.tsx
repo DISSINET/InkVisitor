@@ -1,7 +1,8 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
+import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { FaArrowsAltH, FaEllipsisV, FaUnlink } from "react-icons/fa";
+import { FaArrowsAltH, FaEdit, FaEllipsisV, FaUnlink } from "react-icons/fa";
 import { Button } from "components/basic/Button/Button";
 import { EntityTag } from "../../EntityTag/EntityTag";
 import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
@@ -12,6 +13,7 @@ import {
   StyledAnchorClusterMoveButton,
   StyledAnchorClusterUnlinkButton,
   StyledAnchorControlsCluster,
+  StyledAnchorOpenStatementButton,
 } from "../styles";
 import { Tag } from "@inkvisitor/annotator/src/lib";
 
@@ -170,25 +172,55 @@ const AnnotatorAnchorGridCell: React.FC<AnnotatorAnchorGridCell> = ({
   disableElvl,
   editControls,
 }) => {
+  const { setStatementId, setTerritoryId } = useSearchParams();
   const elvlValue = item.anchor.attributes.elvl as EntityEnums.Elvl;
   const hasElvlValue = Object.values(EntityEnums.Elvl).includes(elvlValue);
   // Where the inline controls can exist at all (not readonly / documents page).
   const controlsAvailable = !readonly && !disableElvl;
+
+  // Opening a Statement in the editor is navigation, not editing, so the
+  // button exists in every mode — view, edit, and for readonly users. Shown
+  // only while the cell is hovered (CSS in the wrapper) to keep tags compact.
+  const openInEditorButton = entity.class === EntityEnums.Class.Statement && (
+    <StyledAnchorOpenStatementButton>
+      <Button
+        icon={<FaEdit size={12} />}
+        color="plain"
+        inverted
+        shape="sharp-square"
+        tooltipLabel="open Statement in editor"
+        onClick={() => {
+          setStatementId(entity.id);
+          const territoryId = entity.data.territory?.territoryId;
+          if (!entity.isTemplate && territoryId) {
+            setTerritoryId(territoryId);
+          }
+        }}
+      />
+    </StyledAnchorOpenStatementButton>
+  );
 
   return (
     <StyledAnchorCell>
       <EntityTag
         fullWidth
         button={
-          controlsAvailable ? (
-            <AnnotatorAnchorControlsCluster
-              item={item}
-              status={entity.status}
-              onRemoveAnchor={onRemoveAnchor}
-              onUpdateAnchor={onUpdateAnchor}
-              onMoveAnchor={onMoveAnchor}
-              editControls={editControls}
-            />
+          // EntityTag renders the wrapper for any truthy button value, so pass
+          // undefined when there is nothing to show instead of an empty fragment
+          openInEditorButton || controlsAvailable ? (
+            <>
+              {openInEditorButton}
+              {controlsAvailable && (
+                <AnnotatorAnchorControlsCluster
+                  item={item}
+                  status={entity.status}
+                  onRemoveAnchor={onRemoveAnchor}
+                  onUpdateAnchor={onUpdateAnchor}
+                  onMoveAnchor={onMoveAnchor}
+                  editControls={editControls}
+                />
+              )}
+            </>
           ) : undefined
         }
         entity={entity}

@@ -47,7 +47,7 @@ import {
 } from "@inkvisitor/shared/types";
 import { AxiosResponse } from "axios";
 import { CancelButton, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
-import { EntityTagById } from "components/advanced";
+import { EntityTagById } from "../EntityTag/EntityTagById";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { CStatement } from "constructors";

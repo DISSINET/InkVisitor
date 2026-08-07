@@ -4,6 +4,7 @@ import {
   EntityTooltip,
   IAudit,
   IDocument,
+  IDocumentExport,
   IEntity,
   IReference,
   IRequestQuery,
@@ -36,11 +37,13 @@ import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
+import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { defaultPing } from "Theme/constants";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
+import { buildDocumentsZip } from "utils/documentExportZip";
 import {
   clearStoredUser,
   getStoredUserId,
@@ -90,6 +93,19 @@ type IFilterDocuments = {
  */
 export const HTML_CAPTURE_STORAGE_KEY = "inkvisitor:htmlResponseCaptures";
 export const HTML_CAPTURE_EVENT = "inkvisitor:html-capture";
+
+const triggerDownload = (blob: Blob, fileName: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+};
 
 class Api {
   private baseUrl: string;
@@ -1731,17 +1747,43 @@ class Api {
         { responseType: "blob" },
       );
 
-      const url = window.URL.createObjectURL(response.data);
-      const a = document.createElement("a");
+      triggerDownload(response.data, `${fileName}.txt`);
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
 
-      a.href = url;
-      a.download = `${fileName}.txt`;
-      document.body.appendChild(a);
-      a.click();
+  /**
+   * Downloads several documents as one archive. The anchor classes to keep are
+   * the same for every document of the batch; the server rejects the whole
+   * request when any of the documents may not be exported by this user.
+   *
+   * The selection is sent in requests of MAX_DOCUMENTS_EXPORT_BATCH documents -
+   * the size the server accepts - one after another, so the server holds one
+   * chunk at a time. A rejected chunk aborts the whole export before any
+   * archive is built.
+   */
+  async documentsExportZip(
+    documentIds: string[],
+    exportedEntities: EntityEnums.Class[],
+    zipFileName: string,
+  ): Promise<void> {
+    try {
+      const exports: IDocumentExport[] = [];
 
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      for (let i = 0; i < documentIds.length; i += MAX_DOCUMENTS_EXPORT_BATCH) {
+        const response = await this.connection.post<IDocumentExport[]>(
+          `/documents/export-batch`,
+          {
+            documentIds: documentIds.slice(i, i + MAX_DOCUMENTS_EXPORT_BATCH),
+            exportedEntities,
+          },
+        );
+
+        exports.push(...response.data);
+      }
+
+      triggerDownload(await buildDocumentsZip(exports), zipFileName);
     } catch (err) {
       throw this.handleError(err);
     }

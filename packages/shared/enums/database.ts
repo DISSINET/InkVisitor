@@ -10,6 +10,7 @@ export namespace DbEnums {
     AuditDateTypeUser = "date_type_user",
     AuditRelationEntityIds = "relation_entityIds",
     EntityUsedTemplate = "usedTemplate",
+    EntityReferences = "references.entityIds",
     PropsRecursive = "props.recursive",
     RelationsEntityIds = "entityIds",
     DocumentEntityIds = "entityIds"
@@ -20,5 +21,6 @@ export namespace DbEnums {
     Indexes.StatementDataProps,
     Indexes.StatementEntities,
     Indexes.StatementActantsCI,
+    Indexes.EntityReferences,
   ]
 }

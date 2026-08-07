@@ -120,6 +120,29 @@ const entitiesIndexes: IndexDef[] = [
     { multi: true }
   ),
   def(DbEnums.Indexes.EntityUsedTemplate),
+  // Multi-index over both sides of every reference row - the resource (R) and
+  // the value (V). Backs Entity.findUsedInReferences, which powers the
+  // reference backlinks in the detail "Used in" section. Rows predating the
+  // references field, or a reference row missing a side, contribute no key.
+  def(
+    DbEnums.Indexes.EntityReferences,
+    function (row: RDatum) {
+      return r.branch(
+        row.hasFields("references").not(),
+        [] as unknown as RValue,
+        row("references")
+          .concatMap((ref: RDatum) => [
+            ref("resource").default(""),
+            ref("value").default(""),
+          ])
+          // a reference row is created before either side is picked, so empty
+          // sides are common - they would all pile up under a single "" key
+          .filter((id: RDatum) => id.ne(""))
+          .distinct()
+      );
+    },
+    { multi: true }
+  ),
   def(
     DbEnums.Indexes.StatementActantsCI,
     function (row: RDatum) {

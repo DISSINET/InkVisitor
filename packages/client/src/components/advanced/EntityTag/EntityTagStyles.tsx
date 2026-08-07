@@ -93,6 +93,8 @@ export const StyledExpansionBadge = styled.div<StyledExpansionBadge>`
 interface StyledLabelWrap {
   $invertedLabel: boolean;
   $isFavorited?: boolean;
+  $tagBorderColorKey: EntityEnums.Status;
+  $labelOnly?: boolean;
 }
 export const StyledLabelWrap = styled.div<StyledLabelWrap>`
   display: inline-grid;
@@ -104,6 +106,10 @@ export const StyledLabelWrap = styled.div<StyledLabelWrap>`
   overflow: hidden;
   background-color: ${({ theme, $invertedLabel }) =>
     $invertedLabel ? theme.color.tagSelectedBackground : theme.color.tagBackground};
+  border-left-width: ${({ theme, $labelOnly }) => ($labelOnly ? 0 : theme.borderWidth[2])};
+  border-left-color: ${({ theme, $tagBorderColorKey }) =>
+    theme.color.tagBorderColor[$tagBorderColorKey]};
+  border-left-style: solid;
 `;
 interface StyledStarWrap {}
 export const StyledStarWrap = styled.div<StyledStarWrap>`
@@ -122,7 +128,7 @@ export const StyledFaStar = styled(FaStar)<StyledFaStar>`
 const getColor = (
   $invertedLabel: boolean,
   $isFavorited: boolean,
-  $isItalic: boolean,
+  $isItalic: boolean
 ): keyof ThemeColor => {
   if ($invertedLabel) {
     // the star glyph already carries the favorited marker, and gold text has too
@@ -135,9 +141,7 @@ const getColor = (
 interface StyledLabel {
   $invertedLabel: boolean;
   $fullWidth: boolean;
-  $tagBorderColorKey: EntityEnums.Status;
   $isFavorited: boolean;
-  $labelOnly?: boolean;
   $isItalic: boolean;
   $maxWidth?: number;
 }
@@ -151,10 +155,6 @@ export const StyledLabel = styled.div<StyledLabel>`
   font-style: ${({ $isItalic }) => `${$isItalic ? "italic" : "normal"}`};
   color: ${({ theme, $invertedLabel, $isItalic, $isFavorited }) =>
     theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};
-  border-left-width: ${({ theme, $labelOnly }) => ($labelOnly ? 0 : theme.borderWidth[2])};
-  border-left-color: ${({ theme, $tagBorderColorKey }) =>
-    theme.color.tagBorderColor[$tagBorderColorKey]};
-  border-left-style: solid;
   max-width: ${({ theme, $fullWidth, $maxWidth }) =>
     $maxWidth ? `${$maxWidth}px` : $fullWidth ? "100%" : theme.space[30]};
   font-weight: ${({ theme, $invertedLabel }) =>

@@ -18,6 +18,7 @@ import {
   IProp,
   IPropSpec,
   IReference,
+  IResourceData,
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
@@ -544,6 +545,27 @@ export default Router()
             continue;
           }
 
+          // a Resource owning a document (data.documentId) must have it
+          // detached first, else the document would be orphaned. A dangling
+          // documentId (document row already gone) does not block.
+          if (entity.class === EntityEnums.Class.Resource) {
+            const ownedDocId = (entity.data as Partial<IResourceData>)
+              ?.documentId;
+            if (
+              ownedDocId &&
+              (await Document.getDocumentById(req.db.connection, ownedDocId))
+            ) {
+              out.result = false;
+              out.data[entity.id] = new InvalidDeleteError(
+                `Cannot be deleted while a document is attached (${ownedDocId})`
+              ).withData<IInvalidDeleteErrorData>({
+                type: "attachedDocument",
+                ids: [ownedDocId],
+              });
+              continue;
+            }
+          }
+
           const model = getEntityClass(entity);
           if (!model.canBeDeletedByUser(req.getUserOrFail())) {
             out.result = false;
@@ -558,11 +580,22 @@ export default Router()
           // find other entities dependend on this one
           const usedBy = await model.getUsedByEntity(req.db.connection);
           if (usedBy.length) {
+            // "reference" steers the client to the target's own detail, whose
+            // "Used in" reference tables list every blocker; mixed conflicts
+            // (statement + reference usage) resolve to "reference" since that
+            // detail shows the statement usages too. `ids` always carries the
+            // full blocker list - the dependencyMap cascade below relies on it.
+            const viaReference = usedBy.some((e) =>
+              (e.references ?? []).some(
+                (ref) =>
+                  ref.resource === entity.id || ref.value === entity.id
+              )
+            );
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
               `Referenced by other entities`
             ).withData<IInvalidDeleteErrorData>({
-              type: "entity",
+              type: viaReference ? "reference" : "entity",
               ids: usedBy.map((e) => e.id),
             });
             dependencyMap[entity.id] = usedBy.map((e) => e.id);

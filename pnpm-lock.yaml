@@ -120,6 +120,9 @@ importers:
       immutability-helper:
         specifier: ^3.1.1
         version: 3.1.1
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
       react:
         specifier: ^19.2.6
         version: 19.2.6
@@ -4386,6 +4389,9 @@ packages:
     engines: {node: '>=16.x'}
     hasBin: true
 
+  immediate@3.0.6:
+    resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
+
   immer@10.2.0:
     resolution: {integrity: sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw==}
 
@@ -4904,6 +4910,9 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
+  jszip@3.10.1:
+    resolution: {integrity: sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==}
+
   juice@7.0.0:
     resolution: {integrity: sha512-AjKQX31KKN+uJs+zaf+GW8mBO/f/0NqSh2moTMyvwBY+4/lXIYTU8D8I2h6BAV3Xnz6GGsbalUyFqbYMe+Vh+Q==}
     engines: {node: '>=10.0.0'}
@@ -4939,6 +4948,9 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  lie@3.3.0:
+    resolution: {integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==}
 
   lighthouse-logger@1.4.2:
     resolution: {integrity: sha512-gPWxznF6TKmUHrOQjlVo2UbaL2EJ71mb2CCeRs/2qBpi4L/g4LUVc9+3lKQ6DTUZwJswfM7ainGrLO1+fOqa2g==}
@@ -5547,6 +5559,9 @@ packages:
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
+
+  pako@1.0.11:
+    resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -11808,6 +11823,8 @@ snapshots:
     dependencies:
       queue: 6.0.2
 
+  immediate@3.0.6: {}
+
   immer@10.2.0: {}
 
   immer@11.1.8: {}
@@ -12757,6 +12774,13 @@ snapshots:
 
   json5@2.2.3: {}
 
+  jszip@3.10.1:
+    dependencies:
+      lie: 3.3.0
+      pako: 1.0.11
+      readable-stream: 2.3.8
+      setimmediate: 1.0.5
+
   juice@7.0.0:
     dependencies:
       cheerio: 1.2.0
@@ -12799,6 +12823,10 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  lie@3.3.0:
+    dependencies:
+      immediate: 3.0.6
 
   lighthouse-logger@1.4.2:
     dependencies:
@@ -13385,6 +13413,8 @@ snapshots:
   p-try@2.2.0: {}
 
   package-json-from-dist@1.0.1: {}
+
+  pako@1.0.11: {}
 
   param-case@3.0.4:
     dependencies:

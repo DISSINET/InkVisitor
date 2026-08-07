@@ -56,6 +56,12 @@
       "import": "./utils/*.ts",
       "require": "./dist/utils/*.js",
       "default": "./dist/utils/*.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "import": "./constants/index.ts",
+      "require": "./dist/constants/index.js",
+      "default": "./dist/constants/index.js"
     }
   },
   "devDependencies": {

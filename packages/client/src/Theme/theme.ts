@@ -30,6 +30,9 @@ const theme = {
       800: "#2d3748",
       900: "#1a202c",
     },
+    // filled table header row; its own token because no single gray step gives
+    // a visible band on the light page and the right tone on the dark one
+    tableHeaderBg: "#e2e8f0",
     invertedBg: {
       plain: "#edf2f7",
       danger: "#FFEEEE",

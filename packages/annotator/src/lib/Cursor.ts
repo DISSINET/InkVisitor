@@ -346,7 +346,8 @@ export default class Cursor
     charWidth: number,
     scrollOffsetY: number = 0,
     viewportLineStart: number = 0,
-    pixelXToColumn?: (absLine: number, deviceX: number) => number
+    pixelXToColumn?: (absLine: number, deviceX: number) => number,
+    lineXOrigin?: (absLine: number) => number
   ) {
     this.setPositionFromCanvasOffsets(
       evt.offsetX,
@@ -355,7 +356,8 @@ export default class Cursor
       charWidth,
       scrollOffsetY,
       viewportLineStart,
-      pixelXToColumn
+      pixelXToColumn,
+      lineXOrigin
     );
   }
 
@@ -366,6 +368,10 @@ export default class Cursor
    * resolved from the prefix table of the clicked line via measured widths, so
    * `yLine` is computed first and `offsetX` is scaled CSS→device px (× ratio) to
    * match the device-px prefix table. Without it, the legacy `xToCharI` is used.
+   *
+   * `lineXOrigin` gives the line's horizontal origin in device px (the paragraph
+   * indent, #2076); column 0 sits there rather than at x=0, so the pointer is
+   * un-shifted by it before a column is resolved.
    */
   setPositionFromCanvasOffsets(
     offsetX: number,
@@ -374,16 +380,19 @@ export default class Cursor
     charWidth: number,
     scrollOffsetY: number = 0,
     viewportLineStart: number = 0,
-    pixelXToColumn?: (absLine: number, deviceX: number) => number
+    pixelXToColumn?: (absLine: number, deviceX: number) => number,
+    lineXOrigin?: (absLine: number) => number
   ) {
     const relY = Math.max(
       0,
       Math.floor((offsetY * this.ratio + scrollOffsetY) / lineHeight)
     );
     this.yLine = viewportLineStart + relY;
+    const originPx = lineXOrigin ? lineXOrigin(this.yLine) : 0;
+    const deviceX = Math.max(0, offsetX * this.ratio - originPx);
     this.xLine = pixelXToColumn
-      ? pixelXToColumn(this.yLine, Math.max(offsetX, 0) * this.ratio)
-      : this.xToCharI(offsetX, charWidth);
+      ? pixelXToColumn(this.yLine, deviceX)
+      : this.xToCharI(deviceX / this.ratio, charWidth);
     this.goalColumn = null;
   }
 

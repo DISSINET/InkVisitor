@@ -30,10 +30,6 @@ import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPan
 import { useAppDispatch } from "redux/hooks";
 import { IcoLock, IcoPlus, IcoTrash } from "Theme/icons";
 import { ButtonSize, classesAnnotator } from "types";
-import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../../EntityTag/EntityTag";
-import { EntityTagById } from "../../EntityTag/EntityTagById";
-import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
 import { TerritoryChildIcon, TerritorySiblingIcon } from "./AnnotatorIcons";
 import {
   ANCHOR_GRID_COLUMNS,
@@ -71,6 +67,10 @@ import {
 } from "../styles";
 import { AnnotatorPositionTNode, TerritoryCreateModalType } from "../types";
 import { useAnnotatorTargetPicker } from "../hooks/useAnnotatorTargetPicker";
+import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../../EntityTag/EntityTag";
+import { EntityTagById } from "../../EntityTag/EntityTagById";
+import { ElvlButtonGroup } from "../../IconButtonGroups/ElvlButtonGroup";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -797,20 +797,22 @@ export const TextAnnotatorMenu = ({
               </div>
               {showAnchorsModeSwitch && (
                 <StyledAnchorModeSwitch>
-                  <SwitchGroup>
+                  <SwitchGroup pillColor="info" activeIndex={anchorsEditActive ? 1 : 0}>
                     <Button
                       icon={<FaRegEye size={11} />}
                       color="info"
                       label="view"
                       shape="rounded-sm"
                       noBorder
-                      inverted={anchorsEditActive}
-                      noBackground={anchorsEditActive}
+                      inverted
+                      noBackground
+                      textColor={anchorsEditActive ? undefined : "white"}
+                      noHoverBackground={!anchorsEditActive}
                       tooltipLabel="view mode"
                       tooltipContent={
                         <p>(hold ctrl or cmd over the list for temporary edit mode)</p>
                       }
-                      bold={!anchorsEditActive}
+                      textRegular={anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(false)}
                     />
                     <Button
@@ -819,10 +821,12 @@ export const TextAnnotatorMenu = ({
                       label="edit"
                       shape="rounded-sm"
                       noBorder
-                      inverted={!anchorsEditActive}
-                      noBackground={!anchorsEditActive}
+                      inverted
+                      noBackground
+                      textColor={anchorsEditActive ? "white" : undefined}
+                      noHoverBackground={anchorsEditActive}
                       tooltipLabel="edit mode — show anchor controls"
-                      bold={anchorsEditActive}
+                      textRegular={!anchorsEditActive}
                       onClick={() => handleAnchorsEditModeChange(true)}
                     />
                   </SwitchGroup>

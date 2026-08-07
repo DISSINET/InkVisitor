@@ -215,7 +215,6 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       icon={<IcoPlusBold />}
       label="new validation rule"
       color="primary"
-      bold
       onClick={initValidationRule}
       size={ButtonSize.Medium}
     />
