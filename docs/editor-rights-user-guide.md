@@ -41,6 +41,27 @@ everything below it then becomes read-only.
   but only between Territories he can edit — both the one it's leaving and the one  
   it's going to. Territories he can't edit won't accept the drop.
 
+### Statement list batch actions
+
+Row of batch actions above the Statement list appears **only in a
+Territory he can edit**.
+
+- **move** — source T and the destination T has to be his to edit
+- **duplicate destination** — source T and the destination T has to be his to edit
+- **delete** — removes the selected Statements from a Territory he can edit.
+
+- **auto order** - needs edit access to the Territory
+
+The remaining four are **not settled yet** — the rules below are what they do
+today, not what they should do:
+
+- **replace a referenced Resource** — Admins and Owners only
+- **append a referenced Resource** — Admins and Owners only
+- **relate to superordinate entity** — works anywhere, even on Statements in a
+  Territory he can only read
+- **classify as** — works anywhere, even on Statements in a Territory he can only
+  read
+
 ## Resources
 
 Resources represent external sources. What an Editor can do depends on whether a
@@ -66,8 +87,7 @@ This section is about the remaining classes.
 
 ## Relations
 
-Relations are the links between two Entities — synonyms, classifications, and so
-on. An Editor can **create, edit, and delete any Relation**. Like the Entities
+An Editor can **create, edit, and delete any Relation**. Like the Entities
 above, Relations are not tied to a Territory, so this does not depend on his tree
 access.
 
