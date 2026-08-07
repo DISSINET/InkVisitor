@@ -374,7 +374,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </StyledFieldHelp>
 
-                <StyledFieldLabel>Default territory</StyledFieldLabel>
+                <StyledFieldLabel>Default Territory</StyledFieldLabel>
                 <StyledFieldControl>
                   {defaultTerritory ? (
                     <EntityTag
@@ -438,29 +438,35 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
                 <StyledRightsLabel>Read</StyledRightsLabel>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? readTerritories.map((territory) => (
-                        <EntityTag fullWidth key={territory.id} entity={territory} />
-                      ))
-                    : "all"}
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner ? (
+                    readTerritories.map((territory) => (
+                      <EntityTag fullWidth key={territory.id} entity={territory} />
+                    ))
+                  ) : (
+                    <i>all</i>
+                  )}
                 </StyledRightsWrap>
 
                 <StyledRightsLabel>Write</StyledRightsLabel>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? writeTerritories.map((territory) => (
-                        <EntityTag fullWidth key={territory.id} entity={territory} />
-                      ))
-                    : "all"}
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner ? (
+                    writeTerritories.map((territory) => (
+                      <EntityTag fullWidth key={territory.id} entity={territory} />
+                    ))
+                  ) : (
+                    <i>all</i>
+                  )}
                 </StyledRightsWrap>
 
                 <StyledRightsLabel>Annotate</StyledRightsLabel>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? (user.resourceRights ?? []).map(({ resource }) => (
-                        <EntityTag fullWidth key={resource.id} entity={resource} />
-                      ))
-                    : "all"}
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner ? (
+                    (user.resourceRights ?? []).map(({ resource }) => (
+                      <EntityTag fullWidth key={resource.id} entity={resource} />
+                    ))
+                  ) : (
+                    <i>all</i>
+                  )}
                 </StyledRightsWrap>
               </StyledRightsGrid>
             </StyledUserCustomizationSection>

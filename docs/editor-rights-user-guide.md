@@ -47,9 +47,8 @@ Row of batch actions above the Statement list appears **only in a
 Territory he can edit**.
 
 - **move** — source T and the destination T has to be his to edit
-- **duplicate destination** — source T and the destination T has to be his to edit
+- **duplicate** — source T and the destination T has to be his to edit
 - **delete** — removes the selected Statements from a Territory he can edit.
-
 - **auto order** - needs edit access to the Territory
 
 The remaining four are **not settled yet** — the rules below are what they do
