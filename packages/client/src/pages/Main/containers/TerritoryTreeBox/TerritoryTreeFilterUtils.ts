@@ -17,13 +17,16 @@ export function filterTreeByFilters(
     return null;
   }
 
-  // a match keeps its subtree whole, so the children under a hit stay browsable
-  if (isNodeMatchingFilters(node, filters, favoriteIds)) {
-    return node;
-  }
-
+  // the match test belongs to the child, not to the node itself: the walk starts
+  // at the root, which satisfies the structural filters and would carry the whole
+  // tree through as a single hit
   const filteredChildren = node.children
-    .map((child) => filterTreeByFilters(child, filters, favoriteIds))
+    .map((child) =>
+      // a match keeps its subtree whole, so the children under a hit stay browsable
+      isNodeMatchingFilters(child, filters, favoriteIds)
+        ? child
+        : filterTreeByFilters(child, filters, favoriteIds)
+    )
     .filter((child): child is IResponseTree => child !== null);
 
   if (filteredChildren.length > 0) {
