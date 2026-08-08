@@ -371,7 +371,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     />
                   )}
                 </StyledFieldControl>
-                <StyledFieldHelp />
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Territory opened in the tree when InkVisitor is loaded without any parameters in the url. A link that already points to a territory, statement or detail opens that instead."
+                  />
+                </StyledFieldHelp>
 
                 <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
                 <StyledFieldControl>

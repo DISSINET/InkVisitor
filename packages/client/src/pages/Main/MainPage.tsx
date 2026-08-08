@@ -11,6 +11,7 @@ import {
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
+import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
   ReactNode,
@@ -41,6 +42,7 @@ import {
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
+import { resolveDefaultTerritory } from "utils/defaultTerritory";
 import { isLayoutUndersized } from "utils/layoutUtils";
 import {
   animateBoxHeightVars,
@@ -227,6 +229,32 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   // user data for current user
   const { data: user } = useUserQuery();
+
+  // The tree the default territory has to be reachable in; already being
+  // fetched for the tree box, so this shares that query.
+  const { data: treeData } = useTreeQuery();
+
+  // A load that carries no params at all - the app opened at its bare address -
+  // starts at the territory the user picked as their default. Decided once per
+  // visit to the page, as soon as both answers are in: a territory the user
+  // closes afterwards is a state of its own, not an invitation to jump back.
+  const defaultTerritoryResolved = useRef(false);
+  useEffect(() => {
+    if (defaultTerritoryResolved.current || !user || !treeData) {
+      return;
+    }
+    defaultTerritoryResolved.current = true;
+
+    const defaultTerritory = resolveDefaultTerritory({
+      user,
+      tree: treeData,
+      isCleanLoad: !territoryId && !statementId && detailIdArray.length === 0,
+    });
+
+    if (defaultTerritory) {
+      setTerritoryId(defaultTerritory);
+    }
+  }, [user, treeData]);
 
   // Admin / Owner / Editor with writer rights
   const hasWriteRightsToSelectedTerritory = useMemo(() => {
