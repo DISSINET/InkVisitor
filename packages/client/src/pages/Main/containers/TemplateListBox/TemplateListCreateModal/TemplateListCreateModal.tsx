@@ -23,6 +23,7 @@ import { useSearchParams } from "hooks";
 import { useUserQuery } from "hooks/react-query";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { MIN_LABEL_LENGTH_MESSAGE } from "Theme/constants";
 import { getShortLabelByLetterCount } from "utils/utils";
 
 interface TemplateListCreateModal {
@@ -37,7 +38,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   const { setStatementId, appendDetailId } = useSearchParams();
 
   const [createModalEntityClass, setCreateModalEntityClass] = useState<EntityEnums.Class>(
-    entitiesDict[0].value
+    entitiesDict[0].value,
   );
   const [createModalEntityLabel, setCreateModalEntityLabel] = useState<string>("");
   const [createModalEntityDetail, setCreateModalEntityDetail] = useState<string>("");
@@ -62,8 +63,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       toast.info(
         `Template [${variables.class}]: "${getShortLabelByLetterCount(
           variables.labels[0],
-          120
-        )}" was created`
+          120,
+        )}" was created`,
       );
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       if (variables.class === EntityEnums.Class.Statement) {
@@ -81,7 +82,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         getStoredUserRole() as UserEnums.Role,
         user.options,
         createModalEntityLabel,
-        createModalEntityDetail
+        createModalEntityDetail,
       );
       return newTemplate;
     } else {
@@ -94,7 +95,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         user.options,
         createModalEntityClass,
         createModalEntityLabel,
-        createModalEntityDetail
+        createModalEntityDetail,
       );
 
       return newTemplate;
@@ -103,7 +104,13 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     }
   };
 
+  const hasLabel = createModalEntityLabel.trim().length > 0;
+
   const handleCreateTemplate = () => {
+    if (!hasLabel) {
+      toast.info(MIN_LABEL_LENGTH_MESSAGE);
+      return;
+    }
     if (user) {
       const entity =
         createModalEntityClass === EntityEnums.Class.Statement
@@ -115,7 +122,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           getStoredUserRole() as UserEnums.Role,
           entity,
           createModalEntityLabel,
-          createModalEntityDetail
+          createModalEntityDetail,
         );
         templateCreateMutation.mutate(templateEntity);
       }
@@ -147,7 +154,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
                 setCreateModalEntityClass(selectedOption);
               }}
               width="full"
-              disableTyping
               autoFocus
             />
           </ModalInputWrap>
@@ -183,6 +189,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
             key="submit"
             label="Create"
             color="info"
+            disabled={!hasLabel}
             onClick={() => {
               handleCreateTemplate();
             }}
