@@ -43,6 +43,7 @@ import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { buildDocumentsZip } from "utils/documentExportZip";
+import { storeRedirectTargetFromWindow } from "utils/redirectAfterLogin";
 import {
   clearStoredUser,
   getStoredUserId,
@@ -374,6 +375,9 @@ class Api {
             // Session is no longer valid - drop stale local user state so route
             // guards (isLoggedIn) reflect reality, then bounce to login.
             clearStoredUser();
+            // the bounce is a full page load, so the place the user was working
+            // in only survives when it is written down first
+            storeRedirectTargetFromWindow();
             // if handled by react router, then the toast could be visible
             window.location.pathname = (process.env.ROOT_URL || "") + "/login";
           }

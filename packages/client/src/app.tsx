@@ -26,7 +26,7 @@ import React, { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Helmet } from "react-helmet-async";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -35,6 +35,7 @@ import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
+import { storeRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserRole } from "utils/userStorage";
 
 const clockPerformance = (
@@ -70,13 +71,22 @@ export const PublicPath = (props: any) => {
   return props.children;
 };
 
+// The redirect to /login drops the route the user asked for together with its
+// search and hash params, so it is recorded first and LoginPage returns them
+// there once the session exists.
+const RedirectToLogin = () => {
+  const location = useLocation();
+  storeRedirectTarget(location);
+  return <Navigate to="/login" replace />;
+};
+
 export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
-  return api.isLoggedIn() ? children : <Navigate to="/login" />;
+  return api.isLoggedIn() ? children : <RedirectToLogin />;
 };
 
 export const RequireOwner = ({ children }: { children: React.ReactNode }) => {
   if (!api.isLoggedIn()) {
-    return <Navigate to="/login" />;
+    return <RedirectToLogin />;
   }
   const isOwner = getStoredUserRole() === UserEnums.Role.Owner;
   return isOwner ? children : <Navigate to="/" />;

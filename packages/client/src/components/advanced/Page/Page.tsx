@@ -16,6 +16,7 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme, { ThemeColor } from "Theme/theme";
 import { getAppEnv } from "utils/appEnv";
+import { clearRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { StyledPage, StyledPageContent } from "./PageStyles";
 
@@ -80,6 +81,9 @@ export const Page: React.FC<Page> = ({ children }) => {
       toast.success("You've been successfully logged out!");
 
       cleanAllParams();
+      // a deliberate logout ends at the login screen, not back where the
+      // previous session was
+      clearRedirectTarget();
 
       navigate("/login");
 
