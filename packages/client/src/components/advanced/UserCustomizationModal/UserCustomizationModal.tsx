@@ -1,4 +1,4 @@
-import { languageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { languageDict, orderLanguageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
@@ -20,7 +20,6 @@ import {
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import { useOrderedLanguageDict } from "hooks/react-query";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaQuestion } from "react-icons/fa";
@@ -90,7 +89,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   // having to find it again in the suggester
   const { territoryId } = useSearchParams();
 
-  const orderedLanguageDict = useOrderedLanguageDict();
+  // follows the working languages being edited rather than the saved ones, so a
+  // language added above is at the top of the two lists below straight away
+  const orderedLanguageDict = useMemo(
+    () => orderLanguageDict(data.workingLanguages),
+    [data.workingLanguages],
+  );
 
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
     setData((prev) => ({
@@ -292,6 +296,32 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledSectionTitle>
 
               <StyledFieldGrid>
+                {/* first of the three: the two defaults below are picked out of
+                    the list it puts on top */}
+                <StyledFieldLabel>Working languages</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Dropdown.Multi.Basic
+                    width="full"
+                    value={data.workingLanguages}
+                    onChange={(selectedOptions) =>
+                      setData((prev) => ({
+                        ...prev,
+                        workingLanguages: selectedOptions as EntityEnums.Language[],
+                      }))
+                    }
+                    options={languageDict.filter(
+                      (lang) => lang.value !== EntityEnums.Language.Empty
+                    )}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Languages you work with. They are shown first in every language dropdown to make them easy to find in the full list."
+                  />
+                </StyledFieldHelp>
+
                 <StyledFieldLabel>Default label language</StyledFieldLabel>
                 <StyledFieldControl>
                   <Dropdown.Single.Basic
@@ -323,30 +353,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     color="success"
                     icon={<FaQuestion />}
                     tooltipLabel="Dominant language of the source texts being coded into statements"
-                  />
-                </StyledFieldHelp>
-
-                <StyledFieldLabel>Working languages</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Dropdown.Multi.Basic
-                    width="full"
-                    value={data.workingLanguages}
-                    onChange={(selectedOptions) =>
-                      setData((prev) => ({
-                        ...prev,
-                        workingLanguages: selectedOptions as EntityEnums.Language[],
-                      }))
-                    }
-                    options={languageDict.filter(
-                      (lang) => lang.value !== EntityEnums.Language.Empty
-                    )}
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Languages you work with. They are shown first in every language dropdown to make them easy to find in the full list."
                   />
                 </StyledFieldHelp>
 
