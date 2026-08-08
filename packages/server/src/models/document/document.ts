@@ -433,7 +433,7 @@ export default class Document implements IDocument, IDbModel {
     }
     const entries = await rethink
       .table(Document.table)
-      .getAll(...entityIds, { index: DbEnums.Indexes.DocumentEntityIds })
+      .getAll(rethink.args(entityIds), { index: DbEnums.Indexes.DocumentEntityIds })
       .without("content")
       .distinct()
       .run(db);
