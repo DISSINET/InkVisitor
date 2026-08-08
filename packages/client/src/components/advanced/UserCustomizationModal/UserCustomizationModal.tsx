@@ -4,7 +4,7 @@ import { DropdownItem, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
-import { IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
+import { IcoListTree, IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
 import api from "api";
 import {
   Button,
@@ -19,6 +19,7 @@ import {
   Toggle,
 } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { useSearchParams } from "hooks";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
@@ -85,6 +86,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const [data, setData] = useState<DataObject>(initialValues);
 
+  // the territory the tree is on, offered as the default without the user
+  // having to find it again in the suggester
+  const { territoryId } = useSearchParams();
+
   const orderedLanguageDict = useOrderedLanguageDict();
 
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
@@ -146,11 +151,11 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
-    [rights],
+    [rights]
   );
   const writeRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Write),
-    [rights],
+    [rights]
   );
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -333,7 +338,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       }))
                     }
                     options={languageDict.filter(
-                      (lang) => lang.value !== EntityEnums.Language.Empty,
+                      (lang) => lang.value !== EntityEnums.Language.Empty
                     )}
                   />
                 </StyledFieldControl>
@@ -375,9 +380,31 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <IconWithTooltip
                     color="success"
                     icon={<FaQuestion />}
-                    tooltipLabel="Territory opened in the tree when InkVisitor is loaded without any parameters in the url. A link that already points to a territory, statement or detail opens that instead."
+                    tooltipLabel="Territory opened in the tree when InkVisitor is loaded without any parameters in the url. A link that already points to a Territory, Statement or Entity detail opens that instead."
                   />
                 </StyledFieldHelp>
+
+                {territoryId && territoryId !== data.defaultTerritory && (
+                  <>
+                    <StyledFieldLabel />
+                    <StyledFieldControl>
+                      <StyledInlineAction>
+                        <Button
+                          label="Use territory open in tree"
+                          icon={<IcoListTree />}
+                          noBorder
+                          color="success"
+                          inverted
+                          noBackground
+                          onClick={() =>
+                            setData((prev) => ({ ...prev, defaultTerritory: territoryId }))
+                          }
+                        />
+                      </StyledInlineAction>
+                    </StyledFieldControl>
+                    <StyledFieldHelp />
+                  </>
+                )}
 
                 <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
                 <StyledFieldControl>
