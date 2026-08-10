@@ -585,6 +585,19 @@ export default Router()
         throw new StatementDoesNotExits("at least one statement not found", "");
       }
 
+      // References live on the statement itself, so writing them is an edit of
+      // that statement. The payload may name statements from more than one
+      // territory, so each is checked on its own.
+      const referencesUser = request.getUserOrFail();
+      for (const statementData of statements) {
+        const model = new Statement({ ...(statementData as IStatement) });
+        if (!model.canBeEditedByUser(referencesUser)) {
+          throw new PermissionDeniedError(
+            `cannot change references of statement ${statementData.id}`
+          );
+        }
+      }
+
       if (replaceAction) {
         statements.forEach((s) => (s.references = referencesData));
       } else {

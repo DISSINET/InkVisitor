@@ -33,11 +33,20 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   { controller: "statements", method: "PUT", route: "batch-move" },
   { controller: "statements", method: "POST", route: "batch-copy" },
   { controller: "statements", method: "PUT", route: "batch-reorder" },
+  // batch reference replace/append behind the statement list; never seeded, so
+  // it carries the auto-created roles:[] row and answers only to Admin/Owner
+  { controller: "statements", method: "PUT", route: "references" },
   // the seeded relations rows cover the collection endpoints ("" for bulk
   // create/update/delete); editing or deleting one relation by id goes through
   // its own route, which had no row of its own
   { controller: "relations", method: "PUT", route: ":relationId?" },
   { controller: "relations", method: "DELETE", route: ":relationId" },
+  // the collection endpoints were seeded as roles:["*"], which waves a Viewer
+  // past the ACL layer; rows are rewritten to the roles named here, so listing
+  // them narrows the wildcard down to the editor
+  { controller: "relations", method: "POST", route: "" },
+  { controller: "relations", method: "PUT", route: "" },
+  { controller: "relations", method: "DELETE", route: "" },
 ];
 
 // read-only routes any signed-in user may reach - kept apart because they are

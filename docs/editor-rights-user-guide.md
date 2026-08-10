@@ -48,18 +48,22 @@ Territory he can edit**.
 
 - **move** — source T and the destination T has to be his to edit
 - **duplicate** — source T and the destination T has to be his to edit
-- **delete** — removes the selected Statements from a Territory he can edit.
-- **auto order** - needs edit access to the Territory
 
-The remaining four are **not settled yet** — the rules below are what they do
-today, not what they should do:
+The following batch actions are allowed for Territories which Editor has write access to:
 
-- **replace a referenced Resource** — Admins and Owners only
-- **append a referenced Resource** — Admins and Owners only
-- **relate to superordinate entity** — works anywhere, even on Statements in a
-  Territory he can only read
-- **classify as** — works anywhere, even on Statements in a Territory he can only
-  read
+- **delete**
+- **auto order**
+- **replace a referenced Resource**
+- **append a referenced Resource**
+- **relate to superordinate entity**
+- **classify as**
+
+Picking a target for one of these four with **more than 10 Statements selected**
+opens a confirmation asking whether to apply the action to that many Entities.
+
+The last two create Relations, and this is where a Relation's rules meet the
+tree: a Relation attached to a Statement shows up on that Statement, so it
+follows the Territory holding it (see [Relations](#relations)).
 
 ## Resources
 
@@ -86,9 +90,14 @@ This section is about the remaining classes.
 
 ## Relations
 
-An Editor can **create, edit, and delete any Relation**. Like the Entities
-above, Relations are not tied to a Territory, so this does not depend on his tree
-access.
+An Editor can **create, edit, and delete any Relation between Entities that are
+not Statements**. Like the Entities above, those are not tied to a Territory, so
+this does not depend on his tree access.
+
+A Relation that links a **Statement** is the exception. It shows up on that
+Statement, so writing it counts as editing the Statement and needs **edit access
+to the Territory holding it**. In a Territory he can only read, the Relation is
+visible but cannot be created, changed, or removed.
 
 ## Documents and annotation
 

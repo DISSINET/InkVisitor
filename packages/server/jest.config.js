@@ -70,6 +70,7 @@ const UNIT_TEST_PATHS = [
   "src/models/relation/classification.test.ts",
   "src/models/relation/implication.test.ts",
   "src/models/relation/path.test.ts",
+  "src/models/relation/relation.rights.test.ts",
   "src/models/relation/related.test.ts",
   "src/models/relation/superordinate-entity.test.ts",
   "src/models/resource/resource.rights.test.ts",

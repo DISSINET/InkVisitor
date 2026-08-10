@@ -48,6 +48,10 @@ import {
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
 
+// batch actions that reach this many statements ask for a confirmation first -
+// they change every selected statement in one go and offer no undo
+const BATCH_CONFIRM_THRESHOLD = 10;
+
 interface StatementListHeader {
   territory?: IResponseTerritory;
   isFetchingTerritory: boolean;
@@ -189,7 +193,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
   ];
 
-  const handleOnSelected = (newSelectedId: string) => {
+  // move, duplicate and delete land somewhere visible or already confirm on
+  // their own; these four rewrite the selected statements in place
+  const confirmedBatchOptions: BatchOption[] = [
+    BatchOption.replace_R,
+    BatchOption.append_R,
+    BatchOption.relate_to_SOE,
+    BatchOption.classify_as,
+  ];
+
+  const performBatchAction = (newSelectedId: string) => {
     switch (batchAction.value) {
       case BatchOption.move_S:
         moveStatementsMutation.mutate({
@@ -245,6 +258,29 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         return;
     }
   };
+
+  const [pendingBatchAction, setPendingBatchAction] = useState<{
+    entityId: string;
+    entity?: IEntity;
+  } | null>(null);
+
+  const handleOnSelected = (newSelectedId: string) => {
+    if (
+      confirmedBatchOptions.includes(batchAction.value as BatchOption) &&
+      selectedRows.length > BATCH_CONFIRM_THRESHOLD
+    ) {
+      setPendingBatchAction({ entityId: newSelectedId });
+      return;
+    }
+    performBatchAction(newSelectedId);
+  };
+
+  // fires right after onSelected on every pick, so it fills in the tag the
+  // confirmation shows without deciding whether to confirm
+  const handleOnPicked = (pickedEntity: IEntity) =>
+    setPendingBatchAction((pending) =>
+      pending ? { ...pending, entity: pickedEntity } : pending,
+    );
 
   // get user data
   const { data: user } = useUserQuery();
@@ -413,6 +449,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                           entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
                         ]}
                         onSelected={(newSelectedId: string) => handleOnSelected(newSelectedId)}
+                        onPicked={handleOnPicked}
                         onEmptyAddButtonClick={
                           // allow duplicating to the same territory (empty suggester)
                           batchAction.value === BatchOption.duplicate_S
@@ -483,6 +520,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           setShowSubmit(false);
         }}
         onCancel={() => setShowSubmit(false)}
+      />
+      <Submit
+        show={pendingBatchAction !== null}
+        title="Batch action"
+        text={`Are you sure you want to apply "${batchAction.label}" to ${selectedRows.length} entities?`}
+        entityToSubmit={pendingBatchAction?.entity}
+        submitLabel="Apply"
+        submitColor="success"
+        bgClickCancels
+        onSubmit={() => {
+          if (pendingBatchAction) {
+            performBatchAction(pendingBatchAction.entityId);
+          }
+          setPendingBatchAction(null);
+        }}
+        onCancel={() => setPendingBatchAction(null)}
       />
     </>
   );

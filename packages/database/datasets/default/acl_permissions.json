@@ -48,6 +48,12 @@
     "roles": ["editor"]
   },
   {
+    "controller": "statements",
+    "route": "references",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
     "controller": "territories",
     "route": ":territoryId",
     "method": "GET",
@@ -267,19 +273,19 @@
     "controller": "relations",
     "route": "",
     "method": "POST",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "relations",
     "route": "",
     "method": "PUT",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "relations",
     "route": "",
     "method": "DELETE",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "relations",
