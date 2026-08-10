@@ -175,14 +175,18 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     right.mode === UserEnums.RoleMode.Annotate &&
     (resourceId === undefined || right.territory === resourceId);
 
-  const addResourceRightToUser = (user: IResponseUser, resourceId: string) => {
+  // one mutation covers the whole batch: a per-resource call would send rights
+  // read before the previous call landed, and the last response would win
+  const addResourceRightsToUser = (user: IResponseUser, resourceIds: string[]) => {
     const newRights: IUserRight[] = [
-      ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
+      ...user.rights.filter(
+        (right) => !resourceIds.some((resourceId) => isAnnotateRight(right, resourceId)),
+      ),
+      ...resourceIds.map((resourceId) => ({
+        territory: resourceId,
+        mode: UserEnums.RoleMode.Annotate,
+      })),
     ];
-    newRights.push({
-      territory: resourceId,
-      mode: UserEnums.RoleMode.Annotate,
-    });
     userMutation.mutate({ id: user.id, rights: newRights });
   };
 
@@ -190,6 +194,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     const newRights: IUserRight[] = [
       ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
     ];
+    userMutation.mutate({ id: user.id, rights: newRights });
+  };
+
+  const removeAllResourceRightsFromUser = (user: IResponseUser) => {
+    const newRights: IUserRight[] = [...user.rights.filter((right) => !isAnnotateRight(right))];
     userMutation.mutate({ id: user.id, rights: newRights });
   };
 
@@ -270,7 +279,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               entities={territoryRights?.map((right) => right.territory)}
               placeholder="assign a territory"
               invalidLabel="invalid T"
-              removeTooltip="remove territory from rights"
+              removeTooltip="unassign territory from this user"
               onAdd={(territoryId) => addRightToUser(row.original, territoryId, "read")}
               onRemove={(territoryId) => removeRightFromUser(row.original, territoryId)}
             />
@@ -299,7 +308,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               entities={territoryRights?.map((right) => right.territory)}
               placeholder="assign a territory"
               invalidLabel="invalid T"
-              removeTooltip="remove territory from rights"
+              removeTooltip="unassign territory from this user"
               onAdd={(territoryId) => addRightToUser(row.original, territoryId, "write")}
               onRemove={(territoryId) => removeRightFromUser(row.original, territoryId)}
             />
@@ -310,7 +319,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Annotate documents",
         id: "resources-annotate",
         Cell: ({ row }: CellType) => {
-          const { rights, resourceRights, role: userRole } = row.original;
+          const { rights, resourceRights, role: userRole, name } = row.original;
 
           if (userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) {
             return <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>;
@@ -321,12 +330,15 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
           return (
             <UserListResourceRightsCell
+              userName={name}
               assignedIds={rights
                 .filter((right: IUserRight) => isAnnotateRight(right))
                 .map((right) => right.territory)}
               entities={resourceRights?.map((right) => right.resource)}
-              onAdd={(resourceId) => addResourceRightToUser(row.original, resourceId)}
+              onAdd={(resourceId) => addResourceRightsToUser(row.original, [resourceId])}
+              onAddAll={(resourceIds) => addResourceRightsToUser(row.original, resourceIds)}
               onRemove={(resourceId) => removeResourceRightFromUser(row.original, resourceId)}
+              onRemoveAll={() => removeAllResourceRightsFromUser(row.original)}
             />
           );
         },

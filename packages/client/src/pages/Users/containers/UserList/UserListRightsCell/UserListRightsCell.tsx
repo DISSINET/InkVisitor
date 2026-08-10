@@ -30,6 +30,8 @@ interface UserListRightsCell {
   preSuggestions?: IEntity[];
   /** fires when the suggester input gains focus, e.g. to refresh preSuggestions */
   onSuggesterFocus?: () => void;
+  /** control rendered next to the suggester, e.g. a bulk-assign button */
+  suggesterAction?: React.ReactNode;
 }
 
 export const UserListRightsCell: React.FC<UserListRightsCell> = ({
@@ -43,6 +45,7 @@ export const UserListRightsCell: React.FC<UserListRightsCell> = ({
   onRemove,
   preSuggestions,
   onSuggesterFocus,
+  suggesterAction,
 }) => {
   return (
     <StyledTerritoryColumn>
@@ -97,6 +100,7 @@ export const UserListRightsCell: React.FC<UserListRightsCell> = ({
             }
           }}
         />
+        {suggesterAction}
       </StyledRightsCellSuggester>
     </StyledTerritoryColumn>
   );

@@ -390,6 +390,9 @@ export const StyledToolbarClear = styled.div`
 `;
 
 export const StyledRightsCellSuggester = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
   padding-top: ${({ theme }) => theme.space[1]};
 `;
 
