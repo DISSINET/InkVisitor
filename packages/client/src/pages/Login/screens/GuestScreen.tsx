@@ -49,7 +49,8 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
       <StyledButtonWrap>
         <Button
           label="Enter"
-          color="success"
+          color="info"
+          shape="rounded-md"
           fullWidth
           onClick={() => handleEnter()}
           size={ButtonSize.Large}

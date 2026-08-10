@@ -108,8 +108,10 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <StyledSubmitWrap>
               <Button
                 fullWidth
+                fullHeight
                 label="Recover password"
-                color="success"
+                color="info"
+                shape="rounded-md"
                 disabled={emailLocal.length === 0}
                 size={ButtonSize.Large}
               />
