@@ -1,5 +1,9 @@
 import "@modules/common.test";
 import { apiPath } from "@common/constants";
+import {
+  MAX_SAVED_QUERY_DEPTH,
+  MAX_SAVED_QUERY_NODES,
+} from "@inkvisitor/shared/constants";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { ISavedQuery } from "@inkvisitor/shared/types";
 import {
@@ -44,6 +48,26 @@ describe("Saved queries", function () {
     },
     includeEquivalents: false,
     includeSubordinates: true,
+  };
+
+  const leafNode = (): any => ({
+    id: "n",
+    type: "E",
+    params: {},
+    operator: "and",
+    edges: [],
+  });
+
+  // a chain of `depth` nodes: the root counts as the first level
+  const nestedQuery = (depth: number): any => {
+    const root = leafNode();
+    let tip = root;
+    for (let lvl = 1; lvl < depth; lvl++) {
+      const child = leafNode();
+      tip.edges = [{ type: "EP:T", logic: "positive", node: child }];
+      tip = child;
+    }
+    return root;
   };
 
   beforeAll(async () => {
@@ -182,6 +206,64 @@ describe("Saved queries", function () {
               ...queryData.query,
               edges: [{ type: "EP:T" }], // missing logic + node
             },
+            includeEquivalents: false,
+            includeSubordinates: false,
+          },
+        })
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+    });
+
+    it("rejects a query tree nested past the depth bound", async () => {
+      await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({
+          name: "deep tree",
+          shared: false,
+          data: {
+            query: nestedQuery(MAX_SAVED_QUERY_DEPTH + 1),
+            includeEquivalents: false,
+            includeSubordinates: false,
+          },
+        })
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+    });
+
+    // the bound tracks what RethinkDB will store, so the deepest accepted tree
+    // has to survive the insert as well as the validation
+    it("accepts a query tree exactly at the depth bound", async () => {
+      const res = await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({
+          name: "deep enough tree",
+          shared: false,
+          data: {
+            query: nestedQuery(MAX_SAVED_QUERY_DEPTH),
+            includeEquivalents: false,
+            includeSubordinates: false,
+          },
+        })
+        .expect("Content-Type", /json/)
+        .expect(200);
+      expect(res.body.result).toBeTruthy();
+      expect(res.body.data.id).toBeTruthy();
+    });
+
+    it("rejects a shallow query tree carrying more nodes than the bound", async () => {
+      const root = leafNode();
+      root.edges = Array.from({ length: MAX_SAVED_QUERY_NODES + 1 }, () => ({
+        type: "EP:T",
+        logic: "positive",
+        node: leafNode(),
+      }));
+      await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({
+          name: "wide tree",
+          shared: false,
+          data: {
+            query: root,
             includeEquivalents: false,
             includeSubordinates: false,
           },

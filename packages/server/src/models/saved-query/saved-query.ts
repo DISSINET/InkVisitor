@@ -1,3 +1,7 @@
+import {
+  MAX_SAVED_QUERY_DEPTH,
+  MAX_SAVED_QUERY_NODES,
+} from "@inkvisitor/shared/constants";
 import { ISavedQuery, ISavedQueryData } from "@inkvisitor/shared/types";
 import { IDbModel } from "@models/common";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
@@ -39,8 +43,28 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
    * Recursively checks the stored query tree has the shape the client
    * expects when loading it (a malformed shared query would otherwise
    * crash the Explorer page for every user who clicks it).
+   *
+   * A tree deeper than MAX_SAVED_QUERY_DEPTH or wider than
+   * MAX_SAVED_QUERY_NODES is treated as malformed: the walk runs on untrusted
+   * JSON before anything about it is known, so its own recursion has to be the
+   * thing that is bounded.
    */
   static isQueryNodeValid(node: unknown): boolean {
+    return SavedQuery.walkQueryNode(node, 1, { visited: 0 });
+  }
+
+  private static walkQueryNode(
+    node: unknown,
+    depth: number,
+    budget: { visited: number }
+  ): boolean {
+    if (depth > MAX_SAVED_QUERY_DEPTH) {
+      return false;
+    }
+    budget.visited += 1;
+    if (budget.visited > MAX_SAVED_QUERY_NODES) {
+      return false;
+    }
     if (!node || typeof node !== "object") {
       return false;
     }
@@ -62,7 +86,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
       return (
         typeof e.type === "string" &&
         typeof e.logic === "string" &&
-        SavedQuery.isQueryNodeValid(e.node)
+        SavedQuery.walkQueryNode(e.node, depth + 1, budget)
       );
     });
   }
