@@ -148,21 +148,28 @@ export class EdgeSUnderT extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    const territoryId = this.node.params.entityId;
     const targetIds = this.targetIds();
-    return q
-      .filter(function(e: RDatum<IEntity>) {
-        return e("class").eq("S");
-      })
-      .filter(function(e: RDatum<IEntity>) {
-        // unpinned target keeps the raw single-id comparison (matches nothing)
-        return targetIds
-          ? r.expr(targetIds).contains(e("data")("territory")("territoryId"))
-          : e("data")("territory")("territoryId").eq(territoryId);
-      })
-      .map(function(e) {
-        return e("id");
-      });
+
+    // the target set is the pinned territory plus whatever its expansion toggles
+    // add - "include subordinates" of a Territory is its whole subtree, so this
+    // set has no upper bound and is pulled through the StatementTerritory index
+    // rather than membership-tested per row of the incoming stream. Intersecting
+    // back with q keeps the subset invariant that positive matching and negation
+    // both rely on; no target matches nothing
+    return intersectIdsWithStream(
+      q,
+      targetIds && targetIds.length
+        ? (r
+            .table(Entity.table)
+            .getAll(r.args(targetIds), {
+              index: DbEnums.Indexes.StatementTerritory,
+            })
+            .filter(function (e: RDatum<IEntity>) {
+              return e("class").eq(EntityEnums.Class.Statement);
+            })
+            .getField("id") as unknown as RStream)
+        : null
+    );
   }
 }
 

@@ -3,6 +3,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IRequest } from "src/custom_typings/request";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { getEntitiesByIds } from "@service/shorthands";
+import Entity from "@models/entity/entity";
 import Territory from "@models/territory/territory";
 import Relation from "./relation";
 import Identification from "./identification";
@@ -369,7 +370,10 @@ export const getEquivalentEntityIds = async (
  *  - inverse HOL (Holonym): meronyms
  *  - child Territories (all levels) when an input is a Territory
  * The relation traversal is a batched, cycle-safe BFS bounded by
- * SUBORDINATE_MAX_NODES; the input ids are removed from the result.
+ * SUBORDINATE_MAX_NODES. The territory closure is unbounded - it is a walk over
+ * the in-memory tree cache, and the query edges that expand a Territory target
+ * ("S under T", "entities used under T") treat it as the complete subtree.
+ * The input ids are removed from the result.
  * @param conn db connection
  * @param entityIds source entity ids to expand
  * @returns unique subordinate entity ids, excluding the inputs
@@ -385,42 +389,51 @@ export const getSubordinateEntityIds = async (
   const visited = new Set<string>(entityIds); // guards against cycles / re-visits
   const collected = new Set<string>(); // subordinates only (inputs excluded)
 
-  // inverse SCL/SOE/HOL, all levels, batched one query per type per BFS level
-  let frontier = [...new Set(entityIds)];
-  while (frontier.length && collected.size < SUBORDINATE_MAX_NODES) {
-    const relationsPerType = await Promise.all(
-      SUBORDINATE_RELATION_TYPES.map((type) =>
-        Relation.findForEntities(conn, frontier, type, 1)
-      )
-    );
+  const inputEntities = await Entity.findEntitiesByIds(conn, entityIds);
+  const territoryInputs = inputEntities.filter(
+    (entity) => entity.class === EntityEnums.Class.Territory
+  );
 
-    const next: string[] = [];
-    for (const relations of relationsPerType) {
-      for (const relation of relations) {
-        const subordinateId = relation.entityIds[0];
-        if (!visited.has(subordinateId)) {
-          visited.add(subordinateId);
-          collected.add(subordinateId);
-          next.push(subordinateId);
+  // SCL/SOE/HOL admit no Territory on either side (RelationRules in
+  // shared/types/relation.ts), so an all-territory input can only expand through
+  // the tree walk below and the relation queries are guaranteed to come back empty
+  if (territoryInputs.length !== inputEntities.length) {
+    // inverse SCL/SOE/HOL, all levels, batched one query per type per BFS level
+    let frontier = [...new Set(entityIds)];
+    while (frontier.length && collected.size < SUBORDINATE_MAX_NODES) {
+      const relationsPerType = await Promise.all(
+        SUBORDINATE_RELATION_TYPES.map((type) =>
+          Relation.findForEntities(conn, frontier, type, 1)
+        )
+      );
+
+      const next: string[] = [];
+      for (const relations of relationsPerType) {
+        for (const relation of relations) {
+          const subordinateId = relation.entityIds[0];
+          if (!visited.has(subordinateId)) {
+            visited.add(subordinateId);
+            collected.add(subordinateId);
+            next.push(subordinateId);
+          }
         }
       }
+      frontier = next;
     }
-    frontier = next;
   }
 
-  // child territories (all levels) of any input that is itself a Territory
-  const inputEntities = await getEntitiesByIds<IEntity>(conn, entityIds);
-  for (const entity of inputEntities) {
-    if (entity.class !== EntityEnums.Class.Territory) {
-      continue;
-    }
-    const childs = Object.values(
-      await new Territory({ id: entity.id }).findChilds(conn, true)
-    );
-    for (const child of childs) {
-      if (collected.size >= SUBORDINATE_MAX_NODES) {
-        break;
-      }
+  // child territories (all levels) of any input that is itself a Territory.
+  // findChilds(deep) walks the in-memory treeCache, so this closure sits outside
+  // the SUBORDINATE_MAX_NODES budget that bounds the DB-backed relation BFS: it
+  // is what "include subordinates" means for a Territory, and a negated edge
+  // subtracts it from the result, so a partial set leaves statements behind
+  const childSets = await Promise.all(
+    territoryInputs.map((entity) =>
+      new Territory({ id: entity.id }).findChilds(conn, true)
+    )
+  );
+  for (const childs of childSets) {
+    for (const child of Object.values(childs)) {
       if (child.id && !visited.has(child.id)) {
         visited.add(child.id);
         collected.add(child.id);
