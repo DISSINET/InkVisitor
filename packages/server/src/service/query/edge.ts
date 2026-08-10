@@ -198,15 +198,24 @@ export class EdgeSUnderChildrenT extends SearchEdge {
       return;
     }
 
+    // the expanded set reaches any class (equivalents/subordinates follow
+    // relations into Concepts), and findChilds falls back to an unindexed table
+    // filter for every id the tree cache does not hold - one batched class read
+    // keeps the walk to the roots that can carry territory children at all
+    const rootEntities = await Entity.findEntitiesByIds(db, rootIds);
+    const territoryRootIds = rootEntities
+      .filter((entity) => entity.class === EntityEnums.Class.Territory)
+      .map((entity) => entity.id);
+
     // findChilds(deep) returns descendants only (keyed by id) - add each root
-    // itself to cover Statements sitting directly in the target territory;
-    // non-territory roots (equivalents can be any class) simply yield no childs
+    // itself to cover Statements sitting directly in the target territory
     const subtree = new Set<string>(rootIds);
-    for (const rootId of rootIds) {
-      const descendants = await new Territory({ id: rootId }).findChilds(
-        db,
-        true
-      );
+    const descendantSets = await Promise.all(
+      territoryRootIds.map((rootId) =>
+        new Territory({ id: rootId }).findChilds(db, true)
+      )
+    );
+    for (const descendants of descendantSets) {
       for (const id of Object.keys(descendants)) {
         subtree.add(id);
       }
