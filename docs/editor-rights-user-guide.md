@@ -90,14 +90,14 @@ This section is about the remaining classes.
 
 ## Relations
 
-An Editor can **create, edit, and delete any Relation between Entities that are
-not Statements**. Like the Entities above, those are not tied to a Territory, so
-this does not depend on his tree access.
+An Editor can **create, edit, and delete any Relation between Entities that live
+outside the tree**. Like the Entities above, those are not tied to a Territory,
+so this does not depend on his tree access.
 
-A Relation that links a **Statement** is the exception. It shows up on that
-Statement, so writing it counts as editing the Statement and needs **edit access
-to the Territory holding it**. In a Territory he can only read, the Relation is
-visible but cannot be created, changed, or removed.
+A Relation that links a **Statement or a Territory** is the exception. It shows
+up on that Entity, so writing it counts as editing the Entity and needs **edit
+access to the Territory guarding it** — the Territory that includes the Statement, or the
+Territory itself.
 
 ## Documents and annotation
 

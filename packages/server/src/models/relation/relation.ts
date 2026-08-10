@@ -3,6 +3,7 @@ import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import {
   IEntity,
   IStatement,
+  ITerritory,
   Relation as RelationTypes,
   AuditScope,
 } from "@inkvisitor/shared/types";
@@ -478,9 +479,10 @@ export default class Relation implements IRelationModel {
 
   /**
    * Predicate shared by the create/edit/delete checks. A relation attached to a
-   * Statement shows up on that Statement, so writing it is a write to the
-   * Statement and answers to the right of the Territory holding it. Entities of
-   * other classes are not tied to a Territory and carry no such restriction.
+   * Statement or a Territory shows up on it, so writing the relation is a write
+   * to that entity and answers to the tree right guarding it - the Territory
+   * holding the Statement, or the Territory itself. Entities of other classes
+   * are not tied to the tree and carry no such restriction.
    *
    * The Territory right can only be read from a loaded entity, so the caller has
    * to preload `entities` before asking; an unloaded relation is refused.
@@ -496,19 +498,25 @@ export default class Relation implements IRelationModel {
       return false;
     }
 
-    // statement.ts pulls in treeCache -> territory -> entity, and entity.ts
-    // reaches this module back through shorthands; loading the class here rather
-    // than at the top keeps Territory from extending an undefined Entity
+    // both classes reach treeCache -> territory -> entity, and entity.ts reaches
+    // this module back through shorthands; loading them here rather than at the
+    // top keeps Territory from extending an undefined Entity
     const {
       default: Statement,
     } = require("@models/statement/statement") as typeof import("@models/statement/statement");
+    const {
+      default: Territory,
+    } = require("@models/territory/territory") as typeof import("@models/territory/territory");
 
     return this.entities.every((entity) => {
-      if (entity.class !== EntityEnums.Class.Statement) {
-        return true;
+      switch (entity.class) {
+        case EntityEnums.Class.Statement:
+          return new Statement(entity as IStatement).canBeEditedByUser(user);
+        case EntityEnums.Class.Territory:
+          return new Territory(entity as ITerritory).canBeEditedByUser(user);
+        default:
+          return true;
       }
-
-      return new Statement(entity as IStatement).canBeEditedByUser(user);
     });
   }
 

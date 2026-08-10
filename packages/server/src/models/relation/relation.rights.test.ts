@@ -34,6 +34,10 @@ function concept(id: string): IEntity {
   return { id, class: EntityEnums.Class.Concept, data: {} } as any;
 }
 
+function territory(id: string): IEntity {
+  return { id, class: EntityEnums.Class.Territory, data: {} } as any;
+}
+
 function makeRelation(entities: IEntity[]): Relation {
   const relation = new Relation({
     id: `rel-${entities.map((e) => e.id).join("-")}`,
@@ -44,7 +48,7 @@ function makeRelation(entities: IEntity[]): Relation {
   return relation;
 }
 
-describe("Relation rights over the territory of a linked statement", () => {
+describe("Relation rights over the tree access of a linked entity", () => {
   const editor = makeUser(UserEnums.Role.Editor);
   const viewer = makeUser(UserEnums.Role.Viewer);
   const admin = makeUser(UserEnums.Role.Admin);
@@ -58,6 +62,8 @@ describe("Relation rights over the territory of a linked statement", () => {
     concept("C1"),
   ]);
   const betweenConcepts = makeRelation([concept("C1"), concept("C2")]);
+  const onWritableT = makeRelation([territory(writableT), concept("C1")]);
+  const onReadOnlyT = makeRelation([territory(readOnlyT), concept("C1")]);
 
   it("editor can create a relation on a statement he may write", () => {
     expect(inWritable.canBeCreatedByUser(editor)).toBe(true);
@@ -70,6 +76,15 @@ describe("Relation rights over the territory of a linked statement", () => {
   });
   it("editor cannot delete a relation on a statement he may only read", () => {
     expect(inReadOnly.canBeDeletedByUser(editor)).toBe(false);
+  });
+  it("editor can create a relation on a territory he may write", () => {
+    expect(onWritableT.canBeCreatedByUser(editor)).toBe(true);
+  });
+  it("editor cannot create a relation on a territory he may only read", () => {
+    expect(onReadOnlyT.canBeCreatedByUser(editor)).toBe(false);
+  });
+  it("editor cannot delete a relation on a territory he may only read", () => {
+    expect(onReadOnlyT.canBeDeletedByUser(editor)).toBe(false);
   });
   it("editor can create a relation between entities held by no territory", () => {
     expect(betweenConcepts.canBeCreatedByUser(editor)).toBe(true);
