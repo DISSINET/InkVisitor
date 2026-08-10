@@ -164,12 +164,15 @@ class Acl {
       return null;
     }
 
-    // The Explorer / Query page query endpoints have no seeded ACL entry either.
-    // Any logged-in user may execute read-only entity queries; mutations are
-    // still governed by the individual entity endpoints.
+    // POST /entities/query backs the Explorer results for everyone and has no
+    // seeded ACL entry. Read-only; mutations are still governed by the
+    // individual entity endpoints.
+    // query-export is deliberately NOT included: bulk TSV export is offered
+    // only to Admin/Owner in the Explorer, and the handler has no role check of
+    // its own, so it is left to its acl_permissions row.
     if (
       controller === "entities" &&
-      (route === "query" || route === "query-export") &&
+      route === "query" &&
       method === HttpMethods.Post
     ) {
       return null;

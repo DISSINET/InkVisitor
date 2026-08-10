@@ -1,6 +1,6 @@
-import { languageDict, userRoleDict } from "@inkvisitor/shared/dictionaries";
+import { languageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { DropdownItem, IResponseUser, IUser } from "@inkvisitor/shared/types";
+import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
@@ -16,9 +16,10 @@ import {
   Modal,
   ModalContent,
   ModalFooter,
+  RoleBadge,
   Toggle,
 } from "components";
-import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
@@ -40,7 +41,6 @@ import {
   StyledUserCustomization,
   StyledUserCustomizationSection,
 } from "./UserCustomizationModalStyles";
-import { UserRightItem } from "./UserRightItem/UserRightItem";
 
 interface DataObject {
   name: string;
@@ -141,16 +141,40 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   };
 
-  const { role, rights } = user;
+  const { role, rights, territoryRights } = user;
   const { name, email, defaultLanguage, defaultStatementLanguage } = data;
 
-  const readRights = useMemo(
-    () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
-    [rights],
+  // A Viewer never creates entities, edits statements or deletes props, so the
+  // options read only on those paths are left out. Working languages stays - it
+  // orders the language dropdown in the search boxes, which a Viewer does use.
+  const isViewer = role === UserEnums.Role.Viewer;
+
+  // territoryRights carries the Territory entities already resolved, so the
+  // rights entries are only needed for the read/write split. An entity can be
+  // absent when the right outlives the Territory it names.
+  const territoryByRight = useMemo(() => {
+    const byId = new Map<string, IResponseEntity>();
+    (territoryRights ?? []).forEach(({ territory }) => {
+      if (territory?.id) {
+        byId.set(territory.id, territory);
+      }
+    });
+    return byId;
+  }, [territoryRights]);
+
+  const territoriesForMode = (mode: UserEnums.RoleMode) =>
+    rights
+      .filter((r) => r.mode === mode)
+      .map((r) => territoryByRight.get(r.territory))
+      .filter((territory): territory is IResponseEntity => !!territory);
+
+  const readTerritories = useMemo(
+    () => territoriesForMode(UserEnums.RoleMode.Read),
+    [rights, territoryByRight],
   );
-  const writeRights = useMemo(
-    () => rights.filter((r) => r.mode === UserEnums.RoleMode.Write),
-    [rights],
+  const writeTerritories = useMemo(
+    () => territoriesForMode(UserEnums.RoleMode.Write),
+    [rights, territoryByRight],
   );
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -162,6 +186,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       <Modal
         showModal={showModal}
         width="auto"
+        maxWidth={440}
         onEnterPress={handleSubmit}
         onClose={onClose}
         isLoading={updateUserMutation.isPending}
@@ -287,39 +312,43 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledSectionTitle>
 
               <StyledFieldGrid>
-                <StyledFieldLabel>Default label language</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Dropdown.Single.Basic
-                    width="full"
-                    value={defaultLanguage}
-                    onChange={(newValue) => handleChange("defaultLanguage", newValue)}
-                    options={orderedLanguageDict}
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Default language used for labeling entities."
-                  />
-                </StyledFieldHelp>
+                {!isViewer && (
+                  <>
+                    <StyledFieldLabel>Default label language</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Dropdown.Single.Basic
+                        width="full"
+                        value={defaultLanguage}
+                        onChange={(newValue) => handleChange("defaultLanguage", newValue)}
+                        options={orderedLanguageDict}
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp>
+                      <IconWithTooltip
+                        color="success"
+                        icon={<FaQuestion />}
+                        tooltipLabel="Default language used for labeling entities."
+                      />
+                    </StyledFieldHelp>
 
-                <StyledFieldLabel>Default source language</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Dropdown.Single.Basic
-                    width="full"
-                    value={defaultStatementLanguage}
-                    onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
-                    options={orderedLanguageDict}
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Dominant language of the source texts being coded into statements"
-                  />
-                </StyledFieldHelp>
+                    <StyledFieldLabel>Default source language</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Dropdown.Single.Basic
+                        width="full"
+                        value={defaultStatementLanguage}
+                        onChange={(newValue) => handleChange("defaultStatementLanguage", newValue)}
+                        options={orderedLanguageDict}
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp>
+                      <IconWithTooltip
+                        color="success"
+                        icon={<FaQuestion />}
+                        tooltipLabel="Dominant language of the source texts being coded into statements"
+                      />
+                    </StyledFieldHelp>
+                  </>
+                )}
 
                 <StyledFieldLabel>Working languages</StyledFieldLabel>
                 <StyledFieldControl>
@@ -345,7 +374,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </StyledFieldHelp>
 
-                <StyledFieldLabel>Default territory</StyledFieldLabel>
+                <StyledFieldLabel>Default Territory</StyledFieldLabel>
                 <StyledFieldControl>
                   {defaultTerritory ? (
                     <EntityTag
@@ -373,21 +402,25 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 </StyledFieldControl>
                 <StyledFieldHelp />
 
-                <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Toggle
-                    value={data.askBeforePropDelete}
-                    onChange={(value) => handleChange("askBeforePropDelete", value)}
-                    // hideLabels
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Show a confirmation before deleting a metaprop that has child properties, since they would be deleted too."
-                  />
-                </StyledFieldHelp>
+                {!isViewer && (
+                  <>
+                    <StyledFieldLabel>Ask before deleting metaprop with children</StyledFieldLabel>
+                    <StyledFieldControl>
+                      <Toggle
+                        value={data.askBeforePropDelete}
+                        onChange={(value) => handleChange("askBeforePropDelete", value)}
+                        // hideLabels
+                      />
+                    </StyledFieldControl>
+                    <StyledFieldHelp>
+                      <IconWithTooltip
+                        color="success"
+                        icon={<FaQuestion />}
+                        tooltipLabel="Show a confirmation before deleting a metaprop that has child properties, since they would be deleted too."
+                      />
+                    </StyledFieldHelp>
+                  </>
+                )}
               </StyledFieldGrid>
             </StyledUserCustomizationSection>
             <StyledUserCustomizationSection>
@@ -399,52 +432,41 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledSectionTitle>
               <StyledRightsGrid>
                 <StyledRightsLabel>Role</StyledRightsLabel>
-                <AttributeButtonGroup
-                  disabled
-                  options={[
-                    {
-                      longValue: userRoleDict[0].label,
-                      shortValue: userRoleDict[0].label,
-                      selected: role === userRoleDict[0].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[1].label,
-                      shortValue: userRoleDict[1].label,
-                      selected: role === userRoleDict[1].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[2].label,
-                      shortValue: userRoleDict[2].label,
-                      selected: role === userRoleDict[2].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[3].label,
-                      shortValue: userRoleDict[3].label,
-                      selected: role === userRoleDict[3].value,
-                      onClick: () => {},
-                    },
-                  ]}
-                />
+                <StyledRightsWrap>
+                  <RoleBadge role={role} />
+                </StyledRightsWrap>
 
                 <StyledRightsLabel>Read</StyledRightsLabel>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? readRights.map((right, key) => (
-                        <UserRightItem key={key} territoryId={right.territory} />
-                      ))
-                    : "all"}
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner ? (
+                    readTerritories.map((territory) => (
+                      <EntityTag fullWidth key={territory.id} entity={territory} />
+                    ))
+                  ) : (
+                    <i>all</i>
+                  )}
                 </StyledRightsWrap>
 
                 <StyledRightsLabel>Write</StyledRightsLabel>
                 <StyledRightsWrap>
-                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner
-                    ? writeRights.map((right, key) => (
-                        <UserRightItem key={key} territoryId={right.territory} />
-                      ))
-                    : "all"}
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner ? (
+                    writeTerritories.map((territory) => (
+                      <EntityTag fullWidth key={territory.id} entity={territory} />
+                    ))
+                  ) : (
+                    <i>all</i>
+                  )}
+                </StyledRightsWrap>
+
+                <StyledRightsLabel>Annotate</StyledRightsLabel>
+                <StyledRightsWrap>
+                  {role !== UserEnums.Role.Admin && role !== UserEnums.Role.Owner ? (
+                    (user.resourceRights ?? []).map(({ resource }) => (
+                      <EntityTag fullWidth key={resource.id} entity={resource} />
+                    ))
+                  ) : (
+                    <i>all</i>
+                  )}
                 </StyledRightsWrap>
               </StyledRightsGrid>
             </StyledUserCustomizationSection>

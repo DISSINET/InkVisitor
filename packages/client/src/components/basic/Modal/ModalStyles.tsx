@@ -1,6 +1,6 @@
 import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { ThemeColor } from "Theme/theme";
 import { space5, space6 } from "Theme/theme-space-shortcut";
 
@@ -130,6 +130,27 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space6} ${space5}`)};
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+
+  ${({ $enableScroll, $noPadding }) =>
+    $enableScroll &&
+    !$noPadding &&
+    css`
+      /* Softens the top edge, which a modal with no header has nothing else to
+         frame - the footer's own border already closes off the bottom. The fade
+         is exactly the body's top padding, so at rest it lies over empty space
+         and shows nothing; a row only dissolves once it scrolls into it. */
+      --modal-scroll-fade: ${space6};
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        #000 var(--modal-scroll-fade)
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        #000 var(--modal-scroll-fade)
+      );
+    `}
 `;
 interface StyledFooter {
   $column?: boolean;

@@ -250,7 +250,13 @@ export function usePanelToggles({
 
     dispatch(setThirdPanelExpanded(true));
     queryClient.invalidateQueries({ queryKey: ["document"] });
+  };
 
+  // The expanded flag and the separator positions are separate state: collapsing
+  // parks the third panel's width into a neighbour, so expanding has to hand it
+  // back. Callers dispatch setThirdPanelExpanded(true) from anywhere (panel
+  // button, statement selection), MainPage runs this on the false -> true edge.
+  const expandThirdPanelLayout = () => {
     // if all three separators were shifted right when second panel was hidden,
     // restore them all to exact pre-collapse positions
     const savedTree = localStorage.getItem("mainPageThirdPanelRestoreTree");
@@ -412,5 +418,11 @@ export function usePanelToggles({
     }
   };
 
-  return { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel };
+  return {
+    toggleFirstPanel,
+    toggleSecondPanel,
+    toggleThirdPanel,
+    toggleFourthPanel,
+    expandThirdPanelLayout,
+  };
 }

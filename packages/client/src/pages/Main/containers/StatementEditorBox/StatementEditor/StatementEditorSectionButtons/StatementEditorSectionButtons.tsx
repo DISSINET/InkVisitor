@@ -76,7 +76,13 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
 
   return (
     <>
-      <ButtonGroup $height={21} style={{ marginLeft: "0.5rem", marginRight: "1rem" }}>
+      {/* the group clips overflow, so shrinking would cut the last button in
+          half rather than reflow the header row */}
+      <ButtonGroup
+        $height={21}
+        $disableShrink
+        style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
+      >
         <Button
           disabled={!hasEntities()}
           icon={<MdDeleteSweep size={17} />}
@@ -114,7 +120,6 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
           onClick={() => handleCopyFromStatement(previousStatement, section, replaceSection)}
-          shape="square"
         />
       </ButtonGroup>
       <EntitySuggester

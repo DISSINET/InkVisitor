@@ -661,8 +661,25 @@ export default Router()
           );
         }
 
-        if (!existingUser.canBeEditedByUser(req.getUserOrFail())) {
+        const editor = req.getUserOrFail();
+
+        if (!existingUser.canBeEditedByUser(editor)) {
           throw new PermissionDeniedError("user cannot be saved");
+        }
+
+        // the owner's name and email are theirs alone to change; an admin still
+        // manages every other field on the account
+        const changesOwnerIdentity =
+          (data.name !== undefined && data.name !== existingUser.name) ||
+          (data.email !== undefined && data.email !== existingUser.email);
+        if (
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          editor.id !== existingUser.id &&
+          changesOwnerIdentity
+        ) {
+          throw new PermissionDeniedError(
+            "only the owner can change the owner's name or email"
+          );
         }
 
         if (data.password) {
@@ -678,7 +695,6 @@ export default Router()
           data.verified !== undefined &&
           data.verified !== existingUser.verified
         ) {
-          const editor = req.getUserOrFail();
           const canSetVerified = editor.hasRole([
             UserEnums.Role.Owner,
             UserEnums.Role.Admin,

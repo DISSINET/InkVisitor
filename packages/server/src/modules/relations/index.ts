@@ -161,11 +161,11 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const entities = await Entity.findEntitiesByIds(
+      model.entities = await Entity.findEntitiesByIds(
         request.db.connection,
         model.entityIds
       );
-      if (entities.length !== model.entityIds.length) {
+      if (model.entities.length !== model.entityIds.length) {
         throw new ModelNotValidError("entity(ies) not found");
       }
 
@@ -231,6 +231,12 @@ export default Router()
       if (!existing) {
         throw RelationDoesNotExist.forId(id);
       }
+
+      // the permission check reads the territory right off each linked entity
+      existing.entities = await Entity.findEntitiesByIds(
+        request.db.connection,
+        existing.entityIds
+      );
 
       if (!existing.canBeDeletedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(

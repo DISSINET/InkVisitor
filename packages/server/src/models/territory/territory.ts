@@ -357,12 +357,22 @@ class Territory extends Entity implements ITerritoryModel {
       return true;
     }
 
+    // templates live outside the tree, so no tree right exists to derive; they
+    // are readable by everyone, like the other template classes
+    if (this.isTemplate) {
+      return true;
+    }
+
     return !!treeCache.getRightForTerritory(this.id, user.rights);
   }
 
   canBeEditedByUser(user: User): boolean {
     // admin/owner role has always the right
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+
+    if (this.isTemplateWritableByUser(user)) {
       return true;
     }
 
@@ -385,6 +395,10 @@ class Territory extends Entity implements ITerritoryModel {
   canBeCreatedByUser(user: User): boolean {
     // admin/owner role has always the right
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+
+    if (this.isTemplateWritableByUser(user)) {
       return true;
     }
 
@@ -420,6 +434,10 @@ class Territory extends Entity implements ITerritoryModel {
   canBeDeletedByUser(user: User): boolean {
     // admin/owner role has always the right
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+
+    if (this.isTemplateWritableByUser(user)) {
       return true;
     }
 

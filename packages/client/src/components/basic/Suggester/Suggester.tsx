@@ -376,16 +376,24 @@ export const Suggester: React.FC<Suggester> = ({
   // choice the user cannot make here
   const categoryIsOffered = dropdownOptions.some((option) => option.value === category);
 
+  // The input draws the slot (and its divider next to the clear button) for any
+  // rightContent it is handed, so the slot is only worth handing over when the
+  // create button, the caller's own content or the fallback button fills it.
+  const hasRightContent = !disableCreate || !!rightContent || !!button;
+
   return (
     // div is necessary for flex to work and render the clear button properly
     <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
+      {/* the drop ref covers the warning icon too - a pointer crossing onto it
+          would otherwise leave the target, hide the icon, and land back on the
+          target, flickering for as long as it hovers there */}
       <StyledSuggester
+        ref={dropRef}
         $marginTop={marginTop}
         $fullWidth={inputWidth === "full"}
         $isFocused={isFocused}
       >
         <StyledInputWrapper
-          ref={dropRef}
           $hasButton={!disableCreate}
           $isOver={isOver}
           $isFocused={isFocused}
@@ -458,28 +466,30 @@ export const Suggester: React.FC<Suggester> = ({
               fullHeight
               clearable={clearableInput}
               rightContent={
-                <>
-                  {/* rightContent renders alongside the create button (e.g. the
-                      annotator's elvl group); the button fallback only applies
-                      when create is disabled and no rightContent is provided. */}
-                  {rightContent ? rightContent : disableCreate ? button && button : null}
-                  {!disableCreate && (
-                    <>
-                      {rightContent && <StyledRightContentDivider />}
-                      <IconButton
-                        icon={<IcoPlusBold />}
-                        tooltipLabel="create new entity"
-                        color={buttonColorKey}
-                        noBackground
-                        noBorder
-                        onClick={() => {
-                          handleAddBtnClick();
-                        }}
-                        disabled={disabled}
-                      />
-                    </>
-                  )}
-                </>
+                hasRightContent ? (
+                  <>
+                    {/* rightContent renders alongside the create button (e.g. the
+                        annotator's elvl group); the button fallback only applies
+                        when create is disabled and no rightContent is provided. */}
+                    {rightContent ? rightContent : disableCreate ? button && button : null}
+                    {!disableCreate && (
+                      <>
+                        {rightContent && <StyledRightContentDivider />}
+                        <IconButton
+                          icon={<IcoPlusBold />}
+                          tooltipLabel="create new entity"
+                          color={buttonColorKey}
+                          noBackground
+                          noBorder
+                          onClick={() => {
+                            handleAddBtnClick();
+                          }}
+                          disabled={disabled}
+                        />
+                      </>
+                    )}
+                  </>
+                ) : undefined
               }
             />
           </div>
