@@ -15,6 +15,7 @@
 
 - Include subordinates / include equivalents is now a checkbox on each query node (#3192)
 - Implemented proper global equivalents / subordinates (result-expanded Entities are badged sub / eq) (#3194)
+- SUT: and EUT: covers the whole Territory subtree through the target node's SUB toggle, replacing the separate SUT:C and EUT:C edge (#3193)
 - Saved queries — store, rename, organise into folders and reload, together with the Explorer filters applied when saved, with shared queries restricted to elevated roles (#783)
 - Add Entity reference values as an Explorer column (#3060)
 - Column widths estimated from content, and the table uses the whole page width when it overflows (#3070)

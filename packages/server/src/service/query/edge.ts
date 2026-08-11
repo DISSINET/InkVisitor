@@ -4,7 +4,6 @@ import {
   getEquivalentEntityIds,
   getSubordinateEntityIds,
 } from "@models/relation/functions";
-import Territory from "@models/territory/territory";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
@@ -39,9 +38,8 @@ export default class SearchEdge implements Query.IEdge {
   /**
    * Async precomputation hook, invoked by the node evaluator before run().
    * run() only composes synchronous ReQL, so anything fetched ahead of time
-   * (the expanded target-id set here, a territory-subtree closure in SUT:C)
-   * is resolved here. Subclasses overriding prepare() must call
-   * super.prepare() so the target expansion stays resolved.
+   * (the expanded target-id set here) is resolved here. Subclasses overriding
+   * prepare() must call super.prepare() so the target expansion stays resolved.
    */
   async prepare(db: Connection): Promise<void> {
     const entityId = this.node.params.entityId;
@@ -162,83 +160,6 @@ export class EdgeSUnderT extends SearchEdge {
         ? (r
             .table(Entity.table)
             .getAll(r.args(targetIds), {
-              index: DbEnums.Indexes.StatementTerritory,
-            })
-            .filter(function (e: RDatum<IEntity>) {
-              return e("class").eq(EntityEnums.Class.Statement);
-            })
-            .getField("id") as unknown as RStream)
-        : null
-    );
-  }
-}
-
-/**
- * SUT:C ("S under T: children"). Emits every Statement whose territory is the
- * target territory T OR any descendant of T, recursively to any depth (the whole
- * subtree rooted at T, T itself included).
- *
- * Territories store only their DIRECT parent (data.parent.territoryId) with no
- * ancestor path, so the descendant closure can't be a single index lookup. It's
- * resolved in prepare() via Territory.findChilds(deep), which walks the in-memory
- * treeCache (zero DB reads in prod) and falls back to a live DB walk when the
- * cache is cold or the territory is absent. run() then pulls the subtree's
- * statements through the StatementTerritory index and intersects them with the
- * incoming stream (the subset invariant that positive matching and negation rely
- * on). No target territory -> matches nothing.
- */
-export class EdgeSUnderChildrenT extends SearchEdge {
-  private subtreeTerritoryIds: string[] = [];
-
-  constructor(data: Partial<Query.IEdge>) {
-    super(data);
-    this.type = Query.EdgeType["SUT:C"];
-  }
-
-  async prepare(db: Connection): Promise<void> {
-    // resolve the expanded target-id set first; the subtree closure is then
-    // built over EVERY expanded root (a single root when toggles are off)
-    await super.prepare(db);
-    const rootIds = this.targetEntityIds ?? [];
-    if (!rootIds.length) {
-      this.subtreeTerritoryIds = [];
-      return;
-    }
-
-    // the expanded set reaches any class (equivalents/subordinates follow
-    // relations into Concepts), and findChilds falls back to an unindexed table
-    // filter for every id the tree cache does not hold - one batched class read
-    // keeps the walk to the roots that can carry territory children at all
-    const rootEntities = await Entity.findEntitiesByIds(db, rootIds);
-    const territoryRootIds = rootEntities
-      .filter((entity) => entity.class === EntityEnums.Class.Territory)
-      .map((entity) => entity.id);
-
-    // findChilds(deep) returns descendants only (keyed by id) - add each root
-    // itself to cover Statements sitting directly in the target territory
-    const subtree = new Set<string>(rootIds);
-    const descendantSets = await Promise.all(
-      territoryRootIds.map((rootId) =>
-        new Territory({ id: rootId }).findChilds(db, true)
-      )
-    );
-    for (const descendants of descendantSets) {
-      for (const id of Object.keys(descendants)) {
-        subtree.add(id);
-      }
-    }
-    this.subtreeTerritoryIds = [...subtree];
-  }
-
-  run(q: RStream): RStream {
-    const subtreeIds = this.subtreeTerritoryIds;
-
-    return intersectIdsWithStream(
-      q,
-      subtreeIds.length
-        ? (r
-            .table(Entity.table)
-            .getAll(r.args(subtreeIds), {
               index: DbEnums.Indexes.StatementTerritory,
             })
             .filter(function (e: RDatum<IEntity>) {
@@ -1131,8 +1052,6 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasSuperordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
-    case Query.EdgeType["SUT:C"]:
-      return new EdgeSUnderChildrenT(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:

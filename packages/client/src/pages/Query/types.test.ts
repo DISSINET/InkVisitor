@@ -193,44 +193,14 @@ describe("query builder offers the 'used in statements under T' edge (EUT:)", ()
   });
 });
 
-describe("the 'S under T: children' edge (SUT:C) stays supported but is not offered", () => {
-  // the subtree is expressed by the target node's SUB toggle on a plain SUT:
-  // edge; SUT:C keeps working so saved queries that already carry it still run
-  it("a Statement source node cannot select SUT:C", () => {
-    expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))).not.toContain(
-      Query.EdgeType["SUT:C"],
-    );
-  });
-
-  it("SUT: is offered in its place and takes the Territory target", () => {
+describe("the 'S under T' edge covers the whole subtree via the SUB toggle", () => {
+  it("SUT: is offered and takes the Territory target", () => {
     expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))).toContain(
       Query.EdgeType["SUT:"],
     );
     const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["SUT:"]];
     expect(params.entityId).toBeTruthy();
     expect(params.entityId.allowedClasses).toEqual([EntityEnums.Class.Territory]);
-  });
-
-  it("SUT:C exposes a Territory entity target param so the territory can be picked", () => {
-    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["SUT:C"]];
-    expect(params.entityId).toBeTruthy();
-    expect(params.entityId.allowedClasses).toEqual([EntityEnums.Class.Territory]);
-  });
-
-  it("source must be a Statement; the target must be a Territory", () => {
-    expect(
-      isEdgeValid(
-        sourceNode([EntityEnums.Class.Statement]),
-        edge(Query.EdgeType["SUT:C"], sourceNode([EntityEnums.Class.Territory])),
-      ).valid,
-    ).toBe(true);
-
-    expect(
-      isEdgeValid(
-        sourceNode([EntityEnums.Class.Person]),
-        edge(Query.EdgeType["SUT:C"], sourceNode([EntityEnums.Class.Territory])),
-      ).valid,
-    ).toBe(false);
   });
 });
 

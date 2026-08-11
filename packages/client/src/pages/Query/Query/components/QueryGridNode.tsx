@@ -67,7 +67,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         Query.EdgeType["IS:"],
         Query.EdgeType["I_IS:"],
         Query.EdgeType["SUT:"],
-        Query.EdgeType["SUT:C"],
         Query.EdgeType["EUT:"],
       ] as Query.EdgeType[]
     ).includes(edgeType);

@@ -52,8 +52,6 @@ export namespace Query {
     "EUT:" = "EUT:",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
-    "SUT:C" = "SUT:C",
-    "I_SUT:C" = "I_SUT:C",
     "HR:R" = "HR:R",
     "I_HR:R" = "I_HR:R",
     "HR:V" = "HR:V",
@@ -160,10 +158,6 @@ export namespace Query {
     },
     "SUT:D": {},
     "I_SUT:D": {},
-    "SUT:C": {
-      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
-    },
-    "I_SUT:C": {},
     "HR:R": {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
     },
@@ -409,26 +403,6 @@ export namespace Query {
       },
     ],
     "I_SUT:D": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Territory] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Statement] },
-      },
-    ],
-    "SUT:C": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Statement] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Territory] },
-      },
-    ],
-    "I_SUT:C": [
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Territory] },
@@ -882,8 +856,6 @@ export namespace Query {
     "EUT:": "used in statements under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
-    "SUT:C": "S under T: children",
-    "I_SUT:C": "T has S: children",
     "HR:R": "has reference: resource",
     "I_HR:R": "R references",
     "HR:V": "has reference: value",
