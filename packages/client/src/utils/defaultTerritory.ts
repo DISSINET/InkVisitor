@@ -34,3 +34,21 @@ export const resolveDefaultTerritory = ({
 
   return defaultTerritory;
 };
+
+/**
+ * Does the territory hold statements of its own?
+ *
+ * The statement list shows one territory at a time, so statements sitting in
+ * child territories are not statements this one has. A territory the tree does
+ * not carry counts as having none.
+ */
+export const territoryHasStatements = (
+  tree: IResponseTree | undefined,
+  territoryId: string,
+): boolean => {
+  if (!tree || !territoryId) {
+    return false;
+  }
+
+  return (searchTree(tree, territoryId)?.statementsCount ?? 0) > 0;
+};

@@ -1,11 +1,14 @@
 import { IResponseTree, IResponseUser } from "@inkvisitor/shared/types";
-import { resolveDefaultTerritory } from "./defaultTerritory";
+import { resolveDefaultTerritory, territoryHasStatements } from "./defaultTerritory";
 
 const asUser = (defaultTerritory: string): IResponseUser =>
   ({ options: { defaultTerritory } }) as unknown as IResponseUser;
 
-const node = (id: string, children: IResponseTree[] = []): IResponseTree =>
-  ({ territory: { id }, children }) as unknown as IResponseTree;
+const node = (
+  id: string,
+  children: IResponseTree[] = [],
+  statementsCount: number = 0,
+): IResponseTree => ({ territory: { id }, children, statementsCount }) as unknown as IResponseTree;
 
 const tree = node("T0", [node("T1"), node("T2", [node("T3")])]);
 
@@ -31,5 +34,27 @@ describe("resolveDefaultTerritory", () => {
     expect(
       resolveDefaultTerritory({ user: asUser("T3"), tree: undefined, isCleanLoad: true }),
     ).toBe(null);
+  });
+});
+
+describe("territoryHasStatements", () => {
+  const withCounts = node("T0", [node("T1", [], 2), node("T2", [node("T3", [], 5)])]);
+
+  it("reports the statements a territory holds", () => {
+    expect(territoryHasStatements(withCounts, "T1")).toBe(true);
+    expect(territoryHasStatements(withCounts, "T3")).toBe(true);
+  });
+
+  it("does not count the statements of child territories", () => {
+    expect(territoryHasStatements(withCounts, "T2")).toBe(false);
+  });
+
+  it("reports nothing for a territory the tree does not carry", () => {
+    expect(territoryHasStatements(withCounts, "T9")).toBe(false);
+  });
+
+  it("reports nothing before the tree arrives", () => {
+    expect(territoryHasStatements(undefined, "T1")).toBe(false);
+    expect(territoryHasStatements(withCounts, "")).toBe(false);
   });
 });
