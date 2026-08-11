@@ -1224,7 +1224,7 @@ export class Annotator {
     this.scroller?.setViewportSize(Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100));
 
     if (this.settingsOverlay.isOpen) {
-      this.settingsOverlay.reposition(this.element);
+      this.settingsOverlay.reposition(this.overlayAnchors());
     }
 
     this.draw();
@@ -2309,6 +2309,24 @@ export class Annotator {
     this.setShowParagraphMarks(!this.showParagraphMarks);
   }
 
+  /**
+   * The elements the settings overlay spans: the whole editor surface, not just
+   * the text canvas. The line-number and scroller canvases are separate
+   * elements beside it, so covering their union keeps the dimmed backdrop
+   * flush with the editor and gives the settings box the full width to lay out
+   * in (the text canvas alone is narrow enough to clip wide controls).
+   */
+  private overlayAnchors(): HTMLElement[] {
+    const anchors: HTMLElement[] = [this.element];
+    if (this.lines) {
+      anchors.push(this.lines.element);
+    }
+    if (this.scroller) {
+      anchors.push(this.scroller.element);
+    }
+    return anchors;
+  }
+
   /** Open the settings overlay with the current options. */
   openSettings(): void {
     const settings: SettingControl[] = [
@@ -2412,7 +2430,7 @@ export class Annotator {
 
     this.settingsOverlay.open(
       settings,
-      this.element,
+      this.overlayAnchors(),
       [
         {
           label: "Reset to defaults",

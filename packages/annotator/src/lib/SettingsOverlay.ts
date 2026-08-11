@@ -56,8 +56,12 @@ export interface FooterAction {
 
 export class SettingsOverlay {
   private backdrop: HTMLDivElement | null = null;
-  /** Canvas the backdrop is anchored to; followed each frame while open. */
-  private anchor: HTMLElement | null = null;
+  /**
+   * Elements the backdrop is anchored to; followed each frame while open. The
+   * backdrop covers their union, so passing the line-number canvas alongside
+   * the text canvas gives the box the full width of the editor surface.
+   */
+  private anchors: HTMLElement[] = [];
   /** Pending requestAnimationFrame id for the anchor-follow loop. */
   private followRaf: number | null = null;
   /** Last anchor rect applied, so the follow loop only writes on change. */
@@ -81,13 +85,14 @@ export class SettingsOverlay {
   /**
    * Show the overlay with the given settings. A previously-open instance is
    * replaced. When `anchor` is given the backdrop covers only that element's
-   * box (e.g. the canvas) instead of the whole viewport.
+   * box (e.g. the canvas) instead of the whole viewport; several elements
+   * cover their union (e.g. line numbers + text canvas + scroller).
    */
   private colors: MenuColors = LIGHT_MENU_COLORS;
 
   open(
     settings: SettingControl[] = [],
-    anchor?: HTMLElement,
+    anchor?: HTMLElement | HTMLElement[],
     footer: FooterAction[] = [],
     colors?: MenuColors
   ): void {
@@ -105,10 +110,10 @@ export class SettingsOverlay {
       background: "rgba(9, 16, 52, 0.4)",
     } as Partial<CSSStyleDeclaration>);
 
-    this.anchor = anchor ?? null;
-    if (anchor) {
+    this.anchors = anchor ? (Array.isArray(anchor) ? [...anchor] : [anchor]) : [];
+    if (this.anchors.length > 0) {
       (backdrop.style as Partial<CSSStyleDeclaration>).overflow = "hidden";
-      this.applyAnchorRect(backdrop, anchor);
+      this.applyAnchorRect(backdrop, this.anchors);
     } else {
       (backdrop.style as Partial<CSSStyleDeclaration>).inset = "0";
     }
@@ -167,16 +172,49 @@ export class SettingsOverlay {
 
     // Follow the anchor every frame so the backdrop tracks the canvas while a
     // panel spring-animates (the canvas drifts after the one-shot resize event).
-    if (this.anchor) {
+    if (this.anchors.length > 0) {
       this.startFollow();
     }
 
     document.addEventListener("keydown", this.onKeyDown, true);
   }
 
-  /** Apply the anchor's current viewport rect to the backdrop, caching it. */
-  private applyAnchorRect(backdrop: HTMLDivElement, anchor: HTMLElement): void {
-    const rect = anchor.getBoundingClientRect();
+  /**
+   * Smallest viewport rect containing every anchor. Elements detached from the
+   * layout (a hidden line-number canvas) report an all-zero rect and are
+   * skipped, so they cannot pull the union to the top-left corner.
+   */
+  private unionRect(
+    anchors: HTMLElement[]
+  ): { left: number; top: number; width: number; height: number } | null {
+    let left = Infinity;
+    let top = Infinity;
+    let right = -Infinity;
+    let bottom = -Infinity;
+
+    for (const anchor of anchors) {
+      const rect = anchor.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) {
+        continue;
+      }
+      left = Math.min(left, rect.left);
+      top = Math.min(top, rect.top);
+      right = Math.max(right, rect.right);
+      bottom = Math.max(bottom, rect.bottom);
+    }
+
+    if (left === Infinity) {
+      return null;
+    }
+    return { left, top, width: right - left, height: bottom - top };
+  }
+
+  /** Apply the anchors' current bounding viewport rect to the backdrop, caching it. */
+  private applyAnchorRect(backdrop: HTMLDivElement, anchors: HTMLElement[]): void {
+    const rect = this.unionRect(anchors);
+    if (!rect) {
+      return;
+    }
     if (
       this.lastRect &&
       this.lastRect.left === rect.left &&
@@ -198,11 +236,11 @@ export class SettingsOverlay {
   /** Re-read the anchor rect each animation frame until the overlay closes. */
   private startFollow(): void {
     const tick = () => {
-      if (!this.backdrop || !this.anchor) {
+      if (!this.backdrop || this.anchors.length === 0) {
         this.followRaf = null;
         return;
       }
-      this.applyAnchorRect(this.backdrop, this.anchor);
+      this.applyAnchorRect(this.backdrop, this.anchors);
       this.followRaf = requestAnimationFrame(tick);
     };
     this.followRaf = requestAnimationFrame(tick);
@@ -217,7 +255,7 @@ export class SettingsOverlay {
       cancelAnimationFrame(this.followRaf);
       this.followRaf = null;
     }
-    this.anchor = null;
+    this.anchors = [];
     this.lastRect = null;
     this.backdrop.remove();
     this.backdrop = null;
@@ -228,11 +266,12 @@ export class SettingsOverlay {
    *  Re-anchor the backdrop to the canvas. No-op when closed. Kept for callers
    *  that drive a resize explicitly; the per-frame follow loop covers the rest.
    */
-  reposition(anchor: HTMLElement): void {
+  reposition(anchor: HTMLElement | HTMLElement[]): void {
     if (!this.backdrop) {
       return;
     }
-    this.applyAnchorRect(this.backdrop, anchor);
+    this.anchors = Array.isArray(anchor) ? [...anchor] : [anchor];
+    this.applyAnchorRect(this.backdrop, this.anchors);
   }
 
   private buildHeader(): HTMLDivElement {
