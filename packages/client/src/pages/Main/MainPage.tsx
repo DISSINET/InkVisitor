@@ -138,8 +138,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   // Travel is how a panel shows the user what their click did. This collapse
   // answers no click - it lands while the page is still assembling itself, and
-  // a panel sliding shut there reads as the page being slow.
-  const collapseWithoutTravelRef = useRef(false);
+  // a panel sliding shut there reads as the page being slow. Holds the
+  // secondPanelExpanded value the skip is meant for, since other inputs move
+  // the widths too (the debounced layout width settles around this moment) and
+  // any of them would otherwise be the one that snaps.
+  const skipTravelForPanelState = useRef<boolean | null>(null);
 
   const prevTerritoryIdRef = useRef(territoryId);
   useEffect(() => {
@@ -151,7 +154,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       defaultTerritoryIsEmptyRef.current = false;
       // only when the widths are going to move, so that the flag cannot outlive
       // this collapse and rob the user's next toggle of its travel
-      collapseWithoutTravelRef.current = opensEmptyByDefault && secondPanelExpanded;
+      skipTravelForPanelState.current = opensEmptyByDefault && secondPanelExpanded ? false : null;
       dispatch(setSecondPanelExpanded(!opensEmptyByDefault));
     }
   }, [territoryId, secondPanelExpanded, dispatch]);
@@ -483,14 +486,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
   useLayoutEffect(() => {
     const widths = [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth];
 
-    if (collapseWithoutTravelRef.current) {
-      collapseWithoutTravelRef.current = false;
+    if (skipTravelForPanelState.current === secondPanelExpanded) {
+      skipTravelForPanelState.current = null;
       setPanelWidthVars(widths, "mainPage");
       return;
     }
 
     animatePanelWidthVars(widths, "mainPage");
-  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth]);
+  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth, secondPanelExpanded]);
 
   // Same for the separators, which a drag on any one of them can move.
   useLayoutEffect(() => {

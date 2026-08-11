@@ -378,11 +378,17 @@ class Api {
             // the bounce is a full page load, so the place the user was working
             // in only survives when it is written down first
             storeRedirectTargetFromWindow();
-            // pathname-only assignment keeps the current search/hash, so login
-            // would carry the previous session's territory/statement/detail ids
-            // — already saved above for restore after sign-in
+            // a whole address rather than a path: the search and hash of the
+            // dead session have no business on the login screen, and they are
+            // written down above for the trip back
             const rootUrl = process.env.ROOT_URL || "";
-            window.location.assign(`${rootUrl === "/" ? "" : rootUrl}/login`);
+            // ROOT_URL may be stored with or without slashes at either end. An
+            // address that does not open with one is read as relative to the
+            // directory the user happens to be in, and a trailing one meets the
+            // slash below as a doubled separator.
+            const trimmedRoot = rootUrl.replace(/^\/+/, "").replace(/\/+$/, "");
+            const basename = trimmedRoot ? `/${trimmedRoot}` : "";
+            window.location.assign(`${basename}/login`);
           }
         }
 
