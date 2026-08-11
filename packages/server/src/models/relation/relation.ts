@@ -1,6 +1,12 @@
 import { determineOrder, IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { IEntity, Relation as RelationTypes, AuditScope } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IStatement,
+  ITerritory,
+  Relation as RelationTypes,
+  AuditScope,
+} from "@inkvisitor/shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { EnumValidators } from "@inkvisitor/shared/enums";
 import {
@@ -472,12 +478,55 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Predicate shared by the create/edit/delete checks. A relation attached to a
+   * Statement or a Territory shows up on it, so writing the relation is a write
+   * to that entity and answers to the tree right guarding it - the Territory
+   * holding the Statement, or the Territory itself. Entities of other classes
+   * are not tied to the tree and carry no such restriction.
+   *
+   * The Territory right can only be read from a loaded entity, so the caller has
+   * to preload `entities` before asking; an unloaded relation is refused.
+   * @param user
+   * @returns
+   */
+  private isWritableByUser(user: User): boolean {
+    if (user.role === UserEnums.Role.Viewer) {
+      return false;
+    }
+
+    if (!this.entities || this.entities.length !== this.entityIds.length) {
+      return false;
+    }
+
+    // both classes reach treeCache -> territory -> entity, and entity.ts reaches
+    // this module back through shorthands; loading them here rather than at the
+    // top keeps Territory from extending an undefined Entity
+    const {
+      default: Statement,
+    } = require("@models/statement/statement") as typeof import("@models/statement/statement");
+    const {
+      default: Territory,
+    } = require("@models/territory/territory") as typeof import("@models/territory/territory");
+
+    return this.entities.every((entity) => {
+      switch (entity.class) {
+        case EntityEnums.Class.Statement:
+          return new Statement(entity as IStatement).canBeEditedByUser(user);
+        case EntityEnums.Class.Territory:
+          return new Territory(entity as ITerritory).canBeEditedByUser(user);
+        default:
+          return true;
+      }
+    });
+  }
+
+  /**
    * Predicate for testing if the current user can create the relation
    * @param user
    * @returns
    */
   canBeCreatedByUser(user: User): boolean {
-    return user.role !== UserEnums.Role.Viewer;
+    return this.isWritableByUser(user);
   }
 
   /**
@@ -486,7 +535,7 @@ export default class Relation implements IRelationModel {
    * @returns
    */
   canBeEditedByUser(user: User): boolean {
-    return user.role !== UserEnums.Role.Viewer;
+    return this.isWritableByUser(user);
   }
 
   /**
@@ -495,7 +544,7 @@ export default class Relation implements IRelationModel {
    * @returns
    */
   canBeDeletedByUser(user: User): boolean {
-    return user.role !== UserEnums.Role.Viewer;
+    return this.isWritableByUser(user);
   }
 
   /**

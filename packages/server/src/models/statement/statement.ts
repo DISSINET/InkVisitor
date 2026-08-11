@@ -260,6 +260,10 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
@@ -288,6 +292,19 @@ class Statement extends Entity implements IStatement {
     }
 
     return false;
+  }
+
+  /**
+   * Predicate for testing if the user can create the statement entry.
+   * A Statement lands in a Territory, so creating one is a write to that
+   * Territory and answers to the same right as editing it - the base Entity
+   * rule (anyone but a Viewer) would let an Editor drop statements into a
+   * branch he may only read, whether through a plain create or a clone.
+   * @param user
+   * @returns boolean representing the access
+   */
+  canBeCreatedByUser(user: User): boolean {
+    return this.canBeEditedByUser(user);
   }
 
   /**
@@ -324,6 +341,10 @@ class Statement extends Entity implements IStatement {
   canBeDeletedByUser(user: User): boolean {
     // only admin has the right, no matter the territory
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+
+    if (this.isTemplateWritableByUser(user)) {
       return true;
     }
 

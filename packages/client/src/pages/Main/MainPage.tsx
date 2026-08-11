@@ -10,8 +10,7 @@ import {
 } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
-import { useUserQuery } from "hooks/react-query";
-import { useTreeQuery } from "hooks/react-query/useTreeQuery";
+import { useTreeQuery, useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
   ReactNode,
@@ -50,6 +49,7 @@ import {
   animateSeparatorPositionVars,
 } from "utils/layoutTransition";
 import { getStoredUserRole } from "utils/userStorage";
+import { searchTree } from "utils/utils";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
@@ -256,17 +256,23 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [user, treeData]);
 
-  // Admin / Owner / Editor with writer rights
+  // Admin / Owner / Editor with writer rights.
+  // The tree node carries the right the server derived for that territory,
+  // which follows the assignment down the branch; a user's own rights entry
+  // names only the territory it was assigned to, so a write right on an
+  // ancestor never appears against its descendants.
   const hasWriteRightsToSelectedTerritory = useMemo(() => {
+    if (user?.role === UserEnums.Role.Admin || user?.role === UserEnums.Role.Owner) {
+      return true;
+    }
+    if (!treeData || !territoryId) {
+      return false;
+    }
+    const node = searchTree(treeData, territoryId);
     return (
-      (user?.role === UserEnums.Role.Editor &&
-        user?.rights?.some(
-          (right) => right.territory === territoryId && right.mode === UserEnums.RoleMode.Write,
-        )) ||
-      user?.role === UserEnums.Role.Admin ||
-      user?.role === UserEnums.Role.Owner
+      node?.right === UserEnums.RoleMode.Write || node?.right === UserEnums.RoleMode.Admin
     );
-  }, [user, territoryId]);
+  }, [user?.role, treeData, territoryId]);
 
   const {
     detailSeparatorY,
@@ -308,13 +314,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
     handleLayoutInit,
   } = useVerticalSeparators();
 
-  const { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel } =
-    usePanelToggles({
-      treeSeparator,
-      centerSeparator,
-      searchSeparator,
-      onePercentOfLayoutWidth,
-    });
+  const {
+    toggleFirstPanel,
+    toggleSecondPanel,
+    toggleThirdPanel,
+    toggleFourthPanel,
+    expandThirdPanelLayout,
+  } = usePanelToggles({
+    treeSeparator,
+    centerSeparator,
+    searchSeparator,
+    onePercentOfLayoutWidth,
+  });
+
+  const prevThirdPanelExpandedRef = useRef(thirdPanelExpanded);
+  useEffect(() => {
+    const wasExpanded = prevThirdPanelExpandedRef.current;
+    prevThirdPanelExpandedRef.current = thirdPanelExpanded;
+
+    if (!wasExpanded && thirdPanelExpanded) {
+      expandThirdPanelLayout();
+    }
+  }, [thirdPanelExpanded]);
 
   const firstPanelButton = () => (
     <IconButton

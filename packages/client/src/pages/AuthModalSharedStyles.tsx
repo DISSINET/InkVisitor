@@ -1,5 +1,5 @@
 import { TbMailFilled } from "react-icons/tb";
-import styled from "styled-components";
+import styled, { DefaultTheme } from "styled-components";
 
 // The logo asset is white + light blue, so the band keeps the fixed dark muni
 // background in both light and dark mode.
@@ -8,13 +8,14 @@ export const StyledLogoBand = styled.div`
   justify-content: center;
   align-items: center;
   background-color: ${({ theme }) => theme.color["muni"]};
-  padding: ${({ theme }) => `${theme.space[7]} ${theme.space[6]}`};
+  /* horizontal padding matches StyledContentWrap's side margin, so the logo
+     spans exactly the same column as the form below it at any modal width */
+  padding: ${({ theme }) => `${theme.space[7]} ${theme.space[12]}`};
   border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
 
   img {
     width: 100%;
-    max-width: 26rem;
   }
 `;
 export const StyledContentWrap = styled.div`
@@ -30,10 +31,15 @@ export const StyledForm = styled.form`
   gap: ${({ theme }) => theme.space[3]};
   width: 100%;
 `;
+/* Every control in an auth form sits on this one row height - fields and the
+   submit button read as a single column of equal blocks. A labelled Button
+   sizes itself from padding, so it needs the row height plus `fullHeight`. */
+const authRowHeight = ({ theme }: { theme: DefaultTheme }) => theme.space[14];
+
 export const StyledInputRow = styled.div`
   display: flex;
   width: 100%;
-  height: ${({ theme }) => theme.space[12]};
+  height: ${authRowHeight};
 
   /* Input's inner positioning wrapper is centered, not stretched, so the
      row's height has to be passed down to it for fullHeight to take effect. */
@@ -44,10 +50,13 @@ export const StyledInputRow = styled.div`
 export const StyledErrorWrap = styled.div`
   margin-top: ${({ theme }) => theme.space["-2"]};
 `;
+/* the form's own gap keeps the fields as one group, so the submit and the
+   secondary link each add enough on top to read as their own step */
 export const StyledSubmitWrap = styled.div`
   display: flex;
   width: 100%;
-  margin-top: ${({ theme }) => theme.space[2]};
+  height: ${authRowHeight};
+  margin-top: ${({ theme }) => theme.space[5]};
 `;
 export const StyledShowPasswordButton = styled.button`
   display: flex;
@@ -66,7 +75,7 @@ export const StyledShowPasswordButton = styled.button`
 `;
 export const StyledLinkButton = styled.button`
   align-self: center;
-  margin-top: ${({ theme }) => theme.space[1]};
+  margin-top: ${({ theme }) => theme.space[3]};
   border: none;
   background: none;
   padding: 0;

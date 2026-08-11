@@ -3,23 +3,28 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Input } from "components";
 import React, { useEffect, useState } from "react";
-import { Row } from "react-table";
 import { toast } from "react-toastify";
 
 interface UserListUsernameInput {
   user: IResponseUser;
-  rows: Row<IResponseUser>[];
+  /** every user, not only the visible rows: the name must be unique across all of them */
+  allUsers: IResponseUser[];
   userMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
     Partial<Omit<IUser, "id">> & { id: IUser["id"] },
     unknown
   >;
+  autoFocus?: boolean;
+  /** the input has finished editing and the parent may return to its read-only view */
+  onDone?: () => void;
 }
 export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
   user,
-  rows,
+  allUsers,
   userMutation,
+  autoFocus = false,
+  onDone,
 }) => {
   const { id, name } = user;
 
@@ -32,8 +37,13 @@ export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
     <Input
       value={localUsername}
       changeOnType
+      autoFocus={autoFocus}
+      onEscapePressFn={() => {
+        setLocalUsername(name);
+        onDone?.();
+      }}
       onBlur={async () => {
-        const usernameList = rows?.map((row) => row.original.name);
+        const usernameList = allUsers.map((otherUser) => otherUser.name);
 
         if (localUsername !== name) {
           if (localUsername.length < 4) {
@@ -52,6 +62,7 @@ export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
             });
           }
         }
+        onDone?.();
       }}
       onChangeFn={(value) => {
         setLocalUsername(value);

@@ -18,6 +18,7 @@ import { FaHome } from "react-icons/fa";
 import { LuScanSearch } from "react-icons/lu";
 import {
   ButtonSize,
+  EntityColors,
   EntityDragItem,
   EntitySingleDropdownItem,
   SuggesterItemToCreate,
@@ -443,6 +444,9 @@ const EntitySuggesterFull: React.FC<
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
       excludedEntityClasses.includes(newHoverred.entityClass) ||
+      // the suggester picks a destination the user has to be able to write,
+      // the same rule filterEditorRights applies to the typed suggestions
+      (filterEditorRights && newHoverred.entityIsReadOnly) ||
       // Is T or S template inside S template
       ((newHoverred.entityClass === EntityEnums.Class.Territory ||
         newHoverred.entityClass === EntityEnums.Class.Statement) &&
@@ -609,6 +613,8 @@ const EntitySuggesterFull: React.FC<
 /**
  * Wrapper that can defer mounting the heavy suggester until user interaction.
  * compactUntilHover: when true, show a small button; mount full suggester on hover/click.
+ * Once mounted it stays mounted while it holds focus or typed text, so the
+ * pointer can leave to reach the suggestion list without collapsing it.
  */
 export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHover?: boolean }> = ({
   compactUntilHover = false,
@@ -618,6 +624,16 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasTypedText, setHasTypedText] = useState(false);
+  // the delayed minify closes over the state of the render that scheduled it,
+  // so it reads these refs for the values current when it fires
+  const keepMountedRef = useRef(false);
+  const isHoveredRef = useRef(false);
+
+  useEffect(() => {
+    keepMountedRef.current = isFocused || hasTypedText;
+  }, [isFocused, hasTypedText]);
 
   const isDropValid = (item: EntityDragItem): boolean => {
     const {
@@ -628,10 +644,12 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       isInsideStatement = false,
       disabled = false,
       categoryTypes = classesAll,
+      filterEditorRights = false,
     } = rest;
 
     if (disabled) return false;
     if (item.isDiscouraged) return false;
+    if (filterEditorRights && item.entityIsReadOnly) return false;
     if (disableTemplatesAccept && item.isTemplate) return false;
     if (excludedActantIds.includes(item.id)) return false;
     if (excludedEntityClasses.includes(item.entityClass)) return false;
@@ -672,6 +690,30 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     }
   };
 
+  /** Collapse back to the button unless the suggester is in use when the delay expires */
+  const scheduleMinify = () => {
+    clearHideTimeout();
+    hideTimeoutRef.current = setTimeout(() => {
+      hideTimeoutRef.current = null;
+      if (!keepMountedRef.current && !isHoveredRef.current) {
+        setIsMinified(true);
+      }
+    }, 1000);
+  };
+
+  const handleFocusChange = (focused: boolean) => {
+    setIsFocused(focused);
+    rest.onFocusChange?.(focused);
+    if (!focused) {
+      scheduleMinify();
+    }
+  };
+
+  const handleTyped = (typed: string) => {
+    setHasTypedText(typed.length > 0);
+    rest.onTyped?.(typed);
+  };
+
   useEffect(() => {
     if (containerRef.current) {
       drop(containerRef);
@@ -683,34 +725,45 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     return <EntitySuggesterFull {...rest} />;
   }
 
+  // a suggester bound to a single class can say which one before it is opened;
+  // one offering a choice has no class to stand for
+  const soleCategory = rest.categoryTypes?.length === 1 ? rest.categoryTypes[0] : undefined;
+  const minifiedColor =
+    (soleCategory && EntityColors[soleCategory]?.color) || ("primary" as const);
+
   return (
     <div
       ref={containerRef}
       onMouseEnter={() => {
+        isHoveredRef.current = true;
         clearHideTimeout();
         setIsMinified(false);
       }}
       onMouseLeave={() => {
-        clearHideTimeout();
-        hideTimeoutRef.current = setTimeout(() => {
-          setIsMinified(true);
-        }, 1000);
+        isHoveredRef.current = false;
+        scheduleMinify();
       }}
       style={{ display: "inline-flex", alignItems: "center" }}
     >
       {isMinified ? (
         <Button
           tooltipLabel="Open suggester"
-          icon={<LuScanSearch color="black" />}
-          color="gray"
+          icon={<LuScanSearch />}
+          color={minifiedColor}
           shape="rounded-lg"
           size={ButtonSize.Medium}
           // inverted
-          noBorder
         />
       ) : (
         <EntitySuggesterFull
           {...rest}
+          // the field appears under the pointer, so it is already the thing the
+          // user is aiming at - typing goes to the input, not to the class
+          // dropdown that would otherwise take the focus on a multi-class field
+          autoFocus
+          autoFocusInput
+          onFocusChange={handleFocusChange}
+          onTyped={handleTyped}
           externalDroppedItem={pendingDropItem}
           onConsumeExternalDrop={() => setPendingDropItem(null)}
         />

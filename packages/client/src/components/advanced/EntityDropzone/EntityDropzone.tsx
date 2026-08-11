@@ -20,6 +20,18 @@ interface EntityDropzone {
 
   children: ReactElement;
   disabled?: boolean;
+  /**
+   * Refuses the drop while still registering as a target, so hovering it warns
+   * the way a wrong entity class does. `disabled` instead leaves no target at
+   * all, which reads as though the drag simply missed.
+   */
+  refuseDrop?: boolean;
+  /**
+   * Set on targets that move the entity rather than link it: a statement can
+   * only leave a territory the user may write, so one dragged out of a
+   * read-only territory is refused wherever it lands.
+   */
+  refuseReadOnlySource?: boolean;
 }
 export const EntityDropzone: React.FC<EntityDropzone> = ({
   categoryTypes,
@@ -35,8 +47,11 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
 
   children,
   disabled,
+  refuseDrop,
+  refuseReadOnlySource,
 }) => {
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
+  const rejectsDrop = isWrongDropCategory || !!refuseDrop;
 
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory,
@@ -52,7 +67,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   };
 
   const handleDropped = (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
-    if (!isWrongDropCategory) {
+    if (!rejectsDrop) {
       if (instantiateTemplate && !disableTemplateInstantiation) {
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);
       } else {
@@ -71,6 +86,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
+      (refuseReadOnlySource && newHoverred.entityIsReadOnly) ||
       (newHoverred.isTemplate &&
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||
@@ -92,7 +108,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
         handleHoverred(newHoverred);
       }}
       isInsideTemplate={isInsideTemplate}
-      isWrongDropCategory={isWrongDropCategory}
+      isWrongDropCategory={rejectsDrop}
       disabled={disabled}
     >
       {children}

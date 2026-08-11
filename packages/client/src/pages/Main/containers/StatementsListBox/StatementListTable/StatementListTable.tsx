@@ -201,7 +201,11 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const statement = row.original;
           return (
             <StyledTagCellWrap onClick={stopRowActivation} onDoubleClick={stopRowActivation}>
-              <EntityTag entity={statement} showOnly="tag" />
+              <EntityTag
+                entity={statement}
+                showOnly="tag"
+                entityIsReadOnly={right === UserEnums.RoleMode.Read}
+              />
             </StyledTagCellWrap>
           );
         },

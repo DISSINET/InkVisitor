@@ -105,15 +105,16 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
   };
 
+  // maxCount of Infinity appends without evicting anything - for callers that
+  // must not cost the user a tab they already had open
   const appendDetailId = (id: string, maxCount: number = maxTabCount) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
-      const newDetailIdArray = [];
-      if (detailIdArray.length < maxCount) {
-        newDetailIdArray.push([...detailIdArray, id]);
-      } else {
-        newDetailIdArray.push([...detailIdArray.splice(1, detailIdArray.length), id]);
-      }
+      // at the cap the oldest tab gives way, so the new one always lands last
+      const newDetailIdArray =
+        detailIdArray.length < maxCount
+          ? [...detailIdArray, id]
+          : [...detailIdArray.slice(1), id];
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
     setSelectedDetailId(id);

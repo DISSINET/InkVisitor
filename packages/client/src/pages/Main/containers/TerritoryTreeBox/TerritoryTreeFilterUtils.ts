@@ -80,9 +80,13 @@ function isNodeMatchingFilters(
   const meetsEditorRightsCondition = editorRights
     ? node.right === UserEnums.RoleMode.Write
     : true;
+  // an entity may carry an empty labels array (see isFirstLabelEmpty), so the
+  // first label is not guaranteed to be there to lowercase
   const meetsFilterCondition =
     targetLabel.length === 0 ||
-    node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
+    (node.territory.labels[0] ?? "")
+      .toLowerCase()
+      .includes(targetLabel.toLowerCase());
 
   // Apply AND/OR logic based on operator
   if (operator === "or") {

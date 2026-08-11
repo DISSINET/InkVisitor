@@ -1,3 +1,4 @@
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Button } from "components";
 import { useTheme } from "hooks";
@@ -16,6 +17,7 @@ import {
   StyledHeaderEditIcon,
 } from "../ExplorerTableStyles";
 import { ExploreTableHeaderTooltip } from "./ExploreTableHeaderTooltip";
+import { getStoredUserRole } from "utils/userStorage";
 
 interface ExploreTableHeaderColumn {
   column: Explore.IExploreColumn;
@@ -103,7 +105,8 @@ const ExploreTableHeaderColumn: React.FC<ExploreTableHeaderColumn> = ({
         <StyledHeaderDragHandle ref={dragRef} title="drag to reorder">
           <MdDragIndicator size={16} color={theme.color.headerTextColor} />
         </StyledHeaderDragHandle>
-        {column.editable && (
+        {/* the marker promises editable cells, which a Viewer's rows never render */}
+        {column.editable && getStoredUserRole() !== UserEnums.Role.Viewer && (
           <StyledHeaderEditIcon title="editable column">
             <MdOutlineEdit size={14} color={theme.color.headerTextColor} />
           </StyledHeaderEditIcon>

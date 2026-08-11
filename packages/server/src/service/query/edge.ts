@@ -148,21 +148,28 @@ export class EdgeSUnderT extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    const territoryId = this.node.params.entityId;
     const targetIds = this.targetIds();
-    return q
-      .filter(function(e: RDatum<IEntity>) {
-        return e("class").eq("S");
-      })
-      .filter(function(e: RDatum<IEntity>) {
-        // unpinned target keeps the raw single-id comparison (matches nothing)
-        return targetIds
-          ? r.expr(targetIds).contains(e("data")("territory")("territoryId"))
-          : e("data")("territory")("territoryId").eq(territoryId);
-      })
-      .map(function(e) {
-        return e("id");
-      });
+
+    // the target set is the pinned territory plus whatever its expansion toggles
+    // add - "include subordinates" of a Territory is its whole subtree, so this
+    // set has no upper bound and is pulled through the StatementTerritory index
+    // rather than membership-tested per row of the incoming stream. Intersecting
+    // back with q keeps the subset invariant that positive matching and negation
+    // both rely on; no target matches nothing
+    return intersectIdsWithStream(
+      q,
+      targetIds && targetIds.length
+        ? (r
+            .table(Entity.table)
+            .getAll(r.args(targetIds), {
+              index: DbEnums.Indexes.StatementTerritory,
+            })
+            .filter(function (e: RDatum<IEntity>) {
+              return e("class").eq(EntityEnums.Class.Statement);
+            })
+            .getField("id") as unknown as RStream)
+        : null
+    );
   }
 }
 
@@ -198,15 +205,24 @@ export class EdgeSUnderChildrenT extends SearchEdge {
       return;
     }
 
+    // the expanded set reaches any class (equivalents/subordinates follow
+    // relations into Concepts), and findChilds falls back to an unindexed table
+    // filter for every id the tree cache does not hold - one batched class read
+    // keeps the walk to the roots that can carry territory children at all
+    const rootEntities = await Entity.findEntitiesByIds(db, rootIds);
+    const territoryRootIds = rootEntities
+      .filter((entity) => entity.class === EntityEnums.Class.Territory)
+      .map((entity) => entity.id);
+
     // findChilds(deep) returns descendants only (keyed by id) - add each root
-    // itself to cover Statements sitting directly in the target territory;
-    // non-territory roots (equivalents can be any class) simply yield no childs
+    // itself to cover Statements sitting directly in the target territory
     const subtree = new Set<string>(rootIds);
-    for (const rootId of rootIds) {
-      const descendants = await new Territory({ id: rootId }).findChilds(
-        db,
-        true
-      );
+    const descendantSets = await Promise.all(
+      territoryRootIds.map((rootId) =>
+        new Territory({ id: rootId }).findChilds(db, true)
+      )
+    );
+    for (const descendants of descendantSets) {
       for (const id of Object.keys(descendants)) {
         subtree.add(id);
       }

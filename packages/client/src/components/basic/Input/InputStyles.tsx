@@ -285,6 +285,9 @@ export const StyledIconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.color["gray"][500]};
+  /* react-icons default to 1em, so an unsized icon would otherwise scale with
+     whatever font-size the call site happens to sit in */
+  font-size: ${({ theme }) => theme.fontSize["base"]};
 
   /* Icons passed via the icon prop are centered here; strip any margin they
      could carry so they stay centered. */

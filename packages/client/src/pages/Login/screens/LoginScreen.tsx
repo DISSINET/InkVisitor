@@ -134,8 +134,10 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         <StyledSubmitWrap>
           <Button
             label={isLoggingIn ? "Logging In…" : "Log In"}
-            color="success"
+            color="info"
+            shape="rounded-md"
             fullWidth
+            fullHeight
             disabled={isLoggingIn}
             size={ButtonSize.Large}
           />

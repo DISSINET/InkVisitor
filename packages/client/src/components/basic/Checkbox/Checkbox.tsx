@@ -30,6 +30,7 @@ interface Checkbox {
   iconOnly?: boolean;
   // optional function to be called when the checkbox is clicked (onChangeFn is main function that returns value)
   onClickFn?: () => void;
+  disableEnterKey?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
@@ -45,11 +46,17 @@ export const Checkbox: React.FC<Checkbox> = ({
   iconOnly = false,
   tooltipPosition = "bottom",
   onClickFn = () => {},
+  disableEnterKey = false,
 }) => {
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleToggle = (e: React.MouseEvent) => {
+    // a click with detail 0 is raised by keyboard activation rather than a
+    // pointer, so a box that hands Enter to the page must let it pass
+    if (disableEnterKey && e.detail === 0) {
+      return;
+    }
     e.stopPropagation();
     onChangeFn(!value, e);
     onClickFn();
@@ -58,11 +65,20 @@ export const Checkbox: React.FC<Checkbox> = ({
   // Space/Enter toggle the box when it holds keyboard focus, matching native
   // checkbox behaviour (the indicator is a styled span, not an <input>).
   const handleKeyToggle = (e: React.KeyboardEvent) => {
+    // the box keeps focus while Enter belongs to the page (e.g. the query page
+    // runs the search): preventDefault drops any activation click the browser
+    // would raise from the key, and the event still bubbles to page handlers
+    if (disableEnterKey && e.key === "Enter") {
+      e.preventDefault();
+      return;
+    }
+
     if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
       onChangeFn(!value);
       onClickFn();
+      return;
     }
   };
 

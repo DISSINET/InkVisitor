@@ -155,6 +155,16 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
       .indexCreate(DbEnums.Indexes.RelationsEntityIds, { multi: true })
       .run(conn);
     await r.table(RELATIONS).indexWait().run(conn);
+    // SUT: pulls its candidate statements through the territory index, since the
+    // expanded target set is a whole territory subtree with no upper bound
+    await r
+      .table(ENTITIES)
+      .indexCreate(
+        DbEnums.Indexes.StatementTerritory,
+        r.row("data")("territory")("territoryId")
+      )
+      .run(conn);
+    await r.table(ENTITIES).indexWait(DbEnums.Indexes.StatementTerritory).run(conn);
     await r.table(ENTITIES).insert(ENTITY_FIXTURES).run(conn);
     await r.table(RELATIONS).insert(RELATION_FIXTURES).run(conn);
   }, 30000);

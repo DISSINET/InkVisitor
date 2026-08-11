@@ -405,6 +405,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     },
                   });
                 }}
+                disableEnterKey
               />
               <Checkbox
                 label="SUB"
@@ -422,6 +423,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     },
                   });
                 }}
+                disableEnterKey
               />
             </StyledNodeExpansionToggles>
           )}

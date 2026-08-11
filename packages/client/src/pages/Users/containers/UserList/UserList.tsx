@@ -3,40 +3,39 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Loader, Submit } from "components";
-import { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
-import { UserTagSize } from "components/advanced/UserTag/utils";
-import { useResourcesWithDocumentsQuery, useUsersGetMoreQuery } from "hooks/react-query";
+import { Box, Button, ButtonGroup, Loader, RoleBadge, Submit } from "components";
+import { AttributeButtonGroup } from "components/advanced";
+import { useUsersGetMoreQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FaEnvelopeOpenText, FaKey, FaToggleOff, FaToggleOn, FaUserCheck } from "react-icons/fa";
+import { FaKey, FaToggleOff, FaToggleOn, FaUserCheck } from "react-icons/fa";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import { IcoTrash } from "Theme/icons";
 import { ButtonSize } from "types";
-import { getUserIcon } from "utils/iconUtils";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
-import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
-import { UserListIcon } from "./UserListIcon/UserListIcon";
+import { UserListIdentityCell } from "./UserListIdentityCell/UserListIdentityCell";
 import {
   ROW_FLASH_CLEAR_AFTER_MS,
-  StyledNotActiveText,
+  StyledEmptyCell,
+  StyledRoleBadgeWrap,
   StyledTable,
   StyledTableWrapper,
-  StyledTerritoryColumn,
   StyledTerritoryColumnAllLabel,
-  StyledTerritoryList,
-  StyledTerritoryListItem,
-  StyledTerritoryListItemMissing,
   StyledTh,
   StyledTHead,
-  StyledUserNameColumn,
-  StyledUserNameColumnIcon,
-  StyledUserNameColumnText,
   UserListRowFlash,
 } from "./UserListStyles";
+import { UserListResourceRightsCell } from "./UserListRightsCell/UserListResourceRightsCell";
+import { UserListRightsCell } from "./UserListRightsCell/UserListRightsCell";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
-import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
+import { UserListToolbar } from "./UserListToolbar/UserListToolbar";
 import { UsersUtils } from "./UsersUtils";
+import {
+  emptyUserListFilters,
+  filterUsers,
+  hasActiveUserListFilters,
+  UserListFilters,
+} from "./userListFilter";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -51,6 +50,7 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
+  const [filters, setFilters] = useState<UserListFilters>(emptyUserListFilters);
   const [rowFlash, setRowFlash] = useState<{
     userId: string;
     kind: Exclude<UserListRowFlash, false>;
@@ -82,7 +82,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
-  const { data: users, isFetching } = useUsersGetMoreQuery();
+  const { data: users, isFetching, isLoading } = useUsersGetMoreQuery();
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
@@ -100,6 +100,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     }
     return [...users].sort(userComparator);
   }, [users]);
+
+  const filteredUsers = useMemo(() => filterUsers(localUsers, filters), [localUsers, filters]);
 
   const removingUser = useMemo(() => {
     return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
@@ -173,14 +175,18 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     right.mode === UserEnums.RoleMode.Annotate &&
     (resourceId === undefined || right.territory === resourceId);
 
-  const addResourceRightToUser = (user: IResponseUser, resourceId: string) => {
+  // one mutation covers the whole batch: a per-resource call would send rights
+  // read before the previous call landed, and the last response would win
+  const addResourceRightsToUser = (user: IResponseUser, resourceIds: string[]) => {
     const newRights: IUserRight[] = [
-      ...user.rights.filter((right) => !isAnnotateRight(right, resourceId)),
+      ...user.rights.filter(
+        (right) => !resourceIds.some((resourceId) => isAnnotateRight(right, resourceId)),
+      ),
+      ...resourceIds.map((resourceId) => ({
+        territory: resourceId,
+        mode: UserEnums.RoleMode.Annotate,
+      })),
     ];
-    newRights.push({
-      territory: resourceId,
-      mode: UserEnums.RoleMode.Annotate,
-    });
     userMutation.mutate({ id: user.id, rights: newRights });
   };
 
@@ -191,11 +197,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     userMutation.mutate({ id: user.id, rights: newRights });
   };
 
+  const removeAllResourceRightsFromUser = (user: IResponseUser) => {
+    const newRights: IUserRight[] = [...user.rights.filter((right) => !isAnnotateRight(right))];
+    userMutation.mutate({ id: user.id, rights: newRights });
+  };
+
   const getRowId = useCallback((row: IResponseUser) => {
     return row.id;
   }, []);
-
-  const { data: resourcesWithDocuments } = useResourcesWithDocumentsQuery();
 
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
@@ -203,127 +212,50 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "",
         id: "Name",
         accessor: "name",
-        Cell: ({ row }: CellType) => {
-          const { name, email, role, active, verified } = row.original;
-
-          return (
-            <StyledUserNameColumn $active={active} $verified={verified}>
-              <StyledUserNameColumnIcon>
-                <UserListIcon
-                  icon={
-                    !verified ? (
-                      <FaEnvelopeOpenText size={16} />
-                    ) : (
-                      getUserIcon(role, UserTagSize.ExtraLarge)
-                    )
-                  }
-                  tooltipLabel={role}
-                />
-              </StyledUserNameColumnIcon>
-
-              {!verified ? (
-                <StyledNotActiveText>
-                  <span>Verification email has been sent to</span>
-                  <b>{email}</b>
-                </StyledNotActiveText>
-              ) : (
-                <StyledUserNameColumnText>
-                  <b>{name}</b>
-                  <span>{email}</span>
-                </StyledUserNameColumnText>
-              )}
-            </StyledUserNameColumn>
-          );
-        },
-      },
-      {
-        Header: "Username",
-        id: "Username",
-        Cell: ({ row, rows }: CellType) => {
-          const { verified } = row.original;
-
-          return (
-            <>
-              {verified && (
-                <UserListUsernameInput
-                  user={row.original}
-                  userMutation={userMutation}
-                  rows={rows}
-                />
-              )}
-            </>
-          );
-        },
-      },
-      {
-        Header: "Email",
-        id: "Email",
-        Cell: ({ row }: CellType) => {
-          const { verified, email } = row.original;
-          return verified ? (
-            <UserListEmailInput user={row.original} userMutation={userMutation} />
-          ) : null;
-        },
+        Cell: ({ row }: CellType) => (
+          <UserListIdentityCell
+            user={row.original}
+            allUsers={localUsers}
+            userMutation={userMutation}
+          />
+        ),
       },
       {
         Header: "Role",
         id: "Role",
         Cell: ({ row }: CellType) => {
           const { id, role } = row.original;
+
+          // an owner keeps the role for good, and nobody demotes themselves, so
+          // those rows state the role rather than offering a control
+          if (id === getStoredUserId() || role === UserEnums.Role.Owner) {
+            return (
+              <StyledRoleBadgeWrap>
+                <RoleBadge role={role} />
+              </StyledRoleBadgeWrap>
+            );
+          }
+
           return (
             <AttributeButtonGroup
-              disabled={id === getStoredUserId() || role === UserEnums.Role.Owner}
-              options={
-                role === UserEnums.Role.Owner
-                  ? [
-                      {
-                        longValue: userRoleDict[0].label,
-                        shortValue: userRoleDict[0].label,
-                        selected: role === userRoleDict[0].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[0].value,
-                          });
-                        },
+              options={userRoleDict.slice(1).map((roleOption) => ({
+                longValue: roleOption.label,
+                shortValue: roleOption.label,
+                selected: role === roleOption.value,
+                onClick: () => {
+                  if (role === roleOption.value) {
+                    return;
+                  }
+                  userMutation.mutate(
+                    { id: id, role: roleOption.value },
+                    {
+                      onSuccess: () => {
+                        scheduleRowFlash(id, "role");
                       },
-                    ]
-                  : [
-                      {
-                        longValue: userRoleDict[1].label,
-                        shortValue: userRoleDict[1].label,
-                        selected: role === userRoleDict[1].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[1].value,
-                          });
-                        },
-                      },
-                      {
-                        longValue: userRoleDict[2].label,
-                        shortValue: userRoleDict[2].label,
-                        selected: role === userRoleDict[2].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[2].value,
-                          });
-                        },
-                      },
-                      {
-                        longValue: userRoleDict[3].label,
-                        shortValue: userRoleDict[3].label,
-                        selected: role === userRoleDict[3].value,
-                        onClick: () => {
-                          userMutation.mutate({
-                            id: id,
-                            role: userRoleDict[3].value,
-                          });
-                        },
-                      },
-                    ]
-              }
+                    },
+                  );
+                },
+              }))}
             />
           );
         },
@@ -332,74 +264,25 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Read Territories",
         id: "territories-read",
         Cell: ({ row }: CellType) => {
-          const {
-            id: userId,
-            rights,
-            territoryRights: territoryActants,
-            role: userRole,
-          } = row.original;
+          const { rights, territoryRights, role: userRole } = row.original;
 
-          const readTerritories = rights.filter((r: IUserRight) => r.mode === "read");
+          if (userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) {
+            return <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>;
+          }
 
           return (
-            <StyledTerritoryColumn>
-              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
-                <React.Fragment>
-                  <EntitySuggester
-                    disableTemplatesAccept
-                    disableCreate
-                    onSelected={(newSelectedId: string) => {
-                      addRightToUser(row.original, newSelectedId, "read");
-                    }}
-                    categoryTypes={[EntityEnums.Class.Territory]}
-                    placeholder={"assign a territory"}
-                    excludedActantIds={readTerritories.map((r) => r.territory)}
-                  />
-                  <StyledTerritoryList>
-                    {readTerritories.length > 0 && territoryActants ? (
-                      readTerritories.map((right: IUserRight) => {
-                        const territoryActant = territoryActants.find(
-                          (t) => t.territory.id === right.territory,
-                        );
-
-                        return territoryActant && territoryActant.territory ? (
-                          <StyledTerritoryListItem key={right.territory}>
-                            <EntityTag
-                              entity={territoryActant.territory}
-                              unlinkButton={{
-                                onClick: () => {
-                                  removeRightFromUser(row.original, right.territory);
-                                },
-                                tooltipLabel: "remove territory from rights",
-                              }}
-                              disableDoubleClick
-                            />
-                          </StyledTerritoryListItem>
-                        ) : (
-                          <StyledTerritoryListItemMissing key={right.territory}>
-                            <div>invalid T {right.territory}</div>
-                            <Button
-                              key="d"
-                              tooltipLabel="remove invalid territory"
-                              icon={<IcoTrash />}
-                              color="danger"
-                              noBorder
-                              onClick={() => {
-                                removeRightFromUser(row.original, right.territory);
-                              }}
-                            />
-                          </StyledTerritoryListItemMissing>
-                        );
-                      })
-                    ) : (
-                      <div />
-                    )}
-                  </StyledTerritoryList>
-                </React.Fragment>
-              ) : (
-                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
-              )}
-            </StyledTerritoryColumn>
+            <UserListRightsCell
+              entityClass={EntityEnums.Class.Territory}
+              assignedIds={rights
+                .filter((right: IUserRight) => right.mode === "read")
+                .map((right) => right.territory)}
+              entities={territoryRights?.map((right) => right.territory)}
+              placeholder="assign a territory"
+              invalidLabel="invalid T"
+              removeTooltip="unassign territory from this user"
+              onAdd={(territoryId) => addRightToUser(row.original, territoryId, "read")}
+              onRemove={(territoryId) => removeRightFromUser(row.original, territoryId)}
+            />
           );
         },
       },
@@ -407,78 +290,28 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Write Territories",
         id: "territories-write",
         Cell: ({ row }: CellType) => {
-          const {
-            id: userId,
-            rights,
-            territoryRights: territoryActants,
-            role: userRole,
-          } = row.original;
+          const { rights, territoryRights, role: userRole } = row.original;
 
-          const writeTerritories = rights.filter((r: IUserRight) => r.mode === "write");
+          if (userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) {
+            return <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>;
+          }
+          if (userRole !== UserEnums.Role.Editor) {
+            return <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>;
+          }
 
           return (
-            <StyledTerritoryColumn>
-              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
-                userRole === UserEnums.Role.Editor ? (
-                  <React.Fragment>
-                    <EntitySuggester
-                      disableTemplatesAccept
-                      disableCreate
-                      onSelected={(newSelectedId: string) => {
-                        addRightToUser(row.original, newSelectedId, "write");
-                      }}
-                      categoryTypes={[EntityEnums.Class.Territory]}
-                      placeholder={"assign a territory"}
-                      excludedActantIds={writeTerritories.map((r) => r.territory)}
-                    />
-                    <StyledTerritoryList>
-                      {writeTerritories.length > 0 && territoryActants ? (
-                        writeTerritories.map((right: IUserRight) => {
-                          const territoryActant = territoryActants.find(
-                            (t) => t.territory.id === right.territory,
-                          );
-
-                          return territoryActant && territoryActant.territory ? (
-                            <StyledTerritoryListItem key={right.territory}>
-                              <EntityTag
-                                entity={territoryActant.territory}
-                                unlinkButton={{
-                                  onClick: () => {
-                                    removeRightFromUser(row.original, right.territory);
-                                  },
-                                  tooltipLabel: "remove territory from rights",
-                                }}
-                                disableDoubleClick
-                              />
-                            </StyledTerritoryListItem>
-                          ) : (
-                            <StyledTerritoryListItemMissing key={right.territory}>
-                              invalid T {right.territory}
-                              <Button
-                                key="d"
-                                tooltipLabel="remove invalid territory"
-                                icon={<IcoTrash />}
-                                color="danger"
-                                noBorder
-                                onClick={() => {
-                                  removeRightFromUser(row.original, right.territory);
-                                }}
-                              />
-                            </StyledTerritoryListItemMissing>
-                          );
-                        })
-                      ) : (
-                        <div />
-                      )}
-                    </StyledTerritoryList>
-                  </React.Fragment>
-                ) : (
-                  <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>
-                )
-              ) : (
-                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
-              )}
-            </StyledTerritoryColumn>
+            <UserListRightsCell
+              entityClass={EntityEnums.Class.Territory}
+              assignedIds={rights
+                .filter((right: IUserRight) => right.mode === "write")
+                .map((right) => right.territory)}
+              entities={territoryRights?.map((right) => right.territory)}
+              placeholder="assign a territory"
+              invalidLabel="invalid T"
+              removeTooltip="unassign territory from this user"
+              onAdd={(territoryId) => addRightToUser(row.original, territoryId, "write")}
+              onRemove={(territoryId) => removeRightFromUser(row.original, territoryId)}
+            />
           );
         },
       },
@@ -486,74 +319,27 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Annotate documents",
         id: "resources-annotate",
         Cell: ({ row }: CellType) => {
-          const { rights, resourceRights, role: userRole } = row.original;
+          const { rights, resourceRights, role: userRole, name } = row.original;
 
-          const annotateRights = rights.filter((r: IUserRight) => isAnnotateRight(r));
+          if (userRole === UserEnums.Role.Admin || userRole === UserEnums.Role.Owner) {
+            return <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>;
+          }
+          if (userRole !== UserEnums.Role.Editor) {
+            return <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>;
+          }
 
           return (
-            <StyledTerritoryColumn>
-              {userRole !== UserEnums.Role.Admin && userRole !== UserEnums.Role.Owner ? (
-                userRole === UserEnums.Role.Editor ? (
-                  <React.Fragment>
-                    <EntitySuggester
-                      disableTemplatesAccept
-                      disableCreate
-                      onSelected={(newSelectedId: string) => {
-                        addResourceRightToUser(row.original, newSelectedId);
-                      }}
-                      categoryTypes={[EntityEnums.Class.Resource]}
-                      placeholder={"assign a resource"}
-                      excludedActantIds={annotateRights.map((r) => r.territory)}
-                      preSuggestions={resourcesWithDocuments}
-                    />
-                    <StyledTerritoryList>
-                      {annotateRights.length > 0 && resourceRights ? (
-                        annotateRights.map((right: IUserRight) => {
-                          const resourceActant = resourceRights.find(
-                            (r) => r.resource.id === right.territory,
-                          );
-
-                          return resourceActant && resourceActant.resource ? (
-                            <StyledTerritoryListItem key={right.territory}>
-                              <EntityTag
-                                entity={resourceActant.resource}
-                                unlinkButton={{
-                                  onClick: () => {
-                                    removeResourceRightFromUser(row.original, right.territory);
-                                  },
-                                  tooltipLabel: "remove resource from rights",
-                                }}
-                                disableDoubleClick
-                              />
-                            </StyledTerritoryListItem>
-                          ) : (
-                            <StyledTerritoryListItemMissing key={right.territory}>
-                              <div>invalid R {right.territory}</div>
-                              <Button
-                                key="d"
-                                tooltipLabel="remove invalid resource"
-                                icon={<IcoTrash />}
-                                color="danger"
-                                noBorder
-                                onClick={() => {
-                                  removeResourceRightFromUser(row.original, right.territory);
-                                }}
-                              />
-                            </StyledTerritoryListItemMissing>
-                          );
-                        })
-                      ) : (
-                        <div />
-                      )}
-                    </StyledTerritoryList>
-                  </React.Fragment>
-                ) : (
-                  <StyledTerritoryColumnAllLabel>-</StyledTerritoryColumnAllLabel>
-                )
-              ) : (
-                <StyledTerritoryColumnAllLabel>all</StyledTerritoryColumnAllLabel>
-              )}
-            </StyledTerritoryColumn>
+            <UserListResourceRightsCell
+              userName={name}
+              assignedIds={rights
+                .filter((right: IUserRight) => isAnnotateRight(right))
+                .map((right) => right.territory)}
+              entities={resourceRights?.map((right) => right.resource)}
+              onAdd={(resourceId) => addResourceRightsToUser(row.original, [resourceId])}
+              onAddAll={(resourceIds) => addResourceRightsToUser(row.original, resourceIds)}
+              onRemove={(resourceId) => removeResourceRightFromUser(row.original, resourceId)}
+              onRemoveAll={() => removeAllResourceRightsFromUser(row.original)}
+            />
           );
         },
       },
@@ -658,18 +444,38 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash, resourcesWithDocuments],
+    [canVerifyManually, scheduleRowFlash, localUsers],
   );
+
+  // an empty body during the first fetch is not yet an empty result
+  const emptyBodyMessage = isLoading
+    ? "loading users..."
+    : hasActiveUserListFilters(filters)
+      ? "no users match the filter"
+      : "no users";
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, visibleColumns } =
     useTable({
       columns,
-      data: localUsers,
+      data: filteredUsers,
       getRowId,
     });
 
   return (
-    <>
+    <Box
+      label="Users"
+      disableHeaderClick
+      disableScroll
+      headerComponent={
+        <UserListToolbar
+          filters={filters}
+          onFiltersChange={setFilters}
+          filteredCount={filteredUsers.length}
+          totalCount={localUsers.length}
+          actions={<UsersUtils users={localUsers} />}
+        />
+      }
+    >
       <StyledTableWrapper>
         <StyledTable {...getTableProps()}>
           <StyledTHead>
@@ -695,13 +501,18 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 />
               );
             })}
+
+            {rows.length === 0 && (
+              <tr>
+                <StyledEmptyCell colSpan={visibleColumns.length}>
+                  {emptyBodyMessage}
+                </StyledEmptyCell>
+              </tr>
+            )}
           </tbody>
         </StyledTable>
         <Loader show={isFetching} />
       </StyledTableWrapper>
-
-      {/* NEW USER | TEST EMAIL */}
-      <UsersUtils users={localUsers} />
 
       <Submit
         title={`Deleting user ${removingUser ? removingUser.name : ""}`}
@@ -713,6 +524,6 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         }}
         loading={removeUserMutation.isPending}
       />
-    </>
+    </Box>
   );
 });

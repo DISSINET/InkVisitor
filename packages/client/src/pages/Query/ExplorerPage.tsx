@@ -693,6 +693,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     tooltipLabel="include equivalents"
                     tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
                     onChangeFn={handleToggleIncludeEquivalents}
+                    disableEnterKey
                   />
                   <Checkbox
                     label="SUB"
@@ -703,6 +704,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     tooltipLabel="include subordinates"
                     tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
                     onChangeFn={handleToggleIncludeSubordinates}
+                    disableEnterKey
                   />
                 </StyledResultExpansionButtons>,
                 <Button

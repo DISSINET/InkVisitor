@@ -40,10 +40,12 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],
   Query.EdgeType["R:SOE"],
+  // SUT: match Statements under the target Territory. The target node's SUB
+  // toggle widens it to the whole subtree - "include subordinates" of a Territory
+  // is its child territories, all levels (server: getSubordinateEntityIds).
+  // SUT:C expresses the same subtree as its own edge type and stays supported for
+  // saved queries that already carry it, but is not offered for new ones
   Query.EdgeType["SUT:"],
-  // SUT:C match Statements under the target Territory OR any descendant
-  // territory, recursively (whole subtree; server: EdgeSUnderChildrenT in edge.ts)
-  Query.EdgeType["SUT:C"],
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
