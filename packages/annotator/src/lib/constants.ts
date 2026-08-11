@@ -194,8 +194,18 @@ export const SELECTION_HANDLE_GRAB_CHAR_FACTOR = 1;
  * it. All values are in CSS px / line-relative ratios and scaled by the device
  * pixel ratio at draw time.
  */
-/** Vertical arm length as a fraction of one line height. */
-export const ANCHOR_MARKER_ARM_H_RATIO = 0.7;
+/**
+ * Vertical arm length as a multiple of the font size. Keyed to the text rather
+ * than to the line box: the marker frames the letters, whose size is unchanged
+ * by the line-spacing setting, so one glyph height serves every spacing.
+ */
+export const ANCHOR_MARKER_ARM_H_EM = 1.24;
+/**
+ * Ceiling on the arm length as a fraction of one line height. At the tightest
+ * spacings a font-sized arm would reach into the rows above and below, where it
+ * reads as a marker on the neighbouring line.
+ */
+export const ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO = 0.8;
 /** Horizontal arm length as a fraction of one character width. */
 export const ANCHOR_MARKER_ARM_W_RATIO = 0.8;
 /** Stroke width of the corner glyph, in CSS px (scaled by ratio at draw time). */

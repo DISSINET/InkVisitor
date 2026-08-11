@@ -92,6 +92,52 @@ describe("Annotator draws Territory anchor markers (#2887)", () => {
     expect(byKind("end")[1]).toBeGreaterThan(byKind("start")[1]);
   });
 
+  test("the arm height follows the font size, not the line spacing", () => {
+    // The marker frames the letters; letters do not shrink when the lines are
+    // pulled together, so neither does the marker.
+    const armFor = (lineHeightRatio: number): number => {
+      markerMock.mockClear();
+      const a = mk("foo <T1>bar</T1> baz");
+      a.setMode(EditMode.HIGHLIGHT);
+      a.onHighlight(() => anchorSchema);
+      a.setLineHeightRatio(lineHeightRatio);
+      a.draw();
+      return markerMock.mock.calls[0][4].armH;
+    };
+    expect(armFor(2.5)).toBe(armFor(1.8));
+  });
+
+  test("a spacing too tight for a font-sized arm clamps it to the line", () => {
+    markerMock.mockClear();
+    const a = mk("foo <T1>bar</T1> baz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => anchorSchema);
+    a.setLineHeightRatio(1);
+    a.draw();
+    expect(markerMock.mock.calls[0][4].armH).toBeLessThan(a.lineHeight);
+  });
+
+  test("the marker centres on the capitals, not on the line box", () => {
+    // `textBaseline = "middle"` centres the em box, whose descender room a
+    // capital leaves empty, so the letters sit above the centre of the line.
+    markerMock.mockClear();
+    const a = mk("foo <T1>bar</T1> baz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => anchorSchema);
+    const ctx = (a as any).ctx as CanvasRenderingContext2D;
+    const measure = ctx.measureText.bind(ctx);
+    ctx.measureText = (t: string) =>
+      ({
+        ...measure(t),
+        actualBoundingBoxAscent: 10,
+        actualBoundingBoxDescent: 2,
+      } as TextMetrics);
+    a.draw();
+
+    const yMid = markerMock.mock.calls[0][2];
+    expect(yMid).toBe(0.5 * a.lineHeight + (2 - 10) / 2);
+  });
+
   test("no markers drawn when no ANCHOR schema is returned", () => {
     const a = mk("foo <T1>bar</T1> baz");
     a.setMode(EditMode.HIGHLIGHT);

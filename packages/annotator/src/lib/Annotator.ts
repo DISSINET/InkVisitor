@@ -1,7 +1,8 @@
 import { drawAnchorMarker } from "./AnchorMarker";
 import { CaretBlink } from "./CaretBlink";
 import {
-  ANCHOR_MARKER_ARM_H_RATIO,
+  ANCHOR_MARKER_ARM_H_EM,
+  ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
   ANCHOR_MARKER_HIT_PAD_PX,
   ANCHOR_MARKER_LINE_WIDTH_PX,
@@ -2802,8 +2803,12 @@ export class Annotator {
     // draw() (so it empties even in RAW/SEMI where this method never runs); we
     // only append here.
 
-    const armH = ANCHOR_MARKER_ARM_H_RATIO * this.lineHeight;
+    const armH = Math.min(
+      ANCHOR_MARKER_ARM_H_EM * this.fontSize * this.ratio,
+      ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO * this.lineHeight
+    );
     const armW = ANCHOR_MARKER_ARM_W_RATIO * this.charWidth;
+    const inkOffset = this.capBandOffsetPx();
     const lineWidth = ANCHOR_MARKER_LINE_WIDTH_PX * this.ratio;
     const stackStep = ANCHOR_MARKER_STACK_STEP_PX * this.ratio;
 
@@ -2884,7 +2889,7 @@ export class Annotator {
       // Stacked markers fan out to the right (both arms point right), so a
       // stack never runs off the left margin where boundaries commonly sit.
       const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
-      const yMid = (relLine + 0.5) * this.lineHeight;
+      const yMid = (relLine + 0.5) * this.lineHeight + inkOffset;
 
       // #2885 — the anchor being resized pulses its corner markers too (not just
       // the span wash), so a Territory (whose only visual is these markers) shows
@@ -2922,6 +2927,32 @@ export class Annotator {
         });
       }
     }
+  }
+
+  /**
+   * Device-px distance from a line's vertical centre down to the centre of the
+   * band capital letters occupy on that line.
+   *
+   * Text is painted with `textBaseline = "middle"`, which centres the em box —
+   * and the em box reserves descender room that a capital never uses, so the
+   * visible letters sit above the line centre by a fixed amount. Anything meant
+   * to read as aligned with the letters (the anchor corner markers) has to be
+   * placed against this band, not against the line box.
+   *
+   * Measured against the live font each frame it is needed; a context without
+   * bounding-box metrics (jsdom) reports 0 and the caller falls back to the
+   * line centre.
+   */
+  private capBandOffsetPx(): number {
+    this.ctx.font = this.font;
+    this.ctx.textBaseline = "middle";
+    const m = this.ctx.measureText("H");
+    const ascent = m.actualBoundingBoxAscent;
+    const descent = m.actualBoundingBoxDescent;
+    if (!Number.isFinite(ascent) || !Number.isFinite(descent)) {
+      return 0;
+    }
+    return (descent - ascent) / 2;
   }
 
   /**
