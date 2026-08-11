@@ -170,13 +170,6 @@ These stay with Admins and Owners:
 He can always manage **his own** account: change his password, his display
 options, and his bookmarks.
 
-## The short version
-
-An Editor can do essentially all the research and content work — building and
-editing Entities, Statements, and Templates, and organizing the parts of the tree
-he has access to. The boundaries are about **scope** (he edits where he's been
-given access).
-
 ## What each assignment gives him (Admin's view)
 
 As an Admin or Owner, you control an Editor's scope by assigning rights to
