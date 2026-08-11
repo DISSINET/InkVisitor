@@ -43,6 +43,7 @@ import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { buildDocumentsZip } from "utils/documentExportZip";
+import { storeRedirectTargetFromWindow } from "utils/redirectAfterLogin";
 import {
   clearStoredUser,
   getStoredUserId,
@@ -374,8 +375,20 @@ class Api {
             // Session is no longer valid - drop stale local user state so route
             // guards (isLoggedIn) reflect reality, then bounce to login.
             clearStoredUser();
-            // if handled by react router, then the toast could be visible
-            window.location.pathname = (process.env.ROOT_URL || "") + "/login";
+            // the bounce is a full page load, so the place the user was working
+            // in only survives when it is written down first
+            storeRedirectTargetFromWindow();
+            // a whole address rather than a path: the search and hash of the
+            // dead session have no business on the login screen, and they are
+            // written down above for the trip back
+            const rootUrl = process.env.ROOT_URL || "";
+            // ROOT_URL may be stored with or without slashes at either end. An
+            // address that does not open with one is read as relative to the
+            // directory the user happens to be in, and a trailing one meets the
+            // slash below as a doubled separator.
+            const trimmedRoot = rootUrl.replace(/^\/+/, "").replace(/\/+$/, "");
+            const basename = trimmedRoot ? `/${trimmedRoot}` : "";
+            window.location.assign(`${basename}/login`);
           }
         }
 

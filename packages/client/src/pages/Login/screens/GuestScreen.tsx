@@ -11,9 +11,9 @@ import { useAppDispatch } from "redux/hooks";
 import { ButtonSize } from "types";
 
 interface GuestScreen {
-  setRedirectToMain: React.Dispatch<React.SetStateAction<boolean>>;
+  onLoggedIn: () => void;
 }
-export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
+export const GuestScreen: React.FC<GuestScreen> = ({ onLoggedIn }) => {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | false>(false);
 
@@ -26,7 +26,7 @@ export const GuestScreen: React.FC<GuestScreen> = ({ setRedirectToMain }) => {
         ignoreErrorToast: true,
       });
       if (res?.id) {
-        setRedirectToMain(true);
+        onLoggedIn();
       }
     } catch (err) {
       setError("Auto login failed");

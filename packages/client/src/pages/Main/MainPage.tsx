@@ -41,11 +41,13 @@ import {
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
+import { resolveDefaultTerritory, territoryHasStatements } from "utils/defaultTerritory";
 import { isLayoutUndersized } from "utils/layoutUtils";
 import {
   animateBoxHeightVars,
   animatePanelWidthVars,
   animateSeparatorPositionVars,
+  setPanelWidthVars,
 } from "utils/layoutTransition";
 import { getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
@@ -128,15 +130,34 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [statementId]);
 
+  // Set while the default territory is being opened and it holds no statements.
+  // Opening a territory otherwise means the user asked for it and wants to see
+  // its statements; the default arrives on its own, and an empty list is not
+  // worth a panel.
+  const defaultTerritoryIsEmptyRef = useRef(false);
+
+  // Travel is how a panel shows the user what their click did. This collapse
+  // answers no click - it lands while the page is still assembling itself, and
+  // a panel sliding shut there reads as the page being slow. Holds the
+  // secondPanelExpanded value the skip is meant for, since other inputs move
+  // the widths too (the debounced layout width settles around this moment) and
+  // any of them would otherwise be the one that snaps.
+  const skipTravelForPanelState = useRef<boolean | null>(null);
+
   const prevTerritoryIdRef = useRef(territoryId);
   useEffect(() => {
     const isNewTerritory = prevTerritoryIdRef.current !== territoryId;
     prevTerritoryIdRef.current = territoryId;
 
     if (territoryId && isNewTerritory) {
-      dispatch(setSecondPanelExpanded(true));
+      const opensEmptyByDefault = defaultTerritoryIsEmptyRef.current;
+      defaultTerritoryIsEmptyRef.current = false;
+      // only when the widths are going to move, so that the flag cannot outlive
+      // this collapse and rob the user's next toggle of its travel
+      skipTravelForPanelState.current = opensEmptyByDefault && secondPanelExpanded ? false : null;
+      dispatch(setSecondPanelExpanded(!opensEmptyByDefault));
     }
-  }, [territoryId, dispatch]);
+  }, [territoryId, secondPanelExpanded, dispatch]);
 
   const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
@@ -229,7 +250,32 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // user data for current user
   const { data: user } = useUserQuery();
 
+  // The tree the default territory has to be reachable in; already being
+  // fetched for the tree box, so this shares that query.
   const { data: treeData } = useTreeQuery();
+
+  // A load that carries no params at all - the app opened at its bare address -
+  // starts at the territory the user picked as their default. Decided once per
+  // visit to the page, as soon as both answers are in: a territory the user
+  // closes afterwards is a state of its own, not an invitation to jump back.
+  const defaultTerritoryResolved = useRef(false);
+  useEffect(() => {
+    if (defaultTerritoryResolved.current || !user || !treeData) {
+      return;
+    }
+    defaultTerritoryResolved.current = true;
+
+    const defaultTerritory = resolveDefaultTerritory({
+      user,
+      tree: treeData,
+      isCleanLoad: !territoryId && !statementId && detailIdArray.length === 0,
+    });
+
+    if (defaultTerritory) {
+      defaultTerritoryIsEmptyRef.current = !territoryHasStatements(treeData, defaultTerritory);
+      setTerritoryId(defaultTerritory);
+    }
+  }, [user, treeData]);
 
   // Admin / Owner / Editor with writer rights.
   // The tree node carries the right the server derived for that territory,
@@ -438,11 +484,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
-    animatePanelWidthVars(
-      [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth],
-      "mainPage",
-    );
-  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth]);
+    const widths = [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth];
+
+    if (skipTravelForPanelState.current === secondPanelExpanded) {
+      skipTravelForPanelState.current = null;
+      setPanelWidthVars(widths, "mainPage");
+      return;
+    }
+
+    animatePanelWidthVars(widths, "mainPage");
+  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth, secondPanelExpanded]);
 
   // Same for the separators, which a drag on any one of them can move.
   useLayoutEffect(() => {

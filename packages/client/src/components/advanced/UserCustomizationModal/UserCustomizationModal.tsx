@@ -1,10 +1,10 @@
-import { languageDict } from "@inkvisitor/shared/dictionaries";
+import { languageDict, orderLanguageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
-import { IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
+import { IcoListTree, IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
 import api from "api";
 import {
   Button,
@@ -20,7 +20,7 @@ import {
   Toggle,
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import { useOrderedLanguageDict } from "hooks/react-query";
+import { useSearchParams } from "hooks";
 import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaQuestion } from "react-icons/fa";
@@ -85,7 +85,16 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const [data, setData] = useState<DataObject>(initialValues);
 
-  const orderedLanguageDict = useOrderedLanguageDict();
+  // the territory the tree is on, offered as the default without the user
+  // having to find it again in the suggester
+  const { territoryId } = useSearchParams();
+
+  // follows the working languages being edited rather than the saved ones, so a
+  // language added above is at the top of the two lists below straight away
+  const orderedLanguageDict = useMemo(
+    () => orderLanguageDict(data.workingLanguages),
+    [data.workingLanguages],
+  );
 
   const handleChange = (key: string, value: string | true | false | DropdownItem) => {
     setData((prev) => ({
@@ -312,6 +321,33 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledSectionTitle>
 
               <StyledFieldGrid>
+                {/* comes first: the two language defaults below are picked out
+                    of the list it puts on top. Shown to a Viewer too, who reads
+                    the same ordering in the search boxes */}
+                <StyledFieldLabel>Working languages</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Dropdown.Multi.Basic
+                    width="full"
+                    value={data.workingLanguages}
+                    onChange={(selectedOptions) =>
+                      setData((prev) => ({
+                        ...prev,
+                        workingLanguages: selectedOptions as EntityEnums.Language[],
+                      }))
+                    }
+                    options={languageDict.filter(
+                      (lang) => lang.value !== EntityEnums.Language.Empty,
+                    )}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Languages you work with. They are shown first in every language dropdown to make them easy to find in the full list."
+                  />
+                </StyledFieldHelp>
+
                 {!isViewer && (
                   <>
                     <StyledFieldLabel>Default label language</StyledFieldLabel>
@@ -350,30 +386,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   </>
                 )}
 
-                <StyledFieldLabel>Working languages</StyledFieldLabel>
-                <StyledFieldControl>
-                  <Dropdown.Multi.Basic
-                    width="full"
-                    value={data.workingLanguages}
-                    onChange={(selectedOptions) =>
-                      setData((prev) => ({
-                        ...prev,
-                        workingLanguages: selectedOptions as EntityEnums.Language[],
-                      }))
-                    }
-                    options={languageDict.filter(
-                      (lang) => lang.value !== EntityEnums.Language.Empty,
-                    )}
-                  />
-                </StyledFieldControl>
-                <StyledFieldHelp>
-                  <IconWithTooltip
-                    color="success"
-                    icon={<FaQuestion />}
-                    tooltipLabel="Languages you work with. They are shown first in every language dropdown to make them easy to find in the full list."
-                  />
-                </StyledFieldHelp>
-
                 <StyledFieldLabel>Default Territory</StyledFieldLabel>
                 <StyledFieldControl>
                   {defaultTerritory ? (
@@ -400,7 +412,35 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     />
                   )}
                 </StyledFieldControl>
-                <StyledFieldHelp />
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Territory opened in the tree when InkVisitor is loaded without any parameters in the url. A link that already points to a Territory, Statement or Entity detail opens that instead."
+                  />
+                </StyledFieldHelp>
+
+                {territoryId && territoryId !== data.defaultTerritory && (
+                  <>
+                    <StyledFieldLabel />
+                    <StyledFieldControl>
+                      <StyledInlineAction>
+                        <Button
+                          label="Use territory open in tree"
+                          icon={<IcoListTree />}
+                          noBorder
+                          color="success"
+                          inverted
+                          noBackground
+                          onClick={() =>
+                            setData((prev) => ({ ...prev, defaultTerritory: territoryId }))
+                          }
+                        />
+                      </StyledInlineAction>
+                    </StyledFieldControl>
+                    <StyledFieldHelp />
+                  </>
+                )}
 
                 {!isViewer && (
                   <>

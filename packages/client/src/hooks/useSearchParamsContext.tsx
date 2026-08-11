@@ -54,6 +54,10 @@ const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
 const arrJoinChar = ",";
 
+// Both sides go through URLSearchParams so encoding alone (the comma in a
+// detail list) is not a difference
+const normalizeHash = (hash: string) => new URLSearchParams(hash.replace(/^#/, "")).toString();
+
 export const useSearchParams = () => useContext(SearchParamsContext);
 
 export const SearchParamsProvider = ({ children }: { children: ReactElement }) => {
@@ -100,7 +104,6 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   );
 
   const isLoggingOutRef = React.useRef(false);
-  const isHandlingLocationChangeRef = React.useRef(false);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
@@ -182,13 +185,23 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   };
 
   const handleHistoryPush = () => {
-    if (!isLoggingOutRef.current && !isHandlingLocationChangeRef.current) {
+    if (!isLoggingOutRef.current) {
       const hashString = params.toString();
       // Remove the = symbol for editorClosed parameter
       const cleanHash = hashString
         .replace(/editorClosed=&/g, "editorClosed&")
         .replace(/&editorClosed=/g, "&editorClosed")
         .replace(/^editorClosed=$/g, "editorClosed");
+
+      // The url can already say this: state that was read out of it in the
+      // first place - a pasted link, back/forward. Navigating again would add a
+      // history entry leading where the user already is, and a navigation that
+      // only carries a hash keeps the pathname it finds, which is the wrong one
+      // while a route change is still in flight.
+      if (normalizeHash(cleanHash) === normalizeHash(location.hash)) {
+        return;
+      }
+
       navigate({
         hash: cleanHash,
       });
@@ -225,9 +238,10 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     }
   }, [territoryId, statementId, selectedDetailId, detailId, editorOpened]);
 
-  const handleLocationChange = (location: any) => {
+  // Puts the params a url carries into state.
+  const applyParamsFromHash = (hash: string) => {
     try {
-      const paramsTemp = new URLSearchParams(location.hash.substring(1));
+      const paramsTemp = new URLSearchParams(hash.replace(/^#/, ""));
       const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
       parsedParamsTemp.territory ? setTerritoryId(parsedParamsTemp.territory) : setTerritoryId("");
@@ -247,18 +261,22 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     }
   };
 
-  useEffect(() => {
-    // Listen for URL changes (back/forward button, direct navigation)
-    // This condition is for redirect - don't use our lifecycle when params are set by search query
-    if (!hasSearchParams) {
-      isHandlingLocationChangeRef.current = true;
-      handleLocationChange(location);
-      // Use setTimeout to ensure state updates have completed before allowing history pushes
-      setTimeout(() => {
-        isHandlingLocationChangeRef.current = false;
-      }, 0);
-    }
-  }, [location, hasSearchParams]);
+  // A url the app did not come from itself - back/forward, a pasted link, the
+  // redirect after login - is read while rendering rather than from an effect.
+  // A page that mounts on this render then holds the params on its first
+  // render, instead of mounting empty and receiving them a commit later: that
+  // later arrival is what its own mount effects read as the user having just
+  // picked this territory, and it holds back every query gated on the ids.
+  // Skipped when params are passed by search query (activation, password
+  // reset), whose url this provider leaves alone. A url the app wrote itself is
+  // read back too: it says what the state it was composed from said, and where
+  // a newer setter has since moved on, the write carrying that newer value is
+  // already on its way to land after this one.
+  const [appliedHash, setAppliedHash] = useState(location.hash);
+  if (!hasSearchParams && location.hash !== appliedHash) {
+    setAppliedHash(location.hash);
+    applyParamsFromHash(location.hash);
+  }
 
   return (
     <SearchParamsContext.Provider
