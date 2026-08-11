@@ -98,7 +98,7 @@ export const StyledRightsLabel = styled.div`
 export const StyledRightsWrap = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.space[1]};
+  gap: ${({ theme }) => theme.space[2]};
   max-width: 23.5rem;
 `;
 
@@ -106,6 +106,6 @@ export const StyledRightsGrid = styled.div`
   display: grid;
   grid-template-columns: ${labelColumn} max-content;
   align-items: center;
-  row-gap: ${({ theme }) => theme.space[3]};
-  column-gap: ${({ theme }) => theme.space[3]};
+  row-gap: ${({ theme }) => theme.space[4]};
+  column-gap: ${({ theme }) => theme.space[4]};
 `;
