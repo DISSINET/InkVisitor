@@ -101,19 +101,18 @@ Territory itself.
 
 ## Documents and annotation
 
-Editor:
+Editor can:
 
-- can **read** all Documents
-- can **edit, annotate, export and delete a Document** when its Resource has been assigned to  
-  him
+- **read** all Documents
+- **edit, annotate, export and delete a Document** when its Resource has been assigned to him
 
 ## Templates
 
-Editor:
+Editor can:
 
-- can **create new Templates**
-- can **edit and delete Templates** — any Template, not only the ones he made
-- can **apply any Template**
+- **create new Templates**
+- **edit and delete Templates** — any Template, not only the ones he made
+- **apply any Template**
 
 ## Explorer
 
