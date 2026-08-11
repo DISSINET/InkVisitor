@@ -41,6 +41,8 @@
 - Panel and box resizing follows the pointer in real time, pushes neighbouring panels past their limits, eases into place on release, and works on touch screens
 - Reworked EntityTag label shortening so tags ellipsis correctly without wrapper elements (#2932)
 - Redesigned error screen with reload, retry and copy-report actions
+- Fixed a deep link losing its route and territory/detail params on auto-logout — the app now returns to the originally requested URL after login instead of always landing on "/" (#3190)
+- The default Territory set in user customization opens on a clean page load
 
 ## Development (Technical)
 
