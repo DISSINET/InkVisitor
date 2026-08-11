@@ -3,19 +3,18 @@
 ## Annotator
 
 - Mark paragraph breaks with a first-line indent and an optional pilcrow paragraph mark, toggled from the context menu (#2076)
-- Separate two touching same-colour highlights with an edge gap so they read as two spans (#2325)
-- User-adjustable line spacing (Compact / Normal / Wide), with proportional text as the default on hosted instances (#2487)
-- Shortcuts for paragraph marks and options, with shortcuts shown in context-menu rows (#3092)
 - Find & replace moved into a dedicated panel (#2775)
-- Reclaimed the box height for the text — document identity in the box header, edit modes and actions in a floating toolbar, and search as a compact top-right bar with the second step in a panel (#3210)
-- Much faster typing in large documents: only the edited paragraph is re-parsed and re-wrapped, roughly 140× faster per keystroke on a 4,000-paragraph document (#3217)
+- Separate two touching same-colour highlights with an edge gap so they read as two spans (#2325)
 - Elvl must be chosen in the highlight menu suggester before creating an Entity, marked with a warning ring, and can also be picked from the Entity create modal (#2873)
-- Prompt to save or discard text edits when switching to highlight mode
+- User-adjustable line spacing (Compact / Normal / Wide), with proportional text as the default on hosted instances
+- Reclaimed the Annotator box height for the text — document identity in the box header, edit modes and actions in a floating toolbar, and search as a compact top-right bar with the second step in a panel
+- Optimized typing in large documents
+- Prompt to save or discard text edits when switching to highlight mode (preparation for virtual lock)
 
 ## Explorer
 
 - Saved queries — store, rename, organise into folders and reload, together with the Explorer filters applied when saved, with shared queries restricted to elevated roles (#783)
-- Include subordinates / include equivalents is now a checkbox on each query node, not a single global setting (#3192)
+- Include subordinates / include equivalents is now a checkbox on each query node (#3192)
 - Fixed subordinates not being applied to Explorer results (#3194)
 - Result-expanded Entities are badged sub / eq, and expansion is also toggleable globally from the results header (#2969)
 - SUT: now covers the whole Territory subtree through the target node's SUB toggle; SUT:C is no longer offered for new queries but still runs in saved ones (#3193)
@@ -37,15 +36,12 @@
 - Stats — percentages with two decimals, a total column, and users below the contribution threshold excluded from totals instead of bucketed as "others" (#3159)
 - Stats — Relations tab merged into Entities, with grouped event-type filters and date-range presets (#3197)
 - Reorder multi-note rows by drag and drop (#1334)
-- Users page rebuilt as a boxed table with role badges, a name/email search, role and hide-inactive filters, a click-to-edit identity cell and bulk Resource annotate rights (#3208)
-- Login, activation and password reset screens redesigned around a shared logo band and form layout, with show/hide password and a loading state on submit (#3219)
-- Reworked Button system, unified modal Cancel buttons, and unified Territory tree filters so unmatched rows dim instead of matches being painted (#3207)
-- Panel and box resizing follows the pointer in real time, pushes neighbouring panels past their limits, eases into place on release, and works on touch screens (#3209)
-- Annotator search across soft-wrapped lines, block caret for monospace fonts, query-grid warning on empty required selectors, and Suggester width fixes (#3189)
+- Users page rebuilt as a boxed table with role badges, a name/email search, role and hide-inactive filters, a click-to-edit identity cell and bulk Resource annotate rights
+- Login, activation and password reset screens redesigned around a shared logo band and form layout, with show/hide password and a loading state on submit
+- Reworked Button system, unified modal Cancel buttons, and unified Territory tree filters so unmatched rows dim instead of matches being painted
+- Panel and box resizing follows the pointer in real time, pushes neighbouring panels past their limits, eases into place on release, and works on touch screens
 - Reworked EntityTag label shortening so tags ellipsis correctly without wrapper elements (#2932)
-- Fixed session cookie not being set when the server sits behind a TLS-terminating reverse proxy (#3185)
 - Redesigned error screen with reload, retry and copy-report actions
-- Opening a Statement from Search results locates its Territory
 
 ## Development (Technical)
 
