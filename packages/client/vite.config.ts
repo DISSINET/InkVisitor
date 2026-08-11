@@ -28,12 +28,15 @@ export default defineConfig(({ command, mode }) => {
 
   const appEnv = env.ENV || mode;
 
-  // Every asset url is resolved against this, so it has to both open and close
-  // with a slash for those urls to land under the deployment path. ROOT_URL may
-  // be written with or without slashes at either end, and is empty for an app
-  // served from the root.
+  // Every asset url is resolved against this, so it has to open with a slash for
+  // those urls to land under the deployment path; ROOT_URL may be written with
+  // or without one, and is empty for an app served from the root. No trailing
+  // slash: vite inserts the separator when it joins asset paths, while the dev
+  // server matches requests by prefix, and a base ending in a slash rejects the
+  // basename on its own - which is the address the router leaves in the bar for
+  // the root route.
   const rootUrl = (env.ROOT_URL || "").replace(/^\/+/, "").replace(/\/+$/, "");
-  const base = rootUrl ? `/${rootUrl}/` : "/";
+  const base = rootUrl ? `/${rootUrl}` : "/";
 
   if (command === "build") {
     console.log(`[inkvisitor] mode "${mode}" builds assets under base "${base}"`);

@@ -159,8 +159,13 @@ export const UNDERLINE_OFFSET_PX = 2;
  * between them; each giving up its own edge parts them by twice this value, so
  * the layer underneath shows through as a separator and the pair reads as two
  * anchors. Applied only at a span's true start/end, never at soft-wrap edges.
+ *
+ * Fractional on purpose: a monospace cell holds almost no side bearing on a wide
+ * glyph (m, w), so a full pixel bitten off the leading edge puts the fill inside
+ * the ink. A sub-pixel inset lands as an antialiased edge — the separator still
+ * reads, and the glyph keeps its cell.
  */
-export const HIGHLIGHT_SPAN_EDGE_GAP_PX = 1;
+export const HIGHLIGHT_SPAN_EDGE_GAP_PX = 0.75;
 
 /** Fraction of one line height scrolled per frame while the pointer is outside the canvas (smooth autoscroll). */
 export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
