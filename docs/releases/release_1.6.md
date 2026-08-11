@@ -13,11 +13,9 @@
 
 ## Explorer
 
-- Saved queries — store, rename, organise into folders and reload, together with the Explorer filters applied when saved, with shared queries restricted to elevated roles (#783)
 - Include subordinates / include equivalents is now a checkbox on each query node (#3192)
-- Fixed subordinates not being applied to Explorer results (#3194)
-- Result-expanded Entities are badged sub / eq, and expansion is also toggleable globally from the results header (#2969)
-- SUT: now covers the whole Territory subtree through the target node's SUB toggle; SUT:C is no longer offered for new queries but still runs in saved ones (#3193)
+- Implemented proper global equivalents / subordinates (result-expanded Entities are badged sub / eq) (#3194)
+- Saved queries — store, rename, organise into folders and reload, together with the Explorer filters applied when saved, with shared queries restricted to elevated roles (#783)
 - Add Entity reference values as an Explorer column (#3060)
 - Column widths estimated from content, and the table uses the whole page width when it overflows (#3070)
 - Batch copy of UUIDs from the synonym cloud and from "Used in" (#3073)
