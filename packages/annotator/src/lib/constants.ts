@@ -146,11 +146,28 @@ export const PARAGRAPH_MARK_CAP_LEAD_PX = 1;
 /** Thickness of the mark's stems and cap, in CSS px (scaled by ratio at draw time). */
 export const PARAGRAPH_MARK_LINE_WIDTH_PX = 1;
 
-/** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */
+/**
+ * Height of the selection/background highlight band as a multiple of the font
+ * size. The band wraps the letters, whose size the line-spacing setting does not
+ * touch, so one height serves every spacing.
+ */
+export const HIGHLIGHT_HEIGHT_EM = 1.33;
+
+/**
+ * Height of selection/background highlight as a fraction of line height (0–1).
+ * The fallback for a caller that measures no text band (a host driving
+ * {@link Highlighter} directly, or a context without font metrics).
+ */
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 
-/** Pixels to raise the underline above the bottom of the line band (UNDERLINE mode). Larger = smaller margin below text. */
-export const UNDERLINE_OFFSET_PX = 2;
+/**
+ * Distance in CSS px from the bottom of the text band down to the top of the
+ * underline bar (UNDERLINE mode), scaled by the device pixel ratio at draw time.
+ * Measured against the band rather than the line box, so the bar keeps its
+ * distance from the words at any line spacing. Negative values lift it into the
+ * band; the bar is clamped to stay inside the line.
+ */
+export const UNDERLINE_OFFSET_PX = 0;
 
 /**
  * #2325 — an entity span (BACKGROUND fill, UNDERLINE) leaves this many CSS px

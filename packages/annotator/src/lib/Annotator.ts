@@ -11,6 +11,7 @@ import {
   DEFAULT_FONT_SIZE,
   EditMode,
   HighlightMode,
+  HIGHLIGHT_HEIGHT_EM,
   HOVER_DEBOUNCE_MS,
   LIGHT_MENU_COLORS,
   DEFAULT_CARET_WIDTH_PX,
@@ -170,6 +171,19 @@ export interface DrawingOptions {
    * mirroring how the SELECT caret keeps empty-line selection visible (#2885).
    */
   minFillWidth?: number;
+  /**
+   * Height in device px of the band the letters occupy, for the highlights that
+   * wrap text rather than fill a line (SELECT, BACKGROUND). Measured from the
+   * font, so the band holds one height across every line spacing. Omitted by a
+   * caller with no font metrics, which falls back to a share of the line height.
+   */
+  textBandHeight?: number;
+  /**
+   * Device-px shift from the centre of a line box down to the centre of that
+   * text band. Text is painted against the em box, whose descender room a
+   * capital leaves empty, so the letters ride above the middle of the line.
+   */
+  textBandOffset?: number;
   /**
    * Proportional column→pixel resolver. When present (and the caller
    * passes the absolute visual line), draw uses measured widths instead of
@@ -426,6 +440,9 @@ export class Annotator {
     kind: "start" | "end";
     tag: Tag;
   }[] = [];
+
+  /** Memo for {@link capBandOffsetPx}, keyed on the font string it measured. */
+  private capBandOffsetCache?: { font: string; offset: number };
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -2939,20 +2956,41 @@ export class Annotator {
    * to read as aligned with the letters (the anchor corner markers) has to be
    * placed against this band, not against the line box.
    *
-   * Measured against the live font each frame it is needed; a context without
+   * Measured against the live font and cached per font string; a context without
    * bounding-box metrics (jsdom) reports 0 and the caller falls back to the
    * line centre.
    */
   private capBandOffsetPx(): number {
-    this.ctx.font = this.font;
+    const font = this.font;
+    if (this.capBandOffsetCache?.font === font) {
+      return this.capBandOffsetCache.offset;
+    }
+    this.ctx.font = font;
     this.ctx.textBaseline = "middle";
     const m = this.ctx.measureText("H");
     const ascent = m.actualBoundingBoxAscent;
     const descent = m.actualBoundingBoxDescent;
-    if (!Number.isFinite(ascent) || !Number.isFinite(descent)) {
-      return 0;
-    }
-    return (descent - ascent) / 2;
+    const offset =
+      Number.isFinite(ascent) && Number.isFinite(descent)
+        ? (descent - ascent) / 2
+        : 0;
+    this.capBandOffsetCache = { font, offset };
+    return offset;
+  }
+
+  /**
+   * Placement of the band the letters occupy, for the visuals that wrap text
+   * instead of filling a line: the selection, the caret and the anchor
+   * background fills. Spread into their {@link DrawingOptions}.
+   */
+  private textBandOptions(): {
+    textBandHeight: number;
+    textBandOffset: number;
+  } {
+    return {
+      textBandHeight: HIGHLIGHT_HEIGHT_EM * this.fontSize * this.ratio,
+      textBandOffset: this.capBandOffsetPx(),
+    };
   }
 
   /**
@@ -3207,6 +3245,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        ...this.textBandOptions(),
         caretWidth: this.caretWidthDevicePx(),
         caretOpacity: this.caretOpacityValue(),
         caretVisible:
@@ -3239,6 +3278,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           columnToPixelX: this.drawColumnToPixelX(),
           lineXOrigin: this.drawLineXOrigin(),
         });
@@ -3378,6 +3418,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           columnToPixelX: this.drawColumnToPixelX(),
           lineXOrigin: this.drawLineXOrigin(),
         });
@@ -3430,6 +3471,7 @@ export class Annotator {
               lineHeight: this.lineHeight,
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
+              ...this.textBandOptions(),
               columnToPixelX: this.drawColumnToPixelX(),
               lineXOrigin: this.drawLineXOrigin(),
               // Keep newline-only lines of the resized span visible (#2885).
@@ -3450,6 +3492,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           caretWidth: this.caretWidthDevicePx(),
           caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),

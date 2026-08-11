@@ -132,6 +132,9 @@ describe("Annotator draws Territory anchor markers (#2887)", () => {
         actualBoundingBoxAscent: 10,
         actualBoundingBoxDescent: 2,
       } as TextMetrics);
+    // The metrics are memoized per font string, and this canvas was already
+    // measured (font-less jsdom, offset 0) by the draws above.
+    (a as any).capBandOffsetCache = undefined;
     a.draw();
 
     const yMid = markerMock.mock.calls[0][2];
