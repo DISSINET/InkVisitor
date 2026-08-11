@@ -22,7 +22,7 @@ import {
   UsersPage,
 } from "pages";
 import { StatsPage } from "pages/Stats/StatsPage";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Helmet } from "react-helmet-async";
@@ -73,10 +73,15 @@ export const PublicPath = (props: any) => {
 
 // The redirect to /login drops the route the user asked for together with its
 // search and hash params, so it is recorded first and LoginPage returns them
-// there once the session exists.
+// there once the session exists. Written in layout effect rather than render:
+// sessionStorage is impure, StrictMode re-invokes the body, and a discarded
+// render would still leave a target behind. Layout (not passive) so it runs
+// before Navigate's effect replaces this route with /login.
 const RedirectToLogin = () => {
   const location = useLocation();
-  storeRedirectTarget(location);
+  useLayoutEffect(() => {
+    storeRedirectTarget(location);
+  }, [location]);
   return <Navigate to="/login" replace />;
 };
 
@@ -89,7 +94,7 @@ export const RequireOwner = ({ children }: { children: React.ReactNode }) => {
     return <RedirectToLogin />;
   }
   const isOwner = getStoredUserRole() === UserEnums.Role.Owner;
-  return isOwner ? children : <Navigate to="/" />;
+  return isOwner ? children : <Navigate to="/" replace />;
 };
 
 const queryClient = new QueryClient({

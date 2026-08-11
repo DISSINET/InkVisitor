@@ -378,8 +378,11 @@ class Api {
             // the bounce is a full page load, so the place the user was working
             // in only survives when it is written down first
             storeRedirectTargetFromWindow();
-            // if handled by react router, then the toast could be visible
-            window.location.pathname = (process.env.ROOT_URL || "") + "/login";
+            // pathname-only assignment keeps the current search/hash, so login
+            // would carry the previous session's territory/statement/detail ids
+            // — already saved above for restore after sign-in
+            const rootUrl = process.env.ROOT_URL || "";
+            window.location.assign(`${rootUrl === "/" ? "" : rootUrl}/login`);
           }
         }
 
