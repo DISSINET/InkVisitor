@@ -54,6 +54,10 @@ const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
 const arrJoinChar = ",";
 
+// Both sides go through URLSearchParams so encoding alone (the comma in a
+// detail list) is not a difference
+const normalizeHash = (hash: string) => new URLSearchParams(hash.replace(/^#/, "")).toString();
+
 export const useSearchParams = () => useContext(SearchParamsContext);
 
 export const SearchParamsProvider = ({ children }: { children: ReactElement }) => {
@@ -100,6 +104,12 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   );
 
   const isLoggingOutRef = React.useRef(false);
+  // hashes we wrote from state via navigate; when one lands, skip re-applying
+  // it into state - setState during render would discard any param updates
+  // that queued after the effect that pushed that hash read the state. A list
+  // rather than a single slot, because a later setter can queue another write
+  // before the earlier one has landed.
+  const pushedHashesRef = React.useRef<string[]>([]);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
@@ -193,14 +203,12 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
       // first place - a pasted link, back/forward. Navigating again would add a
       // history entry leading where the user already is, and a navigation that
       // only carries a hash keeps the pathname it finds, which is the wrong one
-      // while a route change is still in flight. Both sides go through
-      // URLSearchParams so that encoding alone (the comma in a detail list) is
-      // not a difference.
-      const normalize = (hash: string) => new URLSearchParams(hash.replace(/^#/, "")).toString();
-      if (normalize(cleanHash) === normalize(location.hash)) {
+      // while a route change is still in flight.
+      if (normalizeHash(cleanHash) === normalizeHash(location.hash)) {
         return;
       }
 
+      pushedHashesRef.current.push(normalizeHash(cleanHash));
       navigate({
         hash: cleanHash,
       });
@@ -267,11 +275,19 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   // later arrival is what its own mount effects read as the user having just
   // picked this territory, and it holds back every query gated on the ids.
   // Skipped when params are passed by search query (activation, password
-  // reset), whose url this provider leaves alone.
+  // reset), whose url this provider leaves alone. Also skipped when the hash
+  // is one we just pushed from state: re-applying it would only risk eating
+  // concurrent setter updates that landed after that push was composed.
   const [appliedHash, setAppliedHash] = useState(location.hash);
   if (!hasSearchParams && location.hash !== appliedHash) {
     setAppliedHash(location.hash);
-    applyParamsFromHash(location.hash);
+    const landed = normalizeHash(location.hash);
+    const ownPushIndex = pushedHashesRef.current.indexOf(landed);
+    if (ownPushIndex !== -1) {
+      pushedHashesRef.current.splice(ownPushIndex, 1);
+    } else {
+      applyParamsFromHash(location.hash);
+    }
   }
 
   return (

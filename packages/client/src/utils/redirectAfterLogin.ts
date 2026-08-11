@@ -30,10 +30,16 @@ export const storeRedirectTarget = ({ pathname, search, hash }: RedirectTarget) 
  * pathname carries the basename that router paths are relative to.
  */
 export const storeRedirectTargetFromWindow = () => {
+  const rootUrl = process.env.ROOT_URL || "";
+  // "/" is not a path prefix — replacing it would strip the leading slash from
+  // every pathname, and consumeRedirectTarget would then drop the result
+  const withoutRoot =
+    rootUrl && rootUrl !== "/"
+      ? window.location.pathname.replace(rootUrl, "")
+      : window.location.pathname;
   // ROOT_URL may be stored with or without a leading slash, so cutting it
   // out can leave a doubled separator behind
-  const pathname =
-    window.location.pathname.replace(process.env.ROOT_URL || "", "").replace(/\/{2,}/g, "/") || "/";
+  const pathname = withoutRoot.replace(/\/{2,}/g, "/") || "/";
 
   storeRedirectTarget({
     pathname,
@@ -51,7 +57,13 @@ export const consumeRedirectTarget = (): string | null => {
   const target = sessionStorage.getItem(storageKey());
   clearRedirectTarget();
 
-  if (!target || !target.startsWith("/") || target.startsWith("//")) {
+  // browsers treat \ as / in URLs, so /\evil.com is equivalent to //evil.com
+  if (
+    !target ||
+    !target.startsWith("/") ||
+    target.startsWith("//") ||
+    target.includes("\\")
+  ) {
     return null;
   }
   return target;

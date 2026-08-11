@@ -47,6 +47,10 @@ describe("redirectAfterLogin", () => {
 
     sessionStorage.setItem(storageKey, "//evil.example.com");
     expect(consumeRedirectTarget()).toBe(null);
+
+    // browsers normalize \ to /, so this is the same as //evil.example.com
+    sessionStorage.setItem(storageKey, "/\\evil.example.com");
+    expect(consumeRedirectTarget()).toBe(null);
   });
 
   it("clears without returning", () => {
@@ -59,6 +63,16 @@ describe("redirectAfterLogin", () => {
   it("reads the current url relative to the router basename", () => {
     process.env.ROOT_URL = "/apps/inkvisitor";
     window.history.replaceState({}, "", "/apps/inkvisitor/explorer#territory=T1");
+
+    storeRedirectTargetFromWindow();
+
+    expect(consumeRedirectTarget()).toBe("/explorer#territory=T1");
+    process.env.ROOT_URL = "";
+  });
+
+  it("does not strip a leading slash when ROOT_URL is /", () => {
+    process.env.ROOT_URL = "/";
+    window.history.replaceState({}, "", "/explorer#territory=T1");
 
     storeRedirectTargetFromWindow();
 
