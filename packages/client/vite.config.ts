@@ -1,16 +1,43 @@
 /// <reference types="vitest/config" />
+import fs from "fs";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  const env = loadEnv(mode, "./env", "");
+export default defineConfig(({ command, mode }) => {
+  // Resolved from this file rather than the working directory, which belongs to
+  // whoever spelled the build command.
+  const envDir = path.resolve(__dirname, "env");
+  const envFile = path.join(envDir, `.env.${mode}`);
+  const env = loadEnv(mode, envDir, "");
+
+  // The deployment writes this file from a secret, and everything it carries -
+  // the base path below among it - is baked into the bundle. A missing or blank
+  // one produces a build that only reveals itself in the browser, asking for
+  // assets at the root of a host that serves the app from a subdirectory.
+  if (command === "build") {
+    const envFileContent = fs.existsSync(envFile) ? fs.readFileSync(envFile, "utf8").trim() : "";
+    if (!envFileContent) {
+      throw new Error(
+        `No client env for mode "${mode}": ${envFile} is missing or empty. ` +
+          `In CI it is written from the CLIENT_ENV_* secret for this mode; ` +
+          `locally, copy env/example.env to .env.${mode}.`,
+      );
+    }
+  }
+
   const appEnv = env.ENV || mode;
 
-  // Ensure base path starts with a slash
-  const rootUrl = env.ROOT_URL || "";
-  const base = rootUrl.startsWith("/") ? rootUrl : `/${rootUrl}`;
+  // Every asset url is resolved against this, so it has to both open and close
+  // with a slash for those urls to land under the deployment path. ROOT_URL may
+  // be written with or without slashes at either end, and is empty for an app
+  // served from the root.
+  const rootUrl = (env.ROOT_URL || "").replace(/^\/+/, "").replace(/\/+$/, "");
+  const base = rootUrl ? `/${rootUrl}/` : "/";
+
+  if (command === "build") {
+    console.log(`[inkvisitor] mode "${mode}" builds assets under base "${base}"`);
+  }
 
   return {
     base: base,
