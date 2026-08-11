@@ -34,7 +34,7 @@
 - Open-in-editor button for Statement anchors in tables (#2975)
 - Batch export of several full-text documents as a .zip, with the Documents and Backups pages rebuilt on the shared Panel/Box layout (#2702)
 - Stats — percentages with two decimals, a total column, and users below the contribution threshold excluded from totals instead of bucketed as "others" (#3159)
-- Stats — Relations tab merged into Entities, with grouped event-type filters and date-range presets (#3197)
+- Stats — Relations tab merged into Entities, with grouped event-type filters and date-range presets
 - Reorder multi-note rows by drag and drop (#1334)
 - Users page rebuilt as a boxed table with role badges, a name/email search, role and hide-inactive filters, a click-to-edit identity cell and bulk Resource annotate rights
 - Login, activation and password reset screens redesigned around a shared logo band and form layout, with show/hide password and a loading state on submit
@@ -45,9 +45,9 @@
 
 ## Development (Technical)
 
-- Migrated to official TypeScript 7 (#3202)
-- Query export loads only the requested rows, Explorer pagination refetches once per 25-row chunk instead of on every scrolled row, and batch relation creation shares one relation-type context per request (#3206)
-- Centralized Entity query keys, fixing a cache collision between two endpoints sharing one key with different response shapes, and added a `LOG_SLOW_QUERIES` flag for the slow query profiler (#3205)
+- Migrated to official TypeScript 7
+- Query export loads only the requested rows, Explorer pagination refetches once per 25-row chunk instead of on every scrolled row, and batch relation creation shares one relation-type context per request
+- Centralized Entity query keys, fixing a cache collision between two endpoints sharing one key with different response shapes, and added a `LOG_SLOW_QUERIES` flag for the slow query profiler
 - Subtree expansion filters Territory-class roots before looking up children, avoiding unindexed table scans for non-Territory roots
 - Saved query validation bounds tree depth and node count before any database access
 
