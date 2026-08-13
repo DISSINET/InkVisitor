@@ -336,13 +336,19 @@ const EntityTagInner: React.FC<EntityTag> = ({
         <EntityTooltip
           entityId={entity.id}
           entityClass={entity.class}
-          label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
+          label={
+            (entity.labels && entity.labels[0]) ||
+            // an unlabelled statement is identified by its anchor text / text
+            // rows instead, so it gets no label row at all
+            (entity.class === EntityEnums.Class.Statement ? undefined : <i>{"no label"}</i>)
+          }
           alternativeLabels={
             entity.labels && entity.labels.length > 1 ? entity.labels.slice(1) : undefined
           }
           language={entity.language}
           detail={entity.detail}
           text={entity.class === EntityEnums.Class.Statement ? entity.data.text : undefined}
+          anchorTexts={entity.anchorTexts}
           isTemplate={entity.isTemplate}
           partOfSpeech={entity.data.pos}
           itemsCount={statementsCount}
