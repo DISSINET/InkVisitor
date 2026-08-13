@@ -426,6 +426,17 @@ class Api {
     return this.dbStats;
   }
 
+  async health(
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<{ result: boolean; buildTimestamp?: string }>> {
+    try {
+      const response = await this.connection.get(`/health`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
       if (err.code === AxiosError.ECONNABORTED || err.code === AxiosError.ETIMEDOUT) {

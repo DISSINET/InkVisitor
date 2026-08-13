@@ -1,9 +1,9 @@
-# What's changed [Aug 11, 2026]
+# What's changed [Aug 12, 2026]
 
 ## Annotator
 
 - Mark paragraph breaks with a first-line indent and an optional pilcrow paragraph mark, toggled from the context menu (#2076)
-- Find & replace moved into a dedicated panel (#2775)
+- Move find & replace into a dedicated panel (#2775)
 - Separate two touching same-colour highlights with an edge gap so they read as two spans (#2325)
 - Elvl must be chosen in the highlight menu suggester before creating an Entity, marked with a warning ring, and can also be picked from the Entity create modal (#2873)
 - User-adjustable line spacing (Compact / Normal / Wide), with proportional text as the default on hosted instances
@@ -14,11 +14,11 @@
 ## Explorer
 
 - Include subordinates / include equivalents is now a checkbox on each query node (#3192)
-- Implemented proper global equivalents / subordinates (result-expanded Entities are badged sub / eq) (#3194)
+- Implement proper global equivalents / subordinates (result-expanded Entities are badged sub / eq) (#3194)
 - SUT: and EUT: covers the whole Territory subtree through the target node's SUB toggle, replacing the separate SUT:C and EUT:C edge (#3193)
 - Saved queries — store, rename, organise into folders and reload, together with the Explorer filters applied when saved, with shared queries restricted to elevated roles (#783)
 - Add Entity reference values as an Explorer column (#3060)
-- Column widths estimated from content, and the table uses the whole page width when it overflows (#3070)
+- Estimate column widths from content (#3070)
 - Batch copy of UUIDs from the synonym cloud and from "Used in" (#3073)
 - Enter in the query panel runs the search instead of toggling the SUB/SUT checkboxes
 

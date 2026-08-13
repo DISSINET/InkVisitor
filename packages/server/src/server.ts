@@ -25,7 +25,7 @@ import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import headersProtectionMiddleware from "@middlewares/headers-protection";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
-import serveClientApp from "@middlewares/static-client";
+import serveClientApp, { serveAsset } from "@middlewares/static-client";
 import { authenticateRequest } from "@middlewares/auth";
 import {
   cookieParserMiddleware,
@@ -69,7 +69,7 @@ const staticPath = process.env.STATIC_PATH;
 if (staticPath === "/") {
   server.use(serveClientApp);
 } else if (staticPath) {
-  server.use(staticPath, express.static("../client/dist"));
+  server.use(staticPath, serveAsset);
 }
 
 server.use(express.json({ limit: "150mb" }));
@@ -115,10 +115,16 @@ const router = Router();
 server.use(apiPath, router);
 server.use(apiPathOld, router);
 
+// The Dockerfile CMD passes the image build timestamp as the process's first
+// argument; clients watch it across /health responses to detect a new deploy.
+// Empty outside the container (local dev runs pass no argument).
+const buildTimestamp = process.argv[2] || "";
+
 router.get("/health", async function (req, res) {
   await rethink.tableList().run(req.db.connection);
   res.json({
     result: true,
+    buildTimestamp,
     db: {
       pool: {
         size: pool.pool.size,

@@ -5,7 +5,7 @@ import api from "api";
 import { Toast } from "components";
 import { Page } from "components/advanced";
 import ErrorBoundary from "components/ErrorBoundary";
-import { useDebounce } from "hooks";
+import { useDebounce, useNewVersionCheck } from "hooks";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import {
@@ -120,6 +120,8 @@ export const App: React.FC = () => {
   }, [selectedThemeId]);
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
+
+  useNewVersionCheck();
 
   useEffect(() => {
     if (debouncedHeight > 0) {

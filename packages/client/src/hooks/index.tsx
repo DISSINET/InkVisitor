@@ -5,6 +5,7 @@ import { useElementSize } from "./useElementSize";
 import { useIsInViewport } from "./useIsInViewport";
 import useKeyLift from "./useKeyLift";
 import useKeyPress from "./useKeyPress";
+import { useNewVersionCheck } from "./useNewVersionCheck";
 import { useResizeObserver } from "./useResizeObserver";
 import { useSearchParams } from "./useSearchParamsContext";
 import { useTheme } from "./useTheme";
@@ -24,4 +25,5 @@ export {
   useTheme,
   useWidthBreakpoint,
   useWindowSize,
+  useNewVersionCheck,
 };
