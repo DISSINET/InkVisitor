@@ -613,6 +613,36 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
   }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
 
+  // Opening the Detail panel takes width from the Query box, and its header
+  // holds the label filter, both expansion toggles and run search. The parts
+  // that survive without their text go first: the expansion counts (the pill
+  // still shows the state), then the words - the run-search icon and the eq/sub
+  // marks on the result tags carry the same meaning, and both keep a tooltip.
+  //
+  // Held as booleans rather than derived from leftPanelWidth so a separator drag
+  // can feed them the width it is writing to the CSS vars, ahead of the drop
+  // that lands that width in state. Fed per pointer event, so the ref keeps
+  // React out of every move that stays on one side of a breakpoint.
+  const [hideExpansionCounts, setHideExpansionCounts] = useState(false);
+  const [compactHeader, setCompactHeader] = useState(false);
+  const headerBreakpointsRef = useRef({ hideCounts: false, compact: false });
+
+  const applyHeaderBreakpoints = useCallback((width: number) => {
+    const hideCounts = width < 540;
+    const compact = width < 760;
+    const current = headerBreakpointsRef.current;
+    if (hideCounts === current.hideCounts && compact === current.compact) {
+      return;
+    }
+    headerBreakpointsRef.current = { hideCounts, compact };
+    setHideExpansionCounts(hideCounts);
+    setCompactHeader(compact);
+  }, []);
+
+  useEffect(() => {
+    applyHeaderBreakpoints(leftPanelWidth);
+  }, [leftPanelWidth, applyHeaderBreakpoints]);
+
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
@@ -666,6 +696,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
               );
               setPanelWidthVars([resolved, layoutWidth - resolved], "explorerPage");
+              applyHeaderBreakpoints(resolved);
               return resolved;
             }}
             setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
@@ -701,8 +732,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
                   >
                     <Checkbox
-                      label="EQUIVALENTS"
-                      size={15}
+                      label={compactHeader ? "EQ" : "EQUIVALENTS"}
+                      size={14}
                       color="info"
                       value={includeEquivalents}
                       tooltipLabel="include equivalents"
@@ -710,11 +741,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       onChangeFn={handleToggleIncludeEquivalents}
                       disableEnterKey
                     />
-                    {includeEquivalents && expansionCounts !== undefined && (
-                      <StyledExpansionCount $variant="equivalent">
-                        +{expansionCounts.equivalents}
-                      </StyledExpansionCount>
-                    )}
+                    {includeEquivalents &&
+                      !hideExpansionCounts &&
+                      expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="equivalent">
+                          +{expansionCounts.equivalents}
+                        </StyledExpansionCount>
+                      )}
                   </StyledExpansionToggle>
                   <StyledExpansionToggle
                     $active={includeSubordinates}
@@ -722,8 +755,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
                   >
                     <Checkbox
-                      label="SUBORDINATES"
-                      size={15}
+                      label={compactHeader ? "SUB" : "SUBORDINATES"}
+                      size={14}
                       color="warning"
                       value={includeSubordinates}
                       tooltipLabel="include subordinates"
@@ -731,20 +764,23 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       onChangeFn={handleToggleIncludeSubordinates}
                       disableEnterKey
                     />
-                    {includeSubordinates && expansionCounts !== undefined && (
-                      <StyledExpansionCount $variant="subordinate">
-                        +{expansionCounts.subordinates}
-                      </StyledExpansionCount>
-                    )}
+                    {includeSubordinates &&
+                      !hideExpansionCounts &&
+                      expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="subordinate">
+                          +{expansionCounts.subordinates}
+                        </StyledExpansionCount>
+                      )}
                   </StyledExpansionToggle>
                 </StyledResultExpansionButtons>,
                 <Button
                   key="run-search"
                   tooltipLabel="run search (Enter)"
-                  label="run search"
-                  icon={<IcoSearch />}
+                  label={compactHeader ? undefined : "run search"}
+                  icon={<IcoSearch size={13} />}
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
+                  shape={compactHeader ? "square" : undefined}
                 />,
                 <>
                   {/* collapsing the left panel only makes sense while the detail
