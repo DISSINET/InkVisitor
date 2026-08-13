@@ -9,6 +9,7 @@ import { ExplorerTableBatchActionModal } from "./ExplorerTable/ExplorerTableBatc
 import { ExploreAction } from "./state";
 import { useExplorerControls } from "./useExplorerControls";
 import { useInvalidateExplorerQuery } from "../useQueryData";
+import { ResultExpansionBanner } from "./ResultExpansionBanner";
 import {
   StyledExplorerColumn,
   StyledExplorerViewArea,
@@ -30,6 +31,12 @@ interface ExplorerBoxProps {
   onOpenEntityInDetail?: (entityId: string) => void;
   onOpenEntitiesInDetail?: (entityIds: string[]) => void;
 
+  /** Page-level result expansion (#2969), announced above the results. */
+  includeEquivalents?: boolean;
+  includeSubordinates?: boolean;
+  onToggleIncludeEquivalents?: (value: boolean) => void;
+  onToggleIncludeSubordinates?: (value: boolean) => void;
+
   /** When false only read-only batch actions (open, copy, export) are offered. */
   canBatchEdit?: boolean;
 }
@@ -46,6 +53,10 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   getCachedEntity,
   onOpenEntityInDetail,
   onOpenEntitiesInDetail,
+  includeEquivalents = false,
+  includeSubordinates = false,
+  onToggleIncludeEquivalents = () => {},
+  onToggleIncludeSubordinates = () => {},
   canBatchEdit = false,
 }) => {
   const isStats = state.view.mode === Explore.EViewMode.Stats;
@@ -98,6 +109,14 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
             }
           />
         )}
+
+        <ResultExpansionBanner
+          includeEquivalents={includeEquivalents}
+          includeSubordinates={includeSubordinates}
+          expansion={data?.expansion}
+          onToggleIncludeEquivalents={onToggleIncludeEquivalents}
+          onToggleIncludeSubordinates={onToggleIncludeSubordinates}
+        />
 
         <StyledExplorerViewArea>
           {state.view.mode === Explore.EViewMode.Stats ? (

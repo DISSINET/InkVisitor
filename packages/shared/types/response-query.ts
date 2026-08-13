@@ -36,6 +36,15 @@ export interface IResponseQuery {
    */
   stats?: Record<string, Record<string, number>>;
   /**
+   * How many rows of the result were appended by result expansion (#2969)
+   * rather than matched directly, by provenance. Counted over the whole result
+   * set, not the returned page. Zeroes when the toggles are off.
+   */
+  expansion?: {
+    equivalents: number;
+    subordinates: number;
+  };
+  /**
    * Cap on the number of entities the Stats view aggregates audits over, present
    * only in the Stats view. When `total` exceeds it, the stats cover just the
    * first `statsEntityLimit` entities and the client surfaces a warning.

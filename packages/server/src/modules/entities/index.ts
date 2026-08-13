@@ -886,6 +886,7 @@ export default Router()
           entities: [],
           explore: querySearch.explore,
           total: entityIds.length,
+          expansion: querySearch.expansionCounts,
           stats,
           statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
         };
@@ -910,6 +911,7 @@ export default Router()
         entities: results,
         explore: querySearch.explore,
         total: entityIds.length,
+        expansion: querySearch.expansionCounts,
       };
     })
   )

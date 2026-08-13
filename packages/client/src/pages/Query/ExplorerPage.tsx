@@ -48,7 +48,11 @@ import {
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
-import { StyledResultExpansionButtons } from "./ExplorerPageStyles";
+import {
+  StyledExpansionCount,
+  StyledExpansionToggle,
+  StyledResultExpansionButtons,
+} from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
@@ -472,6 +476,11 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     globalIncludeSubordinates: includeSubordinates,
   });
 
+  // Rows the expansion added to the result that is actually displayed. A toggle
+  // change moves the query to a new cache key, so no count is shown between the
+  // toggle and the rerun rather than a number from the previous search.
+  const expansionCounts = queryData?.expansion;
+
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
 
   const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
@@ -683,29 +692,51 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               buttons={[
                 <StyledResultExpansionButtons key="result-expansion-toggles">
                   {/* accent colours echo the eq/sub badges on the resulting
-                      entity tags (see StyledExpansionBadge) */}
-                  <Checkbox
-                    label="EQUIVALENTS"
-                    size={15}
-                    color="info"
-                    noFill
-                    value={includeEquivalents}
-                    tooltipLabel="include equivalents"
-                    tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
-                    onChangeFn={handleToggleIncludeEquivalents}
-                    disableEnterKey
-                  />
-                  <Checkbox
-                    label="SUBORDINATES"
-                    size={15}
-                    color="warning"
-                    noFill
-                    value={includeSubordinates}
-                    tooltipLabel="include subordinates"
-                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
-                    onChangeFn={handleToggleIncludeSubordinates}
-                    disableEnterKey
-                  />
+                      entity tags (see StyledExpansionBadge). The pill takes the
+                      click as well as the box, and Checkbox stops its own click
+                      from bubbling, so a hit on the box toggles exactly once. */}
+                  <StyledExpansionToggle
+                    $active={includeEquivalents}
+                    $variant="equivalent"
+                    onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                  >
+                    <Checkbox
+                      label="EQUIVALENTS"
+                      size={15}
+                      color="info"
+                      value={includeEquivalents}
+                      tooltipLabel="include equivalents"
+                      tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
+                      onChangeFn={handleToggleIncludeEquivalents}
+                      disableEnterKey
+                    />
+                    {includeEquivalents && expansionCounts !== undefined && (
+                      <StyledExpansionCount $variant="equivalent">
+                        +{expansionCounts.equivalents}
+                      </StyledExpansionCount>
+                    )}
+                  </StyledExpansionToggle>
+                  <StyledExpansionToggle
+                    $active={includeSubordinates}
+                    $variant="subordinate"
+                    onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
+                  >
+                    <Checkbox
+                      label="SUBORDINATES"
+                      size={15}
+                      color="warning"
+                      value={includeSubordinates}
+                      tooltipLabel="include subordinates"
+                      tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
+                      onChangeFn={handleToggleIncludeSubordinates}
+                      disableEnterKey
+                    />
+                    {includeSubordinates && expansionCounts !== undefined && (
+                      <StyledExpansionCount $variant="subordinate">
+                        +{expansionCounts.subordinates}
+                      </StyledExpansionCount>
+                    )}
+                  </StyledExpansionToggle>
                 </StyledResultExpansionButtons>,
                 <Button
                   key="run-search"
@@ -865,6 +896,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
+                includeEquivalents={includeEquivalents}
+                includeSubordinates={includeSubordinates}
+                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
               />
             </Box>

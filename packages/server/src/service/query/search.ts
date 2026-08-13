@@ -38,6 +38,17 @@ export default class QuerySearch {
   private equivalentIds = new Set<string>();
   private subordinateIds = new Set<string>();
 
+  /**
+   * Sizes of the provenance sets above - the counts are only final once
+   * expandFilteredResults has run, i.e. after getResults()/getStats().
+   */
+  get expansionCounts(): { equivalents: number; subordinates: number } {
+    return {
+      equivalents: this.equivalentIds.size,
+      subordinates: this.subordinateIds.size,
+    };
+  }
+
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.queryForCache = query;
     this.root = new SearchNode(query);
