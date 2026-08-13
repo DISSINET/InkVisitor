@@ -101,7 +101,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          <StyledCheckboxWrapper $hasLabel={!!label}>
+          <StyledCheckboxWrapper>
             <StyledCheckboxIndicator
               role="checkbox"
               tabIndex={0}

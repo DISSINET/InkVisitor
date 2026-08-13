@@ -685,8 +685,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   {/* accent colours echo the eq/sub badges on the resulting
                       entity tags (see StyledExpansionBadge) */}
                   <Checkbox
-                    label="EQ"
-                    size={13}
+                    label="EQUIVALENTS"
+                    size={15}
                     color="info"
                     noFill
                     value={includeEquivalents}
@@ -696,8 +696,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     disableEnterKey
                   />
                   <Checkbox
-                    label="SUB"
-                    size={13}
+                    label="SUBORDINATES"
+                    size={15}
                     color="warning"
                     noFill
                     value={includeSubordinates}
@@ -715,12 +715,18 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
                 />,
-                <IconButton
-                  key="toggle-query-left-panel"
-                  tooltipLabel="collapse left panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
-                />,
+                <>
+                  {/* collapsing the left panel only makes sense while the detail
+                      panel is there to take over the freed width */}
+                  {isDetailOpen && (
+                    <IconButton
+                      key="toggle-query-left-panel"
+                      tooltipLabel="collapse left panel"
+                      icon={<RiMenuFoldFill />}
+                      onClick={toggleQueryLeftPanel}
+                    />
+                  )}
+                </>,
               ]}
             >
               <MemoizedQueryBox
@@ -834,12 +840,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     />
                   )}
                 </>,
-                <IconButton
-                  key="toggle-query-left-panel"
-                  tooltipLabel="collapse left panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
-                />,
+                <>
+                  {isDetailOpen && (
+                    <IconButton
+                      key="toggle-query-left-panel"
+                      tooltipLabel="collapse left panel"
+                      icon={<RiMenuFoldFill />}
+                      onClick={toggleQueryLeftPanel}
+                    />
+                  )}
+                </>,
               ]}
             >
               <MemoizedExplorerBox
