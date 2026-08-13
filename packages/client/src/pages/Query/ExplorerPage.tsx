@@ -208,9 +208,21 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // and re-fetch automatically because the cache key (stableSignature) changes.
   const [committedSearchSignature, setCommittedSearchSignature] = useState<string | null>(null);
 
+  // Expansion flags of the search that produced the results on screen. The
+  // toggles can be flipped without running a search, so the banner above the
+  // results describes these rather than the live toggle state.
+  const [committedExpansion, setCommittedExpansion] = useState({
+    equivalents: false,
+    subordinates: false,
+  });
+
   const handleRunSearch = useCallback(() => {
     setCommittedSearchSignature(searchSignature);
-  }, [searchSignature]);
+    setCommittedExpansion({
+      equivalents: includeEquivalents,
+      subordinates: includeSubordinates,
+    });
+  }, [searchSignature, includeEquivalents, includeSubordinates]);
 
   // Global Enter shortcut: run search unless focus is in a text input, textarea,
   // or select — except when that input lives inside a container marked with
@@ -629,9 +641,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
 
   const applyHeaderBreakpoints = useCallback((width: number) => {
     const hideCounts = width < 900;
-    // const hideCounts = width < 540;
     const compact = width < 660;
-    // const compact = width < 760;
     const current = headerBreakpointsRef.current;
     if (hideCounts === current.hideCounts && compact === current.compact) {
       return;
@@ -934,8 +944,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
-                includeEquivalents={includeEquivalents}
-                includeSubordinates={includeSubordinates}
+                includeEquivalents={committedExpansion.equivalents}
+                includeSubordinates={committedExpansion.subordinates}
                 onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
                 onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
