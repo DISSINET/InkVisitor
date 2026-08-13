@@ -628,8 +628,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const headerBreakpointsRef = useRef({ hideCounts: false, compact: false });
 
   const applyHeaderBreakpoints = useCallback((width: number) => {
-    const hideCounts = width < 540;
-    const compact = width < 760;
+    const hideCounts = width < 900;
+    // const hideCounts = width < 540;
+    const compact = width < 660;
+    // const compact = width < 760;
     const current = headerBreakpointsRef.current;
     if (hideCounts === current.hideCounts && compact === current.compact) {
       return;

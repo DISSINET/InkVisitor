@@ -61,6 +61,21 @@ export const StyledExpansionBannerChipCount = styled.span`
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
 `;
 
+// the filters run on the query matches and the expansion is appended after them,
+// so a filtered result holds rows the filter itself would not match
+export const StyledExpansionBannerNote = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-style: italic;
+  color: ${({ theme }) => theme.color["gray"][700]};
+`;
+
+export const StyledExpansionBannerInfo = styled.span`
+  display: inline-flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["gray"][700]};
+  cursor: help;
+`;
+
 /** Holds the active view - table or stats - filling what the control bar leaves. */
 export const StyledExplorerViewArea = styled.div`
   display: flex;

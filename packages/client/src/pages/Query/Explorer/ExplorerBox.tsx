@@ -114,6 +114,7 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
           includeEquivalents={includeEquivalents}
           includeSubordinates={includeSubordinates}
           expansion={data?.expansion}
+          hasFilters={state.filters.length > 0}
           onToggleIncludeEquivalents={onToggleIncludeEquivalents}
           onToggleIncludeSubordinates={onToggleIncludeSubordinates}
         />

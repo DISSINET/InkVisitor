@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { IcoClose } from "Theme/icons";
+import { Tooltip } from "components";
+import { IcoClose, IcoInfo } from "Theme/icons";
 import {
   StyledExpansionBannerChip,
   StyledExpansionBannerChipCount,
+  StyledExpansionBannerInfo,
   StyledExpansionBannerLabel,
+  StyledExpansionBannerNote,
   StyledExpansionBannerRow,
 } from "./ExplorerBoxStyles";
 
@@ -13,6 +16,8 @@ interface ResultExpansionBanner {
   includeSubordinates: boolean;
   /** Rows the expansion added to the current result, per provenance. */
   expansion?: { equivalents: number; subordinates: number };
+  /** True while any explore filter narrows the result (label, uuids, search box). */
+  hasFilters?: boolean;
   onToggleIncludeEquivalents: (value: boolean) => void;
   onToggleIncludeSubordinates: (value: boolean) => void;
 }
@@ -25,9 +30,13 @@ export const ResultExpansionBanner: React.FC<ResultExpansionBanner> = ({
   includeEquivalents,
   includeSubordinates,
   expansion,
+  hasFilters = false,
   onToggleIncludeEquivalents,
   onToggleIncludeSubordinates,
 }) => {
+  const [infoElement, setInfoElement] = useState<HTMLElement | null>(null);
+  const [infoHovered, setInfoHovered] = useState(false);
+
   if (!includeEquivalents && !includeSubordinates) {
     return null;
   }
@@ -64,6 +73,33 @@ export const ResultExpansionBanner: React.FC<ResultExpansionBanner> = ({
           )}
           <IcoClose />
         </StyledExpansionBannerChip>
+      )}
+      {hasFilters && (
+        <>
+          <StyledExpansionBannerNote>
+            added after the filters, so they need not match them
+          </StyledExpansionBannerNote>
+          <StyledExpansionBannerInfo
+            ref={setInfoElement}
+            onMouseEnter={() => setInfoHovered(true)}
+            onMouseLeave={() => setInfoHovered(false)}
+          >
+            <IcoInfo />
+          </StyledExpansionBannerInfo>
+          <Tooltip
+            label="expansion runs on the filtered matches"
+            content={
+              <p>
+                The filters narrow the query matches; the equivalents and subordinates of what
+                survives are then appended. Rows that arrived that way carry an eq / sub mark on
+                their tag.
+              </p>
+            }
+            visible={infoHovered}
+            referenceElement={infoElement}
+            position="bottom"
+          />
+        </>
       )}
     </StyledExpansionBannerRow>
   );
