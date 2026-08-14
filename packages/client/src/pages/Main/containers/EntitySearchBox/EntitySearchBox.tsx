@@ -125,6 +125,23 @@ export const EntitySearchBox: React.FC = () => {
   const dispatch = useAppDispatch();
   const expandedOptions = useAppSelector((state) => state.entitySearch.expandedOptions);
 
+  // the query is keyed by this request rather than by the raw filters, so two
+  // searches differing only in a dropped label share one cache entry
+  const searchRequest = useMemo<IRequestSearch>(() => {
+    const { labelOrId, ...rest } = debouncedValues;
+
+    // uuids and a label are exclusive ways of naming the wanted entities, so
+    // the leftover label text is dropped once any uuid is entered
+    if (rest.entityIds?.length) {
+      return rest;
+    }
+
+    return {
+      ...rest,
+      labelOrId: labelOrId && labelOrId.length > 0 ? labelOrId + wildCardChar : labelOrId,
+    };
+  }, [debouncedValues]);
+
   const {
     status,
     data: entities,
@@ -135,7 +152,7 @@ export const EntitySearchBox: React.FC = () => {
     // react-query hashes the key by value with object keys sorted, so the fresh
     // object the debounce produces on every keystroke only misses the cache when
     // a filter actually changed (no need to manually stringify here)
-    queryKey: ["search", debouncedValues],
+    queryKey: ["search", searchRequest],
     queryFn: async () => {
       // if (debouncedValues.usedTemplate === "Any") {
       //   const { usedTemplate, ...filters } = debouncedValues;
@@ -143,17 +160,7 @@ export const EntitySearchBox: React.FC = () => {
       //   const res = await api.entitiesSearch(filters);
       //   return res.data;
       // }
-      const labelWithWildCard =
-        debouncedValues.labelOrId && debouncedValues.labelOrId?.length > 0
-          ? debouncedValues.labelOrId + wildCardChar
-          : debouncedValues.labelOrId;
-
-      const res = await api.entitiesSearch({
-        ...debouncedValues,
-        // uuids and a label are exclusive ways of naming the wanted entities, so
-        // the leftover label text is dropped once any uuid is entered
-        labelOrId: debouncedValues.entityIds?.length ? undefined : labelWithWildCard,
-      });
+      const res = await api.entitiesSearch(searchRequest);
       return res.data;
     },
     enabled: api.isLoggedIn() && validSearch,

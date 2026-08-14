@@ -27,8 +27,8 @@ interface Input {
   /**
    * The parent owns the visible text and may rewrite the very text it just
    * received (e.g. lifting complete UUIDs out of the field into pills), so the
-   * text is re-applied from `value` on every render, not only when the prop
-   * changes. Requires `changeOnType`.
+   * field renders `value` directly instead of a local copy of it. Requires
+   * `changeOnType`.
    */
   valueControlled?: boolean;
   inverted?: boolean;
@@ -129,21 +129,17 @@ export const Input: React.FC<Input> = ({
     setDisplayValue(value);
   }, [value]);
 
-  // when the parent owns the text, `value` can come back unchanged while the
-  // input already shows something else (the parent consumed exactly what was
-  // typed), so the prop is re-applied on every render
-  useEffect(() => {
-    if (valueControlled && value !== displayValue) {
-      setDisplayValue(value);
-    }
-  });
+  // when the parent owns the text, the field renders `value` itself: the parent
+  // may answer a keystroke with different text (e.g. lifting complete UUIDs out
+  // into pills), which the mirrored copy would keep showing
+  const currentValue = valueControlled ? value : displayValue;
 
   // Measure rightContent so the input reserves matching right padding (its width
   // is dynamic, e.g. a variable number of icon checkboxes) and the clearable
   // button can be offset to sit left of it.
   // custom stepper for type="number" (native spinner is hidden)
   const stepNumberValue = (delta: number) => {
-    const current = Number(displayValue);
+    const current = Number(currentValue);
     let next = (Number.isFinite(current) ? current : 0) + delta;
     if (typeof min === "number") {
       next = Math.max(min, next);
@@ -206,7 +202,7 @@ export const Input: React.FC<Input> = ({
             autoFocus={autoFocus}
             className="value"
             placeholder={placeholder}
-            value={displayValue}
+            value={currentValue}
             maxLength={maxLength}
             $icon={icon}
             onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
@@ -254,10 +250,10 @@ export const Input: React.FC<Input> = ({
             $borderColor={borderColor}
             $autocomplete={autocomplete}
             required={required}
-            $iconCount={clearable && displayValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
+            $iconCount={clearable && currentValue.length > 0 ? 1 : showSaveExitIcons ? 2 : 0}
             $rightPadding={
               rightContentWidth
-                ? rightContentWidth + 2 + (clearable && displayValue.length > 0 ? 18 : 0)
+                ? rightContentWidth + 2 + (clearable && currentValue.length > 0 ? 18 : 0)
                 : undefined
             }
           />
@@ -267,13 +263,13 @@ export const Input: React.FC<Input> = ({
           {rightContent && (
             <StyledRightContent
               ref={rightContentRef}
-              $showDivider={clearable && displayValue.length > 0}
+              $showDivider={clearable && currentValue.length > 0}
             >
               {rightContent}
             </StyledRightContent>
           )}
 
-          {displayValue.length > 0 && clearable && (
+          {currentValue.length > 0 && clearable && (
             <StyledClearableInputButton $rightOffset={rightContentWidth}>
               <MdCancel
                 size={15}
@@ -351,7 +347,7 @@ export const Input: React.FC<Input> = ({
           disabled={disabled}
           className="value"
           placeholder={placeholder}
-          value={displayValue}
+          value={currentValue}
           autoFocus={autoFocus}
           rows={rows}
           cols={cols}
@@ -381,7 +377,7 @@ export const Input: React.FC<Input> = ({
       {(type === "datetime-local" || type === "date") && (
         <DatePicker
           type={type}
-          value={displayValue}
+          value={currentValue}
           width={width}
           disabled={disabled}
           clearable={clearable}
@@ -407,7 +403,7 @@ export const Input: React.FC<Input> = ({
             disabled={disabled}
             $roundCorners={roundCorners}
             $rightPadding={20}
-            value={displayValue}
+            value={currentValue}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setDisplayValue(e.currentTarget.value);
 

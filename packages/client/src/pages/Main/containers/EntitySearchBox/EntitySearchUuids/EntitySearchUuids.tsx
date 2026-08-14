@@ -35,6 +35,10 @@ export const EntitySearchUuids: React.FC<EntitySearchUuids> = ({
   const [showList, setShowList] = useState(false);
   const [portalMounted, setPortalMounted] = useState(false);
   const hideTimeoutRef = useRef<number | null>(null);
+  // read from the spring callback, which carries the state of the render that
+  // started the animation and may run after a re-hover has interrupted it
+  const showListRef = useRef(showList);
+  showListRef.current = showList;
 
   const clearHideTimeout = () => {
     if (hideTimeoutRef.current !== null) {
@@ -71,6 +75,13 @@ export const EntitySearchUuids: React.FC<EntitySearchUuids> = ({
   const animatedMount = useSpring({
     opacity: showList ? 1 : 0,
     config: config.stiff,
+    // a faded-out list still occupies its box over the search results below, so
+    // the portal is dropped once the fade finishes
+    onRest: () => {
+      if (!showListRef.current) {
+        setPortalMounted(false);
+      }
+    },
   });
 
   const { refs, floatingStyles } = useFloating({
@@ -116,13 +127,15 @@ export const EntitySearchUuids: React.FC<EntitySearchUuids> = ({
         <FloatingPortal id="page-content">
           <div
             ref={refs.setFloating}
-            style={{ ...floatingStyles, zIndex: 1000, pointerEvents: "auto" }}
+            style={{
+              ...floatingStyles,
+              zIndex: 1000,
+              pointerEvents: showList ? "auto" : "none",
+            }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <animated.div
-              style={{ ...animatedMount, pointerEvents: showList ? "auto" : "none" }}
-            >
+            <animated.div style={animatedMount}>
               <StyledUuidsFloatingContainer>
                 <StyledUuidListTitle>{`${entityIds.length} uuid${
                   entityIds.length === 1 ? "" : "s"
