@@ -445,6 +445,10 @@ export const parseEntityIdsFromText = (text: string): string[] => {
   return ids;
 };
 
+/** Display form of a UUID: first 8 and last 5 chars, so a chip stays narrow. */
+export const shortenUuid = (id: string): string =>
+  id.length > 13 ? `${id.slice(0, 8)}…${id.slice(-5)}` : id;
+
 export const entityIdsEqual = (a: string[], b: string[]): boolean => {
   if (a.length !== b.length) {
     return false;

@@ -238,6 +238,31 @@ export const StyledPillCloseIcon = styled.div`
   }
 `;
 
+export const StyledUuidPills = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+export const StyledUuidPillsHint = styled.div`
+  width: 100%;
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
+
+export const StyledUuidClearAll = styled.button`
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["primary"]};
+  text-decoration: underline;
+`;
+
 export const StyledNoResults = styled.p`
   font-style: italic;
   font-size: 1.4rem;
