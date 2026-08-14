@@ -1,4 +1,4 @@
-# What's changed [Aug 12, 2026]
+# What's changed [Aug 14, 2026]
 
 ## Annotator
 
@@ -10,6 +10,7 @@
 - Reclaimed the Annotator box height for the text — document identity in the box header, edit modes and actions in a floating toolbar, and search as a compact top-right bar with the second step in a panel
 - Optimized typing in large documents
 - Prompt to save or discard text edits when switching to highlight mode (preparation for virtual lock)
+- Statement tooltips show the anchored text while the document links are still loading, instead of an empty "no label" row
 
 ## Explorer
 
@@ -21,6 +22,9 @@
 - Estimate column widths from content (#3070)
 - Batch copy of UUIDs from the synonym cloud and from "Used in" (#3073)
 - Enter in the query panel runs the search instead of toggling the SUB/SUT checkboxes
+- Parent Territory column — resolves a Territory's parent, or the Territory a Statement belongs to (#3190)
+- Batch add of a reference takes a droppable label input instead of a value picker, so each selected Entity gets its own V (same label different UUID as with single Value copy) (#3224)
+- Higher stats limit (500), and the left-panel toggle is hidden when no detail is open
 
 ## Other improvements and fixes
 
@@ -43,6 +47,9 @@
 - Redesigned error screen with reload, retry and copy-report actions
 - Fixed a deep link losing its route and territory/detail params on auto-logout — the app now returns to the originally requested URL after login instead of always landing on "/" (#3190)
 - The default Territory set in user customization opens on a clean page load
+  — multi-UUID search now works in the basic search too (#3222)
+- new Values can be created silently using drag & drop, dropzones that link to an existing Entity (bookmarks, search filters, rule definitions, relations) keep the dropped Entity itself (#3224)
+- A new deploy is detected in an open tab, which offers a reload
 
 ## Development (Technical)
 
@@ -51,6 +58,7 @@
 - Centralized Entity query keys, fixing a cache collision between two endpoints sharing one key with different response shapes, and added a `LOG_SLOW_QUERIES` flag for the slow query profiler
 - Subtree expansion filters Territory-class roots before looking up children, avoiding unindexed table scans for non-Territory roots
 - Saved query validation bounds tree depth and node count before any database access
+- Hashed client bundles are cached permanently while index.html revalidates, so a reloaded tab always references the current deploy's chunks
 
 ## Deployment
 
