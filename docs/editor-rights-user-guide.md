@@ -1,7 +1,6 @@
 # What an Editor can do in InkVisitor
 
-A quick, non-technical guide for Admins: what a user with the **Editor** role can
-and cannot do.
+A quick, non-technical guide for Admins: what a user with the **Editor** role can and cannot do.
 
 ## The roles, briefly
 
@@ -10,10 +9,9 @@ InkVisitor has four roles, from most limited to most powerful:
 - **Viewer** — can look around and read (search), but cannot change anything.
 - **Editor** — can create and edit most content (this guide).
 - **Admin** — everything an Editor can do, plus managing users and the whole tree.
-- **Owner** — full control, including other admins.
+- **Owner** — full control, including other Admins.
 
-An Editor sits in the middle: he does the day-to-day research work, but a few
-administrative powers are reserved for Admins and Owners.
+An Editor sits in the middle: he does the day-to-day research work, but a few administrative powers are reserved for Admins and Owners.
 
 ## Territories (the tree)
 
@@ -27,9 +25,7 @@ administrative powers are reserved for Admins and Owners.
   is Template Territories, described below.
 
 His access to a Territory is inherited: edit access to a Territory also covers
-every sub-Territory and Statement within it. To stop the inheritance for one
-branch, give read access on a specific sub-Territory — that sub-Territory and
-everything below it then becomes read-only.
+every sub-Territory and Statement within it.
 
 ## Statements
 
@@ -71,27 +67,27 @@ Resources represent external sources. What an Editor can do depends on whether a
 Document is attached:
 
 - **A Resource with no Document attached** — he can **edit and delete** it.
-- **A Resource that has a Document attached** — he can edit it and work on its
-  Document only if that Resource has been **assigned to him** by an Admin. The
+- **A Resource that has a Document attached** — he can edit it and delete it and work on its
+  Document only if that Resource has been **assigned to him** by an Admin / Owner. The
   Resource holds the link to its Document, so editing it can detach that Document
   and deleting it removes the link entirely. A Resource can also be assigned to
   several people at once, so deleting it takes away Document access for all of
-  them — which is why this is limited to assigned people rather than open to every
-  Editor.
+  them — which is why the delete operation is limited to assigned people rather than
+  open to every Editor.
 
 ## Other Entities (Concepts, Persons, Objects, Actions, Values, and so on)
 
 Territories, Statements, and Resources are Entity classes too, but they have their own rules.
 This section is about the remaining classes.
 
-- He can freely **create, edit, and delete** these Entities.
+- He can freely **create, edit, and delete** these Entities but with status pending and it’s up to the Admin / Owner to approve them.
 - They aren't tied to a single Territory or Document, so his ability to edit them doesn't
-  depend on tree access or Resource.
+  depend on tree access or a Resource.
 
 ## Relations
 
 An Editor can **create, edit, and delete any Relation between Entities that live
-outside the tree**. Like the Entities above, those are not tied to a Territory,
+outside the Territory tree**. Like the Entities above, those are not tied to a Territory,
 so this does not depend on his tree access.
 
 A Relation that links a **Statement or a Territory** is the exception. It shows
@@ -161,7 +157,7 @@ These stay with Admins and Owners:
 - **Manage users** — creating, deleting, or changing other people's accounts and
   their access rights.
 - **Delete entire (non-Template) Territories** — even ones he has edit access to.
-  Editing a Territory's contents is allowed; removing the whole Territory is not.
+  Editing a Territory's contents is allowed; deleting the whole Territory is not.
 - **See the administration/user-management screens.**
 - **Run the restricted Explorer batch actions** listed above.
 - **Open Backups**, and (Owner only) **Global validations**.
