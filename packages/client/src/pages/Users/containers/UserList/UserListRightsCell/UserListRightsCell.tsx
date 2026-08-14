@@ -16,6 +16,8 @@ interface UserListRightsCell {
   entityClass: EntityEnums.Class;
   /** ids taken from the user's rights for this mode */
   assignedIds: string[];
+  /** ids the suggester must not offer on top of the assigned ones */
+  excludedIds?: string[];
   /**
    * entities resolved for the assigned ids, absent until the response carries
    * them; an id missing from a present array is stale
@@ -37,6 +39,7 @@ interface UserListRightsCell {
 export const UserListRightsCell: React.FC<UserListRightsCell> = ({
   entityClass,
   assignedIds,
+  excludedIds,
   entities,
   placeholder,
   invalidLabel,
@@ -91,7 +94,7 @@ export const UserListRightsCell: React.FC<UserListRightsCell> = ({
           inputWidth={86}
           categoryTypes={[entityClass]}
           placeholder={placeholder}
-          excludedActantIds={assignedIds}
+          excludedActantIds={excludedIds ? [...assignedIds, ...excludedIds] : assignedIds}
           preSuggestions={preSuggestions}
           onSelected={onAdd}
           onFocusChange={(isFocused) => {

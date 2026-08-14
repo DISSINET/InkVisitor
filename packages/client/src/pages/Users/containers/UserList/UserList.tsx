@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, ButtonGroup, Loader, RoleBadge, Submit } from "components";
 import { AttributeButtonGroup } from "components/advanced";
-import { useUsersGetMoreQuery } from "hooks/react-query";
+import { useTreeQuery, useUsersGetMoreQuery } from "hooks/react-query";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaKey, FaToggleOff, FaToggleOn, FaUserCheck } from "react-icons/fa";
 import { CellProps, Column, Row, useTable } from "react-table";
@@ -36,6 +36,7 @@ import {
   hasActiveUserListFilters,
   UserListFilters,
 } from "./userListFilter";
+import { readBlockedTerritoryIds, rightTerritoryIds } from "./userTerritoryRights";
 
 const rolePriority: Record<UserEnums.Role, number> = {
   [UserEnums.Role.Owner]: 1,
@@ -83,6 +84,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
 
   const { data: users, isFetching, isLoading } = useUsersGetMoreQuery();
+  const { data: treeData } = useTreeQuery();
 
   const userComparator = (a: IResponseUser, b: IResponseUser): number => {
     // First, compare by role priority
@@ -273,9 +275,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           return (
             <UserListRightsCell
               entityClass={EntityEnums.Class.Territory}
-              assignedIds={rights
-                .filter((right: IUserRight) => right.mode === "read")
-                .map((right) => right.territory)}
+              assignedIds={rightTerritoryIds(rights, UserEnums.RoleMode.Read)}
+              excludedIds={readBlockedTerritoryIds(
+                treeData,
+                rightTerritoryIds(rights, UserEnums.RoleMode.Write),
+              )}
               entities={territoryRights?.map((right) => right.territory)}
               placeholder="assign a territory"
               invalidLabel="invalid T"
@@ -302,9 +306,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           return (
             <UserListRightsCell
               entityClass={EntityEnums.Class.Territory}
-              assignedIds={rights
-                .filter((right: IUserRight) => right.mode === "write")
-                .map((right) => right.territory)}
+              assignedIds={rightTerritoryIds(rights, UserEnums.RoleMode.Write)}
               entities={territoryRights?.map((right) => right.territory)}
               placeholder="assign a territory"
               invalidLabel="invalid T"
@@ -444,7 +446,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash, localUsers],
+    [canVerifyManually, scheduleRowFlash, localUsers, treeData],
   );
 
   // an empty body during the first fetch is not yet an empty result
