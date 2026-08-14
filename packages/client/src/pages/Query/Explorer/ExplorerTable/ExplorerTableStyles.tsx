@@ -207,6 +207,10 @@ export const StyledPagination = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
+/* Decorative marker for the last clicked row, drawn behind the row checkbox it
+   is centered on. Being positioned, it paints over the static checkbox and is
+   several times its size, so it has to stay transparent to the pointer for the
+   box underneath to stay clickable. */
 export const StyledFocusedCircle = styled.span`
   position: absolute;
   background-color: ${({ theme }) => theme.color.focusedCheckbox};
@@ -217,6 +221,7 @@ export const StyledFocusedCircle = styled.span`
   transform: translate(-50%, -50%);
   top: 50%;
   left: 50%;
+  pointer-events: none;
 `;
 export const StyledCheckboxWrapper = styled.div`
   position: relative;
