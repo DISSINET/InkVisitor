@@ -4,7 +4,6 @@ import {
   entityIdsEqual,
   isViableUuidPrefix,
   mergeTokensIntoIds,
-  shortenUuid,
   unparsedRemainder,
 } from "pages/Query/utils";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -38,6 +37,9 @@ const getRowIdsFilter = (
   filters: Explore.IExploreSearchFilter[],
 ): Explore.IExploreUuidsFilter | undefined =>
   filters.find((f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs);
+
+const shortenUuid = (id: string): string =>
+  id.length > 13 ? `${id.slice(0, 8)}…${id.slice(-5)}` : id;
 
 // space the panel keeps from the button below it and from the top edge of the
 // positioned ancestor (the explorer area) so it never spills out of the page.

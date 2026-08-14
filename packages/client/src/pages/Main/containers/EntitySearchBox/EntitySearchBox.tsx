@@ -19,12 +19,7 @@ import Dropdown, {
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams, useWidthBreakpoint } from "hooks";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import {
-  mergeTokensIntoIds,
-  parseEntityIdsFromText,
-  shortenUuid,
-  unparsedRemainder,
-} from "pages/Query/utils";
+import { mergeTokensIntoIds, parseEntityIdsFromText, unparsedRemainder } from "pages/Query/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
@@ -47,11 +42,9 @@ import {
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
-  StyledUuidClearAll,
-  StyledUuidPills,
-  StyledUuidPillsHint,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { EntitySearchUuids } from "./EntitySearchUuids/EntitySearchUuids";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -383,7 +376,7 @@ export const EntitySearchBox: React.FC = () => {
               <Input
                 width="full"
                 icon={<IcoSearch />}
-                placeholder="label or uuid"
+                placeholder={entityIds.length > 0 ? "uuid(s)" : "label or uuid(s)"}
                 changeOnType
                 value={searchData.labelOrId ?? ""}
                 valueControlled
@@ -410,34 +403,12 @@ export const EntitySearchBox: React.FC = () => {
           {entityIds.length > 0 && (
             <StyledRow>
               <StyledCellMerge>
-                <StyledUuidPills>
-                  {entityIds.map((entityId) => (
-                    <StyledPill
-                      key={entityId}
-                      title={entityId}
-                      onClick={() => removeEntityId(entityId)}
-                    >
-                      <StyledPillLabel>{shortenUuid(entityId)}</StyledPillLabel>
-                      <StyledPillCloseIcon>
-                        <IconWithTooltip
-                          tooltipLabel="Remove uuid"
-                          icon={<RiCloseFill size={15} />}
-                          fullWidth
-                          tooltipPosition="left"
-                        />
-                      </StyledPillCloseIcon>
-                    </StyledPill>
-                  ))}
-                  <StyledUuidClearAll
-                    type="button"
-                    onClick={() => handleChange({ entityIds: undefined })}
-                  >
-                    clear all
-                  </StyledUuidClearAll>
-                  {!!searchData.labelOrId?.length && (
-                    <StyledUuidPillsHint>searching by uuid, label ignored</StyledUuidPillsHint>
-                  )}
-                </StyledUuidPills>
+                <EntitySearchUuids
+                  entityIds={entityIds}
+                  labelIgnored={!!searchData.labelOrId?.length}
+                  onRemove={removeEntityId}
+                  onClearAll={() => handleChange({ entityIds: undefined })}
+                />
               </StyledCellMerge>
             </StyledRow>
           )}
