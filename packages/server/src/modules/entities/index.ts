@@ -1086,10 +1086,11 @@ export default Router()
             entityIds: string[];
             resourceEntityId: string;
             valueEntityId?: string;
+            valueLabel?: string;
           }
         >
       ) => {
-        const { entityIds, resourceEntityId, valueEntityId } = request.body;
+        const { entityIds, resourceEntityId, valueEntityId, valueLabel } = request.body;
 
         if (
           !entityIds ||
@@ -1113,10 +1114,63 @@ export default Router()
         let updated = 0;
 
         for (const entityData of entities) {
+          let valueId = valueEntityId || "";
+
+          // a V is an endpoint - the "40" of one entity is not the "40" of the
+          // next - so a labelled batch gives every entity a V of its own
+          if (valueLabel) {
+            // the V is written before the entity that will hold it, so an
+            // entity the user may not edit must not leave one behind
+            if (!getEntityClass({ ...entityData }).canBeEditedByUser(user)) {
+              errors[entityData.id] = "permission denied";
+              continue;
+            }
+
+            const valueModel = getEntityClass({
+              id: randomUUID(),
+              class: EntityEnums.Class.Value,
+              labels: [valueLabel],
+              detail: "",
+              language: user.options.defaultLanguage,
+              data: {},
+              notes: [],
+              props: [],
+              references: [],
+              status: EntityEnums.Status.Approved,
+              isTemplate: false,
+            });
+
+            if (!valueModel.isValid()) {
+              errors[entityData.id] = "value model not valid";
+              continue;
+            }
+
+            if (!valueModel.canBeCreatedByUser(user)) {
+              errors[entityData.id] = "permission denied";
+              continue;
+            }
+
+            await valueModel.beforeSave(request.db.connection);
+
+            if (!(await valueModel.save(request.db.connection))) {
+              errors[entityData.id] = "value could not be created";
+              continue;
+            }
+
+            await Audit.createNew(
+              request,
+              AuditScope.Entity,
+              valueModel.id,
+              valueModel,
+              EventType.CREATE
+            );
+            valueId = valueModel.id;
+          }
+
           const newRef: IReference = {
             id: randomUUID(),
             resource: resourceEntityId,
-            value: valueEntityId || "",
+            value: valueId,
           };
 
           const updatedRefs = [...entityData.references, newRef];
