@@ -167,6 +167,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               inputWidth="full"
               alwaysShowCreateModal
               excludedActantIds={entitySOEs}
+              reuseDroppedValue
               categoryTypes={[
                 EntityEnums.Class.Location,
                 EntityEnums.Class.Object,
@@ -400,6 +401,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               alwaysShowCreateModal
               categoryTypes={allowedEntitiesClasses}
               excludedActantIds={allowedEntities}
+              reuseDroppedValue
               onPicked={(entity) => {
                 updateValidationRule({
                   allowedEntities: [...(allowedEntities ?? []), entity.id],

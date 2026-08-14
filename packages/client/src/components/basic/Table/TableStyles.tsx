@@ -10,22 +10,18 @@ export const StyledTable = styled.table<StyledTable>`
    content length; cells rely on their own overflow handling */
   table-layout: ${({ $equalColumns }) => ($equalColumns ? "fixed" : "auto")};
   border-spacing: 0;
-  border-collapse: collapse;
+  /* separate keeps the border on the table itself, so the radius renders and
+     the header rule stays a single line - the statement list table is drawn
+     the same way */
+  border-collapse: separate;
   border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme, $noBorder }) => ($noBorder ? "none" : theme.boxShadow["subtle"])};
-  /* border-collapse ignores border-radius, so clip the corners instead */
   border-radius: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderRadius["input"])};
   overflow: hidden;
 `;
-interface StyledTHead {
-  $noBorder: boolean;
-}
-export const StyledTHead = styled.thead<StyledTHead>`
-  border-width: ${({ theme, $noBorder }) => ($noBorder ? 0 : theme.borderWidth[1])};
-  border-style: solid;
-  border-color: ${({ theme }) => theme.color["gray"][500]};
+export const StyledTHead = styled.thead`
   background: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["gray"][700]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
@@ -36,6 +32,8 @@ export const StyledTh = styled.th`
   padding-right: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[2]};
   white-space: nowrap;
+  border-bottom: ${({ theme }) => theme.borderWidth[1]} solid
+    ${({ theme }) => theme.color["gray"][500]};
 `;
 
 interface StyledTableHeader {
@@ -60,8 +58,12 @@ export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
   color: ${({ theme }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  border-top: ${({ theme, $noBorder }) =>
-    $noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
+  /* the head already draws the rule above the first row; separate borders do
+     not merge, so a border-top there would stack a second line on it */
+  &:not(:first-child) {
+    border-top: ${({ theme, $noBorder }) =>
+      $noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
+  }
   cursor: ${({ $hasOnClick }) => ($hasOnClick ? "pointer" : "")};
 
   &:hover {

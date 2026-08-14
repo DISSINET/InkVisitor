@@ -301,6 +301,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 inputWidth="full"
                 excludedEntityClasses={excludedSuggesterEntities}
                 disableTemplatesAccept
+                reuseDroppedValue
                 categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {
                   if (isCloudType) {

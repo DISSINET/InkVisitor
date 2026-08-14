@@ -564,6 +564,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             <EntitySuggester
               inputWidth={74}
               categoryTypes={categoryTypes}
+              reuseDroppedValue
               onPicked={(newEntity) => {
                 handleEditColumn(rowEntity, column.id, newEntity, params.relationType);
               }}

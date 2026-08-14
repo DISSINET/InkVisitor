@@ -1955,16 +1955,20 @@ class Api {
     }
   }
 
+  /**
+   * valueLabel makes the server create a V per entity in the batch, since a V
+   * is an endpoint and must not be shared between the entities it is added to.
+   */
   async batchEntityAddReference(
     entityIds: string[],
     resourceEntityId: string,
-    valueEntityId?: string,
+    valueLabel?: string,
     options?: IApiOptions,
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(
         `/entities/batchAddReference`,
-        { entityIds, resourceEntityId, valueEntityId },
+        { entityIds, resourceEntityId, valueLabel },
         options,
       );
       return response;

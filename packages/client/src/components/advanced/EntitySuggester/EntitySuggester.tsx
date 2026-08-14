@@ -12,6 +12,7 @@ import api from "api";
 import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
+import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { FaHome } from "react-icons/fa";
@@ -25,6 +26,7 @@ import {
   ItemTypes,
 } from "types";
 import { deepCopy } from "utils/utils";
+import { canCreateEntities, copiesDroppedValue } from "utils/valueDropCopy";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 import { useUserQuery } from "hooks/react-query";
 
@@ -47,6 +49,13 @@ interface EntitySuggesterProps {
   territoryId?: string;
   excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
+  /**
+   * Keeps the id of a dropped V instead of linking a copy of it. Set on targets
+   * that point at an entity that already exists - a bookmark, a search filter,
+   * a rule definition. A slot that stores a V links its own copy, see
+   * copiesDroppedValue.
+   */
+  reuseDroppedValue?: boolean;
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
   isInsideStatement?: boolean;
@@ -129,6 +138,7 @@ const EntitySuggesterFull: React.FC<
   excludedEntityClasses = [],
   filterEditorRights = false,
   excludedActantIds = [],
+  reuseDroppedValue,
   isInsideTemplate = false,
   isInsideStatement = false,
   territoryParentId,
@@ -422,16 +432,36 @@ const EntitySuggesterFull: React.FC<
     }
   };
 
-  const handleDropped = (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
-    if (!isWrongDropCategory) {
-      if (instantiateTemplate && !disableTemplateInstantiation) {
-        newDropped.entity && handleInstantiateTemplate(newDropped.entity);
-      } else {
-        onSelected(newDropped.id);
-        newDropped.entity && onPicked(newDropped.entity);
+  const copyDroppedValue = useValueDropCopy();
+
+  const copiesValue = (item: EntityDragItem) =>
+    copiesDroppedValue({
+      entityClass: item.entityClass,
+      categoryTypes,
+      reuseDroppedValue,
+      canCreate: canCreateEntities(getStoredUserRole(), disableCreate),
+    });
+
+  const handleDropped = async (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
+    if (isWrongDropCategory) {
+      return;
+    }
+    if (instantiateTemplate && !disableTemplateInstantiation) {
+      newDropped.entity && handleInstantiateTemplate(newDropped.entity);
+      return;
+    }
+    if (copiesValue(newDropped)) {
+      const valueCopy = await copyDroppedValue(newDropped);
+      if (valueCopy) {
+        onSelected(valueCopy.id);
+        onPicked(valueCopy);
         handleClean();
       }
+      return;
     }
+    onSelected(newDropped.id);
+    newDropped.entity && onPicked(newDropped.entity);
+    handleClean();
   };
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
@@ -443,7 +473,7 @@ const EntitySuggesterFull: React.FC<
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
-      excludedEntityClasses.includes(newHoverred.entityClass) ||
+      (excludedEntityClasses.includes(newHoverred.entityClass) && !copiesValue(newHoverred)) ||
       // the suggester picks a destination the user has to be able to write,
       // the same rule filterEditorRights applies to the typed suggestions
       (filterEditorRights && newHoverred.entityIsReadOnly) ||
@@ -645,6 +675,8 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       disabled = false,
       categoryTypes = classesAll,
       filterEditorRights = false,
+      reuseDroppedValue,
+      disableCreate = false,
     } = rest;
 
     if (disabled) return false;
@@ -652,7 +684,13 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     if (filterEditorRights && item.entityIsReadOnly) return false;
     if (disableTemplatesAccept && item.isTemplate) return false;
     if (excludedActantIds.includes(item.id)) return false;
-    if (excludedEntityClasses.includes(item.entityClass)) return false;
+    const copiesValue = copiesDroppedValue({
+      entityClass: item.entityClass,
+      categoryTypes,
+      reuseDroppedValue,
+      canCreate: canCreateEntities(getStoredUserRole(), disableCreate),
+    });
+    if (excludedEntityClasses.includes(item.entityClass) && !copiesValue) return false;
     if (
       (item.entityClass === EntityEnums.Class.Territory ||
         item.entityClass === EntityEnums.Class.Statement) &&

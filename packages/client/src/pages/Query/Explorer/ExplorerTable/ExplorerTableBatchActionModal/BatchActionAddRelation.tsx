@@ -301,6 +301,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
                   placeholder="select target entity..."
                   inputWidth="full"
                   categoryTypes={allowedTargetEntityClasses}
+                  reuseDroppedValue
                   disabled={!activeType || validEntityIds.length === 0 || !eligibilityReady}
                 />
               )}

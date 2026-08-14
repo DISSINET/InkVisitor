@@ -582,6 +582,7 @@ export const EntitySearchBox: React.FC = () => {
                   <div>
                     <EntitySuggester
                       disableTemplatesAccept
+                      reuseDroppedValue
                       categoryTypes={[
                         EntityEnums.Class.Statement,
                         EntityEnums.Class.Action,
