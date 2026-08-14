@@ -109,7 +109,11 @@ server.use(csrfProtection);
 server.use(apiPath, dbMiddleware);
 
 server.use(authenticateRequest);
-server.use(customizeRequest);
+// customizeRequest reads req.db, which only dbMiddleware sets, so both mount on
+// the same prefix. The browser sends the session cookie for every path of the
+// origin, so authenticateRequest resolves a user on non-api paths too - static
+// assets, the SPA fallback, unknown routes - where no db handle exists.
+server.use(apiPath, customizeRequest);
 
 const router = Router();
 server.use(apiPath, router);
