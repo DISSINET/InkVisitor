@@ -3,9 +3,11 @@ import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
 import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
-import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { EntityEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IStatement, ITerritory, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { findEntityById } from "@service/shorthands";
 import { Connection } from "rethinkdb-ts";
 import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
@@ -293,6 +295,26 @@ export default class Results<T extends { id: string }> {
         // Entity Detail
         case Explore.EExploreColumnType.EDET: {
           out[column.id] = entity.detail || "";
+          break;
+        }
+        // Entity Parent Territory
+        case Explore.EExploreColumnType.EPRT: {
+          // the parent link lives in a different data field per class: territories
+          // carry `parent`, statements carry the territory they are placed in
+          let parentTerritoryId: string | undefined;
+          if (entity.class === EntityEnums.Class.Territory) {
+            const parent = (entity as ITerritory).data.parent;
+            parentTerritoryId = parent ? parent.territoryId : undefined;
+          } else if (entity.class === EntityEnums.Class.Statement) {
+            parentTerritoryId = (entity as IStatement).data.territory?.territoryId;
+          }
+
+          if (parentTerritoryId) {
+            const parentTerritory = await findEntityById(db, parentTerritoryId);
+            if (parentTerritory) {
+              out[column.id] = parentTerritory;
+            }
+          }
           break;
         }
       }

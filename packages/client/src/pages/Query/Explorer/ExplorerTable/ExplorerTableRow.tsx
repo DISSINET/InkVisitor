@@ -36,6 +36,7 @@ import {
   StyledRowInner,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
+import { readOnlyColumnTypes, wideColumnTypes } from "./types";
 import { getColumnWidth } from "./utils";
 
 const EditableCellValue: React.FC<{
@@ -194,7 +195,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     rowItem?.right === UserEnums.RoleMode.Write ||
     rowItem?.right === UserEnums.RoleMode.Admin;
   const isColumnEditable = React.useCallback(
-    (column: Explore.IExploreColumn) => column.editable && rowIsEditable,
+    (column: Explore.IExploreColumn) =>
+      column.editable && rowIsEditable && !readOnlyColumnTypes.has(column.type),
     [rowIsEditable]
   );
 
@@ -342,6 +344,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           <span data-no-row-click="true">
             <EntityTag
               entity={cellValue as IEntity}
+              fullWidth={wideColumnTypes.has(column.type)}
               onDoubleClick={handleOpenEntityInDetail(cellValue as IEntity)}
               unlinkButton={
                 isColumnEditable(column) && {

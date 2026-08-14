@@ -55,3 +55,16 @@ export const contentSizedColumnTypes = new Set([
   Explore.EExploreColumnType.ERV,
 ]);
 
+/**
+ * Columns holding a single entity tag whose label carries the most meaning
+ * (territory names are long and only distinguishable at their tail), so they get
+ * more room than the content estimate would grant them.
+ */
+export const wideColumnTypes = new Set([Explore.EExploreColumnType.EPRT]);
+
+/**
+ * Column types with no write path: their cells stay read-only whatever the
+ * column config says, and the new-column panel omits the editable option.
+ */
+export const readOnlyColumnTypes = new Set([Explore.EExploreColumnType.EPRT]);
+

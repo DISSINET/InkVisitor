@@ -59,13 +59,13 @@ const exploreStateInitial: Explore.IExplore = {
             //   editable: true,
             // },
             // all relations for testing
-            ...RelationEnums.AllTypes.map((relationType, index) => ({
-              id: String(index + 2),
-              name: relationType,
-              params: { relationType },
-              editable: false,
-              type: Explore.EExploreColumnType.ER,
-            })),
+            // ...RelationEnums.AllTypes.map((relationType, index) => ({
+            //   id: String(index + 2),
+            //   name: relationType,
+            //   params: { relationType },
+            //   editable: false,
+            //   type: Explore.EExploreColumnType.ER,
+            // })),
           ]
         : [],
   },
@@ -243,7 +243,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       };
       const trimmedLabel = label.trim();
       const existingLabelFilter = state.filters.find(
-        (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label,
+        (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label
       );
       const nextUseRegex = useRegex ?? existingLabelFilter?.useRegex ?? false;
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Label);
@@ -406,7 +406,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         rootValidity?: IRequestSearchRootValidity;
       };
       const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.SearchOption.RootValidity,
+        (f) => f.type !== Explore.SearchOption.RootValidity
       );
       return {
         ...state,

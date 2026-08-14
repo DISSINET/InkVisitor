@@ -18,6 +18,7 @@ import {
   StyledValue,
 } from "./ExplorerTableNewColumnPanelStyles";
 import { getStoredUserRole } from "utils/userStorage";
+import { readOnlyColumnTypes } from "../types";
 
 interface Props {
   open: boolean;
@@ -93,7 +94,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
       id: uuidv4(),
       name: name.length ? name : Explore.EExploreColumnTypeConfig[type].label,
       type,
-      editable,
+      editable: readOnlyColumnTypes.has(type) ? false : editable,
       params: params as Explore.IExploreColumnParams<typeof type>,
     };
     onCreateColumn(col);
@@ -205,7 +206,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
           </React.Fragment>
         ))}
         {/* an editable column would render read-only cells for a Viewer anyway */}
-        {!isViewer && (
+        {!isViewer && !readOnlyColumnTypes.has(type) && (
           <>
             <StyledLabel>
               <span style={{ display: "inline-flex", alignItems: "center" }}>

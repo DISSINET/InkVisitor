@@ -1066,6 +1066,7 @@ export namespace Explore {
     EAL = "EAL", // Entity Alt Labels
     EPOS = "EPOS", // Entity Part of Speech
     EDET = "EDET", // Entity Detail
+    EPRT = "EPRT", // Entity Parent Territory
   }
 
   /** Param value types - determines which form control to render */
@@ -1120,6 +1121,7 @@ export namespace Explore {
     [EExploreColumnType.EAL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EPOS]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EDET]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EPRT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1258,6 +1260,13 @@ export namespace Explore {
     [EExploreColumnType.EDET]: {
       label: "Detail",
       description: "Shows the detail/description field of this entity.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EPRT]: {
+      label: "Parent territory",
+      description:
+        "Shows the immediate parent territory - the parent of a Territory, or the territory a Statement belongs to. Empty for other classes.",
       isDisabled: false,
       params: {},
     },
