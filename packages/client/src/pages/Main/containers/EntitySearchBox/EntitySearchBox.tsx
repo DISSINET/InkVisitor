@@ -19,6 +19,7 @@ import Dropdown, {
 } from "components/advanced";
 import { useDebounce, useResizeObserver, useSearchParams, useWidthBreakpoint } from "hooks";
 import { useOrderedLanguageDict } from "hooks/react-query";
+import { mergeTokensIntoIds, parseEntityIdsFromText, unparsedRemainder } from "pages/Query/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
 import { setExpandedOptions } from "redux/features/entitySearch/expandedOptionsSlice";
@@ -43,6 +44,7 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { EntitySearchUuids } from "./EntitySearchUuids/EntitySearchUuids";
 
 const initSearchValues: IRequestSearch = {
   labelOrId: "",
@@ -111,6 +113,7 @@ export const EntitySearchBox: React.FC = () => {
   // it has to work also when label is not set but some of the options is selected #2913
   const validSearch = useMemo<boolean>(() => {
     return Boolean(
+      debouncedValues?.entityIds?.length ||
       (debouncedValues?.labelOrId?.length && debouncedValues?.labelOrId?.length > 1) ||
       debouncedValues?.class ||
       debouncedValues?.territoryId ||
@@ -147,7 +150,9 @@ export const EntitySearchBox: React.FC = () => {
 
       const res = await api.entitiesSearch({
         ...debouncedValues,
-        labelOrId: labelWithWildCard,
+        // uuids and a label are exclusive ways of naming the wanted entities, so
+        // the leftover label text is dropped once any uuid is entered
+        labelOrId: debouncedValues.entityIds?.length ? undefined : labelWithWildCard,
       });
       return res.data;
     },
@@ -176,6 +181,29 @@ export const EntitySearchBox: React.FC = () => {
     });
 
     setSearchData(newSearch);
+  };
+
+  const entityIds = searchData.entityIds ?? [];
+
+  // complete uuids typed or pasted into the search field are lifted out into
+  // pills; whatever is left stays in the field as the label part of the query
+  const handleSearchTextChange = (text: string) => {
+    // text without a complete uuid is kept verbatim - stripping it through
+    // unparsedRemainder would swallow the spaces of a multi-word label
+    if (parseEntityIdsFromText(text).length === 0) {
+      handleChange({ labelOrId: text });
+      return;
+    }
+
+    handleChange({
+      labelOrId: unparsedRemainder(text),
+      entityIds: mergeTokensIntoIds(entityIds, text),
+    });
+  };
+
+  const removeEntityId = (id: string) => {
+    const nextIds = entityIds.filter((entityId) => entityId.toLowerCase() !== id.toLowerCase());
+    handleChange({ entityIds: nextIds.length > 0 ? nextIds : undefined });
   };
 
   // sort found entities by label
@@ -348,9 +376,11 @@ export const EntitySearchBox: React.FC = () => {
               <Input
                 width="full"
                 icon={<IcoSearch />}
-                placeholder="label or uuid"
+                placeholder={entityIds.length > 0 ? "uuid(s)" : "label or uuid(s)"}
                 changeOnType
-                onChangeFn={(value: string) => handleChange({ labelOrId: value })}
+                value={searchData.labelOrId ?? ""}
+                valueControlled
+                onChangeFn={handleSearchTextChange}
                 clearable
                 rightContent={
                   <>
@@ -369,6 +399,19 @@ export const EntitySearchBox: React.FC = () => {
               />
             </StyledCellMerge>
           </StyledRow>
+
+          {entityIds.length > 0 && (
+            <StyledRow>
+              <StyledCellMerge>
+                <EntitySearchUuids
+                  entityIds={entityIds}
+                  labelIgnored={!!searchData.labelOrId?.length}
+                  onRemove={removeEntityId}
+                  onClearAll={() => handleChange({ entityIds: undefined })}
+                />
+              </StyledCellMerge>
+            </StyledRow>
+          )}
 
           <EntitySearchAdvancedOptions
             expandedOptions={expandedOptions}

@@ -24,6 +24,13 @@ interface Input {
   label?: string;
   labelSpaceNoWrap?: boolean;
   value?: string;
+  /**
+   * The parent owns the visible text and may rewrite the very text it just
+   * received (e.g. lifting complete UUIDs out of the field into pills), so the
+   * text is re-applied from `value` on every render, not only when the prop
+   * changes. Requires `changeOnType`.
+   */
+  valueControlled?: boolean;
   inverted?: boolean;
   suggester?: boolean;
   type?: "text" | "textarea" | "select" | "password" | "datetime-local" | "date" | "number";
@@ -80,6 +87,7 @@ export const Input: React.FC<Input> = ({
   inverted = false,
   suggester = false,
   value = "",
+  valueControlled = false,
   type = "text",
   rows = 3,
   cols = 50,
@@ -120,6 +128,15 @@ export const Input: React.FC<Input> = ({
   useEffect(() => {
     setDisplayValue(value);
   }, [value]);
+
+  // when the parent owns the text, `value` can come back unchanged while the
+  // input already shows something else (the parent consumed exactly what was
+  // typed), so the prop is re-applied on every render
+  useEffect(() => {
+    if (valueControlled && value !== displayValue) {
+      setDisplayValue(value);
+    }
+  });
 
   // Measure rightContent so the input reserves matching right padding (its width
   // is dynamic, e.g. a variable number of icon checkboxes) and the clearable
