@@ -139,6 +139,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         ) : (
           <EntitySuggester
             categoryTypes={def.entityClasses ?? [EntityEnums.Class.Concept]}
+            reuseDroppedValue
             onPicked={(e) => setParamValue(def.id, e)}
             inputWidth="full"
           />

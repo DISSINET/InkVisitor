@@ -213,6 +213,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
                 addBookmark(bookmarkFolder.id, bookmarkId);
               }}
               categoryTypes={classesAll}
+              reuseDroppedValue
               placeholder="add bookmark"
               inputWidth="full"
               excludedActantIds={bookmarkFolder.entities.map((e) => e.id)}
