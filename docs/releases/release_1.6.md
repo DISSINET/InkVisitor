@@ -1,4 +1,4 @@
-# What's changed [Aug 14, 2026]
+# What's changed [Aug 15, 2026]
 
 ## Annotator
 
@@ -57,7 +57,6 @@
 - Query export loads only the requested rows, Explorer pagination refetches once per 25-row chunk instead of on every scrolled row, and batch relation creation shares one relation-type context per request
 - Centralized Entity query keys, fixing a cache collision between two endpoints sharing one key with different response shapes, and added a `LOG_SLOW_QUERIES` flag for the slow query profiler
 - Subtree expansion filters Territory-class roots before looking up children, avoiding unindexed table scans for non-Territory roots
-- Saved query validation bounds tree depth and node count before any database access
 - Hashed client bundles are cached permanently while index.html revalidates, so a reloaded tab always references the current deploy's chunks
 
 ## Deployment
