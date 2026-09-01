@@ -24,7 +24,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { COLLAPSED_PANEL_WIDTH, maxTabCount } from "Theme/constants";
 import {
   animateBoxHeightVars,
   animatePanelWidthVars,
@@ -84,7 +84,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     replaceDetailIds,
   } = useSearchParams();
 
-  const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   // Page-level result expansion (#2969): append the equivalents (SYN/IDE/AEE)
@@ -554,7 +553,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       if (detailIdArray.includes(entityId)) {
         setSelectedDetailId(entityId);
       } else {
-        appendDetailId(entityId, QUERY_DETAIL_MAX_TABS);
+        appendDetailId(entityId, maxTabCount);
       }
     },
     [appendDetailId, detailIdArray, expandQueryDetailPanel, setSelectedDetailId],
@@ -569,17 +568,17 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       expandQueryDetailPanel();
 
       let idsToAdd = entityIds;
-      if (entityIds.length > QUERY_DETAIL_MAX_TABS) {
+      if (entityIds.length > maxTabCount) {
         toast.info(
-          `Maximum number of tabs reached, only the first ${QUERY_DETAIL_MAX_TABS} displayed.`,
+          `Maximum number of tabs reached, only the first ${maxTabCount} displayed.`,
         );
-        idsToAdd = entityIds.slice(0, QUERY_DETAIL_MAX_TABS);
+        idsToAdd = entityIds.slice(0, maxTabCount);
       }
 
       const filteredArray = detailIdArray.filter((id) => !idsToAdd.includes(id));
       let newDetailIdArray = filteredArray.concat(idsToAdd);
-      if (newDetailIdArray.length > QUERY_DETAIL_MAX_TABS) {
-        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - QUERY_DETAIL_MAX_TABS);
+      if (newDetailIdArray.length > maxTabCount) {
+        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - maxTabCount);
       }
 
       replaceDetailIds(newDetailIdArray);
@@ -1001,7 +1000,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             ]}
           >
             <MemoizedEntityDetailBox
-              maxTabs={QUERY_DETAIL_MAX_TABS}
+              maxTabs={maxTabCount}
               onTabOpen={() => {
                 if (!queryDetailPanelExpanded) {
                   toggleQueryDetailPanel();

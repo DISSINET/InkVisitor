@@ -75,7 +75,7 @@ export const MIN_SEARCH_RESULT_HEIGHT = 100;
 export const COLLAPSED_TABLE_WIDTH = 130;
 
 // LIMITS
-export const maxTabCount = 10;
+export const maxTabCount = 100;
 export const maxTooltipTreeForks = 2;
 export const maxTooltipMultiRelations = 5;
 export const maxTooltipAnchors = 8;
