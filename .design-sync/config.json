@@ -1,0 +1,145 @@
+{
+  "projectId": "ae3da415-f144-4dde-bbcf-ca128de4bedf",
+  "shape": "package",
+  "pkg": "dissinet.ddb.client",
+  "globalName": "InkVisitorDS",
+  "srcDir": "src",
+  "tsconfig": "tsconfig.json",
+  "provider": {
+    "component": "DSProvider"
+  },
+  "componentSrcMap": {
+    "AttributeIcon": "src/components/basic/AttributeIcon/AttributeIcon.tsx",
+    "BaseDropdown": "src/components/basic/BaseDropdown/BaseDropdown.tsx",
+    "Box": "src/components/basic/Box/Box.tsx",
+    "Button": "src/components/basic/Button/Button.tsx",
+    "CancelButton": "src/components/basic/Button/CancelButton.tsx",
+    "IconButton": "src/components/basic/Button/IconButton.tsx",
+    "ButtonGroup": "src/components/basic/ButtonGroup/ButtonGroup.tsx",
+    "ButtonGroups": "src/components/basic/ButtonGroup/ButtonGroup.tsx",
+    "SwitchGroup": "src/components/basic/ButtonGroup/ButtonGroup.tsx",
+    "BundleButtonGroup": "src/components/basic/IconButtonGroup/BundleButtonGroup.tsx",
+    "Checkbox": "src/components/basic/Checkbox/Checkbox.tsx",
+    "Cloud": "src/components/basic/Cloud/Cloud.tsx",
+    "ContactOwnerFooting": "src/components/basic/ContactOwnerFooting/ContactOwnerFooting.tsx",
+    "CustomScrollbar": "src/components/basic/CustomScrollbar/CustomScrollbar.tsx",
+    "DatePicker": "src/components/basic/DatePicker/DatePicker.tsx",
+    "Dropzone": "src/components/basic/Dropzone/Dropzone.tsx",
+    "Header": "src/components/basic/Header/Header.tsx",
+    "IconButtonGroup": "src/components/basic/IconButtonGroup/IconButtonGroup.tsx",
+    "IconFont": "src/components/basic/IconFont/IconFont.tsx",
+    "IconWithTooltip": "src/components/basic/IconWithTooltip/IconWithTooltip.tsx",
+    "Input": "src/components/basic/Input/Input.tsx",
+    "LetterIcon": "src/components/basic/LetterIcon/LetterIcon.tsx",
+    "Loader": "src/components/basic/Loader/Loader.tsx",
+    "RoleBadge": "src/components/basic/RoleBadge/RoleBadge.tsx",
+    "Message": "src/components/basic/Message/Message.tsx",
+    "Modal": "src/components/basic/Modal/Modal.tsx",
+    "ModalCard": "src/components/basic/Modal/Modal.tsx",
+    "ModalContent": "src/components/basic/Modal/Modal.tsx",
+    "ModalFooter": "src/components/basic/Modal/Modal.tsx",
+    "ModalHeader": "src/components/basic/Modal/Modal.tsx",
+    "ModalInputForm": "src/components/basic/Modal/Modal.tsx",
+    "ModalInputLabel": "src/components/basic/Modal/Modal.tsx",
+    "ModalInputWrap": "src/components/basic/Modal/Modal.tsx",
+    "MultiInput": "src/components/basic/MultiInput/MultiInput.tsx",
+    "Panel": "src/components/basic/Panel/Panel.tsx",
+    "Submit": "src/components/basic/Submit/Submit.tsx",
+    "Suggester": "src/components/basic/Suggester/Suggester.tsx",
+    "Table": "src/components/basic/Table/Table.tsx",
+    "Tag": "src/components/basic/Tag/Tag.tsx",
+    "TagGroup": "src/components/basic/TagGroup/TagGroup.tsx",
+    "TemplateActionModal": "src/components/basic/TemplateActionModal/TemplateActionModal.tsx",
+    "Timestamp": "src/components/basic/Timestamp/Timestamp.tsx",
+    "Toast": "src/components/basic/Toast/Toast.tsx",
+    "Toggle": "src/components/basic/Toggle/Toggle.tsx",
+    "WarningIcon": "src/components/basic/Message/WarningIcon.tsx",
+    "Tooltip": "src/components/basic/Tooltip/Tooltip.tsx",
+    "TypeBar": "src/components/basic/TypeBar/TypeBar.tsx",
+    "AttributeButtonGroup": "src/components/advanced/AttributeButtonGroup/AttributeButtonGroup.tsx",
+    "ElvlButtonGroup": "src/components/advanced/IconButtonGroups/ElvlButtonGroup.tsx",
+    "LogicButtonGroup": "src/components/advanced/IconButtonGroups/LogicButtonGroup.tsx",
+    "MoodVariantButtonGroup": "src/components/advanced/IconButtonGroups/MoodVariantButtonGroup.tsx",
+    "PositionButtonGroup": "src/components/advanced/IconButtonGroups/PositionButtonGroup.tsx",
+    "BreadcrumbItem": "src/components/advanced/BreadcrumbItem/BreadcrumbItem.tsx",
+    "EntityTag": "src/components/advanced/EntityTag/EntityTag.tsx",
+    "EmptyEntityTag": "src/components/advanced/EntityTag/EmptyEntityTag.tsx",
+    "LayoutSeparatorHorizontal": "src/components/advanced/PanelSeparator/LayoutSeparatorHorizontal.tsx",
+    "LayoutSeparatorVertical": "src/components/advanced/PanelSeparator/LayoutSeparatorVertical.tsx",
+    "Menu": "src/components/advanced/Menu/Menu.tsx",
+    "Page": "src/components/advanced/Page/Page.tsx",
+    "LeftHeader": "src/components/advanced/PageHeader/PageHeader.tsx",
+    "RightHeader": "src/components/advanced/PageHeader/PageHeader.tsx",
+    "PaginationControls": "src/components/advanced/PaginationControls/PaginationControls.tsx",
+    "UserTag": "src/components/advanced/UserTag/UserTag.tsx",
+    "AbbreviatedTextWithTooltip": "src/components/advanced/AbbreviatedTextWithTooltip/AbbreviatedTextWithTooltip.tsx",
+    "ErrorBoundary": null,
+    "ToastWithLink": "src/components/basic/Toast/ToastWithLink.tsx",
+    "DSProvider": null
+  },
+  "libOverrides": {
+    "source-kit.mjs": "group components by visual family from .design-sync/groups.json instead of the source tree",
+    "dts.mjs": "props interfaces are named after the component, not <Name>Props"
+  },
+  "buildCmd": "npx tsc --emitDeclarationOnly --declaration --outDir dist/types --incremental false  # run in packages/client",
+  "dtsPropsFor": {
+    "ButtonGroups": "  children?: React.ReactNode;\n  className?: string;",
+    "AttributeIcon": "  attributeName: \"certainty\" | \"elvl\" | \"logic\" | \"mood\" | \"moodvariant\" | \"virtuality\" | \"partitivity\" | \"bundleOperator\" | \"bundleStart\" | \"bundleEnd\" | \"negation\";",
+    "ContactOwnerFooting": "  /** Takes no props. */",
+    "Toast": "  /** Takes no props — renders the react-toastify container. */"
+  },
+  "overrides": {
+    "Table": {
+      "cardMode": "column"
+    },
+    "LayoutSeparatorHorizontal": {
+      "cardMode": "column"
+    },
+    "LayoutSeparatorVertical": {
+      "cardMode": "column"
+    },
+    "LeftHeader": {
+      "cardMode": "column"
+    },
+    "RightHeader": {
+      "cardMode": "column"
+    },
+    "Modal": {
+      "cardMode": "single",
+      "primaryStory": "WithForm"
+    },
+    "ModalCard": {
+      "cardMode": "single",
+      "primaryStory": "NormalWidth"
+    },
+    "ModalContent": {
+      "cardMode": "single",
+      "primaryStory": "Column"
+    },
+    "ModalFooter": {
+      "cardMode": "single",
+      "primaryStory": "SpaceBetween"
+    },
+    "ModalHeader": {
+      "cardMode": "single",
+      "primaryStory": "DangerWithIcon"
+    },
+    "ModalInputForm": {
+      "cardMode": "single",
+      "primaryStory": "Centered"
+    },
+    "ModalInputLabel": {
+      "cardMode": "single",
+      "primaryStory": "LongLabel"
+    },
+    "ModalInputWrap": {
+      "cardMode": "single",
+      "primaryStory": "FixedWidth"
+    },
+    "TemplateActionModal": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
