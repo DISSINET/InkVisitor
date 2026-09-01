@@ -150,12 +150,17 @@ export const SwitchGroup: React.FC<SwitchGroup> = ({
     }
     const measure = () => {
       const segment = group.querySelectorAll<HTMLElement>(":scope > button")[activeIndex];
-      const next = segment
+      // the track insets are fractional px, which offsetLeft/offsetTop round away
+      // and leave the pill visibly off-centre, so the geometry is taken from the
+      // client rects and shifted onto the padding box the pill is placed in
+      const groupRect = group.getBoundingClientRect();
+      const segmentRect = segment?.getBoundingClientRect();
+      const next = segmentRect
         ? {
-            left: segment.offsetLeft,
-            top: segment.offsetTop,
-            width: segment.offsetWidth,
-            height: segment.offsetHeight,
+            left: segmentRect.left - groupRect.left - group.clientLeft,
+            top: segmentRect.top - groupRect.top - group.clientTop,
+            width: segmentRect.width,
+            height: segmentRect.height,
           }
         : null;
       // `children` is a fresh array on every render of the parent, so this runs
