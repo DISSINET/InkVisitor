@@ -4,26 +4,28 @@ import {
   flip,
   offset,
   shift,
+  size,
   useClick,
   useDismiss,
   useFloating,
   useInteractions,
   useRole,
 } from "@floating-ui/react";
-import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import { IcoCaretDown } from "Theme/icons";
-import { TypeBar } from "components";
+import { EntityTag } from "components/advanced";
 import React, { useState } from "react";
-import { getEntityLabel } from "utils/utils";
+import { CgClose } from "react-icons/cg";
 import {
   StyledOverflowButton,
   StyledOverflowCount,
-  StyledOverflowLabel,
   StyledOverflowList,
   StyledOverflowRow,
-  StyledOverflowRowClose,
+  StyledOverflowTagWrap,
 } from "./EntityDetailTabOverflowStyles";
+
+/** Gap (px) the list keeps from the edge of the page. */
+const PANEL_VIEWPORT_PADDING = 8;
 
 interface EntityDetailTabOverflow {
   entities: IResponseEntity[];
@@ -43,7 +45,18 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
     open,
     onOpenChange: setOpen,
     placement: "bottom-end",
-    middleware: [offset(2), flip({ padding: 8 }), shift({ padding: 8 })],
+    middleware: [
+      offset(2),
+      flip({ padding: PANEL_VIEWPORT_PADDING }),
+      shift({ padding: PANEL_VIEWPORT_PADDING }),
+      // the list runs as far down the page as there is room for it
+      size({
+        padding: PANEL_VIEWPORT_PADDING,
+        apply({ availableHeight, elements }) {
+          elements.floating.style.maxHeight = `${availableHeight}px`;
+        },
+      }),
+    ],
     whileElementsMounted: autoUpdate,
   });
 
@@ -82,26 +95,20 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
                   onSelect(entity.id);
                 }}
               >
-                <TypeBar
-                  entityLetter={entity.class}
-                  isTemplate={entity.isTemplate}
-                  noMargin
-                  dimColor={entity.id !== selectedDetailId}
-                />
-                <StyledOverflowLabel
-                  $isItalic={entity.class === EntityEnums.Class.Statement && !entity.labels[0]}
-                >
-                  {getEntityLabel(entity)}
-                </StyledOverflowLabel>
-                <StyledOverflowRowClose
-                  size={13}
-                  strokeWidth={0.5}
-                  onClick={(event: React.MouseEvent) => {
-                    // the row click would open the tab this click removes
-                    event.stopPropagation();
-                    onClose(entity.id);
-                  }}
-                />
+                <StyledOverflowTagWrap>
+                  <EntityTag
+                    entity={entity}
+                    fullWidth
+                    disableDrag
+                    disableDoubleClick
+                    tooltipPosition="left"
+                    unlinkButton={{
+                      onClick: () => onClose(entity.id),
+                      tooltipLabel: "close tab",
+                      icon: <CgClose />,
+                    }}
+                  />
+                </StyledOverflowTagWrap>
               </StyledOverflowRow>
             ))}
           </StyledOverflowList>
