@@ -575,14 +575,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         idsToAdd = entityIds.slice(0, maxTabCount);
       }
 
+      // the tab strip fills from the left and hides the tail behind its caret,
+      // so the entities opened here lead and the older ones give way first
       const filteredArray = detailIdArray.filter((id) => !idsToAdd.includes(id));
-      let newDetailIdArray = filteredArray.concat(idsToAdd);
+      let newDetailIdArray = idsToAdd.concat(filteredArray);
       if (newDetailIdArray.length > maxTabCount) {
-        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - maxTabCount);
+        newDetailIdArray = newDetailIdArray.slice(0, maxTabCount);
       }
 
       replaceDetailIds(newDetailIdArray);
-      setSelectedDetailId(idsToAdd[idsToAdd.length - 1]);
+      setSelectedDetailId(idsToAdd[0]);
     },
     [detailIdArray, expandQueryDetailPanel, replaceDetailIds, setSelectedDetailId],
   );
