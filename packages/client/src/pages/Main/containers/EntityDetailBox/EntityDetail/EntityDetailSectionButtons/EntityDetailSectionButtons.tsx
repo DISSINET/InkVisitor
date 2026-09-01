@@ -72,7 +72,8 @@ export const EntityDetailSectionButtons: React.FC<EntityDetailSectionButtons> = 
         onPicked={(entity: IEntity) => handleCopyFromEntity(entity, replaceSection)}
         excludedActantIds={[entityId]}
         disableCreate
-        inputWidth={widthTooNarrow ? "full" : 78}
+        inputWidth={"full"}
+        maxWidth={120}
         placeholder="another entity"
         disableTemplateInstantiation
       />

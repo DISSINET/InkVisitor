@@ -38,6 +38,7 @@ interface EntitySuggesterProps {
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
+  maxWidth?: number;
   // Explicit width for the suggestions dropdown, independent of the input width.
   // Set to intentionally show a wider results list.
   suggestionListWidth?: number;
@@ -132,6 +133,7 @@ const EntitySuggesterFull: React.FC<
   onTyped,
   placeholder = "",
   inputWidth,
+  maxWidth,
   suggestionListWidth,
   openDetailOnCreate = false,
   territoryId,
@@ -572,6 +574,7 @@ const EntitySuggesterFull: React.FC<
         disableButtons={disableButtons}
         disableEnter={disableEnter}
         inputWidth={inputWidth}
+        maxWidth={maxWidth}
         suggestionListWidth={suggestionListWidth}
         isInsideTemplate={isInsideTemplate}
         territoryParentId={territoryParentId}

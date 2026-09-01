@@ -4,6 +4,16 @@ import { ThemeColor } from "Theme/theme";
 import { space2 } from "Theme/theme-space-shortcut";
 import { DEFAULT_DIVIDER_HEIGHT } from "components/basic/Input/InputStyles";
 
+interface StyledSuggesterWrap {
+  $fullWidth?: boolean;
+  $maxWidth?: number;
+}
+/** wraps the suggester so flex sizing and the clear button render correctly */
+export const StyledSuggesterWrap = styled.div<StyledSuggesterWrap>`
+  width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "")};
+  max-width: ${({ $maxWidth }) => ($maxWidth ? `${$maxWidth / 10}rem` : "")};
+`;
+
 interface StyledSuggester {
   $marginTop?: boolean;
   $fullWidth?: boolean;

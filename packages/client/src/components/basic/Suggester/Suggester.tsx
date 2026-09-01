@@ -29,6 +29,7 @@ import {
   StyledRightContentDivider,
   StyledSuggester,
   StyledSuggesterList,
+  StyledSuggesterWrap,
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
@@ -43,6 +44,9 @@ interface Suggester {
   categories: EntitySingleDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
+  // Caps the overall width, in the same tenths-of-rem unit as `inputWidth` -
+  // useful with inputWidth="full", where the suggester follows its container.
+  maxWidth?: number;
   // Explicit width for the suggestions dropdown. When unset the list matches the
   // measured input width; set it to intentionally show a wider results list.
   suggestionListWidth?: number;
@@ -98,6 +102,7 @@ export const Suggester: React.FC<Suggester> = ({
   categories,
   disabled,
   inputWidth = 100,
+  maxWidth,
   suggestionListWidth,
   disableCreate = false,
   disableButtons = false,
@@ -382,8 +387,8 @@ export const Suggester: React.FC<Suggester> = ({
   const hasRightContent = !disableCreate || !!rightContent || !!button;
 
   return (
-    // div is necessary for flex to work and render the clear button properly
-    <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
+    // the wrap is necessary for flex to work and render the clear button properly
+    <StyledSuggesterWrap $fullWidth={inputWidth === "full"} $maxWidth={maxWidth}>
       {/* the drop ref covers the warning icon too - a pointer crossing onto it
           would otherwise leave the target, hide the icon, and land back on the
           target, flickering for as long as it hovers there */}
@@ -576,6 +581,6 @@ export const Suggester: React.FC<Suggester> = ({
           }}
         />
       )}
-    </div>
+    </StyledSuggesterWrap>
   );
 };
