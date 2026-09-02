@@ -34,11 +34,7 @@ const initial: Explore.IExploreColumn = {
   params: {},
 };
 
-const ExplorerTableNewColumnPanel: React.FC<Props> = ({
-  open,
-  onClose,
-  onCreateColumn,
-}) => {
+const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateColumn }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState(initial.type);
@@ -87,7 +83,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
                   ? (val as IEntity).id
                   : val;
               return [def.id, serialized];
-            })
+            }),
           )
         : {};
     const col: Explore.IExploreColumn = {
@@ -171,15 +167,6 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         </StyledCloseIconWrap>
       </StyledHeader>
       <StyledContent>
-        <StyledLabel>Column name</StyledLabel>
-        <StyledValue>
-          <Input
-            width="full"
-            value={name}
-            onChangeFn={(v) => setName(v)}
-            changeOnType
-          />
-        </StyledValue>
         <StyledLabel>Column type</StyledLabel>
         <StyledValue>
           <Dropdown.Single.Basic
@@ -187,10 +174,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             value={type}
             options={Object.keys(Explore.EExploreColumnType)
               .map(
-                (key) =>
-                  Explore.EExploreColumnType[
-                    key as keyof typeof Explore.EExploreColumnType
-                  ]
+                (key) => Explore.EExploreColumnType[key as keyof typeof Explore.EExploreColumnType],
               )
               .map((value) => ({
                 value,
@@ -206,6 +190,10 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             <StyledValue>{renderParamField(def)}</StyledValue>
           </React.Fragment>
         ))}
+        <StyledLabel>Column name</StyledLabel>
+        <StyledValue>
+          <Input width="full" value={name} onChangeFn={(v) => setName(v)} changeOnType />
+        </StyledValue>
         {/* an editable column would render read-only cells for a Viewer anyway */}
         {!isViewer && !readOnlyColumnTypes.has(type) && (
           <>
@@ -232,11 +220,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
           <CancelButton onClick={handleClose} />
-          <Button
-            label="create column"
-            onClick={handleCreate}
-            disabled={!canCreate}
-          />
+          <Button label="create column" onClick={handleCreate} disabled={!canCreate} />
         </ButtonGroup>
       </span>
     </StyledPanel>
