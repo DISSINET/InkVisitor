@@ -361,8 +361,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                           isRelationEntityPickerDisabled ? (
                             <p>
                               The "{edgeLabel}" relation allows no target class for{" "}
-                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}.
-                              Change the root class or the edge type.
+                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}
+                              . Change the root class or the edge type.
                             </p>
                           ) : edgeRequiresTarget ? (
                             <p>This edge requires a target entity.</p>
@@ -393,7 +393,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 size={13}
                 value={node.params.includeEquivalents === true}
                 tooltipLabel="include equivalents"
-                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node's target entity."
+                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
                 onChangeFn={() => {
                   dispatch({
                     type: QueryActionType.updateNodeExpansionToggles,
@@ -411,7 +411,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 size={13}
                 value={node.params.includeSubordinates === true}
                 tooltipLabel="include subordinates"
-                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node's target entity."
+                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
                 onChangeFn={() => {
                   dispatch({
                     type: QueryActionType.updateNodeExpansionToggles,
