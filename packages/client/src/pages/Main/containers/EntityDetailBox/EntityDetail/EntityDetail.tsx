@@ -861,21 +861,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         alwaysShowCreateModal
                       />
                     </StyledPropGroupWrap>
-                    {canEditEntity && (
-                      <Button
-                        color="primary"
-                        inverted
-                        size={ButtonSize.Medium}
-                        label="new metaproperty"
-                        icon={<IcoPlusBold />}
-                        onClick={() => {
-                          const newProp = CMetaProp();
-                          updateEntityMutation.mutate({
-                            props: [...entity.props, newProp],
-                          });
-                        }}
-                      />
-                    )}
                   </StyledDetailSectionContent>
                 )}
               </StyledDetailSection>

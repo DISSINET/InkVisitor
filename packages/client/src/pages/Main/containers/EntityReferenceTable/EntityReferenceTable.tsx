@@ -193,19 +193,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           />
         </StyledSpareRow>
       )}
-
-      <div style={{ marginTop: "1.5rem" }}>
-        {!disabled && (
-          <Button
-            icon={<IcoPlusBold />}
-            label={"new reference"}
-            color="primary"
-            inverted
-            size={ButtonSize.Medium}
-            onClick={() => handleAdd()}
-          />
-        )}
-      </div>
     </React.Fragment>
   );
 };
