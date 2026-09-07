@@ -1,4 +1,5 @@
 import {
+  BATCH_ATTRIBUTE_ELIGIBILITY_KEY,
   BATCH_RELATION_ELIGIBILITY_KEY,
   DETAIL_TAB_ENTITIES_KEY,
   MESSAGE_WARNING_ENTITIES_KEY,
@@ -21,6 +22,7 @@ import { useUsersGetMoreQuery } from "./useUsersGetMoreQuery";
 import { useUsersSimplifiedQuery } from "./useUsersSimplifiedQuery";
 
 export {
+  BATCH_ATTRIBUTE_ELIGIBILITY_KEY,
   BATCH_RELATION_ELIGIBILITY_KEY,
   DETAIL_TAB_ENTITIES_KEY,
   MESSAGE_WARNING_ENTITIES_KEY,

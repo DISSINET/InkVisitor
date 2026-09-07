@@ -83,3 +83,26 @@ export const StyledSelectColumn = styled.div`
 export const StyledSelectColumnLabel = styled.span`
   font-size: ${({ theme }) => theme.fontSize.sm};
 `;
+
+export const StyledBatchField = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+`;
+
+/** label of a single control inside a section, quieter than the section's own
+ * label so the section title stays the only bold line */
+export const StyledBatchFieldLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color.greyer};
+`;
+
+/** the arrow between a "change from" and a "change to" control; it sits in a
+ * field of its own so the empty label above keeps it level with the controls */
+export const StyledBatchArrow = styled.span`
+  display: flex;
+  align-items: center;
+  flex: 1;
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  color: ${({ theme }) => theme.color.greyer};
+`;

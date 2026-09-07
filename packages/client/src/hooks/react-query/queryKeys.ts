@@ -6,3 +6,4 @@ export const DETAIL_TAB_ENTITIES_KEY = "detail-tab-entities";
 export const WARNING_ANCHOR_ENTITIES_KEY = "warning-anchor-entities";
 export const MESSAGE_WARNING_ENTITIES_KEY = "message-warning-entities";
 export const BATCH_RELATION_ELIGIBILITY_KEY = "batch-relation-eligibility";
+export const BATCH_ATTRIBUTE_ELIGIBILITY_KEY = "batch-attribute-eligibility";
