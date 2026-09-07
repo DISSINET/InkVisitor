@@ -40,6 +40,22 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],
   Query.EdgeType["R:SOE"],
+  // ordered relation edges: the entity sits at entityIds[0] and the target at
+  // entityIds[1] (server: EdgeHasOrderedRelation in edge.ts)
+  Query.EdgeType["R:HOL"],
+  Query.EdgeType["R:AEE"],
+  Query.EdgeType["R:IMP"],
+  Query.EdgeType["R:SUS"],
+  Query.EdgeType["R:A1S"],
+  Query.EdgeType["R:A2S"],
+  // unordered relation edges: symmetric pairs and the Synonym cloud, where the
+  // entity can sit at any index (server: EdgeHasUnorderedRelation in edge.ts)
+  Query.EdgeType["R:SYN"],
+  Query.EdgeType["R:ANT"],
+  Query.EdgeType["R:PRR"],
+  Query.EdgeType["R:SAR"],
+  Query.EdgeType["R:IDE"],
+  Query.EdgeType["R:REL"],
   // SUT: match Statements under the target Territory. The target node's SUB
   // toggle widens it to the whole subtree - "include subordinates" of a Territory
   // is its child territories, all levels (server: getSubordinateEntityIds).

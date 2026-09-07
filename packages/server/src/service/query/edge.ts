@@ -305,6 +305,169 @@ export class EdgeHasSuperordinate extends SearchEdge {
   }
 }
 
+/**
+ * Members of `relation` that the iterated entity is related TO. Every occurrence
+ * of the entity's own id is dropped, so a symmetric pair yields just the other
+ * side no matter which index the entity sits at.
+ *
+ * A `selfLoop` relation may legitimately hold the entity as its own partner, in
+ * which case its id occupies BOTH slots - the entity is put back only when it
+ * appears more than once, so an ordinary pair still cannot match itself.
+ */
+function relationPartners(
+  relation: RDatum<RelationTypes.IRelation>,
+  entityId: RDatum<string>,
+  selfLoop: boolean
+): RDatum {
+  const others = relation("entityIds").filter(function (id: RDatum<string>) {
+    return id.ne(entityId);
+  });
+  if (!selfLoop) {
+    return others as unknown as RDatum;
+  }
+  return r.branch(
+    relation("entityIds")
+      .filter(function (id: RDatum<string>) {
+        return id.eq(entityId);
+      })
+      .count()
+      .gt(1),
+    others.append(entityId),
+    others
+  ) as unknown as RDatum;
+}
+
+/**
+ * Shared run for the forward relation edges whose entityIds carry no direction:
+ * the symmetric pairs (ANT, PRR, SAR, IDE, REL) and the Synonym cloud, where the
+ * iterated entity can sit at any index. Matches relations of `relationType` that
+ * contain the iterated entity and whose partners (see relationPartners) satisfy
+ * the edge target:
+ *  - any id of the pinned target-id set (`targetIds`, the pinned entity plus its
+ *    toggle-driven expansion), or
+ *  - any entity whose class is in `targetClasses` (empty suggester + class
+ *    selected there), or
+ *  - with neither, any relation of the type that has a partner at all.
+ * Emits the iterated entity, keeping the subset invariant positive matching and
+ * negation rely on. A dangling partner id (no such entity) is null-safe and
+ * simply fails the class condition.
+ */
+function runHasUnorderedRelationEdge(
+  q: RStream,
+  relationType: RelationEnums.Type,
+  targetIds: string[] | null,
+  targetClasses: EntityEnums.Class[],
+  selfLoop: boolean
+): RStream {
+  return q.concatMap(function (entity: RDatum<IEntity>) {
+    return r
+      .table(Relation.table)
+      .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+      .filter({
+        type: relationType,
+      })
+      .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+        return relation("entityIds").contains(entity("id"));
+      })
+      .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+        const partners = relationPartners(relation, entity("id"), selfLoop);
+
+        if (targetIds) {
+          return partners
+            .setIntersection(r.expr(targetIds))
+            .isEmpty()
+            .not();
+        }
+        if (targetClasses.length) {
+          return partners.contains(function (id: RDatum<string>) {
+            return r
+              .table(Entity.table)
+              .get(id)
+              .default(null)
+              .do(function (ent: RDatum) {
+                return r.branch(
+                  ent,
+                  r.expr(targetClasses).contains(ent("class")),
+                  false
+                );
+              });
+          });
+        }
+        return partners.isEmpty().not();
+      })
+      .map(function () {
+        return entity("id");
+      });
+  });
+}
+
+/**
+ * Relations whose entityIds are ordered [source, target]: the edge walks from
+ * the iterated entity at entityIds[0] to its target at entityIds[1]. The three
+ * relations that predate this map (Superclass, SuperordinateEntity,
+ * Classification) keep their own named classes.
+ */
+const ORDERED_RELATION_EDGES: Partial<Record<Query.EdgeType, RelationEnums.Type>> = {
+  [Query.EdgeType["R:HOL"]]: RelationEnums.Type.Holonym,
+  [Query.EdgeType["R:AEE"]]: RelationEnums.Type.ActionEventEquivalent,
+  [Query.EdgeType["R:IMP"]]: RelationEnums.Type.Implication,
+  [Query.EdgeType["R:SUS"]]: RelationEnums.Type.SubjectSemantics,
+  [Query.EdgeType["R:A1S"]]: RelationEnums.Type.Actant1Semantics,
+  [Query.EdgeType["R:A2S"]]: RelationEnums.Type.Actant2Semantics,
+};
+
+/**
+ * Relations that put no meaning on the entityIds order - the symmetric pairs and
+ * the Synonym cloud (Relation.RelationRules: asymmetrical false / cloudType).
+ * The iterated entity can sit at any index, so these walk partners instead of
+ * entityIds[1].
+ */
+const UNORDERED_RELATION_EDGES: Partial<Record<Query.EdgeType, RelationEnums.Type>> = {
+  [Query.EdgeType["R:SYN"]]: RelationEnums.Type.Synonym,
+  [Query.EdgeType["R:ANT"]]: RelationEnums.Type.Antonym,
+  [Query.EdgeType["R:PRR"]]: RelationEnums.Type.PropertyReciprocal,
+  [Query.EdgeType["R:SAR"]]: RelationEnums.Type.SubjectActant1Reciprocal,
+  [Query.EdgeType["R:IDE"]]: RelationEnums.Type.Identification,
+  [Query.EdgeType["R:REL"]]: RelationEnums.Type.Related,
+};
+
+export class EdgeHasOrderedRelation extends SearchEdge {
+  protected relationType: RelationEnums.Type;
+
+  constructor(data: Partial<Query.IEdge>, relationType: RelationEnums.Type) {
+    super(data);
+    this.relationType = relationType;
+  }
+
+  run(q: RStream): RStream {
+    return runHasRelationTargetEdge(
+      q,
+      this.relationType,
+      this.targetIds(),
+      this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+export class EdgeHasUnorderedRelation extends SearchEdge {
+  protected relationType: RelationEnums.Type;
+
+  constructor(data: Partial<Query.IEdge>, relationType: RelationEnums.Type) {
+    super(data);
+    this.relationType = relationType;
+  }
+
+  run(q: RStream): RStream {
+    return runHasUnorderedRelationEdge(
+      q,
+      this.relationType,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      RelationTypes.RelationRules[this.relationType]?.selfLoop ?? false
+    );
+  }
+}
+
 export class EdgeHasPropType extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -1056,7 +1219,20 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
-    default:
+    default: {
+      const orderedRelation = data.type
+        ? ORDERED_RELATION_EDGES[data.type]
+        : undefined;
+      if (orderedRelation) {
+        return new EdgeHasOrderedRelation(data, orderedRelation);
+      }
+      const unorderedRelation = data.type
+        ? UNORDERED_RELATION_EDGES[data.type]
+        : undefined;
+      if (unorderedRelation) {
+        return new EdgeHasUnorderedRelation(data, unorderedRelation);
+      }
       throw new InternalServerError(`unknown edge type: ${data.type}`);
+    }
   }
 }
