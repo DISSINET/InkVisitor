@@ -115,6 +115,25 @@ export namespace Query {
     params: { entityClass?: EntityEnums.Class[] };
   };
 
+  /**
+   * Classes an Identification relation can hold on either side. The relation
+   * rule states this as "any class except Action and Concept"
+   * (Relation.RelationRules[Identification]: empty allowedEntitiesPattern with
+   * disabledEntities), but an EdgeRule can only enumerate allowed classes.
+   */
+  const IDENTIFICATION_ENTITY_CLASSES = [
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Territory,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Value,
+  ];
+
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
       entityId: { allowedClasses: [] },
@@ -631,7 +650,10 @@ export namespace Query {
       },
     ],
     "R:HOL": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
@@ -642,7 +664,10 @@ export namespace Query {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
     ],
     "R:PRR": [
       {
@@ -691,13 +716,13 @@ export namespace Query {
       },
       {
         nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Event] },
+        params: { entityClass: [EntityEnums.Class.Concept] },
       },
     ],
     "I_R:AEE": [
       {
         nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Event] },
+        params: { entityClass: [EntityEnums.Class.Concept] },
       },
       {
         nodeType: NodeType.E,
@@ -719,24 +744,12 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "R:IDE": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Action] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
     ],
     "I_R:IDE": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Action] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
     ],
     "R:IMP": [
       {
