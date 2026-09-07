@@ -800,6 +800,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                   <StyledDetailSectionHeading>Metaproperties</StyledDetailSectionHeading>
                   {canEditEntity && isSectionExpanded(EntityDetailSection.Metaproperties) && (
                     <EntityDetailSectionButtons
+                      widthTooNarrow={widthTooNarrow}
                       entityId={entity.id}
                       setShowSubmit={setShowBatchRemovePropSubmit}
                       removeBtnTooltip="remove all metaproperties from entity"
