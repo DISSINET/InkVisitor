@@ -721,12 +721,12 @@ export class EdgeStatementHasActant2 extends SearchEdge {
  * a single Statement source node - each edge narrows the set to statements that
  * also reference that entity.
  *
- * Coverage matches the established getCoOccurrentEntityIds semantics (actions,
- * actants, tags, direct territory) plus in-statement prop type/value. Reference
- * resource/value and actant classifications/identifications have no shared "used
- * anywhere" index and are intentionally out of scope. With no target the edge
- * matches nothing (membership "in a statement" is only meaningful relative to a
- * specific entity).
+ * Coverage matches getCoOccurrentEntityIds: actions, actants, tags, direct
+ * territory and in-statement prop type/value. Reference resource/value and
+ * actant classifications/identifications have no shared "used anywhere" index
+ * and are intentionally out of scope. With no target the edge matches nothing
+ * (membership "in a statement" is only meaningful relative to a specific
+ * entity).
  */
 function runStatementHasEntityEdge(
   q: RStream,

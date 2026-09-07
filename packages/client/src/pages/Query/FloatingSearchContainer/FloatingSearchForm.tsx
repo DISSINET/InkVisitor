@@ -4,13 +4,18 @@ import {
   IRequestSearch,
   IRequestSearchRootValidity,
 } from "@inkvisitor/shared/types/request-search";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { Input, TypeBar } from "components";
-import Dropdown, { AttributeButtonGroup } from "components/advanced";
+import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
+import { useEntitiesQuery } from "hooks/react-query/useEntitiesQuery";
 import { useOrderedLanguageDict } from "hooks/react-query";
+import { mergeTokensIntoIds } from "pages/Query/utils";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
 import {
+  StyledCoOccurrenceBox,
+  StyledCoOccurrenceTags,
   StyledDateRange,
   StyledDateRangeField,
   StyledDateRangeLabel,
@@ -105,16 +110,52 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
   return searchData;
 };
 
+const filtersToCoOccurrenceIds = (filters: Explore.IExploreSearchFilter[]): string[] =>
+  filters.find(
+    (f): f is Explore.IExploreCoOccurrenceFilter => f.type === Explore.SearchOption.CoOccurrence,
+  )?.entityIds ?? [];
+
 interface FloatingSearchFormProps {
   dispatch: React.Dispatch<ExploreAction>;
   filters: Explore.IExploreSearchFilter[];
 }
 export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch, filters }) => {
-  const [searchData, setSearchData] = useState<IRequestSearch>(() =>
-    filtersToSearchData(filters),
-  );
+  const [searchData, setSearchData] = useState<IRequestSearch>(() => filtersToSearchData(filters));
 
   const { data: users } = useUsersSimplifiedQuery();
+
+  // the applied filter is the single source of truth for the picked entities:
+  // the form is unmounted while the panel is minimised, so keeping them in
+  // local state would lose them on reopen
+  const coOccurrenceIds = filtersToCoOccurrenceIds(filters);
+  const { data: coOccurrenceEntities } = useEntitiesQuery(
+    "floating-search-cooccurrence",
+    coOccurrenceIds,
+  );
+
+  const setCoOccurrenceIds = useCallback(
+    (entityIds: string[]) => {
+      dispatch({
+        type: ExploreActionType.setCoOccurrenceFilter,
+        payload: { entityIds },
+      });
+    },
+    [dispatch],
+  );
+
+  // pasted text is taken as a list of entity ids; the suggester keeps its own
+  // handling of anything that carries no complete uuid (a label to search for)
+  const handleCoOccurrencePaste = useCallback(
+    (event: React.ClipboardEvent) => {
+      const pasted = event.clipboardData.getData("text");
+      const mergedIds = mergeTokensIntoIds(coOccurrenceIds, pasted);
+      if (mergedIds !== coOccurrenceIds) {
+        event.preventDefault();
+        setCoOccurrenceIds(mergedIds);
+      }
+    },
+    [coOccurrenceIds, setCoOccurrenceIds],
+  );
 
   const orderedLanguageDict = useOrderedLanguageDict();
   const languageOptions: DropdownItem[] = useMemo(
@@ -225,6 +266,44 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             }}
           />
           <TypeBar entityLetter={defaultClassForTypeBar} />
+        </StyledRowControl>
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
+        <StyledRowControl>
+          <StyledCoOccurrenceBox onPaste={handleCoOccurrencePaste}>
+            {coOccurrenceEntities && coOccurrenceEntities.length > 0 && (
+              <StyledCoOccurrenceTags>
+                {coOccurrenceIds.map((entityId) => {
+                  const entity = coOccurrenceEntities.find((e) => e.id === entityId);
+                  return entity ? (
+                    <EntityTag
+                      key={entityId}
+                      entity={entity}
+                      tagMaxWidth={140}
+                      unlinkButton={{
+                        onClick: () =>
+                          setCoOccurrenceIds(coOccurrenceIds.filter((id) => id !== entityId)),
+                      }}
+                    />
+                  ) : null;
+                })}
+              </StyledCoOccurrenceTags>
+            )}
+            <EntitySuggester
+              categoryTypes={classesAll}
+              placeholder="entity"
+              inputWidth="full"
+              disableCreate
+              excludedActantIds={coOccurrenceIds}
+              onSelected={(entityId: string) => {
+                if (!coOccurrenceIds.includes(entityId)) {
+                  setCoOccurrenceIds([...coOccurrenceIds, entityId]);
+                }
+              }}
+            />
+          </StyledCoOccurrenceBox>
         </StyledRowControl>
       </StyledRow>
 

@@ -11,6 +11,10 @@ import { findEntityById } from "@service/shorthands";
 import { Connection } from "rethinkdb-ts";
 import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
+import {
+  applyCoOccurrenceFilter,
+  getCoOccurrenceFilter,
+} from "./explore-cooccurrence-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
 import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
 
@@ -63,7 +67,17 @@ export default class Results<T extends { id: string }> {
       }
     }
 
-    // 2. Label (db regex / wildcard)
+    // 2. Co-occurrence (one indexed statement query, independent of the
+    //    candidate count) - runs before the per-candidate filters below.
+    const coOccurrenceFilter = getCoOccurrenceFilter(exploreData.filters);
+    if (coOccurrenceFilter?.entityIds.length) {
+      this.items = await applyCoOccurrenceFilter(db, this.items, coOccurrenceFilter);
+      if (!this.items.length) {
+        return;
+      }
+    }
+
+    // 3. Label (db regex / wildcard)
     const rowLabelFilter = getRowLabelFilter(exploreData.filters);
     if (rowLabelFilter?.label?.trim()) {
       this.items = await filterEntityIdsByRowLabelFilter(db, this.items, rowLabelFilter);
@@ -72,14 +86,14 @@ export default class Results<T extends { id: string }> {
       }
     }
 
-    // 3. Search-box filters (status, language, dates, created/updated/edited by)
+    // 4. Search-box filters (status, language, dates, created/updated/edited by)
     //    reused via the existing SearchQuery backend.
     this.items = await applyRequestSearchFilters(db, this.items, exploreData.filters);
     if (!this.items.length) {
       return;
     }
 
-    // 4. Root validity (most expensive: per-entity relation queries) - run last
+    // 5. Root validity (most expensive: per-entity relation queries) - run last
     //    on the smallest candidate set.
     const rootValidityFilter = getRootValidityFilter(exploreData.filters);
     if (rootValidityFilter) {

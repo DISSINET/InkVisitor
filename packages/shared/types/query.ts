@@ -973,6 +973,7 @@ export namespace Explore {
     UpdatedBy = "updated by",
     EditedBy = "edited by",
     RootValidity = "root validity",
+    CoOccurrence = "co-occurs with",
   }
 
   export type IExploreSearchFilter =
@@ -985,7 +986,8 @@ export namespace Explore {
     | IExploreCreatedByFilter
     | IExploreUpdatedByFilter
     | IExploreEditedByFilter
-    | IExploreRootValidityFilter;
+    | IExploreRootValidityFilter
+    | IExploreCoOccurrenceFilter;
 
   export interface IExploreLabelFilter {
     type: SearchOption.Label;
@@ -996,6 +998,12 @@ export namespace Explore {
   export interface IExploreUuidsFilter {
     type: SearchOption.UUIDs;
     ids: string[];
+  }
+  export interface IExploreCoOccurrenceFilter {
+    type: SearchOption.CoOccurrence;
+    // OR semantics - matches entities sharing a statement with any of the
+    // listed entities; the listed entities themselves are never matched
+    entityIds: string[];
   }
   interface IExploreStatusFilter {
     type: SearchOption.Status;

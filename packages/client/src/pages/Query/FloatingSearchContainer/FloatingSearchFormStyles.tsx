@@ -47,3 +47,16 @@ export const StyledDateRangeLabel = styled.span`
   font-size: ${({ theme }) => theme.fontSize.xxs};
   text-transform: lowercase;
 `;
+
+export const StyledCoOccurrenceBox = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledCoOccurrenceTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+`;
