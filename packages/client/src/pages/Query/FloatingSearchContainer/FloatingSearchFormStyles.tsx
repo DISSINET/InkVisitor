@@ -90,14 +90,13 @@ export const StyledCoOccurrenceClear = styled.button`
   color: ${({ theme }) => theme.color["info"]};
 `;
 
-export const StyledCoOccurrenceTags = styled.div`
+export const StyledCoOccurrenceListWrap = styled.div<{ $height: number }>`
+  height: ${({ $height }) => `${$height}px`};
+`;
+
+export const StyledCoOccurrenceListRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: ${({ theme }) => theme.space[1]};
-  // a pasted batch can run to hundreds of entities - bound the row and scroll
-  max-height: ${({ theme }) => theme.space[28]};
-  overflow-y: auto;
+  align-items: center;
 `;
 
 export const StyledCoOccurrenceUuidChip = styled.span`

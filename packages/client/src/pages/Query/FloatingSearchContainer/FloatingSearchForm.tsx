@@ -6,25 +6,21 @@ import {
 } from "@inkvisitor/shared/types/request-search";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { Input, TypeBar } from "components";
-import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
-import { useEntitiesQuery } from "hooks/react-query/useEntitiesQuery";
+import Dropdown, { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import { mergeTokensIntoIds, parseEntityIdsFromText, shortenUuid } from "pages/Query/utils";
+import { mergeTokensIntoIds, parseEntityIdsFromText } from "pages/Query/utils";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
 import { MdClose } from "react-icons/md";
 import { IcoChevronDown } from "Theme/icons";
+import { CoOccurrenceEntityList } from "./CoOccurrenceEntityList";
 import {
   StyledCoOccurrenceBox,
   StyledCoOccurrenceChevron,
-  StyledCoOccurrenceChipRemove,
   StyledCoOccurrenceClear,
-  StyledCoOccurrenceMore,
   StyledCoOccurrenceSummary,
-  StyledCoOccurrenceTags,
   StyledCoOccurrenceToggle,
-  StyledCoOccurrenceUuidChip,
   StyledDateRange,
   StyledDateRangeField,
   StyledDateRangeLabel,
@@ -119,10 +115,6 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
   return searchData;
 };
 
-// labels are fetched for this many of the picked entities; the rest stay
-// counted but unnamed, so a batch of hundreds of pasted ids costs one request
-const COOCCURRENCE_LABEL_LIMIT = 100;
-
 const filtersToCoOccurrenceIds = (filters: Explore.IExploreSearchFilter[]): string[] =>
   filters.find(
     (f): f is Explore.IExploreCoOccurrenceFilter => f.type === Explore.SearchOption.CoOccurrence,
@@ -141,20 +133,9 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
   // the form is unmounted while the panel is minimised, so keeping them in
   // local state would lose them on reopen
   const coOccurrenceIds = filtersToCoOccurrenceIds(filters);
+  // the collapsed row shows a count only; the list below fetches the entities
+  // for the rows it actually renders
   const [coOccurrenceExpanded, setCoOccurrenceExpanded] = useState(false);
-
-  const labeledCoOccurrenceIds = useMemo(
-    () => coOccurrenceIds.slice(0, COOCCURRENCE_LABEL_LIMIT),
-    [coOccurrenceIds],
-  );
-  const { data: coOccurrenceEntities } = useEntitiesQuery(
-    "floating-search-cooccurrence",
-    labeledCoOccurrenceIds,
-    // the collapsed row shows a count only, so nothing is fetched until the
-    // list is opened; removing a tag re-keys the query, and the previous
-    // entities cover the remaining ids while it reloads
-    { enabled: coOccurrenceExpanded, keepPrevious: true },
-  );
 
   const setCoOccurrenceIds = useCallback(
     (entityIds: string[]) => {
@@ -339,39 +320,10 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
             )}
 
             {coOccurrenceExpanded && coOccurrenceIds.length > 0 && (
-              <StyledCoOccurrenceTags>
-                {labeledCoOccurrenceIds.map((entityId) => {
-                  const entity = coOccurrenceEntities?.find((e) => e.id === entityId);
-                  // an id that no entity answers to - a mistyped or deleted one -
-                  // still filters, so it is shown as the raw id rather than dropped
-                  return entity ? (
-                    <EntityTag
-                      key={entityId}
-                      entity={entity}
-                      tagMaxWidth={140}
-                      unlinkButton={{
-                        onClick: () => removeCoOccurrenceId(entityId),
-                      }}
-                    />
-                  ) : (
-                    <StyledCoOccurrenceUuidChip key={entityId} title={entityId}>
-                      {shortenUuid(entityId)}
-                      <StyledCoOccurrenceChipRemove
-                        type="button"
-                        aria-label={`Remove ${entityId}`}
-                        onClick={() => removeCoOccurrenceId(entityId)}
-                      >
-                        <MdClose size={12} />
-                      </StyledCoOccurrenceChipRemove>
-                    </StyledCoOccurrenceUuidChip>
-                  );
-                })}
-                {coOccurrenceIds.length > labeledCoOccurrenceIds.length && (
-                  <StyledCoOccurrenceMore>
-                    +{coOccurrenceIds.length - labeledCoOccurrenceIds.length} more
-                  </StyledCoOccurrenceMore>
-                )}
-              </StyledCoOccurrenceTags>
+              <CoOccurrenceEntityList
+                entityIds={coOccurrenceIds}
+                onRemove={removeCoOccurrenceId}
+              />
             )}
           </StyledCoOccurrenceBox>
         </StyledRowControl>
