@@ -151,8 +151,9 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
     "floating-search-cooccurrence",
     labeledCoOccurrenceIds,
     // the collapsed row shows a count only, so nothing is fetched until the
-    // list is opened
-    { enabled: coOccurrenceExpanded },
+    // list is opened; removing a tag re-keys the query, and the previous
+    // entities cover the remaining ids while it reloads
+    { enabled: coOccurrenceExpanded, keepPrevious: true },
   );
 
   const setCoOccurrenceIds = useCallback(
