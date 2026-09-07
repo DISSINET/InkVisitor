@@ -5,6 +5,7 @@ import {
   Button,
   ButtonGroup,
   CancelButton,
+  Checkbox,
   Modal,
   ModalContent,
   ModalFooter,
@@ -38,8 +39,6 @@ import {
 } from "./styles";
 import {
   ATTRIBUTE_PREVIEW_FETCH_MAX,
-  BATCH_ATTRIBUTE_ANY,
-  batchAttributeFrom,
   batchAttributeFromOptions,
   batchAttributeMatches,
 } from "./utils";
@@ -68,10 +67,14 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
     enabled: !isLargeSelection,
   });
 
-  const [fromValue, setFromValue] = useState<
-    EntityEnums.Language | typeof BATCH_ATTRIBUTE_ANY
-  >(EntityEnums.Language.Empty);
+  const [fromValue, setFromValue] = useState<EntityEnums.Language>(
+    EntityEnums.Language.Empty
+  );
   const [toValue, setToValue] = useState<EntityEnums.Language | undefined>();
+  const [overwriteExisting, setOverwriteExisting] = useState(false);
+
+  /** the source value as the API takes it: null for every current value */
+  const from = overwriteExisting ? null : fromValue;
 
   const fromOptions = useMemo(
     () => batchAttributeFromOptions(orderedLanguageDict),
@@ -82,7 +85,6 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
     if (isLargeSelection || !fetchedEntities || toValue === undefined) {
       return undefined;
     }
-    const from = batchAttributeFrom(fromValue);
     return fetchedEntities.filter((entity) =>
       batchAttributeMatches(
         entity.language || EntityEnums.Language.Empty,
@@ -90,14 +92,14 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
         toValue
       )
     ).length;
-  }, [fetchedEntities, isLargeSelection, fromValue, toValue]);
+  }, [fetchedEntities, isLargeSelection, from, toValue]);
 
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (toValue === undefined) return;
       return api.batchEntitySetAttribute(selectedEntityIds, {
         attribute: "language",
-        from: batchAttributeFrom(fromValue),
+        from,
         to: toValue,
       });
     },
@@ -187,10 +189,9 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
                     width={200}
                     value={fromValue}
                     options={fromOptions}
+                    disabled={overwriteExisting}
                     onChange={(value) =>
-                      setFromValue(
-                        value as EntityEnums.Language | typeof BATCH_ATTRIBUTE_ANY
-                      )
+                      setFromValue(value as EntityEnums.Language)
                     }
                   />
                 </StyledBatchField>
@@ -211,12 +212,17 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
                   />
                 </StyledBatchField>
               </StyledBatchAttrRow>
+              <Checkbox
+                label="also overwrite existing value"
+                value={overwriteExisting}
+                onChangeFn={setOverwriteExisting}
+                size={13}
+              />
             </StyledBatchSection>
 
             {matchCount === 0 ? (
               <StyledBatchDangerText>
-                No selected entity matches the "change from" value — nothing
-                would change.
+                No selected entity would change.
               </StyledBatchDangerText>
             ) : (
               <StyledBatchMessage>{message}</StyledBatchMessage>

@@ -10,6 +10,7 @@ import {
   Button,
   ButtonGroup,
   CancelButton,
+  Checkbox,
   Modal,
   ModalContent,
   ModalFooter,
@@ -39,8 +40,6 @@ import {
 } from "./styles";
 import {
   ATTRIBUTE_PREVIEW_FETCH_MAX,
-  BATCH_ATTRIBUTE_ANY,
-  batchAttributeFrom,
   batchAttributeFromOptions,
   batchAttributeMatches,
 } from "./utils";
@@ -76,19 +75,21 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
     enabled: !isLargeSelection,
   });
 
-  const [conceptFrom, setConceptFrom] = useState<
-    EntityEnums.ConceptPartOfSpeech | typeof BATCH_ATTRIBUTE_ANY
-  >(EntityEnums.ConceptPartOfSpeech.Empty);
+  const [conceptFrom, setConceptFrom] = useState<EntityEnums.ConceptPartOfSpeech>(
+    EntityEnums.ConceptPartOfSpeech.Empty
+  );
   const [conceptTo, setConceptTo] = useState<
     EntityEnums.ConceptPartOfSpeech | undefined
   >();
+  const [conceptOverwrite, setConceptOverwrite] = useState(false);
 
   const [actionFrom, setActionFrom] = useState<
-    EntityEnums.ActionPartOfSpeech | "" | typeof BATCH_ATTRIBUTE_ANY
+    EntityEnums.ActionPartOfSpeech | ""
   >("");
   const [actionTo, setActionTo] = useState<
     EntityEnums.ActionPartOfSpeech | undefined
   >();
+  const [actionOverwrite, setActionOverwrite] = useState(false);
 
   const { conceptEntities, actionEntities } = useMemo(() => {
     const entities = isLargeSelection ? [] : fetchedEntities ?? [];
@@ -112,13 +113,29 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
     return {
       attribute: "pos",
       ...(conceptTo !== undefined && showConcept
-        ? { concept: { from: batchAttributeFrom(conceptFrom), to: conceptTo } }
+        ? {
+            concept: {
+              from: conceptOverwrite ? null : conceptFrom,
+              to: conceptTo,
+            },
+          }
         : {}),
       ...(actionTo !== undefined && showAction
-        ? { action: { from: batchAttributeFrom(actionFrom), to: actionTo } }
+        ? {
+            action: { from: actionOverwrite ? null : actionFrom, to: actionTo },
+          }
         : {}),
     };
-  }, [conceptFrom, conceptTo, actionFrom, actionTo, showConcept, showAction]);
+  }, [
+    conceptFrom,
+    conceptTo,
+    conceptOverwrite,
+    actionFrom,
+    actionTo,
+    actionOverwrite,
+    showConcept,
+    showAction,
+  ]);
 
   const matchCount = useMemo<number | undefined>(() => {
     if (isLargeSelection || !fetchedEntities || !changes) return undefined;
@@ -265,12 +282,9 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
                       options={batchAttributeFromOptions(
                         conceptPartOfSpeechDict
                       )}
+                      disabled={conceptOverwrite}
                       onChange={(value) =>
-                        setConceptFrom(
-                          value as
-                            | EntityEnums.ConceptPartOfSpeech
-                            | typeof BATCH_ATTRIBUTE_ANY
-                        )
+                        setConceptFrom(value as EntityEnums.ConceptPartOfSpeech)
                       }
                     />
                   </StyledBatchField>
@@ -291,6 +305,12 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
                     />
                   </StyledBatchField>
                 </StyledBatchAttrRow>
+                <Checkbox
+                  label="also overwrite existing value"
+                  value={conceptOverwrite}
+                  onChangeFn={setConceptOverwrite}
+                  size={13}
+                />
               </StyledBatchSection>
             )}
 
@@ -308,12 +328,10 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
                       width={200}
                       value={actionFrom}
                       options={batchAttributeFromOptions(actionFromDict)}
+                      disabled={actionOverwrite}
                       onChange={(value) =>
                         setActionFrom(
-                          value as
-                            | EntityEnums.ActionPartOfSpeech
-                            | ""
-                            | typeof BATCH_ATTRIBUTE_ANY
+                          value as EntityEnums.ActionPartOfSpeech | ""
                         )
                       }
                     />
@@ -335,13 +353,18 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
                     />
                   </StyledBatchField>
                 </StyledBatchAttrRow>
+                <Checkbox
+                  label="also overwrite existing value"
+                  value={actionOverwrite}
+                  onChangeFn={setActionOverwrite}
+                  size={13}
+                />
               </StyledBatchSection>
             )}
 
             {matchCount === 0 ? (
               <StyledBatchDangerText>
-                No selected entity matches the "change from" value — nothing
-                would change.
+                No selected entity would change.
               </StyledBatchDangerText>
             ) : (
               <StyledBatchMessage>{message}</StyledBatchMessage>
