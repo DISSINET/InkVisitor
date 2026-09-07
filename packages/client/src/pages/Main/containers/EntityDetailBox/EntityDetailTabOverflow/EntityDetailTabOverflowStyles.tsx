@@ -3,10 +3,7 @@ import styled from "styled-components";
 /** Width (px) the caret button occupies in the tab strip. */
 export const OVERFLOW_TAB_WIDTH = 46;
 
-interface StyledOverflowButton {
-  $hasSelected?: boolean;
-}
-export const StyledOverflowButton = styled.button<StyledOverflowButton>`
+export const StyledOverflowButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -14,11 +11,9 @@ export const StyledOverflowButton = styled.button<StyledOverflowButton>`
   flex-shrink: 0;
   width: ${OVERFLOW_TAB_WIDTH}px;
   cursor: pointer;
-  background-color: ${({ theme, $hasSelected }) =>
-    $hasSelected ? "transparent" : theme.color["gray"][100]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-bottom: ${({ $hasSelected }) => ($hasSelected ? "none" : "")};
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   padding: 0;
@@ -46,21 +41,16 @@ export const StyledOverflowList = styled.div`
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
 `;
 
-interface StyledOverflowRow {
-  $isSelected?: boolean;
-}
-export const StyledOverflowRow = styled.div<StyledOverflowRow>`
+export const StyledOverflowRow = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
   cursor: pointer;
-  background-color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.color["gray"][300] : "transparent"};
+  background-color: transparent;
 
   &:hover {
-    background-color: ${({ theme, $isSelected }) =>
-      $isSelected ? theme.color["gray"][300] : theme.color["gray"][200]};
+    background-color: ${({ theme }) => theme.color["gray"][200]};
   }
 `;
 

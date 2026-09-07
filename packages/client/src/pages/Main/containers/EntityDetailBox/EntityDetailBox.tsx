@@ -183,7 +183,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
           {overflowEntities.length > 0 && (
             <EntityDetailTabOverflow
               entities={overflowEntities}
-              selectedDetailId={selectedDetailId}
               onSelect={(entityId) => {
                 if (isMinimized) {
                   onRestore?.();

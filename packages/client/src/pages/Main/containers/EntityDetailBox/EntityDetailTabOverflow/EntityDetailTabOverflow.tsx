@@ -29,13 +29,11 @@ const PANEL_VIEWPORT_PADDING = 8;
 
 interface EntityDetailTabOverflow {
   entities: IResponseEntity[];
-  selectedDetailId: string;
   onSelect: (entityId: string) => void;
   onClose: (entityId: string) => void;
 }
 export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
   entities,
-  selectedDetailId,
   onSelect,
   onClose,
 }) => {
@@ -65,16 +63,9 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
   const role = useRole(context, { role: "menu" });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
 
-  const hasSelected = entities.some((entity) => entity.id === selectedDetailId);
-
   return (
     <>
-      <StyledOverflowButton
-        ref={refs.setReference}
-        type="button"
-        $hasSelected={hasSelected}
-        {...getReferenceProps()}
-      >
+      <StyledOverflowButton ref={refs.setReference} type="button" {...getReferenceProps()}>
         <StyledOverflowCount>{`+${entities.length}`}</StyledOverflowCount>
         <IcoCaretDown size={11} />
       </StyledOverflowButton>
@@ -89,7 +80,6 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
             {entities.map((entity) => (
               <StyledOverflowRow
                 key={entity.id}
-                $isSelected={entity.id === selectedDetailId}
                 onClick={() => {
                   setOpen(false);
                   onSelect(entity.id);
