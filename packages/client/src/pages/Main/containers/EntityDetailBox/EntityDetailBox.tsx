@@ -104,35 +104,31 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
     return Math.max(1, Math.floor((tabGroupWidth - OVERFLOW_TAB_WIDTH) / MIN_TAB_WIDTH));
   }, [tabGroupWidth, entities.length]);
 
-  const visibleEntities = entities.slice(0, visibleTabCount);
-  const overflowEntities = entities.slice(visibleTabCount);
+  // A tab selected from elsewhere - a link, a query result, the caret list -
+  // can sit past the last visible slot. It borrows that slot for display and
+  // the tab that held it moves behind the caret; the order the tabs are kept
+  // in is untouched, since that order is what the `detail` url param is
+  // written from and a narrower strip must not rewrite it. Each visible tab
+  // carries its index in `entities` so drag-and-drop still moves the right one.
+  const { visibleTabs, overflowEntities } = useMemo(() => {
+    const selectedIndex = entities.findIndex((e) => e.id === selectedDetailId);
 
-  const moveToFront = useCallback(
-    (entityId: string) => {
-      const index = entities.findIndex((e) => e.id === entityId);
-      if (index < 1) {
-        return;
-      }
-      const reordered = update(entities, {
-        $splice: [
-          [index, 1],
-          [0, 0, entities[index]],
+    if (selectedIndex >= visibleTabCount) {
+      const lastSlot = visibleTabCount - 1;
+      return {
+        visibleTabs: [
+          ...entities.slice(0, lastSlot).map((entity, index) => ({ entity, index })),
+          { entity: entities[selectedIndex], index: selectedIndex },
         ],
-      });
-      setEntities(reordered);
-      replaceDetailIds(reordered.map((e) => e.id));
-    },
-    [entities, replaceDetailIds],
-  );
-
-  // a tab selected from elsewhere (a link, a query result) can sit past the
-  // visible slots, so it takes the first one and stays in sight
-  const selectedIsHidden = overflowEntities.some((e) => e.id === selectedDetailId);
-  useEffect(() => {
-    if (selectedIsHidden) {
-      moveToFront(selectedDetailId);
+        overflowEntities: entities.filter((_, i) => i >= lastSlot && i !== selectedIndex),
+      };
     }
-  }, [selectedIsHidden, selectedDetailId, moveToFront]);
+
+    return {
+      visibleTabs: entities.slice(0, visibleTabCount).map((entity, index) => ({ entity, index })),
+      overflowEntities: entities.slice(visibleTabCount),
+    };
+  }, [entities, visibleTabCount, selectedDetailId]);
 
   const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
     setEntities((prevEntities) =>
@@ -163,10 +159,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
     <>
       {entities && entities.length > 0 && (
         <StyledTabGroup ref={tabGroupRef}>
-          {visibleEntities.map((entity, key) => (
+          {visibleTabs.map(({ entity, index }) => (
             <EntityDetailTab
-              key={key}
-              index={key}
+              key={entity.id}
+              index={index}
               entity={entity}
               onClick={() => {
                 if (isMinimized) {
@@ -193,7 +189,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
                   onRestore?.();
                 }
                 onTabOpen?.();
-                moveToFront(entityId);
                 setSelectedDetailId(entityId);
               }}
               onClose={(entityId) => handleClose(entityId)}
