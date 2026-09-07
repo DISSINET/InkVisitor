@@ -21,6 +21,7 @@ export namespace Query {
 
   export interface INodeParams {
     entityClasses?: EntityEnums.Class[];
+    entityStatuses?: EntityEnums.Status[];
     label?: string;
     entityId?: string;
     includeEquivalents?: boolean;

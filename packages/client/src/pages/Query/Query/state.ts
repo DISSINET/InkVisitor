@@ -69,6 +69,7 @@ enum QueryActionType {
   updateEdgeLogic,
   updateNodeType,
   updateNodeClass,
+  updateNodeStatuses,
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
@@ -99,6 +100,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeClass;
       payload: { nodeId: string; newEntityClasses: EntityEnums.Class[] };
+    }
+  | {
+      type: QueryActionType.updateNodeStatuses;
+      payload: { nodeId: string; newEntityStatuses: EntityEnums.Status[] };
     }
   | {
       type: QueryActionType.updateNodeEntityId;
@@ -197,6 +202,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeClass:
       return updateNodeClass(state, action.payload.nodeId, action.payload.newEntityClasses);
 
+    case QueryActionType.updateNodeStatuses:
+      return updateNodeStatuses(state, action.payload.nodeId, action.payload.newEntityStatuses);
+
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
@@ -237,6 +245,26 @@ const updateNodeClass = (
   return updatedState;
 };
 
+const updateNodeStatuses = (
+  state: Query.INode,
+  nodeId: string,
+  newEntityStatuses: EntityEnums.Status[],
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  if (newEntityStatuses.length === 0) {
+    delete nodeToUpdate.params.entityStatuses;
+  } else {
+    nodeToUpdate.params.entityStatuses = newEntityStatuses;
+  }
+
+  return updatedState;
+};
+
 const updateNodeEntityId = (
   state: Query.INode,
   nodeId: string,
@@ -253,6 +281,9 @@ const updateNodeEntityId = (
   } else {
     nodeToUpdate.params.entityId = newEntityId;
     nodeToUpdate.params.entityClasses = [];
+    // a pinned entity carries its own status, so the status filter has no
+    // picker while one is set
+    delete nodeToUpdate.params.entityStatuses;
   }
 
   return updatedState;

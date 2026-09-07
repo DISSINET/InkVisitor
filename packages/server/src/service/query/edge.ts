@@ -27,11 +27,12 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * Expanded target-id set for a pinned target node, resolved in prepare():
-   * the pinned entityId plus its equivalents (SYN/AEE/IDE) and/or subordinates
-   * (inverse SCL/SOE/HOL + child territories, all levels) when the node's
-   * expansion toggles ask for them. Null when the target node is not pinned -
-   * toggles never affect an unpinned target.
+   * Explicit target-id set for the edge, resolved in prepare(): for a pinned
+   * target node the pinned entityId plus its equivalents (SYN/AEE/IDE) and/or
+   * subordinates (inverse SCL/SOE/HOL + child territories, all levels) when the
+   * node's expansion toggles ask for them; for an unpinned node the entities
+   * matching its status constraint. Null when the target is neither pinned nor
+   * status-constrained - expansion toggles never affect an unpinned target.
    */
   protected targetEntityIds: string[] | null = null;
 
@@ -43,8 +44,15 @@ export default class SearchEdge implements Query.IEdge {
    */
   async prepare(db: Connection): Promise<void> {
     const entityId = this.node.params.entityId;
+    const statuses = this.node.params.entityStatuses ?? [];
+
     if (!entityId) {
-      this.targetEntityIds = null;
+      // resolving the status constraint into an id set here is what makes it
+      // apply to every edge type: each run() already matches against
+      // targetIds(), so no edge needs to know about statuses
+      this.targetEntityIds = statuses.length
+        ? await this.statusTargetIds(db, statuses)
+        : null;
       return;
     }
 
@@ -60,14 +68,36 @@ export default class SearchEdge implements Query.IEdge {
         ids.add(id);
       }
     }
-    this.targetEntityIds = [...ids];
+    this.targetEntityIds = statuses.length
+      ? await filterIdsByStatus(db, [...ids], statuses)
+      : [...ids];
   }
 
   /**
-   * Target-id set for run() call sites to match against. Non-empty when the
-   * target node is pinned (it always contains the pinned id itself), null
-   * otherwise. Falls back to the raw params.entityId when prepare() has not
-   * run, so a bare run() keeps the single-id semantics.
+   * Ids of entities carrying one of `statuses`, narrowed by the target node's
+   * classes when it has any. Status has no index, so without classes this is a
+   * full scan of the entity table.
+   */
+  private async statusTargetIds(
+    db: Connection,
+    statuses: EntityEnums.Status[]
+  ): Promise<string[]> {
+    const classes = this.node.params.entityClasses ?? [];
+    const base: RStream = classes.length
+      ? r
+          .table(Entity.table)
+          .getAll(r.args(classes), { index: DbEnums.Indexes.Class })
+      : r.table(Entity.table);
+
+    return filterStreamByStatus(base, statuses).run(db) as Promise<string[]>;
+  }
+
+  /**
+   * Target-id set for run() call sites to match against, null when the target
+   * is unconstrained. A pinned target always contains at least the pinned id; a
+   * status-constrained one may resolve to an empty set, which every run()
+   * treats as "matches nothing". Falls back to the raw params.entityId when
+   * prepare() has not run, so a bare run() keeps the single-id semantics.
    */
   protected targetIds(): string[] | null {
     if (this.targetEntityIds) {
@@ -80,6 +110,39 @@ export default class SearchEdge implements Query.IEdge {
   run(q: RStream): RStream {
     throw new Error("base SearchEdge does not implement run method");
   }
+}
+
+/**
+ * Narrows a stream of entities to those carrying one of `statuses` and emits
+ * their distinct ids.
+ */
+function filterStreamByStatus(
+  q: RStream,
+  statuses: EntityEnums.Status[]
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return r.expr(statuses).contains(e("status"));
+    })
+    .getField("id")
+    .distinct() as unknown as RStream;
+}
+
+/**
+ * Subset of `ids` whose entities carry one of `statuses`.
+ */
+async function filterIdsByStatus(
+  db: Connection,
+  ids: string[],
+  statuses: EntityEnums.Status[]
+): Promise<string[]> {
+  if (!ids.length) {
+    return ids;
+  }
+  return filterStreamByStatus(
+    r.table(Entity.table).getAll(r.args(ids)),
+    statuses
+  ).run(db) as Promise<string[]>;
 }
 
 /**

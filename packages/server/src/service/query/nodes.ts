@@ -37,7 +37,7 @@ export default class SearchNode implements Query.INode {
 
   /**
    * Builds the base entity stream for this node from its own params
-   * (entityClasses / entityId / label). Nested child-node params are NOT
+   * (entityClasses / entityStatuses / entityId / label). Nested child-node params are NOT
    * applied here - they describe the target of the parent edge and are
    * consumed by that edge, not used to filter the entity stream.
    */
@@ -47,6 +47,12 @@ export default class SearchNode implements Query.INode {
       const classes = this.params.entityClasses;
       q = q.filter(function (row: RDatum) {
         return r.expr(classes).contains(row("class"));
+      });
+    }
+    if (this.params.entityStatuses?.length) {
+      const statuses = this.params.entityStatuses;
+      q = q.filter(function (row: RDatum) {
+        return r.expr(statuses).contains(row("status"));
       });
     }
     if (this.params.entityId) {
