@@ -9,7 +9,7 @@ export const StyledBatchSectionLabel = styled.span`
 
 export const StyledBatchMessage = styled.label`
   font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.color.greyer};
+  color: ${({ theme }) => theme.color.mutedText};
   font-style: italic;
 `;
 
@@ -94,7 +94,7 @@ export const StyledBatchField = styled.div`
  * label so the section title stays the only bold line */
 export const StyledBatchFieldLabel = styled.span`
   font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme }) => theme.color.greyer};
+  color: ${({ theme }) => theme.color.mutedText};
 `;
 
 /** the arrow between a "change from" and a "change to" control; it sits in a
@@ -104,5 +104,5 @@ export const StyledBatchArrow = styled.span`
   align-items: center;
   flex: 1;
   font-size: ${({ theme }) => theme.fontSize.lg};
-  color: ${({ theme }) => theme.color.greyer};
+  color: ${({ theme }) => theme.color.mutedText};
 `;
