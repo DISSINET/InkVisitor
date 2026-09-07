@@ -26,7 +26,7 @@ export namespace Query {
     includeEquivalents?: boolean;
     includeSubordinates?: boolean;
   }
-  export interface IEdgeParams { }
+  export interface IEdgeParams {}
 
   export enum NodeType {
     E = "Entity",
@@ -949,10 +949,7 @@ export namespace Explore {
    * time filter, and omitting fromDate/toDate lets the server skip the audit
    * `between` scan entirely.
    */
-  export type IExploreStatsParams = Omit<
-    IStatsAggregationParams,
-    "fromDate" | "toDate"
-  > & {
+  export type IExploreStatsParams = Omit<IStatsAggregationParams, "fromDate" | "toDate"> & {
     fromDate?: number;
     toDate?: number;
   };
@@ -973,7 +970,7 @@ export namespace Explore {
     UpdatedBy = "updated by",
     EditedBy = "edited by",
     RootValidity = "root validity",
-    CoOccurrence = "co-occurs with",
+    CoOccurrence = "co-occurrence",
   }
 
   export type IExploreSearchFilter =

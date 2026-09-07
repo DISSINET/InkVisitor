@@ -330,7 +330,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
         <StyledRowControl>
           <StyledDateRange>
             <StyledDateRangeField>
@@ -382,7 +382,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
         <StyledRowControl>
           <StyledDateRange>
             <StyledDateRangeField>

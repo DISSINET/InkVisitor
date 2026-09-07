@@ -17,7 +17,7 @@ import {
 // px; one picked entity per row, matching EntityTag's own height
 const ROW_HEIGHT = 26;
 // rows the list shows before it scrolls
-const MAX_VISIBLE_ROWS = 5;
+const MAX_VISIBLE_ROWS = 3;
 // entities fetched per request; the rows on screen decide which chunks are asked for
 const CHUNK_SIZE = 50;
 

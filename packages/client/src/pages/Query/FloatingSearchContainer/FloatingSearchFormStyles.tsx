@@ -1,5 +1,10 @@
 import styled from "styled-components";
 
+// height of the caption a stacked field carries above its input ("after",
+// "before"). The row header offsets itself by the same amount so it lines up
+// with the input rather than with the caption.
+const FIELD_LABEL_HEIGHT = "1.2rem";
+
 export const StyledForm = styled.div`
   display: flex;
   flex-direction: column;
@@ -9,7 +14,9 @@ export const StyledRow = styled.div`
   position: relative;
   display: grid;
   grid-template-columns: ${({ theme }) => theme.space["32"]} 1fr;
-  align-items: center;
+  // a control can stack several fields under the first one (a date range, the
+  // picked co-occurrence entities); the header belongs next to the first
+  align-items: start;
   margin-bottom: ${({ theme }) => theme.space[2]};
 
   &:last-child {
@@ -17,7 +24,16 @@ export const StyledRow = styled.div`
   }
 `;
 
-export const StyledRowHeader = styled.div`
+export const StyledRowHeader = styled.div<{ $belowFieldLabel?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  // one input tall, so the header sits centred against the control's first
+  // input. Box-sizing is border-box, so the caption offset has to be added to
+  // the height as well - it is padding, and would otherwise eat into it.
+  min-height: ${({ theme, $belowFieldLabel }) =>
+    $belowFieldLabel ? `calc(${theme.space[10]} + ${FIELD_LABEL_HEIGHT})` : theme.space[10]};
+  padding-top: ${({ $belowFieldLabel }) => ($belowFieldLabel ? FIELD_LABEL_HEIGHT : "0")};
   color: ${({ theme }) => theme.color.gray[800]};
   margin-right: ${({ theme }) => theme.space[2]};
   font-size: 1.1rem;
@@ -43,6 +59,8 @@ export const StyledDateRangeField = styled.div`
 `;
 
 export const StyledDateRangeLabel = styled.span`
+  height: ${FIELD_LABEL_HEIGHT};
+  line-height: ${FIELD_LABEL_HEIGHT};
   color: ${({ theme }) => theme.color.gray[600]};
   font-size: ${({ theme }) => theme.fontSize.xxs};
   text-transform: lowercase;
