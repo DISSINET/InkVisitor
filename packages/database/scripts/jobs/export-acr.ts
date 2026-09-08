@@ -10,6 +10,7 @@ import {
   IReference,
   IResource,
   IValue,
+  IEntity,
   IProp,
   Relation as RelationTypes,
   AuditScope,
@@ -22,6 +23,15 @@ import { IJob } from ".";
 import Generator from "./Generator";
 import Audit from "@models/audit/audit";
 import fs from "fs";
+import {
+  collectStats,
+  DroppedProp,
+  EndpointState,
+  firstLabel,
+  renderConsole,
+  renderMarkdown,
+  walkProps,
+} from "./dataset-stats";
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -70,6 +80,25 @@ async function getRelationsWithEntities<T extends RelationTypes.IRelation>(
   return items;
 }
 
+async function getEntitiesByIds(
+  db: Connection,
+  entityIds: string[]
+): Promise<IEntity[]> {
+  const out: IEntity[] = [];
+  for (let i = 0; i < entityIds.length; i += RELATION_QUERY_BATCH) {
+    const batch = entityIds.slice(i, i + RELATION_QUERY_BATCH);
+    if (!batch.length) {
+      continue;
+    }
+    const found: IEntity[] = await rethink
+      .table(Entity.table)
+      .getAll(...batch)
+      .run(db);
+    out.push(...found);
+  }
+  return out;
+}
+
 // each exported entity should have referene to this Resoure, which point to original dissinet source
 const originResource = new Resource({
   id: "dissinet-resource",
@@ -83,112 +112,6 @@ const originResource = new Resource({
   notes: [],
   status: EntityEnums.Status.Approved,
 });
-
-export interface ExportSummary {
-  lines: string[];
-  problems: string[];
-}
-
-// The dataset is published as-is, so the run has to state what it wrote and
-// refuse to hand over a set that cannot be imported on its own: every id a
-// reference, metaprop or relation points at has to be present in the export.
-export function summariseExport(
-  entities: (IAction | IConcept | IResource | IValue)[],
-  relations: RelationTypes.IRelation[],
-  audits: Audit[],
-  userNames: Record<string, string> = {}
-): ExportSummary {
-  const lines: string[] = [];
-  const problems: string[] = [];
-
-  const byClass: Record<string, number> = {};
-  for (const entity of entities) {
-    byClass[entity.class] = (byClass[entity.class] ?? 0) + 1;
-  }
-
-  const byType: Record<string, number> = {};
-  for (const relation of relations) {
-    byType[relation.type] = (byType[relation.type] ?? 0) + 1;
-  }
-
-  const ids = new Set(entities.map((e) => e.id));
-
-  lines.push(`entities   ${entities.length} (distinct ids ${ids.size})`);
-  for (const [entityClass, count] of Object.entries(byClass).sort(
-    (a, b) => b[1] - a[1]
-  )) {
-    lines.push(`  ${entityClass.padEnd(4)} ${count}`);
-  }
-  lines.push(`relations  ${relations.length}`);
-  for (const [type, count] of Object.entries(byType).sort(
-    (a, b) => b[1] - a[1]
-  )) {
-    lines.push(`  ${type.padEnd(4)} ${count}`);
-  }
-  lines.push(`audits     ${audits.length}`);
-
-  const auditsByUser: Record<string, number> = {};
-  for (const audit of audits) {
-    auditsByUser[audit.user] = (auditsByUser[audit.user] ?? 0) + 1;
-  }
-  // the per-user shares are the contribution figures the dataset is published
-  // with, so they are reported over the same audits the export actually wrote
-  for (const [user, count] of Object.entries(auditsByUser).sort(
-    (a, b) => b[1] - a[1]
-  )) {
-    const share = audits.length ? (100 * count) / audits.length : 0;
-    const name = userNames[user] ?? "unknown user";
-    lines.push(`  user ${user} ${name} has ${count} audits (${share.toFixed(2)}%)`);
-  }
-
-  if (entities.length && !relations.length) {
-    problems.push(
-      "no relations were exported alongside a non-empty entity set"
-    );
-  }
-  if (ids.size !== entities.length) {
-    problems.push(`${entities.length - ids.size} entities share an id`);
-  }
-
-  const dangling = (label: string, referenced: string[]) => {
-    const missing = [...new Set(referenced.filter((id) => id && !ids.has(id)))];
-    if (missing.length) {
-      problems.push(
-        `${missing.length} ${label} point outside the export, e.g. ${missing
-          .slice(0, 5)
-          .join(", ")}`
-      );
-    }
-  };
-
-  const propIds: string[] = [];
-  const collectProps = (props: IProp[] | undefined) => {
-    for (const prop of props ?? []) {
-      propIds.push(prop.type.entityId, prop.value.entityId);
-      collectProps(prop.children);
-    }
-  };
-
-  const referenceValueIds: string[] = [];
-  const referenceResourceIds: string[] = [];
-  for (const entity of entities) {
-    for (const reference of entity.references ?? []) {
-      referenceValueIds.push(reference.value);
-      referenceResourceIds.push(reference.resource);
-    }
-    collectProps((entity as IConcept).props);
-  }
-
-  dangling("reference values", referenceValueIds);
-  dangling("reference resources", referenceResourceIds);
-  dangling("metaprop entities", propIds);
-  dangling(
-    "relation members",
-    relations.flatMap((r) => r.entityIds)
-  );
-
-  return { lines, problems };
-}
 
 class ACRGenerator extends Generator {
   getPath(filename?: string) {
@@ -373,26 +296,85 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   const allIds = allEntities.map((a) => a.id);
   const allIdSet = new Set(allIds);
 
-  // filter metaprops, remove all where type or value are not being imported
+  // A metaprop survives only when both of its endpoints are exported, and the
+  // rule applies at every level of the prop tree - a child prop pointing out of
+  // the dataset would break it just as a top-level one would. Each drop is
+  // recorded: an endpoint of an unexported class is the scope working as
+  // intended, while an endpoint absent from the database is a fault in the
+  // source data, and only the endpoint lookup below tells the two apart.
+  const droppedProps: DroppedProp[] = [];
+  const droppedEndpointIds = new Set<string>();
+
+  const filterProps = (
+    carrier: IAction | IConcept,
+    props: IProp[]
+  ): IProp[] =>
+    props
+      .filter((prop) => {
+        if (
+          allIdSet.has(prop.type.entityId) &&
+          allIdSet.has(prop.value.entityId)
+        ) {
+          return true;
+        }
+
+        droppedEndpointIds.add(prop.type.entityId);
+        droppedEndpointIds.add(prop.value.entityId);
+        droppedProps.push({
+          carrierId: carrier.id,
+          carrierClass: carrier.class,
+          carrierLabel: firstLabel(carrier),
+          propId: prop.id,
+          typeId: prop.type.entityId,
+          typeClass: "",
+          typeLabel: "",
+          typeState: "present",
+          valueId: prop.value.entityId,
+          valueClass: "",
+          valueLabel: "",
+          valueState: "present",
+        });
+        return false;
+      })
+      .map((prop) => ({
+        ...prop,
+        children: filterProps(carrier, prop.children ?? []),
+      }));
+
   concepts.forEach((c) => {
-    c.props = c.props.filter((p) => {
-      if (!allIdSet.has(p.type.entityId) || !allIdSet.has(p.value.entityId)) {
-        return false;
-      }
-
-      return true;
-    });
+    c.props = filterProps(c, c.props ?? []);
   });
-
   actions.forEach((a) => {
-    a.props = a.props.filter((p) => {
-      if (!allIdSet.has(p.type.entityId) || !allIdSet.has(p.value.entityId)) {
-        return false;
-      }
-
-      return true;
-    });
+    a.props = filterProps(a, a.props ?? []);
   });
+
+  // name the endpoints of the dropped props so the warning in summary.md can
+  // be acted on, and so an endpoint that no longer exists is reported as such
+  const endpoints = await getEntitiesByIds(
+    db,
+    [...droppedEndpointIds].filter(Boolean)
+  );
+  const endpointById = new Map(endpoints.map((e) => [e.id, e]));
+  const endpointState = (id: string): EndpointState => {
+    if (allIdSet.has(id)) {
+      return "present";
+    }
+    if (!id) {
+      return "unfinished";
+    }
+    return endpointById.has(id) ? "outOfScope" : "absent";
+  };
+
+  for (const dropped of droppedProps) {
+    const type = endpointById.get(dropped.typeId);
+    const value = endpointById.get(dropped.valueId);
+    dropped.typeClass = type?.class ?? "";
+    dropped.typeLabel = firstLabel(type);
+    dropped.typeState = endpointState(dropped.typeId);
+    dropped.valueClass = value?.class ?? "";
+    dropped.valueLabel = firstLabel(value);
+    dropped.valueState = endpointState(dropped.valueId);
+  }
 
   // a relation survives only when every entity it connects is exported, so that
   // the dataset stays import-ready on a deploy that holds nothing else
@@ -446,26 +428,26 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     return acc;
   }, {} as Record<string, string>);
 
-  const summary = summariseExport(
-    exportedEntities,
+  const stats = collectStats({
+    entities: exportedEntities,
     relations,
     audits,
-    userNames
+    userNames,
+    droppedProps,
+  });
+
+  console.log(renderConsole(stats));
+  fs.writeFileSync(
+    generator.getPath("summary.md"),
+    renderMarkdown(stats, {
+      name: `A-C-R export "${generator.datasetName}"`,
+      source: (db as unknown as { db?: string }).db,
+    })
   );
-  const report = [
-    `A-C-R export "${generator.datasetName}" (${new Date().toISOString()})`,
-    ...summary.lines,
-  ].join("\n");
 
-  console.log(report);
-  fs.writeFileSync(generator.getPath("summary.txt"), `${report}\n`);
-
-  if (summary.problems.length) {
-    for (const problem of summary.problems) {
-      console.error(`PROBLEM: ${problem}`);
-    }
+  if (stats.problems.length) {
     throw new Error(
-      `the export is not import-ready: ${summary.problems.length} problem(s) listed above; do not publish these files`
+      `the export is not import-ready: ${stats.problems.length} problem(s) listed above, details in summary.md; do not publish these files`
     );
   }
 };
