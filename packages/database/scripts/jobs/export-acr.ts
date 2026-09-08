@@ -10,6 +10,7 @@ import {
   IReference,
   IResource,
   IValue,
+  IProp,
   Relation as RelationTypes,
   AuditScope,
 } from "@inkvisitor/shared/types";
@@ -33,20 +34,35 @@ export async function getEntitiesDataByClass<T>(
     .run(connection);
 }
 
+// getAll is called with one argument per entity id; RethinkDB rejects a query
+// built from the whole id list at once, so the ids are queried in batches
+const RELATION_QUERY_BATCH = 500;
+
 async function getRelationsWithEntities<T extends RelationTypes.IRelation>(
   db: Connection,
   entityIds: string[],
   relType?: RelationEnums.Type,
   position?: number
 ): Promise<T[]> {
-  const items: T[] = await rethink
-    .table(Relation.table)
-    .getAll.call(undefined, ...entityIds, {
-      index: DbEnums.Indexes.RelationsEntityIds,
-    })
-    .filter(relType ? { type: relType } : {})
-    .distinct()
-    .run(db);
+  // getAll takes one argument per id, so a whole-database id list has to go in
+  // batches; a relation is returned once per matching entityId and is keyed by
+  // its own id to collapse those repeats
+  const byId: Record<string, T> = {};
+  for (let i = 0; i < entityIds.length; i += RELATION_QUERY_BATCH) {
+    const batch = entityIds.slice(i, i + RELATION_QUERY_BATCH);
+    const found: T[] = await rethink
+      .table(Relation.table)
+      .getAll.call(undefined, ...batch, {
+        index: DbEnums.Indexes.RelationsEntityIds,
+      })
+      .filter(relType ? { type: relType } : {})
+      .run(db);
+
+    for (const relation of found) {
+      byId[relation.id] = relation;
+    }
+  }
+  const items: T[] = Object.values(byId);
 
   if (position !== undefined) {
     return items.filter((d) => entityIds.indexOf(d.entityIds[position]) !== -1);
@@ -67,6 +83,112 @@ const originResource = new Resource({
   notes: [],
   status: EntityEnums.Status.Approved,
 });
+
+export interface ExportSummary {
+  lines: string[];
+  problems: string[];
+}
+
+// The dataset is published as-is, so the run has to state what it wrote and
+// refuse to hand over a set that cannot be imported on its own: every id a
+// reference, metaprop or relation points at has to be present in the export.
+export function summariseExport(
+  entities: (IAction | IConcept | IResource | IValue)[],
+  relations: RelationTypes.IRelation[],
+  audits: Audit[],
+  userNames: Record<string, string> = {}
+): ExportSummary {
+  const lines: string[] = [];
+  const problems: string[] = [];
+
+  const byClass: Record<string, number> = {};
+  for (const entity of entities) {
+    byClass[entity.class] = (byClass[entity.class] ?? 0) + 1;
+  }
+
+  const byType: Record<string, number> = {};
+  for (const relation of relations) {
+    byType[relation.type] = (byType[relation.type] ?? 0) + 1;
+  }
+
+  const ids = new Set(entities.map((e) => e.id));
+
+  lines.push(`entities   ${entities.length} (distinct ids ${ids.size})`);
+  for (const [entityClass, count] of Object.entries(byClass).sort(
+    (a, b) => b[1] - a[1]
+  )) {
+    lines.push(`  ${entityClass.padEnd(4)} ${count}`);
+  }
+  lines.push(`relations  ${relations.length}`);
+  for (const [type, count] of Object.entries(byType).sort(
+    (a, b) => b[1] - a[1]
+  )) {
+    lines.push(`  ${type.padEnd(4)} ${count}`);
+  }
+  lines.push(`audits     ${audits.length}`);
+
+  const auditsByUser: Record<string, number> = {};
+  for (const audit of audits) {
+    auditsByUser[audit.user] = (auditsByUser[audit.user] ?? 0) + 1;
+  }
+  // the per-user shares are the contribution figures the dataset is published
+  // with, so they are reported over the same audits the export actually wrote
+  for (const [user, count] of Object.entries(auditsByUser).sort(
+    (a, b) => b[1] - a[1]
+  )) {
+    const share = audits.length ? (100 * count) / audits.length : 0;
+    const name = userNames[user] ?? "unknown user";
+    lines.push(`  user ${user} ${name} has ${count} audits (${share.toFixed(2)}%)`);
+  }
+
+  if (entities.length && !relations.length) {
+    problems.push(
+      "no relations were exported alongside a non-empty entity set"
+    );
+  }
+  if (ids.size !== entities.length) {
+    problems.push(`${entities.length - ids.size} entities share an id`);
+  }
+
+  const dangling = (label: string, referenced: string[]) => {
+    const missing = [...new Set(referenced.filter((id) => id && !ids.has(id)))];
+    if (missing.length) {
+      problems.push(
+        `${missing.length} ${label} point outside the export, e.g. ${missing
+          .slice(0, 5)
+          .join(", ")}`
+      );
+    }
+  };
+
+  const propIds: string[] = [];
+  const collectProps = (props: IProp[] | undefined) => {
+    for (const prop of props ?? []) {
+      propIds.push(prop.type.entityId, prop.value.entityId);
+      collectProps(prop.children);
+    }
+  };
+
+  const referenceValueIds: string[] = [];
+  const referenceResourceIds: string[] = [];
+  for (const entity of entities) {
+    for (const reference of entity.references ?? []) {
+      referenceValueIds.push(reference.value);
+      referenceResourceIds.push(reference.resource);
+    }
+    collectProps((entity as IConcept).props);
+  }
+
+  dangling("reference values", referenceValueIds);
+  dangling("reference resources", referenceResourceIds);
+  dangling("metaprop entities", propIds);
+  dangling(
+    "relation members",
+    relations.flatMap((r) => r.entityIds)
+  );
+
+  return { lines, problems };
+}
 
 class ACRGenerator extends Generator {
   getPath(filename?: string) {
@@ -130,6 +252,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
       id: uuidv4(),
       labels: [a.id],
     });
+    values.push(v);
 
     a.references.push({
       id: uuidv4(),
@@ -170,13 +293,41 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   });
 
   // retrieve all resources
-  const resources = (
-    await getEntitiesDataByClass<IResource>(db, EntityEnums.Class.Resource)
-  )
-    .filter((r) => acResourceIds.includes(r.id))
+  const allResources = await getEntitiesDataByClass<IResource>(
+    db,
+    EntityEnums.Class.Resource
+  );
+
+  // A Resource cited by an A/C can sit anywhere in a superordinate-entity
+  // chain (English WordNet 3.1 Sense Keys under WordNet, CIDOC-CRMsoc under
+  // CIDOC-CRM), and the chain is what gives the exported references their
+  // hierarchy, so the walk continues until it reaches the top of every chain
+  // rather than stopping one level up.
+  const resourceIds = new Set(
+    allResources.filter((r) => acResourceIds.includes(r.id)).map((r) => r.id)
+  );
+
+  let frontier = [...resourceIds];
+  while (frontier.length) {
+    const soeRelations = (
+      await getRelationsWithEntities(
+        db,
+        frontier,
+        RelationEnums.Type.SuperordinateEntity
+      )
+    ).flatMap((rel) => rel.entityIds);
+
+    frontier = [...new Set(soeRelations)].filter(
+      (entityId) => entityId && !resourceIds.has(entityId)
+    );
+    frontier.forEach((entityId) => resourceIds.add(entityId));
+  }
+
+  const resources = allResources
+    .filter((r) => resourceIds.has(r.id))
     .map((r) => {
-      r.references.forEach((r) => {
-        existingReferenceValueIds.push(r.value);
+      r.references.forEach((reference) => {
+        existingReferenceValueIds.push(reference.value);
       });
 
       const v = new Value({
@@ -194,46 +345,23 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
       return r;
     });
 
-  const resourcesRelatedIds: string[] = [];
-  // take all related Resources
-  const resourcesRelations = await rethink
-    .table(Relation.table)
-    .getAll.call(undefined, ...resources.map((r) => r.id), {
-      index: DbEnums.Indexes.RelationsEntityIds,
-    })
-    .distinct()
-    .run(db);
-
-  resourcesRelations
-    .filter(
-      (rel: Relation) => rel.type === RelationEnums.Type.SuperordinateEntity
-    )
-    .forEach((rel: Relation) => {
-      rel.entityIds.forEach((entId) => {
-        if (
-          !resources.map((r) => r.id).includes(entId) &&
-          !resourcesRelatedIds.includes(entId)
-        ) {
-          resourcesRelatedIds.push(entId);
-        }
-      });
-    });
-
-  // get entities from resourcesRelatedIds and add them to resources list
-  const relatedResources = await rethink
-    .table(Resource.table)
-    .getAll(...resourcesRelatedIds)
-    .run(db);
-
-  resources.push(...relatedResources);
-
   // get all Reference Values from existingReferenceValueIds and merge into values
-  const existingReferenceValues = await rethink
-    .table(Value.table)
-    .getAll(...existingReferenceValueIds)
-    .run(db);
+  // Every Value is its own entity and none are merged here: the ids collected
+  // above repeat whenever several references cite the same Value, and getAll
+  // returns one row per argument, so the repeats are copies of a single Value
+  // sharing one id rather than distinct Values.
+  const referenceValueIds = [...new Set(existingReferenceValueIds)];
+  const existingReferenceValues = referenceValueIds.length
+    ? await rethink.table(Value.table).getAll(...referenceValueIds).run(db)
+    : [];
 
-  values.push(...existingReferenceValues);
+  const exportedValueIds = new Set(values.map((v) => v.id));
+  for (const value of existingReferenceValues) {
+    if (!exportedValueIds.has(value.id)) {
+      exportedValueIds.add(value.id);
+      values.push(value);
+    }
+  }
 
   // allow only relations, which have all entities in lists above
   const allEntities: (IAction | IConcept | IResource | IValue)[] = [];
@@ -243,14 +371,12 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   values.forEach((v) => allEntities.push(v));
 
   const allIds = allEntities.map((a) => a.id);
+  const allIdSet = new Set(allIds);
 
   // filter metaprops, remove all where type or value are not being imported
   concepts.forEach((c) => {
     c.props = c.props.filter((p) => {
-      if (
-        !allIds.includes(p.type.entityId) ||
-        !allIds.includes(p.value.entityId)
-      ) {
+      if (!allIdSet.has(p.type.entityId) || !allIdSet.has(p.value.entityId)) {
         return false;
       }
 
@@ -260,10 +386,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
 
   actions.forEach((a) => {
     a.props = a.props.filter((p) => {
-      if (
-        !allIds.includes(p.type.entityId) ||
-        !allIds.includes(p.value.entityId)
-      ) {
+      if (!allIdSet.has(p.type.entityId) || !allIdSet.has(p.value.entityId)) {
         return false;
       }
 
@@ -271,24 +394,11 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     });
   });
 
-  const relations = (await getRelationsWithEntities(db, allIds)).filter((r) => {
-    // check if all relation entityIds are in allIds
-    let matches = 0;
-    for (const entityId of r.entityIds) {
-      for (const allid of allIds) {
-        if (entityId === allid) {
-          matches++;
-          break;
-        }
-      }
-
-      if (matches === r.entityIds.length) {
-        return true;
-      }
-    }
-
-    return false;
-  });
+  // a relation survives only when every entity it connects is exported, so that
+  // the dataset stays import-ready on a deploy that holds nothing else
+  const relations = (await getRelationsWithEntities(db, allIds)).filter((r) =>
+    r.entityIds.every((entityId) => allIdSet.has(entityId))
+  );
 
   generator.entities.entities.A = actions;
   generator.entities.entities.C = concepts;
@@ -299,7 +409,9 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   const auditsAll: Audit[] = await rethink.table("audits").run(db);
 
   const audits = auditsAll
-    .filter((a) => a.auditScope === AuditScope.Entity && allIds.includes(a.modelId))
+    .filter(
+      (a) => a.auditScope === AuditScope.Entity && allIdSet.has(a.modelId)
+    )
     .map((a) => {
       a.changes = {};
       return a;
@@ -313,11 +425,49 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     {} as Record<RelationEnums.Type, RelationTypes.IRelation[]>
   );
 
-  generator.output();
+  await generator.output();
   fs.writeFileSync(
     generator.getPath("audits.json"),
     JSON.stringify(audits, null, 4)
   );
+
+  const exportedEntities = Object.values(generator.entities.entities).flat() as (
+    | IAction
+    | IConcept
+    | IResource
+    | IValue
+  )[];
+  const users = (await rethink
+    .table("users")
+    .pluck("id", "name")
+    .run(db)) as { id: string; name: string }[];
+  const userNames = users.reduce((acc, user) => {
+    acc[user.id] = user.name;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const summary = summariseExport(
+    exportedEntities,
+    relations,
+    audits,
+    userNames
+  );
+  const report = [
+    `A-C-R export "${generator.datasetName}" (${new Date().toISOString()})`,
+    ...summary.lines,
+  ].join("\n");
+
+  console.log(report);
+  fs.writeFileSync(generator.getPath("summary.txt"), `${report}\n`);
+
+  if (summary.problems.length) {
+    for (const problem of summary.problems) {
+      console.error(`PROBLEM: ${problem}`);
+    }
+    throw new Error(
+      `the export is not import-ready: ${summary.problems.length} problem(s) listed above; do not publish these files`
+    );
+  }
 };
 
 export default exportACR;
