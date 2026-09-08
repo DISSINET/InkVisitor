@@ -35,6 +35,8 @@ export const narrowColumnTypes = new Set([
   Explore.EExploreColumnType.EST,
   Explore.EExploreColumnType.ELA,
   Explore.EExploreColumnType.EPOS,
+  Explore.EExploreColumnType.ELT,
+  Explore.EExploreColumnType.ECL,
 ]);
 
 export const smallColumnTypes = new Set([
@@ -66,5 +68,9 @@ export const wideColumnTypes = new Set([Explore.EExploreColumnType.EPRT]);
  * Column types with no write path: their cells stay read-only whatever the
  * column config says, and the new-column panel omits the editable option.
  */
-export const readOnlyColumnTypes = new Set([Explore.EExploreColumnType.EPRT]);
+export const readOnlyColumnTypes = new Set([
+  Explore.EExploreColumnType.EPRT,
+  // an entity's class is fixed at creation
+  Explore.EExploreColumnType.ECL,
+]);
 

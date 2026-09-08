@@ -1067,6 +1067,8 @@ export namespace Explore {
     EPOS = "EPOS", // Entity Part of Speech
     EDET = "EDET", // Entity Detail
     EPRT = "EPRT", // Entity Parent Territory
+    ELT = "ELT", // Entity Logical Type
+    ECL = "ECL", // Entity Class
   }
 
   /** Param value types - determines which form control to render */
@@ -1122,6 +1124,8 @@ export namespace Explore {
     [EExploreColumnType.EPOS]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EDET]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EPRT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ELT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ECL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1267,6 +1271,20 @@ export namespace Explore {
       label: "Parent territory",
       description:
         "Shows the immediate parent territory - the parent of a Territory, or the territory a Statement belongs to. Empty for other classes.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ELT]: {
+      label: "Logical type",
+      description:
+        "Shows the logical type (definite, indefinite, hypothetical, generic) of actant entities. Empty for classes that carry no logical type.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ECL]: {
+      label: "Entity class",
+      description:
+        "Shows the class of this entity spelled out in full (e.g. Concept, Territory), the same class the coded prefix of its label stands for.",
       isDisabled: false,
       params: {},
     },

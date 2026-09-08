@@ -2,7 +2,7 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
+import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IStatement, ITerritory, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
@@ -315,6 +315,23 @@ export default class Results<T extends { id: string }> {
               out[column.id] = parentTerritory;
             }
           }
+          break;
+        }
+        // Entity Logical Type
+        case Explore.EExploreColumnType.ELT: {
+          // only actant classes (person, being, group, object, location, value,
+          // event) carry logicalType in their data
+          const logicalType = (entity.data as any)?.logicalType;
+          const logicalTypeLabel = actantLogicalTypeDict.find(
+            (d) => d.value === logicalType
+          )?.label;
+          out[column.id] = logicalTypeLabel || "";
+          break;
+        }
+        // Entity Class
+        case Explore.EExploreColumnType.ECL: {
+          out[column.id] =
+            entitiesDictKeys[entity.class]?.label || entity.class;
           break;
         }
       }

@@ -173,6 +173,10 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           menuPortalTarget={document.getElementById("page-content")!}
           menuPosition="absolute"
           menuPlacement="auto"
+          // menuPlacement="auto" shrinks this cap to whatever room the control
+          // has inside #page-content, so a menu opened near the page edge stays
+          // fully visible instead of being clipped by its overflow
+          maxMenuHeight={180}
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {
             const selectedOptions: DropdownItem[] =
               selected == null
