@@ -51,6 +51,10 @@ import/~$actants.xlsx
 
 database_data
 
+# full-database dumps taken for analysis; a single audits.json runs to hundreds
+# of MB, past what GitHub accepts, while filtered exports are small and kept
+/packages/database/datasets/production-*/
+
 **/*.tar
 **/*.tar.gz
 
