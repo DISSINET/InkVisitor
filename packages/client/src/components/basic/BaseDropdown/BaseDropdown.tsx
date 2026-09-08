@@ -169,6 +169,14 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
               marginTop: `${-heightHeader}px`,
               zIndex: 9999,
             }),
+            // react-select's own gutter is 8px and sits on whichever side faces
+            // the control, so the gap has to be set per placement to look the
+            // same whether the menu opens downwards or flips above
+            menu: (base, state) => ({
+              ...base,
+              marginTop: state.placement === "bottom" ? "2px" : 0,
+              marginBottom: state.placement === "top" ? "2px" : 0,
+            }),
           }}
           menuPortalTarget={document.getElementById("page-content")!}
           menuPosition="absolute"
@@ -176,7 +184,15 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           // menuPlacement="auto" shrinks this cap to whatever room the control
           // has inside #page-content, so a menu opened near the page edge stays
           // fully visible instead of being clipped by its overflow
-          maxMenuHeight={180}
+          maxMenuHeight={320}
+          // the flip threshold: with room for at least this much, "auto" keeps
+          // the menu below the control and trims it to the space available;
+          // under it the menu would be too squeezed to use, so it flips above
+          minMenuHeight={180}
+          // the portal parent (#page-content) is overflow:hidden and never
+          // scrolls for the user, but scrollTop is still writable: letting
+          // react-select scroll it into view would shift the whole page
+          menuShouldScrollIntoView={false}
           onChange={(selected: unknown, event: ActionMeta<unknown>) => {
             const selectedOptions: DropdownItem[] =
               selected == null

@@ -75,7 +75,6 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       border-radius: ${({ theme }) => theme.borderRadius["input"]};
       box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
       width: 100%;
-      transform: translate(0, -6px);
       overflow: hidden;
 
       color: ${({ theme }) => theme.color["black"]};
