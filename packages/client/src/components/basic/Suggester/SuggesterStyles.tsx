@@ -146,10 +146,12 @@ export const StyledRelativePosition = styled.div<StyledRelativePosition>`
 interface StyledSuggestionRow {
   $twoIcons: boolean;
   $isSelected: boolean;
+  $hasTrailingIcons: boolean;
 }
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
-  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto 3rem;
+  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto
+    ${({ $hasTrailingIcons }) => ($hasTrailingIcons ? "3rem" : "0")};
   align-items: center;
   background-color: ${({ theme, $isSelected }) =>
     $isSelected ? theme.color["blue"][100] : "transparent"};
