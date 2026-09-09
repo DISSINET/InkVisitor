@@ -771,14 +771,17 @@ class Statement extends Entity implements IStatement {
             .map(function (statement: RDatum) {
               return {
                 entityId,
-                // a statement need not sit in a territory, and reading a
-                // missing field aborts the whole query - the same branch the
-                // index definition itself uses
-                territoryId: rethink.branch(
-                  statement("data").hasFields("territory"),
-                  statement("data")("territory")("territoryId"),
-                  null
-                ),
+                // reading a missing attribute raises, and one raised error
+                // aborts the whole query rather than skipping the document
+                // (unlike an index build, which just drops it - which is how a
+                // statement with a malformed territory can sit in the table at
+                // all). Both defaults are load-bearing: the outer one covers a
+                // territory that is absent or null, the inner one a territory
+                // object carrying no territoryId. The caller drops the nulls.
+                territoryId: statement("data")("territory")
+                  .default(rethink.expr({}))
+                  .getField("territoryId")
+                  .default(null),
               };
             });
         })
