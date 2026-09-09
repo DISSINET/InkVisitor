@@ -725,6 +725,49 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
+   * Statements referencing any of the given entities, anywhere the entity-keyed
+   * indexes reach: statement props and references, actions, actants, tags, the
+   * statement's own territory, actant classifications/identifications, and
+   * in-statement prop type/value down to lvl3.
+   *
+   * The indexes live on the shared entity table, so the class filter is what
+   * keeps non-statement hits out. An index lookup does not report which key it
+   * matched, so a caller passing several ids has to attribute each statement to
+   * its entities itself - getEntitiesIds() covers the same ground.
+   * @param db db connection
+   * @param entityIds ids to look up in one pass
+   * @returns statements, deduplicated across the overlapping indexes
+   */
+  static async findUsedInStatements(
+    db: Connection | undefined,
+    entityIds: string[]
+  ): Promise<IStatement[]> {
+    if (!entityIds.length) {
+      return [];
+    }
+
+    const lookup = (index: DbEnums.Indexes) =>
+      rethink.table(Entity.table).getAll(rethink.args(entityIds), { index });
+
+    const [firstIndex, ...restIndexes] = DbEnums.EntityIdReferenceIndexes;
+    let query: any = lookup(firstIndex);
+    for (const index of restIndexes) {
+      query = query.union(lookup(index));
+    }
+
+    const statements: IStatement[] = await query
+      .filter({ class: EntityEnums.Class.Statement })
+      .run(db);
+
+    const byId: Record<string, IStatement> = {};
+    for (const statement of statements) {
+      byId[statement.id] = statement;
+    }
+
+    return Object.values(byId);
+  }
+
+  /**
    * finds statements that are using provided entityId in their
    * data.actants[].classifications or data.actants[].ident
    * @param db

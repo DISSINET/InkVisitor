@@ -14,9 +14,11 @@ import {
   StyledContent,
   StyledHeader,
   StyledLabel,
+  StyledNameFillWrap,
   StyledPanel,
   StyledValue,
 } from "./ExplorerTableNewColumnPanelStyles";
+import { IcoArrowReturnRight } from "Theme/icons";
 import { getStoredUserRole } from "utils/userStorage";
 import { readOnlyColumnTypes } from "../types";
 
@@ -43,6 +45,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
   const [paramValues, setParamValues] = useState<Record<string, unknown>>({});
 
   const paramsDef = Explore.EExploreColumnTypeConfig[type].paramsDef ?? [];
+  const typeLabel = Explore.EExploreColumnTypeConfig[type].label;
 
   // Reset param values when column type changes
   useEffect(() => {
@@ -192,7 +195,27 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
         ))}
         <StyledLabel>Column name</StyledLabel>
         <StyledValue>
-          <Input width="full" value={name} onChangeFn={(v) => setName(v)} changeOnType />
+          <Input
+            width="full"
+            value={name}
+            onChangeFn={(v) => setName(v)}
+            changeOnType
+            rightContent={
+              <StyledNameFillWrap>
+                <Button
+                  icon={<IcoArrowReturnRight size={13} />}
+                  tooltipLabel="fill in the column type label"
+                  tooltipPosition="top"
+                  onClick={() => setName(typeLabel)}
+                  disabled={name === typeLabel}
+                  noBorder
+                  noBackground
+                  color="black"
+                  inverted
+                />
+              </StyledNameFillWrap>
+            }
+          />
         </StyledValue>
         {/* an editable column would render read-only cells for a Viewer anyway */}
         {!isViewer && !readOnlyColumnTypes.has(type) && (
@@ -220,7 +243,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
           <CancelButton onClick={handleClose} />
-          <Button label="create column" onClick={handleCreate} disabled={!canCreate} />
+          <Button label="Create column" onClick={handleCreate} disabled={!canCreate} />
         </ButtonGroup>
       </span>
     </StyledPanel>

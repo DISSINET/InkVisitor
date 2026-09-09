@@ -1069,6 +1069,7 @@ export namespace Explore {
     EPRT = "EPRT", // Entity Parent Territory
     ELT = "ELT", // Entity Logical Type
     ECL = "ECL", // Entity Class
+    EUI = "EUI", // Entity Used In (first-level territories)
   }
 
   /** Param value types - determines which form control to render */
@@ -1126,6 +1127,7 @@ export namespace Explore {
     [EExploreColumnType.EPRT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.ELT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.ECL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EUI]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1285,6 +1287,13 @@ export namespace Explore {
       label: "Entity class",
       description:
         "Shows the class of this entity spelled out in full (e.g. Concept, Territory), the same class the coded prefix of its label stands for.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EUI]: {
+      label: "Used in",
+      description:
+        "Shows the first-level territories (direct children of the root) whose statements use this entity, found the same way the search box finds entities under a territory.",
       isDisabled: false,
       params: {},
     },

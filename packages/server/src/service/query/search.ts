@@ -208,6 +208,14 @@ export default class QuerySearch {
         ? this.explore.view.columns
         : [];
 
+    // idsToLoad already honours rowIndices, so `filtered` is exactly the page
+    // being returned - the shared column data covers it in one pass
+    const columnsContext = await this.results.prepareColumnsContext(
+      db,
+      filtered,
+      columns
+    );
+
     const out: IResponseQueryEntity[] = [];
 
     for (const entity of filtered) {
@@ -217,7 +225,12 @@ export default class QuerySearch {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
-          columnData: await this.results!.columns(db, entity, columns),
+          columnData: await this.results!.columns(
+            db,
+            entity,
+            columns,
+            columnsContext
+          ),
         };
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)

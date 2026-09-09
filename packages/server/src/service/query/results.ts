@@ -1,6 +1,8 @@
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
+import Statement from "@models/statement/statement";
+import treeCache from "@service/treeCache";
 import User from "@models/user/user";
 import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
@@ -13,6 +15,17 @@ import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-la
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
 import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
+import { stripAncestorTerritoryIdsFromStatementLineage } from "@models/entity/response-search";
+
+/**
+ * Column data shared by every row of one page, resolved in a single pass before
+ * the row loop so a column backed by its own query does not repeat that query
+ * per row.
+ */
+export interface IColumnsContext {
+  /** row entity id -> first-level territories its statements sit under (EUI) */
+  usedInTerritories: Record<string, IEntity[]>;
+}
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -161,10 +174,93 @@ export default class Results<T extends { id: string }> {
     return this.items.slice(exploreData.offset, endIndex);
   }
 
+  /**
+   * Resolves the per-page part of the column data for the rows about to be
+   * returned. Only the columns actually configured are prepared, so a view
+   * without them costs nothing.
+   */
+  async prepareColumnsContext(
+    db: Connection,
+    entities: IEntity[],
+    columnsData: Explore.IExploreColumn[]
+  ): Promise<IColumnsContext> {
+    const context: IColumnsContext = { usedInTerritories: {} };
+
+    const wantsUsedIn = columnsData.some(
+      (column) => column.type === Explore.EExploreColumnType.EUI
+    );
+    if (!wantsUsedIn || !entities.length) {
+      return context;
+    }
+
+    const rowIds = new Set(entities.map((entity) => entity.id));
+    const statements = await Statement.findUsedInStatements(
+      db,
+      Array.from(rowIds)
+    );
+
+    const firstLevelIdsByRow: Record<string, Record<string, null>> = {};
+    const allFirstLevelIds: Record<string, null> = {};
+
+    for (const statementData of statements) {
+      const statementTerritoryId = statementData.data?.territory?.territoryId;
+      if (!statementTerritoryId) {
+        continue;
+      }
+      const firstLevelId = treeCache.getFirstLevelTerritoryId(
+        statementTerritoryId
+      );
+      if (!firstLevelId) {
+        continue;
+      }
+
+      // an index lookup does not say which id it matched, so the statement is
+      // attributed here - the same id set the search box reads per territory
+      const entityIds: Record<string, null> = {};
+      for (const id of new Statement(statementData).getEntitiesIds()) {
+        entityIds[id] = null;
+      }
+      stripAncestorTerritoryIdsFromStatementLineage(
+        statementTerritoryId,
+        entityIds
+      );
+
+      for (const entityId of Object.keys(entityIds)) {
+        if (!rowIds.has(entityId)) {
+          continue;
+        }
+        if (!firstLevelIdsByRow[entityId]) {
+          firstLevelIdsByRow[entityId] = {};
+        }
+        firstLevelIdsByRow[entityId][firstLevelId] = null;
+        allFirstLevelIds[firstLevelId] = null;
+      }
+    }
+
+    // the same handful of first-level territories serves the whole page
+    const territories = await Entity.findEntitiesByIds(
+      db,
+      Object.keys(allFirstLevelIds)
+    );
+    const territoryById: Record<string, IEntity> = {};
+    for (const territory of territories) {
+      territoryById[territory.id] = territory;
+    }
+
+    for (const [entityId, ids] of Object.entries(firstLevelIdsByRow)) {
+      context.usedInTerritories[entityId] = Object.keys(ids)
+        .map((id) => territoryById[id])
+        .filter((territory) => !!territory);
+    }
+
+    return context;
+  }
+
   async columns(
     db: Connection,
     entity: IEntity,
-    columnsData: Explore.IExploreColumn[]
+    columnsData: Explore.IExploreColumn[],
+    context?: IColumnsContext
   ): Promise<
     Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]>
   > {
@@ -332,6 +428,11 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.ECL: {
           out[column.id] =
             entitiesDictKeys[entity.class]?.label || entity.class;
+          break;
+        }
+        // Entity Used In (first-level territories)
+        case Explore.EExploreColumnType.EUI: {
+          out[column.id] = context?.usedInTerritories[entity.id] ?? [];
           break;
         }
       }
