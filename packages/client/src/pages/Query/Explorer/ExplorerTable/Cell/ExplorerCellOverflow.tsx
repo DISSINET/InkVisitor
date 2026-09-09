@@ -35,9 +35,13 @@ function getOverflowItemLabel(item: CellOverflowItem): string {
 
 interface ExplorerCellOverflowProps {
   hiddenItems: CellOverflowItem[];
+  onEntityDoubleClick?: (entity: IEntity) => (e: React.MouseEvent) => void;
 }
 
-export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({ hiddenItems }) => {
+export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
+  hiddenItems,
+  onEntityDoubleClick,
+}) => {
   const theme = useTheme();
   const [showTooltip, setShowTooltip] = useState(false);
   const [referenceElement, setReferenceElement] = useState<HTMLSpanElement | null>(null);
@@ -48,14 +52,21 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({ hidd
 
   const allEntities = hiddenItems.every(isEntity);
 
+  // the tooltip renders through a portal, so its clicks still bubble up the
+  // React tree to the row handler - the marker is what the row checks for
   const content = allEntities ? (
-    <StyledOverflowTooltipContent>
+    <StyledOverflowTooltipContent data-no-row-click="true">
       {hiddenItems.map((entity, key) => (
-        <EntityTag key={entity.id ?? key} entity={entity} tooltipPosition="bottom" />
+        <EntityTag
+          key={entity.id ?? key}
+          entity={entity}
+          tooltipPosition="bottom"
+          onDoubleClick={onEntityDoubleClick?.(entity)}
+        />
       ))}
     </StyledOverflowTooltipContent>
   ) : (
-    <StyledOverflowTextList>
+    <StyledOverflowTextList data-no-row-click="true">
       {hiddenItems.map((item, key) => (
         <StyledTooltipRow key={isEntity(item) ? item.id : key}>
           <StyledTooltipValue>{getOverflowItemLabel(item)}</StyledTooltipValue>

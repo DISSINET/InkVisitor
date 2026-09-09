@@ -6,6 +6,7 @@ import {
   entityStatusDict,
   conceptPartOfSpeechDict,
   actionPartOfSpeechDict,
+  actantLogicalTypeDict,
 } from "@inkvisitor/shared/dictionaries";
 import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -430,6 +431,25 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               />
             );
           }
+          if (column.type === Explore.EExploreColumnType.ELT) {
+            // only actant classes carry logicalType; on the rest the cell has
+            // nothing to write to and stays a plain (empty) value
+            if ((recordEntity.data as any)?.logicalType !== undefined) {
+              return (
+                <Dropdown.Single.Basic
+                  width={140}
+                  value={(recordEntity.data as any)?.logicalType}
+                  options={actantLogicalTypeDict}
+                  onChange={(v) => {
+                    updateEntityMutation.mutate({
+                      entityId: recordEntity.id,
+                      changes: { data: { ...recordEntity.data, logicalType: v } },
+                    });
+                  }}
+                />
+              );
+            }
+          }
           if (column.type === Explore.EExploreColumnType.EPOS) {
             if (recordEntity.class === EntityEnums.Class.Concept) {
               return (
@@ -496,7 +516,10 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                 );
               })}
             {cellData.length > CELL_DISPLAY_LIMIT && (
-              <ExplorerCellOverflow hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)} />
+              <ExplorerCellOverflow
+                hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
+                onEntityDoubleClick={handleOpenEntityInDetail}
+              />
             )}
           </StyledCellArrayWrap>
         );
@@ -504,7 +527,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue]
+    [renderCellValue, handleOpenEntityInDetail]
   );
 
   const renderEditSection = React.useCallback(
