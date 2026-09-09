@@ -15,7 +15,6 @@ import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-la
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
 import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
-import { stripAncestorTerritoryIdsFromStatementLineage } from "@models/entity/response-search";
 
 /**
  * Column data shared by every row of one page, resolved in a single pass before
@@ -193,40 +192,18 @@ export default class Results<T extends { id: string }> {
       return context;
     }
 
-    const rowIds = new Set(entities.map((entity) => entity.id));
-    const statements = await Statement.findUsedInStatements(
+    const territoryIdsByRow = await Statement.findUsedInTerritoryIds(
       db,
-      Array.from(rowIds)
+      entities.map((entity) => entity.id)
     );
 
     const firstLevelIdsByRow: Record<string, Record<string, null>> = {};
     const allFirstLevelIds: Record<string, null> = {};
 
-    for (const statementData of statements) {
-      const statementTerritoryId = statementData.data?.territory?.territoryId;
-      if (!statementTerritoryId) {
-        continue;
-      }
-      const firstLevelId = treeCache.getFirstLevelTerritoryId(
-        statementTerritoryId
-      );
-      if (!firstLevelId) {
-        continue;
-      }
-
-      // an index lookup does not say which id it matched, so the statement is
-      // attributed here - the same id set the search box reads per territory
-      const entityIds: Record<string, null> = {};
-      for (const id of new Statement(statementData).getEntitiesIds()) {
-        entityIds[id] = null;
-      }
-      stripAncestorTerritoryIdsFromStatementLineage(
-        statementTerritoryId,
-        entityIds
-      );
-
-      for (const entityId of Object.keys(entityIds)) {
-        if (!rowIds.has(entityId)) {
+    for (const [entityId, territoryIds] of Object.entries(territoryIdsByRow)) {
+      for (const territoryId of territoryIds) {
+        const firstLevelId = treeCache.getFirstLevelTerritoryId(territoryId);
+        if (!firstLevelId) {
           continue;
         }
         if (!firstLevelIdsByRow[entityId]) {

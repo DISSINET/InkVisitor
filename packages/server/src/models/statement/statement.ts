@@ -27,6 +27,13 @@ import {
 import { randomUUID } from "crypto";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 
+/**
+ * Entity ids per pass through the entity-keyed indexes. The list is inlined
+ * into the query term once per index, and an unpaged export can select
+ * thousands of rows, so the passes are chunked to keep each query small.
+ */
+const USED_IN_LOOKUP_CHUNK_SIZE = 200;
+
 export class StatementClassification implements IStatementClassification {
   id = "";
   entityId = "";
@@ -725,46 +732,83 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Statements referencing any of the given entities, anywhere the entity-keyed
-   * indexes reach: statement props and references, actions, actants, tags, the
-   * statement's own territory, actant classifications/identifications, and
-   * in-statement prop type/value down to lvl3.
+   * Territories of the statements that reference each of the given entities,
+   * anywhere the entity-keyed indexes reach: statement props and references,
+   * actions, actants, tags, the statement's own territory, actant
+   * classifications/identifications, and in-statement prop type/value down to
+   * lvl3.
+   *
+   * Attribution happens in the database: each index pass walks the id list and
+   * tags every hit with the id it was looked up under, so a statement matching
+   * several entities is reported once per entity. Only the territory id crosses
+   * the wire - the statement bodies never leave the db.
    *
    * The indexes live on the shared entity table, so the class filter is what
-   * keeps non-statement hits out. An index lookup does not report which key it
-   * matched, so a caller passing several ids has to attribute each statement to
-   * its entities itself - getEntitiesIds() covers the same ground.
+   * keeps non-statement hits out.
    * @param db db connection
-   * @param entityIds ids to look up in one pass
-   * @returns statements, deduplicated across the overlapping indexes
+   * @param entityIds ids to look up
+   * @returns entity id -> deduplicated territory ids, in no particular order
    */
-  static async findUsedInStatements(
+  static async findUsedInTerritoryIds(
     db: Connection | undefined,
     entityIds: string[]
-  ): Promise<IStatement[]> {
-    if (!entityIds.length) {
-      return [];
+  ): Promise<Record<string, string[]>> {
+    const territoryIdsByEntity: Record<string, Record<string, null>> = {};
+
+    for (
+      let offset = 0;
+      offset < entityIds.length;
+      offset += USED_IN_LOOKUP_CHUNK_SIZE
+    ) {
+      const chunk = entityIds.slice(offset, offset + USED_IN_LOOKUP_CHUNK_SIZE);
+
+      const passes = DbEnums.EntityIdReferenceIndexes.map((index) =>
+        rethink.expr(chunk).concatMap(function (entityId: RDatum) {
+          return rethink
+            .table(Entity.table)
+            .getAll(entityId, { index })
+            .filter({ class: EntityEnums.Class.Statement })
+            .map(function (statement: RDatum) {
+              return {
+                entityId,
+                // a statement need not sit in a territory, and reading a
+                // missing field aborts the whole query - the same branch the
+                // index definition itself uses
+                territoryId: rethink.branch(
+                  statement("data").hasFields("territory"),
+                  statement("data")("territory")("territoryId"),
+                  null
+                ),
+              };
+            });
+        })
+      );
+
+      let query: any = passes[0];
+      for (const pass of passes.slice(1)) {
+        query = query.union(pass);
+      }
+
+      const pairs: { entityId: string; territoryId: string | null }[] =
+        await query.run(db);
+
+      for (const pair of pairs) {
+        if (!pair.territoryId) {
+          continue;
+        }
+        if (!territoryIdsByEntity[pair.entityId]) {
+          territoryIdsByEntity[pair.entityId] = {};
+        }
+        territoryIdsByEntity[pair.entityId][pair.territoryId] = null;
+      }
     }
 
-    const lookup = (index: DbEnums.Indexes) =>
-      rethink.table(Entity.table).getAll(rethink.args(entityIds), { index });
-
-    const [firstIndex, ...restIndexes] = DbEnums.EntityIdReferenceIndexes;
-    let query: any = lookup(firstIndex);
-    for (const index of restIndexes) {
-      query = query.union(lookup(index));
+    const out: Record<string, string[]> = {};
+    for (const [entityId, ids] of Object.entries(territoryIdsByEntity)) {
+      out[entityId] = Object.keys(ids);
     }
 
-    const statements: IStatement[] = await query
-      .filter({ class: EntityEnums.Class.Statement })
-      .run(db);
-
-    const byId: Record<string, IStatement> = {};
-    for (const statement of statements) {
-      byId[statement.id] = statement;
-    }
-
-    return Object.values(byId);
+    return out;
   }
 
   /**

@@ -27,7 +27,7 @@ import {
  * Territory search aggregates those ids; strip ancestor territory ids so the root (or any parent T)
  * is not implied when filtering by a child territory.
  */
-export function stripAncestorTerritoryIdsFromStatementLineage(
+function stripAncestorTerritoryIdsFromStatementLineage(
   statementTerritoryId: string | undefined,
   entityIds: Record<string, null>
 ): void {
