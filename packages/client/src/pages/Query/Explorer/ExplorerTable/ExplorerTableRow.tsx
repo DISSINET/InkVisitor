@@ -516,7 +516,10 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                 );
               })}
             {cellData.length > CELL_DISPLAY_LIMIT && (
-              <ExplorerCellOverflow hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)} />
+              <ExplorerCellOverflow
+                hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
+                onEntityDoubleClick={handleOpenEntityInDetail}
+              />
             )}
           </StyledCellArrayWrap>
         );
@@ -524,7 +527,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue]
+    [renderCellValue, handleOpenEntityInDetail]
   );
 
   const renderEditSection = React.useCallback(
