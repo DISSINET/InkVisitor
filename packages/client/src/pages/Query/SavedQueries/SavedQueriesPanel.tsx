@@ -1,6 +1,7 @@
 import { FloatingPortal, autoUpdate, offset, size, useFloating } from "@floating-ui/react";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { ISavedQuery, ISavedQueryCreate, Query } from "@inkvisitor/shared/types";
+import { SavedQueryNameNotUnique } from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -32,6 +33,7 @@ import {
   StyledFolderIcon,
   StyledFolderList,
   StyledLockIcon,
+  StyledNameError,
   StyledPanel,
   StyledPanelHeader,
   StyledPanelTitle,
@@ -73,6 +75,15 @@ const CLIPPING_INSET = 20;
 const QUERY_NAME_MAX_LENGTH = 80;
 
 type FolderKey = "examples" | "mine" | "shared";
+
+const MINE_LABEL = "My queries";
+const SHARED_LABEL = "Shared";
+
+// Names are unique within a folder: every shared query shares one namespace,
+// each user's private queries another. Names that read the same collide, so
+// the comparison ignores case and surrounding whitespace (the server applies
+// the same rule - it is the only place that sees other users' shared saves).
+const normalizeName = (name: string): string => name.trim().toLowerCase();
 
 type FolderRow = ISavedQuery | IExampleQuery;
 
@@ -131,6 +142,16 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   );
   const sharedQueries = useMemo(() => savedQueries.filter((q) => q.shared), [savedQueries]);
 
+  const isNameTaken = (name: string, shared: boolean, exceptId?: string): boolean => {
+    const normalized = normalizeName(name);
+    return (shared ? sharedQueries : mineQueries).some(
+      (q) => q.id !== exceptId && normalizeName(q.name) === normalized,
+    );
+  };
+
+  const trimmedSaveName = saveName.trim();
+  const saveNameTaken = !!trimmedSaveName && isNameTaken(trimmedSaveName, saveShared);
+
   const saveMutation = useMutation({
     mutationFn: (payload: ISavedQueryCreate) => api.savedQueryCreate(payload),
     onSuccess: (_data, variables) => {
@@ -139,8 +160,10 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       setSaveShared(false);
       queryClient.invalidateQueries({ queryKey: ["saved-queries"] });
     },
-    onError: () => {
-      toast.error("Failed to save query");
+    onError: (error) => {
+      toast.error(
+        error instanceof SavedQueryNameNotUnique ? error.message : "Failed to save query",
+      );
     },
   });
 
@@ -152,8 +175,10 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       setEditingName("");
       queryClient.invalidateQueries({ queryKey: ["saved-queries"] });
     },
-    onError: () => {
-      toast.error("Failed to rename query");
+    onError: (error) => {
+      toast.error(
+        error instanceof SavedQueryNameNotUnique ? error.message : "Failed to rename query",
+      );
     },
   });
 
@@ -170,12 +195,11 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   });
 
   const handleSave = () => {
-    const trimmed = saveName.trim();
-    if (!trimmed || saveMutation.isPending) {
+    if (!trimmedSaveName || saveNameTaken || saveMutation.isPending) {
       return;
     }
     saveMutation.mutate({
-      name: trimmed,
+      name: trimmedSaveName,
       shared: saveShared,
       // every Explorer filter in play (UUIDs, label, floating search) travels
       // with the query, so loading it reproduces the whole result
@@ -218,8 +242,15 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     if (!editingId || !trimmed || renameMutation.isPending) {
       return;
     }
-    if (trimmed === savedQueries.find((q) => q.id === editingId)?.name) {
+    const edited = savedQueries.find((q) => q.id === editingId);
+    if (!edited || trimmed === edited.name) {
       cancelEditing();
+      return;
+    }
+    // the row stays in edit mode with the rejected name, so the user can
+    // correct it without retyping (blur also lands here)
+    if (isNameTaken(trimmed, edited.shared, edited.id)) {
+      toast.error(`Name already used in ${edited.shared ? SHARED_LABEL : MINE_LABEL}`);
       return;
     }
     renameMutation.mutate({ id: editingId, name: trimmed });
@@ -276,8 +307,8 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
           },
         ]
       : []),
-    { key: "mine", label: "My queries", rows: mineQueries },
-    { key: "shared", label: "Shared", rows: sharedQueries },
+    { key: "mine", label: MINE_LABEL, rows: mineQueries },
+    { key: "shared", label: SHARED_LABEL, rows: sharedQueries },
   ];
 
   return (
@@ -315,6 +346,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                 width="full"
                 autoFocus
                 maxLength={QUERY_NAME_MAX_LENGTH}
+                borderColor={saveNameTaken ? "danger" : undefined}
                 rightContent={
                   <StyledCharCounter>
                     {saveName.length}/{QUERY_NAME_MAX_LENGTH}
@@ -323,6 +355,11 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                 onChangeFn={setSaveName}
                 onEnterPressFn={handleSave}
               />
+              {saveNameTaken && (
+                <StyledNameError role="alert">
+                  Name already used in {saveShared ? SHARED_LABEL : MINE_LABEL}
+                </StyledNameError>
+              )}
               <StyledSaveFooter
                 onKeyDown={(e) => {
                   // Enter while the Save button holds focus saves; the checkbox
@@ -347,7 +384,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                     label="Save"
                     icon={<IcoSave size={14} />}
                     color="info"
-                    disabled={!saveName.trim() || saveMutation.isPending}
+                    disabled={!trimmedSaveName || saveNameTaken || saveMutation.isPending}
                     onClick={handleSave}
                   />
                 </StyledSaveAction>

@@ -10,6 +10,7 @@ import {
   BadParams,
   NotFound,
   PermissionDeniedError,
+  SavedQueryNameNotUnique,
 } from "@inkvisitor/shared/types/errors";
 import { pool } from "@middlewares/db";
 import SavedQuery from "@models/saved-query/saved-query";
@@ -454,6 +455,106 @@ describe("Saved queries", function () {
           testErroneousResponse.bind(undefined, new PermissionDeniedError(""))
         );
       expect((await SavedQuery.findById(db.connection, id))?.shared).toBeFalsy();
+    });
+  });
+
+  describe("name uniqueness", () => {
+    const create = async (
+      agent: AuthAgent,
+      name: string,
+      shared: boolean
+    ): Promise<string> => {
+      const res = await agent
+        .post(`${apiPath}/saved-queries`)
+        .send({ name, shared, data: queryData })
+        .expect(200);
+      return res.body.data.id;
+    };
+
+    it("rejects a second private query with the same name", async () => {
+      await create(agentA, "A unique", false);
+      await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({ name: "A unique", shared: false, data: queryData })
+        .expect("Content-Type", /json/)
+        .expect(
+          testErroneousResponse.bind(
+            undefined,
+            new SavedQueryNameNotUnique("")
+          )
+        );
+    });
+
+    it("rejects a name differing only in case and surrounding space", async () => {
+      await create(agentA, "A cased", false);
+      await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({ name: "  a CASED  ", shared: false, data: queryData })
+        .expect(
+          testErroneousResponse.bind(
+            undefined,
+            new SavedQueryNameNotUnique("")
+          )
+        );
+    });
+
+    it("another user may reuse a private name", async () => {
+      await create(agentA, "A and B both", false);
+      await create(agentB, "A and B both", false);
+    });
+
+    it("the same name may live in both folders", async () => {
+      await create(agentC, "C in both", false);
+      await create(agentC, "C in both", true);
+    });
+
+    it("rejects a shared name already taken by another user", async () => {
+      await create(agentC, "C shared unique", true);
+      await adminAgent
+        .post(`${apiPath}/saved-queries`)
+        .send({ name: "C shared unique", shared: true, data: queryData })
+        .expect(
+          testErroneousResponse.bind(
+            undefined,
+            new SavedQueryNameNotUnique("")
+          )
+        );
+    });
+
+    it("rejects a rename onto a name taken in the same folder", async () => {
+      await create(agentA, "A first", false);
+      const id = await create(agentA, "A second", false);
+      await agentA
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "A first" })
+        .expect(
+          testErroneousResponse.bind(
+            undefined,
+            new SavedQueryNameNotUnique("")
+          )
+        );
+    });
+
+    it("a query may be renamed to the name it already has", async () => {
+      const id = await create(agentA, "A keeps its name", false);
+      await agentA
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ name: "A keeps its name" })
+        .expect(200);
+    });
+
+    it("rejects sharing a query whose name a shared query already holds", async () => {
+      await create(agentC, "C collides when shared", true);
+      const id = await create(agentC, "C collides when shared", false);
+      await agentC
+        .put(`${apiPath}/saved-queries/${id}`)
+        .send({ shared: true })
+        .expect(
+          testErroneousResponse.bind(
+            undefined,
+            new SavedQueryNameNotUnique("")
+          )
+        );
     });
   });
 });

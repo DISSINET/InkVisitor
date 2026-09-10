@@ -154,6 +154,15 @@ class UserNotUnique extends CustomError {
 }
 
 /**
+ * SavedQueryNameNotUnique will be thrown when a saved query would take a name already used inside the same folder - the shared queries form one namespace for everybody, each user's private queries another
+ */
+class SavedQueryNameNotUnique extends CustomError {
+  public static code = 409;
+  public static title = "Query name already used";
+  public static message = "A query with this name already exists in this folder";
+}
+
+/**
  * EntityDoesNotExist will be thrown when attempting to remove/update the entity entry, which does not exist
  */
 class EntityDoesNotExist extends CustomError {
@@ -536,6 +545,7 @@ const allErrors: Record<string, any> = {
   UserAlreadyActivated,
   UserBadActivationHash,
   UserNotUnique,
+  SavedQueryNameNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
   EntityDoesExist,
@@ -595,6 +605,7 @@ export {
   UserAlreadyActivated,
   UserBadActivationHash,
   UserNotUnique,
+  SavedQueryNameNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
   EntityDoesExist,

@@ -105,6 +105,15 @@ export const StyledCharCounter = styled.span`
   padding-right: 0.2rem;
 `;
 
+// sits between the name field and the save button, which stays disabled while
+// the message shows - the field is marked red at the same time, so this only
+// has to carry the reason
+export const StyledNameError = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["danger"]};
+  padding-left: 0.2rem;
+`;
+
 export const StyledSaveRow = styled.div`
   display: flex;
   flex-direction: column;
