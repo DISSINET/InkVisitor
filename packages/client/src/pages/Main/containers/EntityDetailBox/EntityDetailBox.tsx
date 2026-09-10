@@ -41,6 +41,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
     selectedDetailId,
     setSelectedDetailId,
     appendDetailId,
+    promoteDetailId,
     clearAllDetailIds,
     replaceDetailIds,
   } = useSearchParams();
@@ -74,8 +75,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
 
   useEffect(() => {
     if (data) {
-      if (JSON.stringify(data) !== JSON.stringify(entities)) {
-        setEntities(data);
+      // the api answers in its own order while the tab strip reads its order
+      // from `detailIdArray`, which is also what a promoted or dragged tab
+      // rewrites, so the response is laid back over that order
+      const ordered = detailIdArray
+        .map((id) => data.find((entity) => entity.id === id))
+        .filter((entity): entity is IResponseEntity => entity !== undefined);
+      if (JSON.stringify(ordered) !== JSON.stringify(entities)) {
+        setEntities(ordered);
       }
       if (data.length < detailIdArray.length) {
         const idsFromData = data.map((d) => d.id);
@@ -86,6 +93,25 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
       }
     }
   }, [data]);
+
+  // A tab reached for in the caret list only borrows the last visible slot, so
+  // the next pick would take that slot back; moving it to the front of the
+  // strip is what lets two entities from the caret list sit side by side.
+  const handleOverflowSelect = (entityId: string) => {
+    setEntities((prevEntities) => {
+      const index = prevEntities.findIndex((e) => e.id === entityId);
+      if (index <= 0) {
+        return prevEntities;
+      }
+      return update(prevEntities, {
+        $splice: [
+          [index, 1],
+          [0, 0, prevEntities[index]],
+        ],
+      });
+    });
+    promoteDetailId(entityId);
+  };
 
   const handleClose = (entityId: string) => {
     const newEntities: IResponseEntity[] = entities.filter((e) => e.id !== entityId);
@@ -188,7 +214,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
                   onRestore?.();
                 }
                 onTabOpen?.();
-                setSelectedDetailId(entityId);
+                handleOverflowSelect(entityId);
               }}
               onClose={(entityId) => handleClose(entityId)}
             />

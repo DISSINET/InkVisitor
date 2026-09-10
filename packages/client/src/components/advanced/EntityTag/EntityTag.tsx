@@ -122,7 +122,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isEquivalent = false,
   isSubordinate = false,
 }) => {
-  const { appendDetailId } = useSearchParams();
+  const { promoteDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState,
@@ -376,7 +376,9 @@ const EntityTagInner: React.FC<EntityTag> = ({
             return;
           }
           if (!disableDoubleClick) {
-            appendDetailId(entity.id);
+            // opening at the front of the tab strip keeps the entity on screen
+            // whatever else is already open
+            promoteDetailId(entity.id);
             dispatch(setSecondPanelExpanded(true));
             if (detailBoxState === DetailBoxState.Minimized) {
               dispatch(setDetailBoxState(DetailBoxState.Normal));
