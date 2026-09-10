@@ -1,7 +1,11 @@
 import { Explore } from "@inkvisitor/shared/types/query";
 import React from "react";
 import ExploreTableHeaderColumn from "./ExploreTableHeaderColumn";
-import { StyledHeader, StyledHeaderEntityCell } from "../ExplorerTableStyles";
+import {
+  StyledHeader,
+  StyledHeaderEntityCell,
+  StyledHeaderRowNumber,
+} from "../ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "../constants";
 
 const ExploreTableHeader: React.FC<{
@@ -21,6 +25,7 @@ const ExploreTableHeader: React.FC<{
           maxWidth: WIDTH_COLUMN_FIRST,
         }}
       >
+        <StyledHeaderRowNumber>#</StyledHeaderRowNumber>
         Entity
       </StyledHeaderEntityCell>
       {columns.map((column, key) => {

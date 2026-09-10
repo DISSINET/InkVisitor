@@ -35,6 +35,7 @@ import {
   StyledEntityTagWrap,
   StyledFocusedCircle,
   StyledRowInner,
+  StyledRowNumber,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
 import { readOnlyColumnTypes, wideColumnTypes } from "./types";
@@ -611,6 +612,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           maxWidth: WIDTH_COLUMN_FIRST,
         }}
       >
+        <StyledRowNumber>{rowId + 1}</StyledRowNumber>
+
         <StyledCheckboxWrapper>
           {isLastClicked && <StyledFocusedCircle />}
           <Checkbox
