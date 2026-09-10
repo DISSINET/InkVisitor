@@ -855,18 +855,72 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Returns ids that co-occur with entityId in any statement.
-   * Mirrors the StatementEntities index (actants, actions, tags, direct
-   * territory) plus the statement id itself, so every returned id would
-   * also find these statements if used as the co-occurrence input.
-   * Excludes territory ancestor lineage and nested prop/reference ids,
-   * which made co-occurrence search return many unrelated entities.
+   * Statements that reference any of `entityIds` in any position - action,
+   * actant, tag or direct territory (the StatementEntities index), or an
+   * in-statement prop type/value recursing to lvl3 (the StatementDataProps
+   * index). Both are multi indexes, so a statement matching several keys - or
+   * both indexes - arrives more than once and is deduplicated by id here.
+   * @param db db connection
+   * @param entityIds ids to look for
+   * @returns list of statements, each once
+   */
+  static async getLinkedEntitiesAnyPosition(
+    db: Connection | undefined,
+    entityIds: string[]
+  ): Promise<IStatement[]> {
+    if (!entityIds.length) {
+      return [];
+    }
+
+    const statements: IStatement[] = await rethink
+      .table(Entity.table)
+      .getAll(rethink.args(entityIds), {
+        index: DbEnums.Indexes.StatementEntities,
+      })
+      .union(
+        rethink.table(Entity.table).getAll(rethink.args(entityIds), {
+          index: DbEnums.Indexes.StatementDataProps,
+        }) as any
+      )
+      .filter({ class: EntityEnums.Class.Statement })
+      .run(db);
+
+    const byId = new Map<string, IStatement>();
+    for (const statement of statements) {
+      byId.set(statement.id, statement);
+    }
+
+    return [...byId.values()];
+  }
+
+  /**
+   * Returns ids that co-occur with any of the passed entities in a statement.
+   * Coverage mirrors the two entity-keyed statement indexes exactly - actions,
+   * actants, tags, direct territory, and in-statement prop type/value to lvl3 -
+   * plus the statement id itself, so every returned id would also find these
+   * statements if used as the co-occurrence input. Territory ancestor lineage,
+   * reference resource/value and actant classifications/identifications have no
+   * such index and stay out; including them made co-occurrence search return
+   * many unrelated entities.
+   * Passed ids are never part of the result, so two inputs that co-occur with
+   * each other do not return each other.
+   * @param db db connection
+   * @param entityIds single id or list of ids; results are unioned
+   * @returns list of co-occurring ids
    */
   static async getCoOccurrentEntityIds(
     db: Connection | undefined,
-    entityId: string
+    entityIds: string | string[]
   ): Promise<string[]> {
-    const statements = await Statement.getLinkedEntities(db, entityId);
+    const inputIds = typeof entityIds === "string" ? [entityIds] : entityIds;
+    if (!inputIds.length) {
+      return [];
+    }
+
+    const statements = await Statement.getLinkedEntitiesAnyPosition(
+      db,
+      inputIds
+    );
 
     const ids = new Set<string>();
     for (const s of statements) {
@@ -877,15 +931,21 @@ class Statement extends Entity implements IStatement {
       }
       s.data.actions?.forEach((a) => {
         if (a.actionId) ids.add(a.actionId);
+        Entity.extractIdsFromProps(a.props).forEach((id) => {
+          if (id) ids.add(id);
+        });
       });
       s.data.actants?.forEach((a) => {
         if (a.entityId) ids.add(a.entityId);
+        Entity.extractIdsFromProps(a.props).forEach((id) => {
+          if (id) ids.add(id);
+        });
       });
       s.data.tags?.forEach((t) => {
         if (t) ids.add(t);
       });
     }
-    ids.delete(entityId);
+    inputIds.forEach((id) => ids.delete(id));
 
     return [...ids];
   }

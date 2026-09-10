@@ -227,12 +227,20 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // or select — except when that input lives inside a container marked with
   // [data-run-on-enter] (floating search panel, UUID filter panel), where Enter
   // should also trigger the search alongside any local handler on the input.
+  // A dropdown focuses its own hidden text input, so it would otherwise swallow
+  // Enter everywhere outside those containers; only an OPEN menu keeps Enter for
+  // itself, where the key picks the highlighted option.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
-      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      const focused = document.activeElement;
+      const tag = (focused?.tagName ?? "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") {
-        if (!document.activeElement?.closest("[data-run-on-enter]")) return;
+        if (focused?.closest(".react-select-container")) {
+          if (focused.getAttribute("aria-expanded") === "true") return;
+        } else if (!focused?.closest("[data-run-on-enter]")) {
+          return;
+        }
       }
       handleRunSearch();
     };

@@ -101,6 +101,9 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
 
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  // the menu is controlled so that the clear button can dismiss it (see
+  // ClearIndicator); react-select still drives it through onMenuOpen/onMenuClose
+  const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   const SuggesterDropdownIndicator = (props: DropdownIndicatorProps) => (
     <components.DropdownIndicator {...props}>
@@ -132,7 +135,9 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
         }}
       >
         <StyledSelect
-          // menuIsOpen={loggerId === ""}
+          menuIsOpen={menuIsOpen}
+          onMenuOpen={() => setMenuIsOpen(true)}
+          onMenuClose={() => setMenuIsOpen(false)}
           $suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
@@ -268,8 +273,26 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 };
 
 const ClearIndicator = (props: ClearIndicatorProps): React.ReactElement => {
+  const { onMouseDown, onTouchEnd, ...innerProps } = props.innerProps ?? {};
+
+  // clearing the value means the user wants nothing selected, so the open menu
+  // goes with it
+  const closeMenuAfter =
+    <E extends React.SyntheticEvent<HTMLDivElement>>(handler?: (event: E) => void) =>
+    (event: E) => {
+      handler?.(event);
+      props.selectProps.onMenuClose();
+    };
+
   return (
-    <components.ClearIndicator {...props}>
+    <components.ClearIndicator
+      {...props}
+      innerProps={{
+        ...innerProps,
+        onMouseDown: closeMenuAfter(onMouseDown),
+        onTouchEnd: closeMenuAfter(onTouchEnd),
+      }}
+    >
       <StyledClearIconWrap>
         <components.CrossIcon size={14} />
       </StyledClearIconWrap>

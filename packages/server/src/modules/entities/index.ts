@@ -41,6 +41,7 @@ import {
   TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
 import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import { IBatchSetAttributeChanges } from "@inkvisitor/shared/types/request-batch";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
@@ -1314,6 +1315,127 @@ export default Router()
           message: `Created ${created}/${entities.length} relations${
             Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
+        };
+      }
+    )
+  )
+
+  .post(
+    "/batchSetAttribute",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          {
+            entityIds: string[];
+            changes: IBatchSetAttributeChanges;
+          }
+        >
+      ) => {
+        const { entityIds, changes } = request.body;
+
+        if (!entityIds || !Array.isArray(entityIds) || entityIds.length === 0) {
+          throw new BadParams("entityIds array must be provided");
+        }
+
+        if (!changes || (changes.attribute !== "language" && changes.attribute !== "pos")) {
+          throw new BadParams("changes.attribute must be language or pos");
+        }
+
+        if (changes.attribute === "language" && changes.to === undefined) {
+          throw new BadParams("changes.to must be provided");
+        }
+
+        if (changes.attribute === "pos" && !changes.concept && !changes.action) {
+          throw new BadParams("changes.concept or changes.action must be provided");
+        }
+
+        await request.db.lock();
+
+        const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
+
+        if (entities.length === 0) {
+          throw new EntityDoesNotExist("none of the provided entities were found", entityIds[0]);
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        let updated = 0;
+        // an entity the attribute does not apply to, or whose current value is
+        // not the one being replaced, is left alone - not an error
+        let skipped = 0;
+
+        for (const entityData of entities) {
+          let updateData: Partial<IEntity> | undefined;
+
+          if (changes.attribute === "language") {
+            const current = entityData.language || EntityEnums.Language.Empty;
+            if (changes.from !== null && current !== changes.from) {
+              skipped++;
+              continue;
+            }
+            if (current === changes.to) {
+              skipped++;
+              continue;
+            }
+            updateData = { language: changes.to };
+          } else {
+            const spec =
+              entityData.class === EntityEnums.Class.Concept
+                ? changes.concept
+                : entityData.class === EntityEnums.Class.Action
+                  ? changes.action
+                  : undefined;
+
+            if (!spec) {
+              skipped++;
+              continue;
+            }
+
+            const current = (entityData.data as { pos?: string })?.pos || "";
+            if (spec.from !== null && current !== spec.from) {
+              skipped++;
+              continue;
+            }
+            if (current === spec.to) {
+              skipped++;
+              continue;
+            }
+            updateData = { data: { ...entityData.data, pos: spec.to } } as Partial<IEntity>;
+          }
+
+          const model = getEntityClass({
+            ...mergeDeep(entityData, updateData),
+            class: entityData.class,
+            id: entityData.id,
+          });
+
+          if (!model.isValid()) {
+            errors[entityData.id] = "model not valid";
+            continue;
+          }
+
+          if (!model.canBeEditedByUser(user)) {
+            errors[entityData.id] = "permission denied";
+            continue;
+          }
+
+          await model.beforeSave(request.db.connection);
+          const result = await model.update(request.db.connection, updateData);
+
+          if (result.replaced || result.unchanged) {
+            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
+            updated++;
+          } else {
+            errors[entityData.id] = "update failed";
+          }
+        }
+
+        return {
+          result: updated > 0,
+          message: `Updated ${updated}/${entities.length} entities${
+            skipped ? ` (${skipped} skipped: not relevant / no match)` : ""
+          }${Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""}`,
         };
       }
     )

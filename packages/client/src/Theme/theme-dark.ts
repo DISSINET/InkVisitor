@@ -48,6 +48,7 @@ const darkTheme = {
     white: "#060c26",
     grey: "#6b6b6b",
     greyer: "#b5b5b5",
+    mutedText: "#a0aec0", // gray 500
     text: "#c7c7c7",
     primary: "#f6f6ff",
     statementHighlight: "rgba(158,170,215,1)", // success accent, matches opened-row bar

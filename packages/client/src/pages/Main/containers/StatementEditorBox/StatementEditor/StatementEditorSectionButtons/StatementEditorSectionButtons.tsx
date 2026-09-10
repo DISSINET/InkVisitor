@@ -119,6 +119,7 @@ export const StatementEditorSectionButtons: React.FC<StatementEditorSectionButto
           disabled={!previousStatement}
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
+          shape={editorWidthTooNarrow ? "square" : undefined}
           onClick={() => handleCopyFromStatement(previousStatement, section, replaceSection)}
         />
       </ButtonGroup>

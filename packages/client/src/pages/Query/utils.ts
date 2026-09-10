@@ -2,60 +2,147 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Query, Relation } from "@inkvisitor/shared/types";
 
-export const SUPERCLASS_ENTITY_CLASSES = [EntityEnums.Class.Action, EntityEnums.Class.Concept];
+/**
+ * The relation a `has relation:` / `is related to:` query edge walks, and which
+ * end of that relation the query's root node sits on. `inverse` edges start from
+ * the relation target and look back at its sources.
+ */
+export interface IRelationEdgeBinding {
+  relationType: RelationEnums.Type;
+  inverse: boolean;
+}
 
-/** Superclass relations only allow Action↔Action or Concept↔Concept pairs. */
-export const getSuperclassAllowedClasses = (
-  rootEntityClasses: EntityEnums.Class[] | undefined,
-): EntityEnums.Class[] => {
-  const rootClasses = rootEntityClasses ?? [];
-  // an unset root class is the wildcard, so the edge constrains on its own
-  if (rootClasses.length === 0) {
-    return [...SUPERCLASS_ENTITY_CLASSES];
-  }
-  return SUPERCLASS_ENTITY_CLASSES.filter((c) => rootClasses.includes(c));
+const forward = (relationType: RelationEnums.Type): IRelationEdgeBinding => ({
+  relationType,
+  inverse: false,
+});
+const inverse = (relationType: RelationEnums.Type): IRelationEdgeBinding => ({
+  relationType,
+  inverse: true,
+});
+
+/**
+ * `R:` (has relation: any) is deliberately absent: it matches every relation
+ * type at once, so no single rule constrains its target classes.
+ */
+export const RELATION_EDGE_BINDINGS: Partial<Record<Query.EdgeType, IRelationEdgeBinding>> = {
+  [Query.EdgeType["R:SCL"]]: forward(RelationEnums.Type.Superclass),
+  [Query.EdgeType["I_R:SCL"]]: inverse(RelationEnums.Type.Superclass),
+  [Query.EdgeType["R:SYN"]]: forward(RelationEnums.Type.Synonym),
+  [Query.EdgeType["R:ANT"]]: forward(RelationEnums.Type.Antonym),
+  [Query.EdgeType["I_R:ANT"]]: inverse(RelationEnums.Type.Antonym),
+  [Query.EdgeType["R:HOL"]]: forward(RelationEnums.Type.Holonym),
+  [Query.EdgeType["I_R:HOL"]]: inverse(RelationEnums.Type.Holonym),
+  [Query.EdgeType["R:PRR"]]: forward(RelationEnums.Type.PropertyReciprocal),
+  [Query.EdgeType["I_R:PRR"]]: inverse(RelationEnums.Type.PropertyReciprocal),
+  [Query.EdgeType["R:SAR"]]: forward(RelationEnums.Type.SubjectActant1Reciprocal),
+  [Query.EdgeType["I_R:SAR"]]: inverse(RelationEnums.Type.SubjectActant1Reciprocal),
+  [Query.EdgeType["R:AEE"]]: forward(RelationEnums.Type.ActionEventEquivalent),
+  [Query.EdgeType["I_R:AEE"]]: inverse(RelationEnums.Type.ActionEventEquivalent),
+  [Query.EdgeType["R:CLA"]]: forward(RelationEnums.Type.Classification),
+  [Query.EdgeType["I_R:CLA"]]: inverse(RelationEnums.Type.Classification),
+  [Query.EdgeType["R:IDE"]]: forward(RelationEnums.Type.Identification),
+  [Query.EdgeType["I_R:IDE"]]: inverse(RelationEnums.Type.Identification),
+  [Query.EdgeType["R:IMP"]]: forward(RelationEnums.Type.Implication),
+  [Query.EdgeType["I_R:IMP"]]: inverse(RelationEnums.Type.Implication),
+  [Query.EdgeType["R:SOE"]]: forward(RelationEnums.Type.SuperordinateEntity),
+  [Query.EdgeType["I_R:SOE"]]: inverse(RelationEnums.Type.SuperordinateEntity),
+  [Query.EdgeType["R:SUS"]]: forward(RelationEnums.Type.SubjectSemantics),
+  [Query.EdgeType["I_R:SUS"]]: inverse(RelationEnums.Type.SubjectSemantics),
+  [Query.EdgeType["R:A1S"]]: forward(RelationEnums.Type.Actant1Semantics),
+  [Query.EdgeType["I_R:A1S"]]: inverse(RelationEnums.Type.Actant1Semantics),
+  [Query.EdgeType["R:A2S"]]: forward(RelationEnums.Type.Actant2Semantics),
+  [Query.EdgeType["I_R:A2S"]]: inverse(RelationEnums.Type.Actant2Semantics),
+  [Query.EdgeType["R:REL"]]: forward(RelationEnums.Type.Related),
+  [Query.EdgeType["I_R:REL"]]: inverse(RelationEnums.Type.Related),
 };
 
-/** Target classes allowed for a Superordinate Entity picker given root entity classes. */
-export const getSuperordinateEntityAllowedClasses = (
+/**
+ * Classes the other end of `relationType` can hold, given the classes picked on
+ * the query's root node. An empty `rootEntityClasses` is the wildcard - every
+ * class the rule permits on the root side is still in play, so every class it
+ * permits opposite them is allowed.
+ *
+ * An empty result means the relation cannot start from the root classes at all;
+ * callers use that to disable the target picker.
+ */
+export const getRelationAllowedClasses = (
+  relationType: RelationEnums.Type,
   rootEntityClasses: EntityEnums.Class[] | undefined,
+  isInverse = false,
+  allEntityClasses: EntityEnums.Class[] = classesAll,
 ): EntityEnums.Class[] => {
-  const pattern =
-    Relation.RelationRules[RelationEnums.Type.SuperordinateEntity]?.allowedEntitiesPattern ?? [];
+  const rule = Relation.RelationRules[relationType];
+  if (!rule) {
+    return [];
+  }
+  const { allowedEntitiesPattern, cloudType, disabledEntities } = rule;
   const rootClasses = rootEntityClasses ?? [];
-  const allowed = new Set<EntityEnums.Class>();
+  const matchesRoot = (cls: EntityEnums.Class) =>
+    rootClasses.length === 0 || rootClasses.includes(cls);
 
-  // an unset root class is the wildcard: every source class of the relation is
-  // still in play, so the targets of all of them are allowed
-  if (rootClasses.length === 0) {
-    for (const [, targetClass] of pattern) {
-      allowed.add(targetClass);
+  if (allowedEntitiesPattern.length > 0) {
+    const allowed = new Set<EntityEnums.Class>();
+
+    // a cloud holds one class and has no direction, so a member's partners
+    // share its own class - the pattern rows here are single-class
+    if (cloudType) {
+      for (const [cls] of allowedEntitiesPattern) {
+        if (matchesRoot(cls)) {
+          allowed.add(cls);
+        }
+      }
+      return [...allowed];
+    }
+
+    const rootIndex = isInverse ? 1 : 0;
+    const targetIndex = isInverse ? 0 : 1;
+    for (const pattern of allowedEntitiesPattern) {
+      if (matchesRoot(pattern[rootIndex])) {
+        allowed.add(pattern[targetIndex]);
+      }
     }
     return [...allowed];
   }
 
-  for (const rootClass of rootClasses) {
-    for (const [sourceClass, targetClass] of pattern) {
-      if (sourceClass === rootClass) {
-        allowed.add(targetClass);
-      }
+  // an empty pattern permits every class pair, minus the ones the rule disables
+  // on both ends (Identification: any class but Action and Concept)
+  if (disabledEntities?.length) {
+    if (rootClasses.some((cls) => disabledEntities.includes(cls))) {
+      return [];
     }
+    return allEntityClasses.filter((cls) => !disabledEntities.includes(cls));
   }
 
-  return [...allowed];
+  return [...allEntityClasses];
 };
 
+/** Target classes allowed for a Superclass picker given root entity classes. */
+export const getSuperclassAllowedClasses = (
+  rootEntityClasses: EntityEnums.Class[] | undefined,
+): EntityEnums.Class[] =>
+  getRelationAllowedClasses(RelationEnums.Type.Superclass, rootEntityClasses);
+
+/** Target classes allowed for a Superordinate Entity picker given root entity classes. */
+export const getSuperordinateEntityAllowedClasses = (
+  rootEntityClasses: EntityEnums.Class[] | undefined,
+): EntityEnums.Class[] =>
+  getRelationAllowedClasses(RelationEnums.Type.SuperordinateEntity, rootEntityClasses);
+
+/**
+ * Class constraint the edge's relation puts on its target node, or null when the
+ * edge is not a relation edge and the target classes come from
+ * Query.EdgeTypeTargetNodeParams instead.
+ */
 export const getRelationConstrainedCategoryTypes = (
   edgeType: Query.EdgeType | undefined,
   rootEntityClasses: EntityEnums.Class[] | undefined,
 ): EntityEnums.Class[] | null => {
-  if (edgeType === Query.EdgeType["R:SCL"] || edgeType === Query.EdgeType["I_R:SCL"]) {
-    return getSuperclassAllowedClasses(rootEntityClasses);
+  const binding = edgeType ? RELATION_EDGE_BINDINGS[edgeType] : undefined;
+  if (!binding) {
+    return null;
   }
-  if (edgeType === Query.EdgeType["R:SOE"] || edgeType === Query.EdgeType["I_R:SOE"]) {
-    return getSuperordinateEntityAllowedClasses(rootEntityClasses);
-  }
-  return null;
+  return getRelationAllowedClasses(binding.relationType, rootEntityClasses, binding.inverse);
 };
 
 export interface IRelationSuggesterConfig {
@@ -424,6 +511,13 @@ const hashString = (s: string): string => {
  * Invalid tokens are ignored; duplicates are removed (first occurrence order preserved).
  */
 const ENTITY_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Entity uuid trimmed for display: first 8 and last 5 characters. Ids shorter
+ * than the elision itself are returned unchanged.
+ */
+export const shortenUuid = (id: string): string =>
+  id.length > 13 ? `${id.slice(0, 8)}\u2026${id.slice(-5)}` : id;
 
 export const parseEntityIdsFromText = (text: string): string[] => {
   const seen = new Set<string>();

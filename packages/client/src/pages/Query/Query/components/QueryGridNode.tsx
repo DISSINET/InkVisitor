@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
-import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
@@ -266,6 +266,33 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               placeholder="all classes"
               disabled={node.params.entityId !== undefined}
               limitSelectedItems={Math.floor((270 - 110) / 37)}
+            />
+          )}
+          {/* the root node's own status is filtered in the floating search
+              container (Explore status filter), so the picker is offered only
+              on edge targets */}
+          {!isRoot && !node.params.entityId && (
+            <Dropdown.Single.Basic
+              // params.entityStatuses is a list on purpose - the backend
+              // matches any status in it, so the picker can become multi later
+              value={node.params.entityStatuses?.[0] ?? null}
+              placeholder="any status"
+              tooltipLabel="entity status"
+              isClearable
+              width={110}
+              options={entityStatusDict.map((status) => ({
+                value: status.value,
+                label: status.label,
+              }))}
+              onChange={(newValue) => {
+                dispatch({
+                  type: QueryActionType.updateNodeStatuses,
+                  payload: {
+                    nodeId: node.id,
+                    newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
+                  },
+                });
+              }}
             />
           )}
           {paramEntityId && (

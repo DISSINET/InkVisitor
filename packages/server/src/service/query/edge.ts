@@ -27,11 +27,12 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * Expanded target-id set for a pinned target node, resolved in prepare():
-   * the pinned entityId plus its equivalents (SYN/AEE/IDE) and/or subordinates
-   * (inverse SCL/SOE/HOL + child territories, all levels) when the node's
-   * expansion toggles ask for them. Null when the target node is not pinned -
-   * toggles never affect an unpinned target.
+   * Explicit target-id set for the edge, resolved in prepare(): for a pinned
+   * target node the pinned entityId plus its equivalents (SYN/AEE/IDE) and/or
+   * subordinates (inverse SCL/SOE/HOL + child territories, all levels) when the
+   * node's expansion toggles ask for them; for an unpinned node the entities
+   * matching its status constraint. Null when the target is neither pinned nor
+   * status-constrained - expansion toggles never affect an unpinned target.
    */
   protected targetEntityIds: string[] | null = null;
 
@@ -43,8 +44,15 @@ export default class SearchEdge implements Query.IEdge {
    */
   async prepare(db: Connection): Promise<void> {
     const entityId = this.node.params.entityId;
+    const statuses = this.node.params.entityStatuses ?? [];
+
     if (!entityId) {
-      this.targetEntityIds = null;
+      // resolving the status constraint into an id set here is what makes it
+      // apply to every edge type: each run() already matches against
+      // targetIds(), so no edge needs to know about statuses
+      this.targetEntityIds = statuses.length
+        ? await this.statusTargetIds(db, statuses)
+        : null;
       return;
     }
 
@@ -60,14 +68,36 @@ export default class SearchEdge implements Query.IEdge {
         ids.add(id);
       }
     }
-    this.targetEntityIds = [...ids];
+    this.targetEntityIds = statuses.length
+      ? await filterIdsByStatus(db, [...ids], statuses)
+      : [...ids];
   }
 
   /**
-   * Target-id set for run() call sites to match against. Non-empty when the
-   * target node is pinned (it always contains the pinned id itself), null
-   * otherwise. Falls back to the raw params.entityId when prepare() has not
-   * run, so a bare run() keeps the single-id semantics.
+   * Ids of entities carrying one of `statuses`, narrowed by the target node's
+   * classes when it has any. Status has no index, so without classes this is a
+   * full scan of the entity table.
+   */
+  private async statusTargetIds(
+    db: Connection,
+    statuses: EntityEnums.Status[]
+  ): Promise<string[]> {
+    const classes = this.node.params.entityClasses ?? [];
+    const base: RStream = classes.length
+      ? r
+          .table(Entity.table)
+          .getAll(r.args(classes), { index: DbEnums.Indexes.Class })
+      : r.table(Entity.table);
+
+    return filterStreamByStatus(base, statuses).run(db) as Promise<string[]>;
+  }
+
+  /**
+   * Target-id set for run() call sites to match against, null when the target
+   * is unconstrained. A pinned target always contains at least the pinned id; a
+   * status-constrained one may resolve to an empty set, which every run()
+   * treats as "matches nothing". Falls back to the raw params.entityId when
+   * prepare() has not run, so a bare run() keeps the single-id semantics.
    */
   protected targetIds(): string[] | null {
     if (this.targetEntityIds) {
@@ -80,6 +110,39 @@ export default class SearchEdge implements Query.IEdge {
   run(q: RStream): RStream {
     throw new Error("base SearchEdge does not implement run method");
   }
+}
+
+/**
+ * Narrows a stream of entities to those carrying one of `statuses` and emits
+ * their distinct ids.
+ */
+function filterStreamByStatus(
+  q: RStream,
+  statuses: EntityEnums.Status[]
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return r.expr(statuses).contains(e("status"));
+    })
+    .getField("id")
+    .distinct() as unknown as RStream;
+}
+
+/**
+ * Subset of `ids` whose entities carry one of `statuses`.
+ */
+async function filterIdsByStatus(
+  db: Connection,
+  ids: string[],
+  statuses: EntityEnums.Status[]
+): Promise<string[]> {
+  if (!ids.length) {
+    return ids;
+  }
+  return filterStreamByStatus(
+    r.table(Entity.table).getAll(r.args(ids)),
+    statuses
+  ).run(db) as Promise<string[]>;
 }
 
 /**
@@ -301,6 +364,169 @@ export class EdgeHasSuperordinate extends SearchEdge {
       RelationEnums.Type.SuperordinateEntity,
       this.targetIds(),
       this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+/**
+ * Members of `relation` that the iterated entity is related TO. Every occurrence
+ * of the entity's own id is dropped, so a symmetric pair yields just the other
+ * side no matter which index the entity sits at.
+ *
+ * A `selfLoop` relation may legitimately hold the entity as its own partner, in
+ * which case its id occupies BOTH slots - the entity is put back only when it
+ * appears more than once, so an ordinary pair still cannot match itself.
+ */
+function relationPartners(
+  relation: RDatum<RelationTypes.IRelation>,
+  entityId: RDatum<string>,
+  selfLoop: boolean
+): RDatum {
+  const others = relation("entityIds").filter(function (id: RDatum<string>) {
+    return id.ne(entityId);
+  });
+  if (!selfLoop) {
+    return others as unknown as RDatum;
+  }
+  return r.branch(
+    relation("entityIds")
+      .filter(function (id: RDatum<string>) {
+        return id.eq(entityId);
+      })
+      .count()
+      .gt(1),
+    others.append(entityId),
+    others
+  ) as unknown as RDatum;
+}
+
+/**
+ * Shared run for the forward relation edges whose entityIds carry no direction:
+ * the symmetric pairs (ANT, PRR, SAR, IDE, REL) and the Synonym cloud, where the
+ * iterated entity can sit at any index. Matches relations of `relationType` that
+ * contain the iterated entity and whose partners (see relationPartners) satisfy
+ * the edge target:
+ *  - any id of the pinned target-id set (`targetIds`, the pinned entity plus its
+ *    toggle-driven expansion), or
+ *  - any entity whose class is in `targetClasses` (empty suggester + class
+ *    selected there), or
+ *  - with neither, any relation of the type that has a partner at all.
+ * Emits the iterated entity, keeping the subset invariant positive matching and
+ * negation rely on. A dangling partner id (no such entity) is null-safe and
+ * simply fails the class condition.
+ */
+function runHasUnorderedRelationEdge(
+  q: RStream,
+  relationType: RelationEnums.Type,
+  targetIds: string[] | null,
+  targetClasses: EntityEnums.Class[],
+  selfLoop: boolean
+): RStream {
+  return q.concatMap(function (entity: RDatum<IEntity>) {
+    return r
+      .table(Relation.table)
+      .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+      .filter({
+        type: relationType,
+      })
+      .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+        return relation("entityIds").contains(entity("id"));
+      })
+      .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+        const partners = relationPartners(relation, entity("id"), selfLoop);
+
+        if (targetIds) {
+          return partners
+            .setIntersection(r.expr(targetIds))
+            .isEmpty()
+            .not();
+        }
+        if (targetClasses.length) {
+          return partners.contains(function (id: RDatum<string>) {
+            return r
+              .table(Entity.table)
+              .get(id)
+              .default(null)
+              .do(function (ent: RDatum) {
+                return r.branch(
+                  ent,
+                  r.expr(targetClasses).contains(ent("class")),
+                  false
+                );
+              });
+          });
+        }
+        return partners.isEmpty().not();
+      })
+      .map(function () {
+        return entity("id");
+      });
+  });
+}
+
+/**
+ * Relations whose entityIds are ordered [source, target]: the edge walks from
+ * the iterated entity at entityIds[0] to its target at entityIds[1]. The three
+ * relations that predate this map (Superclass, SuperordinateEntity,
+ * Classification) keep their own named classes.
+ */
+const ORDERED_RELATION_EDGES: Partial<Record<Query.EdgeType, RelationEnums.Type>> = {
+  [Query.EdgeType["R:HOL"]]: RelationEnums.Type.Holonym,
+  [Query.EdgeType["R:AEE"]]: RelationEnums.Type.ActionEventEquivalent,
+  [Query.EdgeType["R:IMP"]]: RelationEnums.Type.Implication,
+  [Query.EdgeType["R:SUS"]]: RelationEnums.Type.SubjectSemantics,
+  [Query.EdgeType["R:A1S"]]: RelationEnums.Type.Actant1Semantics,
+  [Query.EdgeType["R:A2S"]]: RelationEnums.Type.Actant2Semantics,
+};
+
+/**
+ * Relations that put no meaning on the entityIds order - the symmetric pairs and
+ * the Synonym cloud (Relation.RelationRules: asymmetrical false / cloudType).
+ * The iterated entity can sit at any index, so these walk partners instead of
+ * entityIds[1].
+ */
+const UNORDERED_RELATION_EDGES: Partial<Record<Query.EdgeType, RelationEnums.Type>> = {
+  [Query.EdgeType["R:SYN"]]: RelationEnums.Type.Synonym,
+  [Query.EdgeType["R:ANT"]]: RelationEnums.Type.Antonym,
+  [Query.EdgeType["R:PRR"]]: RelationEnums.Type.PropertyReciprocal,
+  [Query.EdgeType["R:SAR"]]: RelationEnums.Type.SubjectActant1Reciprocal,
+  [Query.EdgeType["R:IDE"]]: RelationEnums.Type.Identification,
+  [Query.EdgeType["R:REL"]]: RelationEnums.Type.Related,
+};
+
+export class EdgeHasOrderedRelation extends SearchEdge {
+  protected relationType: RelationEnums.Type;
+
+  constructor(data: Partial<Query.IEdge>, relationType: RelationEnums.Type) {
+    super(data);
+    this.relationType = relationType;
+  }
+
+  run(q: RStream): RStream {
+    return runHasRelationTargetEdge(
+      q,
+      this.relationType,
+      this.targetIds(),
+      this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+export class EdgeHasUnorderedRelation extends SearchEdge {
+  protected relationType: RelationEnums.Type;
+
+  constructor(data: Partial<Query.IEdge>, relationType: RelationEnums.Type) {
+    super(data);
+    this.relationType = relationType;
+  }
+
+  run(q: RStream): RStream {
+    return runHasUnorderedRelationEdge(
+      q,
+      this.relationType,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      RelationTypes.RelationRules[this.relationType]?.selfLoop ?? false
     );
   }
 }
@@ -721,12 +947,12 @@ export class EdgeStatementHasActant2 extends SearchEdge {
  * a single Statement source node - each edge narrows the set to statements that
  * also reference that entity.
  *
- * Coverage matches the established getCoOccurrentEntityIds semantics (actions,
- * actants, tags, direct territory) plus in-statement prop type/value. Reference
- * resource/value and actant classifications/identifications have no shared "used
- * anywhere" index and are intentionally out of scope. With no target the edge
- * matches nothing (membership "in a statement" is only meaningful relative to a
- * specific entity).
+ * Coverage matches getCoOccurrentEntityIds: actions, actants, tags, direct
+ * territory and in-statement prop type/value. Reference resource/value and
+ * actant classifications/identifications have no shared "used anywhere" index
+ * and are intentionally out of scope. With no target the edge matches nothing
+ * (membership "in a statement" is only meaningful relative to a specific
+ * entity).
  */
 function runStatementHasEntityEdge(
   q: RStream,
@@ -1056,7 +1282,20 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
-    default:
+    default: {
+      const orderedRelation = data.type
+        ? ORDERED_RELATION_EDGES[data.type]
+        : undefined;
+      if (orderedRelation) {
+        return new EdgeHasOrderedRelation(data, orderedRelation);
+      }
+      const unorderedRelation = data.type
+        ? UNORDERED_RELATION_EDGES[data.type]
+        : undefined;
+      if (unorderedRelation) {
+        return new EdgeHasUnorderedRelation(data, unorderedRelation);
+      }
       throw new InternalServerError(`unknown edge type: ${data.type}`);
+    }
   }
 }
