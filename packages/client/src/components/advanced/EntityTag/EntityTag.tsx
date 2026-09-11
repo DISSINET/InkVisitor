@@ -182,7 +182,6 @@ const EntityTagInner: React.FC<EntityTag> = ({
     // tags nest (a statement tag inside a prop row), and only the one under the
     // cursor should answer
     e.stopPropagation();
-    setTagHovered(false);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
   }, []);
 

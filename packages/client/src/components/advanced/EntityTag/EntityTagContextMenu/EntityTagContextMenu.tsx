@@ -38,8 +38,9 @@ import {
 } from "./EntityTagContextMenuStyles";
 
 const ICON_SIZE = 13;
-// above the modal layer (500), below the app menu dropdown (10001)
-const MENU_Z_INDEX = 600;
+// tags render inside modals (500) and inside the suggester dropdown (10000),
+// and the menu has to clear whichever one it was opened from
+const MENU_Z_INDEX = 10002;
 // the pointer needs time to cross the gap between the row and the submenu
 const SUBMENU_CLOSE_DELAY = 150;
 
@@ -178,16 +179,21 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       ? target.entityIds.filter((id) => id !== entity.id)
       : [...target.entityIds, entity.id];
 
-    changeBookmarksMutation.mutate(folders, {
-      onSuccess: () =>
-        toast.info(
-          wasBookmarked ? `removed from [${target.name}]` : `bookmarked in [${target.name}]`,
-        ),
-    });
+    changeBookmarksMutation.mutate(folders);
+    // react-query drops mutate-scoped callbacks once the observer unmounts, and
+    // closing the menu unmounts this one, so the feedback cannot wait for the write
+    toast.info(wasBookmarked ? `removed from [${target.name}]` : `bookmarked in [${target.name}]`);
     onClose();
   };
 
+  const hasDetailPanel = location.pathname === "/" || location.pathname === "/explorer";
+
+  // the detail tabs are shared across pages, but the box holding them is part
+  // of the main page layout
   const expandDetailPanel = () => {
+    if (location.pathname !== "/") {
+      return;
+    }
     dispatch(setSecondPanelExpanded(true));
     if (detailBoxState === DetailBoxState.Minimized) {
       dispatch(setDetailBoxState(DetailBoxState.Normal));
@@ -274,6 +280,19 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     </StyledMenuItem>
   );
 
+  const navigationItems = [
+    // only the main page and the explorer mount a detail box to open into
+    hasDetailPanel &&
+      renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail),
+    targetTerritoryId &&
+      renderItem(
+        "territory",
+        isStatement ? "Open statement in editor" : "Go to territory",
+        isStatement ? <IcoEdit size={ICON_SIZE} /> : <IcoListTree size={ICON_SIZE} />,
+        goToTerritory,
+      ),
+  ].filter(Boolean);
+
   return (
     <>
       {/* tags are rendered inside modals too, so the menu portals to the body and
@@ -289,16 +308,12 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
             </StyledMenuHeader>
             <StyledMenuDivider />
 
-            {renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail)}
-            {targetTerritoryId &&
-              renderItem(
-                "territory",
-                isStatement ? "Open statement in editor" : "Go to territory",
-                isStatement ? <IcoEdit size={ICON_SIZE} /> : <IcoListTree size={ICON_SIZE} />,
-                goToTerritory,
-              )}
-
-            <StyledMenuDivider />
+            {navigationItems.length > 0 && (
+              <>
+                {navigationItems}
+                <StyledMenuDivider />
+              </>
+            )}
 
             {renderItem("copy-label", "Copy label", <IcoCopy size={ICON_SIZE} />, () =>
               copyToClipboard(entityLabel, "label"),
