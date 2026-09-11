@@ -10,6 +10,7 @@ import {
   IcoCheck,
   IcoClipboard,
   IcoCopy,
+  IcoEdit,
   IcoListTree,
   IcoStar,
   IcoUnlink,
@@ -64,13 +65,8 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState,
   );
-  const {
-    setTerritoryId,
-    setStatementId,
-    detailIdArray,
-    selectedDetailId,
-    promoteDetailId,
-  } = useSearchParams();
+  const { setTerritoryId, setStatementId, detailIdArray, selectedDetailId, promoteDetailId } =
+    useSearchParams();
 
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
 
@@ -148,8 +144,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   const { data: bookmarkFolders } = useBookmarksQuery();
 
   const changeBookmarksMutation = useMutation({
-    mutationFn: async (bookmarks: IBookmarkFolder[]) =>
-      await api.usersUpdate("me", { bookmarks }),
+    mutationFn: async (bookmarks: IBookmarkFolder[]) => await api.usersUpdate("me", { bookmarks }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     },
@@ -205,12 +200,14 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClose();
   };
 
+  const isStatement = entity.class === EntityEnums.Class.Statement;
+
   // a statement template carries no territory, and every other class is reached
   // through the entities it is used in rather than a place in the tree
   const targetTerritoryId: string | undefined =
     entity.class === EntityEnums.Class.Territory
       ? entity.id
-      : entity.class === EntityEnums.Class.Statement && !entity.isTemplate
+      : isStatement && !entity.isTemplate
         ? entity.data?.territory?.territoryId
         : undefined;
 
@@ -220,8 +217,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     if (!targetTerritoryId) {
       return;
     }
-    const statementToSelect =
-      entity.class === EntityEnums.Class.Statement ? entity.id : undefined;
+    const statementToSelect = isStatement ? entity.id : undefined;
 
     if (location.pathname === "/") {
       setTerritoryId(targetTerritoryId);
@@ -272,12 +268,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClick: () => void,
     color?: "danger",
   ) => (
-    <StyledMenuItem
-      key={key}
-      $color={color}
-      onClick={onClick}
-      onMouseEnter={scheduleSubmenuClose}
-    >
+    <StyledMenuItem key={key} $color={color} onClick={onClick} onMouseEnter={scheduleSubmenuClose}>
       <StyledItemIcon>{icon}</StyledItemIcon>
       <StyledItemLabel>{label}</StyledItemLabel>
     </StyledMenuItem>
@@ -302,10 +293,8 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
             {targetTerritoryId &&
               renderItem(
                 "territory",
-                entity.class === EntityEnums.Class.Statement
-                  ? "Open statement in editor"
-                  : "Go to territory",
-                <IcoListTree size={ICON_SIZE} />,
+                isStatement ? "Open statement in editor" : "Go to territory",
+                isStatement ? <IcoEdit size={ICON_SIZE} /> : <IcoListTree size={ICON_SIZE} />,
                 goToTerritory,
               )}
 
