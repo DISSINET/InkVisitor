@@ -339,7 +339,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
               <StyledItemLabel>Bookmarks</StyledItemLabel>
               <StyledItemTrailing>
                 {bookmarkedInCount > 0 && <span>{bookmarkedInCount}</span>}
-                <IcoCaretRight size={ICON_SIZE} />
+                <IcoCaretRight size={ICON_SIZE + 3} />
               </StyledItemTrailing>
             </StyledMenuItem>
 
