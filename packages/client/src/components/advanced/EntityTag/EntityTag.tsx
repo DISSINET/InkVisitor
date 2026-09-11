@@ -18,6 +18,7 @@ import {
   isFirstLabelEmpty,
   isValidEntityClass,
 } from "utils/utils";
+import { EntityTagContextMenu } from "./EntityTagContextMenu/EntityTagContextMenu";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -73,6 +74,8 @@ interface EntityTag {
   /** the entity sits in a container the user may only read - see EntityDragItem */
   entityIsReadOnly?: boolean;
   disableCopyToClipboard?: boolean;
+  /** Leaves the browser's own menu in place on right click. */
+  disableContextMenu?: boolean;
   tooltipPosition?: Placement;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
@@ -108,6 +111,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   entityIsReadOnly,
   disableDoubleClick = false,
   disableCopyToClipboard = false,
+  disableContextMenu = false,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -132,6 +136,9 @@ const EntityTagInner: React.FC<EntityTag> = ({
   const [tagHovered, setTagHovered] = useState(false);
   const [clickedOnce, setClickedOnce] = useState(false);
   const [expansionBadgeHovered, setExpansionBadgeHovered] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const referenceEl = useRef<HTMLDivElement>(null!);
   const expansionBadgeRef = useRef<HTMLDivElement>(null);
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
@@ -169,6 +176,17 @@ const EntityTagInner: React.FC<EntityTag> = ({
     setButtonHovered(false);
     setTagHovered(false);
   }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // tags nest (a statement tag inside a prop row), and only the one under the
+    // cursor should answer
+    e.stopPropagation();
+    setTagHovered(false);
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleContextMenuClose = useCallback(() => setContextMenuPosition(null), []);
 
   const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
     return (
@@ -332,7 +350,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
 
   return (
     <StyledEntityTagWrap>
-      {tagHovered && !disableTooltip && (
+      {tagHovered && !disableTooltip && !contextMenuPosition && (
         <EntityTooltip
           entityId={entity.id}
           entityClass={entity.class}
@@ -385,9 +403,19 @@ const EntityTagInner: React.FC<EntityTag> = ({
             }
           }
         }}
+        onContextMenu={disableContextMenu ? undefined : handleContextMenu}
         onMouseEnter={handleTagHovered}
         onMouseLeave={handleTagUnhovered}
       />
+      {contextMenuPosition && (
+        <EntityTagContextMenu
+          entity={entity}
+          position={contextMenuPosition}
+          onClose={handleContextMenuClose}
+          onUnlink={unlinkButton ? unlinkButton.onClick : undefined}
+          unlinkLabel={unlinkButton ? unlinkButton.tooltipLabel : undefined}
+        />
+      )}
     </StyledEntityTagWrap>
   );
 };
@@ -412,6 +440,7 @@ function areEntityTagsEqual(
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+  if (prev.disableContextMenu !== next.disableContextMenu) return false;
   if (prev.onDoubleClick !== next.onDoubleClick) return false;
   if (prev.statementsCount !== next.statementsCount) return false;
   if (Boolean(prev.button) !== Boolean(next.button)) return false;

@@ -24,6 +24,7 @@ interface TagProps {
 
   onClick?: () => void;
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
+  onContextMenu?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
 }
@@ -43,6 +44,7 @@ export const Tag: React.FC<TagProps> = ({
 
   onClick,
   onDoubleClick,
+  onContextMenu,
   onMouseEnter,
   onMouseLeave,
 }) => {
@@ -61,6 +63,7 @@ export const Tag: React.FC<TagProps> = ({
         e.preventDefault();
         onDoubleClick?.(e);
       }}
+      onContextMenu={onContextMenu}
       onMouseEnter={onMouseEnter && onMouseEnter}
       onMouseLeave={onMouseLeave && onMouseLeave}
     >
