@@ -4,14 +4,12 @@ import { IBookmarkFolder, IEntity } from "@inkvisitor/shared/types";
 import { config, useSpring } from "@react-spring/web";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { maxTabCount } from "Theme/constants";
 import {
   IcoCaretRight,
   IcoCardText,
   IcoCheck,
   IcoClipboard,
   IcoCopy,
-  IcoExternalLink,
   IcoListTree,
   IcoStar,
   IcoUnlink,
@@ -72,7 +70,6 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     detailIdArray,
     selectedDetailId,
     promoteDetailId,
-    replaceDetailIds,
   } = useSearchParams();
 
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
@@ -208,16 +205,6 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClose();
   };
 
-  const openInBackgroundTab = () => {
-    // the tab strip renders the head of the list, so a tab opened without being
-    // selected still has to go first to be on screen
-    replaceDetailIds(
-      [entity.id, ...detailIdArray.filter((id) => id !== entity.id)].slice(0, maxTabCount),
-    );
-    expandDetailPanel();
-    onClose();
-  };
-
   // a statement template carries no territory, and every other class is reached
   // through the entities it is used in rather than a place in the tree
   const targetTerritoryId: string | undefined =
@@ -227,6 +214,8 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
         ? entity.data?.territory?.territoryId
         : undefined;
 
+  // the editor shows whichever statement is selected inside the opened
+  // territory, so a statement needs both ids set
   const goToTerritory = () => {
     if (!targetTerritoryId) {
       return;
@@ -310,17 +299,11 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
             <StyledMenuDivider />
 
             {renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail)}
-            {renderItem(
-              "background-tab",
-              "Open in background tab",
-              <IcoExternalLink size={ICON_SIZE} />,
-              openInBackgroundTab,
-            )}
             {targetTerritoryId &&
               renderItem(
                 "territory",
                 entity.class === EntityEnums.Class.Statement
-                  ? "Go to statement in tree"
+                  ? "Open statement in editor"
                   : "Go to territory",
                 <IcoListTree size={ICON_SIZE} />,
                 goToTerritory,
