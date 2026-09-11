@@ -66,6 +66,13 @@ export const StyledItemIcon = styled.div`
   flex-shrink: 0;
 `;
 
+// a text glyph rather than an icon, matching how the annotator's context menu
+// marks a toggled-on row
+export const StyledCheckGlyph = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  line-height: 1;
+`;
+
 export const StyledItemLabel = styled.span`
   overflow: hidden;
   white-space: nowrap;

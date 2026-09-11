@@ -7,7 +7,6 @@ import api from "api";
 import {
   IcoCaretRight,
   IcoCardText,
-  IcoCheck,
   IcoClipboard,
   IcoCopy,
   IcoEdit,
@@ -26,6 +25,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DetailBoxState } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import {
+  StyledCheckGlyph,
   StyledEmptyNote,
   StyledItemIcon,
   StyledItemLabel,
@@ -38,6 +38,8 @@ import {
 } from "./EntityTagContextMenuStyles";
 
 const ICON_SIZE = 13;
+// the annotator's own context menu marks a toggled-on row with this glyph
+const CHECK_GLYPH = "\u2713";
 // tags render inside modals (500) and inside the suggester dropdown (10000),
 // and the menu has to clear whichever one it was opened from
 const MENU_Z_INDEX = 10002;
@@ -379,7 +381,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
                   return (
                     <StyledMenuItem key={folder.id} onClick={() => toggleBookmark(folder.id)}>
                       <StyledItemIcon>
-                        {isBookmarked && <IcoCheck size={ICON_SIZE} />}
+                        {isBookmarked && <StyledCheckGlyph>{CHECK_GLYPH}</StyledCheckGlyph>}
                       </StyledItemIcon>
                       <StyledItemLabel>{folder.name}</StyledItemLabel>
                     </StyledMenuItem>
