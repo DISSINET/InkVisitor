@@ -135,6 +135,20 @@ export namespace Query {
     EntityEnums.Class.Value,
   ];
 
+  /** Classes an entity classified by a Concept can have (the I_R:CLA target). */
+  const CLASSIFICATION_INSTANCE_CLASSES = [
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Territory,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Value,
+  ];
+
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
       entityId: { allowedClasses: [] },
@@ -268,20 +282,10 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
     "I_R:CLA": {
-      entityId: {
-        allowedClasses: [
-          EntityEnums.Class.Person,
-          EntityEnums.Class.Being,
-          EntityEnums.Class.Location,
-          EntityEnums.Class.Object,
-          EntityEnums.Class.Group,
-          EntityEnums.Class.Event,
-          EntityEnums.Class.Statement,
-          EntityEnums.Class.Territory,
-          EntityEnums.Class.Resource,
-          EntityEnums.Class.Value,
-        ],
-      },
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the instance to entities of that class (server: EdgeHasInstance)
+      entityClass: { allowedClasses: CLASSIFICATION_INSTANCE_CLASSES },
+      entityId: { allowedClasses: CLASSIFICATION_INSTANCE_CLASSES },
     },
     "R:IDE": {
       entityClass: { allowedClasses: IDENTIFICATION_ENTITY_CLASSES },

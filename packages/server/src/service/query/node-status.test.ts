@@ -27,6 +27,13 @@ const P_PROP_VALUE = "person-prop-value"; // discouraged C as prop VALUE
 const P_PROP_CLEAN = "person-prop-clean"; // approved C on both sides
 const P_CLA_BAD = "person-cla-bad"; // classified as the discouraged C
 const P_CLA_OK = "person-cla-ok";
+// relation-edge fixtures: every relation type below links SUB_WARN -> SUPER_OK
+// and SUB_OK -> SUPER_WARN, so each direction has one Warning and one Approved
+// far side (Warning keeps them out of the Discouraged root-node expectations)
+const K_SUB_WARN = "concept-sub-warning";
+const K_SUB_OK = "concept-sub-approved";
+const K_SUPER_WARN = "concept-super-warning";
+const K_SUPER_OK = "concept-super-approved";
 
 const concept = (id: string, status: EntityEnums.Status) => ({
   id,
@@ -63,7 +70,31 @@ const ENTITY_FIXTURES = [
   person(P_PROP_CLEAN, [prop(C_OK, C_OK)]),
   person(P_CLA_BAD, []),
   person(P_CLA_OK, []),
+  concept(K_SUB_WARN, EntityEnums.Status.Warning),
+  concept(K_SUB_OK, EntityEnums.Status.Approved),
+  concept(K_SUPER_WARN, EntityEnums.Status.Warning),
+  concept(K_SUPER_OK, EntityEnums.Status.Approved),
 ];
+
+// entityIds order is [source, target] for the ordered types; Synonym ignores it
+const STATUS_RELATION_TYPES = [
+  RelationEnums.Type.Superclass,
+  RelationEnums.Type.SuperordinateEntity,
+  RelationEnums.Type.Holonym,
+  RelationEnums.Type.Classification,
+  RelationEnums.Type.Synonym,
+];
+const STATUS_RELATION_FIXTURES: {
+  id: string;
+  type: RelationEnums.Type;
+  entityIds: string[];
+}[] = [];
+for (const type of STATUS_RELATION_TYPES) {
+  STATUS_RELATION_FIXTURES.push(
+    { id: `${type}-warn-ok`, type, entityIds: [K_SUB_WARN, K_SUPER_OK] },
+    { id: `${type}-ok-warn`, type, entityIds: [K_SUB_OK, K_SUPER_WARN] }
+  );
+}
 
 const RELATION_FIXTURES = [
   {
@@ -130,7 +161,10 @@ describe("entityStatuses node param (real ReQL)", () => {
       .run(conn);
     await r.table(RELATIONS).indexWait().run(conn);
     await r.table(ENTITIES).insert(ENTITY_FIXTURES).run(conn);
-    await r.table(RELATIONS).insert(RELATION_FIXTURES).run(conn);
+    await r
+      .table(RELATIONS)
+      .insert([...RELATION_FIXTURES, ...STATUS_RELATION_FIXTURES])
+      .run(conn);
   }, 30000);
 
   afterAll(async () => {
@@ -198,6 +232,95 @@ describe("entityStatuses node param (real ReQL)", () => {
         conn
       );
       expect(sorted(ids)).toEqual([P_PROP_TYPE]);
+    });
+  });
+
+  describe("relation edge target, checked per relation", () => {
+    const WARNING_C: Query.INodeParams = {
+      entityClasses: [EntityEnums.Class.Concept],
+      entityStatuses: [EntityEnums.Status.Warning],
+    };
+    const APPROVED_C: Query.INodeParams = {
+      entityClasses: [EntityEnums.Class.Concept],
+      entityStatuses: [EntityEnums.Status.Approved],
+    };
+
+    test.each([
+      Query.EdgeType["I_R:SCL"],
+      Query.EdgeType["I_R:SOE"],
+      Query.EdgeType["I_R:HOL"],
+      Query.EdgeType["I_R:CLA"],
+    ])("%s matches only entities whose related source has the status", async (type) => {
+      expect(await runEdge(type, WARNING_C, conn)).toEqual([K_SUPER_OK]);
+      expect(await runEdge(type, APPROVED_C, conn)).toEqual([K_SUPER_WARN]);
+    });
+
+    test.each([
+      Query.EdgeType["R:SCL"],
+      Query.EdgeType["R:SOE"],
+      Query.EdgeType["R:HOL"],
+    ])("%s matches only entities whose related target has the status", async (type) => {
+      expect(await runEdge(type, WARNING_C, conn)).toEqual([K_SUB_OK]);
+      expect(await runEdge(type, APPROVED_C, conn)).toEqual([K_SUB_WARN]);
+    });
+
+    test("R:SYN matches only entities whose partner has the status", async () => {
+      expect(sorted(await runEdge(Query.EdgeType["R:SYN"], WARNING_C, conn))).toEqual(
+        sorted([K_SUB_OK, K_SUPER_OK])
+      );
+      expect(sorted(await runEdge(Query.EdgeType["R:SYN"], APPROVED_C, conn))).toEqual(
+        sorted([K_SUB_WARN, K_SUPER_WARN])
+      );
+    });
+
+    test("the target class still applies alongside the status", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["I_R:SCL"],
+        {
+          entityClasses: [EntityEnums.Class.Action],
+          entityStatuses: [EntityEnums.Status.Warning],
+        },
+        conn
+      );
+      expect(ids).toEqual([]);
+    });
+
+    test("classless target: the status alone decides", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["I_R:SCL"],
+        { entityStatuses: [EntityEnums.Status.Warning] },
+        conn
+      );
+      expect(ids).toEqual([K_SUPER_OK]);
+    });
+
+    test("a pinned target still has its status applied", async () => {
+      const pinned = (statuses: EntityEnums.Status[]) =>
+        runEdge(
+          Query.EdgeType["I_R:SCL"],
+          { entityId: K_SUB_WARN, entityStatuses: statuses },
+          conn
+        );
+      expect(await pinned([EntityEnums.Status.Warning])).toEqual([K_SUPER_OK]);
+      expect(await pinned([EntityEnums.Status.Approved])).toEqual([]);
+    });
+
+    test("prepare() does not load the status id list for an unpinned target", async () => {
+      const edge = getEdgeInstance({
+        type: Query.EdgeType["I_R:SCL"],
+        params: {},
+        logic: Query.EdgeLogic.Positive,
+        id: "e1",
+        node: {
+          id: "n1",
+          type: Query.NodeType.E,
+          operator: Query.NodeOperator.And,
+          params: WARNING_C,
+          edges: [],
+        },
+      });
+      await edge.prepare(conn);
+      expect((edge as unknown as { targetEntityIds: unknown }).targetEntityIds).toBeNull();
     });
   });
 

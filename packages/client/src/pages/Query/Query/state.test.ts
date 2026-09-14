@@ -93,6 +93,12 @@ describe("queryReducer updateEdgeType", () => {
     );
   });
 
+  it("seeds I_R:CLA with the first instance class, so the suggester's class is stored", () => {
+    expect(switchEdge([EntityEnums.Class.Concept], Query.EdgeType["I_R:CLA"]).entityClasses).toEqual(
+      [EntityEnums.Class.Person],
+    );
+  });
+
   it("falls back to the edge's own allowed classes when the root pairs with none", () => {
     // a Person can never be a Superclass, so the picker is disabled anyway
     expect(switchEdge([EntityEnums.Class.Person], Query.EdgeType["R:SCL"]).entityClasses).toEqual([
