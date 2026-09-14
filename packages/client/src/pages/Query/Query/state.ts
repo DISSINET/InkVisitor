@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getAllEdges, getAllNodes } from "./utils";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { deepCopy } from "utils/utils";
+import { getRelationConstrainedCategoryTypes } from "../utils";
 
 const queryStateInitial: Query.INode = {
   type: Query.NodeType.E,
@@ -12,7 +13,7 @@ const queryStateInitial: Query.INode = {
     // only show in development mode
     process.env.NODE_ENV === "development"
       ? {
-          entityClasses: [EntityEnums.Class.Action],
+          entityClasses: classesAll,
         }
       : {
           entityClasses: classesAll,
@@ -164,14 +165,25 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
       // the child node's params are edge-type specific. On a type switch, drop
       // the params the new edge type does not accept so stale entity filters
       // don't linger. For edges that respect an entityClass, always re-seed the
-      // picker's default class (the first allowed, else the first of all
-      // classes) - a class carried over from the previous edge type must never
-      // survive the switch - so the class filter and its tooltip hint match
-      // what the suggester shows immediately on switch.
+      // picker's default class - a class carried over from the previous edge
+      // type must never survive the switch - so the class filter and its tooltip
+      // hint match what the suggester shows immediately on switch. The seed is
+      // the first class the suggester offers - for relation edges that depends
+      // on the query root's class, as in QueryGridNode. The suggester never
+      // writes its initial class back, so a seed outside its options would
+      // filter on a class no relation of the root can reach.
       const newTargetParams = Query.EdgeTypeTargetNodeParams[newType] ?? {};
       if (newTargetParams.entityClass) {
         const allowed: EntityEnums.Class[] = newTargetParams.entityClass.allowedClasses ?? [];
-        const defaultClasses = allowed.length ? allowed : classesAll;
+        const relationConstrained = getRelationConstrainedCategoryTypes(
+          newType,
+          updatedStateUpdate.params.entityClasses,
+        );
+        const defaultClasses = relationConstrained?.length
+          ? relationConstrained
+          : allowed.length
+            ? allowed
+            : classesAll;
         edgeToUpdate.node.params.entityClasses = [defaultClasses[0]];
       } else {
         edgeToUpdate.node.params.entityClasses = undefined;

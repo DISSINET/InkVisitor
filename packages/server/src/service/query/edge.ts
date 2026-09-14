@@ -275,25 +275,32 @@ export class EdgeHasRelation extends SearchEdge {
 }
 
 /**
- * Shared run for the forward relation edges that walk from the iterated entity
- * (entityIds[0]) to its relation target (entityIds[1]): R:SCL (Superclass) and
- * R:SOE (SuperordinateEntity). Matches relations of `relationType` where the
- * target satisfies the edge target:
+ * Shared run for the directed relation edges. A forward edge walks from the
+ * iterated entity (entityIds[0]) to its relation target (entityIds[1]): R:SCL
+ * (Superclass), R:SOE (SuperordinateEntity) and ORDERED_RELATION_EDGES. An
+ * inverse edge walks the other way, from the iterated entity at entityIds[1] to
+ * entityIds[0]: I_R:SCL (subclasses), I_R:SOE (subordinates), I_R:CLA
+ * (instances), I_R:HOL (meronyms). Matches relations of `relationType` where the
+ * far side satisfies the edge target:
  *  - any id of the pinned target-id set (`targetIds`, the pinned entity plus
  *    its toggle-driven expansion), or
  *  - any entity whose class is in `targetClasses` (empty suggester + class
  *    selected there), or
  *  - with neither, any relation of the type.
- * Emits the iterated entity itself (the entityIds[0] side), keeping the subset
- * invariant positive matching and negation rely on. A dangling target entity id
- * (no such entity) is null-safe and simply fails the class condition.
+ * Emits the iterated entity itself, keeping the subset invariant positive
+ * matching and negation rely on. A dangling target entity id (no such entity)
+ * is null-safe and simply fails the class condition.
  */
-function runHasRelationTargetEdge(
+function runRelationTargetEdge(
   q: RStream,
   relationType: RelationEnums.Type,
   targetIds: string[] | null,
-  targetClasses: EntityEnums.Class[]
+  targetClasses: EntityEnums.Class[],
+  inverse = false
 ): RStream {
+  const sourceIndex = inverse ? 1 : 0;
+  const targetIndex = inverse ? 0 : 1;
+
   return q.concatMap(function(entity: RDatum<IEntity>) {
     return (
       r
@@ -302,22 +309,22 @@ function runHasRelationTargetEdge(
         .filter({
           type: relationType,
         })
-        // get all relations where the first entity is the source entity
-        // (for R:SOE this is the subordinate side; its superordinate is
+        // keep relations where the iterated entity sits on the source side
+        // (for R:SOE entityIds[0] is the subordinate; its superordinate is
         // entityIds[1], mirroring SuperordinateEntity.getSuperordinate...
         // ForwardConnections, which recurses on entityIds[1])
         .filter(function(relation: RDatum<RelationTypes.IRelation>) {
-          return relation("entityIds").nth(0).eq(entity("id"));
+          return relation("entityIds").nth(sourceIndex).eq(entity("id"));
         })
         // check if the target entity is one of the desired ones
         .filter(function(relation: RDatum<RelationTypes.IRelation>) {
           if (targetIds) {
-            return r.expr(targetIds).contains(relation("entityIds").nth(1));
+            return r.expr(targetIds).contains(relation("entityIds").nth(targetIndex));
           }
           if (targetClasses.length) {
             return r
               .table(Entity.table)
-              .get(relation("entityIds").nth(1))
+              .get(relation("entityIds").nth(targetIndex))
               .default(null)
               .do(function (ent: RDatum) {
                 return r.branch(
@@ -330,7 +337,7 @@ function runHasRelationTargetEdge(
           return true;
         })
         .map(function(relation) {
-          return relation("entityIds").nth(0);
+          return relation("entityIds").nth(sourceIndex);
         })
     );
   });
@@ -343,11 +350,28 @@ export class EdgeCHasSuperclass extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runHasRelationTargetEdge(
+    return runRelationTargetEdge(
       q,
       RelationEnums.Type.Superclass,
       this.targetIds(),
       this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+export class EdgeHasSubclass extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_R:SCL"];
+  }
+
+  run(q: RStream): RStream {
+    return runRelationTargetEdge(
+      q,
+      RelationEnums.Type.Superclass,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      true
     );
   }
 }
@@ -359,7 +383,7 @@ export class EdgeHasSuperordinate extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runHasRelationTargetEdge(
+    return runRelationTargetEdge(
       q,
       RelationEnums.Type.SuperordinateEntity,
       this.targetIds(),
@@ -503,7 +527,7 @@ export class EdgeHasOrderedRelation extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runHasRelationTargetEdge(
+    return runRelationTargetEdge(
       q,
       this.relationType,
       this.targetIds(),
@@ -527,6 +551,57 @@ export class EdgeHasUnorderedRelation extends SearchEdge {
       this.targetIds(),
       this.node.params.entityClasses ?? [],
       RelationTypes.RelationRules[this.relationType]?.selfLoop ?? false
+    );
+  }
+}
+
+export class EdgeHasSubordinate extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_R:SOE"];
+  }
+
+  run(q: RStream): RStream {
+    return runRelationTargetEdge(
+      q,
+      RelationEnums.Type.SuperordinateEntity,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      true
+    );
+  }
+}
+
+export class EdgeHasMeronym extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_R:HOL"];
+  }
+
+  run(q: RStream): RStream {
+    return runRelationTargetEdge(
+      q,
+      RelationEnums.Type.Holonym,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      true
+    );
+  }
+}
+
+export class EdgeHasInstance extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_R:CLA"];
+  }
+
+  run(q: RStream): RStream {
+    return runRelationTargetEdge(
+      q,
+      RelationEnums.Type.Classification,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      true
     );
   }
 }
@@ -1272,10 +1347,18 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:
       return new EdgeHasClassification(data);
+    case Query.EdgeType["I_R:CLA"]:
+      return new EdgeHasInstance(data);
+    case Query.EdgeType["I_R:HOL"]:
+      return new EdgeHasMeronym(data);
     case Query.EdgeType["R:SCL"]:
       return new EdgeCHasSuperclass(data);
+    case Query.EdgeType["I_R:SCL"]:
+      return new EdgeHasSubclass(data);
     case Query.EdgeType["R:SOE"]:
       return new EdgeHasSuperordinate(data);
+    case Query.EdgeType["I_R:SOE"]:
+      return new EdgeHasSubordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
     case Query.EdgeType["EUT:"]:

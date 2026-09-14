@@ -8,7 +8,7 @@ import {
 } from "@inkvisitor/shared/types/request-search";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FOURTH_PANEL_MIN_WIDTH, wildCardChar } from "Theme/constants";
-import { IcoPlusBold, IcoSearch } from "Theme/icons";
+import { IcoCheck, IcoClose, IcoPlusBold, IcoSearch } from "Theme/icons";
 import api from "api";
 import { boxContentId, Button, IconWithTooltip, Input, Loader, TypeBar } from "components";
 import Dropdown, {
@@ -512,7 +512,8 @@ export const EntitySearchBox: React.FC = () => {
                     {territoryEntity && (
                       <EntityTag
                         entity={territoryEntity}
-                        tooltipPosition={"left"}
+                        tooltipPosition="left"
+                        fullWidth
                         unlinkButton={{
                           onClick: () => {
                             handleChange({
@@ -548,10 +549,12 @@ export const EntitySearchBox: React.FC = () => {
               <StyledOptionRow>
                 <StyledRowHeader>Territory children</StyledRowHeader>
                 <AttributeButtonGroup
+                  noMargin
                   options={[
                     {
                       longValue: "included",
-                      shortValue: "included",
+                      shortValue: "",
+                      shortIcon: <IcoCheck />,
                       onClick: () => {
                         handleChange({ subTerritorySearch: true });
                       },
@@ -559,7 +562,8 @@ export const EntitySearchBox: React.FC = () => {
                     },
                     {
                       longValue: "not included",
-                      shortValue: "not included",
+                      shortValue: "",
+                      shortIcon: <IcoClose />,
                       onClick: () => {
                         handleChange({ subTerritorySearch: undefined });
                       },
@@ -576,6 +580,7 @@ export const EntitySearchBox: React.FC = () => {
                   <EntityTag
                     entity={cooccurrenceEntity}
                     tooltipPosition="left"
+                    fullWidth
                     unlinkButton={{
                       onClick: () => {
                         handleChange({ cooccurrenceId: undefined });
@@ -622,6 +627,7 @@ export const EntitySearchBox: React.FC = () => {
                 {referencedTo ? (
                   <EntityTag
                     entity={referencedTo}
+                    fullWidth
                     unlinkButton={{
                       onClick: () => {
                         handleChange({ haveReferenceTo: undefined });

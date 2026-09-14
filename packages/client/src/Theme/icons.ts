@@ -2,7 +2,6 @@
 
 // ai
 export { AiOutlineApartment as IcoApartment } from "react-icons/ai";
-export { AiOutlineCaretRight as IcoCaretRight } from "react-icons/ai";
 export { AiOutlineLink as IcoLinkOutline } from "react-icons/ai";
 export { AiOutlineTag as IcoTagOutline } from "react-icons/ai";
 export { AiOutlineTags as IcoTagsOutline } from "react-icons/ai";
@@ -209,6 +208,7 @@ export { RiRotateLockLine as IcoRotateLock } from "react-icons/ri";
 export { RiTimeLine as IcoTimeline } from "react-icons/ri";
 
 // rx
+export { RxCaretRight as IcoCaretRight } from "react-icons/rx";
 export { RxFileText as IcoFileText } from "react-icons/rx";
 
 // tb

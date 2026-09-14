@@ -21,6 +21,7 @@ const INITIAL_CONTEXT = {
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
+  promoteDetailId: UNINITIALISED,
   appendMultipleDetailIds: UNINITIALISED,
   replaceDetailIds: UNINITIALISED,
   removeDetailId: UNINITIALISED,
@@ -40,6 +41,7 @@ interface SearchParamsContext {
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string, maxCount?: number) => void;
+  promoteDetailId: (id: string, maxCount?: number) => void;
   appendMultipleDetailIds: (ids: string[], maxCount?: number) => void;
   replaceDetailIds: (ids: string[]) => void;
   removeDetailId: (id: string) => void;
@@ -121,6 +123,19 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
           : [...detailIdArray.slice(1), id];
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
+    setSelectedDetailId(id);
+  };
+
+  // The tab strip shows the head of this list, so moving an id to the front is
+  // what keeps its tab on screen. Reaching for a second entity in the caret
+  // list pushes the first one one slot to the right instead of evicting it.
+  const promoteDetailId = (id: string, maxCount: number = maxTabCount) => {
+    const detailIdArray = getDetailIdArray();
+    const newDetailIdArray = [id, ...detailIdArray.filter((detailId) => detailId !== id)].slice(
+      0,
+      maxCount,
+    );
+    setDetailId(newDetailIdArray.join(arrJoinChar));
     setSelectedDetailId(id);
   };
 
@@ -289,6 +304,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
         selectedDetailId,
         setSelectedDetailId,
         appendDetailId,
+        promoteDetailId,
         appendMultipleDetailIds,
         replaceDetailIds,
         removeDetailId,

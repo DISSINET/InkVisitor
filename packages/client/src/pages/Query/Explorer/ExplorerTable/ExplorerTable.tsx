@@ -19,11 +19,16 @@ import { CMetaProp } from "constructors";
 import { useResizeObserver, useSearchParams, useTheme } from "hooks";
 import { ExploreAction, ExploreActionType } from "../state";
 import ExplorerTableNewColumnPanel from "./ExplorerTableNewColumnPanel/ExplorerTableNewColumnPanel";
-import { StyledBody, StyledEmptyMessage, StyledTableWrapper } from "./ExplorerTableStyles";
+import {
+  StyledBody,
+  StyledEmptyMessage,
+  StyledRowNumber,
+  StyledTableWrapper,
+} from "./ExplorerTableStyles";
 
 import ExploreTableHeader from "./Header/ExploreTableHeader";
 import { CELL_DISPLAY_LIMIT } from "./Cell/ExplorerCellOverflow";
-import { HEIGHT_ROW_DEFAULT, WIDTH_COLUMN_FIRST } from "./constants";
+import { HEIGHT_ROW_DEFAULT, ROW_NUMBER_MIN_DIGITS, WIDTH_COLUMN_FIRST } from "./constants";
 import { contentSizedColumnTypes } from "./types";
 import { estimateColumnWidth, getColumnWidth } from "./utils";
 
@@ -305,14 +310,12 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     [columns],
   );
 
-  const { ref: contentRef, width: contentWidth } =
-    useResizeObserver<HTMLDivElement>();
+  const { ref: contentRef, width: contentWidth } = useResizeObserver<HTMLDivElement>();
 
   // The rows fill the body, so the window of rows worth fetching is measured
   // from it. Zero until the first measurement lands, which computeWindowUpdate
   // reads as "one overscan's worth" - and it is only called once rows render.
-  const { ref: bodyRef, height: heightTableBody = 0 } =
-    useResizeObserver<HTMLDivElement>();
+  const { ref: bodyRef, height: heightTableBody = 0 } = useResizeObserver<HTMLDivElement>();
 
   const handleRowClick = useCallback((rowId: number) => {
     setRowFocused((current) => (current === rowId ? -1 : rowId));
@@ -344,6 +347,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       columns.reduce((sum, col) => sum + (columnWidths[col.id] ?? getColumnWidth(col.type)), 0)
     );
   }, [columns, columnWidths]);
+
+  // The last row carries the longest ordinal, so the number slot is sized from
+  // the result count and handed to the header, the rows and the placeholders as
+  // a CSS variable - a re-render of every memoized row would be the alternative.
+  const rowNumberDigits = useMemo(
+    () => Math.max(ROW_NUMBER_MIN_DIGITS, String(Math.max(total, 1)).length),
+    [total],
+  );
 
   const windowUpdateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -380,7 +391,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
       const isPlaceholder = !rowItem;
       const rowEntityId = rowItem?.entity?.id ?? getEntityIdAtRow(index);
       const isSelected = rowEntityId ? selectedEntityIdsSet.has(rowEntityId) : false;
-      const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index;
+      const placeholderLabel = rowItem?.entity?.labels?.[0] ?? index + 1;
       const isLastRow = index === total - 1;
 
       return (
@@ -414,6 +425,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 width: "100%",
               }}
             >
+              <StyledRowNumber>{index + 1}</StyledRowNumber>
               <div
                 style={{
                   position: "relative",
@@ -501,6 +513,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             "--qt-row-odd-bg": themeContext.color.tableOddRow,
             "--qt-row-bg": themeContext.color.tableEvenRow,
             "--qt-row-border": themeContext.color.gray[300],
+            "--qt-row-number-digits": rowNumberDigits,
             width: contentWidth,
             minWidth: "100%",
             height: "100%",

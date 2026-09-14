@@ -703,6 +703,32 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Searches for relations linked to a single entity in the inverse direction only.
+   * For asymmetrical relations "inverse" means the entity occupies entityIds[1]
+   * (the target side, e.g. the superclass/category), so the other member is its
+   * subclass/instance. Symmetrical relations have no fixed direction and are
+   * always returned regardless of position.
+   * @param db
+   * @param entityId
+   * @param relType optional relation type filter
+   * @returns array of relation interfaces
+   */
+  static async findInverseForEntity<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityId: string,
+    relType?: RelationEnums.Type
+  ): Promise<T[]> {
+    const relations = await Relation.findForEntities<T>(db, [entityId], relType);
+
+    return relations.filter((relation) => {
+      if (!RelationTypes.RelationRules[relation.type]?.asymmetrical) {
+        return true;
+      }
+      return relation.entityIds.indexOf(entityId) === 1;
+    });
+  }
+
+  /**
    * Retrieves all relation entries filtered by basic parameters like type
    * @param db
    * @param relType

@@ -19,7 +19,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
 
   constructor(data: Partial<ISavedQuery>) {
     this.id = data.id as string;
-    this.name = data.name || "";
+    this.name = (data.name || "").trim();
     this.ownerId = data.ownerId || "";
     this.shared = !!data.shared;
     this.data = data.data as ISavedQueryData;
@@ -29,7 +29,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
 
   isValid(): boolean {
     return (
-      !!this.name.trim() &&
+      !!this.name &&
       !!this.ownerId &&
       !!this.data &&
       typeof this.data.includeEquivalents === "boolean" &&
@@ -129,6 +129,37 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
   ): Promise<SavedQuery | null> {
     const data = await rethink.table(SavedQuery.table).get(id).run(dbInstance);
     return data ? new SavedQuery(data as ISavedQuery) : null;
+  }
+
+  /**
+   * Names are unique within a folder as the panel lists them: every shared
+   * query shares one namespace, each user's private queries another. Names
+   * that read the same collide, so the comparison ignores case (stored names
+   * are already trimmed by the constructor).
+   *
+   * The scan is unindexed - the table holds one row per saved query, and the
+   * check runs only on create and on rename.
+   */
+  static async isNameTaken(
+    dbInstance: Connection | undefined,
+    name: string,
+    shared: boolean,
+    ownerId: string,
+    exceptId?: string
+  ): Promise<boolean> {
+    const normalized = name.trim().toLowerCase();
+    const rows = await rethink
+      .table(SavedQuery.table)
+      .filter((row: RDatum) =>
+        (shared
+          ? row("shared").eq(true)
+          : row("shared").eq(false).and(row("ownerId").eq(ownerId))
+        ).and(row("name").downcase().eq(normalized))
+      )
+      .pluck("id")
+      .run(dbInstance);
+
+    return (rows as { id: string }[]).some((row) => row.id !== exceptId);
   }
 
   /**

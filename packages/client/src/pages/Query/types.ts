@@ -56,6 +56,12 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:SAR"],
   Query.EdgeType["R:IDE"],
   Query.EdgeType["R:REL"],
+  // inverse relation edges: match the entity on the target side of the relation
+  // (instances / subclasses / subordinates / meronyms of the target node)
+  Query.EdgeType["I_R:CLA"],
+  Query.EdgeType["I_R:SCL"],
+  Query.EdgeType["I_R:SOE"],
+  Query.EdgeType["I_R:HOL"],
   // SUT: match Statements under the target Territory. The target node's SUB
   // toggle widens it to the whole subtree - "include subordinates" of a Territory
   // is its child territories, all levels (server: getSubordinateEntityIds).
@@ -67,4 +73,16 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)
   Query.EdgeType["IS:"],
+];
+
+/**
+ * Edge types left out of the edge type dropdown entirely, not even listed as
+ * disabled. The "used as" inverses of the semantics/implication relations have
+ * no readable "has: X" phrasing.
+ */
+export const edgeTypesHidden: Query.EdgeType[] = [
+  Query.EdgeType["I_R:IMP"],
+  Query.EdgeType["I_R:SUS"],
+  Query.EdgeType["I_R:A1S"],
+  Query.EdgeType["I_R:A2S"],
 ];

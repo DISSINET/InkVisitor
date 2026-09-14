@@ -75,14 +75,16 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       border-radius: ${({ theme }) => theme.borderRadius["input"]};
       box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
       width: 100%;
-      transform: translate(0, -6px);
       overflow: hidden;
 
       color: ${({ theme }) => theme.color["black"]};
       background-color: ${({ theme }) => theme.color["white"]};
     }
     .react-select__menu-list {
-      max-height: 18rem;
+      /* no max-height here: react-select computes one that fits the space left
+         below (or above) the control, and a rule at this specificity would beat
+         its emotion class and pin the menu to a height the viewport cannot show.
+         The cap lives on the maxMenuHeight prop in BaseDropdown. */
       border-radius: ${({ theme }) => theme.borderRadius["input"]};
       padding-top: 0;
       padding-bottom: 0;

@@ -1,8 +1,10 @@
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
+import Statement from "@models/statement/statement";
+import treeCache from "@service/treeCache";
 import User from "@models/user/user";
-import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict } from "@inkvisitor/shared/dictionaries";
+import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IStatement, ITerritory, IUser } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
@@ -17,6 +19,16 @@ import {
 } from "./explore-cooccurrence-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
 import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
+
+/**
+ * Column data shared by every row of one page, resolved in a single pass before
+ * the row loop so a column backed by its own query does not repeat that query
+ * per row.
+ */
+export interface IColumnsContext {
+  /** row entity id -> first-level territories its statements sit under (EUI) */
+  usedInTerritories: Record<string, IEntity[]>;
+}
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -175,10 +187,71 @@ export default class Results<T extends { id: string }> {
     return this.items.slice(exploreData.offset, endIndex);
   }
 
+  /**
+   * Resolves the per-page part of the column data for the rows about to be
+   * returned. Only the columns actually configured are prepared, so a view
+   * without them costs nothing.
+   */
+  async prepareColumnsContext(
+    db: Connection,
+    entities: IEntity[],
+    columnsData: Explore.IExploreColumn[]
+  ): Promise<IColumnsContext> {
+    const context: IColumnsContext = { usedInTerritories: {} };
+
+    const wantsUsedIn = columnsData.some(
+      (column) => column.type === Explore.EExploreColumnType.EUI
+    );
+    if (!wantsUsedIn || !entities.length) {
+      return context;
+    }
+
+    const territoryIdsByRow = await Statement.findUsedInTerritoryIds(
+      db,
+      entities.map((entity) => entity.id)
+    );
+
+    const firstLevelIdsByRow: Record<string, Record<string, null>> = {};
+    const allFirstLevelIds: Record<string, null> = {};
+
+    for (const [entityId, territoryIds] of Object.entries(territoryIdsByRow)) {
+      for (const territoryId of territoryIds) {
+        const firstLevelId = treeCache.getFirstLevelTerritoryId(territoryId);
+        if (!firstLevelId) {
+          continue;
+        }
+        if (!firstLevelIdsByRow[entityId]) {
+          firstLevelIdsByRow[entityId] = {};
+        }
+        firstLevelIdsByRow[entityId][firstLevelId] = null;
+        allFirstLevelIds[firstLevelId] = null;
+      }
+    }
+
+    // the same handful of first-level territories serves the whole page
+    const territories = await Entity.findEntitiesByIds(
+      db,
+      Object.keys(allFirstLevelIds)
+    );
+    const territoryById: Record<string, IEntity> = {};
+    for (const territory of territories) {
+      territoryById[territory.id] = territory;
+    }
+
+    for (const [entityId, ids] of Object.entries(firstLevelIdsByRow)) {
+      context.usedInTerritories[entityId] = Object.keys(ids)
+        .map((id) => territoryById[id])
+        .filter((territory) => !!territory);
+    }
+
+    return context;
+  }
+
   async columns(
     db: Connection,
     entity: IEntity,
-    columnsData: Explore.IExploreColumn[]
+    columnsData: Explore.IExploreColumn[],
+    context?: IColumnsContext
   ): Promise<
     Record<string, IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]>
   > {
@@ -261,9 +334,12 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.ER: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.ER>;
-          // first - retrieve forward relations only (for asymmetrical types the
-          // entity must be the subject at entityIds[0])
-          const relations = await Relation.findForwardForEntity(db, entity.id, params.relationType);
+          // first - retrieve relations in the column's direction only (for
+          // asymmetrical types the entity is the subject at entityIds[0], or the
+          // target at entityIds[1] for an inverse column)
+          const relations = params.inverse
+            ? await Relation.findInverseForEntity(db, entity.id, params.relationType)
+            : await Relation.findForwardForEntity(db, entity.id, params.relationType);
 
           // second - collect linked entity ids (omit entity.id) and load them
           const entityIds = Array.from(
@@ -329,6 +405,28 @@ export default class Results<T extends { id: string }> {
               out[column.id] = parentTerritory;
             }
           }
+          break;
+        }
+        // Entity Logical Type
+        case Explore.EExploreColumnType.ELT: {
+          // only actant classes (person, being, group, object, location, value,
+          // event) carry logicalType in their data
+          const logicalType = (entity.data as any)?.logicalType;
+          const logicalTypeLabel = actantLogicalTypeDict.find(
+            (d) => d.value === logicalType
+          )?.label;
+          out[column.id] = logicalTypeLabel || "";
+          break;
+        }
+        // Entity Class
+        case Explore.EExploreColumnType.ECL: {
+          out[column.id] =
+            entitiesDictKeys[entity.class]?.label || entity.class;
+          break;
+        }
+        // Entity Used In (first-level territories)
+        case Explore.EExploreColumnType.EUI: {
+          out[column.id] = context?.usedInTerritories[entity.id] ?? [];
           break;
         }
       }

@@ -6,7 +6,8 @@ import { getEdgeInstance } from "./edge";
 
 // Verifies the ACTUAL ReQL of the relation edges against a real RethinkDB:
 // R:SOE (its own named class) plus the edges sharing the two generic runners -
-// ordered (R:HOL, R:IMP) and direction-less (R:ANT, R:SYN, R:PRR, R:IDE).
+// ordered (R:HOL, R:IMP) and direction-less (R:ANT, R:SYN, R:PRR, R:IDE) - and
+// the inverse edges (I_R:SOE, I_R:HOL, I_R:CLA).
 // Like inverse-statement-prop.test.ts it creates/drops its OWN throwaway db, so
 // it can never touch real data, and it self-skips when no RethinkDB is reachable
 // on DB_HOST/DB_PORT (defaults localhost:28015).
@@ -43,6 +44,7 @@ const RUNNING = "act-running"; // implies WALKING
 const WALKING = "act-walking";
 const CAESAR = "per-caesar"; // identified with AUGUSTUS
 const AUGUSTUS = "per-augustus";
+const EMPEROR = "con-emperor"; // classifies CAESAR and AUGUSTUS
 
 const entity = (id: string, cls = EntityEnums.Class.Location) => ({
   id,
@@ -53,7 +55,7 @@ const ENTITY_FIXTURES = [
     entity(id)
   ),
   entity(FOUNDING, EntityEnums.Class.Event),
-  ...[HOT, COLD, WARM, BOILING, LONELY, ORPHAN].map((id) =>
+  ...[HOT, COLD, WARM, BOILING, LONELY, ORPHAN, EMPEROR].map((id) =>
     entity(id, EntityEnums.Class.Concept)
   ),
   entity(RUNNING, EntityEnums.Class.Action),
@@ -98,6 +100,9 @@ const RELATION_FIXTURES = [
   ]),
   relation("prr-hot-warm", RelationEnums.Type.PropertyReciprocal, [HOT, WARM]),
   relation("ide-caesar", RelationEnums.Type.Identification, [CAESAR, AUGUSTUS]),
+  // Classification: entityIds = [instance, concept]
+  relation("cla-caesar", RelationEnums.Type.Classification, [CAESAR, EMPEROR]),
+  relation("cla-augustus", RelationEnums.Type.Classification, [AUGUSTUS, EMPEROR]),
   // ordered: entityIds[0] holds the holonym/implication of entityIds[1]
   relation("hol-hot-boiling", RelationEnums.Type.Holonym, [BOILING, HOT]),
   relation("imp-running", RelationEnums.Type.Implication, [RUNNING, WALKING]),
@@ -317,6 +322,87 @@ describe("relation edges (real ReQL)", () => {
       await runEdge(
         Query.EdgeType["R:HOL"],
         { entityClasses: [EntityEnums.Class.Action] },
+        conn
+      )
+    ).toEqual([]);
+  });
+
+  test("I_R:SOE by entity: returns the superordinate of Milan, not Milan itself", async () => {
+    if (!conn) return;
+    expect(
+      await runEdge(Query.EdgeType["I_R:SOE"], { entityId: MILAN }, conn)
+    ).toEqual([LOMBARDY]);
+  });
+
+  test("I_R:SOE ignores other relation types", async () => {
+    if (!conn) return;
+    expect(
+      await runEdge(Query.EdgeType["I_R:SOE"], { entityId: PARIS }, conn)
+    ).toEqual([]);
+  });
+
+  test("I_R:SOE no target: returns every entity that has any subordinate", async () => {
+    if (!conn) return;
+    const ids = await runEdge(Query.EdgeType["I_R:SOE"], {}, conn);
+    // the dangling superordinate has no entity row, so it is never in the stream
+    expect(sorted(ids)).toEqual(sorted([LOMBARDY, LAZIO, FOUNDING]));
+  });
+
+  test("I_R:SOE by class filters on the subordinate's class", async () => {
+    if (!conn) return;
+    // every subordinate in the fixtures is a Location, including Turin under
+    // the Founding event
+    const locationIds = await runEdge(
+      Query.EdgeType["I_R:SOE"],
+      { entityClasses: [EntityEnums.Class.Location] },
+      conn
+    );
+    expect(sorted(locationIds)).toEqual(sorted([LOMBARDY, LAZIO, FOUNDING]));
+    expect(
+      await runEdge(
+        Query.EdgeType["I_R:SOE"],
+        { entityClasses: [EntityEnums.Class.Event] },
+        conn
+      )
+    ).toEqual([]);
+  });
+
+  test("I_R:HOL walks entityIds[1] -> entityIds[0], the reverse of R:HOL", async () => {
+    if (!conn) return;
+    expect(
+      await runEdge(Query.EdgeType["I_R:HOL"], { entityId: BOILING }, conn)
+    ).toEqual([HOT]);
+    expect(
+      await runEdge(Query.EdgeType["I_R:HOL"], { entityId: HOT }, conn)
+    ).toEqual([]);
+    expect(await runEdge(Query.EdgeType["I_R:HOL"], {}, conn)).toEqual([HOT]);
+  });
+
+  test("I_R:CLA returns the concept an instance is classified as", async () => {
+    if (!conn) return;
+    expect(
+      await runEdge(Query.EdgeType["I_R:CLA"], { entityId: CAESAR }, conn)
+    ).toEqual([EMPEROR]);
+    // an instance is never matched as its own concept
+    expect(
+      await runEdge(Query.EdgeType["I_R:CLA"], { entityId: EMPEROR }, conn)
+    ).toEqual([]);
+    expect(await runEdge(Query.EdgeType["I_R:CLA"], {}, conn)).toEqual([EMPEROR]);
+  });
+
+  test("I_R:CLA by class filters on the instance's class", async () => {
+    if (!conn) return;
+    expect(
+      await runEdge(
+        Query.EdgeType["I_R:CLA"],
+        { entityClasses: [EntityEnums.Class.Person] },
+        conn
+      )
+    ).toEqual([EMPEROR]);
+    expect(
+      await runEdge(
+        Query.EdgeType["I_R:CLA"],
+        { entityClasses: [EntityEnums.Class.Location] },
         conn
       )
     ).toEqual([]);

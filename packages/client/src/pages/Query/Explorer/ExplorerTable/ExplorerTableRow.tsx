@@ -6,6 +6,7 @@ import {
   entityStatusDict,
   conceptPartOfSpeechDict,
   actionPartOfSpeechDict,
+  actantLogicalTypeDict,
 } from "@inkvisitor/shared/dictionaries";
 import { IEntity, IResponseQueryEntity, IUser, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -34,9 +35,10 @@ import {
   StyledEntityTagWrap,
   StyledFocusedCircle,
   StyledRowInner,
+  StyledRowNumber,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
-import { readOnlyColumnTypes, wideColumnTypes } from "./types";
+import { isReadOnlyColumn, wideColumnTypes } from "./types";
 import { getColumnWidth } from "./utils";
 
 const EditableCellValue: React.FC<{
@@ -196,7 +198,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     rowItem?.right === UserEnums.RoleMode.Admin;
   const isColumnEditable = React.useCallback(
     (column: Explore.IExploreColumn) =>
-      column.editable && rowIsEditable && !readOnlyColumnTypes.has(column.type),
+      column.editable && rowIsEditable && !isReadOnlyColumn(column),
     [rowIsEditable]
   );
 
@@ -430,6 +432,25 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               />
             );
           }
+          if (column.type === Explore.EExploreColumnType.ELT) {
+            // only actant classes carry logicalType; on the rest the cell has
+            // nothing to write to and stays a plain (empty) value
+            if ((recordEntity.data as any)?.logicalType !== undefined) {
+              return (
+                <Dropdown.Single.Basic
+                  width={140}
+                  value={(recordEntity.data as any)?.logicalType}
+                  options={actantLogicalTypeDict}
+                  onChange={(v) => {
+                    updateEntityMutation.mutate({
+                      entityId: recordEntity.id,
+                      changes: { data: { ...recordEntity.data, logicalType: v } },
+                    });
+                  }}
+                />
+              );
+            }
+          }
           if (column.type === Explore.EExploreColumnType.EPOS) {
             if (recordEntity.class === EntityEnums.Class.Concept) {
               return (
@@ -496,7 +517,10 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                 );
               })}
             {cellData.length > CELL_DISPLAY_LIMIT && (
-              <ExplorerCellOverflow hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)} />
+              <ExplorerCellOverflow
+                hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
+                onEntityDoubleClick={handleOpenEntityInDetail}
+              />
             )}
           </StyledCellArrayWrap>
         );
@@ -504,7 +528,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue]
+    [renderCellValue, handleOpenEntityInDetail]
   );
 
   const renderEditSection = React.useCallback(
@@ -588,6 +612,8 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
           maxWidth: WIDTH_COLUMN_FIRST,
         }}
       >
+        <StyledRowNumber>{rowId + 1}</StyledRowNumber>
+
         <StyledCheckboxWrapper>
           {isLastClicked && <StyledFocusedCircle />}
           <Checkbox
