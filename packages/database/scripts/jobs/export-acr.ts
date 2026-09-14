@@ -215,6 +215,34 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     return c;
   });
 
+  // A metaprop on an Action or Concept may end in a Value or a Resource that no
+  // reference cites. The scope admits both classes, so those endpoints are
+  // resolved here and fed into the Resource seed and the Value fetch below.
+  // Only the endpoints themselves join the export: links leaving them are not
+  // followed, and the validation at the end reports any id they leave dangling.
+  const acIds = new Set([...actions, ...concepts].map((e) => e.id));
+  const metapropEndpointIds = new Set<string>();
+  for (const carrier of [...actions, ...concepts]) {
+    for (const prop of walkProps(carrier.props)) {
+      for (const id of [prop.type.entityId, prop.value.entityId]) {
+        if (id && !acIds.has(id)) {
+          metapropEndpointIds.add(id);
+        }
+      }
+    }
+  }
+
+  const metapropValueIds: string[] = [];
+  for (const endpoint of await getEntitiesByIds(db, [...metapropEndpointIds])) {
+    if (endpoint.class === EntityEnums.Class.Resource) {
+      if (!acResourceIds.includes(endpoint.id)) {
+        acResourceIds.push(endpoint.id);
+      }
+    } else if (endpoint.class === EntityEnums.Class.Value) {
+      metapropValueIds.push(endpoint.id);
+    }
+  }
+
   // retrieve all resources
   const allResources = await getEntitiesDataByClass<IResource>(
     db,
@@ -268,18 +296,21 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
       return r;
     });
 
-  // get all Reference Values from existingReferenceValueIds and merge into values
-  // Every Value is its own entity and none are merged here: the ids collected
-  // above repeat whenever several references cite the same Value, and getAll
-  // returns one row per argument, so the repeats are copies of a single Value
-  // sharing one id rather than distinct Values.
-  const referenceValueIds = [...new Set(existingReferenceValueIds)];
-  const existingReferenceValues = referenceValueIds.length
-    ? await rethink.table(Value.table).getAll(...referenceValueIds).run(db)
+  // get the Values cited by references or reached through metaprops and merge
+  // them into values. Every Value is its own entity and none are merged here:
+  // the ids collected above repeat whenever several references or metaprops
+  // point at the same Value, and getAll returns one row per argument, so the
+  // repeats are copies of a single Value sharing one id rather than distinct
+  // Values.
+  const valueIdsToFetch = [
+    ...new Set([...existingReferenceValueIds, ...metapropValueIds]),
+  ];
+  const fetchedValues = valueIdsToFetch.length
+    ? await rethink.table(Value.table).getAll(...valueIdsToFetch).run(db)
     : [];
 
   const exportedValueIds = new Set(values.map((v) => v.id));
-  for (const value of existingReferenceValues) {
+  for (const value of fetchedValues) {
     if (!exportedValueIds.has(value.id)) {
       exportedValueIds.add(value.id);
       values.push(value);
