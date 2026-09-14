@@ -78,3 +78,14 @@ export const readOnlyColumnTypes = new Set([
   Explore.EExploreColumnType.EUI,
 ]);
 
+/**
+ * Whether a column has no write path, by type or by params: an inverse relation
+ * column lists relations owned by the other entity, so its cells stay read-only.
+ */
+export const isReadOnlyColumn = (
+  column: Pick<Explore.IExploreColumn, "type" | "params">,
+): boolean =>
+  readOnlyColumnTypes.has(column.type) ||
+  (column.type === Explore.EExploreColumnType.ER &&
+    !!(column.params as Explore.IExploreColumnParamsER).inverse);
+

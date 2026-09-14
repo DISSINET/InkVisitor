@@ -40,6 +40,11 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],
   Query.EdgeType["R:SOE"],
+  // inverse relation edges: match the entity on the target side of the relation
+  // (instances / subclasses / subordinates of the target node)
+  Query.EdgeType["I_R:CLA"],
+  Query.EdgeType["I_R:SCL"],
+  Query.EdgeType["I_R:SOE"],
   // SUT: match Statements under the target Territory. The target node's SUB
   // toggle widens it to the whole subtree - "include subordinates" of a Territory
   // is its child territories, all levels (server: getSubordinateEntityIds).

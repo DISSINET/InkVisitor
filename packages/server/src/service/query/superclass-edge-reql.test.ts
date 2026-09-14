@@ -58,10 +58,11 @@ const RELATION_FIXTURES = [
 
 const runEdge = (
   nodeParams: Query.INodeParams,
-  conn: Connection
+  conn: Connection,
+  type = Query.EdgeType["R:SCL"]
 ): Promise<string[]> => {
   const edge = getEdgeInstance({
-    type: Query.EdgeType["R:SCL"],
+    type,
     params: {},
     logic: Query.EdgeLogic.Positive,
     id: "e1",
@@ -157,5 +158,39 @@ describe("R:SCL (Superclass) edge (real ReQL)", () => {
       conn
     );
     expect(sorted(ids)).toEqual(sorted([DOG, CAT]));
+  });
+
+  describe("I_R:SCL (subclasses, inverse)", () => {
+    const runInverse = (nodeParams: Query.INodeParams, c: Connection) =>
+      runEdge(nodeParams, c, Query.EdgeType["I_R:SCL"]);
+
+    test("by entity: returns the superclass of Dog, not Dog itself", async () => {
+      if (!conn) return;
+      const ids = await runInverse({ entityId: DOG }, conn);
+      expect(ids).toEqual([ANIMAL]);
+    });
+
+    test("by entity: a superclass has no superclass of its own here", async () => {
+      if (!conn) return;
+      expect(await runInverse({ entityId: ANIMAL }, conn)).toEqual([]);
+    });
+
+    test("only the Superclass relation type matches (Related is ignored)", async () => {
+      if (!conn) return;
+      expect(await runInverse({ entityId: PLANT }, conn)).toEqual([]);
+    });
+
+    test("no target: returns every entity that has any subclass", async () => {
+      if (!conn) return;
+      const ids = await runInverse({}, conn);
+      // the dangling superclass has no entity row, so it is never in the stream
+      expect(sorted(ids)).toEqual(sorted([ANIMAL, VEHICLE, MOVE]));
+    });
+
+    test("by class: Action subclasses only", async () => {
+      if (!conn) return;
+      const ids = await runInverse({ entityClasses: [EntityEnums.Class.Action] }, conn);
+      expect(ids).toEqual([MOVE]);
+    });
   });
 });
