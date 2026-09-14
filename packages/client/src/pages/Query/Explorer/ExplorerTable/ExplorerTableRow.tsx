@@ -38,7 +38,7 @@ import {
   StyledRowNumber,
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
-import { readOnlyColumnTypes, wideColumnTypes } from "./types";
+import { isReadOnlyColumn, wideColumnTypes } from "./types";
 import { getColumnWidth } from "./utils";
 
 const EditableCellValue: React.FC<{
@@ -198,7 +198,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     rowItem?.right === UserEnums.RoleMode.Admin;
   const isColumnEditable = React.useCallback(
     (column: Explore.IExploreColumn) =>
-      column.editable && rowIsEditable && !readOnlyColumnTypes.has(column.type),
+      column.editable && rowIsEditable && !isReadOnlyColumn(column),
     [rowIsEditable]
   );
 

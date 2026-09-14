@@ -16,28 +16,35 @@ export const getSuperclassAllowedClasses = (
   return SUPERCLASS_ENTITY_CLASSES.filter((c) => rootClasses.includes(c));
 };
 
-/** Target classes allowed for a Superordinate Entity picker given root entity classes. */
+/**
+ * Target classes allowed for a Superordinate Entity picker given root entity
+ * classes. With `inverse` the root is the superordinate side, so the picker
+ * offers the subordinate classes paired with it.
+ */
 export const getSuperordinateEntityAllowedClasses = (
   rootEntityClasses: EntityEnums.Class[] | undefined,
+  inverse = false,
 ): EntityEnums.Class[] => {
   const pattern =
     Relation.RelationRules[RelationEnums.Type.SuperordinateEntity]?.allowedEntitiesPattern ?? [];
   const rootClasses = rootEntityClasses ?? [];
   const allowed = new Set<EntityEnums.Class>();
+  const rootIndex = inverse ? 1 : 0;
+  const targetIndex = inverse ? 0 : 1;
 
-  // an unset root class is the wildcard: every source class of the relation is
-  // still in play, so the targets of all of them are allowed
+  // an unset root class is the wildcard: every root-side class of the relation
+  // is still in play, so the far side of all of them is allowed
   if (rootClasses.length === 0) {
-    for (const [, targetClass] of pattern) {
-      allowed.add(targetClass);
+    for (const pair of pattern) {
+      allowed.add(pair[targetIndex]);
     }
     return [...allowed];
   }
 
   for (const rootClass of rootClasses) {
-    for (const [sourceClass, targetClass] of pattern) {
-      if (sourceClass === rootClass) {
-        allowed.add(targetClass);
+    for (const pair of pattern) {
+      if (pair[rootIndex] === rootClass) {
+        allowed.add(pair[targetIndex]);
       }
     }
   }
@@ -52,8 +59,11 @@ export const getRelationConstrainedCategoryTypes = (
   if (edgeType === Query.EdgeType["R:SCL"] || edgeType === Query.EdgeType["I_R:SCL"]) {
     return getSuperclassAllowedClasses(rootEntityClasses);
   }
-  if (edgeType === Query.EdgeType["R:SOE"] || edgeType === Query.EdgeType["I_R:SOE"]) {
+  if (edgeType === Query.EdgeType["R:SOE"]) {
     return getSuperordinateEntityAllowedClasses(rootEntityClasses);
+  }
+  if (edgeType === Query.EdgeType["I_R:SOE"]) {
+    return getSuperordinateEntityAllowedClasses(rootEntityClasses, true);
   }
   return null;
 };

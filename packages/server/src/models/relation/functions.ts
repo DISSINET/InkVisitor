@@ -396,10 +396,11 @@ export const getSubordinateEntityIds = async (
 
   // SCL/SOE/HOL admit no Territory on either side (RelationRules in
   // shared/types/relation.ts), so an all-territory input can only expand through
-  // the tree walk below and the relation queries are guaranteed to come back empty
-  if (territoryInputs.length !== inputEntities.length) {
+  // the tree walk below and the relation queries are guaranteed to come back empty.
+  // An id with no entity row is not a known Territory, so it still takes the walk
+  let frontier = [...new Set(entityIds)];
+  if (territoryInputs.length < frontier.length) {
     // inverse SCL/SOE/HOL, all levels, batched one query per type per BFS level
-    let frontier = [...new Set(entityIds)];
     while (frontier.length && collected.size < SUBORDINATE_MAX_NODES) {
       const relationsPerType = await Promise.all(
         SUBORDINATE_RELATION_TYPES.map((type) =>

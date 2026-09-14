@@ -59,10 +59,11 @@ const RELATION_FIXTURES = [
 
 const runEdge = (
   nodeParams: Query.INodeParams,
-  conn: Connection
+  conn: Connection,
+  type = Query.EdgeType["R:SOE"]
 ): Promise<string[]> => {
   const edge = getEdgeInstance({
-    type: Query.EdgeType["R:SOE"],
+    type,
     params: {},
     logic: Query.EdgeLogic.Positive,
     id: "e1",
@@ -158,5 +159,36 @@ describe("R:SOE (SuperordinateEntity) edge (real ReQL)", () => {
       conn
     );
     expect(sorted(ids)).toEqual(sorted([MILAN, BERGAMO]));
+  });
+
+  describe("I_R:SOE (subordinates, inverse)", () => {
+    const runInverse = (nodeParams: Query.INodeParams, c: Connection) =>
+      runEdge(nodeParams, c, Query.EdgeType["I_R:SOE"]);
+
+    test("by entity: returns the superordinate of Milan, not Milan itself", async () => {
+      if (!conn) return;
+      expect(await runInverse({ entityId: MILAN }, conn)).toEqual([LOMBARDY]);
+    });
+
+    test("only the SuperordinateEntity relation type matches (Related is ignored)", async () => {
+      if (!conn) return;
+      expect(await runInverse({ entityId: PARIS }, conn)).toEqual([]);
+    });
+
+    test("no target: returns every entity that has any subordinate", async () => {
+      if (!conn) return;
+      const ids = await runInverse({}, conn);
+      // the dangling superordinate has no entity row, so it is never in the stream
+      expect(sorted(ids)).toEqual(sorted([LOMBARDY, LAZIO, FOUNDING]));
+    });
+
+    test("by class: filters on the subordinate's class", async () => {
+      if (!conn) return;
+      // every subordinate in the fixtures is a Location, including Turin under
+      // the Founding event
+      const locationIds = await runInverse({ entityClasses: [EntityEnums.Class.Location] }, conn);
+      expect(sorted(locationIds)).toEqual(sorted([LOMBARDY, LAZIO, FOUNDING]));
+      expect(await runInverse({ entityClasses: [EntityEnums.Class.Event] }, conn)).toEqual([]);
+    });
   });
 });

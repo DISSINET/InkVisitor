@@ -202,12 +202,24 @@ export namespace Query {
         allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
       },
     },
-    "I_R:SCL": {},
+    "I_R:SCL": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the subclass to entities of that class (server: EdgeHasSubclass)
+      entityClass: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
+      entityId: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
+    },
     "R:SYN": {},
     "R:ANT": {},
     "I_R:ANT": {},
     "R:HOL": {},
-    "I_R:HOL": {},
+    "I_R:HOL": {
+      // Holonym only pairs Concepts, so there is no class to narrow by
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "R:PRR": {},
     "I_R:PRR": {},
     "R:SAR": {},
@@ -217,7 +229,22 @@ export namespace Query {
     "R:CLA": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
-    "I_R:CLA": {},
+    "I_R:CLA": {
+      entityId: {
+        allowedClasses: [
+          EntityEnums.Class.Person,
+          EntityEnums.Class.Being,
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Territory,
+          EntityEnums.Class.Resource,
+          EntityEnums.Class.Value,
+        ],
+      },
+    },
     "R:IDE": {},
     "I_R:IDE": {},
     "R:IMP": {},
@@ -252,7 +279,32 @@ export namespace Query {
         ],
       },
     },
-    "I_R:SOE": {},
+    "I_R:SOE": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the subordinate to entities of that class (server: EdgeHasSubordinate)
+      entityClass: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+        ],
+      },
+      entityId: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+        ],
+      },
+    },
     "R:SUS": {},
     "I_R:SUS": {},
     "R:A1S": {},
@@ -875,32 +927,32 @@ export namespace Query {
     I_SC: "is S clasification",
     "R:": "has relation: any",
     "R:SCL": "has relation: Superclass",
-    "I_R:SCL": "is related to: as Superclass",
+    "I_R:SCL": "has: Subclass (inv. Superclass)",
     "R:SYN": "has relation: Synonym",
     "R:ANT": "has relation: Antonym",
     "I_R:ANT": "is related to: as Antonym",
     "R:HOL": "has relation: Holonym",
-    "I_R:HOL": "is related to: as Holonym",
+    "I_R:HOL": "has: Meronym (inv. Holonym)",
     "R:PRR": "has relation: PropertyReciprocal",
     "I_R:PRR": "is related to: as PropertyReciprocal",
     "R:SAR": "has relation: SubjectActant1Reciprocal",
     "I_R:SAR": "is related to: as SubjectActant1Reciprocal",
     "R:AEE": "has relation: ActionEventEquivalent",
-    "I_R:AEE": "is related to: as ActionEventEquivalent",
+    "I_R:AEE": "has: Action equivalent (inv. Action-Event Equivalent)",
     "R:CLA": "has relation: Classification",
-    "I_R:CLA": "is related to: as Classification",
+    "I_R:CLA": "has: Instance (inv. Classification)",
     "R:IDE": "has relation: Identification",
     "I_R:IDE": "is related to: as Identification",
     "R:IMP": "has relation: Implication",
-    "I_R:IMP": "is related to: as Implication",
+    "I_R:IMP": "has: Used as Implication (inv. Implication)",
     "R:SOE": "has relation: SuperordinateEntity",
-    "I_R:SOE": "is related to: as SuperordinateEntity",
+    "I_R:SOE": "has: Subordinate Entity (inv. Superordinate Entity)",
     "R:SUS": "has relation: SubjectSemantics",
-    "I_R:SUS": "is related to: as SubjectSemantics",
+    "I_R:SUS": "has: Used as Subject semantics (inv. Subject Semantics)",
     "R:A1S": "has relation: Actant1Semantics",
-    "I_R:A1S": "is related to: as Actant1Semantics",
+    "I_R:A1S": "has: Used as Actant1 semantics (inv. Actant1 Semantics)",
     "R:A2S": "has relation: Actant2Semantics",
-    "I_R:A2S": "is related to: as Actant2Semantics",
+    "I_R:A2S": "has: Used as Actant2 semantics (inv. Actant2 Semantics)",
     "R:REL": "has relation: Related",
     "I_R:REL": "is related to: as Related",
   };
@@ -1087,6 +1139,12 @@ export namespace Explore {
   /** Params for column types that require configuration */
   export interface IExploreColumnParamsER {
     relationType: RelationEnums.Type;
+    /**
+     * Lists the entities for which the row is the relation target
+     * (entityIds[1], e.g. subclasses for Superclass). Only meaningful for
+     * asymmetrical types; such columns are read-only.
+     */
+    inverse?: boolean;
   }
   export interface IExploreColumnParamsEPV {
     propertyType: string;
