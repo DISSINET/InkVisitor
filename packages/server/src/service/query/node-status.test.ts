@@ -273,6 +273,25 @@ describe("entityStatuses node param (real ReQL)", () => {
       );
     });
 
+    test("R: matches entities with any relation to a partner of that status", async () => {
+      expect(sorted(await runEdge(Query.EdgeType["R:"], WARNING_C, conn))).toEqual(
+        sorted([K_SUB_OK, K_SUPER_OK])
+      );
+      // P_CLA_OK is classified as the approved C_OK
+      expect(sorted(await runEdge(Query.EdgeType["R:"], APPROVED_C, conn))).toEqual(
+        sorted([K_SUB_WARN, K_SUPER_WARN, P_CLA_OK])
+      );
+    });
+
+    test("R: narrows by the partner's class alone", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["R:"],
+        { entityClasses: [EntityEnums.Class.Person] },
+        conn
+      );
+      expect(sorted(ids)).toEqual(sorted([C_BAD, C_OK]));
+    });
+
     test("the target class still applies alongside the status", async () => {
       const ids = await runEdge(
         Query.EdgeType["I_R:SCL"],

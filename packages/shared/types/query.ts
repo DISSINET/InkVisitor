@@ -224,6 +224,9 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
     "R:": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the related entity to that class (server: EdgeHasRelation)
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "R:SCL": {

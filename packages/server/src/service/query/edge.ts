@@ -242,46 +242,6 @@ export class EdgeSUnderT extends SearchEdge {
   }
 }
 
-export class EdgeHasRelation extends SearchEdge {
-  constructor(data: Partial<Query.IEdge>) {
-    super(data);
-    this.type = Query.EdgeType["R:"];
-  }
-
-  run(q: RStream): RStream {
-    const targetIds = this.targetIds();
-
-    return q.concatMap(function(entity: RDatum<IEntity>) {
-      return (
-        r
-          .table(Relation.table)
-          .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
-          // get all relations where any entity is the source entity
-          .filter(function(relation: RDatum<RelationTypes.IRelation>) {
-            return relation("entityIds").contains(entity("id"));
-          })
-          // check if any of the target entities is also in the relation
-          .filter(function(relation: RDatum<RelationTypes.IRelation>) {
-            if (targetIds) {
-              return relation("entityIds")
-                .setIntersection(r.expr(targetIds))
-                .isEmpty()
-                .not();
-            }
-            return true;
-          })
-          // emit the iterated entity itself (it participates in a qualifying
-          // relation) instead of the relation's first member - this keeps the
-          // result a subset of the input stream, which positive matching and
-          // negation (base set minus matches) both rely on
-          .map(function() {
-            return entity("id");
-          })
-      );
-    });
-  }
-}
-
 /**
  * Whether an existing entity has one of `classes` and one of `statuses`; an
  * empty list does not constrain.
@@ -396,6 +356,70 @@ abstract class RelationTargetSearchEdge extends SearchEdge {
       this.unpinnedTargetStatuses(),
       inverse
     );
+  }
+}
+
+export class EdgeHasRelation extends RelationTargetSearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["R:"];
+  }
+
+  /**
+   * Matches entities in a relation of any type whose other members satisfy the
+   * edge target: a pinned target-id set, else the class/status of any partner
+   * (see relationPartners), else any relation at all.
+   */
+  run(q: RStream): RStream {
+    const targetIds = this.targetIds();
+    const targetClasses = this.node.params.entityClasses ?? [];
+    const targetStatuses = this.unpinnedTargetStatuses();
+
+    return q.concatMap(function(entity: RDatum<IEntity>) {
+      return (
+        r
+          .table(Relation.table)
+          .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+          .filter(function(relation: RDatum<RelationTypes.IRelation>) {
+            return relation("entityIds").contains(entity("id"));
+          })
+          .filter(function(relation: RDatum<RelationTypes.IRelation>) {
+            if (targetIds) {
+              return relation("entityIds")
+                .setIntersection(r.expr(targetIds))
+                .isEmpty()
+                .not();
+            }
+            if (targetClasses.length || targetStatuses.length) {
+              // relation types differ in whether an entity may be its own
+              // partner, so a self loop counts wherever the data holds one
+              return relationPartners(relation, entity("id"), true).contains(
+                function (id: RDatum<string>) {
+                  return r
+                    .table(Entity.table)
+                    .get(id)
+                    .default(null)
+                    .do(function (ent: RDatum) {
+                      return r.branch(
+                        ent,
+                        entityMatchesClassesAndStatuses(ent, targetClasses, targetStatuses),
+                        false
+                      );
+                    });
+                }
+              );
+            }
+            return true;
+          })
+          // emit the iterated entity itself (it participates in a qualifying
+          // relation) instead of the relation's first member - this keeps the
+          // result a subset of the input stream, which positive matching and
+          // negation (base set minus matches) both rely on
+          .map(function() {
+            return entity("id");
+          })
+      );
+    });
   }
 }
 
