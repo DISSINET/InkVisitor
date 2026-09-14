@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isTopmostModal, pushModal, removeModal } from "./modalStack";
+import { isAnyModalOpen, isTopmostModal, pushModal, removeModal } from "./modalStack";
 
 // the stack is module state shared by every Modal, so each test cleans up the
 // ids it opened
@@ -56,6 +56,18 @@ describe("modalStack", () => {
 
       expect(isTopmostModal(open)).toBe(true);
     });
+  });
+
+  it("reports a modal open until the last one closes", () => {
+    const batch = Symbol("batch");
+    const confirm = Symbol("confirm");
+
+    withModals([batch, confirm], () => {
+      removeModal(confirm);
+      expect(isAnyModalOpen()).toBe(true);
+    });
+
+    expect(isAnyModalOpen()).toBe(false);
   });
 
   it("reports no topmost modal once every modal has closed", () => {

@@ -14,6 +14,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Box, Button, Checkbox, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { isAnyModalOpen } from "components/basic/Modal/modalStack";
 import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
@@ -229,10 +230,12 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // should also trigger the search alongside any local handler on the input.
   // A dropdown focuses its own hidden text input, so it would otherwise swallow
   // Enter everywhere outside those containers; only an OPEN menu keeps Enter for
-  // itself, where the key picks the highlighted option.
+  // itself, where the key picks the highlighted option. An open modal owns
+  // Enter (Ctrl+Enter applies it), so the search never runs behind one.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
+      if (isAnyModalOpen()) return;
       const focused = document.activeElement;
       const tag = (focused?.tagName ?? "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") {

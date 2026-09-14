@@ -18,3 +18,6 @@ export const removeModal = (id: symbol): void => {
 
 export const isTopmostModal = (id: symbol): boolean =>
   openModals[openModals.length - 1] === id;
+
+/** true while any modal is open; page-level key shortcuts yield to it */
+export const isAnyModalOpen = (): boolean => openModals.length > 0;
