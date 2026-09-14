@@ -216,7 +216,8 @@ export class EdgeHasRelation extends SearchEdge {
  * iterated entity (entityIds[0]) to its relation target (entityIds[1]): R:SCL
  * (Superclass), R:SOE (SuperordinateEntity). An inverse edge walks the other
  * way, from the iterated entity at entityIds[1] to entityIds[0]: I_R:SCL
- * (subclasses), I_R:SOE (subordinates), I_R:CLA (instances). Matches relations
+ * (subclasses), I_R:SOE (subordinates), I_R:CLA (instances), I_R:HOL
+ * (meronyms). Matches relations
  * of `relationType` where the far side satisfies the edge target:
  *  - any id of the pinned target-id set (`targetIds`, the pinned entity plus
  *    its toggle-driven expansion), or
@@ -338,6 +339,23 @@ export class EdgeHasSubordinate extends SearchEdge {
     return runRelationTargetEdge(
       q,
       RelationEnums.Type.SuperordinateEntity,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      true
+    );
+  }
+}
+
+export class EdgeHasMeronym extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_R:HOL"];
+  }
+
+  run(q: RStream): RStream {
+    return runRelationTargetEdge(
+      q,
+      RelationEnums.Type.Holonym,
       this.targetIds(),
       this.node.params.entityClasses ?? [],
       true
@@ -1105,6 +1123,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasClassification(data);
     case Query.EdgeType["I_R:CLA"]:
       return new EdgeHasInstance(data);
+    case Query.EdgeType["I_R:HOL"]:
+      return new EdgeHasMeronym(data);
     case Query.EdgeType["R:SCL"]:
       return new EdgeCHasSuperclass(data);
     case Query.EdgeType["I_R:SCL"]:

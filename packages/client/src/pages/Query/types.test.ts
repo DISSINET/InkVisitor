@@ -1,7 +1,7 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { edgeTypesImplemented } from "./types";
+import { edgeTypesHidden, edgeTypesImplemented } from "./types";
 import {
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
@@ -384,5 +384,20 @@ describe("inverse in-statement edge validity rules", () => {
         edge(Query.EdgeType["I_SC"], sourceNode([EntityEnums.Class.Concept])),
       ).valid,
     ).toBe(true);
+  });
+});
+
+describe("inverse Holonym edge and hidden edge types", () => {
+  it("I_R:HOL is selectable from a Concept and takes a Concept target", () => {
+    expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Concept]))).toContain(
+      Query.EdgeType["I_R:HOL"],
+    );
+    expect(Query.EdgeTypeTargetNodeParams[Query.EdgeType["I_R:HOL"]].entityId.allowedClasses).toEqual(
+      [EntityEnums.Class.Concept],
+    );
+  });
+
+  it("no hidden edge type is also marked implemented", () => {
+    expect(edgeTypesHidden.filter((t) => edgeTypesImplemented.includes(t))).toEqual([]);
   });
 });
