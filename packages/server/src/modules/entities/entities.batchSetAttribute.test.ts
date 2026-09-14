@@ -167,6 +167,28 @@ describe("Entities batchSetAttribute", function () {
     });
   });
 
+  describe("part of speech with an empty or missing target", () => {
+    it.each([
+      ["empty", { from: null, to: EntityEnums.ConceptPartOfSpeech.Empty }],
+      ["missing", { from: null }],
+    ])("is rejected when the target is %s and writes nothing", async (_, concept) => {
+      // the fixture does not persist data, so the route itself sets the pos a
+      // rejected request must leave in place
+      const entity = await makeEntity(EntityEnums.Class.Concept);
+      await setAttribute([entity.id], {
+        attribute: "pos",
+        concept: { from: null, to: EntityEnums.ConceptPartOfSpeech.Noun },
+      });
+      expect(await posOf(entity.id)).toEqual(EntityEnums.ConceptPartOfSpeech.Noun);
+
+      const res = await setAttribute([entity.id], { attribute: "pos", concept });
+
+      expect(res.status).toEqual(new BadParams("").statusCode());
+      expect(res.body.error).toEqual("BadParams");
+      expect(await posOf(entity.id)).toEqual(EntityEnums.ConceptPartOfSpeech.Noun);
+    });
+  });
+
   describe("an unknown attribute", () => {
     it("is rejected", async () => {
       const concept = await makeEntity(EntityEnums.Class.Concept);

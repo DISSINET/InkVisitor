@@ -51,6 +51,12 @@ const actionFromDict: { value: EntityEnums.ActionPartOfSpeech | ""; label: strin
   ...actionPartOfSpeechDict,
 ];
 
+/** the empty pos is only a source value: a batch never clears pos, and the
+ * server rejects an empty target */
+const conceptToDict = conceptPartOfSpeechDict.filter(
+  (option) => option.value !== EntityEnums.ConceptPartOfSpeech.Empty
+);
+
 const posOf = (entity: IEntity): string =>
   (entity.data as { pos?: string })?.pos || "";
 
@@ -297,7 +303,7 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
                     <Dropdown.Single.Basic
                       width={200}
                       value={conceptTo ?? null}
-                      options={conceptPartOfSpeechDict}
+                      options={conceptToDict}
                       placeholder="select part of speech..."
                       onChange={(value) =>
                         setConceptTo(value as EntityEnums.ConceptPartOfSpeech)

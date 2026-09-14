@@ -1350,6 +1350,14 @@ export default Router()
           throw new BadParams("changes.concept or changes.action must be provided");
         }
 
+        // an empty target would clear pos on every matched entity
+        if (
+          changes.attribute === "pos" &&
+          [changes.concept, changes.action].some((spec) => spec && !spec.to)
+        ) {
+          throw new BadParams("changes.concept.to and changes.action.to must name a part of speech");
+        }
+
         await request.db.lock();
 
         const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
