@@ -249,6 +249,40 @@ describe("entityStatuses node param (real ReQL)", () => {
     });
   });
 
+  describe("status lookup narrowed by the edge's target class", () => {
+    // Discouraged entities in the fixtures: C_BAD (Concept) and A_BAD (Action)
+    test.each([
+      [Query.EdgeType["EP:T"], [C_BAD]],
+      [Query.EdgeType["SP:T"], [C_BAD]],
+      [Query.EdgeType["I_SP:T"], [C_BAD]],
+      [Query.EdgeType["I_SC"], [C_BAD]],
+      [Query.EdgeType["HR:R"], []],
+      [Query.EdgeType["HR:V"], []],
+      [Query.EdgeType["SUT:"], []],
+      [Query.EdgeType["EUT:"], []],
+      [Query.EdgeType["IS:"], []],
+      // any-class targets keep every discouraged entity
+      [Query.EdgeType["HP:V"], [A_BAD, C_BAD]],
+    ])("%s resolves a classless status target to %j", async (type, expected) => {
+      const edge = getEdgeInstance({
+        type,
+        params: {},
+        logic: Query.EdgeLogic.Positive,
+        id: "e1",
+        node: {
+          id: "n1",
+          type: Query.NodeType.E,
+          operator: Query.NodeOperator.And,
+          params: { entityStatuses: [EntityEnums.Status.Discouraged] },
+          edges: [],
+        },
+      });
+      await edge.prepare(conn);
+      const ids = (edge as unknown as { targetEntityIds: string[] }).targetEntityIds;
+      expect(sorted(ids)).toEqual(sorted(expected as string[]));
+    });
+  });
+
   describe("relation edge target, checked per relation", () => {
     const WARNING_C: Query.INodeParams = {
       entityClasses: [EntityEnums.Class.Concept],

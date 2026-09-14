@@ -44,6 +44,13 @@ export default class SearchEdge implements Query.IEdge {
   protected checksUnpinnedTargetStatusInRun = false;
 
   /**
+   * Classes the edge's target can hold, used to narrow the status lookup
+   * through the class index when the target node picks no class. Empty for
+   * targets of any class, which leaves that lookup a full entity-table scan.
+   */
+  protected statusTargetClasses: EntityEnums.Class[] = [];
+
+  /**
    * Async precomputation hook, invoked by the node evaluator before run().
    * run() only composes synchronous ReQL, so anything fetched ahead of time
    * (the expanded target-id set here) is resolved here. Subclasses overriding
@@ -83,14 +90,15 @@ export default class SearchEdge implements Query.IEdge {
 
   /**
    * Ids of entities carrying one of `statuses`, narrowed by the target node's
-   * classes when it has any. Status has no index, so without classes this is a
-   * full scan of the entity table.
+   * classes, else by the classes the edge's target can hold. Status has no
+   * index, so without either this is a full scan of the entity table.
    */
   private async statusTargetIds(
     db: Connection,
     statuses: EntityEnums.Status[]
   ): Promise<string[]> {
-    const classes = this.node.params.entityClasses ?? [];
+    const nodeClasses = this.node.params.entityClasses ?? [];
+    const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses;
     const base: RStream = classes.length
       ? r
           .table(Entity.table)
@@ -177,6 +185,8 @@ function intersectIdsWithStream(q: RStream, idsStream: RStream | null): RStream 
 }
 
 export class EdgeSUnderT extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Territory];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["SUT:"];
@@ -627,6 +637,8 @@ export class EdgeHasInstance extends RelationTargetSearchEdge {
 }
 
 export class EdgeHasPropType extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Concept];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["EP:T"];
@@ -746,6 +758,8 @@ function runStatementPropEdge(
 }
 
 export class EdgeStatementHasPropType extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Concept];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["SP:T"];
@@ -882,6 +896,8 @@ function runInverseStatementClassificationEdge(
 }
 
 export class EdgeIsStatementPropType extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Concept];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["I_SP:T"];
@@ -904,6 +920,8 @@ export class EdgeIsStatementPropValue extends SearchEdge {
 }
 
 export class EdgeIsStatementClassification extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Concept];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["I_SC"];
@@ -1208,6 +1226,8 @@ function runUsedUnderTerritoryEdge(
 }
 
 export class EdgeUsedUnderTerritory extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Territory];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["EUT:"];
@@ -1255,6 +1275,8 @@ function runIsInStatementEdge(
 }
 
 export class EdgeIsInStatement extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Statement];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["IS:"];
@@ -1266,6 +1288,8 @@ export class EdgeIsInStatement extends SearchEdge {
 }
 
 export class EdgeHasReferenceResource extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Resource];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["HR:R"];
@@ -1301,6 +1325,8 @@ export class EdgeHasReferenceResource extends SearchEdge {
 }
 
 export class EdgeHasReferenceValue extends SearchEdge {
+  protected statusTargetClasses = [EntityEnums.Class.Value];
+
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["HR:V"];
