@@ -78,9 +78,12 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
 /**
  * Edge types left out of the edge type dropdown entirely, not even listed as
  * disabled. The "used as" inverses of the semantics/implication relations have
- * no readable "has: X" phrasing.
+ * no readable "has: X" phrasing. "CT:G" / "I_CT:G" share their label and node
+ * rules with "CT:" / "I_CT:" and have no server implementation.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
+  Query.EdgeType["CT:G"],
+  Query.EdgeType["I_CT:G"],
   Query.EdgeType["I_R:IMP"],
   Query.EdgeType["I_R:SUS"],
   Query.EdgeType["I_R:A1S"],

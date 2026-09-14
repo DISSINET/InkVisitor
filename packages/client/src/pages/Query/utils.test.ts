@@ -4,6 +4,7 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { describe, it, expect } from "vitest";
 import {
   applyPasteToDraft,
+  buildEdgeTypeOptionGroups,
   buildStableSignature,
   computeWindowUpdate,
   getRelationAllowedClasses,
@@ -422,5 +423,53 @@ describe("getRelationConstrainedCategoryTypes", () => {
     expect(getRelationConstrainedCategoryTypes(Query.EdgeType["R:"], [])).toBeNull();
     expect(getRelationConstrainedCategoryTypes(Query.EdgeType["EP:T"], [])).toBeNull();
     expect(getRelationConstrainedCategoryTypes(undefined, [])).toBeNull();
+  });
+});
+
+describe("buildEdgeTypeOptionGroups", () => {
+  const T = Query.EdgeType;
+
+  it("groups types in the fixed group order and drops empty groups", () => {
+    const groups = buildEdgeTypeOptionGroups([T["R:SYN"], T["IS:"], T["EP:T"]], []);
+    expect(groups.map((g) => g.label)).toEqual(["Property", "Relation", "Position in statement"]);
+  });
+
+  it("puts the any variant first, then sorts alphabetically by menu label", () => {
+    const [relation] = buildEdgeTypeOptionGroups([T["R:SYN"], T["R:"], T["R:ANT"]], []);
+    expect(relation.options.map((o) => o.value)).toEqual([T["R:"], T["R:ANT"], T["R:SYN"]]);
+  });
+
+  it("places each inverse directly below its forward type", () => {
+    const [relation] = buildEdgeTypeOptionGroups(
+      [T["I_R:CLA"], T["R:ANT"], T["R:CLA"], T["I_R:ANT"]],
+      [],
+    );
+    expect(relation.options.map((o) => o.value)).toEqual([
+      T["R:ANT"],
+      T["I_R:ANT"],
+      T["R:CLA"],
+      T["I_R:CLA"],
+    ]);
+  });
+
+  it("strips the group prefix from menu labels but keeps the full label", () => {
+    const [relation] = buildEdgeTypeOptionGroups([T["R:CLA"], T["I_R:CLA"]], []);
+    expect(relation.options.map((o) => [o.label, o.menuLabel])).toEqual([
+      ["has relation: Classification", "Classification"],
+      ["has: Instance (inv. Classification)", "Instance (inv. Classification)"],
+    ]);
+  });
+
+  it("moves unimplemented types to the end of their group, marked disabled", () => {
+    const [relation] = buildEdgeTypeOptionGroups(
+      [T["R:"], T["R:ANT"], T["I_R:ANT"], T["R:SYN"]],
+      [T["R:ANT"], T["R:SYN"]],
+    );
+    expect(relation.options.map((o) => [o.value, o.isDisabled])).toEqual([
+      [T["R:ANT"], false],
+      [T["R:SYN"], false],
+      [T["R:"], true],
+      [T["I_R:ANT"], true],
+    ]);
   });
 });

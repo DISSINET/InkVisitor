@@ -6,11 +6,25 @@ import {
 import { BaseDropdown } from "components";
 import React from "react";
 
+interface BasicDropdownOption<T> {
+  value: T;
+  label: string;
+  // shorter label for the open menu; the control and typing filter use `label`
+  menuLabel?: string;
+  info?: string;
+  isDisabled?: boolean;
+}
+
+interface BasicDropdownGroup<T> {
+  label: string;
+  options: BasicDropdownOption<T>[];
+}
+
 interface BasicDropdown<T = string> {
   width?: number | "full";
   value: T | null;
   onChange: (value: T) => void;
-  options: { value: T; label: string; info?: string; isDisabled?: boolean }[];
+  options: (BasicDropdownOption<T> | BasicDropdownGroup<T>)[];
   icon?: React.ReactNode;
   placeholder?: string;
   tooltipLabel?: string;
@@ -40,10 +54,12 @@ export const BasicDropdown = <T extends string>({
   loggerId,
   noDropDownIndicator = false,
 }: BasicDropdown<T>) => {
+  const flatOptions = options.flatMap((option) => ("options" in option ? option.options : option));
+
   return (
     <BaseDropdown
       width={width}
-      value={options.find((o) => o.value === value) ?? null}
+      value={flatOptions.find((o) => o.value === value) ?? null}
       isClearable={isClearable}
       onChange={(value) => onChange((value[0]?.value ?? "") as T)}
       options={options}

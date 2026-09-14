@@ -230,6 +230,118 @@ export const findValidEdgeTypesForSourceNode = (
   return validEdges;
 };
 
+export interface IEdgeTypeOption {
+  value: Query.EdgeType;
+  label: string;
+  // the label with its group's prefix removed, shown inside the open menu
+  menuLabel: string;
+  isDisabled: boolean;
+}
+
+export interface IEdgeTypeOptionGroup {
+  label: string;
+  options: IEdgeTypeOption[];
+}
+
+interface IEdgeTypeGroupDefinition {
+  label: string;
+  // leading segment of the edge type code with the inverse `I_` marker removed
+  // ("I_R:CLA" -> "R")
+  families: string[];
+  // label prefixes the group heading already says, removed from menu labels
+  labelPrefixes: string[];
+}
+
+const EDGE_TYPE_GROUPS: IEdgeTypeGroupDefinition[] = [
+  { label: "Property", families: ["EP", "HP"], labelPrefixes: ["has property: "] },
+  { label: "Reference", families: ["HR"], labelPrefixes: ["has reference: "] },
+  { label: "Relation", families: ["R"], labelPrefixes: ["has relation: ", "has: "] },
+  { label: "Position in statement", families: ["IS"], labelPrefixes: ["is in S: "] },
+  { label: "Statement property", families: ["SP", "SI", "SC"], labelPrefixes: [] },
+  { label: "Territory", families: ["SUT", "EUT"], labelPrefixes: [] },
+  { label: "Territory hierarchy", families: ["CT"], labelPrefixes: [] },
+];
+
+const INVERSE_EDGE_MARKER = "I_";
+
+const edgeTypeFamily = (type: Query.EdgeType): string =>
+  type.replace(INVERSE_EDGE_MARKER, "").split(":")[0];
+
+/**
+ * Groups edge types for the edge type dropdown. Within a group the implemented
+ * types come before the disabled ones; inside each of those parts the "any"
+ * variants come first, the rest follow alphabetically, and each inverse type
+ * sits directly below its forward type when both are offered and share the
+ * part. Types outside every known family land in a trailing "Other" group.
+ */
+export const buildEdgeTypeOptionGroups = (
+  types: Query.EdgeType[],
+  implementedTypes: Query.EdgeType[],
+): IEdgeTypeOptionGroup[] => {
+  const offered = new Set(types);
+  const groups: (IEdgeTypeGroupDefinition & { types: Query.EdgeType[] })[] = [
+    ...EDGE_TYPE_GROUPS.map((group) => ({ ...group, types: [] as Query.EdgeType[] })),
+    { label: "Other", families: [], labelPrefixes: [], types: [] },
+  ];
+
+  for (const type of types) {
+    const family = edgeTypeFamily(type);
+    const group =
+      groups.find((candidate) => candidate.families.includes(family)) ?? groups[groups.length - 1];
+    group.types.push(type);
+  }
+
+  return groups
+    .filter((group) => group.types.length > 0)
+    .map((group) => {
+      const menuLabel = (type: Query.EdgeType) => {
+        const label = Query.EdgeTypeLabels[type];
+        const prefix = group.labelPrefixes.find((candidate) => label.startsWith(candidate));
+        return prefix ? label.slice(prefix.length) : label;
+      };
+      const isDisabled = (type: Query.EdgeType) => !implementedTypes.includes(type);
+      const isInverse = (type: Query.EdgeType) => type.startsWith(INVERSE_EDGE_MARKER);
+      // the type whose position an option takes: an inverse follows its forward type
+      const anchor = (type: Query.EdgeType) => {
+        const forwardType = type.replace(INVERSE_EDGE_MARKER, "") as Query.EdgeType;
+        return isInverse(type) && offered.has(forwardType) ? forwardType : type;
+      };
+      const isAny = (type: Query.EdgeType) => /\bany\b/.test(Query.EdgeTypeLabels[type]);
+
+      const sortedTypes = [...group.types].sort((a, b) => {
+        if (isDisabled(a) !== isDisabled(b)) {
+          return isDisabled(a) ? 1 : -1;
+        }
+        const anchorA = anchor(a);
+        const anchorB = anchor(b);
+        if (isAny(anchorA) !== isAny(anchorB)) {
+          return isAny(anchorA) ? -1 : 1;
+        }
+        const byLabel = menuLabel(anchorA).localeCompare(menuLabel(anchorB));
+        if (byLabel !== 0) {
+          return byLabel;
+        }
+        // distinct types can share a label, so the code keeps each inverse
+        // attached to its own forward type
+        const byAnchor = anchorA.localeCompare(anchorB);
+        if (byAnchor !== 0) {
+          return byAnchor;
+        }
+        return Number(isInverse(a)) - Number(isInverse(b));
+      });
+
+      return {
+        label: group.label,
+        options: sortedTypes.map((type) => ({
+          value: type,
+          label: Query.EdgeTypeLabels[type],
+          menuLabel: menuLabel(type),
+          isDisabled: isDisabled(type),
+        })),
+      };
+    });
+};
+
 export const findValidEdgeTypesForTargetNode = (node: Query.INode): Query.EdgeType[] => {
   const validEdges = Object.entries(Query.EdgeTypeNodeRules)
     .filter(([, [from, to]]) => {

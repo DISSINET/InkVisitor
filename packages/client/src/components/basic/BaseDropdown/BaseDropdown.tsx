@@ -24,8 +24,17 @@ import {
 } from "./BaseDropdownStyles";
 import { DropdownItem } from "@inkvisitor/shared/types";
 
+// `menuLabel` replaces `label` inside the open menu only, where a group heading
+// can already say what the label repeats; the control and the typing filter
+// keep matching the full `label`
+export type BaseDropdownItem = DropdownItem & { menuLabel?: string };
+export interface BaseDropdownGroup {
+  label: string;
+  options: BaseDropdownItem[];
+}
+
 interface BaseDropdown {
-  options?: DropdownItem[];
+  options?: (BaseDropdownItem | BaseDropdownGroup)[];
   value?: DropdownItem | DropdownItem[] | null;
   onChange: (selectedOption: DropdownItem[], event?: ActionMeta<unknown>) => void;
   // appearance props
@@ -146,6 +155,10 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isDisabled={disabled || isOneOptionSingleEntitySelect}
           isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
           isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
+          formatOptionLabel={(option, { context }) => {
+            const item = option as BaseDropdownItem;
+            return context === "menu" && item.menuLabel ? item.menuLabel : item.label;
+          }}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
           compactChips={compactChips}

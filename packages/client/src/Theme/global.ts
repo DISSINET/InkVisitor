@@ -107,6 +107,23 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     .react-select__option--is-disabled {
       color: ${({ theme }) => theme.color["gray"][500]};
     }
+    .react-select__group {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    /* sticks to the top of the menu while its own options scroll past, so a
+       long group still shows which group the visible options belong to */
+    .react-select__group-heading {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      margin: 0;
+      padding: ${({ theme }) => `${theme.space[2]} ${theme.space[5]}`};
+      font-size: ${({ theme }) => theme.fontSize["xxs"]};
+      font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+      color: ${({ theme }) => theme.color["gray"][600]};
+      background-color: ${({ theme }) => theme.color["gray"][100]};
+    }
   }
 
   .react-select__entity-dropdown {
