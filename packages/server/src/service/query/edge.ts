@@ -176,40 +176,6 @@ function intersectIdsWithStream(q: RStream, idsStream: RStream | null): RStream 
   }) as unknown as RStream;
 }
 
-export class EdgeHasClassification extends SearchEdge {
-  constructor(data: Partial<Query.IEdge>) {
-    super(data);
-    this.type = Query.EdgeType["R:CLA"];
-  }
-
-  run(q: RStream): RStream {
-    const targetIds = this.targetIds();
-    return q.concatMap(function(entity: RDatum<IEntity>) {
-      return r
-        .table(Relation.table)
-        .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
-        .filter({
-          type: RelationEnums.Type.Classification,
-        })
-        .filter(function(relation: RDatum<RelationTypes.IRelation>) {
-          return relation("entityIds").nth(0).eq(entity("id"));
-        })
-        .filter(function(relation: RDatum<RelationTypes.IRelation>) {
-          if (targetIds) {
-            return relation("entityIds")
-              .setIntersection(r.expr(targetIds))
-              .isEmpty()
-              .not();
-          }
-          return true;
-        })
-        .map(function(relation) {
-          return relation("entityIds").nth(0);
-        });
-    });
-  }
-}
-
 export class EdgeSUnderT extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -635,6 +601,17 @@ export class EdgeHasMeronym extends RelationTargetSearchEdge {
 
   run(q: RStream): RStream {
     return this.runRelationTarget(q, RelationEnums.Type.Holonym, true);
+  }
+}
+
+export class EdgeHasClassification extends RelationTargetSearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["R:CLA"];
+  }
+
+  run(q: RStream): RStream {
+    return this.runRelationTarget(q, RelationEnums.Type.Classification);
   }
 }
 

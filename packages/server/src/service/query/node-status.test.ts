@@ -190,6 +190,20 @@ describe("entityStatuses node param (real ReQL)", () => {
       expect(sorted(ids)).toEqual([P_CLA_BAD]);
     });
 
+    test("R:CLA without a class (as the UI sends it) still applies the status", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["R:CLA"],
+        { entityStatuses: [EntityEnums.Status.Discouraged] },
+        conn
+      );
+      expect(sorted(ids)).toEqual([P_CLA_BAD]);
+    });
+
+    test("R:CLA with a pinned concept matches its instances only", async () => {
+      const ids = await runEdge(Query.EdgeType["R:CLA"], { entityId: C_OK }, conn);
+      expect(sorted(ids)).toEqual([P_CLA_OK]);
+    });
+
     test("without the status param every prop origin still matches", async () => {
       const ids = await runEdge(
         Query.EdgeType["EP:T"],
