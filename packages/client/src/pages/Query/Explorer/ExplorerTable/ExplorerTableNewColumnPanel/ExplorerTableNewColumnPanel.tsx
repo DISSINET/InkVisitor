@@ -60,6 +60,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
 
   const paramsDef = Explore.EExploreColumnTypeConfig[type].paramsDef ?? [];
   const typeLabel = Explore.EExploreColumnTypeConfig[type].label;
+  const relationTypeParamDef = paramsDef.find((def) => def.type === "relationType");
 
   // Reset param values when column type changes
   useEffect(() => {
@@ -110,6 +111,14 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
   }, [paramsDef, paramValues]);
 
   const isReadOnly = isReadOnlyColumn({ type, params });
+
+  // a relation column is named after its relation type, so the fill stays
+  // unavailable until one is picked
+  const fillLabel = useMemo(() => {
+    if (!relationTypeParamDef) return typeLabel;
+    const relationType = paramValues[relationTypeParamDef.id] as RelationEnums.Type | undefined;
+    return relationType ? getRelationColumnLabel(relationType, !!paramValues.inverse) : undefined;
+  }, [relationTypeParamDef, typeLabel, paramValues]);
 
   const handleCreate = useCallback(() => {
     const col: Explore.IExploreColumn = {
@@ -230,10 +239,14 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
               <StyledNameFillWrap>
                 <Button
                   icon={<IcoArrowReturnRight size={13} />}
-                  tooltipLabel="fill in the column type label"
+                  tooltipLabel={
+                    relationTypeParamDef
+                      ? "fill in the relation type label"
+                      : "fill in the column type label"
+                  }
                   tooltipPosition="top"
-                  onClick={() => setName(typeLabel)}
-                  disabled={name === typeLabel}
+                  onClick={() => fillLabel && setName(fillLabel)}
+                  disabled={!fillLabel || name === fillLabel}
                   noBorder
                   noBackground
                   color="black"
