@@ -100,3 +100,77 @@ describe("queryReducer updateEdgeType", () => {
     ]);
   });
 });
+
+describe("queryReducer updateNodeClass", () => {
+  const rootWithEdge = (
+    rootClasses: EntityEnums.Class[],
+    type: Query.EdgeType,
+    targetParams: Query.INodeParams,
+  ): Query.INode => ({
+    ...makeNode("root", [
+      {
+        id: "e1",
+        type,
+        params: {},
+        logic: Query.EdgeLogic.Positive,
+        node: { ...makeNode("n1"), params: targetParams },
+      },
+    ]),
+    params: { entityClasses: rootClasses },
+  });
+
+  const changeClass = (state: Query.INode, nodeId: string, classes: EntityEnums.Class[]) =>
+    queryReducer(state, {
+      type: QueryActionType.updateNodeClass,
+      payload: { nodeId, newEntityClasses: classes },
+    });
+
+  it("moves an empty relation target to the first class the new root allows", () => {
+    const state = rootWithEdge([EntityEnums.Class.Concept], Query.EdgeType["R:SYN"], {
+      entityClasses: [EntityEnums.Class.Concept],
+    });
+    const next = changeClass(state, "root", [EntityEnums.Class.Action]);
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Action]);
+  });
+
+  it("keeps a target class the new root still allows", () => {
+    // Superordinate Entity from a Person or a Group can both reach a Group
+    const state = rootWithEdge([EntityEnums.Class.Person], Query.EdgeType["R:SOE"], {
+      entityClasses: [EntityEnums.Class.Group],
+    });
+    const next = changeClass(state, "root", [EntityEnums.Class.Group]);
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Group]);
+  });
+
+  it("leaves a target with a picked entity untouched", () => {
+    const state = rootWithEdge([EntityEnums.Class.Concept], Query.EdgeType["R:SYN"], {
+      entityClasses: [EntityEnums.Class.Concept],
+      entityId: "picked",
+    });
+    const next = changeClass(state, "root", [EntityEnums.Class.Action]);
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
+  });
+
+  it("leaves non-relation edge targets alone", () => {
+    const state = rootWithEdge([EntityEnums.Class.Concept], Query.EdgeType["EP:T"], {
+      entityClasses: [EntityEnums.Class.Concept],
+    });
+    const next = changeClass(state, "root", [EntityEnums.Class.Action]);
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
+  });
+
+  it("does not touch relation targets when a non-root node changes class", () => {
+    const state = rootWithEdge([EntityEnums.Class.Action], Query.EdgeType["R:SYN"], {
+      entityClasses: [EntityEnums.Class.Concept],
+    });
+    state.edges.push({
+      id: "e2",
+      type: Query.EdgeType["EP:T"],
+      params: {},
+      logic: Query.EdgeLogic.Positive,
+      node: makeNode("n2"),
+    });
+    const next = changeClass(state, "n2", [EntityEnums.Class.Concept]);
+    expect(next.edges[0].node.params.entityClasses).toEqual([EntityEnums.Class.Concept]);
+  });
+});

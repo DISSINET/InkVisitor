@@ -254,7 +254,34 @@ const updateNodeClass = (
   }
   nodeToUpdate.params.entityClasses = newEntityClasses;
 
+  if (nodeToUpdate === updatedState) {
+    reseedRelationTargetClasses(updatedState);
+  }
+
   return updatedState;
+};
+
+/**
+ * Relation edges constrain their target classes by the root's classes, so a
+ * root class change can leave a target filtering on a class the relation no
+ * longer reaches. Such a target moves to the first class the relation allows
+ * from the new root, which is what its class picker offers first. Targets with
+ * a picked entity, an empty (any-class) filter, or no allowed class at all (its
+ * picker is disabled) keep their classes.
+ */
+const reseedRelationTargetClasses = (root: Query.INode) => {
+  for (const edge of getAllEdges(root)) {
+    const target = edge.node;
+    const currentClasses = target.params.entityClasses ?? [];
+    if (target.params.entityId !== undefined || currentClasses.length === 0) {
+      continue;
+    }
+    const allowed = getRelationConstrainedCategoryTypes(edge.type, root.params.entityClasses);
+    if (!allowed?.length || currentClasses.every((cls) => allowed.includes(cls))) {
+      continue;
+    }
+    target.params.entityClasses = [allowed[0]];
+  }
 };
 
 const updateNodeStatuses = (
