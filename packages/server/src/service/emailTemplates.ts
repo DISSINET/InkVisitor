@@ -40,6 +40,12 @@ function renderLayout({
   // Dark-mode clients (notably Gmail mobile) may recolor solid backgrounds. Meta
   // color-scheme + bgcolor + gradient tricks improve odds but are not guaranteed.
   const headerBg = "#091034";
+  // alt text is styled too, since clients that block images render it on the dark header
+  const headerContent = logoUrl
+    ? `<img src="${escapeHtml(
+        logoUrl
+      )}" alt="InkVisitor" style="display:block;height:32px;width:auto;color:#ffffff;font-size:22px;font-weight:bold;line-height:32px;" />`
+    : `<span style="display:block;color:#ffffff;font-size:22px;font-weight:bold;line-height:32px;">InkVisitor</span>`;
   return `<!doctype html>
 <html style="color-scheme:light;">
   <head>
@@ -57,13 +63,7 @@ function renderLayout({
           <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #d0d7de;border-radius:10px;overflow:hidden;">
             <tr>
               <td bgcolor="${headerBg}" style="background-color:${headerBg};background-image:linear-gradient(${headerBg},${headerBg});padding:16px 24px;">
-                ${
-                  logoUrl
-                    ? `<img src="${escapeHtml(
-                        logoUrl
-                      )}" alt="InkVisitor" style="display:block;height:32px;width:auto;" />`
-                    : ""
-                }
+                ${headerContent}
               </td>
             </tr>
             <tr><td style="padding:24px;">
@@ -83,9 +83,14 @@ function renderLayout({
 </html>`;
 }
 
-export function accountCreatedEmailTemplate(email: string, domain: string, link: string): string {
+export function accountCreatedEmailTemplate(
+  email: string,
+  domain: string,
+  link: string,
+  logoUrl?: string
+): string {
   return renderLayout({
-    logoUrl: "cid:inkvisitor-logo",
+    logoUrl,
     title: "Account created",
     preheader: `Your ${domain} account is ready`,
     intro: "Your account has been created and is ready for activation.",
@@ -102,10 +107,11 @@ export function accountCreatedEmailTemplate(email: string, domain: string, link:
 export function passwordResetRequestEmailTemplate(
   email: string,
   domain: string,
-  link: string
+  link: string,
+  logoUrl?: string
 ): string {
   return renderLayout({
-    logoUrl: "cid:inkvisitor-logo",
+    logoUrl,
     title: "Password reset request",
     preheader: `Reset your ${domain} password`,
     intro: "We received a request to reset your password.",
@@ -123,10 +129,11 @@ export function passwordResetRequestEmailTemplate(
 export function passwordAdminResetEmailTemplate(
   username: string,
   rawPassword: string,
-  domain: string
+  domain: string,
+  logoUrl?: string
 ): string {
   return renderLayout({
-    logoUrl: "cid:inkvisitor-logo",
+    logoUrl,
     title: "Password reset",
     preheader: `Your ${domain} password was reset`,
     intro: "An administrator reset your password.",
@@ -140,9 +147,9 @@ export function passwordAdminResetEmailTemplate(
   });
 }
 
-export function testEmailTemplate(domain: string): string {
+export function testEmailTemplate(domain: string, logoUrl?: string): string {
   return renderLayout({
-    logoUrl: "cid:inkvisitor-logo",
+    logoUrl,
     title: "Test mail",
     preheader: `Mailer test from ${domain}`,
     intro: "This is a test email from the configured mailer service.",
