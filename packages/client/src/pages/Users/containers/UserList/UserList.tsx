@@ -146,7 +146,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const removeUserMutation = useMutation({
     mutationFn: async (user: IResponseUser) => await api.usersDelete(user.id),
     onSuccess: (data, variables) => {
-      toast.warning(`User ${variables.name} removed!`);
+      toast.warning(`User ${variables.name} deleted!`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setRemovingUserId(false);
     },
