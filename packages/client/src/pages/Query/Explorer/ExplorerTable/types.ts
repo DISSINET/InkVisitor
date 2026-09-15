@@ -5,6 +5,8 @@ export enum BatchAction {
   add_metaprop = "add_metaprop",
   add_reference = "add_reference",
   add_relation = "add_relation",
+  set_language = "set_language",
+  set_pos = "set_pos",
 }
 
 export type BatchOption = {
@@ -19,6 +21,8 @@ export const batchOptions: BatchOption[] = [
   { value: BatchAction.add_metaprop, label: "add new metaproperty" },
   { value: BatchAction.add_reference, label: "add new reference" },
   { value: BatchAction.add_relation, label: "add new relation" },
+  { value: BatchAction.set_language, label: "set label language" },
+  { value: BatchAction.set_pos, label: "set part of speech" },
 ];
 
 /** Batch actions restricted to Admin and Owner roles. */
@@ -27,6 +31,8 @@ export const restrictedBatchActions = new Set<BatchAction>([
   BatchAction.add_metaprop,
   BatchAction.add_reference,
   BatchAction.add_relation,
+  BatchAction.set_language,
+  BatchAction.set_pos,
 ]);
 
 import { Explore } from "@inkvisitor/shared/types/query";

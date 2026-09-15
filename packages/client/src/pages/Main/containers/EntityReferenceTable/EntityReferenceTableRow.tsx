@@ -114,7 +114,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
     <>
       <StyledGrid ref={dropRef} data-handler-id={handlerId} style={{ opacity }}>
         {hasOrder && userCanEdit ? (
-          <span ref={dragRef} style={{ cursor: "move" }}>
+          <span ref={dragRef} style={{ cursor: "move", display: "flex", alignItems: "center" }}>
             <FaGripVertical color={theme.color.black} />
           </span>
         ) : (

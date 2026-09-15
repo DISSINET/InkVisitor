@@ -5,6 +5,8 @@ import { BatchActionAddMetaprop } from "./BatchActionAddMetaprop";
 import { BatchActionAddReference } from "./BatchActionAddReference";
 import { BatchActionAddRelation } from "./BatchActionAddRelation";
 import { BatchActionExportCsv } from "./BatchActionExportTsv";
+import { BatchActionSetLanguage } from "./BatchActionSetLanguage";
+import { BatchActionSetPos } from "./BatchActionSetPos";
 
 interface ExplorerTableBatchActionModalProps {
   batchAction: BatchAction;
@@ -53,6 +55,22 @@ export const ExplorerTableBatchActionModal: React.FC<ExplorerTableBatchActionMod
       case BatchAction.add_relation:
         return (
           <BatchActionAddRelation
+            selectedEntityIds={selectedEntityIds}
+            onClose={onClose}
+            onApply={onApplyAction}
+          />
+        );
+      case BatchAction.set_language:
+        return (
+          <BatchActionSetLanguage
+            selectedEntityIds={selectedEntityIds}
+            onClose={onClose}
+            onApply={onApplyAction}
+          />
+        );
+      case BatchAction.set_pos:
+        return (
+          <BatchActionSetPos
             selectedEntityIds={selectedEntityIds}
             onClose={onClose}
             onApply={onApplyAction}

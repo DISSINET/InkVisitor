@@ -31,8 +31,11 @@ interface DynamicTplRequest {
 
 const INLINE_LOGO_CID = "inkvisitor-logo";
 
+// The Docker image ships only client/dist (vite copies public/ into it), while a
+// local checkout has client/public; cwd is packages/server or the repo root.
 function getInlineLogoPath(): string | undefined {
   const candidates = [
+    path.resolve(process.cwd(), "../client/dist/assets/logos/inkvisitor.svg"),
     path.resolve(process.cwd(), "../client/public/assets/logos/inkvisitor.svg"),
     path.resolve(process.cwd(), "packages/client/public/assets/logos/inkvisitor.svg"),
   ];
@@ -46,17 +49,22 @@ function getInlineLogoPath(): string | undefined {
   return undefined;
 }
 
-function buildHtml(tpl: DynamicTplRequest): string {
+function buildHtml(tpl: DynamicTplRequest, logoUrl?: string): string {
   const d = tpl.data;
   switch (tpl.id) {
     case TplIds.AccountCreated:
-      return accountCreatedEmailTemplate(d.email, d.domain, d.link);
+      return accountCreatedEmailTemplate(d.email, d.domain, d.link, logoUrl);
     case TplIds.PasswordResetRequest:
-      return passwordResetRequestEmailTemplate(d.email, d.domain, d.link);
+      return passwordResetRequestEmailTemplate(d.email, d.domain, d.link, logoUrl);
     case TplIds.PasswordAdminReset:
-      return passwordAdminResetEmailTemplate(d.username, d.rawPassword, d.domain);
+      return passwordAdminResetEmailTemplate(
+        d.username,
+        d.rawPassword,
+        d.domain,
+        logoUrl
+      );
     case TplIds.Test:
-      return testEmailTemplate(d.domain);
+      return testEmailTemplate(d.domain, logoUrl);
     default:
       return "";
   }
@@ -162,7 +170,7 @@ class Mailer {
         from: process.env.MAILER_SENDER || "",
         to: recipient,
         subject: tpl.subject,
-        html: buildHtml(tpl),
+        html: buildHtml(tpl, logoPath ? `cid:${INLINE_LOGO_CID}` : undefined),
         attachments: logoPath
           ? [
               {
@@ -175,7 +183,7 @@ class Mailer {
       });
 
       if (!logoPath) {
-        console.warn("[Mailer] Inline logo not found, sending without logo");
+        console.warn("[Mailer] Inline logo not found, sending with text wordmark");
       }
     } catch (e) {
       throw new Error(`Email error for template ${tpl.subject}: ${e}`);

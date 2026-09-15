@@ -2,6 +2,7 @@ import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   EntityTooltip,
   IAudit,
+  IBatchSetAttributeChanges,
   IDocument,
   IDocumentExport,
   IEntity,
@@ -1969,6 +1970,22 @@ class Api {
       const response = await this.connection.post(
         `/entities/batchAddReference`,
         { entityIds, resourceEntityId, valueLabel },
+        options,
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+  async batchEntitySetAttribute(
+    entityIds: string[],
+    changes: IBatchSetAttributeChanges,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batchSetAttribute`,
+        { entityIds, changes },
         options,
       );
       return response;
