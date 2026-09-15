@@ -124,7 +124,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
             <CancelButton key="cancel" onClick={closeNewUserModal} />
             <Button
               key="submit"
-              label="create"
+              label="Create"
               color="primary"
               disabled={!isValidEmail(newUserEmail) || createNewUserMutataion.isPending}
               tooltipLabel={
@@ -164,7 +164,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
             <CancelButton key="cancel" onClick={() => setShowTestEmailModal(false)} />
             <Button
               key="submit"
-              label="send"
+              label="Send"
               color="info"
               disabled={!isValidEmail(testEmail)}
               tooltipLabel={
