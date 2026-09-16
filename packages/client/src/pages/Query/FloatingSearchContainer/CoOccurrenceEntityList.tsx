@@ -5,7 +5,7 @@ import { EntityTag } from "components/advanced";
 import { shortenUuid } from "pages/Query/utils";
 import React, { useMemo, useRef, useState } from "react";
 import { MdClose } from "react-icons/md";
-import { List } from "react-window";
+import { List, RowComponentProps } from "react-window";
 import { scrollOverscanCount } from "Theme/constants";
 import {
   StyledCoOccurrenceChipRemove,
@@ -35,16 +35,16 @@ interface CoOccurrenceRow {
   entityIds: string[];
   entityById: Map<string, IEntity>;
   onRemove: (entityId: string) => void;
-  index: number;
-  style: React.CSSProperties;
 }
-const CoOccurrenceRow: React.FC<CoOccurrenceRow> = ({
+// passed to List as the component itself: List memoizes the row component by
+// identity, so a new function per render would remount every visible row
+const CoOccurrenceRow = ({
   entityIds,
   entityById,
   onRemove,
   index,
   style,
-}) => {
+}: RowComponentProps<CoOccurrenceRow>): React.ReactElement => {
   const entityId = entityIds[index];
   const entity = entityById.get(entityId);
 
@@ -131,7 +131,7 @@ export const CoOccurrenceEntityList: React.FC<CoOccurrenceEntityList> = ({
         rowHeight={ROW_HEIGHT}
         overscanCount={scrollOverscanCount}
         onRowsRendered={setVisibleRows}
-        rowComponent={(props) => <CoOccurrenceRow {...props} />}
+        rowComponent={CoOccurrenceRow}
       />
     </StyledCoOccurrenceListWrap>
   );

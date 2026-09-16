@@ -895,13 +895,15 @@ class Statement extends Entity implements IStatement {
 
   /**
    * Returns ids that co-occur with any of the passed entities in a statement.
-   * Coverage mirrors the two entity-keyed statement indexes exactly - actions,
-   * actants, tags, direct territory, and in-statement prop type/value to lvl3 -
-   * plus the statement id itself, so every returned id would also find these
-   * statements if used as the co-occurrence input. Territory ancestor lineage,
-   * reference resource/value and actant classifications/identifications have no
-   * such index and stay out; including them made co-occurrence search return
-   * many unrelated entities.
+   * Coverage mirrors the two entity-keyed statement indexes - actions, actants,
+   * tags, direct territory, and in-statement prop type/value - plus the
+   * statement id itself, so every returned id would also find these statements
+   * if used as the co-occurrence input. The prop index stops at lvl3 while the
+   * prop walk here does not; the editor nests props no deeper, so only imported
+   * data with deeper props yields ids that do not find their statement back.
+   * Territory ancestor lineage, reference resource/value and actant
+   * classifications/identifications have no such index and stay out; including
+   * them made co-occurrence search return many unrelated entities.
    * Passed ids are never part of the result, so two inputs that co-occur with
    * each other do not return each other.
    * @param db db connection
