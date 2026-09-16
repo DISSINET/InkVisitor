@@ -19,7 +19,7 @@ export const sessionPool = new DbPool({
 
 // Tests and shutdown tear pools down via `pool.end()`. Drain the session pool from
 // the same call so its evictor timer / idle connections don't keep the process
-// (and Jest) alive - this keeps the existing teardown call sites unchanged.
+// (and Jest) alive, and callers only ever need to end the one pool.
 const endRequestPool = pool.end.bind(pool);
 pool.end = async () => {
   await Promise.all([endRequestPool(), sessionPool.end()]);

@@ -15,7 +15,8 @@ export class CronService {
   }
 
   /**
-   * Starts the cron service with midnight job
+   * Starts the cron service with the midnight stats aggregation and the hourly
+   * expired-session reap
    */
   start(): void {
     if (this.isRunning) {
@@ -34,7 +35,7 @@ export class CronService {
     task.start();
 
     // Reap expired sessions hourly so abandoned sessions don't pile up in the
-    // sessions table (active ones are also cleaned lazily on access).
+    // sessions table (the store also deletes an expired session when it is read).
     const sessionReapTask = cron.schedule(
       "0 * * * *",
       async () => {

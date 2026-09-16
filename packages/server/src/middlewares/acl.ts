@@ -53,7 +53,7 @@ class Acl {
     );
 
     if (!permissions.length) {
-      // if permission does not exist yet, create one that only admin can access
+      // if permission does not exist yet, create one that only admin/owner can access
       const newPermission = new AclPermission({
         controller,
         route,

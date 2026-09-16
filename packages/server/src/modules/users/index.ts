@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { Request } from "express";
+import { red } from "cli-color";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IUser } from "@inkvisitor/shared/types/user";
 import User from "@models/user/user";
@@ -38,6 +39,21 @@ import mailer, {
 import { ResponseUser } from "@models/user/response";
 import { invalidateUserSessions } from "@service/rethinkSessionStore";
 import { IRequest } from "src/custom_typings/request";
+
+/**
+ * Records a rejected credential check. The signin route is public and rate
+ * limited per IP, so the address is what ties repeated failures together into a
+ * recognisable brute-force pattern; the submitted login is kept verbatim while
+ * the password never reaches the log.
+ */
+function logFailedSignin(request: IRequest, login: string, reason: string): void {
+  const ip = (request as Request).ip || "unknown";
+  console.warn(
+    red(
+      `[${new Date().toUTCString()}] Failed signin: login="${login}" ip=${ip} reason=${reason}`
+    )
+  );
+}
 
 export default Router()
   .get(
@@ -365,6 +381,7 @@ export default Router()
 
       const user = await User.findUserByLogin(request.db, login, false);
       if (!user) {
+        logFailedSignin(request, login, "unknown login");
         throw new BadCredentialsError("wrong email / username");
       }
 
@@ -380,6 +397,7 @@ export default Router()
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
+        logFailedSignin(request, login, "wrong password");
         throw new BadCredentialsError("wrong password");
       }
 

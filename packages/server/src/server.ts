@@ -86,20 +86,20 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-if (process.env.NODE_ENV !== "development") {
-  server.use(
-    `${apiPath}/users/signin`,
-    rateLimit({
-      windowMs: 5 * 60 * 1000,
-      max: 5,
-      handler: (req: Request, res: Response, next: NextFunction, options) => {
-        throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
-      },
-      standardHeaders: true,
-      legacyHeaders: false,
-    })
-  );
-}
+server.use(
+  // the signin route is reachable under both router mounts; one limiter
+  // instance listed on both paths keeps a single bucket per client
+  [`${apiPath}/users/signin`, `${apiPathOld}/users/signin`],
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 5,
+    handler: (req: Request, res: Response, next: NextFunction, options) => {
+      throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 server.use(headersProtectionMiddleware);
 server.use(profilerMiddleware);
