@@ -70,6 +70,7 @@ enum QueryActionType {
   updateEdgeLogic,
   updateNodeType,
   updateNodeClass,
+  updateNodeStatuses,
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
@@ -100,6 +101,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeClass;
       payload: { nodeId: string; newEntityClasses: EntityEnums.Class[] };
+    }
+  | {
+      type: QueryActionType.updateNodeStatuses;
+      payload: { nodeId: string; newEntityStatuses: EntityEnums.Status[] };
     }
   | {
       type: QueryActionType.updateNodeEntityId;
@@ -209,6 +214,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeClass:
       return updateNodeClass(state, action.payload.nodeId, action.payload.newEntityClasses);
 
+    case QueryActionType.updateNodeStatuses:
+      return updateNodeStatuses(state, action.payload.nodeId, action.payload.newEntityStatuses);
+
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
@@ -246,6 +254,53 @@ const updateNodeClass = (
   }
   nodeToUpdate.params.entityClasses = newEntityClasses;
 
+  if (nodeToUpdate === updatedState) {
+    reseedRelationTargetClasses(updatedState);
+  }
+
+  return updatedState;
+};
+
+/**
+ * Relation edges constrain their target classes by the root's classes, so a
+ * root class change can leave a target filtering on a class the relation no
+ * longer reaches. Such a target moves to the first class the relation allows
+ * from the new root, which is what its class picker offers first. Targets with
+ * a picked entity, an empty (any-class) filter, or no allowed class at all (its
+ * picker is disabled) keep their classes.
+ */
+const reseedRelationTargetClasses = (root: Query.INode) => {
+  for (const edge of getAllEdges(root)) {
+    const target = edge.node;
+    const currentClasses = target.params.entityClasses ?? [];
+    if (target.params.entityId !== undefined || currentClasses.length === 0) {
+      continue;
+    }
+    const allowed = getRelationConstrainedCategoryTypes(edge.type, root.params.entityClasses);
+    if (!allowed?.length || currentClasses.every((cls) => allowed.includes(cls))) {
+      continue;
+    }
+    target.params.entityClasses = [allowed[0]];
+  }
+};
+
+const updateNodeStatuses = (
+  state: Query.INode,
+  nodeId: string,
+  newEntityStatuses: EntityEnums.Status[],
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  if (newEntityStatuses.length === 0) {
+    delete nodeToUpdate.params.entityStatuses;
+  } else {
+    nodeToUpdate.params.entityStatuses = newEntityStatuses;
+  }
+
   return updatedState;
 };
 
@@ -265,6 +320,9 @@ const updateNodeEntityId = (
   } else {
     nodeToUpdate.params.entityId = newEntityId;
     nodeToUpdate.params.entityClasses = [];
+    // a pinned entity carries its own status, so the status filter has no
+    // picker while one is set
+    delete nodeToUpdate.params.entityStatuses;
   }
 
   return updatedState;

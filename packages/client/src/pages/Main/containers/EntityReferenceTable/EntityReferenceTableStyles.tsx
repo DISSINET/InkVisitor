@@ -57,6 +57,15 @@ export const StyledGrid = styled.div<StyledGrid>`
   align-items: center;
   margin-bottom: 0.5rem;
 `;
+export const StyledDragHandle = styled.span`
+  display: flex;
+  align-items: center;
+  cursor: move;
+`;
+// keeps the first grid column as wide as the drag handle when there is none
+export const StyledDragHandleSpacer = styled.span`
+  width: ${({ theme }) => theme.space[6]};
+`;
 export const StyledGridValue = styled.div`
   display: grid;
   align-items: center;

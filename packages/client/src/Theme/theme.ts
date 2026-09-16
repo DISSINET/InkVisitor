@@ -47,6 +47,10 @@ const theme = {
     white: "#fff",
     grey: "#C4C4C4",
     greyer: "#4a5568",
+    // notes and field labels that must sit below body text in both themes;
+    // greyer lands one step from the dark page's text color and stops reading
+    // as secondary there
+    mutedText: "#718096", // gray 600
     text: "#383737",
     primary: "#091034",
     statementHighlight: "rgba(97,116,194,1)", // success accent, matches opened-row bar

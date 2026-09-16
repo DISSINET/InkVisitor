@@ -1,9 +1,14 @@
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { Query } from "@inkvisitor/shared/types";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { describe, it, expect } from "vitest";
 import {
   applyPasteToDraft,
+  buildEdgeTypeOptionGroups,
   buildStableSignature,
   computeWindowUpdate,
+  getRelationAllowedClasses,
+  getRelationConstrainedCategoryTypes,
   getSuperclassAllowedClasses,
   getSuperordinateEntityAllowedClasses,
   isViableUuidPrefix,
@@ -344,5 +349,127 @@ describe("getSuperordinateEntityAllowedClasses", () => {
     expect(wildcard.length).toBeGreaterThan(0);
     expect(forObject.every((c) => wildcard.includes(c))).toBe(true);
     expect(getSuperordinateEntityAllowedClasses(undefined)).toEqual(wildcard);
+  });
+});
+
+describe("getRelationAllowedClasses", () => {
+  it("walks an ordered pattern forwards and backwards", () => {
+    // Classification is Person/Being/... -> Concept
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Classification, [EntityEnums.Class.Person]),
+    ).toEqual([EntityEnums.Class.Concept]);
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Classification, [EntityEnums.Class.Concept], true),
+    ).toEqual(
+      expect.arrayContaining([EntityEnums.Class.Person, EntityEnums.Class.Statement]),
+    );
+  });
+
+  it("allows nothing when the root class is on the wrong end of an ordered relation", () => {
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Classification, [EntityEnums.Class.Concept]),
+    ).toEqual([]);
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.ActionEventEquivalent, [EntityEnums.Class.Event]),
+    ).toEqual([]);
+  });
+
+  it("keeps a cloud relation inside the root class", () => {
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Synonym, [EntityEnums.Class.Action]),
+    ).toEqual([EntityEnums.Class.Action]);
+    expect(getRelationAllowedClasses(RelationEnums.Type.Synonym, [])).toEqual([
+      EntityEnums.Class.Action,
+      EntityEnums.Class.Concept,
+    ]);
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Synonym, [EntityEnums.Class.Person]),
+    ).toEqual([]);
+  });
+
+  it("subtracts the disabled classes when the relation has no pattern", () => {
+    const allowed = getRelationAllowedClasses(RelationEnums.Type.Identification, [
+      EntityEnums.Class.Person,
+    ]);
+    expect(allowed).toContain(EntityEnums.Class.Person);
+    expect(allowed).not.toContain(EntityEnums.Class.Action);
+    expect(allowed).not.toContain(EntityEnums.Class.Concept);
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Identification, [EntityEnums.Class.Action]),
+    ).toEqual([]);
+  });
+
+  it("allows every class for a relation with neither pattern nor disabled classes", () => {
+    expect(
+      getRelationAllowedClasses(RelationEnums.Type.Related, [EntityEnums.Class.Territory]),
+    ).toEqual(classesAll);
+  });
+});
+
+describe("getRelationConstrainedCategoryTypes", () => {
+  it("constrains every relation edge through its relation rule", () => {
+    expect(
+      getRelationConstrainedCategoryTypes(Query.EdgeType["R:IMP"], [EntityEnums.Class.Action]),
+    ).toEqual([EntityEnums.Class.Action]);
+    expect(
+      getRelationConstrainedCategoryTypes(Query.EdgeType["R:AEE"], [EntityEnums.Class.Action]),
+    ).toEqual([EntityEnums.Class.Concept]);
+    expect(
+      getRelationConstrainedCategoryTypes(Query.EdgeType["I_R:AEE"], [EntityEnums.Class.Concept]),
+    ).toEqual([EntityEnums.Class.Action]);
+  });
+
+  it("leaves non-relation edges and the any-relation edge unconstrained", () => {
+    expect(getRelationConstrainedCategoryTypes(Query.EdgeType["R:"], [])).toBeNull();
+    expect(getRelationConstrainedCategoryTypes(Query.EdgeType["EP:T"], [])).toBeNull();
+    expect(getRelationConstrainedCategoryTypes(undefined, [])).toBeNull();
+  });
+});
+
+describe("buildEdgeTypeOptionGroups", () => {
+  const T = Query.EdgeType;
+
+  it("groups types in the fixed group order and drops empty groups", () => {
+    const groups = buildEdgeTypeOptionGroups([T["R:SYN"], T["IS:"], T["EP:T"]], []);
+    expect(groups.map((g) => g.label)).toEqual(["Property", "Relation", "Position in statement"]);
+  });
+
+  it("puts the any variant first, then sorts alphabetically by menu label", () => {
+    const [relation] = buildEdgeTypeOptionGroups([T["R:SYN"], T["R:"], T["R:ANT"]], []);
+    expect(relation.options.map((o) => o.value)).toEqual([T["R:"], T["R:ANT"], T["R:SYN"]]);
+  });
+
+  it("places each inverse directly below its forward type", () => {
+    const [relation] = buildEdgeTypeOptionGroups(
+      [T["I_R:CLA"], T["R:ANT"], T["R:CLA"], T["I_R:ANT"]],
+      [],
+    );
+    expect(relation.options.map((o) => o.value)).toEqual([
+      T["R:ANT"],
+      T["I_R:ANT"],
+      T["R:CLA"],
+      T["I_R:CLA"],
+    ]);
+  });
+
+  it("strips the group prefix from menu labels but keeps the full label", () => {
+    const [relation] = buildEdgeTypeOptionGroups([T["R:CLA"], T["I_R:CLA"]], []);
+    expect(relation.options.map((o) => [o.label, o.menuLabel])).toEqual([
+      ["has relation: Classification", "Classification"],
+      ["has: Instance (inv. Classification)", "Instance (inv. Classification)"],
+    ]);
+  });
+
+  it("moves unimplemented types to the end of their group, marked disabled", () => {
+    const [relation] = buildEdgeTypeOptionGroups(
+      [T["R:"], T["R:ANT"], T["I_R:ANT"], T["R:SYN"]],
+      [T["R:ANT"], T["R:SYN"]],
+    );
+    expect(relation.options.map((o) => [o.value, o.isDisabled])).toEqual([
+      [T["R:ANT"], false],
+      [T["R:SYN"], false],
+      [T["R:"], true],
+      [T["I_R:ANT"], true],
+    ]);
   });
 });

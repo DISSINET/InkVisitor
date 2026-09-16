@@ -1,10 +1,11 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
 import { edgeTypesHidden, edgeTypesImplemented } from "./types";
 import {
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
+  getRelationAllowedClasses,
   getRelationConstrainedCategoryTypes,
   getSuperordinateEntityAllowedClasses,
 } from "./utils";
@@ -294,13 +295,13 @@ describe("superordinate entity target class filtering", () => {
   });
 
   it("inverse: a Person root is a subordinate of Objects only", () => {
-    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Person], true)).toEqual([
+    expect(getRelationAllowedClasses(RelationEnums.Type.SuperordinateEntity, [EntityEnums.Class.Person], true)).toEqual([
       EntityEnums.Class.Object,
     ]);
   });
 
   it("inverse: an Event root offers Event and Statement subordinates", () => {
-    expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Event], true)).toEqual(
+    expect(getRelationAllowedClasses(RelationEnums.Type.SuperordinateEntity, [EntityEnums.Class.Event], true)).toEqual(
       expect.arrayContaining([EntityEnums.Class.Event, EntityEnums.Class.Statement]),
     );
   });

@@ -193,6 +193,16 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
     return expandedPanelRef.current?.getBoundingClientRect().height ?? 120;
   }, []);
 
+  // the page area the panel has to fit into; the form outgrows it at large
+  // browser zoom, and the panel then scrolls its content instead of extending
+  // past the page bounds
+  const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
+
+  const syncMaxPanelHeight = useCallback(() => {
+    const pageRect = getPageContentRect();
+    setMaxPanelHeight(Math.max(0, pageRect.height - FLOATING_SEARCH_PAGE_PADDING * 2));
+  }, []);
+
   const syncCollapsedPosition = useCallback(() => {
     setCollapsedPosition(
       getDefaultPosition(
@@ -232,11 +242,12 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
   );
 
   const syncLayoutPositions = useCallback(() => {
+    syncMaxPanelHeight();
     syncCollapsedPosition();
     if (isExpandedRef.current) {
       syncExpandedPosition(hasCustomExpandedPositionRef.current);
     }
-  }, [syncCollapsedPosition, syncExpandedPosition]);
+  }, [syncCollapsedPosition, syncExpandedPosition, syncMaxPanelHeight]);
 
   useLayoutEffect(() => {
     syncCollapsedPosition();
@@ -244,9 +255,10 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
 
   useLayoutEffect(() => {
     if (isExpanded) {
+      syncMaxPanelHeight();
       syncExpandedPosition(hasCustomExpandedPositionRef.current);
     }
-  }, [isExpanded, syncExpandedPosition, rightInset]);
+  }, [isExpanded, syncExpandedPosition, syncMaxPanelHeight, rightInset]);
 
   const persistExpandedPosition = useCallback((x: number, y: number) => {
     saveStoredExpandedPosition(positionToStorage(x, y, rightInsetRef.current));
@@ -433,7 +445,11 @@ export const FloatingSearchContainer: React.FC<FloatingSearchContainer> = ({
       {isExpanded && (
         <FloatingPortal id="page-content">
           <StyledFloatingRoot $left={expandedPagePosition.x} $top={expandedPagePosition.y}>
-            <StyledExpandedPanel ref={expandedPanelRef} data-run-on-enter="true">
+            <StyledExpandedPanel
+              ref={expandedPanelRef}
+              $maxHeight={maxPanelHeight}
+              data-run-on-enter="true"
+            >
               <StyledExpandedHeader>
                 <StyledDragHandle
                   onPointerDown={handleDragPointerDown}
