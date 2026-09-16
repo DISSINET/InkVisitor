@@ -27,7 +27,7 @@ export class Db {
   async initDb(): Promise<void> {
     this.connection = await rethink.connect({
       ...rethinkConfig,
-      timeout: 30, // important - close will wait for this seconds
+      timeout: 30, // seconds to wait for the connection to open
     });
   }
 

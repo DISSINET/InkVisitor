@@ -1,17 +1,17 @@
 # A-C-R export "acr-09_2026"
 
-Generated 2026-09-08T17:32:03.185Z from `inkvisitor`.
+Generated 2026-09-14T21:25:38.368Z from `inkvisitor`.
 
-- entities: **22,775** (22,775 distinct ids)
+- entities: **22,780** (22,780 distinct ids)
 - relations: **12,439**
-- audits: **50,961**
-- entities carrying at least one audit: 13,984; without any: 8,791
+- audits: **50,966**
+- entities carrying at least one audit: 13,989; without any: 8,791
 
 ## Entity classes
 
 | class | name | count | share |
 | --- | --: | --: | --: |
-| `V` | Value | 13,984 | 61.40% |
+| `V` | Value | 13,989 | 61.41% |
 | `C` | Concept | 7,594 | 33.34% |
 | `A` | Action | 1,188 | 5.22% |
 | `R` | Resource | 9 | 0.04% |
@@ -41,14 +41,14 @@ Shares are of all creations, of all edits, and of all audit records in this data
 
 | user | id | creations | of creations | edits | of edits | all | of all |
 | --- | --: | --: | --: | --: | --: | --: | --: |
-| David Zbíral | `100` | 5,224 | 37.36% | 10,828 | 29.28% | 16,052 | 31.50% |
+| David Zbíral | `100` | 5,225 | 37.35% | 10,828 | 29.28% | 16,053 | 31.50% |
 | Soňa Hudíková | `6dc46dfb-af6f-4726-a3d9-65185ae958f9` | 1,301 | 9.30% | 8,636 | 23.36% | 9,937 | 19.50% |
-| Katia Riccardo | `103` | 2,528 | 18.08% | 4,772 | 12.91% | 7,300 | 14.32% |
-| Robert Shaw | `101` | 1,170 | 8.37% | 4,220 | 11.41% | 5,390 | 10.58% |
+| Katia Riccardo | `103` | 2,528 | 18.07% | 4,772 | 12.91% | 7,300 | 14.32% |
+| Robert Shaw | `101` | 1,174 | 8.39% | 4,220 | 11.41% | 5,394 | 10.58% |
 | Katalin Suba | `02868c93-517e-4602-94b7-057ce1a393fd` | 883 | 6.31% | 4,245 | 11.48% | 5,128 | 10.06% |
 | stanislaw.banach | `5a8b6aff-3dc1-40b2-9704-82b47a952d4c` | 972 | 6.95% | 3,593 | 9.72% | 4,565 | 8.96% |
 | Davor Salihovic | `102` | 1,073 | 7.67% | 164 | 0.44% | 1,237 | 2.43% |
-| Sari Katajala | `bfb284c6-7180-4ae7-a5ef-e27f91121fd3` | 486 | 3.48% | 168 | 0.45% | 654 | 1.28% |
+| Sari Katajala | `bfb284c6-7180-4ae7-a5ef-e27f91121fd3` | 486 | 3.47% | 168 | 0.45% | 654 | 1.28% |
 | admin | `1` | 35 | 0.25% | 182 | 0.49% | 217 | 0.43% |
 | Reima Välimäki | `105` | 65 | 0.46% | 138 | 0.37% | 203 | 0.40% |
 | Larissa de Freitas Lyth | `107` | 198 | 1.42% | 1 | 0.00% | 199 | 0.39% |
@@ -58,7 +58,7 @@ Shares are of all creations, of all edits, and of all audit records in this data
 
 ## Warning: metaprops not carried into this dataset
 
-74 metaprops on exported entities were dropped, because a prop can only be carried when both of its endpoints are in the dataset: 20 unfinished, 54 outOfScope. Each row names the entity carrying the prop, so it can be opened in the app by id or label.
+69 metaprops on exported entities were dropped, because a prop can only be carried when both of its endpoints are in the dataset: 20 unfinished, 49 outOfScope. Each row names the entity carrying the prop, so it can be opened in the app by id or label.
 
 ### Endpoint left empty
 
@@ -103,7 +103,6 @@ The scope working as designed: the prop points at an entity of a class outside t
 | C bishop of Norwich | `1b4744a2-6e54-4966-a6b2-2abeba595fe9` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | diocese of Norwich `ec906856-6f91-49d6-a9e6-99afc545c317` (outOfScope) |
 | C comes Montisfortis | `21733cd9-3b9b-44ce-a95c-83feabbcfe34` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Monsfortis `86262b22-88c3-4112-bf46-2e37c52edf6c` (outOfScope) |
 | C bishop of Coventry and Lichfield | `3b9fb0e5-774a-49b1-b61e-0d29c4b6386f` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | diocese of Coventry and Lichfield `f8ab648f-d446-49f2-820c-f808d127c6a1` (outOfScope) |
-| C opiniones heretice | `3d70ad7e-6f8b-488b-91c9-1ab57f792752` | amount of singular parts `ea8495b0-31eb-47d0-9de0-9a0389be7a5e` (present) | >1 `97e40cda-f35b-437b-b0e6-c1684070fbbf` (outOfScope) |
 | C prior sanctae Mariae suburbii Carcassonae | `46a18300-09f1-4fdf-98a4-e4f612c34339` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | sancta Maria suburbii Carcasonae `40c84288-9c99-4dea-a3e7-511136b3f0c7` (outOfScope) |
 | C prepositus Tholosane | `4342e1be-4563-441d-8781-57e8c90ed91f` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Tholosae [diocesis] `9ee41dfa-e9a6-46c6-9e01-de29681a79f2` (outOfScope) |
 | C archidiaconus Redensis | `4cc0412b-730e-4f02-b8a3-94fd3fc6b563` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | [pagus] Redensis `7e43ffd5-ee81-4ece-b089-0ecd11436e86` (outOfScope) |
@@ -114,7 +113,6 @@ The scope working as designed: the prop points at an entity of a class outside t
 | C episcopus Carcassonae | `63d6bf00-80f6-488f-b78d-8769f378acf9` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Carcassona `8fdfecde-ded9-4939-a30f-5a74d406d857` (outOfScope) |
 | C bishop of Passau | `6df88583-4330-4cee-b552-dfb9f44b64f3` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Passau `7e19cbcf-f891-4a3d-8897-a2c06366b0e4` (outOfScope) |
 | C archidiaconus Veterismoresii | `80c57279-59cb-4a40-bb15-68ad71d8de4c` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Vielmorès `dd9b7cee-ef1d-4c06-81a5-051f9c20acf3` (outOfScope) |
-| C opiniones [Roberti Hachet] | `80507bb5-4949-4351-8de2-af1ddd513798` | amount of singular parts `ea8495b0-31eb-47d0-9de0-9a0389be7a5e` (present) | >1 `19cc8a36-3b60-4aa1-96f4-010741611aa9` (outOfScope) |
 | C archiepiscopus Narbonensis | `82614b48-6057-4d4e-ad72-6f2f8b92c8db` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Narbonensis [diocesis] `54018ad0-2e46-49a3-82a3-6ee561f82f3e` (outOfScope) |
 | C maior gratia et virtus et auctoritas quam habuerit Petrus apostolus | `8b9efb95-17ac-4c99-981d-edd4410ea44b` | CRP more `1fb9c31d-a58f-4720-b298-7ce2e56c6b39` (present) | Petrus apostolus `ab47724a-4f48-4507-8eae-51cd1d33dd16` (outOfScope) |
 | C abbas Soricinensii | `95435b44-a93d-4c2b-89a6-147c04a0ac86` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Monasterium Sanctae Mariae Soricinensis `5f9f221c-5752-46d1-859b-afcb48e29927` (outOfScope) |
@@ -122,7 +120,6 @@ The scope working as designed: the prop points at an entity of a class outside t
 | C bishop of Lincoln | `ab43ed61-2a9c-4704-a5ed-9ca1731aa2a5` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | diocese of Lincoln `35c2da01-11af-4844-8032-84f7dab93015` (outOfScope) |
 | C senescallus Carcassonae | `9d9900d6-1304-4be3-bac0-5abf36747c78` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Carcassona `8fdfecde-ded9-4939-a30f-5a74d406d857` (outOfScope) |
 | C rex Francie | `b365640e-478c-4a38-a364-b028e0bef246` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Francia `bdc31b13-82b3-4e87-82aa-77003ecc95df` (outOfScope) |
-| C repeatedly | `9a4f88fe-3b1a-4826-b189-f927fe9bd81b` | frequency `78acff75-5d74-42c3-a852-d7de6010b98a` (present) | >1 `4cde171c-a9e6-4331-9831-b99301d98b41` (outOfScope) |
 | C baiulus de Dozincho | `a86b1044-9929-4087-95dc-b3adef179b41` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Dozinchum `d8474d55-576a-433b-ae31-52f9af4f490c` (outOfScope) |
 | C abbas Sancti Papuli | `a3cfe17e-afad-4463-80e7-93166bad8559` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Monasterium Sancti Papuli `3f1ccb6c-20b7-46e1-8fc2-1e28ca2e2e94` (outOfScope) |
 | C abbas Montisolivi | `9c7c8595-af99-4f0b-b0dd-e6c528d1a2ee` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Montisolivi [abbatia] `df26f21f-af3e-4189-a914-d34e75235553` (outOfScope) |
@@ -130,8 +127,6 @@ The scope working as designed: the prop points at an entity of a class outside t
 | C canonicus Appamiae | `b86a5f18-0fef-4af5-96a7-75d7014a1138` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Ecclesia Appamiae `a9eff20a-8912-4eaa-a6db-8533cab224a3` (outOfScope) |
 | C abbas Villaelongae | `be547f6d-534a-4ad9-a8ff-061654a93b3b` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Villalonga `d87e01ae-9bde-44ad-ba1d-12b7f7403929` (outOfScope) |
 | C archidiaconus Carcassone | `b268148d-3ad0-4303-ba1f-e7fce0b08149` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Carcassone [diocesis] `a51bcefa-f8c0-48d5-a175-33340fb754cc` (outOfScope) |
-| C una nox | `da2d9e1e-d571-4c07-a746-492787becd55` | amount of singular parts `ea8495b0-31eb-47d0-9de0-9a0389be7a5e` (present) | 1 `b9873341-6180-4b07-a7df-b0b1467e5151` (outOfScope) |
-| C una nox | `da2d9e1e-d571-4c07-a746-492787becd55` | time span in days `35c9ebf8-29eb-40be-ad79-8224f9df1860` (present) | <1 `fd3a0284-0525-499a-9e7d-9bbb5fbee4e4` (outOfScope) |
 | C amor Spiritus sancti | `b8631860-7017-4702-afc2-862c49a8046b` | human object of love `ed64a7d1-4e49-42b5-b27a-2097cf4bc857` (present) | Spiritus sanctus `0e342b41-c5b1-4a00-a88b-9c31032c9687` (outOfScope) |
 | C abbas Appamiae | `d6c6268c-63d2-4259-8c2f-3bd71e3f5475` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Monasterium Sancti Antonini `94bbc99d-8d05-44c7-b931-762334114ff8` (outOfScope) |
 | C episcopus Tholosane | `d9663e7c-8451-4c3f-89ac-bf448bb0b451` | spatial area of authority `0e6c3830-e4d3-4a30-a54d-759f5a59474e` (present) | Tholosae [diocesis] `9ee41dfa-e9a6-46c6-9e01-de29681a79f2` (outOfScope) |
