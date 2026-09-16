@@ -8,7 +8,12 @@ import { IcoTrash } from "Theme/icons";
 import { DragItem, Identifier, ItemTypes } from "types";
 import { dndHoverFn } from "utils/utils";
 import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
-import { StyledGrid, StyledReferencesListButtons } from "./EntityReferenceTableStyles";
+import {
+  StyledDragHandle,
+  StyledDragHandleSpacer,
+  StyledGrid,
+  StyledReferencesListButtons,
+} from "./EntityReferenceTableStyles";
 import { EntityReferenceTableValue } from "./EntityReferenceTableValue";
 
 interface EntityReferenceTableRow {
@@ -114,11 +119,11 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
     <>
       <StyledGrid ref={dropRef} data-handler-id={handlerId} style={{ opacity }}>
         {hasOrder && userCanEdit ? (
-          <span ref={dragRef} style={{ cursor: "move", display: "flex", alignItems: "center" }}>
+          <StyledDragHandle ref={dragRef}>
             <FaGripVertical color={theme.color.black} />
-          </span>
+          </StyledDragHandle>
         ) : (
-          <span style={{ width: "1.5rem" }} />
+          <StyledDragHandleSpacer />
         )}
         <EntityReferenceTableResource
           reference={reference}
