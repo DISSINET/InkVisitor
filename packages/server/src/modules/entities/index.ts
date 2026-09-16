@@ -100,6 +100,11 @@ export default Router()
 
       await response.prepare(request);
 
+      // stamp document anchor spans onto a statement so its tag can show them
+      // as a label (response-only field, see IEntity.anchorTexts). Must run on
+      // the wrapped response - getEntityClass drops undeclared fields.
+      await Entity.applyAnchorTexts(request.db.connection, [response]);
+
       return response;
     })
   )
