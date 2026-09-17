@@ -1,10 +1,6 @@
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
 import { BaseDropdown } from "components";
 import React from "react";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 
 interface BasicDropdownOption<T> {
   value: T;
@@ -36,7 +32,6 @@ interface BasicDropdown<T = string> {
   isClearable?: boolean;
 
   noDropDownIndicator?: boolean;
-  loggerId?: string;
 }
 export const BasicDropdown = <T extends string>({
   width,
@@ -51,7 +46,6 @@ export const BasicDropdown = <T extends string>({
   disabled,
   onFocus,
   isClearable = false,
-  loggerId,
   noDropDownIndicator = false,
 }: BasicDropdown<T>) => {
   const flatOptions = options.flatMap((option) => ("options" in option ? option.options : option));
@@ -60,18 +54,17 @@ export const BasicDropdown = <T extends string>({
     <BaseDropdown
       width={width}
       value={flatOptions.find((o) => o.value === value) ?? null}
-      isClearable={isClearable}
-      onChange={(value) => onChange((value[0]?.value ?? "") as T)}
+      clearable={isClearable}
+      onChange={(selected) => onChange((selected[0]?.value ?? "") as T)}
       options={options}
       placeholder={placeholder}
       tooltipLabel={tooltipLabel}
       tooltipPosition={tooltipPosition}
       icon={icon}
-      noDropDownIndicator={noDropDownIndicator}
-      disableTyping={disableTyping}
+      chevron={!noDropDownIndicator}
+      searchable={!disableTyping}
       disabled={disabled}
       onFocus={onFocus}
-      loggerId={loggerId}
     />
   );
 };

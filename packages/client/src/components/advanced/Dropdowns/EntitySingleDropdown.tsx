@@ -2,10 +2,9 @@ import { entitiesDictKeys } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { BaseDropdown, Tooltip, TypeBar } from "components";
 import React, { useState } from "react";
-import { components, OptionProps } from "react-select";
 import styled from "styled-components";
 import { EntityColors } from "types";
-import { StyledEntityValue } from "./DropdownStyles";
+import { StyledEntitySingleValue, StyledEntityValue } from "./DropdownStyles";
 
 /* Wraps the dropdown so the entity-class TypeBar sits flush on the left and is
    clipped to the rounded corners (same look as the suggester). */
@@ -32,8 +31,6 @@ interface EntitySingleDropdown<T = string> {
   disableTooltip?: boolean;
   /** Show the entity-class colour bar on the left. Defaults to true. */
   showTypeBar?: boolean;
-
-  loggerId?: string;
 }
 export const EntitySingleDropdown = <T extends string>({
   width,
@@ -49,32 +46,45 @@ export const EntitySingleDropdown = <T extends string>({
   disabled,
   disableTooltip,
   showTypeBar = true,
-  loggerId,
 }: EntitySingleDropdown<T>) => {
+  const isOneOptionSelect = options.length < 2;
+
   const dropdown = (
     <BaseDropdown
-      entityDropdown
       width={width}
       value={options.find((o) => o.value === value)}
       options={options}
-      onChange={(value) => onChange(value[0].value as T)}
+      onChange={(selected) => onChange(selected[0].value as T)}
       placeholder={placeholder}
       onFocus={onFocus}
       onBlur={onBlur}
       suggester={suggester}
-      disableTyping={disableTyping}
-      disabled={disabled}
+      searchable={!disableTyping}
+      disabled={disabled || isOneOptionSelect}
+      /* a one-option select is quiet even when also explicitly disabled —
+         the lone class reads as static text, not as a blocked control */
+      disabledAppearance={isOneOptionSelect ? "quiet" : "stripes"}
+      chevron={!isOneOptionSelect}
       autoFocus={autoFocus}
-      loggerId={loggerId}
-      customComponents={{
-        Option: (props: any) => <Option {...props} disableTooltip={disableTooltip} />,
-      }}
+      renderOption={(o) => (
+        <EntityOptionContent option={o} disableTooltip={disableTooltip} />
+      )}
+      renderValue={(o) => (
+        /* the suggester's class box already carries its own wider margin from
+           the core suggester styles — no extra entity offset on top of it */
+        <StyledEntitySingleValue
+          $wildcard={suggester || o.label === EntityEnums.Extension.Any}
+        >
+          {o.label}
+        </StyledEntitySingleValue>
+      )}
     />
   );
 
   // The suggester renders its own TypeBar inside the grouped layout, so skip it
   // here to avoid duplicates.
-  const typeBarVisible = showTypeBar && !suggester && !!EntityColors[value as string];
+  const typeBarVisible =
+    showTypeBar && !suggester && !!EntityColors[value as string];
 
   if (!typeBarVisible) {
     return dropdown;
@@ -88,33 +98,40 @@ export const EntitySingleDropdown = <T extends string>({
   );
 };
 
-const Option = ({
+const EntityOptionContent = ({
+  option,
   disableTooltip,
-  ...props
-}: OptionProps<any> & { disableTooltip?: boolean }): React.ReactElement => {
+}: {
+  option: { value: string; label: string };
+  disableTooltip?: boolean;
+}): React.ReactElement => {
   const [showTooltip, setShowTooltip] = useState(false);
-  const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLDivElement | null>(null);
 
   return (
-    <components.Option {...props}>
+    <>
       <StyledEntityValue
         ref={setReferenceElement}
-        color={EntityColors[props.data.value]?.color ?? "transparent"}
+        color={EntityColors[option.value]?.color ?? "transparent"}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        {props.data.label}
+        {option.label}
       </StyledEntityValue>
       {!disableTooltip &&
-        props.data.value !== EntityEnums.Extension.Any &&
-        props.data.value !== "" && (
+        option.value !== EntityEnums.Extension.Any &&
+        option.value !== "" && (
           <Tooltip
-            label={entitiesDictKeys[props.data.value as keyof typeof entitiesDictKeys]?.label}
+            label={
+              entitiesDictKeys[option.value as keyof typeof entitiesDictKeys]
+                ?.label
+            }
             visible={showTooltip}
             referenceElement={referenceElement}
             position="left"
           />
         )}
-    </components.Option>
+    </>
   );
 };

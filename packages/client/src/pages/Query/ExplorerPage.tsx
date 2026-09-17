@@ -238,12 +238,13 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       if (isAnyModalOpen()) return;
       const focused = document.activeElement;
       const tag = (focused?.tagName ?? "").toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select") {
-        if (focused?.closest(".react-select-container")) {
-          if (focused.getAttribute("aria-expanded") === "true") return;
-        } else if (!focused?.closest("[data-run-on-enter]")) {
-          return;
-        }
+      // a dropdown's focus sits on its search input, or on the control itself
+      // when typing is off; aria-expanded lives on the control in both cases
+      const dropdown = focused?.closest("[data-dropdown]");
+      if (dropdown) {
+        if (dropdown.querySelector("[aria-expanded='true']")) return;
+      } else if (tag === "input" || tag === "textarea" || tag === "select") {
+        if (!focused?.closest("[data-run-on-enter]")) return;
       }
       handleRunSearch();
     };
