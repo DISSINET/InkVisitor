@@ -1,10 +1,12 @@
 import { Query } from "@inkvisitor/shared/types/query";
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { describe, expect, it } from "vitest";
-import { edgeTypesImplemented } from "./types";
+import { edgeTypesHidden, edgeTypesImplemented } from "./types";
 import {
   findValidEdgeTypesForSourceNode,
   isEdgeValid,
+  getRelationAllowedClasses,
+  getRelationConstrainedCategoryTypes,
   getSuperordinateEntityAllowedClasses,
 } from "./utils";
 
@@ -193,33 +195,14 @@ describe("query builder offers the 'used in statements under T' edge (EUT:)", ()
   });
 });
 
-describe("query builder offers the 'S under T: children' edge (SUT:C)", () => {
-  it("a Statement source node can select SUT:C", () => {
+describe("the 'S under T' edge covers the whole subtree via the SUB toggle", () => {
+  it("SUT: is offered and takes the Territory target", () => {
     expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Statement]))).toContain(
-      Query.EdgeType["SUT:C"],
+      Query.EdgeType["SUT:"],
     );
-  });
-
-  it("SUT:C exposes a Territory entity target param so the territory can be picked", () => {
-    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["SUT:C"]];
+    const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["SUT:"]];
     expect(params.entityId).toBeTruthy();
     expect(params.entityId.allowedClasses).toEqual([EntityEnums.Class.Territory]);
-  });
-
-  it("source must be a Statement; the target must be a Territory", () => {
-    expect(
-      isEdgeValid(
-        sourceNode([EntityEnums.Class.Statement]),
-        edge(Query.EdgeType["SUT:C"], sourceNode([EntityEnums.Class.Territory])),
-      ).valid,
-    ).toBe(true);
-
-    expect(
-      isEdgeValid(
-        sourceNode([EntityEnums.Class.Person]),
-        edge(Query.EdgeType["SUT:C"], sourceNode([EntityEnums.Class.Territory])),
-      ).valid,
-    ).toBe(false);
   });
 });
 
@@ -310,6 +293,58 @@ describe("superordinate entity target class filtering", () => {
   it("Person-only root offers no target classes", () => {
     expect(getSuperordinateEntityAllowedClasses([EntityEnums.Class.Person])).toEqual([]);
   });
+
+  it("inverse: a Person root is a subordinate of Objects only", () => {
+    expect(getRelationAllowedClasses(RelationEnums.Type.SuperordinateEntity, [EntityEnums.Class.Person], true)).toEqual([
+      EntityEnums.Class.Object,
+    ]);
+  });
+
+  it("inverse: an Event root offers Event and Statement subordinates", () => {
+    expect(getRelationAllowedClasses(RelationEnums.Type.SuperordinateEntity, [EntityEnums.Class.Event], true)).toEqual(
+      expect.arrayContaining([EntityEnums.Class.Event, EntityEnums.Class.Statement]),
+    );
+  });
+
+  it("inverse via the edge: I_R:SOE uses the subordinate side, R:SOE the superordinate", () => {
+    const root = [EntityEnums.Class.Object];
+    expect(getRelationConstrainedCategoryTypes(Query.EdgeType["R:SOE"], root)).toEqual(
+      expect.arrayContaining([EntityEnums.Class.Person, EntityEnums.Class.Being]),
+    );
+    expect(getRelationConstrainedCategoryTypes(Query.EdgeType["I_R:SOE"], root)).toEqual([
+      EntityEnums.Class.Object,
+    ]);
+  });
+});
+
+describe("query builder offers the inverse relation edges", () => {
+  it("I_R:SCL is selectable from a Concept, I_R:CLA from a Concept, I_R:SOE from a Location", () => {
+    expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Concept]))).toEqual(
+      expect.arrayContaining([Query.EdgeType["I_R:SCL"], Query.EdgeType["I_R:CLA"]]),
+    );
+    expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Location]))).toContain(
+      Query.EdgeType["I_R:SOE"],
+    );
+  });
+
+  it("each inverse relation edge exposes a target entity param", () => {
+    for (const type of [
+      Query.EdgeType["I_R:SCL"],
+      Query.EdgeType["I_R:CLA"],
+      Query.EdgeType["I_R:SOE"],
+    ]) {
+      expect(Query.EdgeTypeTargetNodeParams[type].entityId).toBeTruthy();
+    }
+  });
+
+  it("I_R:CLA source must be a Concept", () => {
+    expect(
+      isEdgeValid(
+        sourceNode([EntityEnums.Class.Person]),
+        edge(Query.EdgeType["I_R:CLA"], sourceNode([EntityEnums.Class.Person])),
+      ).valid,
+    ).toBe(false);
+  });
 });
 
 // folded in from the (deleted) server inverse-edge-rules.test.ts: edge validity
@@ -350,5 +385,20 @@ describe("inverse in-statement edge validity rules", () => {
         edge(Query.EdgeType["I_SC"], sourceNode([EntityEnums.Class.Concept])),
       ).valid,
     ).toBe(true);
+  });
+});
+
+describe("inverse Holonym edge and hidden edge types", () => {
+  it("I_R:HOL is selectable from a Concept and takes a Concept target", () => {
+    expect(selectableEdgeTypes(sourceNode([EntityEnums.Class.Concept]))).toContain(
+      Query.EdgeType["I_R:HOL"],
+    );
+    expect(Query.EdgeTypeTargetNodeParams[Query.EdgeType["I_R:HOL"]].entityId.allowedClasses).toEqual(
+      [EntityEnums.Class.Concept],
+    );
+  });
+
+  it("no hidden edge type is also marked implemented", () => {
+    expect(edgeTypesHidden.filter((t) => edgeTypesImplemented.includes(t))).toEqual([]);
   });
 });

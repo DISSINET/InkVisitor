@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   clearSelection,
   filterOptions,
+  flattenOptions,
   getDisabledIndices,
   popLastSelection,
   removeChip,
@@ -79,5 +80,24 @@ describe("getDisabledIndices", () => {
   it("lists indices of isDisabled options", () => {
     expect(getDisabledIndices([A, DIS, B])).toEqual([1]);
     expect(getDisabledIndices([A, B])).toEqual([]);
+  });
+});
+
+describe("flattenOptions", () => {
+  it("keeps order across plain options and groups and records each option's group", () => {
+    const { items, groupOf } = flattenOptions([
+      A,
+      { label: "Group 1", options: [B, C] },
+      DIS,
+    ]);
+    expect(items).toEqual([A, B, C, DIS]);
+    expect(groupOf.get(A)).toBeUndefined();
+    expect(groupOf.get(B)).toBe("Group 1");
+    expect(groupOf.get(C)).toBe("Group 1");
+    expect(groupOf.get(DIS)).toBeUndefined();
+  });
+
+  it("drops empty groups", () => {
+    expect(flattenOptions([{ label: "Empty", options: [] }, A]).items).toEqual([A]);
   });
 });

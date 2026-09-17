@@ -18,6 +18,7 @@ import {
   isFirstLabelEmpty,
   isValidEntityClass,
 } from "utils/utils";
+import { EntityTagContextMenu } from "./EntityTagContextMenu/EntityTagContextMenu";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -70,7 +71,11 @@ interface EntityTag {
   disableTooltip?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
+  /** the entity sits in a container the user may only read - see EntityDragItem */
+  entityIsReadOnly?: boolean;
   disableCopyToClipboard?: boolean;
+  /** Leaves the browser's own menu in place on right click. */
+  disableContextMenu?: boolean;
   tooltipPosition?: Placement;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
@@ -103,8 +108,10 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isSelected,
   disableTooltip = false,
   disableDrag = false,
+  entityIsReadOnly,
   disableDoubleClick = false,
   disableCopyToClipboard = false,
+  disableContextMenu = false,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -119,7 +126,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isEquivalent = false,
   isSubordinate = false,
 }) => {
-  const { appendDetailId } = useSearchParams();
+  const { promoteDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState,
@@ -129,6 +136,9 @@ const EntityTagInner: React.FC<EntityTag> = ({
   const [tagHovered, setTagHovered] = useState(false);
   const [clickedOnce, setClickedOnce] = useState(false);
   const [expansionBadgeHovered, setExpansionBadgeHovered] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const referenceEl = useRef<HTMLDivElement>(null!);
   const expansionBadgeRef = useRef<HTMLDivElement>(null);
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
@@ -166,6 +176,16 @@ const EntityTagInner: React.FC<EntityTag> = ({
     setButtonHovered(false);
     setTagHovered(false);
   }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // tags nest (a statement tag inside a prop row), and only the one under the
+    // cursor should answer
+    e.stopPropagation();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleContextMenuClose = useCallback(() => setContextMenuPosition(null), []);
 
   const renderUnlinkButton = (unlinkButton: UnlinkButton) => {
     return (
@@ -255,6 +275,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
     entity,
     isTemplate: entity.isTemplate ?? false,
     isDiscouraged: entity.status === EntityEnums.Status.Discouraged,
+    entityIsReadOnly,
     propId: entity.id,
     entityClass: entity.class,
     disableDrag,
@@ -328,17 +349,23 @@ const EntityTagInner: React.FC<EntityTag> = ({
 
   return (
     <StyledEntityTagWrap>
-      {tagHovered && !disableTooltip && (
+      {tagHovered && !disableTooltip && !contextMenuPosition && (
         <EntityTooltip
           entityId={entity.id}
           entityClass={entity.class}
-          label={(entity.labels && entity.labels[0]) || <i>{"no label"}</i>}
+          label={
+            (entity.labels && entity.labels[0]) ||
+            // an unlabelled statement is identified by its anchor text / text
+            // rows instead, so it gets no label row at all
+            (entity.class === EntityEnums.Class.Statement ? undefined : <i>{"no label"}</i>)
+          }
           alternativeLabels={
             entity.labels && entity.labels.length > 1 ? entity.labels.slice(1) : undefined
           }
           language={entity.language}
           detail={entity.detail}
           text={entity.class === EntityEnums.Class.Statement ? entity.data.text : undefined}
+          anchorTexts={entity.anchorTexts}
           isTemplate={entity.isTemplate}
           partOfSpeech={entity.data.pos}
           itemsCount={statementsCount}
@@ -366,16 +393,28 @@ const EntityTagInner: React.FC<EntityTag> = ({
             return;
           }
           if (!disableDoubleClick) {
-            appendDetailId(entity.id);
+            // opening at the front of the tab strip keeps the entity on screen
+            // whatever else is already open
+            promoteDetailId(entity.id);
             dispatch(setSecondPanelExpanded(true));
             if (detailBoxState === DetailBoxState.Minimized) {
               dispatch(setDetailBoxState(DetailBoxState.Normal));
             }
           }
         }}
+        onContextMenu={disableContextMenu ? undefined : handleContextMenu}
         onMouseEnter={handleTagHovered}
         onMouseLeave={handleTagUnhovered}
       />
+      {contextMenuPosition && (
+        <EntityTagContextMenu
+          entity={entity}
+          position={contextMenuPosition}
+          onClose={handleContextMenuClose}
+          onUnlink={unlinkButton ? unlinkButton.onClick : undefined}
+          unlinkLabel={unlinkButton ? unlinkButton.tooltipLabel : undefined}
+        />
+      )}
     </StyledEntityTagWrap>
   );
 };
@@ -400,6 +439,7 @@ function areEntityTagsEqual(
   if (prev.fullWidth !== next.fullWidth) return false;
   if (prev.disableTooltip !== next.disableTooltip) return false;
   if (prev.disableDoubleClick !== next.disableDoubleClick) return false;
+  if (prev.disableContextMenu !== next.disableContextMenu) return false;
   if (prev.onDoubleClick !== next.onDoubleClick) return false;
   if (prev.statementsCount !== next.statementsCount) return false;
   if (Boolean(prev.button) !== Boolean(next.button)) return false;

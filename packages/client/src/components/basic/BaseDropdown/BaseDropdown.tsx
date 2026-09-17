@@ -1,10 +1,9 @@
 import { FloatingPortal } from "@floating-ui/react";
 import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
-import { DropdownItem } from "@inkvisitor/shared/types";
 import { IcoChevronDown, IcoClose } from "Theme/icons";
 import { Loader, Tooltip } from "components";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   StyledChevron,
   StyledChipOverflow,
@@ -16,6 +15,7 @@ import {
   StyledDefaultChipBody,
   StyledDefaultOptionRow,
   StyledDropdownWrap,
+  StyledGroupHeading,
   StyledIndicators,
   StyledMenu,
   StyledNoOptions,
@@ -25,13 +25,15 @@ import {
   StyledSingleValue,
   StyledValueArea,
 } from "./BaseDropdownStyles";
-import { ChangeMeta, OptionRenderState } from "./types";
+import { flattenOptions } from "./dropdownLogic";
+import { BaseDropdownGroup, BaseDropdownItem, ChangeMeta, OptionRenderState } from "./types";
 import { useDropdown } from "./useDropdown";
 
 type Position = AutoPlacement | BasePlacement | VariationPlacement;
 
-interface BaseDropdown<O extends DropdownItem = DropdownItem> {
-  options?: O[];
+interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
+  // a group renders its label as a heading above its options
+  options?: (O | BaseDropdownGroup<O>)[];
   value?: O | O[] | null;
   onChange: (selected: O[], meta: ChangeMeta<O>) => void;
   multi?: boolean;
@@ -63,7 +65,7 @@ interface BaseDropdown<O extends DropdownItem = DropdownItem> {
   chipDensity?: "default" | "compact";
 }
 
-export const BaseDropdown = <O extends DropdownItem = DropdownItem>({
+export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   options = [],
   value,
   onChange,
@@ -96,8 +98,10 @@ export const BaseDropdown = <O extends DropdownItem = DropdownItem>({
   const selectedArray: O[] =
     value == null ? [] : Array.isArray(value) ? value : [value];
 
+  const { items, groupOf } = useMemo(() => flattenOptions(options), [options]);
+
   const dd = useDropdown<O>({
-    options,
+    options: items,
     value: selectedArray,
     multi,
     searchable: searchable && !disabled,
@@ -143,6 +147,8 @@ export const BaseDropdown = <O extends DropdownItem = DropdownItem>({
 
   return (
     <StyledDropdownWrap
+      // lets global key handlers tell a dropdown's focused control apart from other inputs
+      data-dropdown
       $width={width}
       ref={setWrapperEl}
       onMouseEnter={() => setShowTooltip(true)}
@@ -178,7 +184,7 @@ export const BaseDropdown = <O extends DropdownItem = DropdownItem>({
             (collapse ? (
               <StyledChipShell>
                 <StyledDefaultChipBody>
-                  {chipSummary!(selectedArray.length, options.length)}
+                  {chipSummary!(selectedArray.length, items.length)}
                 </StyledDefaultChipBody>
                 {!disabled && (
                   <StyledChipRemove
@@ -289,35 +295,40 @@ export const BaseDropdown = <O extends DropdownItem = DropdownItem>({
                 highlighted: dd.activeIndex === i,
                 disabled: !!option.isDisabled,
               };
+              const group = groupOf.get(option);
+              const startsGroup =
+                group !== undefined && (i === 0 || groupOf.get(dd.filtered[i - 1]) !== group);
               return (
-                <StyledOption
-                  key={`${option.label}-${option.value}`}
-                  ref={(el) => {
-                    dd.itemsRef.current[i] = el;
-                  }}
-                  $highlighted={state.highlighted}
-                  $selected={state.selected}
-                  $disabled={state.disabled}
-                  {...dd.getItemProps({
-                    // active/selected keys drive floating-ui's
-                    // aria-activedescendant wiring — do not drop them
-                    active: state.highlighted,
-                    selected: state.selected,
-                    onClick: () => dd.selectOption(option),
-                  })}
-                >
-                  {renderOption ? (
-                    renderOption(option, state)
-                  ) : (
-                    <StyledDefaultOptionRow>
-                      {option.value === allEntities.value ? (
-                        <i>{option.label}</i>
-                      ) : (
-                        option.label
-                      )}
-                    </StyledDefaultOptionRow>
-                  )}
-                </StyledOption>
+                <React.Fragment key={`${option.label}-${option.value}`}>
+                  {startsGroup && <StyledGroupHeading>{group}</StyledGroupHeading>}
+                  <StyledOption
+                    ref={(el) => {
+                      dd.itemsRef.current[i] = el;
+                    }}
+                    $highlighted={state.highlighted}
+                    $selected={state.selected}
+                    $disabled={state.disabled}
+                    {...dd.getItemProps({
+                      // active/selected keys drive floating-ui's
+                      // aria-activedescendant wiring — do not drop them
+                      active: state.highlighted,
+                      selected: state.selected,
+                      onClick: () => dd.selectOption(option),
+                    })}
+                  >
+                    {renderOption ? (
+                      renderOption(option, state)
+                    ) : (
+                      <StyledDefaultOptionRow>
+                        {option.value === allEntities.value ? (
+                          <i>{option.label}</i>
+                        ) : (
+                          option.menuLabel ?? option.label
+                        )}
+                      </StyledDefaultOptionRow>
+                    )}
+                  </StyledOption>
+                </React.Fragment>
               );
             })}
           </StyledMenu>

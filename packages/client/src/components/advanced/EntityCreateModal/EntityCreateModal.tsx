@@ -354,6 +354,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 initCategory={selectedCategory}
                 categoryTypes={entityClasses}
                 excludedEntityClasses={excludedSuggesterEntities}
+                reuseDroppedValue
                 onChangeCategory={(selectedOption) => {
                   // Any not allowed here - this condition makes it type safe
                   if (selectedOption !== EntityEnums.Extension.Any) {

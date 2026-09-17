@@ -107,6 +107,14 @@ export const StyledGridHeader = styled.div`
 export const StyledDocumentRow = styled.div`
   display: contents;
 
+  /* Controls inside a cell (the suggester's focus ring and create button, an
+     input's action buttons) carry their own z-index and none of the wrappers
+     around them form a stacking context, so those values would compete with the
+     sticky header at page level. Each cell contains its own. */
+  > * {
+    isolation: isolate;
+  }
+
   &:hover > * {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }

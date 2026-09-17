@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
-import { entitiesDict } from "@inkvisitor/shared/dictionaries";
+import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
@@ -67,7 +67,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
         Query.EdgeType["IS:"],
         Query.EdgeType["I_IS:"],
         Query.EdgeType["SUT:"],
-        Query.EdgeType["SUT:C"],
         Query.EdgeType["EUT:"],
       ] as Query.EdgeType[]
     ).includes(edgeType);
@@ -269,6 +268,33 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               limitSelectedItems={Math.floor((270 - 110) / 37)}
             />
           )}
+          {/* the root node's own status is filtered in the floating search
+              container (Explore status filter), so the picker is offered only
+              on edge targets */}
+          {!isRoot && !node.params.entityId && (
+            <Dropdown.Single.Basic
+              // params.entityStatuses is a list on purpose - the backend
+              // matches any status in it, so the picker can become multi later
+              value={node.params.entityStatuses?.[0] ?? null}
+              placeholder="any status"
+              tooltipLabel="entity status"
+              isClearable
+              width={110}
+              options={entityStatusDict.map((status) => ({
+                value: status.value,
+                label: status.label,
+              }))}
+              onChange={(newValue) => {
+                dispatch({
+                  type: QueryActionType.updateNodeStatuses,
+                  payload: {
+                    nodeId: node.id,
+                    newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
+                  },
+                });
+              }}
+            />
+          )}
           {paramEntityId && (
             <div>
               {isRoot === false &&
@@ -362,8 +388,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                           isRelationEntityPickerDisabled ? (
                             <p>
                               The "{edgeLabel}" relation allows no target class for{" "}
-                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}.
-                              Change the root class or the edge type.
+                              {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}
+                              . Change the root class or the edge type.
                             </p>
                           ) : edgeRequiresTarget ? (
                             <p>This edge requires a target entity.</p>
@@ -394,7 +420,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 size={13}
                 value={node.params.includeEquivalents === true}
                 tooltipLabel="include equivalents"
-                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node's target entity."
+                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
                 onChangeFn={() => {
                   dispatch({
                     type: QueryActionType.updateNodeExpansionToggles,
@@ -405,13 +431,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     },
                   });
                 }}
+                disableEnterKey
               />
               <Checkbox
                 label="SUB"
                 size={13}
                 value={node.params.includeSubordinates === true}
                 tooltipLabel="include subordinates"
-                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node's target entity."
+                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
                 onChangeFn={() => {
                   dispatch({
                     type: QueryActionType.updateNodeExpansionToggles,
@@ -422,6 +449,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     },
                   });
                 }}
+                disableEnterKey
               />
             </StyledNodeExpansionToggles>
           )}

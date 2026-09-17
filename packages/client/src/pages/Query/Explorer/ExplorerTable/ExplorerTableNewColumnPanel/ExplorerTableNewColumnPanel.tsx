@@ -1,5 +1,5 @@
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Button, ButtonGroup, CancelButton, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
@@ -14,9 +14,27 @@ import {
   StyledContent,
   StyledHeader,
   StyledLabel,
+  StyledNameFillWrap,
   StyledPanel,
   StyledValue,
 } from "./ExplorerTableNewColumnPanelStyles";
+import { IcoArrowReturnRight } from "Theme/icons";
+import { getStoredUserRole } from "utils/userStorage";
+import { isReadOnlyColumn } from "../types";
+import { getRelationColumnLabel } from "./ExploreColumnParamValueRenderers";
+
+// the relation type dropdown encodes the direction into the option value, so a
+// single control covers both; the suffix is split off into the `inverse` param
+const INVERSE_SUFFIX = ":inverse";
+
+const relationTypeOptions = RelationEnums.AllTypes.flatMap((t) => {
+  const forward = { value: t as string, label: getRelationColumnLabel(t) };
+  // a symmetrical relation reads the same from both sides
+  if (!Relation.RelationRules[t]?.asymmetrical) {
+    return [forward];
+  }
+  return [forward, { value: `${t}${INVERSE_SUFFIX}`, label: getRelationColumnLabel(t, true) }];
+});
 
 interface Props {
   open: boolean;
@@ -32,18 +50,17 @@ const initial: Explore.IExploreColumn = {
   params: {},
 };
 
-const ExplorerTableNewColumnPanel: React.FC<Props> = ({
-  open,
-  onClose,
-  onCreateColumn,
-}) => {
+const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateColumn }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState(initial.name);
   const [type, setType] = useState(initial.type);
   const [editable, setEditable] = useState<boolean>(initial.editable);
+  const isViewer = getStoredUserRole() === UserEnums.Role.Viewer;
   const [paramValues, setParamValues] = useState<Record<string, unknown>>({});
 
   const paramsDef = Explore.EExploreColumnTypeConfig[type].paramsDef ?? [];
+  const typeLabel = Explore.EExploreColumnTypeConfig[type].label;
+  const relationTypeParamDef = paramsDef.find((def) => def.type === "relationType");
 
   // Reset param values when column type changes
   useEffect(() => {
@@ -73,8 +90,8 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     onClose();
   }, [onClose]);
 
-  const handleCreate = useCallback(() => {
-    const params =
+  const params = useMemo(() => {
+    const serializedParams: Record<string, unknown> =
       paramsDef.length > 0
         ? Object.fromEntries(
             paramsDef.map((def) => {
@@ -84,19 +101,36 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
                   ? (val as IEntity).id
                   : val;
               return [def.id, serialized];
-            })
+            }),
           )
         : {};
+    if (paramValues.inverse) {
+      serializedParams.inverse = true;
+    }
+    return serializedParams as Explore.IExploreColumnParams<typeof type>;
+  }, [paramsDef, paramValues]);
+
+  const isReadOnly = isReadOnlyColumn({ type, params });
+
+  // a relation column is named after its relation type, so the fill stays
+  // unavailable until one is picked
+  const fillLabel = useMemo(() => {
+    if (!relationTypeParamDef) return typeLabel;
+    const relationType = paramValues[relationTypeParamDef.id] as RelationEnums.Type | undefined;
+    return relationType ? getRelationColumnLabel(relationType, !!paramValues.inverse) : undefined;
+  }, [relationTypeParamDef, typeLabel, paramValues]);
+
+  const handleCreate = useCallback(() => {
     const col: Explore.IExploreColumn = {
       id: uuidv4(),
       name: name.length ? name : Explore.EExploreColumnTypeConfig[type].label,
       type,
-      editable,
-      params: params as Explore.IExploreColumnParams<typeof type>,
+      editable: isReadOnly ? false : editable,
+      params,
     };
     onCreateColumn(col);
     handleClose();
-  }, [name, type, editable, paramValues, paramsDef, onCreateColumn, handleClose]);
+  }, [name, type, editable, isReadOnly, params, onCreateColumn, handleClose]);
 
   const tryCreate = useCallback(() => {
     if (!open || !canCreate) return;
@@ -109,16 +143,19 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
     switch (def.type) {
       case "relationType": {
         const value = paramValues[def.id] as RelationEnums.Type | undefined;
+        const optionValue = value ? `${value}${paramValues.inverse ? INVERSE_SUFFIX : ""}` : null;
         return (
           <Dropdown.Single.Basic
             width="full"
-            value={value ?? null}
+            value={optionValue}
             placeholder="Select relation type"
-            options={RelationEnums.AllTypes.map((t) => ({
-              value: t,
-              label: RelationEnums.RelationTypeLabels[t],
-            }))}
-            onChange={(v) => setParamValue(def.id, v)}
+            options={relationTypeOptions}
+            onChange={(v) => {
+              const inverse = v.endsWith(INVERSE_SUFFIX);
+              const relationType = inverse ? v.slice(0, -INVERSE_SUFFIX.length) : v;
+              setParamValue(def.id, relationType || undefined);
+              setParamValue("inverse", inverse || undefined);
+            }}
           />
         );
       }
@@ -136,6 +173,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         ) : (
           <EntitySuggester
             categoryTypes={def.entityClasses ?? [EntityEnums.Class.Concept]}
+            reuseDroppedValue
             onPicked={(e) => setParamValue(def.id, e)}
             inputWidth="full"
           />
@@ -167,15 +205,6 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
         </StyledCloseIconWrap>
       </StyledHeader>
       <StyledContent>
-        <StyledLabel>Column name</StyledLabel>
-        <StyledValue>
-          <Input
-            width="full"
-            value={name}
-            onChangeFn={(v) => setName(v)}
-            changeOnType
-          />
-        </StyledValue>
         <StyledLabel>Column type</StyledLabel>
         <StyledValue>
           <Dropdown.Single.Basic
@@ -183,10 +212,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             value={type}
             options={Object.keys(Explore.EExploreColumnType)
               .map(
-                (key) =>
-                  Explore.EExploreColumnType[
-                    key as keyof typeof Explore.EExploreColumnType
-                  ]
+                (key) => Explore.EExploreColumnType[key as keyof typeof Explore.EExploreColumnType],
               )
               .map((value) => ({
                 value,
@@ -202,17 +228,50 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
             <StyledValue>{renderParamField(def)}</StyledValue>
           </React.Fragment>
         ))}
-        <StyledLabel>
-          <span style={{ display: "inline-flex", alignItems: "center" }}>
-            Editable
-            <span style={{ marginLeft: "0.3rem" }}>
-              <MdOutlineEdit size={14} />
-            </span>
-          </span>
-        </StyledLabel>
+        <StyledLabel>Column name</StyledLabel>
         <StyledValue>
-          <Checkbox value={editable} onChangeFn={(v) => setEditable(v)} />
+          <Input
+            width="full"
+            value={name}
+            onChangeFn={(v) => setName(v)}
+            changeOnType
+            rightContent={
+              <StyledNameFillWrap>
+                <Button
+                  icon={<IcoArrowReturnRight size={13} />}
+                  tooltipLabel={
+                    relationTypeParamDef
+                      ? "fill in the relation type label"
+                      : "fill in the column type label"
+                  }
+                  tooltipPosition="top"
+                  onClick={() => fillLabel && setName(fillLabel)}
+                  disabled={!fillLabel || name === fillLabel}
+                  noBorder
+                  noBackground
+                  color="black"
+                  inverted
+                />
+              </StyledNameFillWrap>
+            }
+          />
         </StyledValue>
+        {/* an editable column would render read-only cells for a Viewer anyway */}
+        {!isViewer && !isReadOnly && (
+          <>
+            <StyledLabel>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>
+                Editable
+                <span style={{ marginLeft: "0.3rem" }}>
+                  <MdOutlineEdit size={14} />
+                </span>
+              </span>
+            </StyledLabel>
+            <StyledValue>
+              <Checkbox value={editable} onChangeFn={(v) => setEditable(v)} />
+            </StyledValue>
+          </>
+        )}
       </StyledContent>
       <span
         style={{
@@ -223,11 +282,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({
       >
         <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
           <CancelButton onClick={handleClose} />
-          <Button
-            label="create column"
-            onClick={handleCreate}
-            disabled={!canCreate}
-          />
+          <Button label="Create column" onClick={handleCreate} disabled={!canCreate} />
         </ButtonGroup>
       </span>
     </StyledPanel>

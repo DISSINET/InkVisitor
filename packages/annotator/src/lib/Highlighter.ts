@@ -139,14 +139,31 @@ export default class Highlighter {
     const isNarrowHighlight =
       this.hlMode === HighlightMode.SELECT ||
       this.hlMode === HighlightMode.BACKGROUND;
+    // The band wraps the letters: its height comes from the measured text band
+    // when the caller supplies one, and never exceeds the line it sits on.
+    const bandHeight = Math.min(
+      options.textBandHeight ?? lineHeight * HIGHLIGHT_HEIGHT_RATIO,
+      lineHeight
+    );
     const height =
       this.hlMode === HighlightMode.UNDERLINE
         ? 3
         : isNarrowHighlight
-        ? Math.max(1, lineHeight * HIGHLIGHT_HEIGHT_RATIO)
+        ? Math.max(1, bandHeight)
         : lineHeight;
-    const yOffset = isNarrowHighlight ? (lineHeight - height) / 2 : 0;
+    // Letters sit above the centre of their line box (the em box the text is
+    // painted against reserves descender room), so a band centred on the line
+    // needs the same shift to stay centred on them.
+    const yOffset = isNarrowHighlight
+      ? (lineHeight - height) / 2 + (options.textBandOffset ?? 0)
+      : 0;
     const y = relLine * lineHeight + yOffset;
+    // Bottom of the band, the edge every text-hugging visual is placed against.
+    const bandBottom =
+      relLine * lineHeight +
+      (lineHeight - bandHeight) / 2 +
+      (options.textBandOffset ?? 0) +
+      bandHeight;
 
     ctx.fillStyle = colorOverride || this.style.color;
     ctx.globalAlpha = this.style.opacity;
@@ -172,8 +189,13 @@ export default class Highlighter {
       ctx.fillRect(xStartPx, relLine * lineHeight, width, lineHeight);
     } else if (this.hlMode === "underline") {
       ctx.globalCompositeOperation = "multiply";
+      // The bar hangs under the letters, clamped to the line it belongs to so a
+      // tight spacing cannot push it onto the row below.
       const offsetPx = UNDERLINE_OFFSET_PX * this.ratio;
-      const underlineY = (relLine + 1) * lineHeight - height - offsetPx;
+      const underlineY = Math.min(
+        bandBottom + offsetPx,
+        (relLine + 1) * lineHeight - height
+      );
       ctx.fillRect(
         xStartPx + startInset,
         underlineY,

@@ -27,6 +27,13 @@ import {
 import { randomUUID } from "crypto";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 
+/**
+ * Entity ids per pass through the entity-keyed indexes. The list is inlined
+ * into the query term once per index, and an unpaged export can select
+ * thousands of rows, so the passes are chunked to keep each query small.
+ */
+const USED_IN_LOOKUP_CHUNK_SIZE = 200;
+
 export class StatementClassification implements IStatementClassification {
   id = "";
   entityId = "";
@@ -260,6 +267,10 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
@@ -288,6 +299,19 @@ class Statement extends Entity implements IStatement {
     }
 
     return false;
+  }
+
+  /**
+   * Predicate for testing if the user can create the statement entry.
+   * A Statement lands in a Territory, so creating one is a write to that
+   * Territory and answers to the same right as editing it - the base Entity
+   * rule (anyone but a Viewer) would let an Editor drop statements into a
+   * branch he may only read, whether through a plain create or a clone.
+   * @param user
+   * @returns boolean representing the access
+   */
+  canBeCreatedByUser(user: User): boolean {
+    return this.canBeEditedByUser(user);
   }
 
   /**
@@ -324,6 +348,10 @@ class Statement extends Entity implements IStatement {
   canBeDeletedByUser(user: User): boolean {
     // only admin has the right, no matter the territory
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
+      return true;
+    }
+
+    if (this.isTemplateWritableByUser(user)) {
       return true;
     }
 
@@ -704,6 +732,89 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
+   * Territories of the statements that reference each of the given entities,
+   * anywhere the entity-keyed indexes reach: statement props and references,
+   * actions, actants, tags, the statement's own territory, actant
+   * classifications/identifications, and in-statement prop type/value down to
+   * lvl3.
+   *
+   * Attribution happens in the database: each index pass walks the id list and
+   * tags every hit with the id it was looked up under, so a statement matching
+   * several entities is reported once per entity. Only the territory id crosses
+   * the wire - the statement bodies never leave the db.
+   *
+   * The indexes live on the shared entity table, so the class filter is what
+   * keeps non-statement hits out.
+   * @param db db connection
+   * @param entityIds ids to look up
+   * @returns entity id -> deduplicated territory ids, in no particular order
+   */
+  static async findUsedInTerritoryIds(
+    db: Connection | undefined,
+    entityIds: string[]
+  ): Promise<Record<string, string[]>> {
+    const territoryIdsByEntity: Record<string, Record<string, null>> = {};
+
+    for (
+      let offset = 0;
+      offset < entityIds.length;
+      offset += USED_IN_LOOKUP_CHUNK_SIZE
+    ) {
+      const chunk = entityIds.slice(offset, offset + USED_IN_LOOKUP_CHUNK_SIZE);
+
+      const passes = DbEnums.EntityIdReferenceIndexes.map((index) =>
+        rethink.expr(chunk).concatMap(function (entityId: RDatum) {
+          return rethink
+            .table(Entity.table)
+            .getAll(entityId, { index })
+            .filter({ class: EntityEnums.Class.Statement })
+            .map(function (statement: RDatum) {
+              return {
+                entityId,
+                // reading a missing attribute raises, and one raised error
+                // aborts the whole query rather than skipping the document
+                // (unlike an index build, which just drops it - which is how a
+                // statement with a malformed territory can sit in the table at
+                // all). Both defaults are load-bearing: the outer one covers a
+                // territory that is absent or null, the inner one a territory
+                // object carrying no territoryId. The caller drops the nulls.
+                territoryId: statement("data")("territory")
+                  .default(rethink.expr({}))
+                  .getField("territoryId")
+                  .default(null),
+              };
+            });
+        })
+      );
+
+      let query: any = passes[0];
+      for (const pass of passes.slice(1)) {
+        query = query.union(pass);
+      }
+
+      const pairs: { entityId: string; territoryId: string | null }[] =
+        await query.run(db);
+
+      for (const pair of pairs) {
+        if (!pair.territoryId) {
+          continue;
+        }
+        if (!territoryIdsByEntity[pair.entityId]) {
+          territoryIdsByEntity[pair.entityId] = {};
+        }
+        territoryIdsByEntity[pair.entityId][pair.territoryId] = null;
+      }
+    }
+
+    const out: Record<string, string[]> = {};
+    for (const [entityId, ids] of Object.entries(territoryIdsByEntity)) {
+      out[entityId] = Object.keys(ids);
+    }
+
+    return out;
+  }
+
+  /**
    * finds statements that are using provided entityId in their
    * data.actants[].classifications or data.actants[].ident
    * @param db
@@ -744,18 +855,74 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Returns ids that co-occur with entityId in any statement.
-   * Mirrors the StatementEntities index (actants, actions, tags, direct
-   * territory) plus the statement id itself, so every returned id would
-   * also find these statements if used as the co-occurrence input.
-   * Excludes territory ancestor lineage and nested prop/reference ids,
-   * which made co-occurrence search return many unrelated entities.
+   * Statements that reference any of `entityIds` in any position - action,
+   * actant, tag or direct territory (the StatementEntities index), or an
+   * in-statement prop type/value recursing to lvl3 (the StatementDataProps
+   * index). Both are multi indexes, so a statement matching several keys - or
+   * both indexes - arrives more than once and is deduplicated by id here.
+   * @param db db connection
+   * @param entityIds ids to look for
+   * @returns list of statements, each once
+   */
+  static async getLinkedEntitiesAnyPosition(
+    db: Connection | undefined,
+    entityIds: string[]
+  ): Promise<IStatement[]> {
+    if (!entityIds.length) {
+      return [];
+    }
+
+    const statements: IStatement[] = await rethink
+      .table(Entity.table)
+      .getAll(rethink.args(entityIds), {
+        index: DbEnums.Indexes.StatementEntities,
+      })
+      .union(
+        rethink.table(Entity.table).getAll(rethink.args(entityIds), {
+          index: DbEnums.Indexes.StatementDataProps,
+        }) as any
+      )
+      .filter({ class: EntityEnums.Class.Statement })
+      .run(db);
+
+    const byId = new Map<string, IStatement>();
+    for (const statement of statements) {
+      byId.set(statement.id, statement);
+    }
+
+    return [...byId.values()];
+  }
+
+  /**
+   * Returns ids that co-occur with any of the passed entities in a statement.
+   * Coverage mirrors the two entity-keyed statement indexes - actions, actants,
+   * tags, direct territory, and in-statement prop type/value - plus the
+   * statement id itself, so every returned id would also find these statements
+   * if used as the co-occurrence input. The prop index stops at lvl3 while the
+   * prop walk here does not; the editor nests props no deeper, so only imported
+   * data with deeper props yields ids that do not find their statement back.
+   * Territory ancestor lineage, reference resource/value and actant
+   * classifications/identifications have no such index and stay out; including
+   * them made co-occurrence search return many unrelated entities.
+   * Passed ids are never part of the result, so two inputs that co-occur with
+   * each other do not return each other.
+   * @param db db connection
+   * @param entityIds single id or list of ids; results are unioned
+   * @returns list of co-occurring ids
    */
   static async getCoOccurrentEntityIds(
     db: Connection | undefined,
-    entityId: string
+    entityIds: string | string[]
   ): Promise<string[]> {
-    const statements = await Statement.getLinkedEntities(db, entityId);
+    const inputIds = typeof entityIds === "string" ? [entityIds] : entityIds;
+    if (!inputIds.length) {
+      return [];
+    }
+
+    const statements = await Statement.getLinkedEntitiesAnyPosition(
+      db,
+      inputIds
+    );
 
     const ids = new Set<string>();
     for (const s of statements) {
@@ -766,15 +933,21 @@ class Statement extends Entity implements IStatement {
       }
       s.data.actions?.forEach((a) => {
         if (a.actionId) ids.add(a.actionId);
+        Entity.extractIdsFromProps(a.props).forEach((id) => {
+          if (id) ids.add(id);
+        });
       });
       s.data.actants?.forEach((a) => {
         if (a.entityId) ids.add(a.entityId);
+        Entity.extractIdsFromProps(a.props).forEach((id) => {
+          if (id) ids.add(id);
+        });
       });
       s.data.tags?.forEach((t) => {
         if (t) ids.add(t);
       });
     }
-    ids.delete(entityId);
+    inputIds.forEach((id) => ids.delete(id));
 
     return [...ids];
   }

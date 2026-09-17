@@ -40,10 +40,32 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],
   Query.EdgeType["R:SOE"],
+  // ordered relation edges: the entity sits at entityIds[0] and the target at
+  // entityIds[1] (server: EdgeHasOrderedRelation in edge.ts)
+  Query.EdgeType["R:HOL"],
+  Query.EdgeType["R:AEE"],
+  Query.EdgeType["R:IMP"],
+  Query.EdgeType["R:SUS"],
+  Query.EdgeType["R:A1S"],
+  Query.EdgeType["R:A2S"],
+  // unordered relation edges: symmetric pairs and the Synonym cloud, where the
+  // entity can sit at any index (server: EdgeHasUnorderedRelation in edge.ts)
+  Query.EdgeType["R:SYN"],
+  Query.EdgeType["R:ANT"],
+  Query.EdgeType["R:PRR"],
+  Query.EdgeType["R:SAR"],
+  Query.EdgeType["R:IDE"],
+  Query.EdgeType["R:REL"],
+  // inverse relation edges: match the entity on the target side of the relation
+  // (instances / subclasses / subordinates / meronyms of the target node)
+  Query.EdgeType["I_R:CLA"],
+  Query.EdgeType["I_R:SCL"],
+  Query.EdgeType["I_R:SOE"],
+  Query.EdgeType["I_R:HOL"],
+  // SUT: match Statements under the target Territory. The target node's SUB
+  // toggle widens it to the whole subtree - "include subordinates" of a Territory
+  // is its child territories, all levels (server: getSubordinateEntityIds).
   Query.EdgeType["SUT:"],
-  // SUT:C match Statements under the target Territory OR any descendant
-  // territory, recursively (whole subtree; server: EdgeSUnderChildrenT in edge.ts)
-  Query.EdgeType["SUT:C"],
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
@@ -51,4 +73,19 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)
   Query.EdgeType["IS:"],
+];
+
+/**
+ * Edge types left out of the edge type dropdown entirely, not even listed as
+ * disabled. The "used as" inverses of the semantics/implication relations have
+ * no readable "has: X" phrasing. "CT:G" / "I_CT:G" share their label and node
+ * rules with "CT:" / "I_CT:" and have no server implementation.
+ */
+export const edgeTypesHidden: Query.EdgeType[] = [
+  Query.EdgeType["CT:G"],
+  Query.EdgeType["I_CT:G"],
+  Query.EdgeType["I_R:IMP"],
+  Query.EdgeType["I_R:SUS"],
+  Query.EdgeType["I_R:A1S"],
+  Query.EdgeType["I_R:A2S"],
 ];

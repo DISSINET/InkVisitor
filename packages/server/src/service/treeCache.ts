@@ -206,6 +206,24 @@ export class TreeCache {
     return out;
   }
 
+  /**
+   * Id of the first-level territory (a direct child of the root) that the given
+   * territory sits under, or the territory itself when it already is one.
+   * Undefined for the root and for ids missing from the tree (a template
+   * territory, or one created after the last cache refresh).
+   */
+  getFirstLevelTerritoryId(terId: string): string | undefined {
+    const ter = this.tree.idMap[terId];
+    if (!ter) {
+      return undefined;
+    }
+    if (ter.lvl === 1) {
+      return terId;
+    }
+    // path runs root-first, so the first-level ancestor is the second entry
+    return ter.lvl > 1 ? ter.path[1] : undefined;
+  }
+
   findRightInParentTerritory(
     terId: string,
     rights: UserRight[]

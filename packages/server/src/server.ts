@@ -25,7 +25,7 @@ import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import headersProtectionMiddleware from "@middlewares/headers-protection";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
-import serveClientApp from "@middlewares/static-client";
+import serveClientApp, { serveAsset } from "@middlewares/static-client";
 import { authenticateRequest } from "@middlewares/auth";
 import {
   cookieParserMiddleware,
@@ -69,7 +69,7 @@ const staticPath = process.env.STATIC_PATH;
 if (staticPath === "/") {
   server.use(serveClientApp);
 } else if (staticPath) {
-  server.use(staticPath, express.static("../client/dist"));
+  server.use(staticPath, serveAsset);
 }
 
 server.use(express.json({ limit: "150mb" }));
@@ -86,20 +86,20 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-if (process.env.NODE_ENV !== "development") {
-  server.use(
-    `${apiPath}/users/signin`,
-    rateLimit({
-      windowMs: 5 * 60 * 1000,
-      max: 5,
-      handler: (req: Request, res: Response, next: NextFunction, options) => {
-        throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
-      },
-      standardHeaders: true,
-      legacyHeaders: false,
-    })
-  );
-}
+server.use(
+  // the signin route is reachable under both router mounts; one limiter
+  // instance listed on both paths keeps a single bucket per client
+  [`${apiPath}/users/signin`, `${apiPathOld}/users/signin`],
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 5,
+    handler: (req: Request, res: Response, next: NextFunction, options) => {
+      throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 server.use(headersProtectionMiddleware);
 server.use(profilerMiddleware);
@@ -109,16 +109,26 @@ server.use(csrfProtection);
 server.use(apiPath, dbMiddleware);
 
 server.use(authenticateRequest);
-server.use(customizeRequest);
+// customizeRequest reads req.db, which only dbMiddleware sets, so both mount on
+// the same prefix. The browser sends the session cookie for every path of the
+// origin, so authenticateRequest resolves a user on non-api paths too - static
+// assets, the SPA fallback, unknown routes - where no db handle exists.
+server.use(apiPath, customizeRequest);
 
 const router = Router();
 server.use(apiPath, router);
 server.use(apiPathOld, router);
 
+// The Dockerfile CMD passes the image build timestamp as the process's first
+// argument; clients watch it across /health responses to detect a new deploy.
+// Empty outside the container (local dev runs pass no argument).
+const buildTimestamp = process.argv[2] || "";
+
 router.get("/health", async function (req, res) {
   await rethink.tableList().run(req.db.connection);
   res.json({
     result: true,
+    buildTimestamp,
     db: {
       pool: {
         size: pool.pool.size,

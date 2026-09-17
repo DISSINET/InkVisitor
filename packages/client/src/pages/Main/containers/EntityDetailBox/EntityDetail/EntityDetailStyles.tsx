@@ -51,6 +51,7 @@ export const StyledDetailSectionHeading = styled.div`
   /* color: ${({ theme }) => theme.color["gray"]["600"]}; */
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   text-transform: uppercase;
+  white-space: nowrap;
 `;
 
 export const StyledExpandIcon = styled.div`

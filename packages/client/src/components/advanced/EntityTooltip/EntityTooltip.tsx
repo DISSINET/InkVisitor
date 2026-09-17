@@ -14,6 +14,7 @@ import {
 import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
 import { useQuery } from "@tanstack/react-query";
 import {
+  maxTooltipAnchors,
   maxTooltipMultiRelations,
   tooltipLabelSeparator,
 } from "Theme/constants";
@@ -56,6 +57,12 @@ interface EntityTooltip {
   language: EntityEnums.Language;
   detail?: string;
   text?: string;
+  /**
+   * Anchor contents carried on the entity itself, so anchored statements show
+   * their text without waiting for the tooltip fetch. The fetched
+   * `usedInDocuments` supersedes it once loaded - it adds document titles.
+   */
+  anchorTexts?: string[];
   itemsCount?: number;
   partOfSpeech?:
     | EntityEnums.ActionPartOfSpeech
@@ -85,6 +92,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   language,
   detail,
   text,
+  anchorTexts,
   itemsCount,
   partOfSpeech,
   // settings
@@ -126,6 +134,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   const anchors = data?.usedInDocuments;
 
+  // the remaining rows (part of speech, items count, alternative labels...)
+  // only render alongside one of these, so they do not count as content
+  const hasEntityInfo = Boolean(
+    text || detail || label || anchorTexts?.length
+  );
+
   const getActionPartOfSpeech = () =>
     actionPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
 
@@ -135,28 +149,30 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const renderEntityInfo = useMemo(
     () => (
       <>
-        {(text || detail || label) && (
+        {hasEntityInfo && (
           <>
-            <StyledRow>
-              <StyledIconWrap>
-                <AiOutlineTag />
-              </StyledIconWrap>
-              <StyledLabel>
-                <>
-                  <StyledBold>{label}</StyledBold>
-                  {" ("}
-                  {languageDict.find((l) => l.value === language)?.label}
-                  {partOfSpeech ? ", " : ""}
-                  {entityClass === EntityEnums.Class.Action &&
-                    partOfSpeech &&
-                    getActionPartOfSpeech()}
-                  {entityClass === EntityEnums.Class.Concept &&
-                    partOfSpeech &&
-                    getConceptPartOfSpeech()}
-                  {")"}
-                </>
-              </StyledLabel>
-            </StyledRow>
+            {label && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <AiOutlineTag />
+                </StyledIconWrap>
+                <StyledLabel>
+                  <>
+                    <StyledBold>{label}</StyledBold>
+                    {" ("}
+                    {languageDict.find((l) => l.value === language)?.label}
+                    {partOfSpeech ? ", " : ""}
+                    {entityClass === EntityEnums.Class.Action &&
+                      partOfSpeech &&
+                      getActionPartOfSpeech()}
+                    {entityClass === EntityEnums.Class.Concept &&
+                      partOfSpeech &&
+                      getConceptPartOfSpeech()}
+                    {")"}
+                  </>
+                </StyledLabel>
+              </StyledRow>
+            )}
             {customTooltipAttributes?.partLabel && (
               <StyledRow>
                 <StyledIconWrap>
@@ -214,41 +230,69 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 </StyledDetail>
               </StyledRow>
             )}
-            {anchors && anchors?.length > 0 && (
+            {anchors && anchors?.length > 0 ? (
               <StyledRow>
                 <StyledIconWrap>
                   <BsCardText />
                 </StyledIconWrap>
                 <StyledDetail>
-                  {anchors.slice(0, 8).map((documentAnchor, index) => {
-                    return (
-                      <StyledAnchorItem key={index}>
-                        <DocumentTitle
-                          title={documentAnchor.document.title}
-                          size="sm"
-                        />
-                        <StyledAnchorText>
-                          {documentAnchor.anchorText}
-                        </StyledAnchorText>
-                      </StyledAnchorItem>
-                    );
-                  })}
-                  {anchors.length > 8 && (
+                  {anchors
+                    .slice(0, maxTooltipAnchors)
+                    .map((documentAnchor, index) => {
+                      return (
+                        <StyledAnchorItem key={index}>
+                          <DocumentTitle
+                            title={documentAnchor.document.title}
+                            size="sm"
+                          />
+                          <StyledAnchorText>
+                            {documentAnchor.anchorText}
+                          </StyledAnchorText>
+                        </StyledAnchorItem>
+                      );
+                    })}
+                  {anchors.length > maxTooltipAnchors && (
                     <StyledMoreText>
-                      +{anchors.length - 8} more anchors
+                      +{anchors.length - maxTooltipAnchors} more anchors
                     </StyledMoreText>
                   )}
                 </StyledDetail>
               </StyledRow>
+            ) : (
+              anchorTexts &&
+              anchorTexts.length > 0 && (
+                <StyledRow>
+                  <StyledIconWrap>
+                    <BsCardText />
+                  </StyledIconWrap>
+                  <StyledDetail>
+                    {anchorTexts
+                      .slice(0, maxTooltipAnchors)
+                      .map((anchorText, index) => (
+                        <StyledAnchorText key={index}>
+                          {anchorText}
+                        </StyledAnchorText>
+                      ))}
+                    {anchorTexts.length > maxTooltipAnchors && (
+                      <StyledMoreText>
+                        +{anchorTexts.length - maxTooltipAnchors} more anchors
+                      </StyledMoreText>
+                    )}
+                  </StyledDetail>
+                </StyledRow>
+              )
             )}
           </>
         )}
       </>
     ),
     [
+      hasEntityInfo,
       text,
       detail,
       label,
+      anchorTexts,
+      anchors,
       itemsCount,
       tooltipData,
       language,
@@ -289,6 +333,17 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     );
   };
 
+  const hasRelations = useMemo(() => {
+    if (!tooltipData) {
+      return false;
+    }
+    return getEntityRelationRules(
+      entityClass,
+      RelationEnums.TooltipTypes,
+      isTemplate
+    ).some((t) => (tooltipData.relations[t]?.connections?.length ?? 0) > 0);
+  }, [tooltipData, entityClass, isTemplate]);
+
   const renderRelations = useMemo(() => {
     if (tooltipData) {
       const { relations, entities } = tooltipData;
@@ -298,11 +353,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         RelationEnums.TooltipTypes,
         isTemplate
       );
-
-      const relationsCount: number[] = filteredTypes.map((t) =>
-        relations[t]?.connections ? relations[t]!.connections.length : 0
-      );
-      const hasRelations = relationsCount.some((count) => count > 0);
 
       return (
         <>
@@ -387,7 +437,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         </>
       );
     }
-  }, [tooltipData]);
+  }, [tooltipData, hasRelations]);
 
   const renderContent = useMemo(
     () => (
@@ -399,15 +449,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     [renderEntityInfo, renderRelations]
   );
 
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  useEffect(() => {
-    if (!disabled) {
-      setShowTooltip(true);
-    } else {
-      setShowTooltip(false);
-    }
-  }, [disabled]);
+  // an empty box with only the arrow is worse than no tooltip at all
+  const showTooltip = !disabled && (hasEntityInfo || hasRelations);
 
   return (
     <>

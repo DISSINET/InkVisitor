@@ -170,6 +170,12 @@ export interface EntityDragItem extends DragItem {
   entityClass: EntityEnums.Class;
   isTemplate: boolean;
   isDiscouraged: boolean;
+  /**
+   * Set when the user may only read this entity. Drop targets opt in to acting
+   * on it: one that moves the entity refuses to lift it, one that treats it as
+   * a destination refuses to land there. Merely linking it stays allowed.
+   */
+  entityIsReadOnly?: boolean;
 }
 export interface DraggedEntityReduxItem {
   index?: number;

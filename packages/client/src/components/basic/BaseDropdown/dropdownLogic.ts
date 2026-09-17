@@ -1,5 +1,29 @@
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { ChangeMeta } from "./types";
+import { BaseDropdownGroup, ChangeMeta } from "./types";
+
+export const isDropdownGroup = <O extends DropdownItem>(
+  entry: O | BaseDropdownGroup<O>
+): entry is BaseDropdownGroup<O> => "options" in entry && Array.isArray(entry.options);
+
+/* Options are navigated and filtered as one flat list; the group of each
+   option is kept aside (keyed by the option object) for rendering headings. */
+export const flattenOptions = <O extends DropdownItem>(
+  entries: (O | BaseDropdownGroup<O>)[]
+): { items: O[]; groupOf: Map<O, string> } => {
+  const items: O[] = [];
+  const groupOf = new Map<O, string>();
+  for (const entry of entries) {
+    if (isDropdownGroup(entry)) {
+      for (const option of entry.options) {
+        items.push(option);
+        groupOf.set(option, entry.label);
+      }
+    } else {
+      items.push(entry);
+    }
+  }
+  return { items, groupOf };
+};
 
 export const filterOptions = <O extends DropdownItem>(
   options: O[],

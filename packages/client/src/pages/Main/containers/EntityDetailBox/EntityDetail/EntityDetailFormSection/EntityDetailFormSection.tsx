@@ -90,12 +90,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
 
   const orderedLanguageDict = useOrderedLanguageDict();
 
-  const noDocumentLinkedItem: DropdownItem = {
-    value: "",
-    label: "no document linked",
-  };
+  // the clear cross unlinks, so the empty state only needs a placeholder
+  const noDocumentLinkedLabel = "no document linked";
   const documentOptions: DropdownItem[] = useMemo(() => {
-    const options = [noDocumentLinkedItem];
+    const options: DropdownItem[] = [];
     documents?.forEach((doc: IDocument) => {
       options.push({
         value: doc.id,
@@ -106,8 +104,20 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   }, [documents]);
 
   const selectedDocumentOption: string = useMemo(() => {
-    return entity.data.documentId ?? noDocumentLinkedItem.value;
+    return entity.data.documentId ?? "";
   }, [documentOptions, entity.data.documentId]);
+
+  const updateDocumentId = (documentId: string) => {
+    const oldData = { ...entity.data };
+    updateEntityMutation.mutate({
+      data: {
+        ...oldData,
+        ...{
+          documentId: documentId,
+        },
+      },
+    });
+  };
 
   // make the selected label the first one so it will be displayed as the main one
   const handlePromoteLabel = (label: string) => {
@@ -607,16 +617,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     value={selectedDocumentOption}
                     width="full"
                     options={documentOptions}
+                    placeholder={noDocumentLinkedLabel}
+                    isClearable={userCanEdit}
                     onChange={(selectedOption) => {
-                      const oldData = { ...entity.data };
-                      updateEntityMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            documentId: selectedOption,
-                          },
-                        },
-                      });
+                      updateDocumentId(selectedOption);
                     }}
                   />
                 </StyledDetailContentRowValue>

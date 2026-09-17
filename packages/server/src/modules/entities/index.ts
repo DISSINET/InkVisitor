@@ -22,6 +22,7 @@ import {
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
+  ITerritory,
   IUser,
   Relation as RelationType,
   RequestSearch,
@@ -37,11 +38,14 @@ import {
   InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
+  TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
 import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import { IBatchSetAttributeChanges } from "@inkvisitor/shared/types/request-batch";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
+import Territory from "@models/territory/territory";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
 import {
@@ -96,6 +100,11 @@ export default Router()
       const response = new ResponseEntity(entity);
 
       await response.prepare(request);
+
+      // stamp document anchor spans onto a statement so its tag can show them
+      // as a label (response-only field, see IEntity.anchorTexts). Must run on
+      // the wrapped response - getEntityClass drops undeclared fields.
+      await Entity.applyAnchorTexts(request.db.connection, [response]);
 
       return response;
     })
@@ -413,6 +422,15 @@ export default Router()
         throw new EntityDoesNotExist(`entity with id ${entityId} does not exist`, entityId);
       }
 
+      // the id is copied out rather than held by reference: the merge below
+      // writes the update into existingEntity, mutating the parent object itself
+      const parentIdBeforeUpdate =
+        existingEntity.class === EntityEnums.Class.Territory &&
+        (existingEntity as ITerritory).data?.parent
+          ? ((existingEntity as ITerritory).data.parent as { territoryId: string })
+              .territoryId
+          : undefined;
+
       // get correct IDbModel implementation
       const model = getEntityClass({
         ...mergeDeep(existingEntity, entityData),
@@ -427,6 +445,39 @@ export default Router()
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be saved");
+      }
+
+      // Re-parenting a Territory through this route is the same operation the
+      // tree position route performs, and needs the same right on the branch it
+      // lands in: canBeEditedByUser derives the right for the moved Territory
+      // alone, which says nothing about where it is going.
+      if (existingEntity.class === EntityEnums.Class.Territory) {
+        const newParent = (model as Territory).data.parent;
+        const newParentId = newParent ? newParent.territoryId : undefined;
+        if (
+          newParentId &&
+          newParentId !== parentIdBeforeUpdate
+        ) {
+          const parentData = await findEntityById<ITerritory>(
+            request.db,
+            newParentId
+          );
+          if (!parentData || parentData.class !== EntityEnums.Class.Territory) {
+            throw new TerritoryDoesNotExits(
+              `territory ${newParentId} was not found`,
+              newParentId
+            );
+          }
+          if (
+            !new Territory(parentData).canBeEditedByUser(
+              request.getUserOrFail()
+            )
+          ) {
+            throw new PermissionDeniedError(
+              `cannot move territory under ${newParentId}`
+            );
+          }
+        }
       }
 
       await model.beforeSave(request.db.connection);
@@ -841,12 +892,22 @@ export default Router()
           entities: [],
           explore: querySearch.explore,
           total: entityIds.length,
+          expansion: querySearch.expansionCounts,
           stats,
           statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
         };
       }
 
       const results = await querySearch.getResults(request.db.connection);
+
+      // The table renders editable cells for a row only when its entity may be
+      // edited, so each row carries the mode the same rules produce elsewhere.
+      // Every path behind it reads the in-memory tree cache or the entity's own
+      // fields, so this costs no further queries.
+      const queryUser = request.getUserOrFail();
+      for (const row of results) {
+        row.right = getEntityClass({ ...row.entity }).getUserRoleMode(queryUser);
+      }
 
       const entityIds = querySearch.results?.items ?? [];
 
@@ -856,6 +917,7 @@ export default Router()
         entities: results,
         explore: querySearch.explore,
         total: entityIds.length,
+        expansion: querySearch.expansionCounts,
       };
     })
   )
@@ -1030,10 +1092,11 @@ export default Router()
             entityIds: string[];
             resourceEntityId: string;
             valueEntityId?: string;
+            valueLabel?: string;
           }
         >
       ) => {
-        const { entityIds, resourceEntityId, valueEntityId } = request.body;
+        const { entityIds, resourceEntityId, valueEntityId, valueLabel } = request.body;
 
         if (
           !entityIds ||
@@ -1057,10 +1120,63 @@ export default Router()
         let updated = 0;
 
         for (const entityData of entities) {
+          let valueId = valueEntityId || "";
+
+          // a V is an endpoint - the "40" of one entity is not the "40" of the
+          // next - so a labelled batch gives every entity a V of its own
+          if (valueLabel) {
+            // the V is written before the entity that will hold it, so an
+            // entity the user may not edit must not leave one behind
+            if (!getEntityClass({ ...entityData }).canBeEditedByUser(user)) {
+              errors[entityData.id] = "permission denied";
+              continue;
+            }
+
+            const valueModel = getEntityClass({
+              id: randomUUID(),
+              class: EntityEnums.Class.Value,
+              labels: [valueLabel],
+              detail: "",
+              language: user.options.defaultLanguage,
+              data: {},
+              notes: [],
+              props: [],
+              references: [],
+              status: EntityEnums.Status.Approved,
+              isTemplate: false,
+            });
+
+            if (!valueModel.isValid()) {
+              errors[entityData.id] = "value model not valid";
+              continue;
+            }
+
+            if (!valueModel.canBeCreatedByUser(user)) {
+              errors[entityData.id] = "permission denied";
+              continue;
+            }
+
+            await valueModel.beforeSave(request.db.connection);
+
+            if (!(await valueModel.save(request.db.connection))) {
+              errors[entityData.id] = "value could not be created";
+              continue;
+            }
+
+            await Audit.createNew(
+              request,
+              AuditScope.Entity,
+              valueModel.id,
+              valueModel,
+              EventType.CREATE
+            );
+            valueId = valueModel.id;
+          }
+
           const newRef: IReference = {
             id: randomUUID(),
             resource: resourceEntityId,
-            value: valueEntityId || "",
+            value: valueId,
           };
 
           const updatedRefs = [...entityData.references, newRef];
@@ -1204,6 +1320,135 @@ export default Router()
           message: `Created ${created}/${entities.length} relations${
             Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
+        };
+      }
+    )
+  )
+
+  .post(
+    "/batchSetAttribute",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          {
+            entityIds: string[];
+            changes: IBatchSetAttributeChanges;
+          }
+        >
+      ) => {
+        const { entityIds, changes } = request.body;
+
+        if (!entityIds || !Array.isArray(entityIds) || entityIds.length === 0) {
+          throw new BadParams("entityIds array must be provided");
+        }
+
+        if (!changes || (changes.attribute !== "language" && changes.attribute !== "pos")) {
+          throw new BadParams("changes.attribute must be language or pos");
+        }
+
+        if (changes.attribute === "language" && changes.to === undefined) {
+          throw new BadParams("changes.to must be provided");
+        }
+
+        if (changes.attribute === "pos" && !changes.concept && !changes.action) {
+          throw new BadParams("changes.concept or changes.action must be provided");
+        }
+
+        // an empty target would clear pos on every matched entity
+        if (
+          changes.attribute === "pos" &&
+          [changes.concept, changes.action].some((spec) => spec && !spec.to)
+        ) {
+          throw new BadParams("changes.concept.to and changes.action.to must name a part of speech");
+        }
+
+        await request.db.lock();
+
+        const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
+
+        if (entities.length === 0) {
+          throw new EntityDoesNotExist("none of the provided entities were found", entityIds[0]);
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        let updated = 0;
+        // an entity the attribute does not apply to, or whose current value is
+        // not the one being replaced, is left alone - not an error
+        let skipped = 0;
+
+        for (const entityData of entities) {
+          let updateData: Partial<IEntity> | undefined;
+
+          if (changes.attribute === "language") {
+            const current = entityData.language || EntityEnums.Language.Empty;
+            if (changes.from !== null && current !== changes.from) {
+              skipped++;
+              continue;
+            }
+            if (current === changes.to) {
+              skipped++;
+              continue;
+            }
+            updateData = { language: changes.to };
+          } else {
+            const spec =
+              entityData.class === EntityEnums.Class.Concept
+                ? changes.concept
+                : entityData.class === EntityEnums.Class.Action
+                  ? changes.action
+                  : undefined;
+
+            if (!spec) {
+              skipped++;
+              continue;
+            }
+
+            const current = (entityData.data as { pos?: string })?.pos || "";
+            if (spec.from !== null && current !== spec.from) {
+              skipped++;
+              continue;
+            }
+            if (current === spec.to) {
+              skipped++;
+              continue;
+            }
+            updateData = { data: { ...entityData.data, pos: spec.to } } as Partial<IEntity>;
+          }
+
+          const model = getEntityClass({
+            ...mergeDeep(entityData, updateData),
+            class: entityData.class,
+            id: entityData.id,
+          });
+
+          if (!model.isValid()) {
+            errors[entityData.id] = "model not valid";
+            continue;
+          }
+
+          if (!model.canBeEditedByUser(user)) {
+            errors[entityData.id] = "permission denied";
+            continue;
+          }
+
+          await model.beforeSave(request.db.connection);
+          const result = await model.update(request.db.connection, updateData);
+
+          if (result.replaced || result.unchanged) {
+            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
+            updated++;
+          } else {
+            errors[entityData.id] = "update failed";
+          }
+        }
+
+        return {
+          result: updated > 0,
+          message: `Updated ${updated}/${entities.length} entities${
+            skipped ? ` (${skipped} skipped: not relevant / no match)` : ""
+          }${Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""}`,
         };
       }
     )

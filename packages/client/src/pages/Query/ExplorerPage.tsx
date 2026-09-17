@@ -14,6 +14,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Box, Button, Checkbox, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { isAnyModalOpen } from "components/basic/Modal/modalStack";
 import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
@@ -24,7 +25,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { COLLAPSED_PANEL_WIDTH, maxTabCount } from "Theme/constants";
 import {
   animateBoxHeightVars,
   animatePanelWidthVars,
@@ -48,7 +49,11 @@ import {
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
-import { StyledResultExpansionButtons } from "./ExplorerPageStyles";
+import {
+  StyledExpansionCount,
+  StyledExpansionToggle,
+  StyledResultExpansionButtons,
+} from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
@@ -80,7 +85,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     replaceDetailIds,
   } = useSearchParams();
 
-  const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   // Page-level result expansion (#2969): append the equivalents (SYN/IDE/AEE)
@@ -204,20 +208,43 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // and re-fetch automatically because the cache key (stableSignature) changes.
   const [committedSearchSignature, setCommittedSearchSignature] = useState<string | null>(null);
 
+  // Expansion flags of the search that produced the results on screen. The
+  // toggles can be flipped without running a search, so the banner above the
+  // results describes these rather than the live toggle state.
+  const [committedExpansion, setCommittedExpansion] = useState({
+    equivalents: false,
+    subordinates: false,
+  });
+
   const handleRunSearch = useCallback(() => {
     setCommittedSearchSignature(searchSignature);
-  }, [searchSignature]);
+    setCommittedExpansion({
+      equivalents: includeEquivalents,
+      subordinates: includeSubordinates,
+    });
+  }, [searchSignature, includeEquivalents, includeSubordinates]);
 
   // Global Enter shortcut: run search unless focus is in a text input, textarea,
   // or select — except when that input lives inside a container marked with
   // [data-run-on-enter] (floating search panel, UUID filter panel), where Enter
   // should also trigger the search alongside any local handler on the input.
+  // A dropdown focuses its own hidden text input, so it would otherwise swallow
+  // Enter everywhere outside those containers; only an OPEN menu keeps Enter for
+  // itself, where the key picks the highlighted option. An open modal owns
+  // Enter (Ctrl+Enter applies it), so the search never runs behind one.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
-      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select") {
-        if (!document.activeElement?.closest("[data-run-on-enter]")) return;
+      if (isAnyModalOpen()) return;
+      const focused = document.activeElement;
+      const tag = (focused?.tagName ?? "").toLowerCase();
+      // a dropdown's focus sits on its search input, or on the control itself
+      // when typing is off; aria-expanded lives on the control in both cases
+      const dropdown = focused?.closest("[data-dropdown]");
+      if (dropdown) {
+        if (dropdown.querySelector("[aria-expanded='true']")) return;
+      } else if (tag === "input" || tag === "textarea" || tag === "select") {
+        if (!focused?.closest("[data-run-on-enter]")) return;
       }
       handleRunSearch();
     };
@@ -472,6 +499,11 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     globalIncludeSubordinates: includeSubordinates,
   });
 
+  // Rows the expansion added to the result that is actually displayed. A toggle
+  // change moves the query to a new cache key, so no count is shown between the
+  // toggle and the rerun rather than a number from the previous search.
+  const expansionCounts = queryData?.expansion;
+
   const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
 
   const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
@@ -533,7 +565,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       if (detailIdArray.includes(entityId)) {
         setSelectedDetailId(entityId);
       } else {
-        appendDetailId(entityId, QUERY_DETAIL_MAX_TABS);
+        appendDetailId(entityId, maxTabCount);
       }
     },
     [appendDetailId, detailIdArray, expandQueryDetailPanel, setSelectedDetailId],
@@ -548,21 +580,23 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       expandQueryDetailPanel();
 
       let idsToAdd = entityIds;
-      if (entityIds.length > QUERY_DETAIL_MAX_TABS) {
+      if (entityIds.length > maxTabCount) {
         toast.info(
-          `Maximum number of tabs reached, only the first ${QUERY_DETAIL_MAX_TABS} displayed.`,
+          `Maximum number of tabs reached, only the first ${maxTabCount} displayed.`,
         );
-        idsToAdd = entityIds.slice(0, QUERY_DETAIL_MAX_TABS);
+        idsToAdd = entityIds.slice(0, maxTabCount);
       }
 
+      // the tab strip fills from the left and hides the tail behind its caret,
+      // so the entities opened here lead and the older ones give way first
       const filteredArray = detailIdArray.filter((id) => !idsToAdd.includes(id));
-      let newDetailIdArray = filteredArray.concat(idsToAdd);
-      if (newDetailIdArray.length > QUERY_DETAIL_MAX_TABS) {
-        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - QUERY_DETAIL_MAX_TABS);
+      let newDetailIdArray = idsToAdd.concat(filteredArray);
+      if (newDetailIdArray.length > maxTabCount) {
+        newDetailIdArray = newDetailIdArray.slice(0, maxTabCount);
       }
 
       replaceDetailIds(newDetailIdArray);
-      setSelectedDetailId(idsToAdd[idsToAdd.length - 1]);
+      setSelectedDetailId(idsToAdd[0]);
     },
     [detailIdArray, expandQueryDetailPanel, replaceDetailIds, setSelectedDetailId],
   );
@@ -603,6 +637,36 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     }
     return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
   }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
+
+  // Opening the Detail panel takes width from the Query box, and its header
+  // holds the label filter, both expansion toggles and run search. The parts
+  // that survive without their text go first: the expansion counts (the pill
+  // still shows the state), then the words - the run-search icon and the eq/sub
+  // marks on the result tags carry the same meaning, and both keep a tooltip.
+  //
+  // Held as booleans rather than derived from leftPanelWidth so a separator drag
+  // can feed them the width it is writing to the CSS vars, ahead of the drop
+  // that lands that width in state. Fed per pointer event, so the ref keeps
+  // React out of every move that stays on one side of a breakpoint.
+  const [hideExpansionCounts, setHideExpansionCounts] = useState(false);
+  const [compactHeader, setCompactHeader] = useState(false);
+  const headerBreakpointsRef = useRef({ hideCounts: false, compact: false });
+
+  const applyHeaderBreakpoints = useCallback((width: number) => {
+    const hideCounts = width < 900;
+    const compact = width < 660;
+    const current = headerBreakpointsRef.current;
+    if (hideCounts === current.hideCounts && compact === current.compact) {
+      return;
+    }
+    headerBreakpointsRef.current = { hideCounts, compact };
+    setHideExpansionCounts(hideCounts);
+    setCompactHeader(compact);
+  }, []);
+
+  useEffect(() => {
+    applyHeaderBreakpoints(leftPanelWidth);
+  }, [leftPanelWidth, applyHeaderBreakpoints]);
 
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
@@ -657,6 +721,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
               );
               setPanelWidthVars([resolved, layoutWidth - resolved], "explorerPage");
+              applyHeaderBreakpoints(resolved);
               return resolved;
             }}
             setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
@@ -683,42 +748,77 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               buttons={[
                 <StyledResultExpansionButtons key="result-expansion-toggles">
                   {/* accent colours echo the eq/sub badges on the resulting
-                      entity tags (see StyledExpansionBadge) */}
-                  <Checkbox
-                    label="EQ"
-                    size={13}
-                    color="info"
-                    noFill
-                    value={includeEquivalents}
-                    tooltipLabel="include equivalents"
-                    tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
-                    onChangeFn={handleToggleIncludeEquivalents}
-                  />
-                  <Checkbox
-                    label="SUB"
-                    size={13}
-                    color="warning"
-                    noFill
-                    value={includeSubordinates}
-                    tooltipLabel="include subordinates"
-                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
-                    onChangeFn={handleToggleIncludeSubordinates}
-                  />
+                      entity tags (see StyledExpansionBadge). The pill takes the
+                      click as well as the box, and Checkbox stops its own click
+                      from bubbling, so a hit on the box toggles exactly once. */}
+                  <StyledExpansionToggle
+                    $active={includeEquivalents}
+                    $variant="equivalent"
+                    onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                  >
+                    <Checkbox
+                      label={compactHeader ? "EQ" : "EQUIVALENTS"}
+                      size={14}
+                      color="info"
+                      value={includeEquivalents}
+                      tooltipLabel="include equivalents"
+                      tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
+                      onChangeFn={handleToggleIncludeEquivalents}
+                      disableEnterKey
+                    />
+                    {includeEquivalents &&
+                      !hideExpansionCounts &&
+                      expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="equivalent">
+                          +{expansionCounts.equivalents}
+                        </StyledExpansionCount>
+                      )}
+                  </StyledExpansionToggle>
+                  <StyledExpansionToggle
+                    $active={includeSubordinates}
+                    $variant="subordinate"
+                    onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
+                  >
+                    <Checkbox
+                      label={compactHeader ? "SUB" : "SUBORDINATES"}
+                      size={14}
+                      color="warning"
+                      value={includeSubordinates}
+                      tooltipLabel="include subordinates"
+                      tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
+                      onChangeFn={handleToggleIncludeSubordinates}
+                      disableEnterKey
+                    />
+                    {includeSubordinates &&
+                      !hideExpansionCounts &&
+                      expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="subordinate">
+                          +{expansionCounts.subordinates}
+                        </StyledExpansionCount>
+                      )}
+                  </StyledExpansionToggle>
                 </StyledResultExpansionButtons>,
                 <Button
                   key="run-search"
                   tooltipLabel="run search (Enter)"
-                  label="run search"
-                  icon={<IcoSearch />}
+                  label={compactHeader ? undefined : "run search"}
+                  icon={<IcoSearch size={13} />}
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
+                  shape={compactHeader ? "square" : undefined}
                 />,
-                <IconButton
-                  key="toggle-query-left-panel"
-                  tooltipLabel="collapse left panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
-                />,
+                <>
+                  {/* collapsing the left panel only makes sense while the detail
+                      panel is there to take over the freed width */}
+                  {isDetailOpen && (
+                    <IconButton
+                      key="toggle-query-left-panel"
+                      tooltipLabel="collapse left panel"
+                      icon={<RiMenuFoldFill />}
+                      onClick={toggleQueryLeftPanel}
+                    />
+                  )}
+                </>,
               ]}
             >
               <MemoizedQueryBox
@@ -832,12 +932,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     />
                   )}
                 </>,
-                <IconButton
-                  key="toggle-query-left-panel"
-                  tooltipLabel="collapse left panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
-                />,
+                <>
+                  {isDetailOpen && (
+                    <IconButton
+                      key="toggle-query-left-panel"
+                      tooltipLabel="collapse left panel"
+                      icon={<RiMenuFoldFill />}
+                      onClick={toggleQueryLeftPanel}
+                    />
+                  )}
+                </>,
               ]}
             >
               <MemoizedExplorerBox
@@ -853,6 +957,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
+                includeEquivalents={committedExpansion.equivalents}
+                includeSubordinates={committedExpansion.subordinates}
+                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
               />
             </Box>
@@ -906,7 +1014,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             ]}
           >
             <MemoizedEntityDetailBox
-              maxTabs={QUERY_DETAIL_MAX_TABS}
+              maxTabs={maxTabCount}
               onTabOpen={() => {
                 if (!queryDetailPanelExpanded) {
                   toggleQueryDetailPanel();

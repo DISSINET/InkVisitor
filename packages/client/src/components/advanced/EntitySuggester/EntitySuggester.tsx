@@ -12,18 +12,21 @@ import api from "api";
 import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
+import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
 import { FaHome } from "react-icons/fa";
 import { LuScanSearch } from "react-icons/lu";
 import {
   ButtonSize,
+  EntityColors,
   EntityDragItem,
   EntitySingleDropdownItem,
   SuggesterItemToCreate,
   ItemTypes,
 } from "types";
 import { deepCopy } from "utils/utils";
+import { canCreateEntities, copiesDroppedValue } from "utils/valueDropCopy";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 import { useUserQuery } from "hooks/react-query";
 
@@ -35,6 +38,7 @@ interface EntitySuggesterProps {
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
+  maxWidth?: number;
   // Explicit width for the suggestions dropdown, independent of the input width.
   // Set to intentionally show a wider results list.
   suggestionListWidth?: number;
@@ -46,6 +50,13 @@ interface EntitySuggesterProps {
   territoryId?: string;
   excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
+  /**
+   * Keeps the id of a dropped V instead of linking a copy of it. Set on targets
+   * that point at an entity that already exists - a bookmark, a search filter,
+   * a rule definition. A slot that stores a V links its own copy, see
+   * copiesDroppedValue.
+   */
+  reuseDroppedValue?: boolean;
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
   isInsideStatement?: boolean;
@@ -122,12 +133,14 @@ const EntitySuggesterFull: React.FC<
   onTyped,
   placeholder = "",
   inputWidth,
+  maxWidth,
   suggestionListWidth,
   openDetailOnCreate = false,
   territoryId,
   excludedEntityClasses = [],
   filterEditorRights = false,
   excludedActantIds = [],
+  reuseDroppedValue,
   isInsideTemplate = false,
   isInsideStatement = false,
   territoryParentId,
@@ -421,16 +434,36 @@ const EntitySuggesterFull: React.FC<
     }
   };
 
-  const handleDropped = (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
-    if (!isWrongDropCategory) {
-      if (instantiateTemplate && !disableTemplateInstantiation) {
-        newDropped.entity && handleInstantiateTemplate(newDropped.entity);
-      } else {
-        onSelected(newDropped.id);
-        newDropped.entity && onPicked(newDropped.entity);
+  const copyDroppedValue = useValueDropCopy();
+
+  const copiesValue = (item: EntityDragItem) =>
+    copiesDroppedValue({
+      entityClass: item.entityClass,
+      categoryTypes,
+      reuseDroppedValue,
+      canCreate: canCreateEntities(getStoredUserRole(), disableCreate),
+    });
+
+  const handleDropped = async (newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
+    if (isWrongDropCategory) {
+      return;
+    }
+    if (instantiateTemplate && !disableTemplateInstantiation) {
+      newDropped.entity && handleInstantiateTemplate(newDropped.entity);
+      return;
+    }
+    if (copiesValue(newDropped)) {
+      const valueCopy = await copyDroppedValue(newDropped);
+      if (valueCopy) {
+        onSelected(valueCopy.id);
+        onPicked(valueCopy);
         handleClean();
       }
+      return;
     }
+    onSelected(newDropped.id);
+    newDropped.entity && onPicked(newDropped.entity);
+    handleClean();
   };
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
@@ -442,7 +475,10 @@ const EntitySuggesterFull: React.FC<
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
-      excludedEntityClasses.includes(newHoverred.entityClass) ||
+      (excludedEntityClasses.includes(newHoverred.entityClass) && !copiesValue(newHoverred)) ||
+      // the suggester picks a destination the user has to be able to write,
+      // the same rule filterEditorRights applies to the typed suggestions
+      (filterEditorRights && newHoverred.entityIsReadOnly) ||
       // Is T or S template inside S template
       ((newHoverred.entityClass === EntityEnums.Class.Territory ||
         newHoverred.entityClass === EntityEnums.Class.Statement) &&
@@ -538,6 +574,7 @@ const EntitySuggesterFull: React.FC<
         disableButtons={disableButtons}
         disableEnter={disableEnter}
         inputWidth={inputWidth}
+        maxWidth={maxWidth}
         suggestionListWidth={suggestionListWidth}
         isInsideTemplate={isInsideTemplate}
         territoryParentId={territoryParentId}
@@ -609,6 +646,8 @@ const EntitySuggesterFull: React.FC<
 /**
  * Wrapper that can defer mounting the heavy suggester until user interaction.
  * compactUntilHover: when true, show a small button; mount full suggester on hover/click.
+ * Once mounted it stays mounted while it holds focus or typed text, so the
+ * pointer can leave to reach the suggestion list without collapsing it.
  */
 export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHover?: boolean }> = ({
   compactUntilHover = false,
@@ -618,6 +657,16 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingDropItem, setPendingDropItem] = useState<EntityDragItem | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [hasTypedText, setHasTypedText] = useState(false);
+  // the delayed minify closes over the state of the render that scheduled it,
+  // so it reads these refs for the values current when it fires
+  const keepMountedRef = useRef(false);
+  const isHoveredRef = useRef(false);
+
+  useEffect(() => {
+    keepMountedRef.current = isFocused || hasTypedText;
+  }, [isFocused, hasTypedText]);
 
   const isDropValid = (item: EntityDragItem): boolean => {
     const {
@@ -628,13 +677,23 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
       isInsideStatement = false,
       disabled = false,
       categoryTypes = classesAll,
+      filterEditorRights = false,
+      reuseDroppedValue,
+      disableCreate = false,
     } = rest;
 
     if (disabled) return false;
     if (item.isDiscouraged) return false;
+    if (filterEditorRights && item.entityIsReadOnly) return false;
     if (disableTemplatesAccept && item.isTemplate) return false;
     if (excludedActantIds.includes(item.id)) return false;
-    if (excludedEntityClasses.includes(item.entityClass)) return false;
+    const copiesValue = copiesDroppedValue({
+      entityClass: item.entityClass,
+      categoryTypes,
+      reuseDroppedValue,
+      canCreate: canCreateEntities(getStoredUserRole(), disableCreate),
+    });
+    if (excludedEntityClasses.includes(item.entityClass) && !copiesValue) return false;
     if (
       (item.entityClass === EntityEnums.Class.Territory ||
         item.entityClass === EntityEnums.Class.Statement) &&
@@ -672,6 +731,30 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     }
   };
 
+  /** Collapse back to the button unless the suggester is in use when the delay expires */
+  const scheduleMinify = () => {
+    clearHideTimeout();
+    hideTimeoutRef.current = setTimeout(() => {
+      hideTimeoutRef.current = null;
+      if (!keepMountedRef.current && !isHoveredRef.current) {
+        setIsMinified(true);
+      }
+    }, 1000);
+  };
+
+  const handleFocusChange = (focused: boolean) => {
+    setIsFocused(focused);
+    rest.onFocusChange?.(focused);
+    if (!focused) {
+      scheduleMinify();
+    }
+  };
+
+  const handleTyped = (typed: string) => {
+    setHasTypedText(typed.length > 0);
+    rest.onTyped?.(typed);
+  };
+
   useEffect(() => {
     if (containerRef.current) {
       drop(containerRef);
@@ -683,34 +766,45 @@ export const EntitySuggester: React.FC<EntitySuggesterProps & { compactUntilHove
     return <EntitySuggesterFull {...rest} />;
   }
 
+  // a suggester bound to a single class can say which one before it is opened;
+  // one offering a choice has no class to stand for
+  const soleCategory = rest.categoryTypes?.length === 1 ? rest.categoryTypes[0] : undefined;
+  const minifiedColor =
+    (soleCategory && EntityColors[soleCategory]?.color) || ("primary" as const);
+
   return (
     <div
       ref={containerRef}
       onMouseEnter={() => {
+        isHoveredRef.current = true;
         clearHideTimeout();
         setIsMinified(false);
       }}
       onMouseLeave={() => {
-        clearHideTimeout();
-        hideTimeoutRef.current = setTimeout(() => {
-          setIsMinified(true);
-        }, 1000);
+        isHoveredRef.current = false;
+        scheduleMinify();
       }}
       style={{ display: "inline-flex", alignItems: "center" }}
     >
       {isMinified ? (
         <Button
           tooltipLabel="Open suggester"
-          icon={<LuScanSearch color="black" />}
-          color="gray"
+          icon={<LuScanSearch />}
+          color={minifiedColor}
           shape="rounded-lg"
           size={ButtonSize.Medium}
           // inverted
-          noBorder
         />
       ) : (
         <EntitySuggesterFull
           {...rest}
+          // the field appears under the pointer, so it is already the thing the
+          // user is aiming at - typing goes to the input, not to the class
+          // dropdown that would otherwise take the focus on a multi-class field
+          autoFocus
+          autoFocusInput
+          onFocusChange={handleFocusChange}
+          onTyped={handleTyped}
           externalDroppedItem={pendingDropItem}
           onConsumeExternalDrop={() => setPendingDropItem(null)}
         />

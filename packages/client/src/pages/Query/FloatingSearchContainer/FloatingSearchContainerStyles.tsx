@@ -138,11 +138,14 @@ export const StyledHeaderButtons = styled.span`
   gap: ${({ theme }) => theme.space[1]};
 `;
 
-export const StyledExpandedPanel = styled.div`
+export const StyledExpandedPanel = styled.div<{ $maxHeight?: number }>`
   display: flex;
   flex-direction: column;
   width: ${FLOATING_SEARCH_EXPANDED_WIDTH}px;
   max-width: calc(100vw - ${FLOATING_SEARCH_PAGE_PADDING * 2}px);
+  // the form is taller than the page at large zoom levels; the panel stops at
+  // the page bounds and its content scrolls instead of running off screen
+  max-height: ${({ $maxHeight }) => ($maxHeight ? `${$maxHeight}px` : "none")};
   border-radius: ${({ theme }) => theme.borderRadius.md};
   background-color: ${({ theme }) => theme.color.blue[100]};
   box-shadow: ${({ theme }) => theme.boxShadow.high};
@@ -179,7 +182,9 @@ export const StyledDragHandle = styled.div`
 
 export const StyledExpandedContent = styled.div`
   padding: ${({ theme }) => theme.space[3]};
-  min-height: 6rem;
+  // a flex child scrolls only once it may shrink below its content
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 `;
 

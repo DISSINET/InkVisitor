@@ -35,6 +35,11 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
         removeDetailId(removeEntityId);
         queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
+      // the removed entity's own detail is dropped rather than refetched -
+      // GET /entities/:id/detail answers EntityDoesNotExist for it, and the
+      // detail tab it backed can still be mounted at this point
+      queryClient.removeQueries({ queryKey: ["entity", removeEntityId] });
+
       entityToRemove &&
         toast.warning(
           `Template [${entityToRemove.class}]: "${getShortLabelByLetterCount(
@@ -43,7 +48,12 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           )}" was removed`
         );
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // other entities cite this template through usedTemplate, so their
+      // details are refreshed - every one except the id just deleted
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === "entity" && query.queryKey[1] !== removeEntityId,
+      });
       setRemoveEntityId(false);
     },
   });

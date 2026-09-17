@@ -16,3 +16,13 @@ export interface OptionRenderState {
   highlighted: boolean;
   disabled: boolean;
 }
+
+/* `menuLabel` replaces `label` inside the open menu only, where a group heading
+   can already say what the label repeats; the control and the typing filter
+   keep matching the full `label` */
+export type BaseDropdownItem = DropdownItem & { menuLabel?: string };
+
+export interface BaseDropdownGroup<O extends DropdownItem = DropdownItem> {
+  label: string;
+  options: O[];
+}

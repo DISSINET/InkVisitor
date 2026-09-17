@@ -23,11 +23,19 @@ interface UserListEmailInput {
     Partial<Omit<IUser, "id">> & { id: IUser["id"] },
     unknown
   >;
+  autoFocus?: boolean;
+  /** the input has finished editing and the parent may return to its read-only view */
+  onDone?: () => void;
 }
-export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMutation }) => {
+export const UserListEmailInput: React.FC<UserListEmailInput> = ({
+  user,
+  userMutation,
+  autoFocus = false,
+  onDone,
+}) => {
   const [showReactivationModal, setShowReactivationModal] = useState(false);
 
-  const [localEmail, setLocalEmail] = useState("");
+  const [localEmail, setLocalEmail] = useState(user.email);
 
   useEffect(() => {
     if (user) {
@@ -51,16 +59,28 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMut
       <Input
         changeOnType
         value={localEmail}
+        autoFocus={autoFocus}
         onChangeFn={(newValue: string) => {
           setLocalEmail(newValue);
         }}
+        onEscapePressFn={() => {
+          setLocalEmail(user.email);
+          onDone?.();
+        }}
         onBlur={() => {
+          if (localEmail === user.email) {
+            onDone?.();
+            return;
+          }
           if (user.verified) {
             userMutation.mutate({
               id: user.id,
               email: localEmail,
             });
-          } else if (!user.verified && user.email !== localEmail) {
+            onDone?.();
+          } else {
+            // the reactivation modal lives in this component, so editing stays
+            // open until the modal is answered
             setShowReactivationModal(true);
           }
         }}
@@ -68,7 +88,14 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMut
       />
 
       {/* Reactivation */}
-      <Modal showModal={showReactivationModal} onClose={() => setShowReactivationModal(false)}>
+      <Modal
+        showModal={showReactivationModal}
+        onClose={() => {
+          setLocalEmail(user.email);
+          setShowReactivationModal(false);
+          onDone?.();
+        }}
+      >
         <ModalContent>
           <div style={{ display: "flex", alignItems: "center" }}>
             <span style={{ width: "14rem" }}>
@@ -87,14 +114,16 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({ user, userMut
               onClick={() => {
                 setLocalEmail(user.email);
                 setShowReactivationModal(false);
+                onDone?.();
               }}
             />
             <Button
-              label="submit"
+              label="Submit"
               color="danger"
               onClick={() => {
                 updateEmail(localEmail);
                 setShowReactivationModal(false);
+                onDone?.();
               }}
             />
           </ButtonGroup>

@@ -201,12 +201,17 @@ export const StyledIndicators = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+// same colors as the chip remove cross
 export const StyledClear = styled.div`
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 0.2rem;
-  color: ${({ theme }) => theme.color["primary"]};
+  padding: 0 0.2rem;
+  color: ${({ theme }) => theme.color["black"]};
+  transition: color 0.2s ease;
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
 `;
 
 interface StyledChevron {
@@ -259,6 +264,19 @@ export const StyledDefaultOptionRow = styled.div`
   align-items: center;
   min-height: 3rem;
   padding: 0.8rem 1.2rem;
+`;
+
+/* sticks to the top of the menu while its own options scroll past, so a long
+   group still shows which group the visible options belong to */
+export const StyledGroupHeading = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: ${({ theme }) => `${theme.space[2]} ${theme.space[5]}`};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
 `;
 
 export const StyledNoOptions = styled.div`

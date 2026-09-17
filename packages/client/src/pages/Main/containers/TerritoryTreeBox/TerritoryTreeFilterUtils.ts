@@ -17,13 +17,16 @@ export function filterTreeByFilters(
     return null;
   }
 
-  // a match keeps its subtree whole, so the children under a hit stay browsable
-  if (isNodeMatchingFilters(node, filters, favoriteIds)) {
-    return node;
-  }
-
+  // the match test belongs to the child, not to the node itself: the walk starts
+  // at the root, which satisfies the structural filters and would carry the whole
+  // tree through as a single hit
   const filteredChildren = node.children
-    .map((child) => filterTreeByFilters(child, filters, favoriteIds))
+    .map((child) =>
+      // a match keeps its subtree whole, so the children under a hit stay browsable
+      isNodeMatchingFilters(child, filters, favoriteIds)
+        ? child
+        : filterTreeByFilters(child, filters, favoriteIds)
+    )
     .filter((child): child is IResponseTree => child !== null);
 
   if (filteredChildren.length > 0) {
@@ -77,9 +80,13 @@ function isNodeMatchingFilters(
   const meetsEditorRightsCondition = editorRights
     ? node.right === UserEnums.RoleMode.Write
     : true;
+  // an entity may carry an empty labels array (see isFirstLabelEmpty), so the
+  // first label is not guaranteed to be there to lowercase
   const meetsFilterCondition =
     targetLabel.length === 0 ||
-    node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
+    (node.territory.labels[0] ?? "")
+      .toLowerCase()
+      .includes(targetLabel.toLowerCase());
 
   // Apply AND/OR logic based on operator
   if (operator === "or") {

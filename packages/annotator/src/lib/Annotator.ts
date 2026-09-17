@@ -1,7 +1,8 @@
 import { drawAnchorMarker } from "./AnchorMarker";
 import { CaretBlink } from "./CaretBlink";
 import {
-  ANCHOR_MARKER_ARM_H_RATIO,
+  ANCHOR_MARKER_ARM_H_EM,
+  ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
   ANCHOR_MARKER_HIT_PAD_PX,
   ANCHOR_MARKER_LINE_WIDTH_PX,
@@ -10,6 +11,7 @@ import {
   DEFAULT_FONT_SIZE,
   EditMode,
   HighlightMode,
+  HIGHLIGHT_HEIGHT_EM,
   HOVER_DEBOUNCE_MS,
   LIGHT_MENU_COLORS,
   DEFAULT_CARET_WIDTH_PX,
@@ -169,6 +171,19 @@ export interface DrawingOptions {
    * mirroring how the SELECT caret keeps empty-line selection visible (#2885).
    */
   minFillWidth?: number;
+  /**
+   * Height in device px of the band the letters occupy, for the highlights that
+   * wrap text rather than fill a line (SELECT, BACKGROUND). Measured from the
+   * font, so the band holds one height across every line spacing. Omitted by a
+   * caller with no font metrics, which falls back to a share of the line height.
+   */
+  textBandHeight?: number;
+  /**
+   * Device-px shift from the centre of a line box down to the centre of that
+   * text band. Text is painted against the em box, whose descender room a
+   * capital leaves empty, so the letters ride above the middle of the line.
+   */
+  textBandOffset?: number;
   /**
    * Proportional column→pixel resolver. When present (and the caller
    * passes the absolute visual line), draw uses measured widths instead of
@@ -425,6 +440,9 @@ export class Annotator {
     kind: "start" | "end";
     tag: Tag;
   }[] = [];
+
+  /** Memo for {@link capBandOffsetPx}, keyed on the font string it measured. */
+  private capBandOffsetCache?: { font: string; offset: number };
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -1206,7 +1224,7 @@ export class Annotator {
     this.scroller?.setViewportSize(Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100));
 
     if (this.settingsOverlay.isOpen) {
-      this.settingsOverlay.reposition(this.element);
+      this.settingsOverlay.reposition(this.overlayAnchors());
     }
 
     this.draw();
@@ -2291,6 +2309,24 @@ export class Annotator {
     this.setShowParagraphMarks(!this.showParagraphMarks);
   }
 
+  /**
+   * The elements the settings overlay spans: the whole editor surface, not just
+   * the text canvas. The line-number and scroller canvases are separate
+   * elements beside it, so covering their union keeps the dimmed backdrop
+   * flush with the editor and gives the settings box the full width to lay out
+   * in (the text canvas alone is narrow enough to clip wide controls).
+   */
+  private overlayAnchors(): HTMLElement[] {
+    const anchors: HTMLElement[] = [this.element];
+    if (this.lines) {
+      anchors.push(this.lines.element);
+    }
+    if (this.scroller) {
+      anchors.push(this.scroller.element);
+    }
+    return anchors;
+  }
+
   /** Open the settings overlay with the current options. */
   openSettings(): void {
     const settings: SettingControl[] = [
@@ -2394,7 +2430,7 @@ export class Annotator {
 
     this.settingsOverlay.open(
       settings,
-      this.element,
+      this.overlayAnchors(),
       [
         {
           label: "Reset to defaults",
@@ -2802,8 +2838,12 @@ export class Annotator {
     // draw() (so it empties even in RAW/SEMI where this method never runs); we
     // only append here.
 
-    const armH = ANCHOR_MARKER_ARM_H_RATIO * this.lineHeight;
+    const armH = Math.min(
+      ANCHOR_MARKER_ARM_H_EM * this.fontSize * this.ratio,
+      ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO * this.lineHeight
+    );
     const armW = ANCHOR_MARKER_ARM_W_RATIO * this.charWidth;
+    const inkOffset = this.capBandOffsetPx();
     const lineWidth = ANCHOR_MARKER_LINE_WIDTH_PX * this.ratio;
     const stackStep = ANCHOR_MARKER_STACK_STEP_PX * this.ratio;
 
@@ -2884,7 +2924,7 @@ export class Annotator {
       // Stacked markers fan out to the right (both arms point right), so a
       // stack never runs off the left margin where boundaries commonly sit.
       const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
-      const yMid = (relLine + 0.5) * this.lineHeight;
+      const yMid = (relLine + 0.5) * this.lineHeight + inkOffset;
 
       // #2885 — the anchor being resized pulses its corner markers too (not just
       // the span wash), so a Territory (whose only visual is these markers) shows
@@ -2922,6 +2962,53 @@ export class Annotator {
         });
       }
     }
+  }
+
+  /**
+   * Device-px distance from a line's vertical centre down to the centre of the
+   * band capital letters occupy on that line.
+   *
+   * Text is painted with `textBaseline = "middle"`, which centres the em box —
+   * and the em box reserves descender room that a capital never uses, so the
+   * visible letters sit above the line centre by a fixed amount. Anything meant
+   * to read as aligned with the letters (the anchor corner markers) has to be
+   * placed against this band, not against the line box.
+   *
+   * Measured against the live font and cached per font string; a context without
+   * bounding-box metrics (jsdom) reports 0 and the caller falls back to the
+   * line centre.
+   */
+  private capBandOffsetPx(): number {
+    const font = this.font;
+    if (this.capBandOffsetCache?.font === font) {
+      return this.capBandOffsetCache.offset;
+    }
+    this.ctx.font = font;
+    this.ctx.textBaseline = "middle";
+    const m = this.ctx.measureText("H");
+    const ascent = m.actualBoundingBoxAscent;
+    const descent = m.actualBoundingBoxDescent;
+    const offset =
+      Number.isFinite(ascent) && Number.isFinite(descent)
+        ? (descent - ascent) / 2
+        : 0;
+    this.capBandOffsetCache = { font, offset };
+    return offset;
+  }
+
+  /**
+   * Placement of the band the letters occupy, for the visuals that wrap text
+   * instead of filling a line: the selection, the caret and the anchor
+   * background fills. Spread into their {@link DrawingOptions}.
+   */
+  private textBandOptions(): {
+    textBandHeight: number;
+    textBandOffset: number;
+  } {
+    return {
+      textBandHeight: HIGHLIGHT_HEIGHT_EM * this.fontSize * this.ratio,
+      textBandOffset: this.capBandOffsetPx(),
+    };
   }
 
   /**
@@ -3176,6 +3263,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        ...this.textBandOptions(),
         caretWidth: this.caretWidthDevicePx(),
         caretOpacity: this.caretOpacityValue(),
         caretVisible:
@@ -3208,6 +3296,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           columnToPixelX: this.drawColumnToPixelX(),
           lineXOrigin: this.drawLineXOrigin(),
         });
@@ -3347,6 +3436,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           columnToPixelX: this.drawColumnToPixelX(),
           lineXOrigin: this.drawLineXOrigin(),
         });
@@ -3399,6 +3489,7 @@ export class Annotator {
               lineHeight: this.lineHeight,
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
+              ...this.textBandOptions(),
               columnToPixelX: this.drawColumnToPixelX(),
               lineXOrigin: this.drawLineXOrigin(),
               // Keep newline-only lines of the resized span visible (#2885).
@@ -3419,6 +3510,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           caretWidth: this.caretWidthDevicePx(),
           caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),

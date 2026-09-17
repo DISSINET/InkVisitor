@@ -800,6 +800,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                   <StyledDetailSectionHeading>Metaproperties</StyledDetailSectionHeading>
                   {canEditEntity && isSectionExpanded(EntityDetailSection.Metaproperties) && (
                     <EntityDetailSectionButtons
+                      widthTooNarrow={widthTooNarrow}
                       entityId={entity.id}
                       setShowSubmit={setShowBatchRemovePropSubmit}
                       removeBtnTooltip="remove all metaproperties from entity"
@@ -861,21 +862,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                         alwaysShowCreateModal
                       />
                     </StyledPropGroupWrap>
-                    {canEditEntity && (
-                      <Button
-                        color="primary"
-                        inverted
-                        size={ButtonSize.Medium}
-                        label="new metaproperty"
-                        icon={<IcoPlusBold />}
-                        onClick={() => {
-                          const newProp = CMetaProp();
-                          updateEntityMutation.mutate({
-                            props: [...entity.props, newProp],
-                          });
-                        }}
-                      />
-                    )}
                   </StyledDetailSectionContent>
                 )}
               </StyledDetailSection>

@@ -80,7 +80,7 @@ const ActivatePage: React.FC = ({}) => {
               <StyledButtonWrap>
                 {!hashOk && (
                   <Button
-                    color="success"
+                    color="info"
                     icon={
                       <TbArrowForwardUp
                         style={{ transform: "rotate(180deg)" }}

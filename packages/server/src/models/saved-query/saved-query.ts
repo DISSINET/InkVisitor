@@ -1,3 +1,7 @@
+import {
+  MAX_SAVED_QUERY_DEPTH,
+  MAX_SAVED_QUERY_NODES,
+} from "@inkvisitor/shared/constants";
 import { ISavedQuery, ISavedQueryData } from "@inkvisitor/shared/types";
 import { IDbModel } from "@models/common";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
@@ -15,7 +19,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
 
   constructor(data: Partial<ISavedQuery>) {
     this.id = data.id as string;
-    this.name = data.name || "";
+    this.name = (data.name || "").trim();
     this.ownerId = data.ownerId || "";
     this.shared = !!data.shared;
     this.data = data.data as ISavedQueryData;
@@ -25,7 +29,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
 
   isValid(): boolean {
     return (
-      !!this.name.trim() &&
+      !!this.name &&
       !!this.ownerId &&
       !!this.data &&
       typeof this.data.includeEquivalents === "boolean" &&
@@ -39,8 +43,28 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
    * Recursively checks the stored query tree has the shape the client
    * expects when loading it (a malformed shared query would otherwise
    * crash the Explorer page for every user who clicks it).
+   *
+   * A tree deeper than MAX_SAVED_QUERY_DEPTH or wider than
+   * MAX_SAVED_QUERY_NODES is treated as malformed: the walk runs on untrusted
+   * JSON before anything about it is known, so its own recursion has to be the
+   * thing that is bounded.
    */
   static isQueryNodeValid(node: unknown): boolean {
+    return SavedQuery.walkQueryNode(node, 1, { visited: 0 });
+  }
+
+  private static walkQueryNode(
+    node: unknown,
+    depth: number,
+    budget: { visited: number }
+  ): boolean {
+    if (depth > MAX_SAVED_QUERY_DEPTH) {
+      return false;
+    }
+    budget.visited += 1;
+    if (budget.visited > MAX_SAVED_QUERY_NODES) {
+      return false;
+    }
     if (!node || typeof node !== "object") {
       return false;
     }
@@ -62,7 +86,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
       return (
         typeof e.type === "string" &&
         typeof e.logic === "string" &&
-        SavedQuery.isQueryNodeValid(e.node)
+        SavedQuery.walkQueryNode(e.node, depth + 1, budget)
       );
     });
   }
@@ -105,6 +129,37 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
   ): Promise<SavedQuery | null> {
     const data = await rethink.table(SavedQuery.table).get(id).run(dbInstance);
     return data ? new SavedQuery(data as ISavedQuery) : null;
+  }
+
+  /**
+   * Names are unique within a folder as the panel lists them: every shared
+   * query shares one namespace, each user's private queries another. Names
+   * that read the same collide, so the comparison ignores case (stored names
+   * are already trimmed by the constructor).
+   *
+   * The scan is unindexed - the table holds one row per saved query, and the
+   * check runs only on create and on rename.
+   */
+  static async isNameTaken(
+    dbInstance: Connection | undefined,
+    name: string,
+    shared: boolean,
+    ownerId: string,
+    exceptId?: string
+  ): Promise<boolean> {
+    const normalized = name.trim().toLowerCase();
+    const rows = await rethink
+      .table(SavedQuery.table)
+      .filter((row: RDatum) =>
+        (shared
+          ? row("shared").eq(true)
+          : row("shared").eq(false).and(row("ownerId").eq(ownerId))
+        ).and(row("name").downcase().eq(normalized))
+      )
+      .pluck("id")
+      .run(dbInstance);
+
+    return (rows as { id: string }[]).some((row) => row.id !== exceptId);
   }
 
   /**

@@ -30,6 +30,30 @@
     "roles": ["*"]
   },
   {
+    "controller": "statements",
+    "route": "batch-move",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "statements",
+    "route": "batch-copy",
+    "method": "POST",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "statements",
+    "route": "batch-reorder",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "statements",
+    "route": "references",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
     "controller": "territories",
     "route": ":territoryId",
     "method": "GET",
@@ -199,9 +223,27 @@
   },
   {
     "controller": "entities",
-    "route": ":entityId",
+    "route": ":entityId?",
     "method": "DELETE",
-    "roles": ["*"]
+    "roles": ["editor"]
+  },
+  {
+    "controller": "entities",
+    "route": ":entityId/restore",
+    "method": "POST",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "entities",
+    "route": ":entityId/clone",
+    "method": "POST",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "entities",
+    "route": "query-export",
+    "method": "POST",
+    "roles": ["admin"]
   },
   {
     "controller": "entities",
@@ -231,19 +273,31 @@
     "controller": "relations",
     "route": "",
     "method": "POST",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "relations",
     "route": "",
     "method": "PUT",
-    "roles": ["*"]
+    "roles": ["editor"]
   },
   {
     "controller": "relations",
     "route": "",
     "method": "DELETE",
-    "roles": ["*"]
+    "roles": ["editor"]
+  },
+  {
+    "controller": "relations",
+    "route": ":relationId?",
+    "method": "PUT",
+    "roles": ["editor"]
+  },
+  {
+    "controller": "relations",
+    "route": ":relationId",
+    "method": "DELETE",
+    "roles": ["editor"]
   },
   {
     "controller": "documents",

@@ -6,17 +6,16 @@ import DbPool from "./rethink-pool";
 /**
  * Per-request wrapper around a pooled Db.
  *
- * Why this exists: the global write mutex (Db.mutex) used to be acquired
- * *while* a pool slot was already held by the middleware. That serialized
- * pool occupancy across all writers in flight - the 11th concurrent write
- * couldn't even get a connection to queue.
+ * A writer waiting on the global write mutex (Db.mutex) while holding a pool
+ * slot keeps that connection idle for the whole wait, so a burst of
+ * concurrent writes can occupy the entire pool and block every other request.
  *
  * DbHandle decouples the two resources. lock() yields the pool slot during
  * the mutex wait so other requests (especially read-only ones) can still
  * borrow connections, and reacquires a fresh slot once the mutex is held.
  *
- * Read-only handlers are unaffected - acquire() at request start, release()
- * on response end, same as before.
+ * Read-only handlers never call lock() - acquire() at request start,
+ * release() on response end.
  */
 export class DbHandle {
   private _db: Db | null = null;

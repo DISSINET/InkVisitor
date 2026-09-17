@@ -59,13 +59,13 @@ const exploreStateInitial: Explore.IExplore = {
             //   editable: true,
             // },
             // all relations for testing
-            ...RelationEnums.AllTypes.map((relationType, index) => ({
-              id: String(index + 2),
-              name: relationType,
-              params: { relationType },
-              editable: false,
-              type: Explore.EExploreColumnType.ER,
-            })),
+            // ...RelationEnums.AllTypes.map((relationType, index) => ({
+            //   id: String(index + 2),
+            //   name: relationType,
+            //   params: { relationType },
+            //   editable: false,
+            //   type: Explore.EExploreColumnType.ER,
+            // })),
           ]
         : [],
   },
@@ -99,6 +99,7 @@ enum ExploreActionType {
   setUpdatedByFilter,
   setEditedByFilter,
   setRootValidityFilter,
+  setCoOccurrenceFilter,
   setFilters,
   clearFloatingSearchFilters,
 }
@@ -112,6 +113,7 @@ const floatingSearchFilterTypes = new Set<Explore.SearchOption>([
   Explore.SearchOption.UpdatedBy,
   Explore.SearchOption.EditedBy,
   Explore.SearchOption.RootValidity,
+  Explore.SearchOption.CoOccurrence,
 ]);
 
 // how many of the filters currently applied belong to the floating search panel
@@ -243,7 +245,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       };
       const trimmedLabel = label.trim();
       const existingLabelFilter = state.filters.find(
-        (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label,
+        (f): f is Explore.IExploreLabelFilter => f.type === Explore.SearchOption.Label
       );
       const nextUseRegex = useRegex ?? existingLabelFilter?.useRegex ?? false;
       const otherFilters = state.filters.filter((f) => f.type !== Explore.SearchOption.Label);
@@ -276,6 +278,29 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
               {
                 type: Explore.SearchOption.UUIDs,
                 ids,
+              },
+            ]
+          : otherFilters;
+
+      return {
+        ...state,
+        filters,
+        offset: 0,
+      };
+    }
+
+    case ExploreActionType.setCoOccurrenceFilter: {
+      const { entityIds } = action.payload as { entityIds: string[] };
+      const otherFilters = state.filters.filter(
+        (f) => f.type !== Explore.SearchOption.CoOccurrence
+      );
+      const filters: Explore.IExploreSearchFilter[] =
+        entityIds.length > 0
+          ? [
+              ...otherFilters,
+              {
+                type: Explore.SearchOption.CoOccurrence,
+                entityIds,
               },
             ]
           : otherFilters;
@@ -406,7 +431,7 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
         rootValidity?: IRequestSearchRootValidity;
       };
       const otherFilters = state.filters.filter(
-        (f) => f.type !== Explore.SearchOption.RootValidity,
+        (f) => f.type !== Explore.SearchOption.RootValidity
       );
       return {
         ...state,

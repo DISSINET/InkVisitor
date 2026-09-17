@@ -22,7 +22,7 @@ interface LoginScreen {
   setUsernameLocal: React.Dispatch<React.SetStateAction<string>>;
   password: string;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
-  setRedirectToMain: React.Dispatch<React.SetStateAction<boolean>>;
+  onLoggedIn: () => void;
   onPasswordReset: () => void;
 }
 export const LoginScreen: React.FC<LoginScreen> = ({
@@ -30,7 +30,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   setUsernameLocal,
   password,
   setPassword,
-  setRedirectToMain,
+  onLoggedIn,
   onPasswordReset,
 }) => {
   const dispatch = useAppDispatch();
@@ -51,7 +51,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         });
         if (res?.id) {
           await dispatch(setUsername(usernameLocal));
-          setRedirectToMain(true);
+          onLoggedIn();
         }
       } catch (err) {
         const errorTemp = getErrorByCode(err as IErrorSignature);
@@ -134,8 +134,10 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         <StyledSubmitWrap>
           <Button
             label={isLoggingIn ? "Logging In…" : "Log In"}
-            color="success"
+            color="info"
+            shape="rounded-md"
             fullWidth
+            fullHeight
             disabled={isLoggingIn}
             size={ButtonSize.Large}
           />

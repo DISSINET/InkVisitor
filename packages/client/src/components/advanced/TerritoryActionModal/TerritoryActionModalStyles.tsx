@@ -24,11 +24,13 @@ export const StyledBlueText = styled.p`
   color: ${({ theme }) => theme.color.success};
   font-weight: bold;
   margin-bottom: 0.2rem;
+  white-space: nowrap;
 `;
 export const StyledGreyText = styled.p`
   color: ${({ theme }) => theme.color.greyer};
   font-weight: bold;
   margin-bottom: 0.2rem;
+  white-space: nowrap;
 `;
 export const StyledInto = styled.i`
   margin-bottom: 0.5rem;

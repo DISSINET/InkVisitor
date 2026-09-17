@@ -290,6 +290,9 @@ export const TextAnnotator = ({
       toast.info("Document content saved");
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // the statement list Text column renders anchorTexts, derived server-side
+      // from the document content
+      queryClient.invalidateQueries({ queryKey: ["territory", "statement-list"] });
     },
     onSettled: () => {
       setIsSaving(false);
@@ -306,6 +309,9 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // the statement list Text column renders anchorTexts, derived server-side
+      // from the document content
+      queryClient.invalidateQueries({ queryKey: ["territory", "statement-list"] });
     },
     onError: () => {
       // The instant anchor save failed, so the cache was never merged and now

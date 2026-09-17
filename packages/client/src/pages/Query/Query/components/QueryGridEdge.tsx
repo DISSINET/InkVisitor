@@ -2,11 +2,16 @@ import { Checkbox } from "components";
 import Dropdown from "components/advanced";
 import React from "react";
 import { QueryAction, QueryActionType } from "../state";
-import { edgeTypesImplemented, INodeItem, QueryValidityProblem } from "../../types";
+import {
+  edgeTypesHidden,
+  edgeTypesImplemented,
+  INodeItem,
+  QueryValidityProblem,
+} from "../../types";
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import { Query } from "@inkvisitor/shared/types/query";
 import { useTheme } from "styled-components";
-import { findValidEdgeTypesForSourceNode } from "pages/Query/utils";
+import { buildEdgeTypeOptionGroups, findValidEdgeTypesForSourceNode } from "pages/Query/utils";
 import {
   StyledEdgeBox,
   StyledEdgeContainer,
@@ -43,11 +48,10 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   const sourceNode = isRootEdge ? rootNode : node;
   const validEdgesTypes = findValidEdgeTypesForSourceNode(sourceNode, isRootEdge);
 
-  const edgeTypeOptions = validEdgesTypes.map((type) => ({
-    value: type,
-    label: Query.EdgeTypeLabels[type],
-    isDisabled: !edgeTypesImplemented.includes(type),
-  }));
+  const edgeTypeOptions = buildEdgeTypeOptionGroups(
+    validEdgesTypes.filter((type) => !edgeTypesHidden.includes(type)),
+    edgeTypesImplemented,
+  );
 
   const isValid = problems.length === 0;
 
@@ -58,18 +62,6 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
   // a valid negative ("NOT") edge gets a distinct red connector so it reads as
   // an exclusion at a glance; invalid still wins (its own red) over this
   const lineColor = isValid && isNegative ? theme.color.entityA : color;
-
-  edgeTypeOptions.sort((a, b) => {
-    if (a.isDisabled && !b.isDisabled) {
-      return 1;
-    }
-
-    if (!a.isDisabled && b.isDisabled) {
-      return -1;
-    }
-
-    return a.label.localeCompare(b.label);
-  });
 
   const x = 20;
   const midY = QUERY_GRID_HEIGHT / 2;

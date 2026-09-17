@@ -42,7 +42,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
                 onClick: () => {
                   removeBookmark(folder.id, entity.id);
                 },
-                tooltipLabel: "delete bookmark",
+                tooltipLabel: "remove bookmark",
                 icon: <IcoTrash />,
               }}
             />

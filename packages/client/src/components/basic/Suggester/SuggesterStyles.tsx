@@ -4,6 +4,16 @@ import { ThemeColor } from "Theme/theme";
 import { space2 } from "Theme/theme-space-shortcut";
 import { DEFAULT_DIVIDER_HEIGHT } from "components/basic/Input/InputStyles";
 
+interface StyledSuggesterWrap {
+  $fullWidth?: boolean;
+  $maxWidth?: number;
+}
+/** wraps the suggester so flex sizing and the clear button render correctly */
+export const StyledSuggesterWrap = styled.div<StyledSuggesterWrap>`
+  width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "")};
+  max-width: ${({ $maxWidth }) => ($maxWidth ? `${$maxWidth / 10}rem` : "")};
+`;
+
 interface StyledSuggester {
   $marginTop?: boolean;
   $fullWidth?: boolean;
@@ -126,10 +136,12 @@ export const StyledRelativePosition = styled.div<StyledRelativePosition>`
 interface StyledSuggestionRow {
   $twoIcons: boolean;
   $isSelected: boolean;
+  $hasTrailingIcons: boolean;
 }
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
-  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto 3rem;
+  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto
+    ${({ theme, $hasTrailingIcons }) => ($hasTrailingIcons ? "3rem" : theme.space[2])};
   align-items: center;
   background-color: ${({ theme, $isSelected }) =>
     $isSelected ? theme.color["blue"][100] : "transparent"};

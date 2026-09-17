@@ -25,7 +25,6 @@ interface AnnotatorBoxHeader {
   selectedDocumentIsFetching: boolean;
   resources: IEntity[];
   onResourcePickerFocus?: () => void;
-  canSelectResource: boolean;
   canEditDocument: boolean;
 }
 
@@ -41,7 +40,6 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
   selectedDocumentIsFetching,
   resources,
   onResourcePickerFocus,
-  canSelectResource,
   canEditDocument,
 }) => {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
@@ -61,7 +59,6 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
                 toast.warning("Resource does not have a document");
               }
             }}
-            isHidden={!canSelectResource}
           />
         </div>
       )}

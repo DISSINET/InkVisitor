@@ -21,12 +21,13 @@ export namespace Query {
 
   export interface INodeParams {
     entityClasses?: EntityEnums.Class[];
+    entityStatuses?: EntityEnums.Status[];
     label?: string;
     entityId?: string;
     includeEquivalents?: boolean;
     includeSubordinates?: boolean;
   }
-  export interface IEdgeParams { }
+  export interface IEdgeParams {}
 
   export enum NodeType {
     E = "Entity",
@@ -52,8 +53,6 @@ export namespace Query {
     "EUT:" = "EUT:",
     "SUT:D" = "SUT:D",
     "I_SUT:D" = "I_SUT:D",
-    "SUT:C" = "SUT:C",
-    "I_SUT:C" = "I_SUT:C",
     "HR:R" = "HR:R",
     "I_HR:R" = "I_HR:R",
     "HR:V" = "HR:V",
@@ -117,6 +116,39 @@ export namespace Query {
     params: { entityClass?: EntityEnums.Class[] };
   };
 
+  /**
+   * Classes an Identification relation can hold on either side. The relation
+   * rule states this as "any class except Action and Concept"
+   * (Relation.RelationRules[Identification]: empty allowedEntitiesPattern with
+   * disabledEntities), but an EdgeRule can only enumerate allowed classes.
+   */
+  const IDENTIFICATION_ENTITY_CLASSES = [
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Territory,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Value,
+  ];
+
+  /** Classes an entity classified by a Concept can have (the I_R:CLA target). */
+  const CLASSIFICATION_INSTANCE_CLASSES = [
+    EntityEnums.Class.Person,
+    EntityEnums.Class.Being,
+    EntityEnums.Class.Location,
+    EntityEnums.Class.Object,
+    EntityEnums.Class.Group,
+    EntityEnums.Class.Event,
+    EntityEnums.Class.Statement,
+    EntityEnums.Class.Territory,
+    EntityEnums.Class.Resource,
+    EntityEnums.Class.Value,
+  ];
+
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
       entityId: { allowedClasses: [] },
@@ -160,10 +192,6 @@ export namespace Query {
     },
     "SUT:D": {},
     "I_SUT:D": {},
-    "SUT:C": {
-      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
-    },
-    "I_SUT:C": {},
     "HR:R": {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
     },
@@ -196,6 +224,9 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
     "R:": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the related entity to that class (server: EdgeHasRelation)
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "R:SCL": {
@@ -208,25 +239,66 @@ export namespace Query {
         allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
       },
     },
-    "I_R:SCL": {},
-    "R:SYN": {},
-    "R:ANT": {},
+    "I_R:SCL": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the subclass to entities of that class (server: EdgeHasSubclass)
+      entityClass: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
+      entityId: {
+        allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+      },
+    },
+    "R:SYN": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept] },
+    },
+    "R:ANT": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Action, EntityEnums.Class.Concept] },
+    },
     "I_R:ANT": {},
-    "R:HOL": {},
-    "I_R:HOL": {},
-    "R:PRR": {},
+    "R:HOL": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "I_R:HOL": {
+      // Holonym only pairs Concepts, so there is no class to narrow by
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "R:PRR": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "I_R:PRR": {},
-    "R:SAR": {},
+    "R:SAR": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Action] },
+      entityId: { allowedClasses: [EntityEnums.Class.Action] },
+    },
     "I_R:SAR": {},
-    "R:AEE": {},
+    "R:AEE": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "I_R:AEE": {},
     "R:CLA": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
-    "I_R:CLA": {},
-    "R:IDE": {},
+    "I_R:CLA": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the instance to entities of that class (server: EdgeHasInstance)
+      entityClass: { allowedClasses: CLASSIFICATION_INSTANCE_CLASSES },
+      entityId: { allowedClasses: CLASSIFICATION_INSTANCE_CLASSES },
+    },
+    "R:IDE": {
+      entityClass: { allowedClasses: IDENTIFICATION_ENTITY_CLASSES },
+      entityId: { allowedClasses: IDENTIFICATION_ENTITY_CLASSES },
+    },
     "I_R:IDE": {},
-    "R:IMP": {},
+    "R:IMP": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Action] },
+      entityId: { allowedClasses: [EntityEnums.Class.Action] },
+    },
     "I_R:IMP": {},
     "R:SOE": {
       // entityClass: with an empty suggester, the category picked there narrows
@@ -258,14 +330,51 @@ export namespace Query {
         ],
       },
     },
-    "I_R:SOE": {},
-    "R:SUS": {},
+    "I_R:SOE": {
+      // entityClass: with an empty suggester, the category picked there narrows
+      // the subordinate to entities of that class (server: EdgeHasSubordinate)
+      entityClass: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+        ],
+      },
+      entityId: {
+        allowedClasses: [
+          EntityEnums.Class.Location,
+          EntityEnums.Class.Object,
+          EntityEnums.Class.Event,
+          EntityEnums.Class.Group,
+          EntityEnums.Class.Statement,
+          EntityEnums.Class.Value,
+          EntityEnums.Class.Resource,
+        ],
+      },
+    },
+    "R:SUS": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "I_R:SUS": {},
-    "R:A1S": {},
+    "R:A1S": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "I_R:A1S": {},
-    "R:A2S": {},
+    "R:A2S": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     "I_R:A2S": {},
-    "R:REL": {},
+    "R:REL": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "I_R:REL": {},
   };
 
@@ -409,26 +518,6 @@ export namespace Query {
       },
     ],
     "I_SUT:D": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Territory] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Statement] },
-      },
-    ],
-    "SUT:C": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Statement] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Territory] },
-      },
-    ],
-    "I_SUT:C": [
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Territory] },
@@ -657,7 +746,10 @@ export namespace Query {
       },
     ],
     "R:HOL": [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
@@ -668,7 +760,10 @@ export namespace Query {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
     ],
     "R:PRR": [
       {
@@ -717,13 +812,13 @@ export namespace Query {
       },
       {
         nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Event] },
+        params: { entityClass: [EntityEnums.Class.Concept] },
       },
     ],
     "I_R:AEE": [
       {
         nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Event] },
+        params: { entityClass: [EntityEnums.Class.Concept] },
       },
       {
         nodeType: NodeType.E,
@@ -745,24 +840,12 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "R:IDE": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Action] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
     ],
     "I_R:IDE": [
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Action] },
-      },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
+      { nodeType: NodeType.E, params: { entityClass: IDENTIFICATION_ENTITY_CLASSES } },
     ],
     "R:IMP": [
       {
@@ -882,8 +965,6 @@ export namespace Query {
     "EUT:": "used in statements under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
-    "SUT:C": "S under T: children",
-    "I_SUT:C": "T has S: children",
     "HR:R": "has reference: resource",
     "I_HR:R": "R references",
     "HR:V": "has reference: value",
@@ -896,39 +977,39 @@ export namespace Query {
     "SP:T": "has S prop: type",
     "I_SP:T": "is S prop: type",
     "SP:V": "has S prop: value",
-    "I_SP:V": "is S prop:value",
+    "I_SP:V": "is S prop: value",
     SI: "has S identification",
     I_SI: "is S identification",
     SC: "has S classification",
     I_SC: "is S clasification",
     "R:": "has relation: any",
     "R:SCL": "has relation: Superclass",
-    "I_R:SCL": "is related to: as Superclass",
+    "I_R:SCL": "has: Subclass (inv. Superclass)",
     "R:SYN": "has relation: Synonym",
     "R:ANT": "has relation: Antonym",
     "I_R:ANT": "is related to: as Antonym",
     "R:HOL": "has relation: Holonym",
-    "I_R:HOL": "is related to: as Holonym",
-    "R:PRR": "has relation: PropertyReciprocal",
-    "I_R:PRR": "is related to: as PropertyReciprocal",
-    "R:SAR": "has relation: SubjectActant1Reciprocal",
-    "I_R:SAR": "is related to: as SubjectActant1Reciprocal",
-    "R:AEE": "has relation: ActionEventEquivalent",
-    "I_R:AEE": "is related to: as ActionEventEquivalent",
+    "I_R:HOL": "has: Meronym (inv. Holonym)",
+    "R:PRR": "has relation: Property Reciprocal",
+    "I_R:PRR": "is related to: as Property Reciprocal",
+    "R:SAR": "has relation: Subject/Actant1 Reciprocal",
+    "I_R:SAR": "is related to: as Subject/Actant1 Reciprocal",
+    "R:AEE": "has relation: Action/Event Equivalent",
+    "I_R:AEE": "has: Action equivalent (inv. Action/Event Equivalent)",
     "R:CLA": "has relation: Classification",
-    "I_R:CLA": "is related to: as Classification",
+    "I_R:CLA": "has: Instance (inv. Classification)",
     "R:IDE": "has relation: Identification",
     "I_R:IDE": "is related to: as Identification",
     "R:IMP": "has relation: Implication",
-    "I_R:IMP": "is related to: as Implication",
-    "R:SOE": "has relation: SuperordinateEntity",
-    "I_R:SOE": "is related to: as SuperordinateEntity",
-    "R:SUS": "has relation: SubjectSemantics",
-    "I_R:SUS": "is related to: as SubjectSemantics",
-    "R:A1S": "has relation: Actant1Semantics",
-    "I_R:A1S": "is related to: as Actant1Semantics",
-    "R:A2S": "has relation: Actant2Semantics",
-    "I_R:A2S": "is related to: as Actant2Semantics",
+    "I_R:IMP": "has: Used as Implication (inv. Implication)",
+    "R:SOE": "has relation: Superordinate Entity",
+    "I_R:SOE": "has: Subordinate Entity (inv. Superordinate Entity)",
+    "R:SUS": "has relation: Subject Semantics",
+    "I_R:SUS": "has: Used as Subject semantics (inv. Subject Semantics)",
+    "R:A1S": "has relation: Actant1 Semantics",
+    "I_R:A1S": "has: Used as Actant1 semantics (inv. Actant1 Semantics)",
+    "R:A2S": "has relation: Actant2 Semantics",
+    "I_R:A2S": "has: Used as Actant2 semantics (inv. Actant2 Semantics)",
     "R:REL": "has relation: Related",
     "I_R:REL": "is related to: as Related",
   };
@@ -977,10 +1058,7 @@ export namespace Explore {
    * time filter, and omitting fromDate/toDate lets the server skip the audit
    * `between` scan entirely.
    */
-  export type IExploreStatsParams = Omit<
-    IStatsAggregationParams,
-    "fromDate" | "toDate"
-  > & {
+  export type IExploreStatsParams = Omit<IStatsAggregationParams, "fromDate" | "toDate"> & {
     fromDate?: number;
     toDate?: number;
   };
@@ -1001,6 +1079,7 @@ export namespace Explore {
     UpdatedBy = "updated by",
     EditedBy = "edited by",
     RootValidity = "root validity",
+    CoOccurrence = "co-occurrence",
   }
 
   export type IExploreSearchFilter =
@@ -1013,7 +1092,8 @@ export namespace Explore {
     | IExploreCreatedByFilter
     | IExploreUpdatedByFilter
     | IExploreEditedByFilter
-    | IExploreRootValidityFilter;
+    | IExploreRootValidityFilter
+    | IExploreCoOccurrenceFilter;
 
   export interface IExploreLabelFilter {
     type: SearchOption.Label;
@@ -1024,6 +1104,12 @@ export namespace Explore {
   export interface IExploreUuidsFilter {
     type: SearchOption.UUIDs;
     ids: string[];
+  }
+  export interface IExploreCoOccurrenceFilter {
+    type: SearchOption.CoOccurrence;
+    // OR semantics - matches entities sharing a statement with any of the
+    // listed entities; the listed entities themselves are never matched
+    entityIds: string[];
   }
   interface IExploreStatusFilter {
     type: SearchOption.Status;
@@ -1094,6 +1180,10 @@ export namespace Explore {
     EAL = "EAL", // Entity Alt Labels
     EPOS = "EPOS", // Entity Part of Speech
     EDET = "EDET", // Entity Detail
+    EPRT = "EPRT", // Entity Parent Territory
+    ELT = "ELT", // Entity Logical Type
+    ECL = "ECL", // Entity Class
+    EUI = "EUI", // Entity Used In (first-level territories)
   }
 
   /** Param value types - determines which form control to render */
@@ -1111,6 +1201,12 @@ export namespace Explore {
   /** Params for column types that require configuration */
   export interface IExploreColumnParamsER {
     relationType: RelationEnums.Type;
+    /**
+     * Lists the entities for which the row is the relation target
+     * (entityIds[1], e.g. subclasses for Superclass). Only meaningful for
+     * asymmetrical types; such columns are read-only.
+     */
+    inverse?: boolean;
   }
   export interface IExploreColumnParamsEPV {
     propertyType: string;
@@ -1148,6 +1244,10 @@ export namespace Explore {
     [EExploreColumnType.EAL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EPOS]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
     [EExploreColumnType.EDET]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EPRT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ELT]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.ECL]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
+    [EExploreColumnType.EUI]: IEExploreColumnTypeConfigEntry<IExploreColumnParamsEmpty>;
   }
 
   export const EExploreColumnTypeConfig: IEExploreColumnTypeConfig = {
@@ -1286,6 +1386,34 @@ export namespace Explore {
     [EExploreColumnType.EDET]: {
       label: "Detail",
       description: "Shows the detail/description field of this entity.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EPRT]: {
+      label: "Parent territory",
+      description:
+        "Shows the immediate parent territory - the parent of a Territory, or the territory a Statement belongs to. Empty for other classes.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ELT]: {
+      label: "Logical type",
+      description:
+        "Shows the logical type (definite, indefinite, hypothetical, generic) of actant entities. Empty for classes that carry no logical type.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.ECL]: {
+      label: "Entity class",
+      description:
+        "Shows the class of this entity spelled out in full (e.g. Concept, Territory), the same class the coded prefix of its label stands for.",
+      isDisabled: false,
+      params: {},
+    },
+    [EExploreColumnType.EUI]: {
+      label: "Used in",
+      description:
+        "Shows the first-level territories (direct children of the root) whose statements use this entity, found the same way the search box finds entities under a territory.",
       isDisabled: false,
       params: {},
     },

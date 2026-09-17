@@ -7,16 +7,19 @@ const checkmarkPop = keyframes`
   100% { transform: scale(1); }
 `;
 
+// the box and its label form one control: the gap between them lives inside
+// this element so moving across it never leaves the hovered area
 export const StyledCheckbox = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   display: flex;
   align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  width: fit-content;
 `;
 
-// declared ahead of the indicator, which selects on it to share its hover state
 export const StyledLabel = styled.label`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  margin-left: 0.2rem;
   user-select: none;
   cursor: pointer;
   display: flex;
@@ -54,9 +57,8 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
 
   /* the label reads as part of the control, so it shares the box's hover state;
      keyboard focus reuses the same accent border cue */
-  &:hover,
   &:focus-visible,
-  ${StyledCheckbox}:has(${StyledLabel}:hover) & {
+  ${StyledCheckbox}:hover & {
     border-color: ${({ theme, $color }) => theme.color[$color]};
   }
 
@@ -75,10 +77,9 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   }
 `;
 
-export const StyledCheckboxWrapper = styled.span<{ $hasLabel?: boolean }>`
+export const StyledCheckboxWrapper = styled.span`
   display: flex;
   cursor: pointer;
-  margin-right: ${({ $hasLabel }) => ($hasLabel ? "0.2rem" : "0")};
 `;
 interface StyledIconOnlyCheckbox {
   $checked?: boolean;

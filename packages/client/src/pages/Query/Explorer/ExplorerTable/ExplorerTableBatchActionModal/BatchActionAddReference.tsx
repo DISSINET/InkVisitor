@@ -6,12 +6,13 @@ import {
   Button,
   ButtonGroup,
   CancelButton,
+  Input,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { EntityDropzone, EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
@@ -35,7 +36,7 @@ export const BatchActionAddReference: React.FC<
   BatchActionAddReferenceProps
 > = ({ selectedEntityIds, onClose, onApply }) => {
   const [resourceEntity, setResourceEntity] = useState<IEntity | undefined>();
-  const [valueEntity, setValueEntity] = useState<IEntity | undefined>();
+  const [valueLabel, setValueLabel] = useState<string>("");
 
   const batchMutation = useMutation({
     mutationFn: async () => {
@@ -43,7 +44,7 @@ export const BatchActionAddReference: React.FC<
       return api.batchEntityAddReference(
         selectedEntityIds,
         resourceEntity.id,
-        valueEntity?.id
+        valueLabel.trim() || undefined
       );
     },
     onSuccess: (res) => {
@@ -73,16 +74,16 @@ export const BatchActionAddReference: React.FC<
   const message = useMemo<string>(() => {
     const count = selectedEntityIds.length;
     const resLabel = resourceEntity?.labels[0];
-    const valLabel = valueEntity?.labels[0];
+    const valLabel = valueLabel.trim();
 
     if (!resLabel) {
       return `Add a new reference to ${count} selected entities.`;
     }
     if (valLabel) {
-      return `Add reference "${resLabel}" with value "${valLabel}" to ${count} selected entities.`;
+      return `Add reference "${resLabel}" to ${count} selected entities, each with a new value "${valLabel}".`;
     }
     return `Add reference "${resLabel}" to ${count} selected entities.`;
-  }, [resourceEntity, valueEntity, selectedEntityIds.length]);
+  }, [resourceEntity, valueLabel, selectedEntityIds.length]);
 
   return (
     <>
@@ -119,19 +120,23 @@ export const BatchActionAddReference: React.FC<
 
           <StyledBatchSection>
             <StyledBatchSectionLabel>Value (optional)</StyledBatchSectionLabel>
-            {valueEntity ? (
-              <EntityTag
-                entity={valueEntity}
-                unlinkButton={{ onClick: () => setValueEntity(undefined) }}
+            {/* the label alone travels to the server, which gives every entity
+                in the batch a V of its own; dropping a V tag here fills the
+                field from its label and links nothing */}
+            <EntityDropzone
+              categoryTypes={[EntityEnums.Class.Value]}
+              reuseDroppedValue
+              onSelected={() => {}}
+              onPicked={(entity) => setValueLabel(entity.labels[0] ?? "")}
+            >
+              <Input
+                width="full"
+                value={valueLabel}
+                changeOnType
+                onChangeFn={(value) => setValueLabel(value)}
+                placeholder="new value for each entity..."
               />
-            ) : (
-              <EntitySuggester
-                categoryTypes={[EntityEnums.Class.Value]}
-                onPicked={(entity) => setValueEntity(entity)}
-                placeholder="select value..."
-                inputWidth="full"
-              />
-            )}
+            </EntityDropzone>
           </StyledBatchSection>
 
           <StyledBatchMessage>{message}</StyledBatchMessage>

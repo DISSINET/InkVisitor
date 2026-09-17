@@ -238,6 +238,95 @@ export const StyledPillCloseIcon = styled.div`
   }
 `;
 
+export const StyledUuidsRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+
+// the pill only reveals the uuid list on hover, nothing to click on it
+export const StyledUuidsPill = styled(StyledPill)`
+  cursor: default;
+`;
+
+export const StyledUuidCount = styled.div`
+  margin-left: ${({ theme }) => theme.space[1]};
+  padding: 0 ${({ theme }) => theme.space[1]};
+  border-radius: 2rem;
+  background-color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme }) => theme.color["white"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight.bold};
+`;
+
+export const StyledUuidsHint = styled.div`
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
+
+export const StyledUuidsFloatingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+`;
+
+export const StyledUuidListTitle = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight.medium};
+`;
+
+// the list is a floating overlay, so its own scroll keeps a long paste from
+// growing past the viewport
+export const StyledUuidList = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-height: 15rem;
+  overflow-y: auto;
+`;
+
+export const StyledUuidListRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: 0.1rem ${({ theme }) => theme.space[1]};
+  // keeps the row clear of the scrollbar the list grows on long pastes
+  margin-right: ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius.xs};
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color["gray"][100]};
+  }
+`;
+
+export const StyledUuidListValue = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  white-space: nowrap;
+`;
+
+export const StyledUuidRemoveButton = styled.button`
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: ${({ theme }) => theme.color["gray"][600]};
+
+  &:hover {
+    color: ${({ theme }) => theme.color["danger"]};
+  }
+`;
+
 export const StyledNoResults = styled.p`
   font-style: italic;
   font-size: 1.4rem;

@@ -194,8 +194,14 @@ export default class Entity implements IEntity, IDbModel {
     return true;
   }
 
+  /**
+   * The default write rule for Entity classes that carry no scoping of their
+   * own (Concept, Person, Object, Action, ...): a Viewer is read-only, everyone
+   * above may write. Classes bound to the tree or to a document (Territory,
+   * Statement, Resource) narrow this further.
+   */
   canBeCreatedByUser(user: User): boolean {
-    return true;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   canBeEditedByUser(user: User): boolean {
@@ -203,7 +209,17 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   canBeDeletedByUser(user: User): boolean {
-    return true;
+    return user.role !== UserEnums.Role.Viewer;
+  }
+
+  /**
+   * Templates sit outside the territory tree and carry no document, so the
+   * scoping rules of the concrete Entity classes have nothing to derive an
+   * answer from. Any user who may write at all may create, edit and delete a
+   * template of any class.
+   */
+  protected isTemplateWritableByUser(user: User): boolean {
+    return !!this.isTemplate && user.role !== UserEnums.Role.Viewer;
   }
 
   /**

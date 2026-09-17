@@ -261,7 +261,7 @@ export default class Document implements IDocument, IDbModel {
    * @returns boolean
    */
   canBeCreatedByUser(user: User): boolean {
-    return true;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   /**
@@ -279,7 +279,7 @@ export default class Document implements IDocument, IDbModel {
    * @returns boolean
    */
   canBeDeletedByUser(user: User): boolean {
-    return true;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   removeAnchors(entityIds: string[]) {
@@ -433,7 +433,7 @@ export default class Document implements IDocument, IDbModel {
     }
     const entries = await rethink
       .table(Document.table)
-      .getAll(...entityIds, { index: DbEnums.Indexes.DocumentEntityIds })
+      .getAll(rethink.args(entityIds), { index: DbEnums.Indexes.DocumentEntityIds })
       .without("content")
       .distinct()
       .run(db);

@@ -4,13 +4,23 @@ import {
   IRequestSearch,
   IRequestSearchRootValidity,
 } from "@inkvisitor/shared/types/request-search";
+import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { Input, TypeBar } from "components";
-import Dropdown, { AttributeButtonGroup } from "components/advanced";
+import Dropdown, { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
+import { mergeTokensIntoIds, parseEntityIdsFromText } from "pages/Query/utils";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
+import { MdClose } from "react-icons/md";
+import { IcoChevronDown } from "Theme/icons";
+import { CoOccurrenceEntityList } from "./CoOccurrenceEntityList";
 import {
+  StyledCoOccurrenceBox,
+  StyledCoOccurrenceChevron,
+  StyledCoOccurrenceClear,
+  StyledCoOccurrenceSummary,
+  StyledCoOccurrenceToggle,
   StyledDateRange,
   StyledDateRangeField,
   StyledDateRangeLabel,
@@ -105,16 +115,58 @@ const filtersToSearchData = (filters: Explore.IExploreSearchFilter[]): IRequestS
   return searchData;
 };
 
+const filtersToCoOccurrenceIds = (filters: Explore.IExploreSearchFilter[]): string[] =>
+  filters.find(
+    (f): f is Explore.IExploreCoOccurrenceFilter => f.type === Explore.SearchOption.CoOccurrence,
+  )?.entityIds ?? [];
+
 interface FloatingSearchFormProps {
   dispatch: React.Dispatch<ExploreAction>;
   filters: Explore.IExploreSearchFilter[];
 }
 export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch, filters }) => {
-  const [searchData, setSearchData] = useState<IRequestSearch>(() =>
-    filtersToSearchData(filters),
-  );
+  const [searchData, setSearchData] = useState<IRequestSearch>(() => filtersToSearchData(filters));
 
   const { data: users } = useUsersSimplifiedQuery();
+
+  // the applied filter is the single source of truth for the picked entities:
+  // the form is unmounted while the panel is minimised, so keeping them in
+  // local state would lose them on reopen
+  const coOccurrenceIds = filtersToCoOccurrenceIds(filters);
+  // the collapsed row shows a count only; the list below fetches the entities
+  // for the rows it actually renders
+  const [coOccurrenceExpanded, setCoOccurrenceExpanded] = useState(false);
+
+  const setCoOccurrenceIds = useCallback(
+    (entityIds: string[]) => {
+      dispatch({
+        type: ExploreActionType.setCoOccurrenceFilter,
+        payload: { entityIds },
+      });
+    },
+    [dispatch],
+  );
+
+  // a paste carrying complete uuids goes into the picked set instead of the
+  // suggester's input, which keeps handling text pasted to search by label
+  const handleCoOccurrencePaste = useCallback(
+    (event: React.ClipboardEvent) => {
+      const pasted = event.clipboardData.getData("text");
+      if (parseEntityIdsFromText(pasted).length === 0) {
+        return;
+      }
+      event.preventDefault();
+      setCoOccurrenceIds(mergeTokensIntoIds(coOccurrenceIds, pasted));
+    },
+    [coOccurrenceIds, setCoOccurrenceIds],
+  );
+
+  const removeCoOccurrenceId = useCallback(
+    (entityId: string) => {
+      setCoOccurrenceIds(coOccurrenceIds.filter((id) => id !== entityId));
+    },
+    [coOccurrenceIds, setCoOccurrenceIds],
+  );
 
   const orderedLanguageDict = useOrderedLanguageDict();
   const languageOptions: DropdownItem[] = useMemo(
@@ -229,7 +281,56 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
+        <StyledRowHeader>{Explore.SearchOption.CoOccurrence}</StyledRowHeader>
+        <StyledRowControl>
+          <StyledCoOccurrenceBox onPaste={handleCoOccurrencePaste}>
+            <EntitySuggester
+              categoryTypes={classesAll}
+              placeholder="pick or paste ids"
+              inputWidth="full"
+              disableCreate
+              excludedActantIds={coOccurrenceIds}
+              onSelected={(entityId: string) => {
+                if (!coOccurrenceIds.includes(entityId)) {
+                  setCoOccurrenceIds([...coOccurrenceIds, entityId]);
+                }
+              }}
+            />
+
+            {coOccurrenceIds.length > 0 && (
+              <StyledCoOccurrenceSummary>
+                <StyledCoOccurrenceToggle
+                  type="button"
+                  onClick={() => setCoOccurrenceExpanded(!coOccurrenceExpanded)}
+                >
+                  <StyledCoOccurrenceChevron $expanded={coOccurrenceExpanded}>
+                    <IcoChevronDown size={10} />
+                  </StyledCoOccurrenceChevron>
+                  {coOccurrenceIds.length}
+                  {coOccurrenceIds.length === 1 ? " entity" : " entities"}
+                </StyledCoOccurrenceToggle>
+                <StyledCoOccurrenceClear
+                  type="button"
+                  aria-label="Clear co-occurrence filter"
+                  onClick={() => setCoOccurrenceIds([])}
+                >
+                  <MdClose size={14} />
+                </StyledCoOccurrenceClear>
+              </StyledCoOccurrenceSummary>
+            )}
+
+            {coOccurrenceExpanded && coOccurrenceIds.length > 0 && (
+              <CoOccurrenceEntityList
+                entityIds={coOccurrenceIds}
+                onRemove={removeCoOccurrenceId}
+              />
+            )}
+          </StyledCoOccurrenceBox>
+        </StyledRowControl>
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.CreatedAt}</StyledRowHeader>
         <StyledRowControl>
           <StyledDateRange>
             <StyledDateRangeField>
@@ -281,7 +382,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
+        <StyledRowHeader $belowFieldLabel>{Explore.SearchOption.UpdatedAt}</StyledRowHeader>
         <StyledRowControl>
           <StyledDateRange>
             <StyledDateRangeField>

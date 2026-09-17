@@ -38,6 +38,17 @@ export default class QuerySearch {
   private equivalentIds = new Set<string>();
   private subordinateIds = new Set<string>();
 
+  /**
+   * Sizes of the provenance sets above - the counts are only final once
+   * expandFilteredResults has run, i.e. after getResults()/getStats().
+   */
+  get expansionCounts(): { equivalents: number; subordinates: number } {
+    return {
+      equivalents: this.equivalentIds.size,
+      subordinates: this.subordinateIds.size,
+    };
+  }
+
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.queryForCache = query;
     this.root = new SearchNode(query);
@@ -197,6 +208,14 @@ export default class QuerySearch {
         ? this.explore.view.columns
         : [];
 
+    // idsToLoad already honours rowIndices, so `filtered` is exactly the page
+    // being returned - the shared column data covers it in one pass
+    const columnsContext = await this.results.prepareColumnsContext(
+      db,
+      filtered,
+      columns
+    );
+
     const out: IResponseQueryEntity[] = [];
 
     for (const entity of filtered) {
@@ -206,7 +225,12 @@ export default class QuerySearch {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
-          columnData: await this.results!.columns(db, entity, columns),
+          columnData: await this.results!.columns(
+            db,
+            entity,
+            columns,
+            columnsContext
+          ),
         };
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)

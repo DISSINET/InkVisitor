@@ -21,6 +21,7 @@ const INITIAL_CONTEXT = {
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
+  promoteDetailId: UNINITIALISED,
   appendMultipleDetailIds: UNINITIALISED,
   replaceDetailIds: UNINITIALISED,
   removeDetailId: UNINITIALISED,
@@ -40,6 +41,7 @@ interface SearchParamsContext {
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string, maxCount?: number) => void;
+  promoteDetailId: (id: string, maxCount?: number) => void;
   appendMultipleDetailIds: (ids: string[], maxCount?: number) => void;
   replaceDetailIds: (ids: string[]) => void;
   removeDetailId: (id: string) => void;
@@ -53,6 +55,10 @@ interface SearchParamsContext {
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
 const arrJoinChar = ",";
+
+// Both sides go through URLSearchParams so encoding alone (the comma in a
+// detail list) is not a difference
+const normalizeHash = (hash: string) => new URLSearchParams(hash.replace(/^#/, "")).toString();
 
 export const useSearchParams = () => useContext(SearchParamsContext);
 
@@ -100,23 +106,36 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   );
 
   const isLoggingOutRef = React.useRef(false);
-  const isHandlingLocationChangeRef = React.useRef(false);
 
   const getDetailIdArray = () => {
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
   };
 
+  // maxCount of Infinity appends without evicting anything - for callers that
+  // must not cost the user a tab they already had open
   const appendDetailId = (id: string, maxCount: number = maxTabCount) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
-      const newDetailIdArray = [];
-      if (detailIdArray.length < maxCount) {
-        newDetailIdArray.push([...detailIdArray, id]);
-      } else {
-        newDetailIdArray.push([...detailIdArray.splice(1, detailIdArray.length), id]);
-      }
+      // at the cap the oldest tab gives way, so the new one always lands last
+      const newDetailIdArray =
+        detailIdArray.length < maxCount
+          ? [...detailIdArray, id]
+          : [...detailIdArray.slice(1), id];
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
+    setSelectedDetailId(id);
+  };
+
+  // The tab strip shows the head of this list, so moving an id to the front is
+  // what keeps its tab on screen. Reaching for a second entity in the caret
+  // list pushes the first one one slot to the right instead of evicting it.
+  const promoteDetailId = (id: string, maxCount: number = maxTabCount) => {
+    const detailIdArray = getDetailIdArray();
+    const newDetailIdArray = [id, ...detailIdArray.filter((detailId) => detailId !== id)].slice(
+      0,
+      maxCount,
+    );
+    setDetailId(newDetailIdArray.join(arrJoinChar));
     setSelectedDetailId(id);
   };
 
@@ -181,13 +200,23 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   };
 
   const handleHistoryPush = () => {
-    if (!isLoggingOutRef.current && !isHandlingLocationChangeRef.current) {
+    if (!isLoggingOutRef.current) {
       const hashString = params.toString();
       // Remove the = symbol for editorClosed parameter
       const cleanHash = hashString
         .replace(/editorClosed=&/g, "editorClosed&")
         .replace(/&editorClosed=/g, "&editorClosed")
         .replace(/^editorClosed=$/g, "editorClosed");
+
+      // The url can already say this: state that was read out of it in the
+      // first place - a pasted link, back/forward. Navigating again would add a
+      // history entry leading where the user already is, and a navigation that
+      // only carries a hash keeps the pathname it finds, which is the wrong one
+      // while a route change is still in flight.
+      if (normalizeHash(cleanHash) === normalizeHash(location.hash)) {
+        return;
+      }
+
       navigate({
         hash: cleanHash,
       });
@@ -224,9 +253,10 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     }
   }, [territoryId, statementId, selectedDetailId, detailId, editorOpened]);
 
-  const handleLocationChange = (location: any) => {
+  // Puts the params a url carries into state.
+  const applyParamsFromHash = (hash: string) => {
     try {
-      const paramsTemp = new URLSearchParams(location.hash.substring(1));
+      const paramsTemp = new URLSearchParams(hash.replace(/^#/, ""));
       const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
       parsedParamsTemp.territory ? setTerritoryId(parsedParamsTemp.territory) : setTerritoryId("");
@@ -246,18 +276,22 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     }
   };
 
-  useEffect(() => {
-    // Listen for URL changes (back/forward button, direct navigation)
-    // This condition is for redirect - don't use our lifecycle when params are set by search query
-    if (!hasSearchParams) {
-      isHandlingLocationChangeRef.current = true;
-      handleLocationChange(location);
-      // Use setTimeout to ensure state updates have completed before allowing history pushes
-      setTimeout(() => {
-        isHandlingLocationChangeRef.current = false;
-      }, 0);
-    }
-  }, [location, hasSearchParams]);
+  // A url the app did not come from itself - back/forward, a pasted link, the
+  // redirect after login - is read while rendering rather than from an effect.
+  // A page that mounts on this render then holds the params on its first
+  // render, instead of mounting empty and receiving them a commit later: that
+  // later arrival is what its own mount effects read as the user having just
+  // picked this territory, and it holds back every query gated on the ids.
+  // Skipped when params are passed by search query (activation, password
+  // reset), whose url this provider leaves alone. A url the app wrote itself is
+  // read back too: it says what the state it was composed from said, and where
+  // a newer setter has since moved on, the write carrying that newer value is
+  // already on its way to land after this one.
+  const [appliedHash, setAppliedHash] = useState(location.hash);
+  if (!hasSearchParams && location.hash !== appliedHash) {
+    setAppliedHash(location.hash);
+    applyParamsFromHash(location.hash);
+  }
 
   return (
     <SearchParamsContext.Provider
@@ -270,6 +304,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
         selectedDetailId,
         setSelectedDetailId,
         appendDetailId,
+        promoteDetailId,
         appendMultipleDetailIds,
         replaceDetailIds,
         removeDetailId,

@@ -151,7 +151,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           <StyledParentRow>
             <div>
               <StyledBlueText>from old parent T</StyledBlueText>
-              {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
+              {oldParentTerritory && <EntityTag fullWidth entity={oldParentTerritory} />}
             </div>
 
             <StyledArrowWrapper>
@@ -170,12 +170,11 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                   return (
                     <StyledTagWrap key={key}>
                       <EntityTag
+                        fullWidth
                         entity={e}
                         unlinkButton={{
                           onClick: () =>
-                            setNewParentEntities(
-                              newParentEntities.filter((et) => et.id !== e.id)
-                            ),
+                            setNewParentEntities(newParentEntities.filter((et) => et.id !== e.id)),
                         }}
                       />
                     </StyledTagWrap>
@@ -270,7 +269,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             <CancelButton onClick={onClose} />
             <Button
               disabled={!newParentEntities.length || !territory}
-              label={action}
+              label={action === "move" ? "Move" : "Duplicate"}
               onClick={() => {
                 if (newParentEntities.length > 0 && territory) {
                   if (action === "move") {

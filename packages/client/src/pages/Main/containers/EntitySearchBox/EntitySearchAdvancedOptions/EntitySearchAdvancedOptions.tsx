@@ -160,6 +160,7 @@ export const EntitySearchAdvancedOptions: React.FC<EntitySearchAdvancedOptions> 
             setExpandedOptions([]);
             setSearchData({
               labelOrId: searchData.labelOrId,
+              entityIds: searchData.entityIds,
             });
           }}
           tooltipLabel="Clear All"

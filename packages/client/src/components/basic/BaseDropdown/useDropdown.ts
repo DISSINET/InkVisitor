@@ -23,6 +23,9 @@ import {
 } from "./dropdownLogic";
 import { ChangeMeta } from "./types";
 
+const MENU_MAX_HEIGHT = 320;
+const MENU_MIN_HEIGHT = 180;
+
 interface UseDropdownArgs<O extends DropdownItem> {
   options: O[];
   value: O[];
@@ -80,17 +83,22 @@ export const useDropdown = <O extends DropdownItem>({
     onOpenChange: (next) => (next ? setOpen(true) : closeMenu()),
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
+    /* size runs before flip: the menu is trimmed to the room on its side, but
+       never below MENU_MIN_HEIGHT, so only a side too cramped to use still
+       overflows and makes flip move the menu to the other side */
     middleware: [
       offset(1),
-      flip({ padding: 10 }),
       size({
         padding: 10,
         apply({ rects, availableHeight, elements }) {
-          // menu tracks the control width; 18rem cap ≙ the old menu-list max-height
           elements.floating.style.width = `${rects.reference.width}px`;
-          elements.floating.style.maxHeight = `min(${availableHeight}px, 18rem)`;
+          elements.floating.style.maxHeight = `${Math.min(
+            MENU_MAX_HEIGHT,
+            Math.max(availableHeight, MENU_MIN_HEIGHT)
+          )}px`;
         },
       }),
+      flip({ padding: 10, fallbackStrategy: "bestFit" }),
     ],
   });
 
@@ -142,7 +150,11 @@ export const useDropdown = <O extends DropdownItem>({
   };
 
   const removeChip = (option: O) => emit(removeChipOp(value, option));
-  const clear = () => emit(clearSelection<O>());
+  // clearing means the user wants nothing selected, so the open menu goes too
+  const clear = () => {
+    emit(clearSelection<O>());
+    closeMenu();
+  };
   const isSelected = (option: O) =>
     value.some((v) => v.value === option.value);
 
@@ -150,6 +162,11 @@ export const useDropdown = <O extends DropdownItem>({
      handle arrow navigation while open, Esc, and outside-click dismissal. */
   const onControlKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
+      if (open) {
+        // an open menu owns Enter; document-level shortcuts (Explorer's run
+        // search) would otherwise see the menu already closed by the pick
+        e.stopPropagation();
+      }
       if (open && activeIndex != null && filtered[activeIndex]) {
         e.preventDefault();
         selectOption(filtered[activeIndex]);
