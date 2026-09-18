@@ -1441,6 +1441,10 @@ export const TextAnnotator = ({
     );
   }, [searchOccurences, searchActiveOccurence]);
 
+  // Bumped on every Ctrl/Cmd+F so the effect below re-runs even when the
+  // keypress leaves both isFindOpen and searchTerm at their current values.
+  const [findFocusRequest, setFindFocusRequest] = useState(0);
+
   // Ctrl/Cmd+F opens the find panel for the current mode, or focuses the input
   // of whichever panel is already open. ctrlKeyCombo is true so it fires
   // page-wide rather than only when the canvas holds focus.
@@ -1448,16 +1452,29 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      if (isFindOpen) {
-        findInputRef.current?.focus();
-        findInputRef.current?.select();
-      } else {
-        setIsFindOpen(true);
+      // A canvas selection always wins over what the input holds; with no
+      // selection the term stays put. search() matches within a single line, so
+      // the whitespace of a selection spanning a break is collapsed to keep it
+      // findable.
+      const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
+      if (selection) {
+        setSearchTerm(selection);
       }
+      setIsFindOpen(true);
+      setFindFocusRequest((request) => request + 1);
     },
-    [isSearchAllowed, isFindOpen],
+    [isSearchAllowed, annotator],
     true,
   );
+
+  // Selecting the input's contents lets the next keystroke replace them. The
+  // effect runs after the render that applied a seeded term, so it selects the
+  // new value rather than the one the keypress saw.
+  useEffect(() => {
+    if (findFocusRequest === 0) return;
+    findInputRef.current?.focus();
+    findInputRef.current?.select();
+  }, [findFocusRequest]);
 
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
