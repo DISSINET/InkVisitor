@@ -37,7 +37,6 @@ import { EntityEnums, InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums
 import {
   IDocument,
   IEntity,
-  IResponseEntity,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -1374,10 +1373,8 @@ export const TextAnnotator = ({
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
-  // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(null);
-  // does the pre-selected anchor exist in the current selection
-  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+  // entities to anchor, applied together so one match can carry several anchors
+  const [entitiesToAnchor, setEntitiesToAnchor] = useState<IEntity[]>([]);
 
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
@@ -1387,15 +1384,10 @@ export const TextAnnotator = ({
     // searchActiveOccurence is in dependencies to call onSelectText on occurence change
   }, [searchActiveOccurence]);
 
-  useEffect(() => {
-    if (!entityToAnchor) {
-      setCurrentAnchorExist(false);
-    } else if (selectedAnchors.some((anchor) => anchor.getTagName() === entityToAnchor?.id)) {
-      setCurrentAnchorExist(true);
-    } else {
-      setCurrentAnchorExist(false);
-    }
-  }, [selectedAnchors, entityToAnchor]);
+  const selectedAnchorTagNames = useMemo(
+    () => selectedAnchors.map((anchor) => anchor.getTagName()),
+    [selectedAnchors]
+  );
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -1449,6 +1441,10 @@ export const TextAnnotator = ({
     );
   }, [searchOccurences, searchActiveOccurence]);
 
+  // Bumped on every Ctrl/Cmd+F so the effect below re-runs even when the
+  // keypress leaves both isFindOpen and searchTerm at their current values.
+  const [findFocusRequest, setFindFocusRequest] = useState(0);
+
   // Ctrl/Cmd+F opens the find panel for the current mode, or focuses the input
   // of whichever panel is already open. ctrlKeyCombo is true so it fires
   // page-wide rather than only when the canvas holds focus.
@@ -1456,16 +1452,29 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      if (isFindOpen) {
-        findInputRef.current?.focus();
-        findInputRef.current?.select();
-      } else {
-        setIsFindOpen(true);
+      // A canvas selection always wins over what the input holds; with no
+      // selection the term stays put. search() matches within a single line, so
+      // the whitespace of a selection spanning a break is collapsed to keep it
+      // findable.
+      const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
+      if (selection) {
+        setSearchTerm(selection);
       }
+      setIsFindOpen(true);
+      setFindFocusRequest((request) => request + 1);
     },
-    [isSearchAllowed, isFindOpen],
+    [isSearchAllowed, annotator],
     true,
   );
+
+  // Selecting the input's contents lets the next keystroke replace them. The
+  // effect runs after the render that applied a seeded term, so it selects the
+  // new value rather than the one the keypress saw.
+  useEffect(() => {
+    if (findFocusRequest === 0) return;
+    findInputRef.current?.focus();
+    findInputRef.current?.select();
+  }, [findFocusRequest]);
 
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
@@ -1518,9 +1527,16 @@ export const TextAnnotator = ({
           setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
           isRegexMode={isRegexMode}
           setIsRegexMode={setIsRegexMode}
-          entityToAnchor={entityToAnchor}
-          setEntityToAnchor={setEntityToAnchor}
-          currentAnchorExist={currentAnchorExist}
+          entitiesToAnchor={entitiesToAnchor}
+          onPickEntityToAnchor={(entity) =>
+            setEntitiesToAnchor((prevEntities) => [...prevEntities, entity])
+          }
+          onRemoveEntityToAnchor={(entityId) =>
+            setEntitiesToAnchor((prevEntities) =>
+              prevEntities.filter((entity) => entity.id !== entityId)
+            )
+          }
+          selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
         />
       )}
