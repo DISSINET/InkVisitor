@@ -6,6 +6,7 @@ import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
 import { useUserQuery } from "hooks/react-query";
+import { scrollToTerritoryInTree } from "hooks/ScrollHandler";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaStar } from "react-icons/fa";
@@ -14,7 +15,7 @@ import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { IcoPlusBold } from "Theme/icons";
+import { IcoCollapse, IcoPlusBold } from "Theme/icons";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
@@ -69,6 +70,7 @@ export const TerritoryTreeBox: React.FC = () => {
   const userRole = getStoredUserRole();
   const { territoryId } = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
+  const [foldAllSignal, setFoldAllSignal] = useState(0);
 
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
@@ -212,6 +214,19 @@ export const TerritoryTreeBox: React.FC = () => {
               tooltipLabel="starred territories"
               tooltipPosition="right"
             />
+            <Button
+              icon={<IcoCollapse size={14} />}
+              color="greyer"
+              inverted
+              onClick={() => {
+                setFoldAllSignal((signal) => signal + 1);
+                if (territoryId) {
+                  scrollToTerritoryInTree(territoryId, treeFilterOpen);
+                }
+              }}
+              tooltipLabel="fold all territories"
+              tooltipPosition="right"
+            />
           </StyledTreeButtonGroup>
 
           {treeFilterOpen && (
@@ -239,6 +254,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     empty={filteredTreeData.empty}
                     storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
+                    foldAllSignal={foldAllSignal}
                   />
                 )}
 

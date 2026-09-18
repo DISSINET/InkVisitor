@@ -44,6 +44,8 @@ interface TerritoryTreeNode {
   right: UserEnums.RoleMode;
   storedTerritories: string[];
   updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
+  // incremented by the tree box to fold every node off the selected path
+  foldAllSignal?: number;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -59,6 +61,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   right,
   storedTerritories,
   updateUserMutation,
+  foldAllSignal = 0,
 }) => {
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -86,6 +89,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     setChildTerritories(children);
   }, [children]);
 
+  // Path expansion only ever opens nodes: branches the user unfolded stay
+  // open while they navigate elsewhere in the tree.
   useEffect(() => {
     if (!treeInitialized) {
       const shouldExpand = initExpandedNodes.some((node) => node === territory.id);
@@ -96,11 +101,15 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         dispatch(setTreeInitialized(true));
       } else if (territory.id === rootTerritoryId) {
         setIsExpanded(true);
-      } else {
-        setIsExpanded(false);
       }
     }
   }, [treeInitialized, initExpandedNodes]);
+
+  useEffect(() => {
+    if (foldAllSignal > 0) {
+      setIsExpanded(territory.id === rootTerritoryId || initExpandedNodes.includes(territory.id));
+    }
+  }, [foldAllSignal]);
 
   const moveChildFn = useCallback((dragIndex: number, hoverIndex: number) => {
     setChildTerritories((childTerritories) =>
@@ -308,6 +317,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               moveFn={moveChildFn}
               storedTerritories={storedTerritories}
               updateUserMutation={updateUserMutation}
+              foldAllSignal={foldAllSignal}
             />
           ))}
         {!hideChildTerritories && isExpanded && showPagination && (
