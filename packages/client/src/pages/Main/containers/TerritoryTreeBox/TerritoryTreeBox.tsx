@@ -6,6 +6,7 @@ import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
 import { useUserQuery } from "hooks/react-query";
+import { scrollToTerritoryInTree } from "hooks/ScrollHandler";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaStar } from "react-icons/fa";
@@ -217,7 +218,12 @@ export const TerritoryTreeBox: React.FC = () => {
               icon={<IcoCollapse size={14} />}
               color="greyer"
               inverted
-              onClick={() => setFoldAllSignal((signal) => signal + 1)}
+              onClick={() => {
+                setFoldAllSignal((signal) => signal + 1);
+                if (territoryId) {
+                  scrollToTerritoryInTree(territoryId, treeFilterOpen);
+                }
+              }}
               tooltipLabel="fold all territories"
               tooltipPosition="right"
             />
