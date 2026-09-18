@@ -131,6 +131,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
 
       <StyledAddLabel $marginTop={entity.labels.length > 1}>
         <Input
+          width="full"
           placeholder="add label"
           allowCtrlEnter
           disabled={!userCanEdit}
