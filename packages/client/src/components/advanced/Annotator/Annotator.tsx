@@ -37,7 +37,6 @@ import { EntityEnums, InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums
 import {
   IDocument,
   IEntity,
-  IResponseEntity,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -1374,10 +1373,8 @@ export const TextAnnotator = ({
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
-  // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(null);
-  // does the pre-selected anchor exist in the current selection
-  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+  // entities to anchor, applied together so one match can carry several anchors
+  const [entitiesToAnchor, setEntitiesToAnchor] = useState<IEntity[]>([]);
 
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
@@ -1387,15 +1384,10 @@ export const TextAnnotator = ({
     // searchActiveOccurence is in dependencies to call onSelectText on occurence change
   }, [searchActiveOccurence]);
 
-  useEffect(() => {
-    if (!entityToAnchor) {
-      setCurrentAnchorExist(false);
-    } else if (selectedAnchors.some((anchor) => anchor.getTagName() === entityToAnchor?.id)) {
-      setCurrentAnchorExist(true);
-    } else {
-      setCurrentAnchorExist(false);
-    }
-  }, [selectedAnchors, entityToAnchor]);
+  const selectedAnchorTagNames = useMemo(
+    () => selectedAnchors.map((anchor) => anchor.getTagName()),
+    [selectedAnchors]
+  );
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -1518,9 +1510,16 @@ export const TextAnnotator = ({
           setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
           isRegexMode={isRegexMode}
           setIsRegexMode={setIsRegexMode}
-          entityToAnchor={entityToAnchor}
-          setEntityToAnchor={setEntityToAnchor}
-          currentAnchorExist={currentAnchorExist}
+          entitiesToAnchor={entitiesToAnchor}
+          onPickEntityToAnchor={(entity) =>
+            setEntitiesToAnchor((prevEntities) => [...prevEntities, entity])
+          }
+          onRemoveEntityToAnchor={(entityId) =>
+            setEntitiesToAnchor((prevEntities) =>
+              prevEntities.filter((entity) => entity.id !== entityId)
+            )
+          }
+          selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
         />
       )}
