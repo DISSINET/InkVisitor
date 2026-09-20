@@ -21,6 +21,30 @@ services:
       - "8080:8080" # dashboard - required only for public access
       - "28015:28015" # driver port - required only for public access
 
+  # PostgreSQL (TimescaleDB image) for the storage migration (#3256). Opt-in:
+  # nothing reads it until the migration lands, RethinkDB stays the default.
+  # Host port is overridable (PG_PORT=5433 docker compose up -d postgres).
+  postgres:
+    image: timescale/timescaledb:2.30.1-pg17
+    container_name: "inkvisitor-postgres"
+    restart: always
+    <<: *logging
+    environment:
+      POSTGRES_DB: ${PG_NAME:-inkvisitor}
+      POSTGRES_USER: ${PG_USER:-inkvisitor}
+      POSTGRES_PASSWORD: ${PG_PASS:-inkvisitor}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - inkvisitor
+    ports:
+      - "${PG_PORT:-5432}:5432"
+
   inkvisitor:
     build:
       context: .
@@ -59,3 +83,6 @@ services:
 
 networks:
   inkvisitor:
+
+volumes:
+  postgres-data:
