@@ -9,6 +9,7 @@ import { getEntityClass, getRelationClass } from "@models/factory";
 import { copyRelations } from "@models/relation/functions";
 import Relation from "@models/relation/relation";
 import { getAuditByEntityId } from "@modules/audits";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
 import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
@@ -21,12 +22,14 @@ import {
   IResourceData,
   IResponseDetail,
   IResponseEntity,
+  IResponseEntityExpansion,
   IResponseGeneric,
   ITerritory,
   IUser,
   Relation as RelationType,
   RequestSearch,
   AuditScope,
+  EXPANSION_RESPONSE_MAX,
 } from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
@@ -818,6 +821,96 @@ export default Router()
             );
 
         return relations;
+      }
+    )
+  )
+  /**
+   * @openapi
+   * /entities/{entityId}/expansion:
+   *   get:
+   *     description: Returns the entities added by the "include equivalents" / "include subordinates" query-node toggles
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the pinned entity
+   *       - in: query
+   *         name: equivalents
+   *         schema:
+   *           type: boolean
+   *         description: include SYN / IDE / AEE equivalents
+   *       - in: query
+   *         name: subordinates
+   *         schema:
+   *           type: boolean
+   *         description: include inverse SCL / SOE / HOL and child territories
+   *     responses:
+   *       200:
+   *         description: Returns IResponseEntityExpansion
+   */
+  .get(
+    "/:entityId/expansion",
+    asyncRouteHandler<IResponseEntityExpansion>(
+      async (
+        request: IRequest<
+          { entityId: string },
+          unknown,
+          { equivalents?: string; subordinates?: string }
+        >
+      ) => {
+        const entityId = request.params.entityId;
+
+        if (!entityId) {
+          throw new BadParams("entity id has to be set");
+        }
+
+        const entityData = await findEntityById(request.db, entityId);
+        if (!entityData) {
+          throw new EntityDoesNotExist(
+            `entity ${entityId} was not found`,
+            entityId
+          );
+        }
+
+        const ids = await getNodeExpansionIds(request.db.connection, entityId, {
+          equivalents: request.query.equivalents === "true",
+          subordinates: request.query.subordinates === "true",
+        });
+
+        const totals = {
+          equivalents: ids.equivalents.length,
+          subordinates: ids.subordinates.length,
+        };
+
+        // rows are capped across both groups, equivalents filled first; totals
+        // above stay exact so the node badge never shows a capped number
+        const equivalentIds = ids.equivalents.slice(0, EXPANSION_RESPONSE_MAX);
+        const subordinateIds = ids.subordinates.slice(
+          0,
+          Math.max(0, EXPANSION_RESPONSE_MAX - equivalentIds.length)
+        );
+
+        const [equivalents, subordinates] = await Promise.all([
+          Entity.findEntitiesByIds(request.db.connection, equivalentIds),
+          Entity.findEntitiesByIds(request.db.connection, subordinateIds),
+        ]);
+
+        return {
+          equivalents,
+          subordinates,
+          totals,
+          // compared against the id slice, not the resolved row count - a
+          // dangling relation id that no longer resolves to a live entity
+          // must not read as the cap having cut the list
+          truncated: {
+            equivalents: equivalentIds.length < ids.equivalents.length,
+            subordinates: subordinateIds.length < ids.subordinates.length,
+          },
+        };
       }
     )
   )

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
@@ -13,8 +13,12 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { useTheme } from "styled-components";
 import { INodeItem, QueryValidityProblem } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { expansionCount } from "../nodeExpansion";
+import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { QueryAction, QueryActionType } from "../state";
 import {
+  StyledExpansionCountButton,
+  StyledExpansionToggleGroup,
   StyledGraphNode,
   StyledNodeContainer,
   StyledNodeExpansionToggles,
@@ -123,6 +127,63 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     },
     enabled: !!entityId && api.isLoggedIn(),
   });
+
+  const includeEquivalents = node.params.includeEquivalents === true;
+  const includeSubordinates = node.params.includeSubordinates === true;
+
+  // The expansion is fetched only when the user asks for it, never as a side
+  // effect of editing the query: this signature identifies the toggle
+  // combination that was asked for, and the request runs only while the node
+  // still carries it. Flipping a toggle therefore costs nothing until the new
+  // combination is asked for in turn.
+  const expansionSignature = `${entityId}|${includeEquivalents}|${includeSubordinates}`;
+  const [requestedExpansionSignature, setRequestedExpansionSignature] = useState<
+    string | null
+  >(null);
+
+  const {
+    data: dataExpansion,
+    isFetching: isExpansionFetching,
+    isError: isExpansionError,
+  } = useQuery({
+    queryKey: [
+      "node-expansion",
+      entityId,
+      includeEquivalents,
+      includeSubordinates,
+    ],
+    queryFn: async () => {
+      const res = await api.entityExpansion(entityId!, {
+        equivalents: includeEquivalents,
+        subordinates: includeSubordinates,
+      });
+      return res.data;
+    },
+    enabled:
+      !!entityId &&
+      requestedExpansionSignature === expansionSignature &&
+      api.isLoggedIn(),
+    // the relation graph does not move while a query is being built, so
+    // returning to a combination already asked for reads from the cache and
+    // shows its count without a second request
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const [openExpansionGroup, setOpenExpansionGroup] = useState<
+    "equivalents" | "subordinates" | null
+  >(null);
+  const equivalentsBadgeRef = useRef<HTMLButtonElement | null>(null);
+  const subordinatesBadgeRef = useRef<HTMLButtonElement | null>(null);
+
+  const openExpansion = (group: "equivalents" | "subordinates") => {
+    setRequestedExpansionSignature(expansionSignature);
+    setOpenExpansionGroup(openExpansionGroup === group ? null : group);
+  };
+
+  // a popover describes one toggle combination, so editing the node closes it
+  useEffect(() => {
+    setOpenExpansionGroup(null);
+  }, [expansionSignature]);
 
   // a node reached through a negative ("NOT") edge gets a red border to match
   // that edge; scoped to this node only - deeper nodes have their own edges
@@ -415,42 +476,83 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           )}
           {!isRoot && !!paramEntityId && (
             <StyledNodeExpansionToggles>
-              <Checkbox
-                label="EQ"
-                size={13}
-                value={node.params.includeEquivalents === true}
-                tooltipLabel="include equivalents"
-                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
-                onChangeFn={() => {
-                  dispatch({
-                    type: QueryActionType.updateNodeExpansionToggles,
-                    payload: {
-                      nodeId: node.id,
-                      field: "includeEquivalents",
-                      value: node.params.includeEquivalents === true ? undefined : true,
-                    },
-                  });
-                }}
-                disableEnterKey
-              />
-              <Checkbox
-                label="SUB"
-                size={13}
-                value={node.params.includeSubordinates === true}
-                tooltipLabel="include subordinates"
-                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
-                onChangeFn={() => {
-                  dispatch({
-                    type: QueryActionType.updateNodeExpansionToggles,
-                    payload: {
-                      nodeId: node.id,
-                      field: "includeSubordinates",
-                      value: node.params.includeSubordinates === true ? undefined : true,
-                    },
-                  });
-                }}
-                disableEnterKey
-              />
+              <StyledExpansionToggleGroup>
+                <Checkbox
+                  label="EQ"
+                  size={13}
+                  color="info"
+                  value={includeEquivalents}
+                  tooltipLabel="include equivalents"
+                  tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
+                  onChangeFn={() => {
+                    dispatch({
+                      type: QueryActionType.updateNodeExpansionToggles,
+                      payload: {
+                        nodeId: node.id,
+                        field: "includeEquivalents",
+                        value: includeEquivalents ? undefined : true,
+                      },
+                    });
+                  }}
+                  disableEnterKey
+                />
+                {!!entityId && includeEquivalents && (
+                  <StyledExpansionCountButton
+                    ref={equivalentsBadgeRef}
+                    type="button"
+                    title="show the equivalent entities"
+                    onClick={() => openExpansion("equivalents")}
+                  >
+                    {expansionCount(dataExpansion, "equivalents") ?? "…"}
+                  </StyledExpansionCountButton>
+                )}
+              </StyledExpansionToggleGroup>
+              <StyledExpansionToggleGroup>
+                <Checkbox
+                  label="SUB"
+                  size={13}
+                  color="warning"
+                  value={includeSubordinates}
+                  tooltipLabel="include subordinates"
+                  tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
+                  onChangeFn={() => {
+                    dispatch({
+                      type: QueryActionType.updateNodeExpansionToggles,
+                      payload: {
+                        nodeId: node.id,
+                        field: "includeSubordinates",
+                        value: includeSubordinates ? undefined : true,
+                      },
+                    });
+                  }}
+                  disableEnterKey
+                />
+                {!!entityId && includeSubordinates && (
+                  <StyledExpansionCountButton
+                    ref={subordinatesBadgeRef}
+                    type="button"
+                    title="show the subordinate entities"
+                    onClick={() => openExpansion("subordinates")}
+                  >
+                    {expansionCount(dataExpansion, "subordinates") ?? "…"}
+                  </StyledExpansionCountButton>
+                )}
+              </StyledExpansionToggleGroup>
+              {openExpansionGroup !== null && (
+                <NodeExpansionPopover
+                  referenceElement={
+                    openExpansionGroup === "equivalents"
+                      ? equivalentsBadgeRef.current
+                      : subordinatesBadgeRef.current
+                  }
+                  group={openExpansionGroup}
+                  data={dataExpansion}
+                  isLoading={isExpansionFetching}
+                  isError={isExpansionError}
+                  onClose={() => setOpenExpansionGroup(null)}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
+                />
+              )}
             </StyledNodeExpansionToggles>
           )}
         </StyledGraphNode>
