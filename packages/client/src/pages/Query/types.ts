@@ -5,6 +5,18 @@ export type INodeItem = Query.INode & {
   gridY: number;
 };
 
+/**
+ * A node's pinned entity and EQ / SUB toggles as they stood when the search was
+ * last run. The builder compares a node's live params against its entry: only
+ * on a match does the node fetch and show its expansion counts, so nothing is
+ * requested or displayed for a search that has not been submitted.
+ */
+export type ICommittedNodeExpansion = {
+  entityId: string;
+  equivalents: boolean;
+  subordinates: boolean;
+};
+
 export type QueryValidity = {
   isValid: boolean;
   problems: QueryValidityProblem[];

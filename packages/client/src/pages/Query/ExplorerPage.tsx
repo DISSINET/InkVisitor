@@ -59,7 +59,11 @@ import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
 import { queryReducer, queryStateInitial } from "./Query/state";
 import { getAllEdges, getAllNodes, isQueryRequestEmpty } from "./Query/utils";
-import { QueryValidity, QueryValidityProblem } from "./types";
+import {
+  ICommittedNodeExpansion,
+  QueryValidity,
+  QueryValidityProblem,
+} from "./types";
 import {
   buildQueryWithResultExpansion,
   invalidateAllExplorerQueries,
@@ -216,13 +220,32 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     subordinates: false,
   });
 
+  // Node-level EQ / SUB toggles of the search that produced the results on
+  // screen, keyed by node id. A node shows its expansion counts only while its
+  // live toggles still match this snapshot, so the builder issues no request
+  // and displays no number for a search that has not run.
+  const [committedNodeExpansion, setCommittedNodeExpansion] = useState<
+    Record<string, ICommittedNodeExpansion>
+  >({});
+
   const handleRunSearch = useCallback(() => {
     setCommittedSearchSignature(searchSignature);
     setCommittedExpansion({
       equivalents: includeEquivalents,
       subordinates: includeSubordinates,
     });
-  }, [searchSignature, includeEquivalents, includeSubordinates]);
+    const nodeExpansion: Record<string, ICommittedNodeExpansion> = {};
+    getAllNodes(queryState).forEach((node) => {
+      if (node.params.entityId) {
+        nodeExpansion[node.id] = {
+          entityId: node.params.entityId,
+          equivalents: node.params.includeEquivalents === true,
+          subordinates: node.params.includeSubordinates === true,
+        };
+      }
+    });
+    setCommittedNodeExpansion(nodeExpansion);
+  }, [searchSignature, includeEquivalents, includeSubordinates, queryState]);
 
   // Global Enter shortcut: run search unless focus is in a text input, textarea,
   // or select — except when that input lives inside a container marked with
@@ -826,6 +849,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 isQueryFetching={queryIsFetching}
                 queryError={queryError}
                 queryStateValidity={queryStateValidity}
+                committedNodeExpansion={committedNodeExpansion}
                 onOpenEntityInDetail={openEntityInDetail}
               />
               {!explorerBoxMaximized && (

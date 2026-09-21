@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IcoPlusBold, IcoQuestion, IcoTrash, IcoWarning } from "Theme/icons";
 
 import { entitiesDict, entityStatusDict } from "@inkvisitor/shared/dictionaries";
@@ -11,10 +11,17 @@ import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { useTheme } from "styled-components";
-import { INodeItem, QueryValidityProblem } from "../../types";
+import {
+  ICommittedNodeExpansion,
+  INodeItem,
+  QueryValidityProblem,
+} from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { expansionCount } from "../nodeExpansion";
+import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { QueryAction, QueryActionType } from "../state";
 import {
+  StyledExpansionCountButton,
   StyledGraphNode,
   StyledNodeContainer,
   StyledNodeExpansionToggles,
@@ -31,6 +38,8 @@ interface QueryGridNodeProps {
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
+  /** this node's pinned entity and toggles as of the last run search */
+  committedExpansion?: ICommittedNodeExpansion;
   onOpenEntityInDetail?: (entityId: string) => void;
 }
 
@@ -41,6 +50,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   dispatch,
   problems,
   isRoot = false,
+  committedExpansion,
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
@@ -123,6 +133,58 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     },
     enabled: !!entityId && api.isLoggedIn(),
   });
+
+  const includeEquivalents = node.params.includeEquivalents === true;
+  const includeSubordinates = node.params.includeSubordinates === true;
+
+  // Counts describe the search on screen, so they appear only once a search has
+  // run with these exact toggles on this exact entity. Flipping a toggle
+  // afterwards withdraws them until the next run, and nothing is requested
+  // while the query is merely being edited.
+  const isExpansionCommitted =
+    !!entityId &&
+    (includeEquivalents || includeSubordinates) &&
+    committedExpansion?.entityId === entityId &&
+    committedExpansion.equivalents === includeEquivalents &&
+    committedExpansion.subordinates === includeSubordinates;
+
+  const {
+    data: dataExpansion,
+    isFetching: isExpansionFetching,
+    isError: isExpansionError,
+  } = useQuery({
+    queryKey: [
+      "node-expansion",
+      entityId,
+      includeEquivalents,
+      includeSubordinates,
+    ],
+    queryFn: async () => {
+      const res = await api.entityExpansion(entityId!, {
+        equivalents: includeEquivalents,
+        subordinates: includeSubordinates,
+      });
+      return res.data;
+    },
+    enabled: isExpansionCommitted && api.isLoggedIn(),
+    // the relation graph does not move while a query is being built, so
+    // re-toggling and reopening the popover cost nothing
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const [openExpansionGroup, setOpenExpansionGroup] = useState<
+    "equivalents" | "subordinates" | null
+  >(null);
+  const equivalentsBadgeRef = useRef<HTMLButtonElement | null>(null);
+  const subordinatesBadgeRef = useRef<HTMLButtonElement | null>(null);
+
+  // editing the node withdraws its counts, so an open popover would otherwise
+  // pop back into view on the next run
+  useEffect(() => {
+    if (!isExpansionCommitted) {
+      setOpenExpansionGroup(null);
+    }
+  }, [isExpansionCommitted]);
 
   // a node reached through a negative ("NOT") edge gets a red border to match
   // that edge; scoped to this node only - deeper nodes have their own edges
@@ -418,7 +480,8 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               <Checkbox
                 label="EQ"
                 size={13}
-                value={node.params.includeEquivalents === true}
+                color="info"
+                value={includeEquivalents}
                 tooltipLabel="include equivalents"
                 tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
                 onChangeFn={() => {
@@ -427,16 +490,33 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     payload: {
                       nodeId: node.id,
                       field: "includeEquivalents",
-                      value: node.params.includeEquivalents === true ? undefined : true,
+                      value: includeEquivalents ? undefined : true,
                     },
                   });
                 }}
                 disableEnterKey
               />
+              {isExpansionCommitted && includeEquivalents && (
+                <StyledExpansionCountButton
+                  ref={equivalentsBadgeRef}
+                  type="button"
+                  title="show the equivalent entities"
+                  onClick={() =>
+                    setOpenExpansionGroup(
+                      openExpansionGroup === "equivalents" ? null : "equivalents",
+                    )
+                  }
+                >
+                  {expansionCount(dataExpansion, "equivalents") === undefined
+                    ? "…"
+                    : `·${expansionCount(dataExpansion, "equivalents")}`}
+                </StyledExpansionCountButton>
+              )}
               <Checkbox
                 label="SUB"
                 size={13}
-                value={node.params.includeSubordinates === true}
+                color="warning"
+                value={includeSubordinates}
                 tooltipLabel="include subordinates"
                 tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
                 onChangeFn={() => {
@@ -445,12 +525,43 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     payload: {
                       nodeId: node.id,
                       field: "includeSubordinates",
-                      value: node.params.includeSubordinates === true ? undefined : true,
+                      value: includeSubordinates ? undefined : true,
                     },
                   });
                 }}
                 disableEnterKey
               />
+              {isExpansionCommitted && includeSubordinates && (
+                <StyledExpansionCountButton
+                  ref={subordinatesBadgeRef}
+                  type="button"
+                  title="show the subordinate entities"
+                  onClick={() =>
+                    setOpenExpansionGroup(
+                      openExpansionGroup === "subordinates" ? null : "subordinates",
+                    )
+                  }
+                >
+                  {expansionCount(dataExpansion, "subordinates") === undefined
+                    ? "…"
+                    : `·${expansionCount(dataExpansion, "subordinates")}`}
+                </StyledExpansionCountButton>
+              )}
+              {isExpansionCommitted && openExpansionGroup !== null && (
+                <NodeExpansionPopover
+                  referenceElement={
+                    openExpansionGroup === "equivalents"
+                      ? equivalentsBadgeRef.current
+                      : subordinatesBadgeRef.current
+                  }
+                  group={openExpansionGroup}
+                  data={dataExpansion}
+                  isLoading={isExpansionFetching}
+                  isError={isExpansionError}
+                  onClose={() => setOpenExpansionGroup(null)}
+                  onOpenEntityInDetail={onOpenEntityInDetail}
+                />
+              )}
             </StyledNodeExpansionToggles>
           )}
         </StyledGraphNode>

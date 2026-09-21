@@ -1,15 +1,12 @@
 import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
-import {
-  getEquivalentEntityIds,
-  getSubordinateEntityIds,
-} from "@models/relation/functions";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
+import { getNodeExpansionIds } from "./node-expansion";
 
 export default class SearchEdge implements Query.IEdge {
   type: Query.EdgeType;
@@ -74,21 +71,17 @@ export default class SearchEdge implements Query.IEdge {
       return;
     }
 
-    // both toggles off -> single-id set, no expansion queries issued
-    const ids = new Set<string>([entityId]);
-    if (this.node.params.includeEquivalents) {
-      for (const id of await getEquivalentEntityIds(db, [entityId])) {
-        ids.add(id);
-      }
-    }
-    if (this.node.params.includeSubordinates) {
-      for (const id of await getSubordinateEntityIds(db, [entityId])) {
-        ids.add(id);
-      }
-    }
+    // both toggles off -> single-id set, no expansion queries issued.
+    // The same resolver backs the /entities/:id/expansion route, so what the
+    // query builder displays is the set this edge matches against.
+    const expansion = await getNodeExpansionIds(db, entityId, {
+      equivalents: this.node.params.includeEquivalents === true,
+      subordinates: this.node.params.includeSubordinates === true,
+    });
+    const ids = [entityId, ...expansion.equivalents, ...expansion.subordinates];
     this.targetEntityIds = statuses.length
-      ? await filterIdsByStatus(db, [...ids], statuses)
-      : [...ids];
+      ? await filterIdsByStatus(db, ids, statuses)
+      : ids;
   }
 
   /**

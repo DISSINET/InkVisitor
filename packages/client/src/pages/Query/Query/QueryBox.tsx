@@ -1,7 +1,7 @@
 import { Query } from "@inkvisitor/shared/types/query";
 import React, { useMemo } from "react";
 import { useTheme } from "styled-components";
-import { INodeItem, QueryValidity } from "../types";
+import { ICommittedNodeExpansion, INodeItem, QueryValidity } from "../types";
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../constants";
 import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
@@ -15,6 +15,7 @@ interface QueryBoxProps {
   isQueryFetching: boolean;
   queryError: Error | null;
   queryStateValidity: QueryValidity;
+  committedNodeExpansion: Record<string, ICommittedNodeExpansion>;
   onOpenEntityInDetail?: (entityId: string) => void;
 }
 
@@ -24,6 +25,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
   isQueryFetching,
   queryError,
   queryStateValidity,
+  committedNodeExpansion,
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
@@ -204,6 +206,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
                   problems={queryStateValidity.problems.filter(
                     (problem) => problem.source === thisCellNode.id,
                   )}
+                  committedExpansion={committedNodeExpansion[thisCellNode.id]}
                   onOpenEntityInDetail={onOpenEntityInDetail}
                 />
               )}

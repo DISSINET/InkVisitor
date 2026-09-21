@@ -127,3 +127,68 @@ export const StyledTooltipListItem = styled.li`
     font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   }
 `;
+
+// the count beside a checked EQ / SUB toggle; opens the expansion popover
+export const StyledExpansionCountButton = styled.button`
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+`;
+
+export const StyledExpansionPopover = styled.div`
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  max-height: 22rem;
+  max-width: 24rem;
+  overflow-y: auto;
+  padding: ${({ theme }) => theme.space[3]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+`;
+
+// reserved for the label filter; renders empty until that lands
+export const StyledExpansionPopoverHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  min-height: 0;
+`;
+
+interface StyledExpansionSectionHeading {
+  $variant: "equivalent" | "subordinate";
+}
+export const StyledExpansionSectionHeading = styled.div<StyledExpansionSectionHeading>`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  color: ${({ theme }) => theme.color["black"]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  background-color: ${({ theme, $variant }) =>
+    theme.color["invertedBg"][$variant === "equivalent" ? "info" : "warning"]};
+  border-left: 3px solid
+    ${({ theme, $variant }) =>
+      theme.color[$variant === "equivalent" ? "info" : "warning"]};
+`;
+
+export const StyledExpansionSectionTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+  padding-top: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledExpansionPopoverMessage = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+`;

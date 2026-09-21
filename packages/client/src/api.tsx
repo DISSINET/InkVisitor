@@ -14,6 +14,7 @@ import {
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
+  IResponseEntityExpansion,
   IResponseGeneric,
   IResponsePermission,
   IPropSpec,
@@ -1586,6 +1587,26 @@ class Api {
           filters,
           forward,
         },
+      });
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Entities added to a pinned query-node entity by its EQ / SUB toggles.
+   * `totals` are exact even when the row lists were capped server-side.
+   */
+  async entityExpansion(
+    entityId: string,
+    params: { equivalents: boolean; subordinates: boolean },
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseEntityExpansion>> {
+    try {
+      const response = await this.connection.get(`entities/${entityId}/expansion`, {
+        ...options,
+        params,
       });
       return response;
     } catch (err) {
