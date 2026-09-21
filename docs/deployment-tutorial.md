@@ -50,6 +50,8 @@ docker compose up -d database
 
 RethinkDB now runs in the `inkvisitor-database` container with its driver port on `28015` and its admin dashboard on `http://localhost:8080`.
 
+The compose file also defines an optional `postgres` service (TimescaleDB image, container `inkvisitor-postgres`, port `5432`) for the storage migration tracked in [#3256](https://github.com/DISSINET/InkVisitor/issues/3256). It is not used by the application yet; start it only when working on that migration (`docker compose up -d postgres`) and verify with `pnpm -C packages/server pg:check` / `pnpm -C packages/database pg:check` after copying the `PG_*` block from the `example.env` files.
+
 #### 2. Import the database schema and initial data
 
 The database CLI runs on the host (not inside a container) and creates the database, tables and indexes — and optionally seeds example data. The target database **does not need to exist beforehand**; the CLI drops and recreates whatever `DB_NAME` it is configured for. The shipped defaults point at a database called `inkvisitor`.

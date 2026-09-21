@@ -134,6 +134,14 @@ cd packages/database && pnpm install && pnpm start && cd -
 docker compose up -d inkvisitor
 ```
 
+Optional: a PostgreSQL (TimescaleDB) instance for the storage migration ([#3256](https://github.com/DISSINET/InkVisitor/issues/3256)). Nothing uses it yet; RethinkDB stays the default.
+
+```bash
+docker compose up -d postgres            # host port 5432, override with PG_PORT=5433
+pnpm -C packages/server pg:check         # connectivity check via env/.env.development (PG_* block)
+pnpm -C packages/database pg:check       # same via env/.env
+```
+
 For Kubernetes manifests, see [kube/](./kube). The setup will likely need to be adapted to your cluster.
 
 ## ACL - access control list
