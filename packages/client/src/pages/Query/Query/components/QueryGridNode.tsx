@@ -159,7 +159,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       return res.data;
     },
     enabled:
-      requestedExpansionSignature === expansionSignature && api.isLoggedIn(),
+      !!entityId &&
+      requestedExpansionSignature === expansionSignature &&
+      api.isLoggedIn(),
     // the relation graph does not move while a query is being built, so
     // returning to a combination already asked for reads from the cache and
     // shows its count without a second request

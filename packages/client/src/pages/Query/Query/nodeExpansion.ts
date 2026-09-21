@@ -46,10 +46,13 @@ export const buildExpansionSection = (
   return {
     group,
     variant: VARIANTS[group],
-    heading:
-      shown < total
-        ? `${group} (showing ${shown} of ${total})`
-        : `${group} (${total})`,
+    // shown can trail total even without truncation - a dangling relation id
+    // that no longer resolves to a live entity is silently dropped server-side
+    // (Entity.findEntitiesByIds) - so the "showing N of total" wording is
+    // reserved for an actual EXPANSION_RESPONSE_MAX cut
+    heading: data.truncated[group]
+      ? `${group} (showing ${shown} of ${total})`
+      : `${group} (${total})`,
     entities,
   };
 };

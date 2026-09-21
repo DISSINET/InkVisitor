@@ -18,6 +18,11 @@ export interface IResponseEntityExpansion {
   subordinates: IEntity[];
   /** true counts, computed before the row cap is applied */
   totals: { equivalents: number; subordinates: number };
-  /** set when the row lists were cut short by EXPANSION_RESPONSE_MAX */
-  truncated: boolean;
+  /**
+   * Per group: true when EXPANSION_RESPONSE_MAX cut that group's id list
+   * short. Compared against the id list, not the resolved row count - a
+   * dangling relation id that no longer resolves to a live entity shrinks the
+   * row count without the cap ever applying, and must not read as truncation.
+   */
+  truncated: { equivalents: boolean; subordinates: boolean };
 }

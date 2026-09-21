@@ -18,7 +18,7 @@ const response = (
   equivalents: [entity("eq-1"), entity("eq-2")],
   subordinates: [entity("sub-1")],
   totals: { equivalents: 2, subordinates: 1 },
-  truncated: false,
+  truncated: { equivalents: false, subordinates: false },
   ...overrides,
 });
 
@@ -27,7 +27,7 @@ describe("expansionCount", () => {
     const data = response({
       equivalents: [entity("eq-1")],
       totals: { equivalents: 940, subordinates: 1 },
-      truncated: true,
+      truncated: { equivalents: true, subordinates: false },
     });
     expect(expansionCount(data, "equivalents")).toBe(940);
   });
@@ -72,11 +72,25 @@ describe("buildExpansionSection", () => {
       response({
         equivalents: [entity("eq-1")],
         totals: { equivalents: 940, subordinates: 1 },
-        truncated: true,
+        truncated: { equivalents: true, subordinates: false },
       }),
       "equivalents",
     );
     expect(section?.heading).toBe("equivalents (showing 1 of 940)");
+  });
+
+  it("labels the plain total even when shown trails total, if the group was not truncated", () => {
+    // a dangling relation id that no longer resolves to a live entity can
+    // shrink the row count without the cap ever applying
+    const section = buildExpansionSection(
+      response({
+        equivalents: [entity("eq-1")],
+        totals: { equivalents: 2, subordinates: 1 },
+        truncated: { equivalents: false, subordinates: false },
+      }),
+      "equivalents",
+    );
+    expect(section?.heading).toBe("equivalents (2)");
   });
 
   it("is null without data", () => {

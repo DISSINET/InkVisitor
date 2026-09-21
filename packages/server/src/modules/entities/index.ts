@@ -903,9 +903,13 @@ export default Router()
           equivalents,
           subordinates,
           totals,
-          truncated:
-            equivalents.length < totals.equivalents ||
-            subordinates.length < totals.subordinates,
+          // compared against the id slice, not the resolved row count - a
+          // dangling relation id that no longer resolves to a live entity
+          // must not read as the cap having cut the list
+          truncated: {
+            equivalents: equivalentIds.length < ids.equivalents.length,
+            subordinates: subordinateIds.length < ids.subordinates.length,
+          },
         };
       }
     )
