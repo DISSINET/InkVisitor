@@ -1,0 +1,12 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/users/3/bookmarks"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": []
+  }
+}

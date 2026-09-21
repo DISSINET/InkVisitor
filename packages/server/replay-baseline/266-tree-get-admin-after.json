@@ -1,0 +1,130 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/tree"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "children": [
+        {
+          "children": [],
+          "empty": false,
+          "lvl": 1,
+          "path": [
+            "T0"
+          ],
+          "right": "admin",
+          "statementsCount": 3,
+          "territory": {
+            "class": "T",
+            "createdAt": "<datetime>",
+            "data": {
+              "parent": {
+                "order": 1,
+                "territoryId": "T0"
+              }
+            },
+            "detail": "",
+            "id": "rp-t",
+            "labels": [
+              "replay territory"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          }
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "empty": true,
+              "lvl": 2,
+              "path": [
+                "T0",
+                "t1"
+              ],
+              "right": "admin",
+              "statementsCount": 0,
+              "territory": {
+                "class": "T",
+                "createdAt": "<datetime>",
+                "data": {
+                  "parent": {
+                    "order": 1,
+                    "territoryId": "t1"
+                  }
+                },
+                "detail": "",
+                "id": "<uuid-36>",
+                "labels": [
+                  "COPY OF replay territory"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            }
+          ],
+          "empty": false,
+          "lvl": 1,
+          "path": [
+            "T0"
+          ],
+          "right": "admin",
+          "statementsCount": 6,
+          "territory": {
+            "class": "T",
+            "createdAt": "<datetime>",
+            "data": {
+              "parent": {
+                "order": 2,
+                "territoryId": "T0"
+              }
+            },
+            "detail": "",
+            "id": "t1",
+            "labels": [
+              "priest Minda and their stories"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          }
+        }
+      ],
+      "empty": false,
+      "lvl": 0,
+      "path": [],
+      "right": "admin",
+      "statementsCount": 0,
+      "territory": {
+        "class": "T",
+        "createdAt": "<datetime>",
+        "data": {
+          "parent": false
+        },
+        "detail": "",
+        "id": "T0",
+        "isTemplate": false,
+        "labels": [
+          "root"
+        ],
+        "language": "lat",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      }
+    }
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/query",
+    "body": {
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "mode": "stats",
+          "stats": {
+            "aggregateBy": "user",
+            "eventType": [
+              "create",
+              "edit"
+            ],
+            "fromDate": 1546300800000,
+            "timeUnit": "month",
+            "toDate": 1924992000000
+          }
+        }
+      },
+      "query": {
+        "edges": [],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "C",
+            "P"
+          ]
+        },
+        "type": "Entity"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "entities": [],
+      "entityIds": [
+        "<uuid-2>",
+        "c-has-isync-1",
+        "c-has-isync-2",
+        "c-has-isync-3",
+        "c-has-isync-4",
+        "c-has-sclm-warning",
+        "c-hasnt-isync-1",
+        "c-hasnt-isync-2",
+        "c-isync-superclass-1",
+        "c-isync-superclass-2",
+        "c1",
+        "c1000",
+        "c1001",
+        "c1002",
+        "c1003",
+        "c1101",
+        "c1102",
+        "c1103",
+        "c1104",
+        "c1105",
+        "c1106",
+        "c1107",
+        "c1108",
+        "c2",
+        "c211",
+        "c211a",
+        "c211b",
+        "c211c",
+        "c212",
+        "c213",
+        "c214",
+        "c215",
+        "c22",
+        "c23",
+        "c24",
+        "c3",
+        "c301",
+        "c31",
+        "c32",
+        "c33",
+        "c4",
+        "c401",
+        "c402",
+        "c403",
+        "c404",
+        "c41",
+        "c42",
+        "c44",
+        "c45",
+        "c46",
+        "c5",
+        "c501",
+        "c502",
+        "c503",
+        "c504",
+        "c51",
+        "c52",
+        "c521",
+        "c522",
+        "c523",
+        "c524",
+        "c53",
+        "c54",
+        "c55",
+        "c56",
+        "c57",
+        "c6",
+        "c60",
+        "c61",
+        "c70",
+        "c71",
+        "c80",
+        "c901",
+        "c902",
+        "c903",
+        "c904",
+        "c905",
+        "c906",
+        "c907",
+        "c908",
+        "p1",
+        "p11",
+        "p12",
+        "p2"
+      ],
+      "expansion": {
+        "equivalents": 0,
+        "subordinates": 0
+      },
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "mode": "stats",
+          "stats": {
+            "aggregateBy": "user",
+            "eventType": [
+              "create",
+              "edit"
+            ],
+            "fromDate": 1546300800000,
+            "timeUnit": "month",
+            "toDate": 1924992000000
+          }
+        }
+      },
+      "query": {
+        "edges": [],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "C",
+            "P"
+          ]
+        },
+        "type": "Entity"
+      },
+      "stats": {},
+      "statsEntityLimit": 500,
+      "total": 84
+    }
+  }
+}

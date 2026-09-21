@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/relations",
+    "body": {
+      "certainty": "1",
+      "entityIds": [
+        "rp-p",
+        "p1"
+      ],
+      "id": "rp-rel-3",
+      "type": "IDE"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

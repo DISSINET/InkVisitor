@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/entities/rp-c",
+    "body": {
+      "detail": "updated detail",
+      "labels": [
+        "replay concept renamed",
+        "alt label"
+      ],
+      "notes": [
+        "note"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

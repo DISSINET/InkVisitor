@@ -1,0 +1,587 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "GET",
+    "path": "/api/entities/c2/detail"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "C",
+      "createdAt": "<datetime>",
+      "data": {
+        "pos": ""
+      },
+      "detail": "",
+      "entities": {
+        "<uuid-20>": {
+          "class": "S",
+          "createdAt": "<datetime>",
+          "data": {
+            "actants": [
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "p1",
+                "id": "<uuid-24>",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "s",
+                "props": [
+                  {
+                    "bundleEnd": false,
+                    "bundleOperator": "a",
+                    "bundleStart": false,
+                    "certainty": "1",
+                    "children": [],
+                    "elvl": "1",
+                    "id": "<uuid-25>",
+                    "logic": "1",
+                    "mood": [],
+                    "moodvariant": "1",
+                    "type": {
+                      "elvl": "1",
+                      "entityId": "c3",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    },
+                    "value": {
+                      "elvl": "1",
+                      "entityId": "c2",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    }
+                  },
+                  {
+                    "bundleEnd": false,
+                    "bundleOperator": "a",
+                    "bundleStart": false,
+                    "certainty": "1",
+                    "children": [],
+                    "elvl": "1",
+                    "id": "<uuid-26>",
+                    "logic": "1",
+                    "mood": [],
+                    "moodvariant": "1",
+                    "type": {
+                      "elvl": "1",
+                      "entityId": "c71",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    },
+                    "value": {
+                      "elvl": "1",
+                      "entityId": "p11",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    }
+                  }
+                ],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "p2",
+                "id": "<uuid-27>",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a1",
+                "props": [],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "s2",
+                "id": "<uuid-28>",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a2",
+                "props": [],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "s3",
+                "id": "<uuid-29>",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a2",
+                "props": [],
+                "virtuality": "1"
+              }
+            ],
+            "actions": [
+              {
+                "actionId": "a1",
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "certainty": "1",
+                "elvl": "1",
+                "id": "<uuid-22>",
+                "logic": "1",
+                "mood": [],
+                "moodvariant": "1",
+                "props": [
+                  {
+                    "bundleEnd": false,
+                    "bundleOperator": "a",
+                    "bundleStart": false,
+                    "certainty": "1",
+                    "children": [],
+                    "elvl": "1",
+                    "id": "<uuid-23>",
+                    "logic": "1",
+                    "mood": [],
+                    "moodvariant": "1",
+                    "type": {
+                      "elvl": "1",
+                      "entityId": "c80",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    },
+                    "value": {
+                      "elvl": "1",
+                      "entityId": "l11",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    }
+                  }
+                ]
+              }
+            ],
+            "tags": [],
+            "territory": {
+              "order": 0,
+              "territoryId": "rp-t"
+            },
+            "text": "Minda, the priest of the great Cat lord, and son of saint Tiger, told someone on the street that..."
+          },
+          "detail": "",
+          "id": "<uuid-20>",
+          "labels": [
+            ""
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "c1": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "c1",
+          "labels": [
+            "everyhing"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "c2": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "c2",
+          "labels": [
+            "priest"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "c3": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "c3",
+          "labels": [
+            "occupation"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "p1": {
+          "class": "P",
+          "createdAt": "<datetime>",
+          "data": {
+            "logicalType": "1"
+          },
+          "detail": "",
+          "id": "p1",
+          "labels": [
+            "Minda, the priest"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "s1": {
+          "class": "S",
+          "createdAt": "<datetime>",
+          "data": {
+            "actants": [
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "p1",
+                "id": "s1_a2",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "s",
+                "props": [
+                  {
+                    "bundleEnd": false,
+                    "bundleOperator": "a",
+                    "bundleStart": false,
+                    "certainty": "1",
+                    "children": [],
+                    "elvl": "1",
+                    "id": "s1_a2_p1",
+                    "logic": "1",
+                    "mood": [],
+                    "moodvariant": "1",
+                    "type": {
+                      "elvl": "1",
+                      "entityId": "c3",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    },
+                    "value": {
+                      "elvl": "1",
+                      "entityId": "c2",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    }
+                  },
+                  {
+                    "bundleEnd": false,
+                    "bundleOperator": "a",
+                    "bundleStart": false,
+                    "certainty": "1",
+                    "children": [],
+                    "elvl": "1",
+                    "id": "s1_a2_p2",
+                    "logic": "1",
+                    "mood": [],
+                    "moodvariant": "1",
+                    "type": {
+                      "elvl": "1",
+                      "entityId": "c71",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    },
+                    "value": {
+                      "elvl": "1",
+                      "entityId": "p11",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    }
+                  }
+                ],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "p2",
+                "id": "s1_a3",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a1",
+                "props": [],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "s2",
+                "id": "s1_a4",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a2",
+                "props": [],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "s3",
+                "id": "s1_a5",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a2",
+                "props": [],
+                "virtuality": "1"
+              }
+            ],
+            "actions": [
+              {
+                "actionId": "a1",
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "certainty": "1",
+                "elvl": "1",
+                "id": "s1_a1",
+                "logic": "1",
+                "mood": [],
+                "moodvariant": "1",
+                "props": [
+                  {
+                    "bundleEnd": false,
+                    "bundleOperator": "a",
+                    "bundleStart": false,
+                    "certainty": "1",
+                    "children": [],
+                    "elvl": "1",
+                    "id": "s1_a1_p1",
+                    "logic": "1",
+                    "mood": [],
+                    "moodvariant": "1",
+                    "type": {
+                      "elvl": "1",
+                      "entityId": "c80",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    },
+                    "value": {
+                      "elvl": "1",
+                      "entityId": "l11",
+                      "logic": "1",
+                      "partitivity": "1",
+                      "virtuality": "1"
+                    }
+                  }
+                ]
+              }
+            ],
+            "tags": [],
+            "territory": {
+              "order": 5,
+              "territoryId": "t1"
+            },
+            "text": "Minda, the priest of the great Cat lord, and son of saint Tiger, told someone on the street that..."
+          },
+          "detail": "",
+          "id": "s1",
+          "labels": [
+            ""
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1",
+          "updatedAt": "<datetime>"
+        }
+      },
+      "id": "c2",
+      "labels": [
+        "priest"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "relations": {
+        "A1S": {
+          "connections": [],
+          "iConnections": []
+        },
+        "A2S": {
+          "connections": [],
+          "iConnections": []
+        },
+        "AEE": {
+          "connections": [],
+          "iConnections": []
+        },
+        "ANT": {
+          "connections": []
+        },
+        "CLA": {
+          "connections": [],
+          "iConnections": [
+            {
+              "entityIds": [
+                "p1",
+                "c2"
+              ],
+              "id": "rel-81",
+              "order": 1,
+              "type": "CLA"
+            }
+          ]
+        },
+        "HOL": {
+          "connections": [],
+          "iConnections": []
+        },
+        "IDE": {
+          "connections": []
+        },
+        "IMP": {
+          "connections": [],
+          "iConnections": []
+        },
+        "PRR": {
+          "connections": []
+        },
+        "REL": {
+          "connections": []
+        },
+        "SAR": {
+          "connections": []
+        },
+        "SCL": {
+          "connections": [
+            {
+              "entityIds": [
+                "c2",
+                "c3"
+              ],
+              "id": "rel-1",
+              "order": 1,
+              "subtrees": [
+                {
+                  "entityIds": [
+                    "c3",
+                    "c1"
+                  ],
+                  "id": "rel-2",
+                  "order": 1,
+                  "subtrees": [],
+                  "type": "SCL"
+                }
+              ],
+              "type": "SCL"
+            }
+          ],
+          "iConnections": []
+        },
+        "SOE": {
+          "connections": [],
+          "iConnections": []
+        },
+        "SUS": {
+          "connections": [],
+          "iConnections": []
+        },
+        "SYN": {
+          "connections": []
+        },
+        "warnings": []
+      },
+      "right": "write",
+      "status": "1",
+      "usedAsTemplate": [],
+      "usedInDocuments": [],
+      "usedInMetaProps": [],
+      "usedInReferenceParts": [],
+      "usedInReferences": [],
+      "usedInStatementClassifications": [],
+      "usedInStatementIdentifications": [],
+      "usedInStatementProps": [
+        {
+          "lvl": 1,
+          "originId": "p1",
+          "statementId": "<uuid-20>",
+          "typeId": "c3",
+          "valueId": "c2"
+        },
+        {
+          "lvl": 1,
+          "originId": "p1",
+          "statementId": "s1",
+          "typeId": "c3",
+          "valueId": "c2"
+        }
+      ],
+      "usedInStatements": [],
+      "warnings": [
+        {
+          "origin": "",
+          "position": {
+            "section": "Entity"
+          },
+          "type": "DM"
+        },
+        {
+          "origin": "",
+          "position": {
+            "section": "Entity"
+          },
+          "type": "PSM"
+        }
+      ]
+    }
+  }
+}

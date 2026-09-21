@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchAddRelation",
+    "body": {
+      "entityIds": [
+        "rp-c",
+        "rp-p"
+      ],
+      "relationType": "CLA",
+      "targetEntityId": "c3"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "Created 1/2 relations. Errors: {\"rp-c\":\"Not allowed entity-class pattern\"}",
+      "result": true
+    }
+  }
+}

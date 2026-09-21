@@ -1,0 +1,33 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/rp-c"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "C",
+      "createdAt": "<datetime>",
+      "data": {
+        "pos": ""
+      },
+      "detail": "updated detail",
+      "id": "rp-c",
+      "labels": [
+        "replay concept renamed",
+        "alt label"
+      ],
+      "language": "eng",
+      "notes": [
+        "note"
+      ],
+      "props": [],
+      "references": [],
+      "right": "admin",
+      "status": "1",
+      "updatedAt": "<datetime>"
+    }
+  }
+}

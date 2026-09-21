@@ -1,0 +1,184 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/users/3"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "active": true,
+      "bookmarks": [
+        {
+          "entities": [
+            {
+              "class": "P",
+              "createdAt": "<datetime>",
+              "data": {
+                "logicalType": "1"
+              },
+              "detail": "",
+              "id": "p1",
+              "labels": [
+                "Minda, the priest"
+              ],
+              "language": "eng",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            },
+            {
+              "class": "C",
+              "createdAt": "<datetime>",
+              "data": {
+                "pos": ""
+              },
+              "detail": "",
+              "id": "c2",
+              "labels": [
+                "priest"
+              ],
+              "language": "eng",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            },
+            {
+              "class": "C",
+              "createdAt": "<datetime>",
+              "data": {
+                "pos": ""
+              },
+              "detail": "updated detail",
+              "id": "rp-c",
+              "labels": [
+                "replay concept renamed",
+                "alt label"
+              ],
+              "language": "eng",
+              "notes": [
+                "note"
+              ],
+              "props": [
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "certainty": "1",
+                  "children": [],
+                  "elvl": "3",
+                  "id": "<uuid-16>",
+                  "logic": "1",
+                  "mood": [],
+                  "moodvariant": "1",
+                  "type": {
+                    "elvl": "1",
+                    "entityId": "c3",
+                    "logic": "1",
+                    "partitivity": "1",
+                    "virtuality": "1"
+                  },
+                  "value": {
+                    "elvl": "1",
+                    "entityId": "l1",
+                    "logic": "1",
+                    "partitivity": "1",
+                    "virtuality": "1"
+                  }
+                }
+              ],
+              "references": [
+                {
+                  "id": "<uuid-17>",
+                  "resource": "dissinet-resource",
+                  "value": "rp-v"
+                }
+              ],
+              "status": "1",
+              "updatedAt": "<datetime>"
+            }
+          ],
+          "id": "bf-1",
+          "name": "Replay folder"
+        }
+      ],
+      "email": "editor@inkvisitor.com",
+      "id": "3",
+      "name": "editor1",
+      "options": {
+        "askBeforePropDelete": true,
+        "defaultLanguage": "eng",
+        "defaultStatementLanguage": "",
+        "defaultTerritory": "t1",
+        "hideStatementElementsOrderTable": false,
+        "searchLanguages": [
+          "eng"
+        ],
+        "workingLanguages": [
+          "eng",
+          "lat"
+        ]
+      },
+      "resourceRights": [],
+      "rights": [
+        {
+          "mode": "write",
+          "territory": "t1"
+        }
+      ],
+      "role": "editor",
+      "storedTerritories": [
+        {
+          "territory": {
+            "class": "T",
+            "createdAt": "<datetime>",
+            "data": {
+              "parent": {
+                "order": 2,
+                "territoryId": "T0"
+              }
+            },
+            "detail": "",
+            "id": "t1",
+            "labels": [
+              "priest Minda and their stories"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          }
+        }
+      ],
+      "territoryRights": [
+        {
+          "territory": {
+            "class": "T",
+            "createdAt": "<datetime>",
+            "data": {
+              "parent": {
+                "order": 2,
+                "territoryId": "T0"
+              }
+            },
+            "detail": "",
+            "id": "t1",
+            "labels": [
+              "priest Minda and their stories"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          }
+        }
+      ],
+      "verified": true
+    }
+  }
+}

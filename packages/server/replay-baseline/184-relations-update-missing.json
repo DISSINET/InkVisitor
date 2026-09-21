@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/relations/rp-rel-missing",
+    "body": {
+      "order": 2
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "RelationDoesNotExist",
+      "message": "Relation rp-rel-missing does not exist",
+      "result": false
+    }
+  }
+}

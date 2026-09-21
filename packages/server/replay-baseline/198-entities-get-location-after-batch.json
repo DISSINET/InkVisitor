@@ -1,0 +1,36 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/rp-l"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "L",
+      "createdAt": "<datetime>",
+      "data": {
+        "logicalType": "1"
+      },
+      "detail": "",
+      "id": "rp-l",
+      "labels": [
+        "replay location"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [
+        {
+          "id": "<uuid-18>",
+          "resource": "dissinet-resource",
+          "value": "<uuid-19>"
+        }
+      ],
+      "right": "admin",
+      "status": "1",
+      "updatedAt": "<datetime>"
+    }
+  }
+}

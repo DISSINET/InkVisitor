@@ -1,0 +1,32 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "C",
+      "data": {
+        "pos": ""
+      },
+      "detail": "",
+      "id": "rp-c",
+      "labels": [
+        "duplicate id"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "ModelNotValidError",
+      "message": "id already exists",
+      "result": false
+    }
+  }
+}

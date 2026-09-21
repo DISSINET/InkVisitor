@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/users/u-replay"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "UserDoesNotExits",
+      "message": "user with id u-replay does not exist",
+      "result": false
+    }
+  }
+}

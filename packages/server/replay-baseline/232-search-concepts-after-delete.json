@@ -1,0 +1,107 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?class=C&label=replay*"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "rp-tpl",
+        "isTemplate": true,
+        "labels": [
+          "replay template"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "rp-c2",
+        "labels": [
+          "replay from template"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>",
+        "usedTemplate": "rp-tpl"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "updated detail",
+        "id": "rp-c",
+        "labels": [
+          "replay concept renamed",
+          "alt label"
+        ],
+        "language": "eng",
+        "notes": [
+          "note"
+        ],
+        "props": [
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "certainty": "1",
+            "children": [],
+            "elvl": "3",
+            "id": "<uuid-16>",
+            "logic": "1",
+            "mood": [],
+            "moodvariant": "1",
+            "type": {
+              "elvl": "1",
+              "entityId": "c3",
+              "logic": "1",
+              "partitivity": "1",
+              "virtuality": "1"
+            },
+            "value": {
+              "elvl": "1",
+              "entityId": "l1",
+              "logic": "1",
+              "partitivity": "1",
+              "virtuality": "1"
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "<uuid-17>",
+            "resource": "dissinet-resource",
+            "value": "rp-v"
+          }
+        ],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>"
+      }
+    ]
+  }
+}

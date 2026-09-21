@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchAddReference",
+    "body": {
+      "entityIds": [
+        "rp-c",
+        "rp-p"
+      ],
+      "resourceEntityId": "dissinet-resource",
+      "valueEntityId": "rp-v"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "Updated 2/2 entities",
+      "result": true
+    }
+  }
+}

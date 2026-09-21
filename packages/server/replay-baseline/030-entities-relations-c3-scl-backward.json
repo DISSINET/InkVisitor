@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/c3/relations?filters[relationType]=SCL&forward=false"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "entityIds": [
+          "c2",
+          "c3"
+        ],
+        "id": "rel-1",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c3",
+          "c1"
+        ],
+        "id": "rel-2",
+        "order": 1,
+        "type": "SCL"
+      }
+    ]
+  }
+}

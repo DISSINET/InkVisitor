@@ -1,0 +1,53 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/stats",
+    "body": {
+      "aggregateBy": "user",
+      "eventType": [
+        "create",
+        "edit",
+        "delete"
+      ],
+      "filter": {
+        "editActivities": {
+          "entities": true,
+          "propsMeta": true,
+          "propsStatement": true,
+          "references": true,
+          "relationsMeta": true,
+          "relationsStatement": true,
+          "tags": true
+        },
+        "entityTypes": "all",
+        "relationTypes": "all",
+        "userIds": "all"
+      },
+      "fromDate": 1546300800000,
+      "timeUnit": "month",
+      "toDate": 1924992000000
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "aggregateBy": "user",
+      "eventType": [
+        "create",
+        "edit",
+        "delete"
+      ],
+      "fromDate": 1546300800000,
+      "timeUnit": "month",
+      "toDate": 1924992000000,
+      "values": {
+        "<date>": {
+          "1": 25,
+          "3": 5
+        }
+      }
+    }
+  }
+}

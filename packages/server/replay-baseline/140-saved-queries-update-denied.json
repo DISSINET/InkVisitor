@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "PUT",
+    "path": "/api/saved-queries/<uuid-12>",
+    "body": {
+      "name": "stolen"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "only the owner or an admin can update this saved query",
+      "result": false
+    }
+  }
+}

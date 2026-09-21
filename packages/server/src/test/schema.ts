@@ -185,6 +185,11 @@ const auditsIndexes: IndexDef[] = [
     r.row("type"),
     r.row("user"),
   ]),
+  def(
+    DbEnums.Indexes.AuditRelationEntityIds,
+    r.row("changes")("entityIds").default([]),
+    { multi: true }
+  ),
 ];
 
 const relationsIndexes: IndexDef[] = [
@@ -230,6 +235,7 @@ export const TABLES: Record<string, IndexDef[]> = {
   users: [],
   acl_permissions: [],
   settings: [],
+  saved_queries: [],
   stats_materialized_day: materializedStatsIndexes,
   stats_materialized_week: materializedStatsIndexes,
   stats_materialized_month: materializedStatsIndexes,

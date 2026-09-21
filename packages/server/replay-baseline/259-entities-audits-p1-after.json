@@ -1,0 +1,34 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/p1/audits"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "auditScope": "entity",
+      "last": [],
+      "modelId": "p1",
+      "relations": [
+        {
+          "auditScope": "relation",
+          "changes": {
+            "entityIds": [
+              "rp-p",
+              "p1"
+            ],
+            "id": "rp-rel-3",
+            "type": "IDE"
+          },
+          "date": "<datetime>",
+          "id": "<uuid-51>",
+          "modelId": "rp-rel-3",
+          "type": "relation_create",
+          "user": "1"
+        }
+      ]
+    }
+  }
+}

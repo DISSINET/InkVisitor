@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/settings/validation_SValency",
+    "body": {
+      "value": true
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

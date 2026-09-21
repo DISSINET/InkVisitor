@@ -1,0 +1,29 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/rp-e"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "E",
+      "createdAt": "<datetime>",
+      "data": {
+        "logicalType": "1"
+      },
+      "detail": "",
+      "id": "rp-e",
+      "labels": [
+        "replay event"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "right": "admin",
+      "status": "1"
+    }
+  }
+}

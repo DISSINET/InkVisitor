@@ -1,0 +1,754 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/query",
+    "body": {
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-scl",
+              "name": "col-scl",
+              "params": {
+                "relationType": "SCL"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-cla-inverse",
+              "name": "col-cla-inverse",
+              "params": {
+                "inverse": true,
+                "relationType": "CLA"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-c3",
+              "name": "col-prop-c3",
+              "params": {
+                "propertyType": "c3"
+              },
+              "type": "EPV"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-types",
+              "name": "col-prop-types",
+              "params": {},
+              "type": "EPT"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-resources",
+              "name": "col-ref-resources",
+              "params": {},
+              "type": "ERR"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-values",
+              "name": "col-ref-values",
+              "params": {
+                "resource": "dissinet-resource"
+              },
+              "type": "ERV"
+            },
+            {
+              "editable": false,
+              "id": "col-statements",
+              "name": "col-statements",
+              "params": {},
+              "type": "ES"
+            },
+            {
+              "editable": false,
+              "id": "col-created-by",
+              "name": "col-created-by",
+              "params": {},
+              "type": "EUC"
+            },
+            {
+              "editable": false,
+              "id": "col-edited-by",
+              "name": "col-edited-by",
+              "params": {},
+              "type": "EUE"
+            },
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            },
+            {
+              "editable": false,
+              "id": "col-used-in",
+              "name": "col-used-in",
+              "params": {},
+              "type": "EUI"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [
+          {
+            "id": "e1",
+            "logic": "positive",
+            "node": {
+              "edges": [],
+              "id": "n2",
+              "operator": "and",
+              "params": {
+                "entityId": "c80"
+              },
+              "type": "Entity"
+            },
+            "params": {},
+            "type": "SP:T"
+          }
+        ],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "S"
+          ]
+        },
+        "type": "Entity"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "entities": [
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Statement",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-parent-territory": {
+              "class": "T",
+              "createdAt": "<datetime>",
+              "data": {
+                "parent": {
+                  "order": 2,
+                  "territoryId": "T0"
+                }
+              },
+              "detail": "",
+              "id": "t1",
+              "labels": [
+                "priest Minda and their stories"
+              ],
+              "language": "eng",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            },
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "S",
+            "createdAt": "<datetime>",
+            "data": {
+              "actants": [
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "classifications": [],
+                  "elvl": "1",
+                  "entityId": "p1",
+                  "id": "s1_a2",
+                  "identifications": [],
+                  "logic": "1",
+                  "partitivity": "1",
+                  "position": "s",
+                  "props": [
+                    {
+                      "bundleEnd": false,
+                      "bundleOperator": "a",
+                      "bundleStart": false,
+                      "certainty": "1",
+                      "children": [],
+                      "elvl": "1",
+                      "id": "s1_a2_p1",
+                      "logic": "1",
+                      "mood": [],
+                      "moodvariant": "1",
+                      "type": {
+                        "elvl": "1",
+                        "entityId": "c3",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      },
+                      "value": {
+                        "elvl": "1",
+                        "entityId": "c2",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      }
+                    },
+                    {
+                      "bundleEnd": false,
+                      "bundleOperator": "a",
+                      "bundleStart": false,
+                      "certainty": "1",
+                      "children": [],
+                      "elvl": "1",
+                      "id": "s1_a2_p2",
+                      "logic": "1",
+                      "mood": [],
+                      "moodvariant": "1",
+                      "type": {
+                        "elvl": "1",
+                        "entityId": "c71",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      },
+                      "value": {
+                        "elvl": "1",
+                        "entityId": "p11",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      }
+                    }
+                  ],
+                  "virtuality": "1"
+                },
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "classifications": [],
+                  "elvl": "1",
+                  "entityId": "p2",
+                  "id": "s1_a3",
+                  "identifications": [],
+                  "logic": "1",
+                  "partitivity": "1",
+                  "position": "a1",
+                  "props": [],
+                  "virtuality": "1"
+                },
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "classifications": [],
+                  "elvl": "1",
+                  "entityId": "s2",
+                  "id": "s1_a4",
+                  "identifications": [],
+                  "logic": "1",
+                  "partitivity": "1",
+                  "position": "a2",
+                  "props": [],
+                  "virtuality": "1"
+                },
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "classifications": [],
+                  "elvl": "1",
+                  "entityId": "s3",
+                  "id": "s1_a5",
+                  "identifications": [],
+                  "logic": "1",
+                  "partitivity": "1",
+                  "position": "a2",
+                  "props": [],
+                  "virtuality": "1"
+                }
+              ],
+              "actions": [
+                {
+                  "actionId": "a1",
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "certainty": "1",
+                  "elvl": "1",
+                  "id": "s1_a1",
+                  "logic": "1",
+                  "mood": [],
+                  "moodvariant": "1",
+                  "props": [
+                    {
+                      "bundleEnd": false,
+                      "bundleOperator": "a",
+                      "bundleStart": false,
+                      "certainty": "1",
+                      "children": [],
+                      "elvl": "1",
+                      "id": "s1_a1_p1",
+                      "logic": "1",
+                      "mood": [],
+                      "moodvariant": "1",
+                      "type": {
+                        "elvl": "1",
+                        "entityId": "c80",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      },
+                      "value": {
+                        "elvl": "1",
+                        "entityId": "l11",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "tags": [],
+              "territory": {
+                "order": 5,
+                "territoryId": "t1"
+              },
+              "text": "Minda, the priest of the great Cat lord, and son of saint Tiger, told someone on the street that..."
+            },
+            "detail": "",
+            "id": "s1",
+            "labels": [
+              ""
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1",
+            "updatedAt": "<datetime>"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Statement",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-parent-territory": {
+              "class": "T",
+              "createdAt": "<datetime>",
+              "data": {
+                "parent": {
+                  "order": 2,
+                  "territoryId": "T0"
+                }
+              },
+              "detail": "",
+              "id": "t1",
+              "labels": [
+                "priest Minda and their stories"
+              ],
+              "language": "eng",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            },
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "S",
+            "createdAt": "<datetime>",
+            "data": {
+              "actants": [
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "classifications": [],
+                  "elvl": "1",
+                  "entityId": "e1",
+                  "id": "s4_a2",
+                  "identifications": [],
+                  "logic": "1",
+                  "partitivity": "1",
+                  "position": "s",
+                  "props": [],
+                  "virtuality": "1"
+                },
+                {
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "classifications": [],
+                  "elvl": "1",
+                  "entityId": "l2",
+                  "id": "s4_a3",
+                  "identifications": [],
+                  "logic": "1",
+                  "partitivity": "1",
+                  "position": "a1",
+                  "props": [
+                    {
+                      "bundleEnd": false,
+                      "bundleOperator": "a",
+                      "bundleStart": false,
+                      "certainty": "1",
+                      "children": [],
+                      "elvl": "1",
+                      "id": "s4_a3_p1",
+                      "logic": "1",
+                      "mood": [],
+                      "moodvariant": "1",
+                      "type": {
+                        "elvl": "1",
+                        "entityId": "c80",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      },
+                      "value": {
+                        "elvl": "1",
+                        "entityId": "l5",
+                        "logic": "1",
+                        "partitivity": "1",
+                        "virtuality": "1"
+                      }
+                    }
+                  ],
+                  "virtuality": "1"
+                }
+              ],
+              "actions": [
+                {
+                  "actionId": "a4",
+                  "bundleEnd": false,
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "certainty": "1",
+                  "elvl": "1",
+                  "id": "s4_a1",
+                  "logic": "1",
+                  "mood": [],
+                  "moodvariant": "1",
+                  "props": []
+                }
+              ],
+              "tags": [],
+              "territory": {
+                "order": 4,
+                "territoryId": "t1"
+              },
+              "text": "This sacrifice ceremony will take place at the sanctuary of the Mauw mountain temple."
+            },
+            "detail": "",
+            "id": "s4",
+            "labels": [
+              ""
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": "<stripped>"
+        }
+      ],
+      "entityIds": [
+        "s1",
+        "s4"
+      ],
+      "expansion": {
+        "equivalents": 0,
+        "subordinates": 0
+      },
+      "explore": {
+        "filters": [],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-scl",
+              "name": "col-scl",
+              "params": {
+                "relationType": "SCL"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-cla-inverse",
+              "name": "col-cla-inverse",
+              "params": {
+                "inverse": true,
+                "relationType": "CLA"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-c3",
+              "name": "col-prop-c3",
+              "params": {
+                "propertyType": "c3"
+              },
+              "type": "EPV"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-types",
+              "name": "col-prop-types",
+              "params": {},
+              "type": "EPT"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-resources",
+              "name": "col-ref-resources",
+              "params": {},
+              "type": "ERR"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-values",
+              "name": "col-ref-values",
+              "params": {
+                "resource": "dissinet-resource"
+              },
+              "type": "ERV"
+            },
+            {
+              "editable": false,
+              "id": "col-statements",
+              "name": "col-statements",
+              "params": {},
+              "type": "ES"
+            },
+            {
+              "editable": false,
+              "id": "col-created-by",
+              "name": "col-created-by",
+              "params": {},
+              "type": "EUC"
+            },
+            {
+              "editable": false,
+              "id": "col-edited-by",
+              "name": "col-edited-by",
+              "params": {},
+              "type": "EUE"
+            },
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            },
+            {
+              "editable": false,
+              "id": "col-used-in",
+              "name": "col-used-in",
+              "params": {},
+              "type": "EUI"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [
+          {
+            "id": "e1",
+            "logic": "positive",
+            "node": {
+              "edges": [],
+              "id": "n2",
+              "operator": "and",
+              "params": {
+                "entityId": "c80"
+              },
+              "type": "Entity"
+            },
+            "params": {},
+            "type": "SP:T"
+          }
+        ],
+        "id": "n1",
+        "operator": "and",
+        "params": {
+          "entityClasses": [
+            "S"
+          ]
+        },
+        "type": "Entity"
+      },
+      "total": 2
+    }
+  }
+}

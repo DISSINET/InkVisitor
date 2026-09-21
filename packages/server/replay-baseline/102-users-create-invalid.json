@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/users",
+    "body": {
+      "name": ""
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "ModelNotValidError",
+      "message": "invalid model",
+      "result": false
+    }
+  }
+}

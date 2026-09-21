@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/documents/doc-replay-editor"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "DocumentDoesNotExist",
+      "message": "Document doc-replay-editor does not exist",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/statements/batch-copy?ids=s1,s2",
+    "body": {
+      "territoryId": "rp-t"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": [
+        "<uuid-20>",
+        "<uuid-21>"
+      ],
+      "message": "2 statements have been copied under 'replay territory'",
+      "result": true
+    }
+  }
+}

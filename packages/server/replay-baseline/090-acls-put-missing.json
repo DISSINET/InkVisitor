@@ -1,0 +1,21 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/acls/acl-missing",
+    "body": {
+      "roles": [
+        "admin"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDoesNotExits",
+      "message": "permission with id acl-missing does not exist",
+      "result": false
+    }
+  }
+}

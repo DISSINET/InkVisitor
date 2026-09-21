@@ -1,0 +1,65 @@
+{
+  "request": {
+    "as": "anon",
+    "method": "POST",
+    "path": "/api/users/signin",
+    "body": {
+      "login": "editor1",
+      "password": "abc"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "active": true,
+      "bookmarks": [],
+      "email": "editor@inkvisitor.com",
+      "id": "3",
+      "name": "editor1",
+      "options": {
+        "askBeforePropDelete": true,
+        "defaultLanguage": "",
+        "defaultStatementLanguage": "",
+        "defaultTerritory": "",
+        "hideStatementElementsOrderTable": false,
+        "searchLanguages": [],
+        "workingLanguages": []
+      },
+      "resourceRights": [],
+      "rights": [
+        {
+          "mode": "write",
+          "territory": "t1"
+        }
+      ],
+      "role": "editor",
+      "storedTerritories": [],
+      "territoryRights": [
+        {
+          "territory": {
+            "class": "T",
+            "createdAt": "<datetime>",
+            "data": {
+              "parent": {
+                "order": 2,
+                "territoryId": "T0"
+              }
+            },
+            "detail": "",
+            "id": "t1",
+            "labels": [
+              "priest Minda and their stories"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          }
+        }
+      ],
+      "verified": true
+    }
+  }
+}

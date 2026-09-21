@@ -1,0 +1,216 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "GET",
+    "path": "/api/statements/s3"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "S",
+      "createdAt": "<datetime>",
+      "data": {
+        "actants": [
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "classifications": [],
+            "elvl": "1",
+            "entityId": "b1",
+            "id": "s3_a2",
+            "identifications": [],
+            "logic": "1",
+            "partitivity": "1",
+            "position": "s",
+            "props": [],
+            "virtuality": "1"
+          }
+        ],
+        "actions": [
+          {
+            "actionId": "a3",
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "certainty": "1",
+            "elvl": "1",
+            "id": "s3_a1",
+            "logic": "1",
+            "mood": [],
+            "moodvariant": "1",
+            "props": []
+          }
+        ],
+        "tags": [],
+        "territory": {
+          "order": 3,
+          "territoryId": "t1"
+        },
+        "text": "...and should be sacrificed."
+      },
+      "detail": "",
+      "entities": {
+        "T0": {
+          "class": "T",
+          "createdAt": "<datetime>",
+          "data": {
+            "parent": false
+          },
+          "detail": "",
+          "id": "T0",
+          "isTemplate": false,
+          "labels": [
+            "root"
+          ],
+          "language": "lat",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "a3": {
+          "class": "A",
+          "createdAt": "<datetime>",
+          "data": {
+            "entities": {
+              "a1": [],
+              "a2": [],
+              "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+              "a1": "",
+              "a2": "",
+              "s": ""
+            }
+          },
+          "detail": "",
+          "id": "a3",
+          "labels": [
+            "sacrifice"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "b1": {
+          "class": "B",
+          "createdAt": "<datetime>",
+          "data": {
+            "logicalType": "1"
+          },
+          "detail": "probably a pug",
+          "id": "b1",
+          "labels": [
+            "a dog"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "s3": {
+          "class": "S",
+          "createdAt": "<datetime>",
+          "data": {
+            "actants": [
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "b1",
+                "id": "s3_a2",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "s",
+                "props": [],
+                "virtuality": "1"
+              }
+            ],
+            "actions": [
+              {
+                "actionId": "a3",
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "certainty": "1",
+                "elvl": "1",
+                "id": "s3_a1",
+                "logic": "1",
+                "mood": [],
+                "moodvariant": "1",
+                "props": []
+              }
+            ],
+            "tags": [],
+            "territory": {
+              "order": 3,
+              "territoryId": "t1"
+            },
+            "text": "...and should be sacrificed."
+          },
+          "detail": "",
+          "id": "s3",
+          "labels": [
+            ""
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "t1": {
+          "class": "T",
+          "createdAt": "<datetime>",
+          "data": {
+            "parent": {
+              "order": 2,
+              "territoryId": "T0"
+            }
+          },
+          "detail": "",
+          "id": "t1",
+          "labels": [
+            "priest Minda and their stories"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        }
+      },
+      "id": "s3",
+      "labels": [
+        ""
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "right": "write",
+      "status": "1",
+      "usedInDocuments": [],
+      "warnings": [
+        {
+          "origin": "s3",
+          "position": {
+            "entityId": "a3",
+            "section": "Statement",
+            "subSection": "s"
+          },
+          "type": "AVU"
+        }
+      ]
+    }
+  }
+}

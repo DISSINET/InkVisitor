@@ -1,0 +1,85 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/rp-c/audits"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "auditScope": "entity",
+      "first": {
+        "auditScope": "entity",
+        "changes": {
+          "class": "C",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "rp-c",
+          "labels": [
+            "replay concept"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "date": "<datetime>",
+        "id": "<uuid-15>",
+        "modelId": "rp-c",
+        "type": "create",
+        "user": "1"
+      },
+      "last": [
+        {
+          "auditScope": "entity",
+          "changes": {
+            "detail": "updated detail",
+            "labels": [
+              "replay concept renamed",
+              "alt label"
+            ],
+            "notes": [
+              "note"
+            ],
+            "updatedAt": "<datetime>"
+          },
+          "date": "<datetime>",
+          "id": "<uuid-14>",
+          "modelId": "rp-c",
+          "type": "edit",
+          "user": "1"
+        },
+        {
+          "auditScope": "entity",
+          "changes": {
+            "class": "C",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "rp-c",
+            "labels": [
+              "replay concept"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "date": "<datetime>",
+          "id": "<uuid-15>",
+          "modelId": "rp-c",
+          "type": "create",
+          "user": "1"
+        }
+      ],
+      "modelId": "rp-c",
+      "relations": []
+    }
+  }
+}

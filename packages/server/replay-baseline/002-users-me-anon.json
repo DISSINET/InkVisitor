@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "anon",
+    "method": "GET",
+    "path": "/api/users/me"
+  },
+  "response": {
+    "status": 401,
+    "contentType": "application/json",
+    "body": {
+      "error": "UnauthorizedError",
+      "message": "unauthorized",
+      "result": false
+    }
+  }
+}

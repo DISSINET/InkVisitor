@@ -1,0 +1,18 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/health"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "buildTimestamp": "<stripped>",
+      "db": {
+        "pool": "<stripped>"
+      },
+      "result": true
+    }
+  }
+}

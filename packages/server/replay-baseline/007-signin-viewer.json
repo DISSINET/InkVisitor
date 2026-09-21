@@ -1,0 +1,37 @@
+{
+  "request": {
+    "as": "anon",
+    "method": "POST",
+    "path": "/api/users/signin",
+    "body": {
+      "login": "viewer1",
+      "password": "viewer"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "active": true,
+      "bookmarks": [],
+      "email": "viewer1@inkvisitor.com",
+      "id": "5",
+      "name": "viewer1",
+      "options": {
+        "askBeforePropDelete": true,
+        "defaultLanguage": "",
+        "defaultStatementLanguage": "",
+        "defaultTerritory": "",
+        "hideStatementElementsOrderTable": false,
+        "searchLanguages": [],
+        "workingLanguages": []
+      },
+      "resourceRights": [],
+      "rights": [],
+      "role": "viewer",
+      "storedTerritories": [],
+      "territoryRights": [],
+      "verified": true
+    }
+  }
+}

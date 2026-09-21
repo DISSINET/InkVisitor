@@ -1,0 +1,20 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/territories/rp-t/copy",
+    "body": {
+      "targets": [
+        "t1"
+      ],
+      "withChildren": true
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

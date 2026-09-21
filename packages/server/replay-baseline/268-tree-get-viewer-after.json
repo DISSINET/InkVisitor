@@ -1,0 +1,37 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "GET",
+    "path": "/api/tree"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "children": [],
+      "empty": false,
+      "lvl": 0,
+      "path": [],
+      "right": "read",
+      "statementsCount": 0,
+      "territory": {
+        "class": "T",
+        "createdAt": "<datetime>",
+        "data": {
+          "parent": false
+        },
+        "detail": "",
+        "id": "T0",
+        "isTemplate": false,
+        "labels": [
+          "root"
+        ],
+        "language": "lat",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      }
+    }
+  }
+}

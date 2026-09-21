@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/entities/p1"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "ids": [
+          "rp-p",
+          "p12",
+          "c2"
+        ],
+        "type": "entity"
+      },
+      "error": "InvalidDeleteError",
+      "message": "Cannot be deleted while linked to relations (rp-rel-3 + 2 others)",
+      "result": false
+    }
+  }
+}

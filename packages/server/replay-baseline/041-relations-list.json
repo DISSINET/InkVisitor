@@ -1,0 +1,1069 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/relations"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "entityIds": [
+          "a-has-not-maee",
+          "c901"
+        ],
+        "id": "rel-123",
+        "order": 1,
+        "type": "AEE"
+      },
+      {
+        "entityIds": [
+          "a3",
+          "c31"
+        ],
+        "id": "rel-77",
+        "order": 1,
+        "type": "AEE"
+      },
+      {
+        "entityIds": [
+          "a5",
+          "c901"
+        ],
+        "id": "rel-78",
+        "order": 1,
+        "type": "AEE"
+      },
+      {
+        "entityIds": [
+          "c3",
+          "c301"
+        ],
+        "id": "rel-70",
+        "order": 1,
+        "type": "ANT"
+      },
+      {
+        "entityIds": [
+          "c4",
+          "c401"
+        ],
+        "id": "rel-71",
+        "order": 1,
+        "type": "ANT"
+      },
+      {
+        "entityIds": [
+          "c5",
+          "c504"
+        ],
+        "id": "rel-72",
+        "order": 1,
+        "type": "ANT"
+      },
+      {
+        "entityIds": [
+          "e1",
+          "c31"
+        ],
+        "id": "rel-94",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l1",
+          "c4"
+        ],
+        "id": "rel-82",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l1",
+          "c4"
+        ],
+        "id": "rel-83",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l10",
+          "c402"
+        ],
+        "id": "rel-93",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l1200",
+          "c1101"
+        ],
+        "id": "rel-95",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l1200",
+          "c1103"
+        ],
+        "id": "rel-96",
+        "order": 2,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l1200",
+          "c1105"
+        ],
+        "id": "rel-97",
+        "order": 3,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l2",
+          "c51"
+        ],
+        "id": "rel-84",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l3",
+          "c56"
+        ],
+        "id": "rel-85",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l4",
+          "c4"
+        ],
+        "id": "rel-86",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l5",
+          "c5"
+        ],
+        "id": "rel-87",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l6",
+          "c402"
+        ],
+        "id": "rel-88",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l7",
+          "c402"
+        ],
+        "id": "rel-89",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l8",
+          "c402"
+        ],
+        "id": "rel-90",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l8",
+          "c403"
+        ],
+        "id": "rel-91",
+        "order": 2,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "l9",
+          "c402"
+        ],
+        "id": "rel-92",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "p1",
+          "c2"
+        ],
+        "id": "rel-81",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "entityIds": [
+          "c51",
+          "c56"
+        ],
+        "id": "rel-102",
+        "order": 1,
+        "type": "HOL"
+      },
+      {
+        "entityIds": [
+          "c52",
+          "c56"
+        ],
+        "id": "rel-103",
+        "order": 1,
+        "type": "HOL"
+      },
+      {
+        "entityIds": [
+          "c53",
+          "c56"
+        ],
+        "id": "rel-104",
+        "order": 1,
+        "type": "HOL"
+      },
+      {
+        "entityIds": [
+          "c54",
+          "c57"
+        ],
+        "id": "rel-105",
+        "order": 1,
+        "type": "HOL"
+      },
+      {
+        "entityIds": [
+          "c55",
+          "c57"
+        ],
+        "id": "rel-106",
+        "order": 1,
+        "type": "HOL"
+      },
+      {
+        "entityIds": [
+          "c56",
+          "c57"
+        ],
+        "id": "rel-107",
+        "order": 1,
+        "type": "HOL"
+      },
+      {
+        "certainty": "5",
+        "entityIds": [
+          "l1200",
+          "l1205"
+        ],
+        "id": "rel-99",
+        "order": 1,
+        "type": "IDE"
+      },
+      {
+        "certainty": "3",
+        "entityIds": [
+          "l1200",
+          "l1206"
+        ],
+        "id": "rel-100",
+        "order": 2,
+        "type": "IDE"
+      },
+      {
+        "certainty": "1",
+        "entityIds": [
+          "l1200",
+          "l1207"
+        ],
+        "id": "rel-101",
+        "order": 1,
+        "type": "IDE"
+      },
+      {
+        "certainty": "2",
+        "entityIds": [
+          "p1",
+          "p12"
+        ],
+        "id": "rel-98",
+        "order": 1,
+        "type": "IDE"
+      },
+      {
+        "entityIds": [
+          "a3",
+          "a33"
+        ],
+        "id": "rel-108",
+        "order": 1,
+        "type": "IMP"
+      },
+      {
+        "entityIds": [
+          "c60",
+          "c61"
+        ],
+        "id": "rel-73",
+        "order": 1,
+        "type": "PRR"
+      },
+      {
+        "entityIds": [
+          "c70",
+          "c71"
+        ],
+        "id": "rel-74",
+        "order": 1,
+        "type": "PRR"
+      },
+      {
+        "entityIds": [
+          "a3",
+          "c56"
+        ],
+        "id": "rel-79",
+        "order": 1,
+        "type": "REL"
+      },
+      {
+        "entityIds": [
+          "c212",
+          "c215"
+        ],
+        "id": "rel-80",
+        "order": 1,
+        "type": "REL"
+      },
+      {
+        "entityIds": [
+          "a1",
+          "a11"
+        ],
+        "id": "rel-76",
+        "order": 1,
+        "type": "SAR"
+      },
+      {
+        "entityIds": [
+          "a3",
+          "a34"
+        ],
+        "id": "rel-75",
+        "order": 1,
+        "type": "SAR"
+      },
+      {
+        "entityIds": [
+          "a5",
+          "a501"
+        ],
+        "id": "rel-33",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "a5",
+          "a503"
+        ],
+        "id": "rel-35",
+        "order": 2,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "a501",
+          "a502"
+        ],
+        "id": "rel-34",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "a503",
+          "a504"
+        ],
+        "id": "rel-36",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c-has-isync-1",
+          "c-isync-superclass-1"
+        ],
+        "id": "rel-120",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c-has-isync-2",
+          "c-isync-superclass-1"
+        ],
+        "id": "rel-121",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c-has-isync-3",
+          "c-isync-superclass-2"
+        ],
+        "id": "rel-122",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c-hasnt-isync-1",
+          "c-isync-superclass-1"
+        ],
+        "id": "rel-117",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c-hasnt-isync-2",
+          "c-isync-superclass-1"
+        ],
+        "id": "rel-118",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1000",
+          "c1001"
+        ],
+        "id": "rel-46",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1001",
+          "c1002"
+        ],
+        "id": "rel-47",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1003",
+          "c1002"
+        ],
+        "id": "rel-49",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1101",
+          "c1102"
+        ],
+        "id": "rel-50",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1102",
+          "c523"
+        ],
+        "id": "rel-51",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1103",
+          "c1104"
+        ],
+        "id": "rel-52",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1105",
+          "c1106"
+        ],
+        "id": "rel-53",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1105",
+          "c1107"
+        ],
+        "id": "rel-54",
+        "order": 2,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c2",
+          "c3"
+        ],
+        "id": "rel-1",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c211",
+          "c1000"
+        ],
+        "id": "rel-45",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c211",
+          "c212"
+        ],
+        "id": "rel-10",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c212",
+          "c1003"
+        ],
+        "id": "rel-48",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c212",
+          "c22"
+        ],
+        "id": "rel-11",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c22",
+          "c23"
+        ],
+        "id": "rel-12",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c23",
+          "c24"
+        ],
+        "id": "rel-13",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c24",
+          "c1"
+        ],
+        "id": "rel-14",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c3",
+          "c1"
+        ],
+        "id": "rel-2",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c301",
+          "c1"
+        ],
+        "id": "rel-3",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c31",
+          "c32"
+        ],
+        "id": "rel-15",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c32",
+          "c33"
+        ],
+        "id": "rel-16",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c401",
+          "c404"
+        ],
+        "id": "rel-5",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c402",
+          "c404"
+        ],
+        "id": "rel-6",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c403",
+          "c404"
+        ],
+        "id": "rel-7",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c404",
+          "c1"
+        ],
+        "id": "rel-4",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c41",
+          "c42"
+        ],
+        "id": "rel-17",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c41",
+          "c44"
+        ],
+        "id": "rel-18",
+        "order": 2,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c41",
+          "c45"
+        ],
+        "id": "rel-19",
+        "order": 3,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c41",
+          "c46"
+        ],
+        "id": "rel-20",
+        "order": 4,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c44",
+          "c1"
+        ],
+        "id": "rel-23",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c45",
+          "c1"
+        ],
+        "id": "rel-22",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c46",
+          "c1"
+        ],
+        "id": "rel-21",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c5",
+          "c404"
+        ],
+        "id": "rel-8",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c52",
+          "c521"
+        ],
+        "id": "rel-24",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c521",
+          "c522"
+        ],
+        "id": "rel-25",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c522",
+          "c523"
+        ],
+        "id": "rel-29",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c522",
+          "c524"
+        ],
+        "id": "rel-30",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c523",
+          "c1"
+        ],
+        "id": "rel-32",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c524",
+          "c1"
+        ],
+        "id": "rel-31",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c53",
+          "c522"
+        ],
+        "id": "rel-26",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c55",
+          "c522"
+        ],
+        "id": "rel-27",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c56",
+          "c522"
+        ],
+        "id": "rel-28",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c6",
+          "c404"
+        ],
+        "id": "rel-9",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c901",
+          "c902"
+        ],
+        "id": "rel-37",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c901",
+          "c904"
+        ],
+        "id": "rel-39",
+        "order": 2,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c901",
+          "c907"
+        ],
+        "id": "rel-42",
+        "order": 3,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c901",
+          "c908"
+        ],
+        "id": "rel-44",
+        "order": 4,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c902",
+          "c903"
+        ],
+        "id": "rel-38",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c904",
+          "c905"
+        ],
+        "id": "rel-40",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c905",
+          "c906"
+        ],
+        "id": "rel-41",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c907",
+          "c905"
+        ],
+        "id": "rel-43",
+        "order": 1,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "l1",
+          "l10"
+        ],
+        "id": "rel-56",
+        "order": 3,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1",
+          "l6"
+        ],
+        "id": "rel-55",
+        "order": 2,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1",
+          "l8"
+        ],
+        "id": "rel-57",
+        "order": 4,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l10",
+          "l8"
+        ],
+        "id": "rel-59",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1200",
+          "l1201"
+        ],
+        "id": "rel-61",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1201",
+          "l1202"
+        ],
+        "id": "rel-62",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1201",
+          "l1204"
+        ],
+        "id": "rel-63",
+        "order": 2,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1202",
+          "l1203"
+        ],
+        "id": "rel-65",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l1204",
+          "l1"
+        ],
+        "id": "rel-64",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l6",
+          "l9"
+        ],
+        "id": "rel-58",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "l8",
+          "l9"
+        ],
+        "id": "rel-60",
+        "order": 1,
+        "type": "SOE"
+      },
+      {
+        "entityIds": [
+          "a5",
+          "a505",
+          "a506"
+        ],
+        "id": "rel-69",
+        "order": 1,
+        "type": "SYN"
+      },
+      {
+        "entityIds": [
+          "c-has-isync-1",
+          "c-has-isync-2",
+          "c-has-isync-3",
+          "c-has-isync-4"
+        ],
+        "id": "rel-119",
+        "order": 1,
+        "type": "SYN"
+      },
+      {
+        "entityIds": [
+          "c-hasnt-isync-1",
+          "c-hasnt-isync-2"
+        ],
+        "id": "rel-116",
+        "order": 1,
+        "type": "SYN"
+      },
+      {
+        "entityIds": [
+          "c211",
+          "c211a",
+          "c211b",
+          "c211c"
+        ],
+        "id": "rel-67",
+        "order": 1,
+        "type": "SYN"
+      },
+      {
+        "entityIds": [
+          "c212",
+          "c213",
+          "c214"
+        ],
+        "id": "rel-66",
+        "order": 1,
+        "type": "SYN"
+      },
+      {
+        "entityIds": [
+          "c5",
+          "c501",
+          "c502",
+          "c503"
+        ],
+        "id": "rel-68",
+        "order": 1,
+        "type": "SYN"
+      }
+    ]
+  }
+}

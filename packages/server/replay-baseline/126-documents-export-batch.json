@@ -1,0 +1,20 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/documents/export-batch",
+    "body": {
+      "documentIds": [
+        "doc-replay",
+        "1"
+      ],
+      "exportedEntities": [
+        "P"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json"
+  }
+}

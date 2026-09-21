@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/p1/audits"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "auditScope": "entity",
+      "last": [],
+      "modelId": "p1",
+      "relations": []
+    }
+  }
+}

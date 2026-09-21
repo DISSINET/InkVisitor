@@ -1,0 +1,76 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/documents"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "anchors": [],
+        "createdAt": "<datetime>",
+        "entityIds": {
+          "A": [],
+          "B": [],
+          "C": [],
+          "E": [],
+          "G": [],
+          "L": [],
+          "O": [],
+          "P": [],
+          "R": [],
+          "S": [],
+          "T": [],
+          "V": []
+        },
+        "id": "2",
+        "title": "Second doc",
+        "updatedAt": "<datetime>"
+      },
+      {
+        "anchors": [],
+        "createdAt": "<datetime>",
+        "entityIds": {
+          "A": [],
+          "B": [],
+          "C": [],
+          "E": [],
+          "G": [],
+          "L": [],
+          "O": [],
+          "P": [],
+          "R": [],
+          "S": [],
+          "T": [],
+          "V": []
+        },
+        "id": "1",
+        "title": "First doc",
+        "updatedAt": "<datetime>"
+      },
+      {
+        "anchors": [],
+        "createdAt": "<datetime>",
+        "entityIds": {
+          "A": [],
+          "B": [],
+          "C": [],
+          "E": [],
+          "G": [],
+          "L": [],
+          "O": [],
+          "P": [],
+          "R": [],
+          "S": [],
+          "T": [],
+          "V": []
+        },
+        "id": "3",
+        "title": "Third doc",
+        "updatedAt": "<datetime>"
+      }
+    ]
+  }
+}

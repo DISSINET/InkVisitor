@@ -1,0 +1,14 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "DELETE",
+    "path": "/api/saved-queries/<uuid-13>"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

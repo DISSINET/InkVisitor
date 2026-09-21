@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "start:dist": "node -r module-alias/register ./dist/server/src",
     "hashpassword": "ENV_FILE=test ts-node -r ./src/register-paths.ts ./src/scripts/hashpassword.ts",
-    "pg:check": "ENV_FILE=${ENV_FILE:-development} ts-node -r ./src/register-paths.ts ./src/scripts/pg-check.ts"
+    "pg:check": "ENV_FILE=${ENV_FILE:-development} ts-node -r ./src/register-paths.ts ./src/scripts/pg-check.ts",
+    "replay": "ts-node -r ./src/register-paths.ts ./src/replay/run.ts"
   },
   "nodemonConfig": {
     "watch": [

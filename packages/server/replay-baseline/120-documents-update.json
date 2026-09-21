@@ -1,0 +1,18 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/documents/doc-replay",
+    "body": {
+      "content": "<p1>Minda</p1> stayed in <l1>Brno</l1>.",
+      "title": "Replay doc renamed"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

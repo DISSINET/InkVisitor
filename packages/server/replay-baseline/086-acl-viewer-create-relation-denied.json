@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "POST",
+    "path": "/api/relations",
+    "body": {
+      "entityIds": [
+        "c1",
+        "c2"
+      ],
+      "id": "rp-rel-x",
+      "type": "SCL"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

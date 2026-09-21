@@ -1,0 +1,566 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/acls"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "controller": "acls",
+        "id": "acl-4",
+        "method": "DELETE",
+        "roles": [
+          "admin"
+        ],
+        "route": ":permissionId"
+      },
+      {
+        "controller": "acls",
+        "id": "acl-2",
+        "method": "GET",
+        "roles": [
+          "admin"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "acls",
+        "id": "acl-3",
+        "method": "PUT",
+        "roles": [
+          "admin"
+        ],
+        "route": ":permissionId"
+      },
+      {
+        "controller": "audits",
+        "id": "acl-43",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "documents",
+        "id": "acl-54",
+        "method": "DELETE",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "documents",
+        "id": "acl-50",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "documents",
+        "id": "acl-51",
+        "method": "GET",
+        "roles": [
+          "editor"
+        ],
+        "route": ":documentId"
+      },
+      {
+        "controller": "documents",
+        "id": "acl-58",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":documentId/anchors"
+      },
+      {
+        "controller": "documents",
+        "id": "acl-57",
+        "method": "PATCH",
+        "roles": [
+          "admin"
+        ],
+        "route": ":documentId/removeAnchor"
+      },
+      {
+        "controller": "documents",
+        "id": "acl-56",
+        "method": "PATCH",
+        "roles": [
+          "admin"
+        ],
+        "route": ":documentId/removeAnchors"
+      },
+      {
+        "controller": "documents",
+        "id": "acl-52",
+        "method": "POST",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "documents",
+        "id": "acl-53",
+        "method": "PUT",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "entities",
+        "id": "acl-37",
+        "method": "DELETE",
+        "roles": [
+          "editor"
+        ],
+        "route": ":entityId?"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-33",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "entities",
+        "id": "acl-31",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":entityId"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-32",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":entityId/audits"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-41",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":entityId/detail"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-42",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":entityId/tooltip"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-34",
+        "method": "POST",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "entities",
+        "id": "acl-39",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": ":entityId/clone"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-38",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": ":entityId/restore"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-35",
+        "method": "POST",
+        "roles": [
+          "*"
+        ],
+        "route": "batch"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-40",
+        "method": "POST",
+        "roles": [
+          "admin"
+        ],
+        "route": "query-export"
+      },
+      {
+        "controller": "entities",
+        "id": "acl-36",
+        "method": "PUT",
+        "roles": [
+          "*"
+        ],
+        "route": ":entityId"
+      },
+      {
+        "controller": "relations",
+        "id": "acl-47",
+        "method": "DELETE",
+        "roles": [
+          "editor"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "relations",
+        "id": "acl-49",
+        "method": "DELETE",
+        "roles": [
+          "editor"
+        ],
+        "route": ":relationId"
+      },
+      {
+        "controller": "relations",
+        "id": "acl-45",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "relations",
+        "id": "acl-46",
+        "method": "PUT",
+        "roles": [
+          "editor"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "relations",
+        "id": "acl-48",
+        "method": "PUT",
+        "roles": [
+          "editor"
+        ],
+        "route": ":relationId?"
+      },
+      {
+        "controller": "settings",
+        "id": "acl-59",
+        "method": "GET",
+        "public": true,
+        "roles": [
+          "*"
+        ],
+        "route": ":key"
+      },
+      {
+        "controller": "settings",
+        "id": "acl-60",
+        "method": "PUT",
+        "public": false,
+        "roles": [
+          "admin"
+        ],
+        "route": ":key"
+      },
+      {
+        "controller": "settings",
+        "id": "acl-61",
+        "method": "PUT",
+        "public": false,
+        "roles": [
+          "admin"
+        ],
+        "route": "group/:groupkey"
+      },
+      {
+        "controller": "statements",
+        "id": "acl-5",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":statementId"
+      },
+      {
+        "controller": "statements",
+        "id": "acl-7",
+        "method": "POST",
+        "roles": [
+          "editor"
+        ],
+        "route": "batch-copy"
+      },
+      {
+        "controller": "statements",
+        "id": "acl-6",
+        "method": "PUT",
+        "roles": [
+          "editor"
+        ],
+        "route": "batch-move"
+      },
+      {
+        "controller": "statements",
+        "id": "acl-8",
+        "method": "PUT",
+        "roles": [
+          "editor"
+        ],
+        "route": "batch-reorder"
+      },
+      {
+        "controller": "statements",
+        "id": "acl-9",
+        "method": "PUT",
+        "roles": [
+          "editor"
+        ],
+        "route": "references"
+      },
+      {
+        "controller": "stats",
+        "id": "acl-44",
+        "method": "GET",
+        "roles": [
+          "admin"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "territories",
+        "id": "acl-10",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":territoryId"
+      },
+      {
+        "controller": "territories",
+        "id": "acl-11",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":territoryId/entities"
+      },
+      {
+        "controller": "territories",
+        "id": "acl-12",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":territoryId/statements"
+      },
+      {
+        "controller": "tree",
+        "id": "acl-13",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "tree",
+        "id": "acl-14",
+        "method": "PATCH",
+        "roles": [
+          "admin",
+          "editor"
+        ],
+        "route": "/:territoryId/position"
+      },
+      {
+        "controller": "users",
+        "id": "acl-22",
+        "method": "DELETE",
+        "roles": [
+          "admin"
+        ],
+        "route": ":userId"
+      },
+      {
+        "controller": "users",
+        "id": "acl-19",
+        "method": "GET",
+        "roles": [
+          "admin"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "users",
+        "id": "acl-30",
+        "method": "GET",
+        "roles": [
+          "admin"
+        ],
+        "route": "/me/emails/test"
+      },
+      {
+        "controller": "users",
+        "id": "acl-18",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":userId"
+      },
+      {
+        "controller": "users",
+        "id": "acl-28",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": ":userId/bookmarks"
+      },
+      {
+        "controller": "users",
+        "id": "acl-24",
+        "method": "GET",
+        "public": true,
+        "roles": [],
+        "route": "activation"
+      },
+      {
+        "controller": "users",
+        "id": "acl-16",
+        "method": "GET",
+        "roles": [
+          "admin"
+        ],
+        "route": "administration"
+      },
+      {
+        "controller": "users",
+        "id": "acl-17",
+        "method": "GET",
+        "roles": [
+          "*"
+        ],
+        "route": "me"
+      },
+      {
+        "controller": "users",
+        "id": "acl-1",
+        "method": "GET",
+        "public": true,
+        "roles": [
+          "*"
+        ],
+        "route": "owner"
+      },
+      {
+        "controller": "users",
+        "id": "acl-27",
+        "method": "GET",
+        "public": true,
+        "roles": [],
+        "route": "password_reset"
+      },
+      {
+        "controller": "users",
+        "id": "<uuid-1>",
+        "method": "GET",
+        "public": false,
+        "roles": [],
+        "route": "simplified"
+      },
+      {
+        "controller": "users",
+        "id": "acl-29",
+        "method": "PATCH",
+        "roles": [
+          "*"
+        ],
+        "route": ":userId/password"
+      },
+      {
+        "controller": "users",
+        "id": "acl-20",
+        "method": "POST",
+        "roles": [
+          "admin"
+        ],
+        "route": ""
+      },
+      {
+        "controller": "users",
+        "id": "acl-23",
+        "method": "POST",
+        "public": true,
+        "roles": [],
+        "route": "activation"
+      },
+      {
+        "controller": "users",
+        "id": "acl-25",
+        "method": "POST",
+        "public": true,
+        "roles": [],
+        "route": "password_reset"
+      },
+      {
+        "controller": "users",
+        "id": "acl-55",
+        "method": "POST",
+        "route": "query"
+      },
+      {
+        "controller": "users",
+        "id": "acl-15",
+        "method": "POST",
+        "public": true,
+        "roles": [],
+        "route": "signin"
+      },
+      {
+        "controller": "users",
+        "id": "acl-21",
+        "method": "PUT",
+        "roles": [
+          "*"
+        ],
+        "route": ":userId"
+      },
+      {
+        "controller": "users",
+        "id": "acl-26",
+        "method": "PUT",
+        "public": true,
+        "roles": [],
+        "route": "password_reset"
+      }
+    ]
+  }
+}

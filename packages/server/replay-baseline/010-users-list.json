@@ -1,0 +1,275 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/users"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "active": true,
+        "bookmarks": [],
+        "email": "admin@admin.com",
+        "id": "1",
+        "name": "admin",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [
+          {
+            "mode": "admin",
+            "territory": "T0"
+          }
+        ],
+        "role": "admin",
+        "storedTerritories": [],
+        "territoryRights": [
+          {
+            "territory": {
+              "class": "T",
+              "createdAt": "<datetime>",
+              "data": {
+                "parent": false
+              },
+              "detail": "",
+              "id": "T0",
+              "isTemplate": false,
+              "labels": [
+                "root"
+              ],
+              "language": "lat",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            }
+          }
+        ],
+        "verified": true
+      },
+      {
+        "active": false,
+        "bookmarks": [],
+        "email": "import@inkvisitor.com",
+        "id": "0",
+        "name": "import",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [],
+        "role": "admin",
+        "storedTerritories": [],
+        "territoryRights": [],
+        "verified": true
+      },
+      {
+        "active": true,
+        "bookmarks": [],
+        "email": "editor@inkvisitor.com",
+        "id": "3",
+        "name": "editor1",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [
+          {
+            "mode": "write",
+            "territory": "t1"
+          }
+        ],
+        "role": "editor",
+        "storedTerritories": [],
+        "territoryRights": [
+          {
+            "territory": {
+              "class": "T",
+              "createdAt": "<datetime>",
+              "data": {
+                "parent": {
+                  "order": 2,
+                  "territoryId": "T0"
+                }
+              },
+              "detail": "",
+              "id": "t1",
+              "labels": [
+                "priest Minda and their stories"
+              ],
+              "language": "eng",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            }
+          }
+        ],
+        "verified": true
+      },
+      {
+        "active": true,
+        "bookmarks": [],
+        "email": "editor2@inkvisitor.com",
+        "id": "4",
+        "name": "editor2",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [
+          {
+            "mode": "read",
+            "territory": "t1"
+          }
+        ],
+        "role": "editor",
+        "storedTerritories": [],
+        "territoryRights": [
+          {
+            "territory": {
+              "class": "T",
+              "createdAt": "<datetime>",
+              "data": {
+                "parent": {
+                  "order": 2,
+                  "territoryId": "T0"
+                }
+              },
+              "detail": "",
+              "id": "t1",
+              "labels": [
+                "priest Minda and their stories"
+              ],
+              "language": "eng",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            }
+          }
+        ],
+        "verified": true
+      },
+      {
+        "active": true,
+        "bookmarks": [],
+        "email": "owner@owner.com",
+        "id": "2",
+        "name": "owner",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [
+          {
+            "mode": "admin",
+            "territory": "T0"
+          }
+        ],
+        "role": "owner",
+        "storedTerritories": [],
+        "territoryRights": [
+          {
+            "territory": {
+              "class": "T",
+              "createdAt": "<datetime>",
+              "data": {
+                "parent": false
+              },
+              "detail": "",
+              "id": "T0",
+              "isTemplate": false,
+              "labels": [
+                "root"
+              ],
+              "language": "lat",
+              "notes": [],
+              "props": [],
+              "references": [],
+              "status": "1"
+            }
+          }
+        ],
+        "verified": true
+      },
+      {
+        "active": false,
+        "bookmarks": [],
+        "email": "inactive@inkvisitor.com",
+        "id": "6",
+        "name": "inactive",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [],
+        "role": "viewer",
+        "storedTerritories": [],
+        "territoryRights": [],
+        "verified": true
+      },
+      {
+        "active": true,
+        "bookmarks": [],
+        "email": "viewer1@inkvisitor.com",
+        "id": "5",
+        "name": "viewer1",
+        "options": {
+          "askBeforePropDelete": true,
+          "defaultLanguage": "",
+          "defaultStatementLanguage": "",
+          "defaultTerritory": "",
+          "hideStatementElementsOrderTable": false,
+          "searchLanguages": [],
+          "workingLanguages": []
+        },
+        "resourceRights": [],
+        "rights": [],
+        "role": "viewer",
+        "storedTerritories": [],
+        "territoryRights": [],
+        "verified": true
+      }
+    ]
+  }
+}

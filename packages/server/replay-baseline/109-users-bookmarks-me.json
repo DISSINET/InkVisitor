@@ -1,0 +1,53 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "GET",
+    "path": "/api/users/me/bookmarks"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "entities": [
+          {
+            "class": "P",
+            "createdAt": "<datetime>",
+            "data": {
+              "logicalType": "1"
+            },
+            "detail": "",
+            "id": "p1",
+            "labels": [
+              "Minda, the priest"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c2",
+            "labels": [
+              "priest"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          }
+        ],
+        "id": "bf-1",
+        "name": "Replay folder"
+      }
+    ]
+  }
+}

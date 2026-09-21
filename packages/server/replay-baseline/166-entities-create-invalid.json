@@ -1,0 +1,20 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "Z",
+      "id": "rp-bad"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "ModelNotValidError",
+      "message": "unknown class for entity",
+      "result": false
+    }
+  }
+}

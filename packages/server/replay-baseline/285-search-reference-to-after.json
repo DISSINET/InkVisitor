@@ -1,0 +1,326 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?haveReferenceTo=dissinet-resource"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "rp-p",
+              "id": "rp-s-s",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            },
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "rp-c",
+              "id": "rp-s-a1",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "a1",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "rp-a",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "rp-s-act",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 3,
+            "territoryId": "rp-t"
+          },
+          "text": "Replay person told a replay concept."
+        },
+        "detail": "",
+        "id": "rp-s",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [
+          {
+            "id": "rp-ref-1",
+            "resource": "dissinet-resource",
+            "value": "rp-v"
+          }
+        ],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>"
+      },
+      {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "p1",
+              "id": "rp-se-s",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            },
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "c1",
+              "id": "rp-se-a1",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "a1",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "a1",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "rp-se-act",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 1,
+            "territoryId": "t1"
+          },
+          "text": "Editor statement, edited."
+        },
+        "detail": "",
+        "id": "rp-se",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [
+          {
+            "id": "rp-ref-2",
+            "resource": "dissinet-resource",
+            "value": "rp-v"
+          }
+        ],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "in general - who gives advice",
+        "id": "<uuid-2>",
+        "labels": [
+          "advisor"
+        ],
+        "language": "eng",
+        "legacyId": "C1449",
+        "notes": [
+          "Import batch [January2023] 2023-01-21 18:58:21.366042"
+        ],
+        "props": [],
+        "references": [
+          {
+            "id": "<uuid-3>",
+            "resource": "dissinet-resource",
+            "value": "<uuid-2>"
+          }
+        ],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "editor touched this",
+        "id": "rp-p",
+        "labels": [
+          "replay person"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "certainty": "1",
+            "children": [],
+            "elvl": "3",
+            "id": "<uuid-34>",
+            "logic": "1",
+            "mood": [],
+            "moodvariant": "1",
+            "type": {
+              "elvl": "1",
+              "entityId": "c3",
+              "logic": "1",
+              "partitivity": "1",
+              "virtuality": "1"
+            },
+            "value": {
+              "elvl": "1",
+              "entityId": "l1",
+              "logic": "1",
+              "partitivity": "1",
+              "virtuality": "1"
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "<uuid-35>",
+            "resource": "dissinet-resource",
+            "value": "rp-v"
+          }
+        ],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "rp-l",
+        "labels": [
+          "replay location"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [
+          {
+            "id": "<uuid-18>",
+            "resource": "dissinet-resource",
+            "value": "<uuid-19>"
+          }
+        ],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "updated detail",
+        "id": "rp-c",
+        "labels": [
+          "replay concept renamed",
+          "alt label"
+        ],
+        "language": "eng",
+        "notes": [
+          "note"
+        ],
+        "props": [
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "certainty": "1",
+            "children": [],
+            "elvl": "3",
+            "id": "<uuid-16>",
+            "logic": "1",
+            "mood": [],
+            "moodvariant": "1",
+            "type": {
+              "elvl": "1",
+              "entityId": "c3",
+              "logic": "1",
+              "partitivity": "1",
+              "virtuality": "1"
+            },
+            "value": {
+              "elvl": "1",
+              "entityId": "l1",
+              "logic": "1",
+              "partitivity": "1",
+              "virtuality": "1"
+            }
+          }
+        ],
+        "references": [
+          {
+            "id": "<uuid-17>",
+            "resource": "dissinet-resource",
+            "value": "rp-v"
+          }
+        ],
+        "right": "admin",
+        "status": "1",
+        "updatedAt": "<datetime>"
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/users/u-replay"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "active": false,
+      "bookmarks": [],
+      "email": "replay@example.com",
+      "id": "u-replay",
+      "name": "replayuser",
+      "options": {
+        "askBeforePropDelete": true,
+        "defaultLanguage": "eng",
+        "defaultStatementLanguage": "",
+        "defaultTerritory": "",
+        "hideStatementElementsOrderTable": false,
+        "searchLanguages": [],
+        "workingLanguages": []
+      },
+      "resourceRights": [],
+      "rights": [],
+      "role": "viewer",
+      "storedTerritories": [],
+      "territoryRights": [],
+      "verified": true
+    }
+  }
+}
