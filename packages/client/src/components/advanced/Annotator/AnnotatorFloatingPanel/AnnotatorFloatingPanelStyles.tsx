@@ -2,7 +2,8 @@ import styled from "styled-components";
 
 /** Floating UI root — positioning only, no transform (drag lives on the inner layer). */
 export const StyledFloatingPanelRoot = styled.div`
-  width: 26rem;
+  /* Fits the find & replace footer, whose four buttons set the widest row. */
+  width: 27rem;
   z-index: 100;
   pointer-events: none;
 `;

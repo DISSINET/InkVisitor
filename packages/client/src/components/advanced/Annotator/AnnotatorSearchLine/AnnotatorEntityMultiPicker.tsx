@@ -24,6 +24,7 @@ export const AnnotatorEntityMultiPicker: React.FC<AnnotatorEntityMultiPicker> = 
   <StyledEntityMultiPickerRow>
     {entities.map((entity) => (
       <EntityTag
+        fullWidth
         key={entity.id}
         entity={entity}
         unlinkButton={{ onClick: () => onRemove(entity.id) }}
