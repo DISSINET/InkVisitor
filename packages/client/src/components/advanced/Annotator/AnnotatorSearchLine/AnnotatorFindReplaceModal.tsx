@@ -1,7 +1,7 @@
 import { Annotator, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument } from "@inkvisitor/shared/types";
 import { Button, Checkbox, Input, Loader, Submit } from "components";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { AnnotatorFloatingPanel } from "../AnnotatorFloatingPanel/AnnotatorFloatingPanel";
 import { useDocumentContentSave } from "../hooks/useDocumentContentSave";
@@ -13,7 +13,11 @@ import {
   StyledFindReplaceRow,
   StyledNoResults,
 } from "./AnnotatorFindReplaceModalStyles";
-import { applyReplacements, nextActiveOccurenceIndex, ReplaceRange } from "./replaceUtils";
+import {
+  applyReplacements,
+  nextOccurenceIndexAfter,
+  ReplaceRange,
+} from "./replaceUtils";
 
 interface AnnotatorFindReplaceModal {
   onClose: () => void;
@@ -29,7 +33,6 @@ interface AnnotatorFindReplaceModal {
   findInputRef: React.RefObject<HTMLInputElement | null>;
 
   searchOccurences: Occurrence[] | null;
-  setSearchOccurences: React.Dispatch<React.SetStateAction<Occurrence[] | null>>;
   /** Re-runs the search after the annotator's text changed underneath it. */
   refreshSearch: () => void;
   searchActiveOccurence: number;
@@ -56,7 +59,6 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
   setSearchTerm,
   findInputRef,
   searchOccurences,
-  setSearchOccurences,
   refreshSearch,
   searchActiveOccurence,
   setSearchActiveOccurence,
@@ -103,18 +105,61 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
     [occurencesCount, replaceWith, isReplacingOne, isReplacingAll, dataDocumentIsFetching],
   );
 
-  const replaceOccurence = () => {
-    annotator?.onReplaceText(replaceWith);
+  /**
+   * Absolute index in the searched text where the occurrence starts, -1 when it
+   * cannot be resolved.
+   */
+  const occurenceStartIndex = (occurence: Occurrence): number => {
+    if (!annotator) {
+      return -1;
+    }
+    const segment = annotator.text.segments[occurence.segmentIndex];
+    if (!segment) {
+      return -1;
+    }
+    const position = annotator.text.getSegmentPosition(
+      segment.lineStart + occurence.lineIndex,
+      occurence.start,
+    );
+    return position ? annotator.text.getAbsTextIndexFromPosition(position) : -1;
+  };
 
+  /**
+   * Index just past the text a replace inserted, held until the searched-again
+   * occurrence list arrives a render later. Null while no replace is pending.
+   */
+  const resumeFromIndexRef = useRef<number | null>(null);
+
+  // Moves the active occurrence past the replacement once the refreshed list is
+  // in. A replacement that still matches the term keeps its place in the list,
+  // so the index has to be recomputed from positions rather than kept or
+  // incremented.
+  useEffect(() => {
+    const resumeFrom = resumeFromIndexRef.current;
+    if (resumeFrom === null || searchOccurences === null) {
+      return;
+    }
+    resumeFromIndexRef.current = null;
+    setSearchActiveOccurence(
+      nextOccurenceIndexAfter(searchOccurences.map(occurenceStartIndex), resumeFrom),
+    );
+  }, [searchOccurences]);
+
+  const replaceOccurence = () => {
     if (searchOccurences === null) {
       return;
     }
-    const newOccurrences = searchOccurences.filter((_, index) => index !== searchActiveOccurence);
+    const replaced = searchOccurences[searchActiveOccurence];
+    const replacedStartIndex = replaced ? occurenceStartIndex(replaced) : -1;
 
-    setSearchOccurences(newOccurrences);
-    setSearchActiveOccurence(
-      nextActiveOccurenceIndex(searchActiveOccurence, newOccurrences.length),
-    );
+    annotator?.onReplaceText(replaceWith);
+
+    // The replacement can itself match the term, and a length change shifts the
+    // coordinates of every occurrence after it, so the list is searched again
+    // rather than derived from the old one.
+    resumeFromIndexRef.current =
+      replacedStartIndex >= 0 ? replacedStartIndex + replaceWith.length : null;
+    refreshSearch();
 
     // the flag tracks a save in flight; onSettled lowers it again
     const saveDispatched = saveDocumentContent();

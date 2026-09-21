@@ -1556,7 +1556,6 @@ export const TextAnnotator = ({
           setSearchTerm={setSearchTerm}
           findInputRef={findInputRef}
           searchOccurences={searchOccurences}
-          setSearchOccurences={setSearchOccurences}
           refreshSearch={refreshSearch}
           searchActiveOccurence={searchActiveOccurence}
           setSearchActiveOccurence={setSearchActiveOccurence}
