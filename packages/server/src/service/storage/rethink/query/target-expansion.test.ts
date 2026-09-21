@@ -4,8 +4,8 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import { getEdgeInstance } from "./edge";
-import QuerySearch from "./search";
-import { clearQueryBaseCache } from "./query-base-cache";
+import QuerySearch from "../../../query/search";
+import { clearQueryBaseCache } from "../../../query/query-base-cache";
 
 // Verifies the per-node expansion toggles (includeEquivalents /
 // includeSubordinates, #2969) against the ACTUAL ReQL of the edges, plus the

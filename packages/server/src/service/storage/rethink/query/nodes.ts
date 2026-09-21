@@ -1,8 +1,8 @@
 import Entity from "@models/entity/entity";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
-import { Results, SearchEdge } from ".";
-import Edge, { getEdgeInstance } from "./edge";
+import Results from "../../../query/results";
+import SearchEdge, { getEdgeInstance } from "./edge";
 import { Query } from "@inkvisitor/shared/types/query";
 
 export default class SearchNode implements Query.INode {
@@ -10,7 +10,7 @@ export default class SearchNode implements Query.INode {
   params: Query.INodeParams;
   operator: Query.NodeOperator;
   id: string;
-  edges: Edge[];
+  edges: SearchEdge[];
   results: Results<IEntity>;
 
   constructor(data: Partial<Query.INode>) {
@@ -110,7 +110,7 @@ export default class SearchNode implements Query.INode {
   private async evaluateEdges(
     db: Connection,
     baseStream: RStream,
-    edges: Edge[],
+    edges: SearchEdge[],
     operator: Query.NodeOperator,
     baseIdsKnown?: string[]
   ): Promise<string[]> {

@@ -79,7 +79,7 @@ const UNIT_TEST_PATHS = [
   // No-op own test; its DB-touching exports are only used as helpers elsewhere.
   "src/modules/common.test.ts",
   // Mocks rethinkdb-ts (jest.mock) - evaluateEdges runs against an in-memory proxy.
-  "src/service/query/nesting.test.ts",
+  "src/service/storage/rethink/query/nesting.test.ts",
   "src/models/stats/event-type-fold.test.ts",
   "src/models/stats/hybrid-stats.test.ts",
   "src/models/stats/stats-aggregator.test.ts",
@@ -90,7 +90,7 @@ const UNIT_TEST_PATHS = [
   "src/service/query/explore-to-request-search.test.ts",
   "src/service/query/query-base-cache.test.ts",
   "src/service/query/results.test.ts",
-  "src/service/query/superordinate-edge.test.ts",
+  "src/service/storage/rethink/query/superordinate-edge.test.ts",
   "src/service/ttlCache.test.ts",
 ];
 

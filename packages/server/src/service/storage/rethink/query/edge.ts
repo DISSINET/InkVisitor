@@ -9,7 +9,7 @@ import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
-import { SearchNode } from ".";
+import SearchNode from "./nodes";
 
 export default class SearchEdge implements Query.IEdge {
   type: Query.EdgeType;
