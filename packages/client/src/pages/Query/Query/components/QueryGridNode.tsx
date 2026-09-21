@@ -18,6 +18,7 @@ import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { QueryAction, QueryActionType } from "../state";
 import {
   StyledExpansionCountButton,
+  StyledExpansionToggleGroup,
   StyledGraphNode,
   StyledNodeContainer,
   StyledNodeExpansionToggles,
@@ -475,64 +476,68 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
           )}
           {!isRoot && !!paramEntityId && (
             <StyledNodeExpansionToggles>
-              <Checkbox
-                label="EQ"
-                size={13}
-                color="info"
-                value={includeEquivalents}
-                tooltipLabel="include equivalents"
-                tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
-                onChangeFn={() => {
-                  dispatch({
-                    type: QueryActionType.updateNodeExpansionToggles,
-                    payload: {
-                      nodeId: node.id,
-                      field: "includeEquivalents",
-                      value: includeEquivalents ? undefined : true,
-                    },
-                  });
-                }}
-                disableEnterKey
-              />
-              {includeEquivalents && (
-                <StyledExpansionCountButton
-                  ref={equivalentsBadgeRef}
-                  type="button"
-                  title="show the equivalent entities"
-                  onClick={() => openExpansion("equivalents")}
-                >
-                  {expansionCount(dataExpansion, "equivalents") ?? "…"}
-                </StyledExpansionCountButton>
-              )}
-              <Checkbox
-                label="SUB"
-                size={13}
-                color="warning"
-                value={includeSubordinates}
-                tooltipLabel="include subordinates"
-                tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
-                onChangeFn={() => {
-                  dispatch({
-                    type: QueryActionType.updateNodeExpansionToggles,
-                    payload: {
-                      nodeId: node.id,
-                      field: "includeSubordinates",
-                      value: includeSubordinates ? undefined : true,
-                    },
-                  });
-                }}
-                disableEnterKey
-              />
-              {includeSubordinates && (
-                <StyledExpansionCountButton
-                  ref={subordinatesBadgeRef}
-                  type="button"
-                  title="show the subordinate entities"
-                  onClick={() => openExpansion("subordinates")}
-                >
-                  {expansionCount(dataExpansion, "subordinates") ?? "…"}
-                </StyledExpansionCountButton>
-              )}
+              <StyledExpansionToggleGroup>
+                <Checkbox
+                  label="EQ"
+                  size={13}
+                  color="info"
+                  value={includeEquivalents}
+                  tooltipLabel="include equivalents"
+                  tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
+                  onChangeFn={() => {
+                    dispatch({
+                      type: QueryActionType.updateNodeExpansionToggles,
+                      payload: {
+                        nodeId: node.id,
+                        field: "includeEquivalents",
+                        value: includeEquivalents ? undefined : true,
+                      },
+                    });
+                  }}
+                  disableEnterKey
+                />
+                {!!entityId && includeEquivalents && (
+                  <StyledExpansionCountButton
+                    ref={equivalentsBadgeRef}
+                    type="button"
+                    title="show the equivalent entities"
+                    onClick={() => openExpansion("equivalents")}
+                  >
+                    {expansionCount(dataExpansion, "equivalents") ?? "…"}
+                  </StyledExpansionCountButton>
+                )}
+              </StyledExpansionToggleGroup>
+              <StyledExpansionToggleGroup>
+                <Checkbox
+                  label="SUB"
+                  size={13}
+                  color="warning"
+                  value={includeSubordinates}
+                  tooltipLabel="include subordinates"
+                  tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
+                  onChangeFn={() => {
+                    dispatch({
+                      type: QueryActionType.updateNodeExpansionToggles,
+                      payload: {
+                        nodeId: node.id,
+                        field: "includeSubordinates",
+                        value: includeSubordinates ? undefined : true,
+                      },
+                    });
+                  }}
+                  disableEnterKey
+                />
+                {!!entityId && includeSubordinates && (
+                  <StyledExpansionCountButton
+                    ref={subordinatesBadgeRef}
+                    type="button"
+                    title="show the subordinate entities"
+                    onClick={() => openExpansion("subordinates")}
+                  >
+                    {expansionCount(dataExpansion, "subordinates") ?? "…"}
+                  </StyledExpansionCountButton>
+                )}
+              </StyledExpansionToggleGroup>
               {openExpansionGroup !== null && (
                 <NodeExpansionPopover
                   referenceElement={

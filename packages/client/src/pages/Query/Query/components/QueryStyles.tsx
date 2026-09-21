@@ -128,12 +128,25 @@ export const StyledTooltipListItem = styled.li`
   }
 `;
 
+// pairs a toggle checkbox with its count button so the container's gap (EQ to
+// SUB) never leaks into the checkbox-to-count gutter, which the count button
+// sets on itself instead
+export const StyledExpansionToggleGroup = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 // the count beside a checked EQ / SUB toggle; opens the expansion popover
 export const StyledExpansionCountButton = styled.button`
   border: none;
   background: none;
   padding: 0;
   margin-left: ${({ theme }) => theme.space[1]};
+  // a <button> does not inherit font-family/line-height from the body by
+  // default, so without this it renders in the browser's UI font and sits off
+  // the EQ / SUB label's baseline
+  font-family: inherit;
+  line-height: inherit;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   color: ${({ theme }) => theme.color["black"]};
