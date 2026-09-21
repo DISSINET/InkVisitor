@@ -1,4 +1,5 @@
 import Entity from "@models/entity/entity";
+import { prepareLabel } from "@common/searchLabel";
 import { SearchQuery } from "@models/entity/response-search";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
@@ -160,7 +161,7 @@ const findMatchingIdsWithDbSearch = async (
   ids: string[],
   label: string
 ): Promise<Set<string>> => {
-  const [preparedLabel, leftFromPrepare, rightFromPrepare] = SearchQuery.prepareLabel(label);
+  const [preparedLabel, leftFromPrepare, rightFromPrepare] = prepareLabel(label);
   const [leftWildcard, rightWildcard] = exploreLabelWildcards(
     label,
     leftFromPrepare,

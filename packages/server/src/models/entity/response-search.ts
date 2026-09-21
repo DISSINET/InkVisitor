@@ -1,5 +1,6 @@
 import Audit from "@models/audit/audit";
 import Document from "@models/document/document";
+import { prepareLabel } from "@common/searchLabel";
 import { getEntityClass } from "@models/factory";
 import Classification from "@models/relation/classification";
 import Statement from "@models/statement/statement";
@@ -201,41 +202,12 @@ export class SearchQuery {
   }
 
   /**
-   * prepares label for search
-   * @param label
-   * @returns
-   */
-  public static prepareLabel(label: string): [string, string, string] {
-    let leftWildcard = "^",
-      rightWildcard = "$";
-
-    if (label[0] === "*") {
-      leftWildcard = "";
-      label = label.slice(1);
-    }
-
-    if (label[label.length - 1] === "*") {
-      rightWildcard = "";
-      label = label.slice(0, -1);
-    }
-    // escape problematic chars - messes with regexp search
-    // label = regExpEscape(label.toLowerCase());
-
-    return [label, leftWildcard, rightWildcard];
-  }
-
-  prepareLabel(label: string): [string, string, string] {
-    return SearchQuery.prepareLabel(label);
-  }
-
-  /**
    * adds condition to filter by label
    * @param label
    * @returns
    */
   whereLabel(label: string): SearchQuery {
-    const [preparedLabel, leftWildcard, rightWildcard] =
-      this.prepareLabel(label);
+    const [preparedLabel, leftWildcard, rightWildcard] = prepareLabel(label);
 
     this.usedLabel = preparedLabel;
 
@@ -258,7 +230,7 @@ export class SearchQuery {
    * @returns
    */
   whereLabelOrId(labelOrId: string): SearchQuery {
-    const [label, leftWildcard, rightWildcard] = this.prepareLabel(labelOrId);
+    const [label, leftWildcard, rightWildcard] = prepareLabel(labelOrId);
     this.usedLabel = label;
 
     const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
