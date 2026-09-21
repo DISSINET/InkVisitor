@@ -11,11 +11,7 @@ import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { useTheme } from "styled-components";
-import {
-  ICommittedNodeExpansion,
-  INodeItem,
-  QueryValidityProblem,
-} from "../../types";
+import { INodeItem, QueryValidityProblem } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
 import { expansionCount } from "../nodeExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
@@ -38,8 +34,6 @@ interface QueryGridNodeProps {
   dispatch: React.Dispatch<QueryAction>;
   problems: QueryValidityProblem[];
   isRoot: boolean;
-  /** this node's pinned entity and toggles as of the last run search */
-  committedExpansion?: ICommittedNodeExpansion;
   onOpenEntityInDetail?: (entityId: string) => void;
 }
 
@@ -50,7 +44,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   dispatch,
   problems,
   isRoot = false,
-  committedExpansion,
   onOpenEntityInDetail,
 }) => {
   const theme = useTheme();
@@ -137,16 +130,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const includeEquivalents = node.params.includeEquivalents === true;
   const includeSubordinates = node.params.includeSubordinates === true;
 
-  // Counts describe the search on screen, so they appear only once a search has
-  // run with these exact toggles on this exact entity. Flipping a toggle
-  // afterwards withdraws them until the next run, and nothing is requested
-  // while the query is merely being edited.
-  const isExpansionCommitted =
-    !!entityId &&
-    (includeEquivalents || includeSubordinates) &&
-    committedExpansion?.entityId === entityId &&
-    committedExpansion.equivalents === includeEquivalents &&
-    committedExpansion.subordinates === includeSubordinates;
+  // The expansion is fetched only when the user asks for it, never as a side
+  // effect of editing the query: this signature identifies the toggle
+  // combination that was asked for, and the request runs only while the node
+  // still carries it. Flipping a toggle therefore costs nothing until the new
+  // combination is asked for in turn.
+  const expansionSignature = `${entityId}|${includeEquivalents}|${includeSubordinates}`;
+  const [requestedExpansionSignature, setRequestedExpansionSignature] = useState<
+    string | null
+  >(null);
 
   const {
     data: dataExpansion,
@@ -166,9 +158,11 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       });
       return res.data;
     },
-    enabled: isExpansionCommitted && api.isLoggedIn(),
+    enabled:
+      requestedExpansionSignature === expansionSignature && api.isLoggedIn(),
     // the relation graph does not move while a query is being built, so
-    // re-toggling and reopening the popover cost nothing
+    // returning to a combination already asked for reads from the cache and
+    // shows its count without a second request
     staleTime: 5 * 60 * 1000,
   });
 
@@ -178,13 +172,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
   const equivalentsBadgeRef = useRef<HTMLButtonElement | null>(null);
   const subordinatesBadgeRef = useRef<HTMLButtonElement | null>(null);
 
-  // editing the node withdraws its counts, so an open popover would otherwise
-  // pop back into view on the next run
+  const openExpansion = (group: "equivalents" | "subordinates") => {
+    setRequestedExpansionSignature(expansionSignature);
+    setOpenExpansionGroup(openExpansionGroup === group ? null : group);
+  };
+
+  // a popover describes one toggle combination, so editing the node closes it
   useEffect(() => {
-    if (!isExpansionCommitted) {
-      setOpenExpansionGroup(null);
-    }
-  }, [isExpansionCommitted]);
+    setOpenExpansionGroup(null);
+  }, [expansionSignature]);
 
   // a node reached through a negative ("NOT") edge gets a red border to match
   // that edge; scoped to this node only - deeper nodes have their own edges
@@ -496,20 +492,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 }}
                 disableEnterKey
               />
-              {isExpansionCommitted && includeEquivalents && (
+              {includeEquivalents && (
                 <StyledExpansionCountButton
                   ref={equivalentsBadgeRef}
                   type="button"
                   title="show the equivalent entities"
-                  onClick={() =>
-                    setOpenExpansionGroup(
-                      openExpansionGroup === "equivalents" ? null : "equivalents",
-                    )
-                  }
+                  onClick={() => openExpansion("equivalents")}
                 >
-                  {expansionCount(dataExpansion, "equivalents") === undefined
-                    ? "…"
-                    : `·${expansionCount(dataExpansion, "equivalents")}`}
+                  {expansionCount(dataExpansion, "equivalents") ?? "…"}
                 </StyledExpansionCountButton>
               )}
               <Checkbox
@@ -531,23 +521,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 }}
                 disableEnterKey
               />
-              {isExpansionCommitted && includeSubordinates && (
+              {includeSubordinates && (
                 <StyledExpansionCountButton
                   ref={subordinatesBadgeRef}
                   type="button"
                   title="show the subordinate entities"
-                  onClick={() =>
-                    setOpenExpansionGroup(
-                      openExpansionGroup === "subordinates" ? null : "subordinates",
-                    )
-                  }
+                  onClick={() => openExpansion("subordinates")}
                 >
-                  {expansionCount(dataExpansion, "subordinates") === undefined
-                    ? "…"
-                    : `·${expansionCount(dataExpansion, "subordinates")}`}
+                  {expansionCount(dataExpansion, "subordinates") ?? "…"}
                 </StyledExpansionCountButton>
               )}
-              {isExpansionCommitted && openExpansionGroup !== null && (
+              {openExpansionGroup !== null && (
                 <NodeExpansionPopover
                   referenceElement={
                     openExpansionGroup === "equivalents"
