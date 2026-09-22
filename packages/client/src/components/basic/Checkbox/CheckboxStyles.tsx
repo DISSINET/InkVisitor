@@ -9,25 +9,33 @@ const checkmarkPop = keyframes`
 
 // the box and its label form one control: the gap between them lives inside
 // this element so moving across it never leaves the hovered area
-export const StyledCheckbox = styled.div`
-  color: ${({ theme }) => theme.color["black"]};
+interface StyledCheckbox {
+  $disabled?: boolean;
+}
+export const StyledCheckbox = styled.div<StyledCheckbox>`
+  color: ${({ theme, $disabled }) =>
+    $disabled ? theme.color["gray"][500] : theme.color["black"]};
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
   width: fit-content;
 `;
 
-export const StyledLabel = styled.label`
+interface StyledLabel {
+  $disabled?: boolean;
+}
+export const StyledLabel = styled.label<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   user-select: none;
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
   display: flex;
   align-items: center;
 `;
 
 interface StyledCheckboxIndicator {
   $checked: boolean;
+  $disabled?: boolean;
   $size: number;
   // accent colour for the border and checkmark when checked (defaults to "info")
   $color: FlatThemeColor;
@@ -45,12 +53,18 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   width: ${({ $size }) => $size}px;
   height: ${({ $size }) => $size}px;
   border: 2px solid
-    ${({ theme, $checked, $color }) =>
-      $checked ? theme.color[$color] : theme.color["gray"][400]};
+    ${({ theme, $checked, $color, $disabled }) =>
+      $disabled
+        ? theme.color["gray"][400]
+        : $checked
+          ? theme.color[$color]
+          : theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $checked, $color, $noFill }) =>
-    $checked && !$noFill ? theme.color[$color] : theme.color["white"]};
-  cursor: pointer;
+  background-color: ${({ theme, $checked, $color, $noFill, $disabled }) =>
+    $checked && !$noFill && !$disabled
+      ? theme.color[$color]
+      : theme.color["white"]};
+  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
   /* transition:
     background-color 0.15s ease,
     border-color 0.15s ease; */
@@ -59,7 +73,8 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
      keyboard focus reuses the same accent border cue */
   &:focus-visible,
   ${StyledCheckbox}:hover & {
-    border-color: ${({ theme, $color }) => theme.color[$color]};
+    border-color: ${({ theme, $color, $disabled }) =>
+      $disabled ? theme.color["gray"][400] : theme.color[$color]};
   }
 
   &:focus-visible {
@@ -67,8 +82,12 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   }
 
   svg {
-    color: ${({ theme, $color, $noFill }) =>
-      $noFill ? theme.color[$color] : theme.color["white"]};
+    color: ${({ theme, $color, $noFill, $disabled }) =>
+      $disabled
+        ? theme.color["gray"][500]
+        : $noFill
+          ? theme.color[$color]
+          : theme.color["white"]};
     ${({ $checked }) =>
       $checked &&
       css`

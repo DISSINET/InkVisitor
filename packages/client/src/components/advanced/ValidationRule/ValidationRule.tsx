@@ -2,7 +2,10 @@ import { entitiesDict, entityStatusDict, languageDict } from "@inkvisitor/shared
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@inkvisitor/shared/types/territory";
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
@@ -16,6 +19,7 @@ import {
   StyledLanguageList,
   StyledNotActiveTag,
 } from "./ValidationRuleStyles";
+import { ExpansionToggles } from "./ExpansionToggles";
 import { ValidationText } from "./ValidationText/ValidationText";
 import { LanguageTag } from "./LanguageTag";
 import { getEntityStatusIcon } from "utils/iconUtils";
@@ -72,6 +76,13 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   const active: boolean = useMemo<boolean>(() => {
     return validation.active !== false;
   }, [validation.active]);
+
+  // the tie decides what Prop type and the allowed list mean, so their
+  // expansions go with the fields the tie switch empties
+  const conditionExpansions = useMemo(() => {
+    const { entityClassifications, entitySOEs } = validation.expansions ?? {};
+    return { entityClassifications, entitySOEs };
+  }, [validation.expansions]);
 
   const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
     if (!allowedEntities) {
@@ -143,6 +154,12 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={!userCanEdit || tieType === EProtocolTieType.Classification}
             />
           )}
+          <ExpansionToggles
+            field="entityClassifications"
+            validation={validation}
+            updateValidationRule={updateValidationRule}
+            userCanEdit={userCanEdit}
+          />
         </StyledValue>
 
         {/* Entity SOE */}
@@ -178,6 +195,9 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                 EntityEnums.Class.Resource,
                 EntityEnums.Class.Person,
                 EntityEnums.Class.Being,
+                // a Territory has no SOE relation; validation reads its parent
+                // as one, so a Territory can be named here
+                EntityEnums.Class.Territory,
               ]}
               onPicked={(entity) =>
                 updateValidationRule({
@@ -187,6 +207,12 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               disabled={!userCanEdit}
             />
           )}
+          <ExpansionToggles
+            field="entitySOEs"
+            validation={validation}
+            updateValidationRule={updateValidationRule}
+            userCanEdit={userCanEdit}
+          />
         </StyledValue>
 
         {/* Entity Languages */}
@@ -290,6 +316,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   propType: [],
                   allowedClasses: [],
                   allowedEntities: [],
+                  expansions: conditionExpansions,
                 }),
               selected: tieType === EProtocolTieType.Property,
             },
@@ -302,6 +329,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   propType: [],
                   allowedClasses: [],
                   allowedEntities: [],
+                  expansions: conditionExpansions,
                 }),
               selected: tieType === EProtocolTieType.Classification,
               optionDisabled: entityClassifications && entityClassifications.length > 0,
@@ -315,6 +343,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   propType: [],
                   allowedClasses: [],
                   allowedEntities: [],
+                  expansions: conditionExpansions,
                 }),
               selected: tieType === EProtocolTieType.Reference,
             },
@@ -354,6 +383,12 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   disabled={!userCanEdit}
                 />
               )}
+              <ExpansionToggles
+                field="propType"
+                validation={validation}
+                updateValidationRule={updateValidationRule}
+                userCanEdit={userCanEdit}
+              />
             </StyledValue>
           </>
         )}
@@ -411,6 +446,14 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
               disabled={!userCanEdit}
+            />
+          )}
+          {tieType !== EProtocolTieType.Property && (
+            <ExpansionToggles
+              field="allowedEntities"
+              validation={validation}
+              updateValidationRule={updateValidationRule}
+              userCanEdit={userCanEdit}
             />
           )}
         </StyledValue>

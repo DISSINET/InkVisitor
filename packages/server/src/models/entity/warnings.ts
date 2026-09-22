@@ -18,6 +18,7 @@ import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { Connection } from "rethinkdb-ts";
 import Entity from "./entity";
+import { buildValidationExpansionMap } from "./validation-expansion-load";
 
 export default class EntityWarnings {
   entityId: string;
@@ -204,12 +205,15 @@ export default class EntityWarnings {
       Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
     );
 
+    const expansions = await buildValidationExpansionMap(conn, [rootTerritory]);
+
     return entity.getTBasedWarnings(
       [rootTerritory],
       classificationEs,
       soeEs,
       propValueEs,
-      settings
+      settings,
+      expansions
     );
   }
 

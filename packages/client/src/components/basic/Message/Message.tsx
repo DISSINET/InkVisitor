@@ -12,10 +12,13 @@ import {
   StyledMessageOrigin,
   StyledWarningIconWrap,
   StyledMessageContent,
+  StyledMessageCondition,
   StyledMessageDetailList,
   StyledMessageDetailRow,
+  StyledMessageExpansion,
 } from "./MessageStyles";
 import { isWarningTBased } from "utils/utils";
+import { validationFieldNote } from "utils/validationExpansion";
 import { wildCardChar } from "Theme/constants";
 import { useTheme } from "styled-components";
 
@@ -46,6 +49,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     };
     warning.validation?.propType?.forEach(addMissing);
     warning.validation?.allowedEntities?.forEach(addMissing);
+    warning.validation?.entityClassifications?.forEach(addMissing);
+    warning.validation?.entitySOEs?.forEach(addMissing);
     warning.details?.forEach((detail) => {
       addMissing(detail.entityId);
       detail.relatedEntityIds?.forEach(addMissing);
@@ -99,6 +104,50 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       </>
     );
   }
+  // states what the rule accepted beyond the entities it names, right after the
+  // list those entities were rendered in
+  function renderExpansionNote(
+    warning: IWarning,
+    field: "propType" | "allowedEntities"
+  ): React.ReactNode {
+    const note = validationFieldNote(warning.validation, field);
+    return note ? <StyledMessageExpansion>{note}</StyledMessageExpansion> : null;
+  }
+
+  // a rule reaches an entity through its conditions; when one of them was
+  // widened, the entity may be here only because of that, so the warning says so
+  function renderConditionNote(warning: IWarning): React.ReactNode {
+    const classificationNote = validationFieldNote(
+      warning.validation,
+      "entityClassifications"
+    );
+    const soeNote = validationFieldNote(warning.validation, "entitySOEs");
+
+    if (!classificationNote && !soeNote) {
+      return null;
+    }
+
+    return (
+      <StyledMessageCondition>
+        {classificationNote && (
+          <>
+            {"rule applies to entities classified as "}
+            {renderEntityTags(warning.validation?.entityClassifications ?? [])}
+            {classificationNote}
+          </>
+        )}
+        {soeNote && (
+          <>
+            {classificationNote ? " and " : "rule applies to entities "}
+            {"having superordinate entity "}
+            {renderEntityTags(warning.validation?.entitySOEs ?? [])}
+            {soeNote}
+          </>
+        )}
+      </StyledMessageCondition>
+    );
+  }
+
   function renderValidationLabel(warning: IWarning): React.ReactNode {
     if (warning.validation?.detail) {
       return (
@@ -281,6 +330,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             {renderEntityTags([warning?.position?.entityId])} is missing a
             required property with type{" "}
             {renderEntityTags(warning.validation?.propType ?? [])}
+            {renderExpansionNote(warning, "propType")}
             {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
@@ -292,6 +342,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} has a wrong
             property type {renderEntityTags(warning.validation?.propType ?? [])}
+            {renderExpansionNote(warning, "propType")}
             {classAllowed && (
               <>
                 - should be of type{" "}
@@ -302,6 +353,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
               <>
                 - should be of values{" "}
                 {renderEntityTags(warning.validation?.allowedEntities ?? [])}
+                {renderExpansionNote(warning, "allowedEntities")}
               </>
             )}
             {renderValidationLabel(warning)}
@@ -320,6 +372,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             {renderEntityTags([warning?.position?.entityId])} is not classified
             with valid entity{" "}
             {renderEntityTags(warning.validation?.allowedEntities ?? [])}
+            {renderExpansionNote(warning, "allowedEntities")}
             {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
@@ -339,7 +392,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
               warning?.validation?.allowedEntities
                 ? warning?.validation?.allowedEntities
                 : []
-            )}{" "}
+            )}
+            {renderExpansionNote(warning, "allowedEntities")}{" "}
             {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
@@ -355,6 +409,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       </StyledWarningIconWrap>
       <StyledMessageContent>
         {getWarningMessage()}
+        {isWarningTBased(warning) && renderConditionNote(warning)}
         {isWarningTBased(warning) && originEntity && (
           <StyledMessageOrigin>
             <b>Source</b>

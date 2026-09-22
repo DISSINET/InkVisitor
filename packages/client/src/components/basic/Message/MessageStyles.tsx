@@ -56,3 +56,18 @@ export const StyledMessageContent = styled.div`
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[2]};
 `;
+
+// what a rule accepts beyond the entities it names, said in the warning itself
+// so the message describes the rule that actually rejected the entity
+export const StyledMessageExpansion = styled.span`
+  font-style: italic;
+  white-space: pre-wrap;
+`;
+export const StyledMessageCondition = styled.div`
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1px;
+  flex-basis: 100%;
+  font-style: italic;
+`;
