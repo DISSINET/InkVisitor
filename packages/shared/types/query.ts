@@ -166,22 +166,30 @@ export namespace Query {
     },
     "IS:A": {},
     "I_IS:A": {},
-    "IS:S": {},
+    "IS:S": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:S": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:A1": {},
+    "IS:A1": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:A1": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:A2": {},
+    "IS:A2": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:A2": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:PS": {},
+    "IS:PS": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:PS": {},
     "SUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },

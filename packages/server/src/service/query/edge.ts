@@ -1269,6 +1269,96 @@ export class EdgeIsInStatement extends SearchEdge {
   }
 }
 
+/**
+ * Shared run for the position-restricted "is in S" edges (IS:S / IS:A1 /
+ * IS:A2 / IS:PS). Emits the ENTITY occupying one of `positions` in the target
+ * Statement(s) - the inverse of I_IS:S / I_IS:A1 / I_IS:A2 (runStatementHasActantEdge),
+ * which instead emit the statement given the actant. The target statement is
+ * fetched by primary key (no index needed); a non-statement or unknown id
+ * yields no statement and therefore no matches. Intersected back with the
+ * incoming stream q, keeping the subset invariant that positive matching and
+ * negation both rely on. With no target the edge matches nothing (an actant
+ * "in S" is only meaningful relative to a specific statement).
+ */
+function runIsInStatementActantEdge(
+  q: RStream,
+  statementIds: string[] | null,
+  positions: EntityEnums.Position[]
+): RStream {
+  return intersectIdsWithStream(
+    q,
+    statementIds
+      ? r
+          .table(Entity.table)
+          .getAll(r.args(statementIds))
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .concatMap(function (stmt: RDatum) {
+            return stmt("data")("actants")
+              .filter(function (a: RDatum) {
+                return r.expr(positions).contains(a("position"));
+              })
+              .map(function (a: RDatum) {
+                return a("entityId");
+              });
+          })
+      : null
+  );
+}
+
+export class EdgeIsInStatementAsSubject extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:S"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [
+      EntityEnums.Position.Subject,
+    ]);
+  }
+}
+
+export class EdgeIsInStatementAsActant1 extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:A1"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [
+      EntityEnums.Position.Actant1,
+    ]);
+  }
+}
+
+export class EdgeIsInStatementAsActant2 extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:A2"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [
+      EntityEnums.Position.Actant2,
+    ]);
+  }
+}
+
+export class EdgeIsInStatementAsPseudoActant extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:PS"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [
+      EntityEnums.Position.PseudoActant,
+    ]);
+  }
+}
+
 export class EdgeHasReferenceResource extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -1389,6 +1479,14 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
+    case Query.EdgeType["IS:S"]:
+      return new EdgeIsInStatementAsSubject(data);
+    case Query.EdgeType["IS:A1"]:
+      return new EdgeIsInStatementAsActant1(data);
+    case Query.EdgeType["IS:A2"]:
+      return new EdgeIsInStatementAsActant2(data);
+    case Query.EdgeType["IS:PS"]:
+      return new EdgeIsInStatementAsPseudoActant(data);
     default: {
       const orderedRelation = data.type
         ? ORDERED_RELATION_EDGES[data.type]

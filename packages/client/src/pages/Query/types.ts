@@ -73,6 +73,13 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)
   Query.EdgeType["IS:"],
+  // position-restricted "is in S" edges: match the entity occupying a given
+  // position (subject / actant1 / actant2 / pseudoactant) in the target
+  // Statement (server: runIsInStatementActantEdge in edge.ts)
+  Query.EdgeType["IS:S"],
+  Query.EdgeType["IS:A1"],
+  Query.EdgeType["IS:A2"],
+  Query.EdgeType["IS:PS"],
 ];
 
 /**
