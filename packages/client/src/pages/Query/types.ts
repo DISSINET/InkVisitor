@@ -30,10 +30,16 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["I_IS:"],
   // inverse in-statement actant-role edges: match statements that have a given
   // entity (or any entity of the target class, e.g. Statement -> substatement
-  // chains) as subject / actant1 / actant2 (server: getEdgeInstance in edge.ts)
+  // chains) as subject / actant1 / actant2 / pseudoactant (server:
+  // getEdgeInstance in edge.ts)
   Query.EdgeType["I_IS:S"],
   Query.EdgeType["I_IS:A1"],
   Query.EdgeType["I_IS:A2"],
+  Query.EdgeType["I_IS:PS"],
+  // I_IS:A: match statements that have the given entity as one of their
+  // actions - data.actions[].actionId, which has no position (server:
+  // EdgeStatementHasAction in edge.ts)
+  Query.EdgeType["I_IS:A"],
   Query.EdgeType["HR:R"],
   Query.EdgeType["HR:V"],
   Query.EdgeType["R:"],
@@ -62,6 +68,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["I_R:SCL"],
   Query.EdgeType["I_R:SOE"],
   Query.EdgeType["I_R:HOL"],
+  // inverse ordered relation edge: walks entityIds[1] -> entityIds[0]
+  // (server: EdgeHasInverseOrderedRelation in edge.ts)
+  Query.EdgeType["I_R:AEE"],
   // SUT: match Statements under the target Territory. The target node's SUB
   // toggle widens it to the whole subtree - "include subordinates" of a Territory
   // is its child territories, all levels (server: getSubordinateEntityIds).
@@ -80,6 +89,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["IS:A1"],
   Query.EdgeType["IS:A2"],
   Query.EdgeType["IS:PS"],
+  // IS:A: match the ACTION entity of the target Statement - data.actions[].actionId
+  // (server: EdgeIsInStatementAsAction in edge.ts)
+  Query.EdgeType["IS:A"],
 ];
 
 /**
