@@ -98,7 +98,11 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
  * Edge types left out of the edge type dropdown entirely, not even listed as
  * disabled. The "used as" inverses of the semantics/implication relations have
  * no readable "has: X" phrasing. "CT:G" / "I_CT:G" share their label and node
- * rules with "CT:" / "I_CT:" and have no server implementation.
+ * rules with "CT:" / "I_CT:" and have no server implementation. Antonym /
+ * PropertyReciprocal / SubjectActant1Reciprocal / Identification / Related are
+ * symmetric relations (RelationRules: asymmetrical false), so their "inverse"
+ * would match the exact same partners as the forward edge - no distinct
+ * behavior to offer, so they stay out rather than sit disabled forever.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -107,4 +111,9 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["I_R:SUS"],
   Query.EdgeType["I_R:A1S"],
   Query.EdgeType["I_R:A2S"],
+  Query.EdgeType["I_R:ANT"],
+  Query.EdgeType["I_R:PRR"],
+  Query.EdgeType["I_R:SAR"],
+  Query.EdgeType["I_R:IDE"],
+  Query.EdgeType["I_R:REL"],
 ];
