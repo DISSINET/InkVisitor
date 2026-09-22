@@ -213,7 +213,9 @@ export namespace Query {
     "HR:R": {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
     },
-    "I_HR:R": {},
+    "I_HR:R": {
+      entityId: { allowedClasses: [] },
+    },
     "HR:V": {
       entityId: { allowedClasses: [EntityEnums.Class.Value] },
     },

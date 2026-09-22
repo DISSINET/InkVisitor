@@ -49,6 +49,9 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["I_IS:A"],
   Query.EdgeType["HR:R"],
   Query.EdgeType["HR:V"],
+  // I_HR:R: match the Resources that the target entity's own references point
+  // at (server: EdgeIsReferenceResource in edge.ts)
+  Query.EdgeType["I_HR:R"],
   Query.EdgeType["R:"],
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],

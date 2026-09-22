@@ -1684,6 +1684,48 @@ export class EdgeHasReferenceResource extends SearchEdge {
   }
 }
 
+/**
+ * I_HR:R ("R references"). Inverse of HR:R: where that matches the entity
+ * holding a reference to a pinned Resource, this matches the Resources that a
+ * pinned entity's own references[] point at. Intersected back with q, keeping
+ * the subset invariant positive matching and negation both rely on. A few
+ * legacy entities store references as "" rather than an array, and a
+ * reference's "resource" can be empty on a value-only ref - both are skipped.
+ */
+function runIsReferenceResourceEdge(q: RStream, entityIds: string[] | null): RStream {
+  return intersectIdsWithStream(
+    q,
+    entityIds
+      ? (r
+          .table(Entity.table)
+          .getAll(r.args(entityIds))
+          .concatMap(function (e: RDatum<IEntity>) {
+            return r.branch(
+              e("references").typeOf().eq("ARRAY"),
+              e("references").map(function (ref: RDatum) {
+                return ref("resource").default("");
+              }),
+              r.expr([] as string[])
+            );
+          })
+          .filter(function (id: RDatum<string>) {
+            return id.ne("");
+          }) as unknown as RStream)
+      : null
+  );
+}
+
+export class EdgeIsReferenceResource extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_HR:R"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsReferenceResourceEdge(q, this.targetIds());
+  }
+}
+
 export class EdgeHasReferenceValue extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -1723,6 +1765,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasPropValue(data);
     case Query.EdgeType["HR:R"]:
       return new EdgeHasReferenceResource(data);
+    case Query.EdgeType["I_HR:R"]:
+      return new EdgeIsReferenceResource(data);
     case Query.EdgeType["HR:V"]:
       return new EdgeHasReferenceValue(data);
     case Query.EdgeType["SP:T"]:
