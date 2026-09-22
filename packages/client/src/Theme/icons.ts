@@ -73,6 +73,7 @@ export { FaFolder as IcoFolder } from "react-icons/fa";
 export { FaFolderOpen as IcoFolderOpen } from "react-icons/fa";
 export { FaGripVertical as IcoDragHandle } from "react-icons/fa";
 export { FaHeadSideVirus as IcoHeadVirus } from "react-icons/fa";
+export { FaMapMarkedAlt as IcoMapMarked } from "react-icons/fa";
 export { FaHighlighter as IcoHighlighter } from "react-icons/fa";
 export { FaHome as IcoHome } from "react-icons/fa";
 export { FaLink as IcoLink } from "react-icons/fa";
@@ -128,6 +129,23 @@ export { FaX as IcoX } from "react-icons/fa6";
 // fi
 export { FiLogIn as IcoLogin } from "react-icons/fi";
 export { FiMove as IcoMove } from "react-icons/fi";
+
+// the thirteen place types, from one uniform-stroke set drawn for interface
+// sizes — a detailed mark loses its detail at 16px and becomes a smudge, which
+// is what a village of nine little roofs became
+export { TbAnchor as IcoPlacePort } from "react-icons/tb";
+export { TbBeach as IcoPlaceIsland } from "react-icons/tb";
+export { TbBuildingArch as IcoPlaceArchaeological } from "react-icons/tb";
+export { TbBuildingChurch as IcoPlaceReligious } from "react-icons/tb";
+export { TbBuildingCommunity as IcoPlaceSettlement } from "react-icons/tb";
+export { TbBuildingFortress as IcoPlaceFortress } from "react-icons/tb";
+export { TbDroplet as IcoPlaceLake } from "react-icons/tb";
+export { TbQuestionMark as IcoPlaceUnknown } from "react-icons/tb";
+export { TbMap2 as IcoPlaceRegion } from "react-icons/tb";
+export { TbMountain as IcoPlaceMountain } from "react-icons/tb";
+export { TbRipple as IcoPlaceRiver } from "react-icons/tb";
+export { TbRoad as IcoPlaceRoad } from "react-icons/tb";
+export { TbSwords as IcoPlaceBattlefield } from "react-icons/tb";
 
 // gr
 export { GrClone as IcoCloneAlt } from "react-icons/gr";
@@ -225,6 +243,10 @@ export { TbLockPlus as IcoLockAdd } from "react-icons/tb";
 export { TbMailFilled as IcoMailFilled } from "react-icons/tb";
 export { TbReplace as IcoReplaceTb } from "react-icons/tb";
 export { TbSettings as IcoSettings } from "react-icons/tb";
+export { TbStack2 as IcoLayers } from "react-icons/tb";
+export { TbCurrentLocation as IcoFlyTo } from "react-icons/tb";
+/** Starting a geocoding run. One mark for the verb, wherever it is offered. */
+export { TbMapSearch as IcoGeocode } from "react-icons/tb";
 
 // ti
 export { TiDocumentText as IcoDocumentText } from "react-icons/ti";

@@ -8,6 +8,7 @@ import {
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IGeocodingUserSettings } from "@inkvisitor/shared/types/geocoding";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { generateUuid, hashPassword } from "@common/auth";
 import { generatePassword } from "@common/functions";
@@ -44,11 +45,19 @@ export class UserOptions implements IUserOptions {
   workingLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
   askBeforePropDelete?: boolean = true;
+  geocoding?: IGeocodingUserSettings = { context: {} };
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
     fillArray(this.searchLanguages, String, data?.searchLanguages || []);
     fillArray(this.workingLanguages, String, data?.workingLanguages || []);
+    // fillFlatObject skips any key whose target is an object, the same reason
+    // the two arrays above are filled by hand
+    if (data?.geocoding) {
+      this.geocoding = {
+        context: { ...(this.geocoding?.context || {}), ...(data.geocoding.context || {}) },
+      };
+    }
   }
 
   isValid(): boolean {

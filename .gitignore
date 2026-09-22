@@ -62,3 +62,5 @@ database_data
 
 # Claude Code project instructions (local only)
 CLAUDE.md
+# Local design references pulled from the Claude Design canvas
+.design/

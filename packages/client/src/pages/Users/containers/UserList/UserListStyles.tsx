@@ -352,7 +352,7 @@ export const StyledToolbar = styled.div`
   justify-content: center;
   gap: ${({ theme }) => theme.space[4]};
   width: 100%;
-  font-family: "Roboto", sans-serif;
+  font-family: ${({ theme }) => theme.fontFamily["body"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   text-transform: none;

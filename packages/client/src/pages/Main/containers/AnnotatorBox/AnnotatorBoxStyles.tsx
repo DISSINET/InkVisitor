@@ -103,7 +103,7 @@ export const StyledAnnotatorHeader = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   min-width: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: ${({ theme }) => theme.fontFamily["body"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   line-height: normal;

@@ -127,6 +127,58 @@ const darkTheme = {
       ident: "#EAE3A3",
     },
 
+    /**
+     * One colour per gazetteer, so a match can name its source at a glance.
+     *
+     * Sixteen fixed slugs the engine publishes, written out rather than derived
+     * from the name: a hash gives no control over which two end up alike, and
+     * these are read side by side on one card.
+     */
+    gazetteer: {
+      "geonames": "#90cdf4",
+      "nominatim": "#81e6d9",
+      "wikipedia": "#d6bcfa",
+      "wikidata": "#b794f4",
+      "tgn": "#f6e05e",
+      "whg": "#9ae6b4",
+      "gov": "#fbd38d",
+      "idai": "#f6ad55",
+      "viabundus": "#63b3ed",
+      "native-land": "#68d391",
+      "pleiades": "#feb2b2",
+      "chgis": "#fbb6ce",
+      "syriaca": "#c3aed6",
+      "hgis-indias": "#f6c199",
+      "sedac-india": "#cbd5e0",
+      "llm-coords": "#a0aec0",
+    },
+
+    /**
+     * How strong a score is, weakest first.
+     *
+     * Sequential rather than diverging: a score orders one query and says
+     * nothing about right or wrong, so the ramp carries intensity and never a
+     * verdict. Five steps because a reader can tell five apart and cannot tell
+     * twenty.
+     *
+     * Built from the interface's own blues rather than a colour of its own —
+     * the primary at the strong end, the success blue in the middle — so a page
+     * of scores reads as part of the application instead of as a chart dropped
+     * into it. It carries no yellow: gold marks a clear winner, which is a
+     * different claim from a high score and is drawn in its own channel.
+     *
+     * Light and dark run in opposite directions. On white, weak is pale and
+     * strong is deep; on a dark ground a pale mark is the loudest thing on the
+     * screen, so weak is dark and strong is bright.
+     */
+    scoreScale: [
+      "#26304f",
+      "#3f5590",
+      "#6174c2",
+      "#9eaad7",
+      "#d5ddf5",
+    ],
+
     tagBorderColor: {
       // EntityTag status
       [EntityEnums.Status.Pending]: "#5f6c7b", // pending
