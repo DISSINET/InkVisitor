@@ -52,8 +52,7 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
   }
 
   // the hosts merge rule changes one key deep, so the whole expansions object
-  // travels on every toggle - read at click time, since a second box ticked
-  // before this render is replaced would otherwise build on the older rule
+  // travels on every toggle
   const setFlag = (
     flag: "equivalents" | "subordinates",
     checked: boolean
@@ -64,7 +63,9 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
       flag,
       checked
     );
-    sent.current = next;
+    // an empty object, not undefined: the next tick must build on "no flags"
+    // rather than fall back to the rule the server still holds
+    sent.current = next ?? {};
     updateValidationRule({ expansions: next });
   };
 

@@ -62,8 +62,27 @@ describe("utils/validationExpansion", () => {
   describe("withExpansionFlag", () => {
     it("stores nothing for a box that is not ticked", () => {
       expect(
-        withExpansionFlag(undefined, "entityClassifications", "subordinates", false)
-      ).toEqual({ entityClassifications: { subordinates: undefined } });
+        withExpansionFlag(
+          undefined,
+          "entityClassifications",
+          "subordinates",
+          false
+        )
+      ).toBeUndefined();
+    });
+
+    it("drops the field once its last box is unticked", () => {
+      expect(
+        withExpansionFlag(
+          {
+            entityClassifications: { subordinates: true },
+            propType: { equivalents: true },
+          },
+          "entityClassifications",
+          "subordinates",
+          false
+        )
+      ).toEqual({ propType: { equivalents: true } });
     });
 
     it("keeps the second box when both are ticked before the rule is saved", () => {

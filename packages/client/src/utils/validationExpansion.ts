@@ -38,13 +38,23 @@ export const withExpansionFlag = (
   field: EValidationExpansionField,
   flag: keyof ITerritoryValidationExpansion,
   checked: boolean
-): ITerritoryValidation["expansions"] => ({
-  ...(expansions ?? {}),
-  [field]: {
-    ...(expansions?.[field] ?? {}),
+): ITerritoryValidation["expansions"] => {
+  const next: NonNullable<ITerritoryValidation["expansions"]> = {
+    ...(expansions ?? {}),
+  };
+  const ticked: ITerritoryValidationExpansion = {
+    ...(next[field] ?? {}),
     [flag]: checked ? true : undefined,
-  },
-});
+  };
+
+  if (ticked.equivalents || ticked.subordinates) {
+    next[field] = ticked;
+  } else {
+    delete next[field];
+  }
+
+  return Object.keys(next).length ? next : undefined;
+};
 
 /**
  * Trailing note stating what a rule field accepts beyond the entities named in
