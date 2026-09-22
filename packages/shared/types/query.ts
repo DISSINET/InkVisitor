@@ -217,9 +217,15 @@ export namespace Query {
     "HR:V": {
       entityId: { allowedClasses: [EntityEnums.Class.Value] },
     },
-    "CT:": {},
-    "I_CT:": {},
-    "CT:D": {},
+    "CT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
+    "I_CT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
+    "CT:D": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
@@ -1001,7 +1007,7 @@ export namespace Query {
     "I_HR:R": "R references",
     "HR:V": "has reference: value",
     "CT:": "T has child T: any",
-    "I_CT:": "T has parent T: any",
+    "I_CT:": "T has parent T",
     "CT:D": "T has child T: direct child",
     "I_CT:D": "T has parent T: direct parent",
     "CT:G": "T has child T: any",

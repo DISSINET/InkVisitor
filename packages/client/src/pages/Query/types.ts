@@ -86,6 +86,15 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // direct territory - a statement sits under exactly one, so unlike SUT: there
   // is no subtree/SUB toggle to widen (server: EdgeTerritoryHasStatement in edge.ts)
   Query.EdgeType["I_SUT:"],
+  // child direction stays two edges: these match the target's ancestors, so
+  // widening from direct to any climbs towards the root - the opposite of what
+  // the SUB toggle does everywhere else (server: runTerritoryHasChildEdge)
+  Query.EdgeType["CT:"],
+  Query.EdgeType["CT:D"],
+  // I_CT: match Territories below the target Territory. The SUB toggle widens
+  // from its direct children to its whole subtree, which is what "include
+  // subordinates" already means for a Territory (server: EdgeTerritoryHasParent)
+  Query.EdgeType["I_CT:"],
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
@@ -117,7 +126,7 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
  * "SUT:D" / "I_SUT:D" ("direct") add nothing beyond SUT:/I_SUT: with the SUB
  * toggle left off: SUT: already goes direct-only without it, and I_SUT: has no
  * direct-vs-any distinction to begin with (a statement sits under exactly one
- * territory).
+ * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -133,4 +142,5 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["I_R:REL"],
   Query.EdgeType["SUT:D"],
   Query.EdgeType["I_SUT:D"],
+  Query.EdgeType["I_CT:D"],
 ];

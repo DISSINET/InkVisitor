@@ -4,6 +4,8 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import treeCache from "@service/treeCache";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 import { getNodeExpansionIds } from "./node-expansion";
@@ -198,6 +200,117 @@ export class EdgeSUnderT extends SearchEdge {
             .getField("id") as unknown as RStream)
         : null
     );
+  }
+}
+
+/**
+ * Ancestors of `territoryId`, root-first, from the path the tree cache keeps
+ * per territory (populateTree) - no tree is walked here. The path excludes the
+ * territory itself, so its last entry is the direct parent and an empty path
+ * means the territory is the root, with nothing above it. `depth` limits it to
+ * the direct parent.
+ */
+function territoryAncestorIds(
+  territoryId: string | undefined,
+  depth: "direct" | "any"
+): string[] {
+  const path = territoryId ? (treeCache.tree.idMap[territoryId]?.path ?? []) : [];
+  return depth === "any" ? path : path.slice(-1);
+}
+
+/**
+ * Shared run for the "T has child T" edges (CT: / CT:D). Matches Territories
+ * that hold the pinned target Territory below them - the target's ancestors,
+ * either all of them or just its direct parent. These climb towards the root
+ * rather than descending, which is why they are two edges instead of one edge
+ * plus the SUB toggle: that toggle widens downwards everywhere else.
+ */
+function runTerritoryHasChildEdge(
+  q: RStream,
+  territoryId: string | undefined,
+  depth: "direct" | "any"
+): RStream {
+  const ancestorIds = territoryAncestorIds(territoryId, depth);
+
+  return intersectIdsWithStream(
+    q,
+    ancestorIds.length ? (r.expr(ancestorIds) as unknown as RStream) : null
+  );
+}
+
+export class EdgeTerritoryHasChild extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["CT:"];
+  }
+
+  run(q: RStream): RStream {
+    return runTerritoryHasChildEdge(q, this.node.params.entityId, "any");
+  }
+}
+
+export class EdgeTerritoryHasDirectChild extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["CT:D"];
+  }
+
+  run(q: RStream): RStream {
+    return runTerritoryHasChildEdge(q, this.node.params.entityId, "direct");
+  }
+}
+
+/**
+ * I_CT: ("T has parent T"). Matches Territories sitting below the pinned target
+ * Territory: with the SUB toggle on, its whole subtree - what "include
+ * subordinates" already resolves to for a Territory - and with it off, only its
+ * direct children, read per row off data.parent. The root territory carries
+ * `parent: false` rather than an object, hence the type check.
+ */
+export class EdgeTerritoryHasParent extends SearchEdge {
+  protected descendantIds: string[] | null = null;
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_CT:"];
+  }
+
+  private anyDepth(): boolean {
+    return this.node.params.includeSubordinates === true;
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    const targetId = this.node.params.entityId;
+    this.descendantIds =
+      targetId && this.anyDepth()
+        ? await getSubordinateEntityIds(db, [targetId])
+        : null;
+  }
+
+  run(q: RStream): RStream {
+    const targetId = this.node.params.entityId;
+    if (!targetId) {
+      return intersectIdsWithStream(q, null);
+    }
+
+    if (this.anyDepth()) {
+      const ids = this.descendantIds;
+      return intersectIdsWithStream(
+        q,
+        ids && ids.length ? (r.expr(ids) as unknown as RStream) : null
+      );
+    }
+
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return r.and(
+          e("data")("parent").typeOf().eq("OBJECT"),
+          e("data")("parent")("territoryId").eq(targetId)
+        );
+      })
+      .map(function (e) {
+        return e("id");
+      });
   }
 }
 
@@ -1660,6 +1773,12 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeSUnderT(data);
     case Query.EdgeType["I_SUT:"]:
       return new EdgeTerritoryHasStatement(data);
+    case Query.EdgeType["CT:"]:
+      return new EdgeTerritoryHasChild(data);
+    case Query.EdgeType["CT:D"]:
+      return new EdgeTerritoryHasDirectChild(data);
+    case Query.EdgeType["I_CT:"]:
+      return new EdgeTerritoryHasParent(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:
