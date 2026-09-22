@@ -19,11 +19,18 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["HP:V"],
   Query.EdgeType["SP:T"],
   Query.EdgeType["SP:V"],
+  // statement actant-field edges: match a Statement that has some actant
+  // referencing the target via a classification/identification (server:
+  // runStatementActantFieldEdge in edge.ts)
+  Query.EdgeType["SC"],
+  Query.EdgeType["SI"],
   // inverse in-statement edges: match the entity characterised by an
-  // in-statement prop/classification (server: getEdgeInstance in edge.ts)
+  // in-statement prop/classification/identification (server: getEdgeInstance
+  // in edge.ts)
   Query.EdgeType["I_SP:T"],
   Query.EdgeType["I_SP:V"],
   Query.EdgeType["I_SC"],
+  Query.EdgeType["I_SI"],
   // I_IS: match statements that reference a given entity in ANY position
   // (action, actant, tag, direct territory, in-statement prop type/value).
   // AND-combine one per entity for statement co-occurrence (server: edge.ts)

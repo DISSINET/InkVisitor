@@ -794,6 +794,62 @@ export class EdgeStatementHasPropValue extends SearchEdge {
 }
 
 /**
+ * Shared run for the forward statement actant-field edges (SC / SI). Mirrors
+ * SP:T / SP:V (a Statement in q that has some actant referencing the target),
+ * but classifications/identifications are a flat {entityId} array with no
+ * children, so there's nothing to recurse the way collectStatementPropIds does.
+ */
+function runStatementActantFieldEdge(
+  q: RStream,
+  targetIds: string[] | null,
+  field: "classifications" | "identifications"
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return e("class").eq(EntityEnums.Class.Statement);
+    })
+    .filter(function (e: RDatum<IEntity>) {
+      const ids = e("data")("actants").concatMap(function (a: RDatum) {
+        return a(field).map(function (c: RDatum) {
+          return c("entityId");
+        });
+      });
+      if (targetIds) {
+        return (ids as RDatum<string[]>)
+          .setIntersection(r.expr(targetIds))
+          .isEmpty()
+          .not();
+      }
+      return ids.count().gt(0);
+    })
+    .map(function (e) {
+      return e("id");
+    });
+}
+
+export class EdgeStatementHasClassification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SC"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementActantFieldEdge(q, this.targetIds(), "classifications");
+  }
+}
+
+export class EdgeStatementHasIdentification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SI"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementActantFieldEdge(q, this.targetIds(), "identifications");
+  }
+}
+
+/**
  * Inverse of SP:T / SP:V. Where SP:* answer "which statements contain an
  * in-statement prop referencing X" (and emit the statement), the inverse
  * answers "which entities are characterised by an in-statement prop
@@ -880,21 +936,23 @@ function runInverseStatementPropEdge(
 }
 
 /**
- * Inverse statement-classification edge (I_SC): emit the entities characterised
- * by an in-statement classification referencing the target concept. Mirrors
- * runInverseStatementPropEdge but reads actant.classifications[] and uses the
- * StatementActantsCI index (which also covers identifications - those are not
- * matched here).
+ * Inverse statement actant-field edges (I_SC / I_SI): emit the entities
+ * characterised by an in-statement classification/identification referencing
+ * the target. Mirrors runInverseStatementPropEdge but reads the flat
+ * actant.classifications[] / actant.identifications[] array (no children to
+ * recurse) and uses the StatementActantsCI index, which covers both fields -
+ * `field` re-checks which one per actant.
  */
-function runInverseStatementClassificationEdge(
+function runInverseStatementActantFieldEdge(
   q: RStream,
-  targetIds: string[] | null
+  targetIds: string[] | null,
+  field: "classifications" | "identifications"
 ): RStream {
   return emitMatchingActants(
     q,
     candidateStatements(targetIds, DbEnums.Indexes.StatementActantsCI),
     function(a: RDatum) {
-      const ids = a("classifications").map(function(c: RDatum) {
+      const ids = a(field).map(function(c: RDatum) {
         return c("entityId");
       });
       return targetIds
@@ -936,7 +994,26 @@ export class EdgeIsStatementClassification extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runInverseStatementClassificationEdge(q, this.targetIds());
+    return runInverseStatementActantFieldEdge(
+      q,
+      this.targetIds(),
+      "classifications"
+    );
+  }
+}
+
+export class EdgeIsStatementIdentification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SI"];
+  }
+
+  run(q: RStream): RStream {
+    return runInverseStatementActantFieldEdge(
+      q,
+      this.targetIds(),
+      "identifications"
+    );
   }
 }
 
@@ -1594,12 +1671,18 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeStatementHasPropType(data);
     case Query.EdgeType["SP:V"]:
       return new EdgeStatementHasPropValue(data);
+    case Query.EdgeType["SC"]:
+      return new EdgeStatementHasClassification(data);
+    case Query.EdgeType["SI"]:
+      return new EdgeStatementHasIdentification(data);
     case Query.EdgeType["I_SP:T"]:
       return new EdgeIsStatementPropType(data);
     case Query.EdgeType["I_SP:V"]:
       return new EdgeIsStatementPropValue(data);
     case Query.EdgeType["I_SC"]:
       return new EdgeIsStatementClassification(data);
+    case Query.EdgeType["I_SI"]:
+      return new EdgeIsStatementIdentification(data);
     case Query.EdgeType["I_IS:"]:
       return new EdgeStatementHasEntity(data);
     case Query.EdgeType["I_IS:S"]:

@@ -233,9 +233,15 @@ export namespace Query {
     "I_SP:V": {
       entityId: { allowedClasses: [] },
     },
-    SI: {},
-    I_SI: {},
-    SC: {},
+    SI: {
+      entityId: { allowedClasses: [] },
+    },
+    I_SI: {
+      entityId: { allowedClasses: [] },
+    },
+    SC: {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     I_SC: {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
@@ -666,7 +672,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     SI: [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     I_SI: [
@@ -674,7 +683,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     SC: [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
@@ -999,7 +1011,7 @@ export namespace Query {
     SI: "has S identification",
     I_SI: "is S identification",
     SC: "has S classification",
-    I_SC: "is S clasification",
+    I_SC: "is S classification",
     "R:": "has relation: any",
     "R:SCL": "has relation: Superclass",
     "I_R:SCL": "has relation: Subclass (inv. Superclass)",
