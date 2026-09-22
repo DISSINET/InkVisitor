@@ -16,6 +16,9 @@ import {
 import { PiSealCheckFill } from "react-icons/pi";
 import { RiLayoutMasonryLine } from "react-icons/ri";
 import { TbSettings } from "react-icons/tb";
+import { IcoMapMarked } from "Theme/icons";
+import { GeocodingSettingsModal } from "pages/Geocoding/GeocodingSettingsModal";
+import { useGeocodingConfig } from "pages/Geocoding/useGeocodingConfig";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ButtonSize, IPage } from "types";
 import { GlobalValidationsModal } from "../GlobalValidationsModal/GlobalValidationsModal";
@@ -61,6 +64,8 @@ export const Menu: React.FC<Menu> = ({
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [showGlobalValidations, setShowGlobalValidations] = useState<boolean>(false);
+  const [showGeocodingSettings, setShowGeocodingSettings] = useState<boolean>(false);
+  const { roles: geocodingRoles, projectContext: geocodingProjectContext } = useGeocodingConfig();
 
   const navPages: IPage[] = [
     { id: "main", label: "Main", color: "info", href: "/", icon: <FaBookOpen size={16} /> },
@@ -70,6 +75,13 @@ export const Menu: React.FC<Menu> = ({
       color: "info",
       href: "/explorer",
       icon: <FaSearchengin size={18} />,
+    },
+    {
+      id: "geocoding",
+      label: "Geocoding",
+      color: "info",
+      href: "/geocoding",
+      icon: <IcoMapMarked size={17} />,
     },
     {
       id: "stats",
@@ -127,6 +139,15 @@ export const Menu: React.FC<Menu> = ({
   ];
 
   const toolsPages: IPage[] = [
+    {
+      id: "global-geocoding",
+      label: "Global geocoding",
+      color: "info",
+      href: false,
+      owner: true,
+      icon: <IcoMapMarked size={16} />,
+      onClick: () => setShowGeocodingSettings(true),
+    },
     {
       id: "global-validations",
       label: "Global validations",
@@ -245,6 +266,13 @@ export const Menu: React.FC<Menu> = ({
       </div>
       {showGlobalValidations && (
         <GlobalValidationsModal setShowGlobalValidations={setShowGlobalValidations} />
+      )}
+      {showGeocodingSettings && (
+        <GeocodingSettingsModal
+          roles={geocodingRoles}
+          projectContext={geocodingProjectContext}
+          onClose={() => setShowGeocodingSettings(false)}
+        />
       )}
     </>
   );

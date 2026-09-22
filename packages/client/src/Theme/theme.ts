@@ -162,6 +162,58 @@ const theme = {
       "5": "#1a9850",
     },
 
+    /**
+     * One colour per gazetteer, so a match can name its source at a glance.
+     *
+     * Sixteen fixed slugs the engine publishes, written out rather than derived
+     * from the name: a hash gives no control over which two end up alike, and
+     * these are read side by side on one card.
+     */
+    gazetteer: {
+      "geonames": "#2b6cb0",
+      "nominatim": "#2c7a7b",
+      "wikipedia": "#6b46c1",
+      "wikidata": "#805ad5",
+      "tgn": "#b7791f",
+      "whg": "#2f855a",
+      "gov": "#c05621",
+      "idai": "#975a16",
+      "viabundus": "#3182ce",
+      "native-land": "#276749",
+      "pleiades": "#9b2c2c",
+      "chgis": "#b83280",
+      "syriaca": "#553c9a",
+      "hgis-indias": "#7b341e",
+      "sedac-india": "#4a5568",
+      "llm-coords": "#718096",
+    },
+
+    /**
+     * How strong a score is, weakest first.
+     *
+     * Sequential rather than diverging: a score orders one query and says
+     * nothing about right or wrong, so the ramp carries intensity and never a
+     * verdict. Five steps because a reader can tell five apart and cannot tell
+     * twenty.
+     *
+     * Built from the interface's own blues rather than a colour of its own —
+     * the primary at the strong end, the success blue in the middle — so a page
+     * of scores reads as part of the application instead of as a chart dropped
+     * into it. It carries no yellow: gold marks a clear winner, which is a
+     * different claim from a high score and is drawn in its own channel.
+     *
+     * Light and dark run in opposite directions. On white, weak is pale and
+     * strong is deep; on a dark ground a pale mark is the loudest thing on the
+     * screen, so weak is dark and strong is bright.
+     */
+    scoreScale: [
+      "#ccd8f0",
+      "#9aaee0",
+      "#6174c2",
+      "#33447f",
+      "#091034",
+    ],
+
     tagBorderColor: {
       // EntityTag status
       [EntityEnums.Status.Pending]: "#a0aec0", // pending
@@ -209,6 +261,14 @@ const theme = {
     56: "14rem",
     60: "15rem",
     64: "16rem",
+  },
+  // Muni has no lowercase glyphs, so it sets box titles and nothing that has to
+  // be read as a sentence; body is the face the document already inherits from
+  // the global stylesheet, named here for the elements that sit inside a Muni
+  // heading and have to opt back out of it
+  fontFamily: {
+    body: '"Roboto", sans-serif',
+    heading: "Muni",
   },
   fontSize: {
     xxs: "1rem",
@@ -269,6 +329,36 @@ const theme = {
   background: {
     stripes: "repeating-linear-gradient( -45deg, #cbd5e0, #cbd5e0, 1px, #fff 1px, #fff 12px)",
   },
+  /**
+   * The stacking order of what is drawn over a page, for the cases where one
+   * of them has to be above or below another.
+   *
+   * Stated here because the constraint is between files: a card drawn by the
+   * map and a picker drawn by a panel have to agree, and a number written in
+   * each of them separately is agreement by coincidence. `modal` is the value
+   * the Modal component uses, repeated here so the others can be read against
+   * it — everything below it is page furniture and must stay under a dialog.
+   */
+  zIndex: {
+    /** What a mark on the map is, shown under the pointer. */
+    mapCard: 400,
+    /** The whole suggestion card, shown for a mark the pointer is on. */
+    hoverCard: 410,
+    /** Closes a picker when the page behind it is clicked. */
+    pickerBackdrop: 420,
+    /** Opened from a control that may itself be inside the hover card. */
+    picker: 421,
+    /** Modal's own overlay. Nothing above belongs over a dialog. */
+    modal: 500,
+    /**
+     * A modal asked to sit under the page furniture rather than over it.
+     *
+     * Below everything above, which is the whole point of the flag: a dialog
+     * opened this way is deliberately not the thing being looked at.
+     */
+    modalLower: 90,
+  },
+
   boxShadow: {
     normal: "0px 5px 10px hsla(0,0%,0%,0.15)",
     subtle: "0 1px 3px hsla(0,0%,0%,0.12), 0 1px 2px hsla(0,0%,0%,0.24)",
@@ -288,6 +378,7 @@ export type ThemeBorderWidth = typeof theme.borderWidth;
 export type InvertedBgColor = typeof theme.color.invertedBg;
 export type ElementTypeColor = typeof theme.color.elementType;
 export type ThemeFontSize = typeof theme.fontSize;
+export type ThemeFontFamily = typeof theme.fontFamily;
 export type PingColor = typeof theme.color.ping;
 export type ThemeBorderRadius = typeof theme.borderRadius;
 export default theme;

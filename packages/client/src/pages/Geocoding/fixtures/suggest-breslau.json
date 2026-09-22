@@ -1,0 +1,3364 @@
+{
+  "suggestions": [
+    {
+      "lat": 51.25,
+      "lon": 17,
+      "label": "Wrocław (Poland, Europe, World)",
+      "score": 0.7399154035887854,
+      "signals": {
+        "convergence": 0.5655408859716493,
+        "matchScore": 0.94,
+        "candidateDiversity": 1,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.7647704429858246,
+        "contextGate": 1,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 1,
+        "agreement": 10
+      },
+      "contextFit": 1,
+      "spreadKm": 15.833678718271322,
+      "offRegion": false,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "geonames",
+          "raw": "seat of a first-order administrative division"
+        },
+        {
+          "source": "geonames",
+          "raw": "airport"
+        },
+        {
+          "source": "geonames",
+          "raw": "stadium"
+        },
+        {
+          "source": "geonames",
+          "raw": "railroad station"
+        },
+        {
+          "source": "geonames",
+          "raw": "second-order administrative division"
+        },
+        {
+          "source": "geonames",
+          "raw": "populated place"
+        },
+        {
+          "source": "geonames",
+          "raw": "populated place"
+        },
+        {
+          "source": "geonames",
+          "raw": "populated place"
+        },
+        {
+          "source": "nominatim",
+          "raw": "city"
+        },
+        {
+          "source": "nominatim",
+          "raw": "administrative"
+        },
+        {
+          "source": "nominatim",
+          "raw": "administrative"
+        },
+        {
+          "source": "whg",
+          "raw": "populated place"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "region"
+        },
+        {
+          "source": "gov",
+          "raw": "region"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "gov",
+          "raw": "religious"
+        },
+        {
+          "source": "idai",
+          "raw": "populated-place"
+        },
+        {
+          "source": "idai",
+          "raw": "populated-place"
+        },
+        {
+          "source": "idai",
+          "raw": "populated-place"
+        },
+        {
+          "source": "idai",
+          "raw": "building-institution"
+        },
+        {
+          "source": "idai",
+          "raw": "building-institution"
+        }
+      ],
+      "bbox": [
+        16.7675,
+        50.983333333333334,
+        17.18,
+        51.25
+      ],
+      "matches": [
+        {
+          "lat": 51.107,
+          "lon": 17.038,
+          "matchType": "hint",
+          "label": "Breslau",
+          "confidence": 0.5,
+          "source": "llm-coords",
+          "notes": "City center on the Oder",
+          "candidateIndex": 0,
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.107,
+          "lon": 17.038,
+          "matchType": "hint",
+          "label": "Wrocław",
+          "confidence": 0.5,
+          "source": "llm-coords",
+          "notes": "City center on the Oder",
+          "candidateIndex": 1,
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.10286,
+          "lon": 17.03006,
+          "matchType": "fuzzy",
+          "label": "Wroclaw",
+          "placeType": "seat of a first-order administrative division",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "seat of a first-order administrative division, PL",
+          "candidateIndex": 0,
+          "sourceId": "3081368",
+          "sourceUrl": "https://www.geonames.org/3081368",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10268,
+          "lon": 16.88584,
+          "matchType": "fuzzy",
+          "label": "Wrocław–Copernicus Airport",
+          "placeType": "airport",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "airport, PL",
+          "candidateIndex": 1,
+          "sourceId": "3081363",
+          "sourceUrl": "https://www.geonames.org/3081363",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.14107,
+          "lon": 16.94401,
+          "matchType": "fuzzy",
+          "label": "Stadion Miejski",
+          "placeType": "stadium",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "stadium, PL",
+          "candidateIndex": 1,
+          "sourceId": "8435762",
+          "sourceUrl": "https://www.geonames.org/8435762",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.09893,
+          "lon": 17.03661,
+          "matchType": "fuzzy",
+          "label": "Wrocław Główny",
+          "placeType": "railroad station",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "railroad station, PL",
+          "candidateIndex": 1,
+          "sourceId": "7931882",
+          "sourceUrl": "https://www.geonames.org/7931882",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.1081,
+          "lon": 17.03859,
+          "matchType": "exact",
+          "label": "Wrocław",
+          "placeType": "second-order administrative division",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "second-order administrative division, PL",
+          "candidateIndex": 1,
+          "sourceId": "7530801",
+          "sourceUrl": "https://www.geonames.org/7530801",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.09352,
+          "lon": 16.98152,
+          "matchType": "fuzzy",
+          "label": "Grabiszyn-Grabiszynek",
+          "placeType": "populated place",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "populated place, PL",
+          "candidateIndex": 2,
+          "sourceId": "8425960",
+          "sourceUrl": "https://www.geonames.org/8425960",
+          "candidateScore": 0.6349999999999999
+        },
+        {
+          "lat": 51.08429,
+          "lon": 17.0095,
+          "matchType": "fuzzy",
+          "label": "Borek",
+          "placeType": "populated place",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "populated place, PL",
+          "candidateIndex": 2,
+          "sourceId": "8425968",
+          "sourceUrl": "https://www.geonames.org/8425968",
+          "candidateScore": 0.6349999999999999
+        },
+        {
+          "lat": 51.08928,
+          "lon": 17.04113,
+          "matchType": "fuzzy",
+          "label": "Huby",
+          "placeType": "populated place",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "populated place, PL",
+          "candidateIndex": 2,
+          "sourceId": "8425970",
+          "sourceUrl": "https://www.geonames.org/8425970",
+          "candidateScore": 0.6349999999999999
+        },
+        {
+          "lat": 51.1089776,
+          "lon": 17.0326689,
+          "matchType": "fuzzy",
+          "label": "Wrocław, województwo dolnośląskie, Polska",
+          "placeType": "city",
+          "confidence": 0.7324700929941661,
+          "source": "nominatim",
+          "notes": "administrative",
+          "candidateIndex": 0,
+          "sourceId": "451516",
+          "sourceUrl": "https://nominatim.openstreetmap.org/ui/details.html?osmtype=R&osmid=451516",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1263106,
+          "lon": 16.9781963,
+          "matchType": "fuzzy",
+          "label": "Wrocław, województwo dolnośląskie, Polska",
+          "placeType": "administrative",
+          "confidence": 0.7324700929941661,
+          "source": "nominatim",
+          "notes": "administrative",
+          "candidateIndex": 0,
+          "sourceId": "2805690",
+          "sourceUrl": "https://nominatim.openstreetmap.org/ui/details.html?osmtype=R&osmid=2805690",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1263106,
+          "lon": 16.9781963,
+          "matchType": "exact",
+          "label": "Wrocław, województwo dolnośląskie, Polska",
+          "placeType": "administrative",
+          "confidence": 0.7324700929941661,
+          "source": "nominatim",
+          "notes": "administrative",
+          "candidateIndex": 1,
+          "sourceId": "2805691",
+          "sourceUrl": "https://nominatim.openstreetmap.org/ui/details.html?osmtype=R&osmid=2805691",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.09805555555556,
+          "lon": 17.0375,
+          "matchType": "fuzzy",
+          "label": "Wrocław Główny railway station",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Wrocław Główny (Polish for Wrocław main station) is the largest and most important passenger station of the southwestern Polish city of Wrocław. Built in the mid-19th century near the centre of the city, until 1945 it was known as Breslau Hauptbahnhof (\"Breslau Main station\") (...)",
+          "candidateIndex": 0,
+          "sourceId": "Wrocław Główny railway station",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Wroc%C5%82aw_G%C5%82%C3%B3wny_railway_station",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.107222,
+          "lon": 17.076944,
+          "matchType": "fuzzy",
+          "label": "Centennial Hall",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "The Centennial Hall (; formerly Hala Ludowa, People's Hall) is a historic building in Wrocław, Poland. It was constructed according to the plans of architect Max Berg in 1911–1913, when the city was part of the German Empire (...)",
+          "candidateIndex": 0,
+          "sourceId": "Centennial Hall",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Centennial_Hall",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11666666666667,
+          "lon": 17.033333333333335,
+          "matchType": "fuzzy",
+          "label": "Siege of Breslau",
+          "confidence": 0.99,
+          "source": "wikipedia",
+          "notes": "The Siege of Breslau, also known as the Battle of Breslau, was a three-month-long siege of the city of Breslau in Lower Silesia, Germany (now Wrocław, Poland), lasting to the end of World War II in Europe. From 13 February 1945 to 6 May 1945, German troops in Breslau were besieged by the Soviet (...)",
+          "candidateIndex": 0,
+          "sourceId": "Siege of Breslau",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Siege_of_Breslau",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.116667,
+          "lon": 17.033333,
+          "matchType": "exact",
+          "label": "Wrocław",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Wrocław is a city in western Poland and the largest city in the historical region of Silesia. It lies on the banks of the River Oder in the Silesian Lowlands of Central Europe, roughly 350 kilometres (220 mi) from the Baltic Sea to the north and 40 kilometres (25 mi) from the Sudeten Mountains to (...)",
+          "candidateIndex": 1,
+          "sourceId": "Wrocław",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Wroc%C5%82aw",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.116667,
+          "lon": 17.033333,
+          "matchType": "fuzzy",
+          "label": "Wrocław Voivodeship (1975–98)",
+          "confidence": 0.99,
+          "source": "wikipedia",
+          "notes": "Wroclaw Voivodeship was a unit of administrative division and local government in Poland in years 1975&ndash;1998, superseded by Lower Silesian Voivodeship. Its capital city was Wrocław.  (...)",
+          "candidateIndex": 1,
+          "sourceId": "Wrocław Voivodeship (1975–98)",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Wroc%C5%82aw_Voivodeship_%281975%E2%80%9398%29",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.114167,
+          "lon": 17.046111,
+          "matchType": "fuzzy",
+          "label": "Wrocław Cathedral",
+          "confidence": 0.98,
+          "source": "wikipedia",
+          "notes": "The Cathedral of St. John the Baptist in Wrocław, , is the seat of the Roman Catholic Archdiocese of Wrocław and a landmark of the city of Wrocław in Poland. The cathedral, located in the Ostrów Tumski district, is a Gothic church with Neo-Gothic additions (...)",
+          "candidateIndex": 1,
+          "sourceId": "Wrocław Cathedral",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Wroc%C5%82aw_Cathedral",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 50.983333333333334,
+          "lon": 17.05,
+          "matchType": "fuzzy",
+          "label": "Żórawina",
+          "confidence": 0.96,
+          "source": "wikipedia",
+          "notes": "Żórawina is a village in Wrocław County, Lower Silesian Voivodeship, in south-western Poland. It is the seat of the administrative district (gmina) called Gmina Żórawina. Prior to 1945 it was in Germany. The village has a population of 1,700 (...)",
+          "candidateIndex": 1,
+          "sourceId": "Żórawina",
+          "sourceUrl": "https://en.wikipedia.org/wiki/%C5%BB%C3%B3rawina",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.106947222222225,
+          "lon": 17.07701388888889,
+          "matchType": "fuzzy",
+          "label": "History of Wrocław",
+          "confidence": 0.98,
+          "source": "wikipedia",
+          "notes": "Wrocław has long been the largest and culturally dominant city in Silesia, and is today the capital of Poland's Lower Silesian Voivodeship. The history of Wrocław starts at a crossroads in Lower Silesia. It was one of the centres of the Duchy and then Kingdom of Poland, and briefly, in the first (...)",
+          "candidateIndex": 2,
+          "sourceId": "History of Wrocław",
+          "sourceUrl": "https://en.wikipedia.org/wiki/History_of_Wroc%C5%82aw",
+          "candidateScore": 0.6349999999999999
+        },
+        {
+          "lat": 51.1,
+          "lon": 17,
+          "matchType": "alias",
+          "label": "Wrocław (Lower Silesian Voivodeship, Poland, ... World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "notes": "Originated on trade route between Roman Empire & Baltic Sea; home of many German immigrants since 13th cen.; passed to Bohemia in 1526 & to Prussia in 1741; damaged by Russian & Nazi sieges of 1945; was rebuilt & industrialized in 1950s-1960s.",
+          "candidateIndex": 0,
+          "sourceId": "7007601",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/7007601",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.25,
+          "lon": 17,
+          "matchType": "exact",
+          "label": "Wrocław (Poland, Europe, World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "candidateIndex": 1,
+          "sourceId": "1002049",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/1002049",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.11,
+          "lon": 17.0325,
+          "matchType": "alias",
+          "label": "Wrocław",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "city in the Lower Silesian Voivodeship, southwestern Poland, and historical capital of Silesia",
+          "candidateIndex": 0,
+          "sourceId": "Q1799",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q1799",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1081,
+          "lon": 17.03859,
+          "matchType": "exact",
+          "label": "Wrocław",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "powiat",
+          "candidateIndex": 1,
+          "sourceId": "Q125774566",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q125774566",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.116666666,
+          "lon": 17.033333333,
+          "matchType": "alias",
+          "label": "Wrocław County",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "powiat of Poland",
+          "candidateIndex": 1,
+          "sourceId": "Q715974",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q715974",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.1,
+          "lon": 17.03333,
+          "matchType": "fuzzy",
+          "label": "Wrocław",
+          "placeType": "populated place",
+          "from": null,
+          "to": null,
+          "confidence": 0.17138134000000002,
+          "source": "whg",
+          "notes": "populated place · PL · ?–?",
+          "candidateIndex": 0,
+          "sourceId": "2487586",
+          "sourceUrl": "https://whgazetteer.org/places/2487586/portal",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1,
+          "lon": 17,
+          "matchType": "fuzzy",
+          "label": "Wrocław",
+          "from": null,
+          "to": null,
+          "confidence": 0.01,
+          "source": "whg",
+          "candidateIndex": 0,
+          "sourceId": "4770012",
+          "sourceUrl": "https://whgazetteer.org/places/4770012/portal",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1105,
+          "lon": 17.0332,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "settlement",
+          "from": 1175,
+          "to": 1305,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wratislavia [lat] from 1295 · Wrezlaue [deu] from 1175 · Wrocław [pol] · Wreczelaw [deu] from 1201",
+          "candidateIndex": 0,
+          "sourceId": "BREADTJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREADTJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.113049873734504,
+          "lon": 17.026127325465,
+          "matchType": "fuzzy",
+          "label": "Breslau/St.Barbara",
+          "placeType": "religious",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "object_172549",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_172549",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.109444,
+          "lon": 17.039167,
+          "matchType": "fuzzy",
+          "label": "Breslau (St. Adalbert)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Wojciecha) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "BREERTJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREERTJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10926,
+          "lon": 17.02428,
+          "matchType": "fuzzy",
+          "label": "Breslau (S. Antonii)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Antoniego z Padwy) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "BRENIIJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRENIIJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10647,
+          "lon": 17.03097,
+          "matchType": "fuzzy",
+          "label": "Breslau (St. Dorothea)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Stanisława, św. Doroty i św. Wacława) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "BREHEAJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREHEAJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.114611,
+          "lon": 17.017,
+          "matchType": "fuzzy",
+          "label": "Breslau (S. Nicolaus)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Mikołaja) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "object_1187063",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_1187063",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11461,
+          "lon": 17.04127,
+          "matchType": "fuzzy",
+          "label": "Wrocław (Najświętszej Maryi Panny na Piasku)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (St. Maria auf dem Sande) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "BRERIAJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRERIAJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11495,
+          "lon": 17.04044,
+          "matchType": "fuzzy",
+          "label": "Wrocław (św. Anny na Piasku)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (S. Annae) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "BRENAEJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRENAEJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11311,
+          "lon": 17.03629,
+          "matchType": "fuzzy",
+          "label": "Wrocław (św. Macieja)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (S. Matthiae) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "BREIAEJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREIAEJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11393,
+          "lon": 17.03519,
+          "matchType": "fuzzy",
+          "label": "Wrocław (Imienia Jezus)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (SS. Nomen Jesu) [deu] from 1887 · Breslau (Name Jesu) [deu]",
+          "candidateIndex": 0,
+          "sourceId": "BREESUJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREESUJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10628,
+          "lon": 17.04693,
+          "matchType": "fuzzy",
+          "label": "Wrocław (św. Maurycego)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (S. Mauritius) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "BREIUSJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREIUSJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10441,
+          "lon": 17.04921,
+          "matchType": "fuzzy",
+          "label": "Breslau (S. Lazarus)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Łazarza) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "BRERUSJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRERUSJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10387,
+          "lon": 17.04916,
+          "matchType": "fuzzy",
+          "label": "Breslau (Barmherzige-Brüder-Kirche)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (Świętej Trójcy) [pol] · Breslau (SS. Trinitatis) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "BRECHEJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRECHEJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.12085,
+          "lon": 17.05087,
+          "matchType": "fuzzy",
+          "label": "Breslau (St. Michael)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Michała Archanioła) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "BREAELJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREAELJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11276,
+          "lon": 17.03832,
+          "matchType": "fuzzy",
+          "label": "Wrocław (Katedra greckokatolicka pw. św. Wincentego i św. Jakuba)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (St. Vincenz) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "object_1187180",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_1187180",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11299,
+          "lon": 17.03757,
+          "matchType": "fuzzy",
+          "label": "Breslau (S. Clarae)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (św. Klary i św. Jadwigi) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "BRERAEJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRERAEJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11298,
+          "lon": 17.03763,
+          "matchType": "fuzzy",
+          "label": "Wrocław (św. Klary i św. Jadwigi)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslau (S. Hedwigis) [deu] from 1887",
+          "candidateIndex": 0,
+          "sourceId": "BREGISJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREGISJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.10497,
+          "lon": 17.03175,
+          "matchType": "fuzzy",
+          "label": "Breslau (SS. Corpus Christi)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (Bożego Ciała) [pol]",
+          "candidateIndex": 0,
+          "sourceId": "WROIAAJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/WROIAAJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.14245,
+          "lon": 16.87048,
+          "matchType": "fuzzy",
+          "label": "Breslau-Deutsch-Lissa",
+          "placeType": "religious",
+          "from": 1945,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław-Leśnica (Podwyższenia Krzyża Świętego) [pol] from 1945 · Deutsch Lissa (Heilig Kreuz) [deu]",
+          "candidateIndex": 0,
+          "sourceId": "object_173417",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_173417",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11431,
+          "lon": 17.04653,
+          "matchType": "fuzzy",
+          "label": "Bazylika Archikatedralna św. Jana Chrzciciela (Wrocław )",
+          "placeType": "religious",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Breslauer Dom [deu] · Kathedrale St. Johannes der Täufer (Breslau) [deu]",
+          "candidateIndex": 0,
+          "sourceId": "BREDOMJO81MC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREDOMJO81MC",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1117,
+          "lon": 17.0303,
+          "matchType": "fuzzy",
+          "label": "Breslau/St.Elisabeth",
+          "placeType": "religious",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "object_172537",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_172537",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1415,
+          "lon": 16.8529,
+          "matchType": "fuzzy",
+          "label": "Wrocław-Pustki",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Klein Heidau [deu]",
+          "candidateIndex": 1,
+          "sourceId": "WROTKIJO81KD",
+          "sourceUrl": "https://gov.genealogy.net/item/show/WROTKIJO81KD",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.1622,
+          "lon": 17.1244,
+          "matchType": "fuzzy",
+          "label": "Zakrzów, Wrocław-Zakrzów",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Sakrau [deu]",
+          "candidateIndex": 1,
+          "sourceId": "object_188652",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_188652",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.101,
+          "lon": 17.1192,
+          "matchType": "fuzzy",
+          "label": "Bartheln",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Bartoszewice, Wrocław-Bartoszewice [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "object_186066",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_186066",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.1345,
+          "lon": 17.1077,
+          "matchType": "fuzzy",
+          "label": "Cawallen-Friedewalde",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Kowale, Wrocław Kowale [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "object_186099",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_186099",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.14582,
+          "lon": 16.86772,
+          "matchType": "fuzzy",
+          "label": "Deutsch Lissa",
+          "placeType": "settlement",
+          "from": 1885,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Leśnica (Wrocław) [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "object_186104",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_186104",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.0456,
+          "lon": 16.9164,
+          "matchType": "fuzzy",
+          "label": "Neudorf",
+          "placeType": "settlement",
+          "from": 1939,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Polnisch Neudorf [deu] · Nowa Wieś Wrocławska [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "NEUORFJO81LB",
+          "sourceUrl": "https://gov.genealogy.net/item/show/NEUORFJO81LB",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.0717,
+          "lon": 17.18,
+          "matchType": "fuzzy",
+          "label": "Steine",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Kamieniec Wrocławski [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "STEINEJO81OB",
+          "sourceUrl": "https://gov.genealogy.net/item/show/STEINEJO81OB",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.0311,
+          "lon": 16.7675,
+          "matchType": "fuzzy",
+          "label": "Canth",
+          "placeType": "settlement",
+          "from": 1930,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Kanth [deu] from 1930 · Kąty Wrocławskie [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "KANADTJO81JA",
+          "sourceUrl": "https://gov.genealogy.net/item/show/KANADTJO81JA",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.0325,
+          "lon": 17.0558,
+          "matchType": "fuzzy",
+          "label": "Żerniki Wrocławskie",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Schönborn [deu]",
+          "candidateIndex": 1,
+          "sourceId": "SCHORNJO81MA",
+          "sourceUrl": "https://gov.genealogy.net/item/show/SCHORNJO81MA",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.0397,
+          "lon": 16.9686,
+          "matchType": "fuzzy",
+          "label": "Bielany Wrocławskie",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Bettlern [deu]",
+          "candidateIndex": 1,
+          "sourceId": "BETERNJO81LA",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BETERNJO81LA",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.15544,
+          "lon": 16.88788,
+          "matchType": "fuzzy",
+          "label": "Stabelwitz (St. Andreas)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wrocław (Stabłowice Nowe) (św. Andrzeja) [pol] · Stabelwitz (S. Andreas) [deu] from 1887",
+          "candidateIndex": 1,
+          "sourceId": "STAEASJO81KD",
+          "sourceUrl": "https://gov.genealogy.net/item/show/STAEASJO81KD",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.12306,
+          "lon": 16.92111,
+          "matchType": "fuzzy",
+          "label": "Neukirch (S. Laurentius)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Neukirch (Hl. Laurentius) [deu] from 1887 · Żerniki (Wrocław) (św. Wawrzyńca) [pol]",
+          "candidateIndex": 1,
+          "sourceId": "NEUIUSJO81LC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/NEUIUSJO81LC",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.12081,
+          "lon": 16.87537,
+          "matchType": "fuzzy",
+          "label": "Herrmannsdorf",
+          "placeType": "religious",
+          "from": 1945,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Jerzmanowo (Wrocław) (Najświętszej Maryi Panny Królowej Polski) [pol] from 1945",
+          "candidateIndex": 1,
+          "sourceId": "object_172499",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_172499",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.12068,
+          "lon": 16.87375,
+          "matchType": "fuzzy",
+          "label": "Herrmansdorf (S. Hedwigis)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Herrmansdorf (Hl. Hedwig) [deu] from 1887 · Jerzmanowo (Wrocław) (św. Jadwigi) [pol]",
+          "candidateIndex": 1,
+          "sourceId": "HERGISJO81KC",
+          "sourceUrl": "https://gov.genealogy.net/item/show/HERGISJO81KC",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.17857,
+          "lon": 17.01678,
+          "matchType": "fuzzy",
+          "label": "Protsch a./W. (S. Anna)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Pracze Widawskie [pol] · Protsch a./W. (Hl. Anna) [deu] from 1887 · Wrocław-Widawa (św. Anny) [pol]",
+          "candidateIndex": 1,
+          "sourceId": "PRONNAJO81ME",
+          "sourceUrl": "https://gov.genealogy.net/item/show/PRONNAJO81ME",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.17,
+          "lon": 17.1113,
+          "matchType": "fuzzy",
+          "label": "Wendelborn",
+          "placeType": "region",
+          "from": 1945,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Wroclaw-Pawlowice [pol] from 1945 · Pawelwitz [deu]",
+          "candidateIndex": 1,
+          "sourceId": "PAWITZJO81NE",
+          "sourceUrl": "https://gov.genealogy.net/item/show/PAWITZJO81NE",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.18,
+          "lon": 16.98,
+          "matchType": "fuzzy",
+          "label": "Lipą Piotrkowską, Wrocław-Lipą-Piotrkowską",
+          "placeType": "region",
+          "from": 1945,
+          "to": 1945,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Leipe-Petersdorf [deu]",
+          "candidateIndex": 1,
+          "sourceId": "LEIORFJO81LE",
+          "sourceUrl": "https://gov.genealogy.net/item/show/LEIORFJO81LE",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.03976,
+          "lon": 16.96869,
+          "matchType": "fuzzy",
+          "label": "Bielany Wrocławskie (św. Andrzeja Apostoła)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Bettlern (S. Andreas Apost.) [deu] from 1887 · Bettlern (St. Andreas Apost.) [deu] from 1887",
+          "candidateIndex": 1,
+          "sourceId": "BETOSTJO81LA",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BETOSTJO81LA",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.03152,
+          "lon": 16.76918,
+          "matchType": "fuzzy",
+          "label": "Canth (SS. Petrus et Paulus Apost.)",
+          "placeType": "religious",
+          "from": 1887,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Kąty Wrocławskie (Świętych Apostołów Piotra i Pawła) [pol]",
+          "candidateIndex": 1,
+          "sourceId": "CANOSTJO81JA",
+          "sourceUrl": "https://gov.genealogy.net/item/show/CANOSTJO81JA",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 51.112917,
+          "lon": 17.026583,
+          "matchType": "fuzzy",
+          "label": "Breslau / Wrocław (Sammlung)",
+          "placeType": "populated-place",
+          "confidence": null,
+          "source": "idai",
+          "notes": "populated-place",
+          "candidateIndex": 0,
+          "sourceId": "2128143",
+          "sourceUrl": "https://gazetteer.dainst.org/place/2128143",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1,
+          "lon": 17.03333,
+          "matchType": "fuzzy",
+          "label": "Breslau / Wrocław",
+          "placeType": "populated-place",
+          "confidence": null,
+          "source": "idai",
+          "notes": "populated-place",
+          "candidateIndex": 0,
+          "sourceId": "2108264",
+          "sourceUrl": "https://gazetteer.dainst.org/place/2108264",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.1081,
+          "lon": 17.03859,
+          "matchType": "fuzzy",
+          "label": "Landkreis Breslau",
+          "placeType": "populated-place",
+          "confidence": null,
+          "source": "idai",
+          "notes": "populated-place",
+          "candidateIndex": 0,
+          "sourceId": "2287409",
+          "sourceUrl": "https://gazetteer.dainst.org/place/2287409",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.111,
+          "lon": 17.0475,
+          "matchType": "fuzzy",
+          "label": "Nationalmuseum Breslau",
+          "placeType": "building-institution",
+          "confidence": null,
+          "source": "idai",
+          "notes": "building-institution",
+          "candidateIndex": 0,
+          "sourceId": "2110564",
+          "sourceUrl": "https://gazetteer.dainst.org/place/2110564",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.11399,
+          "lon": 17.03393,
+          "matchType": "fuzzy",
+          "label": "Uniwersytet Wrocławski",
+          "placeType": "building-institution",
+          "confidence": null,
+          "source": "idai",
+          "notes": "building-institution",
+          "candidateIndex": 0,
+          "sourceId": "2767515",
+          "sourceUrl": "https://gazetteer.dainst.org/place/2767515",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 51.109105,
+          "lon": 17.032891,
+          "matchType": "alias",
+          "label": "Wrocław",
+          "from": 1274,
+          "to": null,
+          "confidence": 0.8,
+          "source": "viabundus",
+          "notes": "staple · 1274–? · In 1274, Henry IV of Silesia limited the staple for entire Silesia to Breslau; confirmed 1409. However, most of the times the staple was difficult to enforce du",
+          "candidateIndex": 0,
+          "sourceId": "981",
+          "sourceUrl": "https://www.viabundus.eu/edit/place/981",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "tgn",
+        "wikidata",
+        "geonames",
+        "nominatim",
+        "gov",
+        "wikipedia",
+        "viabundus",
+        "idai",
+        "whg",
+        "llm-coords"
+      ],
+      "attachment": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Rynek_Starego_Miasta_We_Wroclawiu_%28152991773%29.jpeg/330px-Rynek_Starego_Miasta_We_Wroclawiu_%28152991773%29.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "source": "picture-wiki",
+        "attribution": "Hrs Poland — via Wikimedia Commons",
+        "license": "CC BY-SA 3.0"
+      }
+    },
+    {
+      "lat": 51.145,
+      "lon": 14.9791,
+      "label": "Roman Catholic Diocese of Görlitz",
+      "score": 0.15860279035357958,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.389625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.6349999999999999,
+        "evidence": 0.2984761992069247,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.8174999999999999,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        14.9791,
+        51.145,
+        14.9791,
+        51.145
+      ],
+      "matches": [
+        {
+          "lat": 51.145,
+          "lon": 14.9791,
+          "matchType": "fuzzy",
+          "label": "Roman Catholic Diocese of Görlitz",
+          "confidence": 0.97,
+          "source": "wikipedia",
+          "notes": "The Diocese of Görlitz is a diocese of the Roman Catholic church in Germany. The current ordinary is Wolfgang Ipolt  (...)",
+          "candidateIndex": 2,
+          "sourceId": "Roman Catholic Diocese of Görlitz",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Roman_Catholic_Diocese_of_G%C3%B6rlitz",
+          "candidateScore": 0.6349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10948/17747",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 42.35,
+      "lon": -97.6833,
+      "label": "Breslau (Pierce, Nebraska, ... World)",
+      "score": 0.12866782499999999,
+      "signals": {
+        "convergence": 0.6666666666666666,
+        "matchScore": 0.94,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.6819999999999999,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 5
+      },
+      "contextFit": null,
+      "spreadKm": 1.2864578873388277,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "geonames",
+          "raw": "populated place"
+        },
+        {
+          "source": "whg",
+          "raw": "inhabited place"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        -97.7833,
+        42.35,
+        -97.6833,
+        42.4
+      ],
+      "matches": [
+        {
+          "lat": 42.35028,
+          "lon": -97.69895,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "populated place",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "populated place, US",
+          "candidateIndex": 0,
+          "sourceId": "5064578",
+          "sourceUrl": "https://www.geonames.org/5064578",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 42.35,
+          "lon": -97.6833,
+          "matchType": "exact",
+          "label": "Breslau (Pierce, Nebraska, ... World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "candidateIndex": 0,
+          "sourceId": "2061991",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/2061991",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 42.4,
+          "lon": -97.7833,
+          "matchType": "alias",
+          "label": "Breslau Creek (Pierce, Nebraska, ... World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "candidateIndex": 0,
+          "sourceId": "2193538",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/2193538",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 42.3503,
+          "lon": -97.6989,
+          "matchType": "exact",
+          "label": "Breslau",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "human settlement in Pierce County, Nebraska, United States",
+          "candidateIndex": 0,
+          "sourceId": "Q4961857",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q4961857",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 42.35,
+          "lon": -97.6833,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "inhabited place",
+          "from": null,
+          "to": null,
+          "confidence": 0.3910544,
+          "source": "whg",
+          "notes": "inhabited place · US · ?–?",
+          "candidateIndex": 0,
+          "sourceId": "5404930",
+          "sourceUrl": "https://whgazetteer.org/places/5404930/portal",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 42.3503,
+          "lon": -97.699,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BRELAUEN12DI",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRELAUEN12DI",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "tgn",
+        "wikidata",
+        "geonames",
+        "whg",
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Breslau%2C_Nebraska_3.JPG/330px-Breslau%2C_Nebraska_3.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "source": "picture-wiki",
+        "attribution": "Ammodramus — via Wikimedia Commons",
+        "license": "CC0"
+      }
+    },
+    {
+      "lat": 29.5167,
+      "lon": -96.9833,
+      "label": "Breslau (Lavaca, Texas, ... World)",
+      "score": 0.1284413693836142,
+      "signals": {
+        "convergence": 0.6642660240759474,
+        "matchScore": 0.94,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.6807996787046403,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 5
+      },
+      "contextFit": null,
+      "spreadKm": 1.4737283440476916,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "geonames",
+          "raw": "populated place"
+        },
+        {
+          "source": "whg",
+          "raw": "inhabited place"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        -97.0164,
+        29.5125,
+        -96.9833,
+        29.5231
+      ],
+      "matches": [
+        {
+          "lat": 29.52302,
+          "lon": -96.99665,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "populated place",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "populated place, US",
+          "candidateIndex": 0,
+          "sourceId": "4676234",
+          "sourceUrl": "https://www.geonames.org/4676234",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 29.5167,
+          "lon": -96.9833,
+          "matchType": "exact",
+          "label": "Breslau (Lavaca, Texas, ... World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "candidateIndex": 0,
+          "sourceId": "2102888",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/2102888",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 29.5231,
+          "lon": -96.9967,
+          "matchType": "exact",
+          "label": "Breslau",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "human settlement in Texas, United States of America",
+          "candidateIndex": 0,
+          "sourceId": "Q4961856",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q4961856",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 29.5167,
+          "lon": -96.9833,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "inhabited place",
+          "from": null,
+          "to": null,
+          "confidence": 0.3910544,
+          "source": "whg",
+          "notes": "inhabited place · US · ?–?",
+          "candidateIndex": 0,
+          "sourceId": "5503509",
+          "sourceUrl": "https://whgazetteer.org/places/5503509/portal",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 29.523,
+          "lon": -96.9967,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BRELAUEL19MM",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRELAUEL19MM",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 29.5125,
+          "lon": -97.0164,
+          "matchType": "fuzzy",
+          "label": "Breslau Cemetery",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BREERYEL19LM",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREERYEL19LM",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "tgn",
+        "wikidata",
+        "geonames",
+        "whg",
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/13569/7556",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 43.4667,
+      "lon": -80.4167,
+      "label": "Breslau (Ontario, Canada, ... World)",
+      "score": 0.1254575587625598,
+      "signals": {
+        "convergence": 0.632634824223784,
+        "matchScore": 0.94,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.6649840787785586,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 4
+      },
+      "contextFit": null,
+      "spreadKm": 0.028116916930870355,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "geonames",
+          "raw": "populated place"
+        },
+        {
+          "source": "whg",
+          "raw": "inhabited place"
+        }
+      ],
+      "bbox": [
+        -80.4167,
+        43.4667,
+        -80.4125,
+        43.4753
+      ],
+      "matches": [
+        {
+          "lat": 43.4668,
+          "lon": -80.41638,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "populated place",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "populated place, CA",
+          "candidateIndex": 0,
+          "sourceId": "5908481",
+          "sourceUrl": "https://www.geonames.org/5908481",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 43.4667,
+          "lon": -80.4167,
+          "matchType": "exact",
+          "label": "Breslau (Ontario, Canada, ... World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "candidateIndex": 0,
+          "sourceId": "1014612",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/1014612",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 43.4753,
+          "lon": -80.4125,
+          "matchType": "exact",
+          "label": "Breslau",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "unincorporated community in Ontario, Canada",
+          "candidateIndex": 0,
+          "sourceId": "Q4961852",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q4961852",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 43.4667,
+          "lon": -80.4167,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "inhabited place",
+          "from": null,
+          "to": null,
+          "confidence": 0.3910544,
+          "source": "whg",
+          "notes": "inhabited place · CA · ?–?",
+          "candidateIndex": 0,
+          "sourceId": "4533563",
+          "sourceUrl": "https://whgazetteer.org/places/4533563/portal",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "tgn",
+        "wikidata",
+        "geonames",
+        "whg"
+      ],
+      "attachment": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Breslau_Bridge_-_Breslau%2C_ON.jpg/330px-Breslau_Bridge_-_Breslau%2C_ON.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+        "source": "picture-wiki",
+        "attribution": "JFVoll — via Wikimedia Commons",
+        "license": "CC BY-SA 4.0"
+      }
+    },
+    {
+      "lat": 41.2333,
+      "lon": -75.9333,
+      "label": "Breslau (Luzerne, Pennsylvania, ... World)",
+      "score": 0.12503399399570195,
+      "signals": {
+        "convergence": 0.628144639191169,
+        "matchScore": 0.94,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.6627389862622511,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 4
+      },
+      "contextFit": null,
+      "spreadKm": 0.10927590667518337,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "whg",
+          "raw": "inhabited place"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        -75.9347,
+        41.2333,
+        -75.9333,
+        41.2334
+      ],
+      "matches": [
+        {
+          "lat": 41.2333,
+          "lon": -75.9333,
+          "matchType": "exact",
+          "label": "Breslau (Luzerne, Pennsylvania, ... World)",
+          "confidence": 0.8,
+          "source": "tgn",
+          "candidateIndex": 0,
+          "sourceId": "2086640",
+          "sourceUrl": "https://vocab.getty.edu/page/tgn/2086640",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 41.2333,
+          "lon": -75.9347,
+          "matchType": "exact",
+          "label": "Breslau",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "human settlement in Pennsylvania, United States of America",
+          "candidateIndex": 0,
+          "sourceId": "Q4961855",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q4961855",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 41.2333,
+          "lon": -75.9333,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "inhabited place",
+          "from": null,
+          "to": null,
+          "confidence": 0.3910544,
+          "source": "whg",
+          "notes": "inhabited place · US · ?–?",
+          "candidateIndex": 0,
+          "sourceId": "6104930",
+          "sourceUrl": "https://whgazetteer.org/places/6104930/portal",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 41.2334,
+          "lon": -75.9346,
+          "matchType": "exact",
+          "label": "Breslau",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BRELAUFN21AF",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRELAUFN21AF",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "tgn",
+        "wikidata",
+        "whg",
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/12257/9472",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 50.755833333333335,
+      "lon": 16.205,
+      "label": "Boguszów-Gorce",
+      "score": 0.10898289366842734,
+      "signals": {
+        "convergence": 0.2451171183009636,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.6666666666666666,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3754793924838151,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 1,
+        "agreement": 2
+      },
+      "contextFit": 0,
+      "spreadKm": 24.835781932948457,
+      "offRegion": false,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        16.205,
+        50.71392,
+        16.58266,
+        50.961111
+      ],
+      "matches": [
+        {
+          "lat": 50.76505,
+          "lon": 16.28102,
+          "matchType": "fuzzy",
+          "label": "Wałbrzych",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Wałbrzych (German: Waldenburg; Lower Silesian: Walmbrig or Walmbrich; or Valdenburk) is a city in Lower Silesian Voivodeship in southwestern Poland. From 1975–1998 it was the capital of Wałbrzych Voivodeship; it is now the seat of Wałbrzych County (...)",
+          "candidateIndex": 0,
+          "sourceId": "Wałbrzych",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Wa%C5%82brzych",
+          "candidateScore": 0.9349999999999999
+        },
+        {
+          "lat": 50.755833333333335,
+          "lon": 16.205,
+          "matchType": "fuzzy",
+          "label": "Boguszów-Gorce",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Boguszów-Gorce is a town in Wałbrzych County, Lower Silesian Voivodeship, in south-western Poland. Prior to 1945 it was in Germany. (For more information about the history of the region, see Silesia.) The town lies approximately west of Wałbrzych, and south-west of the regional capital Wrocław (...)",
+          "candidateIndex": 1,
+          "sourceId": "Boguszów-Gorce",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Bogusz%C3%B3w-Gorce",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 50.961111,
+          "lon": 16.344444,
+          "matchType": "fuzzy",
+          "label": "Strzegom",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Strzegom is a town in Świdnica County, Lower Silesian Voivodeship, in south-western Poland. It is the seat of the Gmina Strzegom administrative district (gmina). It lies approximately north-west of Świdnica, and west of the regional capital Wrocław. As at 2006, the town had a population of 16,782.  (...)",
+          "candidateIndex": 1,
+          "sourceId": "Strzegom",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Strzegom",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 50.71392,
+          "lon": 16.58266,
+          "matchType": "fuzzy",
+          "label": "Peterswaldau (Eulengebirge)",
+          "placeType": "settlement",
+          "from": 1945,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Peterswaldau [deu] · Mittel Peterswaldau [deu] · Pieszyce [pol] from 1945 · Peterswaldau, Bez. Breslau [deu]",
+          "candidateIndex": 0,
+          "sourceId": "object_189164",
+          "sourceUrl": "https://gov.genealogy.net/item/show/object_189164",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia",
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/11005/17859",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.209682,
+      "lon": 17.379458,
+      "label": "Oleśnica (Wrocław)",
+      "score": 0.10797044030000046,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.631875,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.815,
+        "evidence": 0.39658563930211377,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9075,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        17.379458,
+        51.209682,
+        17.379458,
+        51.209682
+      ],
+      "matches": [
+        {
+          "lat": 51.209682,
+          "lon": 17.379458,
+          "matchType": "alias",
+          "label": "Oleśnica (Wrocław)",
+          "from": 1250,
+          "to": null,
+          "confidence": 0.8,
+          "source": "viabundus",
+          "notes": "toll · 1250–? · The toll station in Oleśnica was installed in the second half of the 13th century.",
+          "candidateIndex": 1,
+          "sourceId": "5590",
+          "sourceUrl": "https://www.viabundus.eu/edit/place/5590",
+          "candidateScore": 0.815
+        }
+      ],
+      "sources": [
+        "viabundus"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10939/17965",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.8543,
+      "lon": 4.5139,
+      "label": "Breslau",
+      "score": 0.0954628684016178,
+      "signals": {
+        "convergence": 0.31466288638831597,
+        "matchScore": 0.94,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.5059981098608246,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        4.5139,
+        51.8543,
+        4.5139,
+        51.8543
+      ],
+      "matches": [
+        {
+          "lat": 51.8543,
+          "lon": 4.5139,
+          "matchType": "exact",
+          "label": "Breslau",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "street in Barendrecht, the Netherlands",
+          "candidateIndex": 0,
+          "sourceId": "Q18970416",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q18970416",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikidata"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10845/16794",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 50.666666666666664,
+      "lon": 17.933333333333334,
+      "label": "Opole",
+      "score": 0.08741639181980988,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        17.933333333333334,
+        50.666666666666664,
+        17.933333333333334,
+        50.666666666666664
+      ],
+      "matches": [
+        {
+          "lat": 50.666666666666664,
+          "lon": 17.933333333333334,
+          "matchType": "fuzzy",
+          "label": "Opole",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Opole (Silesian German: Uppeln) is a city located in southern Poland on the Oder River and the historical capital of Upper Silesia. With a population of approximately 127,792 (January 2017), it is currently the capital of the Opole Voivodeship and, also the seat of Opole County (...)",
+          "candidateIndex": 0,
+          "sourceId": "Opole",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Opole",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/11018/18016",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.266666666666666,
+      "lon": 15.933333333333334,
+      "label": "Chojnów",
+      "score": 0.08741639181980988,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        15.933333333333334,
+        51.266666666666666,
+        15.933333333333334,
+        51.266666666666666
+      ],
+      "matches": [
+        {
+          "lat": 51.266666666666666,
+          "lon": 15.933333333333334,
+          "matchType": "fuzzy",
+          "label": "Chojnów",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Chojnów is a small town in Legnica County, Lower Silesian Voivodeship, in south-western Poland. It is located on the Skora river, a tributary of the Kaczawa at an average altitude of above sea level. Chojnów is the administrative seat of the rural gmina called Gmina Chojnów, although the town is not (...)",
+          "candidateIndex": 0,
+          "sourceId": "Chojnów",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Chojn%C3%B3w",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10931/17834",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.939722222222215,
+      "lon": 15.505,
+      "label": "Zielona Góra",
+      "score": 0.08741639181980988,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        15.505,
+        51.939722222222215,
+        15.505,
+        51.939722222222215
+      ],
+      "matches": [
+        {
+          "lat": 51.939722222222215,
+          "lon": 15.505,
+          "matchType": "fuzzy",
+          "label": "Zielona Góra",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Zielona Góra is the largest city in Lubusz Voivodeship, in western Poland, with 139,813 inhabitants (2017). Zielona Góra has been in Lubusz Voivodeship since 1999, prior to which it was the capital of Zielona Góra Voivodeship from 1950 to 1998 (...)",
+          "candidateIndex": 0,
+          "sourceId": "Zielona Góra",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Zielona_G%C3%B3ra",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10832/17795",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 50.3,
+      "lon": 16.65,
+      "label": "Bystrzyca Kłodzka",
+      "score": 0.08741639181980988,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        16.65,
+        50.3,
+        16.65,
+        50.3
+      ],
+      "matches": [
+        {
+          "lat": 50.3,
+          "lon": 16.65,
+          "matchType": "fuzzy",
+          "label": "Bystrzyca Kłodzka",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Bystrzyca Kłodzka is a historic town in Kłodzko County, in Lower Silesian Voivodeship in southwestern Poland. It is the administrative seat of Gmina Bystrzyca Kłodzka. The old town of Bystrzyca is famous for its many historical buildings and is a popular tourist destination.  (...)",
+          "candidateIndex": 0,
+          "sourceId": "Bystrzyca Kłodzka",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Bystrzyca_K%C5%82odzka",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/11070/17899",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 57.75657,
+      "lon": 25.03836,
+      "label": "Braslava Manor",
+      "score": 0.08343563402661783,
+      "signals": {
+        "convergence": 0.31466288638831597,
+        "matchScore": 0.7274999999999999,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.44224810986082463,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        25.03836,
+        57.75657,
+        25.03836,
+        57.75657
+      ],
+      "matches": [
+        {
+          "lat": 57.75657,
+          "lon": 25.03836,
+          "matchType": "alias",
+          "label": "Braslava Manor",
+          "confidence": 0.8,
+          "source": "wikidata",
+          "notes": "historical manorial estate in Latvia",
+          "candidateIndex": 0,
+          "sourceId": "Q61391693",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q61391693",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikidata"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/9911/18663",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.5731,
+      "lon": 17.5111,
+      "label": "Burgwall",
+      "score": 0.08291663405000048,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.325125,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.815,
+        "evidence": 0.3045606393021138,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9075,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        17.5111,
+        51.5731,
+        17.5111,
+        51.5731
+      ],
+      "matches": [
+        {
+          "lat": 51.5731,
+          "lon": 17.5111,
+          "matchType": "fuzzy",
+          "label": "Burgwall",
+          "placeType": "settlement",
+          "from": 1900,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Braslawitz [deu] · Bräslawitz [deu] · Breslawitz [deu] from 1900 · Wrocławice [pol] from 2015",
+          "candidateIndex": 1,
+          "sourceId": "BREITZJO81SN",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREITZJO81SN",
+          "candidateScore": 0.815
+        }
+      ],
+      "sources": [
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10886/17977",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.08722222,
+      "lon": 16.40777778,
+      "label": "Lower Silesian Voivodeship",
+      "score": 0.08199522023408523,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.815,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9075,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        16.40777778,
+        51.08722222,
+        16.40777778,
+        51.08722222
+      ],
+      "matches": [
+        {
+          "lat": 51.08722222,
+          "lon": 16.40777778,
+          "matchType": "fuzzy",
+          "label": "Lower Silesian Voivodeship",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Lower Silesian Voivodeship, or Lower Silesia ProvinceArkadiusz Belczyk, , 2002-2006. (Polish: województwo dolnośląskie), in southwestern Poland, is one of the 16 voivodeships (provinces) into which Poland is divided. Lower Silesia was part of Medieval Poland during the Piast dynasty (...)",
+          "candidateIndex": 1,
+          "sourceId": "Lower Silesian Voivodeship",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Lower_Silesian_Voivodeship",
+          "candidateScore": 0.815
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10957/17877",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 50.898611,
+      "lon": 16.744444,
+      "label": "Sobótka",
+      "score": 0.08199522023408523,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.815,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.3,
+        "candidatePrior": 0.9075,
+        "offRegionFactor": 1,
+        "agreement": 1
+      },
+      "contextFit": 0,
+      "spreadKm": 0,
+      "offRegion": false,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        16.744444,
+        50.898611,
+        16.744444,
+        50.898611
+      ],
+      "matches": [
+        {
+          "lat": 50.898611,
+          "lon": 16.744444,
+          "matchType": "fuzzy",
+          "label": "Sobótka",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Sobótka is a town in Wrocław County, Lower Silesian Voivodeship, in south-western Poland. It is the seat of the administrative district (gmina) called Gmina Sobótka. Sobótka is located about southwest of Wrocław on the northern slope of Mount Ślęża, part of the Central Sudetes mountain range (...)",
+          "candidateIndex": 1,
+          "sourceId": "Sobótka",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Sob%C3%B3tka",
+          "candidateScore": 0.815
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10984/17908",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": -22.25,
+      "lon": 29.01667,
+      "label": "Breslaudrif",
+      "score": 0.06390906527661781,
+      "signals": {
+        "convergence": 0.31466288638831597,
+        "matchScore": 0.3825,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3387481098608246,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": null,
+      "placeTypeEvidence": [
+        {
+          "source": "geonames",
+          "raw": "ford"
+        }
+      ],
+      "bbox": [
+        29.01667,
+        -22.25,
+        29.01667,
+        -22.25
+      ],
+      "matches": [
+        {
+          "lat": -22.25,
+          "lon": 29.01667,
+          "matchType": "fuzzy",
+          "label": "Breslaudrif",
+          "placeType": "ford",
+          "confidence": null,
+          "source": "geonames",
+          "notes": "ford, BW",
+          "candidateIndex": 0,
+          "sourceId": "933857",
+          "sourceUrl": "https://www.geonames.org/933857",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "geonames"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/18462/19025",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 46.868,
+      "lon": 10.88,
+      "label": "Breslauer Hütte",
+      "score": 0.05745917161233504,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.325125,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3045606393021138,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        10.88,
+        46.868,
+        10.88,
+        46.868
+      ],
+      "matches": [
+        {
+          "lat": 46.868,
+          "lon": 10.88,
+          "matchType": "fuzzy",
+          "label": "Breslauer Hütte",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BRETTEJN56KU",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRETTEJN56KU",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/11542/17374",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.994,
+      "lon": 7.644,
+      "label": "Breslauer Strasse",
+      "score": 0.05745917161233504,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.325125,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3045606393021138,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        7.644,
+        51.994,
+        7.644,
+        51.994
+      ],
+      "matches": [
+        {
+          "lat": 51.994,
+          "lon": 7.644,
+          "matchType": "fuzzy",
+          "label": "Breslauer Strasse",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BRESSEJO31TX",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BRESSEJO31TX",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10824/17079",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 40.7034,
+      "lon": -73.3687,
+      "label": "Breslau Cemetery",
+      "score": 0.05745917161233504,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.325125,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3045606393021138,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        -73.3687,
+        40.7034,
+        -73.3687,
+        40.7034
+      ],
+      "matches": [
+        {
+          "lat": 40.7034,
+          "lon": -73.3687,
+          "matchType": "fuzzy",
+          "label": "Breslau Cemetery",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "candidateIndex": 0,
+          "sourceId": "BREERYFN30HQ",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BREERYFN30HQ",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/12321/9705",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 50.333333333333336,
+      "lon": 19.00027777777778,
+      "label": "Silesian Voivodeship",
+      "score": 0.05682065468287642,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        19.00027777777778,
+        50.333333333333336,
+        19.00027777777778,
+        50.333333333333336
+      ],
+      "matches": [
+        {
+          "lat": 50.333333333333336,
+          "lon": 19.00027777777778,
+          "matchType": "fuzzy",
+          "label": "Silesian Voivodeship",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Silesian Voivodeship, or Silesia ProvinceArkadiusz Belczyk, , 2002-2006. is a voivodeship, or province, in southern Poland, centered on the historic region known as Upper Silesia , with Katowice serving as its capital (...)",
+          "candidateIndex": 0,
+          "sourceId": "Silesian Voivodeship",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Silesian_Voivodeship",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/11065/18113",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 51.134344444444444,
+      "lon": 13.768,
+      "label": "Dresden Airport",
+      "score": 0.05682065468287642,
+      "signals": {
+        "convergence": 0.22984406508051608,
+        "matchScore": 0.398625,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.9349999999999999,
+        "evidence": 0.3011761992069247,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9675,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": null,
+      "placeTypeEvidence": [],
+      "bbox": [
+        13.768,
+        51.134344444444444,
+        13.768,
+        51.134344444444444
+      ],
+      "matches": [
+        {
+          "lat": 51.134344444444444,
+          "lon": 13.768,
+          "matchType": "fuzzy",
+          "label": "Dresden Airport",
+          "confidence": 1,
+          "source": "wikipedia",
+          "notes": "Dresden Airport is the international airport in Dresden, the capital of the German Free State of Saxony. It is located in Klotzsche, a district of Dresden north of the city centre. It was known in German as Flughafen Dresden-Klotzsche (...)",
+          "candidateIndex": 0,
+          "sourceId": "Dresden Airport",
+          "sourceUrl": "https://en.wikipedia.org/wiki/Dresden_Airport",
+          "candidateScore": 0.9349999999999999
+        }
+      ],
+      "sources": [
+        "wikipedia"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10950/17637",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 53.2416,
+      "lon": 18.6109,
+      "label": "Bahnhof Wrotzlawken",
+      "score": 0.05389581213250031,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.325125,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.815,
+        "evidence": 0.3045606393021138,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9075,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 1.2114174203481611,
+      "offRegion": true,
+      "placeType": "settlement",
+      "placeTypeEvidence": [
+        {
+          "source": "gov",
+          "raw": "settlement"
+        },
+        {
+          "source": "gov",
+          "raw": "settlement"
+        }
+      ],
+      "bbox": [
+        18.6033,
+        53.2416,
+        18.6109,
+        53.2515
+      ],
+      "matches": [
+        {
+          "lat": 53.2515,
+          "lon": 18.6033,
+          "matchType": "fuzzy",
+          "label": "Wrocławki",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Atzmannsdorf [deu] · Wrotzlawken [deu]",
+          "candidateIndex": 1,
+          "sourceId": "WROKENJO93GG",
+          "sourceUrl": "https://gov.genealogy.net/item/show/WROKENJO93GG",
+          "candidateScore": 0.815
+        },
+        {
+          "lat": 53.2416,
+          "lon": 18.6109,
+          "matchType": "fuzzy",
+          "label": "Bahnhof Wrotzlawken",
+          "placeType": "settlement",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Stacja Kolejowa Wrocławki [pol] · Bahnhof Atzmannsdorf [deu]",
+          "candidateIndex": 1,
+          "sourceId": "BAHKENJO93HF",
+          "sourceUrl": "https://gov.genealogy.net/item/show/BAHKENJO93HF",
+          "candidateScore": 0.815
+        }
+      ],
+      "sources": [
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10637/18078",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    },
+    {
+      "lat": 53.63,
+      "lon": 19.17,
+      "label": "Wrocławek",
+      "score": 0.05389581213250031,
+      "signals": {
+        "convergence": 0.2807129452708943,
+        "matchScore": 0.325125,
+        "candidateDiversity": 0.3333333333333333,
+        "candidateScore": 0.815,
+        "evidence": 0.3045606393021138,
+        "contextGate": 0.6499999999999999,
+        "candidatePrior": 0.9075,
+        "offRegionFactor": 0.3,
+        "agreement": 1
+      },
+      "contextFit": null,
+      "spreadKm": 0,
+      "offRegion": true,
+      "placeType": "region",
+      "placeTypeEvidence": [
+        {
+          "source": "gov",
+          "raw": "region"
+        }
+      ],
+      "bbox": [
+        19.17,
+        53.63,
+        19.17,
+        53.63
+      ],
+      "matches": [
+        {
+          "lat": 53.63,
+          "lon": 19.17,
+          "matchType": "fuzzy",
+          "label": "Wrocławek",
+          "placeType": "region",
+          "from": null,
+          "to": null,
+          "confidence": null,
+          "source": "gov",
+          "notes": "Warzeln [deu]",
+          "candidateIndex": 1,
+          "sourceId": "WARELNJO93OP",
+          "sourceUrl": "https://gov.genealogy.net/item/show/WARELNJO93OP",
+          "candidateScore": 0.815
+        }
+      ],
+      "sources": [
+        "gov"
+      ],
+      "attachment": {
+        "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10578/18128",
+        "source": "satellite",
+        "attribution": "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        "license": "Esri Terms of Use (display with attribution)"
+      }
+    }
+  ],
+  "query": {
+    "name": "Breslau",
+    "language": "de",
+    "period": "1200-1400",
+    "region": "Silesia",
+    "place_type": "city",
+    "clientId": "fixture",
+    "criteria": {
+      "regionId": "silesia",
+      "regionBbox": [
+        14.5,
+        49.5,
+        18.5,
+        52
+      ],
+      "periodRange": {
+        "start": 1200,
+        "end": 1400
+      },
+      "languageId": "de"
+    },
+    "candidates": [
+      {
+        "name": "Breslau",
+        "description": "German name used throughout the medieval and early modern period for the Silesian capital on the Oder",
+        "nameFit": 0.95,
+        "attestation": 0.9,
+        "suggestedCoordinates": [
+          {
+            "lat": 51.107,
+            "lon": 17.038,
+            "precisionCategory": "precise",
+            "notes": "City center on the Oder"
+          }
+        ],
+        "llmProvider": "groq",
+        "llmModel": "openai/gpt-oss-20b"
+      },
+      {
+        "name": "Wrocław",
+        "description": "Modern Polish name; first attested in 13th‑century documents and used in later medieval period",
+        "nameFit": 0.8,
+        "attestation": 0.85,
+        "suggestedCoordinates": [
+          {
+            "lat": 51.107,
+            "lon": 17.038,
+            "precisionCategory": "precise",
+            "notes": "City center on the Oder"
+          }
+        ],
+        "llmProvider": "groq",
+        "llmModel": "openai/gpt-oss-20b"
+      },
+      {
+        "name": "Vratislavia",
+        "description": "Medieval Latin form of the city name, used in ecclesiastical and diplomatic sources",
+        "nameFit": 0.8,
+        "attestation": 0.25,
+        "suggestedCoordinates": [],
+        "llmProvider": "groq",
+        "llmModel": "openai/gpt-oss-20b"
+      }
+    ]
+  },
+  "mergeRadiusKm": 25,
+  "sources": [
+    {
+      "name": "pleiades",
+      "status": "skipped",
+      "count": 0,
+      "ms": 0,
+      "reason": "period 1200–1400 outside coverage"
+    },
+    {
+      "name": "chgis",
+      "status": "skipped",
+      "count": 0,
+      "ms": 0,
+      "reason": "region silesia outside coverage"
+    },
+    {
+      "name": "syriaca",
+      "status": "skipped",
+      "count": 0,
+      "ms": 0,
+      "reason": "region silesia outside coverage"
+    },
+    {
+      "name": "hgis-indias",
+      "status": "skipped",
+      "count": 0,
+      "ms": 0,
+      "reason": "region silesia outside coverage"
+    },
+    {
+      "name": "sedac-india",
+      "status": "skipped",
+      "count": 0,
+      "ms": 0,
+      "reason": "region silesia outside coverage"
+    },
+    {
+      "name": "llm-coords",
+      "status": "ran",
+      "count": 2,
+      "ms": 0.9684859999688342
+    },
+    {
+      "name": "geonames",
+      "status": "ran",
+      "count": 12,
+      "ms": 475.26324999995995
+    },
+    {
+      "name": "nominatim",
+      "status": "ran",
+      "count": 3,
+      "ms": 2044.7893159999512
+    },
+    {
+      "name": "wikipedia",
+      "status": "ran",
+      "count": 20,
+      "ms": 569.1039309999906
+    },
+    {
+      "name": "tgn",
+      "status": "ran",
+      "count": 7,
+      "ms": 1558.503449000069
+    },
+    {
+      "name": "wikidata",
+      "status": "ran",
+      "count": 9,
+      "ms": 1705.2827189998934
+    },
+    {
+      "name": "whg",
+      "status": "ran",
+      "count": 6,
+      "ms": 1028.0721259999555
+    },
+    {
+      "name": "gov",
+      "status": "ran",
+      "count": 52,
+      "ms": 2633.5927750000264
+    },
+    {
+      "name": "idai",
+      "status": "ran",
+      "count": 5,
+      "ms": 669.9823229999747
+    },
+    {
+      "name": "viabundus",
+      "status": "ran",
+      "count": 2,
+      "ms": 0.4790250000078231
+    },
+    {
+      "name": "native-land",
+      "status": "ran",
+      "count": 0,
+      "ms": 0.2836959999985993
+    }
+  ],
+  "margin": 0.7856474002510097,
+  "contextEvaluated": true,
+  "log": [
+    {
+      "task": "normalizeInput",
+      "message": "\"Breslau\"",
+      "ms": 0
+    },
+    {
+      "task": "criteria",
+      "message": "region=silesia, period=1200–1400, lang=de",
+      "ms": 0
+    },
+    {
+      "task": "augment",
+      "message": "3 candidates: Breslau [0.95], Wrocław [0.80], Vratislavia [0.80] · groq/openai/gpt-oss-20b",
+      "ms": 1128
+    },
+    {
+      "task": "pleiades",
+      "message": "skipped: period 1200–1400 outside coverage",
+      "ms": 0
+    },
+    {
+      "task": "chgis",
+      "message": "skipped: region silesia outside coverage",
+      "ms": 0
+    },
+    {
+      "task": "syriaca",
+      "message": "skipped: region silesia outside coverage",
+      "ms": 0
+    },
+    {
+      "task": "hgis-indias",
+      "message": "skipped: region silesia outside coverage",
+      "ms": 0
+    },
+    {
+      "task": "sedac-india",
+      "message": "skipped: region silesia outside coverage",
+      "ms": 0
+    },
+    {
+      "task": "viabundus",
+      "message": "2 results",
+      "ms": 1
+    },
+    {
+      "task": "native-land",
+      "message": "0 results",
+      "ms": 0
+    },
+    {
+      "task": "geonames",
+      "message": "12 results",
+      "ms": 474
+    },
+    {
+      "task": "wikipedia",
+      "message": "20 results",
+      "ms": 94
+    },
+    {
+      "task": "idai",
+      "message": "5 results",
+      "ms": 102
+    },
+    {
+      "task": "whg",
+      "message": "6 results",
+      "ms": 358
+    },
+    {
+      "task": "tgn",
+      "message": "7 results",
+      "ms": 530
+    },
+    {
+      "task": "wikidata",
+      "message": "9 results",
+      "ms": 147
+    },
+    {
+      "task": "nominatim",
+      "message": "3 results",
+      "ms": 339
+    },
+    {
+      "task": "gov",
+      "message": "52 results",
+      "ms": 589
+    },
+    {
+      "task": "llm-coords",
+      "message": "2 results (1ms)",
+      "ms": 0
+    },
+    {
+      "task": "geonames",
+      "message": "12 results (475ms)",
+      "ms": 0
+    },
+    {
+      "task": "nominatim",
+      "message": "3 results (2045ms)",
+      "ms": 0
+    },
+    {
+      "task": "wikipedia",
+      "message": "20 results (569ms)",
+      "ms": 0
+    },
+    {
+      "task": "tgn",
+      "message": "7 results (1559ms)",
+      "ms": 0
+    },
+    {
+      "task": "wikidata",
+      "message": "9 results (1705ms)",
+      "ms": 0
+    },
+    {
+      "task": "whg",
+      "message": "6 results (1028ms)",
+      "ms": 0
+    },
+    {
+      "task": "gov",
+      "message": "52 results (2634ms)",
+      "ms": 0
+    },
+    {
+      "task": "idai",
+      "message": "5 results (670ms)",
+      "ms": 0
+    },
+    {
+      "task": "viabundus",
+      "message": "2 results (0ms)",
+      "ms": 0
+    },
+    {
+      "task": "native-land",
+      "message": "0 results (0ms)",
+      "ms": 0
+    },
+    {
+      "task": "suggest",
+      "message": "118 results from 11/16 suggesters (5 excluded)",
+      "ms": 0
+    },
+    {
+      "task": "evaluate-context",
+      "message": "10/10 rated · groq/openai/gpt-oss-20b",
+      "ms": 1388
+    },
+    {
+      "task": "attach-image",
+      "message": "3 wiki + 22 satellite",
+      "ms": 1
+    },
+    {
+      "task": "evaluate",
+      "message": "118 matches → 25 suggestions · top: \"Wrocław (Poland, Europe, World)\" (score 0.74, tgn+wikidata+geonames+nominatim+gov+wikipedia+viabundus+idai+whg+llm-coords)",
+      "ms": 0
+    }
+  ],
+  "cached": false,
+  "elapsed_ms": 5152
+}

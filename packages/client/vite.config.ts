@@ -24,6 +24,17 @@ export default defineConfig(({ command, mode }) => {
           `locally, copy env/example.env to .env.${mode}.`,
       );
     }
+
+    // A blank value here is only visible to whoever opens the geocoding page in
+    // the built app, long after the build that dropped it.
+    for (const key of ["APIURL", "HGA_ENGINE_URL"]) {
+      if (!env[key]) {
+        throw new Error(
+          `Client env for mode "${mode}" has no ${key}. ` +
+            `Add it to ${envFile}, and to the CLIENT_ENV_* secret for this mode in CI.`,
+        );
+      }
+    }
   }
 
   const appEnv = env.ENV || mode;
@@ -134,6 +145,7 @@ export default defineConfig(({ command, mode }) => {
     define: {
       "process.env.ROOT_URL": JSON.stringify(env.ROOT_URL || ""),
       "process.env.APIURL": JSON.stringify(env.APIURL || ""),
+      "process.env.HGA_ENGINE_URL": JSON.stringify(env.HGA_ENGINE_URL || ""),
       "process.env.ENV": JSON.stringify(appEnv),
       "process.env.BUILD_TIMESTAMP": JSON.stringify(
         process.env.BUILD_TIMESTAMP || ""
@@ -148,6 +160,7 @@ export default defineConfig(({ command, mode }) => {
       globals: true,
       environment: "jsdom",
       include: ["src/**/*.{test,spec}.{ts,tsx}"],
+      setupFiles: ["./src/setupTests.ts"],
     },
   };
 });

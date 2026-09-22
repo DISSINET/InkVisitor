@@ -15,7 +15,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     font-size: 62.5%;
   }
   body {
-    font-family: "Roboto", sans-serif;
+    font-family: ${({ theme }) => theme.fontFamily["body"]};
     letter-spacing: .2px;
     line-height: 1.3;
   }

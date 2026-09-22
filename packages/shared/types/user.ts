@@ -1,4 +1,5 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IGeocodingUserSettings } from "./geocoding";
 
 export interface IUser {
   id: string;
@@ -38,6 +39,11 @@ export interface IUserOptions {
   // show a confirm modal before deleting a metaprop that has child properties
   // (undefined is treated as true - warn by default)
   askBeforePropDelete?: boolean;
+
+  // personal overrides for the Geocoding page's query context. Only the
+  // context: which Concept plays which geocoding role is project-wide, since
+  // that assignment is what "geocoded" means.
+  geocoding?: IGeocodingUserSettings;
 }
 
 export interface IStoredTerritory {

@@ -2,7 +2,7 @@
   "name": "inkvisitor-monorepo",
   "private": true,
   "version": "1.6",
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "pnpm@11.25.0",
   "engines": {
     "node": "^22.13.1",
     "pnpm": "^11.1.2"
