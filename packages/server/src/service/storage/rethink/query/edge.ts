@@ -1,14 +1,11 @@
-import Entity from "@models/entity/entity";
-import Relation from "@models/relation/relation";
-import {
-  getEquivalentEntityIds,
-  getSubordinateEntityIds,
-} from "@models/relation/functions";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
+import { ExploreResolvers } from "../../types";
+import { wrap } from "../conn";
+import { TABLE } from "../tables";
 import SearchNode from "./nodes";
 
 export default class SearchEdge implements Query.IEdge {
@@ -17,6 +14,8 @@ export default class SearchEdge implements Query.IEdge {
   logic: Query.EdgeLogic;
   id: string;
   node: SearchNode;
+  /** id expansion for a pinned target; injected by the plan, see setResolvers */
+  protected resolvers?: ExploreResolvers;
 
   constructor(data: Partial<Query.IEdge>) {
     this.type = data.type || ("" as Query.EdgeType);
@@ -24,6 +23,18 @@ export default class SearchEdge implements Query.IEdge {
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
     this.id = data.id || "";
+  }
+
+  setResolvers(resolvers: ExploreResolvers): void {
+    this.resolvers = resolvers;
+    this.node.setResolvers(resolvers);
+  }
+
+  private expand(kind: keyof ExploreResolvers, db: Connection, ids: string[]): Promise<string[]> {
+    if (!this.resolvers) {
+      throw new InternalServerError("explore target expansion requires resolvers");
+    }
+    return this.resolvers[kind](wrap(db), ids);
   }
 
   /**
@@ -51,12 +62,12 @@ export default class SearchEdge implements Query.IEdge {
     // both toggles off -> single-id set, no expansion queries issued
     const ids = new Set<string>([entityId]);
     if (this.node.params.includeEquivalents) {
-      for (const id of await getEquivalentEntityIds(db, [entityId])) {
+      for (const id of await this.expand("equivalents", db, [entityId])) {
         ids.add(id);
       }
     }
     if (this.node.params.includeSubordinates) {
-      for (const id of await getSubordinateEntityIds(db, [entityId])) {
+      for (const id of await this.expand("subordinates", db, [entityId])) {
         ids.add(id);
       }
     }
@@ -115,7 +126,7 @@ export class EdgeHasClassification extends SearchEdge {
     const targetIds = this.targetIds();
     return q.concatMap(function(entity: RDatum<IEntity>) {
       return r
-        .table(Relation.table)
+        .table(TABLE.relations)
         .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
         .filter({
           type: RelationEnums.Type.Classification,
@@ -158,7 +169,7 @@ export class EdgeSUnderT extends SearchEdge {
       q,
       targetIds && targetIds.length
         ? (r
-            .table(Entity.table)
+            .table(TABLE.entities)
             .getAll(r.args(targetIds), {
               index: DbEnums.Indexes.StatementTerritory,
             })
@@ -183,7 +194,7 @@ export class EdgeHasRelation extends SearchEdge {
     return q.concatMap(function(entity: RDatum<IEntity>) {
       return (
         r
-          .table(Relation.table)
+          .table(TABLE.relations)
           .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
           // get all relations where any entity is the source entity
           .filter(function(relation: RDatum<RelationTypes.IRelation>) {
@@ -241,7 +252,7 @@ function runRelationTargetEdge(
   return q.concatMap(function(entity: RDatum<IEntity>) {
     return (
       r
-        .table(Relation.table)
+        .table(TABLE.relations)
         .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
         .filter({
           type: relationType,
@@ -260,7 +271,7 @@ function runRelationTargetEdge(
           }
           if (targetClasses.length) {
             return r
-              .table(Entity.table)
+              .table(TABLE.entities)
               .get(relation("entityIds").nth(targetIndex))
               .default(null)
               .do(function (ent: RDatum) {
@@ -547,10 +558,10 @@ function candidateStatements(
 ): RStream {
   if (targetIds) {
     return r
-      .table(Entity.table)
+      .table(TABLE.entities)
       .getAll(r.args(targetIds), { index }) as unknown as RStream;
   }
-  return r.table(Entity.table).filter(function(e: RDatum<IEntity>) {
+  return r.table(TABLE.entities).filter(function(e: RDatum<IEntity>) {
     return e("class").eq(EntityEnums.Class.Statement);
   }) as unknown as RStream;
 }
@@ -712,7 +723,7 @@ function runStatementHasActantEdge(
         return actantIds
           .filter(function (id: RDatum) {
             return r
-              .table(Entity.table)
+              .table(TABLE.entities)
               .get(id)
               .default(null)
               .do(function (ent: RDatum) {
@@ -811,13 +822,13 @@ function runStatementHasEntityEdge(
     q,
     targetIds
       ? r
-          .table(Entity.table)
+          .table(TABLE.entities)
           .getAll(r.args(targetIds), {
             index: DbEnums.Indexes.StatementEntities,
           })
           .union(
             r
-              .table(Entity.table)
+              .table(TABLE.entities)
               .getAll(r.args(targetIds), {
                 index: DbEnums.Indexes.StatementDataProps,
               }) as unknown as RStream
@@ -947,7 +958,7 @@ function runUsedUnderTerritoryEdge(
     q,
     territoryIds
       ? r
-          .table(Entity.table)
+          .table(TABLE.entities)
           .getAll(r.args(territoryIds), {
             index: DbEnums.Indexes.StatementTerritory,
           })
@@ -996,7 +1007,7 @@ function runIsInStatementEdge(
     q,
     statementIds
       ? r
-          .table(Entity.table)
+          .table(TABLE.entities)
           .getAll(r.args(statementIds))
           .filter(function (e: RDatum<IEntity>) {
             return e("class").eq(EntityEnums.Class.Statement);
@@ -1089,7 +1100,18 @@ export class EdgeHasReferenceValue extends SearchEdge {
   }
 }
 
-export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
+export function getEdgeInstance(
+  data: Partial<Query.IEdge>,
+  resolvers?: ExploreResolvers
+): SearchEdge {
+  const edge = createEdge(data);
+  if (resolvers) {
+    edge.setResolvers(resolvers);
+  }
+  return edge;
+}
+
+function createEdge(data: Partial<Query.IEdge>): SearchEdge {
   switch (data.type) {
     case Query.EdgeType["EP:T"]:
       return new EdgeHasPropType(data);

@@ -1,23 +1,11 @@
-import Entity from "@models/entity/entity";
-import { prepareLabel } from "@common/searchLabel";
-import { SearchQuery } from "@models/entity/response-search";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
-import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
-
-const EXPLORE_LABEL_FILTER_CHUNK_SIZE = 4000;
-
-const chunkArray = <T>(arr: T[], size: number): T[][] => {
-  const chunks: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    chunks.push(arr.slice(i, i + size));
-  }
-  return chunks;
-};
+import { Conn, storage } from "@service/storage";
+import { prepareLabel } from "@common/searchLabel";
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** Same diacritic folding as SearchQuery.searchWordByWord in response-search.ts */
+/** Same diacritic folding as searchWordByWord in the storage adapter (service/storage/rethink/search.ts) */
 const DIACRITIC_CHAR_MAP: Record<string, string> = {
   a: "[aàáâãäå]",
   e: "[eèéêëě]",
@@ -157,7 +145,7 @@ const exploreLabelWildcards = (label: string, left: string, right: string): [str
 };
 
 const findMatchingIdsWithDbSearch = async (
-  db: Connection,
+  db: Conn,
   ids: string[],
   label: string
 ): Promise<Set<string>> => {
@@ -167,57 +155,30 @@ const findMatchingIdsWithDbSearch = async (
     leftFromPrepare,
     rightFromPrepare
   );
-  const matching = new Set<string>();
 
-  await Promise.all(
-    chunkArray(ids, EXPLORE_LABEL_FILTER_CHUNK_SIZE).map(async (chunk) => {
-      const matched = (await rethink
-        .table(Entity.table)
-        .getAll(rethink.args(chunk))
-        .filter(function (row: RDatum) {
-          return SearchQuery.searchWordByWord(row, preparedLabel, leftWildcard, rightWildcard);
-        })("id")
-        .run(db)) as string[];
-
-      matched.forEach((id) => matching.add(id));
-    })
+  return new Set(
+    await storage.entities.idsMatchingLabel(db, ids, preparedLabel, leftWildcard, rightWildcard)
   );
-
-  return matching;
 };
 
 const findMatchingIdsWithRegex = async (
-  db: Connection,
+  db: Conn,
   ids: string[],
   filter: Explore.IExploreLabelFilter
 ): Promise<Set<string>> => {
   const matching = new Set<string>();
 
-  await Promise.all(
-    chunkArray(ids, EXPLORE_LABEL_FILTER_CHUNK_SIZE).map(async (chunk) => {
-      const rows = (await rethink
-        .table(Entity.table)
-        .getAll(rethink.args(chunk))
-        .pluck("id", "labels")
-        .run(db)) as { id: string; labels?: string[] }[];
-
-      for (const row of rows) {
-        if (entityLabelMatchesFilter(row.labels ?? [], filter)) {
-          matching.add(row.id);
-        }
-      }
-    })
-  );
+  for (const row of await storage.entities.labelsOf(db, ids)) {
+    if (entityLabelMatchesFilter(row.labels ?? [], filter)) {
+      matching.add(row.id);
+    }
+  }
 
   return matching;
 };
 
-/**
- * Filters entity ids by row label filter while preserving input order.
- * Uses RethinkDB for wildcard search; regex mode loads only id + labels per chunk.
- */
 export const filterEntityIdsByRowLabelFilter = async (
-  db: Connection,
+  db: Conn,
   ids: string[],
   filter: Explore.IExploreLabelFilter
 ): Promise<string[]> => {

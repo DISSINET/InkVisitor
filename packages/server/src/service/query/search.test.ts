@@ -7,7 +7,7 @@
 // the current Query.* model (see nesting.test.ts for a DB-free example) before
 // re-enabling, and point .env.test at a throwaway DB first.
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import QuerySearch from "./search";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";

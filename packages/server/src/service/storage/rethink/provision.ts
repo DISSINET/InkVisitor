@@ -1,8 +1,11 @@
 import { Connection, r, RDatum, RTable, RValue } from "rethinkdb-ts";
 import { DbEnums } from "@inkvisitor/shared/enums";
+import { Conn } from "../types";
+import { closeConnection, openConnection, unwrap } from "./conn";
 
 /**
- * Table + secondary-index provisioning for the ephemeral test database.
+ * Table + secondary-index provisioning for throwaway databases (jest, replay)
+ * and the startup check that the indexes the routes depend on exist.
  *
  * The index definitions are copied VERBATIM from the canonical source of truth,
  * packages/database/scripts/import/indexes.ts. We do not import that file
@@ -247,7 +250,7 @@ export const TABLES: Record<string, IndexDef[]> = {
  * already-`use`d) test database, waiting for each table's indexes to finish
  * building before moving on so the first query never races a half-built index.
  */
-export async function provisionTables(conn: Connection): Promise<void> {
+async function provisionTables(conn: Connection): Promise<void> {
   for (const [table, indexes] of Object.entries(TABLES)) {
     await r.tableCreate(table).run(conn);
     for (const idx of indexes) {
@@ -257,4 +260,112 @@ export async function provisionTables(conn: Connection): Promise<void> {
       await r.table(table).indexWait().run(conn);
     }
   }
+}
+
+/** Drops `name` if it exists and recreates it with every table and index. */
+export async function createDatabase(name: string): Promise<void> {
+  const conn = await openConnection({ db: null, timeoutSeconds: 5 });
+  try {
+    await r.dbDrop(name).run(unwrap(conn)).catch(() => undefined);
+    await r.dbCreate(name).run(unwrap(conn));
+    unwrap(conn).use(name);
+    await provisionTables(unwrap(conn));
+  } finally {
+    await closeConnection(conn, { noreplyWait: false });
+  }
+}
+
+export async function dropDatabase(name: string): Promise<void> {
+  const conn = await openConnection({ db: null, timeoutSeconds: 5 });
+  try {
+    await r.dbDrop(name).run(unwrap(conn)).catch(() => undefined);
+  } finally {
+    await closeConnection(conn, { noreplyWait: false });
+  }
+}
+
+/**
+ * Indexes the server depends on at request time. If any of these are
+ * missing the corresponding route throws a runtime error - we'd rather
+ * fail-fast at boot with an actionable message.
+ *
+ * Adding a new dependency? Add an entry here and make sure the index
+ * factory is declared in packages/database/scripts/import/indexes.ts;
+ * the operator-run ensureIndexesJob there will create it.
+ */
+interface RequiredIndex {
+  table: string;
+  index: string;
+  usedBy: string;
+}
+
+const REQUIRED: RequiredIndex[] = [
+  // The entity-detail response (ResponseEntityDetail.prepare) and the delete
+  // guard (Entity.getUsedByEntity) reach all of these via getAll():
+  // Entity.findUsedInProps / findUsedInReferences plus
+  // Statement.getLinkedEntities / findByDataPropsId / findByDataActantsCI.
+  // Reuse the canonical entity-id reference set so any index added there is
+  // covered here automatically.
+  ...DbEnums.EntityIdReferenceIndexes.map((index) => ({
+    table: "entities",
+    index,
+    usedBy: "entity-detail response / delete guard (getAll)",
+  })),
+  {
+    table: "entities",
+    index: DbEnums.Indexes.StatementTerritory,
+    usedBy: "Statement.findStatementsInTerritory (territory statements list)",
+  },
+  {
+    table: "documents",
+    index: DbEnums.Indexes.DocumentEntityIds,
+    usedBy: "Document.findByEntityId (entity tooltip/detail usedInDocuments, delete check)",
+  },
+  {
+    table: "audits",
+    index: DbEnums.Indexes.AuditRelationEntityIds,
+    usedBy: "Audit.getRelationAuditsForEntity (entity-detail relation audits)",
+  },
+];
+
+/**
+ * Verifies every entry in REQUIRED exists on the connected RethinkDB.
+ * Throws with operator instructions if anything is missing.
+ */
+export async function assertRequiredIndexes(conn: Conn): Promise<void> {
+  const db = unwrap(conn);
+  const tableList = (await r.tableList().run(db)) as string[];
+  const indexCache = new Map<string, string[]>();
+  const missing: RequiredIndex[] = [];
+
+  for (const req of REQUIRED) {
+    if (!tableList.includes(req.table)) {
+      missing.push(req);
+      continue;
+    }
+    let indexes = indexCache.get(req.table);
+    if (!indexes) {
+      indexes = (await r.table(req.table).indexList().run(db)) as string[];
+      indexCache.set(req.table, indexes);
+    }
+    if (!indexes.includes(req.index)) {
+      missing.push(req);
+    }
+  }
+
+  if (missing.length === 0) {
+    console.log(
+      `[startup] verified ${REQUIRED.length} required RethinkDB indexes`
+    );
+    return;
+  }
+
+  const lines = missing
+    .map((m) => `  - ${m.table}.${m.index}  (${m.usedBy})`)
+    .join("\n");
+  throw new Error(
+    `[startup] required RethinkDB indexes are missing:\n${lines}\n\n` +
+      `Run \`pnpm start\` in packages/database and select ` +
+      `"ensureIndexesJob" to create them, then restart the server.`
+  );
 }

@@ -1,5 +1,5 @@
 import { determineOrder, IDbModel } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import {
   IEntity,
   IStatement,
@@ -7,7 +7,7 @@ import {
   Relation as RelationTypes,
   AuditScope,
 } from "@inkvisitor/shared/types";
-import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { EnumValidators } from "@inkvisitor/shared/enums";
 import {
   InternalServerError,
@@ -352,7 +352,7 @@ export default class Relation implements IRelationModel {
    * @param db database connection
    * @returns  list of relations
    */
-  async getSiblings(db: Connection): Promise<RelationTypes.IRelation[]> {
+  async getSiblings(db: Conn): Promise<RelationTypes.IRelation[]> {
     const childs = await Relation.findForEntities(
       db,
       [this.entityIds[0]],
@@ -366,15 +366,15 @@ export default class Relation implements IRelationModel {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
+  async save(db: Conn | undefined): Promise<boolean> {
     // mark for the create audit emitted in afterSave (excluded from the insert
     // below since _auditEventType is non-enumerable)
     this._auditEventType = EventType.RELATION_CREATE;
 
-    const result = await rethink
-      .table(Relation.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+    const result = await storage.relations.insert(db as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -390,17 +390,13 @@ export default class Relation implements IRelationModel {
    * @returns
    */
   async update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     // mark for the edit audit emitted in afterSave
     this._auditEventType = EventType.RELATION_EDIT;
 
-    return rethink
-      .table(Relation.table)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
+    return storage.relations.update(db as Conn, this.id, updateData);
   }
 
   /**
@@ -410,20 +406,14 @@ export default class Relation implements IRelationModel {
    * @param updateData
    * @returns
    */
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on relation with undefined id"
       );
     }
 
-    const result = await rethink
-      .table(Relation.table)
-      .get(this.id)
-      .delete()
-      .run(db);
-
-    return result;
+    return storage.relations.delete(db, this.id);
   }
 
   /**
@@ -554,24 +544,16 @@ export default class Relation implements IRelationModel {
    * @returns relation model or null if not found
    */
   static async getById(req: IRequest, id: string): Promise<Relation | null> {
-    const data = await rethink
-      .table(Relation.table)
-      .get(id)
-      .run(req.db.connection);
+    const data = await storage.relations.get(req.db.connection, id);
 
     return data ? new Relation(data) : null;
   }
 
   static async getByType<T extends RelationTypes.IRelation>(
-    db: Connection,
+    db: Conn,
     relType: RelationEnums.Type
   ): Promise<T[]> {
-    const items: T[] = await rethink
-      .table(Relation.table)
-      .filter({ type: relType })
-      .run(db);
-
-    return items;
+    return (await storage.relations.byType(db, relType)) as T[];
   }
 
   /**
@@ -579,7 +561,7 @@ export default class Relation implements IRelationModel {
    * to create many relations of the same type. See RelationSaveContext.
    */
   static async buildSaveContext(
-    db: Connection,
+    db: Conn,
     relType: RelationEnums.Type
   ): Promise<RelationSaveContext> {
     const relationsOfType = await Relation.getByType<IRelationModel>(db, relType);
@@ -610,13 +592,13 @@ export default class Relation implements IRelationModel {
 
   /**
    * searches for relations with specific entity ids and returns both relation ids and connected entity ids
-   * @param db Connection
+   * @param db Conn
    * @param entityIds string[]
    * @param relType RelationEnums.Type?
    * @returns promise with both entity/relation ids
    */
   static async getLinkedForEntities(
-    db: Connection,
+    db: Conn,
     entityIds: string[],
     relType?: RelationEnums.Type
   ): Promise<[string[], string[]]> {
@@ -654,19 +636,12 @@ export default class Relation implements IRelationModel {
    * @returns array of relation interfaces
    */
   static async findForEntities<T extends RelationTypes.IRelation>(
-    db: Connection,
+    db: Conn,
     entityIds: string[],
     relType?: RelationEnums.Type,
     position?: number
   ): Promise<T[]> {
-    const items: T[] = await rethink
-      .table(Relation.table)
-      .getAll.call(undefined, ...entityIds, {
-        index: DbEnums.Indexes.RelationsEntityIds,
-      })
-      .filter(relType ? { type: relType } : {})
-      .distinct()
-      .run(db);
+    const items = (await storage.relations.forEntities(db, entityIds, relType)) as T[];
 
     if (position !== undefined) {
       return items.filter(
@@ -688,7 +663,7 @@ export default class Relation implements IRelationModel {
    * @returns array of relation interfaces
    */
   static async findForwardForEntity<T extends RelationTypes.IRelation>(
-    db: Connection,
+    db: Conn,
     entityId: string,
     relType?: RelationEnums.Type
   ): Promise<T[]> {
@@ -714,7 +689,7 @@ export default class Relation implements IRelationModel {
    * @returns array of relation interfaces
    */
   static async findInverseForEntity<T extends RelationTypes.IRelation>(
-    db: Connection,
+    db: Conn,
     entityId: string,
     relType?: RelationEnums.Type
   ): Promise<T[]> {
@@ -738,12 +713,7 @@ export default class Relation implements IRelationModel {
     req: IRequest,
     relType?: RelationEnums.Type
   ): Promise<RelationTypes.IRelation[]> {
-    const items: RelationTypes.IRelation[] = await rethink
-      .table(Relation.table)
-      .filter(relType ? { type: relType } : {})
-      .run(req.db.connection);
-
-    return items;
+    return storage.relations.byType(req.db.connection, relType);
   }
 
   static async copyMany(
@@ -791,11 +761,9 @@ export default class Relation implements IRelationModel {
     // (returnChanges carries their pre-delete snapshot). This mirrors the single
     // DELETE route (delete -> audit on success), so a failing delete can never
     // leave RELATION_DELETE audits for relations that still exist.
-    const result = await rethink
-      .table(Relation.table)
-      .getAll.apply(undefined, ids)
-      .delete({ returnChanges: true })
-      .run(request.db.connection);
+    const result = await storage.relations.deleteMany(request.db.connection, ids, {
+      returnChanges: true,
+    });
 
     for (const change of result.changes || []) {
       if (change.old_val) {

@@ -10,7 +10,7 @@ import { IEntity, IStatement, ITerritory, IUser } from "@inkvisitor/shared/types
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { findEntityById } from "@service/shorthands";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { filterEntityIdsByRowLabelFilter, getRowLabelFilter } from "./explore-label-filter";
 import { applyRowIdsFilter, getRowIdsFilter } from "./explore-ids-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
@@ -61,7 +61,7 @@ export default class Results<T extends { id: string }> {
     this.items = Array.from(new Set((this.items || []).concat(results)));
   }
 
-  async applyExploreFilters(db: Connection, exploreData: Explore.IExplore): Promise<void> {
+  async applyExploreFilters(db: Conn, exploreData: Explore.IExplore): Promise<void> {
     if (!this.items?.length) {
       return;
     }
@@ -179,7 +179,7 @@ export default class Results<T extends { id: string }> {
    * without them costs nothing.
    */
   async prepareColumnsContext(
-    db: Connection,
+    db: Conn,
     entities: IEntity[],
     columnsData: Explore.IExploreColumn[]
   ): Promise<IColumnsContext> {
@@ -234,7 +234,7 @@ export default class Results<T extends { id: string }> {
   }
 
   async columns(
-    db: Connection,
+    db: Conn,
     entity: IEntity,
     columnsData: Explore.IExploreColumn[],
     context?: IColumnsContext

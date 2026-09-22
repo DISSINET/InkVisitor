@@ -1,6 +1,6 @@
 import { EntityEnums, EnumValidators, RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import Relation from "./relation";
 
 export default class Identification
@@ -35,7 +35,7 @@ export default class Identification
   }
 
   static async getIdentificationForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     maxNestLvl: number,
     nestLvl: number,

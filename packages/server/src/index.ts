@@ -7,12 +7,11 @@ import { Server as SocketIO, Socket } from "socket.io";
 import server from "./server";
 import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { CronService } from "@service/cron";
 import { startDbStatsEmitter } from "@service/dbStats";
 import { startCacheInvalidators } from "@service/changefeedInvalidator";
-import { assertRequiredIndexes } from "@service/assertRequiredIndexes";
-import { ensureSessionsTable } from "@service/rethinkSessionStore";
+import { ensureSessionsTable } from "@service/sessionStore";
 import {
   cookieParserMiddleware,
   sessionMiddleware,
@@ -24,7 +23,7 @@ import Document from "@models/document/document";
   const db = new Db();
   await db.initDb();
 
-  await assertRequiredIndexes(db.connection);
+  await storage.assertRequiredIndexes(db.connection);
   await ensureSessionsTable(db.connection);
 
   const backfilled = await Document.backfillEntityIds(db.connection);

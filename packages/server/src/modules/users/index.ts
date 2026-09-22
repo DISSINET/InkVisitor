@@ -37,7 +37,7 @@ import mailer, {
   testTemplate,
 } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
-import { invalidateUserSessions } from "@service/rethinkSessionStore";
+import { invalidateUserSessions } from "@service/sessionStore";
 import { IRequest } from "src/custom_typings/request";
 
 /**

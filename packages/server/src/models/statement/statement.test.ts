@@ -9,7 +9,7 @@ import {
   getIStatementActionMock,
   getIStatementMock,
 } from "@modules/common.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { deleteEntities, findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { UserEnums } from "@inkvisitor/shared/enums";

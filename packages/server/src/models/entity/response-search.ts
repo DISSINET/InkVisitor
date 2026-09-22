@@ -1,16 +1,15 @@
 import Audit from "@models/audit/audit";
-import Document from "@models/document/document";
-import { prepareLabel } from "@common/searchLabel";
 import { getEntityClass } from "@models/factory";
 import Classification from "@models/relation/classification";
 import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
-import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
+import { Conn, storage } from "@service/storage";
+import { prepareLabel } from "@common/searchLabel";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
 import { ResponseEntity } from "./response";
@@ -44,500 +43,173 @@ function stripAncestorTerritoryIdsFromStatementLineage(
   }
 }
 
+export interface SearchOutcome {
+  entities: IEntity[];
+  /** the label the request matched on, for ordering the results */
+  usedLabel?: string;
+  /** the caller's own id list, for ordering the results the way it was typed */
+  retainedIdsOrder?: string[];
+}
+
 /**
- * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
+ * Statements under the territories, as the entity ids they use.
  */
-export class SearchQuery {
-  usedLabel?: string; // used for additional sorting
-  retainedIdsOrder?: string[]; // used for additional sorting - to respect provided entityIds
-
-  connection: Connection;
-  query: RTable<any>;
-
-  filterUsed?: boolean;
-
-  constructor(conn: Connection) {
-    this.connection = conn;
-    this.query = r.table(Entity.table);
+async function getStatementObjectIdsForTerritories(
+  conn: Conn,
+  territoryIds: string[]
+): Promise<string[]> {
+  const statements = await Statement.findByTerritoryIds(conn, territoryIds);
+  const idsMap: Record<string, null> = {};
+  for (const st of statements) {
+    for (const id of st.getEntitiesIds()) {
+      idsMap[id] = null;
+    }
+    stripAncestorTerritoryIdsFromStatementLineage(
+      st.data.territory?.territoryId,
+      idsMap
+    );
   }
 
-  /**
-   * searches Statements under specific territory and returns ids of all statement entity ids
-   * @param territoryId
-   * @returns
-   */
-  async getStatementObjectIdsForTerritories(
-    territoryIds: string[]
-  ): Promise<string[]> {
-    const statements = await Statement.findByTerritoryIds(
-      this.connection,
+  return Object.keys(idsMap);
+}
+
+/**
+ * Fetches audits and updates the request's entityIds by intersecting with the
+ * audit results.
+ * @param req The request search object, will be mutated.
+ * @param getAudits A function that returns a promise of audits.
+ */
+async function updateEntityIdsFromAudits(
+  req: RequestSearch,
+  getAudits: () => Promise<Audit[]>
+): Promise<void> {
+  const audits = await getAudits();
+  const auditEntityIds = audits
+    .filter((a) => a.auditScope === AuditScope.Entity)
+    .map((a) => a.modelId);
+
+  if (!req.entityIds) {
+    req.entityIds = auditEntityIds;
+  } else {
+    const auditEntityIdsSet = new Set(auditEntityIds);
+    req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
+  }
+}
+
+/**
+ * Runs an entity search. The request fields that live in other tables
+ * (co-occurrence, territory, audit dates and users) are resolved into
+ * `entityIds` first, in this order, then the storage adapter applies the
+ * remaining filters. `seedIds` restricts the search to those rows before any
+ * filter (used by the equivalents / subordinates expansion).
+ */
+export async function searchEntities(
+  conn: Conn,
+  req: RequestSearch,
+  opts: { seedIds?: string[] } = {}
+): Promise<SearchOutcome> {
+  const retainedIdsOrder = req.entityIds?.length ? req.entityIds : undefined;
+
+  if (req.cooccurrenceId) {
+    const assocEntityIds = await Statement.getCoOccurrentEntityIds(
+      conn,
+      req.cooccurrenceId
+    );
+    if (!req.entityIds) {
+      req.entityIds = [];
+    }
+    req.entityIds = req.entityIds.concat(assocEntityIds);
+  }
+
+  if (req.territoryId) {
+    let territoryIds = [req.territoryId];
+
+    if (req.subTerritorySearch) {
+      const childs = Object.values(
+        await new Territory({ id: req.territoryId }).findChilds(conn, true)
+      );
+      territoryIds = territoryIds.concat(childs.map((ch) => ch.id));
+    }
+
+    const assocEntityIds = await getStatementObjectIdsForTerritories(
+      conn,
       territoryIds
     );
-    const idsMap: Record<string, null> = {};
-    for (const st of statements) {
-      for (const id of st.getEntitiesIds()) {
-        idsMap[id] = null;
-      }
-      stripAncestorTerritoryIdsFromStatementLineage(
-        st.data.territory?.territoryId,
-        idsMap
-      );
+
+    if (!req.entityIds) {
+      req.entityIds = [];
     }
-
-    return Object.keys(idsMap);
+    req.entityIds = req.entityIds.concat(assocEntityIds);
   }
 
-  /**
-   * adds condition to limit results by filtering by specific class
-   * @param entityClass
-   * @returns
-   */
-  whereClass(
-    entityClass: EntityEnums.Class | EntityEnums.Extension.Any
-  ): SearchQuery {
-    this.query = this.query.filter({
-      class: entityClass,
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to limit results by filtering by specific status
-   * @param entityClass
-   * @returns
-   */
-  whereStatus(status: EntityEnums.Status): SearchQuery {
-    this.query = this.query.filter({
-      status: status,
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to limit results by excluding specific classes
-   * @param entityClass
-   * @returns
-   */
-  whereNotClass(entityClass: EntityEnums.Class[]): SearchQuery {
-    this.query = this.query.filter(function (row: RDatum) {
-      return r.expr(entityClass).contains(row("class")).not();
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to limit results to entries with chosen usedTemplate
-   * @param tpl
-   * @returns
-   */
-  whereUsedTemplate(tpl: string): SearchQuery {
-    this.query = this.query.filter({
-      usedTemplate: tpl,
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to limit results to entries with isTemplate = true flag
-   * @returns
-   */
-  whereIsTemplate(): SearchQuery {
-    this.query = this.query.filter({
-      isTemplate: true,
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to limit results to resources with documentId
-   * @returns
-   */
-  whereResourcesHasDocument(): SearchQuery {
-    this.query = this.query.filter(function (row: RDatum) {
-      return r.and(
-        row("class").eq(EntityEnums.Class.Resource),
-        row.hasFields({ data: { documentId: true } }),
-        row("data")("documentId").ne(""),
-        r.table(Document.table).get(row("data")("documentId")).ne(null)
-      );
-    });
-    return this;
-  }
-
-  /**
-   * adds condition to search for entities which have reference to chosen resource id
-   * @returns
-   */
-  whereHaveReferenceTo(refId: string): SearchQuery {
-    this.query = this.query.filter(function (row: RDatum) {
-      return row("references").contains(function (ref: RDatum) {
-        return ref("resource").eq(refId);
-      });
-    });
-
-    return this;
-  }
-
-  /**
-   * adds condition to filter entries with language
-   * @returns
-   */
-  whereLanguage(language: EntityEnums.Language): SearchQuery {
-    this.query = this.query.filter({
-      language: language,
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to filter by label
-   * @param label
-   * @returns
-   */
-  whereLabel(label: string): SearchQuery {
-    const [preparedLabel, leftWildcard, rightWildcard] = prepareLabel(label);
-
-    this.usedLabel = preparedLabel;
-
-    this.query = this.query.filter(function (row: RDatum) {
-      return SearchQuery.searchWordByWord(
-        row,
-        preparedLabel,
-        leftWildcard,
-        rightWildcard
-      );
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * adds condition to filter by label or id
-   * @param label
-   * @returns
-   */
-  whereLabelOrId(labelOrId: string): SearchQuery {
-    const [label, leftWildcard, rightWildcard] = prepareLabel(labelOrId);
-    this.usedLabel = label;
-
-    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    // id is matched as a prefix of the literal input — strip the trailing
-    // wildcard the client appends, then escape regex chars and anchor at start
-    const idPrefix = labelOrId.replace(/\*$/, "");
-    const escapedIdPrefix = idPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    // search 3 times:
-    // 1. search for exact word match with some normalization
-    // 2. search for exact word match without normalization
-    // 3. search for id prefix match
-    this.query = this.query.filter(function (row: RDatum) {
-      return r.or(
-        SearchQuery.searchWordByWord(
-          row,
-          escapedLabel,
-          leftWildcard,
-          rightWildcard
-        ),
-        SearchQuery.searchWordByWord(
-          row,
-          escapedLabel,
-          leftWildcard,
-          rightWildcard,
-          false
-        ),
-        row("id").match("^" + escapedIdPrefix).ne(null)
-      );
-    });
-
-    this.filterUsed = true;
-    return this;
-  }
-
-  /**
-   * Provides basic search functionality which searches for the subscring with optional wildcard support
-   * @param row - RDatum from rethink api
-   * @param label - cleaned label input (with escaped chars)
-   * @param left - optional wildcard on the left
-   * @param right - optional wildcard on the right
-   * @returns filtration statement for RDatum
-   */
-  public static searchByString(
-    row: RDatum,
-    label: string,
-    left: string,
-    right: string
-  ): RDatum {
-    return row("label").downcase().match(`${left}${label}${right}`);
-  }
-
-  /**
-   * provides searching which respects word boundaries and provides optional wildcard support
-   * @param row - RDatum from rethink api
-   * @param label - cleaned label input (with escaped chars)
-   * @param left - optional wildcard on the left
-   * @param right - optional wildcard on the right
-   * @param normalize - if true, the label will be normalized to remove diacritics and convert to lowercase
-   * @returns filtration statement for RDatum
-   */
-  public static searchWordByWord(
-    row: RDatum,
-    label: string,
-    left: string,
-    right: string,
-    normalize = true
-  ): RDatum<boolean> {
-    // if wildcard not used, update the left/right side to simulate word boundaries
-    if (left === "^") {
-      left = "(^|[^a-zA-Z0-9])";
-    }
-    if (right === "$") {
-      right = "($|[^a-zA-Z0-9])";
-    }
-
-    // Instead of normalizing, create a pattern that matches both accented and non-accented versions
-    const processedLabel = label.toLowerCase();
-    const diacriticPattern = processedLabel
-      .split("")
-      .map((char) => {
-        // Map common accented characters to their base form with optional accents
-        const map: Record<string, string> = {
-          a: "[aàáâãäå]",
-          e: "[eèéêë]",
-          i: "[iìíîï]",
-          o: "[oòóôõö]",
-          u: "[uùúûü]",
-          y: "[yýÿ]",
-          n: "[nñ]",
-          c: "[cç]",
-        };
-        return map[char] || char;
-      })
-      .join("");
-
-    const regexBody = diacriticPattern
-      .split(" ")
-      .join("([^a-zA-Z0-9]+[\\w]+)*[^a-zA-Z0-9]+"); // Allow glue between words
-
-    const regexp = `(?i)${left}${regexBody}${right}`;
-
-    return row("labels").contains<string>((targetLabel) =>
-      targetLabel.match(regexp)
+  if (req.createdAfter || req.createdBefore) {
+    await updateEntityIdsFromAudits(req, () =>
+      Audit.getByCreatedInRange(
+        conn,
+        req.createdAfter as Date | undefined,
+        req.createdBefore as Date | undefined
+      )
+    );
+  } else if (req.createdDate) {
+    await updateEntityIdsFromAudits(req, () =>
+      Audit.getByCreatedDate(conn, req.createdDate as Date)
     );
   }
 
-  /**
-   * adds condition to limit the query only to selected ids.
-   * According to previous filters, it will use filter or getAll method.
-   * Note: this filter should be applied last.
-   * @param entityIds
-   * @returns
-   */
-  whereEntityIds(entityIds: string[]): SearchQuery {
-    if (this.filterUsed) {
-      this.query = this.query.filter((row: RDatum) =>
-        r.expr(entityIds).contains(row("id"))
-      );
-    } else {
-      this.query = this.query.getAll(r.args(entityIds)) as any;
-    }
-    return this;
+  if (req.updatedAfter || req.updatedBefore) {
+    await updateEntityIdsFromAudits(req, () =>
+      Audit.getByUpdatedInRange(
+        conn,
+        req.updatedAfter as Date | undefined,
+        req.updatedBefore as Date | undefined
+      )
+    );
+  } else if (req.updatedDate) {
+    await updateEntityIdsFromAudits(req, () =>
+      Audit.getByUpdatedDate(conn, req.updatedDate as Date)
+    );
   }
 
-  /**
-   * Fetches audits and updates the request's entityIds by intersecting with the audit results.
-   * This is a helper to abstract away the repeated logic for filtering by audit data.
-   * It also improves performance by using a Set for intersection.
-   * @param req The request search object, will be mutated.
-   * @param getAudits A function that returns a promise of audits.
-   */
-  private async _updateEntityIdsFromAudits(
-    req: RequestSearch,
-    getAudits: () => Promise<Audit[]>
-  ) {
-    const audits = await getAudits();
-    const auditEntityIds = audits
-      .filter((a) => a.auditScope === AuditScope.Entity)
-      .map((a) => a.modelId);
+  if (req.createdBy) {
+    await updateEntityIdsFromAudits(req, () =>
+      Audit.getByCreatedBy(conn, req.createdBy as string)
+    );
+  }
+
+  if (req.updatedBy) {
+    await updateEntityIdsFromAudits(req, () =>
+      Audit.getByUpdatedBy(conn, req.updatedBy as string)
+    );
+  }
+
+  if (req.editedBy?.length) {
+    const auditEntityIdsSet = new Set<string>();
+    for (const userId of req.editedBy) {
+      const updatedBy = await Audit.getByUpdatedBy(conn, userId);
+      const createdBy = await Audit.getByCreatedBy(conn, userId);
+
+      updatedBy
+        .concat(createdBy)
+        .filter((a) => a.auditScope === AuditScope.Entity)
+        .forEach((a) => auditEntityIdsSet.add(a.modelId));
+    }
 
     if (!req.entityIds) {
-      req.entityIds = auditEntityIds;
+      req.entityIds = Array.from(auditEntityIdsSet);
     } else {
-      const auditEntityIdsSet = new Set(auditEntityIds);
       req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
     }
   }
 
-  /**
-   * prepares the query according to request
-   * @param req
-   */
-  async fromRequest(req: RequestSearch): Promise<void> {
-    if (req.entityIds?.length) {
-      this.retainedIdsOrder = req.entityIds;
-    }
+  const usedLabel = req.labelOrId
+    ? prepareLabel(req.labelOrId)[0]
+    : req.label
+    ? prepareLabel(req.label)[0]
+    : undefined;
 
-    if (req.cooccurrenceId) {
-      const assocEntityIds = await Statement.getCoOccurrentEntityIds(
-        this.connection,
-        req.cooccurrenceId
-      );
-      if (!req.entityIds) {
-        req.entityIds = [];
-      }
-      req.entityIds = req.entityIds.concat(assocEntityIds);
-    }
+  const entities = await storage.entities.search(conn, req, opts);
 
-    if (req.territoryId) {
-      let territoryIds = [req.territoryId];
-
-      // include childs
-      if (req.subTerritorySearch) {
-        const childs = Object.values(
-          await new Territory({ id: req.territoryId }).findChilds(
-            this.connection,
-            true
-          )
-        );
-        territoryIds = territoryIds.concat(childs.map((ch) => ch.id));
-      }
-
-      const assocEntityIds = await this.getStatementObjectIdsForTerritories(
-        territoryIds
-      );
-
-      if (!req.entityIds) {
-        req.entityIds = [];
-      }
-      req.entityIds = req.entityIds.concat(assocEntityIds);
-    }
-
-    if (req.class) {
-      this.whereClass(req.class);
-    }
-
-    if (req.status) {
-      this.whereStatus(req.status);
-    }
-
-    if (req.createdAfter || req.createdBefore) {
-      await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedInRange(
-          this.connection,
-          req.createdAfter as Date | undefined,
-          req.createdBefore as Date | undefined,
-        )
-      );
-    } else if (req.createdDate) {
-      await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedDate(this.connection, req.createdDate as Date)
-      );
-    }
-
-    if (req.updatedAfter || req.updatedBefore) {
-      await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedInRange(
-          this.connection,
-          req.updatedAfter as Date | undefined,
-          req.updatedBefore as Date | undefined,
-        )
-      );
-    } else if (req.updatedDate) {
-      await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedDate(this.connection, req.updatedDate as Date)
-      );
-    }
-
-    if (req.createdBy) {
-      await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByCreatedBy(this.connection, req.createdBy as string)
-      );
-    }
-
-    if (req.updatedBy) {
-      await this._updateEntityIdsFromAudits(req, () =>
-        Audit.getByUpdatedBy(this.connection, req.updatedBy as string)
-      );
-    }
-
-    if (req.editedBy?.length) {
-      // OR semantics - union of entities edited (created or updated) by any of the listed users
-      const auditEntityIdsSet = new Set<string>();
-      for (const userId of req.editedBy) {
-        const updatedBy = await Audit.getByUpdatedBy(this.connection, userId);
-        const createdBy = await Audit.getByCreatedBy(this.connection, userId);
-
-        updatedBy
-          .concat(createdBy)
-          .filter((a) => a.auditScope === AuditScope.Entity)
-          .forEach((a) => auditEntityIdsSet.add(a.modelId));
-      }
-
-      if (!req.entityIds) {
-        req.entityIds = Array.from(auditEntityIdsSet);
-      } else {
-        req.entityIds = req.entityIds.filter((id) => auditEntityIdsSet.has(id));
-      }
-    }
-
-    if (req.usedTemplate) {
-      this.whereUsedTemplate(req.usedTemplate);
-    }
-
-    if (req.language !== undefined) {
-      this.whereLanguage(req.language);
-    }
-
-    if (req.onlyTemplates) {
-      this.whereIsTemplate();
-    }
-
-    if (req.resourceHasDocument) {
-      this.whereResourcesHasDocument();
-    }
-
-    if (req.excluded) {
-      this.whereNotClass(req.excluded);
-    }
-
-    if (req.label) {
-      this.whereLabel(req.label);
-    }
-
-    if (req.labelOrId) {
-      this.whereLabelOrId(req.labelOrId);
-    }
-
-    if (req.entityIds) {
-      this.whereEntityIds(req.entityIds);
-    }
-
-    if (req.haveReferenceTo) {
-      this.whereHaveReferenceTo(req.haveReferenceTo);
-    }
-    //  console.log(this.query.toString());
-  }
-
-  /**
-   * executes the prepared query
-   * @returns list of found entities
-   */
-  async do(): Promise<IEntity[]> {
-    return this.query.run(this.connection);
-  }
+  return { entities, usedLabel, retainedIdsOrder };
 }
 
 export class ResponseSearch {
@@ -568,7 +240,7 @@ export class ResponseSearch {
    * @param baseEntities entities matched by the original (label) search
    */
   static async expandResults(
-    conn: Connection,
+    conn: Conn,
     request: RequestSearch,
     baseEntities: IEntity[]
   ): Promise<{
@@ -585,7 +257,7 @@ export class ResponseSearch {
     const subordinateIds = new Set<string>();
 
     const expansions: Array<
-      [(c: Connection, ids: string[]) => Promise<string[]>, Set<string>]
+      [(c: Conn, ids: string[]) => Promise<string[]>, Set<string>]
     > = [];
     if (request.includeEquivalents) {
       expansions.push([getEquivalentEntityIds, equivalentIds]);
@@ -614,12 +286,11 @@ export class ResponseSearch {
         includeEquivalents: false,
         includeSubordinates: false,
       });
-      const query = new SearchQuery(conn);
-      query.whereEntityIds(relatedIds);
-      query.filterUsed = true;
-      await query.fromRequest(expansionRequest);
+      const { entities: found } = await searchEntities(conn, expansionRequest, {
+        seedIds: relatedIds,
+      });
 
-      for (const entity of await query.do()) {
+      for (const entity of found) {
         if (!seen.has(entity.id)) {
           seen.add(entity.id);
           target.add(entity.id);
@@ -654,7 +325,7 @@ export class ResponseSearch {
    * Shared by the Search box (ResponseSearch.prepare) and the Explorer filter.
    */
   static async filterEntitiesByRootValidity(
-    conn: Connection,
+    conn: Conn,
     entities: IEntity[],
     validity: IRequestSearchRootValidity,
     settings: ISetting[]
@@ -729,10 +400,12 @@ export class ResponseSearch {
    * @param db
    */
   async prepare(httpRequest: IRequest): Promise<ResponseEntity[]> {
-    const query = new SearchQuery(httpRequest.db.connection);
     const settings = await Setting.getSettingsAll(httpRequest.db.connection);
-    await query.fromRequest(this.request);
-    let entities = await query.do();
+    const { entities: found, usedLabel, retainedIdsOrder } = await searchEntities(
+      httpRequest.db.connection,
+      this.request
+    );
+    let entities = found;
 
     // mix in equivalents/subordinates of the direct matches (#2969); the
     // returned id sets flag which results were added by each option
@@ -757,10 +430,10 @@ export class ResponseSearch {
       settings
     );
 
-    if (query.retainedIdsOrder) {
-      entities = sortByRequiredOrder(entities, query.retainedIdsOrder);
+    if (retainedIdsOrder) {
+      entities = sortByRequiredOrder(entities, retainedIdsOrder);
     } else {
-      entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
+      entities = sortByWordMatch(sortByLength(entities), usedLabel);
     }
 
     const out: ResponseEntity[] = [];

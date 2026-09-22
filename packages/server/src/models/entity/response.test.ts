@@ -18,7 +18,7 @@ import {
 } from "@inkvisitor/shared/types/response-detail";
 import { IEntity, IStatement } from "@inkvisitor/shared/types";
 import { prepareEntity } from "./entity.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import Document from "@models/document/document";
 import Resource from "@models/resource/resource";
 import Territory from "@models/territory/territory";

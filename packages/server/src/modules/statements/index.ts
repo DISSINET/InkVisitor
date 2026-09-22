@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { r as rethink, RDatum } from "rethinkdb-ts";
+import { storage } from "@service/storage";
 import { entityCacheKey, findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { cache } from "@service/ttlCache";
@@ -485,19 +485,11 @@ export default Router()
         }));
 
       if (updatesPayload.length > 0) {
-        const now = new Date();
-        await rethink
-          .expr(updatesPayload)
-          .forEach((u: RDatum) =>
-            rethink
-              .table(Entity.table)
-              .get(u("id"))
-              .update({
-                data: { territory: { territoryId: u("territoryId"), order: u("order") } },
-                updatedAt: now,
-              })
-          )
-          .run(request.db.connection);
+        await storage.entities.updateStatementTerritoryOrders(
+          request.db.connection,
+          updatesPayload,
+          new Date()
+        );
 
         // Bulk path bypassed Entity.update, so invalidate the entity cache
         // for each reordered row manually.

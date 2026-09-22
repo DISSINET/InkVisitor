@@ -5,14 +5,13 @@ import {
   IStoredTerritory,
   IUserRight,
 } from "@inkvisitor/shared/types";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { Conn, Db, WriteResult, storage } from "@service/storage";
 import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import { generateUuid, hashPassword } from "@common/auth";
 import { generatePassword } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
-import { Db } from "@service/rethink";
 import { DbHandle } from "@service/dbHandle";
 import { cache } from "@service/ttlCache";
 
@@ -146,11 +145,11 @@ export default class User implements IUser, IDbModel {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(dbInstance: Connection | undefined): Promise<boolean> {
-    const result = await rethink
-      .table(User.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(dbInstance);
+  async save(dbInstance: Conn | undefined): Promise<boolean> {
+    const result = await storage.users.insert(dbInstance as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -160,7 +159,7 @@ export default class User implements IUser, IDbModel {
   }
 
   async update(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     const snapshot = new User({
@@ -172,7 +171,7 @@ export default class User implements IUser, IDbModel {
       throw new ModelNotValidError("model not valid");
     }
 
-    const result = await rethink.table(User.table).get(this.id).update(updateData).run(dbInstance);
+    const result = await storage.users.update(dbInstance as Conn, this.id, updateData);
     cache.delete(userCacheKey(this.id));
     return result;
   }
@@ -182,14 +181,10 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  async delete(dbInstance: Connection): Promise<WriteResult> {
-    const result = await rethink
-      .table(User.table)
-      .get(this.id)
-      .update({
-        deletedAt: new Date(),
-      })
-      .run(dbInstance);
+  async delete(dbInstance: Conn): Promise<WriteResult> {
+    const result = await storage.users.update(dbInstance, this.id, {
+      deletedAt: new Date(),
+    });
     cache.delete(userCacheKey(this.id));
     return result;
   }
@@ -246,7 +241,7 @@ export default class User implements IUser, IDbModel {
    * @param id
    * @returns
    */
-  static async findUserById(dbInstance: Connection | undefined, id: string): Promise<User | null> {
+  static async findUserById(dbInstance: Conn | undefined, id: string): Promise<User | null> {
     const key = userCacheKey(id);
     // Snapshot before the DB read; trySet below refuses if a writer
     // invalidated the key meanwhile.
@@ -256,8 +251,8 @@ export default class User implements IUser, IDbModel {
       return new User(cached);
     }
 
-    const data = await rethink.table(User.table).get(id).run(dbInstance);
-    if (!data || (data as IUser).deletedAt) {
+    const data = await storage.users.get(dbInstance as Conn, id);
+    if (!data || data.deletedAt) {
       return null;
     }
 
@@ -276,12 +271,9 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  static async getOwner(dbInstance: Connection | undefined): Promise<User | null> {
-    const data = await rethink
-      .table(User.table)
-      .filter({ role: UserEnums.Role.Owner })
-      .run(dbInstance);
-    return data && data.length > 0 ? new User(data[0]) : null;
+  static async getOwner(dbInstance: Conn | undefined): Promise<User | null> {
+    const data = await storage.users.owner(dbInstance as Conn);
+    return data ? new User(data) : null;
   }
 
   /**
@@ -292,21 +284,11 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async getUserByEmail(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     email: string
   ): Promise<User | null> {
-    const data = await rethink
-      .table(User.table)
-      .filter(function (user: any) {
-        return rethink.not(user.hasFields("deletedAt"));
-      })
-      .filter({ email })
-      .limit(1)
-      .run(dbInstance);
-    if (data && data.length) {
-      return new User(data[0]);
-    }
-    return null;
+    const data = await storage.users.byEmail(dbInstance as Conn, email);
+    return data ? new User(data) : null;
   }
 
   /**
@@ -317,20 +299,11 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async getUserByHash(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     hash: string
   ): Promise<User | null> {
-    const data = await rethink
-      .table(User.table)
-      .filter(function (user: any) {
-        return rethink.not(user.hasFields("deletedAt"));
-      })
-      .filter({ hash })
-      .run(dbInstance);
-    if (data && data.length) {
-      return new User(data[0]);
-    }
-    return null;
+    const data = await storage.users.byHash(dbInstance as Conn, hash);
+    return data ? new User(data) : null;
   }
 
   /**
@@ -339,14 +312,8 @@ export default class User implements IUser, IDbModel {
    * @param dbInstance
    * @returns
    */
-  static async findAllUsers(dbInstance: Connection | undefined): Promise<User[]> {
-    const data = await rethink
-      .table(User.table)
-      .filter(function (user: any) {
-        return rethink.not(user.hasFields("deletedAt"));
-      })
-      .orderBy(rethink.asc("role"), rethink.asc("name"))
-      .run(dbInstance);
+  static async findAllUsers(dbInstance: Conn | undefined): Promise<User[]> {
+    const data = await storage.users.allActive(dbInstance as Conn);
     return data.map((d) => new User(d));
   }
 
@@ -363,22 +330,9 @@ export default class User implements IUser, IDbModel {
     login: string,
     includeThrashed: boolean
   ): Promise<User | null> {
-    let req = await rethink.table(User.table);
+    const data = await storage.users.byLogin(dbInstance.connection, login, includeThrashed);
 
-    if (!includeThrashed) {
-      req = req.filter(function (user: any) {
-        return rethink.not(user.hasFields("deletedAt"));
-      });
-    }
-
-    const data = await req
-      .filter(function (user: any) {
-        return rethink.or(rethink.row("name").eq(login), rethink.row("email").eq(login));
-      })
-      .limit(1)
-      .run(dbInstance.connection);
-
-    return data.length == 0 ? null : new User(data[0]);
+    return data ? new User(data) : null;
   }
 
   /**
@@ -389,14 +343,11 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async findUsersByLabel(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     label: string
   ): Promise<User[]> {
-    const data = await rethink
-      .table(User.table)
-
-      .run(dbInstance);
-    return (data as IUser[]).map((d) => new User(d));
+    const data = await storage.users.all(dbInstance as Conn);
+    return data.map((d) => new User(d));
   }
 
   /**
@@ -406,17 +357,8 @@ export default class User implements IUser, IDbModel {
    * @param entityId
    * @returns array of IUser interfaces
    */
-  static async findByBookmarkedEntity(db: Connection, entityId: string): Promise<IUser[]> {
-    const users: IUser[] = await rethink
-      .table(User.table)
-      .filter(function (user: RDatum<IUser>) {
-        return user("bookmarks").contains((bookmark: RDatum<IBookmarkFolder>) =>
-          bookmark("entityIds").contains(entityId)
-        );
-      })
-      .run(db);
-
-    return users;
+  static async findByBookmarkedEntity(db: Conn, entityId: string): Promise<IUser[]> {
+    return storage.users.byBookmarkedEntity(db, entityId);
   }
 
   /**
@@ -426,17 +368,8 @@ export default class User implements IUser, IDbModel {
    * @param territoryId
    * @returns array of IUser interfaces
    */
-  static async findByStoredTerritory(db: Connection, territoryId: string): Promise<IUser[]> {
-    const users: IUser[] = await rethink
-      .table(User.table)
-      .filter(function (user: RDatum<IUser>) {
-        return user("storedTerritories").contains((stored: RDatum<IStoredTerritory>) =>
-          stored("territoryId").eq(territoryId)
-        );
-      })
-      .run(db);
-
-    return users;
+  static async findByStoredTerritory(db: Conn, territoryId: string): Promise<IUser[]> {
+    return storage.users.byStoredTerritory(db, territoryId);
   }
 
   /**
@@ -445,7 +378,7 @@ export default class User implements IUser, IDbModel {
    * @param db
    * @param entityId
    */
-  static async removeBookmarkedEntity(db: Connection, entityId: string): Promise<void> {
+  static async removeBookmarkedEntity(db: Conn, entityId: string): Promise<void> {
     const userEntries = await User.findByBookmarkedEntity(db, entityId);
     for (const userData of userEntries) {
       const userModel = new User(userData);
@@ -460,7 +393,7 @@ export default class User implements IUser, IDbModel {
    * @param db
    * @param territoryId
    */
-  static async removeStoredTerritory(db: Connection, territoryId: string): Promise<void> {
+  static async removeStoredTerritory(db: Conn, territoryId: string): Promise<void> {
     const userEntries = await User.findByStoredTerritory(db, territoryId);
     for (const userData of userEntries) {
       const userModel = new User(userData);

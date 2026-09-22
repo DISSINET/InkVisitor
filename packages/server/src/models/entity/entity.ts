@@ -35,7 +35,7 @@ import {
   ITerritoryValidation,
 } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
-import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
 
@@ -94,13 +94,13 @@ export default class Entity implements IEntity, IDbModel {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
+  async save(db: Conn | undefined): Promise<boolean> {
     this.createdAt = new Date();
 
-    const result = await rethink
-      .table(Entity.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+    const result = await storage.entities.insert(db as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -117,7 +117,7 @@ export default class Entity implements IEntity, IDbModel {
    * Use this method for doing asynchronous operation/checks before the save operation
    * @param db db connection
    */
-  async beforeSave(db: Connection): Promise<void> {
+  async beforeSave(db: Conn): Promise<void> {
     if (!this.isTemplate) {
       const linkedEntities = await Entity.findEntitiesByIds(
         db,
@@ -130,7 +130,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   async update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Partial<IEntity>
   ): Promise<WriteResult> {
     // update timestamp
@@ -142,18 +142,15 @@ export default class Entity implements IEntity, IDbModel {
         !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
     );
 
-    const result = await rethink.table(Entity.table).get(this.id).update(updateData).run(db);
+    const result = await storage.entities.update(db as Conn, this.id, updateData);
     cache.delete(entityCacheKey(this.id));
     return result;
   }
 
-  async getUsedByEntity(db: Connection): Promise<IEntity[]> {
+  async getUsedByEntity(db: Conn): Promise<IEntity[]> {
     const out: Record<string, IEntity> = {};
     for (const index of DbEnums.EntityIdReferenceIndexes) {
-      const entities: IEntity[] = await rethink
-        .table(Entity.table)
-        .getAll(this.id, { index })
-        .run(db);
+      const entities = await storage.entities.byIndex(db, index, [this.id]);
 
       for (const entity of entities) {
         out[entity.id] = entity;
@@ -163,7 +160,7 @@ export default class Entity implements IEntity, IDbModel {
     return Object.values(out);
   }
 
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on entity with undefined id"
@@ -176,11 +173,7 @@ export default class Entity implements IEntity, IDbModel {
       await User.removeStoredTerritory(db, this.id);
     }
 
-    const result = await rethink
-      .table(Entity.table)
-      .get(this.id)
-      .delete()
-      .run(db);
+    const result = await storage.entities.delete(db, this.id);
 
     cache.delete(entityCacheKey(this.id));
     return result;
@@ -242,7 +235,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   static async findUsedInProps(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IEntity[]> {
     // Uses the `props.recursive` multi-index (see
@@ -250,10 +243,7 @@ export default class Entity implements IEntity, IDbModel {
     // entityId referenced from props/children up to 3 levels deep.
     // Used to be a full-table .filter() walking the same shape - same
     // result set, but linear in table size and several seconds on prod.
-    return await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.PropsRecursive })
-      .run(db);
+    return storage.entities.byIndex(db as Conn, DbEnums.Indexes.PropsRecursive, [entityId]);
   }
 
   /**
@@ -264,15 +254,12 @@ export default class Entity implements IEntity, IDbModel {
    * @returns list of entities carrying such a reference
    */
   static async findUsedInReferences(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IEntity[]> {
     // Uses the `references.entityIds` multi-index (see
     // packages/database/scripts/import/indexes.ts).
-    return await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.EntityReferences })
-      .run(db);
+    return storage.entities.byIndex(db as Conn, DbEnums.Indexes.EntityReferences, [entityId]);
   }
 
   /**
@@ -376,7 +363,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   static async findEntitiesByIds(
-    con: Connection,
+    con: Conn,
     ids: string[]
   ): Promise<IEntity[]> {
     const uniqueIds = new Set<string>();
@@ -397,10 +384,7 @@ export default class Entity implements IEntity, IDbModel {
       return [];
     }
 
-    const data = await rethink
-      .table(Entity.table)
-      .getAll(rethink.args([...uniqueIds]))
-      .run(con);
+    const data = await storage.entities.getMany(con, [...uniqueIds]);
 
     const byId = new Map<string, IEntity>(
       data.map((entity: IEntity) => [entity.id, entity])
@@ -637,7 +621,7 @@ export default class Entity implements IEntity, IDbModel {
    * @returns
    */
   async findUsedInDocuments(
-    conn: Connection
+    conn: Conn
   ): Promise<IResponseUsedInDocument[]> {
     const out: IResponseUsedInDocument[] = [];
     await Promise.all(
@@ -646,15 +630,7 @@ export default class Entity implements IEntity, IDbModel {
       ).map(async (docData) => {
         // construct document and tree node filled with entities data
         const doc = new Document(docData);
-        const resources = await rethink
-          .table(Entity.table)
-          .filter({
-            class: EntityEnums.Class.Resource,
-            data: {
-              documentId: docData.id,
-            },
-          })
-          .run(conn);
+        const resources = await storage.entities.resourcesByDocumentId(conn, docData.id);
 
         const resource = resources.length > 0 ? resources[0] : null;
 
@@ -689,7 +665,7 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
-  async getEntities(db: Connection): Promise<IEntity[]> {
+  async getEntities(db: Conn): Promise<IEntity[]> {
     return Entity.findEntitiesByIds(db, this.getEntitiesIds());
   }
 
@@ -704,7 +680,7 @@ export default class Entity implements IEntity, IDbModel {
    * @param entities
    */
   static async applyAnchorTexts(
-    conn: Connection,
+    conn: Conn,
     entities: Record<string, IEntity> | IEntity[]
   ): Promise<void> {
     const list = Array.isArray(entities) ? entities : Object.values(entities);
@@ -733,13 +709,8 @@ export default class Entity implements IEntity, IDbModel {
    * @param db
    * @returns
    */
-  async findFromTemplate(db: Connection): Promise<IEntity[]> {
-    const data = await rethink
-      .table(Entity.table)
-      .getAll(this.id, { index: DbEnums.Indexes.EntityUsedTemplate })
-      .run(db);
-
-    return data;
+  async findFromTemplate(db: Conn): Promise<IEntity[]> {
+    return storage.entities.byIndex(db, DbEnums.Indexes.EntityUsedTemplate, [this.id]);
   }
 
   /**

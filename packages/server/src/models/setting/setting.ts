@@ -1,4 +1,4 @@
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { IDbModel } from "@models/common";
 import { ISetting, SettingsKey } from "@inkvisitor/shared/types/settings";
 import { cache } from "@service/ttlCache";
@@ -25,57 +25,52 @@ export class Setting implements ISetting, IDbModel {
     return !!this.id;
   }
 
-  async save(dbInstance: Connection | undefined): Promise<boolean> {
-    const result = await rethink
-      .table(Setting.table)
-      .insert(
-        {
-          id: this.id,
-          value: this.value,
-          public: this.public,
-        },
-        { conflict: "update" } // use upsert
-      )
-      .run(dbInstance);
+  async save(dbInstance: Conn | undefined): Promise<boolean> {
+    const result = await storage.settings.insert(
+      dbInstance as Conn,
+      {
+        id: this.id,
+        value: this.value,
+        public: this.public,
+      },
+      { conflict: "update" } // use upsert
+    );
 
     cache.delete(SETTINGS_ALL_CACHE_KEY);
     return result.inserted === 1;
   }
 
   async update(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     updateData: { value: any }
   ): Promise<WriteResult> {
-    const result = await rethink
-      .table(Setting.table)
-      .get(this.id)
-      .replace({ ...updateData, id: this.id, public: this.public })
-      .run(dbInstance);
+    const result = await storage.settings.replace(dbInstance as Conn, this.id, {
+      ...updateData,
+      id: this.id,
+      public: this.public,
+    });
 
     cache.delete(SETTINGS_ALL_CACHE_KEY);
     return result;
   }
 
-  delete(dbInstance: Connection): Promise<WriteResult> {
+  delete(dbInstance: Conn): Promise<WriteResult> {
     throw new Error("Setting cannot be removed");
   }
 
   static async getSetting(
-    conn: Connection,
+    conn: Conn,
     key: SettingsKey
   ): Promise<Setting | null> {
-    const result = await rethink.table(Setting.table).get(key).run(conn);
-    return result ? new Setting(result as ISetting) : null;
+    const result = await storage.settings.get(conn, key);
+    return result ? new Setting(result) : null;
   }
 
   static async getSettings(
-    conn: Connection,
+    conn: Conn,
     keys: string[]
   ): Promise<Setting[]> {
-    const results = await rethink
-      .table(Setting.table)
-      .getAll.apply(undefined, keys)
-      .run(conn);
+    const results = await storage.settings.getMany(conn, keys);
     return results.map((data) => new Setting(data));
   }
 
@@ -85,7 +80,7 @@ export class Setting implements ISetting, IDbModel {
    * avoid allocating N instances per call on the hot path. The cache
    * deep-clones on read, so callers may not mutate the result.
    */
-  static async getSettingsAll(conn: Connection): Promise<ISetting[]> {
+  static async getSettingsAll(conn: Conn): Promise<ISetting[]> {
     // Snapshot before the DB read; trySet below refuses if a writer
     // invalidated the key meanwhile.
     const version = cache.snapshot(SETTINGS_ALL_CACHE_KEY);
@@ -94,15 +89,13 @@ export class Setting implements ISetting, IDbModel {
       return cached;
     }
 
-    const results = (await rethink
-      .table(Setting.table)
-      .run(conn)) as ISetting[];
+    const results = await storage.settings.all(conn);
     cache.trySet(SETTINGS_ALL_CACHE_KEY, results, undefined, version);
     return results;
   }
 
   static async updateGroup(
-    conn: Connection,
+    conn: Conn,
     allowedSettingsKeys: string[],
     data: { id: string; value: unknown }[]
   ): Promise<boolean> {

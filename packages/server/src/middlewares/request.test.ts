@@ -1,7 +1,7 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { UserNotActiveError } from "@inkvisitor/shared/types/errors";
 import { apiPath } from "@common/constants";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import User from "@models/user/user";
 import { createAgentWithUserId } from "@modules/testAuth";
 import { pool } from "./db";

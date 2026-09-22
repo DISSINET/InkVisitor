@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export default class Implication
   extends Relation
@@ -19,7 +19,7 @@ export default class Implication
   }
 
   static async getImplicationForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IImplication>[]> {
@@ -45,7 +45,7 @@ export default class Implication
   }
 
   static async getImplicationInverseConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IImplication[]> {

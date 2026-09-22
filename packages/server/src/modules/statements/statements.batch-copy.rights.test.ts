@@ -1,4 +1,4 @@
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
 import { createMockTree } from "@modules/common.test";
@@ -6,7 +6,6 @@ import User from "@models/user/user";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
-import { r as rethink } from "rethinkdb-ts";
 import treeCache from "@service/treeCache";
 import defaultAcl from "../../../../database/datasets/default/acl_permissions.json";
 
@@ -43,7 +42,7 @@ describe("statements/batch-copy - editor rights", () => {
         (row.controller === "statements" && row.route === "batch-copy") ||
         (row.controller === "entities" && row.route === ":entityId/clone")
     );
-    await rethink.table("acl_permissions").insert(seeded).run(db.connection);
+    await storage.acl.insert(db.connection, seeded);
 
     await new User({
       id: editorId,
@@ -62,7 +61,7 @@ describe("statements/batch-copy - editor rights", () => {
   });
 
   afterAll(async () => {
-    await rethink.table("users").getAll(editorId).delete().run(db.connection);
+    await storage.users.deleteMany(db.connection, [editorId]);
     await db.close();
     await pool.end();
   });

@@ -1,5 +1,5 @@
 import { IDbModel, fillFlatObject } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { EventType, Aggregation } from "@inkvisitor/shared/types/stats";
 import { expandEventTypesForStats } from "./event-type-fold";
 
@@ -42,12 +42,10 @@ export class MaterializedStats implements IMaterializedStats {
   /**
    * Stores the materialized stats in the db
    */
-  async save(db: Connection | undefined, timeUnit: string): Promise<boolean> {
-    const tableName = MaterializedStats.getTableName(timeUnit);
-    const result = await rethink
-      .table(tableName)
-      .insert({ ...this, id: this.id || undefined }, { conflict: "replace" })
-      .run(db);
+  async save(db: Conn | undefined, timeUnit: string): Promise<boolean> {
+    const result = await storage
+      .stats(timeUnit)
+      .insert(db as Conn, { ...this, id: this.id || undefined }, { conflict: "replace" });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -60,28 +58,18 @@ export class MaterializedStats implements IMaterializedStats {
    * Updates existing materialized stats
    */
   update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Record<string, unknown>,
     timeUnit: string
   ): Promise<WriteResult> {
-    const tableName = MaterializedStats.getTableName(timeUnit);
-    return rethink
-      .table(tableName)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
+    return storage.stats(timeUnit).update(db as Conn, this.id, updateData);
   }
 
   /**
    * Deletes materialized stats entry
    */
-  async delete(db: Connection, timeUnit: string): Promise<WriteResult> {
-    const tableName = MaterializedStats.getTableName(timeUnit);
-    return rethink
-      .table(tableName)
-      .get(this.id)
-      .delete()
-      .run(db);
+  async delete(db: Conn, timeUnit: string): Promise<WriteResult> {
+    return storage.stats(timeUnit).delete(db, this.id);
   }
 
   /**
@@ -101,26 +89,19 @@ export class MaterializedStats implements IMaterializedStats {
    * Finds materialized stats by date range and filters
    */
   static async findByDateRange(
-    db: Connection,
+    db: Conn,
     timeUnit: string,
     fromDate: Date,
     toDate: Date,
     eventTypes: EventType[],
     aggregateBy: Aggregation
   ): Promise<MaterializedStats[]> {
-    const tableName = MaterializedStats.getTableName(timeUnit);
     const fromDateStr = fromDate.toISOString().split('T')[0];
     const toDateStr = toDate.toISOString().split('T')[0];
 
-    const result = await rethink
-      .table(tableName)
-      .between(fromDateStr, toDateStr, { index: "date" })
-      .filter((doc: any) =>
-        rethink.expr(expandEventTypesForStats(eventTypes)).contains(doc("eventType"))
-      )
-      .filter((doc: any) => doc("aggregateBy").eq(aggregateBy))
-      .orderBy("date")
-      .run(db);
+    const result = await storage
+      .stats(timeUnit)
+      .byDateRange(db, fromDateStr, toDateStr, expandEventTypesForStats(eventTypes), aggregateBy);
 
     return result.map((data) => new MaterializedStats(data));
   }
@@ -129,37 +110,21 @@ export class MaterializedStats implements IMaterializedStats {
    * Gets the latest lastUpdated date for a time unit
    */
   static async getLatestUpdateDate(
-    db: Connection,
+    db: Conn,
     timeUnit: string
   ): Promise<Date | null> {
-    const tableName = MaterializedStats.getTableName(timeUnit);
-    
-    try {
-      const result = await rethink
-        .table(tableName)
-        .max("lastUpdated")
-        .run(db);
-
-      return result ? new Date((result as any).lastUpdated) : null;
-    } catch (error) {
-      // Table might not exist yet
-      return null;
-    }
+    return storage.stats(timeUnit).latestUpdate(db);
   }
 
   /**
    * Bulk insert materialized stats
    */
   static async bulkInsert(
-    db: Connection,
+    db: Conn,
     timeUnit: string,
     stats: IMaterializedStats[]
   ): Promise<WriteResult> {
-    const tableName = MaterializedStats.getTableName(timeUnit);
-    return rethink
-      .table(tableName)
-      .insert(stats, { conflict: "replace" })
-      .run(db);
+    return storage.stats(timeUnit).insert(db, stats, { conflict: "replace" });
   }
 
   /**

@@ -23,7 +23,7 @@ import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
 import { ITerritoryValidation } from "@inkvisitor/shared/types/territory";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
@@ -105,7 +105,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * Prepares the entities map
    * @param db
    */
-  async prepareEntities(db: Connection): Promise<void> {
+  async prepareEntities(db: Conn): Promise<void> {
     const entities = await this.getEntities(db);
     const anchorEntities = await Entity.findEntitiesByIds(
       db,

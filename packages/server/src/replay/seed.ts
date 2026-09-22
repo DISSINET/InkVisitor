@@ -1,16 +1,15 @@
 import fs from "fs";
 import path from "path";
-import { r } from "rethinkdb-ts";
 import { hashPassword } from "@common/auth";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import { connectAdmin, getTestDbName } from "../test/db";
-import { provisionTables } from "../test/schema";
+import { Row, TableStore, storage } from "@service/storage";
+import { getTestDbName } from "../test/db";
 
 /**
  * Builds the replay database from the tracked datasets: the `relationstest`
  * composition of packages/database/scripts/import.ts (relationstest entities
  * and relations, default users / acl / settings / documents), provisioned
- * through the same table + index list the jest harness uses.
+ * through the storage adapter like the jest harness.
  *
  * The seeder is interactive, so its four transforms are repeated here. Where
  * the seeder is non-deterministic the replay pins the value, because two seeds
@@ -24,8 +23,6 @@ import { provisionTables } from "../test/schema";
  * - statements without a labels key get [""], the value every production
  *   statement has (search sorts by labels[0].length and would crash)
  */
-type Row = Record<string, any>;
-
 const DATASETS = path.resolve(__dirname, "../../../database/datasets");
 const SEED_DATE = new Date("2020-01-01T00:00:00.000Z");
 const REPLAY_RIGHTS: Record<string, Row[]> = {
@@ -49,13 +46,9 @@ function isUsableRelation(rel: Row, entityIds: Set<string>): boolean {
 
 export async function seedReplayDb(): Promise<void> {
   const dbName = getTestDbName();
-  const conn = await connectAdmin();
+  await storage.createDatabase(dbName);
+  const conn = await storage.openConnection({ db: dbName });
   try {
-    await r.dbDrop(dbName).run(conn).catch(() => undefined);
-    await r.dbCreate(dbName).run(conn);
-    conn.use(dbName);
-    await provisionTables(conn);
-
     const entities = load("relationstest/entities.json").map((e): Row => ({
       ...e,
       createdAt: e.createdAt ?? SEED_DATE,
@@ -82,30 +75,25 @@ export async function seedReplayDb(): Promise<void> {
       .map((rel, i) => ({ id: `rel-${i + 1}`, ...rel, order: rel.order || 1 }))
       .filter((rel) => isUsableRelation(rel, entityIds));
 
-    const tables: Record<string, Row[]> = {
-      settings: load("default/settings.json"),
-      users,
-      acl_permissions: load("default/acl_permissions.json").map((row, i) => ({
-        id: `acl-${i + 1}`,
-        ...row,
-      })),
-      entities,
-      relations,
-      documents: load("default/documents.json"),
-    };
-    for (const [table, rows] of Object.entries(tables)) {
-      await r.table(table).insert(rows).run(conn);
+    const tables: [TableStore, Row[]][] = [
+      [storage.settings, load("default/settings.json")],
+      [storage.users, users],
+      [
+        storage.acl,
+        load("default/acl_permissions.json").map((row, i) => ({ id: `acl-${i + 1}`, ...row })),
+      ],
+      [storage.entities, entities],
+      [storage.relations, relations],
+      [storage.documents, load("default/documents.json")],
+    ];
+    for (const [table, rows] of tables) {
+      await table.insert(conn, rows);
     }
   } finally {
-    await conn.close();
+    await storage.closeConnection(conn, { noreplyWait: false });
   }
 }
 
-export async function dropReplayDb(): Promise<void> {
-  const conn = await connectAdmin();
-  try {
-    await r.dbDrop(getTestDbName()).run(conn).catch(() => undefined);
-  } finally {
-    await conn.close();
-  }
+export function dropReplayDb(): Promise<void> {
+  return storage.dropDatabase(getTestDbName());
 }

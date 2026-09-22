@@ -9,7 +9,7 @@ import {
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { findEntityById } from "@service/shorthands";
 import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams, EntityDoesNotExist } from "@inkvisitor/shared/types/errors";

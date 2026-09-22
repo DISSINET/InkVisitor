@@ -4,7 +4,7 @@ import {
   testErroneousResponse,
 } from "@modules/common.test";
 import { RelationDoesNotExist } from "@inkvisitor/shared/types/errors";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";

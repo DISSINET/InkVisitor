@@ -1,9 +1,8 @@
 import { IDbModel, fillFlatObject } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { IAudit, AuditScope } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
-import { DbEnums } from "@inkvisitor/shared/enums";
 import { EventType } from "@inkvisitor/shared/types/stats";
 
 export default class Audit implements IAudit, IDbModel {
@@ -39,11 +38,11 @@ export default class Audit implements IAudit, IDbModel {
    * @param db db connection
    * @returns boolean to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
-    const result = await rethink
-      .table(Audit.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+  async save(db: Conn | undefined): Promise<boolean> {
+    const result = await storage.audits.insert(db as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -55,11 +54,11 @@ export default class Audit implements IAudit, IDbModel {
   /**
    * Throws error immediately - Audit entry is immutable.
    * Provides implementation for satisfying IDbModel interface.
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param updateData Promise<WriteResult>
    */
   update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
     throw new InternalServerError("Audit entry cannot be updated");
@@ -68,10 +67,10 @@ export default class Audit implements IAudit, IDbModel {
   /**
    * Throws error immediately - Audit entry is immutable.
    * Provides implementation for satisfying IDbModel interface.
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param updateData Promise<WriteResult>
    */
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     throw new InternalServerError("Audit entry cannot be deleted");
   }
 
@@ -161,14 +160,14 @@ export default class Audit implements IAudit, IDbModel {
    * typed per scope via deletionEventType. The optional snapshot holds the full
    * data of the deleted model so it can later be restored (see the entity
    * restore route); when omitted it defaults to empty changes.
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param modelId id of the deleted entity/document
    * @param userId id of the user performing the deletion
    * @param scope audit scope (entity or document)
    * @param snapshot full snapshot of the deleted model (used for restore)
    */
   static async createDeletionAudit(
-    db: Connection | undefined,
+    db: Conn | undefined,
     modelId: string,
     userId: string,
     scope: AuditScope,
@@ -186,39 +185,27 @@ export default class Audit implements IAudit, IDbModel {
   /**
    * Retrieves first created audit entry for entity.
    * First audit entry stands for created-at entry.
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param entityId string
    * @returns Promise<Audit | null>
    */
   static async getFirstForEntity(
-    db: Connection,
+    db: Conn,
     entityId: string
   ): Promise<Audit | null> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll([AuditScope.Entity, entityId], {
-        index: DbEnums.Indexes.AuditScopeModelId,
-      })
-      .orderBy(rethink.asc("date"))
-      .limit(1)
-      .run(db);
+    const result = await storage.audits.firstFor(db, AuditScope.Entity, entityId);
 
-    return result && result.length ? new Audit(result[0]) : null;
+    return result ? new Audit(result) : null;
   }
 
   /**
    * Gets the earliest audit entry date in the database
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @returns Promise<Date | null>
    */
-  static async getEarliestDate(db: Connection): Promise<Date | null> {
+  static async getEarliestDate(db: Conn): Promise<Date | null> {
     try {
-      const result = await rethink
-        .table(Audit.table)
-        .min("date")
-        .run(db);
-
-      return result ? new Date((result as any).date) : null;
+      return await storage.audits.earliestDate(db);
     } catch (error) {
       // Table might not exist yet or be empty
       return null;
@@ -228,46 +215,32 @@ export default class Audit implements IAudit, IDbModel {
   /**
    * Retrieves last created audit entry for entity.
    * Last audit entry stands for updated-at entry.
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param entityId string
    * @returns Promise<Audit | null>
    */
   static async getLastForEntity(
-    db: Connection,
+    db: Conn,
     entityId: string
   ): Promise<Audit | null> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll([AuditScope.Entity, entityId], {
-        index: DbEnums.Indexes.AuditScopeModelId,
-      })
-      .orderBy(rethink.desc("date"))
-      .limit(1)
-      .run(db);
+    const result = await storage.audits.lastFor(db, AuditScope.Entity, entityId);
 
-    return result && result.length ? new Audit(result[0]) : null;
+    return result ? new Audit(result) : null;
   }
 
   /**
    * Retrieves N audits for entity, ordered by date DESC (last N items)
-   * @param dbConn rethinkdb Connection
+   * @param dbConn rethinkdb Conn
    * @param entityId string
    * @param n limit for returned entries
    * @returns Promise<Audit[]>
    */
   static async getLastNForEntity(
-    dbConn: Connection,
+    dbConn: Conn,
     entityId: string,
     n = 5
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll([AuditScope.Entity, entityId], {
-        index: DbEnums.Indexes.AuditScopeModelId,
-      })
-      .orderBy(rethink.desc("date"))
-      .limit(n)
-      .run(dbConn);
+    const result = await storage.audits.lastNFor(dbConn, AuditScope.Entity, entityId, n);
 
     return result.map((r) => new Audit(r));
   }
@@ -279,74 +252,49 @@ export default class Audit implements IAudit, IDbModel {
    * relation-scoped rows); the auditScope filter is a defensive guard. Ordered
    * newest-first and capped (mirroring the entity `last` cap) so a heavily
    * edited entity's Detail/Audits section stays bounded.
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param entityId string
    * @param n max number of returned entries
    * @returns Promise<Audit[]>
    */
   static async getRelationAuditsForEntity(
-    db: Connection,
+    db: Conn,
     entityId: string,
     n = 10
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll(entityId, {
-        index: DbEnums.Indexes.AuditRelationEntityIds,
-      })
-      .filter({ auditScope: AuditScope.Relation })
-      .orderBy(rethink.desc("date"))
-      .limit(n)
-      .run(db);
+    const result = await storage.audits.relationAuditsForEntity(db, entityId, n);
 
     return result.map((r) => new Audit(r));
   }
 
   static async getLastNForDocument(
-    dbConn: Connection,
+    dbConn: Conn,
     documentId: string,
     n = 10
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll([AuditScope.Document, documentId], {
-        index: DbEnums.Indexes.AuditScopeModelId,
-      })
-      .orderBy(rethink.desc("date"))
-      .limit(n)
-      .run(dbConn);
+    const result = await storage.audits.lastNFor(dbConn, AuditScope.Document, documentId, n);
 
     return result.map((r) => new Audit(r));
   }
 
   static async getFirstForDocument(
-    db: Connection,
+    db: Conn,
     documentId: string
   ): Promise<Audit | null> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll([AuditScope.Document, documentId], {
-        index: DbEnums.Indexes.AuditScopeModelId,
-      })
-      .orderBy(rethink.asc("date"))
-      .limit(1)
-      .run(db);
+    const result = await storage.audits.firstFor(db, AuditScope.Document, documentId);
 
-    return result && result.length ? new Audit(result[0]) : null;
+    return result ? new Audit(result) : null;
   }
 
   /**
    * Retrieved Audit entries that are first entries for respective entity, effectively searching for entities created
    * on particular date
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param date created date
    * @returns Promise<Audit[]> list of Audit entries
    */
-  static async getByCreatedDate(db: Connection, date: Date): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter(rethink.row("date").date().eq(date))
-      .run(db);
+  static async getByCreatedDate(db: Conn, date: Date): Promise<Audit[]> {
+    const result = await storage.audits.onDate(db, date);
 
     const audits = result.map((data) => new Audit(data)) as Audit[];
     const entityAudits = audits.filter((a) => a.auditScope === AuditScope.Entity);
@@ -379,15 +327,12 @@ export default class Audit implements IAudit, IDbModel {
   /**
    * Retrieved Audit entries that are last entries for respective entity, effectively searching for entities updated
    * on particular date
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param date updated date
    * @returns Promise<Audit[]> list of Audit entries
    */
-  static async getByUpdatedDate(db: Connection, date: Date): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter(rethink.row("date").date().eq(date))
-      .run(db);
+  static async getByUpdatedDate(db: Conn, date: Date): Promise<Audit[]> {
+    const result = await storage.audits.onDate(db, date);
 
     const audits = result.map((data) => new Audit(data)) as Audit[];
     const entityAudits = audits.filter((a) => a.auditScope === AuditScope.Entity);
@@ -422,22 +367,11 @@ export default class Audit implements IAudit, IDbModel {
    * update falls within the optional [after, before] datetime range (inclusive).
    */
   static async getByUpdatedInRange(
-    db: Connection,
+    db: Conn,
     after?: Date,
     before?: Date,
   ): Promise<Audit[]> {
-    let query = rethink
-      .table(Audit.table)
-      .filter(rethink.row("auditScope").eq(AuditScope.Entity));
-
-    if (after) {
-      query = query.filter(rethink.row("date").ge(after));
-    }
-    if (before) {
-      query = query.filter(rethink.row("date").le(before));
-    }
-
-    const result = await query.run(db);
+    const result = await storage.audits.entityScopedInRange(db, after, before);
     const audits = result.map((data) => new Audit(data)) as Audit[];
     const entityIds = [
       ...new Set(
@@ -474,22 +408,11 @@ export default class Audit implements IAudit, IDbModel {
    * (inclusive).
    */
   static async getByCreatedInRange(
-    db: Connection,
+    db: Conn,
     after?: Date,
     before?: Date,
   ): Promise<Audit[]> {
-    let query = rethink
-      .table(Audit.table)
-      .filter(rethink.row("auditScope").eq(AuditScope.Entity));
-
-    if (after) {
-      query = query.filter(rethink.row("date").ge(after));
-    }
-    if (before) {
-      query = query.filter(rethink.row("date").le(before));
-    }
-
-    const result = await query.run(db);
+    const result = await storage.audits.entityScopedInRange(db, after, before);
     const audits = result.map((data) => new Audit(data)) as Audit[];
     const entityIds = [
       ...new Set(
@@ -522,37 +445,29 @@ export default class Audit implements IAudit, IDbModel {
 
   /**
    * Retrieves Audit entries that are created by specific user
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param createdBy string
    * @returns Promise<Audit[]> list of Audit entries
    */
   static async getByCreatedBy(
-    db: Connection,
+    db: Conn,
     createdBy: string
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter(rethink.row("type").eq(EventType.CREATE))
-      .filter(rethink.row("user").eq(createdBy))
-      .run(db);
+    const result = await storage.audits.byTypeAndUser(db, EventType.CREATE, createdBy);
     return result.map((data) => new Audit(data)) as Audit[];
   }
 
   /**
    * Retrieves Audit entries that are updated by specific user
-   * @param db rethinkdb Connection
+   * @param db rethinkdb Conn
    * @param updatedBy string
    * @returns Promise<Audit[]> list of Audit entries
    */
   static async getByUpdatedBy(
-    db: Connection,
+    db: Conn,
     updatedBy: string
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .filter(rethink.row("type").eq(EventType.EDIT))
-      .filter(rethink.row("user").eq(updatedBy))
-      .run(db);
+    const result = await storage.audits.byTypeAndUser(db, EventType.EDIT, updatedBy);
     return result.map((data) => new Audit(data)) as Audit[];
   }
 
@@ -563,20 +478,11 @@ export default class Audit implements IAudit, IDbModel {
    * @returns
    */
   static async findMany(
-    db: Connection,
+    db: Conn,
     filter: { skip: number; take: number; from: Date }
   ): Promise<Audit[]> {
-    const result = await rethink
-      .table(Audit.table)
-      .orderBy(rethink.asc("date"))
-      .filter(rethink.row("date").date().ge(filter.from))
-      .skip(filter.skip)
-      .limit(filter.take);
+    const result = await storage.audits.page(db, filter);
 
-    const audits = (await result.run(db)).map(
-      (data) => new Audit(data)
-    ) as Audit[];
-
-    return audits;
+    return result.map((data) => new Audit(data)) as Audit[];
   }
 }

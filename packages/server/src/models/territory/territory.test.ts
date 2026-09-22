@@ -1,6 +1,6 @@
 import "ts-jest";
 import Territory, { TerritoryParent } from "./territory";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { clean, getITerritoryMock } from "@modules/common.test";
 import { findEntityById, deleteEntities } from "@service/shorthands";
 import { IParentTerritory, ITerritory } from "@inkvisitor/shared/types";

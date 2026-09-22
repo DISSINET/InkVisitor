@@ -1,6 +1,5 @@
 import "ts-jest";
-import { r as rethink } from "rethinkdb-ts";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { clean } from "@modules/common.test";
 import User, { BookmarkFolder, StoredTerritory } from "@models/user/user";
 import { IUser } from "@inkvisitor/shared/types";
@@ -243,7 +242,7 @@ describe("models/user", function () {
       // The User constructor drops deletedAt (fillFlatObject skips fields whose
       // class default is undefined), so assert the persisted soft-delete marker
       // on the raw db row rather than the rehydrated model.
-      const rawRow = await rethink.table(User.table).get(user1.id).run(db.connection);
+      const rawRow = await storage.users.get(db.connection, user1.id);
       expect(rawRow).toBeTruthy();
       expect((rawRow as any).deletedAt).toBeTruthy();
     });

@@ -15,8 +15,7 @@ import {
 import { pool } from "@middlewares/db";
 import SavedQuery from "@models/saved-query/saved-query";
 import User from "@models/user/user";
-import { Db } from "@service/rethink";
-import { r as rethink } from "rethinkdb-ts";
+import { Db, storage } from "@service/storage";
 import {
   successfulGenericResponse,
   testErroneousResponse,
@@ -74,12 +73,6 @@ describe("Saved queries", function () {
   beforeAll(async () => {
     await db.initDb();
 
-    // the table may not exist in an older test db
-    const tables = await rethink.tableList().run(db.connection);
-    if (!tables.includes(SavedQuery.table)) {
-      await rethink.tableCreate(SavedQuery.table).run(db.connection);
-    }
-
     await new User({
       id: userAId,
       role: UserEnums.Role.Viewer,
@@ -106,18 +99,15 @@ describe("Saved queries", function () {
   });
 
   afterAll(async () => {
-    await rethink
-      .table(SavedQuery.table)
-      .filter((row: any) =>
-        rethink.expr([userAId, userBId, userCId]).contains(row("ownerId"))
-      )
-      .delete()
-      .run(db.connection);
-    await rethink
-      .table("users")
-      .getAll(userAId, userBId, userCId)
-      .delete()
-      .run(db.connection);
+    const owners = [userAId, userBId, userCId];
+    const mine = (await storage.savedQueries.all(db.connection)).filter((q) =>
+      owners.includes(q.ownerId)
+    );
+    await storage.savedQueries.deleteMany(
+      db.connection,
+      mine.map((q) => q.id)
+    );
+    await storage.users.deleteMany(db.connection, owners);
     await db.close();
     await pool.end();
   });

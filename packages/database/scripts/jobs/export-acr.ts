@@ -2,7 +2,7 @@ import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,

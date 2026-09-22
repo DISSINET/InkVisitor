@@ -1,7 +1,7 @@
 import "ts-jest";
 import { apiPath } from "@common/constants";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import Entity from "@models/entity/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";

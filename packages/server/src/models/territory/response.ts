@@ -99,7 +99,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       if (useWarnings && !this.isTemplate) {
         // Each statement's getWarnings is an independent chain of DB
         // round-trips. Awaiting them one statement at a time serialized the
-        // whole territory; rethinkdb-ts multiplexes concurrent queries over
+        // whole territory; the database driver multiplexes concurrent queries over
         // the single per-request connection, so running them together
         // pipelines the work. Peak in-flight stays roughly the statement
         // count because each statement's own per-entity lookups remain

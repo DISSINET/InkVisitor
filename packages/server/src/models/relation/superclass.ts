@@ -1,7 +1,7 @@
 import { EntityEnums as Entities, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export default class Superclass
   extends Relation
@@ -19,7 +19,7 @@ export default class Superclass
   }
 
   static async getSuperclassForwardConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string,
     asClass: Entities.Class,
     maxNestLvl: number,
@@ -72,7 +72,7 @@ export default class Superclass
   }
 
   static async getSuperclassInverseConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string,
     asClass: Entities.Class
   ): Promise<RelationTypes.ISuperclass[]> {

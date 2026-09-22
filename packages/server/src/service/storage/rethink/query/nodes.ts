@@ -1,19 +1,18 @@
-import Entity from "@models/entity/entity";
-import { IEntity } from "@inkvisitor/shared/types";
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
-import Results from "../../../query/results";
-import SearchEdge, { getEdgeInstance } from "./edge";
 import { Query } from "@inkvisitor/shared/types/query";
+import { Conn, ExplorePlan, ExploreResolvers } from "../../types";
+import { unwrap } from "../conn";
+import { TABLE } from "../tables";
+import SearchEdge, { getEdgeInstance } from "./edge";
 
-export default class SearchNode implements Query.INode {
+export default class SearchNode implements Query.INode, ExplorePlan {
   type: Query.NodeType;
   params: Query.INodeParams;
   operator: Query.NodeOperator;
   id: string;
   edges: SearchEdge[];
-  results: Results<IEntity>;
 
-  constructor(data: Partial<Query.INode>) {
+  constructor(data: Partial<Query.INode>, resolvers?: ExploreResolvers) {
     this.type = data.type || ("" as Query.NodeType);
     this.params = data.params || {};
     this.operator = data.operator || Query.NodeOperator.And;
@@ -21,28 +20,26 @@ export default class SearchNode implements Query.INode {
       ? data.edges.map((edgeData) => getEdgeInstance(edgeData))
       : [];
     this.id = data.id || "";
-    this.results = new Results();
+    if (resolvers) {
+      this.setResolvers(resolvers);
+    }
   }
 
-  /**
-   * adds single edge constructed from parameter object
-   * @param edgeData Partial<Query.IEdge>
-   * @returns SearchEdge created edge
-   */
+  /** hands the id expansion down to every edge and nested node */
+  setResolvers(resolvers: ExploreResolvers): void {
+    for (const edge of this.edges) {
+      edge.setResolvers(resolvers);
+    }
+  }
+
   addEdge(edgeData: Partial<Query.IEdge>): SearchEdge {
     const edgeInstance = getEdgeInstance(edgeData);
     this.edges.push(edgeInstance);
     return edgeInstance;
   }
 
-  /**
-   * Builds the base entity stream for this node from its own params
-   * (entityClasses / entityId / label). Nested child-node params are NOT
-   * applied here - they describe the target of the parent edge and are
-   * consumed by that edge, not used to filter the entity stream.
-   */
   private baseStream(): RStream {
-    let q: RStream = r.table(Entity.table);
+    let q: RStream = r.table(TABLE.entities);
     if (this.params.entityClasses?.length) {
       const classes = this.params.entityClasses;
       q = q.filter(function (row: RDatum) {
@@ -64,10 +61,11 @@ export default class SearchNode implements Query.INode {
    * up and are combined per the node operator (AND = intersection,
    * OR = union). Edges whose target node carries its own edges are resolved
    * recursively, so nesting of arbitrary depth is supported.
-   * @param db Connection
-   * @returns Promise<Results<IEntity>>
+   * @param conn storage connection
+   * @returns matching entity ids
    */
-  async run(db: Connection): Promise<Results<IEntity>> {
+  async run(conn: Conn): Promise<string[]> {
+    const db = unwrap(conn);
     const baseStream = this.baseStream();
 
     let ids: string[];
@@ -82,8 +80,7 @@ export default class SearchNode implements Query.INode {
       );
     }
 
-    this.results.items = ids;
-    return this.results;
+    return ids;
   }
 
   /**
@@ -158,7 +155,7 @@ export default class SearchNode implements Query.INode {
       const inputStream =
         acc === null
           ? baseStream
-          : r.table(Entity.table).getAll(r.args(Array.from(acc)));
+          : r.table(TABLE.entities).getAll(r.args(Array.from(acc)));
 
       const matchIds = await this.resolveEdgeMatch(db, inputStream, edge);
 
@@ -203,7 +200,7 @@ export default class SearchNode implements Query.INode {
     // restrict the recursion to entities that matched this edge, then apply the
     // child node's own edges (the child node params themselves were already
     // consumed by this edge, so they are not re-applied as a filter)
-    const childStream = r.table(Entity.table).getAll(r.args(directIds));
+    const childStream = r.table(TABLE.entities).getAll(r.args(directIds));
     return childNode.evaluateEdges(
       db,
       childStream,

@@ -1,8 +1,8 @@
-import { SearchQuery } from "@models/entity/response-search";
+import { searchEntities } from "@models/entity/response-search";
 import { RequestSearch } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 /**
  * Translates Explorer row filters into a RequestSearch for reuse by the existing
@@ -78,7 +78,7 @@ export const exploreFiltersToRequestSearch = (
  * Order of the input ids is preserved.
  */
 export const applyRequestSearchFilters = async (
-  db: Connection,
+  db: Conn,
   ids: string[],
   filters: Explore.IExploreSearchFilter[]
 ): Promise<string[]> => {
@@ -89,9 +89,7 @@ export const applyRequestSearchFilters = async (
 
   req.entityIds = [...ids];
 
-  const query = new SearchQuery(db);
-  await query.fromRequest(req);
-  const entities = await query.do();
+  const { entities } = await searchEntities(db, req);
 
   const matched = new Set(entities.map((e) => e.id));
   return ids.filter((id) => matched.has(id));

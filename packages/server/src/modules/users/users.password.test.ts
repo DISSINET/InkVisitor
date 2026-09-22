@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../server";
 import { getAuthenticatedAgent, testCredentials } from "@modules/testAuth";
 import mailer, { EmailSubject } from "@service/mailer";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import User from "@models/user/user";
 import { checkPassword } from "@common/auth";
 import { IResponseGeneric } from "@inkvisitor/shared/types";

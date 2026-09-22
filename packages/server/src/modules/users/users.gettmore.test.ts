@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../server";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import { pool } from "@middlewares/db";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import User from "@models/user/user";
 import { IUser } from "@inkvisitor/shared/types";
 

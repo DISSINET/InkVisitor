@@ -1,7 +1,5 @@
-import { Connection } from "rethinkdb-ts";
-import { Db } from "./rethink";
+import { Conn, Db, DbPool } from "@service/storage";
 import { Awaiter } from "./mutex";
-import DbPool from "./rethink-pool";
 
 /**
  * Per-request wrapper around a pooled Db.
@@ -93,7 +91,7 @@ export class DbHandle {
    * acquired a connection yet (typically meaning lock() was called and
    * is still mid-yield, or the handle was used after release()).
    */
-  get connection(): Connection {
+  get connection(): Conn {
     if (!this._db) {
       throw new Error(
         "DbHandle: no connection acquired - if you called lock(), await it first"

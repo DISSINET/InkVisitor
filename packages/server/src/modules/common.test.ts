@@ -3,7 +3,7 @@ import "@models/events/register";
 import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import User from "@models/user/user";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { DbHandle } from "@service/dbHandle";
 import {
   createEntity,

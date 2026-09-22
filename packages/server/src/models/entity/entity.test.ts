@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import Entity from "./entity";
 import Statement, {
   StatementActant,

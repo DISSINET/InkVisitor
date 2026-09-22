@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export default class Holonym
   extends Relation
@@ -19,7 +19,7 @@ export default class Holonym
   }
 
   static async getHolonymForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IHolonym>[]> {
@@ -45,7 +45,7 @@ export default class Holonym
   }
 
   static async getHolonymInverseConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IHolonym>[]> {

@@ -1,12 +1,25 @@
 import { createPool, Pool, Options } from "generic-pool";
-import { r as rethink, RConnectionOptions } from "rethinkdb-ts";
-import { Db } from "./rethink";
+import { Db } from "./db";
+import { storage } from "./instance";
+
+export interface DbPoolOptions {
+  max: number;
+  acquireTimeoutMillis?: number;
+  idleTimeoutMillis?: number;
+}
+
+/** Pool sizing from the environment, shared by the request and session pools. */
+export const poolOptions: DbPoolOptions = {
+  max: parseInt(process.env.DB_POOL_CONNECTIONS || "10") || 10,
+  acquireTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+};
 
 export default class DbPool {
-  options: RConnectionOptions;
+  options: DbPoolOptions;
   pool: Pool<Db>;
 
-  constructor(options: RConnectionOptions & { max: number }) {
+  constructor(options: DbPoolOptions) {
     this.options = options;
     const factory = {
       create: this.create.bind(this),
@@ -14,7 +27,7 @@ export default class DbPool {
       validate: this.validate.bind(this),
     };
 
-    const poolOptions: Options = {
+    const opts: Options = {
       max: options.max,
       min: 0,
       acquireTimeoutMillis: options.acquireTimeoutMillis || 10000,
@@ -29,18 +42,11 @@ export default class DbPool {
       testOnReturn: false,
     };
 
-    this.pool = createPool<Db>(factory, poolOptions);
+    this.pool = createPool<Db>(factory, opts);
   }
 
   async acquire(): Promise<Db> {
-    //console.log(
-    //  `Acquiring db connection, available=${this.pool.available}, size=${this.pool.size}`
-    //);
-    const db = await this.pool.acquire();
-    //console.log(
-    //  `Acquired db connection, available=${this.pool.available}, size=${this.pool.size}`
-    //);
-    return db;
+    return this.pool.acquire();
   }
 
   async release(instance: Db): Promise<void> {
@@ -53,30 +59,24 @@ export default class DbPool {
   }
 
   async create(): Promise<Db> {
-    //console.log(
-    //  `Creating db connection, available=${this.pool.available}, size=${this.pool.size}`
-    //);
     const instance = new Db();
     await instance.initDb();
     return instance;
   }
 
   async destroy(instance: Db): Promise<void> {
-    //console.log(
-    //  `Destroying db connection, used=${this.pool.size}/${this.pool.max}`
-    //);
     return instance.close();
   }
 
   async validate(instance: Db): Promise<boolean> {
-    // `connection.open` is a driver-side flag that can lag behind reality when
-    // the server has closed the socket. A cheap round-trip is the only way to
-    // confirm the conn is actually usable before handing it out.
-    if (!instance.connection.open) {
+    // the driver's open flag can lag behind reality when the server has closed
+    // the socket; a cheap round-trip is the only way to confirm the conn is
+    // actually usable before handing it out
+    if (!storage.isOpen(instance.connection)) {
       return false;
     }
     try {
-      await rethink.expr(1).run(instance.connection);
+      await storage.ping(instance.connection);
       return true;
     } catch {
       return false;

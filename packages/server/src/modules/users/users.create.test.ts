@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../server";
 import { successfulGenericResponse } from "@modules/common.test";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import User from "@models/user/user";
 import { deleteUsers } from "@service/shorthands";
 import { pool } from "@middlewares/db";

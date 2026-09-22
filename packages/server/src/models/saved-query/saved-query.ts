@@ -4,7 +4,7 @@ import {
 } from "@inkvisitor/shared/constants";
 import { ISavedQuery, ISavedQueryData } from "@inkvisitor/shared/types";
 import { IDbModel } from "@models/common";
-import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 
 export default class SavedQuery implements ISavedQuery, IDbModel {
   static table = "saved_queries";
@@ -91,11 +91,11 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
     });
   }
 
-  async save(dbInstance: Connection | undefined): Promise<boolean> {
-    const result = await rethink
-      .table(SavedQuery.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(dbInstance);
+  async save(dbInstance: Conn | undefined): Promise<boolean> {
+    const result = await storage.savedQueries.insert(dbInstance as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -105,30 +105,25 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
   }
 
   update(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    return rethink
-      .table(SavedQuery.table)
-      .get(this.id)
-      .update({ ...updateData, updatedAt: new Date() })
-      .run(dbInstance);
+    return storage.savedQueries.update(dbInstance as Conn, this.id, {
+      ...updateData,
+      updatedAt: new Date(),
+    });
   }
 
-  delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink
-      .table(SavedQuery.table)
-      .get(this.id)
-      .delete()
-      .run(dbInstance);
+  delete(dbInstance: Conn): Promise<WriteResult> {
+    return storage.savedQueries.delete(dbInstance, this.id);
   }
 
   static async findById(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     id: string
   ): Promise<SavedQuery | null> {
-    const data = await rethink.table(SavedQuery.table).get(id).run(dbInstance);
-    return data ? new SavedQuery(data as ISavedQuery) : null;
+    const data = await storage.savedQueries.get(dbInstance as Conn, id);
+    return data ? new SavedQuery(data) : null;
   }
 
   /**
@@ -137,29 +132,23 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
    * that read the same collide, so the comparison ignores case (stored names
    * are already trimmed by the constructor).
    *
-   * The scan is unindexed - the table holds one row per saved query, and the
-   * check runs only on create and on rename.
    */
   static async isNameTaken(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     name: string,
     shared: boolean,
     ownerId: string,
     exceptId?: string
   ): Promise<boolean> {
     const normalized = name.trim().toLowerCase();
-    const rows = await rethink
-      .table(SavedQuery.table)
-      .filter((row: RDatum) =>
-        (shared
-          ? row("shared").eq(true)
-          : row("shared").eq(false).and(row("ownerId").eq(ownerId))
-        ).and(row("name").downcase().eq(normalized))
-      )
-      .pluck("id")
-      .run(dbInstance);
+    const ids = await storage.savedQueries.idsWithName(
+      dbInstance as Conn,
+      normalized,
+      shared,
+      ownerId
+    );
 
-    return (rows as { id: string }[]).some((row) => row.id !== exceptId);
+    return ids.some((id) => id !== exceptId);
   }
 
   /**
@@ -167,17 +156,9 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
    * plus everyone's shared ones. Newest first.
    */
   static async findVisibleForUser(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     userId: string
   ): Promise<ISavedQuery[]> {
-    const data = await rethink
-      .table(SavedQuery.table)
-      .filter((row: RDatum) =>
-        row("shared").eq(true).or(row("ownerId").eq(userId))
-      )
-      .orderBy(rethink.desc("createdAt"))
-      .run(dbInstance);
-
-    return data as ISavedQuery[];
+    return storage.savedQueries.visibleFor(dbInstance as Conn, userId);
   }
 }

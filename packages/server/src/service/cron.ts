@@ -1,15 +1,15 @@
 import * as cron from "node-cron";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
 import { EventType } from "@inkvisitor/shared/types/stats";
-import { reapExpiredSessions } from "@service/rethinkSessionStore";
+import { reapExpiredSessions } from "@service/sessionStore";
 
 export class CronService {
-  private db: Connection;
+  private db: Conn;
   private statsAggregator: StatsAggregator;
   private isRunning = false;
 
-  constructor(db: Connection) {
+  constructor(db: Conn) {
     this.db = db;
     this.statsAggregator = new StatsAggregator(db);
   }

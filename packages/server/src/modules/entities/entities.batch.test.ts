@@ -8,7 +8,7 @@ import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import Document from "@models/document/document";

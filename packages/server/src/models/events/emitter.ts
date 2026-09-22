@@ -1,4 +1,4 @@
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { EventTypes, EmitterCb, EventMap } from "./types";
 
 class Emitter {
@@ -13,7 +13,7 @@ class Emitter {
     this.registered[type]?.push(cb);
   }
 
-  async emit(type: EventTypes, db: Connection, entityId: string) {
+  async emit(type: EventTypes, db: Conn, entityId: string) {
     if (this.registered[type]) {
       for (const cb of this.registered[type] as EmitterCb[]) {
         await cb(db, entityId);

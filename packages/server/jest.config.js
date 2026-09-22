@@ -78,7 +78,7 @@ const UNIT_TEST_PATHS = [
   "src/models/statement/statement.rights.test.ts",
   // No-op own test; its DB-touching exports are only used as helpers elsewhere.
   "src/modules/common.test.ts",
-  // Mocks rethinkdb-ts (jest.mock) - evaluateEdges runs against an in-memory proxy.
+  // Mocks the driver (jest.mock) - evaluateEdges runs against an in-memory proxy.
   "src/service/storage/rethink/query/nesting.test.ts",
   "src/models/stats/event-type-fold.test.ts",
   "src/models/stats/hybrid-stats.test.ts",
