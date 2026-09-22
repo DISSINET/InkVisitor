@@ -4781,6 +4781,16 @@ export class Annotator {
     this.restoreSnapshot(target);
   }
 
+  /**
+   * Text currently covered by the cursor selection, empty string when nothing
+   * is selected. In raw mode the slice includes any tag characters it spans,
+   * matching what the canvas shows in that mode.
+   */
+  getSelectedText(): string {
+    const area = this.cursor.getSelectedArea();
+    return area ? this.text.getRangeText(area[0], area[1]) : "";
+  }
+
   onCopyText() {
     const area = this.cursor.getSelectedArea();
     const text = area

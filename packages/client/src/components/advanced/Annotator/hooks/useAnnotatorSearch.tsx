@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
+import { clampActiveOccurenceIndex } from "../AnnotatorSearchLine/replaceUtils";
 
 /** Shorter queries match too much of a document to be worth running. */
 export const MIN_SEARCH_TERM_LENGTH = 3;
@@ -137,6 +138,15 @@ export const useAnnotatorSearch = ({
         }
       }
       resetActiveOccurrenceOnSearchTermChange();
+
+      if (!termChanged) {
+        // A rerun over text that changed underneath the search (replace) can
+        // return fewer occurrences than the active index addresses. A term
+        // change already went back to 0 above.
+        setSearchActiveOccurence((active) =>
+          clampActiveOccurenceIndex(active, occurrences.length)
+        );
+      }
     },
     [debouncedSearchTerm, setSearchOccurences, setSearchActiveOccurence]
   );

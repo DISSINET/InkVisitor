@@ -1,15 +1,19 @@
 import { Annotator, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@inkvisitor/shared/types";
 import { Button } from "components";
-import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../../EntityTag/EntityTag";
 import React from "react";
 import { useTheme } from "styled-components";
 import { IcoAnchor, IcoAnchorCheck, IcoChevronLeft } from "Theme/icons";
 import { AnnotatorFloatingPanel } from "../AnnotatorFloatingPanel/AnnotatorFloatingPanel";
 import { useDocumentContentSave } from "../hooks/useDocumentContentSave";
+import { AnnotatorEntityMultiPicker } from "./AnnotatorEntityMultiPicker";
 import { AnnotatorFindControls } from "./AnnotatorFindControls";
-import { StyledFindReplaceFooter, StyledFindReplaceRow } from "./AnnotatorFindReplaceModalStyles";
+import { entityIdsToAnchor } from "./anchorUtils";
+import {
+  StyledFindReplaceFooter,
+  StyledFindReplaceFooterInfo,
+  StyledFindReplaceRow,
+} from "./AnnotatorFindReplaceModalStyles";
 
 interface AnnotatorSequentialAnchorPanel {
   onClose: () => void;
@@ -35,10 +39,11 @@ interface AnnotatorSequentialAnchorPanel {
   isRegexMode: boolean;
   setIsRegexMode: React.Dispatch<React.SetStateAction<boolean>>;
 
-  entityToAnchor: IEntity | null;
-  setEntityToAnchor: (entity: IEntity | null) => void;
-  /** True when the active match is already wrapped in an anchor. */
-  currentAnchorExist: boolean;
+  entitiesToAnchor: IEntity[];
+  onPickEntityToAnchor: (entity: IEntity) => void;
+  onRemoveEntityToAnchor: (entityId: string) => void;
+  /** Tag names of the anchors already wrapping the active match. */
+  selectedAnchorTagNames: string[];
   selectedText: string;
 }
 
@@ -61,9 +66,10 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
   setIsExtendToWholeWordMode,
   isRegexMode,
   setIsRegexMode,
-  entityToAnchor,
-  setEntityToAnchor,
-  currentAnchorExist,
+  entitiesToAnchor,
+  onPickEntityToAnchor,
+  onRemoveEntityToAnchor,
+  selectedAnchorTagNames,
   selectedText,
 }) => {
   const theme = useTheme();
@@ -75,6 +81,12 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
   });
 
   const hasResults = (searchOccurences?.length ?? 0) > 0;
+
+  const idsToAnchor = entityIdsToAnchor(
+    entitiesToAnchor.map((entity) => entity.id),
+    selectedAnchorTagNames
+  );
+  const allAlreadyAnchored = entitiesToAnchor.length > 0 && idsToAnchor.length === 0;
 
   return (
     <AnnotatorFloatingPanel
@@ -102,38 +114,34 @@ export const AnnotatorSequentialAnchorPanel: React.FC<AnnotatorSequentialAnchorP
       />
 
       <StyledFindReplaceRow>
-        {entityToAnchor ? (
-          <EntityTag
-            entity={entityToAnchor}
-            unlinkButton={{
-              onClick: () => setEntityToAnchor(null),
-            }}
-          />
-        ) : (
-          <EntitySuggester
-            placeholder="select entity"
-            inputWidth="full"
-            onPicked={(entity) => setEntityToAnchor(entity)}
-          />
-        )}
+        <AnnotatorEntityMultiPicker
+          entities={entitiesToAnchor}
+          onPick={onPickEntityToAnchor}
+          onRemove={onRemoveEntityToAnchor}
+        />
       </StyledFindReplaceRow>
 
       <StyledFindReplaceFooter>
-        {currentAnchorExist ? (
-          <IcoAnchorCheck size={16} color={theme.color.info} title="anchor exists" />
+        {allAlreadyAnchored ? (
+          <StyledFindReplaceFooterInfo>
+            {entitiesToAnchor.length === 1
+              ? "this match is already anchored"
+              : "this match already has all the anchors"}
+            <IcoAnchorCheck size={16} color={theme.color.info} />
+          </StyledFindReplaceFooterInfo>
         ) : (
           <Button
             label="Anchor & next"
             icon={<IcoAnchor />}
             color="success"
-            tooltipLabel="wrap the selection in an anchor for the given entity and go to the next match"
-            disabled={!hasResults || !entityToAnchor || selectedText.length === 0}
+            tooltipLabel="wrap the selection in an anchor for each given entity and go to the next match"
+            disabled={!hasResults || idsToAnchor.length === 0 || selectedText.length === 0}
             onClick={() => {
-              if (entityToAnchor) {
-                annotator?.addAnchor(entityToAnchor.id);
-                saveDocumentContent("Anchor saved");
-                goToNextOccurence();
-              }
+              // each addAnchor re-selects the span it wrapped, so the calls nest
+              // and the first id becomes the outermost tag
+              idsToAnchor.forEach((entityId) => annotator?.addAnchor(entityId));
+              saveDocumentContent("Anchor saved");
+              goToNextOccurence();
             }}
           />
         )}

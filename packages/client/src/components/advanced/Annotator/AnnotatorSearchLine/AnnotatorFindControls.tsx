@@ -61,6 +61,7 @@ export const AnnotatorFindControls: React.FC<AnnotatorFindControls> = ({
           onEnterPressFn={goToNextOccurence}
           onEscapePressFn={onClose}
           changeOnType
+          valueControlled
           clearable
           autoFocus
           width="full"
