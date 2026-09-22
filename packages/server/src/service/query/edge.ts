@@ -202,6 +202,44 @@ export class EdgeSUnderT extends SearchEdge {
 }
 
 /**
+ * I_SUT: ("T has S"). A statement sits under exactly one direct territory, so
+ * unlike SUT: this has no subtree to expand - it just reads the pinned
+ * Statement's own data.territory.territoryId and matches the Territory (at
+ * most one) with that id. Intersected back with q, keeping the subset
+ * invariant that positive matching and negation both rely on. With no target
+ * the edge matches nothing.
+ */
+export class EdgeTerritoryHasStatement extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SUT:"];
+  }
+
+  run(q: RStream): RStream {
+    const statementIds = this.targetIds();
+
+    return intersectIdsWithStream(
+      q,
+      statementIds && statementIds.length
+        ? (r
+            .table(Entity.table)
+            .getAll(r.args(statementIds))
+            .filter(function (e: RDatum<IEntity>) {
+              return e("class").eq(EntityEnums.Class.Statement);
+            })
+            .concatMap(function (e: RDatum) {
+              return r.branch(
+                e("data").hasFields("territory"),
+                [e("data")("territory")("territoryId")],
+                []
+              );
+            }) as unknown as RStream)
+        : null
+    );
+  }
+}
+
+/**
  * Whether an existing entity has one of `classes` and one of `statuses`; an
  * empty list does not constrain.
  */
@@ -1620,6 +1658,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasSubordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
+    case Query.EdgeType["I_SUT:"]:
+      return new EdgeTerritoryHasStatement(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:

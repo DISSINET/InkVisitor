@@ -82,6 +82,10 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // toggle widens it to the whole subtree - "include subordinates" of a Territory
   // is its child territories, all levels (server: getSubordinateEntityIds).
   Query.EdgeType["SUT:"],
+  // I_SUT: match the Territory (at most one) that IS the target Statement's own
+  // direct territory - a statement sits under exactly one, so unlike SUT: there
+  // is no subtree/SUB toggle to widen (server: EdgeTerritoryHasStatement in edge.ts)
+  Query.EdgeType["I_SUT:"],
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
@@ -110,6 +114,10 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
  * symmetric relations (RelationRules: asymmetrical false), so their "inverse"
  * would match the exact same partners as the forward edge - no distinct
  * behavior to offer, so they stay out rather than sit disabled forever.
+ * "SUT:D" / "I_SUT:D" ("direct") add nothing beyond SUT:/I_SUT: with the SUB
+ * toggle left off: SUT: already goes direct-only without it, and I_SUT: has no
+ * direct-vs-any distinction to begin with (a statement sits under exactly one
+ * territory).
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -123,4 +131,6 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["I_R:SAR"],
   Query.EdgeType["I_R:IDE"],
   Query.EdgeType["I_R:REL"],
+  Query.EdgeType["SUT:D"],
+  Query.EdgeType["I_SUT:D"],
 ];

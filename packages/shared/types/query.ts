@@ -202,7 +202,9 @@ export namespace Query {
     "SUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
-    "I_SUT:": {},
+    "I_SUT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "EUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
@@ -990,8 +992,8 @@ export namespace Query {
     "I_IS:A2": "S has: actant2",
     "IS:PS": "is in S: as pseudoactant",
     "I_IS:PS": "S has: pseudoactant",
-    "SUT:": "S under T: any",
-    "I_SUT:": "T has S: any",
+    "SUT:": "S under T",
+    "I_SUT:": "T has S",
     "EUT:": "used in statements under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
