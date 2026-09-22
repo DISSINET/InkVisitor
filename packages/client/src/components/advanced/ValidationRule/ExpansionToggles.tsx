@@ -4,11 +4,12 @@ import {
   validationExpansionKind,
 } from "@inkvisitor/shared/types/territory";
 import { Checkbox } from "components";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   EQUIVALENTS_TOOLTIP,
   expansionKindLabel,
   expansionKindTooltip,
+  withExpansionFlag,
 } from "utils/validationExpansion";
 import {
   StyledExpansionLabel,
@@ -34,27 +35,38 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
   userCanEdit,
 }) => {
   const kind = validationExpansionKind(field, validation.tieType);
-  const expansion = validation.expansions?.[field];
+
+  // The rule arrives from the server and is re-rendered only once a save has
+  // come back, so a second box ticked before that would be built on the rule as
+  // it was BEFORE the first tick and would drop it. Hold what was last sent
+  // until the saved rule catches up.
+  const sent = useRef<ITerritoryValidation["expansions"] | null>(null);
+  useEffect(() => {
+    sent.current = null;
+  }, [validation.expansions]);
+
+  const expansion = (sent.current ?? validation.expansions ?? {})[field];
 
   if (!validation[field]?.length) {
     return null;
   }
 
   // the hosts merge rule changes one key deep, so the whole expansions object
-  // travels on every toggle
+  // travels on every toggle - read at click time, since a second box ticked
+  // before this render is replaced would otherwise build on the older rule
   const setFlag = (
     flag: "equivalents" | "subordinates",
     checked: boolean
-  ): void =>
-    updateValidationRule({
-      expansions: {
-        ...(validation.expansions ?? {}),
-        [field]: {
-          ...(expansion ?? {}),
-          [flag]: checked ? true : undefined,
-        },
-      },
-    });
+  ): void => {
+    const next = withExpansionFlag(
+      sent.current ?? validation.expansions,
+      field,
+      flag,
+      checked
+    );
+    sent.current = next;
+    updateValidationRule({ expansions: next });
+  };
 
   return (
     <StyledExpansionRow>

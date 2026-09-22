@@ -5,7 +5,11 @@ import {
   ITerritoryValidation,
 } from "@inkvisitor/shared/types/territory";
 
-import { expansionNote, validationFieldNote } from "./validationExpansion";
+import {
+  expansionNote,
+  validationFieldNote,
+  withExpansionFlag,
+} from "./validationExpansion";
 
 const rule = (data: Partial<ITerritoryValidation>): ITerritoryValidation => ({
   tieType: EProtocolTieType.Classification,
@@ -52,6 +56,60 @@ describe("utils/validationExpansion", () => {
       expect(
         expansionNote({ equivalents: true, subordinates: true }, null)
       ).toBe(" (incl. equivalents)");
+    });
+  });
+
+  describe("withExpansionFlag", () => {
+    it("stores nothing for a box that is not ticked", () => {
+      expect(
+        withExpansionFlag(undefined, "entityClassifications", "subordinates", false)
+      ).toEqual({ entityClassifications: { subordinates: undefined } });
+    });
+
+    it("keeps the second box when both are ticked before the rule is saved", () => {
+      // the rule comes back from the server only after the first save, so the
+      // second tick has to build on what was sent, not on the stored rule
+      const first = withExpansionFlag(
+        undefined,
+        "entityClassifications",
+        "equivalents",
+        true
+      );
+      const second = withExpansionFlag(
+        first,
+        "entityClassifications",
+        "subordinates",
+        true
+      );
+
+      expect(second).toEqual({
+        entityClassifications: { equivalents: true, subordinates: true },
+      });
+    });
+
+    it("leaves the other fields' boxes alone", () => {
+      expect(
+        withExpansionFlag(
+          { entitySOEs: { subordinates: true } },
+          "allowedEntities",
+          "equivalents",
+          true
+        )
+      ).toEqual({
+        entitySOEs: { subordinates: true },
+        allowedEntities: { equivalents: true },
+      });
+    });
+
+    it("unticks one box without disturbing the other", () => {
+      expect(
+        withExpansionFlag(
+          { propType: { equivalents: true, subordinates: true } },
+          "propType",
+          "equivalents",
+          false
+        )
+      ).toEqual({ propType: { equivalents: undefined, subordinates: true } });
     });
   });
 

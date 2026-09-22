@@ -272,4 +272,102 @@ describe("models/entity getTBasedWarnings with expansions", () => {
       ).toEqual([WarningTypeEnums.TVER]);
     });
   });
+
+  describe("a property requirement", () => {
+    // the entity carries one property, typed with a subclass of what the rule
+    // names, and valued with a Concept
+    const withProp = (typeId: string, valueId: string): Entity =>
+      new Entity({
+        id: "P1",
+        class: EntityEnums.Class.Person,
+        props: [
+          {
+            id: "prop1",
+            children: [],
+            type: { id: "t1", entityId: typeId },
+            value: { id: "v1", entityId: valueId },
+          },
+        ],
+      } as any);
+
+    const subclassMap: ValidationExpansionMap = new Map([
+      [
+        expansionKey(EValidationExpansionKind.Subclasses, "date"),
+        ["start-date"],
+      ],
+    ]);
+
+    const rule = (
+      expand: boolean,
+      allowedClasses?: EntityEnums.Class[]
+    ): ITerritoryValidation => ({
+      tieType: EProtocolTieType.Property,
+      detail: "",
+      propType: ["date"],
+      allowedClasses,
+      expansions: expand ? { propType: { subordinates: true } } : undefined,
+    });
+
+    const check = (
+      entity: Entity,
+      validation: ITerritoryValidation,
+      propValues: IEntity[] = [],
+      expansions?: ValidationExpansionMap
+    ): WarningTypeEnums[] =>
+      entity
+        .getTBasedWarnings(
+          [territoryWith(validation)],
+          [],
+          [],
+          propValues,
+          settings,
+          expansions
+        )
+        .map((warning) => warning.type);
+
+    it("warns about a property typed with a subclass while unchecked", () => {
+      expect(
+        check(withProp("start-date", "value1"), rule(false), [], subclassMap)
+      ).toEqual([WarningTypeEnums.TVEPT]);
+    });
+
+    it("accepts it once the box is checked", () => {
+      expect(
+        check(withProp("start-date", "value1"), rule(true), [], subclassMap)
+      ).toEqual([]);
+    });
+
+    it("still warns about a property type outside the path", () => {
+      expect(
+        check(withProp("colour", "value1"), rule(true), [], subclassMap)
+      ).toEqual([WarningTypeEnums.TVEPT]);
+    });
+
+    it("holds the value class requirement over the widened property type", () => {
+      const conceptValue = [
+        { id: "value1", class: EntityEnums.Class.Concept } as IEntity,
+      ];
+      const personValue = [
+        { id: "value1", class: EntityEnums.Class.Person } as IEntity,
+      ];
+      const withClasses = rule(true, [EntityEnums.Class.Concept]);
+
+      expect(
+        check(
+          withProp("start-date", "value1"),
+          withClasses,
+          conceptValue,
+          subclassMap
+        )
+      ).toEqual([]);
+      expect(
+        check(
+          withProp("start-date", "value1"),
+          withClasses,
+          personValue,
+          subclassMap
+        )
+      ).toEqual([WarningTypeEnums.TVEPV]);
+    });
+  });
 });

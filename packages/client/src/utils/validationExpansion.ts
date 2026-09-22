@@ -27,6 +27,26 @@ export const EQUIVALENTS_TOOLTIP =
   "Also accept entities recorded as equivalent: the synonym cloud, identifications and action-event equivalents.";
 
 /**
+ * The rule's expansion flags with one box of one field flipped. Every other
+ * field is carried over untouched, and an unticked box leaves no key behind, so
+ * a rule that accepts only what it names stores nothing.
+ * @param expansions the flags to build on - the ones last SENT while a save is
+ * still in flight, otherwise the ones the rule came back with
+ */
+export const withExpansionFlag = (
+  expansions: ITerritoryValidation["expansions"],
+  field: EValidationExpansionField,
+  flag: keyof ITerritoryValidationExpansion,
+  checked: boolean
+): ITerritoryValidation["expansions"] => ({
+  ...(expansions ?? {}),
+  [field]: {
+    ...(expansions?.[field] ?? {}),
+    [flag]: checked ? true : undefined,
+  },
+});
+
+/**
  * Trailing note stating what a rule field accepts beyond the entities named in
  * it, e.g. " (incl. subclasses)". Empty when the field takes only what it names,
  * so a rule reads exactly as it did before anyone touched the boxes.

@@ -68,6 +68,8 @@ const UNIT_TEST_PATHS = [
   "src/models/entity/response-search-root-validity.test.ts",
   "src/models/entity/validation-expansion.test.ts",
   "src/models/entity/entity.tvalidation.test.ts",
+  "src/models/entity/validation-expansion-load.test.ts",
+  "src/models/relation/subordinate-options.test.ts",
   "src/models/factory.test.ts",
   "src/models/relation/classification.test.ts",
   "src/models/relation/implication.test.ts",
