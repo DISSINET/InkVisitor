@@ -231,6 +231,7 @@ export const AnnotatorFindReplaceModal: React.FC<AnnotatorFindReplaceModal> = ({
             onEnterPressFn={goToNextOccurence}
             onEscapePressFn={onClose}
             changeOnType
+            valueControlled
             clearable
             autoFocus={focusFindInput}
             width="full"
