@@ -137,6 +137,12 @@ const theme = {
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
+    // annotator XML view syntax colours (#3269)
+    xmlTag: "#2A5DB0",
+    xmlAttr: "#A0461A",
+    xmlQuote: "#8A92A6",
+    xmlValue: "#1F7A3A",
+
     menuHover: "#CCD5F4",
     pageBg: "#edf2f7",
     menuShadow: "rgba(0, 0, 0, 0.3)",

@@ -7,6 +7,7 @@ export * from "./ContextMenu";
 export * from "./SettingsOverlay";
 export * from "./shortcuts";
 export * from "./warnings";
+export * from "./XmlSyntax";
 
 import { LoremIpsum } from "lorem-ipsum";
 

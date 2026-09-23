@@ -805,6 +805,12 @@ export const TextAnnotator = ({
       // The block caret paints over the letter; a light background needs a
       // fainter fill than a dark one for the same readability.
       a.blockCaretOpacity = selectedThemeId === InterfaceEnums.Theme.Dark ? 0.45 : 0.3;
+      a.xmlSyntaxColors = {
+        tag: theme.color.xmlTag,
+        attr: theme.color.xmlAttr,
+        quote: theme.color.xmlQuote,
+        value: theme.color.xmlValue,
+      };
       a.menuColors = {
         bg: theme.color.white,
         text: theme.color.black,
