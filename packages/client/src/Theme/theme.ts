@@ -140,7 +140,9 @@ const theme = {
     // Annotator XML view syntax colours (#3269). One analogous ramp in OKLCH,
     // hue 260 -> 330 at a shared chroma, so the three roles read as a family.
     // Lightness carries the hierarchy: tags darkest, values lightest.
-    xmlTag: "#2A5DB0", // L.50 C.15 H260
+    // L.50 C.12 H260; tag names are entity ids, so they run long and repeat on
+    // every line. Chroma stays below the other roles to keep that bulk quiet.
+    xmlTag: "#3862A7",
     xmlAttr: "#775AA6", // L.53 C.12 H300, muted so names sit behind values
     // quotes recede but stay punctuation, not an artefact: 4.8:1 on white,
     // where gray 600 would only reach 4.0:1
