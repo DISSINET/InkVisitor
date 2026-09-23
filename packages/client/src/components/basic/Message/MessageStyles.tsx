@@ -63,11 +63,7 @@ export const StyledMessageExpansion = styled.span`
   font-style: italic;
   white-space: pre-wrap;
 `;
-export const StyledMessageCondition = styled.div`
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1px;
+export const StyledMessageCondition = styled(StyledMessageTValidationContent)`
   flex-basis: 100%;
   font-style: italic;
 `;

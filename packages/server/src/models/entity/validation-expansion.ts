@@ -1,10 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, ITerritory } from "@inkvisitor/shared/types";
 import {
-  EValidationExpansionField,
   EValidationExpansionKind,
   ITerritoryValidation,
   ITerritoryValidationExpansion,
+  VALIDATION_EXPANSION_FIELDS,
   validationExpansionKind,
 } from "@inkvisitor/shared/types/territory";
 
@@ -20,13 +20,6 @@ export const expansionKey = (
   kind: EValidationExpansionKind,
   entityId: string
 ): string => `${kind}:${entityId}`;
-
-const EXPANDABLE_FIELDS: EValidationExpansionField[] = [
-  "entityClassifications",
-  "entitySOEs",
-  "propType",
-  "allowedEntities",
-];
 
 /**
  * Every (kind, entity id) pair an active rule set needs resolved, deduplicated.
@@ -45,7 +38,7 @@ export const listValidationExpansionKeys = (
         continue;
       }
 
-      for (const field of EXPANDABLE_FIELDS) {
+      for (const field of VALIDATION_EXPANSION_FIELDS) {
         const expansion = validation.expansions[field];
         if (!expansion?.equivalents && !expansion?.subordinates) {
           continue;

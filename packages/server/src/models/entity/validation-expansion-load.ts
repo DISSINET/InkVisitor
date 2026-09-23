@@ -1,8 +1,5 @@
-import {
-  SUBORDINATE_MAX_NODES,
-  getEquivalentEntityIds,
-  getSubordinateEntityIds,
-} from "@models/relation/functions";
+import { SUBORDINATE_MAX_NODES } from "@models/relation/functions";
+import { resolveExpansionIds } from "@service/query/node-expansion";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { ITerritory } from "@inkvisitor/shared/types";
 import { EValidationExpansionKind } from "@inkvisitor/shared/types/territory";
@@ -53,11 +50,11 @@ export const buildValidationExpansionMap = async (
     const entityId = key.slice(separator + 1);
 
     if (kind === EValidationExpansionKind.Equivalents) {
-      map.set(key, await getEquivalentEntityIds(conn, [entityId]));
+      map.set(key, await resolveExpansionIds(conn, entityId, "equivalents"));
       return;
     }
 
-    const ids = await getSubordinateEntityIds(conn, [entityId], {
+    const ids = await resolveExpansionIds(conn, entityId, "subordinates", {
       relationTypes:
         kind === EValidationExpansionKind.Subclasses
           ? [RelationEnums.Type.Superclass]

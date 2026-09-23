@@ -1,12 +1,9 @@
 import "ts-jest";
-import { getRelationClass } from "@models/factory";
 import { Db } from "@service/rethink";
 import { deleteRelations } from "@service/shorthands";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
-import {
-  ITerritory,
-  Relation as RelationTypes,
-} from "@inkvisitor/shared/types";
+import { ITerritory } from "@inkvisitor/shared/types";
+import { saveRelationFixture } from "../../test/relations";
 import {
   EProtocolTieType,
   EValidationExpansionKind,
@@ -23,17 +20,10 @@ import { buildValidationExpansionMap } from "./validation-expansion-load";
 describe("models/entity/validation-expansion against the database", () => {
   const db = new Db();
 
-  const saveRelation = async (
-    id: string,
+  const saveRelation = (
     type: RelationEnums.Type,
     entityIds: [string, string]
-  ): Promise<void> => {
-    await getRelationClass({
-      id,
-      type,
-      entityIds,
-    } as RelationTypes.IRelation).save(db.connection);
-  };
+  ): Promise<void> => saveRelationFixture(db.connection, type, entityIds);
 
   const territory = (validation: ITerritoryValidation): ITerritory =>
     ({
@@ -47,30 +37,30 @@ describe("models/entity/validation-expansion against the database", () => {
     await deleteRelations(db);
 
     // dog -SCL-> animal, puppy -SCL-> dog: two levels of subclasses
-    await saveRelation("v-scl-1", RelationEnums.Type.Superclass, [
+    await saveRelation(RelationEnums.Type.Superclass, [
       "dog",
       "animal",
     ]);
-    await saveRelation("v-scl-2", RelationEnums.Type.Superclass, [
+    await saveRelation(RelationEnums.Type.Superclass, [
       "puppy",
       "dog",
     ]);
     // paw -HOL-> animal: a part of an animal, which a rule must never accept
-    await saveRelation("v-hol-1", RelationEnums.Type.Holonym, [
+    await saveRelation(RelationEnums.Type.Holonym, [
       "paw",
       "animal",
     ]);
     // wordnet-3-1 -SOE-> wordnet, wordnet-3-1-1 -SOE-> wordnet-3-1
-    await saveRelation("v-soe-1", RelationEnums.Type.SuperordinateEntity, [
+    await saveRelation(RelationEnums.Type.SuperordinateEntity, [
       "wordnet-3-1",
       "wordnet",
     ]);
-    await saveRelation("v-soe-2", RelationEnums.Type.SuperordinateEntity, [
+    await saveRelation(RelationEnums.Type.SuperordinateEntity, [
       "wordnet-3-1-1",
       "wordnet-3-1",
     ]);
     // animal -SYN- animal-synonym
-    await saveRelation("v-syn-1", RelationEnums.Type.Synonym, [
+    await saveRelation(RelationEnums.Type.Synonym, [
       "animal",
       "animal-synonym",
     ]);

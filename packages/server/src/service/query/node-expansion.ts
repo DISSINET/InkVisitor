@@ -1,9 +1,36 @@
 import { Connection } from "rethinkdb-ts";
 
 import {
+  ISubordinateExpansionOptions,
   getEquivalentEntityIds,
   getSubordinateEntityIds,
 } from "@models/relation/functions";
+
+/**
+ * One direction an entity can stand for more than itself in: sideways to the
+ * entities recorded as equivalent, or downward to what lies below it.
+ */
+export type ExpansionDirection = "equivalents" | "subordinates";
+
+/**
+ * The ids one direction adds to one entity - the single place that decides
+ * which relation helper answers which direction. A query node takes the whole
+ * downward set; a validation rule field narrows it to the path that field
+ * stands for, which is what `opts` is for.
+ * @param db db connection
+ * @param entityId the entity standing for more than itself
+ * @param direction sideways or downward
+ * @param opts narrows the downward walk; ignored for equivalents
+ */
+export const resolveExpansionIds = async (
+  db: Connection,
+  entityId: string,
+  direction: ExpansionDirection,
+  opts?: ISubordinateExpansionOptions
+): Promise<string[]> =>
+  direction === "equivalents"
+    ? getEquivalentEntityIds(db, [entityId])
+    : getSubordinateEntityIds(db, [entityId], opts);
 
 export interface INodeExpansionOptions {
   equivalents: boolean;
@@ -39,7 +66,7 @@ export const getNodeExpansionIds = async (
   opts: INodeExpansionOptions
 ): Promise<INodeExpansionIds> => {
   const equivalents = opts.equivalents
-    ? await getEquivalentEntityIds(db, [entityId])
+    ? await resolveExpansionIds(db, entityId, "equivalents")
     : [];
 
   if (!opts.subordinates) {
@@ -47,9 +74,9 @@ export const getNodeExpansionIds = async (
   }
 
   const claimed = new Set<string>(equivalents);
-  const subordinates = (await getSubordinateEntityIds(db, [entityId])).filter(
-    (id) => !claimed.has(id)
-  );
+  const subordinates = (
+    await resolveExpansionIds(db, entityId, "subordinates")
+  ).filter((id) => !claimed.has(id));
 
   return { equivalents, subordinates };
 };

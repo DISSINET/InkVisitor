@@ -18,7 +18,7 @@ export const StyledCheckbox = styled.div<StyledCheckbox>`
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   width: fit-content;
 `;
 
@@ -28,7 +28,7 @@ interface StyledLabel {
 export const StyledLabel = styled.label<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   user-select: none;
-  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   display: flex;
   align-items: center;
 `;
@@ -64,7 +64,7 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
     $checked && !$noFill && !$disabled
       ? theme.color[$color]
       : theme.color["white"]};
-  cursor: ${({ $disabled }) => ($disabled ? "default" : "pointer")};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   /* transition:
     background-color 0.15s ease,
     border-color 0.15s ease; */

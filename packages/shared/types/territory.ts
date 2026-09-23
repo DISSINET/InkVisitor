@@ -34,11 +34,15 @@ export interface ITerritoryProtocol {
  * Classification tie) allowedEntities follow subclasses, entitySOEs and (under
  * a Reference tie) allowedEntities follow subordinate entities.
  */
+export const VALIDATION_EXPANSION_FIELDS = [
+  "entityClassifications",
+  "entitySOEs",
+  "propType",
+  "allowedEntities",
+] as const;
+
 export type EValidationExpansionField =
-  | "entityClassifications"
-  | "entitySOEs"
-  | "propType"
-  | "allowedEntities";
+  (typeof VALIDATION_EXPANSION_FIELDS)[number];
 
 /**
  * Whether a rule field accepts entities beyond the ones picked in it:
