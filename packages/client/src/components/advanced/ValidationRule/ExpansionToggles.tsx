@@ -76,7 +76,7 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
         label="equivalents"
         size={13}
         value={expansion?.equivalents === true}
-        disabled={!userCanEdit}
+        isDisabled={!userCanEdit}
         tooltipLabel="include equivalents"
         tooltipContent={EQUIVALENTS_TOOLTIP}
         onChangeFn={(checked) => setFlag("equivalents", checked)}
@@ -86,7 +86,7 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
           label={expansionKindLabel(kind)}
           size={13}
           value={expansion?.subordinates === true}
-          disabled={!userCanEdit}
+          isDisabled={!userCanEdit}
           tooltipLabel={`include ${expansionKindLabel(kind)}`}
           tooltipContent={expansionKindTooltip(kind)}
           onChangeFn={(checked) => setFlag("subordinates", checked)}

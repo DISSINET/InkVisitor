@@ -218,23 +218,28 @@ export const ValidationRule: React.FC<ValidationRule> = ({
         {/* Entity Languages */}
         <StyledLabel>having language</StyledLabel>
         <StyledValue>
-          <StyledLanguageList>
-            {entityLanguages?.map((language, key) => (
-              <LanguageTag
-                languageValue={language}
-                languageTooltip={languageDict.find((lang) => lang.value === language)?.label}
-                onUnlink={
-                  userCanEdit
-                    ? () => {
-                        updateValidationRule({
-                          entityLanguages: entityLanguages.filter((c) => c !== language),
-                        });
-                      }
-                    : undefined
-                }
-              />
-            ))}
-          </StyledLanguageList>
+          {/* an empty list would still take a flex gap and shift the dropdown
+              out of line with the inputs of the rows above */}
+          {entityLanguages && entityLanguages.length > 0 && (
+            <StyledLanguageList>
+              {entityLanguages.map((language, key) => (
+                <LanguageTag
+                  key={key}
+                  languageValue={language}
+                  languageTooltip={languageDict.find((lang) => lang.value === language)?.label}
+                  onUnlink={
+                    userCanEdit
+                      ? () => {
+                          updateValidationRule({
+                            entityLanguages: entityLanguages.filter((c) => c !== language),
+                          });
+                        }
+                      : undefined
+                  }
+                />
+              ))}
+            </StyledLanguageList>
+          )}
 
           {!(!userCanEdit && entityLanguages) && (
             <Dropdown.Single.Basic
