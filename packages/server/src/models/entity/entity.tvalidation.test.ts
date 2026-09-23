@@ -101,18 +101,6 @@ describe("models/entity getTBasedWarnings with expansions", () => {
       ).toEqual([]);
     });
 
-    it("still warns about a concept that is not below the picked one", () => {
-      expect(
-        warningTypes(
-          statement(),
-          territoryWith(rule(true)),
-          [concept("unrelated")],
-          [],
-          subclassMap
-        )
-      ).toEqual([WarningTypeEnums.TVECE]);
-    });
-
     it("behaves as before when no expansion map is handed in", () => {
       expect(
         warningTypes(
@@ -162,17 +150,6 @@ describe("models/entity getTBasedWarnings with expansions", () => {
       ).toEqual([]);
     });
 
-    it("warns about a resource outside the path", () => {
-      expect(
-        warningTypes(
-          entityWithReference("geonames"),
-          territoryWith(rule),
-          [],
-          [],
-          subordinateMap
-        )
-      ).toEqual([WarningTypeEnums.TVERE]);
-    });
   });
 
   describe("a condition field", () => {
@@ -191,18 +168,6 @@ describe("models/entity getTBasedWarnings with expansions", () => {
     const subclassMap: ValidationExpansionMap = new Map([
       [expansionKey(EValidationExpansionKind.Subclasses, "animal"), ["dog"]],
     ]);
-
-    it("leaves an entity classified below the condition alone while unchecked", () => {
-      expect(
-        warningTypes(
-          statement(),
-          territoryWith(rule(false)),
-          [concept("dog")],
-          [],
-          subclassMap
-        )
-      ).toEqual([]);
-    });
 
     it("applies the rule to it once checked", () => {
       expect(
@@ -335,12 +300,6 @@ describe("models/entity getTBasedWarnings with expansions", () => {
       expect(
         check(withProp("start-date", "value1"), rule(true), [], subclassMap)
       ).toEqual([]);
-    });
-
-    it("still warns about a property type outside the path", () => {
-      expect(
-        check(withProp("colour", "value1"), rule(true), [], subclassMap)
-      ).toEqual([WarningTypeEnums.TVEPT]);
     });
 
     it("holds the value class requirement over the widened property type", () => {

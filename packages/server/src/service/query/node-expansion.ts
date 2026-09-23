@@ -6,35 +6,15 @@ import {
   getSubordinateEntityIds,
 } from "@models/relation/functions";
 
-/**
- * One direction an entity can stand for more than itself in: sideways to the
- * entities recorded as equivalent, or downward to what lies below it.
- */
-export type ExpansionDirection = "equivalents" | "subordinates";
-
-/**
- * The ids one direction adds to one entity - the single place that decides
- * which relation helper answers which direction. A query node takes the whole
- * downward set; a validation rule field narrows it to the path that field
- * stands for, which is what `opts` is for.
- * @param db db connection
- * @param entityId the entity standing for more than itself
- * @param direction sideways or downward
- * @param opts narrows the downward walk; ignored for equivalents
- */
-export const resolveExpansionIds = async (
-  db: Connection,
-  entityId: string,
-  direction: ExpansionDirection,
-  opts?: ISubordinateExpansionOptions
-): Promise<string[]> =>
-  direction === "equivalents"
-    ? getEquivalentEntityIds(db, [entityId])
-    : getSubordinateEntityIds(db, [entityId], opts);
-
 export interface INodeExpansionOptions {
   equivalents: boolean;
   subordinates: boolean;
+  /**
+   * Narrows the downward walk. A query node takes the whole downward set and
+   * leaves this out; a validation rule field passes the one path that field
+   * stands for (#2527).
+   */
+  subordinateOptions?: ISubordinateExpansionOptions;
 }
 
 export interface INodeExpansionIds {
@@ -66,7 +46,7 @@ export const getNodeExpansionIds = async (
   opts: INodeExpansionOptions
 ): Promise<INodeExpansionIds> => {
   const equivalents = opts.equivalents
-    ? await resolveExpansionIds(db, entityId, "equivalents")
+    ? await getEquivalentEntityIds(db, [entityId])
     : [];
 
   if (!opts.subordinates) {
@@ -75,7 +55,7 @@ export const getNodeExpansionIds = async (
 
   const claimed = new Set<string>(equivalents);
   const subordinates = (
-    await resolveExpansionIds(db, entityId, "subordinates")
+    await getSubordinateEntityIds(db, [entityId], opts.subordinateOptions)
   ).filter((id) => !claimed.has(id));
 
   return { equivalents, subordinates };

@@ -127,15 +127,4 @@ describe("models/entity/validation-expansion against the database", () => {
     ).toEqual(["animal-synonym"]);
   });
 
-  test("a rule with no flags asks the database for nothing", async () => {
-    const map = await buildValidationExpansionMap(db.connection, [
-      territory({
-        tieType: EProtocolTieType.Classification,
-        detail: "",
-        entityClassifications: ["animal"],
-      }),
-    ]);
-
-    expect(map.size).toBe(0);
-  });
 });

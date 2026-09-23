@@ -1,5 +1,6 @@
 import { EntityEnums } from "../enums";
 import { IEntity } from "./entity";
+import { ExpansionGroup } from "./response-entity-expansion";
 
 export interface ITerritory extends IEntity {
   class: EntityEnums.Class.Territory;
@@ -49,10 +50,9 @@ export type EValidationExpansionField =
  * equivalents are synonyms, identifications and action-event equivalents;
  * subordinates are everything below on the field's own path, all levels.
  */
-export interface ITerritoryValidationExpansion {
-  equivalents?: boolean;
-  subordinates?: boolean;
-}
+export type ITerritoryValidationExpansion = Partial<
+  Record<ExpansionGroup, boolean>
+>;
 
 /**
  * The downward path a rule field stands for. Subclasses is the inverse

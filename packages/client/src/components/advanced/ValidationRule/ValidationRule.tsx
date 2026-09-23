@@ -77,12 +77,19 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     return validation.active !== false;
   }, [validation.active]);
 
-  // the tie decides what Prop type and the allowed list mean, so their
-  // expansions go with the fields the tie switch empties
-  const conditionExpansions = useMemo(() => {
+  // The tie decides what Prop type and the allowed list mean, so switching it
+  // empties those fields - and with them their expansions, while the condition
+  // fields keep theirs.
+  const switchTie = (newTieType: EProtocolTieType) => {
     const { entityClassifications, entitySOEs } = validation.expansions ?? {};
-    return { entityClassifications, entitySOEs };
-  }, [validation.expansions]);
+    updateValidationRule({
+      tieType: newTieType,
+      propType: [],
+      allowedClasses: [],
+      allowedEntities: [],
+      expansions: { entityClassifications, entitySOEs },
+    });
+  };
 
   const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
     if (!allowedEntities) {
@@ -315,41 +322,20 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             {
               longValue: EProtocolTieType.Property,
               shortValue: EProtocolTieType.Property,
-              onClick: () =>
-                updateValidationRule({
-                  tieType: EProtocolTieType.Property,
-                  propType: [],
-                  allowedClasses: [],
-                  allowedEntities: [],
-                  expansions: conditionExpansions,
-                }),
+              onClick: () => switchTie(EProtocolTieType.Property),
               selected: tieType === EProtocolTieType.Property,
             },
             {
               longValue: EProtocolTieType.Classification,
               shortValue: EProtocolTieType.Classification,
-              onClick: () =>
-                updateValidationRule({
-                  tieType: EProtocolTieType.Classification,
-                  propType: [],
-                  allowedClasses: [],
-                  allowedEntities: [],
-                  expansions: conditionExpansions,
-                }),
+              onClick: () => switchTie(EProtocolTieType.Classification),
               selected: tieType === EProtocolTieType.Classification,
               optionDisabled: entityClassifications && entityClassifications.length > 0,
             },
             {
               longValue: EProtocolTieType.Reference,
               shortValue: EProtocolTieType.Reference,
-              onClick: () =>
-                updateValidationRule({
-                  tieType: EProtocolTieType.Reference,
-                  propType: [],
-                  allowedClasses: [],
-                  allowedEntities: [],
-                  expansions: conditionExpansions,
-                }),
+              onClick: () => switchTie(EProtocolTieType.Reference),
               selected: tieType === EProtocolTieType.Reference,
             },
           ]}

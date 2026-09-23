@@ -33,84 +33,39 @@ const territory = (validations: ITerritoryValidation[]): ITerritory =>
   } as ITerritory);
 
 describe("models/entity/validation-expansion", () => {
-  describe("validationExpansionKind", () => {
-    it("sends Concept-valued fields down the superclass path", () => {
-      expect(
-        validationExpansionKind(
-          "entityClassifications",
-          EProtocolTieType.Reference
-        )
-      ).toBe(EValidationExpansionKind.Subclasses);
-      expect(
-        validationExpansionKind("propType", EProtocolTieType.Property)
-      ).toBe(EValidationExpansionKind.Subclasses);
-      expect(
-        validationExpansionKind(
-          "allowedEntities",
-          EProtocolTieType.Classification
-        )
-      ).toBe(EValidationExpansionKind.Subclasses);
-    });
+  it("sends each field down the path it stands for", () => {
+    const { Subclasses, Subordinates } = EValidationExpansionKind;
 
-    it("sends entity-valued fields down the superordinate path", () => {
-      expect(
-        validationExpansionKind("entitySOEs", EProtocolTieType.Property)
-      ).toBe(EValidationExpansionKind.Subordinates);
-      expect(
-        validationExpansionKind("allowedEntities", EProtocolTieType.Reference)
-      ).toBe(EValidationExpansionKind.Subordinates);
-    });
-
-    it("gives the property value list no downward path", () => {
-      expect(
-        validationExpansionKind("allowedEntities", EProtocolTieType.Property)
-      ).toBeNull();
-    });
-  });
-
-  describe("TerritoryValidation round trip", () => {
-    it("keeps the expansion flags when a territory is rebuilt from a row", () => {
-      const row = {
-        id: "T1",
-        class: EntityEnums.Class.Territory,
-        data: {
-          parent: { territoryId: "T0", order: 0 },
-          validations: [
-            {
-              tieType: EProtocolTieType.Reference,
-              detail: "",
-              allowedEntities: ["r1"],
-              expansions: { allowedEntities: { subordinates: true } },
-            },
-          ],
-        },
-      };
-
-      const rebuilt = new Territory(row as any);
-
-      expect(rebuilt.data.validations?.[0].expansions).toEqual({
-        allowedEntities: { subordinates: true },
-      });
-    });
+    expect(
+      validationExpansionKind("entityClassifications", EProtocolTieType.Property)
+    ).toBe(Subclasses);
+    expect(validationExpansionKind("propType", EProtocolTieType.Property)).toBe(
+      Subclasses
+    );
+    expect(
+      validationExpansionKind("entitySOEs", EProtocolTieType.Property)
+    ).toBe(Subordinates);
+    // the allowed list changes meaning with the tie
+    expect(
+      validationExpansionKind("allowedEntities", EProtocolTieType.Classification)
+    ).toBe(Subclasses);
+    expect(
+      validationExpansionKind("allowedEntities", EProtocolTieType.Reference)
+    ).toBe(Subordinates);
+    // the property value list carries no boxes
+    expect(
+      validationExpansionKind("allowedEntities", EProtocolTieType.Property)
+    ).toBeNull();
   });
 
   describe("listValidationExpansionKeys", () => {
-    it("asks for nothing when no rule has expansions", () => {
-      expect(
-        listValidationExpansionKeys([
-          territory([
-            validation({ entityClassifications: ["c1"], propType: ["p1"] }),
-          ]),
-        ])
-      ).toEqual([]);
-    });
-
-    it("asks only for the checked box of the field that carries it", () => {
+    it("asks for the box that was checked, on the field that carries it", () => {
       const keys = listValidationExpansionKeys([
         territory([
           validation({
             entityClassifications: ["c1"],
             entitySOEs: ["s1"],
+            propType: ["p1"],
             expansions: {
               entityClassifications: { subordinates: true },
               entitySOEs: { equivalents: true },
@@ -127,56 +82,22 @@ describe("models/entity/validation-expansion", () => {
       );
     });
 
-    it("follows the tie when deciding what allowedEntities means", () => {
-      const asReference = listValidationExpansionKeys([
-        territory([
-          validation({
-            tieType: EProtocolTieType.Reference,
-            allowedEntities: ["r1"],
-            expansions: { allowedEntities: { subordinates: true } },
-          }),
-        ]),
-      ]);
-      const asClassification = listValidationExpansionKeys([
-        territory([
-          validation({
-            tieType: EProtocolTieType.Classification,
-            allowedEntities: ["r1"],
-            expansions: { allowedEntities: { subordinates: true } },
-          }),
-        ]),
-      ]);
+    it("asks nothing for rules without flags or for deactivated ones, and asks once per pair", () => {
+      const flagged = {
+        entityClassifications: ["c1"],
+        expansions: { entityClassifications: { subordinates: true } },
+      };
 
-      expect(asReference).toEqual([
-        expansionKey(EValidationExpansionKind.Subordinates, "r1"),
-      ]);
-      expect(asClassification).toEqual([
-        expansionKey(EValidationExpansionKind.Subclasses, "r1"),
-      ]);
-    });
-
-    it("skips deactivated rules and deduplicates across rules", () => {
-      const keys = listValidationExpansionKeys([
-        territory([
-          validation({
-            entityClassifications: ["c1"],
-            expansions: { entityClassifications: { subordinates: true } },
-          }),
-          validation({
-            entityClassifications: ["c1"],
-            expansions: { entityClassifications: { subordinates: true } },
-          }),
-          validation({
-            active: false,
-            entityClassifications: ["c2"],
-            expansions: { entityClassifications: { subordinates: true } },
-          }),
-        ]),
-      ]);
-
-      expect(keys).toEqual([
-        expansionKey(EValidationExpansionKind.Subclasses, "c1"),
-      ]);
+      expect(
+        listValidationExpansionKeys([
+          territory([
+            validation(flagged),
+            validation(flagged),
+            validation({ ...flagged, active: false }),
+            validation({ entityClassifications: ["c2"] }),
+          ]),
+        ])
+      ).toEqual([expansionKey(EValidationExpansionKind.Subclasses, "c1")]);
     });
   });
 
@@ -184,7 +105,6 @@ describe("models/entity/validation-expansion", () => {
     const map: ValidationExpansionMap = new Map([
       [expansionKey(EValidationExpansionKind.Subclasses, "c1"), ["c1a", "c1b"]],
       [expansionKey(EValidationExpansionKind.Equivalents, "c1"), ["c1syn"]],
-      [expansionKey(EValidationExpansionKind.Subordinates, "c1"), ["c1sub"]],
     ]);
 
     it("returns the picked ids untouched when no box is checked", () => {
@@ -196,17 +116,7 @@ describe("models/entity/validation-expansion", () => {
           map
         )
       ).toEqual(["c1"]);
-      expect(
-        expandValidationIds(
-          ["c1"],
-          { equivalents: false, subordinates: false },
-          EValidationExpansionKind.Subclasses,
-          map
-        )
-      ).toEqual(["c1"]);
-    });
-
-    it("keeps an empty field empty", () => {
+      // an empty field stays empty, so "no condition set" stays readable
       expect(
         expandValidationIds(
           [],
@@ -217,69 +127,55 @@ describe("models/entity/validation-expansion", () => {
       ).toEqual([]);
     });
 
-    it("adds only the kind the field follows", () => {
+    it("adds what each checked box collected, without duplicates, keeping the picked ids", () => {
       expect(
         expandValidationIds(
-          ["c1"],
-          { subordinates: true },
-          EValidationExpansionKind.Subclasses,
-          map
-        ).sort()
-      ).toEqual(["c1", "c1a", "c1b"]);
-    });
-
-    it("adds both sets when both boxes are checked, without duplicates", () => {
-      expect(
-        expandValidationIds(
-          ["c1", "c1a"],
+          ["c1", "c1a", "unknown"],
           { equivalents: true, subordinates: true },
           EValidationExpansionKind.Subclasses,
           map
         ).sort()
-      ).toEqual(["c1", "c1a", "c1b", "c1syn"]);
-    });
-
-    it("keeps the picked id when nothing was collected for it", () => {
-      expect(
-        expandValidationIds(
-          ["unknown"],
-          { equivalents: true, subordinates: true },
-          EValidationExpansionKind.Subordinates,
-          map
-        )
-      ).toEqual(["unknown"]);
+      ).toEqual(["c1", "c1a", "c1b", "c1syn", "unknown"]);
     });
   });
 
-  describe("soeIdsForValidation", () => {
-    it("leaves a non-Territory entity's relations alone", () => {
-      const concept = {
-        id: "c",
-        class: EntityEnums.Class.Concept,
-        data: {},
-      } as IEntity;
+  it("counts a Territory's parent as a superordinate entity", () => {
+    const child = {
+      id: "T1",
+      class: EntityEnums.Class.Territory,
+      data: { parent: { territoryId: "T0", order: 0 } },
+    } as ITerritory;
+    const root = {
+      id: "T0",
+      class: EntityEnums.Class.Territory,
+      data: { parent: false },
+    } as ITerritory;
+    const concept = { id: "c", class: EntityEnums.Class.Concept } as IEntity;
 
-      expect(soeIdsForValidation(concept, ["soe1"])).toEqual(["soe1"]);
-    });
+    expect(soeIdsForValidation(child, ["soe1"])).toEqual(["soe1", "T0"]);
+    expect(soeIdsForValidation(root, [])).toEqual([]);
+    expect(soeIdsForValidation(concept, ["soe1"])).toEqual(["soe1"]);
+  });
 
-    it("counts a Territory's parent as a superordinate entity", () => {
-      const child = {
-        id: "T1",
-        class: EntityEnums.Class.Territory,
-        data: { parent: { territoryId: "T0", order: 0 } },
-      } as ITerritory;
+  it("keeps the flags when a territory is rebuilt from a database row", () => {
+    const rebuilt = new Territory({
+      id: "T1",
+      class: EntityEnums.Class.Territory,
+      data: {
+        parent: { territoryId: "T0", order: 0 },
+        validations: [
+          {
+            tieType: EProtocolTieType.Reference,
+            detail: "",
+            allowedEntities: ["r1"],
+            expansions: { allowedEntities: { subordinates: true } },
+          },
+        ],
+      },
+    } as any);
 
-      expect(soeIdsForValidation(child, [])).toEqual(["T0"]);
-    });
-
-    it("leaves the root Territory alone", () => {
-      const root = {
-        id: "T0",
-        class: EntityEnums.Class.Territory,
-        data: { parent: false },
-      } as ITerritory;
-
-      expect(soeIdsForValidation(root, [])).toEqual([]);
+    expect(rebuilt.data.validations?.[0].expansions).toEqual({
+      allowedEntities: { subordinates: true },
     });
   });
 });

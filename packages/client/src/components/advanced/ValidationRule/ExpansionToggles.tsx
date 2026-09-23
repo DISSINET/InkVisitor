@@ -1,3 +1,4 @@
+import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import {
   EValidationExpansionField,
   ITerritoryValidation,
@@ -53,10 +54,7 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
 
   // the hosts merge rule changes one key deep, so the whole expansions object
   // travels on every toggle
-  const setFlag = (
-    flag: "equivalents" | "subordinates",
-    checked: boolean
-  ): void => {
+  const setFlag = (flag: ExpansionGroup, checked: boolean): void => {
     const next = withExpansionFlag(
       sent.current ?? validation.expansions,
       field,
@@ -76,7 +74,7 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
         label="equivalents"
         size={13}
         value={expansion?.equivalents === true}
-        isDisabled={!userCanEdit}
+        disabled={!userCanEdit}
         tooltipLabel="include equivalents"
         tooltipContent={EQUIVALENTS_TOOLTIP}
         onChangeFn={(checked) => setFlag("equivalents", checked)}
@@ -86,7 +84,7 @@ export const ExpansionToggles: React.FC<ExpansionToggles> = ({
           label={expansionKindLabel(kind)}
           size={13}
           value={expansion?.subordinates === true}
-          isDisabled={!userCanEdit}
+          disabled={!userCanEdit}
           tooltipLabel={`include ${expansionKindLabel(kind)}`}
           tooltipContent={expansionKindTooltip(kind)}
           onChangeFn={(checked) => setFlag("subordinates", checked)}

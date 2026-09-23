@@ -1,3 +1,4 @@
+import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import {
   EValidationExpansionField,
   EValidationExpansionKind,
@@ -36,7 +37,7 @@ export const EQUIVALENTS_TOOLTIP =
 export const withExpansionFlag = (
   expansions: ITerritoryValidation["expansions"],
   field: EValidationExpansionField,
-  flag: keyof ITerritoryValidationExpansion,
+  flag: ExpansionGroup,
   checked: boolean
 ): ITerritoryValidation["expansions"] => {
   const next: NonNullable<ITerritoryValidation["expansions"]> = {

@@ -32,7 +32,7 @@ interface Checkbox {
   onClickFn?: () => void;
   disableEnterKey?: boolean;
   // shows the value but takes no input, e.g. for a user without edit rights
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
@@ -49,13 +49,13 @@ export const Checkbox: React.FC<Checkbox> = ({
   tooltipPosition = "bottom",
   onClickFn = () => {},
   disableEnterKey = false,
-  isDisabled = false,
+  disabled = false,
 }) => {
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleToggle = (e: React.MouseEvent) => {
-    if (isDisabled) {
+    if (disabled) {
       return;
     }
     // a click with detail 0 is raised by keyboard activation rather than a
@@ -71,7 +71,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   // Space/Enter toggle the box when it holds keyboard focus, matching native
   // checkbox behaviour (the indicator is a styled span, not an <input>).
   const handleKeyToggle = (e: React.KeyboardEvent) => {
-    if (isDisabled) {
+    if (disabled) {
       return;
     }
     // the box keeps focus while Enter belongs to the page (e.g. the query page
@@ -109,17 +109,17 @@ export const Checkbox: React.FC<Checkbox> = ({
           ref={setReferenceElement}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
-          $disabled={isDisabled}
+          $disabled={disabled}
         >
           <StyledCheckboxWrapper>
             <StyledCheckboxIndicator
               role="checkbox"
-              tabIndex={isDisabled ? -1 : 0}
+              tabIndex={disabled ? -1 : 0}
               aria-checked={indeterminate ? "mixed" : value}
-              aria-disabled={isDisabled}
+              aria-disabled={disabled}
               aria-label={label}
               $checked={value || indeterminate}
-              $disabled={isDisabled}
+              $disabled={disabled}
               $size={size}
               $color={color}
               $noFill={noFill}
@@ -134,7 +134,7 @@ export const Checkbox: React.FC<Checkbox> = ({
             </StyledCheckboxIndicator>
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel onClick={handleToggle} $disabled={isDisabled}>
+            <StyledLabel onClick={handleToggle} $disabled={disabled}>
               {label}
               {icon}
             </StyledLabel>
