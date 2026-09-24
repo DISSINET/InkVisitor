@@ -258,12 +258,6 @@
     "roles": ["*"]
   },
   {
-    "controller": "entities",
-    "route": ":entityId/expansion",
-    "method": "GET",
-    "roles": ["*"]
-  },
-  {
     "controller": "audits",
     "route": "",
     "method": "GET",

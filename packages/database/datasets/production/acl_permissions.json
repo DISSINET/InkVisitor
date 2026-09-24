@@ -69,7 +69,6 @@
 {"controller": "entities", "id": "b32ec1df-4c4f-42df-9b68-8ac474504ebe", "method": "GET", "roles": ["*"], "route": ":entityId/detail"},
 {"controller": "users", "id": "b3879782-226d-48ed-8865-761d2e8bf9ca", "method": "GET", "roles": ["admin"], "route": "/me/emails/test"},
 {"controller": "entities", "id": "b7e6a769-71fd-4eb7-acc8-fed0b6f2cb69", "method": "GET", "roles": ["*"], "route": ":entityId/tooltip"},
-{"controller": "entities", "id": "d3115c52-8f77-46b0-9a81-64f3d8cbc612", "method": "GET", "roles": ["*"], "route": ":entityId/expansion"},
 {"controller": "settings", "id": "c0fd1dda-514e-42a2-8f89-394f437f3e6f", "method": "GET", "public": true, "roles": ["*"], "route": ":key"},
 {"controller": "documents", "id": "c20dcdd9-2610-4360-bb0c-6fec63ff4b35", "method": "PUT", "roles": ["*"], "route": ""},
 {"controller": "relations", "id": "c3965472-91ad-43f8-af4d-0d01d01fa812", "method": "POST", "roles": ["editor"], "route": ""},

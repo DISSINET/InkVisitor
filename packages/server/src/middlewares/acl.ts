@@ -178,13 +178,15 @@ class Acl {
       return null;
     }
 
-    // GET /entities/:entityId/tooltip and GET /entities/:entityId/detail have
-    // no seeded ACL entries. Both are read-only companions to the public
-    // GET /entities/:entityId. Any logged-in user may call them; entity-level
-    // access is handled inside each handler.
+    // GET /entities/:entityId/tooltip, /detail and /expansion have no seeded
+    // ACL entries. All are read-only companions to the public
+    // GET /entities/:entityId, so any logged-in user may call them; entity-level
+    // access, where there is any, is handled inside each handler.
     if (
       controller === "entities" &&
-      (route.endsWith("/tooltip") || route.endsWith("/detail")) &&
+      (route.endsWith("/tooltip") ||
+        route.endsWith("/detail") ||
+        route.endsWith("/expansion")) &&
       method === HttpMethods.Get
     ) {
       return null;

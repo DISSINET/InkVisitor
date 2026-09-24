@@ -52,10 +52,7 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
 // read-only routes any signed-in user may reach - kept apart because they are
 // granted to every role, not just the editor
 const READ_ROUTES: Array<{ controller: string; method: string; route: string }> =
-  [
-    { controller: "territories", method: "GET", route: ":territoryId/statements" },
-    { controller: "entities", method: "GET", route: ":entityId/expansion" },
-  ];
+  [{ controller: "territories", method: "GET", route: ":territoryId/statements" }];
 
 // rows the ACL layer wrote for routes that no longer exist - nothing deletes a
 // permission once its route is gone, so they linger and misrepresent what the
