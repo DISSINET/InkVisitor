@@ -31,7 +31,8 @@ interface Checkbox {
   // optional function to be called when the checkbox is clicked (onChangeFn is main function that returns value)
   onClickFn?: () => void;
   disableEnterKey?: boolean;
-  // shows the value but takes no input, e.g. for a user without edit rights
+  // shows the value but ignores clicks and keys (e.g. a user without edit
+  // rights); the tooltip still shows, which is where the reason belongs
   disabled?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
@@ -56,6 +57,7 @@ export const Checkbox: React.FC<Checkbox> = ({
 
   const handleToggle = (e: React.MouseEvent) => {
     if (disabled) {
+      e.stopPropagation();
       return;
     }
     // a click with detail 0 is raised by keyboard activation rather than a
@@ -116,7 +118,7 @@ export const Checkbox: React.FC<Checkbox> = ({
               role="checkbox"
               tabIndex={disabled ? -1 : 0}
               aria-checked={indeterminate ? "mixed" : value}
-              aria-disabled={disabled}
+              aria-disabled={disabled || undefined}
               aria-label={label}
               $checked={value || indeterminate}
               $disabled={disabled}

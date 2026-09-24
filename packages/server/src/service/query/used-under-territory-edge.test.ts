@@ -218,9 +218,9 @@ describe("EUT: edge / used in statements under T (real ReQL)", () => {
     expect(sorted(ids)).toEqual(["RAWACTANT"]);
   });
 
-  test("no target territory -> matches nothing", async () => {
+  test("no target territory -> entities used in any statement", async () => {
     const ids = await runEdge({}, conn);
-    expect(ids).toEqual([]);
+    expect(sorted(ids)).toEqual(sorted([...USED_IN_T1, "ACTANT2", "RAWACTANT"]));
   });
 
   test("an empty / unknown territory -> matches nothing", async () => {

@@ -20,6 +20,13 @@ export const StyledCheckbox = styled.div<StyledCheckbox>`
   gap: 0.4rem;
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   width: fit-content;
+  ${({ $disabled }) =>
+    $disabled &&
+    css`
+      & * {
+        cursor: not-allowed;
+      }
+    `}
 `;
 
 interface StyledLabel {

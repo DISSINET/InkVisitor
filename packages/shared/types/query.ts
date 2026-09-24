@@ -36,6 +36,7 @@ export namespace Query {
     "HP:V" = "HP:V",
     "I_HP:V" = "I_HP:V",
     "EP:T" = "EP:T",
+    "I_EP:T" = "I_EP:T",
     "IS:" = "IS:",
     "I_IS:" = "I_IS:",
     "IS:A" = "IS:A",
@@ -151,42 +152,69 @@ export namespace Query {
 
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "I_HP:V": {},
+    "I_HP:V": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "EP:T": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "I_EP:T": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
     },
 
     "IS:": {
       entityId: { allowedClasses: [EntityEnums.Class.Statement] },
     },
     "I_IS:": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:A": {},
-    "I_IS:A": {},
-    "IS:S": {},
+    "IS:A": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
+    "I_IS:A": {
+      entityClass: { allowedClasses: [EntityEnums.Class.Action] },
+      entityId: { allowedClasses: [EntityEnums.Class.Action] },
+    },
+    "IS:S": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:S": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:A1": {},
+    "IS:A1": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:A1": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:A2": {},
+    "IS:A2": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "I_IS:A2": {
       entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    "IS:PS": {},
-    "I_IS:PS": {},
+    "IS:PS": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
+    "I_IS:PS": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "SUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
-    "I_SUT:": {},
+    "I_SUT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Statement] },
+    },
     "EUT:": {
       entityId: { allowedClasses: [EntityEnums.Class.Territory] },
     },
@@ -195,13 +223,22 @@ export namespace Query {
     "HR:R": {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
     },
-    "I_HR:R": {},
+    "I_HR:R": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "HR:V": {
       entityId: { allowedClasses: [EntityEnums.Class.Value] },
     },
-    "CT:": {},
-    "I_CT:": {},
-    "CT:D": {},
+    "CT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
+    "I_CT:": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
+    "CT:D": {
+      entityId: { allowedClasses: [EntityEnums.Class.Territory] },
+    },
     "I_CT:D": {},
     "CT:G": {},
     "I_CT:G": {},
@@ -212,14 +249,22 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
     "SP:V": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "I_SP:V": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
-    SI: {},
-    I_SI: {},
-    SC: {},
+    SI: {
+      entityId: { allowedClasses: [] },
+    },
+    I_SI: {
+      entityId: { allowedClasses: [] },
+    },
+    SC: {
+      entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
     I_SC: {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
@@ -280,7 +325,9 @@ export namespace Query {
       entityClass: { allowedClasses: [EntityEnums.Class.Concept] },
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
-    "I_R:AEE": {},
+    "I_R:AEE": {
+      entityId: { allowedClasses: [EntityEnums.Class.Action] },
+    },
     "R:CLA": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
@@ -384,11 +431,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: {} },
     ],
     "I_HP:V": [
-      { nodeType: NodeType.E, params: {} },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      // source: the prop value (any class)
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the entity whose own props hold the value (any class)
+      { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "EP:T": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
@@ -396,6 +442,15 @@ export namespace Query {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
+    ],
+    "I_EP:T": [
+      // source: the prop type concept
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      // target: the entity whose own props use the type (any class)
+      { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "IS:": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
@@ -648,7 +703,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     SI: [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     I_SI: [
@@ -656,7 +714,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     SC: [
-      { nodeType: NodeType.E, params: { entityClass: [] } },
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Statement] },
+      },
       {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
@@ -946,12 +1007,13 @@ export namespace Query {
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
     "HP:V": "has property: value",
-    "I_HP:V": "property origin",
+    "I_HP:V": "is property: value",
     "EP:T": "has property: type",
+    "I_EP:T": "is property: type",
     "IS:": "is in S: any position",
     "I_IS:": "S has: in any position",
     "IS:A": "is in S: as action",
-    "I_IS:A": "S has: actant",
+    "I_IS:A": "S has: action",
     "IS:S": "is in S: as subject",
     "I_IS:S": "S has: subject",
     "IS:A1": "is in S: as actant1",
@@ -960,16 +1022,16 @@ export namespace Query {
     "I_IS:A2": "S has: actant2",
     "IS:PS": "is in S: as pseudoactant",
     "I_IS:PS": "S has: pseudoactant",
-    "SUT:": "S under T: any",
-    "I_SUT:": "T has S: any",
+    "SUT:": "S under T",
+    "I_SUT:": "T has S",
     "EUT:": "used in statements under T",
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "HR:R": "has reference: resource",
-    "I_HR:R": "R references",
+    "I_HR:R": "is reference: resource",
     "HR:V": "has reference: value",
     "CT:": "T has child T: any",
-    "I_CT:": "T has parent T: any",
+    "I_CT:": "T has parent T",
     "CT:D": "T has child T: direct child",
     "I_CT:D": "T has parent T: direct parent",
     "CT:G": "T has child T: any",
@@ -981,37 +1043,115 @@ export namespace Query {
     SI: "has S identification",
     I_SI: "is S identification",
     SC: "has S classification",
-    I_SC: "is S clasification",
+    I_SC: "is S classification",
     "R:": "has relation: any",
     "R:SCL": "has relation: Superclass",
-    "I_R:SCL": "has: Subclass (inv. Superclass)",
+    "I_R:SCL": "has relation: Subclass (inv. Superclass)",
     "R:SYN": "has relation: Synonym",
     "R:ANT": "has relation: Antonym",
     "I_R:ANT": "is related to: as Antonym",
     "R:HOL": "has relation: Holonym",
-    "I_R:HOL": "has: Meronym (inv. Holonym)",
+    "I_R:HOL": "has relation: Meronym (inv. Holonym)",
     "R:PRR": "has relation: Property Reciprocal",
     "I_R:PRR": "is related to: as Property Reciprocal",
     "R:SAR": "has relation: Subject/Actant1 Reciprocal",
     "I_R:SAR": "is related to: as Subject/Actant1 Reciprocal",
     "R:AEE": "has relation: Action/Event Equivalent",
-    "I_R:AEE": "has: Action equivalent (inv. Action/Event Equivalent)",
+    "I_R:AEE": "has relation: Action equivalent (inv. Action/Event Equivalent)",
     "R:CLA": "has relation: Classification",
-    "I_R:CLA": "has: Instance (inv. Classification)",
+    "I_R:CLA": "has relation: Instance (inv. Classification)",
     "R:IDE": "has relation: Identification",
     "I_R:IDE": "is related to: as Identification",
     "R:IMP": "has relation: Implication",
-    "I_R:IMP": "has: Used as Implication (inv. Implication)",
+    "I_R:IMP": "has relation: Used as Implication (inv. Implication)",
     "R:SOE": "has relation: Superordinate Entity",
-    "I_R:SOE": "has: Subordinate Entity (inv. Superordinate Entity)",
+    "I_R:SOE": "has relation: Subordinate Entity (inv. Superordinate Entity)",
     "R:SUS": "has relation: Subject Semantics",
-    "I_R:SUS": "has: Used as Subject semantics (inv. Subject Semantics)",
+    "I_R:SUS": "has relation: Used as Subject semantics (inv. Subject Semantics)",
     "R:A1S": "has relation: Actant1 Semantics",
-    "I_R:A1S": "has: Used as Actant1 semantics (inv. Actant1 Semantics)",
+    "I_R:A1S": "has relation: Used as Actant1 semantics (inv. Actant1 Semantics)",
     "R:A2S": "has relation: Actant2 Semantics",
-    "I_R:A2S": "has: Used as Actant2 semantics (inv. Actant2 Semantics)",
+    "I_R:A2S": "has relation: Used as Actant2 semantics (inv. Actant2 Semantics)",
     "R:REL": "has relation: Related",
     "I_R:REL": "is related to: as Related",
+  };
+
+  /**
+   * One sentence per edge type, read left to right through the query: what the
+   * source node's results are, in terms of the target node. Shown as the
+   * tooltip of the chosen edge, since several labels only make sense once the
+   * direction is known.
+   */
+  export const EdgeTypeDescriptions: Record<EdgeType, string> = {
+    "HP:V": "Finds entities whose own props have the target as a value",
+    "I_HP:V": "Finds the prop values in the target entity's own props",
+    "EP:T": "Finds entities whose own props have the target as a type",
+    "I_EP:T": "Finds the prop types in the target entity's own props",
+    "IS:": "Finds entities used anywhere in the target statement",
+    "I_IS:":
+      "Finds statements that use the target anywhere: as an action, actant, tag or prop, or as their territory",
+    "IS:A": "Finds the action of the target statement",
+    "I_IS:A": "Finds statements that have the target as an action",
+    "IS:S": "Finds the subject of the target statement",
+    "I_IS:S": "Finds statements that have the target as the subject",
+    "IS:A1": "Finds actant1 of the target statement",
+    "I_IS:A1": "Finds statements that have the target as actant1",
+    "IS:A2": "Finds actant2 of the target statement",
+    "I_IS:A2": "Finds statements that have the target as actant2",
+    "IS:PS": "Finds the pseudoactant of the target statement",
+    "I_IS:PS": "Finds statements that have the target as a pseudoactant",
+    "SUT:": "Finds statements directly under the target territory (with SUB: anywhere below it)",
+    "I_SUT:": "Finds the territory that directly holds the target statement",
+    "EUT:": "Finds entities used in statements directly under the target territory",
+    "SUT:D": "Finds statements directly under the target territory",
+    "I_SUT:D": "Finds the territory that directly holds the target statement",
+    "HR:R": "Finds entities whose references point to the target resource",
+    "I_HR:R": "Finds the resources the target entity's references point to",
+    "HR:V": "Finds entities whose references have the target as a value",
+    "CT:": "Finds territories that have the target territory anywhere below them",
+    "I_CT:": "Finds territories directly below the target territory (with SUB: anywhere below it)",
+    "CT:D": "Finds the territory directly above the target territory",
+    "I_CT:D": "Finds territories directly below the target territory",
+    "CT:G": "Finds territories that have the target territory anywhere below them",
+    "I_CT:G": "Finds territories anywhere below the target territory",
+    "SP:T": "Finds statements with an action or actant prop whose type is the target",
+    "I_SP:T": "Finds actants that carry a prop in a statement whose type is the target",
+    "SP:V": "Finds statements with an action or actant prop whose value is the target",
+    "I_SP:V": "Finds actants that carry a prop in a statement whose value is the target",
+    SI: "Finds statements with an actant identified there as the target",
+    I_SI: "Finds entities identified in a statement as the target",
+    SC: "Finds statements with an actant classified there as the target",
+    I_SC: "Finds entities classified in a statement as the target",
+    "R:": "Finds entities with any relation to the target",
+    "R:SCL": "Finds entities that have the target as a superclass",
+    "I_R:SCL": "Finds entities that have the target as a subclass",
+    "R:SYN": "Finds synonyms of the target",
+    "R:ANT": "Finds antonyms of the target",
+    "I_R:ANT": "Finds antonyms of the target",
+    "R:HOL": "Finds entities that have the target as a holonym (they are part of it)",
+    "I_R:HOL": "Finds entities that have the target as a meronym (it is part of them)",
+    "R:PRR": "Finds entities that are property reciprocals of the target",
+    "I_R:PRR": "Finds entities that are property reciprocals of the target",
+    "R:SAR": "Finds entities that are subject/actant1 reciprocals of the target",
+    "I_R:SAR": "Finds entities that are subject/actant1 reciprocals of the target",
+    "R:AEE": "Finds entities that have the target as an action/event equivalent",
+    "I_R:AEE": "Finds entities that the target has as an action/event equivalent",
+    "R:CLA": "Finds entities classified as the target",
+    "I_R:CLA": "Finds the classes the target is classified as",
+    "R:IDE": "Finds entities identified with the target",
+    "I_R:IDE": "Finds entities identified with the target",
+    "R:IMP": "Finds entities that have the target as an implication",
+    "I_R:IMP": "Finds entities that the target has as an implication",
+    "R:SOE": "Finds entities that have the target as a superordinate entity",
+    "I_R:SOE": "Finds entities that have the target as a subordinate entity",
+    "R:SUS": "Finds actions that have the target as subject semantics",
+    "I_R:SUS": "Finds entities used as the subject semantics of the target action",
+    "R:A1S": "Finds actions that have the target as actant1 semantics",
+    "I_R:A1S": "Finds entities used as the actant1 semantics of the target action",
+    "R:A2S": "Finds actions that have the target as actant2 semantics",
+    "I_R:A2S": "Finds entities used as the actant2 semantics of the target action",
+    "R:REL": "Finds entities related to the target",
+    "I_R:REL": "Finds entities related to the target",
   };
 
   export enum EdgeProblemSource {

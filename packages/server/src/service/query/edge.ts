@@ -4,6 +4,8 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { Query } from "@inkvisitor/shared/types/query";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import treeCache from "@service/treeCache";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 import { getNodeExpansionIds } from "./node-expansion";
@@ -41,6 +43,13 @@ export default class SearchEdge implements Query.IEdge {
   protected checksUnpinnedTargetStatusInRun = false;
 
   /**
+   * False for edges that read the SUB toggle for something other than widening
+   * a pinned target: prepare() then resolves no subordinates for it, while
+   * the EQ toggle still adds its equivalents.
+   */
+  protected expandsPinnedSubordinates = true;
+
+  /**
    * Classes the edge's target can hold - the target picker's classes from
    * EdgeTypeTargetNodeParams - used to narrow the status lookup through the
    * class index when the target node picks no class. Empty for targets of any
@@ -58,6 +67,9 @@ export default class SearchEdge implements Query.IEdge {
    */
   async prepare(db: Connection): Promise<void> {
     const entityId = this.node.params.entityId;
+    // the status narrows an empty target only: a pinned entity is the target
+    // itself, whatever its status, and the query builder offers no status
+    // picker while one is pinned
     const statuses = this.node.params.entityStatuses ?? [];
 
     if (!entityId) {
@@ -76,12 +88,10 @@ export default class SearchEdge implements Query.IEdge {
     // query builder displays is the set this edge matches against.
     const expansion = await getNodeExpansionIds(db, entityId, {
       equivalents: this.node.params.includeEquivalents === true,
-      subordinates: this.node.params.includeSubordinates === true,
+      subordinates:
+        this.expandsPinnedSubordinates && this.node.params.includeSubordinates === true,
     });
-    const ids = [entityId, ...expansion.equivalents, ...expansion.subordinates];
-    this.targetEntityIds = statuses.length
-      ? await filterIdsByStatus(db, ids, statuses)
-      : ids;
+    this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
   }
 
   /**
@@ -89,16 +99,11 @@ export default class SearchEdge implements Query.IEdge {
    * classes, else by the classes the edge's target can hold. Status has no
    * index, so without either this is a full scan of the entity table.
    */
-  private async statusTargetIds(
-    db: Connection,
-    statuses: EntityEnums.Status[]
-  ): Promise<string[]> {
+  private async statusTargetIds(db: Connection, statuses: EntityEnums.Status[]): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const base: RStream = classes.length
-      ? r
-          .table(Entity.table)
-          .getAll(r.args(classes), { index: DbEnums.Indexes.Class })
+      ? r.table(Entity.table).getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : r.table(Entity.table);
 
     return filterStreamByStatus(base, statuses).run(db) as Promise<string[]>;
@@ -128,33 +133,13 @@ export default class SearchEdge implements Query.IEdge {
  * Narrows a stream of entities to those carrying one of `statuses` and emits
  * their distinct ids.
  */
-function filterStreamByStatus(
-  q: RStream,
-  statuses: EntityEnums.Status[]
-): RStream {
+function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStream {
   return q
     .filter(function (e: RDatum<IEntity>) {
       return r.expr(statuses).contains(e("status"));
     })
     .getField("id")
     .distinct() as unknown as RStream;
-}
-
-/**
- * Subset of `ids` whose entities carry one of `statuses`.
- */
-async function filterIdsByStatus(
-  db: Connection,
-  ids: string[],
-  statuses: EntityEnums.Status[]
-): Promise<string[]> {
-  if (!ids.length) {
-    return ids;
-  }
-  return filterStreamByStatus(
-    r.table(Entity.table).getAll(r.args(ids)),
-    statuses
-  ).run(db) as Promise<string[]>;
 }
 
 /**
@@ -180,6 +165,56 @@ function intersectIdsWithStream(q: RStream, idsStream: RStream | null): RStream 
   }) as unknown as RStream;
 }
 
+/**
+ * Every entity of one of `classes`, or of any class when empty. Backs the "any
+ * target" branch of the edges that otherwise look their target ids up: with no
+ * id to key an index by, this is a scan of the entity table.
+ */
+function entitiesOfClasses(classes: EntityEnums.Class[]): RStream {
+  const table = r.table(Entity.table);
+  return (
+    classes.length
+      ? table.filter(function (e: RDatum<IEntity>) {
+          return r.expr(classes).contains(e("class"));
+        })
+      : table
+  ) as unknown as RStream;
+}
+
+/**
+ * The target statements of an edge, fetched by primary key: every statement
+ * when the target is unconstrained (null), none for an empty target set.
+ * Callers still check the class, since a pinned id may not be a statement.
+ */
+function targetStatements(statementIds: string[] | null): RStream | null {
+  if (statementIds === null) {
+    return entitiesOfClasses([EntityEnums.Class.Statement]);
+  }
+  if (!statementIds.length) {
+    return null;
+  }
+  return r.table(Entity.table).getAll(r.args(statementIds)) as unknown as RStream;
+}
+
+/**
+ * Whether any of `ids` is an existing entity of one of `classes`. Looks each id
+ * up by primary key, so a dangling id simply fails the check.
+ */
+function hasIdOfClasses(ids: RDatum, classes: EntityEnums.Class[]): RDatum<boolean> {
+  return ids
+    .filter(function (id: RDatum) {
+      return r
+        .table(Entity.table)
+        .get(id)
+        .default(null)
+        .do(function (ent: RDatum) {
+          return r.branch(ent, r.expr(classes).contains(ent("class")), false);
+        });
+    })
+    .count()
+    .gt(0) as RDatum<boolean>;
+}
+
 export class EdgeSUnderT extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -194,10 +229,22 @@ export class EdgeSUnderT extends SearchEdge {
     // set has no upper bound and is pulled through the StatementTerritory index
     // rather than membership-tested per row of the incoming stream. Intersecting
     // back with q keeps the subset invariant that positive matching and negation
-    // both rely on; no target matches nothing
+    // both rely on; an unconstrained target matches every statement under some
+    // territory
+    if (targetIds === null) {
+      return intersectIdsWithStream(
+        q,
+        entitiesOfClasses([EntityEnums.Class.Statement])
+          .filter(function (e: RDatum<IEntity>) {
+            return e("data")("territory")("territoryId").default("").ne("");
+          })
+          .getField("id") as unknown as RStream
+      );
+    }
+
     return intersectIdsWithStream(
       q,
-      targetIds && targetIds.length
+      targetIds.length
         ? (r
             .table(Entity.table)
             .getAll(r.args(targetIds), {
@@ -207,6 +254,197 @@ export class EdgeSUnderT extends SearchEdge {
               return e("class").eq(EntityEnums.Class.Statement);
             })
             .getField("id") as unknown as RStream)
+        : null
+    );
+  }
+}
+
+/**
+ * Ancestors of `territoryIds`, from the path the tree cache keeps per territory
+ * (populateTree) - no tree is walked here. A path excludes the territory
+ * itself, so its last entry is the direct parent and an empty path means the
+ * territory is the root, with nothing above it. `depth` limits each territory
+ * to its direct parent.
+ */
+function territoryAncestorIds(territoryIds: string[], depth: "direct" | "any"): string[] {
+  const ancestorIds = new Set<string>();
+  for (const territoryId of territoryIds) {
+    const path = treeCache.tree.idMap[territoryId]?.path ?? [];
+    for (const id of depth === "any" ? path : path.slice(-1)) {
+      ancestorIds.add(id);
+    }
+  }
+  return [...ancestorIds];
+}
+
+/**
+ * Base for the edges that walk the territory tree (CT: / CT:D / I_CT:). On
+ * these edges the SUB toggle picks how far the walk goes rather than widening
+ * the target, so a pinned target widens only to the territories identified
+ * with it (EQ). Every walk starts from each territory of that set.
+ */
+abstract class TerritoryTreeSearchEdge extends SearchEdge {
+  protected expandsPinnedSubordinates = false;
+}
+
+/**
+ * Shared run for the "T has child T" edges (CT: / CT:D). Matches Territories
+ * that hold a target Territory below them - the targets' ancestors, either all
+ * of them or just their direct parents. These climb towards the root rather
+ * than descending, which is why they are two edges instead of one edge plus
+ * the SUB toggle: that toggle widens downwards everywhere else. An
+ * unconstrained target matches every Territory with a child, at either depth.
+ */
+function runTerritoryHasChildEdge(
+  q: RStream,
+  territoryIds: string[] | null,
+  depth: "direct" | "any"
+): RStream {
+  if (territoryIds === null) {
+    return intersectIdsWithStream(
+      q,
+      entitiesOfClasses([EntityEnums.Class.Territory]).concatMap(function (e: RDatum) {
+        return r.branch(
+          e("data")("parent").typeOf().eq("OBJECT"),
+          [e("data")("parent")("territoryId")],
+          []
+        );
+      }) as unknown as RStream
+    );
+  }
+
+  const ancestorIds = territoryAncestorIds(territoryIds, depth);
+
+  return intersectIdsWithStream(
+    q,
+    ancestorIds.length ? (r.expr(ancestorIds) as unknown as RStream) : null
+  );
+}
+
+export class EdgeTerritoryHasChild extends TerritoryTreeSearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["CT:"];
+  }
+
+  run(q: RStream): RStream {
+    return runTerritoryHasChildEdge(q, this.targetIds(), "any");
+  }
+}
+
+export class EdgeTerritoryHasDirectChild extends TerritoryTreeSearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["CT:D"];
+  }
+
+  run(q: RStream): RStream {
+    return runTerritoryHasChildEdge(q, this.targetIds(), "direct");
+  }
+}
+
+/**
+ * I_CT: ("T has parent T"). Matches Territories sitting below a target
+ * Territory: for a pinned target with the SUB toggle on, its whole subtree -
+ * what "include subordinates" already resolves to for a Territory - and
+ * otherwise only the targets' direct children, read per row off data.parent.
+ * An unconstrained target matches every Territory that has a parent. Like the
+ * expansion toggles on every edge, SUB never affects an unpinned target. The
+ * root territory carries `parent: false` rather than an object, hence the type
+ * check.
+ */
+export class EdgeTerritoryHasParent extends TerritoryTreeSearchEdge {
+  protected descendantIds: string[] | null = null;
+
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_CT:"];
+  }
+
+  private anyDepth(): boolean {
+    return !!this.node.params.entityId && this.node.params.includeSubordinates === true;
+  }
+
+  async prepare(db: Connection): Promise<void> {
+    await super.prepare(db);
+    const targetIds = this.targetIds();
+    this.descendantIds =
+      targetIds && targetIds.length && this.anyDepth()
+        ? await getSubordinateEntityIds(db, targetIds)
+        : null;
+  }
+
+  run(q: RStream): RStream {
+    const targetIds = this.targetIds();
+    if (targetIds === null) {
+      return q
+        .filter(function (e: RDatum<IEntity>) {
+          return r.and(
+            e("class").eq(EntityEnums.Class.Territory),
+            e("data")("parent").typeOf().eq("OBJECT")
+          );
+        })
+        .map(function (e) {
+          return e("id");
+        });
+    }
+    if (!targetIds.length) {
+      return intersectIdsWithStream(q, null);
+    }
+
+    if (this.anyDepth()) {
+      const ids = this.descendantIds;
+      return intersectIdsWithStream(
+        q,
+        ids && ids.length ? (r.expr(ids) as unknown as RStream) : null
+      );
+    }
+
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        return r.and(
+          e("data")("parent").typeOf().eq("OBJECT"),
+          r.expr(targetIds).contains(e("data")("parent")("territoryId"))
+        );
+      })
+      .map(function (e) {
+        return e("id");
+      });
+  }
+}
+
+/**
+ * I_SUT: ("T has S"). A statement sits under exactly one direct territory, so
+ * unlike SUT: this has no subtree to expand - it just reads the pinned
+ * Statement's own data.territory.territoryId and matches the Territory (at
+ * most one) with that id. Intersected back with q, keeping the subset
+ * invariant that positive matching and negation both rely on. An
+ * unconstrained target matches every Territory that directly holds a
+ * statement.
+ */
+export class EdgeTerritoryHasStatement extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SUT:"];
+  }
+
+  run(q: RStream): RStream {
+    const statements = targetStatements(this.targetIds());
+
+    return intersectIdsWithStream(
+      q,
+      statements
+        ? (statements
+            .filter(function (e: RDatum<IEntity>) {
+              return e("class").eq(EntityEnums.Class.Statement);
+            })
+            .concatMap(function (e: RDatum) {
+              return r.branch(
+                e("data").hasFields("territory"),
+                [e("data")("territory")("territoryId")],
+                []
+              );
+            }) as unknown as RStream)
         : null
     );
   }
@@ -257,7 +495,7 @@ function runRelationTargetEdge(
   const sourceIndex = inverse ? 1 : 0;
   const targetIndex = inverse ? 0 : 1;
 
-  return q.concatMap(function(entity: RDatum<IEntity>) {
+  return q.concatMap(function (entity: RDatum<IEntity>) {
     return (
       r
         .table(Relation.table)
@@ -269,11 +507,11 @@ function runRelationTargetEdge(
         // (for R:SOE entityIds[0] is the subordinate; its superordinate is
         // entityIds[1], mirroring SuperordinateEntity.getSuperordinate...
         // ForwardConnections, which recurses on entityIds[1])
-        .filter(function(relation: RDatum<RelationTypes.IRelation>) {
+        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
           return relation("entityIds").nth(sourceIndex).eq(entity("id"));
         })
         // check if the target entity is one of the desired ones
-        .filter(function(relation: RDatum<RelationTypes.IRelation>) {
+        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
           if (targetIds) {
             return r.expr(targetIds).contains(relation("entityIds").nth(targetIndex));
           }
@@ -292,7 +530,7 @@ function runRelationTargetEdge(
           }
           return true;
         })
-        .map(function(relation) {
+        .map(function (relation) {
           return relation("entityIds").nth(sourceIndex);
         })
     );
@@ -345,39 +583,36 @@ export class EdgeHasRelation extends RelationTargetSearchEdge {
     const targetClasses = this.node.params.entityClasses ?? [];
     const targetStatuses = this.unpinnedTargetStatuses();
 
-    return q.concatMap(function(entity: RDatum<IEntity>) {
+    return q.concatMap(function (entity: RDatum<IEntity>) {
       return (
         r
           .table(Relation.table)
           .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
-          .filter(function(relation: RDatum<RelationTypes.IRelation>) {
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
             return relation("entityIds").contains(entity("id"));
           })
-          .filter(function(relation: RDatum<RelationTypes.IRelation>) {
+          .filter(function (relation: RDatum<RelationTypes.IRelation>) {
             if (targetIds) {
-              return relation("entityIds")
-                .setIntersection(r.expr(targetIds))
-                .isEmpty()
-                .not();
+              return relation("entityIds").setIntersection(r.expr(targetIds)).isEmpty().not();
             }
             if (targetClasses.length || targetStatuses.length) {
               // relation types differ in whether an entity may be its own
               // partner, so a self loop counts wherever the data holds one
-              return relationPartners(relation, entity("id"), true).contains(
-                function (id: RDatum<string>) {
-                  return r
-                    .table(Entity.table)
-                    .get(id)
-                    .default(null)
-                    .do(function (ent: RDatum) {
-                      return r.branch(
-                        ent,
-                        entityMatchesClassesAndStatuses(ent, targetClasses, targetStatuses),
-                        false
-                      );
-                    });
-                }
-              );
+              return relationPartners(relation, entity("id"), true).contains(function (
+                id: RDatum<string>
+              ) {
+                return r
+                  .table(Entity.table)
+                  .get(id)
+                  .default(null)
+                  .do(function (ent: RDatum) {
+                    return r.branch(
+                      ent,
+                      entityMatchesClassesAndStatuses(ent, targetClasses, targetStatuses),
+                      false
+                    );
+                  });
+              });
             }
             return true;
           })
@@ -385,7 +620,7 @@ export class EdgeHasRelation extends RelationTargetSearchEdge {
           // relation) instead of the relation's first member - this keeps the
           // result a subset of the input stream, which positive matching and
           // negation (base set minus matches) both rely on
-          .map(function() {
+          .map(function () {
             return entity("id");
           })
       );
@@ -495,10 +730,7 @@ function runHasUnorderedRelationEdge(
         const partners = relationPartners(relation, entity("id"), selfLoop);
 
         if (targetIds) {
-          return partners
-            .setIntersection(r.expr(targetIds))
-            .isEmpty()
-            .not();
+          return partners.setIntersection(r.expr(targetIds)).isEmpty().not();
         }
         if (targetClasses.length || targetStatuses.length) {
           return partners.contains(function (id: RDatum<string>) {
@@ -553,6 +785,15 @@ const UNORDERED_RELATION_EDGES: Partial<Record<Query.EdgeType, RelationEnums.Typ
   [Query.EdgeType["R:REL"]]: RelationEnums.Type.Related,
 };
 
+/**
+ * Ordered relations whose inverse edge type is implemented: the edge walks
+ * from entityIds[1] back to entityIds[0], the opposite direction from
+ * ORDERED_RELATION_EDGES above.
+ */
+const INVERSE_ORDERED_RELATION_EDGES: Partial<Record<Query.EdgeType, RelationEnums.Type>> = {
+  [Query.EdgeType["I_R:AEE"]]: RelationEnums.Type.ActionEventEquivalent,
+};
+
 export class EdgeHasOrderedRelation extends RelationTargetSearchEdge {
   protected relationType: RelationEnums.Type;
 
@@ -563,6 +804,19 @@ export class EdgeHasOrderedRelation extends RelationTargetSearchEdge {
 
   run(q: RStream): RStream {
     return this.runRelationTarget(q, this.relationType);
+  }
+}
+
+export class EdgeHasInverseOrderedRelation extends RelationTargetSearchEdge {
+  protected relationType: RelationEnums.Type;
+
+  constructor(data: Partial<Query.IEdge>, relationType: RelationEnums.Type) {
+    super(data);
+    this.relationType = relationType;
+  }
+
+  run(q: RStream): RStream {
+    return this.runRelationTarget(q, this.relationType, true);
   }
 }
 
@@ -639,10 +893,10 @@ export class EdgeHasPropType extends SearchEdge {
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
     return q
-      .filter(function(e: RDatum<IEntity>) {
+      .filter(function (e: RDatum<IEntity>) {
         // some of the e.[props].type.entityId is entity.id
         return e("props")
-          .filter(function(prop) {
+          .filter(function (prop) {
             if (targetIds) {
               return r.expr(targetIds).contains(prop("type")("entityId"));
             } else {
@@ -652,7 +906,7 @@ export class EdgeHasPropType extends SearchEdge {
           .count()
           .gt(0);
       })
-      .map(function(e) {
+      .map(function (e) {
         return e("id");
       });
   }
@@ -666,11 +920,21 @@ export class EdgeHasPropValue extends SearchEdge {
 
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
+    // an empty target with a class picked matches a value of that class
+    const targetClasses = this.node.params.entityClasses ?? [];
     return q
-      .filter(function(e: RDatum<IEntity>) {
+      .filter(function (e: RDatum<IEntity>) {
         // some of the e.[props].value.entityId is entity.id
+        if (!targetIds && targetClasses.length) {
+          return hasIdOfClasses(
+            e("props").map(function (prop: RDatum) {
+              return prop("value")("entityId");
+            }),
+            targetClasses
+          );
+        }
         return e("props")
-          .filter(function(prop) {
+          .filter(function (prop) {
             if (targetIds) {
               return r.expr(targetIds).contains(prop("value")("entityId"));
             } else {
@@ -680,9 +944,81 @@ export class EdgeHasPropValue extends SearchEdge {
           .count()
           .gt(0);
       })
-      .map(function(e) {
+      .map(function (e) {
         return e("id");
       });
+  }
+}
+
+/**
+ * Inverse entity-prop edges (I_EP:T / I_HP:V). Where EP:T / HP:V match the
+ * entity whose own props (entity detail, top level) use the target as a type
+ * or value, these emit the prop types / values found in the target entities'
+ * own props. An unconstrained target reads the props of every entity of the
+ * target node's classes (any class when none is picked). Intersected back
+ * with q, keeping the subset invariant positive matching and negation both
+ * rely on. An unset type/value is an empty entityId and is skipped.
+ */
+function runInversePropEdge(
+  q: RStream,
+  entityIds: string[] | null,
+  entityClasses: EntityEnums.Class[],
+  kind: "type" | "value"
+): RStream {
+  const entities: RStream | null =
+    entityIds === null
+      ? entitiesOfClasses(entityClasses)
+      : entityIds.length
+        ? (r.table(Entity.table).getAll(r.args(entityIds)) as unknown as RStream)
+        : null;
+
+  return intersectIdsWithStream(
+    q,
+    entities
+      ? (entities
+          .concatMap(function (e: RDatum<IEntity>) {
+            return e("props")
+              .default([])
+              .map(function (prop: RDatum) {
+                return prop(kind)("entityId").default("");
+              });
+          })
+          .filter(function (id: RDatum<string>) {
+            return id.ne("");
+          }) as unknown as RStream)
+      : null
+  );
+}
+
+export class EdgeIsPropType extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_EP:T"];
+  }
+
+  run(q: RStream): RStream {
+    return runInversePropEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      "type"
+    );
+  }
+}
+
+export class EdgeIsPropValue extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_HP:V"];
+  }
+
+  run(q: RStream): RStream {
+    return runInversePropEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      "value"
+    );
   }
 }
 
@@ -690,15 +1026,12 @@ export class EdgeHasPropValue extends SearchEdge {
  * Collects entityId of prop[kind] across an in-statement props array, recursing
  * into children to lvl3 - mirrors the StatementDataProps index definition.
  */
-function collectStatementPropIds(
-  propsExpr: RDatum,
-  kind: "type" | "value"
-): RDatum {
-  return propsExpr.concatMap(function(ch1: RDatum) {
+function collectStatementPropIds(propsExpr: RDatum, kind: "type" | "value"): RDatum {
+  return propsExpr.concatMap(function (ch1: RDatum) {
     return r.expr([ch1(kind)("entityId")]).add(
-      ch1("children").concatMap(function(ch2: RDatum) {
+      ch1("children").concatMap(function (ch2: RDatum) {
         return r.expr([ch2(kind)("entityId")]).add(
-          ch2("children").concatMap(function(ch3: RDatum) {
+          ch2("children").concatMap(function (ch3: RDatum) {
             return [ch3(kind)("entityId")];
           }) as RValue
         );
@@ -716,35 +1049,36 @@ function collectStatementPropIds(
 function runStatementPropEdge(
   q: RStream,
   targetIds: string[] | null,
+  targetClasses: EntityEnums.Class[],
   kind: "type" | "value"
 ): RStream {
   return q
-    .filter(function(e: RDatum<IEntity>) {
+    .filter(function (e: RDatum<IEntity>) {
       return e("class").eq(EntityEnums.Class.Statement);
     })
-    .filter(function(e: RDatum<IEntity>) {
+    .filter(function (e: RDatum<IEntity>) {
       const ids = collectStatementPropIds(
-        e("data")("actions").concatMap(function(a: RDatum) {
+        e("data")("actions").concatMap(function (a: RDatum) {
           return a("props");
         }),
         kind
       ).add(
         collectStatementPropIds(
-          e("data")("actants").concatMap(function(a: RDatum) {
+          e("data")("actants").concatMap(function (a: RDatum) {
             return a("props");
           }),
           kind
         ) as RValue
       );
       if (targetIds) {
-        return (ids as RDatum<string[]>)
-          .setIntersection(r.expr(targetIds))
-          .isEmpty()
-          .not();
+        return (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
+      }
+      if (targetClasses.length) {
+        return hasIdOfClasses(ids, targetClasses);
       }
       return ids.count().gt(0);
     })
-    .map(function(e) {
+    .map(function (e) {
       return e("id");
     });
 }
@@ -756,7 +1090,7 @@ export class EdgeStatementHasPropType extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runStatementPropEdge(q, this.targetIds(), "type");
+    return runStatementPropEdge(q, this.targetIds(), [], "type");
   }
 }
 
@@ -767,7 +1101,65 @@ export class EdgeStatementHasPropValue extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runStatementPropEdge(q, this.targetIds(), "value");
+    return runStatementPropEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      "value"
+    );
+  }
+}
+
+/**
+ * Shared run for the forward statement actant-field edges (SC / SI). Mirrors
+ * SP:T / SP:V (a Statement in q that has some actant referencing the target),
+ * but classifications/identifications are a flat {entityId} array with no
+ * children, so there's nothing to recurse the way collectStatementPropIds does.
+ */
+function runStatementActantFieldEdge(
+  q: RStream,
+  targetIds: string[] | null,
+  field: "classifications" | "identifications"
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return e("class").eq(EntityEnums.Class.Statement);
+    })
+    .filter(function (e: RDatum<IEntity>) {
+      const ids = e("data")("actants").concatMap(function (a: RDatum) {
+        return a(field).map(function (c: RDatum) {
+          return c("entityId");
+        });
+      });
+      if (targetIds) {
+        return (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
+      }
+      return ids.count().gt(0);
+    })
+    .map(function (e) {
+      return e("id");
+    });
+}
+
+export class EdgeStatementHasClassification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SC"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementActantFieldEdge(q, this.targetIds(), "classifications");
+  }
+}
+
+export class EdgeStatementHasIdentification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["SI"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementActantFieldEdge(q, this.targetIds(), "identifications");
   }
 }
 
@@ -791,18 +1183,11 @@ export class EdgeStatementHasPropValue extends SearchEdge {
  * index (StatementDataProps / StatementActantsCI). With no target the index
  * cannot be used, so fall back to scanning every statement.
  */
-function candidateStatements(
-  targetIds: string[] | null,
-  index: DbEnums.Indexes
-): RStream {
+function candidateStatements(targetIds: string[] | null, index: DbEnums.Indexes): RStream {
   if (targetIds) {
-    return r
-      .table(Entity.table)
-      .getAll(r.args(targetIds), { index }) as unknown as RStream;
+    return r.table(Entity.table).getAll(r.args(targetIds), { index }) as unknown as RStream;
   }
-  return r.table(Entity.table).filter(function(e: RDatum<IEntity>) {
-    return e("class").eq(EntityEnums.Class.Statement);
-  }) as unknown as RStream;
+  return entitiesOfClasses([EntityEnums.Class.Statement]);
 }
 
 /**
@@ -822,15 +1207,15 @@ function emitMatchingActants(
   return intersectIdsWithStream(
     q,
     statements
-      .filter(function(e: RDatum<IEntity>) {
+      .filter(function (e: RDatum<IEntity>) {
         return e("class").eq(EntityEnums.Class.Statement);
       })
-      .concatMap(function(stmt: RDatum) {
+      .concatMap(function (stmt: RDatum) {
         return stmt("data")("actants")
-          .filter(function(a: RDatum) {
+          .filter(function (a: RDatum) {
             return actantMatches(a);
           })
-          .map(function(a: RDatum) {
+          .map(function (a: RDatum) {
             return a("entityId");
           });
       })
@@ -840,46 +1225,44 @@ function emitMatchingActants(
 function runInverseStatementPropEdge(
   q: RStream,
   targetIds: string[] | null,
+  targetClasses: EntityEnums.Class[],
   kind: "type" | "value"
 ): RStream {
   return emitMatchingActants(
     q,
     candidateStatements(targetIds, DbEnums.Indexes.StatementDataProps),
-    function(a: RDatum) {
+    function (a: RDatum) {
       const ids = collectStatementPropIds(a("props"), kind);
-      return targetIds
-        ? (ids as RDatum<string[]>)
-            .setIntersection(r.expr(targetIds))
-            .isEmpty()
-            .not()
-        : ids.count().gt(0);
+      if (targetIds) {
+        return (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
+      }
+      return targetClasses.length ? hasIdOfClasses(ids, targetClasses) : ids.count().gt(0);
     }
   );
 }
 
 /**
- * Inverse statement-classification edge (I_SC): emit the entities characterised
- * by an in-statement classification referencing the target concept. Mirrors
- * runInverseStatementPropEdge but reads actant.classifications[] and uses the
- * StatementActantsCI index (which also covers identifications - those are not
- * matched here).
+ * Inverse statement actant-field edges (I_SC / I_SI): emit the entities
+ * characterised by an in-statement classification/identification referencing
+ * the target. Mirrors runInverseStatementPropEdge but reads the flat
+ * actant.classifications[] / actant.identifications[] array (no children to
+ * recurse) and uses the StatementActantsCI index, which covers both fields -
+ * `field` re-checks which one per actant.
  */
-function runInverseStatementClassificationEdge(
+function runInverseStatementActantFieldEdge(
   q: RStream,
-  targetIds: string[] | null
+  targetIds: string[] | null,
+  field: "classifications" | "identifications"
 ): RStream {
   return emitMatchingActants(
     q,
     candidateStatements(targetIds, DbEnums.Indexes.StatementActantsCI),
-    function(a: RDatum) {
-      const ids = a("classifications").map(function(c: RDatum) {
+    function (a: RDatum) {
+      const ids = a(field).map(function (c: RDatum) {
         return c("entityId");
       });
       return targetIds
-        ? (ids as RDatum<string[]>)
-            .setIntersection(r.expr(targetIds))
-            .isEmpty()
-            .not()
+        ? (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not()
         : ids.count().gt(0);
     }
   );
@@ -892,7 +1275,7 @@ export class EdgeIsStatementPropType extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runInverseStatementPropEdge(q, this.targetIds(), "type");
+    return runInverseStatementPropEdge(q, this.targetIds(), [], "type");
   }
 }
 
@@ -903,7 +1286,12 @@ export class EdgeIsStatementPropValue extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runInverseStatementPropEdge(q, this.targetIds(), "value");
+    return runInverseStatementPropEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      "value"
+    );
   }
 }
 
@@ -914,15 +1302,26 @@ export class EdgeIsStatementClassification extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runInverseStatementClassificationEdge(q, this.targetIds());
+    return runInverseStatementActantFieldEdge(q, this.targetIds(), "classifications");
+  }
+}
+
+export class EdgeIsStatementIdentification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_SI"];
+  }
+
+  run(q: RStream): RStream {
+    return runInverseStatementActantFieldEdge(q, this.targetIds(), "identifications");
   }
 }
 
 /**
  * Shared run for the inverse in-statement actant-role edges
- * (I_IS:S / I_IS:A1 / I_IS:A2). Keeps only statements, and matches those that
- * have an actant in one of `positions` whose referenced entity satisfies the
- * edge target:
+ * (I_IS:S / I_IS:A1 / I_IS:A2 / I_IS:PS). Keeps only statements, and matches
+ * those that have an actant in one of `positions` whose referenced entity
+ * satisfies the edge target:
  *  - any id of the pinned target-id set (`targetIds`, the pinned entity plus
  *    its toggle-driven expansion), or
  *  - any entity whose class is in `targetClasses` (e.g. Statement -> the actant
@@ -952,29 +1351,11 @@ function runStatementHasActantEdge(
         });
 
       if (targetIds) {
-        return (actantIds as RDatum<string[]>)
-          .setIntersection(r.expr(targetIds))
-          .isEmpty()
-          .not();
+        return (actantIds as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
       }
 
       if (targetClasses.length) {
-        return actantIds
-          .filter(function (id: RDatum) {
-            return r
-              .table(Entity.table)
-              .get(id)
-              .default(null)
-              .do(function (ent: RDatum) {
-                return r.branch(
-                  ent,
-                  r.expr(targetClasses).contains(ent("class")),
-                  false
-                );
-              });
-          })
-          .count()
-          .gt(0);
+        return hasIdOfClasses(actantIds, targetClasses);
       }
 
       return actantIds.count().gt(0);
@@ -1032,6 +1413,71 @@ export class EdgeStatementHasActant2 extends SearchEdge {
   }
 }
 
+export class EdgeStatementHasPseudoActant extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_IS:PS"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementHasActantEdge(
+      q,
+      [EntityEnums.Position.PseudoActant],
+      this.targetIds(),
+      this.node.params.entityClasses ?? []
+    );
+  }
+}
+
+/**
+ * I_IS:A ("S has: action"). Emits STATEMENTS whose data.actions[].actionId
+ * references the edge target - an id of the pinned target-id set, or (with no
+ * pinned target) any action whose entity class is in `targetClasses`, or with
+ * neither, any statement that has an action at all. Maps to the statement's
+ * own id, preserving the subset invariant positive matching and negation rely
+ * on. Mirrors runStatementHasActantEdge but over data.actions, which carries
+ * no `position` field.
+ */
+function runStatementHasActionEdge(
+  q: RStream,
+  targetIds: string[] | null,
+  targetClasses: EntityEnums.Class[]
+): RStream {
+  return q
+    .filter(function (e: RDatum<IEntity>) {
+      return e("class").eq(EntityEnums.Class.Statement);
+    })
+    .filter(function (e: RDatum<IEntity>) {
+      const actionIds = e("data")("actions").map(function (a: RDatum) {
+        return a("actionId");
+      });
+
+      if (targetIds) {
+        return (actionIds as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
+      }
+
+      if (targetClasses.length) {
+        return hasIdOfClasses(actionIds, targetClasses);
+      }
+
+      return actionIds.count().gt(0);
+    })
+    .map(function (e) {
+      return e("id");
+    });
+}
+
+export class EdgeStatementHasAction extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_IS:A"];
+  }
+
+  run(q: RStream): RStream {
+    return runStatementHasActionEdge(q, this.targetIds(), this.node.params.entityClasses ?? []);
+  }
+}
+
 /**
  * I_IS: ("S has: in any position"). Emits STATEMENTS that reference the target
  * entity anywhere - as an action, an actant, a tag, or the direct territory (the
@@ -1049,28 +1495,81 @@ export class EdgeStatementHasActant2 extends SearchEdge {
  * Coverage matches getCoOccurrentEntityIds: actions, actants, tags, direct
  * territory and in-statement prop type/value. Reference resource/value and
  * actant classifications/identifications have no shared "used anywhere" index
- * and are intentionally out of scope. With no target the edge matches nothing
- * (membership "in a statement" is only meaningful relative to a specific
- * entity).
+ * and are intentionally out of scope. An unconstrained target matches every
+ * statement - each one references at least its territory - or, with a class
+ * picked on the target, every statement that references an entity of it.
  */
 function runStatementHasEntityEdge(
   q: RStream,
-  targetIds: string[] | null
+  targetIds: string[] | null,
+  targetClasses: EntityEnums.Class[]
 ): RStream {
+  if (targetIds === null) {
+    return q
+      .filter(function (e: RDatum<IEntity>) {
+        const isStatement = e("class").eq(EntityEnums.Class.Statement);
+        if (!targetClasses.length) {
+          return isStatement;
+        }
+        // the same references the two indexes below cover
+        const ids = e("data")("actions")
+          .map(function (a: RDatum) {
+            return a("actionId");
+          })
+          .add(
+            e("data")("actants").map(function (a: RDatum) {
+              return a("entityId");
+            }) as RValue,
+            e("data")("tags") as RValue,
+            r.branch(
+              e("data").hasFields("territory"),
+              [e("data")("territory")("territoryId")],
+              []
+            ) as RValue,
+            collectStatementPropIds(
+              e("data")("actions").concatMap(function (a: RDatum) {
+                return a("props");
+              }),
+              "type"
+            ) as RValue,
+            collectStatementPropIds(
+              e("data")("actions").concatMap(function (a: RDatum) {
+                return a("props");
+              }),
+              "value"
+            ) as RValue,
+            collectStatementPropIds(
+              e("data")("actants").concatMap(function (a: RDatum) {
+                return a("props");
+              }),
+              "type"
+            ) as RValue,
+            collectStatementPropIds(
+              e("data")("actants").concatMap(function (a: RDatum) {
+                return a("props");
+              }),
+              "value"
+            ) as RValue
+          );
+        return r.branch(isStatement, hasIdOfClasses(ids, targetClasses), false);
+      })
+      .map(function (e) {
+        return e("id");
+      });
+  }
+
   return intersectIdsWithStream(
     q,
-    targetIds
+    targetIds.length
       ? r
           .table(Entity.table)
           .getAll(r.args(targetIds), {
             index: DbEnums.Indexes.StatementEntities,
           })
           .union(
-            r
-              .table(Entity.table)
-              .getAll(r.args(targetIds), {
-                index: DbEnums.Indexes.StatementDataProps,
-              }) as unknown as RStream
+            r.table(Entity.table).getAll(r.args(targetIds), {
+              index: DbEnums.Indexes.StatementDataProps,
+            }) as unknown as RStream
           )
           .filter(function (e: RDatum<IEntity>) {
             return e("class").eq(EntityEnums.Class.Statement);
@@ -1089,7 +1588,7 @@ export class EdgeStatementHasEntity extends SearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runStatementHasEntityEdge(q, this.targetIds());
+    return runStatementHasEntityEdge(q, this.targetIds(), this.node.params.entityClasses ?? []);
   }
 }
 
@@ -1186,21 +1685,23 @@ function collectStatementEntityIds(stmt: RDatum): RDatum {
  * Candidate statements come from the StatementTerritory index (DIRECT territory
  * only, no descendant closure). Their broad "used" id set (collectStatementEntityIds)
  * is intersected back with the incoming stream q, keeping the subset invariant
- * that positive matching and negation rely on. With no target territory the edge
- * matches nothing (an entity is "used under T" only relative to a specific T).
+ * that positive matching and negation rely on. An unconstrained target reads
+ * every statement, matching the entities used in any of them.
  */
-function runUsedUnderTerritoryEdge(
-  q: RStream,
-  territoryIds: string[] | null
-): RStream {
+function runUsedUnderTerritoryEdge(q: RStream, territoryIds: string[] | null): RStream {
+  const statements: RStream | null =
+    territoryIds === null
+      ? entitiesOfClasses([EntityEnums.Class.Statement])
+      : territoryIds.length
+        ? (r.table(Entity.table).getAll(r.args(territoryIds), {
+            index: DbEnums.Indexes.StatementTerritory,
+          }) as unknown as RStream)
+        : null;
+
   return intersectIdsWithStream(
     q,
-    territoryIds
-      ? r
-          .table(Entity.table)
-          .getAll(r.args(territoryIds), {
-            index: DbEnums.Indexes.StatementTerritory,
-          })
+    statements
+      ? statements
           .filter(function (e: RDatum<IEntity>) {
             return e("class").eq(EntityEnums.Class.Statement);
           })
@@ -1233,21 +1734,17 @@ export class EdgeUsedUnderTerritory extends SearchEdge {
  * The single target statement is fetched by primary key (no index needed); a
  * non-statement or unknown id yields no statement and therefore no matches. The
  * used-id set is intersected back with the incoming stream q, keeping the subset
- * invariant that positive matching and negation both rely on. With no target the
- * edge matches nothing (membership "in S" is only meaningful relative to a
- * specific statement). The statement's own id and its territory lineage are not
- * "entities used" and are intentionally excluded (see collectStatementEntityIds).
+ * invariant that positive matching and negation both rely on. An unconstrained
+ * target reads every statement, matching the entities used in any of them. The
+ * statement's own id and its territory lineage are not "entities used" and are
+ * intentionally excluded (see collectStatementEntityIds).
  */
-function runIsInStatementEdge(
-  q: RStream,
-  statementIds: string[] | null
-): RStream {
+function runIsInStatementEdge(q: RStream, statementIds: string[] | null): RStream {
+  const statements = targetStatements(statementIds);
   return intersectIdsWithStream(
     q,
-    statementIds
-      ? r
-          .table(Entity.table)
-          .getAll(r.args(statementIds))
+    statements
+      ? statements
           .filter(function (e: RDatum<IEntity>) {
             return e("class").eq(EntityEnums.Class.Statement);
           })
@@ -1269,6 +1766,126 @@ export class EdgeIsInStatement extends SearchEdge {
   }
 }
 
+/**
+ * Shared run for the position-restricted "is in S" edges (IS:S / IS:A1 /
+ * IS:A2 / IS:PS). Emits the ENTITY occupying one of `positions` in the target
+ * Statement(s) - the inverse of I_IS:S / I_IS:A1 / I_IS:A2 (runStatementHasActantEdge),
+ * which instead emit the statement given the actant. The target statement is
+ * fetched by primary key (no index needed); a non-statement or unknown id
+ * yields no statement and therefore no matches. Intersected back with the
+ * incoming stream q, keeping the subset invariant that positive matching and
+ * negation both rely on. An unconstrained target reads every statement,
+ * matching the entities in those positions in any of them.
+ */
+function runIsInStatementActantEdge(
+  q: RStream,
+  statementIds: string[] | null,
+  positions: EntityEnums.Position[]
+): RStream {
+  const statements = targetStatements(statementIds);
+  return intersectIdsWithStream(
+    q,
+    statements
+      ? statements
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .concatMap(function (stmt: RDatum) {
+            return stmt("data")("actants")
+              .filter(function (a: RDatum) {
+                return r.expr(positions).contains(a("position"));
+              })
+              .map(function (a: RDatum) {
+                return a("entityId");
+              });
+          })
+      : null
+  );
+}
+
+export class EdgeIsInStatementAsSubject extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:S"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [EntityEnums.Position.Subject]);
+  }
+}
+
+export class EdgeIsInStatementAsActant1 extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:A1"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [EntityEnums.Position.Actant1]);
+  }
+}
+
+export class EdgeIsInStatementAsActant2 extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:A2"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [EntityEnums.Position.Actant2]);
+  }
+}
+
+export class EdgeIsInStatementAsPseudoActant extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:PS"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActantEdge(q, this.targetIds(), [EntityEnums.Position.PseudoActant]);
+  }
+}
+
+/**
+ * IS:A ("is in S: as action"). Emits the ACTION entity of the target
+ * Statement(s) - data.actions[].actionId, which has no `position` (actions
+ * sit outside the actant/position model runIsInStatementActantEdge covers).
+ * The target statement is fetched by primary key; a non-statement or unknown
+ * id yields no statement and therefore no matches. Intersected back with the
+ * incoming stream q, keeping the subset invariant that positive matching and
+ * negation both rely on. An unconstrained target reads every statement,
+ * matching the action of any of them.
+ */
+function runIsInStatementActionEdge(q: RStream, statementIds: string[] | null): RStream {
+  const statements = targetStatements(statementIds);
+  return intersectIdsWithStream(
+    q,
+    statements
+      ? statements
+          .filter(function (e: RDatum<IEntity>) {
+            return e("class").eq(EntityEnums.Class.Statement);
+          })
+          .concatMap(function (stmt: RDatum) {
+            return stmt("data")("actions").map(function (a: RDatum) {
+              return a("actionId");
+            });
+          })
+      : null
+  );
+}
+
+export class EdgeIsInStatementAsAction extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["IS:A"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsInStatementActionEdge(q, this.targetIds());
+  }
+}
+
 export class EdgeHasReferenceResource extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -1278,16 +1895,12 @@ export class EdgeHasReferenceResource extends SearchEdge {
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
     return q
-      .filter(function(e: RDatum<IEntity>) {
+      .filter(function (e: RDatum<IEntity>) {
         // a few legacy entities (e.g. the root territory) store references as
         // "" instead of an array - treat any non-array as "no references"
         return r
-          .branch(
-            e("references").typeOf().eq("ARRAY"),
-            e("references"),
-            r.expr([] as any[])
-          )
-          .filter(function(ref: RDatum) {
+          .branch(e("references").typeOf().eq("ARRAY"), e("references"), r.expr([] as any[]))
+          .filter(function (ref: RDatum) {
             if (targetIds) {
               return r.expr(targetIds).contains(ref("resource"));
             }
@@ -1298,9 +1911,66 @@ export class EdgeHasReferenceResource extends SearchEdge {
           .count()
           .gt(0);
       })
-      .map(function(e) {
+      .map(function (e) {
         return e("id");
       });
+  }
+}
+
+/**
+ * I_HR:R ("is reference: resource"). Inverse of HR:R: where that matches the entity
+ * holding a reference to a pinned Resource, this matches the Resources that a
+ * pinned entity's own references[] point at. Intersected back with q, keeping
+ * the subset invariant positive matching and negation both rely on. An
+ * unconstrained target reads the references of every entity of the target
+ * node's classes (any class when none is picked). A few legacy entities store
+ * references as "" rather than an array, and a reference's "resource" can be
+ * empty on a value-only ref - both are skipped.
+ */
+function runIsReferenceResourceEdge(
+  q: RStream,
+  entityIds: string[] | null,
+  entityClasses: EntityEnums.Class[]
+): RStream {
+  const entities: RStream | null =
+    entityIds === null
+      ? entitiesOfClasses(entityClasses)
+      : entityIds.length
+        ? (r.table(Entity.table).getAll(r.args(entityIds)) as unknown as RStream)
+        : null;
+
+  return intersectIdsWithStream(
+    q,
+    entities
+      ? (entities
+          .concatMap(function (e: RDatum<IEntity>) {
+            return r.branch(
+              e("references").typeOf().eq("ARRAY"),
+              e("references").map(function (ref: RDatum) {
+                return ref("resource").default("");
+              }),
+              r.expr([] as string[])
+            );
+          })
+          .filter(function (id: RDatum<string>) {
+            return id.ne("");
+          }) as unknown as RStream)
+      : null
+  );
+}
+
+export class EdgeIsReferenceResource extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_HR:R"];
+  }
+
+  run(q: RStream): RStream {
+    return runIsReferenceResourceEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? []
+    );
   }
 }
 
@@ -1313,16 +1983,12 @@ export class EdgeHasReferenceValue extends SearchEdge {
   run(q: RStream): RStream {
     const targetIds = this.targetIds();
     return q
-      .filter(function(e: RDatum<IEntity>) {
+      .filter(function (e: RDatum<IEntity>) {
         // a few legacy entities (e.g. the root territory) store references as
         // "" instead of an array - treat any non-array as "no references"
         return r
-          .branch(
-            e("references").typeOf().eq("ARRAY"),
-            e("references"),
-            r.expr([] as any[])
-          )
-          .filter(function(ref: RDatum) {
+          .branch(e("references").typeOf().eq("ARRAY"), e("references"), r.expr([] as any[]))
+          .filter(function (ref: RDatum) {
             if (targetIds) {
               return r.expr(targetIds).contains(ref("value"));
             }
@@ -1333,7 +1999,7 @@ export class EdgeHasReferenceValue extends SearchEdge {
           .count()
           .gt(0);
       })
-      .map(function(e) {
+      .map(function (e) {
         return e("id");
       });
   }
@@ -1345,20 +2011,32 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasPropType(data);
     case Query.EdgeType["HP:V"]:
       return new EdgeHasPropValue(data);
+    case Query.EdgeType["I_EP:T"]:
+      return new EdgeIsPropType(data);
+    case Query.EdgeType["I_HP:V"]:
+      return new EdgeIsPropValue(data);
     case Query.EdgeType["HR:R"]:
       return new EdgeHasReferenceResource(data);
+    case Query.EdgeType["I_HR:R"]:
+      return new EdgeIsReferenceResource(data);
     case Query.EdgeType["HR:V"]:
       return new EdgeHasReferenceValue(data);
     case Query.EdgeType["SP:T"]:
       return new EdgeStatementHasPropType(data);
     case Query.EdgeType["SP:V"]:
       return new EdgeStatementHasPropValue(data);
+    case Query.EdgeType["SC"]:
+      return new EdgeStatementHasClassification(data);
+    case Query.EdgeType["SI"]:
+      return new EdgeStatementHasIdentification(data);
     case Query.EdgeType["I_SP:T"]:
       return new EdgeIsStatementPropType(data);
     case Query.EdgeType["I_SP:V"]:
       return new EdgeIsStatementPropValue(data);
     case Query.EdgeType["I_SC"]:
       return new EdgeIsStatementClassification(data);
+    case Query.EdgeType["I_SI"]:
+      return new EdgeIsStatementIdentification(data);
     case Query.EdgeType["I_IS:"]:
       return new EdgeStatementHasEntity(data);
     case Query.EdgeType["I_IS:S"]:
@@ -1367,6 +2045,10 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeStatementHasActant1(data);
     case Query.EdgeType["I_IS:A2"]:
       return new EdgeStatementHasActant2(data);
+    case Query.EdgeType["I_IS:PS"]:
+      return new EdgeStatementHasPseudoActant(data);
+    case Query.EdgeType["I_IS:A"]:
+      return new EdgeStatementHasAction(data);
     case Query.EdgeType["R:"]:
       return new EdgeHasRelation(data);
     case Query.EdgeType["R:CLA"]:
@@ -1385,22 +2067,42 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasSubordinate(data);
     case Query.EdgeType["SUT:"]:
       return new EdgeSUnderT(data);
+    case Query.EdgeType["I_SUT:"]:
+      return new EdgeTerritoryHasStatement(data);
+    case Query.EdgeType["CT:"]:
+      return new EdgeTerritoryHasChild(data);
+    case Query.EdgeType["CT:D"]:
+      return new EdgeTerritoryHasDirectChild(data);
+    case Query.EdgeType["I_CT:"]:
+      return new EdgeTerritoryHasParent(data);
     case Query.EdgeType["EUT:"]:
       return new EdgeUsedUnderTerritory(data);
     case Query.EdgeType["IS:"]:
       return new EdgeIsInStatement(data);
+    case Query.EdgeType["IS:S"]:
+      return new EdgeIsInStatementAsSubject(data);
+    case Query.EdgeType["IS:A1"]:
+      return new EdgeIsInStatementAsActant1(data);
+    case Query.EdgeType["IS:A2"]:
+      return new EdgeIsInStatementAsActant2(data);
+    case Query.EdgeType["IS:PS"]:
+      return new EdgeIsInStatementAsPseudoActant(data);
+    case Query.EdgeType["IS:A"]:
+      return new EdgeIsInStatementAsAction(data);
     default: {
-      const orderedRelation = data.type
-        ? ORDERED_RELATION_EDGES[data.type]
-        : undefined;
+      const orderedRelation = data.type ? ORDERED_RELATION_EDGES[data.type] : undefined;
       if (orderedRelation) {
         return new EdgeHasOrderedRelation(data, orderedRelation);
       }
-      const unorderedRelation = data.type
-        ? UNORDERED_RELATION_EDGES[data.type]
-        : undefined;
+      const unorderedRelation = data.type ? UNORDERED_RELATION_EDGES[data.type] : undefined;
       if (unorderedRelation) {
         return new EdgeHasUnorderedRelation(data, unorderedRelation);
+      }
+      const inverseOrderedRelation = data.type
+        ? INVERSE_ORDERED_RELATION_EDGES[data.type]
+        : undefined;
+      if (inverseOrderedRelation) {
+        return new EdgeHasInverseOrderedRelation(data, inverseOrderedRelation);
       }
       throw new InternalServerError(`unknown edge type: ${data.type}`);
     }

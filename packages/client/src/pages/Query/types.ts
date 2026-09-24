@@ -17,25 +17,45 @@ export type QueryValidityProblem = {
 export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["EP:T"],
   Query.EdgeType["HP:V"],
+  // inverse entity-prop edges: match the prop types / values found in the
+  // target entity's own props (server: runInversePropEdge in edge.ts)
+  Query.EdgeType["I_EP:T"],
+  Query.EdgeType["I_HP:V"],
   Query.EdgeType["SP:T"],
   Query.EdgeType["SP:V"],
+  // statement actant-field edges: match a Statement that has some actant
+  // referencing the target via a classification/identification (server:
+  // runStatementActantFieldEdge in edge.ts)
+  Query.EdgeType["SC"],
+  Query.EdgeType["SI"],
   // inverse in-statement edges: match the entity characterised by an
-  // in-statement prop/classification (server: getEdgeInstance in edge.ts)
+  // in-statement prop/classification/identification (server: getEdgeInstance
+  // in edge.ts)
   Query.EdgeType["I_SP:T"],
   Query.EdgeType["I_SP:V"],
   Query.EdgeType["I_SC"],
+  Query.EdgeType["I_SI"],
   // I_IS: match statements that reference a given entity in ANY position
   // (action, actant, tag, direct territory, in-statement prop type/value).
   // AND-combine one per entity for statement co-occurrence (server: edge.ts)
   Query.EdgeType["I_IS:"],
   // inverse in-statement actant-role edges: match statements that have a given
   // entity (or any entity of the target class, e.g. Statement -> substatement
-  // chains) as subject / actant1 / actant2 (server: getEdgeInstance in edge.ts)
+  // chains) as subject / actant1 / actant2 / pseudoactant (server:
+  // getEdgeInstance in edge.ts)
   Query.EdgeType["I_IS:S"],
   Query.EdgeType["I_IS:A1"],
   Query.EdgeType["I_IS:A2"],
+  Query.EdgeType["I_IS:PS"],
+  // I_IS:A: match statements that have the given entity as one of their
+  // actions - data.actions[].actionId, which has no position (server:
+  // EdgeStatementHasAction in edge.ts)
+  Query.EdgeType["I_IS:A"],
   Query.EdgeType["HR:R"],
   Query.EdgeType["HR:V"],
+  // I_HR:R: match the Resources that the target entity's own references point
+  // at (server: EdgeIsReferenceResource in edge.ts)
+  Query.EdgeType["I_HR:R"],
   Query.EdgeType["R:"],
   Query.EdgeType["R:CLA"],
   Query.EdgeType["R:SCL"],
@@ -62,10 +82,26 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["I_R:SCL"],
   Query.EdgeType["I_R:SOE"],
   Query.EdgeType["I_R:HOL"],
+  // inverse ordered relation edge: walks entityIds[1] -> entityIds[0]
+  // (server: EdgeHasInverseOrderedRelation in edge.ts)
+  Query.EdgeType["I_R:AEE"],
   // SUT: match Statements under the target Territory. The target node's SUB
   // toggle widens it to the whole subtree - "include subordinates" of a Territory
   // is its child territories, all levels (server: getSubordinateEntityIds).
   Query.EdgeType["SUT:"],
+  // I_SUT: match the Territory (at most one) that IS the target Statement's own
+  // direct territory - a statement sits under exactly one, so unlike SUT: there
+  // is no subtree/SUB toggle to widen (server: EdgeTerritoryHasStatement in edge.ts)
+  Query.EdgeType["I_SUT:"],
+  // child direction stays two edges: these match the target's ancestors, so
+  // widening from direct to any climbs towards the root - the opposite of what
+  // the SUB toggle does everywhere else (server: runTerritoryHasChildEdge)
+  Query.EdgeType["CT:"],
+  Query.EdgeType["CT:D"],
+  // I_CT: match Territories below the target Territory. The SUB toggle widens
+  // from its direct children to its whole subtree, which is what "include
+  // subordinates" already means for a Territory (server: EdgeTerritoryHasParent)
+  Query.EdgeType["I_CT:"],
   // EUT: match any entity USED in statements directly under the target
   // Territory (server: EdgeUsedUnderTerritory in edge.ts)
   Query.EdgeType["EUT:"],
@@ -73,13 +109,31 @@ export const edgeTypesImplemented: Query.EdgeType[] = [
   // - action, actant, reference, prop type/value, classification, identification,
   // tag (server: EdgeIsInStatement in edge.ts)
   Query.EdgeType["IS:"],
+  // position-restricted "is in S" edges: match the entity occupying a given
+  // position (subject / actant1 / actant2 / pseudoactant) in the target
+  // Statement (server: runIsInStatementActantEdge in edge.ts)
+  Query.EdgeType["IS:S"],
+  Query.EdgeType["IS:A1"],
+  Query.EdgeType["IS:A2"],
+  Query.EdgeType["IS:PS"],
+  // IS:A: match the ACTION entity of the target Statement - data.actions[].actionId
+  // (server: EdgeIsInStatementAsAction in edge.ts)
+  Query.EdgeType["IS:A"],
 ];
 
 /**
  * Edge types left out of the edge type dropdown entirely, not even listed as
  * disabled. The "used as" inverses of the semantics/implication relations have
  * no readable "has: X" phrasing. "CT:G" / "I_CT:G" share their label and node
- * rules with "CT:" / "I_CT:" and have no server implementation.
+ * rules with "CT:" / "I_CT:" and have no server implementation. Antonym /
+ * PropertyReciprocal / SubjectActant1Reciprocal / Identification / Related are
+ * symmetric relations (RelationRules: asymmetrical false), so their "inverse"
+ * would match the exact same partners as the forward edge - no distinct
+ * behavior to offer, so they stay out rather than sit disabled forever.
+ * "SUT:D" / "I_SUT:D" ("direct") add nothing beyond SUT:/I_SUT: with the SUB
+ * toggle left off: SUT: already goes direct-only without it, and I_SUT: has no
+ * direct-vs-any distinction to begin with (a statement sits under exactly one
+ * territory). "I_CT:D" is likewise I_CT: with the SUB toggle off.
  */
 export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["CT:G"],
@@ -88,4 +142,30 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["I_R:SUS"],
   Query.EdgeType["I_R:A1S"],
   Query.EdgeType["I_R:A2S"],
+  Query.EdgeType["I_R:ANT"],
+  Query.EdgeType["I_R:PRR"],
+  Query.EdgeType["I_R:SAR"],
+  Query.EdgeType["I_R:IDE"],
+  Query.EdgeType["I_R:REL"],
+  Query.EdgeType["SUT:D"],
+  Query.EdgeType["I_SUT:D"],
+  Query.EdgeType["I_CT:D"],
 ];
+
+/**
+ * Edges on which the SUB toggle does not widen a pinned target (server:
+ * expandsPinnedSubordinates on the territory-tree edges). CT: / CT:D look
+ * upward at the territory's ancestors, so SUB does not apply there; EQ still
+ * adds the territories identified with the target.
+ */
+export const edgeTypesWithoutSubordinates: Query.EdgeType[] = [
+  Query.EdgeType["CT:"],
+  Query.EdgeType["CT:D"],
+];
+
+/**
+ * Edges that read the SUB toggle as how deep to match below the target rather
+ * than as "include subordinates": I_CT: matches the target territory's direct
+ * children, or with SUB its whole subtree.
+ */
+export const edgeTypesWithSubtreeDepth: Query.EdgeType[] = [Query.EdgeType["I_CT:"]];
