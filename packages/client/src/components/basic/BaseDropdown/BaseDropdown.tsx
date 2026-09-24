@@ -4,6 +4,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Loader, Tooltip } from "components";
 import React, { useState } from "react";
+import { useTheme } from "styled-components";
 import {
   ActionMeta,
   ClearIndicatorProps,
@@ -106,6 +107,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   loading = false,
   roundCorners = true,
 }) => {
+  const theme = useTheme();
   const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
 
   const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
@@ -189,11 +191,14 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
             }),
             // react-select's own gutter is 8px and sits on whichever side faces
             // the control, so the gap has to be set per placement to look the
-            // same whether the menu opens downwards or flips above
+            // same whether the menu opens downwards or flips above. A downward
+            // menu keeps a gutter below it: react-select subtracts marginBottom
+            // when it trims the menu to the space left, so a menu cut short
+            // still ends clear of the page edge
             menu: (base, state) => ({
               ...base,
               marginTop: state.placement === "bottom" ? "2px" : 0,
-              marginBottom: state.placement === "top" ? "2px" : 0,
+              marginBottom: state.placement === "top" ? "2px" : theme.space[3],
             }),
           }}
           menuPortalTarget={document.getElementById("page-content")!}
