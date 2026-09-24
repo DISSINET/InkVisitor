@@ -204,33 +204,50 @@ export class EdgeSUnderT extends SearchEdge {
 }
 
 /**
- * Ancestors of `territoryId`, root-first, from the path the tree cache keeps
- * per territory (populateTree) - no tree is walked here. The path excludes the
- * territory itself, so its last entry is the direct parent and an empty path
- * means the territory is the root, with nothing above it. `depth` limits it to
- * the direct parent.
+ * Ancestors of `territoryIds`, from the path the tree cache keeps per territory
+ * (populateTree) - no tree is walked here. A path excludes the territory
+ * itself, so its last entry is the direct parent and an empty path means the
+ * territory is the root, with nothing above it. `depth` limits each territory
+ * to its direct parent.
  */
-function territoryAncestorIds(
-  territoryId: string | undefined,
-  depth: "direct" | "any"
-): string[] {
-  const path = territoryId ? (treeCache.tree.idMap[territoryId]?.path ?? []) : [];
-  return depth === "any" ? path : path.slice(-1);
+function territoryAncestorIds(territoryIds: string[], depth: "direct" | "any"): string[] {
+  const ancestorIds = new Set<string>();
+  for (const territoryId of territoryIds) {
+    const path = treeCache.tree.idMap[territoryId]?.path ?? [];
+    for (const id of depth === "any" ? path : path.slice(-1)) {
+      ancestorIds.add(id);
+    }
+  }
+  return [...ancestorIds];
+}
+
+/**
+ * Base for the edges that walk the territory tree (CT: / CT:D / I_CT:). On
+ * these edges the SUB toggle picks how far the walk goes rather than widening
+ * the target, so a pinned target stands alone, without the expansion the base
+ * prepare() resolves for it. An unpinned target is the base status-resolved
+ * set, so a status on the target node applies here as on every other edge.
+ */
+abstract class TerritoryTreeSearchEdge extends SearchEdge {
+  protected treeTargetIds(): string[] | null {
+    const entityId = this.node.params.entityId;
+    return entityId ? [entityId] : this.targetIds();
+  }
 }
 
 /**
  * Shared run for the "T has child T" edges (CT: / CT:D). Matches Territories
- * that hold the pinned target Territory below them - the target's ancestors,
- * either all of them or just its direct parent. These climb towards the root
- * rather than descending, which is why they are two edges instead of one edge
- * plus the SUB toggle: that toggle widens downwards everywhere else.
+ * that hold a target Territory below them - the targets' ancestors, either all
+ * of them or just their direct parents. These climb towards the root rather
+ * than descending, which is why they are two edges instead of one edge plus
+ * the SUB toggle: that toggle widens downwards everywhere else.
  */
 function runTerritoryHasChildEdge(
   q: RStream,
-  territoryId: string | undefined,
+  territoryIds: string[] | null,
   depth: "direct" | "any"
 ): RStream {
-  const ancestorIds = territoryAncestorIds(territoryId, depth);
+  const ancestorIds = territoryIds ? territoryAncestorIds(territoryIds, depth) : [];
 
   return intersectIdsWithStream(
     q,
@@ -238,36 +255,38 @@ function runTerritoryHasChildEdge(
   );
 }
 
-export class EdgeTerritoryHasChild extends SearchEdge {
+export class EdgeTerritoryHasChild extends TerritoryTreeSearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["CT:"];
   }
 
   run(q: RStream): RStream {
-    return runTerritoryHasChildEdge(q, this.node.params.entityId, "any");
+    return runTerritoryHasChildEdge(q, this.treeTargetIds(), "any");
   }
 }
 
-export class EdgeTerritoryHasDirectChild extends SearchEdge {
+export class EdgeTerritoryHasDirectChild extends TerritoryTreeSearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType["CT:D"];
   }
 
   run(q: RStream): RStream {
-    return runTerritoryHasChildEdge(q, this.node.params.entityId, "direct");
+    return runTerritoryHasChildEdge(q, this.treeTargetIds(), "direct");
   }
 }
 
 /**
- * I_CT: ("T has parent T"). Matches Territories sitting below the pinned target
- * Territory: with the SUB toggle on, its whole subtree - what "include
- * subordinates" already resolves to for a Territory - and with it off, only its
- * direct children, read per row off data.parent. The root territory carries
- * `parent: false` rather than an object, hence the type check.
+ * I_CT: ("T has parent T"). Matches Territories sitting below a target
+ * Territory: for a pinned target with the SUB toggle on, its whole subtree -
+ * what "include subordinates" already resolves to for a Territory - and
+ * otherwise only the targets' direct children, read per row off data.parent.
+ * Like the expansion toggles on every edge, SUB never affects an unpinned
+ * target. The root territory carries `parent: false` rather than an object,
+ * hence the type check.
  */
-export class EdgeTerritoryHasParent extends SearchEdge {
+export class EdgeTerritoryHasParent extends TerritoryTreeSearchEdge {
   protected descendantIds: string[] | null = null;
 
   constructor(data: Partial<Query.IEdge>) {
@@ -276,20 +295,21 @@ export class EdgeTerritoryHasParent extends SearchEdge {
   }
 
   private anyDepth(): boolean {
-    return this.node.params.includeSubordinates === true;
+    return !!this.node.params.entityId && this.node.params.includeSubordinates === true;
   }
 
   async prepare(db: Connection): Promise<void> {
-    const targetId = this.node.params.entityId;
+    await super.prepare(db);
+    const targetIds = this.treeTargetIds();
     this.descendantIds =
-      targetId && this.anyDepth()
-        ? await getSubordinateEntityIds(db, [targetId])
+      targetIds && targetIds.length && this.anyDepth()
+        ? await getSubordinateEntityIds(db, targetIds)
         : null;
   }
 
   run(q: RStream): RStream {
-    const targetId = this.node.params.entityId;
-    if (!targetId) {
+    const targetIds = this.treeTargetIds();
+    if (!targetIds || !targetIds.length) {
       return intersectIdsWithStream(q, null);
     }
 
@@ -305,7 +325,7 @@ export class EdgeTerritoryHasParent extends SearchEdge {
       .filter(function (e: RDatum<IEntity>) {
         return r.and(
           e("data")("parent").typeOf().eq("OBJECT"),
-          e("data")("parent")("territoryId").eq(targetId)
+          r.expr(targetIds).contains(e("data")("parent")("territoryId"))
         );
       })
       .map(function (e) {
