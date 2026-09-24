@@ -159,6 +159,8 @@ Recorded so a future run does not treat these as regressions to fix:
   components added to `src/components/basic` do **not** appear in the sync until
   they are added there *and* to `cfg.componentSrcMap` *and* to
   `.design-sync/groups.json`. All three, or the build silently omits them.
+  `node .design-sync/check-lists.mjs` compares the three and exits non-zero
+  naming any component missing from one of them.
 - `cfg.dtsPropsFor` pins four components whose props the extractor cannot reach
   (`ButtonGroups`, `AttributeIcon` — inline type; `ContactOwnerFooting`, `Toast`
   — genuinely propless). If those components gain real props, the pins go stale
