@@ -152,6 +152,7 @@ export namespace Query {
 
   export const EdgeTypeTargetNodeParams: Record<EdgeType, Record<string, any>> = {
     "HP:V": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "I_HP:V": {
@@ -170,6 +171,7 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Statement] },
     },
     "I_IS:": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "IS:A": {
@@ -247,9 +249,11 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
     },
     "SP:V": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "I_SP:V": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     SI: {
