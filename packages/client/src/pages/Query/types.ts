@@ -17,6 +17,10 @@ export type QueryValidityProblem = {
 export const edgeTypesImplemented: Query.EdgeType[] = [
   Query.EdgeType["EP:T"],
   Query.EdgeType["HP:V"],
+  // inverse entity-prop edges: match the prop types / values found in the
+  // target entity's own props (server: runInversePropEdge in edge.ts)
+  Query.EdgeType["I_EP:T"],
+  Query.EdgeType["I_HP:V"],
   Query.EdgeType["SP:T"],
   Query.EdgeType["SP:V"],
   // statement actant-field edges: match a Statement that has some actant

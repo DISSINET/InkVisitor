@@ -36,6 +36,7 @@ export namespace Query {
     "HP:V" = "HP:V",
     "I_HP:V" = "I_HP:V",
     "EP:T" = "EP:T",
+    "I_EP:T" = "I_EP:T",
     "IS:" = "IS:",
     "I_IS:" = "I_IS:",
     "IS:A" = "IS:A",
@@ -153,9 +154,16 @@ export namespace Query {
     "HP:V": {
       entityId: { allowedClasses: [] },
     },
-    "I_HP:V": {},
+    "I_HP:V": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
+    },
     "EP:T": {
       entityId: { allowedClasses: [EntityEnums.Class.Concept] },
+    },
+    "I_EP:T": {
+      entityClass: { allowedClasses: [] },
+      entityId: { allowedClasses: [] },
     },
 
     "IS:": {
@@ -419,11 +427,10 @@ export namespace Query {
       { nodeType: NodeType.E, params: {} },
     ],
     "I_HP:V": [
-      { nodeType: NodeType.E, params: {} },
-      {
-        nodeType: NodeType.E,
-        params: { entityClass: [EntityEnums.Class.Concept] },
-      },
+      // source: the prop value (any class)
+      { nodeType: NodeType.E, params: { entityClass: [] } },
+      // target: the entity whose own props hold the value (any class)
+      { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "EP:T": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
@@ -431,6 +438,15 @@ export namespace Query {
         nodeType: NodeType.E,
         params: { entityClass: [EntityEnums.Class.Concept] },
       },
+    ],
+    "I_EP:T": [
+      // source: the prop type concept
+      {
+        nodeType: NodeType.E,
+        params: { entityClass: [EntityEnums.Class.Concept] },
+      },
+      // target: the entity whose own props use the type (any class)
+      { nodeType: NodeType.E, params: { entityClass: [] } },
     ],
     "IS:": [
       { nodeType: NodeType.E, params: { entityClass: [] } },
@@ -987,8 +1003,9 @@ export namespace Query {
   };
   export const EdgeTypeLabels: Record<EdgeType, string> = {
     "HP:V": "has property: value",
-    "I_HP:V": "property origin",
+    "I_HP:V": "is property: value",
     "EP:T": "has property: type",
+    "I_EP:T": "is property: type",
     "IS:": "is in S: any position",
     "I_IS:": "S has: in any position",
     "IS:A": "is in S: as action",

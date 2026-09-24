@@ -932,6 +932,78 @@ export class EdgeHasPropValue extends SearchEdge {
 }
 
 /**
+ * Inverse entity-prop edges (I_EP:T / I_HP:V). Where EP:T / HP:V match the
+ * entity whose own props (entity detail, top level) use the target as a type
+ * or value, these emit the prop types / values found in the target entities'
+ * own props. An unconstrained target reads the props of every entity of the
+ * target node's classes (any class when none is picked). Intersected back
+ * with q, keeping the subset invariant positive matching and negation both
+ * rely on. An unset type/value is an empty entityId and is skipped.
+ */
+function runInversePropEdge(
+  q: RStream,
+  entityIds: string[] | null,
+  entityClasses: EntityEnums.Class[],
+  kind: "type" | "value"
+): RStream {
+  const entities: RStream | null =
+    entityIds === null
+      ? entitiesOfClasses(entityClasses)
+      : entityIds.length
+        ? (r.table(Entity.table).getAll(r.args(entityIds)) as unknown as RStream)
+        : null;
+
+  return intersectIdsWithStream(
+    q,
+    entities
+      ? (entities
+          .concatMap(function (e: RDatum<IEntity>) {
+            return e("props")
+              .default([])
+              .map(function (prop: RDatum) {
+                return prop(kind)("entityId").default("");
+              });
+          })
+          .filter(function (id: RDatum<string>) {
+            return id.ne("");
+          }) as unknown as RStream)
+      : null
+  );
+}
+
+export class EdgeIsPropType extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_EP:T"];
+  }
+
+  run(q: RStream): RStream {
+    return runInversePropEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      "type"
+    );
+  }
+}
+
+export class EdgeIsPropValue extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType["I_HP:V"];
+  }
+
+  run(q: RStream): RStream {
+    return runInversePropEdge(
+      q,
+      this.targetIds(),
+      this.node.params.entityClasses ?? [],
+      "value"
+    );
+  }
+}
+
+/**
  * Collects entityId of prop[kind] across an in-statement props array, recursing
  * into children to lvl3 - mirrors the StatementDataProps index definition.
  */
@@ -1877,6 +1949,10 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasPropType(data);
     case Query.EdgeType["HP:V"]:
       return new EdgeHasPropValue(data);
+    case Query.EdgeType["I_EP:T"]:
+      return new EdgeIsPropType(data);
+    case Query.EdgeType["I_HP:V"]:
+      return new EdgeIsPropValue(data);
     case Query.EdgeType["HR:R"]:
       return new EdgeHasReferenceResource(data);
     case Query.EdgeType["I_HR:R"]:
