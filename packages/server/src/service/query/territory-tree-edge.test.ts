@@ -1,6 +1,6 @@
 import "ts-jest";
 import { r, Connection } from "rethinkdb-ts";
-import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
+import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree } from "@inkvisitor/shared/types";
 import { Query } from "@inkvisitor/shared/types/query";
 import treeCache from "@service/treeCache";
@@ -22,7 +22,7 @@ const ENTITIES = "entities";
 const RELATIONS = "relations";
 
 //   ROOT
-//   ├── T_A
+//   ├── T_A             <- identified (IDE) with T_B1
 //   └── T_B
 //       └── T_B1        <- the only Discouraged territory
 //           └── T_B1A
@@ -53,6 +53,10 @@ const ENTITY_FIXTURES = TREE.map(([id, parentId]) => ({
     parent: parentId ? { territoryId: parentId, order: 1 } : false,
   },
 }));
+
+const RELATION_FIXTURES = [
+  { id: "ide-a-b1", type: RelationEnums.Type.Identification, entityIds: [T_A, T_B1] },
+];
 
 const DISCOURAGED: Query.INodeParams = {
   entityStatuses: [EntityEnums.Status.Discouraged],
@@ -110,7 +114,15 @@ describe("territory-tree edges (real ReQL)", () => {
     // index (mirrors indexes.ts)
     await r.table(ENTITIES).indexCreate(DbEnums.Indexes.Class).run(conn);
     await r.table(ENTITIES).indexWait(DbEnums.Indexes.Class).run(conn);
+    // EQ reads Identification relations through this multi index (mirrors
+    // indexes.ts)
+    await r
+      .table(RELATIONS)
+      .indexCreate(DbEnums.Indexes.RelationsEntityIds, { multi: true })
+      .run(conn);
+    await r.table(RELATIONS).indexWait().run(conn);
     await r.table(ENTITIES).insert(ENTITY_FIXTURES).run(conn);
+    await r.table(RELATIONS).insert(RELATION_FIXTURES).run(conn);
   }, 30000);
 
   afterAll(async () => {
@@ -131,6 +143,15 @@ describe("territory-tree edges (real ReQL)", () => {
       const ids = await runEdge(
         Query.EdgeType["CT:"],
         { entityId: T_B1, includeSubordinates: true },
+        conn
+      );
+      expect(sorted(ids)).toEqual(sorted([ROOT, T_B]));
+    });
+
+    test("CT: with EQ also climbs from the territories identified with the target", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["CT:"],
+        { entityId: T_A, includeEquivalents: true },
         conn
       );
       expect(sorted(ids)).toEqual(sorted([ROOT, T_B]));
@@ -170,6 +191,24 @@ describe("territory-tree edges (real ReQL)", () => {
         conn
       );
       expect(sorted(ids)).toEqual(sorted([T_B1, T_B1A, T_B1A1]));
+    });
+
+    test("pinned target with EQ: also the children of territories identified with it", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["I_CT:"],
+        { entityId: T_A, includeEquivalents: true },
+        conn
+      );
+      expect(ids).toEqual([T_B1A]);
+    });
+
+    test("pinned target with EQ and SUB: also the subtrees of identified territories", async () => {
+      const ids = await runEdge(
+        Query.EdgeType["I_CT:"],
+        { entityId: T_A, includeEquivalents: true, includeSubordinates: true },
+        conn
+      );
+      expect(sorted(ids)).toEqual(sorted([T_B1A, T_B1A1]));
     });
 
     test("unpinned status target, SUB off: that territory's direct children", async () => {

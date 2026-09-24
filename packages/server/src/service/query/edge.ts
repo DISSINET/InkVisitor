@@ -43,10 +43,11 @@ export default class SearchEdge implements Query.IEdge {
   protected checksUnpinnedTargetStatusInRun = false;
 
   /**
-   * False for edges that match a pinned target on its own: prepare() then
-   * resolves no equivalents/subordinates for it, whatever the node's toggles.
+   * False for edges that read the SUB toggle for something other than widening
+   * a pinned target: prepare() then resolves no subordinates for it, while
+   * the EQ toggle still adds its equivalents.
    */
-  protected expandsPinnedTarget = true;
+  protected expandsPinnedSubordinates = true;
 
   /**
    * Classes the edge's target can hold - the target picker's classes from
@@ -82,17 +83,13 @@ export default class SearchEdge implements Query.IEdge {
       return;
     }
 
-    if (!this.expandsPinnedTarget) {
-      this.targetEntityIds = [entityId];
-      return;
-    }
-
     // both toggles off -> single-id set, no expansion queries issued.
     // The same resolver backs the /entities/:id/expansion route, so what the
     // query builder displays is the set this edge matches against.
     const expansion = await getNodeExpansionIds(db, entityId, {
       equivalents: this.node.params.includeEquivalents === true,
-      subordinates: this.node.params.includeSubordinates === true,
+      subordinates:
+        this.expandsPinnedSubordinates && this.node.params.includeSubordinates === true,
     });
     this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
   }
@@ -264,10 +261,11 @@ function territoryAncestorIds(territoryIds: string[], depth: "direct" | "any"): 
 /**
  * Base for the edges that walk the territory tree (CT: / CT:D / I_CT:). On
  * these edges the SUB toggle picks how far the walk goes rather than widening
- * the target, so a pinned target stands alone.
+ * the target, so a pinned target widens only to the territories identified
+ * with it (EQ). Every walk starts from each territory of that set.
  */
 abstract class TerritoryTreeSearchEdge extends SearchEdge {
-  protected expandsPinnedTarget = false;
+  protected expandsPinnedSubordinates = false;
 }
 
 /**
