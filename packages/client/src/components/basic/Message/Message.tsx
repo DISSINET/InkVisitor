@@ -16,6 +16,7 @@ import {
   StyledMessageDetailList,
   StyledMessageDetailRow,
   StyledMessageExpansion,
+  StyledMessageText,
 } from "./MessageStyles";
 import { isWarningTBased } from "utils/utils";
 import { validationFieldNote } from "utils/validationExpansion";
@@ -338,20 +339,22 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         const classAllowed =
           warning.validation?.allowedClasses &&
           warning.validation?.allowedClasses.length > 0;
+        // raised both when the property is missing and when its value is wrong,
+        // so the message states what is required rather than what failed
         return (
           <StyledMessageTValidationContent>
-            {renderEntityTags([warning?.position?.entityId])} has a wrong
-            property type {renderEntityTags(warning.validation?.propType ?? [])}
+            {renderEntityTags([warning?.position?.entityId])} should have a
+            property {renderEntityTags(warning.validation?.propType ?? [])}
             {renderExpansionNote(warning, "propType")}
             {classAllowed && (
               <>
-                - should be of type{" "}
+                <StyledMessageText>{" with value of type "}</StyledMessageText>
                 {renderEntityClasses(warning.validation?.allowedClasses)}
               </>
             )}
             {!classAllowed && (
               <>
-                - should be of values{" "}
+                <StyledMessageText>{" with value "}</StyledMessageText>
                 {renderEntityTags(warning.validation?.allowedEntities ?? [])}
                 {renderExpansionNote(warning, "allowedEntities")}
               </>

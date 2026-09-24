@@ -614,46 +614,30 @@ export default class Entity implements IEntity, IDbModel {
               addNewValidationWarning(WarningTypeEnums.TVEPV, tId, validation);
             } else if (allowedClasses?.length) {
               // class is required
-
-              // no valid props
-              if (validProps.length === 0) {
+              let passed = true;
+              for (const pi in eProps) {
+                const p = eProps[pi];
+                const propValueEntity = propValueEs.find(
+                  (e) => e.id === p.value.entityId
+                );
+                if (
+                  propValueEntity &&
+                  acceptedPropTypes.includes(p.type.entityId) &&
+                  !allowedClasses?.includes(propValueEntity.class)
+                ) {
+                  passed = false;
+                }
+              }
+              if (!passed) {
                 addNewValidationWarning(
                   WarningTypeEnums.TVEPV,
                   tId,
                   validation
                 );
-              } else {
-                let passed = true;
-                for (const pi in eProps) {
-                  const p = eProps[pi];
-                  const propValueEntity = propValueEs.find(
-                    (e) => e.id === p.value.entityId
-                  );
-                  if (
-                    propValueEntity &&
-                    acceptedPropTypes.includes(p.type.entityId) &&
-                    !allowedClasses?.includes(propValueEntity.class)
-                  ) {
-                    passed = false;
-                  }
-                }
-                if (!passed) {
-                  addNewValidationWarning(
-                    WarningTypeEnums.TVEPV,
-                    tId,
-                    validation
-                  );
-                }
               }
             } else if (allowedEntities?.length) {
               // entity is required
-              if (validProps.length === 0) {
-                addNewValidationWarning(
-                  WarningTypeEnums.TVEPV,
-                  tId,
-                  validation
-                );
-              } else if (
+              if (
                 !validProps.some((p) =>
                   acceptedEntities.includes(p.value.entityId)
                 )
