@@ -11,8 +11,6 @@ import { getUserLabel, getVariantColors, UserTagSize, UserTagVariant } from "./u
 interface UserTagProps {
   userId: string;
   variant?: UserTagVariant;
-  // TODO: for size to work properly, we need to control height of Tag component
-  // size currently controls only the font size and icon size
   size?: UserTagSize;
   showOnly?: "tag" | "label";
   fontWeight?: "normal" | "bold";
@@ -71,6 +69,7 @@ export const UserTag: React.FC<UserTagProps> = ({
       $borderColor={variantColors.border}
       $backgroundColor={variantColors.labelBackground}
       $showOnly={showOnly}
+      $size={size}
     >
       <Tag
         dragDisabled

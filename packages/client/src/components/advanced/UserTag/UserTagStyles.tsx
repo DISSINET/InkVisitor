@@ -1,11 +1,24 @@
 import styled from "styled-components";
+import { ThemeFontSize, ThemeType } from "Theme/theme";
 import { UserTagSize, UserTagVariant } from "./utils";
+
+/* size grows the pill mostly through height and padding; the name's font
+   steps up only slightly so larger tags stay calm next to body text */
+const sizeScale: Record<
+  UserTagSize,
+  { height: string; inset: keyof ThemeType["space"]; padding: keyof ThemeType["space"]; font: keyof ThemeFontSize }
+> = {
+  [UserTagSize.Small]: { height: "2.25rem", inset: 2, padding: 2, font: "xs" },
+  [UserTagSize.Medium]: { height: "2.75rem", inset: 2, padding: 3, font: "xs" },
+  [UserTagSize.Large]: { height: "3.25rem", inset: 3, padding: 4, font: "sm" },
+  [UserTagSize.ExtraLarge]: { height: "3.75rem", inset: 3, padding: 5, font: "sm" },
+};
 
 interface StyledUserTagWrapProps {
   $borderColor: string;
   $backgroundColor: string;
   $showOnly?: "tag" | "label";
-  // $size: keyof ThemeFontSize;
+  $size: UserTagSize;
 }
 
 export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
@@ -18,8 +31,12 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
     align-items: center;
     justify-content: center;
     gap: ${({ theme }) => theme.space[1]};
-    /* the inset only balances the icon against the name; alone, either one centers */
-    padding-left: ${({ theme, $showOnly }) => ($showOnly ? 0 : theme.space[2])};
+    /* the icon takes the inset on its outer side; the name pads itself */
+    padding-left: ${({ theme, $showOnly, $size }) =>
+      $showOnly === "label" ? 0 : theme.space[sizeScale[$size].inset]};
+    padding-right: ${({ theme, $showOnly, $size }) =>
+      $showOnly === "tag" ? theme.space[sizeScale[$size].inset] : 0};
+    height: ${({ $size }) => sizeScale[$size].height};
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
     border-width: 2px;
@@ -73,7 +90,7 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  padding: 0 ${({ theme }) => theme.space[2]};
+  padding: 0 ${({ theme, $size }) => theme.space[sizeScale[$size].padding]};
   /* divider line between the role icon and the name */
   border-left: ${({ $borderColor, $showDivider }) =>
     $showDivider ? `1px solid ${$borderColor}` : "none"};
@@ -83,14 +100,5 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   letter-spacing: 0.02em;
   font-weight: ${({ theme, $fontWeight }) =>
     $fontWeight === "bold" ? theme.fontWeight.bold : theme.fontWeight.normal};
-  font-size: ${({ theme, $size }) =>
-    $size === UserTagSize.Small
-      ? theme.fontSize.xs
-      : $size === UserTagSize.Medium
-        ? theme.fontSize.sm
-        : $size === UserTagSize.Large
-          ? theme.fontSize.base
-          : $size === UserTagSize.ExtraLarge
-            ? theme.fontSize.lg
-            : theme.fontSize.lg};
+  font-size: ${({ theme, $size }) => theme.fontSize[sizeScale[$size].font]};
 `;
