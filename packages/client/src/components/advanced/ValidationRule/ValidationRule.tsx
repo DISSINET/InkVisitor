@@ -26,7 +26,11 @@ import { ButtonSize } from "types";
 interface ValidationRule {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
-  updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
+  /** onError runs if this save fails */
+  updateValidationRule: (
+    changes: Partial<ITerritoryValidation>,
+    onError?: () => void,
+  ) => void;
   removeValidationRule: () => void;
   isInsideTemplate: boolean;
   territoryParentId?: string;
@@ -81,8 +85,10 @@ export const ValidationRule: React.FC<ValidationRule> = ({
   // sends the whole expansions object. A box ticked before an earlier save
   // returns must build on what was sent, not on the saved rule, or it drops the
   // earlier tick - whichever field either box sits in. So the flags last sent
-  // are held for the whole rule until the saved rule shows the same flags; an
-  // intermediate save coming back in between does not release them.
+  // are held for the whole rule until the saved rule shows the same flags or a
+  // save fails; an intermediate save coming back in between does not release
+  // them. The hosts remount a rule whenever the list or the entity changes, so
+  // held flags never pass to the rule that takes over this index.
   const [pendingExpansions, setPendingExpansions] = useState<
     ITerritoryValidation["expansions"] | null
   >(null);
@@ -101,7 +107,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     // an empty object, not null: the next tick must build on "no flags" rather
     // than fall back to the rule the server still holds
     setPendingExpansions(next ?? {});
-    updateValidationRule({ ...changes, expansions: next });
+    updateValidationRule({ ...changes, expansions: next }, () => setPendingExpansions(null));
   };
 
   // The tie decides what Prop type and the allowed list mean, so switching it
