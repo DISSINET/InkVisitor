@@ -4,6 +4,7 @@ import { UserTagSize, UserTagVariant } from "./utils";
 interface StyledUserTagWrapProps {
   $borderColor: string;
   $backgroundColor: string;
+  $showOnly?: "tag" | "label";
   // $size: keyof ThemeFontSize;
 }
 
@@ -15,8 +16,10 @@ export const StyledUserTagWrap = styled.span<StyledUserTagWrapProps>`
      floats on top of it — the two-tone split is what reads as a person */
   .tag {
     align-items: center;
+    justify-content: center;
     gap: ${({ theme }) => theme.space[1]};
-    padding-left: ${({ theme }) => theme.space[2]};
+    /* the inset only balances the icon against the name; alone, either one centers */
+    padding-left: ${({ theme, $showOnly }) => ($showOnly ? 0 : theme.space[2])};
     border-color: ${({ $borderColor }) => $borderColor};
     border-style: solid;
     border-width: 2px;
@@ -60,6 +63,7 @@ interface StyledUserLabelProps {
   $variant: UserTagVariant;
   $size: UserTagSize;
   $fontWeight: "normal" | "bold";
+  $showDivider: boolean;
 }
 
 /* name field: transparent (sits on the pill's pale background); slight
@@ -71,7 +75,8 @@ export const StyledUserLabel = styled.div<StyledUserLabelProps>`
   white-space: nowrap;
   padding: 0 ${({ theme }) => theme.space[2]};
   /* divider line between the role icon and the name */
-  border-left: 1px solid ${({ $borderColor }) => $borderColor};
+  border-left: ${({ $borderColor, $showDivider }) =>
+    $showDivider ? `1px solid ${$borderColor}` : "none"};
   /* transparent: the pill (StyledUserTagWrap .tag) already paints the field */
   background-color: transparent;
   color: ${({ $textColor }) => $textColor};

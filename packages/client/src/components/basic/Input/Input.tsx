@@ -33,7 +33,7 @@ interface Input {
   valueControlled?: boolean;
   inverted?: boolean;
   suggester?: boolean;
-  type?: "text" | "textarea" | "select" | "password" | "datetime-local" | "date" | "number";
+  type?: "text" | "textarea" | "password" | "datetime-local" | "date" | "number";
 
   rows?: number;
   cols?: number;

@@ -59,16 +59,18 @@ export const UserTag: React.FC<UserTagProps> = ({
         $variant={variant}
         $size={size}
         $fontWeight={fontWeight}
+        $showDivider={!showOnly}
       >
         {label}
       </StyledUserLabel>
     );
-  }, [label, variantColors, size]);
+  }, [label, variantColors, size, showOnly]);
 
   return (
     <StyledUserTagWrap
       $borderColor={variantColors.border}
       $backgroundColor={variantColors.labelBackground}
+      $showOnly={showOnly}
     >
       <Tag
         dragDisabled
