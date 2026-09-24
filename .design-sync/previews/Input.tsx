@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, IcoSearch, IcoUser } from "dissinet.ddb.client";
+import { Input, IcoSearch, IcoUser, theme } from "dissinet.ddb.client";
 
 const Row: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-start" }}>
@@ -49,7 +49,7 @@ export const ClearableWithRightContent = () => (
     value="Charles"
     icon={<IcoSearch />}
     clearable
-    rightContent={<span style={{ fontSize: 11, opacity: 0.6 }}>3 results</span>}
+    rightContent={<span style={{ fontSize: theme.fontSize["xs"], opacity: 0.6 }}>3 results</span>}
     width={260}
     onChangeFn={() => {}}
   />

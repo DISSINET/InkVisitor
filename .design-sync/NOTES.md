@@ -61,6 +61,9 @@ because they import `ts-morph` by bare name. Recreate it per clone:
   `darkTheme`.
 - Props come from `ds-bundle/components/<group>/<Name>/<Name>.d.ts` — accurate
   and JSDoc-carrying once declarations are emitted.
+- Previews use inline `style={}` for layout glue (flex, gap, padding); the
+  styled-components rule in CLAUDE.md covers app code only. Colors and font
+  sizes still come from `theme`, never literals.
 - Previews compile through esbuild with no typecheck, so a string enum member
   can be written as its literal (`size="S"`).
 - `TagGroup` is **not** a layout wrapper — it takes `definedEntities: IEntity[]`
