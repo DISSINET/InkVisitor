@@ -199,19 +199,17 @@ export const ModalContent: FC<ModalContent> = ({
 
 interface ModalFooter {
   children?: ReactNode;
-  column?: boolean;
   spaceBetween?: boolean;
   /** Optional gray text shown on the left side, vertically centered. */
   note?: ReactNode;
 }
 export const ModalFooter: FC<ModalFooter> = ({
   children,
-  column = false,
   spaceBetween = false,
   note,
 }) => {
   return (
-    <StyledFooter $column={column} $spaceBetween={spaceBetween}>
+    <StyledFooter $spaceBetween={spaceBetween}>
       {note && <StyledFooterNote>{note}</StyledFooterNote>}
       <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md" textRegular>
         {children}
