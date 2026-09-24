@@ -30,10 +30,19 @@ export const Colors = () => (
 // size axis is actually visible.
 export const Sizes = () => (
   <ButtonGroup>
-    <Button size="S" icon={<IcoSearch />} color="primary" onClick={() => {}} />
-    <Button size="M" icon={<IcoSearch />} color="primary" onClick={() => {}} />
-    <Button size="L" icon={<IcoSearch />} color="primary" onClick={() => {}} />
-    <Button size="XL" icon={<IcoSearch />} color="primary" onClick={() => {}} />
+    <Button size="S" label="Small" color="primary" onClick={() => {}} />
+    <Button size="M" label="Medium" color="primary" onClick={() => {}} />
+    <Button size="L" label="Large" color="primary" onClick={() => {}} />
+    <Button size="XL" label="Extra large" color="primary" onClick={() => {}} />
+  </ButtonGroup>
+);
+
+export const IconSizes = () => (
+  <ButtonGroup>
+    <Button size="S" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
+    <Button size="M" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
+    <Button size="L" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
+    <Button size="XL" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
   </ButtonGroup>
 );
 
@@ -42,7 +51,7 @@ export const WithIcons = () => (
     <Button icon={<IcoSearch />} label="Search" color="primary" onClick={() => {}} />
     <Button icon={<IcoCheck />} label="Approve" color="success" onClick={() => {}} />
     <Button icon={<IcoTrash />} color="danger" tooltipLabel="Delete" onClick={() => {}} />
-    <Button icon={<IcoClose />} color="danger" noBackground onClick={() => {}} />
+    <Button icon={<IcoClose />} color="danger" inverted noBackground onClick={() => {}} />
   </ButtonGroup>
 );
 

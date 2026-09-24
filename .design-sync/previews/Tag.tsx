@@ -103,7 +103,7 @@ export const WithTrailingActions = () => (
     tagComponent={marker("A", "success")}
     labelComponent={<span>to convene</span>}
     rightContent={
-      <Button icon={<IcoClose />} color="danger" noBackground onClick={() => {}} />
+      <Button icon={<IcoClose />} color="danger" inverted noBackground onClick={() => {}} />
     }
   />
 );

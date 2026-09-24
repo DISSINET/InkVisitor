@@ -68,8 +68,13 @@ because they import `ts-morph` by bare name. Recreate it per clone:
   can be written as its literal (`size="S"`).
 - `TagGroup` is **not** a layout wrapper — it takes `definedEntities: IEntity[]`
   and renders its own `EntityTag`s. A variant sweep needs a local flex `Row`.
-- `Button`'s `size` only moves padding on a labelled button; the icon glyph is
-  sized in em, so the size axis is only visible on icon-only buttons.
+- `Button` text and icons are white unless `inverted` (or `textColor`) is set,
+  so `noBackground` without `inverted` renders white on white. The app always
+  pairs them; `IconButton` defaults to `inverted`.
+- A `Button` size sweep uses either labelled buttons (size sets font and
+  padding) or icon buttons with `shape="square"` (size sets a fixed box:
+  2 / 2.25 / 3 / 3.9rem). A bare icon-only button without a square shape is
+  not how the app shows sizes.
 - Realistic content follows the DISSINET domain: historical entities,
   territories, statements (Council of Trent, Charles V, 1545–1563).
 - A modal footer's back-out action is `<CancelButton />`, as in every app
@@ -81,9 +86,6 @@ because they import `ts-morph` by bare name. Recreate it per clone:
 
 Collected while authoring the 64 previews; each of these cost an iteration.
 
-- **`Input`'s `.d.ts` lists `type="select"` but `Input.tsx` has no render branch
-  for it** — that mode renders the label and nothing else. A repo bug, not a
-  sync artifact.
 - **`MultiInput` defaults to `disabled = true`** (meaning read-only), so an
   editable cell must pass `disabled={false}` explicitly.
 - **`theme.color["button"].success` is indigo, not green** — a `success` pill

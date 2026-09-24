@@ -31,7 +31,7 @@ right, and is what keeps dark mode working.
 
 ```jsx
 <Button label="Delete" color="danger" size="M" shape="rounded-md" />
-<Button icon={<IcoSearch />} color="primary" noBackground />
+<Button icon={<IcoSearch />} color="primary" inverted noBackground />
 ```
 
 ## 3. The token vocabulary
