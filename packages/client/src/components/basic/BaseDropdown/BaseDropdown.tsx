@@ -44,6 +44,9 @@ interface BaseDropdown {
   noOptionsMessage?: string;
   icon?: React.ReactNode;
   tooltipLabel?: string;
+  // plain-text tooltip for a single-value dropdown, in place of the bold
+  // tooltipLabel - for a sentence rather than a name
+  tooltipContent?: string;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   // single entity dropdown props
   onFocus?: () => void;
@@ -94,6 +97,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
 
   icon,
   tooltipLabel,
+  tooltipContent,
   tooltipPosition = "top",
   entityDropdown = false,
   userDropdown = false,
@@ -241,7 +245,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
       </StyledSelectWrapper>
 
       {/* Tooltip */}
-      {tooltipLabel && (
+      {(tooltipLabel || tooltipContent) && (
         <Tooltip
           disabled={isMulti && (value as DropdownItem[])?.length === 0}
           content={
@@ -264,6 +268,8 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
                   </b>{" "}
                   ({tooltipLabel})
                 </>
+              ) : tooltipContent ? (
+                tooltipContent
               ) : (
                 <b>{tooltipLabel}</b>
               )}

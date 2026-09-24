@@ -123,7 +123,7 @@ export const QueryGridEdge: React.FC<QueryGridEdgeProps> = ({
             width={212}
             noDropDownIndicator
             value={edge.type}
-            tooltipLabel={Query.EdgeTypeDescriptions[edge.type]}
+            tooltipContent={Query.EdgeTypeDescriptions[edge.type]}
             onChange={(newValue) => {
               dispatch({
                 type: QueryActionType.updateEdgeType,
