@@ -137,20 +137,18 @@ const theme = {
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
-    // Annotator XML view syntax colours (#3269). One analogous ramp in OKLCH,
-    // hue 260 -> 330 at a shared chroma, so the three roles read as a family.
-    // Lightness carries the hierarchy: tags darkest, values lightest.
-    // L.50 C.12 H260; tag names are entity ids, so they run long and repeat on
-    // every line. Chroma stays below the other roles to keep that bulk quiet.
-    xmlTag: "#3862A7",
-    xmlAttr: "#775AA6", // L.53 C.12 H300, muted so names sit behind values
+    // Annotator XML view syntax colours (#3269). Three hue families spread
+    // around the wheel (OKLCH H260 blue, H5 rose, H168 teal-green) so the
+    // roles are told apart by hue at a glance, as in code editors. All hold
+    // >=4.5:1 on white.
+    // Tag names are entity ids, so they run long and repeat on every line;
+    // the blue stays low-chroma to keep that bulk quiet.
+    xmlTag: "#3E639F",
+    xmlAttr: "#B93B63",
     // quotes recede but stay punctuation, not an artefact: 4.8:1 on white,
     // where gray 600 would only reach 4.0:1
     xmlQuote: "#6B7280",
-    // values sit inline with body text, so they need separation from black as
-    // well as from white; 4.5:1 up against the page caps this at ~4.7:1 down
-    // against the text, and L.59 C.22 H330 balances both at ~4.6:1
-    xmlValue: "#C039B9",
+    xmlValue: "#028464",
 
     menuHover: "#CCD5F4",
     pageBg: "#edf2f7",
