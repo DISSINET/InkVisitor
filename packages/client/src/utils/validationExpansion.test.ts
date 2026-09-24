@@ -7,6 +7,7 @@ import {
 
 import {
   expansionNote,
+  sameExpansions,
   validationFieldNote,
   withExpansionFlag,
 } from "./validationExpansion";
@@ -107,5 +108,37 @@ describe("utils/validationExpansion", () => {
         false
       )
     ).toBeUndefined();
+  });
+
+  it("sees a saved rule as matching what was sent despite dropped undefined keys", () => {
+    // what is sent carries unticked flags as undefined; the saved rule does not
+    expect(
+      sameExpansions(
+        { propType: { equivalents: true, subordinates: undefined } },
+        { propType: { equivalents: true } }
+      )
+    ).toBe(true);
+    expect(sameExpansions({}, undefined)).toBe(true);
+    expect(
+      sameExpansions(
+        { propType: { equivalents: true }, entitySOEs: { subordinates: true } },
+        { entitySOEs: { subordinates: true }, propType: { equivalents: true } }
+      )
+    ).toBe(true);
+  });
+
+  it("tells an intermediate save apart from the flags last sent", () => {
+    expect(
+      sameExpansions(
+        { entityClassifications: { equivalents: true, subordinates: true } },
+        { entityClassifications: { equivalents: true } }
+      )
+    ).toBe(false);
+    expect(
+      sameExpansions(
+        { entitySOEs: { equivalents: true } },
+        { entityClassifications: { equivalents: true } }
+      )
+    ).toBe(false);
   });
 });

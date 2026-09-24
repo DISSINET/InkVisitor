@@ -2,14 +2,11 @@ import { entitiesDict, entityStatusDict, languageDict } from "@inkvisitor/shared
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@inkvisitor/shared/types/territory";
+import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { Button, Input } from "components";
 import Dropdown, { AttributeButtonGroup, EntitySuggester, EntityTag } from "components/advanced";
 import { useOrderedLanguageDict } from "hooks/react-query";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { IcoTrash } from "Theme/icons";
 import {
   StyledBorderLeft,
@@ -23,6 +20,8 @@ import { ExpansionToggles } from "./ExpansionToggles";
 import { ValidationText } from "./ValidationText/ValidationText";
 import { LanguageTag } from "./LanguageTag";
 import { getEntityStatusIcon } from "utils/iconUtils";
+import { sameExpansions } from "utils/validationExpansion";
+import { ButtonSize } from "types";
 
 interface ValidationRule {
   validation: ITerritoryValidation;
@@ -77,18 +76,43 @@ export const ValidationRule: React.FC<ValidationRule> = ({
     return validation.active !== false;
   }, [validation.active]);
 
+  // The rule arrives from the server and is re-rendered only once a save has
+  // come back, while the hosts merge rule changes one key deep, so every change
+  // sends the whole expansions object. A box ticked before an earlier save
+  // returns must build on what was sent, not on the saved rule, or it drops the
+  // earlier tick - whichever field either box sits in. So the flags last sent
+  // are held for the whole rule until the saved rule shows the same flags; an
+  // intermediate save coming back in between does not release them.
+  const [pendingExpansions, setPendingExpansions] = useState<
+    ITerritoryValidation["expansions"] | null
+  >(null);
+  useEffect(() => {
+    if (pendingExpansions && sameExpansions(pendingExpansions, validation.expansions)) {
+      setPendingExpansions(null);
+    }
+  }, [validation.expansions, pendingExpansions]);
+
+  const expansions = pendingExpansions ?? validation.expansions;
+
+  const updateExpansions = (
+    next: ITerritoryValidation["expansions"],
+    changes: Partial<ITerritoryValidation> = {},
+  ) => {
+    // an empty object, not null: the next tick must build on "no flags" rather
+    // than fall back to the rule the server still holds
+    setPendingExpansions(next ?? {});
+    updateValidationRule({ ...changes, expansions: next });
+  };
+
   // The tie decides what Prop type and the allowed list mean, so switching it
   // empties those fields - and with them their expansions, while the condition
   // fields keep theirs.
   const switchTie = (newTieType: EProtocolTieType) => {
-    const { entityClassifications, entitySOEs } = validation.expansions ?? {};
-    updateValidationRule({
-      tieType: newTieType,
-      propType: [],
-      allowedClasses: [],
-      allowedEntities: [],
-      expansions: { entityClassifications, entitySOEs },
-    });
+    const { entityClassifications, entitySOEs } = expansions ?? {};
+    updateExpansions(
+      { entityClassifications, entitySOEs },
+      { tieType: newTieType, propType: [], allowedClasses: [], allowedEntities: [] },
+    );
   };
 
   const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
@@ -140,7 +164,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
                   onClick: () =>
                     updateValidationRule({
                       entityClassifications: entityClassifications.filter(
-                        (c) => c !== classification
+                        (c) => c !== classification,
                       ),
                     }),
                 }
@@ -164,7 +188,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
           <ExpansionToggles
             field="entityClassifications"
             validation={validation}
-            updateValidationRule={updateValidationRule}
+            expansions={expansions}
+            updateExpansions={updateExpansions}
             userCanEdit={userCanEdit}
           />
         </StyledValue>
@@ -217,7 +242,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
           <ExpansionToggles
             field="entitySOEs"
             validation={validation}
-            updateValidationRule={updateValidationRule}
+            expansions={expansions}
+            updateExpansions={updateExpansions}
             userCanEdit={userCanEdit}
           />
         </StyledValue>
@@ -254,7 +280,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               placeholder="Add new rule language"
               width={200}
               options={orderedLanguageDict.filter(
-                (language) => !entityLanguages || !entityLanguages.includes(language.value)
+                (language) => !entityLanguages || !entityLanguages.includes(language.value),
               )}
               value={null}
               onChange={(selectedOption) => {
@@ -377,7 +403,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
               <ExpansionToggles
                 field="propType"
                 validation={validation}
-                updateValidationRule={updateValidationRule}
+                expansions={expansions}
+                updateExpansions={updateExpansions}
                 userCanEdit={userCanEdit}
               />
             </StyledValue>
@@ -443,7 +470,8 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             <ExpansionToggles
               field="allowedEntities"
               validation={validation}
-              updateValidationRule={updateValidationRule}
+              expansions={expansions}
+              updateExpansions={updateExpansions}
               userCanEdit={userCanEdit}
             />
           )}
@@ -473,6 +501,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             onClick={() => updateValidationRule({ active: !active })}
             inverted
             label={active ? "deactivate rule" : "activate rule"}
+            size={ButtonSize.Medium}
           />
           <Button
             color="danger"
@@ -480,6 +509,7 @@ export const ValidationRule: React.FC<ValidationRule> = ({
             onClick={removeValidationRule}
             inverted
             label="remove validation rule"
+            size={ButtonSize.Medium}
           />
         </div>
       )}

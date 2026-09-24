@@ -5,7 +5,7 @@ import {
   validationExpansionKind,
 } from "@inkvisitor/shared/types/territory";
 import { Checkbox } from "components";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import {
   EQUIVALENTS_TOOLTIP,
   expansionKindLabel,
@@ -20,7 +20,9 @@ import {
 interface ExpansionToggles {
   field: EValidationExpansionField;
   validation: ITerritoryValidation;
-  updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
+  /** the rule's flags, including any sent but not yet saved */
+  expansions: ITerritoryValidation["expansions"];
+  updateExpansions: (expansions: ITerritoryValidation["expansions"]) => void;
   userCanEdit: boolean;
 }
 
@@ -32,40 +34,20 @@ interface ExpansionToggles {
 export const ExpansionToggles: React.FC<ExpansionToggles> = ({
   field,
   validation,
-  updateValidationRule,
+  expansions,
+  updateExpansions,
   userCanEdit,
 }) => {
   const kind = validationExpansionKind(field, validation.tieType);
 
-  // The rule arrives from the server and is re-rendered only once a save has
-  // come back, so a second box ticked before that would be built on the rule as
-  // it was BEFORE the first tick and would drop it. Hold what was last sent
-  // until the saved rule catches up.
-  const sent = useRef<ITerritoryValidation["expansions"] | null>(null);
-  useEffect(() => {
-    sent.current = null;
-  }, [validation.expansions]);
-
-  const expansion = (sent.current ?? validation.expansions ?? {})[field];
+  const expansion = expansions?.[field];
 
   if (!validation[field]?.length) {
     return null;
   }
 
-  // the hosts merge rule changes one key deep, so the whole expansions object
-  // travels on every toggle
-  const setFlag = (flag: ExpansionGroup, checked: boolean): void => {
-    const next = withExpansionFlag(
-      sent.current ?? validation.expansions,
-      field,
-      flag,
-      checked
-    );
-    // an empty object, not undefined: the next tick must build on "no flags"
-    // rather than fall back to the rule the server still holds
-    sent.current = next ?? {};
-    updateValidationRule({ expansions: next });
-  };
+  const setFlag = (flag: ExpansionGroup, checked: boolean): void =>
+    updateExpansions(withExpansionFlag(expansions, field, flag, checked));
 
   return (
     <StyledExpansionRow>

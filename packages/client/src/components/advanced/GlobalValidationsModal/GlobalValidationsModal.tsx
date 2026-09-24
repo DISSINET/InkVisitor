@@ -222,7 +222,12 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
   return (
     <>
-      <Modal showModal={showModal} onClose={() => setShowGlobalValidations(false)} width={650}>
+      <Modal
+        showModal={showModal}
+        onClose={() => setShowGlobalValidations(false)}
+        onEnterPress={() => setShowGlobalValidations(false)}
+        width={650}
+      >
         <ModalHeader
           title="Global validations"
           icon={<PiSealCheckFill size={20} style={{ marginTop: "-2px" }} />}

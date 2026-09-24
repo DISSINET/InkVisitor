@@ -58,6 +58,27 @@ export const withExpansionFlag = (
 };
 
 /**
+ * Whether two sets of expansion flags tick the same boxes. Key order, unticked
+ * flags left as undefined and an empty object versus none all count as equal,
+ * since the saved rule comes back without the undefined keys that were sent.
+ */
+export const sameExpansions = (
+  a: ITerritoryValidation["expansions"],
+  b: ITerritoryValidation["expansions"]
+): boolean => {
+  const ticked = (expansions: ITerritoryValidation["expansions"]): string[] =>
+    Object.entries(expansions ?? {})
+      .flatMap(([field, flags]) =>
+        Object.entries(flags ?? {})
+          .filter(([, on]) => on === true)
+          .map(([flag]) => `${field}.${flag}`)
+      )
+      .sort();
+  const [left, right] = [ticked(a), ticked(b)];
+  return left.length === right.length && left.every((key, i) => key === right[i]);
+};
+
+/**
  * Trailing note stating what a rule field accepts beyond the entities named in
  * it, e.g. " (incl. subclasses)". Empty when the field takes only what it names,
  * so a rule reads exactly as it did before anyone touched the boxes.
