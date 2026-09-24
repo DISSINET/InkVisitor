@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -29,7 +30,7 @@ export const Centered = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Create" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -59,7 +60,7 @@ export const AlignLeft = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>

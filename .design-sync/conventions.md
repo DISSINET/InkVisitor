@@ -58,7 +58,15 @@ including black text, which is `theme.color["black"]`. A literal hex or a named
 CSS color survives the light theme and breaks the dark one, and nothing
 downstream catches it.
 
-## 5. Where the truth lives
+## 5. Modal footers
+
+The back-out action beside a committing one is always
+`<CancelButton onClick={close} />` — a ghost button labelled "Cancel". Never a
+`Button` labelled Cancel for it: the committing action must be the only filled
+button in the footer. A modal whose only action is acknowledging (a result or
+notice) uses a single `Button label="Close" color="primary"` instead.
+
+## 6. Where the truth lives
 
 - `components/<group>/<Name>/<Name>.d.ts` — the real prop contract, with the
   authors' own JSDoc. Read it before using a component; the props are specific
@@ -71,12 +79,12 @@ Icons come from the same bundle as `Ico*` exports (`IcoSearch`, `IcoCheck`,
 `IcoClose`, `IcoTrash`, `IcoPlus`, `IcoEdit`, `IcoWarning`, …). Enum-typed props
 take members of `EntityEnums`, `RelationEnums` and `UserEnums`, also exported.
 
-## 6. A worked example
+## 7. A worked example
 
 ```jsx
 const {
   DSProvider, Modal, ModalHeader, ModalContent, ModalFooter,
-  ButtonGroup, Button, Input, IcoWarning,
+  ButtonGroup, Button, CancelButton, Input, IcoWarning,
 } = window.InkVisitorDS;
 
 <DSProvider>
@@ -87,7 +95,7 @@ const {
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={close} />
+        <CancelButton onClick={close} />
         <Button label="Create" color="primary" onClick={create} />
       </ButtonGroup>
     </ModalFooter>

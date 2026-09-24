@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   IcoWarning,
   IcoCheck,
   Modal,
@@ -18,7 +19,7 @@ export const Plain = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -38,7 +39,7 @@ export const DangerWithIcon = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Delete" color="danger" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -100,7 +101,7 @@ export const IconColorOverride = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Close" color="greyer" onClick={() => {}} />
+        <Button label="Close" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
   </Modal>

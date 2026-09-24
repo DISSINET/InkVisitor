@@ -139,6 +139,36 @@
     "TemplateActionModal": {
       "cardMode": "single",
       "primaryStory": "Default"
+    },
+    "Submit": {
+      "cardMode": "single",
+      "primaryStory": "DeleteWithEntity"
+    },
+    "AbbreviatedTextWithTooltip": {
+      "cardMode": "single",
+      "primaryStory": "OpenTooltip"
+    },
+    "IconWithTooltip": {
+      "cardMode": "single",
+      "primaryStory": "OpenTooltip"
+    },
+    "Message": {
+      "cardMode": "column"
+    },
+    "Toast": {
+      "cardMode": "single",
+      "primaryStory": "Severities"
+    },
+    "ToastWithLink": {
+      "cardMode": "column"
+    },
+    "Tooltip": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    },
+    "WarningIcon": {
+      "cardMode": "single",
+      "primaryStory": "OpenTooltip"
     }
   },
   "readmeHeader": ".design-sync/conventions.md"

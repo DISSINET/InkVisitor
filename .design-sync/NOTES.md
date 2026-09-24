@@ -72,6 +72,10 @@ because they import `ts-morph` by bare name. Recreate it per clone:
   sized in em, so the size axis is only visible on icon-only buttons.
 - Realistic content follows the DISSINET domain: historical entities,
   territories, statements (Council of Trent, Charles V, 1545–1563).
+- A modal footer's back-out action is `<CancelButton />`, as in every app
+  modal; a `Button` labelled Cancel/Close teaches the design agent a filled
+  back-out button the app never uses. A single acknowledging "Close" (the
+  modal's only action) stays a primary `Button`.
 
 ## Component behaviour worth knowing before authoring a preview
 
@@ -146,9 +150,12 @@ Recorded so a future run does not treat these as regressions to fix:
 - `Submit` trips `variants render identically`. Its cells differ in copy and in
   whether an entity tag is shown, not in chrome — the component renders one
   confirmation dialog shape regardless. Benign.
-- The modal parts and the two separators carry `cardMode` overrides
-  (`single` / `column`) in `cfg.overrides`. Without them the fixed-position
-  dialog escapes its grid cell and the separators overflow it.
+- The modal parts, the two separators, the tooltip family
+  (`Tooltip`, `IconWithTooltip`, `WarningIcon`, `AbbreviatedTextWithTooltip`),
+  `Toast`, `ToastWithLink`, `Message` and `Submit` carry `cardMode` overrides
+  (`single` / `column`) in `cfg.overrides`. Without them fixed-position and
+  portalled content escapes its grid cell (`[GRID_OVERFLOW]`) and wide stories
+  get cropped.
 
 ## Re-sync risks
 
@@ -161,6 +168,12 @@ Recorded so a future run does not treat these as regressions to fix:
   `.design-sync/groups.json`. All three, or the build silently omits them.
   `node .design-sync/check-lists.mjs` compares the three and exits non-zero
   naming any component missing from one of them.
+- A component's JSDoc reaches its `.prompt.md` only when no same-named
+  interface is declared above it: the converter's `leadingJsdoc` takes the
+  first declaration named `<Name>`, and this repo's props interface shares the
+  component's name. `CancelButton` and `RoleBadge` carry JSDoc on the component
+  and ship without a description for that reason. Fixing it in the
+  `source-kit.mjs` fork re-grades every component (fork bytes key all grades).
 - `cfg.dtsPropsFor` pins four components whose props the extractor cannot reach
   (`ButtonGroups`, `AttributeIcon` — inline type; `ContactOwnerFooting`, `Toast`
   — genuinely propless). If those components gain real props, the pins go stale

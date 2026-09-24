@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -21,7 +22,7 @@ export const Default = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Remove" color="danger" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -51,7 +52,7 @@ export const Column = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Create" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -66,7 +67,7 @@ export const Centered = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Close" color="greyer" onClick={() => {}} />
+        <Button label="Close" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
   </Modal>
@@ -95,7 +96,7 @@ export const EnableScroll = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Close" color="greyer" onClick={() => {}} />
+        <Button label="Close" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
   </Modal>
@@ -109,7 +110,7 @@ export const Loading = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
   </Modal>

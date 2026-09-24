@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   IcoWarning,
   Input,
   Modal,
@@ -21,7 +22,7 @@ export const Default = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -51,7 +52,7 @@ export const WithForm = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Create" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -71,7 +72,7 @@ export const Warning = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Delete" color="danger" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>

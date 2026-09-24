@@ -11,7 +11,7 @@ import {
 export const Default = () => (
   <ButtonGroup>
     <Button label="Save" color="success" onClick={() => {}} />
-    <Button label="Cancel" color="greyer" onClick={() => {}} />
+    <Button label="Archive" color="greyer" onClick={() => {}} />
   </ButtonGroup>
 );
 

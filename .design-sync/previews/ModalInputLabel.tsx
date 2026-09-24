@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -25,7 +26,7 @@ export const ShortLabel = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -51,7 +52,7 @@ export const LongLabel = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>

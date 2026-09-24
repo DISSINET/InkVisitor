@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -24,7 +25,7 @@ export const NormalWidth = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -62,7 +63,7 @@ export const FullHeightNoBorder = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Import" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -78,7 +79,7 @@ export const Loading = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
   </Modal>

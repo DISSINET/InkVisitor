@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Modal,
   ModalContent,
@@ -25,7 +26,7 @@ export const AutoWidth = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Apply" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -49,7 +50,7 @@ export const FixedWidth = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Apply" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>

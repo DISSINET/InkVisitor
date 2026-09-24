@@ -26,15 +26,15 @@ export const Gaps = () => (
   <Row>
     <ButtonGroup $gap="no">
       <Button label="Save" color="primary" onClick={() => {}} />
-      <Button label="Cancel" color="greyer" onClick={() => {}} />
+      <Button label="Export" color="info" onClick={() => {}} />
     </ButtonGroup>
     <ButtonGroup $gap="small">
       <Button label="Save" color="primary" onClick={() => {}} />
-      <Button label="Cancel" color="greyer" onClick={() => {}} />
+      <Button label="Export" color="info" onClick={() => {}} />
     </ButtonGroup>
     <ButtonGroup $gap="large">
       <Button label="Save" color="primary" onClick={() => {}} />
-      <Button label="Cancel" color="greyer" onClick={() => {}} />
+      <Button label="Export" color="info" onClick={() => {}} />
     </ButtonGroup>
   </Row>
 );

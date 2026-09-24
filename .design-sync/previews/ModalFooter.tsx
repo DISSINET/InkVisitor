@@ -2,6 +2,7 @@ import React from "react";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Modal,
   ModalContent,
   ModalFooter,
@@ -17,7 +18,7 @@ export const Default = () => (
     </ModalContent>
     <ModalFooter>
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Delete" color="danger" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -33,7 +34,7 @@ export const SpaceBetween = () => (
     <ModalFooter spaceBetween>
       <Button label="View history" color="greyer" onClick={() => {}} />
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Save" color="primary" onClick={() => {}} />
       </ButtonGroup>
     </ModalFooter>
@@ -49,22 +50,9 @@ export const WithNote = () => (
     </ModalContent>
     <ModalFooter note="24 entities will be created">
       <ButtonGroup>
-        <Button label="Cancel" color="greyer" onClick={() => {}} />
+        <CancelButton onClick={() => {}} />
         <Button label="Apply" color="primary" onClick={() => {}} />
       </ButtonGroup>
-    </ModalFooter>
-  </Modal>
-);
-
-export const Column = () => (
-  <Modal showModal width="auto" onClose={() => {}}>
-    <ModalHeader title="Export options" onClose={() => {}} />
-    <ModalContent>
-      Choose how to export the statements under "Council of Trent".
-    </ModalContent>
-    <ModalFooter column>
-      <Button label="Export as CSV" color="primary" onClick={() => {}} />
-      <Button label="Export as JSON" color="greyer" onClick={() => {}} />
     </ModalFooter>
   </Modal>
 );
