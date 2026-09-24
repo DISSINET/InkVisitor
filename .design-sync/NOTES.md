@@ -79,9 +79,6 @@ Collected while authoring the 64 previews; each of these cost an iteration.
   sync artifact.
 - **`MultiInput` defaults to `disabled = true`** (meaning read-only), so an
   editable cell must pass `disabled={false}` explicitly.
-- **`EntityColors` (client `types.ts`) only covers entity classes T/R/A/S/C/E/G/L.**
-  P/B/O/V have theme colors but no `EntityColors` entry, and `EntityTag` reads
-  it unguarded — those classes throw. Fixtures stay on the covered set.
 - **`theme.color["button"].success` is indigo, not green** — a `success` pill
   that looks blue is correct.
 - **`SwitchGroup` is a layout shell**: its `Button` children need

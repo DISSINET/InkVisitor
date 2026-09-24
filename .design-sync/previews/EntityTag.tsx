@@ -3,10 +3,7 @@ import { EntityEnums, EntityTag } from "dissinet.ddb.client";
 
 // EntityTag takes a full entity object. Fixtures mirror the shape from
 // packages/shared/types/entity.ts (IEntity) — only the fields the component
-// actually reads are filled in beyond the required ones. entity.class is
-// restricted to the classes the client's EntityColors table covers (T, R, A,
-// S, C, E, G, L); other classes have no color entry and the component reads
-// it unguarded.
+// actually reads are filled in beyond the required ones.
 const Row: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
     {children}
@@ -34,6 +31,10 @@ const trento = entity({ class: EntityEnums.Class.Location, labels: ["Trento"] })
 const habsburgDynasty = entity({ class: EntityEnums.Class.Group, labels: ["Habsburg dynasty"] });
 const peaceOfAugsburg = entity({ class: EntityEnums.Class.Event, labels: ["Peace of Augsburg"] });
 const tridentineDecrees = entity({ class: EntityEnums.Class.Resource, labels: ["Tridentine decrees"] });
+const charlesV = entity({ class: EntityEnums.Class.Person, labels: ["Charles V"] });
+const imperialEagle = entity({ class: EntityEnums.Class.Being, labels: ["imperial eagle"] });
+const papalBull = entity({ class: EntityEnums.Class.Object, labels: ["papal bull"] });
+const year1545 = entity({ class: EntityEnums.Class.Value, labels: ["1545"] });
 const councilStatement = entity({
   class: EntityEnums.Class.Statement,
   labels: [],
@@ -51,6 +52,10 @@ export const EntityClassSweep = () => (
     <EntityTag entity={habsburgDynasty} disableTooltip />
     <EntityTag entity={peaceOfAugsburg} disableTooltip />
     <EntityTag entity={tridentineDecrees} disableTooltip />
+    <EntityTag entity={charlesV} disableTooltip />
+    <EntityTag entity={imperialEagle} disableTooltip />
+    <EntityTag entity={papalBull} disableTooltip />
+    <EntityTag entity={year1545} disableTooltip />
   </Row>
 );
 
