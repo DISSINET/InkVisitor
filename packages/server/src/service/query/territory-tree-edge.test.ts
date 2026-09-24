@@ -7,7 +7,8 @@ import treeCache from "@service/treeCache";
 import { getEdgeInstance } from "./edge";
 
 // Verifies the territory-tree edges (CT: / CT:D / I_CT:) against the ACTUAL
-// ReQL, for a pinned target and for an unpinned target narrowed by status. It
+// ReQL, for a pinned target, an unpinned target narrowed by status, and an
+// unconstrained target, which means "any territory". It
 // creates/drops its OWN throwaway db, so it never touches real data. Runs only
 // when a RethinkDB is reachable on DB_HOST/DB_PORT (defaults localhost:28015).
 //
@@ -145,9 +146,14 @@ describe("territory-tree edges (real ReQL)", () => {
       expect(ids).toEqual([T_B]);
     });
 
-    test("an unpinned target without a status matches nothing", async () => {
+    test("an unconstrained target matches every territory with a child", async () => {
       const ids = await runEdge(Query.EdgeType["CT:"], {}, conn);
-      expect(ids).toEqual([]);
+      expect(sorted(ids)).toEqual(sorted([ROOT, T_B, T_B1, T_B1A]));
+    });
+
+    test("CT:D with an unconstrained target matches the same territories", async () => {
+      const ids = await runEdge(Query.EdgeType["CT:D"], {}, conn);
+      expect(sorted(ids)).toEqual(sorted([ROOT, T_B, T_B1, T_B1A]));
     });
   });
 
@@ -180,9 +186,9 @@ describe("territory-tree edges (real ReQL)", () => {
       expect(ids).toEqual([T_B1A]);
     });
 
-    test("an unpinned target without a status matches nothing", async () => {
+    test("an unconstrained target matches every territory with a parent", async () => {
       const ids = await runEdge(Query.EdgeType["I_CT:"], {}, conn);
-      expect(ids).toEqual([]);
+      expect(sorted(ids)).toEqual(sorted([T_A, T_B, T_B1, T_B1A, T_B1A1]));
     });
   });
 });

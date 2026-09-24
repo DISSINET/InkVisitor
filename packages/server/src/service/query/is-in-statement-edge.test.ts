@@ -182,9 +182,9 @@ describe("IS: edge / is in S: any position (real ReQL)", () => {
     expect(ids).not.toContain(TERR);
   });
 
-  test("no target statement -> matches nothing", async () => {
+  test("no target statement -> entities used in any statement", async () => {
     const ids = await runEdge({}, conn);
-    expect(ids).toEqual([]);
+    expect(sorted(ids)).toEqual(sorted([...USED, A_OTHER]));
   });
 
   test("an unknown statement -> matches nothing", async () => {

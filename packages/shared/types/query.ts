@@ -214,6 +214,7 @@ export namespace Query {
       entityId: { allowedClasses: [EntityEnums.Class.Resource] },
     },
     "I_HR:R": {
+      entityClass: { allowedClasses: [] },
       entityId: { allowedClasses: [] },
     },
     "HR:V": {
@@ -1006,7 +1007,7 @@ export namespace Query {
     "SUT:D": "S under T: direct",
     "I_SUT:D": "T has S: direct",
     "HR:R": "has reference: resource",
-    "I_HR:R": "R references",
+    "I_HR:R": "is reference: resource",
     "HR:V": "has reference: value",
     "CT:": "T has child T: any",
     "I_CT:": "T has parent T",

@@ -278,9 +278,18 @@ describe("I_IS: edge / S has entity in any position (real ReQL)", () => {
     expect(ids).toContain("S_ACTION");
   });
 
-  test("no target entity -> matches nothing", async () => {
+  test("no target entity -> every statement", async () => {
     const ids = await runEdge(undefined, conn);
-    expect(ids).toEqual([]);
+    expect(sorted(ids)).toEqual(
+      sorted([
+        ...MATCH_X,
+        "S_YONLY",
+        "S_OTHER",
+        "S_REFONLY",
+        "S_CLASSONLY",
+        "S_TERR",
+      ])
+    );
   });
 
   test("an unknown entity -> matches nothing", async () => {
