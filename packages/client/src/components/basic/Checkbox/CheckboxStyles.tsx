@@ -9,13 +9,25 @@ const checkmarkPop = keyframes`
 
 // the box and its label form one control: the gap between them lives inside
 // this element so moving across it never leaves the hovered area
-export const StyledCheckbox = styled.div`
+interface StyledCheckbox {
+  $disabled?: boolean;
+}
+export const StyledCheckbox = styled.div<StyledCheckbox>`
   color: ${({ theme }) => theme.color["black"]};
   display: flex;
   align-items: center;
   gap: 0.4rem;
   cursor: pointer;
   width: fit-content;
+  ${({ $disabled }) =>
+    $disabled &&
+    css`
+      opacity: 0.4;
+      &,
+      & * {
+        cursor: not-allowed;
+      }
+    `}
 `;
 
 export const StyledLabel = styled.label`
@@ -36,6 +48,7 @@ interface StyledCheckboxIndicator {
   // the checkmark is white. Used e.g. by the negated query edge so the check
   // echoes the red edge colour.
   $noFill?: boolean;
+  $disabled?: boolean;
 }
 export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   display: inline-flex;
@@ -59,7 +72,8 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
      keyboard focus reuses the same accent border cue */
   &:focus-visible,
   ${StyledCheckbox}:hover & {
-    border-color: ${({ theme, $color }) => theme.color[$color]};
+    border-color: ${({ theme, $checked, $color, $disabled }) =>
+      $disabled && !$checked ? theme.color["gray"][400] : theme.color[$color]};
   }
 
   &:focus-visible {

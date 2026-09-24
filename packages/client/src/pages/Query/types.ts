@@ -151,3 +151,21 @@ export const edgeTypesHidden: Query.EdgeType[] = [
   Query.EdgeType["I_SUT:D"],
   Query.EdgeType["I_CT:D"],
 ];
+
+/**
+ * Edges on which the SUB toggle does not widen a pinned target (server:
+ * expandsPinnedSubordinates on the territory-tree edges). CT: / CT:D look
+ * upward at the territory's ancestors, so SUB does not apply there; EQ still
+ * adds the territories identified with the target.
+ */
+export const edgeTypesWithoutSubordinates: Query.EdgeType[] = [
+  Query.EdgeType["CT:"],
+  Query.EdgeType["CT:D"],
+];
+
+/**
+ * Edges that read the SUB toggle as how deep to match below the target rather
+ * than as "include subordinates": I_CT: matches the target territory's direct
+ * children, or with SUB its whole subtree.
+ */
+export const edgeTypesWithSubtreeDepth: Query.EdgeType[] = [Query.EdgeType["I_CT:"]];
