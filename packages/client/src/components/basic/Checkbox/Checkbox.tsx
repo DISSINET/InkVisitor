@@ -31,6 +31,8 @@ interface Checkbox {
   // optional function to be called when the checkbox is clicked (onChangeFn is main function that returns value)
   onClickFn?: () => void;
   disableEnterKey?: boolean;
+  // shows the value but takes no input, e.g. for a user without edit rights
+  disabled?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
@@ -47,11 +49,15 @@ export const Checkbox: React.FC<Checkbox> = ({
   tooltipPosition = "bottom",
   onClickFn = () => {},
   disableEnterKey = false,
+  disabled = false,
 }) => {
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleToggle = (e: React.MouseEvent) => {
+    if (disabled) {
+      return;
+    }
     // a click with detail 0 is raised by keyboard activation rather than a
     // pointer, so a box that hands Enter to the page must let it pass
     if (disableEnterKey && e.detail === 0) {
@@ -65,6 +71,9 @@ export const Checkbox: React.FC<Checkbox> = ({
   // Space/Enter toggle the box when it holds keyboard focus, matching native
   // checkbox behaviour (the indicator is a styled span, not an <input>).
   const handleKeyToggle = (e: React.KeyboardEvent) => {
+    if (disabled) {
+      return;
+    }
     // the box keeps focus while Enter belongs to the page (e.g. the query page
     // runs the search): preventDefault drops any activation click the browser
     // would raise from the key, and the event still bubbles to page handlers
@@ -100,14 +109,17 @@ export const Checkbox: React.FC<Checkbox> = ({
           ref={setReferenceElement}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
+          $disabled={disabled}
         >
           <StyledCheckboxWrapper>
             <StyledCheckboxIndicator
               role="checkbox"
-              tabIndex={0}
+              tabIndex={disabled ? -1 : 0}
               aria-checked={indeterminate ? "mixed" : value}
+              aria-disabled={disabled}
               aria-label={label}
               $checked={value || indeterminate}
+              $disabled={disabled}
               $size={size}
               $color={color}
               $noFill={noFill}
@@ -122,7 +134,7 @@ export const Checkbox: React.FC<Checkbox> = ({
             </StyledCheckboxIndicator>
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel onClick={handleToggle}>
+            <StyledLabel onClick={handleToggle} $disabled={disabled}>
               {label}
               {icon}
             </StyledLabel>

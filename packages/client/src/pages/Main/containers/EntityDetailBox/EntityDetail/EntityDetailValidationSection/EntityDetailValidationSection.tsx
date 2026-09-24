@@ -97,7 +97,8 @@ export const EntityDetailValidationSection: React.FC<
 
   const handleUpdateValidation = (
     key: number,
-    changes: Partial<ITerritoryValidation>
+    changes: Partial<ITerritoryValidation>,
+    onError?: () => void
   ) => {
     const validationsCopy = deepCopy(validations as ITerritoryValidation[]);
     const updatedObject: ITerritoryValidation = {
@@ -110,11 +111,14 @@ export const EntityDetailValidationSection: React.FC<
       ...validationsCopy.slice(key + 1),
     ];
     console.log("changes", changes, newValidation);
-    updateEntityMutation?.mutate({
-      data: {
-        validations: newValidation,
+    updateEntityMutation?.mutate(
+      {
+        data: {
+          validations: newValidation,
+        },
       },
-    });
+      { onError }
+    );
   };
 
   const [showBatchRemoveSubmit, setShowBatchRemoveSubmit] = useState(false);
@@ -188,16 +192,22 @@ export const EntityDetailValidationSection: React.FC<
         <StyledDetailSectionContent>
           <StyledValidationList>
             {(validations as ITerritoryValidation[]).map((validation, key) => {
+              // rules have no id; the entity and the length in the key remount
+              // every rule on another entity or once one is added or removed,
+              // so no rule keeps the state of the one that sat at its index
               return (
-                <React.Fragment key={key}>
+                <React.Fragment
+                  key={`${entity.id}-${validations.length}-${key}`}
+                >
                   <ValidationRule
                     key={key}
                     validation={validation}
                     entities={entities}
                     updateValidationRule={(
-                      changes: Partial<ITerritoryValidation>
+                      changes: Partial<ITerritoryValidation>,
+                      onError?: () => void
                     ) => {
-                      handleUpdateValidation(key, changes);
+                      handleUpdateValidation(key, changes, onError);
                     }}
                     removeValidationRule={() => setTempIndexToRemove(key)}
                     isInsideTemplate={isInsideTemplate}

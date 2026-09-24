@@ -56,3 +56,19 @@ export const StyledMessageContent = styled.div`
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.space[2]};
 `;
+
+// what a rule accepts beyond the entities it names, said in the warning itself
+// so the message describes the rule that actually rejected the entity
+export const StyledMessageExpansion = styled.span`
+  font-style: italic;
+  white-space: pre-wrap;
+`;
+// a text run inside the flex row would lose its edge spaces, which keep it
+// apart from the tags and notes beside it
+export const StyledMessageText = styled.span`
+  white-space: pre-wrap;
+`;
+export const StyledMessageCondition = styled(StyledMessageTValidationContent)`
+  flex-basis: 100%;
+  font-style: italic;
+`;
