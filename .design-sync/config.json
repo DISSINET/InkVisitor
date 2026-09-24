@@ -81,7 +81,7 @@
     "source-kit.mjs": "group components by visual family from .design-sync/groups.json instead of the source tree",
     "dts.mjs": "props interfaces are named after the component, not <Name>Props"
   },
-  "buildCmd": "npx tsc --emitDeclarationOnly --declaration --outDir dist/types --incremental false  # run in packages/client",
+  "buildCmd": "cd packages/client && npx tsc --emitDeclarationOnly --declaration --outDir dist/types --incremental false",
   "dtsPropsFor": {
     "ButtonGroups": "  children?: React.ReactNode;\n  className?: string;",
     "AttributeIcon": "  attributeName: \"certainty\" | \"elvl\" | \"logic\" | \"mood\" | \"moodvariant\" | \"virtuality\" | \"partitivity\" | \"bundleOperator\" | \"bundleStart\" | \"bundleEnd\" | \"negation\";",
