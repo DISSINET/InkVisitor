@@ -361,7 +361,7 @@ describe("entityStatuses node param (real ReQL)", () => {
       expect(ids).toEqual([K_SUPER_OK]);
     });
 
-    test("a pinned target still has its status applied", async () => {
+    test("a pinned target ignores the status: it only narrows an empty target", async () => {
       const pinned = (statuses: EntityEnums.Status[]) =>
         runEdge(
           Query.EdgeType["I_R:SCL"],
@@ -369,7 +369,7 @@ describe("entityStatuses node param (real ReQL)", () => {
           conn
         );
       expect(await pinned([EntityEnums.Status.Warning])).toEqual([K_SUPER_OK]);
-      expect(await pinned([EntityEnums.Status.Approved])).toEqual([]);
+      expect(await pinned([EntityEnums.Status.Approved])).toEqual([K_SUPER_OK]);
     });
 
     test("prepare() does not load the status id list for an unpinned target", async () => {

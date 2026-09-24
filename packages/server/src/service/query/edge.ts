@@ -43,6 +43,12 @@ export default class SearchEdge implements Query.IEdge {
   protected checksUnpinnedTargetStatusInRun = false;
 
   /**
+   * False for edges that match a pinned target on its own: prepare() then
+   * resolves no equivalents/subordinates for it, whatever the node's toggles.
+   */
+  protected expandsPinnedTarget = true;
+
+  /**
    * Classes the edge's target can hold - the target picker's classes from
    * EdgeTypeTargetNodeParams - used to narrow the status lookup through the
    * class index when the target node picks no class. Empty for targets of any
@@ -60,6 +66,9 @@ export default class SearchEdge implements Query.IEdge {
    */
   async prepare(db: Connection): Promise<void> {
     const entityId = this.node.params.entityId;
+    // the status narrows an empty target only: a pinned entity is the target
+    // itself, whatever its status, and the query builder offers no status
+    // picker while one is pinned
     const statuses = this.node.params.entityStatuses ?? [];
 
     if (!entityId) {
@@ -73,6 +82,11 @@ export default class SearchEdge implements Query.IEdge {
       return;
     }
 
+    if (!this.expandsPinnedTarget) {
+      this.targetEntityIds = [entityId];
+      return;
+    }
+
     // both toggles off -> single-id set, no expansion queries issued.
     // The same resolver backs the /entities/:id/expansion route, so what the
     // query builder displays is the set this edge matches against.
@@ -80,8 +94,7 @@ export default class SearchEdge implements Query.IEdge {
       equivalents: this.node.params.includeEquivalents === true,
       subordinates: this.node.params.includeSubordinates === true,
     });
-    const ids = [entityId, ...expansion.equivalents, ...expansion.subordinates];
-    this.targetEntityIds = statuses.length ? await filterIdsByStatus(db, ids, statuses) : ids;
+    this.targetEntityIds = [entityId, ...expansion.equivalents, ...expansion.subordinates];
   }
 
   /**
@@ -130,22 +143,6 @@ function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStre
     })
     .getField("id")
     .distinct() as unknown as RStream;
-}
-
-/**
- * Subset of `ids` whose entities carry one of `statuses`.
- */
-async function filterIdsByStatus(
-  db: Connection,
-  ids: string[],
-  statuses: EntityEnums.Status[]
-): Promise<string[]> {
-  if (!ids.length) {
-    return ids;
-  }
-  return filterStreamByStatus(r.table(Entity.table).getAll(r.args(ids)), statuses).run(
-    db
-  ) as Promise<string[]>;
 }
 
 /**
@@ -267,15 +264,10 @@ function territoryAncestorIds(territoryIds: string[], depth: "direct" | "any"): 
 /**
  * Base for the edges that walk the territory tree (CT: / CT:D / I_CT:). On
  * these edges the SUB toggle picks how far the walk goes rather than widening
- * the target, so a pinned target stands alone, without the expansion the base
- * prepare() resolves for it. An unpinned target is the base status-resolved
- * set, so a status on the target node applies here as on every other edge.
+ * the target, so a pinned target stands alone.
  */
 abstract class TerritoryTreeSearchEdge extends SearchEdge {
-  protected treeTargetIds(): string[] | null {
-    const entityId = this.node.params.entityId;
-    return entityId ? [entityId] : this.targetIds();
-  }
+  protected expandsPinnedTarget = false;
 }
 
 /**
@@ -319,7 +311,7 @@ export class EdgeTerritoryHasChild extends TerritoryTreeSearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runTerritoryHasChildEdge(q, this.treeTargetIds(), "any");
+    return runTerritoryHasChildEdge(q, this.targetIds(), "any");
   }
 }
 
@@ -330,7 +322,7 @@ export class EdgeTerritoryHasDirectChild extends TerritoryTreeSearchEdge {
   }
 
   run(q: RStream): RStream {
-    return runTerritoryHasChildEdge(q, this.treeTargetIds(), "direct");
+    return runTerritoryHasChildEdge(q, this.targetIds(), "direct");
   }
 }
 
@@ -358,7 +350,7 @@ export class EdgeTerritoryHasParent extends TerritoryTreeSearchEdge {
 
   async prepare(db: Connection): Promise<void> {
     await super.prepare(db);
-    const targetIds = this.treeTargetIds();
+    const targetIds = this.targetIds();
     this.descendantIds =
       targetIds && targetIds.length && this.anyDepth()
         ? await getSubordinateEntityIds(db, targetIds)
@@ -366,7 +358,7 @@ export class EdgeTerritoryHasParent extends TerritoryTreeSearchEdge {
   }
 
   run(q: RStream): RStream {
-    const targetIds = this.treeTargetIds();
+    const targetIds = this.targetIds();
     if (targetIds === null) {
       return q
         .filter(function (e: RDatum<IEntity>) {
