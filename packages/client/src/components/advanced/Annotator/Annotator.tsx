@@ -88,7 +88,12 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./styles";
-import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import {
+  ANNOTATOR_OVERLAY_Z,
+  RATIO,
+  TerritoryCreateModalType,
+  W_SCROLL,
+} from "./types";
 import { annotatorHighlight } from "./utils/highlight";
 
 interface TextAnnotatorProps {
@@ -124,9 +129,9 @@ interface TextAnnotatorProps {
 
   /**
    * Overrides the annotator's context-menu / settings-overlay stacking layers.
-   * Both overlays are appended to `document.body`; the library defaults suit a
-   * plain page panel (MainPage). A host that mounts the annotator inside a modal
-   * (the Documents page) passes higher values so the overlays sit above it.
+   * Both overlays are appended to `document.body` and default to
+   * {@link ANNOTATOR_OVERLAY_Z}, which clears the app's floating tier. A host
+   * that stacks something even higher over the annotator passes its own values.
    */
   overlayZIndex?: { contextMenu: number; settingsOverlay: number };
 
@@ -805,6 +810,12 @@ export const TextAnnotator = ({
       // The block caret paints over the letter; a light background needs a
       // fainter fill than a dark one for the same readability.
       a.blockCaretOpacity = selectedThemeId === InterfaceEnums.Theme.Dark ? 0.45 : 0.3;
+      a.xmlSyntaxColors = {
+        tag: theme.color.xmlTag,
+        attr: theme.color.xmlAttr,
+        quote: theme.color.xmlQuote,
+        value: theme.color.xmlValue,
+      };
       a.menuColors = {
         bg: theme.color.white,
         text: theme.color.black,
@@ -908,12 +919,12 @@ export const TextAnnotator = ({
 
     applyCanvasTheme(newAnnotator);
 
-    // Raise the body-appended overlays above the host modal on the Documents
-    // page; MainPage leaves the lib defaults (which sit under app modals).
-    if (overlayZIndex) {
-      newAnnotator.contextMenu.zIndex = overlayZIndex.contextMenu;
-      newAnnotator.settingsOverlay.zIndex = overlayZIndex.settingsOverlay;
-    }
+    // The library defaults sit below the app's floating tier, so the overlays
+    // are always given the annotator's own layers unless the host overrides.
+    newAnnotator.contextMenu.zIndex =
+      overlayZIndex?.contextMenu ?? ANNOTATOR_OVERLAY_Z.contextMenu;
+    newAnnotator.settingsOverlay.zIndex =
+      overlayZIndex?.settingsOverlay ?? ANNOTATOR_OVERLAY_Z.settingsOverlay;
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -1693,7 +1704,7 @@ export const TextAnnotator = ({
                   position: "fixed",
                   left: xmlMarkupAnchorHover.x - 35,
                   top: xmlMarkupAnchorHover.y + 12,
-                  zIndex: 10050,
+                  zIndex: ANNOTATOR_OVERLAY_Z.anchorHoverPreview,
                   pointerEvents: "auto",
                   maxWidth: 340,
                   borderRadius: 4,

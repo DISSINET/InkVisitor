@@ -1,6 +1,13 @@
 import { IEntity } from "./entity";
 
 /**
+ * The two directions an entity can stand for more than itself in, named once:
+ * sideways to the entities recorded as equivalent, downward to what lies below
+ * it. Used by the query node's toggles, its API call and the validation rules.
+ */
+export type ExpansionGroup = "equivalents" | "subordinates";
+
+/**
  * Maximum number of entity rows a single expansion response carries, counted
  * across both groups. A Territory's subordinate closure is a walk of the whole
  * child-territory subtree with no upper bound, so the row list is capped while

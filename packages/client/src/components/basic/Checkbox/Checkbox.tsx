@@ -31,8 +31,8 @@ interface Checkbox {
   // optional function to be called when the checkbox is clicked (onChangeFn is main function that returns value)
   onClickFn?: () => void;
   disableEnterKey?: boolean;
-  // a disabled box ignores clicks and keys but still shows its tooltip, which
-  // is where the reason for disabling it belongs
+  // shows the value but ignores clicks and keys (e.g. a user without edit
+  // rights); the tooltip still shows, which is where the reason belongs
   disabled?: boolean;
 }
 export const Checkbox: React.FC<Checkbox> = ({
@@ -121,10 +121,10 @@ export const Checkbox: React.FC<Checkbox> = ({
               aria-disabled={disabled || undefined}
               aria-label={label}
               $checked={value || indeterminate}
+              $disabled={disabled}
               $size={size}
               $color={color}
               $noFill={noFill}
-              $disabled={disabled}
               onClick={handleToggle}
               onKeyDown={handleKeyToggle}
             >
@@ -136,7 +136,7 @@ export const Checkbox: React.FC<Checkbox> = ({
             </StyledCheckboxIndicator>
           </StyledCheckboxWrapper>
           {(label || icon) && (
-            <StyledLabel onClick={handleToggle}>
+            <StyledLabel onClick={handleToggle} $disabled={disabled}>
               {label}
               {icon}
             </StyledLabel>

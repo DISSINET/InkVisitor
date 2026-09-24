@@ -9,6 +9,15 @@
   GitHub issue number (e.g. `(#3001)`) when applicable.
 - Only commit or push when explicitly asked.
 
+## API endpoints
+
+- **When adding a new server endpoint, ask which user roles may call it.** A
+  route with no `acl_permissions` row is auto-created with `roles: []`, so every
+  non-admin gets "Endpoint not allowed". Once agreed, seed the row in
+  `packages/database/datasets/{default,production}/acl_permissions.json` and add
+  it to `packages/database/scripts/jobs/fix-editor-entity-acl.ts` so running
+  databases get it too.
+
 ## Comments
 
 - **Describe the code, not the change.** A comment is read by someone who never

@@ -23,7 +23,17 @@ const SUBORDINATE_RELATION_TYPES: RelationEnums.Type[] = [
 ];
 
 // safety bound on how many subordinates a single expansion collects
-const SUBORDINATE_MAX_NODES = 1000;
+export const SUBORDINATE_MAX_NODES = 1000;
+
+/**
+ * Narrows what "subordinate" means for one expansion. Both default to the full
+ * downward set: every relation in SUBORDINATE_RELATION_TYPES, and a Territory
+ * standing for its whole subtree.
+ */
+export interface ISubordinateExpansionOptions {
+  relationTypes?: RelationEnums.Type[];
+  includeChildTerritories?: boolean;
+}
 
 /**
  * recursively search for action event trees
@@ -374,22 +384,35 @@ export const getEquivalentEntityIds = async (
  * the in-memory tree cache, and the query edges that expand a Territory target
  * ("S under T", "entities used under T") treat it as the complete subtree.
  * The input ids are removed from the result.
+ *
+ * A caller that means one specific path - a validation rule field stands for
+ * its own relation and nothing else (#2527) - narrows the walk through opts.
  * @param conn db connection
  * @param entityIds source entity ids to expand
+ * @param opts which relations to follow and whether a Territory stands for its
+ * subtree; both default to the full set above
  * @returns unique subordinate entity ids, excluding the inputs
  */
 export const getSubordinateEntityIds = async (
   conn: Connection,
-  entityIds: string[]
+  entityIds: string[],
+  opts?: ISubordinateExpansionOptions
 ): Promise<string[]> => {
   if (!entityIds.length) {
     return [];
   }
 
+  const relationTypes = opts?.relationTypes ?? SUBORDINATE_RELATION_TYPES;
+  const withChildTerritories = opts?.includeChildTerritories ?? true;
+
   const visited = new Set<string>(entityIds); // guards against cycles / re-visits
   const collected = new Set<string>(); // subordinates only (inputs excluded)
 
-  const inputEntities = await Entity.findEntitiesByIds(conn, entityIds);
+  // the entity rows are read only to find the Territories among the inputs, so
+  // a caller that does not want the territory closure needs none of them
+  const inputEntities = withChildTerritories
+    ? await Entity.findEntitiesByIds(conn, entityIds)
+    : [];
   const territoryInputs = inputEntities.filter(
     (entity) => entity.class === EntityEnums.Class.Territory
   );
@@ -403,7 +426,7 @@ export const getSubordinateEntityIds = async (
     // inverse SCL/SOE/HOL, all levels, batched one query per type per BFS level
     while (frontier.length && collected.size < SUBORDINATE_MAX_NODES) {
       const relationsPerType = await Promise.all(
-        SUBORDINATE_RELATION_TYPES.map((type) =>
+        relationTypes.map((type) =>
           Relation.findForEntities(conn, frontier, type, 1)
         )
       );

@@ -90,6 +90,12 @@ const darkTheme = {
 
     statsChartCursor: "rgba(246, 246, 255, 0.08)", // gentle primary tint for hovered column
 
+    // the light theme's hues, lifted to hold >=4.5:1 on the dark page
+    xmlTag: "#7FAEE9",
+    xmlAttr: "#EF86A0",
+    xmlQuote: "#8A93A8",
+    xmlValue: "#5DD0A9",
+
     pageBg: "#283040",
     menuHover: "#222A40",
     closeBtnBackground: "rgba(200, 200, 200, 0.1)",
