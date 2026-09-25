@@ -1,3 +1,4 @@
+import { languageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, ITerritory, Relation } from "@inkvisitor/shared/types";
 import { EntityTag } from "components/advanced";
@@ -22,6 +23,9 @@ interface EntityImportPreview {
   plan: ImportPlan;
   notes: ImportIssue[];
 }
+
+const languageName = (language: EntityEnums.Language) =>
+  languageDict.find((item) => item.value === language)?.label ?? language;
 
 const count = (amount: number, singular: string, plural: string) =>
   `${amount} ${amount === 1 ? singular : plural}`;
@@ -84,7 +88,9 @@ export const EntityImportPreview: React.FC<EntityImportPreview> = ({ plan, notes
     props.map((prop) => (
       <React.Fragment key={prop.id}>
         <StyledRow $depth={depth}>
-          {depth === 0 && <StyledRowLabel>metaprop</StyledRowLabel>}
+          {/* nested levels keep the empty label column, so they indent from
+              where the first level's tags start */}
+          <StyledRowLabel>{depth === 0 ? "metaprop" : ""}</StyledRowLabel>
           {tagOf(prop.type.entityId)}
           <StyledRelationLabel>→</StyledRelationLabel>
           {prop.value.entityId ? tagOf(prop.value.entityId) : <StyledMeta>no value</StyledMeta>}
@@ -150,10 +156,20 @@ export const EntityImportPreview: React.FC<EntityImportPreview> = ({ plan, notes
             <StyledRow>
               {tagOf(entity.id)}
               <StyledNewBadge>NEW</StyledNewBadge>
-              <StyledMeta>
-                {[entity.language, entity.detail].filter(Boolean).join(" · ")}
-              </StyledMeta>
+              {entity.language && <StyledMeta>{languageName(entity.language)}</StyledMeta>}
             </StyledRow>
+            {entity.detail && (
+              <StyledRow>
+                <StyledRowLabel>detail</StyledRowLabel>
+                {entity.detail}
+              </StyledRow>
+            )}
+            {entity.notes.map((note, noteIndex) => (
+              <StyledRow key={noteIndex}>
+                <StyledRowLabel>note</StyledRowLabel>
+                {note}
+              </StyledRow>
+            ))}
             {renderProps(entity.props, 0)}
             {entity.references.map((reference) => (
               <StyledRow key={reference.id}>

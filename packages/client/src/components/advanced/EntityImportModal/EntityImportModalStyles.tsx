@@ -1,10 +1,13 @@
 import styled from "styled-components";
 
+// fills the full-height modal, so the JSON field gets all the room left
 export const StyledStep = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: ${({ theme }) => theme.space[3]};
   width: 100%;
+  min-height: 0;
 `;
 
 export const StyledHint = styled.p`
@@ -12,13 +15,14 @@ export const StyledHint = styled.p`
   color: ${({ theme }) => theme.color["mutedText"]};
 `;
 
-// The field grows with its content up to the height the modal leaves for it
-// (the viewport minus the modal's margins, header, hint and footer) and
-// scrolls from there. The editor lays a highlighted <pre> under a transparent
-// textarea; both take their font from this wrapper, so they stay aligned.
+// The field takes all the height the modal leaves (keeping a usable minimum
+// when a long error list sits below it) and scrolls from there. The editor
+// lays a highlighted <pre> under a transparent textarea; both take their font
+// from this wrapper, so they stay aligned.
 export const StyledJsonEditor = styled.div`
+  flex: 1;
   width: 100%;
-  max-height: calc(100vh - 26rem);
+  min-height: ${({ theme }) => theme.space[48]};
   overflow: auto;
   font-family: monospace;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
@@ -39,7 +43,7 @@ export const StyledJsonEditor = styled.div`
   /* the editor's own box; its textarea covers it whole, so a click anywhere
      in the empty field lands in the textarea */
   & > div {
-    min-height: ${({ theme }) => theme.space[48]};
+    min-height: 100%;
   }
   textarea {
     outline: 0;

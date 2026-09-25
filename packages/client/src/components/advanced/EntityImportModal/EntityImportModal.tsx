@@ -151,6 +151,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     <Modal
       showModal={showModal}
       width={900}
+      // the JSON field fills the height; the preview and the result keep the
+      // height of their content
+      fullHeight={step === "input"}
       onClose={isWriting ? undefined : closeModal}
       disableEscapeClose={isWriting}
       disableBgClick
