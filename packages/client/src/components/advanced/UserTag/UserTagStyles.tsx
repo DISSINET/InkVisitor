@@ -2,16 +2,16 @@ import styled from "styled-components";
 import { ThemeFontSize, ThemeType } from "Theme/theme";
 import { UserTagSize, UserTagVariant } from "./utils";
 
-/* size grows the pill mostly through height and padding; the name's font
-   steps up only slightly so larger tags stay calm next to body text */
+/* size grows the pill through height and the name's font; inset and padding
+   stay at the small tag's values so larger tags don't read as airy */
 const sizeScale: Record<
   UserTagSize,
   { height: string; inset: keyof ThemeType["space"]; padding: keyof ThemeType["space"]; font: keyof ThemeFontSize }
 > = {
   [UserTagSize.Small]: { height: "2.25rem", inset: 2, padding: 2, font: "xs" },
-  [UserTagSize.Medium]: { height: "2.75rem", inset: 2, padding: 3, font: "xs" },
-  [UserTagSize.Large]: { height: "3.25rem", inset: 3, padding: 4, font: "sm" },
-  [UserTagSize.ExtraLarge]: { height: "3.75rem", inset: 3, padding: 5, font: "sm" },
+  [UserTagSize.Medium]: { height: "2.75rem", inset: 2, padding: 2, font: "sm" },
+  [UserTagSize.Large]: { height: "3.25rem", inset: 2, padding: 2, font: "base" },
+  [UserTagSize.ExtraLarge]: { height: "3.75rem", inset: 2, padding: 2, font: "lg" },
 };
 
 interface StyledUserTagWrapProps {
