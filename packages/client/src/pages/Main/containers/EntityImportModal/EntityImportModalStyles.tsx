@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { StyledTabGroup } from "../EntityDetailBox/EntityDetailBoxStyles";
 
 // fills the full-height modal, so the JSON field gets all the room left
 export const StyledStep = styled.div`
@@ -74,11 +75,11 @@ export const StyledJsonEditor = styled.div`
 `;
 
 // the draft tabs take the modal's height; Detail scrolls inside its own box
+// the tabs sit right on the Detail below them, as in the Detail box
 export const StyledDrafts = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: ${({ theme }) => theme.space[2]};
   width: 100%;
   min-height: 0;
 `;
@@ -90,7 +91,22 @@ export const StyledDraftIssues = styled.div`
   flex-shrink: 0;
   gap: ${({ theme }) => theme.space[2]};
   max-height: ${({ theme }) => theme.space[40]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
   overflow: auto;
+`;
+
+// the bottom edges of the other tabs draw the top line of the box, and the
+// selected tab, which has none, opens into it
+export const StyledDraftTabGroup = styled(StyledTabGroup)`
+  margin-bottom: 0;
+  /* the selected tab takes the background of the Detail it opens into */
+  & > [data-selected="true"] {
+    background-color: ${({ theme }) => theme.color["white"]};
+  }
+  /* the last tab ends on the right edge of the box below */
+  & > *:last-child {
+    margin-right: 0;
+  }
 `;
 
 export const StyledDraftDetail = styled.div`
@@ -99,7 +115,11 @@ export const StyledDraftDetail = styled.div`
   min-height: ${({ theme }) => theme.space[64]};
   overflow: hidden;
   background-color: ${({ theme }) => theme.color["white"]};
-  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"]["300"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"][500]};
+  border-top: none;
+  /* matches the rounding of the tabs on top */
+  border-bottom-left-radius: ${({ theme }) => theme.borderRadius.sm};
+  border-bottom-right-radius: ${({ theme }) => theme.borderRadius.sm};
 `;
 
 export const StyledHiddenFileInput = styled.input`

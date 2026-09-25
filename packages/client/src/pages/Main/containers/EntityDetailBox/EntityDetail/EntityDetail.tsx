@@ -674,8 +674,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
           scrollerId={ENTITY_DETAIL_SCROLLBAR_ID}
           elementId={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
           customStyle={{
-            // necessary to scroll until the bottom of the page
-            height: "calc(100% - 2.5rem)",
+            // necessary to scroll until the bottom of the page; the Detail box
+            // holds its tab strip in the same height, a draft's tabs sit
+            // outside Detail's box
+            height: draft ? "100%" : "calc(100% - 2.5rem)",
           }}
         >
           <>
@@ -1140,7 +1142,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
               )}
 
               {/* JSON */}
-              <StyledDetailSection key="editor-section-json">
+              <StyledDetailSection key="editor-section-json" $lastSection>
                 <StyledDetailSectionHeader onClick={() => toggleSection(EntityDetailSection.Json)}>
                   <EntityDetailExpandIcon
                     isExpanded={isSectionExpanded(EntityDetailSection.Json)}

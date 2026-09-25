@@ -88,6 +88,8 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
       <StyledTab
         ref={ref}
         $isSelected={isSelected}
+        // lets a surrounding strip style the selected tab
+        data-selected={isSelected}
         onMouseEnter={() => {
           setShowTooltip(true);
           setIsHovered(true);

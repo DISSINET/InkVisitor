@@ -2,7 +2,6 @@ import { UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { EntityDraft, EntityDraftContext } from "hooks";
 import { EntityDetail } from "../EntityDetailBox/EntityDetail/EntityDetail";
-import { StyledTabGroup } from "../EntityDetailBox/EntityDetailBoxStyles";
 import { EntityDetailTab } from "../EntityDetailBox/EntityDetailTab/EntityDetailTab";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -16,7 +15,12 @@ import {
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
 import { EntityImportIssueList } from "./EntityImportIssueList";
-import { StyledDraftDetail, StyledDraftIssues, StyledDrafts } from "./EntityImportModalStyles";
+import {
+  StyledDraftDetail,
+  StyledDraftIssues,
+  StyledDrafts,
+  StyledDraftTabGroup,
+} from "./EntityImportModalStyles";
 
 // Detail decides its narrow layout from the width of this element
 const DRAFT_DETAIL_ELEMENT_ID = "entity-import-draft-detail";
@@ -111,7 +115,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
           </StyledDraftIssues>
         )}
 
-        <StyledTabGroup>
+        <StyledDraftTabGroup>
           {draft.entities.map((entity, index) => (
             <EntityDetailTab
               key={entity.id}
@@ -123,7 +127,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               moveRow={onMoveTab}
             />
           ))}
-        </StyledTabGroup>
+        </StyledDraftTabGroup>
 
         <StyledDraftDetail id={DRAFT_DETAIL_ELEMENT_ID}>
           {detail && (
