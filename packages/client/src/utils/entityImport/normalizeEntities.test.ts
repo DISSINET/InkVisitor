@@ -233,68 +233,20 @@ describe("normalizeEntities", () => {
     expect(territory.data.protocol).toMatchObject({ project: "P1", guidelines: [] });
 
     expect(paths(normalizeOne({ class: "T", labels: ["T"] }).errors)).toEqual(["data.parent"]);
-    expect(
-      paths(
-        normalizeOne({
-          class: "T",
-          labels: ["T"],
-          data: { parent: { territoryId: "p" }, validations: [{}] },
-        }).errors
-      )
-    ).toEqual(["data.validations"]);
-  });
-
-  it("rejects a relations field that is neither a list nor grouped by type", () => {
-    expect(paths(normalizeOne({ class: "C", labels: ["d"], relations: "SCL" }).errors)).toEqual([
-      "relations",
-    ]);
-  });
-
-  it("reads relations grouped by type as the JSON section of Detail shows them", () => {
-    const { entities, errors, notes } = normalizeEntities(
-      [
-        {
-          class: "C",
-          labels: ["dog"],
-          relations: {
-            SCL: {
-              connections: [{ id: "r1", type: "SCL", entityIds: ["dog", "animal"], subtrees: [] }],
-              iConnections: [{ entityIds: ["puppy", "dog"] }],
-            },
-            SYN: { connections: [] },
-          },
-        },
-      ],
-      options
-    );
-
-    expect(errors).toEqual([]);
-    // relations pointing at the entity are left to the entity they start at
-    expect(entities[0].rawRelations).toEqual([
-      {
-        path: "relations.SCL.connections[0]",
-        raw: { id: "r1", type: "SCL", entityIds: ["dog", "animal"], subtrees: [] },
-      },
-    ]);
-    expect(notes.map((note) => note.path)).toEqual(["relations.SCL.iConnections"]);
-  });
-
-  it("reports grouped relations with a wrong type or shape", () => {
-    const { errors } = normalizeOne({
-      class: "C",
-      labels: ["dog"],
-      relations: {
-        XYZ: { connections: [] },
-        SCL: { connections: [{ type: "SYN", entityIds: ["a", "b"] }], other: [] },
-        ANT: [],
-      },
+    // Detail shows validation rules in the JSON of a territory; the import
+    // leaves them out
+    const withRules = normalizeOne({
+      class: "T",
+      labels: ["T"],
+      data: { parent: { territoryId: "p" }, validations: [{}] },
     });
+    expect(withRules.errors).toEqual([]);
+    expect(paths(withRules.notes)).toEqual(["data.validations"]);
+  });
 
-    expect(paths(errors)).toEqual([
-      "relations.XYZ",
-      "relations.SCL.other",
-      "relations.SCL.connections[0].type",
-      "relations.ANT",
+  it("rejects a relations field that is not a list", () => {
+    expect(paths(normalizeOne({ class: "C", labels: ["d"], relations: {} }).errors)).toEqual([
+      "relations",
     ]);
   });
 

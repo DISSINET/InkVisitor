@@ -1,5 +1,5 @@
 import { Button } from "components";
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import { BsArrowsCollapse, BsArrowsExpand, BsClipboard } from "react-icons/bs";
 import ReactJson from "react-json-view";
 import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
@@ -9,11 +9,9 @@ import { toast } from "react-toastify";
 
 interface IJSONDisplay {
   data: object;
-  // placed after the built-in buttons
-  buttons?: ReactNode;
 }
 
-export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {}, buttons }) => {
+export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {} }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
   const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
     (state) => state.theme
@@ -47,7 +45,6 @@ export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {}, buttons }) => 
           icon={<BsClipboard size={17} />}
           label="Copy JSON"
         />
-        {buttons}
       </div>
 
       <ReactJson

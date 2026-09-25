@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import { CMetaProp, CReference } from "constructors";
-import { buildImportJson } from "./copyAsImport";
+import { buildEntityJson } from "./entityJson";
 import { validateImport } from "./validateImport";
 
 const existingEntity = (id: string, entityClass = EntityEnums.Class.Concept) =>
@@ -16,7 +16,7 @@ const dog: IEntity = {
   status: EntityEnums.Status.Approved,
   notes: ["note"],
   data: { pos: EntityEnums.ConceptPartOfSpeech.Noun },
-  props: [{ ...CMetaProp({ typeEntityId: "size", valueEntityId: "dog" }) }],
+  props: [{ ...CMetaProp({ typeEntityId: "size", valueEntityId: "animal" }) }],
   references: [CReference("book", "page")],
   isTemplate: false,
   createdAt: new Date(),
@@ -54,7 +54,7 @@ const database = [
   existingEntity("catalogue", EntityEnums.Class.Territory),
 ];
 
-const importAgain = (json: object) =>
+const importJson = (json: object) =>
   validateImport(JSON.stringify(json), {
     role: UserEnums.Role.Admin,
     defaultLanguage: EntityEnums.Language.English,
@@ -64,61 +64,49 @@ const importAgain = (json: object) =>
     },
   });
 
-describe("buildImportJson", () => {
-  it("copies the entity with a fresh id and only its own first-level relations", () => {
-    const json = buildImportJson(dog, dogRelations);
-    const newId = json.id as string;
+/** What a user does with a copy: replace the id wherever it appears. */
+const withNewId = (json: object, oldId: string, newId: string) =>
+  JSON.parse(JSON.stringify(json).split(`"${oldId}"`).join(`"${newId}"`));
 
-    expect(newId).not.toBe("dog");
+describe("buildEntityJson", () => {
+  it("keeps what Detail edits: own first-level relations, no ids of nested objects", () => {
+    const json = buildEntityJson(dog, dogRelations);
+
+    expect(json.id).toBe("dog");
     expect(json).not.toHaveProperty("createdAt");
     expect(json).not.toHaveProperty("legacyId");
-    expect(json.relations).toEqual({
-      [RelationEnums.Type.Superclass]: { connections: [{ entityIds: [newId, "animal"] }] },
-      [RelationEnums.Type.Synonym]: { connections: [{ entityIds: ["hound", newId] }] },
-    });
-    expect((json.props as { value: { entityId: string } }[])[0].value.entityId).toBe(newId);
+    expect(json).not.toHaveProperty("isTemplate");
+    expect(json.relations).toEqual([
+      { type: RelationEnums.Type.Superclass, entityIds: ["dog", "animal"] },
+      { type: RelationEnums.Type.Synonym, entityIds: ["hound", "dog"] },
+    ]);
+    expect((json.props as object[])[0]).not.toHaveProperty("id");
+    expect(json.references).toEqual([{ resource: "book", value: "page" }]);
   });
 
-  it("imports the Detail JSON itself once its id is new", async () => {
-    const detailJson = {
-      ...dog,
-      id: "dog-copy",
-      createdAt: undefined,
-      legacyId: undefined,
-      props: [],
-      usedInStatements: [],
-      warnings: [],
-      right: "write",
-      relations: {
-        [RelationEnums.Type.Superclass]: {
-          connections: [{ ...dogRelations.SCL!.connections[0], entityIds: ["dog-copy", "animal"] }],
-          iConnections: [],
-        },
-      },
-    };
-
-    const { errors, notes, plan } = await importAgain(detailJson);
+  it("imports back without errors once the id is replaced", async () => {
+    const { errors, notes, plan } = await importJson(
+      withNewId(buildEntityJson(dog, dogRelations), "dog", "dog-copy")
+    );
 
     expect(errors).toEqual([]);
+    expect(notes).toEqual([]);
     expect(plan!.relations).toMatchObject([
       { type: RelationEnums.Type.Superclass, entityIds: ["dog-copy", "animal"] },
-    ]);
-    expect(notes.map((note) => note.path)).toEqual([
-      "isTemplate",
-      "usedInStatements, warnings, right",
-      "relations.SCL.connections[0].subtrees",
+      { type: RelationEnums.Type.Synonym, entityIds: ["hound", "dog-copy"] },
     ]);
   });
 
-  it("imports again without errors", async () => {
-    const { errors, plan } = await importAgain(buildImportJson(dog, dogRelations));
+  it("imported unchanged, reports the existing id", async () => {
+    const json = buildEntityJson(dog, dogRelations);
+    database.push(existingEntity("dog"));
+    const { errors } = await importJson(json);
+    database.pop();
 
-    expect(errors).toEqual([]);
-    expect(plan!.entities).toHaveLength(1);
-    expect(plan!.relations).toHaveLength(2);
+    expect(errors.map((error) => error.path)).toEqual(["id"]);
   });
 
-  it("copies a territory without its order and validation rules", async () => {
+  it("shows a territory without its order, and its validation rules are ignored on import", async () => {
     const territory = {
       ...dog,
       id: "manuscript",
@@ -132,8 +120,15 @@ describe("buildImportJson", () => {
       },
     } as unknown as ITerritory;
 
-    const json = buildImportJson(territory, {});
-    expect(json.data).toEqual({ parent: { territoryId: "catalogue" }, protocol: { project: "P1" } });
-    expect((await importAgain(json)).errors).toEqual([]);
+    const json = buildEntityJson(territory, {});
+    expect(json.data).toEqual({
+      parent: { territoryId: "catalogue" },
+      protocol: { project: "P1" },
+      validations: [{ entityClasses: [] }],
+    });
+
+    const { errors, notes } = await importJson(withNewId(json, "manuscript", "manuscript-copy"));
+    expect(errors).toEqual([]);
+    expect(notes.map((note) => note.path)).toEqual(["data.validations"]);
   });
 });

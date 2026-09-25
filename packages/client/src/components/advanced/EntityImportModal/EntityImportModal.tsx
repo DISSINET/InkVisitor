@@ -43,9 +43,7 @@ const INPUT_PLACEHOLDER = `[
     "class": "C",
     "labels": ["dog"],
     "detail": "domestic canine",
-    "relations": {
-      "SCL": { "connections": [{ "entityIds": ["<this entity's id>", "<superclass id>"] }] }
-    }
+    "relations": [{ "type": "SCL", "entityIds": ["<this entity's id>", "<superclass id>"] }]
   }
 ]`;
 
@@ -166,7 +164,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         {step === "input" && (
           <StyledStep>
             <StyledHint>
-              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. "Copy as import JSON" in the JSON section of Detail gives an example.`}
+              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. The JSON section of Detail shows an entity in this format; a copy imports as a new entity once its id is replaced.`}
             </StyledHint>
             <EntityImportJsonEditor
               value={text}

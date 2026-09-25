@@ -76,8 +76,8 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { IcoCopy, IcoPlusBold } from "Theme/icons";
-import { buildImportJson } from "utils/entityImport";
+import { IcoPlusBold } from "Theme/icons";
+import { buildEntityJson } from "utils/entityImport";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -178,14 +178,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   const queryClient = useQueryClient();
 
   const isClassChangeable = entity && allowedEntityChangeClasses.includes(entity.class);
-
-  const handleCopyAsImportJson = () => {
-    navigator.clipboard.writeText(
-      JSON.stringify(buildImportJson(entity, entity.relations), null, 2),
-    );
-    toast.info("Import JSON copied to clipboard");
-  };
-
   const {
     data: allTemplates,
     isStale: templatesStale,
@@ -1097,23 +1089,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 </StyledDetailSectionHeader>
                 {isSectionExpanded(EntityDetailSection.Json) && (
                   <StyledDetailSectionContent>
-                    {entity && (
-                      <JSONExplorer
-                        data={entity}
-                        buttons={
-                          // statements can't be imported
-                          entity.class !== EntityEnums.Class.Statement && (
-                            <Button
-                              onClick={handleCopyAsImportJson}
-                              inverted
-                              icon={<IcoCopy size={17} />}
-                              label="Copy as import JSON"
-                              tooltipLabel="copy this entity in the format of Import entities from JSON, with a new id"
-                            />
-                          )
-                        }
-                      />
-                    )}
+                    {/* the format of Import entities from JSON, so a copy can be
+                        edited and imported back */}
+                    {entity && <JSONExplorer data={buildEntityJson(entity, entity.relations)} />}
                   </StyledDetailSectionContent>
                 )}
               </StyledDetailSection>
