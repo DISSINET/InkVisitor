@@ -44,8 +44,7 @@ export const normalizeRelationItems = (
   const notes: ImportIssue[] = [];
 
   for (const { index, entity, rawRelations } of entities) {
-    rawRelations.forEach((raw, itemIndex) => {
-      const path = `relations[${itemIndex}]`;
+    rawRelations.forEach(({ path, raw }) => {
       const issue = (subPath: string, message: string): ImportIssue => ({
         entityIndex: index,
         label: entity.labels[0],
@@ -242,14 +241,18 @@ export const validateRelations = async (
       continue;
     }
 
-    if (rule.treeType) {
-      if (!entityIds.some(isNew)) {
-        notes.push(
-          issue(item, `${describe(item.relation)}: ignored, it links two existing entities`)
-        );
-        continue;
-      }
-    } else if (!entityIds.includes(owner.entity.id)) {
+    // a directional relation belongs to the entity it starts at, and Detail
+    // sets it only there, so the import never adds one to an existing entity
+    if (rule.asymmetrical && !isNew(entityIds[0])) {
+      notes.push(
+        issue(
+          item,
+          `${describe(item.relation)}: ignored, ${labelOf(entityIds[0])} is an existing entity; add it in its Detail`
+        )
+      );
+      continue;
+    }
+    if (!rule.treeType && !entityIds.includes(owner.entity.id)) {
       errors.push(issue(item, "must include the id of this entity", ".entityIds"));
       continue;
     }

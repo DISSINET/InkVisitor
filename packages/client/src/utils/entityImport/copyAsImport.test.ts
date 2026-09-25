@@ -72,11 +72,42 @@ describe("buildImportJson", () => {
     expect(newId).not.toBe("dog");
     expect(json).not.toHaveProperty("createdAt");
     expect(json).not.toHaveProperty("legacyId");
-    expect(json.relations).toEqual([
-      { type: RelationEnums.Type.Superclass, entityIds: [newId, "animal"] },
-      { type: RelationEnums.Type.Synonym, entityIds: ["hound", newId] },
-    ]);
+    expect(json.relations).toEqual({
+      [RelationEnums.Type.Superclass]: { connections: [{ entityIds: [newId, "animal"] }] },
+      [RelationEnums.Type.Synonym]: { connections: [{ entityIds: ["hound", newId] }] },
+    });
     expect((json.props as { value: { entityId: string } }[])[0].value.entityId).toBe(newId);
+  });
+
+  it("imports the Detail JSON itself once its id is new", async () => {
+    const detailJson = {
+      ...dog,
+      id: "dog-copy",
+      createdAt: undefined,
+      legacyId: undefined,
+      props: [],
+      usedInStatements: [],
+      warnings: [],
+      right: "write",
+      relations: {
+        [RelationEnums.Type.Superclass]: {
+          connections: [{ ...dogRelations.SCL!.connections[0], entityIds: ["dog-copy", "animal"] }],
+          iConnections: [],
+        },
+      },
+    };
+
+    const { errors, notes, plan } = await importAgain(detailJson);
+
+    expect(errors).toEqual([]);
+    expect(plan!.relations).toMatchObject([
+      { type: RelationEnums.Type.Superclass, entityIds: ["dog-copy", "animal"] },
+    ]);
+    expect(notes.map((note) => note.path)).toEqual([
+      "isTemplate",
+      "usedInStatements, warnings, right",
+      "relations.SCL.connections[0].subtrees",
+    ]);
   });
 
   it("imports again without errors", async () => {

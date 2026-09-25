@@ -99,12 +99,19 @@ export const buildImportJson = (
       resource: swapId(resource),
       value: swapId(value),
     })),
-    relations: outgoingRelations(entity.id, relations).map((relation) => ({
-      type: relation.type,
-      entityIds: relation.entityIds.map(swapId),
-      ...(relation.type === RelationEnums.Type.Identification
-        ? { certainty: (relation as Relation.IIdentification).certainty }
-        : {}),
-    })),
+    // grouped by type the way the JSON section of Detail shows relations
+    relations: outgoingRelations(entity.id, relations).reduce<
+      Record<string, { connections: ImportJson[] }>
+    >((groups, relation) => {
+      const group = groups[relation.type] ?? { connections: [] };
+      group.connections.push({
+        entityIds: relation.entityIds.map(swapId),
+        ...(relation.type === RelationEnums.Type.Identification
+          ? { certainty: (relation as Relation.IIdentification).certainty }
+          : {}),
+      });
+      groups[relation.type] = group;
+      return groups;
+    }, {}),
   };
 };

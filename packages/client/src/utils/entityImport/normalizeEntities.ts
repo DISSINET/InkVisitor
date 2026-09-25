@@ -1,4 +1,4 @@
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IPropSpec, IReference } from "@inkvisitor/shared/types";
 import { IActionEntity } from "@inkvisitor/shared/types/action";
 import { ITerritoryProtocol } from "@inkvisitor/shared/types/territory";
@@ -12,7 +12,7 @@ import {
   isStringList,
   quote,
 } from "./helpers";
-import { ImportEntity, ImportIssue } from "./types";
+import { ImportEntity, ImportIssue, RawRelation } from "./types";
 
 // Metaprops nest in three levels: prop, its children, their children.
 const MAX_PROP_DEPTH = 3;
@@ -31,6 +31,27 @@ const ENTITY_KEYS = [
   "relations",
 ];
 const SERVER_MANAGED_KEYS = ["createdAt", "updatedAt"];
+// What the JSON section of Detail shows on top of the entity itself; an
+// entity copied from there is accepted as it is, these fields are dropped.
+const DETAIL_VIEW_KEYS = [
+  "entities",
+  "usedInStatements",
+  "usedInStatementProps",
+  "usedInMetaProps",
+  "usedInDocuments",
+  "usedInStatementIdentifications",
+  "usedInStatementClassifications",
+  "usedInReferences",
+  "usedInReferenceParts",
+  "usedAsTemplate",
+  "warnings",
+  "legacyValidations",
+  "right",
+  "isEquivalent",
+  "isSubordinate",
+  "anchorTexts",
+];
+const RELATION_GROUP_KEYS = ["connections", "iConnections"];
 // Rejected when they carry a value; empty ones (isTemplate: false, as in a
 // database dump) are dropped with a note.
 const TEMPLATE_KEYS: Record<string, string> = {
@@ -476,6 +497,68 @@ const readList = <T,>(
   return raw.map((item, itemIndex) => readItem(item, `${path}[${itemIndex}]`));
 };
 
+/**
+ * Relations come either as a list, or grouped by type the way the JSON section
+ * of Detail shows them: { "SCL": { "connections": [...], "iConnections": [...] } }.
+ * Both read into one list; a grouped relation takes its type from its group.
+ */
+const readRawRelations = (raw: unknown, report: Reporter): RawRelation[] => {
+  if (raw === undefined) {
+    return [];
+  }
+  if (Array.isArray(raw)) {
+    return raw.map((item, itemIndex) => ({ path: `relations[${itemIndex}]`, raw: item }));
+  }
+  if (!isPlainObject(raw)) {
+    report.error("relations", "must be a list, or relations grouped by type as in Detail");
+    return [];
+  }
+
+  const out: RawRelation[] = [];
+  for (const [type, group] of Object.entries(raw)) {
+    const groupPath = `relations.${type}`;
+    if (!isEnumValue(RelationEnums.Type, type)) {
+      report.error(groupPath, `unknown relation type; use one of ${enumList(RelationEnums.Type)}`);
+      continue;
+    }
+    if (!isPlainObject(group)) {
+      report.error(groupPath, 'must be an object with "connections" and/or "iConnections"');
+      continue;
+    }
+    reportUnknownKeys(group, RELATION_GROUP_KEYS, groupPath, report);
+    for (const key of RELATION_GROUP_KEYS) {
+      const items = group[key];
+      if (items === undefined) {
+        continue;
+      }
+      if (!Array.isArray(items)) {
+        report.error(`${groupPath}.${key}`, "must be a list");
+        continue;
+      }
+      // relations pointing at the entity belong to their source entity, which
+      // sets them in its own Detail; Detail lists them here read-only
+      if (key === "iConnections") {
+        if (items.length) {
+          report.note(
+            `${groupPath}.iConnections`,
+            `ignored (${items.length}); relations pointing at this entity are set from the entity they start at`
+          );
+        }
+        continue;
+      }
+      items.forEach((item, itemIndex) => {
+        const path = `${groupPath}.${key}[${itemIndex}]`;
+        if (isPlainObject(item) && item.type !== undefined && item.type !== type) {
+          report.error(`${path}.type`, `must be "${type}" or left out inside the ${type} group`);
+          return;
+        }
+        out.push({ path, raw: isPlainObject(item) ? { ...item, type } : item });
+      });
+    }
+  }
+  return out;
+};
+
 const normalizeEntity = (
   raw: Record<string, unknown>,
   index: number,
@@ -490,11 +573,14 @@ const normalizeEntity = (
     note: (path, message) => notes.push({ entityIndex: index, label, path, message }),
   };
 
+  const detailViewKeys: string[] = [];
   for (const [key, value] of Object.entries(raw)) {
     if (ENTITY_KEYS.includes(key)) {
       continue;
     } else if (SERVER_MANAGED_KEYS.includes(key)) {
       report.note(key, "ignored, set by the server");
+    } else if (DETAIL_VIEW_KEYS.includes(key)) {
+      detailViewKeys.push(key);
     } else if (key in TEMPLATE_KEYS) {
       if (isEmptyValue(value)) {
         report.note(key, "ignored, it is empty");
@@ -505,6 +591,12 @@ const normalizeEntity = (
       const hint = KEY_HINTS[key] ? `; did you mean "${KEY_HINTS[key]}"?` : "";
       report.error(key, `unknown field${hint}`);
     }
+  }
+  if (detailViewKeys.length) {
+    report.note(
+      detailViewKeys.join(", "),
+      "ignored, shown by the Detail view but not part of the entity"
+    );
   }
 
   let id = uuidv4();
@@ -588,14 +680,7 @@ const normalizeEntity = (
       ? normalizeData(entityClass, raw.data, report)
       : {};
 
-  let rawRelations: unknown[] = [];
-  if (raw.relations !== undefined) {
-    if (Array.isArray(raw.relations)) {
-      rawRelations = raw.relations;
-    } else {
-      report.error("relations", "must be a list");
-    }
-  }
+  const rawRelations = readRawRelations(raw.relations, report);
 
   const entity: IEntity = {
     id,

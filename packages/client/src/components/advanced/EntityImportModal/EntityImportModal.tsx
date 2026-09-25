@@ -43,7 +43,9 @@ const INPUT_PLACEHOLDER = `[
     "class": "C",
     "labels": ["dog"],
     "detail": "domestic canine",
-    "relations": [{ "type": "SCL", "entityIds": ["<this entity's id>", "<superclass id>"] }]
+    "relations": {
+      "SCL": { "connections": [{ "entityIds": ["<this entity's id>", "<superclass id>"] }] }
+    }
   }
 ]`;
 

@@ -17,19 +17,26 @@ export interface ImportIssue {
   message: string;
 }
 
+/** A relation as written in the input, with where it was written. */
+export interface RawRelation {
+  // "relations[0]" or, grouped as in Detail, "relations.SCL.connections[0]"
+  path: string;
+  raw: unknown;
+}
+
 /** An entity of the input, filled with defaults and ready to be created. */
 export interface ImportEntity {
   // 1-based position in the input
   index: number;
   entity: IEntity;
-  // the "relations" list as written, checked by the relation validators
-  rawRelations: unknown[];
+  // checked by the relation validators
+  rawRelations: RawRelation[];
 }
 
 /** A relation of the input that passed the shape checks. */
 export interface ImportRelationItem {
   ownerIndex: number;
-  // "relations[0]" inside the owning entity
+  // where the relation was written inside the owning entity
   path: string;
   relation: Relation.IRelation;
 }

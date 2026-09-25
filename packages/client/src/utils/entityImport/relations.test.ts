@@ -147,7 +147,7 @@ describe("validateRelations", () => {
     expect(errors[4].message).toContain("Synonym links Action only, Concept only");
   });
 
-  it("requires a non-tree relation to include its entity and drops tree edges between existing entities", async () => {
+  it("requires a non-tree relation to include its entity and drops relations starting at an existing entity", async () => {
     const { pairs, errors, notes } = await run(
       [
         concept("dog", [
@@ -161,7 +161,26 @@ describe("validateRelations", () => {
     expect(pairs).toEqual([]);
     expect(errors.map((error) => error.message)).toEqual(["must include the id of this entity"]);
     expect(notes.map((note) => note.message)).toEqual([
-      'Superclass "mammal" → "animal": ignored, it links two existing entities',
+      'Superclass "mammal" → "animal": ignored, "mammal" is an existing entity; add it in its Detail',
+    ]);
+  });
+
+  it("never gives an existing entity a new directional relation", async () => {
+    const { pairs, notes } = await run(
+      [
+        concept("mammal", [
+          relation(Superclass, "dog", "mammal"),
+          relation(Superclass, "cat", "mammal"),
+        ]),
+        concept("cat"),
+      ],
+      database([existingEntity("dog")])
+    );
+
+    // a new source is fine wherever the relation is written
+    expect(pairs).toEqual(["SCL cat>mammal"]);
+    expect(notes.map((note) => note.message)).toEqual([
+      'Superclass "dog" → "mammal": ignored, "dog" is an existing entity; add it in its Detail',
     ]);
   });
 
@@ -255,20 +274,14 @@ describe("validateRelations", () => {
     ]);
   });
 
-  it("reports a loop running through database edges", async () => {
-    const { errors } = await run(
+  it("cannot close a loop through database edges, the edge back into the input is ignored", async () => {
+    const { errors, pairs } = await run(
       [concept("x", [relation(Superclass, "x", "a"), relation(Superclass, "b", "x")])],
       database([existingEntity("a"), existingEntity("b")], [dbRelation(Superclass, "a", "b")])
     );
 
-    expect(errors.map((error) => error.message)).toEqual([
-      [
-        "Superclass loop:",
-        '  "x" → "a"   (JSON, entity 1)',
-        '  "a" → "b"   (database)',
-        '  "b" → "x"   (JSON, entity 1)',
-      ].join("\n"),
-    ]);
+    expect(errors).toEqual([]);
+    expect(pairs).toEqual(["SCL x>a"]);
   });
 
   it("allows one relation per entity where the type says so", async () => {
