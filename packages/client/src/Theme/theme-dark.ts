@@ -69,6 +69,7 @@ const darkTheme = {
     tagSelectedBackground: "#2e3f7a", // tableSelection - tableOpened is too close to the page
     tagSelectedColor: "#EBF0FA",
     tagItalic: "#D1DAEF",
+    cloudBackground: "#1E2330",
 
     treeNodeRead: "#718096",
     treeNodeWrite: "#f7fafc",

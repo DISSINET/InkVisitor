@@ -6,8 +6,10 @@ interface CancelButton {
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-// the one place the "back out without committing" look is defined: a ghost
-// button, so the committing action is the only one carrying weight in a footer
+/**
+ * The back-out action in a modal footer: a ghost button, so the committing
+ * action is the only one carrying weight. Label defaults to "Cancel".
+ */
 export const CancelButton: React.FC<CancelButton> = ({ label = "Cancel", onClick }) => {
   return (
     <Button

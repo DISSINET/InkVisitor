@@ -72,6 +72,9 @@ const theme = {
     tagSelectedBackground: "#d8ddf5", // tableOpened
     tagSelectedColor: "#091034",
     tagItalic: "#4a5568",
+    // a relation cloud holds the opened entity's selected tag, so its fill
+    // stays lighter than tagSelectedBackground
+    cloudBackground: "#eef1fb",
 
     /* query explorer colors */
     query1: "#E6F0FF",

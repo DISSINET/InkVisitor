@@ -153,7 +153,6 @@ export const StyledCardBody = styled.section<StyledCardBody>`
     `}
 `;
 interface StyledFooter {
-  $column?: boolean;
   $spaceBetween?: boolean;
 }
 export const StyledFooter = styled.div<StyledFooter>`
@@ -165,7 +164,6 @@ export const StyledFooter = styled.div<StyledFooter>`
   display: flex;
   flex-shrink: 0;
   justify-content: ${({ $spaceBetween }) => ($spaceBetween ? "space-between" : "flex-end")};
-  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${space5};
   --button-group-gap: 0.75rem;
 `;
