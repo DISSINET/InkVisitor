@@ -15,6 +15,7 @@ import { UserMultiDropdown } from "./Dropdowns/UserMultiDropdown";
 import { UserSingleDropdown } from "./Dropdowns/UserSingleDropdown";
 import { EmptyEntityTag } from "./EntityTag/EmptyEntityTag";
 import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
+import { EntityImportModal } from "./EntityImportModal/EntityImportModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
@@ -70,6 +71,7 @@ export {
   ElvlButtonGroup,
   EmptyEntityTag,
   EntityCreateModal,
+  EntityImportModal,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
