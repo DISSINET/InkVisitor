@@ -28,22 +28,28 @@ export const Colors = () => (
 // A labelled button keeps one text size across the scale and grows through
 // padding; the icon glyph is sized in em, so icon-only buttons are where the
 // size axis is actually visible.
+// ButtonGroup stretches its children to one height, which would hide the
+// size axis; the sweeps line buttons up on a plain centered row instead.
+const SizeRow: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>{children}</div>
+);
+
 export const Sizes = () => (
-  <ButtonGroup>
+  <SizeRow>
     <Button size="S" label="Small" color="primary" onClick={() => {}} />
     <Button size="M" label="Medium" color="primary" onClick={() => {}} />
     <Button size="L" label="Large" color="primary" onClick={() => {}} />
     <Button size="XL" label="Extra large" color="primary" onClick={() => {}} />
-  </ButtonGroup>
+  </SizeRow>
 );
 
 export const IconSizes = () => (
-  <ButtonGroup>
+  <SizeRow>
     <Button size="S" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
     <Button size="M" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
     <Button size="L" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
     <Button size="XL" shape="square" icon={<IcoSearch />} color="primary" onClick={() => {}} />
-  </ButtonGroup>
+  </SizeRow>
 );
 
 export const WithIcons = () => (

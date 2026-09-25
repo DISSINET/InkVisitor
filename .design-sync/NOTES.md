@@ -75,6 +75,9 @@ because they import `ts-morph` by bare name. Recreate it per clone:
   padding) or icon buttons with `shape="square"` (size sets a fixed box:
   2 / 2.25 / 3 / 3.9rem). A bare icon-only button without a square shape is
   not how the app shows sizes.
+- `ButtonGroup` stretches its children to one height (flex default), so a
+  size sweep inside it shows every button at the largest height. Sweeps use a
+  plain `alignItems: "center"` row.
 - Realistic content follows the DISSINET domain: historical entities,
   territories, statements (Council of Trent, Charles V, 1545–1563).
 - A modal footer's back-out action is `<CancelButton />`, as in every app
