@@ -4,7 +4,6 @@ import {
   Button,
   ButtonGroup,
   CancelButton,
-  Input,
   Modal,
   ModalContent,
   ModalFooter,
@@ -26,10 +25,10 @@ import {
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
 import { EntityImportIssueList } from "./EntityImportIssueList";
+import { EntityImportJsonEditor } from "./EntityImportJsonEditor";
 import {
   StyledHiddenFileInput,
   StyledHint,
-  StyledJsonInput,
   StyledProgress,
   StyledResult,
   StyledResultFailure,
@@ -38,9 +37,6 @@ import {
 import { EntityImportPreview } from "./EntityImportPreview/EntityImportPreview";
 
 type Step = "input" | "preview" | "writing" | "result";
-
-// room for the placeholder example; longer input grows the field
-const MIN_INPUT_ROWS = 10;
 
 const INPUT_PLACEHOLDER = `[
   {
@@ -167,19 +163,11 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             <StyledHint>
               {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. "Copy as import JSON" in the JSON section of Detail gives an example.`}
             </StyledHint>
-            <StyledJsonInput>
-              <Input
-                type="textarea"
-                value={text}
-                onChangeFn={(newText) => {
-                  setText(newText);
-                }}
-                changeOnType
-                width="full"
-                rows={Math.max(MIN_INPUT_ROWS, text.split("\n").length + 1)}
-                placeholder={INPUT_PLACEHOLDER}
-              />
-            </StyledJsonInput>
+            <EntityImportJsonEditor
+              value={text}
+              onChange={setText}
+              placeholder={INPUT_PLACEHOLDER}
+            />
             <StyledHiddenFileInput
               ref={fileInputRef}
               type="file"
