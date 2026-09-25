@@ -10,20 +10,27 @@ import {
   ModalHeader,
 } from "components";
 import { useUserQuery } from "hooks/react-query";
-import React, { useEffect, useRef, useState } from "react";
+import update from "immutability-helper";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoFileText } from "Theme/icons";
 import {
+  draftFromPlan,
+  draftToImportJson,
   errorMessage,
-  ImportValidation,
+  ImportDraft,
+  ImportIssue,
   ImportWriteOutcome,
   importDataSource,
   importWriteApi,
   MAX_IMPORT_ENTITIES,
+  missingEntityIds,
+  removeDraftEntity,
   validateImport,
   writeImport,
 } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
+import { EntityImportDrafts } from "./EntityImportDrafts";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import { EntityImportJsonEditor } from "./EntityImportJsonEditor";
 import {
@@ -34,9 +41,8 @@ import {
   StyledResultFailure,
   StyledStep,
 } from "./EntityImportModalStyles";
-import { EntityImportPreview } from "./EntityImportPreview/EntityImportPreview";
 
-type Step = "input" | "preview" | "writing" | "result";
+type Step = "input" | "drafts" | "writing" | "result";
 
 const INPUT_PLACEHOLDER = `[
   {
@@ -46,6 +52,8 @@ const INPUT_PLACEHOLDER = `[
     "relations": [{ "type": "SCL", "entityIds": ["<this entity's id>", "<superclass id>"] }]
   }
 ]`;
+
+const entityCount = (count: number) => `${count} ${count === 1 ? "entity" : "entities"}`;
 
 interface EntityImportModal {
   closeModal: () => void;
@@ -63,7 +71,12 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   const [step, setStep] = useState<Step>("input");
   const [text, setText] = useState("");
   const [isValidating, setIsValidating] = useState(false);
-  const [validation, setValidation] = useState<ImportValidation | null>(null);
+  const [inputErrors, setInputErrors] = useState<ImportIssue[]>([]);
+
+  const [draft, setDraft] = useState<ImportDraft | null>(null);
+  const [draftErrors, setDraftErrors] = useState<ImportIssue[]>([]);
+  const [draftNotes, setDraftNotes] = useState<ImportIssue[]>([]);
+
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [outcome, setOutcome] = useState<ImportWriteOutcome | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,13 +84,46 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   // a write in progress must finish or roll back before the modal can close
   const isWriting = step === "writing";
 
+  const validationContext = () => ({
+    role: getStoredUserRole() as UserEnums.Role,
+    defaultLanguage: user!.options.defaultLanguage,
+    source: importDataSource,
+  });
+
+  // entities an edit links to are loaded, so Detail can show them as tags
+  const requestedIds = useRef(new Set<string>());
+  useEffect(() => {
+    if (!draft) {
+      return;
+    }
+    const ids = missingEntityIds(draft).filter((id) => !requestedIds.current.has(id));
+    if (!ids.length) {
+      return;
+    }
+    ids.forEach((id) => requestedIds.current.add(id));
+    importDataSource
+      .getEntities(ids)
+      .then((found) =>
+        setDraft((current) =>
+          current && {
+            ...current,
+            existing: {
+              ...current.existing,
+              ...Object.fromEntries(found.map((entity) => [entity.id, entity])),
+            },
+          }
+        )
+      )
+      .catch(() => ids.forEach((id) => requestedIds.current.delete(id)));
+  }, [draft]);
+
   const handleFileLoad = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     // cleared so loading the same file again fires a change
     event.target.value = "";
     if (file) {
       setText(await file.text());
-      setValidation(null);
+      setInputErrors([]);
     }
   };
 
@@ -87,31 +133,91 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
     setIsValidating(true);
     try {
-      const result = await validateImport(text, {
-        role: getStoredUserRole() as UserEnums.Role,
-        defaultLanguage: user.options.defaultLanguage,
-        source: importDataSource,
-      });
-      setValidation(result);
+      const result = await validateImport(text, validationContext());
+      setInputErrors(result.errors);
       if (result.plan) {
-        setStep("preview");
+        setDraft(draftFromPlan(result.plan));
+        setDraftNotes(result.notes);
+        setDraftErrors([]);
+        setStep("drafts");
       }
     } catch (error) {
-      setValidation({
-        errors: [{ message: `Validation could not finish: ${errorMessage(error)}` }],
-        notes: [],
-        plan: null,
-      });
+      setInputErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
     } finally {
       setIsValidating(false);
     }
   };
 
+  const handleDraftChange = useCallback(
+    (change: (current: ImportDraft) => ImportDraft) =>
+      setDraft((current) => current && change(current)),
+    []
+  );
+
+  const handleCloseTab = (entityId: string) => {
+    if (!draft) {
+      return;
+    }
+    const entity = draft.entities.find((candidate) => candidate.id === entityId);
+    const { draft: rest, removedRelations } = removeDraftEntity(draft, entityId);
+    setDraft(rest);
+    setDraftNotes((notes) => [
+      ...notes,
+      {
+        label: entity?.labels[0],
+        message: `left out of the import${
+          removedRelations.length
+            ? `, with ${removedRelations.length} ${
+                removedRelations.length === 1 ? "relation" : "relations"
+              }`
+            : ""
+        }`,
+      },
+    ]);
+  };
+
+  const handleMoveTab = useCallback(
+    (dragIndex: number, hoverIndex: number) =>
+      setDraft(
+        (current) =>
+          current && {
+            ...current,
+            entities: update(current.entities, {
+              $splice: [
+                [dragIndex, 1],
+                [hoverIndex, 0, current.entities[dragIndex]],
+              ],
+            }),
+          }
+      ),
+    []
+  );
+
   const handleCreate = async () => {
-    const plan = validation?.plan;
+    if (!draft || !user) {
+      return;
+    }
+
+    // the edited drafts go through the same checks as pasted JSON; an edit or
+    // a closed tab can leave something the import cannot create
+    setIsValidating(true);
+    let plan;
+    try {
+      const result = await validateImport(
+        JSON.stringify(draftToImportJson(draft)),
+        validationContext()
+      );
+      setDraftErrors(result.errors);
+      plan = result.plan;
+    } catch (error) {
+      setDraftErrors([{ message: `Validation could not finish: ${errorMessage(error)}` }]);
+    } finally {
+      setIsValidating(false);
+    }
     if (!plan) {
       return;
     }
+
     setStep("writing");
     setProgress({ done: 0, total: plan.entities.length + plan.relations.length });
 
@@ -131,40 +237,41 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     if (result.status === "created") {
       onImported(plan.entities);
       toast.info(
-        `Imported ${plan.entities.length} ${plan.entities.length === 1 ? "entity" : "entities"}, ${
-          result.relationCount
-        } ${result.relationCount === 1 ? "relation" : "relations"}`
+        `Imported ${entityCount(plan.entities.length)}, ${result.relationCount} ${
+          result.relationCount === 1 ? "relation" : "relations"
+        }`
       );
       closeModal();
     } else if (result.status === "conflict") {
-      setValidation({ errors: result.errors, notes: [], plan: null });
-      setStep("input");
+      setDraftErrors(result.errors);
+      setStep("drafts");
     } else {
       setOutcome(result);
       setStep("result");
     }
   };
 
-  const plan = validation?.plan;
+  const draftCount = draft?.entities.length ?? 0;
 
   return (
     <Modal
       showModal={showModal}
-      width={900}
-      // the JSON field fills the height; the preview and the result keep the
-      // height of their content
-      fullHeight={step === "input"}
+      // wide enough for a relation line with two ids to fit unwrapped
+      width="fat"
+      // the JSON field and the Detail of the drafts fill the height; the
+      // result keeps the height of its content
+      fullHeight={step === "input" || step === "drafts"}
       onClose={isWriting ? undefined : closeModal}
       disableEscapeClose={isWriting}
       disableBgClick
       isLoading={isValidating}
     >
       <ModalHeader title="Import entities from JSON" />
-      <ModalContent column enableScroll>
+      <ModalContent column enableScroll={step !== "drafts"}>
         {step === "input" && (
           <StyledStep>
             <StyledHint>
-              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. The JSON section of Detail shows an entity in this format; a copy imports as a new entity once its id is replaced.`}
+              {`Paste up to ${MAX_IMPORT_ENTITIES} entities as a JSON object or array, or load a .json file. Detail's JSON section shows this format; give a copy a new id.`}
             </StyledHint>
             <EntityImportJsonEditor
               value={text}
@@ -177,18 +284,28 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               accept=".json,application/json"
               onChange={handleFileLoad}
             />
-            {validation && (
-              <EntityImportIssueList
-                title="Invalid input, nothing was created"
-                issues={validation.errors}
-                isError
-              />
-            )}
+            <EntityImportIssueList
+              title="Invalid input, nothing was created"
+              issues={inputErrors}
+              isError
+            />
           </StyledStep>
         )}
 
-        {step === "preview" && plan && validation && (
-          <EntityImportPreview plan={plan} notes={validation.notes} />
+        {step === "drafts" && draft && (
+          <>
+            {draftCount === 0 && (
+              <StyledHint>{"Every entity was left out; there is nothing to create."}</StyledHint>
+            )}
+            <EntityImportDrafts
+              draft={draft}
+              onDraftChange={handleDraftChange}
+              onCloseTab={handleCloseTab}
+              onMoveTab={handleMoveTab}
+              errors={draftErrors}
+              notes={draftNotes}
+            />
+          </>
         )}
 
         {step === "writing" && (
@@ -235,26 +352,25 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             </ButtonGroup>
           </>
         )}
-        {step === "preview" && plan && (
+        {step === "drafts" && (
           <ButtonGroup>
-            <CancelButton label="Back" onClick={() => setStep("input")} />
+            <CancelButton onClick={closeModal} />
             <Button
-              label={`Create ${plan.entities.length} ${
-                plan.entities.length === 1 ? "entity" : "entities"
-              }`}
+              label={`Create ${entityCount(draftCount)}`}
               color="info"
+              disabled={draftCount === 0 || isValidating}
               onClick={handleCreate}
             />
           </ButtonGroup>
         )}
         {step === "result" && (
           <ButtonGroup>
+            {/* the drafts are kept, so the import can be tried again */}
             <CancelButton
               label="Back"
               onClick={() => {
                 setOutcome(null);
-                setValidation(null);
-                setStep("input");
+                setStep("drafts");
               }}
             />
             <Button label="Close" color="info" onClick={closeModal} />

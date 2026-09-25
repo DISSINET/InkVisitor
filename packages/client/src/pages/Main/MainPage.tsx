@@ -5,12 +5,12 @@ import api from "api";
 import { Box, Button, ButtonGroup, IconButton, Panel } from "components";
 import {
   EntityCreateModal,
-  EntityImportModal,
   LayoutSeparatorHorizontal,
   LayoutSeparatorVertical,
 } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
+import { EntityImportModal } from "./containers/EntityImportModal/EntityImportModal";
 import { useTreeQuery, useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {

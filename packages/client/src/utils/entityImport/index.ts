@@ -6,3 +6,15 @@ export type { ImportIssue, ImportPlan, ImportValidation } from "./types";
 export { validateImport } from "./validateImport";
 export { writeImport } from "./writeImport";
 export type { ImportWriteOutcome } from "./writeImport";
+export {
+  buildDraftDetail,
+  createDraftRelation,
+  deleteDraftRelation,
+  draftFromPlan,
+  draftToImportJson,
+  missingEntityIds,
+  removeDraftEntity,
+  updateDraftEntity,
+  updateDraftRelation,
+} from "./draft";
+export type { ImportDraft } from "./draft";

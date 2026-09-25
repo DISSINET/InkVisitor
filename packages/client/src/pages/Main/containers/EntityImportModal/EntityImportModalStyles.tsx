@@ -25,7 +25,9 @@ export const StyledJsonEditor = styled.div`
   min-height: ${({ theme }) => theme.space[48]};
   overflow: auto;
   font-family: monospace;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  /* between the theme's xxs and xs: long id lines fit unwrapped and stay
+     easy to read, as the input placeholders' 1.1rem */
+  font-size: 1.1rem;
   line-height: 1.4;
   color: ${({ theme }) => theme.color["primary"]};
   background-color: ${({ theme }) => theme.color["white"]};
@@ -69,6 +71,35 @@ export const StyledJsonEditor = styled.div`
   .token.operator {
     color: ${({ theme }) => theme.color["xmlQuote"]};
   }
+`;
+
+// the draft tabs take the modal's height; Detail scrolls inside its own box
+export const StyledDrafts = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  width: 100%;
+  min-height: 0;
+`;
+
+// a long list of errors or notes scrolls on its own, so Detail keeps its room
+export const StyledDraftIssues = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[2]};
+  max-height: ${({ theme }) => theme.space[40]};
+  overflow: auto;
+`;
+
+export const StyledDraftDetail = styled.div`
+  position: relative;
+  flex: 1;
+  min-height: ${({ theme }) => theme.space[64]};
+  overflow: hidden;
+  background-color: ${({ theme }) => theme.color["white"]};
+  border: ${({ theme }) => theme.borderWidth[1]} solid ${({ theme }) => theme.color["gray"]["300"]};
 `;
 
 export const StyledHiddenFileInput = styled.input`

@@ -6,6 +6,7 @@ import {
   IProp,
   IReference,
   IResponseDetail,
+  IResponseGeneric,
   IResponseStatement,
   Relation,
 } from "@inkvisitor/shared/types";
@@ -13,6 +14,7 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
+import { AxiosResponse } from "axios";
 import {
   boxContentId,
   Button,
@@ -30,7 +32,7 @@ import {
   RelationAuditTable,
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useIsInViewport, useSearchParams, useWidthBreakpoint } from "hooks";
+import { useEntityDraft, useIsInViewport, useSearchParams, useWidthBreakpoint } from "hooks";
 import { DETAIL_TAB_ENTITIES_KEY, useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
@@ -88,6 +90,9 @@ const allowedEntityChangeClasses = [
   EntityEnums.Class.Location,
   EntityEnums.Class.Object,
 ];
+// what the api answers a write with, for the writes a draft settles locally
+const DRAFT_RESPONSE = { data: { result: true } } as AxiosResponse<IResponseGeneric>;
+
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
@@ -121,6 +126,9 @@ interface EntityDetail {
   isFetching: boolean;
 }
 export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, isFetching }) => {
+  // an entity of the JSON import, edited before it exists in the database
+  const draft = useEntityDraft();
+
   const {
     statementId,
     setStatementId,
@@ -237,8 +245,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   }, [entity]);
 
   const updateEntityMutation = useMutation({
-    mutationFn: async (changes: Partial<IEntity>) => await api.entityUpdate(detailId, changes),
+    mutationFn: async (changes: Partial<IEntity>) => {
+      if (draft) {
+        draft.updateEntity(detailId, changes);
+        return DRAFT_RESPONSE;
+      }
+      return await api.entityUpdate(detailId, changes);
+    },
     onSuccess: (data, variables) => {
+      if (draft) {
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       queryClient.invalidateQueries({ queryKey: ["audit", detailId] });
       invalidateAllExplorerQueries(queryClient);
@@ -280,11 +297,19 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   });
 
   const changeEntityTypeMutation = useMutation({
-    mutationFn: async (newClass: EntityEnums.Class) =>
-      await api.entityUpdate(detailId, { class: newClass }),
+    mutationFn: async (newClass: EntityEnums.Class) => {
+      if (draft) {
+        draft.updateEntity(detailId, { class: newClass });
+        return DRAFT_RESPONSE;
+      }
+      return await api.entityUpdate(detailId, { class: newClass });
+    },
 
     onSuccess: (data, variables) => {
       setShowTypeSubmit(false);
+      if (draft) {
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       invalidateAllExplorerQueries(queryClient);
       queryClient.invalidateQueries({ queryKey: ["statement"] });
@@ -546,8 +571,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   };
 
   const relationCreateMutation = useMutation({
-    mutationFn: async (newRelation: Relation.IRelation) => await api.relationCreate(newRelation),
+    mutationFn: async (newRelation: Relation.IRelation) => {
+      if (draft) {
+        draft.createRelation(newRelation);
+        return DRAFT_RESPONSE;
+      }
+      return await api.relationCreate(newRelation);
+    },
     onSuccess: () => {
+      if (draft) {
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       // refresh the Relation audits section on every open detail - a relation
       // touches more than the current entity
@@ -560,17 +594,35 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (relationObject: {
       relationId: string;
       changes: Partial<Relation.IRelation>;
-    }) => await api.relationUpdate(relationObject.relationId, relationObject.changes),
+    }) => {
+      if (draft) {
+        draft.updateRelation(relationObject.relationId, relationObject.changes);
+        return DRAFT_RESPONSE;
+      }
+      return await api.relationUpdate(relationObject.relationId, relationObject.changes);
+    },
     onSuccess: () => {
+      if (draft) {
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       queryClient.invalidateQueries({ queryKey: ["audit"] });
       invalidateAllExplorerQueries(queryClient);
     },
   });
   const relationDeleteMutation = useMutation({
-    mutationFn: async (relationId: string) => await api.relationDelete(relationId),
+    mutationFn: async (relationId: string) => {
+      if (draft) {
+        draft.deleteRelation(relationId);
+        return DRAFT_RESPONSE;
+      }
+      return await api.relationDelete(relationId);
+    },
 
     onSuccess: () => {
+      if (draft) {
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       queryClient.invalidateQueries({ queryKey: ["audit"] });
       invalidateAllExplorerQueries(queryClient);
@@ -601,7 +653,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   const isSectionExpanded = (sectionId: EntityDetailSection) => !collapsedSections.has(sectionId);
 
-  const widthTooNarrow = useWidthBreakpoint(516, boxContentId("Detail"));
+  const widthTooNarrow = useWidthBreakpoint(
+    516,
+    draft ? draft.widthElementId : boxContentId("Detail"),
+  );
 
   const isRootTerritory = selectedDetailId === rootTerritoryId;
   const isOwner = (getStoredUserRole() as UserEnums.Role) === UserEnums.Role.Owner;
@@ -694,8 +749,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 </StyledDetailSection>
               )}
 
-              {/* Validation rules */}
-              {entity.class === EntityEnums.Class.Territory && (
+              {/* Validation rules - not imported, so not offered on a draft */}
+              {entity.class === EntityEnums.Class.Territory && !draft && (
                 <StyledDetailSection>
                   <EntityDetailValidationSection
                     isValidationExpanded={isSectionExpanded(EntityDetailSection.Validation)}
@@ -894,190 +949,195 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 )}
               </StyledDetailSection>
 
-              <StyledDetailSection id={usedInSectionId(entity.id)}>
-                <StyledDetailSectionHeader
-                  onClick={() => toggleSection(EntityDetailSection.UsedIn)}
-                >
-                  <EntityDetailExpandIcon
-                    isExpanded={isSectionExpanded(EntityDetailSection.UsedIn)}
-                  />
-                  <StyledDetailSectionHeading>Used in:</StyledDetailSectionHeading>
-                </StyledDetailSectionHeader>
-
-                {isSectionExpanded(EntityDetailSection.UsedIn) && (
-                  <StyledDetailSectionContent>
-                    {/* used as template */}
-                    {!!entity.isTemplate && entity.usedAsTemplate && (
-                      <>
-                        <StyledUsedAsHeading>
-                          <StyledUsedAsTitle>
-                            <b>{entity.usedAsTemplate.length}</b> As a template
-                          </StyledUsedAsTitle>
-                        </StyledUsedAsHeading>
-                        <StyledDetailSectionEntityList>
-                          {entity.usedAsTemplate.map((entityId) => (
-                            <React.Fragment key={entityId}>
-                              <div style={{ display: "inline-grid" }}>
-                                <EntityTag entity={entity.entities[entityId]} fullWidth />
-                              </div>
-                            </React.Fragment>
-                          ))}
-                        </StyledDetailSectionEntityList>
-                      </>
-                    )}
-
-                    {/* usedIn props */}
-                    {!entity.isTemplate && (
-                      <EntityDetailMetaPropsTable
-                        title={{
-                          singular: "Metaproperty",
-                          plural: "Metaproperties",
-                        }}
-                        entities={entity.entities}
-                        useCases={entity.usedInMetaProps}
-                        key="MetaProp"
-                        perPage={10}
-                        equalColumnsSize
+              {/* usages and audits exist only for a stored entity */}
+              {!draft && (
+                <>
+                  <StyledDetailSection id={usedInSectionId(entity.id)}>
+                    <StyledDetailSectionHeader
+                      onClick={() => toggleSection(EntityDetailSection.UsedIn)}
+                    >
+                      <EntityDetailExpandIcon
+                        isExpanded={isSectionExpanded(EntityDetailSection.UsedIn)}
                       />
-                    )}
+                      <StyledDetailSectionHeading>Used in:</StyledDetailSectionHeading>
+                    </StyledDetailSectionHeader>
 
-                    {/* usedIn statements */}
-                    {!entity.isTemplate && (
-                      <EntityDetailStatementsTable
-                        title={{ singular: "Statement", plural: "Statements" }}
-                        entities={entity.entities}
-                        useCases={entity.usedInStatements}
-                        key="Statement"
-                        perPage={10}
+                    {isSectionExpanded(EntityDetailSection.UsedIn) && (
+                      <StyledDetailSectionContent>
+                        {/* used as template */}
+                        {!!entity.isTemplate && entity.usedAsTemplate && (
+                          <>
+                            <StyledUsedAsHeading>
+                              <StyledUsedAsTitle>
+                                <b>{entity.usedAsTemplate.length}</b> As a template
+                              </StyledUsedAsTitle>
+                            </StyledUsedAsHeading>
+                            <StyledDetailSectionEntityList>
+                              {entity.usedAsTemplate.map((entityId) => (
+                                <React.Fragment key={entityId}>
+                                  <div style={{ display: "inline-grid" }}>
+                                    <EntityTag entity={entity.entities[entityId]} fullWidth />
+                                  </div>
+                                </React.Fragment>
+                              ))}
+                            </StyledDetailSectionEntityList>
+                          </>
+                        )}
+
+                        {/* usedIn props */}
+                        {!entity.isTemplate && (
+                          <EntityDetailMetaPropsTable
+                            title={{
+                              singular: "Metaproperty",
+                              plural: "Metaproperties",
+                            }}
+                            entities={entity.entities}
+                            useCases={entity.usedInMetaProps}
+                            key="MetaProp"
+                            perPage={10}
+                            equalColumnsSize
+                          />
+                        )}
+
+                        {/* usedIn statements */}
+                        {!entity.isTemplate && (
+                          <EntityDetailStatementsTable
+                            title={{ singular: "Statement", plural: "Statements" }}
+                            entities={entity.entities}
+                            useCases={entity.usedInStatements}
+                            key="Statement"
+                            perPage={10}
+                          />
+                        )}
+
+                        {/* usedIn statement props */}
+                        {!entity.isTemplate && (
+                          <EntityDetailStatementPropsTable
+                            title={{
+                              singular: "In-statement Property",
+                              plural: "In-statement Properties",
+                            }}
+                            entities={entity.entities}
+                            useCases={entity.usedInStatementProps}
+                            key="StatementProp"
+                            perPage={10}
+                          />
+                        )}
+
+                        {/* usedIn statement identification */}
+                        {!entity.isTemplate && (
+                          <EntityDetailIdentificationTable
+                            title={{
+                              singular: "In-statement Identification",
+                              plural: "In-statement Identifications",
+                            }}
+                            entities={entity.entities}
+                            useCases={entity.usedInStatementIdentifications}
+                            key="StatementIdentification"
+                            perPage={10}
+                          />
+                        )}
+
+                        {/* usedIn statement classification */}
+                        {!entity.isTemplate && (
+                          <EntityDetailClassificationTable
+                            title={{
+                              singular: "In-statement Classification",
+                              plural: "In-statement Classifications",
+                            }}
+                            entities={entity.entities}
+                            useCases={entity.usedInStatementClassifications}
+                            key="StatementClassification"
+                            perPage={10}
+                          />
+                        )}
+
+                        {/* usedIn references - only an R can be a reference resource */}
+                        {!entity.isTemplate && entity.class === EntityEnums.Class.Resource && (
+                          <EntityDetailReferencesTable
+                            title={{
+                              singular: "Reference",
+                              plural: "References",
+                            }}
+                            entities={entity.entities}
+                            useCases={entity.usedInReferences}
+                            key="Reference"
+                            perPage={10}
+                          />
+                        )}
+
+                        {/* usedIn reference parts - only a V can be a reference value */}
+                        {!entity.isTemplate && entity.class === EntityEnums.Class.Value && (
+                          <EntityDetailReferencesTable
+                            title={{
+                              singular: "Reference part",
+                              plural: "Reference parts",
+                            }}
+                            entities={entity.entities}
+                            useCases={entity.usedInReferenceParts}
+                            key="ReferencePart"
+                            perPage={10}
+                          />
+                        )}
+
+                        {!entity.isTemplate && (
+                          <EntityDetailUsedInDocumentsTable
+                            title={{
+                              singular: "Anchor",
+                              plural: "Anchors",
+                            }}
+                            perPage={10}
+                            entity={entity}
+                            widthTooNarrow={widthTooNarrow}
+                          />
+                        )}
+                      </StyledDetailSectionContent>
+                    )}
+                  </StyledDetailSection>
+
+                  {/* Audits */}
+                  <StyledDetailSection key="editor-section-audits">
+                    <StyledDetailSectionHeader
+                      onClick={() => toggleSection(EntityDetailSection.Audits)}
+                    >
+                      <EntityDetailExpandIcon
+                        isExpanded={isSectionExpanded(EntityDetailSection.Audits)}
                       />
+                      <StyledDetailSectionHeading>Audits</StyledDetailSectionHeading>
+                    </StyledDetailSectionHeader>
+                    {isSectionExpanded(EntityDetailSection.Audits) && (
+                      <StyledDetailSectionContent ref={auditSectionRef}>
+                        {audit && <AuditTable {...audit} />}
+                      </StyledDetailSectionContent>
                     )}
+                  </StyledDetailSection>
 
-                    {/* usedIn statement props */}
-                    {!entity.isTemplate && (
-                      <EntityDetailStatementPropsTable
-                        title={{
-                          singular: "In-statement Property",
-                          plural: "In-statement Properties",
-                        }}
-                        entities={entity.entities}
-                        useCases={entity.usedInStatementProps}
-                        key="StatementProp"
-                        perPage={10}
+                  {/* Relation audits */}
+                  <StyledDetailSection key="editor-section-relation-audits">
+                    <StyledDetailSectionHeader
+                      onClick={() => toggleSection(EntityDetailSection.RelationAudits)}
+                    >
+                      <EntityDetailExpandIcon
+                        isExpanded={isSectionExpanded(EntityDetailSection.RelationAudits)}
                       />
+                      <StyledDetailSectionHeading>Relation audits</StyledDetailSectionHeading>
+                    </StyledDetailSectionHeader>
+                    {isSectionExpanded(EntityDetailSection.RelationAudits) && (
+                      <StyledDetailSectionContent>
+                        {audit && (
+                          <RelationAuditTable
+                            relations={audit.relations}
+                            detailEntityId={detailId}
+                            entities={entity.entities}
+                            hasMore={audit.relations.length >= relationsLimit}
+                            onLoadMore={() => setRelationsLimit((limit) => limit + 10)}
+                          />
+                        )}
+                      </StyledDetailSectionContent>
                     )}
-
-                    {/* usedIn statement identification */}
-                    {!entity.isTemplate && (
-                      <EntityDetailIdentificationTable
-                        title={{
-                          singular: "In-statement Identification",
-                          plural: "In-statement Identifications",
-                        }}
-                        entities={entity.entities}
-                        useCases={entity.usedInStatementIdentifications}
-                        key="StatementIdentification"
-                        perPage={10}
-                      />
-                    )}
-
-                    {/* usedIn statement classification */}
-                    {!entity.isTemplate && (
-                      <EntityDetailClassificationTable
-                        title={{
-                          singular: "In-statement Classification",
-                          plural: "In-statement Classifications",
-                        }}
-                        entities={entity.entities}
-                        useCases={entity.usedInStatementClassifications}
-                        key="StatementClassification"
-                        perPage={10}
-                      />
-                    )}
-
-                    {/* usedIn references - only an R can be a reference resource */}
-                    {!entity.isTemplate && entity.class === EntityEnums.Class.Resource && (
-                      <EntityDetailReferencesTable
-                        title={{
-                          singular: "Reference",
-                          plural: "References",
-                        }}
-                        entities={entity.entities}
-                        useCases={entity.usedInReferences}
-                        key="Reference"
-                        perPage={10}
-                      />
-                    )}
-
-                    {/* usedIn reference parts - only a V can be a reference value */}
-                    {!entity.isTemplate && entity.class === EntityEnums.Class.Value && (
-                      <EntityDetailReferencesTable
-                        title={{
-                          singular: "Reference part",
-                          plural: "Reference parts",
-                        }}
-                        entities={entity.entities}
-                        useCases={entity.usedInReferenceParts}
-                        key="ReferencePart"
-                        perPage={10}
-                      />
-                    )}
-
-                    {!entity.isTemplate && (
-                      <EntityDetailUsedInDocumentsTable
-                        title={{
-                          singular: "Anchor",
-                          plural: "Anchors",
-                        }}
-                        perPage={10}
-                        entity={entity}
-                        widthTooNarrow={widthTooNarrow}
-                      />
-                    )}
-                  </StyledDetailSectionContent>
-                )}
-              </StyledDetailSection>
-
-              {/* Audits */}
-              <StyledDetailSection key="editor-section-audits">
-                <StyledDetailSectionHeader
-                  onClick={() => toggleSection(EntityDetailSection.Audits)}
-                >
-                  <EntityDetailExpandIcon
-                    isExpanded={isSectionExpanded(EntityDetailSection.Audits)}
-                  />
-                  <StyledDetailSectionHeading>Audits</StyledDetailSectionHeading>
-                </StyledDetailSectionHeader>
-                {isSectionExpanded(EntityDetailSection.Audits) && (
-                  <StyledDetailSectionContent ref={auditSectionRef}>
-                    {audit && <AuditTable {...audit} />}
-                  </StyledDetailSectionContent>
-                )}
-              </StyledDetailSection>
-
-              {/* Relation audits */}
-              <StyledDetailSection key="editor-section-relation-audits">
-                <StyledDetailSectionHeader
-                  onClick={() => toggleSection(EntityDetailSection.RelationAudits)}
-                >
-                  <EntityDetailExpandIcon
-                    isExpanded={isSectionExpanded(EntityDetailSection.RelationAudits)}
-                  />
-                  <StyledDetailSectionHeading>Relation audits</StyledDetailSectionHeading>
-                </StyledDetailSectionHeader>
-                {isSectionExpanded(EntityDetailSection.RelationAudits) && (
-                  <StyledDetailSectionContent>
-                    {audit && (
-                      <RelationAuditTable
-                        relations={audit.relations}
-                        detailEntityId={detailId}
-                        entities={entity.entities}
-                        hasMore={audit.relations.length >= relationsLimit}
-                        onLoadMore={() => setRelationsLimit((limit) => limit + 10)}
-                      />
-                    )}
-                  </StyledDetailSectionContent>
-                )}
-              </StyledDetailSection>
+                  </StyledDetailSection>
+                </>
+              )}
 
               {/* JSON */}
               <StyledDetailSection key="editor-section-json">
