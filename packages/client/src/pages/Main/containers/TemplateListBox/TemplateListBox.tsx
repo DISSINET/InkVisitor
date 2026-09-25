@@ -50,6 +50,10 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       return [];
     }
     return allTemplatesData.filter((template: IEntity) => {
+      // discouraged templates stay reachable through search and Explorer only
+      if (template.status === EntityEnums.Status.Discouraged) {
+        return false;
+      }
       if (filterByClass !== allEntityOption.value && template.class !== filterByClass) {
         return false;
       }
