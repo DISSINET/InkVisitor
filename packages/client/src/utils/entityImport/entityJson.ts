@@ -81,6 +81,7 @@ export const buildEntityJson = (
   relations: Relation.IUsedRelations | undefined
 ): EntityJson => ({
   id: entity.id,
+  ...(entity.legacyId ? { legacyId: entity.legacyId } : {}),
   class: entity.class,
   labels: entity.labels,
   detail: entity.detail,

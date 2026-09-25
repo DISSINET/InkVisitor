@@ -74,7 +74,7 @@ describe("buildEntityJson", () => {
 
     expect(json.id).toBe("dog");
     expect(json).not.toHaveProperty("createdAt");
-    expect(json).not.toHaveProperty("legacyId");
+    expect(json.legacyId).toBe("legacy");
     expect(json).not.toHaveProperty("isTemplate");
     expect(json.relations).toEqual([
       { type: RelationEnums.Type.Superclass, entityIds: ["dog", "animal"] },

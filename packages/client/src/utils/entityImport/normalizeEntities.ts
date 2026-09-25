@@ -29,6 +29,8 @@ const ENTITY_KEYS = [
   "props",
   "references",
   "relations",
+  // the id of the entity in the project's original data, editable in Explorer
+  "legacyId",
 ];
 const SERVER_MANAGED_KEYS = ["createdAt", "updatedAt"];
 // What the entity detail response carries on top of the entity itself (as a
@@ -58,7 +60,6 @@ const TEMPLATE_KEYS: Record<string, string> = {
   isTemplate: "templates can't be imported",
   usedTemplate: "entities created from a template can't be imported",
   templateData: "entities created from a template can't be imported",
-  legacyId: "legacy ids can't be imported, remove the field",
 };
 const KEY_HINTS: Record<string, string> = {
   label: "labels",
@@ -608,6 +609,15 @@ const normalizeEntity = (
     }
   }
 
+  let legacyId: string | undefined;
+  if (raw.legacyId !== undefined && raw.legacyId !== null && raw.legacyId !== "") {
+    if (typeof raw.legacyId === "string") {
+      legacyId = raw.legacyId;
+    } else {
+      report.error("legacyId", "must be a text");
+    }
+  }
+
   let entityNotes: string[] = [];
   if (raw.notes !== undefined) {
     if (isStringList(raw.notes)) {
@@ -643,6 +653,7 @@ const normalizeEntity = (
     references,
     data,
     isTemplate: false,
+    ...(legacyId ? { legacyId } : {}),
   };
 
   return { index, entity, rawRelations };

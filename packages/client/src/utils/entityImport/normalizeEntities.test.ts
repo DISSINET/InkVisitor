@@ -85,9 +85,8 @@ describe("normalizeEntities", () => {
       labels: ["dog"],
       isTemplate: true,
       usedTemplate: "tpl",
-      legacyId: "old-1",
     });
-    expect(paths(rejected.errors)).toEqual(["isTemplate", "usedTemplate", "legacyId"]);
+    expect(paths(rejected.errors)).toEqual(["isTemplate", "usedTemplate"]);
 
     const ignored = normalizeOne({
       class: "C",
@@ -102,6 +101,18 @@ describe("normalizeEntities", () => {
     // database rows also store "not a template" as 0 or ""
     expect(normalizeOne({ class: "C", labels: ["dog"], isTemplate: 0 }).errors).toEqual([]);
     expect(normalizeOne({ class: "C", labels: ["dog"], isTemplate: "" }).errors).toEqual([]);
+  });
+
+  it("keeps a legacy id, the id of the entity in the original data", () => {
+    expect(normalizeOne({ class: "C", labels: ["dog"], legacyId: "old-1" }).entity.legacyId).toBe(
+      "old-1"
+    );
+    expect(normalizeOne({ class: "C", labels: ["dog"], legacyId: "" }).entity).not.toHaveProperty(
+      "legacyId"
+    );
+    expect(paths(normalizeOne({ class: "C", labels: ["dog"], legacyId: 7 }).errors)).toEqual([
+      "legacyId",
+    ]);
   });
 
   it("rejects statements and unknown classes", () => {
