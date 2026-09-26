@@ -28,6 +28,9 @@ const ROUTES: Array<{ controller: string; method: string; route: string }> = [
   { controller: "entities", method: "DELETE", route: ":entityId?" },
   { controller: "entities", method: "POST", route: ":entityId/restore" },
   { controller: "entities", method: "POST", route: ":entityId/clone" },
+  // the relations of one entity, read by the Explorer relation column and by
+  // the JSON import's checks; never seeded, so it answers only to Admin/Owner
+  { controller: "entities", method: "GET", route: ":entityId/relations" },
   // seeded permissively in the datasets from the start, but a database built
   // before that carries the auto-created roles:[] row and refuses drag-move
   { controller: "statements", method: "PUT", route: "batch-move" },
