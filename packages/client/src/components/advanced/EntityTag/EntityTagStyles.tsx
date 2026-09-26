@@ -2,6 +2,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { FaStar } from "react-icons/fa";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
+import { IcoFileText } from "Theme/icons";
 
 interface StyledEntityTagWrap {}
 export const StyledEntityTagWrap = styled.div<StyledEntityTagWrap>`
@@ -93,15 +94,19 @@ export const StyledExpansionBadge = styled.div<StyledExpansionBadge>`
 interface StyledLabelWrap {
   $invertedLabel: boolean;
   $isFavorited?: boolean;
+  $hasDocument?: boolean;
   $tagBorderColorKey: EntityEnums.Status;
   $labelOnly?: boolean;
 }
 export const StyledLabelWrap = styled.div<StyledLabelWrap>`
   display: inline-grid;
-  /* the star keeps its intrinsic width and the label takes the rest; the 0 floor
-     lets the label shrink below its content so the ellipsis can appear */
-  grid-template-columns: ${({ $isFavorited }) =>
-    $isFavorited ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)"};
+  /* the star and the document icon keep their intrinsic width and the label
+     takes the rest; the 0 floor lets the label shrink below its content so the
+     ellipsis can appear */
+  grid-template-columns: ${({ $isFavorited, $hasDocument }) =>
+    [$isFavorited && "auto", "minmax(0, 1fr)", $hasDocument && "auto"]
+      .filter(Boolean)
+      .join(" ")};
   align-items: center;
   overflow: hidden;
   background-color: ${({ theme, $invertedLabel }) =>
@@ -125,6 +130,21 @@ export const StyledFaStar = styled(FaStar)<StyledFaStar>`
   margin-bottom: 0.1rem;
 `;
 
+interface StyledDocumentIconWrap {
+  $invertedLabel: boolean;
+}
+export const StyledDocumentIconWrap = styled.div<StyledDocumentIconWrap>`
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  margin-right: ${({ theme }) => theme.space[1]};
+  color: ${({ theme, $invertedLabel }) =>
+    $invertedLabel ? theme.color.tagSelectedColor : theme.color.tagColor};
+`;
+export const StyledDocumentIcon = styled(IcoFileText)`
+  flex-shrink: 0;
+`;
+
 const getColor = (
   $invertedLabel: boolean,
   $isFavorited: boolean,
@@ -142,6 +162,7 @@ interface StyledLabel {
   $invertedLabel: boolean;
   $fullWidth: boolean;
   $isFavorited: boolean;
+  $hasDocument?: boolean;
   $isItalic: boolean;
   $maxWidth?: number;
 }
@@ -152,6 +173,7 @@ export const StyledLabel = styled.div<StyledLabel>`
   text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
   padding-left: ${({ theme, $isFavorited }) => ($isFavorited ? theme.space[1] : "")};
+  padding-right: ${({ theme, $hasDocument }) => ($hasDocument ? theme.space[1] : "")};
   font-style: ${({ $isItalic }) => `${$isItalic ? "italic" : "normal"}`};
   color: ${({ theme, $invertedLabel, $isItalic, $isFavorited }) =>
     theme.color[getColor($invertedLabel, $isFavorited, $isItalic)]};

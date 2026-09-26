@@ -25,7 +25,6 @@ import TerritoryTreeNodeArrowIcon from "./TerritoryTreeNodeArrowIcon";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
-  StyledDocumentIcon,
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
@@ -47,8 +46,8 @@ interface TerritoryTreeNode {
   updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
   // incremented by the tree box to fold every node off the selected path
   foldAllSignal?: number;
-  // titles of the documents anchoring each territory, keyed by territory id
-  territoryDocumentTitles: Record<string, string[]>;
+  // ids of the territories anchored in at least one document
+  territoriesWithDocument: Set<string>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -65,7 +64,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   storedTerritories,
   updateUserMutation,
   foldAllSignal = 0,
-  territoryDocumentTitles,
+  territoriesWithDocument,
 }) => {
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -277,6 +276,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 updateOrderFn={moveTerritoryMutation.mutate}
                 statementsCount={statementsCount}
                 isFavorited={isFavorited}
+                hasDocument={territoriesWithDocument.has(id)}
                 showOnly="label"
                 tooltipPosition="right"
                 customTooltipAttributes={{
@@ -284,13 +284,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 }}
               />
             </EntityDropzone>
-            {territoryDocumentTitles[id] && (
-              <StyledDocumentIcon
-                size={14}
-                $right={right}
-                title={`document: ${territoryDocumentTitles[id].join(", ")}`}
-              />
-            )}
             <TerritoryTreeContextMenu
               territoryActant={territory}
               onMenuOpen={handleMenuOpen}
@@ -329,7 +322,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               storedTerritories={storedTerritories}
               updateUserMutation={updateUserMutation}
               foldAllSignal={foldAllSignal}
-              territoryDocumentTitles={territoryDocumentTitles}
+              territoriesWithDocument={territoriesWithDocument}
             />
           ))}
         {!hideChildTerritories && isExpanded && showPagination && (

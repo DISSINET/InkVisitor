@@ -49,15 +49,10 @@ export const TerritoryTreeBox: React.FC = () => {
   const { data: documents } = useDocumentsQuery();
 
   // a territory has a document when any document holds an anchor of it
-  const territoryDocumentTitles = useMemo(() => {
-    const titles: Record<string, string[]> = {};
-    documents?.forEach((document) => {
-      document.entityIds.T?.forEach((territoryId) => {
-        titles[territoryId] = [...(titles[territoryId] ?? []), document.title];
-      });
-    });
-    return titles;
-  }, [documents]);
+  const territoriesWithDocument = useMemo(
+    () => new Set(documents?.flatMap((document) => document.entityIds.T ?? []) ?? []),
+    [documents],
+  );
 
   const storedTerritoryIds = useMemo(
     () => userData?.storedTerritories?.map((territory) => territory.territory.id) ?? [],
@@ -268,7 +263,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
                     foldAllSignal={foldAllSignal}
-                    territoryDocumentTitles={territoryDocumentTitles}
+                    territoriesWithDocument={territoriesWithDocument}
                   />
                 )}
 

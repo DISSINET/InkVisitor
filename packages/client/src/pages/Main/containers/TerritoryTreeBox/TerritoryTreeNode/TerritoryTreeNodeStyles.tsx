@@ -1,8 +1,6 @@
 import { FaCircle, FaDotCircle } from "react-icons/fa";
 import { animated } from "@react-spring/web";
-import { UserEnums } from "@inkvisitor/shared/enums";
 import styled from "styled-components";
-import { IcoDocumentText } from "Theme/icons";
 
 interface StyledTerritoryTagWrap {
   $dimmed?: boolean;
@@ -36,15 +34,6 @@ export const StyledFaCircle = styled(FaCircle)`
   margin: 0 ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["primary"]};
   stroke-width: 0.5;
-`;
-interface StyledDocumentIcon {
-  $right: UserEnums.RoleMode;
-}
-export const StyledDocumentIcon = styled(IcoDocumentText)<StyledDocumentIcon>`
-  flex-shrink: 0;
-  margin-left: ${({ theme }) => theme.space[1]};
-  color: ${({ theme, $right }) =>
-    $right === UserEnums.RoleMode.Read ? theme.color.treeNodeRead : theme.color.treeNodeWrite};
 `;
 export const StyledDisabledTag = styled.div`
   height: 2.25rem;
