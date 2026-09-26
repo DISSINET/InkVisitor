@@ -5,7 +5,7 @@ import api from "api";
 import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
-import { useUserQuery } from "hooks/react-query";
+import { useDocumentsQuery, useUserQuery } from "hooks/react-query";
 import { scrollToTerritoryInTree } from "hooks/ScrollHandler";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
@@ -45,6 +45,14 @@ export const TerritoryTreeBox: React.FC = () => {
   const { data: treeData, isFetching } = useTreeQuery();
 
   const { data: userData } = useUserQuery();
+
+  const { data: documents } = useDocumentsQuery();
+
+  // a territory has a document when any document holds an anchor of it
+  const territoriesWithDocument = useMemo(
+    () => new Set(documents?.flatMap((document) => document.entityIds.T ?? []) ?? []),
+    [documents],
+  );
 
   const storedTerritoryIds = useMemo(
     () => userData?.storedTerritories?.map((territory) => territory.territory.id) ?? [],
@@ -255,6 +263,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
                     foldAllSignal={foldAllSignal}
+                    territoriesWithDocument={territoriesWithDocument}
                   />
                 )}
 

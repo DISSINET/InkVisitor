@@ -21,6 +21,8 @@ import {
 import { EntityTagContextMenu } from "./EntityTagContextMenu/EntityTagContextMenu";
 import {
   StyledButtonWrapper,
+  StyledDocumentIcon,
+  StyledDocumentIconWrap,
   StyledElvlWrapper,
   StyledEntityTag,
   StyledEntityTagWrap,
@@ -81,6 +83,8 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+  /** Shows a document icon after the label: a document holds an anchor of the entity. */
+  hasDocument?: boolean;
   elvlButtonGroup?: ReactNode | false;
 
   unlinkButton?: UnlinkButton | false;
@@ -117,6 +121,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   lvl,
   statementsCount,
   isFavorited,
+  hasDocument = false,
 
   elvlButtonGroup = false,
 
@@ -248,6 +253,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
       <StyledLabelWrap
         $invertedLabel={isSelected ?? false}
         $isFavorited={isFavorited ?? false}
+        $hasDocument={hasDocument}
         $tagBorderColorKey={entity.status}
         $labelOnly={showOnly === "label"}
       >
@@ -261,13 +267,28 @@ const EntityTagInner: React.FC<EntityTag> = ({
           $fullWidth={fullWidth}
           $maxWidth={tagMaxWidth}
           $isFavorited={isFavorited ?? false}
+          $hasDocument={hasDocument}
           $isItalic={isFirstLabelEmpty(entity.labels)}
         >
           {entityLabel}
         </StyledLabel>
+        {hasDocument && (
+          <StyledDocumentIconWrap $invertedLabel={isSelected ?? false}>
+            <StyledDocumentIcon size={13} />
+          </StyledDocumentIconWrap>
+        )}
       </StyledLabelWrap>
     );
-  }, [entity, entityLabel, isSelected, isFavorited, showOnly, fullWidth, tagMaxWidth]);
+  }, [
+    entity,
+    entityLabel,
+    isSelected,
+    isFavorited,
+    hasDocument,
+    showOnly,
+    fullWidth,
+    tagMaxWidth,
+  ]);
 
   const draggedEntity: DraggedEntityReduxItem = useAppSelector((state) => state.draggedEntity);
 

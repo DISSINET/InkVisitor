@@ -46,6 +46,8 @@ interface TerritoryTreeNode {
   updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
   // incremented by the tree box to fold every node off the selected path
   foldAllSignal?: number;
+  // ids of the territories anchored in at least one document
+  territoriesWithDocument: Set<string>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -62,6 +64,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   storedTerritories,
   updateUserMutation,
   foldAllSignal = 0,
+  territoriesWithDocument,
 }) => {
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -273,6 +276,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 updateOrderFn={moveTerritoryMutation.mutate}
                 statementsCount={statementsCount}
                 isFavorited={isFavorited}
+                hasDocument={territoriesWithDocument.has(id)}
                 showOnly="label"
                 tooltipPosition="right"
                 customTooltipAttributes={{
@@ -318,6 +322,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               storedTerritories={storedTerritories}
               updateUserMutation={updateUserMutation}
               foldAllSignal={foldAllSignal}
+              territoriesWithDocument={territoriesWithDocument}
             />
           ))}
         {!hideChildTerritories && isExpanded && showPagination && (
