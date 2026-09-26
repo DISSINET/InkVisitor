@@ -19,6 +19,7 @@ import { IResponseGeneric, IEntity, IResponseDetail } from "@inkvisitor/shared/t
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { IcoPlus } from "Theme/icons";
+import { DUPLICATE_LABEL_MESSAGE, isDuplicateLabel } from "utils/entityLabels";
 
 interface EntityDetailFormSectionAlternativeLabels {
   entity: IResponseDetail;
@@ -40,6 +41,23 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
   const [newAltLabel, setNewAltLabel] = useState<string>("");
   const alternativeLabels = entity.labels.slice(1);
 
+  const isNewAltLabelValid =
+    newAltLabel.trim().length > 0 && !isDuplicateLabel(entity.labels, newAltLabel);
+
+  const addAltLabel = () => {
+    if (newAltLabel.trim().length === 0) {
+      return;
+    }
+    if (isDuplicateLabel(entity.labels, newAltLabel)) {
+      toast.error(DUPLICATE_LABEL_MESSAGE);
+      return;
+    }
+    updateEntityMutation.mutate({
+      labels: [...entity.labels, newAltLabel],
+    });
+    setNewAltLabel("");
+  };
+
   return (
     <>
       <StyledAlternativeLabels>
@@ -57,6 +75,11 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
                     onChangeFn={(value) => {
                       if (value.length < 1) {
                         toast.error("Label cannot be empty");
+                        return;
+                      }
+                      // alternative labels start at index 1 of entity.labels
+                      if (isDuplicateLabel(entity.labels, value, key + 1)) {
+                        toast.error(DUPLICATE_LABEL_MESSAGE);
                         return;
                       }
                       updateEntityMutation.mutate({
@@ -115,7 +138,7 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
                       noPadding
                       onClick={() => {
                         updateEntityMutation.mutate({
-                          labels: entity.labels.filter((l) => l !== label),
+                          labels: entity.labels.filter((_, index) => index !== key + 1),
                         });
                       }}
                       icon={<MdClose size={15} />}
@@ -138,23 +161,13 @@ export const EntityDetailFormSectionAlternativeLabels: React.FC<
           changeOnType
           value={newAltLabel}
           onChangeFn={(newLabel: string) => setNewAltLabel(newLabel)}
-          onEnterPressFn={() => {
-            updateEntityMutation.mutate({
-              labels: [...entity.labels, newAltLabel],
-            });
-            setNewAltLabel("");
-          }}
+          onEnterPressFn={addAltLabel}
           rightContent={
             <Button
-              disabled={newAltLabel.length === 0 || entity.labels.includes(newAltLabel)}
+              disabled={!isNewAltLabelValid}
               color="black"
               icon={<IcoPlus />}
-              onClick={() => {
-                updateEntityMutation.mutate({
-                  labels: [...entity.labels, newAltLabel],
-                });
-                setNewAltLabel("");
-              }}
+              onClick={addAltLabel}
               noBorder
               noBackground
               inverted
