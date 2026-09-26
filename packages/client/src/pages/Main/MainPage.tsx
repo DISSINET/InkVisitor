@@ -10,6 +10,7 @@ import {
 } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
+import { EntityImportModal } from "./containers/EntityImportModal/EntityImportModal";
 import { useTreeQuery, useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
@@ -65,7 +66,7 @@ import { useBoxLayout } from "./hooks/useBoxLayout";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
 import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
-import { IcoPlusBold } from "Theme/icons";
+import { IcoCode, IcoPlusBold } from "Theme/icons";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -79,6 +80,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     clearAllDetailIds,
     selectedDetailId,
     appendDetailId,
+    appendMultipleDetailIds,
     setStatementId,
     setTerritoryId,
     editorOpened,
@@ -219,6 +221,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+  const [showEntityImportModal, setShowEntityImportModal] = useState(false);
 
   // The annotator Box's header content lives in AnnotatorBox (it owns the
   // resource/document data it is built from); this page only owns the Box
@@ -741,13 +744,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 buttons={[
                   <>
                     {userRole !== UserEnums.Role.Viewer && (
-                      <Button
-                        icon={<IcoPlusBold />}
-                        label="entity"
-                        inverted
-                        onClick={() => setShowEntityCreateModal(true)}
-                        tooltipLabel="create new entity"
-                      />
+                      <>
+                        <Button
+                          icon={<IcoPlusBold />}
+                          label="entity"
+                          inverted
+                          onClick={() => setShowEntityCreateModal(true)}
+                          tooltipLabel="create new entity"
+                        />
+                        <Button
+                          icon={<IcoCode />}
+                          label="import"
+                          inverted
+                          onClick={() => setShowEntityImportModal(true)}
+                          tooltipLabel="import entities from JSON"
+                        />
+                      </>
                     )}
                   </>,
                   <IconButton
@@ -821,6 +833,24 @@ const MainPage: React.FC<MainPage> = ({}) => {
               }
               if (entity.class === EntityEnums.Class.Territory) {
                 queryClient.invalidateQueries({ queryKey: ["tree"] });
+              }
+            }}
+          />
+        )}
+        {showEntityImportModal && (
+          <EntityImportModal
+            closeModal={() => setShowEntityImportModal(false)}
+            onImported={(entities) => {
+              queryClient.invalidateQueries({ queryKey: ["entity"] });
+              if (entities.some((entity) => entity.class === EntityEnums.Class.Territory)) {
+                queryClient.invalidateQueries({ queryKey: ["tree"] });
+              }
+              // Values are not opened in Detail, as after creating one
+              const detailIds = entities
+                .filter((entity) => entity.class !== EntityEnums.Class.Value)
+                .map((entity) => entity.id);
+              if (detailIds.length) {
+                appendMultipleDetailIds(detailIds);
               }
             }}
           />

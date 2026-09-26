@@ -4,7 +4,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag, Tooltip } from "components";
 import { EntityTooltip } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useEntityDraft, useSearchParams } from "hooks";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -106,12 +106,12 @@ const EntityTagInner: React.FC<EntityTag> = ({
   index,
   moveFn,
   isSelected,
-  disableTooltip = false,
-  disableDrag = false,
+  disableTooltip: disableTooltipProp = false,
+  disableDrag: disableDragProp = false,
   entityIsReadOnly,
-  disableDoubleClick = false,
+  disableDoubleClick: disableDoubleClickProp = false,
   disableCopyToClipboard = false,
-  disableContextMenu = false,
+  disableContextMenu: disableContextMenuProp = false,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -126,6 +126,16 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isEquivalent = false,
   isSubordinate = false,
 }) => {
+  // Inside the JSON import modal a double click would open Detail behind it,
+  // and a draft entity is not stored yet, so it has no tooltip to fetch and
+  // nothing to drag or act on from its menu.
+  const draft = useEntityDraft();
+  const isDraftEntity = !!draft?.draftEntityIds.has(entity.id);
+  const disableTooltip = disableTooltipProp || isDraftEntity;
+  const disableDrag = disableDragProp || isDraftEntity;
+  const disableDoubleClick = disableDoubleClickProp || !!draft;
+  const disableContextMenu = disableContextMenuProp || isDraftEntity;
+
   const { promoteDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(

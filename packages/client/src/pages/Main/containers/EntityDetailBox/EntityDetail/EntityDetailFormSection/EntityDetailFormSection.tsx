@@ -18,6 +18,7 @@ import {
 import { IConceptData } from "@inkvisitor/shared/types/concept";
 import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { useDocumentsQuery, useOrderedLanguageDict } from "hooks/react-query";
+import { useEntityDraft } from "hooks";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -84,8 +85,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
+  // a draft of the JSON import edits its own attributes only: no templates,
+  // no linked document
+  const draft = useEntityDraft();
+
   const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
-    actantMode === "resource",
+    actantMode === "resource" && !draft,
   );
 
   const orderedLanguageDict = useOrderedLanguageDict();
@@ -149,8 +154,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const queryClient = useQueryClient();
 
   const updateTerritoryMutation = useMutation({
-    mutationFn: async (tObject: { territoryId: string; changes: Partial<ITerritory> }) =>
-      await api.entityUpdate(tObject?.territoryId, tObject?.changes),
+    mutationFn: async (tObject: { territoryId: string; changes: Partial<ITerritory> }) => {
+      if (draft) {
+        draft.updateEntity(tObject.territoryId, tObject.changes);
+        return { data: { result: true } } as AxiosResponse<IResponseGeneric>;
+      }
+      return await api.entityUpdate(tObject?.territoryId, tObject?.changes);
+    },
     onSuccess: () =>
       // data: IResponseGeneric,
       // variables: { territoryId: string; changes: Partial<ITerritory> }
@@ -217,21 +227,23 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           )}
 
           {/* templates */}
-          <StyledDetailContentRow>
-            <StyledDetailContentRowLabel>Apply Template</StyledDetailContentRowLabel>
-            <StyledDetailContentRowValue>
-              <Dropdown.Single.Basic
-                key={"template-dropdown-" + entity.id}
-                placeholder="select template.."
-                disabled={isTemplateDisabled}
-                width="full"
-                value={null}
-                options={templateOptions}
-                onFocus={onTemplateDropdownFocus}
-                onChange={handleAskForTemplateApply}
-              />
-            </StyledDetailContentRowValue>
-          </StyledDetailContentRow>
+          {!draft && (
+            <StyledDetailContentRow>
+              <StyledDetailContentRowLabel>Apply Template</StyledDetailContentRowLabel>
+              <StyledDetailContentRowValue>
+                <Dropdown.Single.Basic
+                  key={"template-dropdown-" + entity.id}
+                  placeholder="select template.."
+                  disabled={isTemplateDisabled}
+                  width="full"
+                  value={null}
+                  options={templateOptions}
+                  onFocus={onTemplateDropdownFocus}
+                  onChange={handleAskForTemplateApply}
+                />
+              </StyledDetailContentRowValue>
+            </StyledDetailContentRow>
+          )}
 
           {templateApplied && (
             <StyledDetailContentRow>
@@ -609,22 +621,24 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRow>
 
               {/* document id */}
-              <StyledDetailContentRow>
-                <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
-                <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>
-                  <Dropdown.Single.Basic
-                    disabled={!userCanEdit}
-                    value={selectedDocumentOption}
-                    width="full"
-                    options={documentOptions}
-                    placeholder={noDocumentLinkedLabel}
-                    isClearable={userCanEdit}
-                    onChange={(selectedOption) => {
-                      updateDocumentId(selectedOption);
-                    }}
-                  />
-                </StyledDetailContentRowValue>
-              </StyledDetailContentRow>
+              {!draft && (
+                <StyledDetailContentRow>
+                  <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
+                  <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>
+                    <Dropdown.Single.Basic
+                      disabled={!userCanEdit}
+                      value={selectedDocumentOption}
+                      width="full"
+                      options={documentOptions}
+                      placeholder={noDocumentLinkedLabel}
+                      isClearable={userCanEdit}
+                      onChange={(selectedOption) => {
+                        updateDocumentId(selectedOption);
+                      }}
+                    />
+                  </StyledDetailContentRowValue>
+                </StyledDetailContentRow>
+              )}
             </React.Fragment>
           )}
 

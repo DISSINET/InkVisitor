@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
 import { InstTemplate } from "constructors";
-import { useSearchParams } from "hooks";
+import { useEntityDraft, useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
@@ -43,6 +43,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 }) => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
+  const draft = useEntityDraft();
 
   const { setStatementId, setTerritoryId, appendDetailId, setSelectedDetailId } = useSearchParams();
 
@@ -109,158 +110,161 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        <ButtonGroup $height={22.5} $disableShrink>
-          {userCanEdit && (
-            <Button
-              key="delete-entity"
-              size={ButtonSize.Medium}
-              shape="square"
-              color="primary"
-              icon={<IcoTrash size={13} />}
-              disabled={!mayBeRemoved}
-              tooltipLabel={
-                mayBeRemoved
-                  ? "delete entity"
-                  : "entity cannot be deleted while it is linked elsewhere"
-              }
-              inverted
-              onClick={() => {
-                if (mayBeRemoved) {
-                  setShowRemoveSubmit(true);
+        {/* a draft of the JSON import only edits its own attributes */}
+        {!draft && (
+          <ButtonGroup $height={22.5} $disableShrink>
+            {userCanEdit && (
+              <Button
+                key="delete-entity"
+                size={ButtonSize.Medium}
+                shape="square"
+                color="primary"
+                icon={<IcoTrash size={13} />}
+                disabled={!mayBeRemoved}
+                tooltipLabel={
+                  mayBeRemoved
+                    ? "delete entity"
+                    : "entity cannot be deleted while it is linked elsewhere"
                 }
-              }}
-            />
-          )}
-          {userCanEdit && !!entity.isTemplate && (
-            <>
-              <Button
-                key="template-create-template"
-                size={ButtonSize.Medium}
-                shape="square"
-                icon={<FaClone size={13} />}
-                tooltipLabel="create a new template from template"
                 inverted
-                color="primary"
                 onClick={() => {
-                  setCreateTemplateModal(true);
-                }}
-              />
-              <Button
-                key="instantiate-template"
-                size={ButtonSize.Medium}
-                shape="square"
-                icon={<StyledGrClone size={13} $color={"black"} />}
-                tooltipLabel="create entity from template"
-                inverted
-                color="primary"
-                onClick={() => {
-                  if (entity.class === EntityEnums.Class.Territory) {
-                    setShowAddParentModal(true);
-                  } else {
-                    instantiateTemplate();
+                  if (mayBeRemoved) {
+                    setShowRemoveSubmit(true);
                   }
                 }}
               />
-            </>
-          )}
-          {userCanEdit && !entity.isTemplate && (
-            <>
+            )}
+            {userCanEdit && !!entity.isTemplate && (
+              <>
+                <Button
+                  key="template-create-template"
+                  size={ButtonSize.Medium}
+                  shape="square"
+                  icon={<FaClone size={13} />}
+                  tooltipLabel="create a new template from template"
+                  inverted
+                  color="primary"
+                  onClick={() => {
+                    setCreateTemplateModal(true);
+                  }}
+                />
+                <Button
+                  key="instantiate-template"
+                  size={ButtonSize.Medium}
+                  shape="square"
+                  icon={<StyledGrClone size={13} $color={"black"} />}
+                  tooltipLabel="create entity from template"
+                  inverted
+                  color="primary"
+                  onClick={() => {
+                    if (entity.class === EntityEnums.Class.Territory) {
+                      setShowAddParentModal(true);
+                    } else {
+                      instantiateTemplate();
+                    }
+                  }}
+                />
+              </>
+            )}
+            {userCanEdit && !entity.isTemplate && (
+              <>
+                <Button
+                  key="entity-duplicate"
+                  size={ButtonSize.Medium}
+                  shape="square"
+                  icon={<FaClone size={13} />}
+                  color="primary"
+                  disabled={entity.class === EntityEnums.Class.Statement}
+                  tooltipLabel="duplicate entity"
+                  inverted
+                  onClick={() => {
+                    if (entity.class !== EntityEnums.Class.Statement) {
+                      cloneEntityMutation.mutate(entity.id);
+                    }
+                  }}
+                />
+                <Button
+                  key="entity-create-template"
+                  size={ButtonSize.Medium}
+                  shape="square"
+                  icon={<StyledGrClone size={13} $color={"black"} />}
+                  tooltipLabel="create template from entity"
+                  inverted
+                  color="primary"
+                  onClick={() => {
+                    setCreateTemplateModal(true);
+                  }}
+                />
+              </>
+            )}
+            {entity.class === EntityEnums.Class.Statement && (
               <Button
-                key="entity-duplicate"
+                key="edit"
                 size={ButtonSize.Medium}
                 shape="square"
-                icon={<FaClone size={13} />}
-                color="primary"
-                disabled={entity.class === EntityEnums.Class.Statement}
-                tooltipLabel="duplicate entity"
+                icon={<FaEdit size={14} />}
+                tooltipLabel="open statement in editor"
                 inverted
+                color="primary"
                 onClick={() => {
-                  if (entity.class !== EntityEnums.Class.Statement) {
-                    cloneEntityMutation.mutate(entity.id);
+                  setStatementId(entity.id);
+                  if (!entity.isTemplate && (entity as IStatement).data.territory?.territoryId) {
+                    setTerritoryId(entity.data.territory.territoryId);
                   }
                 }}
               />
+            )}
+            {entity.class === EntityEnums.Class.Territory && (
               <Button
-                key="entity-create-template"
+                key="open-territory"
                 size={ButtonSize.Medium}
                 shape="square"
-                icon={<StyledGrClone size={13} $color={"black"} />}
-                tooltipLabel="create template from entity"
+                icon={<CgListTree size={14} />}
+                tooltipLabel="open territory in tree"
                 inverted
                 color="primary"
                 onClick={() => {
-                  setCreateTemplateModal(true);
+                  // Reset so the tree re-runs its path expansion (and pagination
+                  // page selection) for the newly selected territory.
+                  dispatch(setTreeInitialized(false));
+                  setTerritoryId(entity.id);
+                }}
+                disabled={entity.isTemplate}
+              />
+            )}
+            {userCanEdit && (
+              <Button
+                key="copy-link"
+                size={ButtonSize.Medium}
+                shape="square"
+                color="primary"
+                icon={<AiOutlineLink size={17} />}
+                tooltipLabel={"copy link to detail"}
+                inverted
+                onClick={async () => {
+                  await navigator.clipboard.writeText(
+                    `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`,
+                  );
+                  toast.info("Link to detail copied to clipboard");
                 }}
               />
-            </>
-          )}
-          {entity.class === EntityEnums.Class.Statement && (
-            <Button
-              key="edit"
-              size={ButtonSize.Medium}
-              shape="square"
-              icon={<FaEdit size={14} />}
-              tooltipLabel="open statement in editor"
-              inverted
-              color="primary"
-              onClick={() => {
-                setStatementId(entity.id);
-                if (!entity.isTemplate && (entity as IStatement).data.territory?.territoryId) {
-                  setTerritoryId(entity.data.territory.territoryId);
-                }
-              }}
-            />
-          )}
-          {entity.class === EntityEnums.Class.Territory && (
-            <Button
-              key="open-territory"
-              size={ButtonSize.Medium}
-              shape="square"
-              icon={<CgListTree size={14} />}
-              tooltipLabel="open territory in tree"
-              inverted
-              color="primary"
-              onClick={() => {
-                // Reset so the tree re-runs its path expansion (and pagination
-                // page selection) for the newly selected territory.
-                dispatch(setTreeInitialized(false));
-                setTerritoryId(entity.id);
-              }}
-              disabled={entity.isTemplate}
-            />
-          )}
-          {userCanEdit && (
-            <Button
-              key="copy-link"
-              size={ButtonSize.Medium}
-              shape="square"
-              color="primary"
-              icon={<AiOutlineLink size={17} />}
-              tooltipLabel={"copy link to detail"}
-              inverted
-              onClick={async () => {
-                await navigator.clipboard.writeText(
-                  `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`,
-                );
-                toast.info("Link to detail copied to clipboard");
-              }}
-            />
-          )}
-          {userCanAdmin && (
-            <Button
-              key="clean-entity"
-              size={ButtonSize.Medium}
-              shape="square"
-              color="primary"
-              icon={<MdCleaningServices size={15} />}
-              tooltipLabel="clean all entity details"
-              inverted
-              onClick={() => {
-                setIsCleaningEntityPrompt(true);
-              }}
-            />
-          )}
-        </ButtonGroup>
+            )}
+            {userCanAdmin && (
+              <Button
+                key="clean-entity"
+                size={ButtonSize.Medium}
+                shape="square"
+                color="primary"
+                icon={<MdCleaningServices size={15} />}
+                tooltipLabel="clean all entity details"
+                inverted
+                onClick={() => {
+                  setIsCleaningEntityPrompt(true);
+                }}
+              />
+            )}
+          </ButtonGroup>
+        )}
       </StyledActantHeaderRow>
 
       {showAddParentModal && (

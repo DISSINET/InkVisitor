@@ -11,6 +11,7 @@ import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { EntitySuggester } from "components/advanced";
+import { useEntityDraft } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -137,6 +138,25 @@ export const EntityDetailRelationTypeBlock: React.FC<
     }
     setUsedEntityIds([...new Set(entityIds)]);
   }, [selectedRelations, relationRule]);
+
+  // A draft of the JSON import joins its own group; groups of stored entities
+  // are merged by the server when the import creates the relation.
+  const draft = useEntityDraft();
+  const addToDraftCloud = (selectedId: string) => {
+    const cloud = currentRelations[0];
+    if (cloud) {
+      relationUpdateMutation?.mutate({
+        relationId: cloud.id,
+        changes: { entityIds: [...cloud.entityIds, selectedId] },
+      });
+    } else {
+      relationCreateMutation?.mutate({
+        id: uuidv4(),
+        entityIds: [entity.id, selectedId],
+        type: relationType,
+      });
+    }
+  };
 
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
@@ -304,7 +324,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 reuseDroppedValue
                 categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {
-                  if (isCloudType) {
+                  if (isCloudType && draft) {
+                    addToDraftCloud(selectedId);
+                  } else if (isCloudType) {
                     setTempCloudEntityId(selectedId);
                   } else {
                     handleMultiSelected(selectedId);
