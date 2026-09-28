@@ -104,6 +104,40 @@ describe("validateImport", () => {
     ]);
   });
 
+  it("removes the links to a left-out statement from the other entities", async () => {
+    const context = contextWith([
+      existingEntity("animal", EntityEnums.Class.Concept),
+      existingEntity("source", EntityEnums.Class.Resource),
+    ]);
+    const text = JSON.stringify([
+      { id: "stmt", class: "S", labels: ["dog barks"] },
+      {
+        id: "dog",
+        class: "C",
+        labels: ["dog"],
+        props: [{ type: "animal", value: "stmt" }],
+        references: [{ resource: "source", value: "stmt" }],
+        relations: [
+          { type: "SCL", entityIds: ["animal"] },
+          { type: "SCL", entityIds: ["stmt"] },
+        ],
+      },
+    ]);
+
+    const { errors, notes, plan } = await validateImport(text, context);
+
+    expect(errors).toEqual([]);
+    const [dog] = plan!.entities;
+    expect(dog.props[0].value.entityId).toBe("");
+    expect(dog.references[0].value).toBe("");
+    expect(plan!.relations.map((relation) => relation.entityIds)).toEqual([["dog", "animal"]]);
+    expect(notes.map((note) => [note.entityIndex, note.path])).toEqual([
+      [1, "class"],
+      [2, undefined],
+      [2, "relations[1]"],
+    ]);
+  });
+
   it("stops at a parse error without asking the database", async () => {
     const context = contextWith([]);
     const { errors } = await validateImport("[", context);

@@ -1,5 +1,6 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
+import { unlinkEntity } from "./draft";
 import { unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { parseImportInput } from "./parse";
@@ -37,11 +38,45 @@ export const validateImport = async (
   const normalized = normalizeEntities(parsed.items, {
     defaultLanguage: context.defaultLanguage,
   });
-  const relationItems = normalizeRelationItems(normalized.entities);
-  const errors = [...normalized.errors, ...relationItems.errors];
-  const notes = [...normalized.notes, ...relationItems.notes];
+  const notes = [...normalized.notes];
 
-  const entities = normalized.entities;
+  // the entities lose their links to a left-out statement, so they can still
+  // be created
+  const leftOutIds = new Set(normalized.leftOutIds);
+  const entities = normalized.entities.map((item) => {
+    let entity = item.entity;
+    const changes: string[] = [];
+    leftOutIds.forEach((leftOutId) => {
+      const unlinked = unlinkEntity(entity, leftOutId, undefined);
+      entity = unlinked.entity;
+      changes.push(...unlinked.changes);
+    });
+    if (changes.length) {
+      notes.push({
+        entityIndex: item.index,
+        label: entity.labels[0],
+        message: `${changes.join(", ")} (they pointed at a left-out statement)`,
+      });
+    }
+    return { ...item, entity };
+  });
+
+  const relationItems = normalizeRelationItems(entities);
+  relationItems.items = relationItems.items.filter((item) => {
+    if (!item.relation.entityIds.some((entityId) => leftOutIds.has(entityId))) {
+      return true;
+    }
+    notes.push({
+      entityIndex: item.ownerIndex,
+      label: entities.find((candidate) => candidate.index === item.ownerIndex)?.entity.labels[0],
+      path: item.path,
+      message: "removed, it pointed at a left-out statement",
+    });
+    return false;
+  });
+  const errors = [...normalized.errors, ...relationItems.errors];
+  notes.push(...relationItems.notes);
+
   const batchIds = unique(entities.map(({ entity }) => entity.id));
   const batch = new Map<string, IEntity>();
   entities.forEach(({ entity }) => batch.has(entity.id) || batch.set(entity.id, entity));

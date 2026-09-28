@@ -669,9 +669,24 @@ const normalizeEntity = (
 export const normalizeEntities = (
   items: unknown[],
   options: { defaultLanguage: EntityEnums.Language }
-): { entities: ImportEntity[]; errors: ImportIssue[]; notes: ImportIssue[] } => {
+): {
+  entities: ImportEntity[];
+  errors: ImportIssue[];
+  notes: ImportIssue[];
+  // ids of the left-out statements, whose links the other entities lose
+  leftOutIds: string[];
+} => {
   const errors: ImportIssue[] = [];
   const notes: ImportIssue[] = [];
+
+  const leftOutIds = items
+    .filter(
+      (item) =>
+        isPlainObject(item) &&
+        item.class === EntityEnums.Class.Statement &&
+        isNonEmptyString(item.id)
+    )
+    .map((item) => (item as Record<string, string>).id);
 
   const entities = items
     .map((item, itemIndex) => ({ item, index: itemIndex + 1 }))
@@ -681,5 +696,5 @@ export const normalizeEntities = (
     )
     .filter((entity): entity is ImportEntity => entity !== null);
 
-  return { entities, errors, notes };
+  return { entities, errors, notes, leftOutIds };
 };

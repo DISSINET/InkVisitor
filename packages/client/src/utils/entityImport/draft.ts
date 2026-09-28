@@ -119,7 +119,7 @@ const count = (amount: number, singular: string, plural: string) =>
  * cleared, a reference to it as resource goes, protocol entries go, and a
  * territory under it moves to `newParentId`.
  */
-const unlinkEntity = (
+export const unlinkEntity = (
   entity: IEntity,
   removedId: string,
   newParentId: string | undefined
