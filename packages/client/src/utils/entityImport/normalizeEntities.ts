@@ -515,13 +515,19 @@ const normalizeEntity = (
   defaultLanguage: EntityEnums.Language,
   errors: ImportIssue[],
   notes: ImportIssue[]
-): ImportEntity => {
+): ImportEntity | null => {
   const label =
     Array.isArray(raw.labels) && typeof raw.labels[0] === "string" ? raw.labels[0] : undefined;
   const report: Reporter = {
     error: (path, message) => errors.push({ entityIndex: index, label, path, message }),
     note: (path, message) => notes.push({ entityIndex: index, label, path, message }),
   };
+
+  // a statement is left out unchecked; the rest of the input imports
+  if (raw.class === EntityEnums.Class.Statement) {
+    report.note("class", "Statements are not supported yet; left out of the import");
+    return null;
+  }
 
   const detailViewKeys: string[] = [];
   for (const [key, value] of Object.entries(raw)) {
@@ -565,8 +571,6 @@ const normalizeEntity = (
     report.error("class", `required, one of ${enumList(EntityEnums.Class)}`);
   } else if (!classIsValid) {
     report.error("class", `must be one of ${enumList(EntityEnums.Class)}; got ${quote(raw.class)}`);
-  } else if (entityClass === EntityEnums.Class.Statement) {
-    report.error("class", "statements can't be imported");
   }
 
   let labels: string[] = [];
@@ -635,10 +639,7 @@ const normalizeEntity = (
     normalizeReference(item, itemPath, report)
   );
 
-  const data =
-    classIsValid && entityClass !== EntityEnums.Class.Statement
-      ? normalizeData(entityClass, raw.data, report)
-      : {};
+  const data = classIsValid ? normalizeData(entityClass, raw.data, report) : {};
 
   const rawRelations = readRawRelations(raw.relations, report);
 
@@ -677,7 +678,8 @@ export const normalizeEntities = (
     .filter(({ item }) => isPlainObject(item))
     .map(({ item, index }) =>
       normalizeEntity(item as Record<string, unknown>, index, options.defaultLanguage, errors, notes)
-    );
+    )
+    .filter((entity): entity is ImportEntity => entity !== null);
 
   return { entities, errors, notes };
 };

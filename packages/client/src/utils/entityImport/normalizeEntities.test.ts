@@ -133,8 +133,27 @@ describe("normalizeEntities", () => {
     ]);
   });
 
-  it("rejects statements and unknown classes", () => {
-    expect(paths(normalizeOne({ class: "S", labels: ["s"] }).errors)).toEqual(["class"]);
+  it("leaves statements out with a note, whatever their fields", () => {
+    const { entities, errors, notes } = normalizeEntities(
+      [
+        {
+          class: "S",
+          labels: [""],
+          data: { territory: { territoryId: "T0" }, actions: [] },
+          relations: [{ type: "SCL", entityIds: ["x"] }],
+        },
+        { class: "C", labels: ["dog"] },
+      ],
+      options
+    );
+    expect(errors).toEqual([]);
+    expect(notes).toHaveLength(1);
+    expect(notes[0]).toMatchObject({ entityIndex: 1, path: "class" });
+    expect(notes[0].message).toContain("not supported yet");
+    expect(entities.map((item) => item.index)).toEqual([2]);
+  });
+
+  it("rejects unknown classes", () => {
     expect(paths(normalizeOne({ class: "Concept", labels: ["s"] }).errors)).toEqual(["class"]);
     expect(paths(normalizeOne({ labels: ["s"] }).errors)).toEqual(["class"]);
   });
