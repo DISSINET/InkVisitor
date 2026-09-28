@@ -273,6 +273,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
       if (variables.labels !== undefined) {
         queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
+      if (variables.data?.documentId !== undefined) {
+        queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+      }
       if (entity?.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
       }
