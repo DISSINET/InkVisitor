@@ -13,6 +13,13 @@ describe("parseImportInput", () => {
     expect(errors[0].message).toMatch(/^Invalid JSON: /);
   });
 
+  it("accepts trailing commas and keeps commas inside texts", () => {
+    const text = '[{"class": "C", "labels": ["a,]", "b\\",}",], },\n]';
+    const { items, errors } = parseImportInput(text);
+    expect(errors).toEqual([]);
+    expect(items).toEqual([{ class: "C", labels: ["a,]", 'b",}'] }]);
+  });
+
   it("wraps a single object into a list", () => {
     const { items, errors } = parseImportInput('{"class": "C"}');
     expect(errors).toEqual([]);
