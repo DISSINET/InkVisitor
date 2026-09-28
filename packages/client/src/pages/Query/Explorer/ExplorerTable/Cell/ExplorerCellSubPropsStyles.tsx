@@ -72,7 +72,3 @@ export const StyledSubPropTreeRow = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
 `;
-
-export const StyledSubPropTreeLevel = styled.span`
-  font-size: ${({ theme }) => theme.fontSize["xxs"]};
-`;

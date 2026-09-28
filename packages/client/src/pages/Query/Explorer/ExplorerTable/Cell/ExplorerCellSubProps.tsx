@@ -6,7 +6,6 @@ import {
   StyledSubPropGroup,
   StyledSubPropLevel,
   StyledSubPropTree,
-  StyledSubPropTreeLevel,
   StyledSubPropTreeRow,
   StyledValueTree,
 } from "./ExplorerCellSubPropsStyles";
@@ -52,17 +51,15 @@ export const ExplorerCellSubProps: React.FC<ExplorerCellSubProps> = ({
   </StyledSubPropGroup>
 );
 
-/** The subproperties as an indented tree, one per line with its level. */
+/** The subproperties as a tree, one per line, each level indented. */
 export const ExplorerCellSubPropsTree: React.FC<ExplorerCellSubProps> = ({
   subProps,
   onEntityDoubleClick,
-  level = 2,
 }) => (
   <StyledSubPropTree>
     {subProps.map((subProp, key) => (
       <React.Fragment key={key}>
         <StyledSubPropTreeRow>
-          <StyledSubPropTreeLevel>{subPropLevelLabel(level)}</StyledSubPropTreeLevel>
           {subProp.type && (
             <EntityTag
               entity={subProp.type}
@@ -84,7 +81,6 @@ export const ExplorerCellSubPropsTree: React.FC<ExplorerCellSubProps> = ({
           <ExplorerCellSubPropsTree
             subProps={subProp.children}
             onEntityDoubleClick={onEntityDoubleClick}
-            level={level + 1}
           />
         )}
       </React.Fragment>
