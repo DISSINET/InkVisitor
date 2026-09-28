@@ -59,6 +59,8 @@ interface SavedQueriesPanel {
   onToggleIncludeSubordinates: (value: boolean) => void;
   exploreFilters: Explore.IExploreSearchFilter[];
   exploreDispatch: React.Dispatch<any>;
+  tableColumns: Explore.IExploreColumn[];
+  onLoadTableColumns: (columns: Explore.IExploreColumn[]) => void;
 }
 
 // gap between the Queries toggle and the panel (matches the old flex gap)
@@ -96,6 +98,8 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   onToggleIncludeSubordinates,
   exploreFilters,
   exploreDispatch,
+  tableColumns,
+  onLoadTableColumns,
 }) => {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -201,13 +205,15 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     saveMutation.mutate({
       name: trimmedSaveName,
       shared: saveShared,
-      // every Explorer filter in play (UUIDs, label, floating search) travels
-      // with the query, so loading it reproduces the whole result
+      // every Explorer filter in play (UUIDs, label, floating search) and the
+      // table columns travel with the query, so loading it reproduces the
+      // whole result, down to the column names an export is read by
       data: {
         query: queryState,
         includeEquivalents,
         includeSubordinates,
         filters: exploreFilters,
+        columns: tableColumns,
       },
     });
   };
@@ -225,6 +231,10 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       type: ExploreActionType.setFilters,
       payload: { filters: row.data.filters ?? [] },
     });
+    // a query stored without columns leaves the current ones in place
+    if (row.data.columns) {
+      onLoadTableColumns(row.data.columns);
+    }
   };
 
   const startEditing = (row: ISavedQuery) => {
