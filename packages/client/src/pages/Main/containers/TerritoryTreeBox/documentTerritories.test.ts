@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { getDocumentTerritoryIds } from "./documentTerritories";
 
 const node = (id: string, path: string[], children: IResponseTree[] = []): IResponseTree =>
-  ({ territory: { id }, path, children }) as unknown as IResponseTree;
+  ({ territory: { id }, path, lvl: path.length, children }) as unknown as IResponseTree;
 
 // root > A > B > C, root > D
 const tree = node("root", [], [

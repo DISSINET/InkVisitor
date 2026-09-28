@@ -132,14 +132,15 @@ export const StyledFaStar = styled(FaStar)<StyledFaStar>`
 
 interface StyledDocumentIconWrap {
   $invertedLabel: boolean;
+  $isItalic: boolean;
 }
 export const StyledDocumentIconWrap = styled.div<StyledDocumentIconWrap>`
   display: inline-flex;
   align-items: center;
   height: 100%;
   margin-right: ${({ theme }) => theme.space[1]};
-  color: ${({ theme, $invertedLabel }) =>
-    $invertedLabel ? theme.color.tagSelectedColor : theme.color.tagColor};
+  color: ${({ theme, $invertedLabel, $isItalic }) =>
+    theme.color[getColor($invertedLabel, false, $isItalic)]};
 `;
 export const StyledDocumentIcon = styled(IcoFileText)`
   flex-shrink: 0;

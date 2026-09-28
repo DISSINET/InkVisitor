@@ -273,7 +273,10 @@ const EntityTagInner: React.FC<EntityTag> = ({
           {entityLabel}
         </StyledLabel>
         {hasDocument && (
-          <StyledDocumentIconWrap $invertedLabel={isSelected ?? false}>
+          <StyledDocumentIconWrap
+            $invertedLabel={isSelected ?? false}
+            $isItalic={isFirstLabelEmpty(entity.labels)}
+          >
             <StyledDocumentIcon size={13} />
           </StyledDocumentIconWrap>
         )}

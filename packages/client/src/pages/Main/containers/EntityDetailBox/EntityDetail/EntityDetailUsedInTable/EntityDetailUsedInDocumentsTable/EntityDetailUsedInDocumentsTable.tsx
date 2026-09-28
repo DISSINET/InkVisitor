@@ -61,6 +61,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
     },
   });
 

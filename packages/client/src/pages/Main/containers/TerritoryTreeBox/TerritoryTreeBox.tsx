@@ -49,10 +49,17 @@ export const TerritoryTreeBox: React.FC = () => {
   const { data: userData } = useUserQuery();
 
   const { data: documents } = useDocumentsQuery();
+  const documentsLoaded = documents !== undefined;
 
-  const territoriesWithDocument = useMemo(
-    () => getDocumentTerritoryIds(treeData, documents),
+  // every document save refetches the documents; the key keeps the set's
+  // reference (and so the memoized tree nodes) unchanged while its ids stay the same
+  const territoriesWithDocumentKey = useMemo(
+    () => [...getDocumentTerritoryIds(treeData, documents)].sort().join(","),
     [treeData, documents],
+  );
+  const territoriesWithDocument = useMemo(
+    () => new Set(territoriesWithDocumentKey ? territoriesWithDocumentKey.split(",") : []),
+    [territoriesWithDocumentKey],
   );
 
   const storedTerritoryIds = useMemo(
@@ -98,7 +105,7 @@ export const TerritoryTreeBox: React.FC = () => {
         setFilteredTreeData(getFilteredTreeData());
       }
     }
-  }, [treeData, filterSettings, userData, territoriesWithDocument]);
+  }, [treeData, filterSettings, userData, documentsLoaded, territoriesWithDocument]);
 
   const handleFilterChange = (key: keyof ITerritoryFilter, value: boolean | string) =>
     setFilterSettings({ ...filterSettings, [key]: value });
@@ -124,6 +131,11 @@ export const TerritoryTreeBox: React.FC = () => {
       // the starred filter needs the user's favorites, so until they load it
       // would select nothing - show the unfiltered tree rather than "No results"
       if (filterSettings.starred && !userData) {
+        return newFilteredTreeData;
+      }
+
+      // same for the document filter until the documents load (or when they fail)
+      if (filterSettings.withDocument && !documentsLoaded) {
         return newFilteredTreeData;
       }
 

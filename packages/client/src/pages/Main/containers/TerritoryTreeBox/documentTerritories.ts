@@ -13,16 +13,16 @@ export const getDocumentTerritoryIds = (
     return documentTerritoryIds;
   }
 
-  const pathsById = new Map<string, string[]>();
-  const collectPaths = (node: IResponseTree) => {
-    pathsById.set(node.territory.id, node.path);
-    node.children.forEach(collectPaths);
+  const lvlsById = new Map<string, number>();
+  const collectLvls = (node: IResponseTree) => {
+    lvlsById.set(node.territory.id, node.lvl);
+    node.children.forEach(collectLvls);
   };
-  collectPaths(tree);
+  collectLvls(tree);
 
   documents.forEach((document) => {
     const anchoredIds = (document.entityIds.T ?? []).filter((territoryId) =>
-      pathsById.has(territoryId),
+      lvlsById.has(territoryId),
     );
     if (anchoredIds.length === 0) {
       return;
@@ -30,7 +30,7 @@ export const getDocumentTerritoryIds = (
 
     // the first of the shallowest territories wins a tie
     const highestId = anchoredIds.reduce((highest, territoryId) =>
-      pathsById.get(territoryId)!.length < pathsById.get(highest)!.length ? territoryId : highest,
+      lvlsById.get(territoryId)! < lvlsById.get(highest)! ? territoryId : highest,
     );
     documentTerritoryIds.add(highestId);
   });
