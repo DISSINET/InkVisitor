@@ -11,13 +11,7 @@ import { toast } from "react-toastify";
 import { setDetailBoxState } from "redux/features/layout/mainPage/detailBoxStateSlice";
 import { setSecondPanelExpanded } from "redux/features/layout/mainPage/secondPanelExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  DetailBoxState,
-  DraggedEntityReduxItem,
-  EntityColors,
-  EntityDragItem,
-  TerritoryDocumentMark,
-} from "types";
+import { DetailBoxState, DraggedEntityReduxItem, EntityColors, EntityDragItem } from "types";
 import {
   getEntityLabel,
   getShortLabelByLetterCount,
@@ -26,7 +20,6 @@ import {
 } from "utils/utils";
 import { EntityTagContextMenu } from "./EntityTagContextMenu/EntityTagContextMenu";
 import {
-  StyledAnchorIcon,
   StyledButtonWrapper,
   StyledDocumentIcon,
   StyledDocumentIconWrap,
@@ -90,9 +83,8 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
-  /** Icon after the label: "document" for the entity encapsulating a document,
-   * "anchor" for an entity anchored inside it. */
-  documentMark?: TerritoryDocumentMark;
+  /** Shows a document icon after the label: a document holds an anchor of the entity. */
+  hasDocument?: boolean;
   elvlButtonGroup?: ReactNode | false;
 
   unlinkButton?: UnlinkButton | false;
@@ -129,7 +121,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   lvl,
   statementsCount,
   isFavorited,
-  documentMark,
+  hasDocument = false,
 
   elvlButtonGroup = false,
 
@@ -261,7 +253,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
       <StyledLabelWrap
         $invertedLabel={isSelected ?? false}
         $isFavorited={isFavorited ?? false}
-        $hasDocument={documentMark !== undefined}
+        $hasDocument={hasDocument}
         $tagBorderColorKey={entity.status}
         $labelOnly={showOnly === "label"}
       >
@@ -275,18 +267,14 @@ const EntityTagInner: React.FC<EntityTag> = ({
           $fullWidth={fullWidth}
           $maxWidth={tagMaxWidth}
           $isFavorited={isFavorited ?? false}
-          $hasDocument={documentMark !== undefined}
+          $hasDocument={hasDocument}
           $isItalic={isFirstLabelEmpty(entity.labels)}
         >
           {entityLabel}
         </StyledLabel>
-        {documentMark && (
+        {hasDocument && (
           <StyledDocumentIconWrap $invertedLabel={isSelected ?? false}>
-            {documentMark === "document" ? (
-              <StyledDocumentIcon size={13} />
-            ) : (
-              <StyledAnchorIcon size={12} />
-            )}
+            <StyledDocumentIcon size={13} />
           </StyledDocumentIconWrap>
         )}
       </StyledLabelWrap>
@@ -296,7 +284,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
     entityLabel,
     isSelected,
     isFavorited,
-    documentMark,
+    hasDocument,
     showOnly,
     fullWidth,
     tagMaxWidth,

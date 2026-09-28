@@ -19,7 +19,6 @@ import {
   DraggedEntityReduxItem,
   EntityDragItem,
   IExtendedResponseTree,
-  TerritoryDocumentMark,
 } from "types";
 import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import TerritoryTreeNodeArrowIcon from "./TerritoryTreeNodeArrowIcon";
@@ -47,8 +46,8 @@ interface TerritoryTreeNode {
   updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
   // incremented by the tree box to fold every node off the selected path
   foldAllSignal?: number;
-  // document marks of the territories anchored in documents, by territory id
-  territoryDocumentMarks: Map<string, TerritoryDocumentMark>;
+  // ids of the territories encapsulating a document
+  territoriesWithDocument: Set<string>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,
@@ -65,7 +64,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   storedTerritories,
   updateUserMutation,
   foldAllSignal = 0,
-  territoryDocumentMarks,
+  territoriesWithDocument,
 }) => {
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
@@ -277,7 +276,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 updateOrderFn={moveTerritoryMutation.mutate}
                 statementsCount={statementsCount}
                 isFavorited={isFavorited}
-                documentMark={territoryDocumentMarks.get(id)}
+                hasDocument={territoriesWithDocument.has(id)}
                 showOnly="label"
                 tooltipPosition="right"
                 customTooltipAttributes={{
@@ -323,7 +322,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               storedTerritories={storedTerritories}
               updateUserMutation={updateUserMutation}
               foldAllSignal={foldAllSignal}
-              territoryDocumentMarks={territoryDocumentMarks}
+              territoriesWithDocument={territoriesWithDocument}
             />
           ))}
         {!hideChildTerritories && isExpanded && showPagination && (

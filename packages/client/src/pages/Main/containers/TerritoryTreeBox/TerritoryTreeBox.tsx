@@ -27,7 +27,7 @@ import {
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import { filterTreeByFilters, markNodesWithFilters } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { getTerritoryDocumentMarks } from "./territoryDocumentMarks";
+import { getDocumentTerritoryIds } from "./documentTerritories";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -49,8 +49,8 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const { data: documents } = useDocumentsQuery();
 
-  const territoryDocumentMarks = useMemo(
-    () => getTerritoryDocumentMarks(treeData, documents),
+  const territoriesWithDocument = useMemo(
+    () => getDocumentTerritoryIds(treeData, documents),
     [treeData, documents],
   );
 
@@ -263,7 +263,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
                     foldAllSignal={foldAllSignal}
-                    territoryDocumentMarks={territoryDocumentMarks}
+                    territoriesWithDocument={territoriesWithDocument}
                   />
                 )}
 

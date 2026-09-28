@@ -2,7 +2,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { FaStar } from "react-icons/fa";
 import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
-import { IcoAnchorCheck, IcoFileText } from "Theme/icons";
+import { IcoFileText } from "Theme/icons";
 
 interface StyledEntityTagWrap {}
 export const StyledEntityTagWrap = styled.div<StyledEntityTagWrap>`
@@ -142,9 +142,6 @@ export const StyledDocumentIconWrap = styled.div<StyledDocumentIconWrap>`
     $invertedLabel ? theme.color.tagSelectedColor : theme.color.tagColor};
 `;
 export const StyledDocumentIcon = styled(IcoFileText)`
-  flex-shrink: 0;
-`;
-export const StyledAnchorIcon = styled(IcoAnchorCheck)`
   flex-shrink: 0;
 `;
 

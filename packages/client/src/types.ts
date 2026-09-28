@@ -408,9 +408,6 @@ export interface IExtendedResponseTree extends IResponseTree {
   foundByRecursion?: boolean;
 }
 
-// "document": topmost territory anchored in a document, "anchor": anchored below it
-export type TerritoryDocumentMark = "document" | "anchor";
-
 export enum StatementListDisplayMode {
   TEXT = "text",
   LIST = "list",
