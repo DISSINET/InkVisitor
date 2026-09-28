@@ -1,8 +1,8 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { Checkbox, Input } from "components";
 import { AttributeButtonGroup } from "components/advanced";
-import { useTheme } from "hooks";
 import React from "react";
+import { IcoSearch } from "Theme/icons";
 import { ITerritoryFilter } from "types";
 import {
   StyledFilterList,
@@ -10,7 +10,6 @@ import {
   StyledInputWrap,
   StyledLogicalOperator,
 } from "./TerritoryTreeFilterStyles";
-import { IcoSearch } from "Theme/icons";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
