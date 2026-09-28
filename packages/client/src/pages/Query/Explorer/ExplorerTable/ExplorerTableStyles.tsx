@@ -607,8 +607,16 @@ export const StyledCellContent = styled.div`
   width: 100%;
 `;
 
-export const StyledCellArrayWrap = styled.div`
+// $singleLine keeps values with subproperties on the row's one visible line:
+// the wrap shrinks to the cell and each value clips its own subproperties
+export const StyledCellArrayWrap = styled.div<{ $singleLine?: boolean }>`
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: ${({ $singleLine }) => ($singleLine ? "nowrap" : "wrap")};
   gap: 0.25rem;
+  ${({ $singleLine }) =>
+    $singleLine &&
+    `
+    min-width: 0;
+    overflow: hidden;
+  `}
 `;

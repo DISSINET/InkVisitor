@@ -51,6 +51,8 @@ const OVERFLOW_CHIP_PX = 18;
 const SUGGESTER_PX = 110;
 /** Subproperty group bar: 2px border + 0.25rem padding. */
 const SUBPROP_BAR_PX = 6;
+/** Subproperty level label ("2nd", "3rd" at xxs) plus the gap after it. */
+const SUBPROP_LEVEL_PX = 20;
 /** Gap between subproperties inside a group (0.5rem). */
 const SUBPROP_GAP_PX = 8;
 
@@ -74,12 +76,29 @@ const estimateItemWidth = (item: unknown, hasUnlink: boolean): number => {
 };
 
 /**
+ * The part of a value's subproperties shown inline in the cell: only the first
+ * pair, without anything nested under it. The rest waits in the tooltip tree.
+ */
+export const getInlineSubProps = (
+  subProps: IResponseQuerySubProp[],
+): { inline: IResponseQuerySubProp[]; hasHidden: boolean } => {
+  const [first] = subProps;
+  if (!first) {
+    return { inline: [], hasHidden: false };
+  }
+  return {
+    inline: [{ ...first, children: [] }],
+    hasHidden: subProps.length > 1 || first.children.length > 0,
+  };
+};
+
+/**
  * Width of the subproperty group rendered after a value (ExplorerCellSubProps):
- * its bar and padding, then the type and value tags of each subproperty with
- * any deeper group after them.
+ * its bar, padding and level label, then the type and value tags of each
+ * subproperty with any deeper group after them.
  */
 export const estimateSubPropsWidth = (subProps: IResponseQuerySubProp[]): number => {
-  let w = SUBPROP_BAR_PX;
+  let w = SUBPROP_BAR_PX + SUBPROP_LEVEL_PX;
   subProps.forEach((subProp, i) => {
     if (i > 0) {
       w += SUBPROP_GAP_PX;
@@ -121,7 +140,11 @@ export const estimateColumnWidth = (
       w += estimateItemWidth(item, column.editable) + CELL_GAP_PX;
       const subProps = subPropsByValue?.[(item as IEntity)?.id];
       if (subProps?.length) {
-        w += estimateSubPropsWidth(subProps) + CELL_GAP_PX;
+        const { inline, hasHidden } = getInlineSubProps(subProps);
+        w += estimateSubPropsWidth(inline) + CELL_GAP_PX;
+        if (hasHidden) {
+          w += OVERFLOW_CHIP_PX;
+        }
       }
     }
     if (items.length > displayLimit) {

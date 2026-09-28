@@ -21,7 +21,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
-import { ExplorerCellSubProps } from "./Cell/ExplorerCellSubProps";
+import { ExplorerCellValueWithSubProps } from "./Cell/ExplorerCellValueWithSubProps";
 import {
   StyledAltLabelAddInput,
   StyledAltLabelChip,
@@ -510,22 +510,28 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
+        const subPropsByValue = columnSubProps?.[column.id];
         return (
-          <StyledCellArrayWrap>
+          <StyledCellArrayWrap $singleLine={!!subPropsByValue}>
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
                 const entityId = (cellEntity as IEntity)?.id;
-                const subProps = entityId ? columnSubProps?.[column.id]?.[entityId] : undefined;
+                const subProps = entityId ? subPropsByValue?.[entityId] : undefined;
+                if (subProps?.length) {
+                  return (
+                    <ExplorerCellValueWithSubProps
+                      key={entityId}
+                      value={cellEntity as IEntity}
+                      valueTag={renderCellValue(cellEntity, recordEntity, column)}
+                      subProps={subProps}
+                      onEntityDoubleClick={handleOpenEntityInDetail}
+                    />
+                  );
+                }
                 return (
                   <React.Fragment key={entityId ? entityId : key}>
                     {renderCellValue(cellEntity, recordEntity, column)}
-                    {!!subProps?.length && (
-                      <ExplorerCellSubProps
-                        subProps={subProps}
-                        onEntityDoubleClick={handleOpenEntityInDetail}
-                      />
-                    )}
                   </React.Fragment>
                 );
               })}
@@ -533,6 +539,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               <ExplorerCellOverflow
                 hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
                 onEntityDoubleClick={handleOpenEntityInDetail}
+                subPropsByValue={subPropsByValue}
               />
             )}
           </StyledCellArrayWrap>

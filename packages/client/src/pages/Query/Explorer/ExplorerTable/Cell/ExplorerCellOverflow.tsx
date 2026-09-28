@@ -1,4 +1,4 @@
-import { IEntity, IUser } from "@inkvisitor/shared/types";
+import { IEntity, IResponseQuerySubProp, IUser } from "@inkvisitor/shared/types";
 import { Tooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { useTheme } from "hooks";
@@ -6,6 +6,8 @@ import { StyledDots } from "pages/Main/containers/StatementsListBox/StatementLis
 import React, { useState } from "react";
 import { getEntityLabel } from "utils/utils";
 import { StyledTooltipRow, StyledTooltipValue } from "../Header/ExploreTableHeaderTooltipStyles";
+import { ExplorerCellValueTree } from "./ExplorerCellSubProps";
+import { useHoverTooltip } from "./useHoverTooltip";
 import {
   StyledOverflowTextList,
   StyledOverflowTooltipContent,
@@ -36,14 +38,17 @@ function getOverflowItemLabel(item: CellOverflowItem): string {
 interface ExplorerCellOverflowProps {
   hiddenItems: CellOverflowItem[];
   onEntityDoubleClick?: (entity: IEntity) => (e: React.MouseEvent) => void;
+  /** Subproperties shown after each hidden value, by value entity id. */
+  subPropsByValue?: Record<string, IResponseQuerySubProp[]>;
 }
 
 export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
   hiddenItems,
   onEntityDoubleClick,
+  subPropsByValue,
 }) => {
   const theme = useTheme();
-  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltip = useHoverTooltip();
   const [referenceElement, setReferenceElement] = useState<HTMLSpanElement | null>(null);
 
   if (hiddenItems.length === 0) {
@@ -56,14 +61,27 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
   // React tree to the row handler - the marker is what the row checks for
   const content = allEntities ? (
     <StyledOverflowTooltipContent data-no-row-click="true">
-      {hiddenItems.map((entity, key) => (
-        <EntityTag
-          key={entity.id ?? key}
-          entity={entity}
-          tooltipPosition="bottom"
-          onDoubleClick={onEntityDoubleClick?.(entity)}
-        />
-      ))}
+      {hiddenItems.map((entity, key) => {
+        const subProps = subPropsByValue?.[entity.id];
+        if (subProps?.length) {
+          return (
+            <ExplorerCellValueTree
+              key={entity.id}
+              value={entity}
+              subProps={subProps}
+              onEntityDoubleClick={onEntityDoubleClick}
+            />
+          );
+        }
+        return (
+          <EntityTag
+            key={entity.id ?? key}
+            entity={entity}
+            tooltipPosition="bottom"
+            onDoubleClick={onEntityDoubleClick?.(entity)}
+          />
+        );
+      })}
     </StyledOverflowTooltipContent>
   ) : (
     <StyledOverflowTextList data-no-row-click="true">
@@ -78,14 +96,14 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
   return (
     <>
       <Tooltip
-        visible={showTooltip}
+        visible={tooltip.visible}
         referenceElement={referenceElement}
         offsetY={-14}
         position="right"
         color="success"
         noArrow
         tagGroup={allEntities}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseLeave={tooltip.onTooltipMouseLeave}
         content={content}
       />
       <StyledDots
@@ -93,7 +111,8 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
         ref={setReferenceElement}
         data-no-row-click="true"
         style={{ color: theme.color.primary }}
-        onMouseEnter={() => setShowTooltip(true)}
+        onMouseEnter={tooltip.onTriggerMouseEnter}
+        onMouseLeave={tooltip.onTriggerMouseLeave}
       >
         ...
       </StyledDots>
