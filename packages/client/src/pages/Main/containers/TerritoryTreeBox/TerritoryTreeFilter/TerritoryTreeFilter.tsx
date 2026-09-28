@@ -63,6 +63,12 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           value={filterData.withStatements}
           onChangeFn={(value: boolean) => handleFilterChange("withStatements", value)}
         />
+        <Checkbox
+          label="with document"
+          value={filterData.withDocument}
+          onChangeFn={(value: boolean) => handleFilterChange("withDocument", value)}
+          tooltipLabel="Territories encapsulating a document"
+        />
         <StyledInputWrap>
           <Input
             value={filterData.filter}

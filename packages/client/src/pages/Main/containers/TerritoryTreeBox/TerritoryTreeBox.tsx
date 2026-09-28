@@ -34,6 +34,7 @@ const initFilterSettings: ITerritoryFilter = {
   editorRights: false,
   withSubterritories: false,
   withStatements: false,
+  withDocument: false,
   filter: "",
   operator: "or",
 };
@@ -97,7 +98,7 @@ export const TerritoryTreeBox: React.FC = () => {
         setFilteredTreeData(getFilteredTreeData());
       }
     }
-  }, [treeData, filterSettings, userData]);
+  }, [treeData, filterSettings, userData, territoriesWithDocument]);
 
   const handleFilterChange = (key: keyof ITerritoryFilter, value: boolean | string) =>
     setFilterSettings({ ...filterSettings, [key]: value });
@@ -112,6 +113,7 @@ export const TerritoryTreeBox: React.FC = () => {
         filterSettings.editorRights ||
         filterSettings.withStatements ||
         filterSettings.withSubterritories ||
+        filterSettings.withDocument ||
         filterSettings.filter.length > 0;
 
       if (!hasActiveFilters) {
@@ -127,12 +129,22 @@ export const TerritoryTreeBox: React.FC = () => {
 
       const favoriteIds = userData?.storedTerritories.map((t) => t.territory.id) ?? [];
 
-      newFilteredTreeData = filterTreeByFilters(treeData, filterSettings, favoriteIds);
+      newFilteredTreeData = filterTreeByFilters(
+        treeData,
+        filterSettings,
+        favoriteIds,
+        territoriesWithDocument,
+      );
 
       // Mark tree data for highlighting. Pruning and marking read the same
       // favorites, so every surviving row carries a flag and can dim
       if (newFilteredTreeData) {
-        return markNodesWithFilters(newFilteredTreeData, filterSettings, favoriteIds);
+        return markNodesWithFilters(
+          newFilteredTreeData,
+          filterSettings,
+          favoriteIds,
+          territoriesWithDocument,
+        );
       }
 
       return newFilteredTreeData;

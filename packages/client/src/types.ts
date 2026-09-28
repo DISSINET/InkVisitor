@@ -400,6 +400,7 @@ export interface ITerritoryFilter {
   editorRights: boolean;
   withSubterritories: boolean;
   withStatements: boolean;
+  withDocument: boolean;
   filter: string;
   operator?: "and" | "or"; // "and" on default
 }
