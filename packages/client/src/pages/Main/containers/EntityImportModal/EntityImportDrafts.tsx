@@ -10,6 +10,7 @@ import {
   deleteDraftRelation,
   ImportDraft,
   ImportIssue,
+  reorderDraftRelations,
   updateDraftEntity,
   updateDraftRelation,
 } from "utils/entityImport";
@@ -86,6 +87,11 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
     (relationId: string) => onDraftChange((current) => deleteDraftRelation(current, relationId)),
     [onDraftChange]
   );
+  const reorderRelations = useCallback(
+    (orderedIds: string[]) =>
+      onDraftChange((current) => reorderDraftRelations(current, orderedIds)),
+    [onDraftChange]
+  );
 
   const context = useMemo<EntityDraft>(
     () => ({
@@ -94,9 +100,10 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
       createRelation,
       updateRelation,
       deleteRelation,
+      reorderRelations,
       widthElementId: DRAFT_DETAIL_ELEMENT_ID,
     }),
-    [draftEntityIds, updateEntity, createRelation, updateRelation, deleteRelation]
+    [draftEntityIds, updateEntity, createRelation, updateRelation, deleteRelation, reorderRelations]
   );
 
   const detail = selectedId ? buildDraftDetail(draft, selectedId, right) : undefined;

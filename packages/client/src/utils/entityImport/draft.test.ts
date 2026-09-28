@@ -9,6 +9,7 @@ import {
   mergeChanges,
   missingEntityIds,
   removeDraftEntity,
+  reorderDraftRelations,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
@@ -63,6 +64,22 @@ describe("draft edits", () => {
 
     draft = deleteDraftRelation(draft, "r4");
     expect(draft.relations.map((item) => item.id)).toEqual(["r1", "r2", "r3"]);
+  });
+
+  it("reorders relations by position, which Detail then shows and the import creates in", () => {
+    let draft = createDraftRelation(baseDraft(), relation("r4", RelationEnums.Type.Superclass, "dog", "pet"));
+    draft = createDraftRelation(draft, relation("r5", RelationEnums.Type.Superclass, "dog", "mammal"));
+
+    // dog's superclasses r1, r4, r5 become r5, r1, r4; the other relations keep their slots
+    draft = reorderDraftRelations(draft, ["r5", "r1", "r4"]);
+    expect(draft.relations.map((item) => item.id)).toEqual(["r5", "r2", "r3", "r1", "r4"]);
+
+    const detail = buildDraftDetail(draft, "dog", UserEnums.RoleMode.Write)!;
+    expect(detail.relations.SCL!.connections.map((item) => item.id)).toEqual(["r5", "r1", "r4"]);
+    const [dogJson] = draftToImportJson(draft) as { relations: { type: string; entityIds: string[] }[] }[];
+    expect(
+      dogJson.relations.filter((item) => item.type === "SCL").map((item) => item.entityIds[1])
+    ).toEqual(["mammal", "animal", "pet"]);
   });
 
   it("leaves out an entity with every relation it is in", () => {

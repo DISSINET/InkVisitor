@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation } from "@inkvisitor/shared/types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
@@ -13,6 +13,7 @@ import { ThemeProvider } from "styled-components";
 import theme from "Theme/theme";
 import { ImportDraft } from "utils/entityImport";
 import { normalizeEntities } from "utils/entityImport/normalizeEntities";
+import { saveStoredUser } from "utils/userStorage";
 import { EntityImportDrafts } from "./EntityImportDrafts";
 
 // Detail renders with no server behind it: every api call answers empty
@@ -100,31 +101,36 @@ const Harness = () => {
   );
 };
 
-describe("EntityImportDrafts", () => {
-  let container: HTMLDivElement;
-  let root: Root;
+let container: HTMLDivElement;
+let root: Root;
 
+// the url is the one of the page behind the modal
+const renderDrafts = async (url = "/") => {
+  container = document.createElement("div");
+  document.body.append(container);
+  root = createRoot(container);
+  await act(async () => {
+    root.render(
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <QueryClientProvider client={new QueryClient()}>
+            <DndProvider backend={HTML5Backend}>
+              <MemoryRouter initialEntries={[url]}>
+                <SearchParamsProvider>
+                  <Harness />
+                </SearchParamsProvider>
+              </MemoryRouter>
+            </DndProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </Provider>
+    );
+  });
+};
+
+describe("EntityImportDrafts", () => {
   beforeEach(async () => {
-    container = document.createElement("div");
-    document.body.append(container);
-    root = createRoot(container);
-    await act(async () => {
-      root.render(
-        <Provider store={store}>
-          <ThemeProvider theme={theme}>
-            <QueryClientProvider client={new QueryClient()}>
-              <DndProvider backend={HTML5Backend}>
-                <MemoryRouter>
-                  <SearchParamsProvider>
-                    <Harness />
-                  </SearchParamsProvider>
-                </MemoryRouter>
-              </DndProvider>
-            </QueryClientProvider>
-          </ThemeProvider>
-        </Provider>
-      );
-    });
+    await renderDrafts();
   });
 
   afterEach(() => {
@@ -184,5 +190,28 @@ describe("EntityImportDrafts", () => {
     });
 
     expect(latestDraft.entities[0].detail).toBe("edited in the draft");
+  });
+});
+
+describe("EntityImportDrafts behind a selected root territory", () => {
+  beforeEach(async () => {
+    saveStoredUser("admin", "admin-id", UserEnums.Role.Admin);
+    // the Detail box behind the modal shows the root territory, which only
+    // the Owner may edit
+    await renderDrafts("/#selectedDetail=T0&detail=T0");
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    localStorage.clear();
+  });
+
+  it("keeps the drafts editable for an admin", () => {
+    const labelInput = [...container.querySelectorAll("input")].find(
+      (input) => input.value === "TEST dog"
+    );
+    expect(labelInput).toBeDefined();
+    expect(labelInput!.disabled).toBe(false);
   });
 });

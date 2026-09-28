@@ -230,6 +230,15 @@ export const EntityDetailRelationTypeBlock: React.FC<
   }, []);
 
   const updateOrderFn = (relationId: string, newOrder: number) => {
+    // a draft orders its relations by position; newOrder is the target index
+    if (draft) {
+      const ids = selectedRelations
+        .map((relation) => relation.id)
+        .filter((id) => id !== relationId);
+      ids.splice(newOrder, 0, relationId);
+      draft.reorderRelations(ids);
+      return;
+    }
     let allOrders: number[] = selectedRelations.map((relation, key) =>
       relation.order !== undefined ? relation.order : 0
     );

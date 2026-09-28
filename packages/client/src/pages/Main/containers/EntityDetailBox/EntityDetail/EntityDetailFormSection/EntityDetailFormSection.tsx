@@ -18,7 +18,7 @@ import {
 import { IConceptData } from "@inkvisitor/shared/types/concept";
 import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import { useDocumentsQuery, useOrderedLanguageDict } from "hooks/react-query";
-import { useEntityDraft } from "hooks";
+import { DRAFT_WRITE_RESPONSE, useEntityDraft } from "hooks";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -157,7 +157,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     mutationFn: async (tObject: { territoryId: string; changes: Partial<ITerritory> }) => {
       if (draft) {
         draft.updateEntity(tObject.territoryId, tObject.changes);
-        return { data: { result: true } } as AxiosResponse<IResponseGeneric>;
+        return DRAFT_WRITE_RESPONSE;
       }
       return await api.entityUpdate(tObject?.territoryId, tObject?.changes);
     },
@@ -165,6 +165,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
       // data: IResponseGeneric,
       // variables: { territoryId: string; changes: Partial<ITerritory> }
       {
+        // a draft's move exists only in the import modal
+        if (draft) {
+          return;
+        }
         queryClient.invalidateQueries({ queryKey: ["tree"] });
         queryClient.invalidateQueries({ queryKey: ["territory"] });
         queryClient.invalidateQueries({ queryKey: ["entity"] });

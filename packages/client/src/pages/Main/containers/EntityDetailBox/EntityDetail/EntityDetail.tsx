@@ -6,7 +6,6 @@ import {
   IProp,
   IReference,
   IResponseDetail,
-  IResponseGeneric,
   IResponseStatement,
   Relation,
 } from "@inkvisitor/shared/types";
@@ -14,7 +13,6 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { AxiosResponse } from "axios";
 import {
   boxContentId,
   Button,
@@ -32,7 +30,13 @@ import {
   RelationAuditTable,
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
-import { useEntityDraft, useIsInViewport, useSearchParams, useWidthBreakpoint } from "hooks";
+import {
+  DRAFT_WRITE_RESPONSE,
+  useEntityDraft,
+  useIsInViewport,
+  useSearchParams,
+  useWidthBreakpoint,
+} from "hooks";
 import { DETAIL_TAB_ENTITIES_KEY, useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import React, { useEffect, useMemo, useState } from "react";
@@ -90,9 +94,6 @@ const allowedEntityChangeClasses = [
   EntityEnums.Class.Location,
   EntityEnums.Class.Object,
 ];
-// what the api answers a write with, for the writes a draft settles locally
-const DRAFT_RESPONSE = { data: { result: true } } as AxiosResponse<IResponseGeneric>;
-
 const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
@@ -138,7 +139,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     setSelectedDetailId,
     appendDetailId,
     detailIdArray,
-    selectedDetailId,
   } = useSearchParams();
 
   useEffect(() => {
@@ -248,7 +248,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (changes: Partial<IEntity>) => {
       if (draft) {
         draft.updateEntity(detailId, changes);
-        return DRAFT_RESPONSE;
+        return DRAFT_WRITE_RESPONSE;
       }
       return await api.entityUpdate(detailId, changes);
     },
@@ -300,7 +300,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (newClass: EntityEnums.Class) => {
       if (draft) {
         draft.updateEntity(detailId, { class: newClass });
-        return DRAFT_RESPONSE;
+        return DRAFT_WRITE_RESPONSE;
       }
       return await api.entityUpdate(detailId, { class: newClass });
     },
@@ -574,7 +574,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (newRelation: Relation.IRelation) => {
       if (draft) {
         draft.createRelation(newRelation);
-        return DRAFT_RESPONSE;
+        return DRAFT_WRITE_RESPONSE;
       }
       return await api.relationCreate(newRelation);
     },
@@ -597,7 +597,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     }) => {
       if (draft) {
         draft.updateRelation(relationObject.relationId, relationObject.changes);
-        return DRAFT_RESPONSE;
+        return DRAFT_WRITE_RESPONSE;
       }
       return await api.relationUpdate(relationObject.relationId, relationObject.changes);
     },
@@ -614,7 +614,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     mutationFn: async (relationId: string) => {
       if (draft) {
         draft.deleteRelation(relationId);
-        return DRAFT_RESPONSE;
+        return DRAFT_WRITE_RESPONSE;
       }
       return await api.relationDelete(relationId);
     },
@@ -658,7 +658,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     draft ? draft.widthElementId : boxContentId("Detail"),
   );
 
-  const isRootTerritory = selectedDetailId === rootTerritoryId;
+  // the entity this Detail shows; the selected tab of the Detail box can be
+  // another one when Detail renders a draft of the JSON import
+  const isRootTerritory = detailId === rootTerritoryId;
   const isOwner = (getStoredUserRole() as UserEnums.Role) === UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
   const canEditEntity = userCanEdit && !disableAttributesForNonOwnersInRoot;

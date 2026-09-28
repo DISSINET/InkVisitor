@@ -1,4 +1,5 @@
-import { IEntity, Relation } from "@inkvisitor/shared/types";
+import { IEntity, IResponseGeneric, Relation } from "@inkvisitor/shared/types";
+import { AxiosResponse } from "axios";
 import { createContext, useContext } from "react";
 
 /**
@@ -15,6 +16,8 @@ export interface EntityDraft {
   createRelation: (relation: Relation.IRelation) => void;
   updateRelation: (relationId: string, changes: Partial<Relation.IRelation>) => void;
   deleteRelation: (relationId: string) => void;
+  // puts these relations in this order; a draft orders relations by position
+  reorderRelations: (orderedIds: string[]) => void;
   // element whose width decides Detail's narrow layout
   widthElementId: string;
 }
@@ -23,3 +26,6 @@ export const EntityDraftContext = createContext<EntityDraft | null>(null);
 
 /** The draft Detail is editing, or null for a stored entity. */
 export const useEntityDraft = () => useContext(EntityDraftContext);
+
+/** What the api answers a write with, for the writes a draft settles locally. */
+export const DRAFT_WRITE_RESPONSE = { data: { result: true } } as AxiosResponse<IResponseGeneric>;

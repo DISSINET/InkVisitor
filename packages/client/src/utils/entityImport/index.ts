@@ -14,6 +14,7 @@ export {
   draftToImportJson,
   missingEntityIds,
   removeDraftEntity,
+  reorderDraftRelations,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";

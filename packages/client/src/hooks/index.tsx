@@ -2,7 +2,7 @@ import { useContainerDimensions } from "./useContainerDimensions";
 import useDebounce from "./useDebounce";
 import useDebouncedCallback from "./useDebouncedCallback";
 import { useElementSize } from "./useElementSize";
-import { EntityDraftContext, useEntityDraft } from "./useEntityDraft";
+import { DRAFT_WRITE_RESPONSE, EntityDraftContext, useEntityDraft } from "./useEntityDraft";
 import { useIsInViewport } from "./useIsInViewport";
 import useKeyLift from "./useKeyLift";
 import useKeyPress from "./useKeyPress";
@@ -21,6 +21,7 @@ export {
   useElementSize,
   EntityDraftContext,
   useEntityDraft,
+  DRAFT_WRITE_RESPONSE,
   useIsInViewport,
   useSearchParams,
   useDebouncedCallback,

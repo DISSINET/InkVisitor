@@ -79,6 +79,24 @@ export const updateDraftRelation = (
   ),
 });
 
+/**
+ * Puts the given relations in the given order. A draft keeps no order values:
+ * relations are shown and created in list order, and the server appends each
+ * new relation last, so the list order is the order they end up with.
+ */
+export const reorderDraftRelations = (draft: ImportDraft, orderedIds: string[]): ImportDraft => {
+  const byId = new Map(draft.relations.map((relation) => [relation.id, relation]));
+  const reordered = orderedIds.map((id) => byId.get(id)).filter(Boolean) as Relation.IRelation[];
+  let next = 0;
+  return {
+    ...draft,
+    // the moved relations take the slots they held before, in the new order
+    relations: draft.relations.map((relation) =>
+      orderedIds.includes(relation.id) ? reordered[next++] : relation
+    ),
+  };
+};
+
 export const deleteDraftRelation = (draft: ImportDraft, relationId: string): ImportDraft => ({
   ...draft,
   relations: draft.relations.filter((relation) => relation.id !== relationId),
