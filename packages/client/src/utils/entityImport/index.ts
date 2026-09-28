@@ -17,4 +17,4 @@ export {
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
-export type { ImportDraft } from "./draft";
+export type { DraftCleanup, ImportDraft } from "./draft";

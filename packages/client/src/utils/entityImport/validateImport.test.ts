@@ -75,6 +75,35 @@ describe("validateImport", () => {
     ]);
   });
 
+  it("fills in the entity a relation is listed under, so an entity without an id can have relations", async () => {
+    const context = contextWith([
+      existingEntity("animal", EntityEnums.Class.Concept),
+      existingEntity("hound", EntityEnums.Class.Concept),
+    ]);
+    const text = JSON.stringify([
+      {
+        class: "C",
+        labels: ["TEST dog"],
+        relations: [
+          { type: "SCL", entityIds: ["animal"] },
+          { type: "SYN", entityIds: ["hound"] },
+        ],
+      },
+      { id: "cat", class: "C", labels: ["TEST cat"], relations: [{ type: "SCL", entityIds: ["animal"] }] },
+    ]);
+
+    const { errors, plan } = await validateImport(text, context);
+
+    expect(errors).toEqual([]);
+    const dogId = plan!.entities[0].id;
+    expect(dogId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(plan!.relations.map((relation) => [relation.type, relation.entityIds])).toEqual([
+      [RelationEnums.Type.Superclass, [dogId, "animal"]],
+      [RelationEnums.Type.Synonym, [dogId, "hound"]],
+      [RelationEnums.Type.Superclass, ["cat", "animal"]],
+    ]);
+  });
+
   it("stops at a parse error without asking the database", async () => {
     const context = contextWith([]);
     const { errors } = await validateImport("[", context);

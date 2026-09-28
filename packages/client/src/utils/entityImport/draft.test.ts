@@ -1,5 +1,5 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, Relation } from "@inkvisitor/shared/types";
+import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
   buildDraftDetail,
   createDraftRelation,
@@ -71,6 +71,65 @@ describe("draft edits", () => {
     expect(draft.relations).toEqual([]);
     expect(removedRelations.map((item) => item.id)).toEqual(["r1", "r2", "r3"]);
   });
+
+  it("removes the links other drafts have to a left-out entity", () => {
+    const withLinks = updateDraftEntity(baseDraft(), "puppy", {
+      props: newEntity("x", {
+        props: [
+          { type: "dog", value: "animal", children: [{ type: "size" }] },
+          { type: "size", value: "dog", children: [{ type: "dog" }, { type: "size", value: "dog" }] },
+        ],
+      }).props,
+      references: newEntity("x", {
+        references: [{ resource: "dog", value: "page" }, { resource: "book", value: "dog" }],
+      }).references,
+    });
+
+    const { draft, cleanups } = removeDraftEntity(withLinks, "dog");
+    const puppy = draft.entities[0];
+
+    // a metaprop typed by dog goes with its children; a value of dog is cleared
+    expect(puppy.props).toHaveLength(1);
+    expect(puppy.props[0]).toMatchObject({ type: { entityId: "size" }, value: { entityId: "" } });
+    expect(puppy.props[0].children.map((child) => [child.type.entityId, child.value.entityId])).toEqual([
+      ["size", ""],
+    ]);
+    expect(puppy.references.map((item) => [item.resource, item.value])).toEqual([["book", ""]]);
+    expect(cleanups).toEqual([
+      {
+        entityId: "puppy",
+        changes: [
+          "2 metaprops removed",
+          "2 metaprop values cleared",
+          "1 reference removed",
+          "1 reference value cleared",
+        ],
+      },
+    ]);
+  });
+
+  it("moves territories under a left-out territory to its parent", () => {
+    const territory = (id: string, parentId: string, protocol = {}) =>
+      newEntity(id, { class: "T", data: { parent: { territoryId: parentId }, protocol } });
+    const draft: ImportDraft = {
+      entities: [
+        territory("manuscript", "T0"),
+        territory("folio", "manuscript", { guidelines: ["manuscript"], startDate: "manuscript" }),
+      ],
+      relations: [],
+      existing: {},
+    };
+
+    const { draft: rest, cleanups } = removeDraftEntity(draft, "manuscript");
+    const folio = rest.entities[0] as ITerritory;
+
+    expect(folio.data.parent).toMatchObject({ territoryId: "T0" });
+    expect(folio.data.protocol).toMatchObject({ guidelines: [], startDate: "" });
+    expect(cleanups[0].changes).toEqual([
+      "moved to the parent of the left-out territory",
+      "2 protocol entries removed",
+    ]);
+  });
 });
 
 describe("buildDraftDetail", () => {
@@ -103,7 +162,7 @@ describe("draftToImportJson", () => {
     expect(puppy.relations.map((item) => item.entityIds)).toEqual([["puppy", "dog"]]);
   });
 
-  it("passes the import validation, and reports what a closed tab leaves dangling", async () => {
+  it("passes the import validation, also after a tab with links to it is closed", async () => {
     const context = {
       role: UserEnums.Role.Editor,
       defaultLanguage: EntityEnums.Language.English,
@@ -117,13 +176,13 @@ describe("draftToImportJson", () => {
     expect(valid.errors).toEqual([]);
     expect(valid.plan!.relations).toHaveLength(3);
 
-    // puppy keeps a metaprop pointing at dog after dog's tab is closed
+    // puppy's metaprop pointed at dog; closing dog's tab removes it
     const withProp = updateDraftEntity(baseDraft(), "puppy", {
       props: newEntity("x", { props: [{ type: "dog" }] }).props,
     });
     const { draft } = removeDraftEntity(withProp, "dog");
-    const dangling = await validateImport(JSON.stringify(draftToImportJson(draft)), context);
-    expect(dangling.errors.map((error) => error.path)).toEqual(["props[0].type.entityId"]);
+    const rest = await validateImport(JSON.stringify(draftToImportJson(draft)), context);
+    expect(rest.errors).toEqual([]);
   });
 });
 

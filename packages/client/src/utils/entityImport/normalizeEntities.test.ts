@@ -32,6 +32,24 @@ describe("normalizeEntities", () => {
     expect((entity as IConcept).data).toEqual({ pos: EntityEnums.ConceptPartOfSpeech.Empty });
   });
 
+  it("gives an entity without an id, or with an empty one, a new id", () => {
+    const { entities, errors } = normalizeEntities(
+      [
+        { id: "kept-id", class: "C", labels: ["a"] },
+        { class: "C", labels: ["b"] },
+        { id: "", class: "C", labels: ["c"] },
+        { id: null, class: "C", labels: ["d"] },
+      ],
+      options
+    );
+
+    expect(errors).toEqual([]);
+    const [kept, ...generated] = entities.map((item) => item.entity.id);
+    expect(kept).toBe("kept-id");
+    generated.forEach((id) => expect(id).toMatch(/^[0-9a-f-]{36}$/));
+    expect(new Set(generated).size).toBe(3);
+  });
+
   it("keeps a provided id and the given fields", () => {
     const { entity, errors } = normalizeOne({
       id: "dog-id",

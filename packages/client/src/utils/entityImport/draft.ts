@@ -1,5 +1,5 @@
-import { RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IResponseDetail, Relation } from "@inkvisitor/shared/types";
+import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { IEntity, IProp, IResponseDetail, ITerritory, Relation } from "@inkvisitor/shared/types";
 import { buildEntityJson } from "./entityJson";
 import { isPlainObject, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
@@ -84,21 +84,138 @@ export const deleteDraftRelation = (draft: ImportDraft, relationId: string): Imp
   relations: draft.relations.filter((relation) => relation.id !== relationId),
 });
 
-/** Leaves an entity out of the import, together with every relation it is in. */
+/** What leaving an entity out changed in one of the remaining drafts. */
+export interface DraftCleanup {
+  entityId: string;
+  changes: string[];
+}
+
+const count = (amount: number, singular: string, plural: string) =>
+  `${amount} ${amount === 1 ? singular : plural}`;
+
+/**
+ * Removes every link to `removedId` from one draft: a metaprop typed by it
+ * goes (with its children), a metaprop or reference value pointing at it is
+ * cleared, a reference to it as resource goes, protocol entries go, and a
+ * territory under it moves to `newParentId`.
+ */
+const unlinkEntity = (
+  entity: IEntity,
+  removedId: string,
+  newParentId: string | undefined
+): { entity: IEntity; changes: string[] } => {
+  let removedProps = 0;
+  let clearedProps = 0;
+  const cleanProps = (props: IProp[]): IProp[] =>
+    props
+      .filter((prop) => {
+        if (prop.type.entityId === removedId) {
+          removedProps++;
+          return false;
+        }
+        return true;
+      })
+      .map((prop) => {
+        const value =
+          prop.value.entityId === removedId
+            ? (clearedProps++, { ...prop.value, entityId: "" })
+            : prop.value;
+        return { ...prop, value, children: cleanProps(prop.children) };
+      });
+  const props = cleanProps(entity.props);
+
+  let removedReferences = 0;
+  let clearedReferences = 0;
+  const references = entity.references
+    .filter((reference) => {
+      if (reference.resource === removedId) {
+        removedReferences++;
+        return false;
+      }
+      return true;
+    })
+    .map((reference) =>
+      reference.value === removedId
+        ? (clearedReferences++, { ...reference, value: "" })
+        : reference
+    );
+
+  const changes: string[] = [];
+  if (removedProps) changes.push(`${count(removedProps, "metaprop", "metaprops")} removed`);
+  if (clearedProps) changes.push(`${count(clearedProps, "metaprop value", "metaprop values")} cleared`);
+  if (removedReferences) changes.push(`${count(removedReferences, "reference", "references")} removed`);
+  if (clearedReferences) changes.push(`${count(clearedReferences, "reference value", "reference values")} cleared`);
+
+  let data = entity.data;
+  if (entity.class === EntityEnums.Class.Territory) {
+    const territoryData = (entity as ITerritory).data;
+    const nextData = { ...territoryData };
+    if (territoryData.parent && territoryData.parent.territoryId === removedId && newParentId) {
+      nextData.parent = { ...territoryData.parent, territoryId: newParentId };
+      changes.push("moved to the parent of the left-out territory");
+    }
+    if (territoryData.protocol) {
+      const protocol = { ...territoryData.protocol } as unknown as Record<string, string | string[]>;
+      let removedEntries = 0;
+      for (const [key, value] of Object.entries(protocol)) {
+        if (Array.isArray(value) && value.includes(removedId)) {
+          protocol[key] = value.filter((id) => id !== removedId);
+          removedEntries++;
+        } else if (value === removedId) {
+          protocol[key] = "";
+          removedEntries++;
+        }
+      }
+      if (removedEntries) {
+        nextData.protocol = protocol as unknown as ITerritory["data"]["protocol"];
+        changes.push(`${count(removedEntries, "protocol entry", "protocol entries")} removed`);
+      }
+    }
+    data = nextData;
+  }
+
+  return { entity: changes.length ? { ...entity, props, references, data } : entity, changes };
+};
+
+/**
+ * Leaves an entity out of the import: every relation it is in goes with it,
+ * and the other drafts lose their links to it, so what remains can still be
+ * created.
+ */
 export const removeDraftEntity = (
   draft: ImportDraft,
   entityId: string
-): { draft: ImportDraft; removedRelations: Relation.IRelation[] } => {
+): { draft: ImportDraft; removedRelations: Relation.IRelation[]; cleanups: DraftCleanup[] } => {
+  const removed = draft.entities.find((entity) => entity.id === entityId);
+  // a territory under the left-out one keeps a place in the tree
+  const removedParent =
+    removed?.class === EntityEnums.Class.Territory
+      ? (removed as ITerritory).data.parent || undefined
+      : undefined;
+
   const removedRelations = draft.relations.filter((relation) =>
     relation.entityIds.includes(entityId)
   );
+
+  const cleanups: DraftCleanup[] = [];
+  const entities = draft.entities
+    .filter((entity) => entity.id !== entityId)
+    .map((entity) => {
+      const result = unlinkEntity(entity, entityId, removedParent?.territoryId);
+      if (result.changes.length) {
+        cleanups.push({ entityId: entity.id, changes: result.changes });
+      }
+      return result.entity;
+    });
+
   return {
     draft: {
       ...draft,
-      entities: draft.entities.filter((entity) => entity.id !== entityId),
+      entities,
       relations: draft.relations.filter((relation) => !removedRelations.includes(relation)),
     },
     removedRelations,
+    cleanups,
   };
 };
 

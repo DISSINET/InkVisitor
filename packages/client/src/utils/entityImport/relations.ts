@@ -71,18 +71,28 @@ export const normalizeRelationItems = (
       }
       const rule = ruleOf(type);
 
-      const entityIds = raw.entityIds;
-      if (!Array.isArray(entityIds) || !entityIds.every(isNonEmptyString)) {
+      // A relation may leave out the entity it is listed under - the only way
+      // to give relations to an entity whose id the import generates. It is
+      // then added as the first id: a directional relation starts at it, and
+      // a synonym group gets it as a member.
+      let entityIds: string[] = [];
+      if (!Array.isArray(raw.entityIds) || !raw.entityIds.every(isNonEmptyString)) {
         errors.push(issue(".entityIds", "must be a list of entity ids"));
-      } else if (rule.cloudType ? entityIds.length < 2 : entityIds.length !== 2) {
-        errors.push(
-          issue(
-            ".entityIds",
-            rule.cloudType
-              ? `${rule.label} needs at least 2 entity ids`
-              : `${rule.label} needs exactly 2 entity ids`
-          )
-        );
+      } else {
+        entityIds = raw.entityIds as string[];
+        if (rule.cloudType ? !entityIds.includes(entity.id) : entityIds.length === 1) {
+          entityIds = [entity.id, ...entityIds];
+        }
+        if (rule.cloudType ? entityIds.length < 2 : entityIds.length !== 2) {
+          errors.push(
+            issue(
+              ".entityIds",
+              rule.cloudType
+                ? `${rule.label} needs at least one other entity id`
+                : `${rule.label} needs the other entity's id, or both ids`
+            )
+          );
+        }
       }
 
       let certainty = EntityEnums.Certainty.Certain;
@@ -118,10 +128,10 @@ export const normalizeRelationItems = (
           ? ({
               id: uuidv4(),
               type,
-              entityIds: entityIds as string[],
+              entityIds,
               certainty,
             } as Relation.IIdentification)
-          : { id: uuidv4(), type, entityIds: entityIds as string[] };
+          : { id: uuidv4(), type, entityIds };
 
       items.push({ ownerIndex: index, path, relation });
     });

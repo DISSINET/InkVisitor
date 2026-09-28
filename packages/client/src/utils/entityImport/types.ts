@@ -19,7 +19,7 @@ export interface ImportIssue {
 
 /** A relation as written in the input, with where it was written. */
 export interface RawRelation {
-  // "relations[0]" or, grouped as in Detail, "relations.SCL.connections[0]"
+  // "relations[0]"
   path: string;
   raw: unknown;
 }

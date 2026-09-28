@@ -49,7 +49,7 @@ const INPUT_PLACEHOLDER = `[
     "class": "C",
     "labels": ["dog"],
     "detail": "domestic canine",
-    "relations": [{ "type": "SCL", "entityIds": ["<this entity's id>", "<superclass id>"] }]
+    "relations": [{ "type": "SCL", "entityIds": ["<superclass id>"] }]
   }
 ]`;
 
@@ -159,8 +159,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       return;
     }
     const entity = draft.entities.find((candidate) => candidate.id === entityId);
-    const { draft: rest, removedRelations } = removeDraftEntity(draft, entityId);
+    const { draft: rest, removedRelations, cleanups } = removeDraftEntity(draft, entityId);
     setDraft(rest);
+    const labelOf = (id: string) => draft.entities.find((candidate) => candidate.id === id)?.labels[0];
     setDraftNotes((notes) => [
       ...notes,
       {
@@ -173,6 +174,11 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             : ""
         }`,
       },
+      // the other drafts no longer point at it
+      ...cleanups.map((cleanup) => ({
+        label: labelOf(cleanup.entityId),
+        message: `${cleanup.changes.join(", ")} (they pointed at "${entity?.labels[0]}")`,
+      })),
     ]);
   };
 

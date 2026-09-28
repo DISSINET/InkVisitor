@@ -33,9 +33,9 @@ const ENTITY_KEYS = [
   "legacyId",
 ];
 const SERVER_MANAGED_KEYS = ["createdAt", "updatedAt"];
-// What the entity detail response carries on top of the entity itself (as a
-// raw API response or an older copy of the JSON section of Detail holds it);
-// these fields are dropped rather than rejected.
+// What the entity detail response carries on top of the entity itself; an
+// entity taken from it keeps its other fields, these are dropped rather than
+// rejected. Its relations still have to be written as the flat list.
 const DETAIL_VIEW_KEYS = [
   "entities",
   "usedInStatements",
@@ -549,8 +549,9 @@ const normalizeEntity = (
     );
   }
 
+  // an entity without an id, or with an empty one, gets a new one
   let id = uuidv4();
-  if (raw.id !== undefined) {
+  if (raw.id !== undefined && raw.id !== null && raw.id !== "") {
     if (typeof raw.id === "string" && /^\S+$/.test(raw.id)) {
       id = raw.id;
     } else {
