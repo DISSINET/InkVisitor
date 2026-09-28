@@ -27,6 +27,7 @@ import {
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import { filterTreeByFilters, markNodesWithFilters } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { getTerritoryDocumentMarks } from "./territoryDocumentMarks";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
@@ -48,10 +49,9 @@ export const TerritoryTreeBox: React.FC = () => {
 
   const { data: documents } = useDocumentsQuery();
 
-  // a territory has a document when any document holds an anchor of it
-  const territoriesWithDocument = useMemo(
-    () => new Set(documents?.flatMap((document) => document.entityIds.T ?? []) ?? []),
-    [documents],
+  const territoryDocumentMarks = useMemo(
+    () => getTerritoryDocumentMarks(treeData, documents),
+    [treeData, documents],
   );
 
   const storedTerritoryIds = useMemo(
@@ -263,7 +263,7 @@ export const TerritoryTreeBox: React.FC = () => {
                     storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
                     foldAllSignal={foldAllSignal}
-                    territoriesWithDocument={territoriesWithDocument}
+                    territoryDocumentMarks={territoryDocumentMarks}
                   />
                 )}
 
