@@ -84,6 +84,14 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   // a write in progress must finish or roll back before the modal can close
   const isWriting = step === "writing";
 
+  // Closing the modal while Create still checks the drafts cancels the
+  // import: the check runs on, but nothing is written once it is done.
+  const isClosedRef = useRef(false);
+  const handleClose = () => {
+    isClosedRef.current = true;
+    closeModal();
+  };
+
   const validationContext = () => ({
     role: getStoredUserRole() as UserEnums.Role,
     defaultLanguage: user!.options.defaultLanguage,
@@ -220,7 +228,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     } finally {
       setIsValidating(false);
     }
-    if (!plan) {
+    if (!plan || isClosedRef.current) {
       return;
     }
 
@@ -267,7 +275,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       // the JSON field and the Detail of the drafts fill the height; the
       // result keeps the height of its content
       fullHeight={step === "input" || step === "drafts"}
-      onClose={isWriting ? undefined : closeModal}
+      onClose={isWriting ? undefined : handleClose}
       disableEscapeClose={isWriting}
       disableBgClick
       isLoading={isValidating}
@@ -348,7 +356,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onClick={() => fileInputRef.current?.click()}
             />
             <ButtonGroup>
-              <CancelButton onClick={closeModal} />
+              <CancelButton onClick={handleClose} />
               <Button
                 label="Validate"
                 color="info"
@@ -360,7 +368,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         )}
         {step === "drafts" && (
           <ButtonGroup>
-            <CancelButton onClick={closeModal} />
+            <CancelButton onClick={handleClose} />
             <Button
               label={`Create ${entityCount(draftCount)}`}
               color="info"
@@ -379,7 +387,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
                 setStep("drafts");
               }}
             />
-            <Button label="Close" color="info" onClick={closeModal} />
+            <Button label="Close" color="info" onClick={handleClose} />
           </ButtonGroup>
         )}
       </ModalFooter>
