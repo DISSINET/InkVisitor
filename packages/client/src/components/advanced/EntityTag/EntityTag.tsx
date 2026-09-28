@@ -454,6 +454,7 @@ function areEntityTagsEqual(
   // Compare minimal fields that affect rendering
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.isFavorited !== next.isFavorited) return false;
+  if (prev.hasDocument !== next.hasDocument) return false;
   if (prev.isEquivalent !== next.isEquivalent) return false;
   if (prev.isSubordinate !== next.isSubordinate) return false;
   if (prev.showOnly !== next.showOnly) return false;
