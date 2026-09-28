@@ -6,22 +6,13 @@ import {
   IProp,
   IReference,
   IResponseDetail,
-  IResponseStatement,
   Relation,
 } from "@inkvisitor/shared/types";
 import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  boxContentId,
-  Button,
-  CustomScrollbar,
-  Loader,
-  Message,
-  Submit,
-  ToastWithLink,
-} from "components";
+import { boxContentId, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -31,24 +22,24 @@ import {
 } from "components/advanced";
 import { CMetaProp, DProps } from "constructors";
 import {
-  DRAFT_WRITE_RESPONSE,
-  useEntityDraft,
+  EntityWritesContext,
+  useEntityEditing,
   useIsInViewport,
   useSearchParams,
   useWidthBreakpoint,
 } from "hooks";
-import { DETAIL_TAB_ENTITIES_KEY, useAuditQuery, useTemplatesQuery } from "hooks/react-query";
-import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
+import { useAuditQuery, useTemplatesQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
-import { ButtonSize, DraggedPropRowCategory } from "types";
+import { DraggedPropRowCategory } from "types";
 import {
-  ENTITY_DETAIL_SCROLLBAR_ID,
   ENTITY_DETAIL_SCROLL_CONTAINER_ID,
+  ENTITY_DETAIL_SCROLLBAR_ID,
   handleDeleteEntityError,
   usedInSectionId,
 } from "utils/deleteEntityConflict";
+import { buildEntityJson } from "utils/entityImport";
 import { openRestoredEntity } from "utils/openRestoredEntity";
 import { getStoredUserRole } from "utils/userStorage";
 import { getEntityLabel, getEntityRelationRules, getShortLabelByLetterCount } from "utils/utils";
@@ -82,8 +73,7 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailUsedInDocumentsTable } from "./EntityDetailUsedInTable/EntityDetailUsedInDocumentsTable/EntityDetailUsedInDocumentsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { IcoPlusBold } from "Theme/icons";
-import { buildEntityJson } from "utils/entityImport";
+import { useStoredEntityWrites } from "./useStoredEntityWrites";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -127,8 +117,11 @@ interface EntityDetail {
   isFetching: boolean;
 }
 export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, isFetching }) => {
-  // an entity of the JSON import, edited before it exists in the database
-  const draft = useEntityDraft();
+  // where Detail's writes land and what it offers: the database by default,
+  // the drafts of the JSON import inside its modal
+  const editing = useEntityEditing();
+  const storedWrites = useStoredEntityWrites();
+  const writes = editing.writes ?? storedWrites;
 
   const {
     statementId,
@@ -245,82 +238,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   }, [entity]);
 
   const updateEntityMutation = useMutation({
-    mutationFn: async (changes: Partial<IEntity>) => {
-      if (draft) {
-        draft.updateEntity(detailId, changes);
-        return DRAFT_WRITE_RESPONSE;
-      }
-      return await api.entityUpdate(detailId, changes);
-    },
-    onSuccess: (data, variables) => {
-      if (draft) {
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
-      queryClient.invalidateQueries({ queryKey: ["audit", detailId] });
-      invalidateAllExplorerQueries(queryClient);
-
-      // read the open statement from cache (the editor already fetched it) -
-      // no need to subscribe and fetch it here just for this check
-      const statement = queryClient.getQueryData<IResponseStatement>(["statement", statementId]);
-      if (
-        statementId &&
-        (statementId === entity?.id ||
-          (statement?.entities && entity && Object.keys(statement.entities).includes(entity.id)))
-      ) {
-        queryClient.invalidateQueries({ queryKey: ["statement"] });
-      }
-
-      if (
-        variables.references !== undefined ||
-        variables.detail !== undefined ||
-        variables.labels !== undefined ||
-        variables.status ||
-        variables.language !== undefined ||
-        variables.data?.logicalType
-      ) {
-        queryClient.invalidateQueries({ queryKey: ["suggestion"] });
-        if (entity?.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries({ queryKey: ["tree"] });
-        }
-
-        queryClient.invalidateQueries({ queryKey: ["territory"] });
-        queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
-      }
-      if (variables.labels !== undefined) {
-        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
-      }
-      if (entity?.isTemplate) {
-        queryClient.invalidateQueries({ queryKey: ["templates"] });
-      }
-    },
+    mutationFn: (changes: Partial<IEntity>) => writes.updateEntity(entity, changes),
   });
 
   const changeEntityTypeMutation = useMutation({
-    mutationFn: async (newClass: EntityEnums.Class) => {
-      if (draft) {
-        draft.updateEntity(detailId, { class: newClass });
-        return DRAFT_WRITE_RESPONSE;
-      }
-      return await api.entityUpdate(detailId, { class: newClass });
-    },
-
-    onSuccess: (data, variables) => {
+    mutationFn: (newClass: EntityEnums.Class) => writes.updateEntity(entity, { class: newClass }),
+    onSuccess: () => {
       setShowTypeSubmit(false);
-      if (draft) {
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
-      invalidateAllExplorerQueries(queryClient);
-      queryClient.invalidateQueries({ queryKey: ["statement"] });
-      if (variables === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries({ queryKey: ["tree"] });
-      }
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
-      if (entity?.isTemplate) {
-        queryClient.invalidateQueries({ queryKey: ["templates"] });
-      }
     },
   });
 
@@ -571,62 +495,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   };
 
   const relationCreateMutation = useMutation({
-    mutationFn: async (newRelation: Relation.IRelation) => {
-      if (draft) {
-        draft.createRelation(newRelation);
-        return DRAFT_WRITE_RESPONSE;
-      }
-      return await api.relationCreate(newRelation);
-    },
-    onSuccess: () => {
-      if (draft) {
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
-      // refresh the Relation audits section on every open detail - a relation
-      // touches more than the current entity
-      queryClient.invalidateQueries({ queryKey: ["audit"] });
-      invalidateAllExplorerQueries(queryClient);
-    },
+    mutationFn: (newRelation: Relation.IRelation) => writes.createRelation(newRelation),
   });
-
   const relationUpdateMutation = useMutation({
-    mutationFn: async (relationObject: {
-      relationId: string;
-      changes: Partial<Relation.IRelation>;
-    }) => {
-      if (draft) {
-        draft.updateRelation(relationObject.relationId, relationObject.changes);
-        return DRAFT_WRITE_RESPONSE;
-      }
-      return await api.relationUpdate(relationObject.relationId, relationObject.changes);
-    },
-    onSuccess: () => {
-      if (draft) {
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
-      queryClient.invalidateQueries({ queryKey: ["audit"] });
-      invalidateAllExplorerQueries(queryClient);
-    },
+    mutationFn: (relationObject: { relationId: string; changes: Partial<Relation.IRelation> }) =>
+      writes.updateRelation(relationObject.relationId, relationObject.changes),
   });
   const relationDeleteMutation = useMutation({
-    mutationFn: async (relationId: string) => {
-      if (draft) {
-        draft.deleteRelation(relationId);
-        return DRAFT_WRITE_RESPONSE;
-      }
-      return await api.relationDelete(relationId);
-    },
-
-    onSuccess: () => {
-      if (draft) {
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["entity"] });
-      queryClient.invalidateQueries({ queryKey: ["audit"] });
-      invalidateAllExplorerQueries(queryClient);
-    },
+    mutationFn: (relationId: string) => writes.deleteRelation(relationId),
   });
 
   const isInsideTemplate = entity?.isTemplate || false;
@@ -653,13 +529,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
 
   const isSectionExpanded = (sectionId: EntityDetailSection) => !collapsedSections.has(sectionId);
 
-  const widthTooNarrow = useWidthBreakpoint(
-    516,
-    draft ? draft.widthElementId : boxContentId("Detail"),
-  );
+  const widthTooNarrow = useWidthBreakpoint(516, editing.hostElementId ?? boxContentId("Detail"));
 
   // the entity this Detail shows; the selected tab of the Detail box can be
-  // another one when Detail renders a draft of the JSON import
+  // another one when Detail is shown outside it
   const isRootTerritory = detailId === rootTerritoryId;
   const isOwner = (getStoredUserRole() as UserEnums.Role) === UserEnums.Role.Owner;
   const disableAttributesForNonOwnersInRoot = isRootTerritory && !isOwner;
@@ -670,16 +543,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
   }
 
   return (
-    <>
+    // the parts of Detail that write on their own reach the same writes
+    <EntityWritesContext.Provider value={writes}>
       {entity && (
         <CustomScrollbar
           scrollerId={ENTITY_DETAIL_SCROLLBAR_ID}
           elementId={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
           customStyle={{
             // necessary to scroll until the bottom of the page; the Detail box
-            // holds its tab strip in the same height, a draft's tabs sit
-            // outside Detail's box
-            height: draft ? "100%" : "calc(100% - 2.5rem)",
+            // holds its tab strip in the same height, a host of its own keeps
+            // its tabs outside
+            height: editing.hostElementId ? "100%" : "calc(100% - 2.5rem)",
           }}
         >
           <>
@@ -753,24 +627,25 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                 </StyledDetailSection>
               )}
 
-              {/* Validation rules - not imported, so not offered on a draft */}
-              {entity.class === EntityEnums.Class.Territory && !draft && (
-                <StyledDetailSection>
-                  <EntityDetailValidationSection
-                    isValidationExpanded={isSectionExpanded(EntityDetailSection.Validation)}
-                    setIsValidationExpanded={() => toggleSection(EntityDetailSection.Validation)}
-                    validations={entity.data.validations as ITerritoryValidation[] | undefined}
-                    entities={entity.entities}
-                    updateEntityMutation={updateEntityMutation}
-                    userCanEdit={canEditEntity}
-                    isInsideTemplate={isInsideTemplate}
-                    territoryParentId={getTerritoryId(entity)}
-                    entity={entity}
-                    setLoadingValidations={setLoadingValidations}
-                    widthTooNarrow={widthTooNarrow}
-                  />
-                </StyledDetailSection>
-              )}
+              {/* Validation rules */}
+              {entity.class === EntityEnums.Class.Territory &&
+                editing.offersStoredEntityFeatures && (
+                  <StyledDetailSection>
+                    <EntityDetailValidationSection
+                      isValidationExpanded={isSectionExpanded(EntityDetailSection.Validation)}
+                      setIsValidationExpanded={() => toggleSection(EntityDetailSection.Validation)}
+                      validations={entity.data.validations as ITerritoryValidation[] | undefined}
+                      entities={entity.entities}
+                      updateEntityMutation={updateEntityMutation}
+                      userCanEdit={canEditEntity}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={getTerritoryId(entity)}
+                      entity={entity}
+                      setLoadingValidations={setLoadingValidations}
+                      widthTooNarrow={widthTooNarrow}
+                    />
+                  </StyledDetailSection>
+                )}
 
               {/* Valency (A) */}
               {entity.class === EntityEnums.Class.Action && (
@@ -954,7 +829,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
               </StyledDetailSection>
 
               {/* usages and audits exist only for a stored entity */}
-              {!draft && (
+              {editing.offersStoredEntityFeatures && (
                 <>
                   <StyledDetailSection id={usedInSectionId(entity.id)}>
                     <StyledDetailSectionHeader
@@ -1243,6 +1118,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
         }}
         onCancel={() => setIsCleaningEntityPrompt(false)}
       />
-    </>
+    </EntityWritesContext.Provider>
   );
 };

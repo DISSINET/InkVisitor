@@ -6,12 +6,11 @@ import {
   IResponseGeneric,
   Relation,
 } from "@inkvisitor/shared/types";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import api from "api";
 import { AxiosResponse } from "axios";
 import { EntitySuggester } from "components/advanced";
-import { useEntityDraft } from "hooks";
+import { useEntityWrites } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -139,65 +138,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setUsedEntityIds([...new Set(entityIds)]);
   }, [selectedRelations, relationRule]);
 
-  // A draft of the JSON import joins its own group; groups of stored entities
-  // are merged by the server when the import creates the relation.
-  const draft = useEntityDraft();
-  const addToDraftCloud = (selectedId: string) => {
-    const cloud = currentRelations[0];
-    if (cloud) {
-      relationUpdateMutation?.mutate({
-        relationId: cloud.id,
-        changes: { entityIds: [...cloud.entityIds, selectedId] },
-      });
-    } else {
-      relationCreateMutation?.mutate({
-        id: uuidv4(),
-        entityIds: [entity.id, selectedId],
-        type: relationType,
-      });
-    }
-  };
-
-  const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
-    false
-  );
-  const {} = useQuery({
-    queryKey: ["relation-entity-temp", tempCloudEntityId],
-    queryFn: async () => {
-      if (tempCloudEntityId) {
-        const res = await api.detailGet(tempCloudEntityId);
-        if (res.data) {
-          addToCloud(res.data);
-          setTempCloudEntityId(false);
-        }
-        return res.data;
-      }
-    },
-    enabled: api.isLoggedIn() && !!tempCloudEntityId,
-  });
-  const addToCloud = (cloudEntity: IResponseDetail) => {
-    const selectedEntityRelation =
-      cloudEntity.relations[relationType]?.connections;
-
-    if (selectedEntityRelation?.length) {
-      // update existing relation
-      const changes = {
-        entityIds: [...selectedEntityRelation[0].entityIds, entity.id],
-      };
-      relationUpdateMutation?.mutate({
-        relationId: selectedEntityRelation[0].id,
-        changes: changes,
-      });
-    } else {
-      // Create new relation (cloud init)
-      const newRelation: Relation.IRelation = {
-        id: uuidv4(),
-        entityIds: [entity.id, cloudEntity.id],
-        type: relationType as RelationEnums.Type,
-      };
-      relationCreateMutation?.mutate(newRelation);
-    }
-  };
+  const writes = useEntityWrites();
 
   useEffect(() => {
     const uniqueRelationIds: string[] = [];
@@ -229,40 +170,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
     );
   }, []);
 
+  // newOrder is the index the relation was dragged to
   const updateOrderFn = (relationId: string, newOrder: number) => {
-    // a draft orders its relations by position; newOrder is the target index
-    if (draft) {
-      const ids = selectedRelations
-        .map((relation) => relation.id)
-        .filter((id) => id !== relationId);
-      ids.splice(newOrder, 0, relationId);
-      draft.reorderRelations(ids);
-      return;
-    }
-    let allOrders: number[] = selectedRelations.map((relation, key) =>
-      relation.order !== undefined ? relation.order : 0
-    );
-    let finalOrder: number = 0;
-
-    const currentRelation = selectedRelations.find(
-      (relation) => relation.id === relationId
-    );
-
-    if (newOrder === 0) {
-      finalOrder = allOrders[0] - 1;
-    } else if (newOrder === selectedRelations.length - 1) {
-      finalOrder = allOrders[newOrder - 1] + 1;
-    } else {
-      if (currentRelation?.order === allOrders[newOrder - 1]) {
-        finalOrder = allOrders[newOrder];
-      } else {
-        finalOrder = allOrders[newOrder - 1];
-      }
-    }
-    relationUpdateMutation?.mutate({
-      relationId: relationId,
-      changes: { order: finalOrder },
-    });
+    writes.moveRelation(selectedRelations, relationId, newOrder);
   };
 
   const hasSuggester = useMemo(() => {
@@ -333,10 +243,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 reuseDroppedValue
                 categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {
-                  if (isCloudType && draft) {
-                    addToDraftCloud(selectedId);
-                  } else if (isCloudType) {
-                    setTempCloudEntityId(selectedId);
+                  if (isCloudType) {
+                    writes.joinSynonymGroup(entity, selectedId, currentRelations[0]);
                   } else {
                     handleMultiSelected(selectedId);
                   }

@@ -16,11 +16,10 @@ import {
   ITerritory,
 } from "@inkvisitor/shared/types";
 import { IConceptData } from "@inkvisitor/shared/types/concept";
-import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
+import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import { useDocumentsQuery, useOrderedLanguageDict } from "hooks/react-query";
-import { DRAFT_WRITE_RESPONSE, useEntityDraft } from "hooks";
+import { useEntityEditing, useEntityWrites } from "hooks";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
-import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput } from "components";
 import Dropdown, {
@@ -85,12 +84,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isStatementWithTerritory,
   widthTooNarrow,
 }) => {
-  // a draft of the JSON import edits its own attributes only: no templates,
-  // no linked document
-  const draft = useEntityDraft();
+  const { offersStoredEntityFeatures } = useEntityEditing();
+  const writes = useEntityWrites();
 
   const { data: documents, refetch: refetchDocuments } = useDocumentsQuery(
-    actantMode === "resource" && !draft,
+    actantMode === "resource" && offersStoredEntityFeatures,
   );
 
   const orderedLanguageDict = useOrderedLanguageDict();
@@ -151,28 +149,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     [entity.class, entity.data.parent?.territoryId],
   );
 
-  const queryClient = useQueryClient();
-
+  // the move dialog moves the territory shown here
   const updateTerritoryMutation = useMutation({
-    mutationFn: async (tObject: { territoryId: string; changes: Partial<ITerritory> }) => {
-      if (draft) {
-        draft.updateEntity(tObject.territoryId, tObject.changes);
-        return DRAFT_WRITE_RESPONSE;
-      }
-      return await api.entityUpdate(tObject?.territoryId, tObject?.changes);
-    },
-    onSuccess: () =>
-      // data: IResponseGeneric,
-      // variables: { territoryId: string; changes: Partial<ITerritory> }
-      {
-        // a draft's move exists only in the import modal
-        if (draft) {
-          return;
-        }
-        queryClient.invalidateQueries({ queryKey: ["tree"] });
-        queryClient.invalidateQueries({ queryKey: ["territory"] });
-        queryClient.invalidateQueries({ queryKey: ["entity"] });
-      },
+    mutationFn: (tObject: { territoryId: string; changes: Partial<ITerritory> }) =>
+      writes.updateEntity(entity, tObject.changes),
   });
 
   const isTemplateDisabled = useMemo<boolean>(() => {
@@ -231,7 +211,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           )}
 
           {/* templates */}
-          {!draft && (
+          {offersStoredEntityFeatures && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>Apply Template</StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
@@ -625,7 +605,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRow>
 
               {/* document id */}
-              {!draft && (
+              {offersStoredEntityFeatures && (
                 <StyledDetailContentRow>
                   <StyledDetailContentRowLabel>Linked Document</StyledDetailContentRowLabel>
                   <StyledDetailContentRowValue onFocus={() => refetchDocuments()}>

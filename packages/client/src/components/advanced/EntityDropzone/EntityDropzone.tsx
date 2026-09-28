@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { Dropzone } from "components";
 import { InstTemplate } from "constructors";
-import { useEntityDraft } from "hooks";
+import { useEntityEditing } from "hooks";
 import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { ReactElement, useState } from "react";
 import { EntityDragItem } from "types";
@@ -61,12 +61,12 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   refuseReadOnlySource,
   reuseDroppedValue,
 }) => {
-  // Inside a draft of the JSON import nothing may reach the database before
-  // the import does: a dropped Value is not copied (so a slot that holds its
-  // own copy refuses it) and templates are neither linked nor instantiated.
-  const draft = useEntityDraft();
-  const disableTemplateInstantiation = disableTemplateInstantiationProp || !!draft;
-  const disableTemplatesAccept = disableTemplatesAcceptProp || !!draft;
+  // where creating an entity would write too early (the JSON import's drafts),
+  // a dropped Value is not copied - so a slot that holds its own copy refuses
+  // it - and templates are neither linked nor instantiated
+  const { createsEntities } = useEntityEditing();
+  const disableTemplateInstantiation = disableTemplateInstantiationProp || !createsEntities;
+  const disableTemplatesAccept = disableTemplatesAcceptProp || !createsEntities;
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
   const rejectsDrop = isWrongDropCategory || !!refuseDrop;
@@ -78,7 +78,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       entityClass: item.entityClass,
       categoryTypes,
       reuseDroppedValue,
-      canCreate: canCreateEntities(getStoredUserRole(), !!draft),
+      canCreate: canCreateEntities(getStoredUserRole(), !createsEntities),
     });
 
   const handleInstantiateTemplate = async (

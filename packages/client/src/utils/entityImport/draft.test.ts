@@ -3,6 +3,7 @@ import { IEntity, ITerritory, Relation } from "@inkvisitor/shared/types";
 import {
   buildDraftDetail,
   createDraftRelation,
+  createDraftWrites,
   deleteDraftRelation,
   draftToImportJson,
   ImportDraft,
@@ -212,5 +213,58 @@ describe("missingEntityIds", () => {
       "size",
       "cat",
     ]);
+  });
+});
+
+describe("createDraftWrites", () => {
+  // applies each write to a draft kept here, as the import modal does
+  const writesOn = (initial: ImportDraft) => {
+    let current = initial;
+    const writes = createDraftWrites((update) => {
+      current = update(current);
+    });
+    return { writes, draft: () => current };
+  };
+
+  it("writes Detail's edits into the draft, answering like the api", async () => {
+    const { writes, draft } = writesOn(baseDraft());
+    const dog = draft().entities[0];
+
+    const response = await writes.updateEntity(dog, { detail: "canine" });
+    await writes.deleteRelation("r1");
+
+    expect(response.data.result).toBe(true);
+    expect(draft().entities[0].detail).toBe("canine");
+    expect(draft().relations.map((item) => item.id)).toEqual(["r2", "r3"]);
+  });
+
+  it("moves a relation to the index it was dragged to", async () => {
+    const { writes, draft } = writesOn(
+      createDraftRelation(baseDraft(), relation("r4", RelationEnums.Type.Superclass, "dog", "pet"))
+    );
+    const siblings = draft().relations.filter((item) => ["r1", "r4"].includes(item.id));
+
+    await writes.moveRelation(siblings, "r4", 0);
+
+    expect(draft().relations.map((item) => item.id)).toEqual(["r4", "r2", "r3", "r1"]);
+  });
+
+  it("joins a synonym group: the draft's own one, or a new one", async () => {
+    const { writes, draft } = writesOn(baseDraft());
+    const [dog, puppy] = draft().entities;
+    const dogGroup = draft().relations.find((item) => item.id === "r3")!;
+
+    await writes.joinSynonymGroup(dog, "canine", dogGroup);
+    await writes.joinSynonymGroup(puppy, "whelp");
+
+    expect(draft().relations.find((item) => item.id === "r3")!.entityIds).toEqual([
+      "hound",
+      "dog",
+      "canine",
+    ]);
+    expect(draft().relations.at(-1)).toMatchObject({
+      type: RelationEnums.Type.Synonym,
+      entityIds: ["puppy", "whelp"],
+    });
   });
 });

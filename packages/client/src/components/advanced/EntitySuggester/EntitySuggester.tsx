@@ -11,7 +11,7 @@ import { STATEMENT_LABEL_NOT_RECOMMENDED, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
-import { useDebounce, useEntityDraft, useSearchParams } from "hooks";
+import { useDebounce, useEntityEditing, useSearchParams } from "hooks";
 import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
@@ -180,12 +180,12 @@ const EntitySuggesterFull: React.FC<
   onEmptyAddButtonClick,
   clearableInput = true,
 }) => {
-  // Inside a draft of the JSON import nothing may reach the database before
-  // the import does, and the import links no templates.
-  const draft = useEntityDraft();
-  const disableCreate = disableCreateProp || !!draft;
-  const disableTemplateInstantiation = disableTemplateInstantiationProp || !!draft;
-  const disableTemplatesAccept = disableTemplatesAcceptProp || !!draft;
+  // where creating an entity would write too early (the JSON import's drafts),
+  // no entity is created and no template is linked or instantiated
+  const { createsEntities } = useEntityEditing();
+  const disableCreate = disableCreateProp || !createsEntities;
+  const disableTemplateInstantiation = disableTemplateInstantiationProp || !createsEntities;
+  const disableTemplatesAccept = disableTemplatesAcceptProp || !createsEntities;
 
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   // Remembers the input typed under a non-Statement class so it can be restored

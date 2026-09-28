@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
 import { InstTemplate } from "constructors";
-import { useEntityDraft, useSearchParams } from "hooks";
+import { useEntityEditing, useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
@@ -43,7 +43,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 }) => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-  const draft = useEntityDraft();
+  const { offersStoredEntityFeatures } = useEntityEditing();
 
   const { setStatementId, setTerritoryId, appendDetailId, setSelectedDetailId } = useSearchParams();
 
@@ -110,8 +110,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
-        {/* a draft of the JSON import only edits its own attributes */}
-        {!draft && (
+        {/* delete, duplicate, templates, links: all act on a stored entity */}
+        {offersStoredEntityFeatures && (
           <ButtonGroup $height={22.5} $disableShrink>
             {userCanEdit && (
               <Button

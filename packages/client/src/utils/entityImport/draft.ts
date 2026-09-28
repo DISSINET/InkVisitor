@@ -1,5 +1,7 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IResponseDetail, ITerritory, Relation } from "@inkvisitor/shared/types";
+import { EntityWrites, LOCAL_WRITE_RESPONSE } from "hooks/useEntityEditing";
+import { v4 as uuidv4 } from "uuid";
 import { buildEntityJson } from "./entityJson";
 import { isPlainObject, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
@@ -328,4 +330,47 @@ export const missingEntityIds = (draft: ImportDraft): string[] => {
   ).map((ref) => ref.id);
   const relationIds = draft.relations.flatMap((relation) => relation.entityIds);
   return unique([...refs, ...relationIds]).filter((id) => !known.has(id));
+};
+
+/**
+ * Detail's writes for the drafts: each one changes the draft through
+ * `change`, and nothing reaches the database.
+ */
+export const createDraftWrites = (
+  change: (update: (draft: ImportDraft) => ImportDraft) => void
+): EntityWrites => {
+  const settle = (update: (draft: ImportDraft) => ImportDraft) => {
+    change(update);
+    return Promise.resolve(LOCAL_WRITE_RESPONSE);
+  };
+
+  return {
+    updateEntity: (entity, changes) =>
+      settle((draft) => updateDraftEntity(draft, entity.id, changes)),
+    createRelation: (relation) => settle((draft) => createDraftRelation(draft, relation)),
+    updateRelation: (relationId, changes) =>
+      settle((draft) => updateDraftRelation(draft, relationId, changes)),
+    deleteRelation: (relationId) => settle((draft) => deleteDraftRelation(draft, relationId)),
+    moveRelation: (siblings, relationId, index) => {
+      const ids = siblings.map((relation) => relation.id).filter((id) => id !== relationId);
+      ids.splice(index, 0, relationId);
+      return settle((draft) => reorderDraftRelations(draft, ids));
+    },
+    // a draft joins its own group; groups of stored entities are merged by
+    // the server when the import creates the relation
+    joinSynonymGroup: (entity, memberId, ownGroup) =>
+      ownGroup
+        ? settle((draft) =>
+            updateDraftRelation(draft, ownGroup.id, {
+              entityIds: [...ownGroup.entityIds, memberId],
+            })
+          )
+        : settle((draft) =>
+            createDraftRelation(draft, {
+              id: uuidv4(),
+              entityIds: [entity.id, memberId],
+              type: RelationEnums.Type.Synonym,
+            })
+          ),
+  };
 };

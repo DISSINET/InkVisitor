@@ -1,19 +1,9 @@
 import { UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity, Relation } from "@inkvisitor/shared/types";
-import { EntityDraft, EntityDraftContext } from "hooks";
+import { EntityEditing, EntityEditingContext } from "hooks";
 import { EntityDetail } from "../EntityDetailBox/EntityDetail/EntityDetail";
 import { EntityDetailTab } from "../EntityDetailBox/EntityDetailTab/EntityDetailTab";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  buildDraftDetail,
-  createDraftRelation,
-  deleteDraftRelation,
-  ImportDraft,
-  ImportIssue,
-  reorderDraftRelations,
-  updateDraftEntity,
-  updateDraftRelation,
-} from "utils/entityImport";
+import React, { useEffect, useMemo, useState } from "react";
+import { buildDraftDetail, createDraftWrites, ImportDraft, ImportIssue } from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
@@ -63,53 +53,28 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
     ? UserEnums.RoleMode.Admin
     : UserEnums.RoleMode.Write;
 
+  // Detail edits the drafts: its writes change the draft, its suggesters and
+  // drop zones create nothing, and it leaves out what needs a stored entity
+  const writes = useMemo(() => createDraftWrites(onDraftChange), [onDraftChange]);
   const draftEntityIds = useMemo(
     () => new Set(draft.entities.map((entity) => entity.id)),
     [draft.entities]
   );
-
-  const updateEntity = useCallback(
-    (entityId: string, changes: Partial<IEntity>) =>
-      onDraftChange((current) => updateDraftEntity(current, entityId, changes)),
-    [onDraftChange]
-  );
-  const createRelation = useCallback(
-    (relation: Relation.IRelation) =>
-      onDraftChange((current) => createDraftRelation(current, relation)),
-    [onDraftChange]
-  );
-  const updateRelation = useCallback(
-    (relationId: string, changes: Partial<Relation.IRelation>) =>
-      onDraftChange((current) => updateDraftRelation(current, relationId, changes)),
-    [onDraftChange]
-  );
-  const deleteRelation = useCallback(
-    (relationId: string) => onDraftChange((current) => deleteDraftRelation(current, relationId)),
-    [onDraftChange]
-  );
-  const reorderRelations = useCallback(
-    (orderedIds: string[]) =>
-      onDraftChange((current) => reorderDraftRelations(current, orderedIds)),
-    [onDraftChange]
-  );
-
-  const context = useMemo<EntityDraft>(
+  const editing = useMemo<EntityEditing>(
     () => ({
-      draftEntityIds,
-      updateEntity,
-      createRelation,
-      updateRelation,
-      deleteRelation,
-      reorderRelations,
-      widthElementId: DRAFT_DETAIL_ELEMENT_ID,
+      writes,
+      unstoredEntityIds: draftEntityIds,
+      createsEntities: false,
+      offersStoredEntityFeatures: false,
+      hostElementId: DRAFT_DETAIL_ELEMENT_ID,
     }),
-    [draftEntityIds, updateEntity, createRelation, updateRelation, deleteRelation, reorderRelations]
+    [writes, draftEntityIds]
   );
 
   const detail = selectedId ? buildDraftDetail(draft, selectedId, right) : undefined;
 
   return (
-    <EntityDraftContext.Provider value={context}>
+    <EntityEditingContext.Provider value={editing}>
       <StyledDrafts>
         {(errors.length > 0 || notes.length > 0) && (
           <StyledDraftIssues>
@@ -148,6 +113,6 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
           )}
         </StyledDraftDetail>
       </StyledDrafts>
-    </EntityDraftContext.Provider>
+    </EntityEditingContext.Provider>
   );
 };

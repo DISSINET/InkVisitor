@@ -2,7 +2,14 @@ import { useContainerDimensions } from "./useContainerDimensions";
 import useDebounce from "./useDebounce";
 import useDebouncedCallback from "./useDebouncedCallback";
 import { useElementSize } from "./useElementSize";
-import { DRAFT_WRITE_RESPONSE, EntityDraftContext, useEntityDraft } from "./useEntityDraft";
+import {
+  EntityEditingContext,
+  EntityWritesContext,
+  LOCAL_WRITE_RESPONSE,
+  STORED_ENTITY_EDITING,
+  useEntityEditing,
+  useEntityWrites,
+} from "./useEntityEditing";
 import { useIsInViewport } from "./useIsInViewport";
 import useKeyLift from "./useKeyLift";
 import useKeyPress from "./useKeyPress";
@@ -19,9 +26,12 @@ export {
   useKeyLift,
   useContainerDimensions,
   useElementSize,
-  EntityDraftContext,
-  useEntityDraft,
-  DRAFT_WRITE_RESPONSE,
+  EntityEditingContext,
+  EntityWritesContext,
+  LOCAL_WRITE_RESPONSE,
+  STORED_ENTITY_EDITING,
+  useEntityEditing,
+  useEntityWrites,
   useIsInViewport,
   useSearchParams,
   useDebouncedCallback,
@@ -31,4 +41,4 @@ export {
   useWindowSize,
   useNewVersionCheck,
 };
-export type { EntityDraft } from "./useEntityDraft";
+export type { EntityEditing, EntityWrites } from "./useEntityEditing";
