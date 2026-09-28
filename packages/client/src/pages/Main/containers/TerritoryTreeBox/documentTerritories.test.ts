@@ -11,24 +11,37 @@ const tree = node("root", [], [
   node("D", ["root"]),
 ]);
 
-const doc = (T: string[]) => ({ entityIds: { T } }) as never;
+let docCount = 0;
+const doc = (T: string[]) => ({ id: `doc${++docCount}`, entityIds: { T } }) as never;
+// a resource linked to each of the given documents
+const linked = (...documents: { id: string }[]) =>
+  documents.map((document) => ({ data: { documentId: document.id } }));
+const marks = (documents: never[]) => getDocumentTerritoryIds(tree, documents, linked(...documents));
 
 describe("getDocumentTerritoryIds", () => {
   it("keeps only the highest anchored territory of a document", () => {
-    expect(getDocumentTerritoryIds(tree, [doc(["C", "A", "B"])])).toEqual(new Set(["A"]));
+    expect(marks([doc(["C", "A", "B"])])).toEqual(new Set(["A"]));
   });
 
   it("keeps one territory per document across separate branches", () => {
-    expect(getDocumentTerritoryIds(tree, [doc(["B", "D"])])).toEqual(new Set(["D"]));
+    expect(marks([doc(["B", "D"])])).toEqual(new Set(["D"]));
   });
 
   it("keeps the highest territory of each document", () => {
-    expect(getDocumentTerritoryIds(tree, [doc(["A", "B"]), doc(["B", "C"])])).toEqual(
+    expect(marks([doc(["A", "B"]), doc(["B", "C"])])).toEqual(
       new Set(["A", "B"]),
     );
   });
 
   it("ignores territories missing from the tree", () => {
-    expect(getDocumentTerritoryIds(tree, [doc(["X"])]).size).toBe(0);
+    expect(marks([doc(["X"])]).size).toBe(0);
+  });
+
+  it("ignores documents no resource links to", () => {
+    const linkedDocument = doc(["A"]);
+    const unlinkedDocument = doc(["D"]);
+    expect(
+      getDocumentTerritoryIds(tree, [linkedDocument, unlinkedDocument], linked(linkedDocument)),
+    ).toEqual(new Set(["A"]));
   });
 });

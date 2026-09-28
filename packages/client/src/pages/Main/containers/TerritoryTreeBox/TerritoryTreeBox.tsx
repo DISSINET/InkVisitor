@@ -5,7 +5,11 @@ import api from "api";
 import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
-import { useDocumentsQuery, useUserQuery } from "hooks/react-query";
+import {
+  useDocumentsQuery,
+  useResourcesWithDocumentsQuery,
+  useUserQuery,
+} from "hooks/react-query";
 import { scrollToTerritoryInTree } from "hooks/ScrollHandler";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
@@ -49,13 +53,15 @@ export const TerritoryTreeBox: React.FC = () => {
   const { data: userData } = useUserQuery();
 
   const { data: documents } = useDocumentsQuery();
-  const documentsLoaded = documents !== undefined;
+  const { data: resourcesWithDocuments } = useResourcesWithDocumentsQuery();
+  const documentsLoaded = documents !== undefined && resourcesWithDocuments !== undefined;
 
   // every document save refetches the documents; the key keeps the set's
   // reference (and so the memoized tree nodes) unchanged while its ids stay the same
   const territoriesWithDocumentKey = useMemo(
-    () => [...getDocumentTerritoryIds(treeData, documents)].sort().join(","),
-    [treeData, documents],
+    () =>
+      [...getDocumentTerritoryIds(treeData, documents, resourcesWithDocuments)].sort().join(","),
+    [treeData, documents, resourcesWithDocuments],
   );
   const territoriesWithDocument = useMemo(
     () => new Set(territoriesWithDocumentKey ? territoriesWithDocumentKey.split(",") : []),
