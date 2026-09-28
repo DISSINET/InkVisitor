@@ -21,6 +21,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
+import { ExplorerCellSubProps } from "./Cell/ExplorerCellSubProps";
 import {
   StyledAltLabelAddInput,
   StyledAltLabelChip,
@@ -211,7 +212,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     },
   });
 
-  const { entity: rowEntity, columnData, isEquivalent, isSubordinate } = rowItem ?? {};
+  const {
+    entity: rowEntity,
+    columnData,
+    columnSubProps,
+    isEquivalent,
+    isSubordinate,
+  } = rowItem ?? {};
 
   const handleOpenEntityInDetail = React.useCallback(
     (entity: IEntity) => (e: React.MouseEvent) => {
@@ -508,11 +515,17 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
+                const entityId = (cellEntity as IEntity)?.id;
+                const subProps = entityId ? columnSubProps?.[column.id]?.[entityId] : undefined;
                 return (
-                  <React.Fragment
-                    key={(cellEntity as IEntity)?.id ? (cellEntity as IEntity).id : key}
-                  >
+                  <React.Fragment key={entityId ? entityId : key}>
                     {renderCellValue(cellEntity, recordEntity, column)}
+                    {!!subProps?.length && (
+                      <ExplorerCellSubProps
+                        subProps={subProps}
+                        onEntityDoubleClick={handleOpenEntityInDetail}
+                      />
+                    )}
                   </React.Fragment>
                 );
               })}
@@ -528,7 +541,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue, handleOpenEntityInDetail]
+    [renderCellValue, handleOpenEntityInDetail, columnSubProps]
   );
 
   const renderEditSection = React.useCallback(
