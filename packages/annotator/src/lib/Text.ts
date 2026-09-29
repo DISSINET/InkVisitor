@@ -1256,6 +1256,37 @@ class Text {
   }
 
   /**
+   * Raw offset where the opening or closing tag ending right at `offset`
+   * starts, or -1 when the text before `offset` does not end with a tag.
+   */
+  tagStartBefore(offset: number): number {
+    if (offset <= 0 || this.value[offset - 1] !== ">") {
+      return -1;
+    }
+    const start = this.value.lastIndexOf("<", offset - 2);
+    if (start < 0) {
+      return -1;
+    }
+    return /^<\/?[^<>\n]+>$/.test(this.value.slice(start, offset)) ? start : -1;
+  }
+
+  /**
+   * Raw offset right after the opening or closing tag starting at `offset`, or
+   * -1 when the text after `offset` does not start with a tag.
+   */
+  tagEndAfter(offset: number): number {
+    if (this.value[offset] !== "<") {
+      return -1;
+    }
+    const close = this.value.indexOf(">", offset + 1);
+    if (close < 0) {
+      return -1;
+    }
+    const end = close + 1;
+    return /^<\/?[^<>\n]+>$/.test(this.value.slice(offset, end)) ? end : -1;
+  }
+
+  /**
    * ABSOLUTE visual coordinates to a raw document offset.
    * Returns `-1` when the line index is out of bounds (uses the non-clamping
    * {@link getSegmentPositionOrNull}). Inverse of {@link visualFromOffset}.

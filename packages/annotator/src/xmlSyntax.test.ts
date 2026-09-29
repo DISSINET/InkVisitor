@@ -1,4 +1,9 @@
-import { tokenizeXmlLines, XmlTokenRun } from "./lib/XmlSyntax";
+import {
+  advanceXmlState,
+  initialXmlTokenizerState,
+  tokenizeXmlLines,
+  XmlTokenRun,
+} from "./lib/XmlSyntax";
 
 const kinds = (line: string, runs: XmlTokenRun[]) =>
   runs.map((r) => `${r.kind}:${line.slice(r.start, r.end)}`);
@@ -55,5 +60,24 @@ describe("tokenizeXmlLines (#3269)", () => {
     const { runs } = tokenizeXmlLines(["a <", "w>"]);
     expect(runs[0].map((r) => r.kind)).toEqual(["text", "tag"]);
     expect(runs[1].map((r) => r.kind)).toEqual(["tag"]);
+  });
+});
+
+describe("advanceXmlState", () => {
+  test("ends in the same state as tokenizing the lines", () => {
+    const lines = ['a <w lemma="long ', "value' n=", '"2" x', "y>z <", "v"];
+    const state = initialXmlTokenizerState();
+    lines.forEach((line, i) => advanceXmlState(state, line, lines[i + 1]));
+    expect(state).toEqual(tokenizeXmlLines(lines).state);
+  });
+
+  test("< at a line end opens a tag only with a tag start on the next line", () => {
+    expect(advanceXmlState(initialXmlTokenizerState(), "a <", "w>").inTag).toBe(
+      true
+    );
+    expect(advanceXmlState(initialXmlTokenizerState(), "a <", " b").inTag).toBe(
+      false
+    );
+    expect(advanceXmlState(initialXmlTokenizerState(), "a <").inTag).toBe(false);
   });
 });

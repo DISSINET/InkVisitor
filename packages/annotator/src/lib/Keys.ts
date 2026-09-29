@@ -186,10 +186,23 @@ export default class Keys {
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     } else if (metaKey && !altKey && !ctrlKey) {
       // Cmd+Backspace: delete from beginning of line to caret (macOS-style).
+      // In RAW mode a tag right before the caret is deleted as a whole instead.
       const end = this.cursor.getAbsolutePosition();
-      const start = { xLine: 0, yLine: end.yLine };
-      this.text.deleteRangeText(start, end);
-      this.cursor.setPosition(0, end.yLine);
+      const endOffset = this.text.offsetFromVisual(end.xLine, end.yLine);
+      const tagStart =
+        this.text.mode === EditMode.RAW && endOffset >= 0
+          ? this.text.tagStartBefore(endOffset)
+          : -1;
+      const tagStartPos =
+        tagStart >= 0 ? this.text.visualFromOffset(tagStart) : null;
+      if (tagStartPos) {
+        this.text.deleteRangeText(tagStartPos, end);
+        this.cursor.moveToOffset(this.text, tagStart);
+      } else {
+        const start = { xLine: 0, yLine: end.yLine };
+        this.text.deleteRangeText(start, end);
+        this.cursor.setPosition(0, end.yLine);
+      }
     } else {
       // Delete word-wise: Ctrl / Alt / ⌥+⌘ + ←  or Ctrl+Alt + ← on Windows
       const before = this.cursor.getAbsolutePosition();
@@ -245,11 +258,28 @@ export default class Keys {
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     } else if (metaKey && !altKey && !ctrlKey) {
+      // Cmd+Delete: delete from caret to end of line. In RAW mode a tag right
+      // after the caret is deleted as a whole instead.
       const before = this.cursor.getAbsolutePosition();
-      const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-      const end = { xLine: line.length, yLine: before.yLine };
-      this.text.deleteRangeText(before, end);
-      this.cursor.setPosition(before.xLine, before.yLine);
+      const startOffset = this.text.offsetFromVisual(
+        before.xLine,
+        before.yLine
+      );
+      const tagEnd =
+        this.text.mode === EditMode.RAW && startOffset >= 0
+          ? this.text.tagEndAfter(startOffset)
+          : -1;
+      const tagEndPos =
+        tagEnd >= 0 ? this.text.visualFromOffset(tagEnd) : null;
+      if (tagEndPos) {
+        this.text.deleteRangeText(before, tagEndPos);
+        this.cursor.moveToOffset(this.text, startOffset);
+      } else {
+        const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+        const end = { xLine: line.length, yLine: before.yLine };
+        this.text.deleteRangeText(before, end);
+        this.cursor.setPosition(before.xLine, before.yLine);
+      }
     } else {
       const before = this.cursor.getAbsolutePosition();
       this.onArrowRight({
