@@ -1,6 +1,6 @@
 import "ts-jest";
 import { r, Connection } from "rethinkdb-ts";
-import { EntityEnums } from "@inkvisitor/shared/enums";
+import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
 
@@ -151,6 +151,10 @@ describe("IS: edge / is in S: any position (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
+    // an unconstrained target reads its candidates through the class index
+    // (mirrors indexes.ts)
+    await r.table(TABLE).indexCreate(DbEnums.Indexes.Class).run(conn);
+    await r.table(TABLE).indexWait(DbEnums.Indexes.Class).run(conn);
     await r.table(TABLE).insert(FIXTURES).run(conn);
   }, 30000);
 

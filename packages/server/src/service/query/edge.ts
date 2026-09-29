@@ -167,16 +167,15 @@ function intersectIdsWithStream(q: RStream, idsStream: RStream | null): RStream 
 
 /**
  * Every entity of one of `classes`, or of any class when empty. Backs the "any
- * target" branch of the edges that otherwise look their target ids up: with no
- * id to key an index by, this is a scan of the entity table.
+ * target" branch of the edges that otherwise look their target ids up: the
+ * class index reads only the requested classes, while no class at all is a
+ * scan of the entity table.
  */
 function entitiesOfClasses(classes: EntityEnums.Class[]): RStream {
   const table = r.table(Entity.table);
   return (
     classes.length
-      ? table.filter(function (e: RDatum<IEntity>) {
-          return r.expr(classes).contains(e("class"));
-        })
+      ? table.getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : table
   ) as unknown as RStream;
 }

@@ -158,6 +158,10 @@ describe("EUT: edge / used in statements under T (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
+    // an unconstrained target reads its candidates through the class index
+    // (mirrors indexes.ts)
+    await r.table(TABLE).indexCreate(DbEnums.Indexes.Class).run(conn);
+    await r.table(TABLE).indexWait(DbEnums.Indexes.Class).run(conn);
     // the edge reads candidate statements via this index (mirrors indexes.ts);
     // entities without data.territory are simply skipped by the index function
     await r
