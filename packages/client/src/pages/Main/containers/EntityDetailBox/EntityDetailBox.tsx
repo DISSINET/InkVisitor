@@ -56,7 +56,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const { data, error } = useEntitiesQuery(DETAIL_TAB_ENTITIES_KEY, detailIdArray, {
+  // the query key is the set of open tabs, not their order, so promoting or
+  // dragging a tab reuses the cached entities instead of refetching every tab
+  const sortedDetailIds = useMemo(() => [...detailIdArray].sort(), [detailIdArray]);
+  const { data, error } = useEntitiesQuery(DETAIL_TAB_ENTITIES_KEY, sortedDetailIds, {
     staleTime: 1000 * 30, // 30 seconds
   });
 
@@ -92,7 +95,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({
         }
       }
     }
-  }, [data]);
+  }, [data, detailIdArray]);
 
   // A tab reached for in the caret list only borrows the last visible slot, so
   // the next pick would take that slot back; moving it to the front of the
