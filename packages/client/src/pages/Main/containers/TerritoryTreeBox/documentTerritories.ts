@@ -1,9 +1,10 @@
 import { IDocument, IResponseTree } from "@inkvisitor/shared/types";
 
 /**
- * Ids of the territories encapsulating a document: for each document, its
- * anchored territory highest in the tree. Only documents linked to a resource
- * count, since the annotator reaches a territory's document through a resource.
+ * Ids of the territories encapsulating a document: for each document, every
+ * anchored territory with no anchored ancestor in that document. Only documents
+ * linked to a resource count, since the annotator reaches a territory's
+ * document through a resource.
  */
 export const getDocumentTerritoryIds = (
   tree: IResponseTree | undefined,
@@ -19,29 +20,26 @@ export const getDocumentTerritoryIds = (
     resources.map((resource) => resource.data.documentId).filter(Boolean),
   );
 
-  const lvlsById = new Map<string, number>();
-  const collectLvls = (node: IResponseTree) => {
-    lvlsById.set(node.territory.id, node.lvl);
-    node.children.forEach(collectLvls);
+  const pathsById = new Map<string, string[]>();
+  const collectPaths = (node: IResponseTree) => {
+    pathsById.set(node.territory.id, node.path);
+    node.children.forEach(collectPaths);
   };
-  collectLvls(tree);
+  collectPaths(tree);
 
   documents.forEach((document) => {
     if (!linkedDocumentIds.has(document.id)) {
       return;
     }
-    const anchoredIds = (document.entityIds.T ?? []).filter((territoryId) =>
-      lvlsById.has(territoryId),
+    const anchoredIds = new Set(
+      (document.entityIds.T ?? []).filter((territoryId) => pathsById.has(territoryId)),
     );
-    if (anchoredIds.length === 0) {
-      return;
-    }
-
-    // the first of the shallowest territories wins a tie
-    const highestId = anchoredIds.reduce((highest, territoryId) =>
-      lvlsById.get(territoryId)! < lvlsById.get(highest)! ? territoryId : highest,
-    );
-    documentTerritoryIds.add(highestId);
+    anchoredIds.forEach((territoryId) => {
+      const path = pathsById.get(territoryId)!;
+      if (!path.some((ancestorId) => anchoredIds.has(ancestorId))) {
+        documentTerritoryIds.add(territoryId);
+      }
+    });
   });
 
   return documentTerritoryIds;

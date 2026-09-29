@@ -19,15 +19,23 @@ const linked = (...documents: { id: string }[]) =>
 const marks = (documents: never[]) => getDocumentTerritoryIds(tree, documents, linked(...documents));
 
 describe("getDocumentTerritoryIds", () => {
-  it("keeps only the highest anchored territory of a document", () => {
+  it("skips territories below another anchored territory of the document", () => {
     expect(marks([doc(["C", "A", "B"])])).toEqual(new Set(["A"]));
   });
 
-  it("keeps one territory per document across separate branches", () => {
-    expect(marks([doc(["B", "D"])])).toEqual(new Set(["D"]));
+  it("keeps every anchored territory with no anchored ancestor", () => {
+    expect(marks([doc(["B", "D"])])).toEqual(new Set(["B", "D"]));
   });
 
-  it("keeps the highest territory of each document", () => {
+  it("keeps anchored siblings alike", () => {
+    expect(marks([doc(["D", "A"])])).toEqual(new Set(["A", "D"]));
+  });
+
+  it("looks past unanchored ancestors", () => {
+    expect(marks([doc(["C", "D"])])).toEqual(new Set(["C", "D"]));
+  });
+
+  it("judges each document on its own anchors", () => {
     expect(marks([doc(["A", "B"]), doc(["B", "C"])])).toEqual(
       new Set(["A", "B"]),
     );
