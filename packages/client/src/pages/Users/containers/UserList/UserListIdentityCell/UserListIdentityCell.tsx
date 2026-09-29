@@ -38,7 +38,7 @@ export const UserListIdentityCell: React.FC<UserListIdentityCell> = ({
   const [editing, setEditing] = useState<"name" | "email" | null>(null);
   const { name, email, role, verified } = user;
 
-  // the owner's name and email are theirs alone to change; an admin manages
+  // an owner's name and email are theirs alone to change; an admin manages
   // everything else about the account
   const canEdit = role !== UserEnums.Role.Owner || getStoredUserId() === user.id;
 

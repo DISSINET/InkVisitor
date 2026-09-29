@@ -223,6 +223,17 @@ export default class User implements IUser, IDbModel {
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
+  /**
+   * Owners and admins assign roles, but only an owner grants or takes away
+   * the owner role.
+   */
+  canRoleBeChangedByUser(user: User, role: UserEnums.Role): boolean {
+    if (this.hasRole([UserEnums.Role.Owner]) || role === UserEnums.Role.Owner) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
+  }
+
   generatePassword(): string {
     const raw = generatePassword(12);
     return this.setPassword(raw);
@@ -282,6 +293,30 @@ export default class User implements IUser, IDbModel {
       .filter({ role: UserEnums.Role.Owner })
       .run(dbInstance);
     return data && data.length > 0 ? new User(data[0]) : null;
+  }
+
+  /**
+   * Whether an owner other than the given user exists
+   * Ignores thrashed entries
+   * @param dbInstance
+   * @param userId
+   * @returns
+   */
+  static async hasOtherOwner(
+    dbInstance: Connection | undefined,
+    userId: string
+  ): Promise<boolean> {
+    const count = await rethink
+      .table(User.table)
+      .filter(function (user: RDatum<IUser>) {
+        return rethink
+          .not(user.hasFields("deletedAt"))
+          .and(user("role").eq(UserEnums.Role.Owner))
+          .and(user("id").ne(userId));
+      })
+      .count()
+      .run(dbInstance);
+    return count > 0;
   }
 
   /**

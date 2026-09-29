@@ -592,6 +592,13 @@ export default Router()
           throw new ModelNotValidError("invalid model");
         }
 
+        if (
+          user.hasRole([UserEnums.Role.Owner]) &&
+          !request.getUserOrFail().hasRole([UserEnums.Role.Owner])
+        ) {
+          throw new PermissionDeniedError("only an owner can create an owner");
+        }
+
         await request.db.lock();
 
         if (await User.findUserByLogin(request.db, userData.email, true)) {
@@ -685,7 +692,7 @@ export default Router()
           throw new PermissionDeniedError("user cannot be saved");
         }
 
-        // the owner's name and email are theirs alone to change; an admin still
+        // an owner's name and email are theirs alone to change; an admin still
         // manages every other field on the account
         const changesOwnerIdentity =
           (data.name !== undefined && data.name !== existingUser.name) ||
@@ -696,8 +703,16 @@ export default Router()
           changesOwnerIdentity
         ) {
           throw new PermissionDeniedError(
-            "only the owner can change the owner's name or email"
+            "only the owner can change their name or email"
           );
+        }
+
+        if (
+          data.role !== undefined &&
+          data.role !== existingUser.role &&
+          !existingUser.canRoleBeChangedByUser(editor, data.role)
+        ) {
+          throw new PermissionDeniedError("user role cannot be changed");
         }
 
         if (data.password) {
@@ -725,6 +740,17 @@ export default Router()
         }
 
         await req.db.lock();
+
+        // counted under the write lock, so two owners demoting each other at
+        // once still leave one of them an owner
+        if (
+          data.role !== undefined &&
+          data.role !== UserEnums.Role.Owner &&
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(req.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last owner cannot give up the owner role");
+        }
 
         if (data.email) {
           const existingEmail = await User.findUserByLogin(
