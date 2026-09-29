@@ -83,6 +83,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const currentUserRole = getStoredUserRole() as UserEnums.Role;
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
+  // only an owner grants the owner role
   const roleOptions = useMemo(
     () =>
       currentUserRole === UserEnums.Role.Owner

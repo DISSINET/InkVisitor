@@ -223,6 +223,10 @@ export default class User implements IUser, IDbModel {
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
+  /**
+   * Owners and admins assign roles, but only an owner grants the owner role,
+   * and an owner keeps it for good.
+   */
   canRoleBeChangedByUser(user: User, role: UserEnums.Role): boolean {
     if (this.hasRole([UserEnums.Role.Owner])) {
       return false;

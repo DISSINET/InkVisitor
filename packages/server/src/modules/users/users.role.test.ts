@@ -9,6 +9,8 @@ import { r } from "rethinkdb-ts";
 
 describe("Users role change", function () {
   const db = new Db();
+  // the request pipeline re-fetches the user by id, so every role lives in the
+  // db row and each actor gets a cookie session of its own
   const makeUser = (role: UserEnums.Role) =>
     new User({
       id: `role-${role}-${Math.random()}`,
