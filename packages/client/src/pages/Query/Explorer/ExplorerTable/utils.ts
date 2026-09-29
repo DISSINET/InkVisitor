@@ -47,8 +47,10 @@ const CELL_GAP_PX = 4;
 const CELL_PADDING_PX = 26;
 /** "..." overflow indicator (StyledDots: three glyphs + 0.25rem margin). */
 const OVERFLOW_CHIP_PX = 18;
-/** Compact EntitySuggester (74px input + button chrome). */
-const SUGGESTER_PX = 110;
+/**
+ * EntitySuggester once hovered open
+ */
+const SUGGESTER_PX = 120;
 /** Subproperty group bar: 2px border + 0.25rem padding. */
 const SUBPROP_BAR_PX = 6;
 /** Subproperty level label ("2nd", "3rd" at xxs) plus the gap after it. */
