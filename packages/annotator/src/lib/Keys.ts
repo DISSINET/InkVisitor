@@ -258,11 +258,28 @@ export default class Keys {
       this.cursor.reset();
       this.cursor.setPosition(area[0].xLine, area[0].yLine);
     } else if (metaKey && !altKey && !ctrlKey) {
+      // Cmd+Delete: delete from caret to end of line. In RAW mode a tag right
+      // after the caret is deleted as a whole instead.
       const before = this.cursor.getAbsolutePosition();
-      const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
-      const end = { xLine: line.length, yLine: before.yLine };
-      this.text.deleteRangeText(before, end);
-      this.cursor.setPosition(before.xLine, before.yLine);
+      const startOffset = this.text.offsetFromVisual(
+        before.xLine,
+        before.yLine
+      );
+      const tagEnd =
+        this.text.mode === EditMode.RAW && startOffset >= 0
+          ? this.text.tagEndAfter(startOffset)
+          : -1;
+      const tagEndPos =
+        tagEnd >= 0 ? this.text.visualFromOffset(tagEnd) : null;
+      if (tagEndPos) {
+        this.text.deleteRangeText(before, tagEndPos);
+        this.cursor.moveToOffset(this.text, startOffset);
+      } else {
+        const line = this.text.getCurrentLine(this.viewport, this.cursor) || "";
+        const end = { xLine: line.length, yLine: before.yLine };
+        this.text.deleteRangeText(before, end);
+        this.cursor.setPosition(before.xLine, before.yLine);
+      }
     } else {
       const before = this.cursor.getAbsolutePosition();
       this.onArrowRight({

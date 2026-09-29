@@ -1,6 +1,7 @@
 /**
- * Cmd+Backspace in RAW mode: a tag right before the caret is deleted as a whole
- * (opening or closing); anywhere else it deletes back to the line start.
+ * Cmd+Backspace / Cmd+Delete in RAW mode: a tag right before / after the caret
+ * is deleted as a whole (opening or closing); anywhere else they delete back to
+ * the line start / on to the line end.
  */
 import { Annotator } from "./lib/Annotator";
 import { EditMode } from "./lib/constants";
@@ -100,6 +101,84 @@ describe("Cmd+Backspace after a tag", () => {
     const a = mk("ab<T1>cd</T1>");
     a.cursor.setPosition(6, 0);
     key(a, "Backspace", { metaKey: true });
+    key(a, "z", { metaKey: true });
+    expect(a.text.value).toBe("ab<T1>cd</T1>");
+  });
+});
+
+describe("Cmd+Delete before a tag", () => {
+  test("deletes the opening tag after the caret", () => {
+    const a = mk("ab<T1>cd</T1>");
+    a.cursor.setPosition(2, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("abcd</T1>");
+    expect(pos(a)).toEqual({ x: 2, y: 0 });
+  });
+
+  test("deletes the closing tag after the caret", () => {
+    const a = mk("ab<T1>cd</T1>ef");
+    a.cursor.setPosition(8, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("ab<T1>cdef");
+    expect(pos(a)).toEqual({ x: 8, y: 0 });
+  });
+
+  test("deletes a tag with attributes", () => {
+    const a = mk('x <w lemma="a b" n="1">y');
+    a.cursor.setPosition(2, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("x y");
+    expect(pos(a)).toEqual({ x: 2, y: 0 });
+  });
+
+  test("only touches the tag's own line", () => {
+    const a = mk("ab<T1>cd\nlast");
+    a.cursor.setPosition(2, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("abcd\nlast");
+    expect(pos(a)).toEqual({ x: 2, y: 0 });
+  });
+
+  test("deletes a tag that wraps over several visual lines", () => {
+    const a = mk("ab<T1>");
+    const tag = `<${"x".repeat(a.text.charsAtLine * 3)}>`;
+    a.text.value = `ab ${tag} cd`;
+    a.text.prepareSegments();
+    a.text.calculateLines();
+    expect(a.text.noLines).toBeGreaterThan(2);
+    a.cursor.setPosition(3, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("ab  cd");
+    expect(pos(a)).toEqual({ x: 3, y: 0 });
+  });
+
+  test("still deletes to the line end when no tag starts at the caret", () => {
+    const a = mk("ab<T1>cd");
+    a.cursor.setPosition(0, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("");
+    expect(pos(a)).toEqual({ x: 0, y: 0 });
+  });
+
+  test("a stray < is not a tag", () => {
+    const a = mk("a < b <");
+    a.cursor.setPosition(2, 0);
+    key(a, "Delete", { metaKey: true });
+    expect(a.text.value).toBe("a ");
+  });
+
+  test("Ctrl+Delete deletes the tag after the caret too", () => {
+    const a = mk("ab<T1>cd</T1>");
+    a.cursor.setPosition(2, 0);
+    key(a, "Delete", { ctrlKey: true });
+    expect(a.text.value).toBe("abcd</T1>");
+    expect(pos(a)).toEqual({ x: 2, y: 0 });
+  });
+
+  test("undo restores the deleted tag", () => {
+    const a = mk("ab<T1>cd</T1>");
+    a.cursor.setPosition(2, 0);
+    key(a, "Delete", { metaKey: true });
     key(a, "z", { metaKey: true });
     expect(a.text.value).toBe("ab<T1>cd</T1>");
   });
