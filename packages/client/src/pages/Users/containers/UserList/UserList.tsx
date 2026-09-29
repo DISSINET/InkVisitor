@@ -51,6 +51,7 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
+  const [promotingUserId, setPromotingUserId] = useState<false | string>(false);
   const [filters, setFilters] = useState<UserListFilters>(emptyUserListFilters);
   const [rowFlash, setRowFlash] = useState<{
     userId: string;
@@ -82,6 +83,13 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const currentUserRole = getStoredUserRole() as UserEnums.Role;
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
+  const roleOptions = useMemo(
+    () =>
+      currentUserRole === UserEnums.Role.Owner
+        ? userRoleDict
+        : userRoleDict.filter((roleOption) => roleOption.value !== UserEnums.Role.Owner),
+    [currentUserRole],
+  );
 
   const { data: users, isFetching, isLoading } = useUsersGetMoreQuery();
   const { data: treeData } = useTreeQuery();
@@ -108,6 +116,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const removingUser = useMemo(() => {
     return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
+
+  const promotingUser = useMemo(() => {
+    return promotingUserId ? users?.find((d) => d.id === promotingUserId) : false;
+  }, [promotingUserId, users]);
 
   const userMutation = useMutation({
     mutationFn: async (userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }) =>
@@ -240,12 +252,16 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
           return (
             <AttributeButtonGroup
-              options={userRoleDict.slice(1).map((roleOption) => ({
+              options={roleOptions.map((roleOption) => ({
                 longValue: roleOption.label,
                 shortValue: roleOption.label,
                 selected: role === roleOption.value,
                 onClick: () => {
                   if (role === roleOption.value) {
+                    return;
+                  }
+                  if (roleOption.value === UserEnums.Role.Owner) {
+                    setPromotingUserId(id);
                     return;
                   }
                   userMutation.mutate(
@@ -446,7 +462,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash, localUsers, treeData],
+    [canVerifyManually, roleOptions, scheduleRowFlash, localUsers, treeData],
   );
 
   // an empty body during the first fetch is not yet an empty result
@@ -525,6 +541,31 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           setRemovingUserId(false);
         }}
         loading={removeUserMutation.isPending}
+      />
+
+      <Submit
+        title={`Making ${promotingUser ? promotingUser.name : ""} an owner`}
+        text={`Do you really want to make ${promotingUser ? promotingUser.name : ""} an owner? The owner role cannot be taken away again.`}
+        submitLabel="Make owner"
+        show={promotingUser != false}
+        onSubmit={() =>
+          promotingUser &&
+          userMutation.mutate(
+            { id: promotingUser.id, role: UserEnums.Role.Owner },
+            {
+              onSuccess: () => {
+                scheduleRowFlash(promotingUser.id, "role");
+              },
+              onSettled: () => {
+                setPromotingUserId(false);
+              },
+            },
+          )
+        }
+        onCancel={() => {
+          setPromotingUserId(false);
+        }}
+        loading={userMutation.isPending}
       />
     </Box>
   );

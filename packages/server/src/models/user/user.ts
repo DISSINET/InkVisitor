@@ -223,6 +223,16 @@ export default class User implements IUser, IDbModel {
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
+  canRoleBeChangedByUser(user: User, role: UserEnums.Role): boolean {
+    if (this.hasRole([UserEnums.Role.Owner])) {
+      return false;
+    }
+    if (role === UserEnums.Role.Owner) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
+  }
+
   generatePassword(): string {
     const raw = generatePassword(12);
     return this.setPassword(raw);
