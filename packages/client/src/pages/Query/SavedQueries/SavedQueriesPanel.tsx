@@ -44,9 +44,9 @@ import {
   StyledQueryRow,
   StyledSaveAction,
   StyledSaveFooter,
+  StyledSaveOption,
   StyledSaveRow,
   StyledSavedQueriesRoot,
-  StyledShareRow,
   StyledToggleButton,
 } from "./SavedQueriesPanelStyles";
 
@@ -105,6 +105,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saveShared, setSaveShared] = useState(false);
+  const [saveColumns, setSaveColumns] = useState(true);
   const [openFolders, setOpenFolders] = useState<Record<FolderKey, boolean>>({
     examples: true,
     mine: true,
@@ -162,6 +163,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       toast.success(`Query "${variables.name}" saved`);
       setSaveName("");
       setSaveShared(false);
+      setSaveColumns(true);
       queryClient.invalidateQueries({ queryKey: ["saved-queries"] });
     },
     onError: (error) => {
@@ -205,15 +207,16 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     saveMutation.mutate({
       name: trimmedSaveName,
       shared: saveShared,
-      // every Explorer filter in play (UUIDs, label, floating search) and the
-      // table columns travel with the query, so loading it reproduces the
-      // whole result, down to the column names an export is read by
+      // every Explorer filter in play (UUIDs, label, floating search) travels
+      // with the query, so loading it reproduces the whole result; the table
+      // columns go along unless the user opts out, and a query stored without
+      // them leaves the columns of whoever loads it in place
       data: {
         query: queryState,
         includeEquivalents,
         includeSubordinates,
         filters: exploreFilters,
-        columns: tableColumns,
+        ...(saveColumns ? { columns: tableColumns } : {}),
       },
     });
   };
@@ -384,14 +387,21 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                   }
                 }}
               >
+                <StyledSaveOption>
+                  <Checkbox
+                    label="include columns"
+                    value={saveColumns}
+                    onChangeFn={(value) => setSaveColumns(value)}
+                  />
+                </StyledSaveOption>
                 {canShare && (
-                  <StyledShareRow>
+                  <StyledSaveOption>
                     <Checkbox
-                      label="shared with everyone"
+                      label="shared"
                       value={saveShared}
                       onChangeFn={(value) => setSaveShared(value)}
                     />
-                  </StyledShareRow>
+                  </StyledSaveOption>
                 )}
                 <StyledSaveAction>
                   <Button
