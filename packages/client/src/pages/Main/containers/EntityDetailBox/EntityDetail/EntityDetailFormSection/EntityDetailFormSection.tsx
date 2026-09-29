@@ -34,6 +34,7 @@ import { TbHomeMove } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { getEntityStatusIcon } from "utils/iconUtils";
+import { DUPLICATE_LABEL_MESSAGE, isDuplicateLabel } from "utils/entityLabels";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
@@ -280,6 +281,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 onBlur={() => {
                   if (entity.class !== EntityEnums.Class.Statement && newLabel.length < 1) {
                     toast.info(MIN_LABEL_LENGTH_MESSAGE);
+                    setNewLabel(entity.labels[0]);
+                  } else if (
+                    newLabel !== entity.labels[0] &&
+                    isDuplicateLabel(entity.labels, newLabel, 0)
+                  ) {
+                    toast.error(DUPLICATE_LABEL_MESSAGE);
                     setNewLabel(entity.labels[0]);
                   } else {
                     if (newLabel !== entity.labels[0]) {
