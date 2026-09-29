@@ -111,6 +111,34 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Batch form of {@link createNew}: one audit per entry, inserted in chunks of
+   * one query each.
+   * @returns number of audits inserted
+   */
+  static async createMany(
+    req: IRequest,
+    auditScope: AuditScope,
+    entries: { modelId: string; changes: object }[],
+    type: EventType
+  ): Promise<number> {
+    const user = req.getUserOrFail().id;
+    let inserted = 0;
+    for (let i = 0; i < entries.length; i += Audit.CREATE_MANY_CHUNK) {
+      const docs = entries
+        .slice(i, i + Audit.CREATE_MANY_CHUNK)
+        .map(({ modelId, changes }) => {
+          const entry = new Audit({ modelId, auditScope, user, changes, type });
+          return { ...entry, id: undefined };
+        });
+      const result = await rethink.table(Audit.table).insert(docs).run(req.db.connection);
+      inserted += result.inserted;
+    }
+    return inserted;
+  }
+
+  static CREATE_MANY_CHUNK = 1000;
+
+  /**
    * Resolves the audit event type for a document save based on what changed.
    * A single save produces a single typed audit, chosen by priority:
    * anchor additions > anchor removals > anchor attribute edits > text changes

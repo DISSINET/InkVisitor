@@ -154,6 +154,40 @@ export default class Entity implements IEntity, IDbModel {
     return result;
   }
 
+  /**
+   * Applies the same update to many entities, one query per chunk of ids so a
+   * large selection stays far below RethinkDB's array size limit. A write result
+   * does not say which document failed, so a chunk with any error is reported
+   * whole in `failed`.
+   * @returns the ids of the chunks written without error, and of the others
+   */
+  static async updateMany(
+    db: Connection | undefined,
+    entityIds: string[],
+    updateData: Partial<IEntity>
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const data: Partial<IEntity> = { ...updateData, updatedAt: new Date() };
+    Object.keys(data).forEach(
+      (key) => !(key in entityAllowedFields) && delete data[key as keyof IEntity]
+    );
+
+    const written: string[] = [];
+    const failed: string[] = [];
+    for (let i = 0; i < entityIds.length; i += Entity.UPDATE_MANY_CHUNK) {
+      const chunk = entityIds.slice(i, i + Entity.UPDATE_MANY_CHUNK);
+      const result = await rethink
+        .table(Entity.table)
+        .getAll(rethink.args(chunk))
+        .update(data)
+        .run(db);
+      chunk.forEach((id) => cache.delete(entityCacheKey(id)));
+      (result.errors ? failed : written).push(...chunk);
+    }
+    return { written, failed };
+  }
+
+  static UPDATE_MANY_CHUNK = 1000;
+
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
     const out: Record<string, IEntity> = {};
     for (const index of DbEnums.EntityIdReferenceIndexes) {

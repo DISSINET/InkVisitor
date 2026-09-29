@@ -1466,13 +1466,20 @@ export default Router()
 
         const user = request.getUserOrFail();
         const errors: Record<string, string> = {};
-        let updated = 0;
         // an entity the attribute does not apply to, or whose current value is
         // not the one being replaced, is left alone - not an error
         let skipped = 0;
+        // entities to write, grouped by the update they share: one for a
+        // language change, one per target part of speech for pos. Every write
+        // goes out in bulk after the loop, since the global write lock is held
+        // for the whole request.
+        const groups = new Map<string, { update: Partial<IEntity>; ids: string[] }>();
+        const auditChanges: Record<string, Partial<IEntity>> = {};
 
         for (const entityData of entities) {
           let updateData: Partial<IEntity> | undefined;
+          let groupKey: string;
+          let groupUpdate: Partial<IEntity>;
 
           if (changes.attribute === "language") {
             const current = entityData.language || EntityEnums.Language.Empty;
@@ -1485,6 +1492,8 @@ export default Router()
               continue;
             }
             updateData = { language: changes.to };
+            groupKey = "language";
+            groupUpdate = updateData;
           } else {
             const spec =
               entityData.class === EntityEnums.Class.Concept
@@ -1508,6 +1517,9 @@ export default Router()
               continue;
             }
             updateData = { data: { ...entityData.data, pos: spec.to } } as Partial<IEntity>;
+            groupKey = `pos:${spec.to}`;
+            // the database merges nested objects on update, so only pos changes
+            groupUpdate = { data: { pos: spec.to } } as Partial<IEntity>;
           }
 
           const model = getEntityClass({
@@ -1526,16 +1538,28 @@ export default Router()
             continue;
           }
 
-          await model.beforeSave(request.db.connection);
-          const result = await model.update(request.db.connection, updateData);
-
-          if (result.replaced || result.unchanged) {
-            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
-            updated++;
-          } else {
-            errors[entityData.id] = "update failed";
-          }
+          // beforeSave is skipped on purpose: it only guards the entities an
+          // entity links to, which a language or pos change leaves as they are
+          const group = groups.get(groupKey) ?? { update: groupUpdate, ids: [] };
+          group.ids.push(entityData.id);
+          groups.set(groupKey, group);
+          auditChanges[entityData.id] = updateData;
         }
+
+        const writtenIds: string[] = [];
+        for (const { update, ids } of groups.values()) {
+          const { written, failed } = await Entity.updateMany(request.db.connection, ids, update);
+          writtenIds.push(...written);
+          failed.forEach((id) => (errors[id] = "update failed"));
+        }
+        const updated = writtenIds.length;
+
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          writtenIds.map((id) => ({ modelId: id, changes: auditChanges[id] })),
+          EventType.EDIT
+        );
 
         return {
           result: updated > 0,
