@@ -51,7 +51,9 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
-  const [promotingUserId, setPromotingUserId] = useState<false | string>(false);
+  const [ownerRoleChange, setOwnerRoleChange] = useState<
+    { userId: string; role: UserEnums.Role } | false
+  >(false);
   const [filters, setFilters] = useState<UserListFilters>(emptyUserListFilters);
   const [rowFlash, setRowFlash] = useState<{
     userId: string;
@@ -118,9 +120,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
 
-  const promotingUser = useMemo(() => {
-    return promotingUserId ? users?.find((d) => d.id === promotingUserId) : false;
-  }, [promotingUserId, users]);
+  const ownerRoleChangeUser = useMemo(() => {
+    return ownerRoleChange ? users?.find((d) => d.id === ownerRoleChange.userId) : false;
+  }, [ownerRoleChange, users]);
+  const ownerRoleChangeName = ownerRoleChangeUser ? ownerRoleChangeUser.name : "";
+  const grantsOwner = ownerRoleChange && ownerRoleChange.role === UserEnums.Role.Owner;
 
   const userMutation = useMutation({
     mutationFn: async (userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }) =>
@@ -164,6 +168,18 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       setRemovingUserId(false);
     },
   });
+
+  const changeRole = (userId: string, role: UserEnums.Role, onSettled?: () => void) => {
+    userMutation.mutate(
+      { id: userId, role },
+      {
+        onSuccess: () => {
+          scheduleRowFlash(userId, "role");
+        },
+        onSettled,
+      },
+    );
+  };
 
   const addRightToUser = (user: IResponseUser, territoryId: string, mode: "read" | "write") => {
     // remove this territory from the list if it was added before
@@ -241,9 +257,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Cell: ({ row }: CellType) => {
           const { id, role } = row.original;
 
-          // an owner keeps the role for good, and nobody demotes themselves, so
-          // those rows state the role rather than offering a control
-          if (id === getStoredUserId() || role === UserEnums.Role.Owner) {
+          // nobody changes their own role, and only an owner changes an owner's,
+          // so those rows state the role rather than offering a control
+          if (
+            id === getStoredUserId() ||
+            (role === UserEnums.Role.Owner && currentUserRole !== UserEnums.Role.Owner)
+          ) {
             return (
               <StyledRoleBadgeWrap>
                 <RoleBadge role={role} />
@@ -261,18 +280,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   if (role === roleOption.value) {
                     return;
                   }
-                  if (roleOption.value === UserEnums.Role.Owner) {
-                    setPromotingUserId(id);
+                  if (
+                    role === UserEnums.Role.Owner ||
+                    roleOption.value === UserEnums.Role.Owner
+                  ) {
+                    setOwnerRoleChange({ userId: id, role: roleOption.value });
                     return;
                   }
-                  userMutation.mutate(
-                    { id: id, role: roleOption.value },
-                    {
-                      onSuccess: () => {
-                        scheduleRowFlash(id, "role");
-                      },
-                    },
-                  );
+                  changeRole(id, roleOption.value);
                 },
               }))}
             />
@@ -545,26 +560,26 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       />
 
       <Submit
-        title={`Making ${promotingUser ? promotingUser.name : ""} an owner`}
-        text={`Do you really want to make ${promotingUser ? promotingUser.name : ""} an owner? The owner role cannot be taken away again.`}
-        submitLabel="Make owner"
-        show={promotingUser != false}
+        title={
+          grantsOwner
+            ? `Making ${ownerRoleChangeName} an owner`
+            : `Taking the owner role from ${ownerRoleChangeName}`
+        }
+        text={
+          grantsOwner
+            ? `Do you really want to make ${ownerRoleChangeName} an owner?`
+            : `Do you really want to change ${ownerRoleChangeName} from owner to ${ownerRoleChange ? ownerRoleChange.role : ""}?`
+        }
+        submitLabel={grantsOwner ? "Make owner" : "Change role"}
+        show={ownerRoleChangeUser != false}
         onSubmit={() =>
-          promotingUser &&
-          userMutation.mutate(
-            { id: promotingUser.id, role: UserEnums.Role.Owner },
-            {
-              onSuccess: () => {
-                scheduleRowFlash(promotingUser.id, "role");
-              },
-              onSettled: () => {
-                setPromotingUserId(false);
-              },
-            },
-          )
+          ownerRoleChange &&
+          changeRole(ownerRoleChange.userId, ownerRoleChange.role, () => {
+            setOwnerRoleChange(false);
+          })
         }
         onCancel={() => {
-          setPromotingUserId(false);
+          setOwnerRoleChange(false);
         }}
         loading={userMutation.isPending}
       />

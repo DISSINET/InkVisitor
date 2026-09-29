@@ -741,6 +741,17 @@ export default Router()
 
         await req.db.lock();
 
+        // counted under the write lock, so two owners demoting each other at
+        // once still leave one of them an owner
+        if (
+          data.role !== undefined &&
+          data.role !== UserEnums.Role.Owner &&
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(req.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last owner cannot give up the owner role");
+        }
+
         if (data.email) {
           const existingEmail = await User.findUserByLogin(
             req.db,

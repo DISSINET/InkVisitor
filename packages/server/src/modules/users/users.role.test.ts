@@ -5,7 +5,8 @@ import User from "@models/user/user";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
 import { Db } from "@service/rethink";
 import { deleteUsers } from "@service/shorthands";
-import { r } from "rethinkdb-ts";
+import { IUser } from "@inkvisitor/shared/types";
+import { r, RDatum } from "rethinkdb-ts";
 
 describe("Users role change", function () {
   const db = new Db();
@@ -120,19 +121,38 @@ describe("Users role change", function () {
     expect(await storedRole(target.id)).toEqual(UserEnums.Role.Editor);
   });
 
-  it("keeps the owner role once granted", async () => {
+  it("lets an owner take the owner role from another owner", async () => {
     const target = await createTarget(UserEnums.Role.Owner);
 
     await ownerAgent
       .put(`${apiPath}/users/${target.id}`)
       .send({ role: UserEnums.Role.Admin })
-      .expect(403);
+      .expect(200);
+
+    expect(await storedRole(target.id)).toEqual(UserEnums.Role.Admin);
+  });
+
+  it("does not let an admin change an owner's role", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
     await adminAgent
       .put(`${apiPath}/users/${target.id}`)
       .send({ role: UserEnums.Role.Viewer })
       .expect(403);
 
     expect(await storedRole(target.id)).toEqual(UserEnums.Role.Owner);
+  });
+
+  it("lets an owner give up the owner role while another owner remains", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+    const targetAgent = await createAgentWithUserId(target.id);
+
+    await targetAgent
+      .put(`${apiPath}/users/me`)
+      .send({ role: UserEnums.Role.Admin })
+      .expect(200);
+
+    expect(await storedRole(target.id)).toEqual(UserEnums.Role.Admin);
   });
 
   it("does not let an admin create an owner", async () => {
@@ -156,5 +176,20 @@ describe("Users role change", function () {
       .put(`${apiPath}/users/me`)
       .send({ role: UserEnums.Role.Viewer, name: viewer.name })
       .expect(200);
+  });
+
+  it("does not let the last owner give up the owner role", async () => {
+    await r
+      .table(User.table)
+      .filter((user: RDatum<IUser>) => user("role").eq(UserEnums.Role.Owner).and(user("id").ne(owner.id)))
+      .update({ role: UserEnums.Role.Admin })
+      .run(db.connection);
+
+    await ownerAgent
+      .put(`${apiPath}/users/me`)
+      .send({ role: UserEnums.Role.Admin })
+      .expect(403);
+
+    expect(await storedRole(owner.id)).toEqual(UserEnums.Role.Owner);
   });
 });
