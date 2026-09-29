@@ -43,14 +43,19 @@ import { IRequest } from "src/custom_typings/request";
 /**
  * Records a rejected credential check. The signin route is public and rate
  * limited per IP, so the address is what ties repeated failures together into a
- * recognisable brute-force pattern; the submitted login is kept verbatim while
- * the password never reaches the log.
+ * recognisable brute-force pattern. The submitted login never reaches the log:
+ * people type their password into the login field by mistake, and raw input
+ * could forge extra log lines. An existing account is named by its stored id
+ * and name instead.
  */
-function logFailedSignin(request: IRequest, login: string, reason: string): void {
+function logFailedSignin(request: IRequest, reason: string, user?: User): void {
   const ip = (request as Request).ip || "unknown";
+  const account = user
+    ? ` user=${user.id} name=${JSON.stringify(user.name)}`
+    : "";
   console.warn(
     red(
-      `[${new Date().toUTCString()}] Failed signin: login="${login}" ip=${ip} reason=${reason}`
+      `[${new Date().toUTCString()}] Failed signin:${account} ip=${ip} reason=${reason}`
     )
   );
 }
@@ -381,7 +386,7 @@ export default Router()
 
       const user = await User.findUserByLogin(request.db, login, false);
       if (!user) {
-        logFailedSignin(request, login, "unknown login");
+        logFailedSignin(request, "unknown login");
         throw new BadCredentialsError("wrong email / username");
       }
 
@@ -397,7 +402,7 @@ export default Router()
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
-        logFailedSignin(request, login, "wrong password");
+        logFailedSignin(request, "wrong password", user);
         throw new BadCredentialsError("wrong password");
       }
 
