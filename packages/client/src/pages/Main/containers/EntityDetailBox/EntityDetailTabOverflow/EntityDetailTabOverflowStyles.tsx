@@ -29,6 +29,7 @@ export const StyledOverflowCount = styled.span`
 `;
 
 export const StyledOverflowList = styled.div`
+  z-index: 200;
   display: flex;
   flex-direction: column;
   min-width: 16rem;

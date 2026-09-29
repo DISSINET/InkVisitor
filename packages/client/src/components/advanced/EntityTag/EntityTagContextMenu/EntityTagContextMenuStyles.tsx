@@ -2,6 +2,14 @@ import { animated } from "@react-spring/web";
 import { InvertedBgColor } from "Theme/theme";
 import styled from "styled-components";
 
+// tags render inside modals (500) and inside the suggester dropdown (10000),
+// and the menu has to clear whichever one it was opened from
+const MENU_Z_INDEX = 10002;
+
+export const StyledMenuFloating = styled.div<{ $submenu?: boolean }>`
+  z-index: ${({ $submenu }) => ($submenu ? MENU_Z_INDEX + 1 : MENU_Z_INDEX)};
+`;
+
 export const StyledMenuGroup = styled(animated.div)`
   display: flex;
   flex-direction: column;

@@ -31,6 +31,7 @@ import {
   StyledItemLabel,
   StyledItemTrailing,
   StyledMenuDivider,
+  StyledMenuFloating,
   StyledMenuGroup,
   StyledMenuHeader,
   StyledMenuHeaderLabel,
@@ -40,9 +41,6 @@ import {
 const ICON_SIZE = 13;
 // the annotator's own context menu marks a toggled-on row with this glyph
 const CHECK_GLYPH = "\u2713";
-// tags render inside modals (500) and inside the suggester dropdown (10000),
-// and the menu has to clear whichever one it was opened from
-const MENU_Z_INDEX = 10002;
 // the pointer needs time to cross the gap between the row and the submenu
 const SUBMENU_CLOSE_DELAY = 150;
 
@@ -300,7 +298,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       {/* tags are rendered inside modals too, so the menu portals to the body and
           sits above the modal layer rather than inside the clipped page content */}
       <FloatingPortal>
-        <div ref={menu.refs.setFloating} style={{ ...menu.floatingStyles, zIndex: MENU_Z_INDEX }}>
+        <StyledMenuFloating ref={menu.refs.setFloating} style={menu.floatingStyles}>
           <StyledMenuGroup
             style={animatedMount}
             onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
@@ -359,14 +357,15 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
               </>
             )}
           </StyledMenuGroup>
-        </div>
+        </StyledMenuFloating>
       </FloatingPortal>
 
       {submenuOpen && (
         <FloatingPortal>
-          <div
+          <StyledMenuFloating
             ref={submenu.refs.setFloating}
-            style={{ ...submenu.floatingStyles, zIndex: MENU_Z_INDEX + 1 }}
+            style={submenu.floatingStyles}
+            $submenu
           >
             <StyledMenuGroup
               onMouseEnter={openSubmenu}
@@ -391,7 +390,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
                 <StyledEmptyNote>no bookmark folders yet</StyledEmptyNote>
               )}
             </StyledMenuGroup>
-          </div>
+          </StyledMenuFloating>
         </FloatingPortal>
       )}
     </>
