@@ -233,7 +233,11 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
     });
     // a query stored without columns leaves the current ones in place
     if (row.data.columns) {
-      onLoadTableColumns(row.data.columns);
+      // stored columns outlive the column types they name; the table header
+      // throws on a type missing from the config, so such columns are skipped
+      onLoadTableColumns(
+        row.data.columns.filter((column) => column.type in Explore.EExploreColumnTypeConfig),
+      );
     }
   };
 
