@@ -1213,12 +1213,13 @@ export default Router()
 
         // the resource and a picked value are the only links this route adds,
         // so one lookup tells whether either is a template, which only another
-        // template may use
+        // template may use; a labelled batch never links the picked value, only
+        // a new V of its own
+        const addedIds = [resourceEntityId, valueLabel ? "" : valueEntityId].filter(
+          (id): id is string => !!id
+        );
         const addsTemplate = (
-          await Entity.findEntitiesByIds(
-            request.db.connection,
-            [resourceEntityId, valueEntityId].filter((id): id is string => !!id)
-          )
+          await Entity.findEntitiesByIds(request.db.connection, addedIds)
         ).some((entity) => entity.isTemplate);
 
         // every entity is checked first and its writes collected, so a V is

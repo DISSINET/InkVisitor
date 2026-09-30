@@ -172,6 +172,29 @@ describe("Entities batchAddReference", function () {
     });
   });
 
+  describe("a template sent as the value of a labelled batch", () => {
+    it("is not used, so it blocks nothing", async () => {
+      const resource = await makeEntity(EntityEnums.Class.Resource);
+      const templateValue = await makeEntity(EntityEnums.Class.Value, { isTemplate: true });
+      const target = await makeEntity(EntityEnums.Class.Concept);
+
+      const res = await authAgent
+        .post(`${apiPath}/entities/batchAddReference`)
+        .send({
+          entityIds: [target.id],
+          resourceEntityId: resource.id,
+          valueEntityId: templateValue.id,
+          valueLabel: "f. 2v",
+        });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.message).toContain("1/1");
+      const [valueId] = await valueIdsOf([target.id]);
+      expect(valueId).not.toEqual(templateValue.id);
+      expect((await findEntityById(db, valueId)).labels).toEqual(["f. 2v"]);
+    });
+  });
+
   describe("an entity that already links a template", () => {
     it("still gets the reference", async () => {
       const template = await makeEntity(EntityEnums.Class.Resource, { isTemplate: true });
