@@ -708,18 +708,21 @@ export default class Entity implements IEntity, IDbModel {
               addNewValidationWarning(WarningTypeEnums.TVEPV, tId, validation);
             } else if (allowedClasses?.length) {
               // class is required
-              let passed = true;
-              for (const p of validProps) {
-                const propValueEntity = propValueEs.find(
-                  (e) => e.id === p.value.entityId
-                );
-                if (
-                  propValueEntity &&
-                  !allowedClasses?.includes(propValueEntity.class)
-                ) {
-                  passed = false;
-                }
-              }
+              const valueClass = (p: IProp) =>
+                propValueEs.find((e) => e.id === p.value.entityId)?.class;
+              const passed = propType?.length
+                ? // a named type: every property of it needs a value of an
+                  // allowed class
+                  validProps.every((p) => {
+                    const cls = valueClass(p);
+                    return !cls || allowedClasses.includes(cls);
+                  })
+                : // no type: one property with a value of an allowed class
+                  // is enough
+                  validProps.some((p) => {
+                    const cls = valueClass(p);
+                    return !!cls && allowedClasses.includes(cls);
+                  });
               if (!passed) {
                 addNewValidationWarning(
                   WarningTypeEnums.TVEPV,
