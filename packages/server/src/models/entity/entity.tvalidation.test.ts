@@ -328,5 +328,25 @@ describe("models/entity getTBasedWarnings with expansions", () => {
         )
       ).toEqual([WarningTypeEnums.TVEPV]);
     });
+
+    it("checks the value class of every property when no type is named", () => {
+      const anyType: ITerritoryValidation = {
+        tieType: EProtocolTieType.Property,
+        detail: "",
+        propType: [],
+        allowedClasses: [EntityEnums.Class.Person],
+      };
+
+      expect(
+        check(withProp("any-type", "value1"), anyType, [
+          { id: "value1", class: EntityEnums.Class.Concept } as IEntity,
+        ])
+      ).toEqual([WarningTypeEnums.TVEPV]);
+      expect(
+        check(withProp("any-type", "value1"), anyType, [
+          { id: "value1", class: EntityEnums.Class.Person } as IEntity,
+        ])
+      ).toEqual([]);
+    });
   });
 });

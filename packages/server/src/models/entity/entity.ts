@@ -709,14 +709,12 @@ export default class Entity implements IEntity, IDbModel {
             } else if (allowedClasses?.length) {
               // class is required
               let passed = true;
-              for (const pi in eProps) {
-                const p = eProps[pi];
+              for (const p of validProps) {
                 const propValueEntity = propValueEs.find(
                   (e) => e.id === p.value.entityId
                 );
                 if (
                   propValueEntity &&
-                  acceptedPropTypes.includes(p.type.entityId) &&
                   !allowedClasses?.includes(propValueEntity.class)
                 ) {
                   passed = false;
