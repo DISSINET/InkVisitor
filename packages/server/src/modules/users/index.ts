@@ -45,8 +45,8 @@ import { IRequest } from "src/custom_typings/request";
  * limited per IP, so the address is what ties repeated failures together into a
  * recognisable brute-force pattern. The submitted login never reaches the log:
  * people type their password into the login field by mistake, and raw input
- * could forge extra log lines. An existing account is named by its stored id
- * and name instead.
+ * could forge extra log lines. An existing account is named by the id and
+ * name stored for it.
  */
 function logFailedSignin(request: IRequest, reason: string, user?: User): void {
   const ip = (request as Request).ip || "unknown";
