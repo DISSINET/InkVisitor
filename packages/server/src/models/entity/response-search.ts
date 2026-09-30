@@ -6,6 +6,7 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
+import { QUERY_RUN_OPTIONS } from "@service/query/run-options";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
@@ -565,7 +566,7 @@ export class SearchQuery {
    * @returns list of found entities
    */
   async do(): Promise<IEntity[]> {
-    return this.query.run(this.connection);
+    return this.query.run(this.connection, QUERY_RUN_OPTIONS);
   }
 }
 

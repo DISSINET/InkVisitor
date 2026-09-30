@@ -9,6 +9,7 @@ import treeCache from "@service/treeCache";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 import { getNodeExpansionIds } from "./node-expansion";
+import { QUERY_RUN_OPTIONS } from "./run-options";
 
 export default class SearchEdge implements Query.IEdge {
   type: Query.EdgeType;
@@ -141,14 +142,6 @@ function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStre
     .getField("id")
     .distinct() as unknown as RStream;
 }
-
-/**
- * Run options for the query that evaluates an edge. The candidate ids of an
- * edge, and the id sets the nodes combine, are materialised as arrays, which
- * RethinkDB caps at 100,000 elements by default; an unconstrained target on a
- * large database collects more than that.
- */
-export const QUERY_RUN_OPTIONS = { arrayLimit: 1_000_000 };
 
 /**
  * Intersects a precomputed candidate-id stream back into the incoming stream q:
