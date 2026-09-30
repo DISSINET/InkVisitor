@@ -186,6 +186,66 @@ export default class Entity implements IEntity, IDbModel {
     return { written, failed };
   }
 
+  /**
+   * Applies its own update to each of many entities, one query per chunk. As
+   * in {@link updateMany}, a chunk with any error is reported whole in `failed`.
+   * @returns the ids of the chunks written without error, and of the others
+   */
+  static async updateEach(
+    db: Connection | undefined,
+    updates: { id: string; data: Partial<IEntity> }[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const updatedAt = new Date();
+    const cleaned = updates.map(({ id, data }) => {
+      const allowed: Partial<IEntity> = { ...data, updatedAt };
+      Object.keys(allowed).forEach(
+        (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+      );
+      return { id, data: allowed };
+    });
+
+    const written: string[] = [];
+    const failed: string[] = [];
+    for (let i = 0; i < cleaned.length; i += Entity.UPDATE_MANY_CHUNK) {
+      const chunk = cleaned.slice(i, i + Entity.UPDATE_MANY_CHUNK);
+      const ids = chunk.map(({ id }) => id);
+      const result = await rethink
+        .expr(chunk)
+        .forEach(function (update: RDatum) {
+          return rethink.table(Entity.table).get(update("id")).update(update("data"));
+        })
+        .run(db);
+      ids.forEach((id) => cache.delete(entityCacheKey(id)));
+      (result.errors ? failed : written).push(...ids);
+    }
+    return { written, failed };
+  }
+
+  /**
+   * Inserts many new entities, one query per chunk, stamping createdAt as
+   * {@link save} does. A chunk with any error is reported whole in `failed`.
+   * @returns the ids of the chunks inserted without error, and of the others
+   */
+  static async saveMany(
+    db: Connection | undefined,
+    entities: Entity[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const createdAt = new Date();
+    const written: string[] = [];
+    const failed: string[] = [];
+    for (let i = 0; i < entities.length; i += Entity.UPDATE_MANY_CHUNK) {
+      const chunk = entities.slice(i, i + Entity.UPDATE_MANY_CHUNK);
+      chunk.forEach((entity) => (entity.createdAt = createdAt));
+      const result = await rethink
+        .table(Entity.table)
+        .insert(chunk.map((entity) => ({ ...entity })))
+        .run(db);
+      const ids = chunk.map(({ id }) => id);
+      (result.errors ? failed : written).push(...ids);
+    }
+    return { written, failed };
+  }
+
   static UPDATE_MANY_CHUNK = 1000;
 
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
