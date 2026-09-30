@@ -4,6 +4,7 @@ import { WarningTypeEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IWarning } from "@inkvisitor/shared/types";
 import { WarningIcon } from "./WarningIcon";
 import { EntityTag } from "components/advanced";
+import { LetterIcon } from "components";
 import { MESSAGE_WARNING_ENTITIES_KEY, useEntitiesQuery } from "hooks/react-query";
 import { EntityColors } from "types";
 import {
@@ -21,7 +22,6 @@ import {
 import { isWarningTBased } from "utils/utils";
 import { validationFieldNote } from "utils/validationExpansion";
 import { wildCardChar } from "Theme/constants";
-import { useTheme } from "styled-components";
 
 interface Message {
   warning: IWarning;
@@ -30,7 +30,6 @@ interface Message {
   };
 }
 export const Message: React.FC<Message> = ({ warning, entities }) => {
-  const theme = useTheme();
   const positionObject: { [key: string]: string } = {
     s: "Subject",
     a1: "Actant1",
@@ -172,19 +171,14 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             if (entityClass === wildCardChar) return null;
             const classItem = EntityColors[entityClass];
             const colorName = classItem?.color ?? "transparent";
-            const color = theme.color[colorName] as string;
 
             return (
               <span key={index}>
-                <span
-                  style={{
-                    backgroundColor: color,
-                    padding: "1px 2px",
-                    color: "white",
-                  }}
-                >
-                  {classItem?.entityClass}
-                </span>
+                <LetterIcon
+                  letter={classItem?.entityClass ?? entityClass}
+                  bgColor={colorName}
+                  borderColor={colorName}
+                />
                 {index < entityClasses.length - 1 ? ", " : ""}
               </span>
             );
