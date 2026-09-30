@@ -5,6 +5,7 @@ import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { entityCacheKey, findEntityById } from "@service/shorthands";
 import { cache } from "@service/ttlCache";
+import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
@@ -45,6 +46,15 @@ import {
   expandValidationIds,
   soeIdsForValidation,
 } from "./validation-expansion";
+
+/** `data` without the fields an entity update may not set. */
+function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
+  const allowed: Partial<IEntity> = { ...data };
+  Object.keys(allowed).forEach(
+    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+  );
+  return allowed;
+}
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -156,97 +166,89 @@ export default class Entity implements IEntity, IDbModel {
 
   /**
    * Applies the same update to many entities, one query per chunk of ids so a
-   * large selection stays far below RethinkDB's array size limit. A write result
-   * does not say which document failed, so a chunk with any error is reported
-   * whole in `failed`.
-   * @returns the ids of the chunks written without error, and of the others
+   * large selection stays far below RethinkDB's array size limit.
+   * @returns the ids written, and the ids that failed or no longer exist
    */
   static async updateMany(
     db: Connection | undefined,
     entityIds: string[],
     updateData: Partial<IEntity>
   ): Promise<{ written: string[]; failed: string[] }> {
-    const data: Partial<IEntity> = { ...updateData, updatedAt: new Date() };
-    Object.keys(data).forEach(
-      (key) => !(key in entityAllowedFields) && delete data[key as keyof IEntity]
-    );
-
-    const written: string[] = [];
-    const failed: string[] = [];
-    for (let i = 0; i < entityIds.length; i += Entity.UPDATE_MANY_CHUNK) {
-      const chunk = entityIds.slice(i, i + Entity.UPDATE_MANY_CHUNK);
+    const data = allowedEntityData({ ...updateData, updatedAt: new Date() });
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entityIds)) {
       const result = await rethink
         .table(Entity.table)
         .getAll(rethink.args(chunk))
-        .update(data)
+        .update(data, { returnChanges: "always" })
         .run(db);
       chunk.forEach((id) => cache.delete(entityCacheKey(id)));
-      (result.errors ? failed : written).push(...chunk);
+      writtenIds(result).forEach((id) => written.add(id));
     }
-    return { written, failed };
+    return {
+      written: entityIds.filter((id) => written.has(id)),
+      failed: entityIds.filter((id) => !written.has(id)),
+    };
   }
 
   /**
-   * Applies its own update to each of many entities, one query per chunk. As
-   * in {@link updateMany}, a chunk with any error is reported whole in `failed`.
-   * @returns the ids of the chunks written without error, and of the others
+   * Applies its own update to each of many entities, one query per chunk.
+   * @returns the ids written, and the ids that failed or no longer exist
    */
   static async updateEach(
     db: Connection | undefined,
     updates: { id: string; data: Partial<IEntity> }[]
   ): Promise<{ written: string[]; failed: string[] }> {
     const updatedAt = new Date();
-    const cleaned = updates.map(({ id, data }) => {
-      const allowed: Partial<IEntity> = { ...data, updatedAt };
-      Object.keys(allowed).forEach(
-        (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
-      );
-      return { id, data: allowed };
-    });
-
-    const written: string[] = [];
-    const failed: string[] = [];
-    for (let i = 0; i < cleaned.length; i += Entity.UPDATE_MANY_CHUNK) {
-      const chunk = cleaned.slice(i, i + Entity.UPDATE_MANY_CHUNK);
-      const ids = chunk.map(({ id }) => id);
+    const written = new Set<string>();
+    for (const chunk of chunksOf(updates)) {
       const result = await rethink
-        .expr(chunk)
+        .expr(chunk.map(({ id, data }) => ({ id, data: allowedEntityData({ ...data, updatedAt }) })))
         .forEach(function (update: RDatum) {
-          return rethink.table(Entity.table).get(update("id")).update(update("data"));
+          return rethink
+            .table(Entity.table)
+            .get(update("id"))
+            .update(update("data"), { returnChanges: "always" });
         })
         .run(db);
-      ids.forEach((id) => cache.delete(entityCacheKey(id)));
-      (result.errors ? failed : written).push(...ids);
+      chunk.forEach(({ id }) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
     }
-    return { written, failed };
+    return {
+      written: updates.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: updates.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
   }
 
   /**
    * Inserts many new entities, one query per chunk, stamping createdAt as
-   * {@link save} does. A chunk with any error is reported whole in `failed`.
-   * @returns the ids of the chunks inserted without error, and of the others
+   * {@link save} does.
+   * @returns the ids inserted, and the ids that failed
    */
   static async saveMany(
     db: Connection | undefined,
     entities: Entity[]
   ): Promise<{ written: string[]; failed: string[] }> {
     const createdAt = new Date();
-    const written: string[] = [];
-    const failed: string[] = [];
-    for (let i = 0; i < entities.length; i += Entity.UPDATE_MANY_CHUNK) {
-      const chunk = entities.slice(i, i + Entity.UPDATE_MANY_CHUNK);
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entities)) {
       chunk.forEach((entity) => (entity.createdAt = createdAt));
       const result = await rethink
         .table(Entity.table)
-        .insert(chunk.map((entity) => ({ ...entity })))
+        .insert(
+          chunk.map((entity) => ({ ...entity })),
+          { returnChanges: "always" }
+        )
         .run(db);
-      const ids = chunk.map(({ id }) => id);
-      (result.errors ? failed : written).push(...ids);
+      writtenIds(result).forEach((id) => written.add(id));
     }
-    return { written, failed };
+    return {
+      written: entities.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: entities.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
   }
 
-  static UPDATE_MANY_CHUNK = 1000;
+  static UPDATE_MANY_CHUNK = WRITE_CHUNK;
 
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
     const out: Record<string, IEntity> = {};

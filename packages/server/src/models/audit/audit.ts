@@ -5,6 +5,7 @@ import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
 import { DbEnums } from "@inkvisitor/shared/enums";
 import { EventType } from "@inkvisitor/shared/types/stats";
+import { chunksOf } from "@models/batch-write";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
@@ -123,20 +124,16 @@ export default class Audit implements IAudit, IDbModel {
   ): Promise<number> {
     const user = req.getUserOrFail().id;
     let inserted = 0;
-    for (let i = 0; i < entries.length; i += Audit.CREATE_MANY_CHUNK) {
-      const docs = entries
-        .slice(i, i + Audit.CREATE_MANY_CHUNK)
-        .map(({ modelId, changes }) => {
-          const entry = new Audit({ modelId, auditScope, user, changes, type });
-          return { ...entry, id: undefined };
-        });
+    for (const chunk of chunksOf(entries)) {
+      const docs = chunk.map(({ modelId, changes }) => {
+        const entry = new Audit({ modelId, auditScope, user, changes, type });
+        return { ...entry, id: undefined };
+      });
       const result = await rethink.table(Audit.table).insert(docs).run(req.db.connection);
       inserted += result.inserted;
     }
     return inserted;
   }
-
-  static CREATE_MANY_CHUNK = 1000;
 
   /**
    * Resolves the audit event type for a document save based on what changed.
