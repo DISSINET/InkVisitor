@@ -22,6 +22,7 @@ import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
+import { templateSourceLink } from "./templateSourceLink";
 
 interface EntityDetailCreateTemplateModal {
   showModal: boolean;
@@ -51,7 +52,10 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
     mutationFn: async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      updateEntityMutation.mutate({ usedTemplate: variables.id });
+      const sourceChange = templateSourceLink(entity, variables.id);
+      if (sourceChange) {
+        updateEntityMutation.mutate(sourceChange);
+      }
 
       appendDetailId(variables.id);
 
