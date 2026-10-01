@@ -16,7 +16,7 @@ export const StyledMenuGroup = styled(animated.div)`
   gap: 0.1rem;
   min-width: 18rem;
   max-width: 30rem;
-  padding: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2]};
   background-color: ${({ theme }) => theme.color["white"]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
