@@ -58,3 +58,7 @@
 - Failed sign-ins are logged with login, IP and reason (never the password)
 - A-C-R export: emits the missing Action reference stubs and metaprop Values/Resources, writes each Value once, batches relation queries, and validates dangling ids before writing; `dataset-stats.ts` produces a `summary.md` beside any exported dataset
 - Full production dumps (`datasets/production-*`) are git-ignored
+
+## Deployment
+
+- Clear `usedTemplate` on the one template that had a new template created from it before #3289 — it points at its own copy and should be empty.
