@@ -74,7 +74,7 @@ export const EntityDetailTabOverflow: React.FC<EntityDetailTabOverflow> = ({
         <FloatingPortal id="page-content">
           <StyledOverflowList
             ref={refs.setFloating}
-            style={{ zIndex: 200, ...floatingStyles }}
+            style={floatingStyles}
             {...getFloatingProps()}
           >
             {entities.map((entity) => (

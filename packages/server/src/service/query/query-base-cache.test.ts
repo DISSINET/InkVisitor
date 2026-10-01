@@ -27,4 +27,10 @@ describe("query-base-cache", () => {
     cached.push("b");
     expect(getCachedBaseIds(key)).toEqual(["a"]);
   });
+
+  it("does not cache a result above the size limit", () => {
+    const key = "too-large";
+    setCachedBaseIds(key, Array.from({ length: 100_001 }, (_, i) => `id${i}`));
+    expect(getCachedBaseIds(key)).toBeNull();
+  });
 });

@@ -260,15 +260,18 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
 
   let frontier = [...resourceIds];
   while (frontier.length) {
-    const soeRelations = (
+    // a superordinate-entity relation lists the subordinate entity first, so
+    // keeping the frontier at position 0 steps up to the superordinate only
+    const parentIds = (
       await getRelationsWithEntities(
         db,
         frontier,
-        RelationEnums.Type.SuperordinateEntity
+        RelationEnums.Type.SuperordinateEntity,
+        0
       )
-    ).flatMap((rel) => rel.entityIds);
+    ).map((rel) => rel.entityIds[1]);
 
-    frontier = [...new Set(soeRelations)].filter(
+    frontier = [...new Set(parentIds)].filter(
       (entityId) => entityId && !resourceIds.has(entityId)
     );
     frontier.forEach((entityId) => resourceIds.add(entityId));

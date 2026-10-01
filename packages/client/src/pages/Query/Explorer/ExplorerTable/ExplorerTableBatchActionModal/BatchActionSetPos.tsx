@@ -42,6 +42,7 @@ import {
   ATTRIBUTE_PREVIEW_FETCH_MAX,
   batchAttributeFromOptions,
   batchAttributeMatches,
+  batchAttributeChangeNote,
 } from "./utils";
 
 /** A carries a single pos value and no empty one of its own, so the missing
@@ -170,6 +171,22 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
     isLargeSelection,
   ]);
 
+  // with "overwrite" ticked, the entities already at the target are the only
+  // reason fewer change than are selected in that class
+  const alreadySetCount = useMemo<number>(() => {
+    if (matchCount === undefined || changes?.attribute !== "pos") return 0;
+    let alreadySet = 0;
+    for (const [spec, entities] of [
+      [changes.concept, conceptEntities],
+      [changes.action, actionEntities],
+    ] as const) {
+      if (spec && spec.from === null) {
+        alreadySet += entities.filter((entity) => posOf(entity) === spec.to).length;
+      }
+    }
+    return alreadySet;
+  }, [matchCount, changes, conceptEntities, actionEntities]);
+
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (!changes) return;
@@ -218,10 +235,15 @@ export const BatchActionSetPos: React.FC<BatchActionSetPos> = ({
     return (
       <>
         <b>{matchCount}</b> of {selectedEntityIds.length} selected entities will
-        change; the rest stay untouched.
+        change
+        {batchAttributeChangeNote(
+          alreadySetCount,
+          matchCount + alreadySetCount < selectedEntityIds.length
+        )}
+        .
       </>
     );
-  }, [hasRelevantEntities, changes, matchCount, selectedEntityIds.length]);
+  }, [hasRelevantEntities, changes, matchCount, alreadySetCount, selectedEntityIds.length]);
 
   const previewReady =
     isLargeSelection || (!isLoadingEntities && !isEntitiesFetchError);

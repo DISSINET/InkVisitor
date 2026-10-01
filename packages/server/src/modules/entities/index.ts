@@ -1210,22 +1210,36 @@ export default Router()
 
         const user = request.getUserOrFail();
         const errors: Record<string, string> = {};
-        let updated = 0;
+
+        // the resource and a picked value are the only links this route adds,
+        // so one lookup tells whether either is a template, which only another
+        // template may use; a labelled batch never links the picked value, only
+        // a new V of its own
+        const addedIds = [resourceEntityId, valueLabel ? "" : valueEntityId].filter(
+          (id): id is string => !!id
+        );
+        const addsTemplate = (
+          await Entity.findEntitiesByIds(request.db.connection, addedIds)
+        ).some((entity) => entity.isTemplate);
+
+        // every entity is checked first and its writes collected, so a V is
+        // only minted for an entity that takes the reference; the writes then
+        // go out in bulk, since the global write lock is held for the request
+        const newValues: Entity[] = [];
+        const valueIdByEntity: Record<string, string> = {};
+        const updates: { id: string; data: Partial<IEntity> }[] = [];
 
         for (const entityData of entities) {
-          let valueId = valueEntityId || "";
+          if (addsTemplate && !entityData.isTemplate) {
+            errors[entityData.id] = "cannot use template in entity instance";
+            continue;
+          }
 
           // a V is an endpoint - the "40" of one entity is not the "40" of the
           // next - so a labelled batch gives every entity a V of its own
+          let valueModel: Entity | undefined;
           if (valueLabel) {
-            // the V is written before the entity that will hold it, so an
-            // entity the user may not edit must not leave one behind
-            if (!getEntityClass({ ...entityData }).canBeEditedByUser(user)) {
-              errors[entityData.id] = "permission denied";
-              continue;
-            }
-
-            const valueModel = getEntityClass({
+            valueModel = getEntityClass({
               id: randomUUID(),
               class: EntityEnums.Class.Value,
               labels: [valueLabel],
@@ -1248,31 +1262,18 @@ export default Router()
               errors[entityData.id] = "permission denied";
               continue;
             }
-
-            await valueModel.beforeSave(request.db.connection);
-
-            if (!(await valueModel.save(request.db.connection))) {
-              errors[entityData.id] = "value could not be created";
-              continue;
-            }
-
-            await Audit.createNew(
-              request,
-              AuditScope.Entity,
-              valueModel.id,
-              valueModel,
-              EventType.CREATE
-            );
-            valueId = valueModel.id;
           }
 
           const newRef: IReference = {
             id: randomUUID(),
             resource: resourceEntityId,
-            value: valueId,
+            value: valueModel?.id || valueEntityId || "",
           };
-
-          const updatedRefs = [...entityData.references, newRef];
+          // a few legacy entities store references as "" rather than an array
+          const updatedRefs = [
+            ...(Array.isArray(entityData.references) ? entityData.references : []),
+            newRef,
+          ];
           const updateData: Partial<IEntity> = { references: updatedRefs };
 
           const model = getEntityClass({
@@ -1291,16 +1292,49 @@ export default Router()
             continue;
           }
 
-          await model.beforeSave(request.db.connection);
-          const result = await model.update(request.db.connection, updateData);
-
-          if (result.replaced || result.unchanged) {
-            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
-            updated++;
-          } else {
-            errors[entityData.id] = "update failed";
+          if (valueModel) {
+            newValues.push(valueModel);
+            valueIdByEntity[entityData.id] = valueModel.id;
           }
+          updates.push({ id: entityData.id, data: updateData });
         }
+
+        const savedValues = await Entity.saveMany(request.db.connection, newValues);
+        const failedValueIds = new Set(savedValues.failed);
+        const savedValueIds = new Set(savedValues.written);
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          newValues
+            .filter((value) => savedValueIds.has(value.id))
+            .map((value) => ({ modelId: value.id, changes: value })),
+          EventType.CREATE
+        );
+
+        // an entity whose V did not make it in keeps its references as they are
+        const writableUpdates = updates.filter(({ id }) => {
+          const valueId = valueIdByEntity[id];
+          if (valueId && failedValueIds.has(valueId)) {
+            errors[id] = "value could not be created";
+            return false;
+          }
+          return true;
+        });
+
+        const { written, failed } = await Entity.updateEach(
+          request.db.connection,
+          writableUpdates
+        );
+        failed.forEach((id) => (errors[id] = "update failed"));
+        const updated = written.length;
+
+        const updateById = new Map(writableUpdates.map((update) => [update.id, update.data]));
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          written.map((id) => ({ modelId: id, changes: updateById.get(id) as object })),
+          EventType.EDIT
+        );
 
         return {
           result: updated > 0,
@@ -1466,13 +1500,20 @@ export default Router()
 
         const user = request.getUserOrFail();
         const errors: Record<string, string> = {};
-        let updated = 0;
         // an entity the attribute does not apply to, or whose current value is
         // not the one being replaced, is left alone - not an error
         let skipped = 0;
+        // entities to write, grouped by the update they share: one for a
+        // language change, one per target part of speech for pos. Every write
+        // goes out in bulk after the loop, since the global write lock is held
+        // for the whole request.
+        const groups = new Map<string, { update: Partial<IEntity>; ids: string[] }>();
+        const auditChanges: Record<string, Partial<IEntity>> = {};
 
         for (const entityData of entities) {
           let updateData: Partial<IEntity> | undefined;
+          let groupKey: string;
+          let groupUpdate: Partial<IEntity>;
 
           if (changes.attribute === "language") {
             const current = entityData.language || EntityEnums.Language.Empty;
@@ -1485,6 +1526,8 @@ export default Router()
               continue;
             }
             updateData = { language: changes.to };
+            groupKey = "language";
+            groupUpdate = updateData;
           } else {
             const spec =
               entityData.class === EntityEnums.Class.Concept
@@ -1508,6 +1551,9 @@ export default Router()
               continue;
             }
             updateData = { data: { ...entityData.data, pos: spec.to } } as Partial<IEntity>;
+            groupKey = `pos:${spec.to}`;
+            // the database merges nested objects on update, so only pos changes
+            groupUpdate = { data: { pos: spec.to } } as Partial<IEntity>;
           }
 
           const model = getEntityClass({
@@ -1526,16 +1572,28 @@ export default Router()
             continue;
           }
 
-          await model.beforeSave(request.db.connection);
-          const result = await model.update(request.db.connection, updateData);
-
-          if (result.replaced || result.unchanged) {
-            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
-            updated++;
-          } else {
-            errors[entityData.id] = "update failed";
-          }
+          // beforeSave is skipped on purpose: it only guards the entities an
+          // entity links to, which a language or pos change leaves as they are
+          const group = groups.get(groupKey) ?? { update: groupUpdate, ids: [] };
+          group.ids.push(entityData.id);
+          groups.set(groupKey, group);
+          auditChanges[entityData.id] = updateData;
         }
+
+        const writtenIds: string[] = [];
+        for (const { update, ids } of groups.values()) {
+          const { written, failed } = await Entity.updateMany(request.db.connection, ids, update);
+          writtenIds.push(...written);
+          failed.forEach((id) => (errors[id] = "update failed"));
+        }
+        const updated = writtenIds.length;
+
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          writtenIds.map((id) => ({ modelId: id, changes: auditChanges[id] })),
+          EventType.EDIT
+        );
 
         return {
           result: updated > 0,

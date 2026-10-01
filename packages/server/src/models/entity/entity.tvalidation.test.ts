@@ -328,5 +328,59 @@ describe("models/entity getTBasedWarnings with expansions", () => {
         )
       ).toEqual([WarningTypeEnums.TVEPV]);
     });
+
+    it("warns when no property value is of an allowed class and no type is named", () => {
+      const anyType: ITerritoryValidation = {
+        tieType: EProtocolTieType.Property,
+        detail: "",
+        propType: [],
+        allowedClasses: [EntityEnums.Class.Person],
+      };
+
+      expect(
+        check(withProp("any-type", "value1"), anyType, [
+          { id: "value1", class: EntityEnums.Class.Concept } as IEntity,
+        ])
+      ).toEqual([WarningTypeEnums.TVEPV]);
+      expect(
+        check(withProp("any-type", "value1"), anyType, [
+          { id: "value1", class: EntityEnums.Class.Person } as IEntity,
+        ])
+      ).toEqual([]);
+    });
+
+    it("is met by one matching property among others when no type is named", () => {
+      const anyType: ITerritoryValidation = {
+        tieType: EProtocolTieType.Property,
+        detail: "",
+        propType: [],
+        allowedClasses: [EntityEnums.Class.Person],
+      };
+      const twoProps = new Entity({
+        id: "P1",
+        class: EntityEnums.Class.Person,
+        props: [
+          {
+            id: "prop1",
+            children: [],
+            type: { id: "t1", entityId: "type-a" },
+            value: { id: "v1", entityId: "person-value" },
+          },
+          {
+            id: "prop2",
+            children: [],
+            type: { id: "t2", entityId: "type-b" },
+            value: { id: "v2", entityId: "concept-value" },
+          },
+        ],
+      } as any);
+
+      expect(
+        check(twoProps, anyType, [
+          { id: "person-value", class: EntityEnums.Class.Person } as IEntity,
+          { id: "concept-value", class: EntityEnums.Class.Concept } as IEntity,
+        ])
+      ).toEqual([]);
+    });
   });
 });
