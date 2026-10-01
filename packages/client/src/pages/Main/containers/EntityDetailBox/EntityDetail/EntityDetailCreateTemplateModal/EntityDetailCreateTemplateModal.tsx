@@ -22,7 +22,6 @@ import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
-import { templateSourceLink } from "./templateSourceLink";
 
 interface EntityDetailCreateTemplateModal {
   showModal: boolean;
@@ -52,9 +51,9 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
     mutationFn: async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      const sourceChange = templateSourceLink(entity, variables.id);
-      if (sourceChange) {
-        updateEntityMutation.mutate(sourceChange);
+      // a template copied into another template is not an instance of it
+      if (!entity.isTemplate) {
+        updateEntityMutation.mutate({ usedTemplate: variables.id });
       }
 
       appendDetailId(variables.id);
