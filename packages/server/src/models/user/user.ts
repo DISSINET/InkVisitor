@@ -284,13 +284,18 @@ export default class User implements IUser, IDbModel {
 
   /**
    * Returns first owner-role based user or null
+   * Ignores thrashed entries
    * @param dbInstance
    * @returns
    */
   static async getOwner(dbInstance: Connection | undefined): Promise<User | null> {
     const data = await rethink
       .table(User.table)
-      .filter({ role: UserEnums.Role.Owner })
+      .filter(function (user: RDatum<IUser>) {
+        return rethink
+          .not(user.hasFields("deletedAt"))
+          .and(user("role").eq(UserEnums.Role.Owner));
+      })
       .run(dbInstance);
     return data && data.length > 0 ? new User(data[0]) : null;
   }
