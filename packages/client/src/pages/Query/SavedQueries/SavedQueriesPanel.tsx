@@ -5,7 +5,7 @@ import { SavedQueryNameNotUnique } from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Checkbox, Input, Submit } from "components";
+import { Button, Checkbox, Input, Submit, Tooltip } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -88,6 +88,35 @@ const SHARED_LABEL = "Shared";
 const normalizeName = (name: string): string => name.trim().toLowerCase();
 
 type FolderRow = ISavedQuery | IExampleQuery;
+
+interface SavedQueryName {
+  row: FolderRow;
+  onLoad: (row: FolderRow) => void;
+}
+const SavedQueryName: React.FC<SavedQueryName> = ({ row, onLoad }) => {
+  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+    <>
+      <StyledQueryName
+        ref={setReferenceElement}
+        type="button"
+        onClick={() => onLoad(row)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {row.name}
+      </StyledQueryName>
+      <Tooltip
+        visible={showTooltip}
+        referenceElement={referenceElement}
+        position="left"
+        label={row.data.columns ? `${row.name} (includes columns)` : row.name}
+      />
+    </>
+  );
+};
 
 const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   queryState,
@@ -449,13 +478,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                           return (
                             <StyledQueryRow key={row.id}>
                               <StyledQueryBullet>•</StyledQueryBullet>
-                              <StyledQueryName
-                                type="button"
-                                title={row.name}
-                                onClick={() => handleLoad(row)}
-                              >
-                                {row.name}
-                              </StyledQueryName>
+                              <SavedQueryName row={row} onLoad={handleLoad} />
                             </StyledQueryRow>
                           );
                         }
@@ -477,13 +500,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                                 onBlur={acceptEditing}
                               />
                             ) : (
-                              <StyledQueryName
-                                type="button"
-                                title={row.name}
-                                onClick={() => handleLoad(row)}
-                              >
-                                {row.name}
-                              </StyledQueryName>
+                              <SavedQueryName row={row} onLoad={handleLoad} />
                             )}
 
                             <StyledQueryActions $forceVisible={isEditing}>
