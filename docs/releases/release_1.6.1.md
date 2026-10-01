@@ -18,6 +18,7 @@
 - EQ / SUB toggles on a query node show how many entities they pull in, with a popover listing them (#3252)
 - New columns: logical type, entity class and "Used in" (the first-level Territories whose Statements reference the entity) (#3227)
 - Numbered rows in query results (#2954)
+- With several "co-occurs with" entities picked, a row that is itself one of them stays in the results when it shares a Statement with another picked entity
 - Saved queries reject duplicate names on save and rename (#3234)
 - Column name field in the new column panel moved below type and params, and fills itself from the picked type (#3232)
 - Corrected query grid node tooltip and disabled-picker text (#3236)
@@ -28,6 +29,9 @@
 - Syntax highlighting in the RAW (XML) view, in both light and dark mode (#3269)
 - Ctrl/Cmd+F seeds the find panel with the current text selection
 - Find & replace resumes at the correct occurrence after a replace
+- Next / Previous search notifies when it wraps around the document (#3094)
+- Cmd+Backspace / Cmd+Delete next to a tag in the RAW (XML) view delete the whole tag (#3269)
+- Large documents load much faster: a 200k-word document drops from about 52 s to 0.2 s (#3269)
 
 ## Validation rules
 
@@ -41,6 +45,11 @@
 - Detail box tabs that do not fit collapse behind a caret list instead of shrinking, and the tab limit is raised to 100 (#3229)
 - Entities picked from the caret list or double-clicked move to the front of the tab strip, and tab order survives a refetch
 - Territory tree keeps unfolded branches open on navigation, with a new "fold all" button (#3252)
+- Territory tree marks the top anchored Territories of each document with a document icon listing the document titles, and gets a "with document" filter; only documents linked to a Resource count (#2494)
+- Templates box hides discouraged templates; they stay reachable through search and the Explorer (#3274)
+- Creating a template from a template leaves the origin template unchanged (#3289)
+- Detail rejects duplicate labels when adding an alternative label with Enter or editing a label, and removing an alternative label removes just that entry (#3279)
+- An owner can make other users owners and change another owner's role; the last owner cannot give up the role (#3285)
 - Alternative label input takes the full width (#3253)
 - Removed the new metaproperty / reference add buttons from the Detail box (#3235)
 - Stacked modals handle Enter and Esc for the topmost modal only; Enter in an open modal no longer runs the Explorer search
@@ -55,7 +64,7 @@
 - One expansion resolver (`getNodeExpansionIds`) serves query edges, the EQ/SUB popover and validation rules
 - Relation edges share one runner and one class/status filtering path (`RelationTargetSearchEdge`)
 - "Used in" resolves Statement Territories in RethinkDB in chunked index passes, so only Territory ids cross the wire
-- Failed sign-ins are logged with login, IP and reason (never the password)
+- Failed sign-ins are logged with IP and reason; a wrong password names the account by its stored id and name, an unknown login is left out
 - A-C-R export: emits the missing Action reference stubs and metaprop Values/Resources, writes each Value once, batches relation queries, and validates dangling ids before writing; `dataset-stats.ts` produces a `summary.md` beside any exported dataset
 - Full production dumps (`datasets/production-*`) are git-ignored
 
