@@ -14,8 +14,8 @@ export const StyledOverflowButton = styled.button`
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-top-left-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  border-top-right-radius: ${({ theme }) => theme.borderRadius["sm"]};
   padding: 0;
 
   &:hover {
@@ -38,7 +38,7 @@ export const StyledOverflowList = styled.div`
   padding: ${({ theme }) => theme.space[1]} 0;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-radius: 3px;
+  border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
 `;
 
