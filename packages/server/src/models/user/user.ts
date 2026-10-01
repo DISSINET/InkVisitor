@@ -301,7 +301,7 @@ export default class User implements IUser, IDbModel {
   }
 
   /**
-   * Whether an owner other than the given user exists
+   * Whether an active owner other than the given user exists
    * Ignores thrashed entries
    * @param dbInstance
    * @param userId
@@ -316,6 +316,7 @@ export default class User implements IUser, IDbModel {
       .filter(function (user: RDatum<IUser>) {
         return rethink
           .not(user.hasFields("deletedAt"))
+          .and(user("active").eq(true))
           .and(user("role").eq(UserEnums.Role.Owner))
           .and(user("id").ne(userId));
       })

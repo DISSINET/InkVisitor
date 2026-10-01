@@ -192,4 +192,22 @@ describe("Users role change", function () {
 
     expect(await storedRole(owner.id)).toEqual(UserEnums.Role.Owner);
   });
+
+  it("does not count an inactive owner as another owner", async () => {
+    await r
+      .table(User.table)
+      .filter((user: RDatum<IUser>) => user("role").eq(UserEnums.Role.Owner).and(user("id").ne(owner.id)))
+      .update({ role: UserEnums.Role.Admin })
+      .run(db.connection);
+    const inactiveOwner = makeUser(UserEnums.Role.Owner);
+    inactiveOwner.active = false;
+    await inactiveOwner.save(db.connection);
+
+    await ownerAgent
+      .put(`${apiPath}/users/me`)
+      .send({ role: UserEnums.Role.Admin })
+      .expect(403);
+
+    expect(await storedRole(owner.id)).toEqual(UserEnums.Role.Owner);
+  });
 });
