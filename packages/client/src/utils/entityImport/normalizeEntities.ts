@@ -128,15 +128,11 @@ const normalizePropSpec = (
   raw: unknown,
   path: string,
   defaults: IPropSpec,
-  required: boolean,
   report: Reporter
 ): IPropSpec => {
   const spec = { ...defaults };
 
   if (raw === undefined) {
-    if (required) {
-      report.error(path, 'required, e.g. "type": { "entityId": "<uuid>" }');
-    }
     return spec;
   }
   // "type": "<uuid>" is a shorthand for { "entityId": "<uuid>" }
@@ -168,11 +164,12 @@ const normalizePropSpec = (
     }
   }
 
-  if (required && !spec.entityId) {
-    report.error(`${path}.entityId`, "required");
-  }
   return spec;
 };
+
+/** "props[0].children[1]" as "Metaprop 1.2", the way a person counts them. */
+const propLabel = (path: string): string =>
+  `Metaprop ${[...path.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1]) + 1).join(".")}`;
 
 const normalizeProp = (raw: unknown, path: string, depth: number, report: Reporter): IProp => {
   const prop = CMetaProp();
@@ -216,8 +213,13 @@ const normalizeProp = (raw: unknown, path: string, depth: number, report: Report
     }
   }
 
-  prop.type = normalizePropSpec(raw.type, `${path}.type`, prop.type, true, report);
-  prop.value = normalizePropSpec(raw.value, `${path}.value`, prop.value, false, report);
+  // Detail keeps a metaprop without a type until one is picked, so the import
+  // creates it that way too
+  prop.type = normalizePropSpec(raw.type, `${path}.type`, prop.type, report);
+  prop.value = normalizePropSpec(raw.value, `${path}.value`, prop.value, report);
+  if (!prop.type.entityId) {
+    report.note("", `${propLabel(path)} has no type; it is created without one`);
+  }
 
   if (raw.children !== undefined) {
     if (!Array.isArray(raw.children)) {

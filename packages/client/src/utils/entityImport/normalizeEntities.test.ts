@@ -203,6 +203,20 @@ describe("normalizeEntities", () => {
     expect(prop.children[0].value.entityId).toBe("");
   });
 
+  it("creates a metaprop without a type, with a note", () => {
+    const { entity, errors, notes } = normalizeOne({
+      class: "C",
+      labels: ["dog"],
+      props: [{ type: "t", children: [{ value: "v" }] }],
+    });
+
+    expect(errors).toEqual([]);
+    expect(entity.props[0].children[0].type.entityId).toBe("");
+    expect(notes.map((note) => note.message)).toEqual([
+      "Metaprop 1.1 has no type; it is created without one",
+    ]);
+  });
+
   it("reports metaprop problems with their paths", () => {
     const { errors } = normalizeOne({
       class: "C",
@@ -218,7 +232,6 @@ describe("normalizeEntities", () => {
     });
 
     expect(paths(errors)).toEqual([
-      "props[0].type",
       "props[1].elvl",
       "props[1].color",
       "props[2].children[0].children[0].children",
