@@ -170,9 +170,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
     );
   }, []);
 
+  // the api already shows a failed write as a toast; nothing is left to handle
+  const ignoreFailure = () => {};
+
   // newOrder is the index the relation was dragged to
   const updateOrderFn = (relationId: string, newOrder: number) => {
-    writes.moveRelation(selectedRelations, relationId, newOrder);
+    writes.moveRelation(selectedRelations, relationId, newOrder).catch(ignoreFailure);
   };
 
   const hasSuggester = useMemo(() => {
@@ -244,7 +247,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {
                   if (isCloudType) {
-                    writes.joinSynonymGroup(entity, selectedId, currentRelations[0]);
+                    writes
+                      .joinSynonymGroup(entity, selectedId, currentRelations[0])
+                      .catch(ignoreFailure);
                   } else {
                     handleMultiSelected(selectedId);
                   }
