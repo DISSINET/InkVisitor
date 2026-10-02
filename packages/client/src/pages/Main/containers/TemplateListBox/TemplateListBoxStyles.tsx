@@ -18,7 +18,9 @@ export const StyledTemplateSection = styled.div`
 `;
 export const StyledTemplateSectionHeader = styled.div`
   display: flex;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
+  padding-right: ${({ theme }) => theme.space[2]};
   font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   color: ${({ theme }) => theme.color["primary"]};
@@ -43,22 +45,17 @@ export const StyledTemplateSectionList = styled.div`
 `;
 
 export const StyledTemplateFilter = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
   align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  padding-right: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledTemplateFilterInputRow = styled.div`
-  display: contents;
-`;
-export const StyledTemplateFilterInputLabel = styled.div`
-  font-size: ${({ theme }) => theme.fontSize.sm};
-  color: ${({ theme }) => theme.color["primary"]};
-  white-space: nowrap;
-  text-align: right;
-`;
-export const StyledTemplateFilterInputValue = styled.div`
-  padding: ${({ theme }) => theme.space[2]};
+// shares its row with the controls next to it and shrinks with the panel
+export const StyledTemplateControl = styled.div`
+  position: relative;
+  flex: 1;
+  min-width: 0;
 `;
 
 export const StyledModalContent = styled.div`

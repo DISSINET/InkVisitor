@@ -12,14 +12,12 @@ import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { IcoPlusBold, IcoStar, IcoTrashSimple } from "Theme/icons";
+import { IcoPlusBold, IcoSort, IcoStar, IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
   StyledStarButtonWrap,
+  StyledTemplateControl,
   StyledTemplateFilter,
-  StyledTemplateFilterInputLabel,
-  StyledTemplateFilterInputRow,
-  StyledTemplateFilterInputValue,
   StyledTemplateSection,
   StyledTemplateSectionHeader,
   StyledTemplateSectionList,
@@ -166,10 +164,11 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
           {userRole !== UserEnums.Role.Viewer && (
             <Button
               key="add-template"
-              icon={<IcoPlusBold />}
+              icon={<IcoPlusBold size={14} />}
               color="primary"
               inverted
-              label="template"
+              label={widthTooNarrow ? "" : "template"}
+              tooltipLabel={widthTooNarrow ? "new template" : ""}
               size={ButtonSize.Medium}
               onClick={() => {
                 handleAskCreateTemplate();
@@ -184,58 +183,51 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
             onClick={() => setOnlyStarred(!onlyStarred)}
             tooltipLabel="starred templates"
           />
+          <StyledTemplateControl>
+            <Dropdown.Single.Basic
+              value={order}
+              options={templateOrderOptions}
+              onChange={(newOrder) => setOrder(newOrder)}
+              icon={<IcoSort />}
+              tooltipLabel="order"
+              width="full"
+              disableTyping
+            />
+          </StyledTemplateControl>
         </StyledTemplateSectionHeader>
 
         <StyledTemplateFilter>
-          <StyledTemplateFilterInputRow>
-            <StyledTemplateFilterInputLabel>{"Entity class: "}</StyledTemplateFilterInputLabel>
-            <StyledTemplateFilterInputValue>
-              <div style={{ position: "relative" }}>
-                <Dropdown.Single.Entity
-                  value={filterByClass}
-                  options={
-                    widthTooNarrow
-                      ? allEntityOptions.map((c) => {
-                          return {
-                            value: c.value,
-                            label: c.value,
-                          };
-                        })
-                      : allEntityOptions
-                  }
-                  onChange={(selectedOption) => {
-                    setFilterByClass(selectedOption);
-                  }}
-                  width="full"
-                  disableTooltip={!widthTooNarrow}
-                />
-              </div>
-            </StyledTemplateFilterInputValue>
-          </StyledTemplateFilterInputRow>
-          <StyledTemplateFilterInputRow>
-            <StyledTemplateFilterInputLabel>{"Label: "}</StyledTemplateFilterInputLabel>
-            <StyledTemplateFilterInputValue>
-              <Input
-                value={filterByLabel}
-                onChangeFn={(newType: string) => setFilterByLabel(newType)}
-                changeOnType
-                width="full"
-                autoFocus
-              />
-            </StyledTemplateFilterInputValue>
-          </StyledTemplateFilterInputRow>
-          <StyledTemplateFilterInputRow>
-            <StyledTemplateFilterInputLabel>{"Order: "}</StyledTemplateFilterInputLabel>
-            <StyledTemplateFilterInputValue>
-              <Dropdown.Single.Basic
-                value={order}
-                options={templateOrderOptions}
-                onChange={(newOrder) => setOrder(newOrder)}
-                width="full"
-                disableTyping
-              />
-            </StyledTemplateFilterInputValue>
-          </StyledTemplateFilterInputRow>
+          <StyledTemplateControl>
+            <Dropdown.Single.Entity
+              value={filterByClass}
+              options={
+                widthTooNarrow
+                  ? allEntityOptions.map((c) => {
+                      return {
+                        value: c.value,
+                        label: c.value,
+                      };
+                    })
+                  : allEntityOptions
+              }
+              onChange={(selectedOption) => {
+                setFilterByClass(selectedOption);
+              }}
+              width="full"
+              tooltipLabel="entity class"
+              disableTooltip={!widthTooNarrow}
+            />
+          </StyledTemplateControl>
+          <StyledTemplateControl>
+            <Input
+              value={filterByLabel}
+              onChangeFn={(newType: string) => setFilterByLabel(newType)}
+              changeOnType
+              width="full"
+              placeholder="label"
+              autoFocus
+            />
+          </StyledTemplateControl>
         </StyledTemplateFilter>
         <StyledTemplateSectionList>
           {templatesData &&

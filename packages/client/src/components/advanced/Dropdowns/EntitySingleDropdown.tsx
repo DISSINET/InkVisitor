@@ -30,6 +30,7 @@ interface EntitySingleDropdown<T = string> {
   disableTyping?: boolean;
   disabled?: boolean;
   disableTooltip?: boolean;
+  tooltipLabel?: string;
   /** Show the entity-class colour bar on the left. Defaults to true. */
   showTypeBar?: boolean;
 
@@ -48,6 +49,7 @@ export const EntitySingleDropdown = <T extends string>({
   disableTyping,
   disabled,
   disableTooltip,
+  tooltipLabel,
   showTypeBar = true,
   loggerId,
 }: EntitySingleDropdown<T>) => {
@@ -65,6 +67,7 @@ export const EntitySingleDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       autoFocus={autoFocus}
+      tooltipLabel={tooltipLabel}
       loggerId={loggerId}
       customComponents={{
         Option: (props: any) => <Option {...props} disableTooltip={disableTooltip} />,
