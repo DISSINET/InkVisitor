@@ -32,7 +32,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   // FILTER;
   const allEntityOption = {
     value: EntityEnums.Extension.Any,
-    label: "all",
+    label: EntityEnums.Extension.Any,
   } as { value: EntityEnums.Extension.Any; label: string };
   const allEntityOptions = [allEntityOption, ...entitiesDict];
 
