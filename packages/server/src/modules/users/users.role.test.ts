@@ -210,4 +210,63 @@ describe("Users role change", function () {
 
     expect(await storedRole(owner.id)).toEqual(UserEnums.Role.Owner);
   });
+
+  it("does not let the last active owner be deactivated", async () => {
+    await r
+      .table(User.table)
+      .filter((user: RDatum<IUser>) => user("role").eq(UserEnums.Role.Owner).and(user("id").ne(owner.id)))
+      .update({ role: UserEnums.Role.Admin })
+      .run(db.connection);
+
+    await adminAgent
+      .put(`${apiPath}/users/${owner.id}`)
+      .send({ active: false })
+      .expect(403);
+
+    const row = await r.table(User.table).get(owner.id).run(db.connection);
+    expect(row.active).toEqual(true);
+  });
+
+  it("lets an owner deactivate another owner while one stays active", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await ownerAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ active: false })
+      .expect(200);
+
+    const row = await r.table(User.table).get(target.id).run(db.connection);
+    expect(row.active).toEqual(false);
+  });
+
+  it("does not let an admin delete an owner", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent.delete(`${apiPath}/users/${target.id}`).expect(403);
+
+    const row = await r.table(User.table).get(target.id).run(db.connection);
+    expect(row.deletedAt).toBeUndefined();
+  });
+
+  it("lets an owner delete another owner", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await ownerAgent.delete(`${apiPath}/users/${target.id}`).expect(200);
+
+    const row = await r.table(User.table).get(target.id).run(db.connection);
+    expect(row.deletedAt).toBeDefined();
+  });
+
+  it("does not let the last active owner be deleted", async () => {
+    await r
+      .table(User.table)
+      .filter((user: RDatum<IUser>) => user("role").eq(UserEnums.Role.Owner).and(user("id").ne(owner.id)))
+      .update({ role: UserEnums.Role.Admin })
+      .run(db.connection);
+
+    await ownerAgent.delete(`${apiPath}/users/${owner.id}`).expect(403);
+
+    const row = await r.table(User.table).get(owner.id).run(db.connection);
+    expect(row.deletedAt).toBeUndefined();
+  });
 });

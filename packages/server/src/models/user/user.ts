@@ -219,7 +219,13 @@ export default class User implements IUser, IDbModel {
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]) || user.id == this.id;
   }
 
+  /**
+   * Owners and admins delete users, but only an owner deletes an owner.
+   */
   canBeDeletedByUser(user: User): boolean {
+    if (this.hasRole([UserEnums.Role.Owner])) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 

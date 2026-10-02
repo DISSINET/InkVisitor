@@ -401,9 +401,15 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             activateTooltip = "deactivate user";
           }
 
+          // only an owner deletes an owner; the viewing owner is active, so
+          // another owner row is never the last active owner
+          const ownerDeleteDenied =
+            role === UserEnums.Role.Owner && currentUserRole !== UserEnums.Role.Owner;
           let deleteTooltip = "delete user";
           if (userId === getStoredUserId()) {
             deleteTooltip = "cannot delete yourself";
+          } else if (ownerDeleteDenied) {
+            deleteTooltip = "only an owner can delete an owner";
           }
 
           return (
@@ -413,7 +419,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<IcoTrash size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
-                disabled={userId === getStoredUserId() || role === UserEnums.Role.Owner}
+                disabled={userId === getStoredUserId() || ownerDeleteDenied}
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}

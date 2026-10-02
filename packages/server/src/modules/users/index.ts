@@ -725,10 +725,6 @@ export default Router()
           await invalidateUserSessions(req.db.connection, existingUser.id);
         }
 
-        if (data.active === false && existingUser.active) {
-          await invalidateUserSessions(req.db.connection, existingUser.id);
-        }
-
         if (
           data.verified !== undefined &&
           data.verified !== existingUser.verified
@@ -746,8 +742,8 @@ export default Router()
 
         await req.db.lock();
 
-        // counted under the write lock, so two owners demoting each other at
-        // once still leave one of them an owner
+        // counted under the write lock, so two owners demoting or deactivating
+        // each other at once still leave one of them an active owner
         if (
           data.role !== undefined &&
           data.role !== UserEnums.Role.Owner &&
@@ -755,6 +751,18 @@ export default Router()
           !(await User.hasOtherOwner(req.db.connection, existingUser.id))
         ) {
           throw new PermissionDeniedError("the last owner cannot give up the owner role");
+        }
+        if (
+          data.active === false &&
+          existingUser.active &&
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(req.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last active owner cannot be deactivated");
+        }
+
+        if (data.active === false && existingUser.active) {
+          await invalidateUserSessions(req.db.connection, existingUser.id);
         }
 
         if (data.email) {
@@ -861,6 +869,21 @@ export default Router()
             `user with id ${userId} does not exist`,
             userId
           );
+        }
+
+        if (!existingUser.canBeDeletedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError("user cannot be deleted");
+        }
+
+        await request.db.lock();
+
+        // counted under the write lock, so two owners deleting each other at
+        // once still leave one of them an active owner
+        if (
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(request.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last active owner cannot be deleted");
         }
 
         const result = await existingUser.delete(request.db.connection);
