@@ -20,6 +20,24 @@ export interface IResponseQueryEntity {
     string,
     IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
   >;
+  /**
+   * Subproperties of the props shown in "Entity Property value" columns:
+   * column id -> value entity id -> the subproperties nested under that value.
+   * Kept apart from columnData so its cells stay flat entity lists. Absent when
+   * no shown prop has any.
+   */
+  columnSubProps?: Record<string, Record<string, IResponseQuerySubProp[]>>;
+}
+
+/**
+ * One subproperty (an IProp.children entry) resolved for display: its type and
+ * value entities and its own nested subproperties. A side whose entity is unset
+ * or missing is left out.
+ */
+export interface IResponseQuerySubProp {
+  type?: IEntity;
+  value?: IEntity;
+  children: IResponseQuerySubProp[];
 }
 
 export interface IResponseQuery {

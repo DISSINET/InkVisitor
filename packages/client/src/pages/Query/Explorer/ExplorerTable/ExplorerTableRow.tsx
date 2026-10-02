@@ -21,6 +21,7 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
+import { ExplorerCellValueWithSubProps } from "./Cell/ExplorerCellValueWithSubProps";
 import {
   StyledAltLabelAddInput,
   StyledAltLabelChip,
@@ -211,7 +212,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     },
   });
 
-  const { entity: rowEntity, columnData, isEquivalent, isSubordinate } = rowItem ?? {};
+  const {
+    entity: rowEntity,
+    columnData,
+    columnSubProps,
+    isEquivalent,
+    isSubordinate,
+  } = rowItem ?? {};
 
   const handleOpenEntityInDetail = React.useCallback(
     (entity: IEntity) => (e: React.MouseEvent) => {
@@ -503,15 +510,27 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
+        const subPropsByValue = columnSubProps?.[column.id];
         return (
-          <StyledCellArrayWrap>
+          <StyledCellArrayWrap $singleLine={!!subPropsByValue}>
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
+                const entityId = (cellEntity as IEntity)?.id;
+                const subProps = entityId ? subPropsByValue?.[entityId] : undefined;
+                if (subProps?.length) {
+                  return (
+                    <ExplorerCellValueWithSubProps
+                      key={entityId}
+                      value={cellEntity as IEntity}
+                      valueTag={renderCellValue(cellEntity, recordEntity, column)}
+                      subProps={subProps}
+                      onEntityDoubleClick={handleOpenEntityInDetail}
+                    />
+                  );
+                }
                 return (
-                  <React.Fragment
-                    key={(cellEntity as IEntity)?.id ? (cellEntity as IEntity).id : key}
-                  >
+                  <React.Fragment key={entityId ? entityId : key}>
                     {renderCellValue(cellEntity, recordEntity, column)}
                   </React.Fragment>
                 );
@@ -520,6 +539,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               <ExplorerCellOverflow
                 hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
                 onEntityDoubleClick={handleOpenEntityInDetail}
+                subPropsByValue={subPropsByValue}
               />
             )}
           </StyledCellArrayWrap>
@@ -528,7 +548,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue, handleOpenEntityInDetail]
+    [renderCellValue, handleOpenEntityInDetail, columnSubProps]
   );
 
   const renderEditSection = React.useCallback(
