@@ -44,11 +44,15 @@ export class UserOptions implements IUserOptions {
   workingLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
   askBeforePropDelete?: boolean = true;
+  starredTemplates: string[] = [];
+  promotedTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any =
+    EntityEnums.Extension.Any;
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
     fillArray(this.searchLanguages, String, data?.searchLanguages || []);
     fillArray(this.workingLanguages, String, data?.workingLanguages || []);
+    fillArray(this.starredTemplates, String, data?.starredTemplates || []);
   }
 
   isValid(): boolean {
@@ -57,6 +61,10 @@ export class UserOptions implements IUserOptions {
     }
 
     if (this.workingLanguages.find((lang) => !lang)) {
+      return false;
+    }
+
+    if (this.starredTemplates.find((id) => !id)) {
       return false;
     }
 
