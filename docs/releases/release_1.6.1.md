@@ -2,13 +2,12 @@
 
 ## Explorer
 
-- All has-relation edges are now implemented — HOL, AEE, IMP, SUS, A1S, A2S, SYN, ANT, PRR, SAR, IDE and REL were offered by the query builder but disabled (#2969)
+- All has-relation edges are now implemented — HOL, AEE, IMP, SUS, A1S, A2S, SYN, ANT, PRR, SAR, IDE and REL (#2969)
 - Inverse relation edges — subclasses, subordinates, instances, meronyms and Action/Event equivalents (I_R:SCL, I_R:SOE, I_R:CLA, I_R:HOL, I_R:AEE), labelled "(inv. X)" (#3199, #3271)
 - Position-restricted "is in S" edges — subject, actant 1, actant 2, pseudoactant and action (IS:S, IS:A1, IS:A2, IS:PS, IS:A), with inverses I_IS:A and I_IS:PS (#3271)
 - Statement classification / identification edges SC, SI and I_SI (#3271)
 - Territory tree edges — "T has child T" (any / direct child) and "T has parent T" (CT:, CT:D, I_CT:), with EQ adding identified Territories and SUB widening "T has parent T" from direct children to the whole subtree; "T has S" (I_SUT:) (#3271)
 - Inverse reference edge I_HR:R (the Resources an entity's references point at), and inverse property edges I_EP:T and I_HP:V ("is property: type / value") (#3271)
-- An edge whose target has no picked entity and no status matches any target instead of nothing, and the class picked in the target suggester narrows HP:V, SP:V, I_SP:V and I_IS: (#3271)
 - Relation edges constrain their target to the classes the relation rule allows, and the target class follows the query root (#2969)
 - Entity status filter on search nodes; it narrows only an empty target, a picked entity is matched as is (#2969, #3271)
 - EQ / SUB toggles are disabled until an entity is picked and where they do not apply, with a tooltip saying why (#3271)
