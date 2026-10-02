@@ -3,6 +3,7 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
+import { provisionEntityIndexes } from "../../test/schema";
 
 // Verifies the inverse entity-prop edges (I_EP:T / I_HP:V) against the ACTUAL
 // ReQL: given an origin entity, they match the prop types / values in its own
@@ -86,6 +87,8 @@ describe("inverse entity-prop edges (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
+    // the edges read through the same indexes as a real database
+    await provisionEntityIndexes(conn, TABLE);
     await r.table(TABLE).insert(FIXTURES).run(conn);
   }, 30000);
 

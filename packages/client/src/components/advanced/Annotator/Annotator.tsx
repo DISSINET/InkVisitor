@@ -96,6 +96,8 @@ import {
 } from "./types";
 import { annotatorHighlight } from "./utils/highlight";
 
+const SEARCH_WRAP_TOAST_ID = "annotator-search-wrap";
+
 interface TextAnnotatorProps {
   width: number;
   height: number;
@@ -1440,13 +1442,30 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  // Navigation wraps around the document; a wrap past the last hit lands on one
+  // that "Anchor & next" may already have annotated, so the user is told. One
+  // toast is shared by repeated F3 presses and rewritten when direction flips.
+  const notifySearchWrap = (message: string) => {
+    if (toast.isActive(SEARCH_WRAP_TOAST_ID)) {
+      toast.update(SEARCH_WRAP_TOAST_ID, { render: message });
+    } else {
+      toast.info(message, { toastId: SEARCH_WRAP_TOAST_ID, autoClose: 2500 });
+    }
+  };
+
   const goToNextOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
+    if (searchActiveOccurence + 1 >= searchOccurences.length) {
+      notifySearchWrap("Reached the end of results. Continuing from the beginning.");
+    }
     setSearchActiveOccurence((searchActiveOccurence + 1) % searchOccurences.length);
   }, [searchOccurences, searchActiveOccurence]);
 
   const goToPreviousOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
+    if (searchActiveOccurence <= 0) {
+      notifySearchWrap("Reached the beginning of results. Continuing from the end.");
+    }
     setSearchActiveOccurence(
       (searchActiveOccurence - 1 + searchOccurences.length) % searchOccurences.length,
     );

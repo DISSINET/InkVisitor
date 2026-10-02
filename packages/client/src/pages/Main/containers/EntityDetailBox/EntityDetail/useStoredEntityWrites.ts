@@ -64,6 +64,9 @@ export const useStoredEntityWrites = (): EntityWrites => {
       if (changes.labels !== undefined) {
         queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
       }
+      if (changes.data?.documentId !== undefined) {
+        queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+      }
       if (entity.isTemplate) {
         queryClient.invalidateQueries({ queryKey: ["templates"] });
       }

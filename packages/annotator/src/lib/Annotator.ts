@@ -55,7 +55,13 @@ import { SettingControl, SettingsOverlay } from "./SettingsOverlay";
 import Text, { SegmentPosition, Tag } from "./Text";
 import { CanvasMeasurer } from "./TextMeasurer";
 import Viewport from "./Viewport";
-import { XmlSyntaxColors, XmlTokenRun, tokenizeXmlLines } from "./XmlSyntax";
+import {
+  XmlSyntaxColors,
+  XmlTokenRun,
+  advanceXmlState,
+  initialXmlTokenizerState,
+  tokenizeXmlLines,
+} from "./XmlSyntax";
 import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 
 // Updated regex to properly handle tags with attributes
@@ -3197,15 +3203,20 @@ export class Annotator {
     if (!this.xmlSyntaxColors || this.text.mode !== EditMode.RAW) {
       return null;
     }
-    const seedLines: string[] = [];
-    for (
-      let l = this.viewport.lineStart - 1;
-      l >= 0 && l < this.text.noLines && !this.text.isParagraphEnd(l);
-      l--
+    const lineStart = this.viewport.lineStart;
+    let seedStart = lineStart;
+    while (
+      seedStart > 0 &&
+      seedStart - 1 < this.text.noLines &&
+      !this.text.isParagraphEnd(seedStart - 1)
     ) {
-      seedLines.unshift(this.text.getLine(l));
+      seedStart--;
     }
-    const seed = tokenizeXmlLines(seedLines).state;
+    // runs for the seed lines are never drawn, so only the state is carried
+    const seed = initialXmlTokenizerState();
+    for (let l = seedStart; l < lineStart; l++) {
+      advanceXmlState(seed, this.text.getLine(l), this.text.getLine(l + 1));
+    }
     return tokenizeXmlLines(textToRender, seed).runs;
   }
 
@@ -4356,11 +4367,11 @@ export class Annotator {
     }
 
     // Construct the Tag at the start
-    const openTag = new Tag(0, anchor, false, undefined, -1);
+    const openTag = new Tag(0, anchor, false, -1);
     if (attributes) {
       openTag.setAttributes(attributes);
     }
-    const closeTag = new Tag(0, anchor, true, undefined, -1);
+    const closeTag = new Tag(0, anchor, true, -1);
 
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
@@ -4462,13 +4473,13 @@ export class Annotator {
     }
 
     // Build the original tag string using the tag's current attributes
-    const originalTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    const originalTag = new Tag(0, tag.getTagName(), false, -1);
     originalTag.setAttributes(tag.attributes);
     const originalTagString = originalTag.getTag();
     const originalTagLength = originalTagString.length;
 
     // Build the new tag string with updated attributes
-    const newTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    const newTag = new Tag(0, tag.getTagName(), false, -1);
     if (attributes) {
       newTag.setAttributes(attributes);
     } else {

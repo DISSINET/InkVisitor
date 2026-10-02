@@ -27,6 +27,10 @@ interface StyledLetter {
   $color: keyof ThemeColor;
 }
 export const StyledLetter = styled.p<StyledLetter>`
+  // the default line box leaves room below the glyph, which lifts it above the
+  // middle of the circle
+  margin: 0;
+  line-height: 1;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   color: ${({ theme, $color }) => theme.color[$color]};

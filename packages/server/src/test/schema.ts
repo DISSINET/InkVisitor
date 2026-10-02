@@ -252,3 +252,14 @@ export async function provisionTables(conn: Connection): Promise<void> {
     }
   }
 }
+
+/**
+ * Create the entity indexes on `table` of a suite's own database and wait for
+ * them, so a ReQL test runs against the same indexes as a real database.
+ */
+export async function provisionEntityIndexes(conn: Connection, table: string): Promise<void> {
+  for (const idx of entitiesIndexes) {
+    await idx.build(r.table(table)).run(conn);
+  }
+  await r.table(table).indexWait().run(conn);
+}

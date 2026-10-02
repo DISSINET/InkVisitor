@@ -5,6 +5,7 @@ import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { entityCacheKey, findEntityById } from "@service/shorthands";
 import { cache } from "@service/ttlCache";
+import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
@@ -45,6 +46,15 @@ import {
   expandValidationIds,
   soeIdsForValidation,
 } from "./validation-expansion";
+
+/** `data` without the fields an entity update may not set. */
+function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
+  const allowed: Partial<IEntity> = { ...data };
+  Object.keys(allowed).forEach(
+    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+  );
+  return allowed;
+}
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -153,6 +163,92 @@ export default class Entity implements IEntity, IDbModel {
     cache.delete(entityCacheKey(this.id));
     return result;
   }
+
+  /**
+   * Applies the same update to many entities, one query per chunk of ids so a
+   * large selection stays far below RethinkDB's array size limit.
+   * @returns the ids written, and the ids that failed or no longer exist
+   */
+  static async updateMany(
+    db: Connection | undefined,
+    entityIds: string[],
+    updateData: Partial<IEntity>
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const data = allowedEntityData({ ...updateData, updatedAt: new Date() });
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entityIds)) {
+      const result = await rethink
+        .table(Entity.table)
+        .getAll(rethink.args(chunk))
+        .update(data, { returnChanges: "always" })
+        .run(db);
+      chunk.forEach((id) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: entityIds.filter((id) => written.has(id)),
+      failed: entityIds.filter((id) => !written.has(id)),
+    };
+  }
+
+  /**
+   * Applies its own update to each of many entities, one query per chunk.
+   * @returns the ids written, and the ids that failed or no longer exist
+   */
+  static async updateEach(
+    db: Connection | undefined,
+    updates: { id: string; data: Partial<IEntity> }[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const updatedAt = new Date();
+    const written = new Set<string>();
+    for (const chunk of chunksOf(updates)) {
+      const result = await rethink
+        .expr(chunk.map(({ id, data }) => ({ id, data: allowedEntityData({ ...data, updatedAt }) })))
+        .forEach(function (update: RDatum) {
+          return rethink
+            .table(Entity.table)
+            .get(update("id"))
+            .update(update("data"), { returnChanges: "always" });
+        })
+        .run(db);
+      chunk.forEach(({ id }) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: updates.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: updates.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
+  }
+
+  /**
+   * Inserts many new entities, one query per chunk, stamping createdAt as
+   * {@link save} does.
+   * @returns the ids inserted, and the ids that failed
+   */
+  static async saveMany(
+    db: Connection | undefined,
+    entities: Entity[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const createdAt = new Date();
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entities)) {
+      chunk.forEach((entity) => (entity.createdAt = createdAt));
+      const result = await rethink
+        .table(Entity.table)
+        .insert(
+          chunk.map((entity) => ({ ...entity })),
+          { returnChanges: "always" }
+        )
+        .run(db);
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: entities.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: entities.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
+  }
+
+  static UPDATE_MANY_CHUNK = WRITE_CHUNK;
 
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
     const out: Record<string, IEntity> = {};
@@ -614,20 +710,21 @@ export default class Entity implements IEntity, IDbModel {
               addNewValidationWarning(WarningTypeEnums.TVEPV, tId, validation);
             } else if (allowedClasses?.length) {
               // class is required
-              let passed = true;
-              for (const pi in eProps) {
-                const p = eProps[pi];
-                const propValueEntity = propValueEs.find(
-                  (e) => e.id === p.value.entityId
-                );
-                if (
-                  propValueEntity &&
-                  acceptedPropTypes.includes(p.type.entityId) &&
-                  !allowedClasses?.includes(propValueEntity.class)
-                ) {
-                  passed = false;
-                }
-              }
+              const valueClass = (p: IProp) =>
+                propValueEs.find((e) => e.id === p.value.entityId)?.class;
+              const passed = propType?.length
+                ? // a named type: every property of it needs a value of an
+                  // allowed class
+                  validProps.every((p) => {
+                    const cls = valueClass(p);
+                    return !cls || allowedClasses.includes(cls);
+                  })
+                : // no type: one property with a value of an allowed class
+                  // is enough
+                  validProps.some((p) => {
+                    const cls = valueClass(p);
+                    return !!cls && allowedClasses.includes(cls);
+                  });
               if (!passed) {
                 addNewValidationWarning(
                   WarningTypeEnums.TVEPV,
