@@ -275,12 +275,16 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       // the JSON field and the Detail of the drafts fill the height; the
       // result keeps the height of its content
       fullHeight={step === "input" || step === "drafts"}
+      narrowGutter
       onClose={isWriting ? undefined : handleClose}
       disableEscapeClose={isWriting}
       disableBgClick
       isLoading={isValidating}
     >
-      <ModalHeader title="Import entities from JSON" />
+      <ModalHeader
+        title="Import entities from JSON"
+        onClose={isWriting ? undefined : handleClose}
+      />
       <ModalContent column enableScroll={step !== "drafts"}>
         {step === "input" && (
           <StyledStep>
