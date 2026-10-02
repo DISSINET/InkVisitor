@@ -752,13 +752,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
                           onClick={() => setShowEntityCreateModal(true)}
                           tooltipLabel="create new entity"
                         />
-                        <Button
-                          icon={<IcoCode />}
-                          label="import"
-                          inverted
-                          onClick={() => setShowEntityImportModal(true)}
-                          tooltipLabel="import entities from JSON"
-                        />
+                        {/* only owners may import entities */}
+                        {userRole === UserEnums.Role.Owner && (
+                          <Button
+                            icon={<IcoCode />}
+                            label="import"
+                            inverted
+                            onClick={() => setShowEntityImportModal(true)}
+                            tooltipLabel="import entities from JSON"
+                          />
+                        )}
                       </>
                     )}
                   </>,
