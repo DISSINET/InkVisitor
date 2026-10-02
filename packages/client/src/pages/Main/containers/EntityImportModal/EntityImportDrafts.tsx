@@ -83,7 +83,11 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
               issues={errors}
               isError
             />
-            <EntityImportIssueList title="Changes the import made to the input" issues={notes} />
+            <EntityImportIssueList
+              title="Changes the import made to the input"
+              issues={notes}
+              collapsible
+            />
           </StyledDraftIssues>
         )}
 

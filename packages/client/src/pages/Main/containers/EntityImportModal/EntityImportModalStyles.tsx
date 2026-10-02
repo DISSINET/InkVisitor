@@ -155,6 +155,24 @@ export const StyledIssueTitle = styled.p<{ $error: boolean }>`
   color: ${({ theme, $error }) => ($error ? theme.color["danger"] : theme.color["black"])};
 `;
 
+export const StyledIssueToggle = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  /* the colors of Detail's section headers, which open the same way */
+  color: ${({ theme }) => theme.color["gray"]["600"]};
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
+`;
+
 export const StyledIssueList = styled.ul`
   display: flex;
   flex-direction: column;

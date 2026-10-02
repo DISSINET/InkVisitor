@@ -16,14 +16,16 @@ import { normalizeEntities } from "utils/entityImport/normalizeEntities";
 import { saveStoredUser } from "utils/userStorage";
 import { EntityImportDrafts } from "./EntityImportDrafts";
 
-// Detail renders with no server behind it: every api call answers empty
+// Detail renders with no server behind it: every api call answers empty,
+// except the signed-in user, whose options Detail reads
 vi.mock("api", () => {
   const answer = async () => ({ data: [] });
+  const calls: Record<string, unknown> = {
+    isLoggedIn: () => true,
+    usersGet: async () => ({ data: { options: { defaultLanguage: "eng", workingLanguages: [] } } }),
+  };
   return {
-    default: new Proxy(
-      {},
-      { get: (_target, key) => (key === "isLoggedIn" ? () => true : answer) }
-    ),
+    default: new Proxy({}, { get: (_target, key: string) => calls[key] ?? answer }),
   };
 });
 
