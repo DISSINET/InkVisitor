@@ -122,11 +122,11 @@ export const validateBatchIds = (
 
     const firstIndex = firstIndexById.get(entity.id);
     if (firstIndex !== undefined) {
-      report(`id ${quote(entity.id)} is already used by entity ${firstIndex}`);
+      report(`${quote(entity.id)} is already used by entity ${firstIndex}`);
     } else {
       firstIndexById.set(entity.id, index);
       if (existingIds.has(entity.id)) {
-        report(`id ${quote(entity.id)} already exists in the database`);
+        report(`${quote(entity.id)} already exists in the database`);
       }
     }
   }
