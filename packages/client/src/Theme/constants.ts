@@ -1,4 +1,3 @@
-import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 
 export const defaultPing = -10;
@@ -9,12 +8,6 @@ export const wildCardChar = "*";
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityEnums.Class.Value];
 export const scrollOverscanCount = 10;
-
-// classes offered by the template list filter, led by "all"
-export const templateClassOptions = [
-  { value: EntityEnums.Extension.Any as const, label: "all" },
-  ...entitiesDict,
-];
 
 // layout
 export const heightHeader = 70;

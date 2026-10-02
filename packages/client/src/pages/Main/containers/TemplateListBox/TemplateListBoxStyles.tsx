@@ -23,6 +23,10 @@ export const StyledTemplateSectionHeader = styled.div`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+export const StyledStarButtonWrap = styled.div`
+  display: none;
+`;
+
 export const StyledTemplateSectionList = styled.div`
   position: relative;
   min-height: 5rem;
@@ -30,6 +34,11 @@ export const StyledTemplateSectionList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+
+  /* each tag is a direct child, so only the hovered one shows its star button */
+  > *:hover ${StyledStarButtonWrap} {
+    display: flex;
+  }
 `;
 
 export const StyledTemplateFilter = styled.div`

@@ -23,7 +23,7 @@ const prepareUserData = (): IUser => {
       hideStatementElementsOrderTable: false,
       askBeforePropDelete: true,
       starredTemplates: ["template1"],
-      defaultTemplateClass: EntityEnums.Class.Statement,
+      promotedTemplateClass: EntityEnums.Class.Statement,
     } as IUser["options"],
     verified: true,
     rights: [],

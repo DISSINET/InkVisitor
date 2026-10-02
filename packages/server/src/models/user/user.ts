@@ -45,7 +45,7 @@ export class UserOptions implements IUserOptions {
   hideStatementElementsOrderTable?: boolean = false;
   askBeforePropDelete?: boolean = true;
   starredTemplates: string[] = [];
-  defaultTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any =
+  promotedTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any =
     EntityEnums.Extension.Any;
 
   constructor(data: Partial<IUserOptions>) {

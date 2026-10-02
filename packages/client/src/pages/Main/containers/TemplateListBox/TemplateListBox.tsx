@@ -1,3 +1,4 @@
+import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IResponseUser, IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,13 +9,13 @@ import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import Dropdown, { EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { templateClassOptions } from "Theme/constants";
 import { IcoPlusBold, IcoStar, IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
+  StyledStarButtonWrap,
   StyledTemplateFilter,
   StyledTemplateFilterInputLabel,
   StyledTemplateFilterInputRow,
@@ -30,23 +31,23 @@ import { ButtonSize } from "types";
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {
   // FILTER;
+  const allEntityOption = {
+    value: EntityEnums.Extension.Any,
+    label: "all",
+  } as { value: EntityEnums.Extension.Any; label: string };
+  const allEntityOptions = [allEntityOption, ...entitiesDict];
+
+  const [filterByClass, setFilterByClass] = useState<EntityEnums.Class | EntityEnums.Extension.Any>(
+    EntityEnums.Extension.Any,
+  );
+  const [filterByLabel, setFilterByLabel] = useState<string>("");
+
   const { data: user } = useUserQuery();
-  const defaultTemplateClass = user?.options.defaultTemplateClass ?? EntityEnums.Extension.Any;
+  const promotedTemplateClass = user?.options.promotedTemplateClass;
   const starredTemplateIds = useMemo(
     () => new Set(user?.options.starredTemplates ?? []),
     [user?.options.starredTemplates],
   );
-
-  const [filterByClass, setFilterByClass] = useState<EntityEnums.Class | EntityEnums.Extension.Any>(
-    defaultTemplateClass,
-  );
-  const [filterByLabel, setFilterByLabel] = useState<string>("");
-
-  // the user can arrive after the box mounts, and a default saved in the user
-  // settings applies here without a reload
-  useEffect(() => {
-    setFilterByClass(defaultTemplateClass);
-  }, [defaultTemplateClass]);
 
   const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
   const widthTooNarrow = fourthPanelWidth < 220;
@@ -63,7 +64,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       if (template.status === EntityEnums.Status.Discouraged) {
         return false;
       }
-      if (filterByClass !== EntityEnums.Extension.Any && template.class !== filterByClass) {
+      if (filterByClass !== allEntityOption.value && template.class !== filterByClass) {
         return false;
       }
       if (
@@ -74,10 +75,10 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       }
       return true;
     });
-    return filtered.sort(
-      (a, b) => Number(starredTemplateIds.has(b.id)) - Number(starredTemplateIds.has(a.id)),
-    );
-  }, [allTemplatesData, filterByClass, filterByLabel, starredTemplateIds]);
+    // the promoted class first, both groups keep their order
+    const rank = (template: IEntity) => (template.class === promotedTemplateClass ? 0 : 1);
+    return filtered.sort((a, b) => rank(a) - rank(b));
+  }, [allTemplatesData, filterByClass, filterByLabel, promotedTemplateClass]);
 
   const queryClient = useQueryClient();
 
@@ -174,13 +175,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                   value={filterByClass}
                   options={
                     widthTooNarrow
-                      ? templateClassOptions.map((c) => {
+                      ? allEntityOptions.map((c) => {
                           return {
                             value: c.value,
                             label: c.value,
                           };
                         })
-                      : templateClassOptions
+                      : allEntityOptions
                   }
                   onChange={(selectedOption) => {
                     setFilterByClass(selectedOption);
@@ -217,14 +218,16 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                     tooltipPosition="left"
                     isFavorited={isStarred}
                     button={
-                      <Button
-                        tooltipLabel={isStarred ? "unstar template" : "star template"}
-                        icon={<IcoStar />}
-                        color={isStarred ? "warning" : "grey"}
-                        inverted
-                        shape="sharp"
-                        onClick={() => toggleStar(templateEntity.id)}
-                      />
+                      <StyledStarButtonWrap>
+                        <Button
+                          tooltipLabel={isStarred ? "unstar template" : "star template"}
+                          icon={<IcoStar />}
+                          color={isStarred ? "warning" : "grey"}
+                          inverted
+                          shape="sharp"
+                          onClick={() => toggleStar(templateEntity.id)}
+                        />
+                      </StyledStarButtonWrap>
                     }
                     unlinkButton={
                       userRole !== UserEnums.Role.Viewer && {

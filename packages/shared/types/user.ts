@@ -39,11 +39,12 @@ export interface IUserOptions {
   // (undefined is treated as true - warn by default)
   askBeforePropDelete?: boolean;
 
-  // template ids listed first in the template list
+  // template ids the user starred in the template list
   starredTemplates?: string[];
 
-  // entity class the template list filter starts on
-  defaultTemplateClass?: EntityEnums.Class | EntityEnums.Extension.Any;
+  // templates of this class are listed first in the template list; Any
+  // promotes none
+  promotedTemplateClass?: EntityEnums.Class | EntityEnums.Extension.Any;
 }
 
 export interface IStoredTerritory {

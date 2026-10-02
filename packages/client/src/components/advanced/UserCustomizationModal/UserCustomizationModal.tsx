@@ -1,9 +1,13 @@
-import { languageDict, orderLanguageDict } from "@inkvisitor/shared/dictionaries";
+import {
+  entitiesDict,
+  languageDict,
+  orderLanguageDict,
+} from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SAFE_PASSWORD_DESCRIPTION, templateClassOptions } from "Theme/constants";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import { IcoListTree, IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
 import api from "api";
 import {
@@ -51,7 +55,7 @@ interface DataObject {
   workingLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
   askBeforePropDelete: boolean;
-  defaultTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any;
+  promotedTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -81,7 +85,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
       askBeforePropDelete: options.askBeforePropDelete !== false,
-      defaultTemplateClass: options.defaultTemplateClass ?? EntityEnums.Extension.Any,
+      promotedTemplateClass: options.promotedTemplateClass ?? EntityEnums.Extension.Any,
     };
   });
 
@@ -147,7 +151,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           workingLanguages: data.workingLanguages.map((wL) => wL),
           defaultTerritory: data.defaultTerritory || "",
           askBeforePropDelete: data.askBeforePropDelete,
-          defaultTemplateClass: data.defaultTemplateClass,
+          promotedTemplateClass: data.promotedTemplateClass,
         },
       });
     }
@@ -445,15 +449,15 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   </>
                 )}
 
-                <StyledFieldLabel>Default template class</StyledFieldLabel>
+                <StyledFieldLabel>Templates listed first</StyledFieldLabel>
                 <StyledFieldControl>
                   <Dropdown.Single.Entity
                     width="full"
-                    value={data.defaultTemplateClass}
+                    value={data.promotedTemplateClass}
                     onChange={(newValue) =>
-                      setData((prev) => ({ ...prev, defaultTemplateClass: newValue }))
+                      setData((prev) => ({ ...prev, promotedTemplateClass: newValue }))
                     }
-                    options={templateClassOptions}
+                    options={[{ value: EntityEnums.Extension.Any, label: "none" }, ...entitiesDict]}
                     disableTyping
                   />
                 </StyledFieldControl>
@@ -461,7 +465,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <IconWithTooltip
                     color="success"
                     icon={<FaQuestion />}
-                    tooltipLabel="Entity class the template list is filtered to when InkVisitor is loaded."
+                    tooltipLabel="Templates of this class are listed at the top of the template list."
                   />
                 </StyledFieldHelp>
 
