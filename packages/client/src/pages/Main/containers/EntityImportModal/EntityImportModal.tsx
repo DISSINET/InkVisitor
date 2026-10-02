@@ -1,4 +1,4 @@
-import { UserEnums } from "@inkvisitor/shared/enums";
+import { RelationEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
   Button,
@@ -13,7 +13,7 @@ import { useUserQuery } from "hooks/react-query";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { IcoFileText } from "Theme/icons";
+import { IcoArrow90DegLeft, IcoFileText } from "Theme/icons";
 import {
   draftFromPlan,
   draftToImportJson,
@@ -25,6 +25,7 @@ import {
   importWriteApi,
   MAX_IMPORT_ENTITIES,
   missingEntityIds,
+  missingSynonymGroupIds,
   removeDraftEntity,
   validateImport,
   writeImport,
@@ -125,6 +126,37 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       .catch(() => ids.forEach((id) => requestedIds.current.delete(id)));
   }, [draft]);
 
+  // the stored synonym groups a draft synonym joins, so Detail shows them whole
+  const requestedSynonymIds = useRef(new Set<string>());
+  useEffect(() => {
+    if (!draft) {
+      return;
+    }
+    const ids = missingSynonymGroupIds(draft).filter(
+      (id) => !requestedSynonymIds.current.has(id)
+    );
+    if (!ids.length) {
+      return;
+    }
+    ids.forEach((id) => requestedSynonymIds.current.add(id));
+    Promise.all(
+      ids.map(async (id) => {
+        const groups = await importDataSource.getForwardRelations(id, RelationEnums.Type.Synonym);
+        return [id, groups[0]?.entityIds ?? []] as const;
+      })
+    )
+      .then((found) =>
+        setDraft(
+          (current) =>
+            current && {
+              ...current,
+              storedSynonyms: { ...current.storedSynonyms, ...Object.fromEntries(found) },
+            }
+        )
+      )
+      .catch(() => ids.forEach((id) => requestedSynonymIds.current.delete(id)));
+  }, [draft]);
+
   const handleFileLoad = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     // cleared so loading the same file again fires a change
@@ -154,6 +186,21 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     } finally {
       setIsValidating(false);
     }
+  };
+
+  // the JSON field gets the drafts as they are now, edits included, to be
+  // changed or replaced and validated again
+  const handleBackToJson = () => {
+    if (draft) {
+      setText(JSON.stringify(draftToImportJson(draft), null, 2));
+    }
+    setDraft(null);
+    setDraftErrors([]);
+    setDraftNotes([]);
+    setInputErrors([]);
+    requestedIds.current.clear();
+    requestedSynonymIds.current.clear();
+    setStep("input");
   };
 
   const handleDraftChange = useCallback(
@@ -350,7 +397,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
         )}
       </ModalContent>
 
-      <ModalFooter spaceBetween={step === "input"}>
+      <ModalFooter spaceBetween={step === "input" || step === "drafts"}>
         {step === "input" && (
           <>
             <Button
@@ -371,15 +418,24 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
           </>
         )}
         {step === "drafts" && (
-          <ButtonGroup>
-            <CancelButton onClick={handleClose} />
+          <>
             <Button
-              label={`Create ${entityCount(draftCount)}`}
-              color="info"
-              disabled={draftCount === 0 || isValidating}
-              onClick={handleCreate}
+              label="back to JSON"
+              icon={<IcoArrow90DegLeft />}
+              inverted
+              disabled={isValidating}
+              onClick={handleBackToJson}
             />
-          </ButtonGroup>
+            <ButtonGroup>
+              <CancelButton onClick={handleClose} />
+              <Button
+                label={`Create ${entityCount(draftCount)}`}
+                color="info"
+                disabled={draftCount === 0 || isValidating}
+                onClick={handleCreate}
+              />
+            </ButtonGroup>
+          </>
         )}
         {step === "result" && (
           <ButtonGroup>

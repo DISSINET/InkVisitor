@@ -18,6 +18,11 @@ export interface ImportDraft {
   relations: Relation.IRelation[];
   // database entities the drafts refer to, for showing them as tags
   existing: Record<string, IEntity>;
+  // the stored synonym group of each database entity in a draft synonym
+  // relation (empty: it has none), loaded after the drafts open; Detail shows
+  // the whole group the relation will join, but only the draft relation is
+  // written, and the server merges the groups
+  storedSynonyms?: Record<string, string[]>;
 }
 
 export const draftFromPlan = (plan: ImportPlan): ImportDraft => ({
@@ -242,6 +247,50 @@ export const removeDraftEntity = (
 const isAsymmetrical = (type: RelationEnums.Type) =>
   !!Relation.RelationRules[type]?.asymmetrical;
 
+/** The relation's members plus, for a synonym, the stored groups it joins. */
+const shownEntityIds = (draft: ImportDraft, relation: Relation.IRelation): string[] =>
+  relation.type === RelationEnums.Type.Synonym
+    ? unique([
+        ...relation.entityIds,
+        ...relation.entityIds.flatMap((id) => draft.storedSynonyms?.[id] ?? []),
+      ])
+    : relation.entityIds;
+
+/** Database entities in draft synonyms whose stored group is not loaded yet. */
+export const missingSynonymGroupIds = (draft: ImportDraft): string[] => {
+  const draftIds = new Set(draft.entities.map((entity) => entity.id));
+  return unique(
+    draft.relations
+      .filter((relation) => relation.type === RelationEnums.Type.Synonym)
+      .flatMap((relation) => relation.entityIds)
+      .filter((id) => !draftIds.has(id) && !(id in (draft.storedSynonyms ?? {})))
+  );
+};
+
+/**
+ * Applies new members to a draft synonym. The members Detail shows only from
+ * stored groups are dropped, as the draft relation never holds them; a group
+ * left with fewer than two members, or with no draft, is removed.
+ */
+const setSynonymMembers = (
+  draft: ImportDraft,
+  relationId: string,
+  entityIds: string[]
+): ImportDraft => {
+  const relation = draft.relations.find((candidate) => candidate.id === relationId);
+  if (!relation) {
+    return draft;
+  }
+  const shownOnly = shownEntityIds(draft, relation).filter(
+    (id) => !relation.entityIds.includes(id)
+  );
+  const members = entityIds.filter((id) => !shownOnly.includes(id));
+  const hasDraft = members.some((id) => draft.entities.some((entity) => entity.id === id));
+  return members.length < 2 || !hasDraft
+    ? deleteDraftRelation(draft, relationId)
+    : updateDraftRelation(draft, relationId, { entityIds: members });
+};
+
 /**
  * What the detail endpoint would answer for a draft, so Detail renders it as
  * it renders a stored entity: the entities it shows as tags, and its relations
@@ -262,11 +311,13 @@ export const buildDraftDetail = (
   for (const type of RelationEnums.AllTypes) {
     const ofType = draft.relations.filter((relation) => relation.type === type);
     (relations as Record<string, Relation.IDetailType<Relation.IRelation>>)[type] = {
-      connections: ofType.filter((relation) =>
-        isAsymmetrical(type)
-          ? relation.entityIds[0] === entityId
-          : relation.entityIds.includes(entityId)
-      ),
+      connections: ofType
+        .filter((relation) =>
+          isAsymmetrical(type)
+            ? relation.entityIds[0] === entityId
+            : relation.entityIds.includes(entityId)
+        )
+        .map((relation) => ({ ...relation, entityIds: shownEntityIds(draft, relation) })),
       iConnections: isAsymmetrical(type)
         ? ofType.filter((relation) => relation.entityIds.slice(1).includes(entityId))
         : [],
@@ -328,7 +379,7 @@ export const missingEntityIds = (draft: ImportDraft): string[] => {
   const refs = collectEntityRefs(
     draft.entities.map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
   ).map((ref) => ref.id);
-  const relationIds = draft.relations.flatMap((relation) => relation.entityIds);
+  const relationIds = draft.relations.flatMap((relation) => shownEntityIds(draft, relation));
   return unique([...refs, ...relationIds]).filter((id) => !known.has(id));
 };
 
@@ -349,7 +400,12 @@ export const createDraftWrites = (
       settle((draft) => updateDraftEntity(draft, entity.id, changes)),
     createRelation: (relation) => settle((draft) => createDraftRelation(draft, relation)),
     updateRelation: (relationId, changes) =>
-      settle((draft) => updateDraftRelation(draft, relationId, changes)),
+      settle((draft) => {
+        const relation = draft.relations.find((candidate) => candidate.id === relationId);
+        return relation?.type === RelationEnums.Type.Synonym && changes.entityIds
+          ? setSynonymMembers(draft, relationId, changes.entityIds)
+          : updateDraftRelation(draft, relationId, changes);
+      }),
     deleteRelation: (relationId) => settle((draft) => deleteDraftRelation(draft, relationId)),
     moveRelation: (siblings, relationId, index) => {
       const ids = siblings.map((relation) => relation.id).filter((id) => id !== relationId);
@@ -361,9 +417,7 @@ export const createDraftWrites = (
     joinSynonymGroup: (entity, memberId, ownGroup) =>
       ownGroup
         ? settle((draft) =>
-            updateDraftRelation(draft, ownGroup.id, {
-              entityIds: [...ownGroup.entityIds, memberId],
-            })
+            setSynonymMembers(draft, ownGroup.id, [...ownGroup.entityIds, memberId])
           )
         : settle((draft) =>
             createDraftRelation(draft, {

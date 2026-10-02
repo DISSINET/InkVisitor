@@ -9,6 +9,7 @@ import {
   ImportDraft,
   mergeChanges,
   missingEntityIds,
+  missingSynonymGroupIds,
   removeDraftEntity,
   reorderDraftRelations,
   updateDraftEntity,
@@ -266,5 +267,49 @@ describe("createDraftWrites", () => {
       type: RelationEnums.Type.Synonym,
       entityIds: ["puppy", "whelp"],
     });
+  });
+
+  // hound is stored in a synonym group with canine
+  const withStoredGroup = (): ImportDraft => ({
+    ...baseDraft(),
+    storedSynonyms: { hound: ["hound", "canine"] },
+  });
+
+  it("shows the stored group a draft synonym joins, and asks for the missing ones", () => {
+    const detail = buildDraftDetail(withStoredGroup(), "dog", UserEnums.RoleMode.Write)!;
+
+    expect(detail.relations[RelationEnums.Type.Synonym]!.connections[0].entityIds).toEqual([
+      "hound",
+      "dog",
+      "canine",
+    ]);
+    expect(missingEntityIds(withStoredGroup())).toContain("canine");
+    expect(missingSynonymGroupIds(baseDraft())).toEqual(["hound"]);
+    expect(missingSynonymGroupIds(withStoredGroup())).toEqual([]);
+  });
+
+  it("keeps the stored members out of the draft synonym it edits", async () => {
+    const { writes, draft } = writesOn(withStoredGroup());
+    const [dog] = draft().entities;
+    const shown = buildDraftDetail(draft(), "dog", UserEnums.RoleMode.Write)!.relations[
+      RelationEnums.Type.Synonym
+    ]!.connections[0];
+
+    await writes.joinSynonymGroup(dog, "pup", shown);
+
+    expect(draft().relations.find((item) => item.id === "r3")!.entityIds).toEqual([
+      "hound",
+      "dog",
+      "pup",
+    ]);
+  });
+
+  it("removes a draft synonym once the draft leaves its group", async () => {
+    const { writes, draft } = writesOn(withStoredGroup());
+
+    // what the cloud's unlink sends for dog: the shown group without it
+    await writes.updateRelation("r3", { entityIds: ["hound", "canine"] });
+
+    expect(draft().relations.map((item) => item.id)).toEqual(["r1", "r2"]);
   });
 });
