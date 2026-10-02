@@ -211,10 +211,11 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                   : allEntityOptions
               }
               onChange={(selectedOption) => {
-                setFilterByClass(selectedOption);
+                setFilterByClass(selectedOption || EntityEnums.Extension.Any);
               }}
               width="full"
               tooltipLabel="entity class"
+              isClearable={filterByClass !== EntityEnums.Extension.Any}
               disableTooltip={!widthTooNarrow}
             />
           </StyledTemplateControl>
