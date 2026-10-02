@@ -42,6 +42,9 @@ interface Modal {
   /** Drops the card border in favor of a shadow, for cards whose content
    * bleeds to the edge (e.g. the auth pages' logo band). */
   noBorder?: boolean;
+  /** Leaves only a thin gap above and below the card, for content that needs
+   * every line of height. */
+  narrowGutter?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -57,6 +60,7 @@ export const Modal: FC<Modal> = ({
   fullHeight = false,
   lowerZIndex = false,
   noBorder = false,
+  narrowGutter = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -99,6 +103,7 @@ export const Modal: FC<Modal> = ({
                 isLoading={isLoading}
                 fullHeight={fullHeight}
                 noBorder={noBorder}
+                narrowGutter={narrowGutter}
               >
                 {children}
               </ModalCard>
@@ -131,6 +136,7 @@ interface ModalCard {
   isLoading?: boolean;
   fullHeight: boolean;
   noBorder?: boolean;
+  narrowGutter?: boolean;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
@@ -140,6 +146,7 @@ export const ModalCard: FC<ModalCard> = ({
   isLoading,
   fullHeight,
   noBorder,
+  narrowGutter,
 }) => {
   return (
     <StyledCard
@@ -148,6 +155,7 @@ export const ModalCard: FC<ModalCard> = ({
       $maxWidth={maxWidth}
       $fullHeight={fullHeight}
       $noBorder={noBorder}
+      $narrowGutter={narrowGutter}
     >
       {children}
       <Loader show={isLoading} size={36} />
