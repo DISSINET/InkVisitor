@@ -189,7 +189,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
               onChangeFn={(newType: string) => setFilterByLabel(newType)}
               changeOnType
               width="full"
-              placeholder="label"
+              placeholder="filter by label"
               autoFocus
               clearable
             />
