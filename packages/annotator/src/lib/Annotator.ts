@@ -3243,7 +3243,12 @@ export class Annotator {
         (this.proportional
           ? this.text.columnToPixelX(absLine, run.start)
           : run.start * this.charWidth);
-      this.ctx.fillStyle = run.kind === "text" ? this.fontColor : colors[run.kind];
+      this.ctx.fillStyle =
+        run.kind === "text"
+          ? this.fontColor
+          : run.kind === "tag"
+            ? (run.tagName && colors.tagColor?.(run.tagName)) || colors.tag
+            : colors[run.kind];
       this.ctx.fillText(textLine.slice(run.start, run.end), x, y);
     }
     this.ctx.fillStyle = this.fontColor;

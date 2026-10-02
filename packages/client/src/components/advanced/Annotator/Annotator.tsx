@@ -53,6 +53,7 @@ import { CStatement } from "constructors";
 import { useDebounce, useDebouncedCallback, useSearchParams, useTheme } from "hooks";
 import useKeypress from "hooks/useKeyPress";
 import { useAppSelector } from "redux/hooks";
+import { EntityColors } from "types";
 import {
   collectStatementAnchors,
   collectTerritoryAnchors,
@@ -456,16 +457,16 @@ export const TextAnnotator = ({
   const xmlMarkupPreviewPointerInsideRef = useRef(false);
   const xmlMarkupAnchorHoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const documentEntityIds = useMemo(() => {
-    const ids = new Set<string>();
+  const documentEntityClasses = useMemo(() => {
+    const classes = new Map<string, EntityEnums.Class>();
     if (dataDocument?.entityIds) {
-      for (const list of Object.values(dataDocument.entityIds)) {
+      for (const [entityClass, list] of Object.entries(dataDocument.entityIds)) {
         for (const id of list) {
-          ids.add(id);
+          classes.set(id, entityClass as EntityEnums.Class);
         }
       }
     }
-    return ids;
+    return classes;
   }, [dataDocument?.entityIds]);
 
   // following 3 useEffects are related to XML markup anchor hover preview
@@ -794,7 +795,7 @@ export const TextAnnotator = ({
         }
         cancelClear();
         const entityId = tag.getTagName();
-        if (!documentEntityIds.has(entityId)) {
+        if (!documentEntityClasses.has(entityId)) {
           setXmlMarkupAnchorHover(null);
           return;
         }
@@ -817,6 +818,12 @@ export const TextAnnotator = ({
         attr: theme.color.xmlAttr,
         quote: theme.color.xmlQuote,
         value: theme.color.xmlValue,
+        // an entity anchor tag takes its entity's class colour
+        tagColor: (tagName) => {
+          const entityClass = documentEntityClasses.get(tagName);
+          const colorName = entityClass && EntityColors[entityClass]?.color;
+          return colorName ? theme.color[colorName] : undefined;
+        },
       };
       a.menuColors = {
         bg: theme.color.white,

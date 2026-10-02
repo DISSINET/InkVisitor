@@ -61,6 +61,28 @@ describe("tokenizeXmlLines (#3269)", () => {
     expect(runs[0].map((r) => r.kind)).toEqual(["text", "tag"]);
     expect(runs[1].map((r) => r.kind)).toEqual(["tag"]);
   });
+
+  test("tag runs carry their tag's name", () => {
+    const line = '<T0a1>x</T0a1><w n="1">';
+    const { runs } = tokenizeXmlLines([line]);
+    expect(
+      runs[0]
+        .filter((r) => r.kind === "tag")
+        .map((r) => `${line.slice(r.start, r.end)}:${r.tagName}`)
+    ).toEqual(["<T0a1>:T0a1", "</T0a1>:T0a1", "<w:w", "=:w", ">:w"]);
+  });
+
+  test("a tag name wrapped across lines names runs on both", () => {
+    const { runs } = tokenizeXmlLines(["x <T0", "a1>y"]);
+    expect(runs[0][1].tagName).toBe("T0a1");
+    expect(runs[1][0].tagName).toBe("T0a1");
+  });
+
+  test("a tag started in seed lines names its visible runs", () => {
+    const seed = advanceXmlState(initialXmlTokenizerState(), "x </T0", "a1>y");
+    const { runs } = tokenizeXmlLines(["a1>y"], seed);
+    expect(runs[0][0].tagName).toBe("T0a1");
+  });
 });
 
 describe("advanceXmlState", () => {
