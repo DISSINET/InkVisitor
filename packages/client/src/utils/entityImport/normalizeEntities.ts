@@ -3,6 +3,7 @@ import { IEntity, IProp, IPropSpec, IReference } from "@inkvisitor/shared/types"
 import { IActionEntity } from "@inkvisitor/shared/types/action";
 import { ITerritoryProtocol } from "@inkvisitor/shared/types/territory";
 import { CEmptyProtocol, CMetaProp, CReference } from "constructors";
+import { isDuplicateLabel } from "utils/entityLabels";
 import { v4 as uuidv4 } from "uuid";
 import {
   enumList,
@@ -167,10 +168,6 @@ const normalizePropSpec = (
   return spec;
 };
 
-/** "props[0].children[1]" as "Metaprop 1.2", the way a person counts them. */
-const propLabel = (path: string): string =>
-  `Metaprop ${[...path.matchAll(/\[(\d+)\]/g)].map((match) => Number(match[1]) + 1).join(".")}`;
-
 const normalizeProp = (raw: unknown, path: string, depth: number, report: Reporter): IProp => {
   const prop = CMetaProp();
 
@@ -217,9 +214,6 @@ const normalizeProp = (raw: unknown, path: string, depth: number, report: Report
   // creates it that way too
   prop.type = normalizePropSpec(raw.type, `${path}.type`, prop.type, report);
   prop.value = normalizePropSpec(raw.value, `${path}.value`, prop.value, report);
-  if (!prop.type.entityId) {
-    report.note("", `${propLabel(path)} has no type; it is created without one`);
-  }
 
   if (raw.children !== undefined) {
     if (!Array.isArray(raw.children)) {
@@ -583,7 +577,18 @@ const normalizeEntity = (
   } else if (!raw.labels[0].trim()) {
     report.error("labels", "the first label must not be empty");
   } else {
-    labels = raw.labels;
+    // Detail refuses a label the entity already has, so a repeat is dropped
+    const repeated: string[] = [];
+    raw.labels.forEach((candidate) => {
+      if (isDuplicateLabel(labels, candidate)) {
+        repeated.push(candidate);
+      } else {
+        labels.push(candidate);
+      }
+    });
+    if (repeated.length) {
+      report.note("labels", `repeated ${repeated.map(quote).join(", ")} dropped`);
+    }
   }
 
   let detail = "";

@@ -158,6 +158,19 @@ describe("normalizeEntities", () => {
     expect(paths(normalizeOne({ labels: ["s"] }).errors)).toEqual(["class"]);
   });
 
+  it("drops a repeated label with a note, as Detail refuses one", () => {
+    const { entity, errors, notes } = normalizeOne({
+      class: "C",
+      labels: ["dog", "hound", " dog ", "hound"],
+    });
+
+    expect(errors).toEqual([]);
+    expect(entity.labels).toEqual(["dog", "hound"]);
+    expect(notes.map((note) => [note.path, note.message])).toEqual([
+      ["labels", 'repeated " dog ", "hound" dropped'],
+    ]);
+  });
+
   it("checks labels, language, status, notes and id", () => {
     expect(paths(normalizeOne({ class: "C" }).errors)).toEqual(["labels"]);
     expect(paths(normalizeOne({ class: "C", labels: "dog" }).errors)).toEqual(["labels"]);
@@ -203,7 +216,7 @@ describe("normalizeEntities", () => {
     expect(prop.children[0].value.entityId).toBe("");
   });
 
-  it("creates a metaprop without a type, with a note", () => {
+  it("creates a metaprop without a type, as Detail does", () => {
     const { entity, errors, notes } = normalizeOne({
       class: "C",
       labels: ["dog"],
@@ -211,10 +224,8 @@ describe("normalizeEntities", () => {
     });
 
     expect(errors).toEqual([]);
+    expect(notes).toEqual([]);
     expect(entity.props[0].children[0].type.entityId).toBe("");
-    expect(notes.map((note) => note.message)).toEqual([
-      "Metaprop 1.1 has no type; it is created without one",
-    ]);
   });
 
   it("reports metaprop problems with their paths", () => {
