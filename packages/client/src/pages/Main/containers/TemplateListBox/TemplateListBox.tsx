@@ -1,16 +1,18 @@
-import { entitiesDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
-import { IEntity } from "@inkvisitor/shared/types";
+import { IEntity, IResponseUser, IUserOptions } from "@inkvisitor/shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import { Button, Input, Loader } from "components";
-import { getStoredUserRole } from "utils/userStorage";
+import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 
 import Dropdown, { EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
-import { useTemplatesQuery } from "hooks/react-query";
-import React, { useMemo, useState } from "react";
+import { useTemplatesQuery, useUserQuery } from "hooks/react-query";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectPanelWidth } from "redux/features/layout/mainPage/panelWidthsSlice";
-import { IcoPlusBold, IcoTrashSimple } from "Theme/icons";
+import { templateClassOptions } from "Theme/constants";
+import { IcoPlusBold, IcoStar, IcoTrashSimple } from "Theme/icons";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -28,16 +30,23 @@ import { ButtonSize } from "types";
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = () => {
   // FILTER;
-  const allEntityOption = {
-    value: EntityEnums.Extension.Any,
-    label: "all",
-  } as { value: EntityEnums.Extension.Any; label: string };
-  const allEntityOptions = [allEntityOption, ...entitiesDict];
+  const { data: user } = useUserQuery();
+  const defaultTemplateClass = user?.options.defaultTemplateClass ?? EntityEnums.Extension.Any;
+  const starredTemplateIds = useMemo(
+    () => new Set(user?.options.starredTemplates ?? []),
+    [user?.options.starredTemplates],
+  );
 
   const [filterByClass, setFilterByClass] = useState<EntityEnums.Class | EntityEnums.Extension.Any>(
-    EntityEnums.Extension.Any,
+    defaultTemplateClass,
   );
   const [filterByLabel, setFilterByLabel] = useState<string>("");
+
+  // the user can arrive after the box mounts, and a default saved in the user
+  // settings applies here without a reload
+  useEffect(() => {
+    setFilterByClass(defaultTemplateClass);
+  }, [defaultTemplateClass]);
 
   const fourthPanelWidth = useDebounce(useSelector(selectPanelWidth(3)), 200);
   const widthTooNarrow = fourthPanelWidth < 220;
@@ -49,12 +58,12 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     if (!allTemplatesData) {
       return [];
     }
-    return allTemplatesData.filter((template: IEntity) => {
+    const filtered = allTemplatesData.filter((template: IEntity) => {
       // discouraged templates stay reachable through search and Explorer only
       if (template.status === EntityEnums.Status.Discouraged) {
         return false;
       }
-      if (filterByClass !== allEntityOption.value && template.class !== filterByClass) {
+      if (filterByClass !== EntityEnums.Extension.Any && template.class !== filterByClass) {
         return false;
       }
       if (
@@ -65,7 +74,50 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       }
       return true;
     });
-  }, [allTemplatesData, filterByClass, filterByLabel]);
+    return filtered.sort(
+      (a, b) => Number(starredTemplateIds.has(b.id)) - Number(starredTemplateIds.has(a.id)),
+    );
+  }, [allTemplatesData, filterByClass, filterByLabel, starredTemplateIds]);
+
+  const queryClient = useQueryClient();
+
+  const userKey = ["user", getStoredUserId()];
+
+  // one at a time, so a later list can not be overwritten by an earlier one
+  // that reaches the server second
+  const starMutation = useMutation({
+    scope: { id: "starredTemplates" },
+    mutationFn: async (starredTemplates: string[]) => {
+      // the server merges options into the stored ones, so only the starred
+      // list is sent
+      await api.usersUpdate(getStoredUserId() as string, {
+        options: { starredTemplates } as IUserOptions,
+      });
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: userKey });
+    },
+  });
+
+  // reads the user from the cache at click time and writes the result back
+  // straight away, so quick clicks each start from the previous one. It reads
+  // nothing that changes between renders, which matters because EntityTag
+  // re-renders on a changed `button` only when it appears or goes away.
+  const toggleStar = (templateId: string) => {
+    const current = queryClient.getQueryData<IResponseUser>(userKey);
+    if (!current) {
+      return;
+    }
+    const starred = current.options.starredTemplates ?? [];
+    const starredTemplates = starred.includes(templateId)
+      ? starred.filter((id) => id !== templateId)
+      : [...starred, templateId];
+    queryClient.setQueryData<IResponseUser>(userKey, {
+      ...current,
+      options: { ...current.options, starredTemplates },
+    });
+    starMutation.mutate(starredTemplates);
+  };
 
   // CREATE MODAL
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
@@ -122,13 +174,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                   value={filterByClass}
                   options={
                     widthTooNarrow
-                      ? allEntityOptions.map((c) => {
+                      ? templateClassOptions.map((c) => {
                           return {
                             value: c.value,
                             label: c.value,
                           };
                         })
-                      : allEntityOptions
+                      : templateClassOptions
                   }
                   onChange={(selectedOption) => {
                     setFilterByClass(selectedOption);
@@ -156,12 +208,24 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
         <StyledTemplateSectionList>
           {templatesData &&
             templatesData.map((templateEntity, ti) => {
+              const isStarred = starredTemplateIds.has(templateEntity.id);
               return (
                 <React.Fragment key={templateEntity.id + ti}>
                   <EntityTag
                     entity={templateEntity}
                     fullWidth
                     tooltipPosition="left"
+                    isFavorited={isStarred}
+                    button={
+                      <Button
+                        tooltipLabel={isStarred ? "unstar template" : "star template"}
+                        icon={<IcoStar />}
+                        color={isStarred ? "warning" : "grey"}
+                        inverted
+                        shape="sharp"
+                        onClick={() => toggleStar(templateEntity.id)}
+                      />
+                    }
                     unlinkButton={
                       userRole !== UserEnums.Role.Viewer && {
                         onClick: () => {

@@ -22,6 +22,8 @@ const prepareUserData = (): IUser => {
       workingLanguages: [],
       hideStatementElementsOrderTable: false,
       askBeforePropDelete: true,
+      starredTemplates: ["template1"],
+      defaultTemplateClass: EntityEnums.Class.Statement,
     } as IUser["options"],
     verified: true,
     rights: [],
@@ -210,6 +212,34 @@ describe("models/user", function () {
         );
         expect(user2After?.storedTerritories).toHaveLength(0);
       });
+    });
+  });
+
+  describe("User.update with partial options", function () {
+    let db: Db;
+    const user1 = prepareUser();
+    user1.options.workingLanguages = [EntityEnums.Language.English];
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await user1.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should keep the options that were not sent", async () => {
+      await user1.update(db.connection, {
+        options: { starredTemplates: ["template1"] },
+      });
+
+      const user1After = await User.findUserById(db.connection, user1.id);
+      expect(user1After?.options.starredTemplates).toEqual(["template1"]);
+      expect(user1After?.options.workingLanguages).toEqual([
+        EntityEnums.Language.English,
+      ]);
     });
   });
 

@@ -38,6 +38,12 @@ export interface IUserOptions {
   // show a confirm modal before deleting a metaprop that has child properties
   // (undefined is treated as true - warn by default)
   askBeforePropDelete?: boolean;
+
+  // template ids listed first in the template list
+  starredTemplates?: string[];
+
+  // entity class the template list filter starts on
+  defaultTemplateClass?: EntityEnums.Class | EntityEnums.Extension.Any;
 }
 
 export interface IStoredTerritory {

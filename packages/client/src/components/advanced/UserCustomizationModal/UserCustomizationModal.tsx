@@ -3,7 +3,7 @@ import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
+import { SAFE_PASSWORD_DESCRIPTION, templateClassOptions } from "Theme/constants";
 import { IcoListTree, IcoSettings, IcoShield, IcoUserAlt } from "Theme/icons";
 import api from "api";
 import {
@@ -51,6 +51,7 @@ interface DataObject {
   workingLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
   askBeforePropDelete: boolean;
+  defaultTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -80,6 +81,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
       askBeforePropDelete: options.askBeforePropDelete !== false,
+      defaultTemplateClass: options.defaultTemplateClass ?? EntityEnums.Extension.Any,
     };
   });
 
@@ -145,6 +147,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           workingLanguages: data.workingLanguages.map((wL) => wL),
           defaultTerritory: data.defaultTerritory || "",
           askBeforePropDelete: data.askBeforePropDelete,
+          defaultTemplateClass: data.defaultTemplateClass,
         },
       });
     }
@@ -441,6 +444,26 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     <StyledFieldHelp />
                   </>
                 )}
+
+                <StyledFieldLabel>Default template class</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Dropdown.Single.Entity
+                    width="full"
+                    value={data.defaultTemplateClass}
+                    onChange={(newValue) =>
+                      setData((prev) => ({ ...prev, defaultTemplateClass: newValue }))
+                    }
+                    options={templateClassOptions}
+                    disableTyping
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Entity class the template list is filtered to when InkVisitor is loaded."
+                  />
+                </StyledFieldHelp>
 
                 {!isViewer && (
                   <>
