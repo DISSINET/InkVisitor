@@ -1,8 +1,4 @@
-import {
-  entitiesDict,
-  languageDict,
-  orderLanguageDict,
-} from "@inkvisitor/shared/dictionaries";
+import { entitiesDict, languageDict, orderLanguageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
@@ -458,7 +454,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       setData((prev) => ({ ...prev, promotedTemplateClass: newValue }))
                     }
                     options={[{ value: EntityEnums.Extension.Any, label: "none" }, ...entitiesDict]}
-                    disableTyping
                   />
                 </StyledFieldControl>
                 <StyledFieldHelp>

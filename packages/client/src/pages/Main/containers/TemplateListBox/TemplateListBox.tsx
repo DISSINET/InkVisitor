@@ -26,6 +26,7 @@ import {
 } from "./TemplateListBoxStyles";
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
+import { sortTemplates, TemplateOrder, templateOrderOptions } from "./sortTemplates";
 import { ButtonSize } from "types";
 
 interface TemplateListBox {}
@@ -41,6 +42,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     EntityEnums.Extension.Any,
   );
   const [filterByLabel, setFilterByLabel] = useState<string>("");
+  const [onlyStarred, setOnlyStarred] = useState<boolean>(false);
+  const [order, setOrder] = useState<TemplateOrder>("label");
 
   const { data: user } = useUserQuery();
   const promotedTemplateClass = user?.options.promotedTemplateClass;
@@ -67,6 +70,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       if (filterByClass !== allEntityOption.value && template.class !== filterByClass) {
         return false;
       }
+      if (onlyStarred && !starredTemplateIds.has(template.id)) {
+        return false;
+      }
       if (
         filterByLabel.length &&
         !template.labels[0]?.toLocaleLowerCase().startsWith(filterByLabel.toLocaleLowerCase())
@@ -75,10 +81,16 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       }
       return true;
     });
-    // the promoted class first, both groups keep their order
-    const rank = (template: IEntity) => (template.class === promotedTemplateClass ? 0 : 1);
-    return filtered.sort((a, b) => rank(a) - rank(b));
-  }, [allTemplatesData, filterByClass, filterByLabel, promotedTemplateClass]);
+    return sortTemplates(filtered, order, promotedTemplateClass);
+  }, [
+    order,
+    allTemplatesData,
+    filterByClass,
+    filterByLabel,
+    onlyStarred,
+    starredTemplateIds,
+    promotedTemplateClass,
+  ]);
 
   const queryClient = useQueryClient();
 
@@ -157,13 +169,21 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
               icon={<IcoPlusBold />}
               color="primary"
               inverted
-              label="new template"
+              label="template"
               size={ButtonSize.Medium}
               onClick={() => {
                 handleAskCreateTemplate();
               }}
             />
           )}
+          <Button
+            icon={<IcoStar />}
+            color={onlyStarred ? "warning" : "greyer"}
+            inverted={!onlyStarred}
+            size={ButtonSize.Medium}
+            onClick={() => setOnlyStarred(!onlyStarred)}
+            tooltipLabel="starred templates"
+          />
         </StyledTemplateSectionHeader>
 
         <StyledTemplateFilter>
@@ -187,7 +207,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                     setFilterByClass(selectedOption);
                   }}
                   width="full"
-                  disableTyping
                   disableTooltip={!widthTooNarrow}
                 />
               </div>
@@ -202,6 +221,18 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                 changeOnType
                 width="full"
                 autoFocus
+              />
+            </StyledTemplateFilterInputValue>
+          </StyledTemplateFilterInputRow>
+          <StyledTemplateFilterInputRow>
+            <StyledTemplateFilterInputLabel>{"Order: "}</StyledTemplateFilterInputLabel>
+            <StyledTemplateFilterInputValue>
+              <Dropdown.Single.Basic
+                value={order}
+                options={templateOrderOptions}
+                onChange={(newOrder) => setOrder(newOrder)}
+                width="full"
+                disableTyping
               />
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>

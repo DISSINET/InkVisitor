@@ -18,6 +18,7 @@ export const StyledTemplateSection = styled.div`
 `;
 export const StyledTemplateSectionHeader = styled.div`
   display: flex;
+  gap: ${({ theme }) => theme.space[1]};
   font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   color: ${({ theme }) => theme.color["primary"]};
