@@ -176,7 +176,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
             />
           )}
           <Button
-            icon={<IcoStar />}
+            icon={<IcoStar size={14} />}
             color={onlyStarred ? "warning" : "greyer"}
             inverted={!onlyStarred}
             size={ButtonSize.Medium}
@@ -184,14 +184,14 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
             tooltipLabel="starred templates"
           />
           <StyledTemplateControl>
-            <Dropdown.Single.Basic
-              value={order}
-              options={templateOrderOptions}
-              onChange={(newOrder) => setOrder(newOrder)}
-              icon={<IcoSort />}
-              tooltipLabel="order"
+            <Input
+              value={filterByLabel}
+              onChangeFn={(newType: string) => setFilterByLabel(newType)}
+              changeOnType
               width="full"
-              disableTyping
+              placeholder="label"
+              autoFocus
+              clearable
             />
           </StyledTemplateControl>
         </StyledTemplateSectionHeader>
@@ -219,13 +219,14 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
             />
           </StyledTemplateControl>
           <StyledTemplateControl>
-            <Input
-              value={filterByLabel}
-              onChangeFn={(newType: string) => setFilterByLabel(newType)}
-              changeOnType
+            <Dropdown.Single.Basic
+              value={order}
+              options={templateOrderOptions}
+              onChange={(newOrder) => setOrder(newOrder)}
+              icon={<IcoSort />}
+              tooltipLabel="order"
               width="full"
-              placeholder="label"
-              autoFocus
+              disableTyping
             />
           </StyledTemplateControl>
         </StyledTemplateFilter>
