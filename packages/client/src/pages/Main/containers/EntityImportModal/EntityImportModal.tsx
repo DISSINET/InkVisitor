@@ -28,6 +28,7 @@ import {
   missingEntityIds,
   missingSynonymGroupIds,
   removeDraftEntity,
+  tabEntities,
   validateImport,
   writeImport,
 } from "utils/entityImport";
@@ -259,20 +260,28 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     ]);
   };
 
+  // the indexes count tabs; the Value copies, which have none, stay first
   const handleMoveTab = useCallback(
     (dragIndex: number, hoverIndex: number) =>
-      setDraft(
-        (current) =>
-          current && {
-            ...current,
-            entities: update(current.entities, {
+      setDraft((current) => {
+        if (!current) {
+          return current;
+        }
+        const tabs = tabEntities(current);
+        const copies = current.entities.filter((entity) => !tabs.includes(entity));
+        return {
+          ...current,
+          entities: [
+            ...copies,
+            ...update(tabs, {
               $splice: [
                 [dragIndex, 1],
-                [hoverIndex, 0, current.entities[dragIndex]],
+                [hoverIndex, 0, tabs[dragIndex]],
               ],
             }),
-          }
-      ),
+          ],
+        };
+      }),
     []
   );
 
@@ -334,7 +343,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     }
   };
 
-  const draftCount = draft?.entities.length ?? 0;
+  const draftCount = draft ? tabEntities(draft).length : 0;
 
   return (
     <Modal

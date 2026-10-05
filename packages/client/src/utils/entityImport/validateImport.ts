@@ -157,6 +157,7 @@ export const validateImport = async (
       entities: [...valueCopies, ...territories.ordered.map(({ entity }) => entity)],
       relations: relations.relations,
       existingEntities: Object.fromEntries(existing),
+      valueCopyIds: valueCopies.map((copy) => copy.id),
     },
   };
 };

@@ -167,6 +167,7 @@ describe("validateImport", () => {
       { class: EntityEnums.Class.Value, labels: ["stored-12"] },
     ]);
     expect(propCopy.id).not.toBe(referenceCopy.id);
+    expect(plan!.valueCopyIds).toEqual([propCopy.id, referenceCopy.id]);
     expect(dog.props.map((prop) => prop.value.entityId)).toEqual([propCopy.id, "new-13"]);
     expect(dog.references[0].value).toBe(referenceCopy.id);
     expect(notes.map((note) => [note.entityIndex, note.path])).toEqual([

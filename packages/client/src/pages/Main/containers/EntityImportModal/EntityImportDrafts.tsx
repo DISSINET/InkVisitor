@@ -3,7 +3,13 @@ import { EntityEditing, EntityEditingContext } from "hooks";
 import { EntityDetail } from "../EntityDetailBox/EntityDetail/EntityDetail";
 import { EntityDetailTab } from "../EntityDetailBox/EntityDetailTab/EntityDetailTab";
 import React, { useEffect, useMemo, useState } from "react";
-import { buildDraftDetail, createDraftWrites, ImportDraft, ImportIssue } from "utils/entityImport";
+import {
+  buildDraftDetail,
+  createDraftWrites,
+  ImportDraft,
+  ImportIssue,
+  tabEntities,
+} from "utils/entityImport";
 import { getStoredUserRole } from "utils/userStorage";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import {
@@ -38,14 +44,15 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
   errors,
   notes,
 }) => {
-  const [selectedId, setSelectedId] = useState<string | undefined>(draft.entities[0]?.id);
+  const tabs = useMemo(() => tabEntities(draft), [draft]);
+  const [selectedId, setSelectedId] = useState<string | undefined>(tabs[0]?.id);
 
   // a closed tab hands the selection to the first tab left
   useEffect(() => {
-    if (!draft.entities.some((entity) => entity.id === selectedId)) {
-      setSelectedId(draft.entities[0]?.id);
+    if (!tabs.some((entity) => entity.id === selectedId)) {
+      setSelectedId(tabs[0]?.id);
     }
-  }, [draft.entities, selectedId]);
+  }, [tabs, selectedId]);
 
   const right = [UserEnums.Role.Admin, UserEnums.Role.Owner].includes(
     getStoredUserRole() as UserEnums.Role
@@ -92,7 +99,7 @@ export const EntityImportDrafts: React.FC<EntityImportDrafts> = ({
         )}
 
         <StyledDraftTabGroup>
-          {draft.entities.map((entity, index) => (
+          {tabs.map((entity, index) => (
             <EntityDetailTab
               key={entity.id}
               index={index}

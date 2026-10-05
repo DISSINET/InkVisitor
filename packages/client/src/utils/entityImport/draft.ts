@@ -23,13 +23,25 @@ export interface ImportDraft {
   // the whole group the relation will join, but only the draft relation is
   // written, and the server merges the groups
   storedSynonyms?: Record<string, string[]>;
+  // Values made for slots naming a stored Value: like a copy Detail makes on a
+  // drop, they get no tab, show in their slot and are created only while a
+  // draft still points at them
+  valueCopyIds?: string[];
 }
 
 export const draftFromPlan = (plan: ImportPlan): ImportDraft => ({
   entities: plan.entities,
   relations: plan.relations,
   existing: plan.existingEntities,
+  valueCopyIds: plan.valueCopyIds,
 });
+
+const isValueCopy = (draft: ImportDraft, entityId: string) =>
+  !!draft.valueCopyIds?.includes(entityId);
+
+/** The drafts that have a tab: every one but the Value copies. */
+export const tabEntities = (draft: ImportDraft): IEntity[] =>
+  draft.entities.filter((entity) => !isValueCopy(draft, entity.id));
 
 /**
  * Applies changes the way the server applies an entity update: nested objects
@@ -356,19 +368,28 @@ const relationOwner = (draft: ImportDraft, relation: Relation.IRelation): string
  * it belongs to, so the edited drafts pass through the same validation as
  * pasted JSON.
  */
-export const draftToImportJson = (draft: ImportDraft): object[] =>
-  draft.entities.map((entity) => ({
-    ...buildEntityJson(entity, undefined),
-    relations: draft.relations
-      .filter((relation) => relationOwner(draft, relation) === entity.id)
-      .map((relation) => ({
-        type: relation.type,
-        entityIds: relation.entityIds,
-        ...(relation.type === RelationEnums.Type.Identification
-          ? { certainty: (relation as Relation.IIdentification).certainty }
-          : {}),
-      })),
-  }));
+export const draftToImportJson = (draft: ImportDraft): object[] => {
+  // a Value copy no draft points at any more is not created
+  const pointedAt = new Set(
+    collectEntityRefs(
+      tabEntities(draft).map((entity, position) => ({ index: position + 1, entity, rawRelations: [] }))
+    ).map((ref) => ref.id)
+  );
+  return draft.entities
+    .filter((entity) => !isValueCopy(draft, entity.id) || pointedAt.has(entity.id))
+    .map((entity) => ({
+      ...buildEntityJson(entity, undefined),
+      relations: draft.relations
+        .filter((relation) => relationOwner(draft, relation) === entity.id)
+        .map((relation) => ({
+          type: relation.type,
+          entityIds: relation.entityIds,
+          ...(relation.type === RelationEnums.Type.Identification
+            ? { certainty: (relation as Relation.IIdentification).certainty }
+            : {}),
+        })),
+    }));
+};
 
 /** Entities the drafts refer to that are neither drafts nor loaded yet. */
 export const missingEntityIds = (draft: ImportDraft): string[] => {

@@ -12,6 +12,7 @@ import {
   missingSynonymGroupIds,
   removeDraftEntity,
   reorderDraftRelations,
+  tabEntities,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
@@ -267,6 +268,27 @@ describe("createDraftWrites", () => {
       type: RelationEnums.Type.Synonym,
       entityIds: ["puppy", "whelp"],
     });
+  });
+
+  it("gives a Value copy no tab and creates it only while a draft points at it", async () => {
+    const copy = normalizeEntities([{ id: "copy-12", class: "V", labels: ["12"] }], {
+      defaultLanguage: EntityEnums.Language.English,
+    }).entities[0].entity;
+    const dog = newEntity("dog", { props: [{ type: "size", value: "copy-12" }] });
+    const { writes, draft } = writesOn({
+      entities: [copy, dog],
+      relations: [],
+      existing: {},
+      valueCopyIds: ["copy-12"],
+    });
+    const ids = () => draftToImportJson(draft()).map((item) => (item as { id: string }).id);
+
+    expect(tabEntities(draft()).map((entity) => entity.id)).toEqual(["dog"]);
+    expect(ids()).toEqual(["copy-12", "dog"]);
+
+    // clearing the slot in Detail leaves the copy unused
+    await writes.updateEntity(dog, { props: [{ ...dog.props[0], value: { ...dog.props[0].value, entityId: "" } }] });
+    expect(ids()).toEqual(["dog"]);
   });
 
   // hound is stored in a synonym group with canine

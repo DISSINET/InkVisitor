@@ -74,6 +74,7 @@ const plan = (entities: IEntity[], relations: Relation.IRelation[] = []): Import
   entities,
   relations,
   existingEntities: { animal: entity("animal"), hound: entity("hound") },
+  valueCopyIds: [],
 });
 
 describe("writeImport", () => {

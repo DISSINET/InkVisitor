@@ -57,6 +57,8 @@ export interface ImportPlan {
   relations: Relation.IRelation[];
   // database entities the input refers to, for showing them in the preview
   existingEntities: Record<string, IEntity>;
+  // Values the import made for slots naming a stored Value (see validateImport)
+  valueCopyIds: string[];
 }
 
 export interface ImportValidation {

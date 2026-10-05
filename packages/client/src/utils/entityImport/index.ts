@@ -17,6 +17,7 @@ export {
   missingSynonymGroupIds,
   removeDraftEntity,
   reorderDraftRelations,
+  tabEntities,
   updateDraftEntity,
   updateDraftRelation,
 } from "./draft";
