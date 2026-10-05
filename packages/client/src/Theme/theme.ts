@@ -128,6 +128,10 @@ const theme = {
     warningMessage: "#FFE089",
     warningBorder: "#ffbb00",
 
+    // the shared success colour is the app's periwinkle accent; toasts get a
+    // teal-green so a success reads at a glance (4.7:1 under white text)
+    toastSuccess: "#028464",
+
     tooltipColor: "#fff",
     tooltipBackground: "#000",
     tooltipNodeInfoBackground: "#324185",
