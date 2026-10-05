@@ -9,6 +9,7 @@ import treeCache from "@service/treeCache";
 import { Connection, r, RDatum, RStream, RValue } from "rethinkdb-ts";
 import { SearchNode } from ".";
 import { getNodeExpansionIds } from "./node-expansion";
+import { QUERY_RUN_OPTIONS } from "./run-options";
 
 export default class SearchEdge implements Query.IEdge {
   type: Query.EdgeType;
@@ -106,7 +107,7 @@ export default class SearchEdge implements Query.IEdge {
       ? r.table(Entity.table).getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : r.table(Entity.table);
 
-    return filterStreamByStatus(base, statuses).run(db) as Promise<string[]>;
+    return filterStreamByStatus(base, statuses).run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
   }
 
   /**
@@ -144,39 +145,48 @@ function filterStreamByStatus(q: RStream, statuses: EntityEnums.Status[]): RStre
 
 /**
  * Intersects a precomputed candidate-id stream back into the incoming stream q:
- * dedupes `idsStream`, coerces it to an array and emits only the ids already
- * present in q - the subset invariant that positive matching and negation
- * (base set minus matches) both rely on. Pass null when the edge has no usable
- * target - the edge then matches nothing.
+ * dedupes `idsStream`, turns it into an object keyed by id and emits only the
+ * ids already present in q - the subset invariant that positive matching and
+ * negation (base set minus matches) both rely on. The object makes the check
+ * per row a key lookup rather than a scan of every candidate. Pass null when
+ * the edge has no usable target - the edge then matches nothing.
  */
 function intersectIdsWithStream(q: RStream, idsStream: RStream | null): RStream {
   const idsArray: RDatum = idsStream
     ? (idsStream.distinct() as unknown as RDatum).coerceTo("array")
     : r.expr([] as string[]);
 
-  return idsArray.do(function (ids: RDatum) {
-    return q
-      .filter(function (e: RDatum<IEntity>) {
-        return ids.contains(e("id"));
-      })
-      .map(function (e: RDatum<IEntity>) {
-        return e("id");
-      });
-  }) as unknown as RStream;
+  return idsArray
+    // an object key has to be a string; a missing id in the data is no match
+    .filter(function (id: RDatum) {
+      return id.typeOf().eq("STRING");
+    })
+    .map(function (id: RDatum) {
+      return [id, true];
+    })
+    .coerceTo("object")
+    .do(function (ids: RDatum) {
+      return q
+        .filter(function (e: RDatum<IEntity>) {
+          return ids.hasFields(e("id"));
+        })
+        .map(function (e: RDatum<IEntity>) {
+          return e("id");
+        });
+    }) as unknown as RStream;
 }
 
 /**
  * Every entity of one of `classes`, or of any class when empty. Backs the "any
- * target" branch of the edges that otherwise look their target ids up: with no
- * id to key an index by, this is a scan of the entity table.
+ * target" branch of the edges that otherwise look their target ids up: the
+ * class index reads only the requested classes, while no class at all is a
+ * scan of the entity table.
  */
 function entitiesOfClasses(classes: EntityEnums.Class[]): RStream {
   const table = r.table(Entity.table);
   return (
     classes.length
-      ? table.filter(function (e: RDatum<IEntity>) {
-          return r.expr(classes).contains(e("class"));
-        })
+      ? table.getAll(r.args(classes), { index: DbEnums.Indexes.Class })
       : table
   ) as unknown as RStream;
 }

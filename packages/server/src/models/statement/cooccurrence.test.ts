@@ -68,9 +68,9 @@ describe("Statement.getCoOccurrentEntityIds", () => {
     );
   });
 
-  it("unions the statements of several inputs and returns none of the inputs", async () => {
+  it("unions the statements of several inputs and returns the inputs that share a statement", async () => {
     // inA and inB co-occur with each other in s1, so each is in the other's
-    // co-occurrent set - neither may show up as a result
+    // co-occurrent set; inC only appears on its own in s3
     mockStatements([
       statement("s1", {
         actants: [{ entityId: "inA" }, { entityId: "inB" }, { entityId: "x" }],
@@ -78,14 +78,33 @@ describe("Statement.getCoOccurrentEntityIds", () => {
       statement("s2", {
         actants: [{ entityId: "inB" }, { entityId: "y" }],
       }),
+      statement("s3", {
+        actants: [{ entityId: "inC" }, { entityId: "z" }],
+      }),
     ]);
 
     const ids = await Statement.getCoOccurrentEntityIds(undefined, [
       "inA",
       "inB",
+      "inC",
     ]);
 
-    expect(new Set(ids)).toEqual(new Set(["s1", "s2", "x", "y"]));
+    expect(new Set(ids)).toEqual(
+      new Set(["s1", "s2", "s3", "x", "y", "z", "inA", "inB"])
+    );
+  });
+
+  it("does not return a single input found in its own statements", async () => {
+    mockStatements([
+      statement("s1", {
+        actants: [{ entityId: "input" }, { entityId: "x" }],
+        tags: ["input"],
+      }),
+    ]);
+
+    const ids = await Statement.getCoOccurrentEntityIds(undefined, "input");
+
+    expect(new Set(ids)).toEqual(new Set(["s1", "x"]));
   });
 
   it("skips the query for an empty input list", async () => {

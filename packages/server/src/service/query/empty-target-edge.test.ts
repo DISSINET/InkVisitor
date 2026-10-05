@@ -3,6 +3,7 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
+import { provisionEntityIndexes } from "../../test/schema";
 
 // Verifies against the ACTUAL ReQL that an edge target left empty - no pinned
 // entity, no status - means "any" for the edges that otherwise look their
@@ -129,6 +130,8 @@ describe("edges with an empty target match any (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
+    // the edges read through the same indexes as a real database
+    await provisionEntityIndexes(conn, TABLE);
     await r.table(TABLE).insert(FIXTURES).run(conn);
   }, 30000);
 

@@ -51,6 +51,9 @@ interface UserList {}
 
 export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
+  const [ownerRoleChange, setOwnerRoleChange] = useState<
+    { userId: string; role: UserEnums.Role } | false
+  >(false);
   const [filters, setFilters] = useState<UserListFilters>(emptyUserListFilters);
   const [rowFlash, setRowFlash] = useState<{
     userId: string;
@@ -82,6 +85,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const currentUserRole = getStoredUserRole() as UserEnums.Role;
   const canVerifyManually =
     currentUserRole === UserEnums.Role.Admin || currentUserRole === UserEnums.Role.Owner;
+  // only an owner grants the owner role
+  const roleOptions = useMemo(
+    () =>
+      currentUserRole === UserEnums.Role.Owner
+        ? userRoleDict
+        : userRoleDict.filter((roleOption) => roleOption.value !== UserEnums.Role.Owner),
+    [currentUserRole],
+  );
 
   const { data: users, isFetching, isLoading } = useUsersGetMoreQuery();
   const { data: treeData } = useTreeQuery();
@@ -108,6 +119,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   const removingUser = useMemo(() => {
     return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
+
+  const ownerRoleChangeUser = useMemo(() => {
+    return ownerRoleChange ? users?.find((d) => d.id === ownerRoleChange.userId) : false;
+  }, [ownerRoleChange, users]);
+  const ownerRoleChangeName = ownerRoleChangeUser ? ownerRoleChangeUser.name : "";
+  const grantsOwner = ownerRoleChange && ownerRoleChange.role === UserEnums.Role.Owner;
 
   const userMutation = useMutation({
     mutationFn: async (userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }) =>
@@ -151,6 +168,18 @@ export const UserList: React.FC<UserList> = React.memo(() => {
       setRemovingUserId(false);
     },
   });
+
+  const changeRole = (userId: string, role: UserEnums.Role, onSettled?: () => void) => {
+    userMutation.mutate(
+      { id: userId, role },
+      {
+        onSuccess: () => {
+          scheduleRowFlash(userId, "role");
+        },
+        onSettled,
+      },
+    );
+  };
 
   const addRightToUser = (user: IResponseUser, territoryId: string, mode: "read" | "write") => {
     // remove this territory from the list if it was added before
@@ -228,9 +257,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Cell: ({ row }: CellType) => {
           const { id, role } = row.original;
 
-          // an owner keeps the role for good, and nobody demotes themselves, so
-          // those rows state the role rather than offering a control
-          if (id === getStoredUserId() || role === UserEnums.Role.Owner) {
+          // nobody changes their own role, and only an owner changes an owner's,
+          // so those rows state the role rather than offering a control
+          if (
+            id === getStoredUserId() ||
+            (role === UserEnums.Role.Owner && currentUserRole !== UserEnums.Role.Owner)
+          ) {
             return (
               <StyledRoleBadgeWrap>
                 <RoleBadge role={role} />
@@ -240,7 +272,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
           return (
             <AttributeButtonGroup
-              options={userRoleDict.slice(1).map((roleOption) => ({
+              options={roleOptions.map((roleOption) => ({
                 longValue: roleOption.label,
                 shortValue: roleOption.label,
                 selected: role === roleOption.value,
@@ -248,14 +280,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                   if (role === roleOption.value) {
                     return;
                   }
-                  userMutation.mutate(
-                    { id: id, role: roleOption.value },
-                    {
-                      onSuccess: () => {
-                        scheduleRowFlash(id, "role");
-                      },
-                    },
-                  );
+                  if (
+                    role === UserEnums.Role.Owner ||
+                    roleOption.value === UserEnums.Role.Owner
+                  ) {
+                    setOwnerRoleChange({ userId: id, role: roleOption.value });
+                    return;
+                  }
+                  changeRole(id, roleOption.value);
                 },
               }))}
             />
@@ -369,9 +401,15 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             activateTooltip = "deactivate user";
           }
 
+          // only an owner deletes an owner; the viewing owner is active, so
+          // another owner row is never the last active owner
+          const ownerDeleteDenied =
+            role === UserEnums.Role.Owner && currentUserRole !== UserEnums.Role.Owner;
           let deleteTooltip = "delete user";
           if (userId === getStoredUserId()) {
             deleteTooltip = "cannot delete yourself";
+          } else if (ownerDeleteDenied) {
+            deleteTooltip = "only an owner can delete an owner";
           }
 
           return (
@@ -381,7 +419,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<IcoTrash size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
-                disabled={userId === getStoredUserId() || role === UserEnums.Role.Owner}
+                disabled={userId === getStoredUserId() || ownerDeleteDenied}
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
@@ -446,7 +484,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    [canVerifyManually, scheduleRowFlash, localUsers, treeData],
+    [canVerifyManually, roleOptions, scheduleRowFlash, localUsers, treeData],
   );
 
   // an empty body during the first fetch is not yet an empty result
@@ -525,6 +563,31 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           setRemovingUserId(false);
         }}
         loading={removeUserMutation.isPending}
+      />
+
+      <Submit
+        title={
+          grantsOwner
+            ? `Making ${ownerRoleChangeName} an owner`
+            : `Taking the owner role from ${ownerRoleChangeName}`
+        }
+        text={
+          grantsOwner
+            ? `Do you really want to make ${ownerRoleChangeName} an owner?`
+            : `Do you really want to change ${ownerRoleChangeName} from owner to ${ownerRoleChange ? ownerRoleChange.role : ""}?`
+        }
+        submitLabel={grantsOwner ? "Make owner" : "Change role"}
+        show={ownerRoleChangeUser != false}
+        onSubmit={() =>
+          ownerRoleChange &&
+          changeRole(ownerRoleChange.userId, ownerRoleChange.role, () => {
+            setOwnerRoleChange(false);
+          })
+        }
+        onCancel={() => {
+          setOwnerRoleChange(false);
+        }}
+        loading={userMutation.isPending}
       />
     </Box>
   );

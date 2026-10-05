@@ -35,7 +35,29 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
       typeof this.data.includeEquivalents === "boolean" &&
       typeof this.data.includeSubordinates === "boolean" &&
       (this.data.filters === undefined || Array.isArray(this.data.filters)) &&
+      (this.data.columns === undefined ||
+        (Array.isArray(this.data.columns) &&
+          this.data.columns.every(SavedQuery.isColumnValid))) &&
       SavedQuery.isQueryNodeValid(this.data.query)
+    );
+  }
+
+  /**
+   * Checks a stored Explorer column has the fields the table reads when a
+   * loaded query renders it.
+   */
+  static isColumnValid(column: unknown): boolean {
+    if (!column || typeof column !== "object") {
+      return false;
+    }
+    const c = column as Record<string, unknown>;
+    return (
+      typeof c.id === "string" &&
+      typeof c.name === "string" &&
+      typeof c.type === "string" &&
+      typeof c.editable === "boolean" &&
+      !!c.params &&
+      typeof c.params === "object"
     );
   }
 
