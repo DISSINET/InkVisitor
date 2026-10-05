@@ -11,7 +11,7 @@ import { STATEMENT_LABEL_NOT_RECOMMENDED, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
-import { useDebounce, useSearchParams } from "hooks";
+import { useDebounce, useEntityEditing, useSearchParams } from "hooks";
 import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
@@ -156,10 +156,10 @@ const EntitySuggesterFull: React.FC<
   onFocusChange,
   preSuggestions,
 
-  disableCreate = false,
-  disableTemplateInstantiation = false,
+  disableCreate: disableCreateProp = false,
+  disableTemplateInstantiation: disableTemplateInstantiationProp = false,
   disableWildCard = false,
-  disableTemplatesAccept = false,
+  disableTemplatesAccept: disableTemplatesAcceptProp = false,
   disableButtons = false,
   disableEnter = false,
   autoFocus,
@@ -180,6 +180,13 @@ const EntitySuggesterFull: React.FC<
   onEmptyAddButtonClick,
   clearableInput = true,
 }) => {
+  // where creating an entity would write too early (the JSON import's drafts),
+  // no entity is created and no template is linked or instantiated
+  const { createsEntities } = useEntityEditing();
+  const disableCreate = disableCreateProp || !createsEntities;
+  const disableTemplateInstantiation = disableTemplateInstantiationProp || !createsEntities;
+  const disableTemplatesAccept = disableTemplatesAcceptProp || !createsEntities;
+
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   // Remembers the input typed under a non-Statement class so it can be restored
   // when the user switches away from Statement (statementLabelHint mode).

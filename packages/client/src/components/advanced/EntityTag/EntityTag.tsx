@@ -4,7 +4,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag, Tooltip } from "components";
 import { EntityTooltip } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useEntityEditing, useSearchParams } from "hooks";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -110,12 +110,12 @@ const EntityTagInner: React.FC<EntityTag> = ({
   index,
   moveFn,
   isSelected,
-  disableTooltip = false,
-  disableDrag = false,
+  disableTooltip: disableTooltipProp = false,
+  disableDrag: disableDragProp = false,
   entityIsReadOnly,
-  disableDoubleClick = false,
+  disableDoubleClick: disableDoubleClickProp = false,
   disableCopyToClipboard = false,
-  disableContextMenu = false,
+  disableContextMenu: disableContextMenuProp = false,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -131,6 +131,16 @@ const EntityTagInner: React.FC<EntityTag> = ({
   isEquivalent = false,
   isSubordinate = false,
 }) => {
+  // An unstored entity has no tooltip to fetch and nothing to drag or act on
+  // from its menu; where Detail offers no stored-entity features (the JSON
+  // import's modal) a double click would open Detail behind it.
+  const editing = useEntityEditing();
+  const isUnstored = editing.unstoredEntityIds.has(entity.id);
+  const disableTooltip = disableTooltipProp || isUnstored;
+  const disableDrag = disableDragProp || isUnstored;
+  const disableDoubleClick = disableDoubleClickProp || !editing.offersStoredEntityFeatures;
+  const disableContextMenu = disableContextMenuProp || isUnstored;
+
   const { promoteDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
