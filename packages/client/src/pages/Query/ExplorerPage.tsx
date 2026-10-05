@@ -18,6 +18,7 @@ import { isAnyModalOpen } from "components/basic/Modal/modalStack";
 import { useUserQuery } from "hooks/react-query";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
+import { MemoizedStatementEditorBox } from "pages/Main/containers/StatementEditorBox/StatementEditorBox";
 import { BiBarChartAlt2, BiHide, BiRefresh, BiTable } from "react-icons/bi";
 import { IcoSearch } from "Theme/icons";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
@@ -50,6 +51,7 @@ import {
   exploreStateInitial,
 } from "./Explorer/state";
 import {
+  StyledCloseEditorIcon,
   StyledExpansionCount,
   StyledExpansionToggle,
   StyledResultExpansionButtons,
@@ -83,6 +85,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     appendDetailId,
     setSelectedDetailId,
     replaceDetailIds,
+    statementId,
+    setStatementId,
   } = useSearchParams();
 
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
@@ -518,7 +522,12 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // toggle and the rerun rather than a number from the previous search.
   const expansionCounts = queryData?.expansion;
 
-  const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
+  // the detail panel holds the Detail box and, while a statement is open, the
+  // Editor box above it
+  const hasDetailTabs = !!(selectedDetailId || detailIdArray.length > 0);
+  const isDetailOpen = hasDetailTabs || !!statementId;
+  // with both boxes open each takes half the height
+  const detailPanelBoxHeight = statementId && hasDetailTabs ? contentHeight / 2 : contentHeight;
 
   const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
   const [queryLeftPanelExpanded, setQueryLeftPanelExpanded] = useState(
@@ -698,6 +707,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       "explorerPage",
     );
   }, [querySeparatorYPosition, contentHeight]);
+
+  const detailPanelToggleButton = (
+    <IconButton
+      key="toggle-query-detail-panel"
+      tooltipLabel={queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"}
+      icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      onClick={toggleQueryDetailPanel}
+    />
+  );
 
   return (
     <>
@@ -1002,42 +1020,60 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       </Panel>
       {isDetailOpen && (
         <Panel width={detailPanelWidth} widthVarIndex={1}>
-          <Box
-            label="Detail"
-            borderColor="white"
-            height={contentHeight}
-            disableScroll
-            isExpanded={queryDetailPanelExpanded}
-            onHeaderClick={toggleQueryDetailPanel}
-            buttons={[
-              <>
-                {queryDetailPanelExpanded && (
-                  <IconButton
-                    tooltipLabel="close all tabs"
-                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
-                    onClick={clearAllDetailIds}
-                  />
-                )}
-              </>,
-              <IconButton
-                key="toggle-query-detail-panel"
-                tooltipLabel={
-                  queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"
-                }
-                icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
-                onClick={toggleQueryDetailPanel}
-              />,
-            ]}
-          >
-            <MemoizedEntityDetailBox
-              maxTabs={maxTabCount}
-              onTabOpen={() => {
-                if (!queryDetailPanelExpanded) {
-                  toggleQueryDetailPanel();
-                }
-              }}
-            />
-          </Box>
+          {statementId && (
+            <Box
+              label="Editor"
+              borderColor="white"
+              height={detailPanelBoxHeight}
+              isExpanded={queryDetailPanelExpanded}
+              onHeaderClick={toggleQueryDetailPanel}
+              buttons={[
+                <>
+                  {queryDetailPanelExpanded && (
+                    <IconButton
+                      tooltipLabel="close editor box"
+                      icon={<StyledCloseEditorIcon />}
+                      onClick={() => setStatementId("")}
+                    />
+                  )}
+                </>,
+                detailPanelToggleButton,
+              ]}
+            >
+              <MemoizedStatementEditorBox isExpanded={queryDetailPanelExpanded} isVisible />
+            </Box>
+          )}
+          {hasDetailTabs && (
+            <Box
+              label="Detail"
+              borderColor="white"
+              height={detailPanelBoxHeight}
+              disableScroll
+              isExpanded={queryDetailPanelExpanded}
+              onHeaderClick={toggleQueryDetailPanel}
+              buttons={[
+                <>
+                  {queryDetailPanelExpanded && (
+                    <IconButton
+                      tooltipLabel="close all tabs"
+                      icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                      onClick={clearAllDetailIds}
+                    />
+                  )}
+                </>,
+                detailPanelToggleButton,
+              ]}
+            >
+              <MemoizedEntityDetailBox
+                maxTabs={maxTabCount}
+                onTabOpen={() => {
+                  if (!queryDetailPanelExpanded) {
+                    toggleQueryDetailPanel();
+                  }
+                }}
+              />
+            </Box>
+          )}
         </Panel>
       )}
     </>
