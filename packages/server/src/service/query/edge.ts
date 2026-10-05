@@ -196,6 +196,15 @@ function entitiesOfClasses(classes: EntityEnums.Class[]): RStream {
  * when the target is unconstrained (null), none for an empty target set.
  * Callers still check the class, since a pinned id may not be a statement.
  */
+/**
+ * A statement's direct territory as a 0/1-element array. Some legacy statements
+ * have no territory, or a territory object without territoryId.
+ */
+function statementTerritoryIds(statement: RDatum): RDatum {
+  const territoryId = statement("data")("territory")("territoryId").default("");
+  return r.branch(territoryId.ne(""), [territoryId], []);
+}
+
 function targetStatements(statementIds: string[] | null): RStream | null {
   if (statementIds === null) {
     return entitiesOfClasses([EntityEnums.Class.Statement]);
@@ -449,11 +458,7 @@ export class EdgeTerritoryHasStatement extends SearchEdge {
               return e("class").eq(EntityEnums.Class.Statement);
             })
             .concatMap(function (e: RDatum) {
-              return r.branch(
-                e("data").hasFields("territory"),
-                [e("data")("territory")("territoryId")],
-                []
-              );
+              return statementTerritoryIds(e);
             }) as unknown as RStream)
         : null
     );
@@ -904,13 +909,15 @@ export class EdgeHasPropType extends SearchEdge {
     const targetIds = this.targetIds();
     return q
       .filter(function (e: RDatum<IEntity>) {
-        // some of the e.[props].type.entityId is entity.id
+        // some of the e.[props].type.entityId is entity.id; a prop never
+        // filled in keeps entityId "" and has no type
         return e("props")
           .filter(function (prop) {
+            const typeId = prop("type")("entityId").default("");
             if (targetIds) {
-              return r.expr(targetIds).contains(prop("type")("entityId"));
+              return r.expr(targetIds).contains(typeId);
             } else {
-              return prop("type");
+              return typeId.ne("");
             }
           })
           .count()
@@ -934,21 +941,18 @@ export class EdgeHasPropValue extends SearchEdge {
     const targetClasses = this.node.params.entityClasses ?? [];
     return q
       .filter(function (e: RDatum<IEntity>) {
-        // some of the e.[props].value.entityId is entity.id
+        // some of the e.[props].value.entityId is entity.id; a prop never
+        // filled in keeps entityId "" and has no value
+        const valueId = (prop: RDatum) => prop("value")("entityId").default("");
         if (!targetIds && targetClasses.length) {
-          return hasIdOfClasses(
-            e("props").map(function (prop: RDatum) {
-              return prop("value")("entityId");
-            }),
-            targetClasses
-          );
+          return hasIdOfClasses(e("props").map(valueId), targetClasses);
         }
         return e("props")
           .filter(function (prop) {
             if (targetIds) {
-              return r.expr(targetIds).contains(prop("value")("entityId"));
+              return r.expr(targetIds).contains(valueId(prop));
             } else {
-              return prop("value");
+              return valueId(prop).ne("");
             }
           })
           .count()
@@ -1035,19 +1039,31 @@ export class EdgeIsPropValue extends SearchEdge {
 /**
  * Collects entityId of prop[kind] across an in-statement props array, recursing
  * into children to lvl3 - mirrors the StatementDataProps index definition.
+ * Legacy props may lack the entityId or children, and a prop added in the
+ * editor but never filled keeps entityId ""; neither yields an id. Callers run
+ * this inside concatMap, where a missing field would abort the whole query.
  */
 function collectStatementPropIds(propsExpr: RDatum, kind: "type" | "value"): RDatum {
-  return propsExpr.concatMap(function (ch1: RDatum) {
-    return r.expr([ch1(kind)("entityId")]).add(
-      ch1("children").concatMap(function (ch2: RDatum) {
-        return r.expr([ch2(kind)("entityId")]).add(
-          ch2("children").concatMap(function (ch3: RDatum) {
-            return [ch3(kind)("entityId")];
+  const propId = (prop: RDatum) => prop(kind)("entityId").default("");
+  return propsExpr
+    .concatMap(function (ch1: RDatum) {
+      return r.expr([propId(ch1)]).add(
+        ch1("children")
+          .default([])
+          .concatMap(function (ch2: RDatum) {
+            return r.expr([propId(ch2)]).add(
+              ch2("children")
+                .default([])
+                .concatMap(function (ch3: RDatum) {
+                  return [propId(ch3)];
+                }) as RValue
+            );
           }) as RValue
-        );
-      }) as RValue
-    );
-  });
+      );
+    })
+    .filter(function (id: RDatum) {
+      return id.ne("");
+    });
 }
 
 /**
@@ -1121,6 +1137,25 @@ export class EdgeStatementHasPropValue extends SearchEdge {
 }
 
 /**
+ * The entityIds of one actant's classifications or identifications. A row
+ * added in the editor but never filled keeps entityId "", and old rows may lack
+ * the field entirely; neither counts as having one.
+ */
+function actantFieldIds(
+  actant: RDatum,
+  field: "classifications" | "identifications"
+): RDatum {
+  return actant(field)
+    .default([])
+    .map(function (c: RDatum) {
+      return c("entityId");
+    })
+    .filter(function (id: RDatum) {
+      return id.ne("");
+    });
+}
+
+/**
  * Shared run for the forward statement actant-field edges (SC / SI). Mirrors
  * SP:T / SP:V (a Statement in q that has some actant referencing the target),
  * but classifications/identifications are a flat {entityId} array with no
@@ -1136,17 +1171,8 @@ function runStatementActantFieldEdge(
       return e("class").eq(EntityEnums.Class.Statement);
     })
     .filter(function (e: RDatum<IEntity>) {
-      // a row added in the editor but never filled keeps entityId "", and old
-      // rows may lack the field entirely; neither counts as having one
       const ids = e("data")("actants").concatMap(function (a: RDatum) {
-        return a(field)
-          .default([])
-          .map(function (c: RDatum) {
-            return c("entityId");
-          })
-          .filter(function (id: RDatum) {
-            return id.ne("");
-          });
+        return actantFieldIds(a, field);
       });
       if (targetIds) {
         return (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
@@ -1275,9 +1301,7 @@ function runInverseStatementActantFieldEdge(
     q,
     candidateStatements(targetIds, DbEnums.Indexes.StatementActantsCI),
     function (a: RDatum) {
-      const ids = a(field).map(function (c: RDatum) {
-        return c("entityId");
-      });
+      const ids = actantFieldIds(a, field);
       return targetIds
         ? (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not()
         : ids.count().gt(0);
@@ -1537,12 +1561,8 @@ function runStatementHasEntityEdge(
             e("data")("actants").map(function (a: RDatum) {
               return a("entityId");
             }) as RValue,
-            e("data")("tags") as RValue,
-            r.branch(
-              e("data").hasFields("territory"),
-              [e("data")("territory")("territoryId")],
-              []
-            ) as RValue,
+            e("data")("tags").default([]) as RValue,
+            statementTerritoryIds(e) as RValue,
             collectStatementPropIds(
               e("data")("actions").concatMap(function (a: RDatum) {
                 return a("props");
@@ -1627,12 +1647,17 @@ function collectPropEntityIds(propsExpr: RDatum): RDatum {
 function collectStatementEntityIds(stmt: RDatum): RDatum {
   return (collectPropEntityIds(stmt("props")) as RDatum)
     .add(
-      // a few legacy entities store references as "" instead of an array
+      // a few legacy entities store references as "" instead of an array, and
+      // some legacy reference rows lack a side
       r.branch(
         stmt("references").typeOf().eq("ARRAY"),
-        stmt("references").concatMap(function (ref: RDatum) {
-          return [ref("resource"), ref("value")];
-        }),
+        stmt("references")
+          .concatMap(function (ref: RDatum) {
+            return [ref("resource").default(""), ref("value").default("")];
+          })
+          .filter(function (id: RDatum) {
+            return id.ne("");
+          }),
         r.expr([] as string[])
       ) as RValue
     )
@@ -1655,28 +1680,9 @@ function collectStatementEntityIds(stmt: RDatum): RDatum {
       r.branch(
         stmt("data").hasFields("actants"),
         stmt("data")("actants").concatMap(function (a: RDatum) {
-          // classifications / identifications are optional on an actant row
-          // (getEntitiesIds uses ?.; the StatementActantsCI index guards the same
-          // two fields with hasFields) - an unguarded access would abort the query
           return (r.expr([a("entityId")]) as RDatum)
-            .add(
-              r.branch(
-                a.hasFields("classifications"),
-                a("classifications").map(function (c: RDatum) {
-                  return c("entityId");
-                }),
-                r.expr([] as string[])
-              ) as RValue
-            )
-            .add(
-              r.branch(
-                a.hasFields("identifications"),
-                a("identifications").map(function (ci: RDatum) {
-                  return ci("entityId");
-                }),
-                r.expr([] as string[])
-              ) as RValue
-            )
+            .add(actantFieldIds(a, "classifications") as RValue)
+            .add(actantFieldIds(a, "identifications") as RValue)
             .add(collectPropEntityIds(a("props")) as RValue);
         }),
         r.expr([] as string[])
