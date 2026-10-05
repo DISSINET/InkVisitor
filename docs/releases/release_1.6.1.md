@@ -19,6 +19,9 @@
 - Numbered rows in query results (#2954)
 - With several "co-occurs with" entities picked, a row that is itself one of them stays in the results when it shares a Statement with another picked entity
 - Saved queries reject duplicate names on save and rename (#3234)
+- Saved queries can carry the table columns, in their order and with their names; an "include columns" checkbox (checked by default) decides it, and loading the query restores them (#3233)
+- Statement classification / identification and property edges skip rows that were added but never filled in, so "has property", "has S prop", "has / is S classification" and "has / is S identification" without a target no longer match them (#3271)
+- Edges reading legacy Statements that lack classifications, identifications, a prop id, a reference resource or a territory id no longer drop those Statements or fail the whole query (#3271)
 - Column name field in the new column panel moved below type and params, and fills itself from the picked type (#3232)
 - Corrected query grid node tooltip and disabled-picker text (#3236)
 
@@ -46,9 +49,12 @@
 - Territory tree keeps unfolded branches open on navigation, with a new "fold all" button (#3252)
 - Territory tree marks the top anchored Territories of each document with a document icon listing the document titles, and gets a "with document" filter; only documents linked to a Resource count (#2494)
 - Templates box hides discouraged templates; they stay reachable through search and the Explorer (#3274)
+- Templates can be starred, with a "starred only" filter and an order dropdown (label, class, newest); a user setting lists templates of a chosen class first (#3294)
+- Import entities from JSON in the Detail box: up to 10 entities, pasted or loaded from a .json file, are validated, previewed and created together, and rolled back if a write fails; Territories only by admins and owners. The Detail JSON section gets "Copy as import JSON" (#3273)
 - Creating a template from a template leaves the origin template unchanged (#3289)
 - Detail rejects duplicate labels when adding an alternative label with Enter or editing a label, and removing an alternative label removes just that entry (#3279)
-- An owner can make other users owners and change another owner's role; the last owner cannot give up the role (#3285)
+- An owner can make other users owners and change another owner's role; the last active owner cannot give up the role, be deactivated or be deleted (#3285)
+- Only an owner deletes an owner, sets or resets an owner's password, or deactivates an owner; the Users list disables those buttons on owner rows for admins (#3285)
 - Alternative label input takes the full width (#3253)
 - Removed the new metaproperty / reference add buttons from the Detail box (#3235)
 - Stacked modals handle Enter and Esc for the topmost modal only; Enter in an open modal no longer runs the Explorer search
@@ -57,6 +63,8 @@
 - Statement anchor texts are filled in when a Statement is fetched as an Entity
 - Emails show a text wordmark when the logo asset is missing (e.g. in Docker images)
 - User deletion toast says "deleted" instead of "removed"
+- Escape in a clearable input clears it first; the next Escape closes the modal (#3294)
+- Success notifications are green
 
 ## Development (Technical)
 
@@ -69,4 +77,5 @@
 
 ## Deployment
 
+- Run `fixEditorEntityAclJob` again. It now also opens `GET entities/:entityId/relations` to editors; without it they get "Endpoint not allowed" in the JSON import's relation checks and in the Explorer relation column.
 - Clear `usedTemplate` on the one template that had a new template created from it before #3289 — it points at its own copy and should be empty.
