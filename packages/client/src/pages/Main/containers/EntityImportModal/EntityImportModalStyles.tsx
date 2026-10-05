@@ -122,6 +122,15 @@ export const StyledDraftDetail = styled.div`
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius.sm};
 `;
 
+// between the footer's left and right buttons
+export const StyledDraftModeHint = styled.p`
+  flex: 1;
+  margin: ${({ theme }) => `0 ${theme.space[4]}`};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["mutedText"]};
+  text-align: center;
+`;
+
 export const StyledHiddenFileInput = styled.input`
   display: none;
 `;

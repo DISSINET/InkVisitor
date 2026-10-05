@@ -35,6 +35,7 @@ import { EntityImportDrafts } from "./EntityImportDrafts";
 import { EntityImportIssueList } from "./EntityImportIssueList";
 import { EntityImportJsonEditor } from "./EntityImportJsonEditor";
 import {
+  StyledDraftModeHint,
   StyledHiddenFileInput,
   StyledHint,
   StyledProgress,
@@ -426,6 +427,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               disabled={isValidating}
               onClick={handleBackToJson}
             />
+            <StyledDraftModeHint>
+              {"Draft mode. Nothing is saved until Create, so suggesters can't create new entities."}
+            </StyledDraftModeHint>
             <ButtonGroup>
               <CancelButton onClick={handleClose} />
               <Button
