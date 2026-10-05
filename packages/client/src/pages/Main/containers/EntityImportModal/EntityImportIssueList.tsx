@@ -13,7 +13,7 @@ interface EntityImportIssueList {
   title: string;
   issues: ImportIssue[];
   isError?: boolean;
-  // starts as a single line with the count; a click shows the list
+  // the title, with the count, opens and closes the list
   collapsible?: boolean;
 }
 
@@ -23,7 +23,7 @@ export const EntityImportIssueList: React.FC<EntityImportIssueList> = ({
   isError = false,
   collapsible = false,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(!collapsible);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   if (!issues.length) {
     return null;

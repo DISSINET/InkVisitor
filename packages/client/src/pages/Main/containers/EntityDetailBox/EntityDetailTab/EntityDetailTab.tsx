@@ -3,6 +3,7 @@ import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import { Tooltip, TypeBar } from "components";
 import { EntityTag } from "components/advanced";
+import { useEntityEditing } from "hooks";
 import React, { MouseEventHandler, useLayoutEffect, useRef, useState } from "react";
 import { DragSourceMonitor, DropTargetMonitor, useDrag, useDrop } from "react-dnd";
 import { FiMove } from "react-icons/fi";
@@ -61,7 +62,11 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     return () => resizeObserver.disconnect();
   }, []);
 
-  const showMoveIcon = isHovered && tabWidth >= MIN_TAB_WIDTH_FOR_MOVE_ICON;
+  // the icon lifts out the entity's tag to drag it elsewhere; an entity not
+  // stored yet (a draft of the JSON import) has nothing to drag
+  const { unstoredEntityIds } = useEntityEditing();
+  const showMoveIcon =
+    isHovered && tabWidth >= MIN_TAB_WIDTH_FOR_MOVE_ICON && !unstoredEntityIds.has(entity.id);
 
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.DETAIL_TAB,
