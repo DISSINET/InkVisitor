@@ -47,3 +47,5 @@
   font sizes, etc. Never hardcode color values — the app supports dark mode
   and hardcoded colors break it.
 - If adding icon, first check Theme/icons.ts if this or similar icon exists in our app
+- Never use the native `title` attribute for hover hints. Use the app's
+  `Tooltip` component (or `IconWithTooltip` for a lone icon) from `components`.

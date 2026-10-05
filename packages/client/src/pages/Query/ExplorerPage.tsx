@@ -175,6 +175,21 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   };
   const isStatsView = exploreState.view.mode === Explore.EViewMode.Stats;
 
+  // table columns as the Table view shows them, also while the Stats view is up
+  const tableColumns =
+    exploreState.view.mode === Explore.EViewMode.Table
+      ? exploreState.view.columns
+      : lastColumnsRef.current;
+
+  const handleLoadTableColumns = (columns: Explore.IExploreColumn[]) => {
+    if (exploreState.view.mode === Explore.EViewMode.Table) {
+      exploreStateDispatch({ type: ExploreActionType.setColumns, payload: { columns } });
+    } else {
+      // the Table view picks these up when the user switches back to it
+      lastColumnsRef.current = columns;
+    }
+  };
+
   const queryClient = useQueryClient();
 
   const handleInvalidateQuery = () => {
@@ -838,6 +853,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                   exploreFilters={exploreState.filters}
                   exploreDispatch={exploreStateDispatch}
+                  tableColumns={tableColumns}
+                  onLoadTableColumns={handleLoadTableColumns}
                 />
               )}
               {!explorerBoxMaximized && (

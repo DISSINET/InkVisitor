@@ -131,9 +131,10 @@ export const StyledSaveFooter = styled.div`
   min-height: 2.6rem;
 `;
 
-// sharing is a property of the query being saved rather than an action on the
-// name field, so it gets a written label under the input
-export const StyledShareRow = styled.div`
+// sharing and including the columns are properties of the query being saved
+// rather than actions on the name field, so each gets a written label under
+// the input
+export const StyledSaveOption = styled.div`
   display: inline-flex;
   align-items: center;
   padding-left: 0.2rem;
