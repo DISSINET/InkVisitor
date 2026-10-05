@@ -5,6 +5,7 @@ import {
   ButtonGroup,
   CancelButton,
   Modal,
+  Submit,
   ModalContent,
   ModalFooter,
   ModalHeader,
@@ -55,6 +56,14 @@ const INPUT_PLACEHOLDER = `[
   }
 ]`;
 
+// the drafts in the import format, in id order: moving a tab is no edit
+const draftSnapshot = (draft: ImportDraft) =>
+  JSON.stringify(
+    [...draftToImportJson(draft)].sort((a, b) =>
+      String((a as { id: string }).id).localeCompare(String((b as { id: string }).id))
+    )
+  );
+
 const entityCount = (count: number) => `${count} ${count === 1 ? "entity" : "entities"}`;
 
 interface EntityImportModal {
@@ -76,6 +85,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   const [inputErrors, setInputErrors] = useState<ImportIssue[]>([]);
 
   const [draft, setDraft] = useState<ImportDraft | null>(null);
+  // the drafts as Validate opened them, to tell whether they were edited
+  const validatedSnapshot = useRef("");
   const [draftErrors, setDraftErrors] = useState<ImportIssue[]>([]);
   const [draftNotes, setDraftNotes] = useState<ImportIssue[]>([]);
 
@@ -177,7 +188,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       const result = await validateImport(text, validationContext());
       setInputErrors(result.errors);
       if (result.plan) {
-        setDraft(draftFromPlan(result.plan));
+        const validatedDraft = draftFromPlan(result.plan);
+        validatedSnapshot.current = draftSnapshot(validatedDraft);
+        setDraft(validatedDraft);
         setDraftNotes(result.notes);
         setDraftErrors([]);
         setStep("drafts");
@@ -191,10 +204,18 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
   // the JSON field gets the drafts as they are now, edits included, to be
   // changed or replaced and validated again
+  // the JSON field still holds the validated text; going back shows it again
+  // and drops the drafts, so edited drafts ask first
+  const [showBackSubmit, setShowBackSubmit] = useState(false);
   const handleBackToJson = () => {
-    if (draft) {
-      setText(JSON.stringify(draftToImportJson(draft), null, 2));
+    if (draft && draftSnapshot(draft) !== validatedSnapshot.current) {
+      setShowBackSubmit(true);
+    } else {
+      goBackToJson();
     }
+  };
+  const goBackToJson = () => {
+    setShowBackSubmit(false);
     setDraft(null);
     setDraftErrors([]);
     setDraftNotes([]);
@@ -455,6 +476,15 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
           </ButtonGroup>
         )}
       </ModalFooter>
+
+      <Submit
+        title="Back to JSON"
+        text="The JSON field shows the input as you pasted it. Your changes in the tabs will be lost."
+        submitLabel="Back to JSON"
+        show={showBackSubmit}
+        onSubmit={goBackToJson}
+        onCancel={() => setShowBackSubmit(false)}
+      />
     </Modal>
   );
 };
