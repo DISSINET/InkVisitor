@@ -1,7 +1,7 @@
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { unlinkEntity } from "./draft";
-import { unique } from "./helpers";
+import { quote, unique } from "./helpers";
 import { normalizeEntities } from "./normalizeEntities";
 import { parseImportInput } from "./parse";
 import { collectEntityRefs, validateBatchIds, validateEntityRefs } from "./references";
@@ -14,6 +14,16 @@ const byEntity = (issues: ImportIssue[]): ImportIssue[] =>
   [...issues].sort(
     (a, b) => (a.entityIndex ?? Infinity) - (b.entityIndex ?? Infinity)
   );
+
+/** Sets the field at a path such as "props[0].value.entityId". */
+const setAtPath = (target: object, path: string, value: string) => {
+  const keys = path.match(/[^.[\]]+/g)!;
+  let node = target as Record<string, unknown>;
+  keys.slice(0, -1).forEach((key) => {
+    node = node[key] as Record<string, unknown>;
+  });
+  node[keys[keys.length - 1]] = value;
+};
 
 export interface ImportValidationContext {
   role: UserEnums.Role;
@@ -117,11 +127,34 @@ export const validateImport = async (
     return { errors: byEntity(errors), notes: byEntity(notes), plan: null };
   }
 
+  // A stored Value is never reused: a metaprop or reference that names one
+  // gets its own copy, with the labels of the original, as a drop into the
+  // slot in Detail makes one. The copies are created with the batch.
+  const valueCopies: IEntity[] = [];
+  for (const ref of refs) {
+    const source = existing.get(ref.id);
+    if (source?.class !== EntityEnums.Class.Value) {
+      continue;
+    }
+    const copy = normalizeEntities([{ class: EntityEnums.Class.Value, labels: source.labels }], {
+      defaultLanguage: context.defaultLanguage,
+    }).entities[0].entity;
+    const owner = entities.find((item) => item.index === ref.entityIndex)!.entity;
+    setAtPath(owner, ref.path, copy.id);
+    valueCopies.push(copy);
+    notes.push({
+      entityIndex: ref.entityIndex,
+      label: ref.label,
+      path: ref.path,
+      message: `Value ${quote(source.labels[0])} gets a new id ${quote(copy.id)}; a stored Value is never reused`,
+    });
+  }
+
   return {
     errors,
     notes: byEntity(notes),
     plan: {
-      entities: territories.ordered.map(({ entity }) => entity),
+      entities: [...valueCopies, ...territories.ordered.map(({ entity }) => entity)],
       relations: relations.relations,
       existingEntities: Object.fromEntries(existing),
     },

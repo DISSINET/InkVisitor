@@ -90,7 +90,8 @@ describe("buildEntityJson", () => {
     );
 
     expect(errors).toEqual([]);
-    expect(notes).toEqual([]);
+    // the copy gets its own Value instead of reusing the original's
+    expect(notes.map((note) => note.path)).toEqual(["references[0].value"]);
     expect(plan!.relations).toMatchObject([
       { type: RelationEnums.Type.Superclass, entityIds: ["dog-copy", "animal"] },
       { type: RelationEnums.Type.Synonym, entityIds: ["hound", "dog-copy"] },

@@ -138,6 +138,43 @@ describe("validateImport", () => {
     ]);
   });
 
+  it("gives each slot naming a stored Value its own copy, and links a batch Value as is", async () => {
+    const context = contextWith([
+      existingEntity("stored-12", EntityEnums.Class.Value),
+      existingEntity("source", EntityEnums.Class.Resource),
+      existingEntity("size", EntityEnums.Class.Concept),
+    ]);
+    const text = JSON.stringify([
+      { id: "new-13", class: "V", labels: ["13"] },
+      {
+        id: "dog",
+        class: "C",
+        labels: ["dog"],
+        props: [
+          { type: "size", value: "stored-12" },
+          { type: "size", value: "new-13" },
+        ],
+        references: [{ resource: "source", value: "stored-12" }],
+      },
+    ]);
+
+    const { errors, notes, plan } = await validateImport(text, context);
+
+    expect(errors).toEqual([]);
+    const [propCopy, referenceCopy, , dog] = plan!.entities;
+    expect([propCopy, referenceCopy]).toMatchObject([
+      { class: EntityEnums.Class.Value, labels: ["stored-12"], status: EntityEnums.Status.Approved },
+      { class: EntityEnums.Class.Value, labels: ["stored-12"] },
+    ]);
+    expect(propCopy.id).not.toBe(referenceCopy.id);
+    expect(dog.props.map((prop) => prop.value.entityId)).toEqual([propCopy.id, "new-13"]);
+    expect(dog.references[0].value).toBe(referenceCopy.id);
+    expect(notes.map((note) => [note.entityIndex, note.path])).toEqual([
+      [2, "props[0].value.entityId"],
+      [2, "references[0].value"],
+    ]);
+  });
+
   it("stops at a parse error without asking the database", async () => {
     const context = contextWith([]);
     const { errors } = await validateImport("[", context);
