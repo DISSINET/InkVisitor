@@ -93,10 +93,12 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
   const queryClient = useQueryClient();
 
   const userKey = ["user", getStoredUserId()];
+  const starMutationKey = ["starredTemplates"];
 
   // one at a time, so a later list can not be overwritten by an earlier one
   // that reaches the server second
   const starMutation = useMutation({
+    mutationKey: starMutationKey,
     scope: { id: "starredTemplates" },
     mutationFn: async (starredTemplates: string[]) => {
       // the server merges options into the stored ones, so only the starred
@@ -105,8 +107,14 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
         options: { starredTemplates } as IUserOptions,
       });
     },
-    onError: () => {
-      queryClient.invalidateQueries({ queryKey: userKey });
+    onSettled: () => {
+      // the user query refetches on window focus, and a refetch answered
+      // while a save is in flight brings back the stars from before it. The
+      // last pending save (this one still counts) reloads the user once the
+      // server holds every star.
+      if (queryClient.isMutating({ mutationKey: starMutationKey }) === 1) {
+        queryClient.invalidateQueries({ queryKey: userKey });
+      }
     },
   });
 
@@ -123,6 +131,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     const starredTemplates = starred.includes(templateId)
       ? starred.filter((id) => id !== templateId)
       : [...starred, templateId];
+    // a user fetch already running would land after this and undo the star
+    queryClient.cancelQueries({ queryKey: userKey });
     queryClient.setQueryData<IResponseUser>(userKey, {
       ...current,
       options: { ...current.options, starredTemplates },
