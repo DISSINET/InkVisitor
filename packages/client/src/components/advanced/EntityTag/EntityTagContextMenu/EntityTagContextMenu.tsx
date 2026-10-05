@@ -144,9 +144,17 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
 
   const { data: bookmarkFolders } = useBookmarksQuery();
 
+  // the toast lives in these callbacks rather than in mutate()'s: closing the
+  // menu unmounts this component, and react-query drops mutate()'s callbacks
+  // with it, while these still run. A failed write is reported by the api
+  // error toast.
   const changeBookmarksMutation = useMutation({
-    mutationFn: async (bookmarks: IBookmarkFolder[]) => await api.usersUpdate("me", { bookmarks }),
-    onSuccess: () => {
+    mutationFn: async ({ bookmarks }: { bookmarks: IBookmarkFolder[]; doneMessage: string }) =>
+      await api.usersUpdate("me", { bookmarks }),
+    onSuccess: (_data, { doneMessage }) => {
+      toast.info(doneMessage);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     },
   });
@@ -179,10 +187,12 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       ? target.entityIds.filter((id) => id !== entity.id)
       : [...target.entityIds, entity.id];
 
-    changeBookmarksMutation.mutate(folders);
-    // react-query drops mutate-scoped callbacks once the observer unmounts, and
-    // closing the menu unmounts this one, so the feedback cannot wait for the write
-    toast.info(wasBookmarked ? `removed from [${target.name}]` : `bookmarked in [${target.name}]`);
+    changeBookmarksMutation.mutate({
+      bookmarks: folders,
+      doneMessage: wasBookmarked
+        ? `removed from [${target.name}]`
+        : `bookmarked in [${target.name}]`,
+    });
     onClose();
   };
 
