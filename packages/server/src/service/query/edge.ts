@@ -1136,10 +1136,17 @@ function runStatementActantFieldEdge(
       return e("class").eq(EntityEnums.Class.Statement);
     })
     .filter(function (e: RDatum<IEntity>) {
+      // a row added in the editor but never filled keeps entityId "", and old
+      // rows may lack the field entirely; neither counts as having one
       const ids = e("data")("actants").concatMap(function (a: RDatum) {
-        return a(field).map(function (c: RDatum) {
-          return c("entityId");
-        });
+        return a(field)
+          .default([])
+          .map(function (c: RDatum) {
+            return c("entityId");
+          })
+          .filter(function (id: RDatum) {
+            return id.ne("");
+          });
       });
       if (targetIds) {
         return (ids as RDatum<string[]>).setIntersection(r.expr(targetIds)).isEmpty().not();
