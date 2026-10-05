@@ -61,8 +61,8 @@ const INPUT_PLACEHOLDER = `[
 const draftSnapshot = (draft: ImportDraft) =>
   JSON.stringify(
     [...draftToImportJson(draft)].sort((a, b) =>
-      String((a as { id: string }).id).localeCompare(String((b as { id: string }).id))
-    )
+      String((a as { id: string }).id).localeCompare(String((b as { id: string }).id)),
+    ),
   );
 
 const entityCount = (count: number) => `${count} ${count === 1 ? "entity" : "entities"}`;
@@ -126,15 +126,16 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     importDataSource
       .getEntities(ids)
       .then((found) =>
-        setDraft((current) =>
-          current && {
-            ...current,
-            existing: {
-              ...current.existing,
-              ...Object.fromEntries(found.map((entity) => [entity.id, entity])),
+        setDraft(
+          (current) =>
+            current && {
+              ...current,
+              existing: {
+                ...current.existing,
+                ...Object.fromEntries(found.map((entity) => [entity.id, entity])),
+              },
             },
-          }
-        )
+        ),
       )
       .catch(() => ids.forEach((id) => requestedIds.current.delete(id)));
   }, [draft]);
@@ -145,9 +146,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     if (!draft) {
       return;
     }
-    const ids = missingSynonymGroupIds(draft).filter(
-      (id) => !requestedSynonymIds.current.has(id)
-    );
+    const ids = missingSynonymGroupIds(draft).filter((id) => !requestedSynonymIds.current.has(id));
     if (!ids.length) {
       return;
     }
@@ -156,7 +155,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
       ids.map(async (id) => {
         const groups = await importDataSource.getForwardRelations(id, RelationEnums.Type.Synonym);
         return [id, groups[0]?.entityIds ?? []] as const;
-      })
+      }),
     )
       .then((found) =>
         setDraft(
@@ -164,8 +163,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
             current && {
               ...current,
               storedSynonyms: { ...current.storedSynonyms, ...Object.fromEntries(found) },
-            }
-        )
+            },
+        ),
       )
       .catch(() => ids.forEach((id) => requestedSynonymIds.current.delete(id)));
   }, [draft]);
@@ -229,7 +228,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
   const handleDraftChange = useCallback(
     (change: (current: ImportDraft) => ImportDraft) =>
       setDraft((current) => current && change(current)),
-    []
+    [],
   );
 
   const handleCloseTab = (entityId: string) => {
@@ -239,7 +238,8 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     const entity = draft.entities.find((candidate) => candidate.id === entityId);
     const { draft: rest, removedRelations, cleanups } = removeDraftEntity(draft, entityId);
     setDraft(rest);
-    const labelOf = (id: string) => draft.entities.find((candidate) => candidate.id === id)?.labels[0];
+    const labelOf = (id: string) =>
+      draft.entities.find((candidate) => candidate.id === id)?.labels[0];
     setDraftNotes((notes) => [
       ...notes,
       {
@@ -282,7 +282,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
           ],
         };
       }),
-    []
+    [],
   );
 
   const handleCreate = async () => {
@@ -297,7 +297,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     try {
       const result = await validateImport(
         JSON.stringify(draftToImportJson(draft)),
-        validationContext()
+        validationContext(),
       );
       setDraftErrors(result.errors);
       plan = result.plan;
@@ -316,7 +316,7 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
     let result: ImportWriteOutcome;
     try {
       result = await writeImport(plan, importWriteApi, (done, total) =>
-        setProgress({ done, total })
+        setProgress({ done, total }),
       );
     } catch (error) {
       // only the check before the first write can throw; nothing was written
@@ -328,10 +328,18 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
 
     if (result.status === "created") {
       onImported(plan.entities);
+      // the Value copies were made by the import, not given in the input
+      const copyCount = plan.entities.filter((entity) =>
+        draft.valueCopyIds?.includes(entity.id),
+      ).length;
+      const relations = `${result.relationCount} ${
+        result.relationCount === 1 ? "relation" : "relations"
+      }`;
+      const copies = copyCount
+        ? `; ${copyCount} ${copyCount === 1 ? "Value" : "Values"} created`
+        : "";
       toast.info(
-        `Imported ${entityCount(plan.entities.length)}, ${result.relationCount} ${
-          result.relationCount === 1 ? "relation" : "relations"
-        }`
+        `Imported ${entityCount(plan.entities.length - copyCount)}, ${relations}${copies}`,
       );
       closeModal();
     } else if (result.status === "conflict") {
@@ -458,7 +466,9 @@ export const EntityImportModal: React.FC<EntityImportModal> = ({ closeModal, onI
               onClick={handleBackToJson}
             />
             <StyledDraftModeHint>
-              {"Draft mode. Nothing is saved until Create, so suggesters can't create new entities."}
+              {
+                "Draft mode. Nothing is saved until Create, so suggesters can't create new entities."
+              }
             </StyledDraftModeHint>
             <ButtonGroup>
               <CancelButton onClick={handleClose} />
