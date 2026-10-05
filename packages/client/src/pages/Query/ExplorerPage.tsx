@@ -36,6 +36,8 @@ import {
 import { floorNumberToOneDecimal } from "utils/utils";
 import {
   QUERY_BUILDER_MIN_HEIGHT,
+  QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT,
+  QUERY_DETAIL_SEPARATOR_Y_PERCENT_POSITION,
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
   QUERY_RIGHT_PANEL_MIN_WIDTH,
@@ -523,11 +525,31 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   const expansionCounts = queryData?.expansion;
 
   // the detail panel holds the Detail box and, while a statement is open, the
-  // Editor box above it
+  // Editor box under it
   const hasDetailTabs = !!(selectedDetailId || detailIdArray.length > 0);
   const isDetailOpen = hasDetailTabs || !!statementId;
-  // with both boxes open each takes half the height
-  const detailPanelBoxHeight = statementId && hasDetailTabs ? contentHeight / 2 : contentHeight;
+  const isDetailPanelSplit = hasDetailTabs && !!statementId;
+
+  // Held as a percentage of the content height, so a window resize keeps the
+  // proportion between the Detail and Editor boxes.
+  const detailSeparatorYPercentStorageKey = "queryDetailSeparatorYPosition";
+  const [detailSeparatorYPercent, setDetailSeparatorYPercent] = useState<number>(() => {
+    const stored = Number(localStorage.getItem(detailSeparatorYPercentStorageKey));
+    return stored > 0 ? stored : QUERY_DETAIL_SEPARATOR_Y_PERCENT_POSITION;
+  });
+  const detailSeparatorYPosition = Math.min(
+    Math.max(
+      detailSeparatorYPercent * onePercentOfContentHeight,
+      QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT,
+    ),
+    contentHeight - QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT,
+  );
+
+  const handleDetailSeparatorYPositionChange = (yPosition: number) => {
+    const percent = floorNumberToOneDecimal(yPosition / onePercentOfContentHeight);
+    setDetailSeparatorYPercent(percent);
+    localStorage.setItem(detailSeparatorYPercentStorageKey, percent.toString());
+  };
 
   const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
   const [queryLeftPanelExpanded, setQueryLeftPanelExpanded] = useState(
@@ -697,16 +719,25 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     animatePanelWidthVars([leftPanelWidth, detailPanelWidth], "explorerPage");
   }, [leftPanelWidth, detailPanelWidth]);
 
-  // Same for the two boxes the horizontal separator splits.
+  // A drag preview of either horizontal separator writes every box height, so
+  // the boxes of the other panel keep theirs through the drag.
+  const getBoxHeights = (queryBuilderHeight: number, detailSeparatorY: number) => ({
+    queryBuilder: queryBuilderHeight,
+    explorer: contentHeight - queryBuilderHeight,
+    queryDetail: isDetailPanelSplit ? detailSeparatorY : contentHeight,
+    queryEditor: isDetailPanelSplit ? contentHeight - detailSeparatorY : contentHeight,
+  });
+  const boxHeights = getBoxHeights(querySeparatorYPosition, detailSeparatorYPosition);
+
+  // Same for the boxes the horizontal separators split.
   useLayoutEffect(() => {
-    animateBoxHeightVars(
-      {
-        queryBuilder: querySeparatorYPosition,
-        explorer: contentHeight - querySeparatorYPosition,
-      },
-      "explorerPage",
-    );
-  }, [querySeparatorYPosition, contentHeight]);
+    animateBoxHeightVars(boxHeights, "explorerPage");
+  }, [
+    boxHeights.queryBuilder,
+    boxHeights.explorer,
+    boxHeights.queryDetail,
+    boxHeights.queryEditor,
+  ]);
 
   const detailPanelToggleButton = (
     <IconButton
@@ -724,18 +755,26 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
           panelIndex={0}
           boxHeightVarKey="queryBuilder"
           applyPreview={(yPosition) =>
-            setBoxHeightVars(
-              {
-                queryBuilder: yPosition,
-                explorer: contentHeight - yPosition,
-              },
-              "explorerPage",
-            )
+            setBoxHeightVars(getBoxHeights(yPosition, detailSeparatorYPosition), "explorerPage")
           }
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
           separatorYPosition={querySeparatorYPosition}
           setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
+        />
+      )}
+
+      {isDetailPanelSplit && queryDetailPanelExpanded && (
+        <LayoutSeparatorHorizontal
+          panelIndex={1}
+          boxHeightVarKey="queryDetail"
+          applyPreview={(yPosition) =>
+            setBoxHeightVars(getBoxHeights(querySeparatorYPosition, yPosition), "explorerPage")
+          }
+          topPositionMin={QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
+          topPositionMax={contentHeight - QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
+          separatorYPosition={detailSeparatorYPosition}
+          setSeparatorYPosition={handleDetailSeparatorYPositionChange}
         />
       )}
 
@@ -1020,34 +1059,12 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       </Panel>
       {isDetailOpen && (
         <Panel width={detailPanelWidth} widthVarIndex={1}>
-          {statementId && (
-            <Box
-              label="Editor"
-              borderColor="white"
-              height={detailPanelBoxHeight}
-              isExpanded={queryDetailPanelExpanded}
-              onHeaderClick={toggleQueryDetailPanel}
-              buttons={[
-                <>
-                  {queryDetailPanelExpanded && (
-                    <IconButton
-                      tooltipLabel="close editor box"
-                      icon={<StyledCloseEditorIcon />}
-                      onClick={() => setStatementId("")}
-                    />
-                  )}
-                </>,
-                detailPanelToggleButton,
-              ]}
-            >
-              <MemoizedStatementEditorBox isExpanded={queryDetailPanelExpanded} isVisible />
-            </Box>
-          )}
           {hasDetailTabs && (
             <Box
               label="Detail"
               borderColor="white"
-              height={detailPanelBoxHeight}
+              height={boxHeights.queryDetail}
+              heightVarKey="queryDetail"
               disableScroll
               isExpanded={queryDetailPanelExpanded}
               onHeaderClick={toggleQueryDetailPanel}
@@ -1072,6 +1089,30 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   }
                 }}
               />
+            </Box>
+          )}
+          {statementId && (
+            <Box
+              label="Editor"
+              borderColor="white"
+              height={boxHeights.queryEditor}
+              heightVarKey="queryEditor"
+              isExpanded={queryDetailPanelExpanded}
+              onHeaderClick={toggleQueryDetailPanel}
+              buttons={[
+                <>
+                  {queryDetailPanelExpanded && (
+                    <IconButton
+                      tooltipLabel="close editor box"
+                      icon={<StyledCloseEditorIcon />}
+                      onClick={() => setStatementId("")}
+                    />
+                  )}
+                </>,
+                detailPanelToggleButton,
+              ]}
+            >
+              <MemoizedStatementEditorBox isExpanded={queryDetailPanelExpanded} isVisible />
             </Box>
           )}
         </Panel>
