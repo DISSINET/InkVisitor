@@ -248,6 +248,18 @@ export default class User implements IUser, IDbModel {
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
+  /**
+   * Owners and admins set other users' passwords and (de)activate them, but
+   * only an owner does so for an owner: whoever sets a password can sign in
+   * with it.
+   */
+  canAccessBeChangedByUser(user: User): boolean {
+    if (this.hasRole([UserEnums.Role.Owner])) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
+  }
+
   generatePassword(): string {
     const raw = generatePassword(12);
     return this.setPassword(raw);

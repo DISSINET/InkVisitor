@@ -401,15 +401,24 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             activateTooltip = "deactivate user";
           }
 
-          // only an owner deletes an owner; the viewing owner is active, so
-          // another owner row is never the last active owner
-          const ownerDeleteDenied =
+          // only an owner deletes an owner or resets an owner's password; the
+          // viewing owner is active, so another owner row is never the last
+          // active owner
+          const ownerActionDenied =
             role === UserEnums.Role.Owner && currentUserRole !== UserEnums.Role.Owner;
           let deleteTooltip = "delete user";
           if (userId === getStoredUserId()) {
             deleteTooltip = "cannot delete yourself";
-          } else if (ownerDeleteDenied) {
+          } else if (ownerActionDenied) {
             deleteTooltip = "only an owner can delete an owner";
+          }
+
+          let passwordTooltip =
+            "set a new random password (copy by clicking on the notification)";
+          if (ownerActionDenied) {
+            passwordTooltip = "only an owner can reset an owner's password";
+          } else if (!active) {
+            passwordTooltip = "cannot reset the password of an inactive user";
           }
 
           return (
@@ -419,7 +428,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<IcoTrash size={14} />}
                 color="danger"
                 tooltipLabel={deleteTooltip}
-                disabled={userId === getStoredUserId() || ownerDeleteDenied}
+                disabled={userId === getStoredUserId() || ownerActionDenied}
                 onClick={() => {
                   setRemovingUserId(userId);
                 }}
@@ -428,9 +437,9 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               />
               <Button
                 icon={<FaKey size={14} />}
-                tooltipLabel="set a new random password (copy by clicking on the notification)"
+                tooltipLabel={passwordTooltip}
                 color="warning"
-                disabled={!active}
+                disabled={!active || ownerActionDenied}
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
                 }}

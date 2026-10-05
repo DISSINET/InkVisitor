@@ -143,6 +143,57 @@ describe("Users role change", function () {
     expect(await storedRole(target.id)).toEqual(UserEnums.Role.Owner);
   });
 
+  it("does not let an admin set an owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ password: "taken-over" })
+      .expect(403);
+
+    const row = await r.table(User.table).get(target.id).run(db.connection);
+    expect(row.password).toBeUndefined();
+  });
+
+  it("does not let an admin deactivate an owner", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent
+      .put(`${apiPath}/users/${target.id}`)
+      .send({ active: false })
+      .expect(403);
+
+    const row = await r.table(User.table).get(target.id).run(db.connection);
+    expect(row.active).toBe(true);
+  });
+
+  it("does not let an admin reset an owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await adminAgent
+      .patch(`${apiPath}/users/${target.id}/password`)
+      .expect(403);
+
+    const row = await r.table(User.table).get(target.id).run(db.connection);
+    expect(row.password).toBeUndefined();
+  });
+
+  it("lets an owner reset another owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Owner);
+
+    await ownerAgent
+      .patch(`${apiPath}/users/${target.id}/password`)
+      .expect(200);
+  });
+
+  it("lets an admin reset a non-owner's password", async () => {
+    const target = await createTarget(UserEnums.Role.Editor);
+
+    await adminAgent
+      .patch(`${apiPath}/users/${target.id}/password`)
+      .expect(200);
+  });
+
   it("lets an owner give up the owner role while another owner remains", async () => {
     const target = await createTarget(UserEnums.Role.Owner);
     const targetAgent = await createAgentWithUserId(target.id);

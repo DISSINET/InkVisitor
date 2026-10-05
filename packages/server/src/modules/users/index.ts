@@ -720,6 +720,19 @@ export default Router()
           throw new PermissionDeniedError("user role cannot be changed");
         }
 
+        const changesAccess =
+          !!data.password ||
+          (data.active !== undefined && data.active !== existingUser.active);
+        if (
+          changesAccess &&
+          editor.id !== existingUser.id &&
+          !existingUser.canAccessBeChangedByUser(editor)
+        ) {
+          throw new PermissionDeniedError(
+            "only an owner can change an owner's password or active state"
+          );
+        }
+
         if (data.password) {
           data.password = hashPassword(data.password);
           await invalidateUserSessions(req.db.connection, existingUser.id);
@@ -993,6 +1006,17 @@ export default Router()
 
         if (!user) {
           throw new UserDoesNotExits(`user ${userId} not found`, userId);
+        }
+
+        // the response carries the new password, so this is the same as setting it
+        const requester = request.getUserOrFail();
+        if (
+          user.id !== requester.id &&
+          !user.canAccessBeChangedByUser(requester)
+        ) {
+          throw new PermissionDeniedError(
+            "only an owner can reset an owner's password"
+          );
         }
 
         const rawPassword = user.generatePassword();
