@@ -529,7 +529,11 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                 onEntityDoubleClick={handleOpenEntityInDetail}
                 subPropsTree={
                   subPropsByValue && hasSubProps(subPropsByValue)
-                    ? { values: cellData as IEntity[], subPropsByValue }
+                    ? {
+                        values: cellData as IEntity[],
+                        subPropsByValue,
+                        valueOnly: column.type === Explore.EExploreColumnType.EPT,
+                      }
                     : undefined
                 }
               />
