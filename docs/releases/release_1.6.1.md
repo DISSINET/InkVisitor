@@ -63,7 +63,7 @@
 - Alternative label input takes the full width (#3253)
 - Removed the new metaproperty / reference add buttons from the Detail box (#3235)
 - Stacked modals handle Enter and Esc for the topmost modal only; Enter in an open modal no longer runs the Explorer search
-- Emails show a text wordmark when the logo asset is missing (e.g. in Docker images)
+- Emails show the InkVisitor logo as a PNG, so Gmail and Outlook display it, and fall back to a text wordmark when the logo file cannot be found
 
 Owner only: Import entities from JSON in the Detail box: up to 10 entities, pasted or loaded from a .json file, are validated, previewed and created together, and rolled back if a write fails (#3273)
 
