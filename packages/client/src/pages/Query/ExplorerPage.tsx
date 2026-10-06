@@ -16,14 +16,14 @@ import { Box, Button, Checkbox, IconButton, Panel, SwitchGroup } from "component
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
 import { isAnyModalOpen } from "components/basic/Modal/modalStack";
 import { useUserQuery } from "hooks/react-query";
+import { DetailPanelRevealProvider } from "hooks/useDetailPanelReveal";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedStatementEditorBox } from "pages/Main/containers/StatementEditorBox/StatementEditorBox";
 import { BiBarChartAlt2, BiHide, BiRefresh, BiTable } from "react-icons/bi";
-import { IcoSearch } from "Theme/icons";
+import { IcoHide, IcoSearch, IcoSquareFill } from "Theme/icons";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { COLLAPSED_PANEL_WIDTH, hiddenBoxHeight, maxTabCount } from "Theme/constants";
@@ -53,6 +53,7 @@ import {
   exploreStateInitial,
 } from "./Explorer/state";
 import {
+  StyledCloseAllIcon,
   StyledCloseEditorIcon,
   StyledExpansionCount,
   StyledExpansionToggle,
@@ -90,8 +91,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     replaceDetailIds,
     statementId,
     setStatementId,
-    statementSetCount,
-    detailOpenCount,
   } = useSearchParams();
 
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
@@ -628,20 +627,15 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     });
   }, []);
 
-  // A statement can be opened from a tag anywhere on the page, also while the
-  // panel holding the editor is collapsed, and opening the statement that is
-  // already open has to bring the editor back as well.
-  useEffect(() => {
-    if (statementId) {
-      expandQueryDetailPanel();
-      setEditorBoxState((state) =>
-        state === EditorBoxState.Minimized ? EditorBoxState.Normal : state,
-      );
-    }
-  }, [statementId, statementSetCount, expandQueryDetailPanel]);
+  // Called by the handlers that open a statement or an entity, through
+  // DetailPanelRevealProvider for the ones outside this page.
+  const revealEditorBox = useCallback(() => {
+    expandQueryDetailPanel();
+    setEditorBoxState((state) =>
+      state === EditorBoxState.Minimized ? EditorBoxState.Normal : state,
+    );
+  }, [expandQueryDetailPanel]);
 
-  // an entity opened in detail also brings back a Detail box squeezed under a
-  // maximized editor
   const revealDetailBox = useCallback(() => {
     expandQueryDetailPanel();
     setEditorBoxState((state) =>
@@ -649,15 +643,28 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     );
   }, [expandQueryDetailPanel]);
 
-  // Entities opened from tags anywhere on the page. The count lives in the
-  // provider for the whole session, so only a change after mount counts.
-  const seenDetailOpenCountRef = useRef(detailOpenCount);
-  useEffect(() => {
-    if (detailOpenCount !== seenDetailOpenCountRef.current) {
-      seenDetailOpenCountRef.current = detailOpenCount;
-      revealDetailBox();
+  // A box squeezed to its header opens back up from its header, and a collapsed
+  // panel expands from either box's strip. Any other header click does nothing.
+  const handleDetailPanelBoxHeaderClick = () => {
+    if (queryDetailPanelExpanded) {
+      setEditorBoxState(EditorBoxState.Normal);
+    } else {
+      toggleQueryDetailPanel();
     }
-  }, [detailOpenCount, revealDetailBox]);
+  };
+
+  const detailPanelReveal = useMemo(
+    () => ({ revealEditor: revealEditorBox, revealDetail: revealDetailBox }),
+    [revealEditorBox, revealDetailBox],
+  );
+
+  // a minimized or maximized editor left behind would come back the next time
+  // the Detail box opens
+  useEffect(() => {
+    if (!hasDetailTabs) {
+      setEditorBoxState(EditorBoxState.Normal);
+    }
+  }, [hasDetailTabs]);
 
   const openEntityInDetail = useCallback(
     (entityId: string) => {
@@ -822,7 +829,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   );
 
   return (
-    <>
+    <DetailPanelRevealProvider value={detailPanelReveal}>
       {queryLeftPanelExpanded && isExplorerNormal && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           panelIndex={0}
@@ -1142,13 +1149,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               heightVarKey="queryDetail"
               disableScroll
               isExpanded={queryDetailPanelExpanded}
-              onHeaderClick={toggleQueryDetailPanel}
+              onHeaderClick={handleDetailPanelBoxHeaderClick}
+              disableHeaderClick={
+                !queryDetailPanelExpanded || editorBoxLayout !== EditorBoxState.FullHeight
+              }
               buttons={[
                 <>
                   {queryDetailPanelExpanded && (
                     <IconButton
                       tooltipLabel="close all tabs"
-                      icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                      icon={<StyledCloseAllIcon />}
                       onClick={clearAllDetailIds}
                     />
                   )}
@@ -1173,8 +1183,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               height={boxHeights.queryEditor}
               heightVarKey="queryEditor"
               isExpanded={queryDetailPanelExpanded}
-              onHeaderClick={toggleQueryDetailPanel}
-              disableHeaderClick
+              onHeaderClick={handleDetailPanelBoxHeaderClick}
+              disableHeaderClick={
+                !queryDetailPanelExpanded || editorBoxLayout !== EditorBoxState.Minimized
+              }
               buttons={[
                 <>
                   {queryDetailPanelExpanded && isDetailPanelSplit && (
@@ -1182,7 +1194,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       tooltipLabel={getEditorMaximizeBtnTooltip()}
                       icon={
                         editorBoxLayout === EditorBoxState.Normal ? (
-                          <BsSquareFill />
+                          <IcoSquareFill />
                         ) : (
                           <StyledRestoreBoxIcon />
                         )
@@ -1197,7 +1209,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     editorBoxLayout !== EditorBoxState.Minimized && (
                       <IconButton
                         tooltipLabel="minimize editor box"
-                        icon={<BiHide />}
+                        icon={<IcoHide />}
                         onClick={() => setEditorBoxState(EditorBoxState.Minimized)}
                       />
                     )}
@@ -1225,6 +1237,6 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
           )}
         </Panel>
       )}
-    </>
+    </DetailPanelRevealProvider>
   );
 };

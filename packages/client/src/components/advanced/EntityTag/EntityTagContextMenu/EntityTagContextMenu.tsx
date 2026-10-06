@@ -15,7 +15,7 @@ import {
   IcoUnlink,
 } from "Theme/icons";
 import { useBookmarksQuery } from "hooks/react-query";
-import { useSearchParams } from "hooks";
+import { useDetailPanelReveal, useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -68,6 +68,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   );
   const { setTerritoryId, setStatementId, detailIdArray, selectedDetailId, promoteDetailId } =
     useSearchParams();
+  const { revealEditor, revealDetail } = useDetailPanelReveal();
 
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
 
@@ -203,6 +204,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   const openInDetail = () => {
     promoteDetailId(entity.id);
     expandDetailPanel();
+    revealDetail();
     onClose();
   };
 
@@ -259,6 +261,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
 
   const openStatementInEditor = () => {
     setStatementId(entity.id);
+    revealEditor();
     onClose();
   };
 

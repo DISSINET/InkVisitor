@@ -5,7 +5,7 @@ import api from "api";
 import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
 import { InstTemplate } from "constructors";
-import { useEntityEditing, useSearchParams } from "hooks";
+import { useDetailPanelReveal, useEntityEditing, useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AiOutlineLink } from "react-icons/ai";
@@ -47,6 +47,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   const { offersStoredEntityFeatures } = useEntityEditing();
 
   const { setStatementId, setTerritoryId, appendDetailId, setSelectedDetailId } = useSearchParams();
+  const { revealEditor } = useDetailPanelReveal();
   const location = useLocation();
 
   const cloneEntityMutation = useMutation({
@@ -210,6 +211,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 color="primary"
                 onClick={() => {
                   setStatementId(entity.id);
+                  revealEditor();
                   if (!entity.isTemplate && (entity as IStatement).data.territory?.territoryId) {
                     setTerritoryId(entity.data.territory.territoryId);
                   }

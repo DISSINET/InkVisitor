@@ -1,6 +1,7 @@
 import { useContainerDimensions } from "./useContainerDimensions";
 import useDebounce from "./useDebounce";
 import useDebouncedCallback from "./useDebouncedCallback";
+import { DetailPanelRevealProvider, useDetailPanelReveal } from "./useDetailPanelReveal";
 import { useElementSize } from "./useElementSize";
 import {
   EntityEditingContext,
@@ -25,6 +26,8 @@ export {
   useKeyPress,
   useKeyLift,
   useContainerDimensions,
+  DetailPanelRevealProvider,
+  useDetailPanelReveal,
   useElementSize,
   EntityEditingContext,
   EntityWritesContext,
