@@ -46,6 +46,7 @@ interface ExplorerCellOverflowProps {
   propsTree?: {
     values: IEntity[];
     propsByValue: Record<string, IResponseQuerySubProp[]>;
+    typesOnly?: boolean;
   };
 }
 
@@ -70,6 +71,7 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
     <ExplorerCellPropsTree
       values={propsTree.values}
       propsByValue={propsTree.propsByValue}
+      typesOnly={propsTree.typesOnly}
       onEntityDoubleClick={onEntityDoubleClick}
     />
   ) : allEntities ? (

@@ -30,6 +30,7 @@ import {
   collectSubPropEntityIds,
   groupPropsByType,
   groupPropsByValue,
+  resolveSubPropTypes,
   resolveSubProps,
 } from "./explore-subprops";
 
@@ -449,8 +450,9 @@ export default class Results<T extends { id: string }> {
   }
 
   /**
-   * Prop trees for the entity's "Entity Property value" and "Entity Property
-   * types" columns, see IResponseQueryEntity.columnSubProps. Undefined when
+   * Prop trees for the entity's "Entity Property value" columns and
+   * subproperty type trees for its "Entity Property types" columns, see
+   * IResponseQueryEntity.columnSubProps. Undefined when
    * none of those columns shows a prop with subproperties, which costs no
    * query.
    */
@@ -460,18 +462,22 @@ export default class Results<T extends { id: string }> {
     columnsData: Explore.IExploreColumn[]
   ): Promise<Record<string, Record<string, IResponseQuerySubProp[]>> | undefined> {
     // per column: the first-level props to resolve, by the cell entity they
-    // sit under
-    const grouped: Record<string, Record<string, IProp[]>> = {};
+    // sit under, and how to resolve them
+    type Resolve = (props: IProp[], entityById: Record<string, IEntity>) => IResponseQuerySubProp[];
+    const grouped: Record<string, { byKey: Record<string, IProp[]>; resolve: Resolve }> = {};
     const entityIds: string[] = [];
 
     for (const column of columnsData) {
       let byKey: Record<string, IProp[]>;
+      let resolve: Resolve;
       if (column.type === Explore.EExploreColumnType.EPV) {
         const params =
           column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
         byKey = groupPropsByValue(entity.props, params.propertyType);
+        resolve = resolveSubProps;
       } else if (column.type === Explore.EExploreColumnType.EPT) {
         byKey = groupPropsByType(entity.props);
+        resolve = resolveSubPropTypes;
       } else {
         continue;
       }
@@ -479,7 +485,7 @@ export default class Results<T extends { id: string }> {
       if (!props.length) {
         continue;
       }
-      grouped[column.id] = byKey;
+      grouped[column.id] = { byKey, resolve };
       entityIds.push(...collectSubPropEntityIds(props));
     }
 
@@ -493,10 +499,10 @@ export default class Results<T extends { id: string }> {
     }
 
     const out: Record<string, Record<string, IResponseQuerySubProp[]>> = {};
-    for (const [columnId, byKey] of Object.entries(grouped)) {
+    for (const [columnId, { byKey, resolve }] of Object.entries(grouped)) {
       out[columnId] = {};
       for (const [key, props] of Object.entries(byKey)) {
-        out[columnId][key] = resolveSubProps(props, entityById);
+        out[columnId][key] = resolve(props, entityById);
       }
     }
     return out;

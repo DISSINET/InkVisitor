@@ -4,6 +4,7 @@ import {
   collectSubPropEntityIds,
   groupPropsByType,
   groupPropsByValue,
+  resolveSubPropTypes,
   resolveSubProps,
 } from "./explore-subprops";
 
@@ -83,6 +84,23 @@ describe("explore-subprops", () => {
         value: byId["10m"],
         children: [{ type: undefined, value: byId.metre, children: [] }],
       },
+    ]);
+  });
+
+  it("resolveSubPropTypes merges subproperty types across props, level by level", () => {
+    const byId = {
+      distance: entity("distance"),
+      unit: entity("unit"),
+      note: entity("note"),
+    };
+    const props = [
+      prop("related", "praha", [prop("distance", "206", [prop("unit", "km")])]),
+      prop("related", "vienna", [prop("distance", "110"), prop("note", "x")]),
+      prop("related", "linz"),
+    ];
+    expect(resolveSubPropTypes(props, byId)).toEqual([
+      { type: byId.distance, children: [{ type: byId.unit, children: [] }] },
+      { type: byId.note, children: [] },
     ]);
   });
 });

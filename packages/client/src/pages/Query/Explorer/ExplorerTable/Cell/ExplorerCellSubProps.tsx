@@ -73,25 +73,73 @@ export const ExplorerCellSubPropsTree: React.FC<ExplorerCellSubPropsTree> = ({
   </StyledSubPropTree>
 );
 
+interface ExplorerCellSubPropTypesTree {
+  /** Subproperty type nodes; only their `type` is set. */
+  subPropTypes: IResponseQuerySubProp[];
+  onEntityDoubleClick?: OnEntityDoubleClick;
+}
+
+/** Subproperty types one per line, each level indented behind a bar. */
+const ExplorerCellSubPropTypesTree: React.FC<ExplorerCellSubPropTypesTree> = ({
+  subPropTypes,
+  onEntityDoubleClick,
+}) => (
+  <StyledSubPropTree>
+    {subPropTypes.map((node, key) => (
+      <React.Fragment key={key}>
+        <TreeTag entity={node.type} emptyLabel="type" onEntityDoubleClick={onEntityDoubleClick} />
+        {node.children.length > 0 && (
+          <ExplorerCellSubPropTypesTree
+            subPropTypes={node.children}
+            onEntityDoubleClick={onEntityDoubleClick}
+          />
+        )}
+      </React.Fragment>
+    ))}
+  </StyledSubPropTree>
+);
+
 interface ExplorerCellPropsTree {
   /** The cell's entities, in cell order: values, or types in a types column. */
   values: IEntity[];
-  /** The first-level props under each cell entity, by its id. */
+  /**
+   * The nodes under each cell entity, by its id: its first-level props, or with
+   * `typesOnly` its subproperty types.
+   */
   propsByValue: Record<string, IResponseQuerySubProp[]>;
+  /** The cell entities are property types, each with its subproperty types. */
+  typesOnly?: boolean;
   onEntityDoubleClick?: OnEntityDoubleClick;
 }
 
 /**
  * The cell's first-level props in cell order, each as its type and value with
  * its subproperties under it. A cell entity without props shows as a lone tag.
+ * With `typesOnly`, each cell type instead shows the subproperty types used
+ * under it, without values.
  */
 export const ExplorerCellPropsTree: React.FC<ExplorerCellPropsTree> = ({
   values,
   propsByValue,
+  typesOnly = false,
   onEntityDoubleClick,
 }) => (
   <StyledPropsTree data-no-row-click="true">
     {values.map((value) => {
+      if (typesOnly) {
+        const subPropTypes = propsByValue[value.id] ?? [];
+        return (
+          <StyledPropBlock key={value.id}>
+            <TreeTag entity={value} emptyLabel="type" onEntityDoubleClick={onEntityDoubleClick} />
+            {subPropTypes.length > 0 && (
+              <ExplorerCellSubPropTypesTree
+                subPropTypes={subPropTypes}
+                onEntityDoubleClick={onEntityDoubleClick}
+              />
+            )}
+          </StyledPropBlock>
+        );
+      }
       const props = propsByValue[value.id];
       if (!props?.length) {
         return (

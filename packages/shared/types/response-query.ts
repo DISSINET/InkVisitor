@@ -21,11 +21,13 @@ export interface IResponseQueryEntity {
     IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
   >;
   /**
-   * Prop trees for the cells of property columns, by column id and then by the
-   * cell entity they sit under: a value in "Entity Property value" columns, a
-   * type in "Entity Property types" columns. The nodes are the first-level
-   * props under that entity, each with its subproperties. Present for a column
-   * once one of its shown props has subproperties; then it covers every prop
+   * Trees for the cells of property columns, by column id and then by the cell
+   * entity they sit under. In "Entity Property value" columns the key is a
+   * value and the nodes are the first-level props with that value, each with
+   * its subproperties. In "Entity Property types" columns the key is a type
+   * and the nodes are the subproperty types used under its props, merged so
+   * each appears once per level, with only `type` set. Present for a column
+   * once one of its shown props has subproperties; then it covers every entity
    * the cell shows. Kept apart from columnData so its cells stay flat entity
    * lists.
    */

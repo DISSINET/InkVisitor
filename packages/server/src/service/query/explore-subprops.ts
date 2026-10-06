@@ -80,3 +80,34 @@ export const resolveSubProps = (
   }
   return out;
 };
+
+/**
+ * The subproperty types under a set of props, merged: each subproperty type
+ * appears once per level however many props use it, and its own subproperty
+ * types merge the same way below it. Values are left out; a node carries only
+ * its type. Subproperties without a loaded type are skipped.
+ */
+export const resolveSubPropTypes = (
+  props: IProp[],
+  entityById: Record<string, IEntity>
+): IResponseQuerySubProp[] => {
+  const childrenByType: Record<string, IProp[]> = {};
+  const typeOrder: string[] = [];
+  for (const prop of props) {
+    for (const child of prop.children ?? []) {
+      const typeId = child.type?.entityId;
+      if (!typeId || !entityById[typeId]) {
+        continue;
+      }
+      if (!childrenByType[typeId]) {
+        childrenByType[typeId] = [];
+        typeOrder.push(typeId);
+      }
+      childrenByType[typeId].push(child);
+    }
+  }
+  return typeOrder.map((typeId) => ({
+    type: entityById[typeId],
+    children: resolveSubPropTypes(childrenByType[typeId], entityById),
+  }));
+};
