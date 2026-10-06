@@ -24,6 +24,7 @@
 - Edges reading legacy Statements that lack classifications, identifications, a prop id, a reference resource or a territory id no longer drop those Statements or fail the whole query (#3271)
 - Column name field in the new column panel moved below type and params, and fills itself from the picked type (#3232)
 - Corrected query grid node tooltip and disabled-picker text (#3236)
+- Statements open in an Editor box under the Detail box in the Explorer detail panel (#3297)
 
 ## Annotator
 
