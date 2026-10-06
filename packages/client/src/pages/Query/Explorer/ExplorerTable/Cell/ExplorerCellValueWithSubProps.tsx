@@ -70,6 +70,9 @@ export const ExplorerCellValueWithSubProps: React.FC<ExplorerCellValueWithSubPro
             color="success"
             noArrow
             tagGroup
+            offsetY={0}
+            fadeOut
+            onMouseEnter={tooltip.onTooltipMouseEnter}
             onMouseLeave={tooltip.onTooltipMouseLeave}
             content={
               <ExplorerCellValueTree

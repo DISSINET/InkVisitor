@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Visibility of a tooltip opened by hovering a trigger. Leaving the trigger
- * hides it after a short delay, long enough for the cursor to cross into the
- * tooltip, which Tooltip keeps open for as long as it is hovered.
+ * hides it after a short delay, which entering the tooltip cancels: Tooltip
+ * fades out on `visible` alone, even while hovered.
  */
 export const useHoverTooltip = (hideDelay = 150) => {
   const [visible, setVisible] = useState(false);
@@ -30,6 +30,10 @@ export const useHoverTooltip = (hideDelay = 150) => {
         hideTimeoutRef.current = null;
         setVisible(false);
       }, hideDelay);
+    },
+    onTooltipMouseEnter: () => {
+      clearHideTimeout();
+      setVisible(true);
     },
     onTooltipMouseLeave: () => {
       clearHideTimeout();

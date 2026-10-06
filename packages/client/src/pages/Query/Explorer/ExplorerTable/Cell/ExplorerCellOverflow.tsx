@@ -98,11 +98,13 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
       <Tooltip
         visible={tooltip.visible}
         referenceElement={referenceElement}
-        offsetY={-14}
         position="right"
         color="success"
         noArrow
         tagGroup={allEntities}
+        offsetY={0}
+        fadeOut
+        onMouseEnter={tooltip.onTooltipMouseEnter}
         onMouseLeave={tooltip.onTooltipMouseLeave}
         content={content}
       />
