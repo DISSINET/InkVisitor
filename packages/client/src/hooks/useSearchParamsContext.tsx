@@ -41,10 +41,10 @@ interface SearchParamsContext {
   statementId: string;
   setStatementId: (statement: string) => void;
   // Grows with every setStatementId call, so a page can react to a statement
-  // opened again while it is already the open one.
+  // opened again (same statementId) while it is already the open one.
   statementSetCount: number;
   // Grows with every entity opened in detail (append or promote), so a page can
-  // react to an entity opened again while it is already the selected tab.
+  // react to an entity opened again (same detailId) while it is already the selected tab.
   detailOpenCount: number;
   detailIdArray: string[];
   selectedDetailId: string;
@@ -134,9 +134,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     if (!detailIdArray.includes(id)) {
       // at the cap the oldest tab gives way, so the new one always lands last
       const newDetailIdArray =
-        detailIdArray.length < maxCount
-          ? [...detailIdArray, id]
-          : [...detailIdArray.slice(1), id];
+        detailIdArray.length < maxCount ? [...detailIdArray, id] : [...detailIdArray.slice(1), id];
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
     setSelectedDetailId(id);
