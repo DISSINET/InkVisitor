@@ -262,16 +262,17 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                           shape="sharp"
                           onClick={() => toggleStar(templateEntity.id)}
                         />
+                        {userRole !== UserEnums.Role.Viewer && (
+                          <Button
+                            tooltipLabel="delete template"
+                            icon={<IcoTrashSimple />}
+                            color="plain"
+                            inverted
+                            shape="sharp"
+                            onClick={() => handleAskRemoveTemplate(templateEntity.id)}
+                          />
+                        )}
                       </StyledStarButtonWrap>
-                    }
-                    unlinkButton={
-                      userRole !== UserEnums.Role.Viewer && {
-                        onClick: () => {
-                          handleAskRemoveTemplate(templateEntity.id);
-                        },
-                        tooltipLabel: "delete template",
-                        icon: <IcoTrashSimple />,
-                      }
                     }
                   />
                 </React.Fragment>

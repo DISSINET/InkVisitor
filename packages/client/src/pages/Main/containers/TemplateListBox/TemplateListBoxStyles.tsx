@@ -35,10 +35,11 @@ export const StyledTemplateSectionList = styled.div`
   min-height: 5rem;
   width: 100%;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.5rem;
 
-  /* each tag is a direct child, so only the hovered one shows its star button */
+  /* each tag is a direct child, so only the hovered one shows its buttons */
   > *:hover ${StyledStarButtonWrap} {
     display: flex;
   }
