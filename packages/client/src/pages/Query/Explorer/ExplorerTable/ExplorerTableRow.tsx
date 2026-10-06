@@ -39,7 +39,7 @@ import {
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
 import { isReadOnlyColumn, wideColumnTypes } from "./types";
-import { getColumnWidth } from "./utils";
+import { getColumnWidth, hasSubProps } from "./utils";
 
 const EditableCellValue: React.FC<{
   value: string;
@@ -211,7 +211,13 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
     },
   });
 
-  const { entity: rowEntity, columnData, isEquivalent, isSubordinate } = rowItem ?? {};
+  const {
+    entity: rowEntity,
+    columnData,
+    columnSubProps,
+    isEquivalent,
+    isSubordinate,
+  } = rowItem ?? {};
 
   const handleOpenEntityInDetail = React.useCallback(
     (entity: IEntity) => (e: React.MouseEvent) => {
@@ -503,6 +509,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       column: Explore.IExploreColumn
     ): React.ReactElement => {
       if (Array.isArray(cellData)) {
+        const subPropsByValue = columnSubProps?.[column.id];
         return (
           <StyledCellArrayWrap>
             {cellData
@@ -516,10 +523,19 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
                   </React.Fragment>
                 );
               })}
-            {cellData.length > CELL_DISPLAY_LIMIT && (
+            {(cellData.length > CELL_DISPLAY_LIMIT || hasSubProps(subPropsByValue)) && (
               <ExplorerCellOverflow
                 hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
                 onEntityDoubleClick={handleOpenEntityInDetail}
+                propsTree={
+                  subPropsByValue && hasSubProps(subPropsByValue)
+                    ? {
+                        values: cellData as IEntity[],
+                        propsByValue: subPropsByValue,
+                        typesOnly: column.type === Explore.EExploreColumnType.EPT,
+                      }
+                    : undefined
+                }
               />
             )}
           </StyledCellArrayWrap>
@@ -528,7 +544,7 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
         return renderCellValue(cellData, recordEntity, column);
       }
     },
-    [renderCellValue, handleOpenEntityInDetail]
+    [renderCellValue, handleOpenEntityInDetail, columnSubProps]
   );
 
   const renderEditSection = React.useCallback(

@@ -36,6 +36,9 @@ interface Tooltip {
   disabled?: boolean;
   disableAutoPosition?: boolean;
   onMouseLeave?: () => void;
+  onMouseEnter?: () => void;
+  /** Fade out when `visible` turns false, instead of disappearing at once. */
+  fadeOut?: boolean;
   /** Portal root. #page-content is overflow:hidden and starts below the header,
    * so anything anchored outside it needs a wider root such as #page. */
   portalId?: string;
@@ -59,6 +62,8 @@ export const Tooltip: React.FC<Tooltip> = ({
   disabled = false,
   disableAutoPosition = false,
   onMouseLeave = () => {},
+  onMouseEnter = () => {},
+  fadeOut = false,
   portalId = "page-content",
 }) => {
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
@@ -96,9 +101,23 @@ export const Tooltip: React.FC<Tooltip> = ({
 
   const [tooltipHovered, setTooltipHovered] = useState(false);
 
+  // with fadeOut the container stays mounted after `visible` turns false,
+  // until the opacity spring settles at 0
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    if (visible) {
+      setIsMounted(true);
+    }
+  }, [visible]);
+
   const animatedTooltip = useSpring({
     opacity: showTooltip ? 1 : 0,
     config: { mass: 2, friction: 2, tension: 100, clamp: true },
+    onRest: (result: { value: { opacity: number } }) => {
+      if (result.value.opacity === 0) {
+        setIsMounted(false);
+      }
+    },
   });
 
   // Needed for state update
@@ -113,7 +132,7 @@ export const Tooltip: React.FC<Tooltip> = ({
 
   return (
     <>
-      {!disabled && (showTooltip || tooltipHovered) && (
+      {!disabled && (showTooltip || tooltipHovered || (fadeOut && isMounted)) && (
         <>
           <FloatingPortal id={portalId}>
             <StyledContainer
@@ -126,6 +145,7 @@ export const Tooltip: React.FC<Tooltip> = ({
               }}
               arrowoffset={-offsetY}
               onMouseEnter={() => {
+                onMouseEnter();
                 setTooltipHovered(true);
               }}
               {...attributes.popper}

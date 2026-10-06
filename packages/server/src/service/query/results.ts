@@ -6,7 +6,14 @@ import treeCache from "@service/treeCache";
 import User from "@models/user/user";
 import { conceptPartOfSpeechDict, actionPartOfSpeechDict, entityStatusDict, languageDict, actantLogicalTypeDict, entitiesDictKeys } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { IEntity, IStatement, ITerritory, IUser } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IProp,
+  IResponseQuerySubProp,
+  IStatement,
+  ITerritory,
+  IUser,
+} from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { findEntityById } from "@service/shorthands";
@@ -19,6 +26,13 @@ import {
 } from "./explore-cooccurrence-filter";
 import { applyRequestSearchFilters } from "./explore-to-request-search";
 import { applyRootValidityFilter, getRootValidityFilter } from "./explore-root-validity-filter";
+import {
+  collectSubPropEntityIds,
+  groupPropsByType,
+  groupPropsByValue,
+  resolveSubPropTypes,
+  resolveSubProps,
+} from "./explore-subprops";
 
 /**
  * Column data shared by every row of one page, resolved in a single pass before
@@ -432,6 +446,65 @@ export default class Results<T extends { id: string }> {
       }
     }
 
+    return out;
+  }
+
+  /**
+   * Prop trees for the entity's "Entity Property value" columns and
+   * subproperty type trees for its "Entity Property types" columns, see
+   * IResponseQueryEntity.columnSubProps. Undefined when
+   * none of those columns shows a prop with subproperties, which costs no
+   * query.
+   */
+  async columnSubProps(
+    db: Connection,
+    entity: IEntity,
+    columnsData: Explore.IExploreColumn[]
+  ): Promise<Record<string, Record<string, IResponseQuerySubProp[]>> | undefined> {
+    // per column: the first-level props to resolve, by the cell entity they
+    // sit under, and how to resolve them
+    type Resolve = (props: IProp[], entityById: Record<string, IEntity>) => IResponseQuerySubProp[];
+    const grouped: Record<string, { byKey: Record<string, IProp[]>; resolve: Resolve }> = {};
+    const entityIds: string[] = [];
+
+    for (const column of columnsData) {
+      let byKey: Record<string, IProp[]>;
+      let resolve: Resolve;
+      if (column.type === Explore.EExploreColumnType.EPV) {
+        const params =
+          column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+        byKey = groupPropsByValue(entity.props, params.propertyType);
+        resolve = resolveSubProps;
+      } else if (column.type === Explore.EExploreColumnType.EPT) {
+        byKey = groupPropsByType(entity.props);
+        resolve = resolveSubPropTypes;
+      } else {
+        continue;
+      }
+      const props = ([] as IProp[]).concat(...Object.values(byKey));
+      if (!props.length) {
+        continue;
+      }
+      grouped[column.id] = { byKey, resolve };
+      entityIds.push(...collectSubPropEntityIds(props));
+    }
+
+    if (!Object.keys(grouped).length) {
+      return undefined;
+    }
+
+    const entityById: Record<string, IEntity> = {};
+    for (const loaded of await Entity.findEntitiesByIds(db, entityIds)) {
+      entityById[loaded.id] = loaded;
+    }
+
+    const out: Record<string, Record<string, IResponseQuerySubProp[]>> = {};
+    for (const [columnId, { byKey, resolve }] of Object.entries(grouped)) {
+      out[columnId] = {};
+      for (const [key, props] of Object.entries(byKey)) {
+        out[columnId][key] = resolve(props, entityById);
+      }
+    }
     return out;
   }
 }

@@ -1,4 +1,9 @@
-import { IEntity, IResponseQueryEntity, IUser } from "@inkvisitor/shared/types";
+import {
+  IEntity,
+  IResponseQueryEntity,
+  IResponseQuerySubProp,
+  IUser,
+} from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import {
   WIDTH_COLUMN_DEFAULT,
@@ -42,8 +47,10 @@ const CELL_GAP_PX = 4;
 const CELL_PADDING_PX = 26;
 /** "..." overflow indicator (StyledDots: three glyphs + 0.25rem margin). */
 const OVERFLOW_CHIP_PX = 18;
-/** Compact EntitySuggester (74px input + button chrome). */
-const SUGGESTER_PX = 110;
+/**
+ * EntitySuggester once hovered open
+ */
+const SUGGESTER_PX = 120;
 
 const getItemLabel = (item: unknown): string => {
   if (item && typeof item === "object") {
@@ -63,6 +70,11 @@ const estimateItemWidth = (item: unknown, hasUnlink: boolean): number => {
   }
   return Math.min(labelPx, TEXT_MAX_PX);
 };
+
+/** Whether the cell has prop trees, which its "..." opens; see IResponseQueryEntity.columnSubProps. */
+export const hasSubProps = (
+  subPropsByValue: Record<string, IResponseQuerySubProp[]> | undefined,
+): boolean => !!subPropsByValue && Object.values(subPropsByValue).some((s) => s.length > 0);
 
 /**
  * Estimate the width (px) a column needs to show the widest cell in the given
@@ -88,7 +100,7 @@ export const estimateColumnWidth = (
     for (const item of items.slice(0, displayLimit)) {
       w += estimateItemWidth(item, column.editable) + CELL_GAP_PX;
     }
-    if (items.length > displayLimit) {
+    if (items.length > displayLimit || hasSubProps(row.columnSubProps?.[column.id])) {
       w += OVERFLOW_CHIP_PX;
     }
     maxContent = Math.max(maxContent, w);
