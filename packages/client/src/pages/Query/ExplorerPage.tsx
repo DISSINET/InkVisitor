@@ -89,6 +89,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     replaceDetailIds,
     statementId,
     setStatementId,
+    statementSetCount,
   } = useSearchParams();
 
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
@@ -603,13 +604,14 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     });
   }, []);
 
-  // a statement can be opened from a tag anywhere on the page, also while the
-  // panel holding the editor is collapsed
+  // A statement can be opened from a tag anywhere on the page, also while the
+  // panel holding the editor is collapsed, and opening the statement that is
+  // already open has to bring the editor back as well.
   useEffect(() => {
     if (statementId) {
       expandQueryDetailPanel();
     }
-  }, [statementId, expandQueryDetailPanel]);
+  }, [statementId, statementSetCount, expandQueryDetailPanel]);
 
   const openEntityInDetail = useCallback(
     (entityId: string) => {

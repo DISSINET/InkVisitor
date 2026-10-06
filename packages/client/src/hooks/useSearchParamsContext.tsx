@@ -1,6 +1,7 @@
 import React, {
   createContext,
   ReactElement,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -17,6 +18,7 @@ const INITIAL_CONTEXT = {
   setTerritoryId: UNINITIALISED,
   statementId: "",
   setStatementId: UNINITIALISED,
+  statementSetCount: 0,
   detailIdArray: [],
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
@@ -37,6 +39,9 @@ interface SearchParamsContext {
   setTerritoryId: (territory: string) => void;
   statementId: string;
   setStatementId: (statement: string) => void;
+  // Grows with every setStatementId call, so a page can react to a statement
+  // opened again while it is already the open one.
+  statementSetCount: number;
   detailIdArray: string[];
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
@@ -91,6 +96,11 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   const [statementId, setStatementId] = useState<string>(
     typeof parsedParams.statement === "string" ? parsedParams.statement : "",
   );
+  const [statementSetCount, setStatementSetCount] = useState(0);
+  const setStatementIdCounted = useCallback((statement: string) => {
+    setStatementId(statement);
+    setStatementSetCount((count) => count + 1);
+  }, []);
   const [selectedDetailId, setSelectedDetailId] = useState<string>(
     typeof parsedParams.selectedDetail === "string" ? parsedParams.selectedDetail : "",
   );
@@ -299,7 +309,8 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
         territoryId,
         setTerritoryId,
         statementId,
-        setStatementId,
+        setStatementId: setStatementIdCounted,
+        statementSetCount,
         detailIdArray: getDetailIdArray(),
         selectedDetailId,
         setSelectedDetailId,
