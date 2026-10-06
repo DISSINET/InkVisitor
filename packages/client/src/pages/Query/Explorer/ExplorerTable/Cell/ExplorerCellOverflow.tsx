@@ -6,7 +6,7 @@ import { StyledDots } from "pages/Main/containers/StatementsListBox/StatementLis
 import React, { useState } from "react";
 import { getEntityLabel } from "utils/utils";
 import { StyledTooltipRow, StyledTooltipValue } from "../Header/ExploreTableHeaderTooltipStyles";
-import { ExplorerCellValueTree } from "./ExplorerCellSubProps";
+import { ExplorerCellValuesTree } from "./ExplorerCellSubProps";
 import { useHoverTooltip } from "./useHoverTooltip";
 import {
   StyledOverflowTextList,
@@ -38,20 +38,27 @@ function getOverflowItemLabel(item: CellOverflowItem): string {
 interface ExplorerCellOverflowProps {
   hiddenItems: CellOverflowItem[];
   onEntityDoubleClick?: (entity: IEntity) => (e: React.MouseEvent) => void;
-  /** Subproperties shown after each hidden value, by value entity id. */
-  subPropsByValue?: Record<string, IResponseQuerySubProp[]>;
+  /**
+   * All the cell's values with their subproperties, by value entity id. When
+   * given, the "..." shows even with nothing hidden and opens the trees of all
+   * the values.
+   */
+  subPropsTree?: {
+    values: IEntity[];
+    subPropsByValue: Record<string, IResponseQuerySubProp[]>;
+  };
 }
 
 export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
   hiddenItems,
   onEntityDoubleClick,
-  subPropsByValue,
+  subPropsTree,
 }) => {
   const theme = useTheme();
   const tooltip = useHoverTooltip();
   const [referenceElement, setReferenceElement] = useState<HTMLSpanElement | null>(null);
 
-  if (hiddenItems.length === 0) {
+  if (hiddenItems.length === 0 && !subPropsTree) {
     return null;
   }
 
@@ -59,29 +66,22 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
 
   // the tooltip renders through a portal, so its clicks still bubble up the
   // React tree to the row handler - the marker is what the row checks for
-  const content = allEntities ? (
+  const content = subPropsTree ? (
+    <ExplorerCellValuesTree
+      values={subPropsTree.values}
+      subPropsByValue={subPropsTree.subPropsByValue}
+      onEntityDoubleClick={onEntityDoubleClick}
+    />
+  ) : allEntities ? (
     <StyledOverflowTooltipContent data-no-row-click="true">
-      {hiddenItems.map((entity, key) => {
-        const subProps = subPropsByValue?.[entity.id];
-        if (subProps?.length) {
-          return (
-            <ExplorerCellValueTree
-              key={entity.id}
-              value={entity}
-              subProps={subProps}
-              onEntityDoubleClick={onEntityDoubleClick}
-            />
-          );
-        }
-        return (
-          <EntityTag
-            key={entity.id ?? key}
-            entity={entity}
-            tooltipPosition="bottom"
-            onDoubleClick={onEntityDoubleClick?.(entity)}
-          />
-        );
-      })}
+      {hiddenItems.map((entity, key) => (
+        <EntityTag
+          key={entity.id ?? key}
+          entity={entity}
+          tooltipPosition="bottom"
+          onDoubleClick={onEntityDoubleClick?.(entity)}
+        />
+      ))}
     </StyledOverflowTooltipContent>
   ) : (
     <StyledOverflowTextList data-no-row-click="true">
@@ -101,7 +101,7 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
         position="right"
         color="success"
         noArrow
-        tagGroup={allEntities}
+        tagGroup={!!subPropsTree || allEntities}
         offsetY={0}
         fadeOut
         onMouseEnter={tooltip.onTooltipMouseEnter}

@@ -2,57 +2,22 @@ import { IEntity, IResponseQuerySubProp } from "@inkvisitor/shared/types";
 import { EntityTag } from "components/advanced";
 import React from "react";
 import {
-  StyledSubProp,
-  StyledSubPropGroup,
-  StyledSubPropLevel,
   StyledSubPropTree,
   StyledSubPropTreeRow,
+  StyledValuesTree,
   StyledValueTree,
 } from "./ExplorerCellSubPropsStyles";
 
-interface ExplorerCellSubProps {
+interface ExplorerCellSubPropsTree {
   subProps: IResponseQuerySubProp[];
   onEntityDoubleClick?: (entity: IEntity) => (e: React.MouseEvent) => void;
-  /** Prop level of these subproperties; the property value itself is the 1st. */
-  level?: number;
 }
 
 /** Tree tags in the tooltip: twice the default label cap (theme.space[30] = 75px). */
 const TREE_TAG_MAX_WIDTH = 150;
 
-export const subPropLevelLabel =(level: number): string =>
-  level === 2 ? "2nd" : level === 3 ? "3rd" : `${level}th`;
-
-/** Type and value tags of the subproperties nested under one property value. */
-export const ExplorerCellSubProps: React.FC<ExplorerCellSubProps> = ({
-  subProps,
-  onEntityDoubleClick,
-  level = 2,
-}) => (
-  <StyledSubPropGroup data-no-row-click="true">
-    <StyledSubPropLevel>{subPropLevelLabel(level)}</StyledSubPropLevel>
-    {subProps.map((subProp, key) => (
-      <StyledSubProp key={key}>
-        {subProp.type && (
-          <EntityTag entity={subProp.type} onDoubleClick={onEntityDoubleClick?.(subProp.type)} />
-        )}
-        {subProp.value && (
-          <EntityTag entity={subProp.value} onDoubleClick={onEntityDoubleClick?.(subProp.value)} />
-        )}
-        {subProp.children.length > 0 && (
-          <ExplorerCellSubProps
-            subProps={subProp.children}
-            onEntityDoubleClick={onEntityDoubleClick}
-            level={level + 1}
-          />
-        )}
-      </StyledSubProp>
-    ))}
-  </StyledSubPropGroup>
-);
-
 /** The subproperties as a tree, one per line, each level indented. */
-export const ExplorerCellSubPropsTree: React.FC<ExplorerCellSubProps> = ({
+export const ExplorerCellSubPropsTree: React.FC<ExplorerCellSubPropsTree> = ({
   subProps,
   onEntityDoubleClick,
 }) => (
@@ -107,6 +72,33 @@ export const ExplorerCellValueTree: React.FC<ExplorerCellValueTree> = ({
       tooltipPosition="bottom"
       onDoubleClick={onEntityDoubleClick?.(value)}
     />
-    <ExplorerCellSubPropsTree subProps={subProps} onEntityDoubleClick={onEntityDoubleClick} />
+    {subProps.length > 0 && (
+      <ExplorerCellSubPropsTree subProps={subProps} onEntityDoubleClick={onEntityDoubleClick} />
+    )}
   </StyledValueTree>
+);
+
+interface ExplorerCellValuesTree {
+  values: IEntity[];
+  /** Subproperties by value entity id; values without any show as a lone tag. */
+  subPropsByValue: Record<string, IResponseQuerySubProp[]>;
+  onEntityDoubleClick?: (entity: IEntity) => (e: React.MouseEvent) => void;
+}
+
+/** Every value of a cell, each with its full subproperty tree. */
+export const ExplorerCellValuesTree: React.FC<ExplorerCellValuesTree> = ({
+  values,
+  subPropsByValue,
+  onEntityDoubleClick,
+}) => (
+  <StyledValuesTree data-no-row-click="true">
+    {values.map((value) => (
+      <ExplorerCellValueTree
+        key={value.id}
+        value={value}
+        subProps={subPropsByValue[value.id] ?? []}
+        onEntityDoubleClick={onEntityDoubleClick}
+      />
+    ))}
+  </StyledValuesTree>
 );

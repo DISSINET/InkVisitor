@@ -51,12 +51,6 @@ const OVERFLOW_CHIP_PX = 18;
  * EntitySuggester once hovered open
  */
 const SUGGESTER_PX = 120;
-/** Subproperty group bar: 2px border + 0.25rem padding. */
-const SUBPROP_BAR_PX = 6;
-/** Subproperty level label ("2nd", "3rd" at xxs) plus the gap after it. */
-const SUBPROP_LEVEL_PX = 20;
-/** Gap between subproperties inside a group (0.5rem). */
-const SUBPROP_GAP_PX = 8;
 
 const getItemLabel = (item: unknown): string => {
   if (item && typeof item === "object") {
@@ -77,44 +71,10 @@ const estimateItemWidth = (item: unknown, hasUnlink: boolean): number => {
   return Math.min(labelPx, TEXT_MAX_PX);
 };
 
-/**
- * The part of a value's subproperties shown inline in the cell: only the first
- * pair, without anything nested under it. The rest waits in the tooltip tree.
- */
-export const getInlineSubProps = (
-  subProps: IResponseQuerySubProp[],
-): { inline: IResponseQuerySubProp[]; hasHidden: boolean } => {
-  const [first] = subProps;
-  if (!first) {
-    return { inline: [], hasHidden: false };
-  }
-  return {
-    inline: [{ ...first, children: [] }],
-    hasHidden: subProps.length > 1 || first.children.length > 0,
-  };
-};
-
-/**
- * Width of the subproperty group rendered after a value (ExplorerCellSubProps):
- * its bar, padding and level label, then the type and value tags of each
- * subproperty with any deeper group after them.
- */
-export const estimateSubPropsWidth = (subProps: IResponseQuerySubProp[]): number => {
-  let w = SUBPROP_BAR_PX + SUBPROP_LEVEL_PX;
-  subProps.forEach((subProp, i) => {
-    if (i > 0) {
-      w += SUBPROP_GAP_PX;
-    }
-    const parts = [subProp.type, subProp.value].filter((part) => !!part);
-    parts.forEach((part, j) => {
-      w += (j > 0 ? CELL_GAP_PX : 0) + estimateItemWidth(part, false);
-    });
-    if (subProp.children.length) {
-      w += CELL_GAP_PX + estimateSubPropsWidth(subProp.children);
-    }
-  });
-  return w;
-};
+/** Whether any value of a cell has subproperties, which its "..." opens. */
+export const hasSubProps = (
+  subPropsByValue: Record<string, IResponseQuerySubProp[]> | undefined,
+): boolean => !!subPropsByValue && Object.values(subPropsByValue).some((s) => s.length > 0);
 
 /**
  * Estimate the width (px) a column needs to show the widest cell in the given
@@ -135,21 +95,12 @@ export const estimateColumnWidth = (
       : cell !== undefined && cell !== null && cell !== ""
         ? [cell]
         : [];
-    const subPropsByValue = row.columnSubProps?.[column.id];
 
     let w = 0;
     for (const item of items.slice(0, displayLimit)) {
       w += estimateItemWidth(item, column.editable) + CELL_GAP_PX;
-      const subProps = subPropsByValue?.[(item as IEntity)?.id];
-      if (subProps?.length) {
-        const { inline, hasHidden } = getInlineSubProps(subProps);
-        w += estimateSubPropsWidth(inline) + CELL_GAP_PX;
-        if (hasHidden) {
-          w += OVERFLOW_CHIP_PX;
-        }
-      }
     }
-    if (items.length > displayLimit) {
+    if (items.length > displayLimit || hasSubProps(row.columnSubProps?.[column.id])) {
       w += OVERFLOW_CHIP_PX;
     }
     maxContent = Math.max(maxContent, w);

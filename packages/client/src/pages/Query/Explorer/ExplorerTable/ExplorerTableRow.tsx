@@ -21,7 +21,6 @@ import { EntityEnums, RelationEnums, UserEnums } from "@inkvisitor/shared/enums"
 import { invalidateAllExplorerQueries } from "pages/Query/useQueryData";
 import { getRelationSuggesterConfig } from "pages/Query/utils";
 import { CELL_DISPLAY_LIMIT, ExplorerCellOverflow } from "./Cell/ExplorerCellOverflow";
-import { ExplorerCellValueWithSubProps } from "./Cell/ExplorerCellValueWithSubProps";
 import {
   StyledAltLabelAddInput,
   StyledAltLabelChip,
@@ -40,7 +39,7 @@ import {
 } from "./ExplorerTableStyles";
 import { WIDTH_COLUMN_FIRST } from "./constants";
 import { isReadOnlyColumn, wideColumnTypes } from "./types";
-import { getColumnWidth } from "./utils";
+import { getColumnWidth, hasSubProps } from "./utils";
 
 const EditableCellValue: React.FC<{
   value: string;
@@ -512,34 +511,27 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
       if (Array.isArray(cellData)) {
         const subPropsByValue = columnSubProps?.[column.id];
         return (
-          <StyledCellArrayWrap $singleLine={!!subPropsByValue}>
+          <StyledCellArrayWrap>
             {cellData
               .filter((_, i) => i < CELL_DISPLAY_LIMIT)
               .map((cellEntity, key) => {
-                const entityId = (cellEntity as IEntity)?.id;
-                const subProps = entityId ? subPropsByValue?.[entityId] : undefined;
-                if (subProps?.length) {
-                  return (
-                    <ExplorerCellValueWithSubProps
-                      key={entityId}
-                      value={cellEntity as IEntity}
-                      valueTag={renderCellValue(cellEntity, recordEntity, column)}
-                      subProps={subProps}
-                      onEntityDoubleClick={handleOpenEntityInDetail}
-                    />
-                  );
-                }
                 return (
-                  <React.Fragment key={entityId ? entityId : key}>
+                  <React.Fragment
+                    key={(cellEntity as IEntity)?.id ? (cellEntity as IEntity).id : key}
+                  >
                     {renderCellValue(cellEntity, recordEntity, column)}
                   </React.Fragment>
                 );
               })}
-            {cellData.length > CELL_DISPLAY_LIMIT && (
+            {(cellData.length > CELL_DISPLAY_LIMIT || hasSubProps(subPropsByValue)) && (
               <ExplorerCellOverflow
                 hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
                 onEntityDoubleClick={handleOpenEntityInDetail}
-                subPropsByValue={subPropsByValue}
+                subPropsTree={
+                  subPropsByValue && hasSubProps(subPropsByValue)
+                    ? { values: cellData as IEntity[], subPropsByValue }
+                    : undefined
+                }
               />
             )}
           </StyledCellArrayWrap>

@@ -1,7 +1,7 @@
 import { IEntity, IResponseQueryEntity, IResponseQuerySubProp } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { describe, expect, it } from "vitest";
-import { estimateColumnWidth, estimateSubPropsWidth, getInlineSubProps } from "./utils";
+import { estimateColumnWidth, hasSubProps } from "./utils";
 
 const entity = (label: string): IEntity => ({ id: label, labels: [label] }) as IEntity;
 
@@ -11,67 +11,38 @@ const column = {
   editable: false,
 } as Explore.IExploreColumn;
 
-const row = (
-  value: IEntity,
-  subProps?: IResponseQuerySubProp[],
-): IResponseQueryEntity => ({
-  entity: entity("row"),
-  columnData: { col: [value] },
-  columnSubProps: subProps ? { col: { [value.id]: subProps } } : undefined,
-});
-
-// "distance" (8 chars) and "206" (3 chars) tags: 24px marker + 6px per char
 const distance: IResponseQuerySubProp = {
   type: entity("distance"),
   value: entity("206"),
   children: [],
 };
 
-describe("estimateSubPropsWidth", () => {
-  it("adds the bar, the level label and the type and value tags", () => {
-    expect(estimateSubPropsWidth([distance])).toBe(6 + 20 + 72 + 4 + 42);
-  });
+// labels long enough to hit the tag cap: 24px marker + 75px label each
+const praha = entity("Praha hlavni mesto");
+const brno = entity("Brno statutarni mesto");
 
-  it("adds a nested group after its subproperty", () => {
-    const withUnit = { ...distance, children: [{ type: entity("unit"), children: [] }] };
-    expect(estimateSubPropsWidth([withUnit])).toBe(6 + 20 + 72 + 4 + 42 + 4 + (6 + 20 + 48));
-  });
-
-  it("separates sibling subproperties", () => {
-    expect(estimateSubPropsWidth([distance, distance])).toBe(6 + 20 + 118 + 8 + 118);
-  });
+const row = (subPropsByValue?: Record<string, IResponseQuerySubProp[]>): IResponseQueryEntity => ({
+  entity: entity("row"),
+  columnData: { col: [praha, brno] },
+  columnSubProps: subPropsByValue ? { col: subPropsByValue } : undefined,
 });
 
-describe("getInlineSubProps", () => {
-  const withUnit = { ...distance, children: [{ type: entity("unit"), children: [] }] };
-
-  it("shows a lone pair whole", () => {
-    expect(getInlineSubProps([distance])).toEqual({ inline: [distance], hasHidden: false });
-  });
-
-  it("shows only the first pair and hides its siblings", () => {
-    expect(getInlineSubProps([distance, withUnit])).toEqual({
-      inline: [distance],
-      hasHidden: true,
-    });
-  });
-
-  it("hides what is nested under the first pair", () => {
-    expect(getInlineSubProps([withUnit])).toEqual({ inline: [distance], hasHidden: true });
+describe("hasSubProps", () => {
+  it("is true only when some value has subproperties", () => {
+    expect(hasSubProps(undefined)).toBe(false);
+    expect(hasSubProps({ [praha.id]: [] })).toBe(false);
+    expect(hasSubProps({ [praha.id]: [], [brno.id]: [distance] })).toBe(true);
   });
 });
 
 describe("estimateColumnWidth", () => {
-  it("counts only the first pair plus the overflow chip when more subproperties hide", () => {
-    const praha = entity("Praha");
-    expect(estimateColumnWidth(column, [row(praha, [distance, distance])], 5)).toBe(
-      26 + 58 + 144 + 4 + 18,
-    );
+  it("counts the values only", () => {
+    expect(estimateColumnWidth(column, [row()], 5)).toBe(26 + 2 * (99 + 4));
   });
 
-  it("widens a property value column by the subproperties shown after the value", () => {
-    const praha = entity("Praha");
-    expect(estimateColumnWidth(column, [row(praha)], 5)).toBe(160);
-    expect(estimateColumnWidth(column, [row(praha, [distance])], 5)).toBe(26 + 58 + 144 + 4);
+  it("adds the overflow chip when a value has subproperties", () => {
+    expect(estimateColumnWidth(column, [row({ [brno.id]: [distance] })], 5)).toBe(
+      26 + 2 * (99 + 4) + 18,
+    );
   });
 });
