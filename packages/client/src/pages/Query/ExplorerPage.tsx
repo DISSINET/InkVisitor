@@ -26,7 +26,7 @@ import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH, maxTabCount } from "Theme/constants";
+import { COLLAPSED_PANEL_WIDTH, hiddenBoxHeight, maxTabCount } from "Theme/constants";
 import {
   animateBoxHeightVars,
   animatePanelWidthVars,
@@ -56,6 +56,7 @@ import {
   StyledCloseEditorIcon,
   StyledExpansionCount,
   StyledExpansionToggle,
+  StyledRestoreBoxIcon,
   StyledResultExpansionButtons,
 } from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
@@ -70,7 +71,7 @@ import {
   useQueryData,
 } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
-import { ButtonSize } from "types";
+import { ButtonSize, EditorBoxState } from "types";
 
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
@@ -552,6 +553,28 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     localStorage.setItem(detailSeparatorYPercentStorageKey, percent.toString());
   };
 
+  // Maximizing or minimizing squeezes one of the two boxes down to its header.
+  // The editor alone in the panel has no box to share the height with.
+  const [editorBoxState, setEditorBoxState] = useState(EditorBoxState.Normal);
+  const editorBoxLayout = isDetailPanelSplit ? editorBoxState : EditorBoxState.Normal;
+
+  const handleMaximizeEditorBox = () => {
+    setEditorBoxState(
+      editorBoxLayout === EditorBoxState.Normal ? EditorBoxState.FullHeight : EditorBoxState.Normal,
+    );
+  };
+
+  const getEditorMaximizeBtnTooltip = () => {
+    switch (editorBoxLayout) {
+      case EditorBoxState.Minimized:
+        return "open editor box";
+      case EditorBoxState.FullHeight:
+        return "shrink editor box";
+      default:
+        return "maximize editor box";
+    }
+  };
+
   const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
   const [queryLeftPanelExpanded, setQueryLeftPanelExpanded] = useState(
     () => localStorage.getItem(queryLeftPanelExpandedStorageKey) !== "false",
@@ -610,6 +633,9 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   useEffect(() => {
     if (statementId) {
       expandQueryDetailPanel();
+      setEditorBoxState((state) =>
+        state === EditorBoxState.Minimized ? EditorBoxState.Normal : state,
+      );
     }
   }, [statementId, statementSetCount, expandQueryDetailPanel]);
 
@@ -729,14 +755,31 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     animatePanelWidthVars([leftPanelWidth, detailPanelWidth], "explorerPage");
   }, [leftPanelWidth, detailPanelWidth]);
 
+  const getEditorBoxHeight = (detailSeparatorY: number) => {
+    if (!isDetailPanelSplit) {
+      return contentHeight;
+    }
+    switch (editorBoxLayout) {
+      case EditorBoxState.FullHeight:
+        return contentHeight - hiddenBoxHeight;
+      case EditorBoxState.Minimized:
+        return hiddenBoxHeight;
+      default:
+        return contentHeight - detailSeparatorY;
+    }
+  };
+
   // A drag preview of either horizontal separator writes every box height, so
   // the boxes of the other panel keep theirs through the drag.
-  const getBoxHeights = (queryBuilderHeight: number, detailSeparatorY: number) => ({
-    queryBuilder: queryBuilderHeight,
-    explorer: contentHeight - queryBuilderHeight,
-    queryDetail: isDetailPanelSplit ? detailSeparatorY : contentHeight,
-    queryEditor: isDetailPanelSplit ? contentHeight - detailSeparatorY : contentHeight,
-  });
+  const getBoxHeights = (queryBuilderHeight: number, detailSeparatorY: number) => {
+    const editorHeight = getEditorBoxHeight(detailSeparatorY);
+    return {
+      queryBuilder: queryBuilderHeight,
+      explorer: contentHeight - queryBuilderHeight,
+      queryDetail: isDetailPanelSplit ? contentHeight - editorHeight : contentHeight,
+      queryEditor: editorHeight,
+    };
+  };
   const boxHeights = getBoxHeights(querySeparatorYPosition, detailSeparatorYPosition);
 
   // Same for the boxes the horizontal separators split.
@@ -774,19 +817,21 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         />
       )}
 
-      {isDetailPanelSplit && queryDetailPanelExpanded && (
-        <LayoutSeparatorHorizontal
-          panelIndex={1}
-          boxHeightVarKey="queryDetail"
-          applyPreview={(yPosition) =>
-            setBoxHeightVars(getBoxHeights(querySeparatorYPosition, yPosition), "explorerPage")
-          }
-          topPositionMin={QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
-          topPositionMax={contentHeight - QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
-          separatorYPosition={detailSeparatorYPosition}
-          setSeparatorYPosition={handleDetailSeparatorYPositionChange}
-        />
-      )}
+      {isDetailPanelSplit &&
+        queryDetailPanelExpanded &&
+        editorBoxLayout === EditorBoxState.Normal && (
+          <LayoutSeparatorHorizontal
+            panelIndex={1}
+            boxHeightVarKey="queryDetail"
+            applyPreview={(yPosition) =>
+              setBoxHeightVars(getBoxHeights(querySeparatorYPosition, yPosition), "explorerPage")
+            }
+            topPositionMin={QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
+            topPositionMax={contentHeight - QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
+            separatorYPosition={detailSeparatorYPosition}
+            setSeparatorYPosition={handleDetailSeparatorYPositionChange}
+          />
+        )}
 
       {isDetailOpen &&
         queryLeftPanelExpanded &&
@@ -1111,11 +1156,40 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               onHeaderClick={toggleQueryDetailPanel}
               buttons={[
                 <>
+                  {queryDetailPanelExpanded && isDetailPanelSplit && (
+                    <IconButton
+                      tooltipLabel={getEditorMaximizeBtnTooltip()}
+                      icon={
+                        editorBoxLayout === EditorBoxState.Normal ? (
+                          <BsSquareFill />
+                        ) : (
+                          <StyledRestoreBoxIcon />
+                        )
+                      }
+                      onClick={handleMaximizeEditorBox}
+                    />
+                  )}
+                </>,
+                <>
+                  {queryDetailPanelExpanded &&
+                    isDetailPanelSplit &&
+                    editorBoxLayout !== EditorBoxState.Minimized && (
+                      <IconButton
+                        tooltipLabel="minimize editor box"
+                        icon={<BiHide />}
+                        onClick={() => setEditorBoxState(EditorBoxState.Minimized)}
+                      />
+                    )}
+                </>,
+                <>
                   {queryDetailPanelExpanded && (
                     <IconButton
                       tooltipLabel="close editor box"
                       icon={<StyledCloseEditorIcon />}
-                      onClick={() => setStatementId("")}
+                      onClick={() => {
+                        setStatementId("");
+                        setEditorBoxState(EditorBoxState.Normal);
+                      }}
                     />
                   )}
                 </>,
@@ -1124,7 +1198,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
             >
               <MemoizedStatementEditorBox
                 isExpanded={queryDetailPanelExpanded}
-                isVisible={queryDetailPanelExpanded}
+                isVisible={queryDetailPanelExpanded && editorBoxLayout !== EditorBoxState.Minimized}
               />
             </Box>
           )}
