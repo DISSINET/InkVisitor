@@ -39,6 +39,7 @@ import {
 } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
 import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -552,6 +553,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const statementListOpened = useAppSelector((state) => state.layout.mainPage.statementListOpened);
 
+  const isExplorer = useLocation().pathname === "/explorer";
+
   const scrollToStatementAnchor = (parentTerritoryId: string, anchorIndex?: number) => {
     let timeout = 0;
     // short timeout -> statement list is open and the active territory is the anchor parent territory
@@ -695,19 +698,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <StyledAnchorText>{documentAnchor.anchorText}</StyledAnchorText>
                     <StyledAnchorMeta>
                       <div style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
-                        <Button
-                          inverted
-                          noBorder
-                          noBackground
-                          tooltipLabel="locate statement anchor"
-                          icon={<FaAnchor size={16} />}
-                          onClick={() => {
-                            scrollToStatementAnchor(
-                              documentAnchor.parentTerritoryId,
-                              documentAnchor.anchorIndex,
-                            );
-                          }}
-                        />
+                        {/* the explorer has no annotator to locate the anchor in */}
+                        {!isExplorer && (
+                          <Button
+                            inverted
+                            noBorder
+                            noBackground
+                            tooltipLabel="locate statement anchor"
+                            icon={<FaAnchor size={16} />}
+                            onClick={() => {
+                              scrollToStatementAnchor(
+                                documentAnchor.parentTerritoryId,
+                                documentAnchor.anchorIndex,
+                              );
+                            }}
+                          />
+                        )}
                         <DocumentTitle title={documentAnchor.document.title} />
                       </div>
                       {documentAnchor.resourceId && (
