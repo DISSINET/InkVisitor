@@ -1,4 +1,4 @@
-# What's changed [Sep 24, 2026]
+# What's changed [Oct 7, 2026]
 
 ## Explorer
 
