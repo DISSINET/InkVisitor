@@ -2,7 +2,9 @@ import "ts-jest";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
 import {
   collectSubPropEntityIds,
+  groupPropsWithSubPropsByType,
   groupSubPropsByValue,
+  resolvePropsUnderType,
   resolveSubProps,
 } from "./explore-subprops";
 
@@ -58,6 +60,34 @@ describe("explore-subprops", () => {
         value: byId["10m"],
         children: [{ type: undefined, value: byId.metre, children: [] }],
       },
+    ]);
+  });
+});
+
+describe("explore-subprops for property type columns", () => {
+  const distance = prop("distance", "206");
+
+  it("groupPropsWithSubPropsByType keeps every prop of a type where one has subproperties", () => {
+    const withDistance = prop("related", "praha", [distance]);
+    const plain = prop("related", "vienna");
+    const props = [withDistance, plain, prop("status", "alive")];
+    expect(groupPropsWithSubPropsByType(props)).toEqual({ related: [withDistance, plain] });
+  });
+
+  it("resolvePropsUnderType turns each prop into its value with its subproperties", () => {
+    const byId = {
+      praha: entity("praha"),
+      vienna: entity("vienna"),
+      distance: entity("distance"),
+      "206": entity("206"),
+    };
+    const props = [prop("related", "praha", [distance]), prop("related", "vienna")];
+    expect(resolvePropsUnderType(props, byId)).toEqual([
+      {
+        value: byId.praha,
+        children: [{ type: byId.distance, value: byId["206"], children: [] }],
+      },
+      { value: byId.vienna, children: [] },
     ]);
   });
 });

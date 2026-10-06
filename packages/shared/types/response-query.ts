@@ -21,10 +21,13 @@ export interface IResponseQueryEntity {
     IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
   >;
   /**
-   * Subproperties of the props shown in "Entity Property value" columns:
-   * column id -> value entity id -> the subproperties nested under that value.
-   * Kept apart from columnData so its cells stay flat entity lists. Absent when
-   * no shown prop has any.
+   * Subproperty trees for the cells of property columns, by column id and then
+   * by the cell entity they sit under. In "Entity Property value" columns the
+   * key is a value entity and the nodes are its subproperties; in "Entity
+   * Property types" columns the key is a type entity and the nodes are that
+   * type's props, each a value with its subproperties. Kept apart from
+   * columnData so its cells stay flat entity lists. Absent when no shown prop
+   * has subproperties.
    */
   columnSubProps?: Record<string, Record<string, IResponseQuerySubProp[]>>;
 }

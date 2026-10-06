@@ -56,3 +56,45 @@ export const resolveSubProps = (
   }
   return out;
 };
+
+/**
+ * First-level props grouped by type, for the types where at least one prop has
+ * subproperties. Every prop of such a type is kept, so the type's values all
+ * show next to the ones that carry subproperties.
+ */
+export const groupPropsWithSubPropsByType = (props: IProp[]): Record<string, IProp[]> => {
+  const byType: Record<string, IProp[]> = {};
+  for (const prop of props) {
+    const typeId = prop.type?.entityId;
+    if (typeId) {
+      byType[typeId] = (byType[typeId] ?? []).concat(prop);
+    }
+  }
+  const out: Record<string, IProp[]> = {};
+  for (const [typeId, typeProps] of Object.entries(byType)) {
+    if (typeProps.some((prop) => prop.children?.length)) {
+      out[typeId] = typeProps;
+    }
+  }
+  return out;
+};
+
+/**
+ * The props of one type as tree nodes under that type: each node is a prop's
+ * value with its subproperties, the type itself being the parent.
+ */
+export const resolvePropsUnderType = (
+  props: IProp[],
+  entityById: Record<string, IEntity>
+): IResponseQuerySubProp[] => {
+  const out: IResponseQuerySubProp[] = [];
+  for (const prop of props) {
+    const value = entityById[prop.value?.entityId];
+    const children = resolveSubProps(prop.children ?? [], entityById);
+    if (!value && !children.length) {
+      continue;
+    }
+    out.push({ value, children });
+  }
+  return out;
+};
