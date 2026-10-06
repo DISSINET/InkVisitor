@@ -18,7 +18,7 @@ export const StyledToastContainer = styled(ToastContainer)`
     background-color: ${({ theme }) => theme.color["info"]};
   }
   .Toastify__toast--success {
-    background-color: ${({ theme }) => theme.color["toastSuccess"]};
+    background-color: ${({ theme }) => theme.color["success"]};
   }
   .Toastify__toast--warning {
     background-color: ${({ theme }) => theme.color["warning"]};

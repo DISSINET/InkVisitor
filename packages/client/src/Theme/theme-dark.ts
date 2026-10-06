@@ -126,8 +126,6 @@ const darkTheme = {
 
     warningText: "#e84c6e",
 
-    toastSuccess: "#5DD0A9",
-
     elementType: {
       action: "#EB6B6B",
       actant: "#7E9BFF",

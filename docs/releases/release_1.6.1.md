@@ -65,7 +65,6 @@
 - Emails show a text wordmark when the logo asset is missing (e.g. in Docker images)
 - User deletion toast says "deleted" instead of "removed"
 - Escape in a clearable input clears it first; the next Escape closes the modal (#3294)
-- Success notifications are green
 
 ## Development (Technical)
 
