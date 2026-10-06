@@ -251,9 +251,11 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClose();
   };
 
-  // the explorer mounts its own editor, so a statement opens there without
-  // leaving the page, templates included
-  const opensEditorInPlace = isStatement && location.pathname === "/explorer";
+  // The explorer is never left for the main page: a statement opens in the
+  // explorer's own editor, templates included, and a territory has no tree to
+  // open in there.
+  const isExplorer = location.pathname === "/explorer";
+  const opensEditorInPlace = isStatement && isExplorer;
 
   const openStatementInEditor = () => {
     setStatementId(entity.id);
@@ -293,7 +295,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     // only the main page and the explorer mount a detail box to open into
     hasDetailPanel &&
       renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail),
-    (opensEditorInPlace || targetTerritoryId) &&
+    (isExplorer ? opensEditorInPlace : targetTerritoryId) &&
       renderItem(
         "territory",
         isStatement ? "Open statement in editor" : "Go to territory",
