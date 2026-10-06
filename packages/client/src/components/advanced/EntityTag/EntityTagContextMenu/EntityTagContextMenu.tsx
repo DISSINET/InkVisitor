@@ -251,6 +251,15 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClose();
   };
 
+  // the explorer mounts its own editor, so a statement opens there without
+  // leaving the page, templates included
+  const opensEditorInPlace = isStatement && location.pathname === "/explorer";
+
+  const openStatementInEditor = () => {
+    setStatementId(entity.id);
+    onClose();
+  };
+
   const copyToClipboard = (value: string, what: string) => {
     navigator.clipboard.writeText(value);
     toast.info(`${what} [${getShortLabelByLetterCount(value, 200)}] copied to clipboard`);
@@ -284,12 +293,12 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     // only the main page and the explorer mount a detail box to open into
     hasDetailPanel &&
       renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail),
-    targetTerritoryId &&
+    (opensEditorInPlace || targetTerritoryId) &&
       renderItem(
         "territory",
         isStatement ? "Open statement in editor" : "Go to territory",
         isStatement ? <IcoEdit size={ICON_SIZE} /> : <IcoListTree size={ICON_SIZE} />,
-        goToTerritory,
+        opensEditorInPlace ? openStatementInEditor : goToTerritory,
       ),
   ].filter(Boolean);
 

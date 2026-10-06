@@ -603,6 +603,14 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     });
   }, []);
 
+  // a statement can be opened from a tag anywhere on the page, also while the
+  // panel holding the editor is collapsed
+  useEffect(() => {
+    if (statementId) {
+      expandQueryDetailPanel();
+    }
+  }, [statementId, expandQueryDetailPanel]);
+
   const openEntityInDetail = useCallback(
     (entityId: string) => {
       expandQueryDetailPanel();
@@ -1112,7 +1120,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 detailPanelToggleButton,
               ]}
             >
-              <MemoizedStatementEditorBox isExpanded={queryDetailPanelExpanded} isVisible />
+              <MemoizedStatementEditorBox
+                isExpanded={queryDetailPanelExpanded}
+                isVisible={queryDetailPanelExpanded}
+              />
             </Box>
           )}
         </Panel>
