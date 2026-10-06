@@ -78,5 +78,5 @@ Owner only: Import entities from JSON in the Detail box: up to 10 entities, past
 
 ## Deployment
 
-- Run `fixEditorEntityAclJob` again. It now also opens `GET entities/:entityId/relations` to editors; without it they get "Endpoint not allowed" in the JSON import's relation checks and in the Explorer relation column.
+- Run `fixEditorEntityAclJob` again. It now also opens `GET entities/:entityId/relations` to editors; without it they get "Endpoint not allowed" in the Explorer relation column.
 - Clear `usedTemplate` on the one template that had a new template created from it before #3289 — it points at its own copy and should be empty.
