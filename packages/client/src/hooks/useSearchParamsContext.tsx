@@ -19,6 +19,7 @@ const INITIAL_CONTEXT = {
   statementId: "",
   setStatementId: UNINITIALISED,
   statementSetCount: 0,
+  detailOpenCount: 0,
   detailIdArray: [],
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
@@ -42,6 +43,9 @@ interface SearchParamsContext {
   // Grows with every setStatementId call, so a page can react to a statement
   // opened again while it is already the open one.
   statementSetCount: number;
+  // Grows with every entity opened in detail (append or promote), so a page can
+  // react to an entity opened again while it is already the selected tab.
+  detailOpenCount: number;
   detailIdArray: string[];
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
@@ -108,6 +112,8 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
   const [detailId, setDetailId] = useState<string>(
     typeof parsedParams.detail === "string" ? parsedParams.detail : "",
   );
+  const [detailOpenCount, setDetailOpenCount] = useState(0);
+  const countDetailOpen = () => setDetailOpenCount((count) => count + 1);
 
   // Editor is open by default; the URL only records the non-default (closed)
   // state via the `editorClosed` token.
@@ -134,6 +140,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
     setSelectedDetailId(id);
+    countDetailOpen();
   };
 
   // The tab strip shows the head of this list, so moving an id to the front is
@@ -147,6 +154,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
     );
     setDetailId(newDetailIdArray.join(arrJoinChar));
     setSelectedDetailId(id);
+    countDetailOpen();
   };
 
   const appendMultipleDetailIds = (ids: string[], maxCount: number = maxTabCount) => {
@@ -171,6 +179,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
 
     setDetailId(newDetailIdArray.join(arrJoinChar));
     setSelectedDetailId(ids[0]);
+    countDetailOpen();
   };
 
   const replaceDetailIds = (ids: string[]) => {
@@ -311,6 +320,7 @@ export const SearchParamsProvider = ({ children }: { children: ReactElement }) =
         statementId,
         setStatementId: setStatementIdCounted,
         statementSetCount,
+        detailOpenCount,
         detailIdArray: getDetailIdArray(),
         selectedDetailId,
         setSelectedDetailId,

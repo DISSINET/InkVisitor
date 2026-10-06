@@ -91,6 +91,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     statementId,
     setStatementId,
     statementSetCount,
+    detailOpenCount,
   } = useSearchParams();
 
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
@@ -639,9 +640,28 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     }
   }, [statementId, statementSetCount, expandQueryDetailPanel]);
 
+  // an entity opened in detail also brings back a Detail box squeezed under a
+  // maximized editor
+  const revealDetailBox = useCallback(() => {
+    expandQueryDetailPanel();
+    setEditorBoxState((state) =>
+      state === EditorBoxState.FullHeight ? EditorBoxState.Normal : state,
+    );
+  }, [expandQueryDetailPanel]);
+
+  // Entities opened from tags anywhere on the page. The count lives in the
+  // provider for the whole session, so only a change after mount counts.
+  const seenDetailOpenCountRef = useRef(detailOpenCount);
+  useEffect(() => {
+    if (detailOpenCount !== seenDetailOpenCountRef.current) {
+      seenDetailOpenCountRef.current = detailOpenCount;
+      revealDetailBox();
+    }
+  }, [detailOpenCount, revealDetailBox]);
+
   const openEntityInDetail = useCallback(
     (entityId: string) => {
-      expandQueryDetailPanel();
+      revealDetailBox();
 
       if (detailIdArray.includes(entityId)) {
         setSelectedDetailId(entityId);
@@ -649,7 +669,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         appendDetailId(entityId, maxTabCount);
       }
     },
-    [appendDetailId, detailIdArray, expandQueryDetailPanel, setSelectedDetailId],
+    [appendDetailId, detailIdArray, revealDetailBox, setSelectedDetailId],
   );
 
   const openEntitiesInDetail = useCallback(
@@ -658,7 +678,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         return;
       }
 
-      expandQueryDetailPanel();
+      revealDetailBox();
 
       let idsToAdd = entityIds;
       if (entityIds.length > maxTabCount) {
@@ -679,7 +699,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       replaceDetailIds(newDetailIdArray);
       setSelectedDetailId(idsToAdd[0]);
     },
-    [detailIdArray, expandQueryDetailPanel, replaceDetailIds, setSelectedDetailId],
+    [detailIdArray, revealDetailBox, replaceDetailIds, setSelectedDetailId],
   );
 
   useEffect(() => {
@@ -1154,6 +1174,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               heightVarKey="queryEditor"
               isExpanded={queryDetailPanelExpanded}
               onHeaderClick={toggleQueryDetailPanel}
+              disableHeaderClick
               buttons={[
                 <>
                   {queryDetailPanelExpanded && isDetailPanelSplit && (
