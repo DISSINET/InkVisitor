@@ -6,7 +6,7 @@ import { StyledDots } from "pages/Main/containers/StatementsListBox/StatementLis
 import React, { useState } from "react";
 import { getEntityLabel } from "utils/utils";
 import { StyledTooltipRow, StyledTooltipValue } from "../Header/ExploreTableHeaderTooltipStyles";
-import { ExplorerCellValuesTree } from "./ExplorerCellSubProps";
+import { ExplorerCellPropsTree } from "./ExplorerCellSubProps";
 import { useHoverTooltip } from "./useHoverTooltip";
 import {
   StyledOverflowTextList,
@@ -39,28 +39,26 @@ interface ExplorerCellOverflowProps {
   hiddenItems: CellOverflowItem[];
   onEntityDoubleClick?: (entity: IEntity) => (e: React.MouseEvent) => void;
   /**
-   * All the cell's values with their subproperties, by value entity id. When
-   * given, the "..." shows even with nothing hidden and opens the trees of all
-   * the values.
+   * All the cell's entities with their first-level props, by cell entity id.
+   * When given, the "..." shows even with nothing hidden and opens the props
+   * of all the cell's entities with their subproperties.
    */
-  subPropsTree?: {
+  propsTree?: {
     values: IEntity[];
-    subPropsByValue: Record<string, IResponseQuerySubProp[]>;
-    /** The values are property types and the first tree level their props. */
-    valueOnly?: boolean;
+    propsByValue: Record<string, IResponseQuerySubProp[]>;
   };
 }
 
 export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
   hiddenItems,
   onEntityDoubleClick,
-  subPropsTree,
+  propsTree,
 }) => {
   const theme = useTheme();
   const tooltip = useHoverTooltip();
   const [referenceElement, setReferenceElement] = useState<HTMLSpanElement | null>(null);
 
-  if (hiddenItems.length === 0 && !subPropsTree) {
+  if (hiddenItems.length === 0 && !propsTree) {
     return null;
   }
 
@@ -68,11 +66,10 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
 
   // the tooltip renders through a portal, so its clicks still bubble up the
   // React tree to the row handler - the marker is what the row checks for
-  const content = subPropsTree ? (
-    <ExplorerCellValuesTree
-      values={subPropsTree.values}
-      subPropsByValue={subPropsTree.subPropsByValue}
-      valueOnly={subPropsTree.valueOnly}
+  const content = propsTree ? (
+    <ExplorerCellPropsTree
+      values={propsTree.values}
+      propsByValue={propsTree.propsByValue}
       onEntityDoubleClick={onEntityDoubleClick}
     />
   ) : allEntities ? (
@@ -104,7 +101,7 @@ export const ExplorerCellOverflow: React.FC<ExplorerCellOverflowProps> = ({
         position="right"
         color="success"
         noArrow
-        tagGroup={!!subPropsTree || allEntities}
+        tagGroup={!!propsTree || allEntities}
         offsetY={0}
         fadeOut
         onMouseEnter={tooltip.onTooltipMouseEnter}

@@ -71,7 +71,7 @@ const estimateItemWidth = (item: unknown, hasUnlink: boolean): number => {
   return Math.min(labelPx, TEXT_MAX_PX);
 };
 
-/** Whether any value of a cell has subproperties, which its "..." opens. */
+/** Whether the cell has prop trees, which its "..." opens; see IResponseQueryEntity.columnSubProps. */
 export const hasSubProps = (
   subPropsByValue: Record<string, IResponseQuerySubProp[]> | undefined,
 ): boolean => !!subPropsByValue && Object.values(subPropsByValue).some((s) => s.length > 0);

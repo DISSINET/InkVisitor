@@ -527,13 +527,9 @@ const ExplorerTableRow: React.FC<ExplorerTableRowProps> = ({
               <ExplorerCellOverflow
                 hiddenItems={cellData.slice(CELL_DISPLAY_LIMIT)}
                 onEntityDoubleClick={handleOpenEntityInDetail}
-                subPropsTree={
+                propsTree={
                   subPropsByValue && hasSubProps(subPropsByValue)
-                    ? {
-                        values: cellData as IEntity[],
-                        subPropsByValue,
-                        valueOnly: column.type === Explore.EExploreColumnType.EPT,
-                      }
+                    ? { values: cellData as IEntity[], propsByValue: subPropsByValue }
                     : undefined
                 }
               />

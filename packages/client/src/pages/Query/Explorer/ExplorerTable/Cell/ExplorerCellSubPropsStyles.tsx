@@ -1,14 +1,15 @@
 import styled from "styled-components";
 
-// the full nesting, one subproperty per line, each level indented behind a bar
-export const StyledValuesTree = styled.div`
+// the cell's props, one block each: the prop's row with its subproperties
+// under it, one per line, each level indented behind a bar
+export const StyledPropsTree = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledValueTree = styled.div`
+export const StyledPropBlock = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;

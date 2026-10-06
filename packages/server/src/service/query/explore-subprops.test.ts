@@ -2,9 +2,8 @@ import "ts-jest";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
 import {
   collectSubPropEntityIds,
-  groupPropsWithSubPropsByType,
-  groupSubPropsByValue,
-  resolvePropsUnderType,
+  groupPropsByType,
+  groupPropsByValue,
   resolveSubProps,
 } from "./explore-subprops";
 
@@ -22,19 +21,43 @@ describe("explore-subprops", () => {
   const distance = prop("distance", "206");
   const precision = prop("precision", "10m", [prop("unit", "metre")]);
 
-  it("groupSubPropsByValue keeps only props of the type that have subproperties", () => {
-    const props = [
-      prop("related", "praha", [distance]),
-      prop("related", "vienna"),
-      prop("coordinates", "49N", [precision]),
-    ];
-    expect(groupSubPropsByValue(props, "related")).toEqual({ praha: [distance] });
+  describe("groupPropsByValue", () => {
+    it("keeps every prop of the type, by value, once one has subproperties", () => {
+      const praha = prop("related", "praha", [distance]);
+      const vienna = prop("related", "vienna");
+      const props = [praha, vienna, prop("coordinates", "49N", [precision])];
+      expect(groupPropsByValue(props, "related")).toEqual({
+        praha: [praha],
+        vienna: [vienna],
+      });
+    });
+
+    it("keeps props sharing a value apart", () => {
+      const first = prop("related", "praha", [distance]);
+      const second = prop("related", "praha");
+      expect(groupPropsByValue([first, second], "related")).toEqual({ praha: [first, second] });
+    });
+
+    it("is empty when no prop of the type has subproperties", () => {
+      const props = [prop("related", "praha"), prop("coordinates", "49N", [precision])];
+      expect(groupPropsByValue(props, "related")).toEqual({});
+    });
   });
 
-  it("groupSubPropsByValue merges subproperties of props sharing a value", () => {
-    const other = prop("note", "x");
-    const props = [prop("related", "praha", [distance]), prop("related", "praha", [other])];
-    expect(groupSubPropsByValue(props, "related")).toEqual({ praha: [distance, other] });
+  describe("groupPropsByType", () => {
+    it("keeps every prop, by type, once one has subproperties", () => {
+      const praha = prop("related", "praha", [distance]);
+      const vienna = prop("related", "vienna");
+      const alive = prop("status", "alive");
+      expect(groupPropsByType([praha, vienna, alive])).toEqual({
+        related: [praha, vienna],
+        status: [alive],
+      });
+    });
+
+    it("is empty when no prop has subproperties", () => {
+      expect(groupPropsByType([prop("related", "praha"), prop("status", "alive")])).toEqual({});
+    });
   });
 
   it("collectSubPropEntityIds walks nested subproperties", () => {
@@ -48,7 +71,7 @@ describe("explore-subprops", () => {
     ]);
   });
 
-  it("resolveSubProps maps ids to entities and drops subproperties with nothing to show", () => {
+  it("resolveSubProps maps ids to entities and drops props with nothing to show", () => {
     const byId = {
       precision: entity("precision"),
       "10m": entity("10m"),
@@ -60,34 +83,6 @@ describe("explore-subprops", () => {
         value: byId["10m"],
         children: [{ type: undefined, value: byId.metre, children: [] }],
       },
-    ]);
-  });
-});
-
-describe("explore-subprops for property type columns", () => {
-  const distance = prop("distance", "206");
-
-  it("groupPropsWithSubPropsByType keeps every prop of a type where one has subproperties", () => {
-    const withDistance = prop("related", "praha", [distance]);
-    const plain = prop("related", "vienna");
-    const props = [withDistance, plain, prop("status", "alive")];
-    expect(groupPropsWithSubPropsByType(props)).toEqual({ related: [withDistance, plain] });
-  });
-
-  it("resolvePropsUnderType turns each prop into its value with its subproperties", () => {
-    const byId = {
-      praha: entity("praha"),
-      vienna: entity("vienna"),
-      distance: entity("distance"),
-      "206": entity("206"),
-    };
-    const props = [prop("related", "praha", [distance]), prop("related", "vienna")];
-    expect(resolvePropsUnderType(props, byId)).toEqual([
-      {
-        value: byId.praha,
-        children: [{ type: byId.distance, value: byId["206"], children: [] }],
-      },
-      { value: byId.vienna, children: [] },
     ]);
   });
 });

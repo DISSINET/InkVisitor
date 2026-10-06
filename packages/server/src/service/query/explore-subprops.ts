@@ -1,21 +1,45 @@
 import { IEntity, IProp, IResponseQuerySubProp } from "@inkvisitor/shared/types";
 
+const hasSubProps = (props: IProp[]): boolean => props.some((prop) => prop.children?.length);
+
 /**
- * Subproperties of the props of one type, grouped by the value entity they hang
- * under. Props sharing a value merge their subproperties; values without any
- * are left out.
+ * The props of one type grouped by their value entity, for an "Entity Property
+ * value" cell. Empty unless one of those props has subproperties; then every
+ * prop of the type is kept, so the tooltip lists all the cell's values.
  */
-export const groupSubPropsByValue = (
+export const groupPropsByValue = (
   props: IProp[],
   propertyTypeId: string
 ): Record<string, IProp[]> => {
+  const typeProps = props.filter(
+    (prop) => prop.type?.entityId === propertyTypeId && prop.value?.entityId
+  );
+  if (!hasSubProps(typeProps)) {
+    return {};
+  }
+  const out: Record<string, IProp[]> = {};
+  for (const prop of typeProps) {
+    const valueId = prop.value.entityId;
+    out[valueId] = (out[valueId] ?? []).concat(prop);
+  }
+  return out;
+};
+
+/**
+ * The props grouped by their type entity, for an "Entity Property types" cell.
+ * Empty unless one of the props has subproperties; then every prop is kept, so
+ * the tooltip lists all the cell's types with their values.
+ */
+export const groupPropsByType = (props: IProp[]): Record<string, IProp[]> => {
+  if (!hasSubProps(props)) {
+    return {};
+  }
   const out: Record<string, IProp[]> = {};
   for (const prop of props) {
-    const valueId = prop.value?.entityId;
-    if (prop.type?.entityId !== propertyTypeId || !valueId || !prop.children?.length) {
-      continue;
+    const typeId = prop.type?.entityId;
+    if (typeId) {
+      out[typeId] = (out[typeId] ?? []).concat(prop);
     }
-    out[valueId] = (out[valueId] ?? []).concat(prop.children);
   }
   return out;
 };
@@ -36,9 +60,9 @@ export const collectSubPropEntityIds = (props: IProp[]): string[] => {
 };
 
 /**
- * Swaps the entity ids in the prop trees for the loaded entities. A subproperty
- * with neither side loaded and nothing nested under it has nothing to show and
- * is dropped.
+ * Swaps the entity ids in the prop trees for the loaded entities. A prop with
+ * neither side loaded and nothing nested under it has nothing to show and is
+ * dropped.
  */
 export const resolveSubProps = (
   props: IProp[],
@@ -53,48 +77,6 @@ export const resolveSubProps = (
       continue;
     }
     out.push({ type, value, children });
-  }
-  return out;
-};
-
-/**
- * First-level props grouped by type, for the types where at least one prop has
- * subproperties. Every prop of such a type is kept, so the type's values all
- * show next to the ones that carry subproperties.
- */
-export const groupPropsWithSubPropsByType = (props: IProp[]): Record<string, IProp[]> => {
-  const byType: Record<string, IProp[]> = {};
-  for (const prop of props) {
-    const typeId = prop.type?.entityId;
-    if (typeId) {
-      byType[typeId] = (byType[typeId] ?? []).concat(prop);
-    }
-  }
-  const out: Record<string, IProp[]> = {};
-  for (const [typeId, typeProps] of Object.entries(byType)) {
-    if (typeProps.some((prop) => prop.children?.length)) {
-      out[typeId] = typeProps;
-    }
-  }
-  return out;
-};
-
-/**
- * The props of one type as tree nodes under that type: each node is a prop's
- * value with its subproperties, the type itself being the parent.
- */
-export const resolvePropsUnderType = (
-  props: IProp[],
-  entityById: Record<string, IEntity>
-): IResponseQuerySubProp[] => {
-  const out: IResponseQuerySubProp[] = [];
-  for (const prop of props) {
-    const value = entityById[prop.value?.entityId];
-    const children = resolveSubProps(prop.children ?? [], entityById);
-    if (!value && !children.length) {
-      continue;
-    }
-    out.push({ value, children });
   }
   return out;
 };
