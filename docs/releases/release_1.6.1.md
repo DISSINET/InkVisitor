@@ -2,12 +2,12 @@
 
 ## Explorer
 
-- Edges that were greyed out in the edge type dropdown are now implemented and can be used in queries (#2969, #3199, #3271)
+- Edges that were greyed out in the edge type dropdown are now implemented and can be used in queries (#2969 [8], #3199, #3271)
 
 <details>
 <summary>List of the newly implemented edges</summary>
 
-- Has-relation edges — HOL, AEE, IMP, SUS, A1S, A2S, SYN, ANT, PRR, SAR, IDE and REL (#2969)
+- Has-relation edges — HOL, AEE, IMP, SUS, A1S, A2S, SYN, ANT, PRR, SAR, IDE and REL (#2969 [8])
 - Inverse relation edges — subclasses, subordinates, instances, meronyms and Action/Event equivalents (I_R:SCL, I_R:SOE, I_R:CLA, I_R:HOL, I_R:AEE), labelled "(inv. X)" (#3199, #3271)
 - Position-restricted "is in S" edges — subject, actant 1, actant 2, pseudoactant and action (IS:S, IS:A1, IS:A2, IS:PS, IS:A), with inverses I_IS:A and I_IS:PS (#3271)
 - Statement classification / identification edges SC, SI and I_SI (#3271)
@@ -16,12 +16,12 @@
 
 </details>
 
-- Relation edges constrain their target to the classes the relation rule allows, and the target class follows the query root (#2969)
-- Entity status filter on search nodes; it narrows only an empty target, a picked entity is matched as is (#2969, #3271)
+- Relation edges constrain their target to the classes the relation rule allows, and the target class follows the query root (#2969 [8])
+- Entity status filter on search nodes; it narrows only an empty target, a picked entity is matched as is (#2969 [16], #3271)
 - EQ / SUB toggles are disabled until an entity is picked and where they do not apply, with a tooltip saying why (#3271)
-- Edge type dropdown grouped by relation family, with forward and inverse pairs side by side and a tooltip describing each edge; edges that duplicate another (symmetric-relation inverses, SUT:D / I_SUT:D, inverse IMP / SUS / A1S / A2S, CT:G) are hidden (#2969, #3271)
-- "Co-occurs with" filter in the floating search — matches entities sharing a Statement with any of the picked entities (#2969)
-- Batch actions to set label language and part of speech, with an overwrite checkbox, for Admin and Owner (#2969)
+- Edge type dropdown grouped by relation family, with forward and inverse pairs side by side and a tooltip describing each edge; edges that duplicate another (symmetric-relation inverses, SUT:D / I_SUT:D, inverse IMP / SUS / A1S / A2S, CT:G) are hidden (#2969 [8], [23], #3271)
+- "Co-occurs with" filter in the floating search — matches entities sharing a Statement with any of the picked entities (#2969 [14])
+- Batch actions to set label language and part of speech, with an overwrite checkbox, for Admin and Owner (#2969 [4], [22])
 - EQ / SUB toggles on a query node show how many entities they pull in, with a popover listing them (#3252)
 - New columns: logical type, entity class and "Used in" (the first-level Territories whose Statements reference the entity) (#3227)
 - Numbered rows in query results (#2954)
