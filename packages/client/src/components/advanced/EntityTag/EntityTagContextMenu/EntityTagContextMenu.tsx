@@ -15,7 +15,7 @@ import {
   IcoUnlink,
 } from "Theme/icons";
 import { useBookmarksQuery } from "hooks/react-query";
-import { useSearchParams } from "hooks";
+import { useDetailPanelReveal, useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -29,6 +29,7 @@ import {
   StyledEmptyNote,
   StyledItemIcon,
   StyledItemLabel,
+  StyledItemCount,
   StyledItemTrailing,
   StyledMenuDivider,
   StyledMenuFloating,
@@ -68,6 +69,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   );
   const { setTerritoryId, setStatementId, detailIdArray, selectedDetailId, promoteDetailId } =
     useSearchParams();
+  const { revealEditor, revealDetail } = useDetailPanelReveal();
 
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
 
@@ -213,6 +215,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   const openInDetail = () => {
     promoteDetailId(entity.id);
     expandDetailPanel();
+    revealDetail();
     onClose();
   };
 
@@ -261,6 +264,18 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClose();
   };
 
+  // The explorer is never left for the main page: a statement opens in the
+  // explorer's own editor, templates included, and a territory has no tree to
+  // open in there.
+  const isExplorer = location.pathname === "/explorer";
+  const opensEditorInPlace = isStatement && isExplorer;
+
+  const openStatementInEditor = () => {
+    setStatementId(entity.id);
+    revealEditor();
+    onClose();
+  };
+
   const copyToClipboard = (value: string, what: string) => {
     navigator.clipboard.writeText(value);
     toast.info(`${what} [${getShortLabelByLetterCount(value, 200)}] copied to clipboard`);
@@ -294,12 +309,12 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     // only the main page and the explorer mount a detail box to open into
     hasDetailPanel &&
       renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail),
-    targetTerritoryId &&
+    (isExplorer ? opensEditorInPlace : targetTerritoryId) &&
       renderItem(
         "territory",
         isStatement ? "Open statement in editor" : "Go to territory",
         isStatement ? <IcoEdit size={ICON_SIZE} /> : <IcoListTree size={ICON_SIZE} />,
-        goToTerritory,
+        opensEditorInPlace ? openStatementInEditor : goToTerritory,
       ),
   ].filter(Boolean);
 
@@ -346,7 +361,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
               </StyledItemIcon>
               <StyledItemLabel>Bookmarks</StyledItemLabel>
               <StyledItemTrailing>
-                {bookmarkedInCount > 0 && <span>{bookmarkedInCount}</span>}
+                {bookmarkedInCount > 0 && <StyledItemCount>{bookmarkedInCount}</StyledItemCount>}
                 <IcoCaretRight size={ICON_SIZE + 3} />
               </StyledItemTrailing>
             </StyledMenuItem>

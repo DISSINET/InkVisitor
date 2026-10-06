@@ -938,7 +938,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
               thirdPanelButton(),
             ]}
           >
-            <MemoizedStatementEditorBox />
+            <MemoizedStatementEditorBox
+              isExpanded={thirdPanelExpanded}
+              isVisible={editorOpened && editorBoxState !== EditorBoxState.Minimized}
+            />
           </Box>
         )}
       </Panel>

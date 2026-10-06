@@ -11,6 +11,7 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { FaAnchor } from "react-icons/fa";
 import { IcoTrash } from "Theme/icons";
 import { HiClipboardList } from "react-icons/hi";
@@ -67,6 +68,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
 
   const { setTerritoryId, setStatementId, territoryId } = useSearchParams();
   const dispatch = useAppDispatch();
+  const isExplorer = useLocation().pathname === "/explorer";
 
   const { scrollToAnchor } = useAnnotator();
 
@@ -257,7 +259,8 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
           );
         },
       },
-    ],
+      // the explorer has no annotator to locate an anchor in
+    ].filter((column) => !isExplorer || column.id !== "anchor btn"),
     [
       entities,
       detailBoxState,
@@ -265,6 +268,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
       entityId,
       territoryId,
       widthTooNarrow,
+      isExplorer,
     ]
   );
 
@@ -276,7 +280,7 @@ export const EntityDetailUsedInDocumentsTable: React.FC<
         data={uses}
         perPage={perPage}
         isLoading={removeAnchorMutation.isPending}
-        firstColumnMinWidth
+        firstColumnMinWidth={!isExplorer}
         // lastColumnMinWidth
       />
     </>

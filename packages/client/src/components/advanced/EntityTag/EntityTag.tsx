@@ -4,7 +4,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { ThemeColor } from "Theme/theme";
 import { Button, Tag, Tooltip } from "components";
 import { EntityTooltip } from "components/advanced";
-import { useEntityEditing, useSearchParams } from "hooks";
+import { useDetailPanelReveal, useEntityEditing, useSearchParams } from "hooks";
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -142,6 +142,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
   const disableContextMenu = disableContextMenuProp || isUnstored;
 
   const { promoteDetailId } = useSearchParams();
+  const { revealDetail } = useDetailPanelReveal();
   const dispatch = useAppDispatch();
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState,
@@ -430,6 +431,7 @@ const EntityTagInner: React.FC<EntityTag> = ({
             // opening at the front of the tab strip keeps the entity on screen
             // whatever else is already open
             promoteDetailId(entity.id);
+            revealDetail();
             dispatch(setSecondPanelExpanded(true));
             if (detailBoxState === DetailBoxState.Minimized) {
               dispatch(setDetailBoxState(DetailBoxState.Normal));

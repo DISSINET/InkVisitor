@@ -11,7 +11,7 @@ import { STATEMENT_LABEL_NOT_RECOMMENDED, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester, Button } from "components";
 import { CEntity, InstTemplate } from "constructors";
-import { useDebounce, useEntityEditing, useSearchParams } from "hooks";
+import { useDebounce, useDetailPanelReveal, useEntityEditing, useSearchParams } from "hooks";
 import { useValueDropCopy } from "hooks/useValueDropCopy";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDrop } from "react-dnd";
@@ -229,6 +229,12 @@ const EntitySuggesterFull: React.FC<
   }, [categoryTypes, disableWildCard]);
 
   const { appendDetailId } = useSearchParams();
+  const { revealDetail } = useDetailPanelReveal();
+
+  const openCreatedInDetail = (entityId: string) => {
+    appendDetailId(entityId);
+    revealDetail();
+  };
 
   // get user data
   const userRole = getStoredUserRole();
@@ -344,7 +350,7 @@ const EntitySuggesterFull: React.FC<
       handleClean();
     }
     if (openDetailOnCreate && entity.class !== EntityEnums.Class.Value) {
-      appendDetailId(entity.id);
+      openCreatedInDetail(entity.id);
     }
     if (entity.class === EntityEnums.Class.Territory) {
       queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -423,7 +429,7 @@ const EntitySuggesterFull: React.FC<
       onPicked(newEntity);
       handleClean();
       if (openDetailOnCreate && templateToDuplicate.class !== EntityEnums.Class.Value) {
-        appendDetailId(newEntity.id);
+        openCreatedInDetail(newEntity.id);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
         queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -616,7 +622,7 @@ const EntitySuggesterFull: React.FC<
               onPicked(newEntity);
               handleClean();
               if (openDetailOnCreate) {
-                appendDetailId(newEntity.id);
+                openCreatedInDetail(newEntity.id);
               }
               queryClient.invalidateQueries({ queryKey: ["tree"] });
             }
