@@ -16,6 +16,7 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
+    "oxlint": "^1.87.0",
     "prettier": "3.7.4",
     "turbo": "^2.9.14"
   }
