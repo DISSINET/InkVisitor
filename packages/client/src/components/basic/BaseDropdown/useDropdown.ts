@@ -62,7 +62,7 @@ interface UseDropdownArgs<O extends DropdownItem> {
      keys drive floating-ui's aria-activedescendant wiring;
    - the search input is a child of the control; the control div is the
      floating reference. */
-export const useDropdown =<O extends DropdownItem>({
+export const useDropdown = <O extends DropdownItem>({
   options,
   value,
   multi,
