@@ -26,6 +26,24 @@ import { ChangeMeta } from "./types";
 const MENU_MAX_HEIGHT = 320;
 const MENU_MIN_HEIGHT = 180;
 
+/* size runs before flip: the menu is trimmed to the room on its side, but
+   never below MENU_MIN_HEIGHT, so only a side too cramped to use still
+   overflows and makes flip move the menu to the other side */
+const menuMiddleware = [
+  offset(1),
+  size({
+    padding: 10,
+    apply({ rects, availableHeight, elements }) {
+      elements.floating.style.width = `${rects.reference.width}px`;
+      elements.floating.style.maxHeight = `${Math.min(
+        MENU_MAX_HEIGHT,
+        Math.max(availableHeight, MENU_MIN_HEIGHT)
+      )}px`;
+    },
+  }),
+  flip({ padding: 10, fallbackStrategy: "bestFit" }),
+];
+
 interface UseDropdownArgs<O extends DropdownItem> {
   options: O[];
   value: O[];
@@ -36,7 +54,15 @@ interface UseDropdownArgs<O extends DropdownItem> {
   onChange: (next: O[], meta: ChangeMeta<O>) => void;
 }
 
-export const useDropdown = <O extends DropdownItem>({
+/* Consumer contract:
+   - spread getReferenceProps({ onKeyDown: onControlKeyDown }) on the control;
+   - every option must get getItemProps({ active: i === activeIndex,
+     selected: isSelected(option), onClick: () => selectOption(option) })
+     AND ref={(el) => { itemsRef.current[i] = el }} — the active/selected
+     keys drive floating-ui's aria-activedescendant wiring;
+   - the search input is a child of the control; the control div is the
+     floating reference. */
+export const useDropdown =<O extends DropdownItem>({
   options,
   value,
   multi,
@@ -72,6 +98,16 @@ export const useDropdown = <O extends DropdownItem>({
 
   const disabledIdx = getDisabledIndices(filtered);
 
+  const isSelected = (option: O) =>
+    value.some((v) => v.value === option.value);
+
+  /* only seeds the highlight while not filtering — during a search the
+     first-match effect owns the highlight, and a moving selectedIndex would
+     re-trigger floating-ui's own seeding effect on every keystroke */
+  const firstSelectedIndex = filtered.findIndex(isSelected);
+  const selectedIndex =
+    !search && firstSelectedIndex !== -1 ? firstSelectedIndex : null;
+
   const closeMenu = () => {
     setOpen(false);
     setSearch("");
@@ -83,23 +119,7 @@ export const useDropdown = <O extends DropdownItem>({
     onOpenChange: (next) => (next ? setOpen(true) : closeMenu()),
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    /* size runs before flip: the menu is trimmed to the room on its side, but
-       never below MENU_MIN_HEIGHT, so only a side too cramped to use still
-       overflows and makes flip move the menu to the other side */
-    middleware: [
-      offset(1),
-      size({
-        padding: 10,
-        apply({ rects, availableHeight, elements }) {
-          elements.floating.style.width = `${rects.reference.width}px`;
-          elements.floating.style.maxHeight = `${Math.min(
-            MENU_MAX_HEIGHT,
-            Math.max(availableHeight, MENU_MIN_HEIGHT)
-          )}px`;
-        },
-      }),
-      flip({ padding: 10, fallbackStrategy: "bestFit" }),
-    ],
+    middleware: menuMiddleware,
   });
 
   const click = useClick(context, { enabled: !disabled, keyboardHandlers: false });
@@ -113,15 +133,7 @@ export const useDropdown = <O extends DropdownItem>({
     loop: true,
     disabledIndices: (index) =>
       index >= filtered.length || disabledIdx.includes(index),
-    /* only seeds the highlight while not filtering — during a search the
-       first-match effect owns the highlight, and a moving selectedIndex would
-       re-trigger floating-ui's own seeding effect on every keystroke */
-    selectedIndex: !search && value.length > 0
-      ? (() => {
-          const i = filtered.findIndex((o) => value.some((v) => v.value === o.value));
-          return i === -1 ? null : i;
-        })()
-      : null,
+    selectedIndex,
   });
   const typeahead = useTypeahead(context, {
     listRef: labelsRef,
@@ -155,16 +167,14 @@ export const useDropdown = <O extends DropdownItem>({
     emit(clearSelection<O>());
     closeMenu();
   };
-  const isSelected = (option: O) =>
-    value.some((v) => v.value === option.value);
 
   /* Enter/arrow/backspace behavior on the control; the floating-ui hooks
      handle arrow navigation while open, Esc, and outside-click dismissal. */
   const onControlKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       if (open) {
-        // an open menu owns Enter; document-level shortcuts (Explorer's run
-        // search) would otherwise see the menu already closed by the pick
+        // an open menu owns Enter: document-level shortcuts (Explorer's run
+        // search) must not react to the Enter that picks an option
         e.stopPropagation();
       }
       if (open && activeIndex != null && filtered[activeIndex]) {
@@ -184,14 +194,6 @@ export const useDropdown = <O extends DropdownItem>({
     }
   };
 
-  /* Consumer contract:
-     - spread getReferenceProps({ onKeyDown: onControlKeyDown }) on the control;
-     - every option must get getItemProps({ active: i === activeIndex,
-       selected: isSelected(option), onClick: () => selectOption(option) })
-       AND ref={(el) => { itemsRef.current[i] = el }} — the active/selected
-       keys drive floating-ui's aria-activedescendant wiring;
-     - the search input is a child of the control; the control div is the
-       floating reference. */
   return {
     open,
     setOpen,
