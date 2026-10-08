@@ -70,7 +70,6 @@
   },
   "devDependencies": {
     "@redux-devtools/extension": "^3.3.0",
-    "@tanstack/eslint-plugin-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.100.10",
     "@types/d3": "^7.4.3",
     "@types/node": "^24.12.4",
@@ -83,15 +82,13 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/react-table": "^7.7.20",
     "@types/styled-components": "^5.1.36",
-    "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^5.2.0",
     "babel-plugin-styled-components": "^2.1.4",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
     "react-spring": "^10.0.3",
     "socket.io-client": "^4.8.3",
-    "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-plugin-styled-components": "^3.0.0",
+    "typescript": "^7.0.2",
     "vite": "8.0.3",
     "vitest": "^4.1.7"
   }
