@@ -3,7 +3,7 @@ import { IEntity, IStatement } from "@inkvisitor/shared/types";
 import { IResponseUsedInStatementProps } from "@inkvisitor/shared/types/response-detail";
 import { Button } from "components";
 import { EntityTag } from "components/advanced";
-import { useSearchParams, useTheme } from "hooks";
+import { useDetailPanelReveal, useSearchParams, useTheme } from "hooks";
 import React, { useMemo } from "react";
 import { List } from "react-window";
 import { FaEdit } from "react-icons/fa";
@@ -106,6 +106,7 @@ export const EntityDetailStatementPropsTable: React.FC<EntityDetailStatementProp
   const separatorHeight = 3;
 
   const { setStatementId, setTerritoryId } = useSearchParams();
+  const { revealEditor } = useDetailPanelReveal();
 
   const handleEditClick = async (statementId: string) => {
     const entity = entities[statementId];
@@ -113,6 +114,7 @@ export const EntityDetailStatementPropsTable: React.FC<EntityDetailStatementProp
       const statement = entity as IStatement;
       if (statement.data.territory) {
         setStatementId(statement.id);
+        revealEditor();
         setTerritoryId(statement.data.territory.territoryId);
       }
     }

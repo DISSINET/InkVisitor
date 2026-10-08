@@ -9,6 +9,21 @@
   GitHub issue number (e.g. `(#3001)`) when applicable.
 - Only commit or push when explicitly asked.
 
+## API endpoints
+
+- **When adding a new server endpoint, ask which user roles may call it.** A
+  route with no `acl_permissions` row is auto-created with `roles: []`, so every
+  non-admin gets "Endpoint not allowed". Once agreed, open it one of two ways:
+  - **Read-only route open to every logged-in user** (e.g. entity tooltip,
+    detail, expansion): add a code exception in
+    `packages/server/src/middlewares/acl.ts` next to the existing ones. No
+    database change or deploy job needed.
+  - **Route limited to specific roles** (e.g. editor): seed the row in
+    `packages/database/datasets/{default,production}/acl_permissions.json` and
+    add it to `packages/database/scripts/jobs/fix-editor-entity-acl.ts` so
+    running databases get it too; mention the job in the release notes'
+    Deployment section.
+
 ## Comments
 
 - **Describe the code, not the change.** A comment is read by someone who never
@@ -32,3 +47,5 @@
   font sizes, etc. Never hardcode color values — the app supports dark mode
   and hardcoded colors break it.
 - If adding icon, first check Theme/icons.ts if this or similar icon exists in our app
+- Never use the native `title` attribute for hover hints. Use the app's
+  `Tooltip` component (or `IconWithTooltip` for a lone icon) from `components`.

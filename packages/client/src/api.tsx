@@ -14,6 +14,7 @@ import {
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
+  IResponseEntityExpansion,
   IResponseGeneric,
   IResponsePermission,
   IPropSpec,
@@ -35,6 +36,7 @@ import {
 } from "@inkvisitor/shared/types";
 import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
 import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
@@ -1586,6 +1588,26 @@ class Api {
           filters,
           forward,
         },
+      });
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Entities added to a pinned query-node entity by its EQ / SUB toggles.
+   * `totals` are exact even when the row lists were capped server-side.
+   */
+  async entityExpansion(
+    entityId: string,
+    params: Record<ExpansionGroup, boolean>,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseEntityExpansion>> {
+    try {
+      const response = await this.connection.get(`entities/${entityId}/expansion`, {
+        ...options,
+        params,
       });
       return response;
     } catch (err) {

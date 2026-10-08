@@ -75,12 +75,3 @@ export const StyledTagWrap = styled.div`
   margin-bottom: 0.3rem;
   margin-right: 0.3rem;
 `;
-
-export const StyledNotes = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  margin-top: 2rem;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-`;

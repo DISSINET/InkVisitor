@@ -5,7 +5,12 @@ import api from "api";
 import { boxContentId, Button, CustomScrollbar, Loader } from "components";
 import { EntityCreateModal } from "components/advanced";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
-import { useUserQuery } from "hooks/react-query";
+import {
+  useDocumentsQuery,
+  useResourcesWithDocumentsQuery,
+  useUserQuery,
+} from "hooks/react-query";
+import { scrollToTerritoryInTree } from "hooks/ScrollHandler";
 import { useTreeQuery } from "hooks/react-query/useTreeQuery";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaStar } from "react-icons/fa";
@@ -14,7 +19,7 @@ import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { IcoPlusBold } from "Theme/icons";
+import { IcoCollapse, IcoPlusBold } from "Theme/icons";
 import { IExtendedResponseTree, ITerritoryFilter } from "types";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { searchTree } from "utils/utils";
@@ -26,12 +31,14 @@ import {
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import { filterTreeByFilters, markNodesWithFilters } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { getDocumentTerritoryIds } from "./documentTerritories";
 
 const initFilterSettings: ITerritoryFilter = {
   starred: false,
   editorRights: false,
   withSubterritories: false,
   withStatements: false,
+  withDocument: false,
   filter: "",
   operator: "or",
 };
@@ -44,6 +51,22 @@ export const TerritoryTreeBox: React.FC = () => {
   const { data: treeData, isFetching } = useTreeQuery();
 
   const { data: userData } = useUserQuery();
+
+  const { data: documents } = useDocumentsQuery();
+  const { data: resourcesWithDocuments } = useResourcesWithDocumentsQuery();
+  const documentsLoaded = documents !== undefined && resourcesWithDocuments !== undefined;
+
+  // every document save refetches the documents; the key keeps the set's
+  // reference (and so the memoized tree nodes) unchanged while its ids stay the same
+  const territoriesWithDocumentKey = useMemo(
+    () =>
+      [...getDocumentTerritoryIds(treeData, documents, resourcesWithDocuments)].sort().join(","),
+    [treeData, documents, resourcesWithDocuments],
+  );
+  const territoriesWithDocument = useMemo(
+    () => new Set(territoriesWithDocumentKey ? territoriesWithDocumentKey.split(",") : []),
+    [territoriesWithDocumentKey],
+  );
 
   const storedTerritoryIds = useMemo(
     () => userData?.storedTerritories?.map((territory) => territory.territory.id) ?? [],
@@ -69,6 +92,7 @@ export const TerritoryTreeBox: React.FC = () => {
   const userRole = getStoredUserRole();
   const { territoryId } = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
+  const [foldAllSignal, setFoldAllSignal] = useState(0);
 
   const dispatch = useAppDispatch();
   const selectedTerritoryPath = useAppSelector(
@@ -87,7 +111,7 @@ export const TerritoryTreeBox: React.FC = () => {
         setFilteredTreeData(getFilteredTreeData());
       }
     }
-  }, [treeData, filterSettings, userData]);
+  }, [treeData, filterSettings, userData, documentsLoaded, territoriesWithDocument]);
 
   const handleFilterChange = (key: keyof ITerritoryFilter, value: boolean | string) =>
     setFilterSettings({ ...filterSettings, [key]: value });
@@ -102,6 +126,7 @@ export const TerritoryTreeBox: React.FC = () => {
         filterSettings.editorRights ||
         filterSettings.withStatements ||
         filterSettings.withSubterritories ||
+        filterSettings.withDocument ||
         filterSettings.filter.length > 0;
 
       if (!hasActiveFilters) {
@@ -115,14 +140,29 @@ export const TerritoryTreeBox: React.FC = () => {
         return newFilteredTreeData;
       }
 
+      // same for the document filter until the documents load (or when they fail)
+      if (filterSettings.withDocument && !documentsLoaded) {
+        return newFilteredTreeData;
+      }
+
       const favoriteIds = userData?.storedTerritories.map((t) => t.territory.id) ?? [];
 
-      newFilteredTreeData = filterTreeByFilters(treeData, filterSettings, favoriteIds);
+      newFilteredTreeData = filterTreeByFilters(
+        treeData,
+        filterSettings,
+        favoriteIds,
+        territoriesWithDocument,
+      );
 
       // Mark tree data for highlighting. Pruning and marking read the same
       // favorites, so every surviving row carries a flag and can dim
       if (newFilteredTreeData) {
-        return markNodesWithFilters(newFilteredTreeData, filterSettings, favoriteIds);
+        return markNodesWithFilters(
+          newFilteredTreeData,
+          filterSettings,
+          favoriteIds,
+          territoriesWithDocument,
+        );
       }
 
       return newFilteredTreeData;
@@ -212,6 +252,19 @@ export const TerritoryTreeBox: React.FC = () => {
               tooltipLabel="starred territories"
               tooltipPosition="right"
             />
+            <Button
+              icon={<IcoCollapse size={14} />}
+              color="greyer"
+              inverted
+              onClick={() => {
+                setFoldAllSignal((signal) => signal + 1);
+                if (territoryId) {
+                  scrollToTerritoryInTree(territoryId, treeFilterOpen);
+                }
+              }}
+              tooltipLabel="fold all territories"
+              tooltipPosition="right"
+            />
           </StyledTreeButtonGroup>
 
           {treeFilterOpen && (
@@ -239,6 +292,8 @@ export const TerritoryTreeBox: React.FC = () => {
                     empty={filteredTreeData.empty}
                     storedTerritories={storedTerritoryIds}
                     updateUserMutation={updateUserMutation}
+                    foldAllSignal={foldAllSignal}
+                    territoriesWithDocument={territoriesWithDocument}
                   />
                 )}
 

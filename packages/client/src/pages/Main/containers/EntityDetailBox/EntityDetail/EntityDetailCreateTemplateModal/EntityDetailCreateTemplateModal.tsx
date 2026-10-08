@@ -51,7 +51,10 @@ export const EntityDetailCreateTemplateModal: React.FC<EntityDetailCreateTemplat
     mutationFn: async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      updateEntityMutation.mutate({ usedTemplate: variables.id });
+      // a template copied into another template is not an instance of it
+      if (!entity.isTemplate) {
+        updateEntityMutation.mutate({ usedTemplate: variables.id });
+      }
 
       appendDetailId(variables.id);
 

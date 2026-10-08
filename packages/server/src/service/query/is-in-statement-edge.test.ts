@@ -3,6 +3,7 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
+import { provisionEntityIndexes } from "../../test/schema";
 
 // Verifies the ACTUAL ReQL of the IS: edge ("is in S: any position", aka
 // XIsInS): given a target Statement S, it should return every entity USED in S
@@ -151,6 +152,8 @@ describe("IS: edge / is in S: any position (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
+    // the edges read through the same indexes as a real database
+    await provisionEntityIndexes(conn, TABLE);
     await r.table(TABLE).insert(FIXTURES).run(conn);
   }, 30000);
 
@@ -182,9 +185,9 @@ describe("IS: edge / is in S: any position (real ReQL)", () => {
     expect(ids).not.toContain(TERR);
   });
 
-  test("no target statement -> matches nothing", async () => {
+  test("no target statement -> entities used in any statement", async () => {
     const ids = await runEdge({}, conn);
-    expect(ids).toEqual([]);
+    expect(sorted(ids)).toEqual(sorted([...USED, A_OTHER]));
   });
 
   test("an unknown statement -> matches nothing", async () => {

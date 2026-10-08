@@ -62,3 +62,11 @@ database_data
 
 # Claude Code project instructions (local only)
 CLAUDE.md
+# design-sync (claude.ai/design import)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+# the bare `config.json` rule above is for the db config
+!.design-sync/config.json

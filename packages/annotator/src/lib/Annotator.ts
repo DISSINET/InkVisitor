@@ -55,6 +55,13 @@ import { SettingControl, SettingsOverlay } from "./SettingsOverlay";
 import Text, { SegmentPosition, Tag } from "./Text";
 import { CanvasMeasurer } from "./TextMeasurer";
 import Viewport from "./Viewport";
+import {
+  XmlSyntaxColors,
+  XmlTokenRun,
+  advanceXmlState,
+  initialXmlTokenizerState,
+  tokenizeXmlLines,
+} from "./XmlSyntax";
 import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 
 // Updated regex to properly handle tags with attributes
@@ -229,6 +236,12 @@ export class Annotator {
    * host sets this per theme: a dark background needs a stronger fill than a
    * light one for the same perceived emphasis. */
   blockCaretOpacity: number = 0.45;
+
+  /**
+   * Syntax colours for the XML (RAW) view (#3269); null keeps it one colour.
+   * Set by the host per theme, like {@link blockCaretOpacity}.
+   */
+  xmlSyntaxColors: XmlSyntaxColors | null = null;
 
   private _menuColors: MenuColors = LIGHT_MENU_COLORS;
   get menuColors(): MenuColors {
@@ -3181,6 +3194,62 @@ export class Annotator {
   }
 
   /**
+   * Token runs per viewport line for XML syntax colouring (#3269), or null
+   * when the view is not RAW or no colours are set. The tokenizer is seeded
+   * from the earlier visual lines of the first paragraph in view, so a tag
+   * wrapping onto the top line still colours as a tag.
+   */
+  private xmlSyntaxRuns(textToRender: string[]): XmlTokenRun[][] | null {
+    if (!this.xmlSyntaxColors || this.text.mode !== EditMode.RAW) {
+      return null;
+    }
+    const lineStart = this.viewport.lineStart;
+    let seedStart = lineStart;
+    while (
+      seedStart > 0 &&
+      seedStart - 1 < this.text.noLines &&
+      !this.text.isParagraphEnd(seedStart - 1)
+    ) {
+      seedStart--;
+    }
+    // runs for the seed lines are never drawn, so only the state is carried
+    const seed = initialXmlTokenizerState();
+    for (let l = seedStart; l < lineStart; l++) {
+      advanceXmlState(seed, this.text.getLine(l), this.text.getLine(l + 1));
+    }
+    return tokenizeXmlLines(textToRender, seed).runs;
+  }
+
+  /**
+   * Paint one RAW line run by run in its syntax colour. Each run starts at its
+   * column's x from the same width tables the caret uses, so the pieces land
+   * exactly where the one-shot fillText would have put them.
+   */
+  private drawXmlLine(
+    textLine: string,
+    runs: XmlTokenRun[] | undefined,
+    absLine: number,
+    originPx: number,
+    y: number
+  ): void {
+    const colors = this.xmlSyntaxColors;
+    if (!colors || !runs) {
+      this.ctx.fillText(textLine, originPx, y);
+      return;
+    }
+    for (const run of runs) {
+      const x =
+        originPx +
+        (this.proportional
+          ? this.text.columnToPixelX(absLine, run.start)
+          : run.start * this.charWidth);
+      this.ctx.fillStyle = run.kind === "text" ? this.fontColor : colors[run.kind];
+      this.ctx.fillText(textLine.slice(run.start, run.end), x, y);
+    }
+    this.ctx.fillStyle = this.fontColor;
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
@@ -3215,13 +3284,16 @@ export class Annotator {
     this.ctx.textBaseline = "middle";
 
     const textToRender = this.text.getViewportText(this.viewport);
+    const xmlRuns = this.xmlSyntaxRuns(textToRender);
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       const absLine = this.viewport.lineStart + renderLine;
       const originPx = this.lineXOriginPx(absLine);
       const y = (renderLine + 0.5) * this.lineHeight;
-      if (textLine) {
+      if (textLine && xmlRuns) {
+        this.drawXmlLine(textLine, xmlRuns[renderLine], absLine, originPx, y);
+      } else if (textLine) {
         this.ctx.fillText(textLine, originPx, y);
       }
       if (
@@ -4295,11 +4367,11 @@ export class Annotator {
     }
 
     // Construct the Tag at the start
-    const openTag = new Tag(0, anchor, false, undefined, -1);
+    const openTag = new Tag(0, anchor, false, -1);
     if (attributes) {
       openTag.setAttributes(attributes);
     }
-    const closeTag = new Tag(0, anchor, true, undefined, -1);
+    const closeTag = new Tag(0, anchor, true, -1);
 
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
@@ -4401,13 +4473,13 @@ export class Annotator {
     }
 
     // Build the original tag string using the tag's current attributes
-    const originalTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    const originalTag = new Tag(0, tag.getTagName(), false, -1);
     originalTag.setAttributes(tag.attributes);
     const originalTagString = originalTag.getTag();
     const originalTagLength = originalTagString.length;
 
     // Build the new tag string with updated attributes
-    const newTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    const newTag = new Tag(0, tag.getTagName(), false, -1);
     if (attributes) {
       newTag.setAttributes(attributes);
     } else {
@@ -4779,6 +4851,16 @@ export class Annotator {
       return;
     }
     this.restoreSnapshot(target);
+  }
+
+  /**
+   * Text currently covered by the cursor selection, empty string when nothing
+   * is selected. In raw mode the slice includes any tag characters it spans,
+   * matching what the canvas shows in that mode.
+   */
+  getSelectedText(): string {
+    const area = this.cursor.getSelectedArea();
+    return area ? this.text.getRangeText(area[0], area[1]) : "";
   }
 
   onCopyText() {

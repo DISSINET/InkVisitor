@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { applyReplacements, nextActiveOccurenceIndex } from "./replaceUtils";
+import {
+  applyReplacements,
+  clampActiveOccurenceIndex,
+  nextOccurenceIndexAfter,
+} from "./replaceUtils";
 
 describe("applyReplacements", () => {
   it("replaces a single range", () => {
@@ -41,16 +45,42 @@ describe("applyReplacements", () => {
   });
 });
 
-describe("nextActiveOccurenceIndex", () => {
-  it("keeps the index when occurrences remain after it", () => {
-    expect(nextActiveOccurenceIndex(0, 2)).toBe(0);
+describe("clampActiveOccurenceIndex", () => {
+  it("keeps an index the list still addresses", () => {
+    expect(clampActiveOccurenceIndex(0, 2)).toBe(0);
+    expect(clampActiveOccurenceIndex(1, 2)).toBe(1);
   });
 
-  it("steps back when the removed occurrence was the last one", () => {
-    expect(nextActiveOccurenceIndex(2, 2)).toBe(1);
+  it("pulls an index past the end back to the last occurrence", () => {
+    expect(clampActiveOccurenceIndex(5, 2)).toBe(1);
   });
 
-  it("resets to 0 when nothing is left", () => {
-    expect(nextActiveOccurenceIndex(3, 0)).toBe(0);
+  it("returns 0 for an empty list", () => {
+    expect(clampActiveOccurenceIndex(3, 0)).toBe(0);
+  });
+});
+
+describe("nextOccurenceIndexAfter", () => {
+  it("steps over a replacement that still matches the term", () => {
+    // "bal" at 0, 10, 20; the one at 10 was replaced by a 3-char match
+    expect(nextOccurenceIndexAfter([0, 10, 20], 13)).toBe(2);
+  });
+
+  it("lands on the following match when the replacement no longer matches", () => {
+    // the match at 10 is gone, so the list is [0, 20]
+    expect(nextOccurenceIndexAfter([0, 20], 13)).toBe(1);
+  });
+
+  it("skips matches created inside the replacement", () => {
+    // "bal" replaced by "balbal": new matches at 10 and 13, resume past both
+    expect(nextOccurenceIndexAfter([0, 10, 13, 20], 16)).toBe(3);
+  });
+
+  it("wraps to the first occurrence when the replaced spot was last", () => {
+    expect(nextOccurenceIndexAfter([0, 10], 23)).toBe(0);
+  });
+
+  it("returns 0 for an empty list", () => {
+    expect(nextOccurenceIndexAfter([], 13)).toBe(0);
   });
 });

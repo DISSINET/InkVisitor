@@ -1,5 +1,6 @@
 import { EntityEnums } from "../enums";
 import { IEntity } from "./entity";
+import { ExpansionGroup } from "./response-entity-expansion";
 
 export interface ITerritory extends IEntity {
   class: EntityEnums.Class.Territory;
@@ -28,6 +29,71 @@ export interface ITerritoryProtocol {
   relatedDataPublications: string[]; // R class entities
 }
 
+/**
+ * Rule fields whose entities can stand for more than themselves. Each one
+ * follows one downward path: entityClassifications, propType and (under a
+ * Classification tie) allowedEntities follow subclasses, entitySOEs and (under
+ * a Reference tie) allowedEntities follow subordinate entities.
+ */
+export const VALIDATION_EXPANSION_FIELDS = [
+  "entityClassifications",
+  "entitySOEs",
+  "propType",
+  "allowedEntities",
+] as const;
+
+export type EValidationExpansionField =
+  (typeof VALIDATION_EXPANSION_FIELDS)[number];
+
+/**
+ * Whether a rule field accepts entities beyond the ones picked in it:
+ * equivalents are synonyms, identifications and action-event equivalents;
+ * subordinates are everything below on the field's own path, all levels.
+ */
+export type ITerritoryValidationExpansion = Partial<
+  Record<ExpansionGroup, boolean>
+>;
+
+/**
+ * The downward path a rule field stands for. Subclasses is the inverse
+ * Superclass path, Subordinates the inverse SuperordinateEntity path (plus, for
+ * a Territory, its child Territories).
+ */
+export enum EValidationExpansionKind {
+  Equivalents = "EQ",
+  Subclasses = "SCL",
+  Subordinates = "SOE",
+}
+
+/**
+ * Which downward path a field follows. A Concept-valued field follows
+ * subclasses, an entity-valued field subordinates; allowedEntities is the one
+ * field whose targets change with the tie - Concepts under Classification,
+ * Resources under Reference. Null where the field takes no expansion, which is
+ * the property value list: it holds entities of any class and carries no
+ * checkboxes.
+ *
+ * Shared so that the check, the rule's sentence and the warning text all read
+ * the same table.
+ */
+export const validationExpansionKind = (
+  field: EValidationExpansionField,
+  tieType: EProtocolTieType
+): EValidationExpansionKind | null => {
+  if (field === "entitySOEs") {
+    return EValidationExpansionKind.Subordinates;
+  }
+  if (field === "allowedEntities") {
+    if (tieType === EProtocolTieType.Reference) {
+      return EValidationExpansionKind.Subordinates;
+    }
+    if (tieType === EProtocolTieType.Property) {
+      return null;
+    }
+  }
+  return EValidationExpansionKind.Subclasses;
+};
+
 export interface ITerritoryValidation {
   active?: boolean;
   territoryId?: string;
@@ -42,6 +108,11 @@ export interface ITerritoryValidation {
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
   allowedEntities?: string[]; //
   detail: string;
+
+  // absent on a rule that accepts only the entities picked in it
+  expansions?: Partial<
+    Record<EValidationExpansionField, ITerritoryValidationExpansion>
+  >;
 }
 
 export enum EProtocolTieType {

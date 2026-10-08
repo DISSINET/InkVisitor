@@ -41,6 +41,7 @@ import {
   ATTRIBUTE_PREVIEW_FETCH_MAX,
   batchAttributeFromOptions,
   batchAttributeMatches,
+  batchAttributeChangeNote,
 } from "./utils";
 
 interface BatchActionSetLanguage {
@@ -94,6 +95,17 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
     ).length;
   }, [fetchedEntities, isLargeSelection, from, toValue]);
 
+  // with "overwrite" ticked, the entities already at the target are the only
+  // reason fewer change than are selected
+  const alreadySetCount = useMemo<number>(() => {
+    if (matchCount === undefined || !fetchedEntities || toValue === undefined || from !== null) {
+      return 0;
+    }
+    return fetchedEntities.filter(
+      (entity) => (entity.language || EntityEnums.Language.Empty) === toValue
+    ).length;
+  }, [matchCount, fetchedEntities, from, toValue]);
+
   const batchMutation = useMutation({
     mutationFn: async () => {
       if (toValue === undefined) return;
@@ -137,10 +149,15 @@ export const BatchActionSetLanguage: React.FC<BatchActionSetLanguage> = ({
     return (
       <>
         <b>{matchCount}</b> of {selectedEntityIds.length} selected entities will
-        change; the rest stay untouched.
+        change
+        {batchAttributeChangeNote(
+          alreadySetCount,
+          matchCount + alreadySetCount < selectedEntityIds.length
+        )}
+        .
       </>
     );
-  }, [toValue, matchCount, selectedEntityIds.length]);
+  }, [toValue, matchCount, alreadySetCount, selectedEntityIds.length]);
 
   const previewReady =
     isLargeSelection || (!isLoadingEntities && !isEntitiesFetchError);

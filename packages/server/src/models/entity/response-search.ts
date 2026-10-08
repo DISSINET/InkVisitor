@@ -6,12 +6,14 @@ import Statement from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import { getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
+import { QUERY_RUN_OPTIONS } from "@service/query/run-options";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IConcept, IEntity, ITerritory, RequestSearch, AuditScope } from "@inkvisitor/shared/types";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "./entity";
+import { buildValidationExpansionMap } from "./validation-expansion-load";
 import { ResponseEntity } from "./response";
 import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
 import { Setting } from "@models/setting/setting";
@@ -564,7 +566,7 @@ export class SearchQuery {
    * @returns list of found entities
    */
   async do(): Promise<IEntity[]> {
-    return this.query.run(this.connection);
+    return this.query.run(this.connection, QUERY_RUN_OPTIONS);
   }
 }
 
@@ -696,6 +698,10 @@ export class ResponseSearch {
 
     const rootT = treeCache.tree.getRootTerritory() as ITerritory;
 
+    // one map for the whole result set: the ids a rule accepts depend on the
+    // rules alone, never on the entity being checked
+    const expansions = await buildValidationExpansionMap(conn, [rootT]);
+
     // Used to be a serial nested loop: N entities x 5 awaits each. Fan
     // out the per-entity work in parallel, and inside each entity, run
     // the 3 independent fetches concurrently before resolving the 2
@@ -734,12 +740,15 @@ export class ResponseSearch {
           ),
         ]);
 
-        const warnings = new Entity(entity).getTBasedWarnings(
+        // the concrete class, not the base one: a Territory's parent lives in
+        // data, which only its own model keeps, and the SOE condition reads it
+        const warnings = getEntityClass(entity).getTBasedWarnings(
           [rootT],
           classificationEs,
           soeEs,
           propValueEs,
-          settings
+          settings,
+          expansions
         );
         return { entity, hasWarnings: warnings.length > 0 };
       })

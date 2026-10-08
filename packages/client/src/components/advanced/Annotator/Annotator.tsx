@@ -37,7 +37,6 @@ import { EntityEnums, InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums
 import {
   IDocument,
   IEntity,
-  IResponseEntity,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -89,8 +88,15 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./styles";
-import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import {
+  ANNOTATOR_OVERLAY_Z,
+  RATIO,
+  TerritoryCreateModalType,
+  W_SCROLL,
+} from "./types";
 import { annotatorHighlight } from "./utils/highlight";
+
+const SEARCH_WRAP_TOAST_ID = "annotator-search-wrap";
 
 interface TextAnnotatorProps {
   width: number;
@@ -125,9 +131,9 @@ interface TextAnnotatorProps {
 
   /**
    * Overrides the annotator's context-menu / settings-overlay stacking layers.
-   * Both overlays are appended to `document.body`; the library defaults suit a
-   * plain page panel (MainPage). A host that mounts the annotator inside a modal
-   * (the Documents page) passes higher values so the overlays sit above it.
+   * Both overlays are appended to `document.body` and default to
+   * {@link ANNOTATOR_OVERLAY_Z}, which clears the app's floating tier. A host
+   * that stacks something even higher over the annotator passes its own values.
    */
   overlayZIndex?: { contextMenu: number; settingsOverlay: number };
 
@@ -806,6 +812,12 @@ export const TextAnnotator = ({
       // The block caret paints over the letter; a light background needs a
       // fainter fill than a dark one for the same readability.
       a.blockCaretOpacity = selectedThemeId === InterfaceEnums.Theme.Dark ? 0.45 : 0.3;
+      a.xmlSyntaxColors = {
+        tag: theme.color.xmlTag,
+        attr: theme.color.xmlAttr,
+        quote: theme.color.xmlQuote,
+        value: theme.color.xmlValue,
+      };
       a.menuColors = {
         bg: theme.color.white,
         text: theme.color.black,
@@ -909,12 +921,12 @@ export const TextAnnotator = ({
 
     applyCanvasTheme(newAnnotator);
 
-    // Raise the body-appended overlays above the host modal on the Documents
-    // page; MainPage leaves the lib defaults (which sit under app modals).
-    if (overlayZIndex) {
-      newAnnotator.contextMenu.zIndex = overlayZIndex.contextMenu;
-      newAnnotator.settingsOverlay.zIndex = overlayZIndex.settingsOverlay;
-    }
+    // The library defaults sit below the app's floating tier, so the overlays
+    // are always given the annotator's own layers unless the host overrides.
+    newAnnotator.contextMenu.zIndex =
+      overlayZIndex?.contextMenu ?? ANNOTATOR_OVERLAY_Z.contextMenu;
+    newAnnotator.settingsOverlay.zIndex =
+      overlayZIndex?.settingsOverlay ?? ANNOTATOR_OVERLAY_Z.settingsOverlay;
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -1374,10 +1386,8 @@ export const TextAnnotator = ({
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
-  // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(null);
-  // does the pre-selected anchor exist in the current selection
-  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+  // entities to anchor, applied together so one match can carry several anchors
+  const [entitiesToAnchor, setEntitiesToAnchor] = useState<IEntity[]>([]);
 
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
@@ -1387,15 +1397,10 @@ export const TextAnnotator = ({
     // searchActiveOccurence is in dependencies to call onSelectText on occurence change
   }, [searchActiveOccurence]);
 
-  useEffect(() => {
-    if (!entityToAnchor) {
-      setCurrentAnchorExist(false);
-    } else if (selectedAnchors.some((anchor) => anchor.getTagName() === entityToAnchor?.id)) {
-      setCurrentAnchorExist(true);
-    } else {
-      setCurrentAnchorExist(false);
-    }
-  }, [selectedAnchors, entityToAnchor]);
+  const selectedAnchorTagNames = useMemo(
+    () => selectedAnchors.map((anchor) => anchor.getTagName()),
+    [selectedAnchors]
+  );
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -1437,17 +1442,38 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  // Navigation wraps around the document; a wrap past the last hit lands on one
+  // that "Anchor & next" may already have annotated, so the user is told. One
+  // toast is shared by repeated F3 presses and rewritten when direction flips.
+  const notifySearchWrap = (message: string) => {
+    if (toast.isActive(SEARCH_WRAP_TOAST_ID)) {
+      toast.update(SEARCH_WRAP_TOAST_ID, { render: message });
+    } else {
+      toast.info(message, { toastId: SEARCH_WRAP_TOAST_ID, autoClose: 2500 });
+    }
+  };
+
   const goToNextOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
+    if (searchActiveOccurence + 1 >= searchOccurences.length) {
+      notifySearchWrap("Reached the end of results. Continuing from the beginning.");
+    }
     setSearchActiveOccurence((searchActiveOccurence + 1) % searchOccurences.length);
   }, [searchOccurences, searchActiveOccurence]);
 
   const goToPreviousOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
+    if (searchActiveOccurence <= 0) {
+      notifySearchWrap("Reached the beginning of results. Continuing from the end.");
+    }
     setSearchActiveOccurence(
       (searchActiveOccurence - 1 + searchOccurences.length) % searchOccurences.length,
     );
   }, [searchOccurences, searchActiveOccurence]);
+
+  // Bumped on every Ctrl/Cmd+F so the effect below re-runs even when the
+  // keypress leaves both isFindOpen and searchTerm at their current values.
+  const [findFocusRequest, setFindFocusRequest] = useState(0);
 
   // Ctrl/Cmd+F opens the find panel for the current mode, or focuses the input
   // of whichever panel is already open. ctrlKeyCombo is true so it fires
@@ -1456,16 +1482,29 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      if (isFindOpen) {
-        findInputRef.current?.focus();
-        findInputRef.current?.select();
-      } else {
-        setIsFindOpen(true);
+      // A canvas selection always wins over what the input holds; with no
+      // selection the term stays put. search() matches within a single line, so
+      // the whitespace of a selection spanning a break is collapsed to keep it
+      // findable.
+      const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
+      if (selection) {
+        setSearchTerm(selection);
       }
+      setIsFindOpen(true);
+      setFindFocusRequest((request) => request + 1);
     },
-    [isSearchAllowed, isFindOpen],
+    [isSearchAllowed, annotator],
     true,
   );
+
+  // Selecting the input's contents lets the next keystroke replace them. The
+  // effect runs after the render that applied a seeded term, so it selects the
+  // new value rather than the one the keypress saw.
+  useEffect(() => {
+    if (findFocusRequest === 0) return;
+    findInputRef.current?.focus();
+    findInputRef.current?.select();
+  }, [findFocusRequest]);
 
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
@@ -1518,9 +1557,16 @@ export const TextAnnotator = ({
           setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
           isRegexMode={isRegexMode}
           setIsRegexMode={setIsRegexMode}
-          entityToAnchor={entityToAnchor}
-          setEntityToAnchor={setEntityToAnchor}
-          currentAnchorExist={currentAnchorExist}
+          entitiesToAnchor={entitiesToAnchor}
+          onPickEntityToAnchor={(entity) =>
+            setEntitiesToAnchor((prevEntities) => [...prevEntities, entity])
+          }
+          onRemoveEntityToAnchor={(entityId) =>
+            setEntitiesToAnchor((prevEntities) =>
+              prevEntities.filter((entity) => entity.id !== entityId)
+            )
+          }
+          selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
         />
       )}
@@ -1540,7 +1586,6 @@ export const TextAnnotator = ({
           setSearchTerm={setSearchTerm}
           findInputRef={findInputRef}
           searchOccurences={searchOccurences}
-          setSearchOccurences={setSearchOccurences}
           refreshSearch={refreshSearch}
           searchActiveOccurence={searchActiveOccurence}
           setSearchActiveOccurence={setSearchActiveOccurence}
@@ -1678,7 +1723,7 @@ export const TextAnnotator = ({
                   position: "fixed",
                   left: xmlMarkupAnchorHover.x - 35,
                   top: xmlMarkupAnchorHover.y + 12,
-                  zIndex: 10050,
+                  zIndex: ANNOTATOR_OVERLAY_Z.anchorHoverPreview,
                   pointerEvents: "auto",
                   maxWidth: 340,
                   borderRadius: 4,

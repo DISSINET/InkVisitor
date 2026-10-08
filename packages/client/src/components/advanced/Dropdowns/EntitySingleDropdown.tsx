@@ -29,6 +29,9 @@ interface EntitySingleDropdown<T = string> {
   disableTyping?: boolean;
   disabled?: boolean;
   disableTooltip?: boolean;
+  tooltipLabel?: string;
+  // adds the clear cross to the control; clearing reports an empty string
+  isClearable?: boolean;
   /** Show the entity-class colour bar on the left. Defaults to true. */
   showTypeBar?: boolean;
 }
@@ -45,6 +48,8 @@ export const EntitySingleDropdown = <T extends string>({
   disableTyping,
   disabled,
   disableTooltip,
+  tooltipLabel,
+  isClearable = false,
   showTypeBar = true,
 }: EntitySingleDropdown<T>) => {
   const isOneOptionSelect = options.length < 2;
@@ -54,7 +59,7 @@ export const EntitySingleDropdown = <T extends string>({
       width={width}
       value={options.find((o) => o.value === value)}
       options={options}
-      onChange={(selected) => onChange(selected[0].value as T)}
+      onChange={(selected) => onChange((selected[0]?.value ?? "") as T)}
       placeholder={placeholder}
       onFocus={onFocus}
       onBlur={onBlur}
@@ -66,6 +71,8 @@ export const EntitySingleDropdown = <T extends string>({
       disabledAppearance={isOneOptionSelect ? "quiet" : "stripes"}
       chevron={!isOneOptionSelect}
       autoFocus={autoFocus}
+      tooltipLabel={tooltipLabel}
+      clearable={isClearable}
       renderOption={(o) => (
         <EntityOptionContent option={o} disableTooltip={disableTooltip} />
       )}

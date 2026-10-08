@@ -34,7 +34,6 @@ export enum CaretAffinity {
  */
 export class Tag {
   readonly position: number; // raw position in segment text
-  readonly relativeParsedPosition: number; // relative position in parsed segment text
   readonly closing?: boolean;
   // Index of the segment containing this tag. Written by Text.prepareSegments
   // when segment reuse shifts the segment (and its tags) to a new position.
@@ -49,14 +48,12 @@ export class Tag {
    * @param position - The absolute position of the tag in the raw text
    * @param tag - The tag name (e.g., "person", "location" along with attributes)
    * @param closing - Whether this is a closing tag (default: false)
-   * @param segment - Optional segment reference for calculating relative position
    * @param segmentIndex - The index of the segment containing this tag
    */
   constructor(
     position: number,
     tag: string,
     closing?: boolean,
-    segment?: Segment,
     segmentIndex?: number
   ) {
     this.position = position;
@@ -64,7 +61,6 @@ export class Tag {
     this.closing = closing;
     this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
     this.attributes = this.parseAttributes(tag);
-    this.relativeParsedPosition = this.calculateRelativeParsedPosition(segment);
   }
 
   /**
@@ -109,41 +105,6 @@ export class Tag {
     }
 
     return attributes;
-  }
-
-  /**
-   * Calculates the position of this tag in the parsed (tag-free) text.
-   *
-   * This method accounts for the length of all tags that appear before this tag
-   * in the raw text, providing the position where this tag would appear in
-   * the clean, parsed text without any XML-like tags.
-   *
-   * @param segment - The segment containing this tag
-   * @returns The relative position in parsed text
-   */
-  private calculateRelativeParsedPosition(segment?: Segment): number {
-    if (!segment) {
-      return 0;
-    }
-
-    // Calculate the parsed position by subtracting the length of all tags that come before this tag
-    let parsedPosition = this.position;
-
-    // Subtract length of all opening tags before this position
-    for (const tag of segment.openingTags) {
-      if (tag.position < this.position) {
-        parsedPosition -= tag.getTagLength();
-      }
-    }
-
-    // Subtract length of all closing tags before this position
-    for (const tag of segment.closingTags) {
-      if (tag.position < this.position) {
-        parsedPosition -= tag.getTagLength();
-      }
-    }
-
-    return parsedPosition;
   }
 
   /**
@@ -299,14 +260,14 @@ export class Segment {
     let match;
     while ((match = openingRegex.exec(this.raw)) !== null) {
       this.openingTags.push(
-        new Tag(match.index, match[1], false, this, this.segmentIndex)
+        new Tag(match.index, match[1], false, this.segmentIndex)
       );
     }
 
     // Find closing tags
     while ((match = closingRegex.exec(this.raw)) !== null) {
       this.closingTags.push(
-        new Tag(match.index, match[1], true, this, this.segmentIndex)
+        new Tag(match.index, match[1], true, this.segmentIndex)
       );
     }
 
@@ -1253,6 +1214,37 @@ class Text {
       xLine: charInLineIndex,
       yLine: segment.lineStart + lineIndex,
     };
+  }
+
+  /**
+   * Raw offset where the opening or closing tag ending right at `offset`
+   * starts, or -1 when the text before `offset` does not end with a tag.
+   */
+  tagStartBefore(offset: number): number {
+    if (offset <= 0 || this.value[offset - 1] !== ">") {
+      return -1;
+    }
+    const start = this.value.lastIndexOf("<", offset - 2);
+    if (start < 0) {
+      return -1;
+    }
+    return /^<\/?[^<>\n]+>$/.test(this.value.slice(start, offset)) ? start : -1;
+  }
+
+  /**
+   * Raw offset right after the opening or closing tag starting at `offset`, or
+   * -1 when the text after `offset` does not start with a tag.
+   */
+  tagEndAfter(offset: number): number {
+    if (this.value[offset] !== "<") {
+      return -1;
+    }
+    const close = this.value.indexOf(">", offset + 1);
+    if (close < 0) {
+      return -1;
+    }
+    const end = close + 1;
+    return /^<\/?[^<>\n]+>$/.test(this.value.slice(offset, end)) ? end : -1;
   }
 
   /**

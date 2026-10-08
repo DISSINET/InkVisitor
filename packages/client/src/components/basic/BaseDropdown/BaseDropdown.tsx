@@ -44,6 +44,9 @@ interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
   noOptionsMessage?: string;
   icon?: React.ReactNode;
   tooltipLabel?: string;
+  // plain-text tooltip for a single-value dropdown, in place of the bold
+  // tooltipLabel - for a sentence rather than a name
+  tooltipContent?: string;
   tooltipPosition?: Position;
   suggester?: boolean;
   disabled?: boolean;
@@ -76,6 +79,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   noOptionsMessage = "No option selected",
   icon,
   tooltipLabel,
+  tooltipContent,
   tooltipPosition = "top",
   suggester = false,
   disabled = false,
@@ -336,7 +340,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
       )}
 
       {/* control tooltip — unchanged behavior from the old implementation */}
-      {tooltipLabel && (
+      {(tooltipLabel || tooltipContent) && (
         <Tooltip
           disabled={multi && selectedArray.length === 0}
           content={
@@ -357,6 +361,8 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
                   </b>{" "}
                   ({tooltipLabel})
                 </>
+              ) : tooltipContent ? (
+                tooltipContent
               ) : (
                 <b>{tooltipLabel}</b>
               )}

@@ -44,11 +44,15 @@ export class UserOptions implements IUserOptions {
   workingLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
   askBeforePropDelete?: boolean = true;
+  starredTemplates: string[] = [];
+  promotedTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any =
+    EntityEnums.Extension.Any;
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
     fillArray(this.searchLanguages, String, data?.searchLanguages || []);
     fillArray(this.workingLanguages, String, data?.workingLanguages || []);
+    fillArray(this.starredTemplates, String, data?.starredTemplates || []);
   }
 
   isValid(): boolean {
@@ -57,6 +61,10 @@ export class UserOptions implements IUserOptions {
     }
 
     if (this.workingLanguages.find((lang) => !lang)) {
+      return false;
+    }
+
+    if (this.starredTemplates.find((id) => !id)) {
       return false;
     }
 
@@ -219,7 +227,36 @@ export default class User implements IUser, IDbModel {
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]) || user.id == this.id;
   }
 
+  /**
+   * Owners and admins delete users, but only an owner deletes an owner.
+   */
   canBeDeletedByUser(user: User): boolean {
+    if (this.hasRole([UserEnums.Role.Owner])) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
+  }
+
+  /**
+   * Owners and admins assign roles, but only an owner grants or takes away
+   * the owner role.
+   */
+  canRoleBeChangedByUser(user: User, role: UserEnums.Role): boolean {
+    if (this.hasRole([UserEnums.Role.Owner]) || role === UserEnums.Role.Owner) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
+    return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
+  }
+
+  /**
+   * Owners and admins set other users' passwords and (de)activate them, but
+   * only an owner does so for an owner: whoever sets a password can sign in
+   * with it.
+   */
+  canAccessBeChangedByUser(user: User): boolean {
+    if (this.hasRole([UserEnums.Role.Owner])) {
+      return user.hasRole([UserEnums.Role.Owner]);
+    }
     return user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin]);
   }
 
@@ -273,15 +310,45 @@ export default class User implements IUser, IDbModel {
 
   /**
    * Returns first owner-role based user or null
+   * Ignores thrashed entries
    * @param dbInstance
    * @returns
    */
   static async getOwner(dbInstance: Connection | undefined): Promise<User | null> {
     const data = await rethink
       .table(User.table)
-      .filter({ role: UserEnums.Role.Owner })
+      .filter(function (user: RDatum<IUser>) {
+        return rethink
+          .not(user.hasFields("deletedAt"))
+          .and(user("role").eq(UserEnums.Role.Owner));
+      })
       .run(dbInstance);
     return data && data.length > 0 ? new User(data[0]) : null;
+  }
+
+  /**
+   * Whether an active owner other than the given user exists
+   * Ignores thrashed entries
+   * @param dbInstance
+   * @param userId
+   * @returns
+   */
+  static async hasOtherOwner(
+    dbInstance: Connection | undefined,
+    userId: string
+  ): Promise<boolean> {
+    const count = await rethink
+      .table(User.table)
+      .filter(function (user: RDatum<IUser>) {
+        return rethink
+          .not(user.hasFields("deletedAt"))
+          .and(user("active").eq(true))
+          .and(user("role").eq(UserEnums.Role.Owner))
+          .and(user("id").ne(userId));
+      })
+      .count()
+      .run(dbInstance);
+    return count > 0;
   }
 
   /**

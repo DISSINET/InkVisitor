@@ -15,7 +15,7 @@ import {
   IcoUnlink,
 } from "Theme/icons";
 import { useBookmarksQuery } from "hooks/react-query";
-import { useSearchParams } from "hooks";
+import { useDetailPanelReveal, useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -29,8 +29,10 @@ import {
   StyledEmptyNote,
   StyledItemIcon,
   StyledItemLabel,
+  StyledItemCount,
   StyledItemTrailing,
   StyledMenuDivider,
+  StyledMenuFloating,
   StyledMenuGroup,
   StyledMenuHeader,
   StyledMenuHeaderLabel,
@@ -40,9 +42,6 @@ import {
 const ICON_SIZE = 13;
 // the annotator's own context menu marks a toggled-on row with this glyph
 const CHECK_GLYPH = "\u2713";
-// tags render inside modals (500) and inside the suggester dropdown (10000),
-// and the menu has to clear whichever one it was opened from
-const MENU_Z_INDEX = 10002;
 // the pointer needs time to cross the gap between the row and the submenu
 const SUBMENU_CLOSE_DELAY = 150;
 
@@ -70,6 +69,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   );
   const { setTerritoryId, setStatementId, detailIdArray, selectedDetailId, promoteDetailId } =
     useSearchParams();
+  const { revealEditor, revealDetail } = useDetailPanelReveal();
 
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
 
@@ -146,9 +146,17 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
 
   const { data: bookmarkFolders } = useBookmarksQuery();
 
+  // the toast lives in these callbacks rather than in mutate()'s: closing the
+  // menu unmounts this component, and react-query drops mutate()'s callbacks
+  // with it, while these still run. A failed write is reported by the api
+  // error toast.
   const changeBookmarksMutation = useMutation({
-    mutationFn: async (bookmarks: IBookmarkFolder[]) => await api.usersUpdate("me", { bookmarks }),
-    onSuccess: () => {
+    mutationFn: async ({ bookmarks }: { bookmarks: IBookmarkFolder[]; doneMessage: string }) =>
+      await api.usersUpdate("me", { bookmarks }),
+    onSuccess: (_data, { doneMessage }) => {
+      toast.info(doneMessage);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     },
   });
@@ -181,10 +189,12 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       ? target.entityIds.filter((id) => id !== entity.id)
       : [...target.entityIds, entity.id];
 
-    changeBookmarksMutation.mutate(folders);
-    // react-query drops mutate-scoped callbacks once the observer unmounts, and
-    // closing the menu unmounts this one, so the feedback cannot wait for the write
-    toast.info(wasBookmarked ? `removed from [${target.name}]` : `bookmarked in [${target.name}]`);
+    changeBookmarksMutation.mutate({
+      bookmarks: folders,
+      doneMessage: wasBookmarked
+        ? `removed from [${target.name}]`
+        : `bookmarked in [${target.name}]`,
+    });
     onClose();
   };
 
@@ -205,6 +215,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   const openInDetail = () => {
     promoteDetailId(entity.id);
     expandDetailPanel();
+    revealDetail();
     onClose();
   };
 
@@ -253,6 +264,18 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     onClose();
   };
 
+  // The explorer is never left for the main page: a statement opens in the
+  // explorer's own editor, templates included, and a territory has no tree to
+  // open in there.
+  const isExplorer = location.pathname === "/explorer";
+  const opensEditorInPlace = isStatement && isExplorer;
+
+  const openStatementInEditor = () => {
+    setStatementId(entity.id);
+    revealEditor();
+    onClose();
+  };
+
   const copyToClipboard = (value: string, what: string) => {
     navigator.clipboard.writeText(value);
     toast.info(`${what} [${getShortLabelByLetterCount(value, 200)}] copied to clipboard`);
@@ -286,12 +309,12 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     // only the main page and the explorer mount a detail box to open into
     hasDetailPanel &&
       renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail),
-    targetTerritoryId &&
+    (isExplorer ? opensEditorInPlace : targetTerritoryId) &&
       renderItem(
         "territory",
         isStatement ? "Open statement in editor" : "Go to territory",
         isStatement ? <IcoEdit size={ICON_SIZE} /> : <IcoListTree size={ICON_SIZE} />,
-        goToTerritory,
+        opensEditorInPlace ? openStatementInEditor : goToTerritory,
       ),
   ].filter(Boolean);
 
@@ -300,7 +323,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
       {/* tags are rendered inside modals too, so the menu portals to the body and
           sits above the modal layer rather than inside the clipped page content */}
       <FloatingPortal>
-        <div ref={menu.refs.setFloating} style={{ ...menu.floatingStyles, zIndex: MENU_Z_INDEX }}>
+        <StyledMenuFloating ref={menu.refs.setFloating} style={menu.floatingStyles}>
           <StyledMenuGroup
             style={animatedMount}
             onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
@@ -338,7 +361,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
               </StyledItemIcon>
               <StyledItemLabel>Bookmarks</StyledItemLabel>
               <StyledItemTrailing>
-                {bookmarkedInCount > 0 && <span>{bookmarkedInCount}</span>}
+                {bookmarkedInCount > 0 && <StyledItemCount>{bookmarkedInCount}</StyledItemCount>}
                 <IcoCaretRight size={ICON_SIZE + 3} />
               </StyledItemTrailing>
             </StyledMenuItem>
@@ -359,14 +382,15 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
               </>
             )}
           </StyledMenuGroup>
-        </div>
+        </StyledMenuFloating>
       </FloatingPortal>
 
       {submenuOpen && (
         <FloatingPortal>
-          <div
+          <StyledMenuFloating
             ref={submenu.refs.setFloating}
-            style={{ ...submenu.floatingStyles, zIndex: MENU_Z_INDEX + 1 }}
+            style={submenu.floatingStyles}
+            $submenu
           >
             <StyledMenuGroup
               onMouseEnter={openSubmenu}
@@ -391,7 +415,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
                 <StyledEmptyNote>no bookmark folders yet</StyledEmptyNote>
               )}
             </StyledMenuGroup>
-          </div>
+          </StyledMenuFloating>
         </FloatingPortal>
       )}
     </>

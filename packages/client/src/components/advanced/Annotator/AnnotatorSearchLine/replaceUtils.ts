@@ -27,13 +27,33 @@ export const applyReplacements = (
 };
 
 /**
- * The occurrence to activate after the one at `currentIndex` was replaced and
- * removed from the list. Staying at the same index lands on what is now the
- * next occurrence; if the replaced one was last, step back.
+ * The active occurrence index for a freshly searched list. A search rerun over
+ * edited text can return fewer occurrences than the caller is parked on, and an
+ * index past the end addresses nothing.
  */
-export const nextActiveOccurenceIndex = (currentIndex: number, remainingCount: number): number => {
-  if (remainingCount === 0) {
+export const clampActiveOccurenceIndex = (
+  activeIndex: number,
+  occurenceCount: number,
+): number => {
+  if (occurenceCount === 0) {
     return 0;
   }
-  return currentIndex >= remainingCount ? remainingCount - 1 : currentIndex;
+  return Math.min(activeIndex, occurenceCount - 1);
+};
+
+/**
+ * The occurrence to activate after a replace, given every occurrence's start
+ * index in the searched text and `resumeFrom`, the index just past the inserted
+ * text. Picks the first match beyond the replacement, so a replacement that
+ * still matches the term is stepped over rather than revisited. Wraps to the
+ * first occurrence when nothing follows the replaced spot.
+ */
+export const nextOccurenceIndexAfter = (
+  occurenceStartIndices: number[],
+  resumeFrom: number,
+): number => {
+  const next = occurenceStartIndices.findIndex(
+    (startIndex) => startIndex >= resumeFrom,
+  );
+  return next === -1 ? 0 : next;
 };
