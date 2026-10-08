@@ -37,7 +37,7 @@ const menuMiddleware = [
       elements.floating.style.width = `${rects.reference.width}px`;
       elements.floating.style.maxHeight = `${Math.min(
         MENU_MAX_HEIGHT,
-        Math.max(availableHeight, MENU_MIN_HEIGHT)
+        Math.max(availableHeight, MENU_MIN_HEIGHT),
       )}px`;
     },
   }),
@@ -73,15 +73,20 @@ export const useDropdown = <O extends DropdownItem>({
 }: UseDropdownArgs<O>) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  // the index of the currently highlighted option
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
+  // the options that are currently visible in the menu
   const filtered = useMemo(
     () => (searchable ? filterOptions(options, search) : options),
-    [options, search, searchable]
+    [options, search, searchable],
   );
 
+  // refs to the DOM elements of the options
   const itemsRef = useRef<Array<HTMLElement | null>>([]);
+  // refs to the labels of the options
   const labelsRef = useRef<Array<string | null>>([]);
+  // update the labels ref to the labels of the filtered options
   labelsRef.current = filtered.map((o) => o.label);
 
   /* Trim stale nodes after filtering to prevent ArrowDown walking past the last real row */
@@ -98,15 +103,13 @@ export const useDropdown = <O extends DropdownItem>({
 
   const disabledIdx = getDisabledIndices(filtered);
 
-  const isSelected = (option: O) =>
-    value.some((v) => v.value === option.value);
+  const isSelected = (option: O) => value.some((v) => v.value === option.value);
 
   /* only seeds the highlight while not filtering — during a search the
      first-match effect owns the highlight, and a moving selectedIndex would
      re-trigger floating-ui's own seeding effect on every keystroke */
   const firstSelectedIndex = filtered.findIndex(isSelected);
-  const selectedIndex =
-    !search && firstSelectedIndex !== -1 ? firstSelectedIndex : null;
+  const selectedIndex = !search && firstSelectedIndex !== -1 ? firstSelectedIndex : null;
 
   const closeMenu = () => {
     setOpen(false);
@@ -131,8 +134,7 @@ export const useDropdown = <O extends DropdownItem>({
     onNavigate: setActiveIndex,
     virtual: true, // focus stays on the control/input; aria-activedescendant tracks
     loop: true,
-    disabledIndices: (index) =>
-      index >= filtered.length || disabledIdx.includes(index),
+    disabledIndices: (index) => index >= filtered.length || disabledIdx.includes(index),
     selectedIndex,
   });
   const typeahead = useTypeahead(context, {
@@ -142,12 +144,15 @@ export const useDropdown = <O extends DropdownItem>({
     enabled: !searchable && open,
   });
 
-  const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions(
-    [click, dismiss, role, listNav, typeahead]
-  );
+  const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+    listNav,
+    typeahead,
+  ]);
 
-  const emit = (result: { next: O[]; meta: ChangeMeta<O> }) =>
-    onChange(result.next, result.meta);
+  const emit = (result: { next: O[]; meta: ChangeMeta<O> }) => onChange(result.next, result.meta);
 
   const selectOption = (option: O) => {
     if (option.isDisabled) {
