@@ -12,6 +12,9 @@ export namespace DbEnums {
     EntityUsedTemplate = "usedTemplate",
     EntityReferences = "references.entityIds",
     PropsRecursive = "props.recursive",
+    // index names are scoped to their table, so the documents table has its own
+    // "entityIds" index next to the relations one
+    // oxlint-disable-next-line typescript/no-duplicate-enum-values
     RelationsEntityIds = "entityIds",
     DocumentEntityIds = "entityIds"
   }

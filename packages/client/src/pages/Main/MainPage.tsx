@@ -634,6 +634,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={firstPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["tree", "territory", "user"]}
               isHidden={!firstPanelExpanded}
             />,
@@ -723,6 +724,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 </>,
                 statementListOpened && territoryId && (
                   <RefreshBoxButton
+                    key="refresh"
                     queriesToRefresh={["territory", "statement", "user"]}
                     isHidden={false}
                   />
@@ -766,6 +768,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     )}
                   </>,
                   <IconButton
+                    key="maximize"
                     dataTestId="maximize-detail-box"
                     tooltipLabel={getMaximizeBtnTooltip()}
                     icon={
@@ -787,6 +790,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     )}
                   </>,
                   <IconButton
+                    key="close-all"
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={() => {
@@ -956,10 +960,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={fourthPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["search-templates", "search"]}
               isHidden={!fourthPanelExpanded}
             />,
-            <ToggleFourthPanelBoxButton boxToHide="search" />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="search" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -974,8 +979,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["bookmarks"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="bookmarks" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["bookmarks"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="bookmarks" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -990,8 +999,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["templates"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="templates" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["templates"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="templates" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
