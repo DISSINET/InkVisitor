@@ -2,7 +2,6 @@ import { DropdownItem } from "@inkvisitor/shared/types";
 import { BaseDropdown } from "components";
 import React from "react";
 import { FaRegUser } from "react-icons/fa";
-import { components, OptionProps, SingleValueProps } from "react-select";
 import {
   StyledUserOptionIconWrap,
   StyledUserOptionLabel,
@@ -18,7 +17,6 @@ interface UserSingleDropdown {
   placeholder?: string;
   disableTyping?: boolean;
   disabled?: boolean;
-  loggerId?: string;
 }
 export const UserSingleDropdown = ({
   width,
@@ -28,57 +26,36 @@ export const UserSingleDropdown = ({
   placeholder,
   disableTyping = false,
   disabled,
-  loggerId,
 }: UserSingleDropdown) => {
   return (
     <BaseDropdown
-      userDropdown
       width={width}
       value={options.find((o) => o.value === value)}
       onChange={(selected) => onChange(selected[0].value)}
       options={options}
       placeholder={placeholder}
-      disableTyping={disableTyping}
+      searchable={!disableTyping}
       disabled={disabled}
-      loggerId={loggerId}
-      customComponents={{
-        Option,
-        SingleValue: SingleValue as typeof components.SingleValue,
-      }}
-    />
-  );
-};
-
-const SingleValue = (props: SingleValueProps<DropdownItem>): React.ReactElement => {
-  const isAny = !props.data.value;
-
-  return (
-    <components.SingleValue {...props}>
-      {isAny ? (
-        props.data.label
-      ) : (
-        <StyledUserSingleValueRow>
+      renderValue={(o) =>
+        !o.value ? (
+          o.label
+        ) : (
+          <StyledUserSingleValueRow>
+            <StyledUserOptionIconWrap>
+              <FaRegUser size={14} />
+            </StyledUserOptionIconWrap>
+            {o.label}
+          </StyledUserSingleValueRow>
+        )
+      }
+      renderOption={(o) => (
+        <StyledUserOptionRow>
           <StyledUserOptionIconWrap>
-            <FaRegUser size={14} />
+            {!!o.value && <FaRegUser size={14} />}
           </StyledUserOptionIconWrap>
-          {props.data.label}
-        </StyledUserSingleValueRow>
+          <StyledUserOptionLabel>{o.label}</StyledUserOptionLabel>
+        </StyledUserOptionRow>
       )}
-    </components.SingleValue>
-  );
-};
-
-const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  const isAny = !props.data.value;
-
-  return (
-    <components.Option {...props}>
-      <StyledUserOptionRow>
-        <StyledUserOptionIconWrap>
-          {!isAny && <FaRegUser size={14} />}
-        </StyledUserOptionIconWrap>
-        <StyledUserOptionLabel>{props.label}</StyledUserOptionLabel>
-      </StyledUserOptionRow>
-    </components.Option>
+    />
   );
 };
