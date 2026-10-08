@@ -129,6 +129,8 @@ const theme = {
     warningBorder: "#ffbb00",
 
     tooltipColor: "#fff",
+    // on entity class colours, in both light and dark mode
+    letterIconText: "#fff",
     tooltipBackground: "#000",
     tooltipNodeInfoBackground: "#324185",
     tooltipNodeWarningBackground: "#B78928",

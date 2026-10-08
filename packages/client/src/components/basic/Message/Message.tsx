@@ -176,8 +176,10 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
               <span key={index}>
                 <LetterIcon
                   letter={classItem?.entityClass ?? entityClass}
+                  color="letterIconText"
                   bgColor={colorName}
                   borderColor={colorName}
+                  square
                 />
                 {index < entityClasses.length - 1 ? ", " : ""}
               </span>
