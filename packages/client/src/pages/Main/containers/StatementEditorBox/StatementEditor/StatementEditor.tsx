@@ -356,7 +356,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           changes.value.entityId &&
           changes.value.elvl !== EntityEnums.Elvl.Inferential);
 
-      if (languageCheck && isTypeOrValueChange && user && user.options.workingLanguages?.length) {
+      if (languageCheck && isTypeOrValueChange && user && user.options.defaultStatementLanguage) {
         checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
@@ -364,40 +364,45 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  // checking if the entity language is not in the user's working languages -> in that case, switch elvl to EntityEnums.Elvl.Inferential
-  const checkTypeEntityLanguage = (propId: string, changes: any, instantUpdate?: boolean) => {
-    if (user) {
-      const workingLanguages = user.options.workingLanguages ?? [];
-      if (changes.type) {
-        api.entityGet(changes.type?.entityId).then((typeEntity) => {
-          if (typeEntity.data) {
-            const entityLanguage = typeEntity.data.language;
-            if (!workingLanguages.includes(entityLanguage) && changes.type) {
-              changes.type.elvl = EntityEnums.Elvl.Inferential;
-              applyPropChanges(propId, changes, instantUpdate);
-              toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property type slot is not among your working languages. Epistemic level of property type's involvement changed to "inferential"`,
-              );
-            }
-          }
-        });
-      }
-      if (changes.value) {
-        api.entityGet(changes.value.entityId).then((valueEntity) => {
-          if (valueEntity.data) {
-            const entityLanguage = valueEntity.data.language;
-            if (!workingLanguages.includes(entityLanguage) && changes.value) {
-              changes.value.elvl = EntityEnums.Elvl.Inferential;
-              applyPropChanges(propId, changes, instantUpdate);
-              toast.info(
-                `The language of the entity (${entityLanguage}) assigned to the property value slot is not among your working languages. Epistemic level of property value's involvement changed to "inferential"`,
-              );
-            }
-          }
-        });
+  // checking if the entity language differs from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
+  const checkTypeEntityLanguage = async (
+    propId: string,
+    changes: Partial<IProp>,
+    instantUpdate?: boolean,
+  ) => {
+    const statementLanguage = user?.options.defaultStatementLanguage;
+    const checkedChanges: Partial<IProp> = { ...changes };
+
+    if (changes.type) {
+      const entityLanguage = await fetchEntityLanguage(changes.type.entityId);
+      if (entityLanguage !== undefined && entityLanguage !== statementLanguage) {
+        checkedChanges.type = { ...changes.type, elvl: EntityEnums.Elvl.Inferential };
+        toast.info(
+          `The language of the entity (${entityLanguage}) assigned to the property type slot does not correspond with the user statement language (${statementLanguage}). Epistemic level of property type's involvement changed to "inferential"`,
+        );
       }
     }
-    applyPropChanges(propId, changes, instantUpdate);
+    if (changes.value) {
+      const entityLanguage = await fetchEntityLanguage(changes.value.entityId);
+      if (entityLanguage !== undefined && entityLanguage !== statementLanguage) {
+        checkedChanges.value = { ...changes.value, elvl: EntityEnums.Elvl.Inferential };
+        toast.info(
+          `The language of the entity (${entityLanguage}) assigned to the property value slot does not correspond with the user statement language (${statementLanguage}). Epistemic level of property value's involvement changed to "inferential"`,
+        );
+      }
+    }
+
+    applyPropChanges(propId, checkedChanges, instantUpdate);
+  };
+
+  // undefined when the entity cannot be fetched, so the pick is saved with its elvl unchanged
+  const fetchEntityLanguage = async (entityId: string) => {
+    try {
+      const response = await api.entityGet(entityId);
+      return response.data?.language;
+    } catch {
+      return undefined;
+    }
   };
 
   const applyPropChanges = (propId: string, changes: Partial<IProp>, instantUpdate?: boolean) => {
