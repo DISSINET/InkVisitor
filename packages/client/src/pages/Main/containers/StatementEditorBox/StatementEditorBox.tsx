@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
@@ -85,6 +85,9 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
   });
 
   const [tempObject, setTempObject] = useState<IResponseStatement>();
+  // read after awaits, where the tempObject of the calling render may be outdated
+  const tempObjectRef = useRef(tempObject);
+  tempObjectRef.current = tempObject;
   const [lastSentData, setLastSentData] = useState<string>("");
 
   useEffect(() => {
@@ -323,13 +326,15 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
       const validatedData = await checkValidActantPosition(changes);
       const validatedData2 = await checkValidActantLanguage(validatedData);
 
+      const latestTempObject = tempObjectRef.current ?? tempObject;
       const newData: IResponseStatement = {
-        ...tempObject,
+        ...latestTempObject,
         data: {
-          ...tempObject.data,
+          ...latestTempObject.data,
           ...validatedData2,
         },
       };
+      tempObjectRef.current = newData;
       setTempObject(newData);
       updateChangesAndPendingState(newData, instantUpdate);
     }

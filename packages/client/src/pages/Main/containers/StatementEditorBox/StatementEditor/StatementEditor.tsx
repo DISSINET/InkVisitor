@@ -38,7 +38,7 @@ import {
   useWidthBreakpoint,
 } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AiOutlineWarning } from "react-icons/ai";
 import { FaAnchor, FaRegCopy } from "react-icons/fa";
@@ -111,6 +111,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   handleAttributeChange,
   handleDataAttributeChange,
 }) => {
+  // read after the entity language fetch, where the statement of the calling render may be outdated
+  const latestStatementRef = useRef(statement);
+  latestStatementRef.current = statement;
+
   const {
     statementId,
     setStatementId,
@@ -406,7 +410,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const applyPropChanges = (propId: string, changes: Partial<IProp>, instantUpdate?: boolean) => {
-    const newStatementData = deepCopy(statement.data);
+    const newStatementData = deepCopy(latestStatementRef.current.data);
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
         actant.props.forEach((prop1, pi1) => {
