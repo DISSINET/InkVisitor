@@ -1,4 +1,4 @@
-import Prism from "prismjs";
+import Prism from "./prism";
 import "prismjs/components/prism-json";
 import React from "react";
 import Editor from "react-simple-code-editor";
