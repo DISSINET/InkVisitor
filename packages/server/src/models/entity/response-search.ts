@@ -25,6 +25,22 @@ import {
 } from "@models/relation/functions";
 
 /**
+ * Apostrophes, quotation marks and the characters typed in their place (primes,
+ * accents, fullwidth forms). Label search treats all of them as one character,
+ * single and double alike.
+ */
+const QUOTE_CHARS =
+  "'\u2018\u2019\u201A\u201B\u2039\u203A\u02BC\u02BB`\u00B4\u2032\uFF07" +
+  '"\u201C\u201D\u201E\u201F\u00AB\u00BB\u2033\uFF02';
+
+/**
+ * Regex character class matching every quote char when `char` is one of them.
+ * The class is valid in both JavaScript and RethinkDB (RE2) patterns.
+ */
+export const quoteCharPattern = (char: string): string | undefined =>
+  QUOTE_CHARS.includes(char) ? `[${QUOTE_CHARS}]` : undefined;
+
+/**
  * Statement.getEntitiesIds() appends territory lineage (ancestors toward root) for other features.
  * Territory search aggregates those ids; strip ancestor territory ids so the root (or any parent T)
  * is not implied when filtering by a child territory.
@@ -354,7 +370,7 @@ export class SearchQuery {
           n: "[nñ]",
           c: "[cç]",
         };
-        return map[char] || char;
+        return map[char] || quoteCharPattern(char) || char;
       })
       .join("");
 
