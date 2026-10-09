@@ -135,7 +135,9 @@ export const StyledRelativePosition = styled.div<StyledRelativePosition>`
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   min-width: 16.1rem;
   /* max-width: 24rem; */
-  max-width: ${({ $width }) => (!$width ? "24rem" : "")};
+  /* the explicit width is capped to the viewport minus the 1rem shift padding
+     on each side */
+  max-width: ${({ $width }) => (!$width ? "24rem" : "calc(100vw - 2rem)")};
   width: ${({ $width }) => ($width ? `${$width / 10}rem` : "")};
 
   overflow: hidden;
