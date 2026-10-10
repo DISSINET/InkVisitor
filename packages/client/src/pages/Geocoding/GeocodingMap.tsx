@@ -670,6 +670,12 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   /** Why the last drag was not a region. Cleared by the next one. */
   const [drawRefusal, setDrawRefusal] = useState<string | null>(null);
   /**
+   * Whether the pointer or keyboard focus is on the region control or its
+   * note. The drawn region's coordinates are shown only then, since the button
+   * already says a region is set.
+   */
+  const [regionDetailsOpen, setRegionDetailsOpen] = useState(false);
+  /**
    * Where the drag started, held across renders rather than inside the effect.
    *
    * A drag is one gesture and the page re-renders during it — the elapsed
@@ -1387,6 +1393,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           <StyledDrawToggle
             type="button"
             $armed={drawing}
+            $set={!!context.regionBbox}
             aria-pressed={drawing}
             title={
               drawing
@@ -1400,8 +1407,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           >
             <IcoSelection />
           </StyledDrawToggle>
-          {drawing || drawRefusal || context.regionBbox ? (
-            <StyledDrawNote>
+          {drawing || drawRefusal || (context.regionBbox && regionDetailsOpen) ? (
+            <StyledDrawNote
+              onMouseEnter={() => setRegionDetailsOpen(true)}
+              onMouseLeave={() => setRegionDetailsOpen(false)}
+            >
               {drawRefusal ? (
                 <StyledDrawRefusal>{drawRefusal}</StyledDrawRefusal>
               ) : drawing ? (

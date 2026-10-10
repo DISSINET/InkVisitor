@@ -268,7 +268,7 @@ export const StyledLayersToggle = styled.button<{ $open: boolean }>`
  * a mode — the next drag makes a rectangle instead of moving the map — and a
  * mode the reader cannot see they are in is a map that has stopped working.
  */
-export const StyledDrawToggle = styled.button<{ $armed: boolean }>`
+export const StyledDrawToggle = styled.button<{ $armed: boolean; $set: boolean }>`
   position: absolute;
   top: ${belowToggle};
   right: ${({ theme }) => theme.space[2]};
@@ -280,11 +280,13 @@ export const StyledDrawToggle = styled.button<{ $armed: boolean }>`
   height: ${TOGGLE_SIZE};
   cursor: pointer;
   border: 1px solid
-    ${({ theme, $armed }) => ($armed ? theme.color["primary"] : theme.color["gray"][500])};
+    ${({ theme, $armed, $set }) =>
+      $armed || $set ? theme.color["primary"] : theme.color["gray"][500]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $armed }) =>
-    $armed ? theme.color["primary"] : theme.color["white"]};
-  color: ${({ theme, $armed }) => ($armed ? theme.color["white"] : theme.color["black"])};
+  background-color: ${({ theme, $armed, $set }) =>
+    $armed ? theme.color["primary"] : $set ? theme.color["gray"][200] : theme.color["white"]};
+  color: ${({ theme, $armed, $set }) =>
+    $armed ? theme.color["white"] : $set ? theme.color["primary"] : theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize.lg};
 
   &:hover {
@@ -316,6 +318,17 @@ export const StyledDrawNote = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xxs};
   color: ${({ theme }) => theme.color["black"]};
   white-space: nowrap;
+
+  /* the gap to the toggle is part of the note, so moving the pointer from one
+     to the other does not leave both */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: ${({ theme }) => theme.space[2]};
+  }
 `;
 
 /** Says what a bad drag was refused for, in the place the drag happened. */
