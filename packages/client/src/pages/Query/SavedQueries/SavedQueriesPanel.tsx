@@ -5,7 +5,7 @@ import { SavedQueryNameNotUnique } from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Checkbox, Input, Submit } from "components";
+import { Button, Checkbox, Input, Submit, Tooltip } from "components";
 import { useSavedQueriesQuery, useUserQuery } from "hooks/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -44,9 +44,9 @@ import {
   StyledQueryRow,
   StyledSaveAction,
   StyledSaveFooter,
+  StyledSaveOption,
   StyledSaveRow,
   StyledSavedQueriesRoot,
-  StyledShareRow,
   StyledToggleButton,
 } from "./SavedQueriesPanelStyles";
 
@@ -59,6 +59,8 @@ interface SavedQueriesPanel {
   onToggleIncludeSubordinates: (value: boolean) => void;
   exploreFilters: Explore.IExploreSearchFilter[];
   exploreDispatch: React.Dispatch<any>;
+  tableColumns: Explore.IExploreColumn[];
+  onLoadTableColumns: (columns: Explore.IExploreColumn[]) => void;
 }
 
 // gap between the Queries toggle and the panel (matches the old flex gap)
@@ -87,6 +89,35 @@ const normalizeName = (name: string): string => name.trim().toLowerCase();
 
 type FolderRow = ISavedQuery | IExampleQuery;
 
+interface SavedQueryName {
+  row: FolderRow;
+  onLoad: (row: FolderRow) => void;
+}
+const SavedQueryName: React.FC<SavedQueryName> = ({ row, onLoad }) => {
+  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+    <>
+      <StyledQueryName
+        ref={setReferenceElement}
+        type="button"
+        onClick={() => onLoad(row)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        {row.name}
+      </StyledQueryName>
+      <Tooltip
+        visible={showTooltip}
+        referenceElement={referenceElement}
+        position="left"
+        label={row.data.columns ? `${row.name} (includes columns)` : row.name}
+      />
+    </>
+  );
+};
+
 const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   queryState,
   queryStateDispatch,
@@ -96,11 +127,14 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
   onToggleIncludeSubordinates,
   exploreFilters,
   exploreDispatch,
+  tableColumns,
+  onLoadTableColumns,
 }) => {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saveShared, setSaveShared] = useState(false);
+  const [saveColumns, setSaveColumns] = useState(true);
   const [openFolders, setOpenFolders] = useState<Record<FolderKey, boolean>>({
     examples: true,
     mine: true,
@@ -158,6 +192,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       toast.success(`Query "${variables.name}" saved`);
       setSaveName("");
       setSaveShared(false);
+      setSaveColumns(true);
       queryClient.invalidateQueries({ queryKey: ["saved-queries"] });
     },
     onError: (error) => {
@@ -202,12 +237,15 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       name: trimmedSaveName,
       shared: saveShared,
       // every Explorer filter in play (UUIDs, label, floating search) travels
-      // with the query, so loading it reproduces the whole result
+      // with the query, so loading it reproduces the whole result; the table
+      // columns go along unless the user opts out, and a query stored without
+      // them leaves the columns of whoever loads it in place
       data: {
         query: queryState,
         includeEquivalents,
         includeSubordinates,
         filters: exploreFilters,
+        ...(saveColumns ? { columns: tableColumns } : {}),
       },
     });
   };
@@ -225,6 +263,14 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
       type: ExploreActionType.setFilters,
       payload: { filters: row.data.filters ?? [] },
     });
+    // a query stored without columns leaves the current ones in place
+    if (row.data.columns) {
+      // stored columns outlive the column types they name; the table header
+      // throws on a type missing from the config, so such columns are skipped
+      onLoadTableColumns(
+        row.data.columns.filter((column) => column.type in Explore.EExploreColumnTypeConfig),
+      );
+    }
   };
 
   const startEditing = (row: ISavedQuery) => {
@@ -370,14 +416,21 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                   }
                 }}
               >
+                <StyledSaveOption>
+                  <Checkbox
+                    label="include columns"
+                    value={saveColumns}
+                    onChangeFn={(value) => setSaveColumns(value)}
+                  />
+                </StyledSaveOption>
                 {canShare && (
-                  <StyledShareRow>
+                  <StyledSaveOption>
                     <Checkbox
-                      label="shared with everyone"
+                      label="shared"
                       value={saveShared}
                       onChangeFn={(value) => setSaveShared(value)}
                     />
-                  </StyledShareRow>
+                  </StyledSaveOption>
                 )}
                 <StyledSaveAction>
                   <Button
@@ -425,13 +478,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                           return (
                             <StyledQueryRow key={row.id}>
                               <StyledQueryBullet>•</StyledQueryBullet>
-                              <StyledQueryName
-                                type="button"
-                                title={row.name}
-                                onClick={() => handleLoad(row)}
-                              >
-                                {row.name}
-                              </StyledQueryName>
+                              <SavedQueryName row={row} onLoad={handleLoad} />
                             </StyledQueryRow>
                           );
                         }
@@ -453,13 +500,7 @@ const SavedQueriesPanel: React.FC<SavedQueriesPanel> = ({
                                 onBlur={acceptEditing}
                               />
                             ) : (
-                              <StyledQueryName
-                                type="button"
-                                title={row.name}
-                                onClick={() => handleLoad(row)}
-                              >
-                                {row.name}
-                              </StyledQueryName>
+                              <SavedQueryName row={row} onLoad={handleLoad} />
                             )}
 
                             <StyledQueryActions $forceVisible={isEditing}>

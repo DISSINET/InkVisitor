@@ -88,9 +88,6 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({ documentId, onClose, a
                 // and content happens in the Main page annotator box.
                 canEditDocument={false}
                 disableCreate
-                // Annotator lives inside this modal; lift its body-appended
-                // overlays above the modal (default lib values sit under it).
-                overlayZIndex={{ contextMenu: 700, settingsOverlay: 650 }}
                 noBorderRadius
               />
             </AnnotatorProvider>

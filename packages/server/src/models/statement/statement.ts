@@ -904,8 +904,9 @@ class Statement extends Entity implements IStatement {
    * Territory ancestor lineage, reference resource/value and actant
    * classifications/identifications have no such index and stay out; including
    * them made co-occurrence search return many unrelated entities.
-   * Passed ids are never part of the result, so two inputs that co-occur with
-   * each other do not return each other.
+   * A passed id is part of the result only when it shares a statement with
+   * another passed id, so a single input never returns itself while each of
+   * two inputs that co-occur with each other is in the other's result.
    * @param db db connection
    * @param entityIds single id or list of ids; results are unioned
    * @returns list of co-occurring ids
@@ -924,30 +925,44 @@ class Statement extends Entity implements IStatement {
       inputIds
     );
 
+    const inputIdSet = new Set(inputIds);
+    const coOccurringInputIds = new Set<string>();
     const ids = new Set<string>();
     for (const s of statements) {
-      ids.add(s.id);
+      const statementIds = new Set<string>([s.id]);
       const territoryId = s.data.territory?.territoryId;
       if (territoryId) {
-        ids.add(territoryId);
+        statementIds.add(territoryId);
       }
       s.data.actions?.forEach((a) => {
-        if (a.actionId) ids.add(a.actionId);
+        if (a.actionId) statementIds.add(a.actionId);
         Entity.extractIdsFromProps(a.props).forEach((id) => {
-          if (id) ids.add(id);
+          if (id) statementIds.add(id);
         });
       });
       s.data.actants?.forEach((a) => {
-        if (a.entityId) ids.add(a.entityId);
+        if (a.entityId) statementIds.add(a.entityId);
         Entity.extractIdsFromProps(a.props).forEach((id) => {
-          if (id) ids.add(id);
+          if (id) statementIds.add(id);
         });
       });
       s.data.tags?.forEach((t) => {
-        if (t) ids.add(t);
+        if (t) statementIds.add(t);
       });
+
+      // the input list can be a pasted batch of thousands of ids, so inputs
+      // are looked up from the statement's few ids, not the other way round
+      const statementInputIds = [...statementIds].filter((id) =>
+        inputIdSet.has(id)
+      );
+      if (statementInputIds.length > 1) {
+        statementInputIds.forEach((id) => coOccurringInputIds.add(id));
+      }
+      statementIds.forEach((id) => ids.add(id));
     }
-    inputIds.forEach((id) => ids.delete(id));
+    inputIds.forEach((id) => {
+      if (!coOccurringInputIds.has(id)) ids.delete(id);
+    });
 
     return [...ids];
   }

@@ -51,13 +51,43 @@ describe("Users signin", function () {
     // The signin handler now reads `login` (not `username`) and responds with
     // BadCredentialsError (401) for an unknown login, instead of UserDoesNotExits.
     it("should return a BadCredentialsError wrapped in IResponseGeneric", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      // a password typed into the login field, with a line break that would
+      // forge a second log line if logged verbatim
+      const login = "s3cret-pass\nFailed signin: forged";
       await request(app)
         .post(`${apiPath}/users/signin`)
-        .send({ login: "fake", password: "fake" })
+        .send({ login, password: "fake" })
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new BadCredentialsError(""))
         );
+
+      const logged = warn.mock.calls.map((args) => args.join(" ")).join("\n");
+      warn.mockRestore();
+      expect(logged).toContain("Failed signin");
+      expect(logged).toContain("reason=unknown login");
+      expect(logged).not.toContain("s3cret-pass");
+      expect(logged).not.toContain("forged");
+    });
+  });
+  describe("Existing user with a wrong password", () => {
+    it("should log the account, not the submitted login", async () => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      await request(app)
+        .post(`${apiPath}/users/signin`)
+        .send({ login: "admin", password: "wrong" })
+        .expect("Content-Type", /json/)
+        .expect(
+          testErroneousResponse.bind(undefined, new BadCredentialsError(""))
+        );
+
+      const logged = warn.mock.calls.map((args) => args.join(" ")).join("\n");
+      warn.mockRestore();
+      expect(logged).toContain('name="admin"');
+      expect(logged).toMatch(/user=\S+/);
+      expect(logged).toContain("reason=wrong password");
+      expect(logged).not.toContain("wrong\"");
     });
   });
   describe("Ok body with ok user", () => {

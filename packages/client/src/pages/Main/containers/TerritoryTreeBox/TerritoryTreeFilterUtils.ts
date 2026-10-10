@@ -11,7 +11,8 @@ import { IExtendedResponseTree, ITerritoryFilter } from "types";
 export function filterTreeByFilters(
   node: IResponseTree | null,
   filters: ITerritoryFilter,
-  favoriteIds: string[]
+  favoriteIds: string[],
+  documentTerritoryIds: Set<string>
 ): IResponseTree | null {
   if (!node) {
     return null;
@@ -23,9 +24,9 @@ export function filterTreeByFilters(
   const filteredChildren = node.children
     .map((child) =>
       // a match keeps its subtree whole, so the children under a hit stay browsable
-      isNodeMatchingFilters(child, filters, favoriteIds)
+      isNodeMatchingFilters(child, filters, favoriteIds, documentTerritoryIds)
         ? child
-        : filterTreeByFilters(child, filters, favoriteIds)
+        : filterTreeByFilters(child, filters, favoriteIds, documentTerritoryIds)
     )
     .filter((child): child is IResponseTree => child !== null);
 
@@ -39,16 +40,22 @@ export function filterTreeByFilters(
 export function markNodesWithFilters(
   node: IResponseTree,
   filters: ITerritoryFilter,
-  favoriteIds: string[]
+  favoriteIds: string[],
+  documentTerritoryIds: Set<string>
 ): IExtendedResponseTree {
   const extendedNode: IExtendedResponseTree = {
     ...node,
-    foundByRecursion: isNodeMatchingFilters(node, filters, favoriteIds),
+    foundByRecursion: isNodeMatchingFilters(
+      node,
+      filters,
+      favoriteIds,
+      documentTerritoryIds
+    ),
     children: [],
   };
 
   extendedNode.children = node.children.map((child) =>
-    markNodesWithFilters(child, filters, favoriteIds)
+    markNodesWithFilters(child, filters, favoriteIds, documentTerritoryIds)
   );
 
   return extendedNode;
@@ -57,13 +64,15 @@ export function markNodesWithFilters(
 function isNodeMatchingFilters(
   node: IResponseTree,
   filters: ITerritoryFilter,
-  favoriteIds: string[]
+  favoriteIds: string[],
+  documentTerritoryIds: Set<string>
 ): boolean {
   const {
     starred,
     editorRights,
     withSubterritories,
     withStatements,
+    withDocument,
     filter: targetLabel,
     operator = "and", // default to "and" if not specified
   } = filters;
@@ -73,6 +82,9 @@ function isNodeMatchingFilters(
     : true;
   const meetsWithSubterritoriesCondition = withSubterritories
     ? node.children.length > 0
+    : true;
+  const meetsWithDocumentCondition = withDocument
+    ? documentTerritoryIds.has(node.territory.id)
     : true;
   const meetsStarredCondition = starred
     ? favoriteIds.includes(node.territory.id)
@@ -94,6 +106,7 @@ function isNodeMatchingFilters(
     const activeConditions = [
       withStatements ? meetsWithStatementsCondition : null,
       withSubterritories ? meetsWithSubterritoriesCondition : null,
+      withDocument ? meetsWithDocumentCondition : null,
       starred ? meetsStarredCondition : null,
       editorRights ? meetsEditorRightsCondition : null,
       targetLabel.length > 0 ? meetsFilterCondition : null,
@@ -111,6 +124,7 @@ function isNodeMatchingFilters(
     return (
       meetsWithStatementsCondition &&
       meetsWithSubterritoriesCondition &&
+      meetsWithDocumentCondition &&
       meetsStarredCondition &&
       meetsEditorRightsCondition &&
       meetsFilterCondition

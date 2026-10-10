@@ -30,6 +30,7 @@ interface BasicDropdown<T = string> {
   /** What the control is called, where nothing on screen names it. */
   ariaLabel?: string;
   tooltipLabel?: string;
+  tooltipContent?: string;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   disableTyping?: boolean;
   disabled?: boolean;
@@ -49,6 +50,7 @@ export const BasicDropdown = <T extends string>({
   placeholder,
   ariaLabel,
   tooltipLabel,
+  tooltipContent,
   tooltipPosition,
   disableTyping = false,
   disabled,
@@ -69,6 +71,7 @@ export const BasicDropdown = <T extends string>({
       placeholder={placeholder}
       ariaLabel={ariaLabel}
       tooltipLabel={tooltipLabel}
+      tooltipContent={tooltipContent}
       tooltipPosition={tooltipPosition}
       icon={icon}
       noDropDownIndicator={noDropDownIndicator}

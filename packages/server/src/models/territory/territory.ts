@@ -112,6 +112,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   territoryId?: string | undefined;
   detail: string;
   active?: boolean;
+  expansions?: ITerritoryValidation["expansions"];
 
   constructor(data: Partial<ITerritoryValidation>) {
     this.entityClasses = data.entityClasses || [];
@@ -129,6 +130,7 @@ export class TerritoryValidation implements ITerritoryValidation {
     this.territoryId = data.territoryId;
 
     this.active = data.active;
+    this.expansions = data.expansions;
   }
 
   isValid(): boolean {

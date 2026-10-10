@@ -302,6 +302,7 @@ export const BatchActionAddRelation: React.FC<BatchActionAddRelationProps> = ({
                   inputWidth="full"
                   categoryTypes={allowedTargetEntityClasses}
                   reuseDroppedValue
+                  disableTemplatesAccept
                   disabled={!activeType || validEntityIds.length === 0 || !eligibilityReady}
                 />
               )}

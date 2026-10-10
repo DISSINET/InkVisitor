@@ -41,10 +41,11 @@ function renderLayout({
   // color-scheme + bgcolor + gradient tricks improve odds but are not guaranteed.
   const headerBg = "#091034";
   // alt text is styled too, since clients that block images render it on the dark header
+  // Outlook desktop sizes images by the width/height attributes, not CSS
   const headerContent = logoUrl
     ? `<img src="${escapeHtml(
         logoUrl
-      )}" alt="InkVisitor" style="display:block;height:32px;width:auto;color:#ffffff;font-size:22px;font-weight:bold;line-height:32px;" />`
+      )}" alt="InkVisitor" width="173" height="32" style="display:block;height:32px;width:173px;color:#ffffff;font-size:22px;font-weight:bold;line-height:32px;" />`
     : `<span style="display:block;color:#ffffff;font-size:22px;font-weight:bold;line-height:32px;">InkVisitor</span>`;
   return `<!doctype html>
 <html style="color-scheme:light;">

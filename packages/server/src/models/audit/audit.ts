@@ -5,6 +5,7 @@ import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
 import { DbEnums } from "@inkvisitor/shared/enums";
 import { EventType } from "@inkvisitor/shared/types/stats";
+import { chunksOf } from "@models/batch-write";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
@@ -108,6 +109,30 @@ export default class Audit implements IAudit, IDbModel {
       type,
     });
     return entry.save(req.db.connection);
+  }
+
+  /**
+   * Batch form of {@link createNew}: one audit per entry, inserted in chunks of
+   * one query each.
+   * @returns number of audits inserted
+   */
+  static async createMany(
+    req: IRequest,
+    auditScope: AuditScope,
+    entries: { modelId: string; changes: object }[],
+    type: EventType
+  ): Promise<number> {
+    const user = req.getUserOrFail().id;
+    let inserted = 0;
+    for (const chunk of chunksOf(entries)) {
+      const docs = chunk.map(({ modelId, changes }) => {
+        const entry = new Audit({ modelId, auditScope, user, changes, type });
+        return { ...entry, id: undefined };
+      });
+      const result = await rethink.table(Audit.table).insert(docs).run(req.db.connection);
+      inserted += result.inserted;
+    }
+    return inserted;
   }
 
   /**

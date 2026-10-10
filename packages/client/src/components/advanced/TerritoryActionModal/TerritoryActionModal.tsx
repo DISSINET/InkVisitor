@@ -6,14 +6,12 @@ import {
   IResponseTerritory,
   ITerritory,
 } from "@inkvisitor/shared/types";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
-import api from "api";
+import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import {
   Button,
   ButtonGroup,
   CancelButton,
-  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -35,7 +33,6 @@ import {
   StyledGreyText,
   StyledHeadingColumn,
   StyledInto,
-  StyledNotes,
   StyledParentRow,
   StyledTagList,
   StyledTagWrap,
@@ -257,51 +254,43 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           </StyledFlexRow>
         </StyledFlexContainer>
       </ModalContent>
-      <ModalFooter column>
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-        >
-          <ButtonGroup>
-            <CancelButton onClick={onClose} />
-            <Button
-              disabled={!newParentEntities.length || !territory}
-              label={action === "move" ? "Move" : "Duplicate"}
-              onClick={() => {
-                if (newParentEntities.length > 0 && territory) {
-                  if (action === "move") {
-                    // MOVE
-                    updateTerritoryMutation.mutate({
-                      territoryId: territory.id,
-                      changes: {
-                        data: {
-                          parent: {
-                            territoryId: newParentEntities[0].id,
-                            order: order,
-                          },
+      <ModalFooter>
+        <ButtonGroup>
+          <CancelButton onClick={onClose} />
+          <Button
+            disabled={!newParentEntities.length || !territory}
+            label={action === "move" ? "Move" : "Duplicate"}
+            onClick={() => {
+              if (newParentEntities.length > 0 && territory) {
+                if (action === "move") {
+                  // MOVE
+                  updateTerritoryMutation.mutate({
+                    territoryId: territory.id,
+                    changes: {
+                      data: {
+                        parent: {
+                          territoryId: newParentEntities[0].id,
+                          order: order,
                         },
                       },
-                    });
-                    onClose();
-                  }
-                  //  else if (action === "duplicate") {
-                  //   // DUPLICATE
-                  //   duplicateTerritoryMutation.mutate({
-                  //     territoryId: territory.id,
-                  //     targets: newParentEntities.map((e) => e.id),
-                  //     withChildren: includeChildren,
-                  //   });
-                  //   onClose();
-                  // }
+                    },
+                  });
+                  onClose();
                 }
-              }}
-              color={"success"}
-            />
-          </ButtonGroup>
-        </div>
+                //  else if (action === "duplicate") {
+                //   // DUPLICATE
+                //   duplicateTerritoryMutation.mutate({
+                //     territoryId: territory.id,
+                //     targets: newParentEntities.map((e) => e.id),
+                //     withChildren: includeChildren,
+                //   });
+                //   onClose();
+                // }
+              }
+            }}
+            color={"success"}
+          />
+        </ButtonGroup>
         {/* this note will appear if we are duplicating T (with or without children) that have at least 1 S */}
         {/* {(showDuplicateNote || showMoveNote) && (
           <StyledNotes>

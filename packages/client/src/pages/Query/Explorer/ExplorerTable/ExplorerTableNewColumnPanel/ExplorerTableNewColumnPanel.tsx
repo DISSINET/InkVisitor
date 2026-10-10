@@ -14,12 +14,13 @@ import {
   StyledContent,
   StyledHeader,
   StyledLabel,
-  StyledNameFillWrap,
+  StyledNameRow,
   StyledPanel,
   StyledValue,
 } from "./ExplorerTableNewColumnPanelStyles";
 import { IcoArrowReturnRight } from "Theme/icons";
 import { getStoredUserRole } from "utils/userStorage";
+import { getEntityLabel } from "utils/utils";
 import { isReadOnlyColumn } from "../types";
 import { getRelationColumnLabel } from "./ExploreColumnParamValueRenderers";
 
@@ -61,6 +62,7 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
   const paramsDef = Explore.EExploreColumnTypeConfig[type].paramsDef ?? [];
   const typeLabel = Explore.EExploreColumnTypeConfig[type].label;
   const relationTypeParamDef = paramsDef.find((def) => def.type === "relationType");
+  const entityParamDef = paramsDef.find((def) => def.type === "entity");
 
   // Reset param values when column type changes
   useEffect(() => {
@@ -113,12 +115,18 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
   const isReadOnly = isReadOnlyColumn({ type, params });
 
   // a relation column is named after its relation type, so the fill stays
-  // unavailable until one is picked
+  // unavailable until one is picked; an entity-param column pairs the type's
+  // short code (e.g. EPV) with the picked entity's label
   const fillLabel = useMemo(() => {
-    if (!relationTypeParamDef) return typeLabel;
-    const relationType = paramValues[relationTypeParamDef.id] as RelationEnums.Type | undefined;
-    return relationType ? getRelationColumnLabel(relationType, !!paramValues.inverse) : undefined;
-  }, [relationTypeParamDef, typeLabel, paramValues]);
+    if (relationTypeParamDef) {
+      const relationType = paramValues[relationTypeParamDef.id] as RelationEnums.Type | undefined;
+      return relationType ? getRelationColumnLabel(relationType, !!paramValues.inverse) : undefined;
+    }
+    const entity = entityParamDef
+      ? (paramValues[entityParamDef.id] as IEntity | undefined)
+      : undefined;
+    return entity ? `${type} - ${getEntityLabel(entity)}` : typeLabel;
+  }, [relationTypeParamDef, entityParamDef, type, typeLabel, paramValues]);
 
   const handleCreate = useCallback(() => {
     const col: Explore.IExploreColumn = {
@@ -230,31 +238,26 @@ const ExplorerTableNewColumnPanel: React.FC<Props> = ({ open, onClose, onCreateC
         ))}
         <StyledLabel>Column name</StyledLabel>
         <StyledValue>
-          <Input
-            width="full"
-            value={name}
-            onChangeFn={(v) => setName(v)}
-            changeOnType
-            rightContent={
-              <StyledNameFillWrap>
-                <Button
-                  icon={<IcoArrowReturnRight size={13} />}
-                  tooltipLabel={
-                    relationTypeParamDef
-                      ? "fill in the relation type label"
-                      : "fill in the column type label"
-                  }
-                  tooltipPosition="top"
-                  onClick={() => fillLabel && setName(fillLabel)}
-                  disabled={!fillLabel || name === fillLabel}
-                  noBorder
-                  noBackground
-                  color="black"
-                  inverted
-                />
-              </StyledNameFillWrap>
-            }
-          />
+          <StyledNameRow>
+            <Button
+              icon={<IcoArrowReturnRight size={13} />}
+              tooltipLabel={
+                relationTypeParamDef
+                  ? "fill in the relation type label"
+                  : entityParamDef
+                    ? `fill in the column type and ${entityParamDef.label.toLowerCase()} label`
+                    : "fill in the column type label"
+              }
+              tooltipPosition="top"
+              onClick={() => fillLabel && setName(fillLabel)}
+              disabled={!fillLabel || name === fillLabel}
+              noBorder
+              noBackground
+              color="black"
+              inverted
+            />
+            <Input width="full" value={name} onChangeFn={(v) => setName(v)} changeOnType />
+          </StyledNameRow>
         </StyledValue>
         {/* an editable column would render read-only cells for a Viewer anyway */}
         {!isViewer && !isReadOnly && (

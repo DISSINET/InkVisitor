@@ -12,8 +12,7 @@ import { mergeTokensIntoIds, parseEntityIdsFromText } from "pages/Query/utils";
 import { useUsersSimplifiedQuery } from "hooks/react-query/useUsersSimplifiedQuery";
 import React, { useCallback, useMemo, useState } from "react";
 import { BsShieldExclamation, BsShieldFillCheck, BsShieldShaded } from "react-icons/bs";
-import { MdClose } from "react-icons/md";
-import { IcoChevronDown } from "Theme/icons";
+import { IcoChevronDown, IcoCloseMd } from "Theme/icons";
 import { CoOccurrenceEntityList } from "./CoOccurrenceEntityList";
 import {
   StyledCoOccurrenceBox,
@@ -314,7 +313,7 @@ export const FloatingSearchForm: React.FC<FloatingSearchFormProps> = ({ dispatch
                   aria-label="Clear co-occurrence filter"
                   onClick={() => setCoOccurrenceIds([])}
                 >
-                  <MdClose size={14} />
+                  <IcoCloseMd size={14} />
                 </StyledCoOccurrenceClear>
               </StyledCoOccurrenceSummary>
             )}

@@ -4,9 +4,9 @@ import api from "api";
 import { EntityTag } from "components/advanced";
 import { shortenUuid } from "pages/Query/utils";
 import React, { useMemo, useRef, useState } from "react";
-import { MdClose } from "react-icons/md";
 import { List, RowComponentProps } from "react-window";
 import { scrollOverscanCount } from "Theme/constants";
+import { IcoCloseMd } from "Theme/icons";
 import {
   StyledCoOccurrenceChipRemove,
   StyledCoOccurrenceListRow,
@@ -66,7 +66,7 @@ const CoOccurrenceRow = ({
             aria-label={`Remove ${entityId}`}
             onClick={() => onRemove(entityId)}
           >
-            <MdClose size={12} />
+            <IcoCloseMd size={12} />
           </StyledCoOccurrenceChipRemove>
         </StyledCoOccurrenceUuidChip>
       )}

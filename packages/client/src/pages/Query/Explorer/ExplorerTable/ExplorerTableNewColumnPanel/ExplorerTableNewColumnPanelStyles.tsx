@@ -40,11 +40,11 @@ export const StyledValue = styled.div`
   color: ${({ theme }) => theme.color.black};
 `;
 
-/** Holds the fill-from-type-label button inside the column name input. */
-export const StyledNameFillWrap = styled.div`
+/** Column name row: the fill-from-type-label button, then the input. */
+export const StyledNameRow = styled.div`
   display: flex;
   align-items: center;
-  margin-left: 0.2rem;
+  gap: 0.2rem;
 `;
 
 export const StyledCloseIconWrap = styled.span`

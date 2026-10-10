@@ -11,7 +11,12 @@ import { Button, Checkbox, IconWithTooltip, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
 import { useTheme } from "styled-components";
-import { INodeItem, QueryValidityProblem } from "../../types";
+import {
+  edgeTypesWithoutSubordinates,
+  edgeTypesWithSubtreeDepth,
+  INodeItem,
+  QueryValidityProblem,
+} from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
 import { expansionCount } from "../nodeExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
@@ -58,22 +63,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
 
   const edgeType = edge?.type;
   const edgeLabel = edgeType ? Query.EdgeTypeLabels[edgeType] : "related";
-
-  // edges whose target entity is mandatory: with an empty picker the backend
-  // matches nothing (membership is only meaningful relative to a specific
-  // territory/statement), so the generic "empty = any" hint does not apply -
-  // these get a "requires a target entity" note instead. Mirrors the
-  // `if (!id) matches nothing` guards in server/src/service/query/edge.ts.
-  const edgeRequiresTarget =
-    !!edgeType &&
-    (
-      [
-        Query.EdgeType["IS:"],
-        Query.EdgeType["I_IS:"],
-        Query.EdgeType["SUT:"],
-        Query.EdgeType["EUT:"],
-      ] as Query.EdgeType[]
-    ).includes(edgeType);
 
   const nodeParams = edgeType ? Query.EdgeTypeTargetNodeParams[edgeType] : {};
 
@@ -128,8 +117,14 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
     enabled: !!entityId && api.isLoggedIn(),
   });
 
-  const includeEquivalents = node.params.includeEquivalents === true;
-  const includeSubordinates = node.params.includeSubordinates === true;
+  // EQ / SUB only widen a picked entity, and not on every edge; a toggle that
+  // does not apply reads as off, whatever the node params still carry
+  const withoutSubordinates = !!edgeType && edgeTypesWithoutSubordinates.includes(edgeType);
+  const subordinatesAsDepth = !!edgeType && edgeTypesWithSubtreeDepth.includes(edgeType);
+  const equivalentsApply = !!entityId;
+  const subordinatesApply = !!entityId && !withoutSubordinates;
+  const includeEquivalents = equivalentsApply && node.params.includeEquivalents === true;
+  const includeSubordinates = subordinatesApply && node.params.includeSubordinates === true;
 
   // The expansion is fetched only when the user asks for it, never as a side
   // effect of editing the query: this signature identifies the toggle
@@ -422,13 +417,9 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     }}
                     rightContent={
                       <IconWithTooltip
-                        color={
-                          edgeRequiresTarget || isRelationEntityPickerDisabled
-                            ? "warning"
-                            : "success"
-                        }
+                        color={isRelationEntityPickerDisabled ? "warning" : "success"}
                         icon={
-                          edgeRequiresTarget || isRelationEntityPickerDisabled ? (
+                          isRelationEntityPickerDisabled ? (
                             <IcoWarning size={12} />
                           ) : (
                             <IcoQuestion size={11} />
@@ -436,7 +427,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                         }
                         tooltipPosition="top"
                         tooltipColor={
-                          edgeRequiresTarget || isRelationEntityPickerDisabled
+                          isRelationEntityPickerDisabled
                             ? "tooltipNodeWarningBackground"
                             : "tooltipNodeInfoBackground"
                         }
@@ -452,8 +443,6 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                               {rootClassLabels ? <b>{rootClassLabels}</b> : "the root node's class"}
                               . Change the root class or the edge type.
                             </p>
-                          ) : edgeRequiresTarget ? (
-                            <p>This edge requires a target entity.</p>
                           ) : (
                             <StyledTooltipList>
                               <StyledTooltipListItem>
@@ -482,8 +471,13 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   size={13}
                   color="info"
                   value={includeEquivalents}
+                  disabled={!equivalentsApply}
                   tooltipLabel="include equivalents"
-                  tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to this node."
+                  tooltipContent={
+                    entityId
+                      ? "Also include entities equivalent (SYN, IDE, AEE) to this node."
+                      : "Pick an entity to include its equivalents."
+                  }
                   onChangeFn={() => {
                     dispatch({
                       type: QueryActionType.updateNodeExpansionToggles,
@@ -513,8 +507,19 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                   size={13}
                   color="warning"
                   value={includeSubordinates}
-                  tooltipLabel="include subordinates"
-                  tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
+                  disabled={!subordinatesApply}
+                  tooltipLabel={
+                    subordinatesAsDepth ? "match the whole subtree" : "include subordinates"
+                  }
+                  tooltipContent={
+                    !entityId
+                      ? "Pick an entity to include its subordinates."
+                      : subordinatesAsDepth
+                        ? "Match every territory below the picked one, not just its direct children."
+                        : withoutSubordinates
+                          ? "This edge looks upward at the territory's ancestors, so subordinates don't apply."
+                          : "Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of this node."
+                  }
                   onChangeFn={() => {
                     dispatch({
                       type: QueryActionType.updateNodeExpansionToggles,

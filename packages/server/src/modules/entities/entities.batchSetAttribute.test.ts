@@ -7,6 +7,8 @@ import Entity from "@models/entity/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { BadParams } from "@inkvisitor/shared/types/errors";
+import Audit from "@models/audit/audit";
+import { RDatum, r } from "rethinkdb-ts";
 
 // batchSetAttribute rewrites one attribute across a selection, but only where
 // the attribute applies (pos lives on C and A alone) and only where the current
@@ -186,6 +188,93 @@ describe("Entities batchSetAttribute", function () {
       expect(res.status).toEqual(new BadParams("").statusCode());
       expect(res.body.error).toEqual("BadParams");
       expect(await posOf(entity.id)).toEqual(EntityEnums.ConceptPartOfSpeech.Noun);
+    });
+  });
+
+  describe("a selection larger than one write chunk", () => {
+    it("writes every entity and audits each one", async () => {
+      const count = Entity.UPDATE_MANY_CHUNK + 200;
+      const run = Math.random().toString();
+      const entities = Array.from({ length: count }, (_, i) => {
+        const entity = new Entity({
+          id: `test-bsa-bulk-${run}-${i}`,
+          class: EntityEnums.Class.Concept,
+          language: EntityEnums.Language.Empty,
+        });
+        entity.labels = [`${entity.id}-label`];
+        return { ...entity };
+      });
+      await r.table(Entity.table).insert(entities).run(db.connection);
+      const ids = entities.map((entity) => entity.id);
+
+      const res = await setAttribute(ids, {
+        attribute: "language",
+        from: EntityEnums.Language.Empty,
+        to: EntityEnums.Language.Latin,
+      });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.message).toContain(`${count}/${count}`);
+      const languages: string[] = await r
+        .table(Entity.table)
+        .getAll(r.args(ids))
+        .getField("language")
+        .run(db.connection);
+      expect(languages).toHaveLength(count);
+      expect(new Set(languages)).toEqual(new Set([EntityEnums.Language.Latin]));
+      const audited: number = await r
+        .table(Audit.table)
+        .filter((audit: RDatum) => r.expr(ids).contains(audit("modelId")))
+        .count()
+        .run(db.connection);
+      expect(audited).toEqual(count);
+    });
+  });
+
+  describe("an entity that links a template", () => {
+    it("is written like any other", async () => {
+      const template = await makeEntity(EntityEnums.Class.Resource, { isTemplate: true });
+      const concept = await makeEntity(EntityEnums.Class.Concept, {
+        language: EntityEnums.Language.Empty,
+        references: [{ id: "ref", resource: template.id, value: "" }],
+      });
+      const plain = await makeEntity(EntityEnums.Class.Concept, {
+        language: EntityEnums.Language.Empty,
+      });
+
+      const res = await setAttribute([concept.id, plain.id], {
+        attribute: "language",
+        from: EntityEnums.Language.Empty,
+        to: EntityEnums.Language.Latin,
+      });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.message).toContain("2/2");
+      expect((await reload(concept.id)).language).toEqual(EntityEnums.Language.Latin);
+      expect((await reload(plain.id)).language).toEqual(EntityEnums.Language.Latin);
+    });
+  });
+
+  describe("part of speech on an Action with more data", () => {
+    it("keeps the other data fields", async () => {
+      const valencies = { s: "subject", a1: "", a2: "" };
+      // inserted as is: the generic Entity model makeEntity saves through
+      // leaves data out
+      const action = { id: `test-bsa-${Math.random().toString()}`, class: EntityEnums.Class.Action };
+      await r
+        .table(Entity.table)
+        .insert({ ...action, labels: [`${action.id}-label`], data: { pos: "", valencies } })
+        .run(db.connection);
+
+      const res = await setAttribute([action.id], {
+        attribute: "pos",
+        action: { from: "", to: EntityEnums.ActionPartOfSpeech.Verb },
+      });
+
+      expect(res.status).toEqual(200);
+      const data = (await reload(action.id)).data as { pos?: string; valencies?: object };
+      expect(data.pos).toEqual(EntityEnums.ActionPartOfSpeech.Verb);
+      expect(data.valencies).toEqual(valencies);
     });
   });
 

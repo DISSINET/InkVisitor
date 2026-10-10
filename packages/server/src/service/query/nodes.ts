@@ -3,6 +3,7 @@ import { IEntity } from "@inkvisitor/shared/types";
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
 import { Results, SearchEdge } from ".";
 import Edge, { getEdgeInstance } from "./edge";
+import { QUERY_RUN_OPTIONS } from "./run-options";
 import { Query } from "@inkvisitor/shared/types/query";
 
 export default class SearchNode implements Query.INode {
@@ -78,7 +79,7 @@ export default class SearchNode implements Query.INode {
 
     let ids: string[];
     if (!this.edges.length) {
-      ids = await baseStream.getField("id").distinct().run(db);
+      ids = await baseStream.getField("id").distinct().run(db, QUERY_RUN_OPTIONS);
     } else {
       ids = await this.evaluateEdges(
         db,
@@ -126,7 +127,7 @@ export default class SearchNode implements Query.INode {
         baseIdsCache = (await baseStream
           .getField("id")
           .distinct()
-          .run(db)) as string[];
+          .run(db, QUERY_RUN_OPTIONS)) as string[];
       }
       return baseIdsCache;
     };
@@ -199,7 +200,7 @@ export default class SearchNode implements Query.INode {
     edge: SearchEdge
   ): Promise<string[]> {
     await edge.prepare(db);
-    const directIds = await edge.run(baseStream).distinct().run(db);
+    const directIds = await edge.run(baseStream).distinct().run(db, QUERY_RUN_OPTIONS);
 
     const childNode = edge.node;
     if (!childNode.edges.length || directIds.length === 0) {

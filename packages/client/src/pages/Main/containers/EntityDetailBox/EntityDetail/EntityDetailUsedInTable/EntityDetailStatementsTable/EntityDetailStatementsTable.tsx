@@ -8,7 +8,7 @@ import {
 } from "@inkvisitor/shared/types";
 import { Table, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
-import { useSearchParams } from "hooks";
+import { useDetailPanelReveal, useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { CellProps, Column } from "react-table";
 import { TbAnchor } from "react-icons/tb";
@@ -31,6 +31,7 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
   disableRowClick,
 }) => {
   const { setStatementId, setTerritoryId } = useSearchParams();
+  const { revealEditor } = useDetailPanelReveal();
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
@@ -167,6 +168,7 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
                   const statement = entity as IStatement;
                   if (statement.data.territory) {
                     setStatementId(statement.id);
+                    revealEditor();
                     setTerritoryId(statement.data.territory.territoryId);
                   }
                 }

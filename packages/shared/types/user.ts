@@ -44,6 +44,13 @@ export interface IUserOptions {
   // context: which Concept plays which geocoding role is project-wide, since
   // that assignment is what "geocoded" means.
   geocoding?: IGeocodingUserSettings;
+
+  // template ids the user starred in the template list
+  starredTemplates?: string[];
+
+  // templates of this class are listed first in the template list; Any
+  // promotes none
+  promotedTemplateClass?: EntityEnums.Class | EntityEnums.Extension.Any;
 }
 
 export interface IStoredTerritory {

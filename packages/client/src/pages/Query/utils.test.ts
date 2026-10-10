@@ -456,7 +456,7 @@ describe("buildEdgeTypeOptionGroups", () => {
     const [relation] = buildEdgeTypeOptionGroups([T["R:CLA"], T["I_R:CLA"]], []);
     expect(relation.options.map((o) => [o.label, o.menuLabel])).toEqual([
       ["has relation: Classification", "Classification"],
-      ["has: Instance (inv. Classification)", "Instance (inv. Classification)"],
+      ["has relation: Instance (inv. Classification)", "Instance (inv. Classification)"],
     ]);
   });
 

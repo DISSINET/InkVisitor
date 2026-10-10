@@ -1,11 +1,12 @@
 import { IEntity, IResponseBookmarkFolder } from "@inkvisitor/shared/types";
+import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CellProps, Column, Row, useTable } from "react-table";
-import { IcoTrash } from "Theme/icons";
+import { IcoTrashSimple } from "Theme/icons";
 import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
-import { StyledTable } from "./EntityBookmarkTableStyles";
+import { StyledRemoveButtonWrap, StyledTable } from "./EntityBookmarkTableStyles";
 
 type CellType = CellProps<IEntity>;
 
@@ -38,13 +39,18 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
               entity={entity}
               tooltipPosition="left"
               fullWidth
-              unlinkButton={{
-                onClick: () => {
-                  removeBookmark(folder.id, entity.id);
-                },
-                tooltipLabel: "remove bookmark",
-                icon: <IcoTrash />,
-              }}
+              button={
+                <StyledRemoveButtonWrap>
+                  <Button
+                    tooltipLabel="remove bookmark"
+                    icon={<IcoTrashSimple />}
+                    color="plain"
+                    inverted
+                    shape="sharp"
+                    onClick={() => removeBookmark(folder.id, entity.id)}
+                  />
+                </StyledRemoveButtonWrap>
+              }
             />
           );
         },

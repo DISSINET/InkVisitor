@@ -83,6 +83,7 @@ enum ExploreActionType {
   addColumn,
   removeColumn,
   moveColumn,
+  setColumns,
   setViewMode,
   setStatsParams,
   setOffset,
@@ -172,6 +173,18 @@ const exploreReducerBase = (state: Explore.IExplore, action: ExploreAction): Exp
       return {
         ...state,
         view: { ...state.view, columns: nextColumns },
+      };
+    }
+
+    // replaces every column at once — used when loading a saved query
+    case ExploreActionType.setColumns: {
+      if (state.view.mode !== Explore.EViewMode.Table) {
+        return state;
+      }
+      const { columns } = action.payload as { columns: Explore.IExploreColumn[] };
+      return {
+        ...state,
+        view: { ...state.view, columns },
       };
     }
 

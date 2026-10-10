@@ -272,6 +272,35 @@ describe("Saved queries", function () {
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
+
+    it("stores the table columns with their names and order", async () => {
+      const columns = [
+        { id: "c2", name: "status_col", type: "EST", editable: true, params: {} },
+        { id: "c1", name: "sex", type: "EPV", editable: true, params: { propertyType: "p" } },
+      ];
+      const res = await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({
+          name: "with columns",
+          shared: false,
+          data: { ...queryData, columns },
+        })
+        .expect(200);
+      const stored = await SavedQuery.findById(db.connection, res.body.data.id);
+      expect(stored?.data.columns).toEqual(columns);
+    });
+
+    it("rejects a malformed column", async () => {
+      await agentA
+        .post(`${apiPath}/saved-queries`)
+        .send({
+          name: "bad column",
+          shared: false,
+          data: { ...queryData, columns: [{ id: "c1", name: "no type" }] },
+        })
+        .expect("Content-Type", /json/)
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+    });
   });
 
   describe("list", () => {

@@ -1,4 +1,4 @@
-import { languageDict, orderLanguageDict } from "@inkvisitor/shared/dictionaries";
+import { entitiesDict, languageDict, orderLanguageDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem, IResponseEntity, IResponseUser, IUser } from "@inkvisitor/shared/types";
 import { UnsafePasswordError } from "@inkvisitor/shared/types/errors";
@@ -51,6 +51,7 @@ interface DataObject {
   workingLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
   askBeforePropDelete: boolean;
+  promotedTemplateClass: EntityEnums.Class | EntityEnums.Extension.Any;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -80,6 +81,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       workingLanguages: options.workingLanguages ?? [],
       defaultTerritory: options.defaultTerritory,
       askBeforePropDelete: options.askBeforePropDelete !== false,
+      promotedTemplateClass: options.promotedTemplateClass ?? EntityEnums.Extension.Any,
     };
   });
 
@@ -145,6 +147,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           workingLanguages: data.workingLanguages.map((wL) => wL),
           defaultTerritory: data.defaultTerritory || "",
           askBeforePropDelete: data.askBeforePropDelete,
+          promotedTemplateClass: data.promotedTemplateClass,
         },
       });
     }
@@ -441,6 +444,25 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     <StyledFieldHelp />
                   </>
                 )}
+
+                <StyledFieldLabel>Templates listed first</StyledFieldLabel>
+                <StyledFieldControl>
+                  <Dropdown.Single.Entity
+                    width="full"
+                    value={data.promotedTemplateClass}
+                    onChange={(newValue) =>
+                      setData((prev) => ({ ...prev, promotedTemplateClass: newValue }))
+                    }
+                    options={[{ value: EntityEnums.Extension.Any, label: "none" }, ...entitiesDict]}
+                  />
+                </StyledFieldControl>
+                <StyledFieldHelp>
+                  <IconWithTooltip
+                    color="success"
+                    icon={<FaQuestion />}
+                    tooltipLabel="Templates of this class are listed at the top of the template list."
+                  />
+                </StyledFieldHelp>
 
                 {!isViewer && (
                   <>

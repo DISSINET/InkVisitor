@@ -1,6 +1,6 @@
 import { IEntity, IResponseEntityExpansion } from "@inkvisitor/shared/types";
-
-export type ExpansionGroup = "equivalents" | "subordinates";
+export type { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
+import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 
 /** `EntityTag`'s provenance-badge variant for each group. */
 export type ExpansionVariant = "equivalent" | "subordinate";

@@ -258,6 +258,12 @@
     "roles": ["*"]
   },
   {
+    "controller": "entities",
+    "route": ":entityId/relations",
+    "method": "GET",
+    "roles": ["editor"]
+  },
+  {
     "controller": "audits",
     "route": "",
     "method": "GET",
