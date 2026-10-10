@@ -1,7 +1,6 @@
 import { IResponseStats } from "@inkvisitor/shared/types";
 import { Aggregation, EventType } from "@inkvisitor/shared/types/stats";
 import { schemeTableau10 } from "d3";
-import { useTheme } from "styled-components";
 
 export const OTHERS_KEY = "others";
 /** Row key of the column holding the sum over all categories of a time bucket. */
@@ -188,14 +187,13 @@ export const transformDataForTable = (
 
 const colors = schemeTableau10;
 
-export const getCategoryMap = (categories: string[]) => {
-  const theme = useTheme();
+export const getCategoryMap = (categories: string[], othersColor: string) => {
   const colorsOut: Record<string, string> = {};
   categories.forEach((category, index) => {
     const color = colors[index % colors.length] || "#000";
     colorsOut[category] = color;
   });
-  colorsOut[OTHERS_KEY] = theme.color.greyer;
+  colorsOut[OTHERS_KEY] = othersColor;
   return colorsOut;
 };
 

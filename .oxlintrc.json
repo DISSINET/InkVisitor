@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "typescript/ban-ts-comment": "warn",
+    "typescript/no-array-constructor": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-empty-object-type": "warn",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "warn",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-require-imports": "warn",
+    "typescript/no-this-alias": "warn",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    "no-unused-vars": "warn",
+    "no-unused-expressions": "warn",
+    "no-useless-escape": "warn",
+    "no-empty-pattern": "warn",
+    "no-extra-boolean-cast": "warn",
+    "no-constant-condition": ["error", { "checkLoops": "none" }],
+    "react/no-children-prop": "warn",
+    "react/set-state-in-effect": "warn",
+    "react/refs": "warn",
+    "react/preserve-manual-memoization": "warn",
+    "react/immutability": "warn",
+    "react/use-memo": "warn",
+    "react/void-use-memo": "warn",
+    "react/purity": "warn",
+    "react/globals": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["packages/client/**/*.{ts,tsx}"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn"
+      }
+    }
+  ],
+  "ignorePatterns": [".claude/**", "**/dist/**", "**/build/**", "**/node_modules/**", "**/*.js"]
+}
