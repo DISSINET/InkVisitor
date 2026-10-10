@@ -1,8 +1,9 @@
 import "ts-jest";
 import { r, Connection } from "rethinkdb-ts";
-import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
+import { provisionEntityIndexes } from "../../test/schema";
 
 // Verifies the ACTUAL ReQL of the EUT: edge ("used in statements under T"):
 // every entity USED in a statement directly under the
@@ -158,16 +159,8 @@ describe("EUT: edge / used in statements under T (real ReQL)", () => {
     await r.dbCreate(TMP_DB).run(conn);
     conn.use(TMP_DB);
     await r.tableCreate(TABLE).run(conn);
-    // the edge reads candidate statements via this index (mirrors indexes.ts);
-    // entities without data.territory are simply skipped by the index function
-    await r
-      .table(TABLE)
-      .indexCreate(
-        DbEnums.Indexes.StatementTerritory,
-        r.row("data")("territory")("territoryId")
-      )
-      .run(conn);
-    await r.table(TABLE).indexWait(DbEnums.Indexes.StatementTerritory).run(conn);
+    // the edges read through the same indexes as a real database
+    await provisionEntityIndexes(conn, TABLE);
     await r.table(TABLE).insert(FIXTURES).run(conn);
   }, 30000);
 
@@ -218,9 +211,9 @@ describe("EUT: edge / used in statements under T (real ReQL)", () => {
     expect(sorted(ids)).toEqual(["RAWACTANT"]);
   });
 
-  test("no target territory -> matches nothing", async () => {
+  test("no target territory -> entities used in any statement", async () => {
     const ids = await runEdge({}, conn);
-    expect(ids).toEqual([]);
+    expect(sorted(ids)).toEqual(sorted([...USED_IN_T1, "ACTANT2", "RAWACTANT"]));
   });
 
   test("an empty / unknown territory -> matches nothing", async () => {

@@ -105,8 +105,9 @@ describe("query builder offers the any-position in-statement edge (I_IS:) for co
     const params = Query.EdgeTypeTargetNodeParams[Query.EdgeType["I_IS:"]];
     expect(params.entityId).toBeTruthy();
     expect(params.entityId.allowedClasses).toEqual([]);
-    // index-keyed by entity id, not class: no class picker is offered
-    expect(params.entityClass).toBeFalsy();
+    // the class picked in the suggester narrows an empty target, so it is
+    // part of the query (any class)
+    expect(params.entityClass.allowedClasses).toEqual([]);
   });
 
   it("source must be a Statement; any target entity is valid", () => {

@@ -28,6 +28,7 @@ interface BasicDropdown<T = string> {
   icon?: React.ReactNode;
   placeholder?: string;
   tooltipLabel?: string;
+  tooltipContent?: string;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   disableTyping?: boolean;
   disabled?: boolean;
@@ -46,6 +47,7 @@ export const BasicDropdown = <T extends string>({
   icon,
   placeholder,
   tooltipLabel,
+  tooltipContent,
   tooltipPosition,
   disableTyping = false,
   disabled,
@@ -65,6 +67,7 @@ export const BasicDropdown = <T extends string>({
       options={options}
       placeholder={placeholder}
       tooltipLabel={tooltipLabel}
+      tooltipContent={tooltipContent}
       tooltipPosition={tooltipPosition}
       icon={icon}
       noDropDownIndicator={noDropDownIndicator}

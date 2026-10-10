@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { IcoCloseAll, IcoCloseVsc, IcoSquareHalf } from "Theme/icons";
 
 // Query Builder box buttons: compact result-expansion checkboxes (#2969),
 // grouped as a single ButtonGroup item next to "run search".
@@ -63,4 +64,16 @@ export const StyledExpansionCount = styled.span<StyledExpansionCount>`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   line-height: 1.2;
+`;
+
+export const StyledCloseEditorIcon = styled(IcoCloseVsc)`
+  transform: scale(1.3);
+`;
+
+export const StyledCloseAllIcon = styled(IcoCloseAll)`
+  transform: scale(1.3);
+`;
+
+export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
+  transform: rotate(270deg);
 `;

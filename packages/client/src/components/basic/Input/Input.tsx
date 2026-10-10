@@ -33,7 +33,7 @@ interface Input {
   valueControlled?: boolean;
   inverted?: boolean;
   suggester?: boolean;
-  type?: "text" | "textarea" | "select" | "password" | "datetime-local" | "date" | "number";
+  type?: "text" | "textarea" | "password" | "datetime-local" | "date" | "number";
 
   rows?: number;
   cols?: number;
@@ -223,9 +223,20 @@ export const Input: React.FC<Input> = ({
                   }
                   return;
                 case "Escape":
-                  if (!event.ctrlKey && !event.metaKey) {
-                    onEscapePressFn();
+                  if (event.ctrlKey || event.metaKey) {
+                    return;
                   }
+                  // a clearable field with text spends the first Escape on
+                  // clearing it; stopping the event keeps window-level Escape
+                  // handlers (modals) for the next press. The Suggester
+                  // clears on Escape itself.
+                  if (clearable && !suggester && currentValue.length > 0) {
+                    event.stopPropagation();
+                    setDisplayValue("");
+                    onChangeFn("");
+                    return;
+                  }
+                  onEscapePressFn();
                   return;
                 case "ArrowUp":
                   event.preventDefault();

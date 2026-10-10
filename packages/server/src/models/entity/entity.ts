@@ -5,6 +5,7 @@ import Prop from "@models/prop/prop";
 import User from "@models/user/user";
 import { entityCacheKey, findEntityById } from "@service/shorthands";
 import { cache } from "@service/ttlCache";
+import { chunksOf, writtenIds, WRITE_CHUNK } from "@models/batch-write";
 
 import { AnchorsNode } from "@models/document/anchors";
 import { ISetting } from "@inkvisitor/shared/types/settings";
@@ -32,12 +33,28 @@ import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { IResponseUsedInDocument } from "@inkvisitor/shared/types/response-detail";
 import {
   EProtocolTieType,
+  EValidationExpansionField,
   ITerritoryValidation,
+  validationExpansionKind,
 } from "@inkvisitor/shared/types/territory";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 import { IRequest } from "../../custom_typings/request";
 import Reference from "./reference";
+import {
+  ValidationExpansionMap,
+  expandValidationIds,
+  soeIdsForValidation,
+} from "./validation-expansion";
+
+/** `data` without the fields an entity update may not set. */
+function allowedEntityData(data: Partial<IEntity>): Partial<IEntity> {
+  const allowed: Partial<IEntity> = { ...data };
+  Object.keys(allowed).forEach(
+    (key) => !(key in entityAllowedFields) && delete allowed[key as keyof IEntity]
+  );
+  return allowed;
+}
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -146,6 +163,92 @@ export default class Entity implements IEntity, IDbModel {
     cache.delete(entityCacheKey(this.id));
     return result;
   }
+
+  /**
+   * Applies the same update to many entities, one query per chunk of ids so a
+   * large selection stays far below RethinkDB's array size limit.
+   * @returns the ids written, and the ids that failed or no longer exist
+   */
+  static async updateMany(
+    db: Connection | undefined,
+    entityIds: string[],
+    updateData: Partial<IEntity>
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const data = allowedEntityData({ ...updateData, updatedAt: new Date() });
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entityIds)) {
+      const result = await rethink
+        .table(Entity.table)
+        .getAll(rethink.args(chunk))
+        .update(data, { returnChanges: "always" })
+        .run(db);
+      chunk.forEach((id) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: entityIds.filter((id) => written.has(id)),
+      failed: entityIds.filter((id) => !written.has(id)),
+    };
+  }
+
+  /**
+   * Applies its own update to each of many entities, one query per chunk.
+   * @returns the ids written, and the ids that failed or no longer exist
+   */
+  static async updateEach(
+    db: Connection | undefined,
+    updates: { id: string; data: Partial<IEntity> }[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const updatedAt = new Date();
+    const written = new Set<string>();
+    for (const chunk of chunksOf(updates)) {
+      const result = await rethink
+        .expr(chunk.map(({ id, data }) => ({ id, data: allowedEntityData({ ...data, updatedAt }) })))
+        .forEach(function (update: RDatum) {
+          return rethink
+            .table(Entity.table)
+            .get(update("id"))
+            .update(update("data"), { returnChanges: "always" });
+        })
+        .run(db);
+      chunk.forEach(({ id }) => cache.delete(entityCacheKey(id)));
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: updates.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: updates.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
+  }
+
+  /**
+   * Inserts many new entities, one query per chunk, stamping createdAt as
+   * {@link save} does.
+   * @returns the ids inserted, and the ids that failed
+   */
+  static async saveMany(
+    db: Connection | undefined,
+    entities: Entity[]
+  ): Promise<{ written: string[]; failed: string[] }> {
+    const createdAt = new Date();
+    const written = new Set<string>();
+    for (const chunk of chunksOf(entities)) {
+      chunk.forEach((entity) => (entity.createdAt = createdAt));
+      const result = await rethink
+        .table(Entity.table)
+        .insert(
+          chunk.map((entity) => ({ ...entity })),
+          { returnChanges: "always" }
+        )
+        .run(db);
+      writtenIds(result).forEach((id) => written.add(id));
+    }
+    return {
+      written: entities.filter(({ id }) => written.has(id)).map(({ id }) => id),
+      failed: entities.filter(({ id }) => !written.has(id)).map(({ id }) => id),
+    };
+  }
+
+  static UPDATE_MANY_CHUNK = WRITE_CHUNK;
 
   async getUsedByEntity(db: Connection): Promise<IEntity[]> {
     const out: Record<string, IEntity> = {};
@@ -418,12 +521,18 @@ export default class Entity implements IEntity, IDbModel {
     return sortedData;
   }
 
+  /**
+   * @param expansions ids the rules' fields accept beyond the ones picked in
+   * them, resolved by buildValidationExpansionMap before this synchronous check
+   * runs. An empty map means every field accepts only what it names.
+   */
   getTBasedWarnings(
     territoryEs: ITerritory[],
     classificationEs: IConcept[],
     soeEs: IEntity[],
     propValueEs: IEntity[],
-    settings: ISetting[]
+    settings: ISetting[],
+    expansions: ValidationExpansionMap = new Map()
   ): IWarning[] {
     const warnings: IWarning[] = [];
 
@@ -469,6 +578,29 @@ export default class Entity implements IEntity, IDbModel {
         allowedEntities,
       } = validation;
 
+      // each field accepts the entities picked in it plus whatever its own
+      // checkboxes add; an unchecked field yields the picked ids unchanged, so
+      // an empty field stays empty and the "is anything set?" tests below still
+      // read the rule as it was written
+      const expand = (
+        ids: string[] | undefined,
+        field: EValidationExpansionField
+      ): string[] =>
+        expandValidationIds(
+          ids ?? [],
+          validation.expansions?.[field],
+          validationExpansionKind(field, tieType),
+          expansions
+        );
+
+      const acceptedClassifications = expand(
+        entityClassifications,
+        "entityClassifications"
+      );
+      const acceptedSOEs = expand(entitySOEs, "entitySOEs");
+      const acceptedPropTypes = expand(propType, "propType");
+      const acceptedEntities = expand(allowedEntities, "allowedEntities");
+
       // check if entity falls into the allowed classes
       const entityCheck =
         !entityClasses?.length || entityClasses.includes(this.class);
@@ -476,7 +608,7 @@ export default class Entity implements IEntity, IDbModel {
       // check if entity has the allowed classifications
       const classificationCheck =
         !entityClassifications?.length ||
-        entityClassifications.some((c) =>
+        acceptedClassifications.some((c) =>
           classificationEs.map((cla) => cla.id)?.includes(c)
         );
 
@@ -487,7 +619,11 @@ export default class Entity implements IEntity, IDbModel {
         !entityStatuses?.length || entityStatuses.includes(this.status);
 
       const soeCheck =
-        !entitySOEs?.length || soeEs.some((e) => entitySOEs.includes(e.id));
+        !entitySOEs?.length ||
+        soeIdsForValidation(
+          this,
+          soeEs.map((e) => e.id)
+        ).some((id) => acceptedSOEs.includes(id));
 
       if (
         entityCheck &&
@@ -506,7 +642,7 @@ export default class Entity implements IEntity, IDbModel {
           } else {
             // classifications of the entity
             if (
-              !allowedEntities.some((classCondition) =>
+              !acceptedEntities.some((classCondition) =>
                 classificationEs.map((cla) => cla.id)?.includes(classCondition)
               )
             ) {
@@ -528,7 +664,7 @@ export default class Entity implements IEntity, IDbModel {
           } else {
             // at least one reference needs to be of the allowed entity
             if (
-              !eReferences.some((r) => allowedEntities?.includes(r.resource))
+              !eReferences.some((r) => acceptedEntities.includes(r.resource))
             ) {
               addNewValidationWarning(WarningTypeEnums.TVERE, tId, validation);
             }
@@ -560,60 +696,47 @@ export default class Entity implements IEntity, IDbModel {
           ) {
             if (
               eProps.length === 0 ||
-              !eProps.some((p) => propType?.includes(p.type.entityId))
+              !eProps.some((p) => acceptedPropTypes.includes(p.type.entityId))
             ) {
               addNewValidationWarning(WarningTypeEnums.TVEPT, tId, validation);
             }
           } else if (allowedEntities?.length || allowedClasses?.length) {
             const validProps = eProps.filter((p) =>
-              propType?.length ? propType.includes(p.type.entityId) : true
+              propType?.length
+                ? acceptedPropTypes.includes(p.type.entityId)
+                : true
             );
             if (!validProps?.length) {
               addNewValidationWarning(WarningTypeEnums.TVEPV, tId, validation);
             } else if (allowedClasses?.length) {
               // class is required
-
-              // no valid props
-              if (validProps.length === 0) {
+              const valueClass = (p: IProp) =>
+                propValueEs.find((e) => e.id === p.value.entityId)?.class;
+              const passed = propType?.length
+                ? // a named type: every property of it needs a value of an
+                  // allowed class
+                  validProps.every((p) => {
+                    const cls = valueClass(p);
+                    return !cls || allowedClasses.includes(cls);
+                  })
+                : // no type: one property with a value of an allowed class
+                  // is enough
+                  validProps.some((p) => {
+                    const cls = valueClass(p);
+                    return !!cls && allowedClasses.includes(cls);
+                  });
+              if (!passed) {
                 addNewValidationWarning(
                   WarningTypeEnums.TVEPV,
                   tId,
                   validation
                 );
-              } else {
-                let passed = true;
-                for (const pi in eProps) {
-                  const p = eProps[pi];
-                  const propValueEntity = propValueEs.find(
-                    (e) => e.id === p.value.entityId
-                  );
-                  if (
-                    propValueEntity &&
-                    propType?.includes(p.type.entityId) &&
-                    !allowedClasses?.includes(propValueEntity.class)
-                  ) {
-                    passed = false;
-                  }
-                }
-                if (!passed) {
-                  addNewValidationWarning(
-                    WarningTypeEnums.TVEPV,
-                    tId,
-                    validation
-                  );
-                }
               }
             } else if (allowedEntities?.length) {
               // entity is required
-              if (validProps.length === 0) {
-                addNewValidationWarning(
-                  WarningTypeEnums.TVEPV,
-                  tId,
-                  validation
-                );
-              } else if (
+              if (
                 !validProps.some((p) =>
-                  allowedEntities.includes(p.value.entityId)
+                  acceptedEntities.includes(p.value.entityId)
                 )
               ) {
                 addNewValidationWarning(

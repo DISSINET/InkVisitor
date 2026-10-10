@@ -72,6 +72,9 @@ const theme = {
     tagSelectedBackground: "#d8ddf5", // tableOpened
     tagSelectedColor: "#091034",
     tagItalic: "#4a5568",
+    // a relation cloud holds the opened entity's selected tag, so its fill
+    // stays lighter than tagSelectedBackground
+    cloudBackground: "#eef1fb",
 
     /* query explorer colors */
     query1: "#E6F0FF",
@@ -126,6 +129,8 @@ const theme = {
     warningBorder: "#ffbb00",
 
     tooltipColor: "#fff",
+    // on entity class colours, in both light and dark mode
+    letterIconText: "#fff",
     tooltipBackground: "#000",
     tooltipNodeInfoBackground: "#324185",
     tooltipNodeWarningBackground: "#B78928",
@@ -136,6 +141,19 @@ const theme = {
     statsTooltipBackground: "#f7fafc", // gray 100
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
+
+    // Annotator XML view syntax colours (#3269). Three hue families spread
+    // around the wheel (OKLCH H260 blue, H5 rose, H168 teal-green) so the
+    // roles are told apart by hue at a glance, as in code editors. All hold
+    // >=4.5:1 on white.
+    // Tag names are entity ids, so they run long and repeat on every line;
+    // the blue stays low-chroma to keep that bulk quiet.
+    xmlTag: "#3E639F",
+    xmlAttr: "#B93B63",
+    // quotes recede but stay punctuation, not an artefact: 4.8:1 on white,
+    // where gray 600 would only reach 4.0:1
+    xmlQuote: "#6B7280",
+    xmlValue: "#028464",
 
     menuHover: "#CCD5F4",
     pageBg: "#edf2f7",

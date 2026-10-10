@@ -35,6 +35,7 @@ interface Card {
   $fullHeight: boolean;
   $maxWidth?: number;
   $noBorder?: boolean;
+  $narrowGutter?: boolean;
 }
 const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
@@ -60,7 +61,8 @@ export const StyledCard = styled(animated.div)<Card>`
   display: flex;
   flex-direction: column;
   margin: ${({ theme }) => `0 ${theme.space[8]}`};
-  max-height: calc(100vh - 8rem);
+  max-height: ${({ theme, $narrowGutter }) =>
+    `calc(100vh - 2 * ${$narrowGutter ? theme.space[4] : theme.space[16]})`};
   z-index: 155;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
@@ -153,7 +155,6 @@ export const StyledCardBody = styled.section<StyledCardBody>`
     `}
 `;
 interface StyledFooter {
-  $column?: boolean;
   $spaceBetween?: boolean;
 }
 export const StyledFooter = styled.div<StyledFooter>`
@@ -165,7 +166,6 @@ export const StyledFooter = styled.div<StyledFooter>`
   display: flex;
   flex-shrink: 0;
   justify-content: ${({ $spaceBetween }) => ($spaceBetween ? "space-between" : "flex-end")};
-  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${space5};
   --button-group-gap: 0.75rem;
 `;

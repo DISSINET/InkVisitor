@@ -4,25 +4,22 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
-import { useAppSelector } from "redux/hooks";
 import { computeDifferences } from "utils/utils";
 import { DETAIL_TAB_ENTITIES_KEY, useStatementQuery, useUserQuery } from "hooks/react-query";
-import { EditorBoxState } from "types";
 
-export const StatementEditorBox: React.FC = () => {
-  const thirdPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.mainPage.thirdPanelExpanded
-  );
-  const editorBoxState: EditorBoxState = useAppSelector(
-    (state) => state.layout.mainPage.editorBoxState
-  );
-
-  const { statementId, setStatementId, selectedDetailId, setTerritoryId, editorOpened } = useSearchParams();
+interface StatementEditorBox {
+  // the panel holding the box is expanded
+  isExpanded: boolean;
+  // the box is on screen rather than minimized
+  isVisible: boolean;
+}
+export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, isVisible }) => {
+  const { statementId, setStatementId, selectedDetailId, setTerritoryId } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -88,6 +85,9 @@ export const StatementEditorBox: React.FC = () => {
   });
 
   const [tempObject, setTempObject] = useState<IResponseStatement>();
+  // read after awaits, where the tempObject of the calling render may be outdated
+  const tempObjectRef = useRef(tempObject);
+  tempObjectRef.current = tempObject;
   const [lastSentData, setLastSentData] = useState<string>("");
 
   useEffect(() => {
@@ -326,13 +326,15 @@ export const StatementEditorBox: React.FC = () => {
       const validatedData = await checkValidActantPosition(changes);
       const validatedData2 = await checkValidActantLanguage(validatedData);
 
+      const latestTempObject = tempObjectRef.current ?? tempObject;
       const newData: IResponseStatement = {
-        ...tempObject,
+        ...latestTempObject,
         data: {
-          ...tempObject.data,
+          ...latestTempObject.data,
           ...validatedData2,
         },
       };
+      tempObjectRef.current = newData;
       setTempObject(newData);
       updateChangesAndPendingState(newData, instantUpdate);
     }
@@ -342,20 +344,20 @@ export const StatementEditorBox: React.FC = () => {
   const [showEditor, setShowEditor] = useState(true);
 
   useEffect(() => {
-    if (thirdPanelExpanded) {
+    if (isExpanded) {
       setTimeout(() => {
         setShowEditor(true);
       }, 500);
     } else {
       setShowEditor(false);
     }
-  }, [thirdPanelExpanded]);
+  }, [isExpanded]);
 
   return (
     <>
       {showEditor && (
         <>
-          {tempObject && thirdPanelExpanded ? (
+          {tempObject && isExpanded ? (
             <CustomScrollbar>
               <div
                 onMouseLeave={() => {
@@ -397,11 +399,10 @@ export const StatementEditorBox: React.FC = () => {
 
       <Loader
         show={
-          editorOpened &&
-          editorBoxState !== EditorBoxState.Minimized &&
+          isVisible &&
           (isFetchingStatement ||
             updateStatementMutation.isPending ||
-            (thirdPanelExpanded && !showEditor))
+            (isExpanded && !showEditor))
         }
       />
     </>

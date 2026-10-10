@@ -70,6 +70,21 @@ export const StyledValue = styled.div`
   gap: ${({ theme }) => theme.space[4]};
 `;
 
+// the expansion boxes belong to the field above them, not to the entity tags
+// beside them, so they take a row of their own under the value
+export const StyledExpansionRow = styled.div`
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[4]};
+  margin-top: ${({ theme }) => theme.space[1]};
+`;
+export const StyledExpansionLabel = styled.span`
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
 export const StyledLanguageList = styled.div`
   display: flex;
   flex-wrap: wrap;

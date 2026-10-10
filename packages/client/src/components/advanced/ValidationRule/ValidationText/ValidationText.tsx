@@ -11,6 +11,7 @@ import {
 } from "@inkvisitor/shared/types/territory";
 import React, { useCallback, useMemo } from "react";
 import { getEntityLabel } from "utils/utils";
+import { validationFieldNote } from "utils/validationExpansion";
 import { StyledSentence, StyledSentenceEntity } from "../ValidationRuleStyles";
 
 interface ValidationText {
@@ -158,12 +159,14 @@ export const ValidationText: React.FC<ValidationText> = ({
         <>
           {` classified as `}
           {renderEntityList(entityClassifications ?? [])}
+          {validationFieldNote(validation, "entityClassifications")}
         </>
       )}
       {entitySOEs && entitySOEs.length > 0 && (
         <>
           {` having superordinate entity `}
           {renderEntityList(entitySOEs ?? [])}
+          {validationFieldNote(validation, "entitySOEs")}
         </>
       )}
       {entityLanguages && entityLanguages.length > 0 && (
@@ -184,6 +187,7 @@ export const ValidationText: React.FC<ValidationText> = ({
               <>
                 {` of type `}
                 {renderEntityList(propType)}
+                {validationFieldNote(validation, "propType")}
               </>
             )}
             {valuesClasssesActive && (
@@ -209,6 +213,7 @@ export const ValidationText: React.FC<ValidationText> = ({
               <>
                 {` with property type `}
                 {renderEntityList(allowedEntities ?? [])}
+                {validationFieldNote(validation, "allowedEntities")}
               </>
             )}
           </span>
@@ -222,6 +227,7 @@ export const ValidationText: React.FC<ValidationText> = ({
               <>
                 {` to Resource `}
                 {renderEntityList(allowedEntities ?? [])}
+                {validationFieldNote(validation, "allowedEntities")}
               </>
             )}
           </span>

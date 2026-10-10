@@ -34,7 +34,15 @@ export const StyledTr = styled.tr<StyledTr>`
     width: 1%;
   }
 `;
+export const StyledRemoveButtonWrap = styled.div`
+  display: none;
+`;
 export const StyledTd = styled.td`
+  /* the tag is the cell's only child and sized to its content, so hovering it,
+     not the rest of the row, shows the remove button */
+  > *:hover ${StyledRemoveButtonWrap} {
+    display: flex;
+  }
   padding-top: ${({ theme }) => `${theme.space[1]}`};
   padding-right: ${({ theme }) => `${theme.space[2]}`};
   padding-bottom: ${({ theme }) => `${theme.space[1]}`};

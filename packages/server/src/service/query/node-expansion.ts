@@ -1,6 +1,7 @@
 import { Connection } from "rethinkdb-ts";
 
 import {
+  ISubordinateExpansionOptions,
   getEquivalentEntityIds,
   getSubordinateEntityIds,
 } from "@models/relation/functions";
@@ -8,6 +9,12 @@ import {
 export interface INodeExpansionOptions {
   equivalents: boolean;
   subordinates: boolean;
+  /**
+   * Narrows the downward walk. A query node takes the whole downward set and
+   * leaves this out; a validation rule field passes the one path that field
+   * stands for (#2527).
+   */
+  subordinateOptions?: ISubordinateExpansionOptions;
 }
 
 export interface INodeExpansionIds {
@@ -47,9 +54,9 @@ export const getNodeExpansionIds = async (
   }
 
   const claimed = new Set<string>(equivalents);
-  const subordinates = (await getSubordinateEntityIds(db, [entityId])).filter(
-    (id) => !claimed.has(id)
-  );
+  const subordinates = (
+    await getSubordinateEntityIds(db, [entityId], opts.subordinateOptions)
+  ).filter((id) => !claimed.has(id));
 
   return { equivalents, subordinates };
 };

@@ -26,10 +26,13 @@ import { ITerritoryValidation } from "@inkvisitor/shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
+import { getEntityClass } from "@models/factory";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
 import { Setting } from "@models/setting/setting";
 import { ISetting } from "@inkvisitor/shared/types/settings";
+import { ValidationExpansionMap } from "../entity/validation-expansion";
+import { buildValidationExpansionMap } from "../entity/validation-expansion-load";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -235,7 +238,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   /**
    * check all avalidation warnings for single entity
    */
-  async getTValidationWarnings(req: IRequest, preloadedSettings?: ISetting[]): Promise<IWarning[]> {
+  async getTValidationWarnings(
+    req: IRequest,
+    preloadedSettings?: ISetting[],
+    preloadedExpansions?: ValidationExpansionMap
+  ): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
     const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
@@ -292,6 +299,14 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       t.data.validations?.some((v) => v.active !== false)
     );
 
+    // the rules are the same for every entity in the loop below - and for every
+    // statement of a territory, which is why the caller can hand the map in
+    const expansions =
+      preloadedExpansions ??
+      (hasActiveValidations
+        ? await buildValidationExpansionMap(req.db.connection, territoryEs)
+        : new Map<string, string[]>());
+
     // prepare entities
     for (const ei in allEntities) {
       const entityId = allEntities[ei];
@@ -307,7 +322,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
             continue;
           }
 
-          const entity = new Entity(entityData);
+          // the concrete class, not the base one: a Territory's parent lives in
+          // data, which only its own model keeps, and the SOE condition reads it
+          const entity = getEntityClass(entityData);
 
           const classificationRels =
             await Classification.getClassificationForwardConnections(
@@ -342,7 +359,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
             classificationEs,
             soeEs,
             propValueEs,
-            settings
+            settings,
+            expansions
           );
           if (eWarnings.length) {
             warnings = warnings.concat(eWarnings);
@@ -473,7 +491,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * get a list of all warnings for actions -> actants relations
    * @returns list of warnings
    */
-  async getWarnings(req: IRequest, preloadedSettings?: ISetting[]): Promise<IWarning[]> {
+  async getWarnings(
+    req: IRequest,
+    preloadedSettings?: ISetting[],
+    preloadedExpansions?: ValidationExpansionMap
+  ): Promise<IWarning[]> {
     const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
 
     const isNAEnabled =
@@ -481,7 +503,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     let warnings: IWarning[] = [];
 
-    const tbasedWarnings = await this.getTValidationWarnings(req, settings);
+    const tbasedWarnings = await this.getTValidationWarnings(
+      req,
+      settings,
+      preloadedExpansions
+    );
     warnings = warnings.concat(tbasedWarnings);
 
     if (!this.data.actions.length) {
