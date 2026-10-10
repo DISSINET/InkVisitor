@@ -60,15 +60,15 @@ export const StyledMapPanel = styled.div`
     display: none;
   }
 
-  /* the zoom sits under the layers toggle rather than at the top left, which is
-     where the search field is - the renderer's default corner is the same one */
-  .maplibregl-ctrl-top-right {
-    top: ${belowToggle};
-    right: 0;
+  /* the zoom sits at the foot of the right edge, above the attribution: the
+     toggles above it are a column of their own, and a zoom control sharing that
+     column ends up under whichever of them is drawn */
+  .maplibregl-ctrl-bottom-right {
+    bottom: ${({ theme }) => theme.space[1]};
   }
 
-  .maplibregl-ctrl-top-right .maplibregl-ctrl {
-    margin-right: ${({ theme }) => theme.space[2]};
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+    margin: 0 ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[2]} 0;
   }
 
   /* the renderer draws its own buttons: a white group with a soft shadow and a

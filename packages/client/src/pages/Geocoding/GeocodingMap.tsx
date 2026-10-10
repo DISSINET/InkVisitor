@@ -819,7 +819,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       zoom: toMapZoom(position ? 9 : 5),
     });
     // the zoom sits top right, away from the search field on the other side
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     map.on("style.load", () => setStyleEpoch((epoch) => epoch + 1));
     // the renderer reports a failed style, tile or glyph through this event and
     // nowhere else: without a listener a basemap that never arrives is silent,
