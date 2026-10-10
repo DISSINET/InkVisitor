@@ -39,6 +39,7 @@ import {
   StyledDegradedIcon,
   StyledDegradedTip,
   StyledEmptyPanel,
+  StyledNoSelection,
   StyledHoverCard,
   StyledOffRegion,
   StyledPanelHead,
@@ -898,7 +899,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
 
   const body = useMemo(() => {
     if (!selected) {
-      return <StyledEmptyPanel>Select a location to geocode it.</StyledEmptyPanel>;
+      return <StyledNoSelection>Select a location to geocode it.</StyledNoSelection>;
     }
     if (error) {
       return <StyledEmptyPanel>{error}</StyledEmptyPanel>;
@@ -1021,16 +1022,16 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
         {/* the name and what is recorded against it are one statement: the
             panel is about this Location, and whether it already has a
             coordinate is the first thing that decides what to do next */}
-        <StyledTargetLine>
-          <StyledTarget>{selected ? name : "No location selected"}</StyledTarget>
-          {selected ? (
+        {selected ? (
+          <StyledTargetLine>
+            <StyledTarget>{name}</StyledTarget>
             <StyledCurrent>
               {selected.isGeocoded
                 ? `${selected.lat?.toFixed(4)}, ${selected.lon?.toFixed(4)} · ${selected.accuracy}`
                 : "not geocoded"}
             </StyledCurrent>
-          ) : null}
-        </StyledTargetLine>
+          </StyledTargetLine>
+        ) : null}
         {selected?.isGeocoded && onRetype ? (
           <StyledRetype>
             {/* the kind of place is corrected far more often than the coordinate

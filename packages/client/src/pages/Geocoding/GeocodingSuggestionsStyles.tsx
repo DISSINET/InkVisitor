@@ -19,6 +19,11 @@ export const StyledSuggestionsPanel = styled.div`
 export const StyledPanelHead = styled.div`
   padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[GUTTER]};
   border-bottom: 1px solid ${({ theme }) => theme.color["gray"][300]};
+
+  /* with nothing selected there is nothing in it to frame */
+  &:empty {
+    display: none;
+  }
 `;
 
 export const StyledTarget = styled.div`
@@ -236,6 +241,14 @@ export const StyledReject = styled.div`
   flex-wrap: wrap;
   padding: ${({ theme }) => theme.space[2]};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+`;
+
+/** Nothing selected, in the italic the rest of the app uses for missing data. */
+export const StyledNoSelection = styled.p`
+  margin: ${({ theme }) => theme.space[2]};
+  font-style: italic;
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  color: ${({ theme }) => theme.color["black"]};
 `;
 
 export const StyledEmptyPanel = styled.div`
