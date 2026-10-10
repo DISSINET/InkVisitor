@@ -20,6 +20,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   BASEMAP_GROUPS,
   BasemapLayer,
+  flatBuildingLayerFor,
   groupedLayersOf,
   neverDrawnLayerIds,
 } from "./basemapLayers";
@@ -919,7 +920,13 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     if (!style) {
       return;
     }
-    const styleLayers = (style.layers ?? []) as Parameters<typeof groupedLayersOf>[0];
+    let styleLayers = (style.layers ?? []) as Parameters<typeof groupedLayersOf>[0];
+    // the style draws buildings flat only up to the zoom its extrusions start at
+    const flatBuilding = flatBuildingLayerFor(style.layers ?? []);
+    if (flatBuilding) {
+      map.addLayer(flatBuilding.layer as never, flatBuilding.beforeId);
+      styleLayers = (map.getStyle()?.layers ?? styleLayers) as typeof styleLayers;
+    }
     basemapLayers.current = groupedLayersOf(styleLayers);
     if (basemapLayers.current.length === 0) {
       // a style on another schema loads and draws perfectly well; it just leaves

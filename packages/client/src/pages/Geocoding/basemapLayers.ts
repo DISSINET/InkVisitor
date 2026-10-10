@@ -23,15 +23,19 @@ export const BASEMAP_GROUPS: { id: BasemapGroup; title: string; note: string }[]
   {
     id: "citiesAndPoi",
     title: "built-up detail",
-    note: "buildings, parks and points of interest",
+    note: "buildings and points of interest",
   },
-  { id: "land", title: "land cover & use", note: "woodland, grass, sand, ice, built-up areas" },
+  {
+    id: "land",
+    title: "land cover & use",
+    note: "woodland, grass, parks, sand, ice, built-up areas",
+  },
 ];
 
 const GROUP_SOURCE_LAYERS: Record<BasemapGroup, string[]> = {
   transportation: ["transportation", "transportation_name", "aeroway", "aerodrome_label"],
-  citiesAndPoi: ["park", "building", "poi"],
-  land: ["landuse", "landcover"],
+  citiesAndPoi: ["building", "poi"],
+  land: ["landuse", "landcover", "park"],
 };
 
 /**
@@ -106,3 +110,51 @@ export const groupedLayersOf = (
  */
 export const neverDrawnLayerIds = (layers: { id: string; type: string }[]): string[] =>
   layers.filter((layer) => layer.type === "fill-extrusion").map((layer) => layer.id);
+
+/** The flat building footprints this page adds for the zooms the style draws only in 3D. */
+export const FLAT_BUILDING_LAYER_ID = "building-flat-detail";
+
+interface StyleLayerSummary {
+  id: string;
+  type: string;
+  source?: string;
+  "source-layer"?: string;
+  maxzoom?: number;
+  paint?: Record<string, unknown>;
+}
+
+/**
+ * A flat building fill for the zooms where the style draws buildings only as
+ * extrusions.
+ *
+ * The style's flat fill stops at the zoom its extrusion starts, and extrusions
+ * are never drawn here, so past that zoom a village shows no buildings at all.
+ * This layer carries on from the flat fill with the same source, source layer
+ * and paint, and goes through the same grouping, so the built-up switch owns it.
+ *
+ * Returns the layer with the id of the layer it belongs directly above, or null
+ * where the style has no flat building fill to continue or the layer is already
+ * there.
+ */
+export const flatBuildingLayerFor = (
+  layers: StyleLayerSummary[],
+): { layer: Record<string, unknown>; beforeId: string | undefined } | null => {
+  const index = layers.findIndex(
+    (layer) => layer.type === "fill" && layer["source-layer"] === "building",
+  );
+  const flat = layers[index];
+  if (!flat || flat.maxzoom === undefined || layers.some((l) => l.id === FLAT_BUILDING_LAYER_ID)) {
+    return null;
+  }
+  return {
+    layer: {
+      id: FLAT_BUILDING_LAYER_ID,
+      type: "fill",
+      source: flat.source,
+      "source-layer": "building",
+      minzoom: flat.maxzoom,
+      paint: flat.paint,
+    },
+    beforeId: layers[index + 1]?.id,
+  };
+};

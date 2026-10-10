@@ -4,6 +4,8 @@ import {
   ALWAYS_DRAWN_SOURCE_LAYERS,
   BASEMAP_GROUPS,
   BasemapGroup,
+  FLAT_BUILDING_LAYER_ID,
+  flatBuildingLayerFor,
   groupedLayersOf,
   neverDrawnLayerIds,
 } from "./basemapLayers";
@@ -39,17 +41,18 @@ describe("groupedLayersOf", () => {
     );
   });
 
-  it("puts buildings, parks and points of interest under built-up detail", () => {
+  it("puts buildings and points of interest under built-up detail", () => {
     const ids = idsIn("citiesAndPoi");
-    expect(ids).toEqual(
-      expect.arrayContaining(["building", "park", "park_outline", "poi_r1", "poi_transit"]),
-    );
+    expect(ids).toEqual(expect.arrayContaining(["building", "poi_r1", "poi_transit"]));
+    expect(ids).not.toContain("park");
   });
 
-  it("puts land cover and land use under land", () => {
+  it("puts land cover, land use and parks under land", () => {
     const ids = idsIn("land");
     expect(ids).toEqual(
       expect.arrayContaining([
+        "park",
+        "park_outline",
         "landcover_wood",
         "landcover_ice",
         "landuse_residential",
@@ -128,5 +131,54 @@ describe("neverDrawnLayerIds", () => {
         false,
       );
     }
+  });
+});
+
+describe("flatBuildingLayerFor", () => {
+  const style = [
+    { id: "water", type: "fill", source: "openmaptiles", "source-layer": "water" },
+    {
+      id: "building",
+      type: "fill",
+      source: "openmaptiles",
+      "source-layer": "building",
+      maxzoom: 14,
+      paint: { "fill-color": "hsl(35,8%,85%)" },
+    },
+    { id: "building-3d", type: "fill-extrusion", "source-layer": "building", maxzoom: undefined },
+  ];
+
+  it("continues the flat fill from the zoom it stops at, under the extrusion", () => {
+    const added = flatBuildingLayerFor(style);
+    expect(added?.layer).toMatchObject({
+      id: FLAT_BUILDING_LAYER_ID,
+      source: "openmaptiles",
+      "source-layer": "building",
+      minzoom: 14,
+      paint: { "fill-color": "hsl(35,8%,85%)" },
+    });
+    expect(added?.beforeId).toBe("building-3d");
+  });
+
+  it("is grouped with the flat fill it continues, so the built-up switch owns it", () => {
+    const added = flatBuildingLayerFor(style);
+    const withIt = [...style, { ...added!.layer, id: FLAT_BUILDING_LAYER_ID }] as {
+      id: string;
+      type: string;
+      "source-layer"?: string;
+    }[];
+    expect(groupedLayersOf(withIt).find((l) => l.id === FLAT_BUILDING_LAYER_ID)?.group).toBe(
+      "citiesAndPoi",
+    );
+  });
+
+  it("adds nothing twice, and nothing to a style with no bounded flat fill", () => {
+    const added = flatBuildingLayerFor(style)!;
+    expect(
+      flatBuildingLayerFor([...style, { id: FLAT_BUILDING_LAYER_ID, type: "fill" }]),
+    ).toBeNull();
+    expect(added).not.toBeNull();
+    expect(flatBuildingLayerFor([{ id: "building", type: "fill", "source-layer": "building" }])).toBeNull();
+    expect(flatBuildingLayerFor([])).toBeNull();
   });
 });
