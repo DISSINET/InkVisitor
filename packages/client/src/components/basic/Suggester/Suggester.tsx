@@ -1,4 +1,4 @@
-import { FloatingPortal, autoUpdate, flip, offset, useFloating } from "@floating-ui/react";
+import { FloatingPortal, autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
@@ -35,6 +35,11 @@ import {
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
 import { IcoMinus, IcoPlusBold } from "Theme/icons";
 
+// suggestion labels get at least this much room (tenths of rem, as `inputWidth`)
+// even when the input itself is narrow; the list floats in a portal, so it is
+// free to overhang the input and its container
+const SUGGESTION_LIST_MIN_WIDTH = 320;
+
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
@@ -48,7 +53,7 @@ interface Suggester {
   // useful with inputWidth="full", where the suggester follows its container.
   maxWidth?: number;
   // Explicit width for the suggestions dropdown. When unset the list matches the
-  // measured input width; set it to intentionally show a wider results list.
+  // measured input width, but never goes below SUGGESTION_LIST_MIN_WIDTH.
   suggestionListWidth?: number;
   disableCreate?: boolean;
   disableButtons?: boolean;
@@ -169,7 +174,9 @@ export const Suggester: React.FC<Suggester> = ({
 
   // Explicit override wins over the measured input width so the results list can
   // intentionally be wider than the input.
-  const effectiveResultWidth = suggestionListWidth ?? resultWidth;
+  const effectiveResultWidth =
+    suggestionListWidth ??
+    (resultWidth !== undefined ? Math.max(resultWidth, SUGGESTION_LIST_MIN_WIDTH) : undefined);
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -337,7 +344,9 @@ export const Suggester: React.FC<Suggester> = ({
   const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [offset(1), flip({ padding: 10 })],
+    // shift slides the list back into the viewport when it is wider than the
+    // space to the right of the input
+    middleware: [offset(1), flip({ padding: 10 }), shift({ padding: 10 })],
   });
 
   const theme = useTheme();
