@@ -244,6 +244,7 @@ export { TbMailFilled as IcoMailFilled } from "react-icons/tb";
 export { TbReplace as IcoReplaceTb } from "react-icons/tb";
 export { TbSettings as IcoSettings } from "react-icons/tb";
 export { TbStack2 as IcoLayers } from "react-icons/tb";
+export { TbFilter as IcoFilter } from "react-icons/tb";
 export { TbCurrentLocation as IcoFlyTo } from "react-icons/tb";
 /** Starting a geocoding run. One mark for the verb, wherever it is offered. */
 export { TbMapSearch as IcoGeocode } from "react-icons/tb";

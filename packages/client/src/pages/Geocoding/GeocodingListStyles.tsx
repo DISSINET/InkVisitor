@@ -413,6 +413,15 @@ export const StyledChipRow = styled.div`
   gap: 4px;
 `;
 
+/** The mark that says the tags beside it are filters. */
+export const StyledFilterMark = styled.span`
+  display: flex;
+  align-items: center;
+  padding: 0 ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.base};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
 /**
  * A chip's value.
  *

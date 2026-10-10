@@ -1,6 +1,6 @@
 import { DropdownItem } from "@inkvisitor/shared/types";
-import { Input } from "components";
-import { IcoSearch } from "Theme/icons";
+import { IconWithTooltip, Input } from "components";
+import { IcoFilter, IcoSearch } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -8,6 +8,7 @@ import {
   StyledChipDrop,
   StyledChipField,
   StyledChipRow,
+  StyledFilterMark,
   StyledChipValue,
   StyledChipNoMatch,
   StyledChipContent,
@@ -166,6 +167,14 @@ export const GeocodingFilterChips: React.FC<GeocodingFilterChips> = ({
 
   return (
     <StyledChipRow role="group" aria-label="Filters">
+      <StyledFilterMark>
+        <IconWithTooltip
+          icon={<IcoFilter />}
+          tooltipLabel="Filters"
+          tooltipText="Narrow the list by these tags. Click one to choose a value; a set tag can be dropped with its cross."
+          tooltipPosition="bottom-start"
+        />
+      </StyledFilterMark>
       {chips.map((chip) => {
         const set = filters[chip.key] !== unsetOf(chip);
         return (
