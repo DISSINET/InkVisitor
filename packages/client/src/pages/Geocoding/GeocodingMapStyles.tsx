@@ -7,6 +7,7 @@ import styled, { DefaultTheme } from "styled-components";
  * resized toggle carries them with it.
  */
 const TOGGLE_SIZE = "2.6rem";
+const LAYER_LINE = "1.4rem";
 const belowToggle = ({ theme }: { theme: DefaultTheme }) =>
   `calc(${theme.space[2]} + ${TOGGLE_SIZE} + ${theme.space[2]})`;
 
@@ -352,6 +353,11 @@ export const StyledLayersPanel = styled.div`
 
 export const StyledLayersHead = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
+
+  &:not(:first-child) {
+    margin-top: ${({ theme }) => theme.space[2]};
+  }
+
   font-size: ${({ theme }) => theme.fontSize.xxs};
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   color: ${({ theme }) => theme.color["greyer"]};
@@ -364,11 +370,22 @@ export const StyledLayerRow = styled.label`
   padding: ${({ theme }) => theme.space[1]} 0;
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize.xs};
+  line-height: ${LAYER_LINE};
   color: ${({ theme }) => theme.color["black"]};
+
+  /* a checkbox's own margins push it off the first line of its label; sized to
+     that line and stripped of them, every box sits level with its title */
+  input[type="checkbox"] {
+    flex: none;
+    width: ${LAYER_LINE};
+    height: ${LAYER_LINE};
+    margin: 0;
+  }
 `;
 
 export const StyledLayerCount = styled.span`
   display: block;
+  line-height: 1.3;
   font-size: ${({ theme }) => theme.fontSize.xxs};
   color: ${({ theme }) => theme.color["greyer"]};
 `;
