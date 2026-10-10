@@ -6,16 +6,13 @@ import {
   StyledCandidateForm,
   StyledCandidateForms,
   StyledDetail,
-  StyledElapsed,
   StyledRail,
-  StyledRailHead,
   StyledSourceCell,
   StyledSourceCount,
   StyledSourceName,
   StyledStep,
   StyledStepMark,
   StyledStepWord,
-  StyledSubject,
 } from "./GeocodingProgressStyles";
 import {
   advance,
@@ -37,6 +34,9 @@ import {
  * in "working out which names to search for" is a slow language model — the two
  * are worth different reactions, and only this tells them apart.
  *
+ * The place's name and the elapsed time are not repeated here: the panel head
+ * above already names the place, and carries the clock beside the cancel button.
+ *
  * The rail advances but never fills smoothly. The engine publishes no fraction,
  * and a bar sliding towards an end it cannot see would be inventing one.
  *
@@ -55,7 +55,6 @@ interface GeocodingProgress {
     failed: Record<string, string>;
     excluded: Record<string, string>;
   };
-  seconds: string;
   name: string;
   /**
    * The name forms this request will search, once the engine has decided them.
@@ -72,7 +71,6 @@ interface GeocodingProgress {
 export const GeocodingProgress: React.FC<GeocodingProgress> = ({
   stage,
   sources,
-  seconds,
   name,
   candidates,
 }) => {
@@ -103,11 +101,6 @@ export const GeocodingProgress: React.FC<GeocodingProgress> = ({
 
   return (
     <StyledRail aria-live="polite" aria-label={`Geocoding ${name}`}>
-      <StyledRailHead>
-        <StyledSubject>{name}</StyledSubject>
-        <StyledElapsed>{seconds}s</StyledElapsed>
-      </StyledRailHead>
-
       {PHASE_ORDER.map((phase, index) => {
         const state = index < reached ? "done" : index === reached ? "running" : "waiting";
         return (

@@ -910,7 +910,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           stage={stage}
           sources={suggest.sources}
           candidates={suggest.candidates}
-          seconds={seconds}
           name={name}
         />
       );
@@ -985,7 +984,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     error,
     name,
     stage,
-    seconds,
     suggest.sources,
     pending,
     accuracyMenu,
@@ -1090,11 +1088,13 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           ) : null}
           <StyledRunFacts>
             <StyledProgress>
-              {!isRunningForThis && response
-                ? `${response.suggestions.length} suggestions · margin ${
-                    response.margin == null ? "—" : response.margin.toFixed(2)
-                  } · ${timing(response)}`
-                : null}
+              {isRunningForThis
+                ? `${seconds}s`
+                : response
+                  ? `${response.suggestions.length} suggestions · margin ${
+                      response.margin == null ? "—" : response.margin.toFixed(2)
+                    } · ${timing(response)}`
+                  : null}
             </StyledProgress>
             {/* what the engine actually searched for, said once beside the
                 button that asked it. Per card it was the same few names

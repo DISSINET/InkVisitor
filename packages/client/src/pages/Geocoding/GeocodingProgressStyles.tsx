@@ -10,26 +10,6 @@ export const StyledRail = styled.div`
   padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledRailHead = styled.div`
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: ${({ theme }) => theme.space[2]};
-  padding-bottom: ${({ theme }) => theme.space[2]};
-`;
-
-export const StyledSubject = styled.span`
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
-  color: ${({ theme }) => theme.color["black"]};
-`;
-
-export const StyledElapsed = styled.span`
-  font-family: monospace;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme }) => theme.color["greyer"]};
-`;
-
 /**
  * One stage of the pipeline.
  *
