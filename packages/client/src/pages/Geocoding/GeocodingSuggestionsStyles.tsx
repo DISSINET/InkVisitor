@@ -152,6 +152,15 @@ export const StyledCard = styled.div<{
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 
+  /* while one card is pointed at, here or from its mark on the map, the others
+     step back so the one being judged is the one the eye is on */
+  transition: opacity 0.15s ease-in-out;
+
+  ${StyledSuggestionList}:has([data-suggestion-card][data-highlighted="true"]) &:not([data-highlighted="true"]),
+  ${StyledSuggestionList}:has([data-suggestion-card]:hover) &:not(:hover) {
+    opacity: 0.45;
+  }
+
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.color["success"]};
     outline-offset: -2px;

@@ -267,6 +267,8 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       $offRegion={suggestion.offRegion}
       $lead={index === 0 && !!band?.clear}
       $highlighted={highlighted}
+      data-suggestion-card
+      data-highlighted={highlighted}
       $share={scoreShare(tied ? topScore : suggestion.score, topScore)}
       onMouseEnter={() => onHover?.(true)}
       onMouseLeave={() => onHover?.(false)}
