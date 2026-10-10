@@ -23,7 +23,6 @@ import {
   StyledRowMain,
   StyledRowMark,
   StyledRowMarkBox,
-  StyledRowMeta,
   StyledRowProblem,
   StyledRowTag,
   StyledRowType,
@@ -234,10 +233,17 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
         {/* the row says whether it has a coordinate whatever the list is grouped
             by, so it still reads under "kind of place" or under one flat list,
             where no heading says it */}
-        <StyledRowMark
-          $state={location.isGeocoded ? "geocoded" : location.problem ? "problem" : "none"}
-          title={
-            location.isGeocoded ? "has a coordinate" : location.problem || "no coordinate recorded"
+        <IconWithTooltip
+          tooltipPosition="right"
+          tooltipText={
+            location.isGeocoded
+              ? `${location.lat?.toFixed(4)}, ${location.lon?.toFixed(4)} · ${location.accuracy}`
+              : location.problem || "no coordinate recorded"
+          }
+          icon={
+            <StyledRowMark
+              $state={location.isGeocoded ? "geocoded" : location.problem ? "problem" : "none"}
+            />
           }
         />
         {/* the mark is the control: a kind of place is corrected far more often
@@ -289,16 +295,14 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
               tooltipPosition="right"
             />
           </StyledRowTag>
-          {/* nothing at all for a Location that simply has none: the mark at
-              the head of the row already says so, on every row, and a line of
-              text repeating it on the thousand rows that are the reason this
-              page exists is a column of noise. A problem is different — it is
-              the one thing here that varies and cannot be guessed */}
-          {location.isGeocoded ? (
-            <StyledRowMeta>
-              {location.lat?.toFixed(4)}, {location.lon?.toFixed(4)} · {location.accuracy}
-            </StyledRowMeta>
-          ) : location.problem ? (
+          {/* nothing at all for a Location that simply has none, and none for the
+              coordinate of one that has: the mark at the head of the row says
+              which it is on every row, and holds the coordinate for when it is
+              wanted — a line of text repeating either on the thousand rows
+              that are the reason this page exists is a column of noise. A
+              problem is different — it is the one thing here that varies and
+              cannot be guessed */}
+          {!location.isGeocoded && location.problem ? (
             <StyledRowProblem>{location.problem}</StyledRowProblem>
           ) : null}
         </StyledRowMain>
