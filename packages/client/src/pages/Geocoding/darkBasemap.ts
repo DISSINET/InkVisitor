@@ -4,7 +4,7 @@
  * The obvious alternative — pointing at the style server's own dark style — is
  * what this replaces. That style is a different, far sparser map: it carries no
  * parks and no points of interest at all, so a dark theme lost the green of a
- * town's open ground and the "built-up detail" switch had almost nothing left to
+ * town's open ground and the "land cover & use" switch had almost nothing left to
  * switch. One style recoloured keeps every layer, so both themes draw the same
  * map and every control means the same thing in each.
  *

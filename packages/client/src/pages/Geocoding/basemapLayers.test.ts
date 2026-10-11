@@ -41,10 +41,11 @@ describe("groupedLayersOf", () => {
     );
   });
 
-  it("puts buildings and points of interest under built-up detail", () => {
-    const ids = idsIn("citiesAndPoi");
-    expect(ids).toEqual(expect.arrayContaining(["building", "poi_r1", "poi_transit"]));
-    expect(ids).not.toContain("park");
+  it("puts buildings and points of interest under land, with the built-up areas they stand in", () => {
+    const ids = idsIn("land");
+    expect(ids).toEqual(
+      expect.arrayContaining(["building", "poi_r1", "poi_transit", "landuse_residential"]),
+    );
   });
 
   it("puts land cover, land use and parks under land", () => {
@@ -111,14 +112,14 @@ describe("neverDrawnLayerIds", () => {
     expect(neverDrawnLayerIds(layers)).toEqual(["building-3d"]);
   });
 
-  it("leaves the flat building fill alone, which the built-up switch owns", () => {
+  it("leaves the flat building fill alone, which the land switch owns", () => {
     expect(neverDrawnLayerIds(layers)).not.toContain("building");
-    expect(idsIn("citiesAndPoi")).toContain("building");
+    expect(idsIn("land")).toContain("building");
   });
 
   /**
    * The regression this guards: `building-3d` shares the `building` source
-   * layer with the flat footprint the built-up switch owns, so a grouping that
+   * layer with the flat footprint the land switch owns, so a grouping that
    * read only the source layer would put the extrusion under that switch too.
    * Turning the switch on would then set the very layer `neverDrawnLayerIds`
    * hides back to visible.
@@ -160,7 +161,7 @@ describe("flatBuildingLayerFor", () => {
     expect(added?.beforeId).toBe("building-3d");
   });
 
-  it("is grouped with the flat fill it continues, so the built-up switch owns it", () => {
+  it("is grouped with the flat fill it continues, so the land switch owns it", () => {
     const added = flatBuildingLayerFor(style);
     const withIt = [...style, { ...added!.layer, id: FLAT_BUILDING_LAYER_ID }] as {
       id: string;
@@ -168,7 +169,7 @@ describe("flatBuildingLayerFor", () => {
       "source-layer"?: string;
     }[];
     expect(groupedLayersOf(withIt).find((l) => l.id === FLAT_BUILDING_LAYER_ID)?.group).toBe(
-      "citiesAndPoi",
+      "land",
     );
   });
 

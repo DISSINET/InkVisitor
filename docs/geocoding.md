@@ -741,10 +741,10 @@ slowing it down. It fades over its last three-quarters of a second and is gone
 six seconds after it was asked for, so a ring is never left standing over a
 Location that is no longer the one being read.
 
-The basemap is a vector style, so what it draws is switchable too. Three groups
-are: transport (roads, railways, paths, airports and their names), built-up
-detail (buildings and points of interest), and land cover and use (woodland,
-grass, parks, sand, ice and built-up areas). Four
+The basemap is a vector style, so what it draws is switchable too. Two groups
+are: transport (roads, railways, paths, airports and their names), and land
+cover and use (woodland, grass, parks, sand, ice, built-up areas, buildings and
+points of interest). Four
 things are not, and carry no switch at all — administrative borders, place
 names, water and waterways, and the shaded relief. Those are what a place is
 judged against, so a control that could remove them would only ever be a way to
@@ -752,7 +752,7 @@ break the page quietly. Extruded buildings are never drawn: they are a 3D
 reading of a map being used flat, and they cover the marks this page puts on it.
 The style draws flat building footprints only up to zoom 14 and extrusions beyond
 it, so the page adds a flat fill, copied from the style's own, that carries on
-from zoom 14; it belongs to the built-up switch like the footprints it continues.
+from zoom 14; it belongs to the land cover and use switch like the footprints it continues.
 
 The groups are read from the style the server sends, by the source layer each of
 its layers draws from, rather than from the style's own layer names — `place`

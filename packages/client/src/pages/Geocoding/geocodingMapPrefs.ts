@@ -38,7 +38,6 @@ export const DEFAULT_MAP_PREFS: MapLayerPrefs = {
     // motorway junction says nothing about where a place was in 1300 — the two
     // switches below start off for the same reason
     transportation: false,
-    citiesAndPoi: false,
     // on by default: without it the map is white behind its lines, and woodland
     // against open ground is the one modern surface that still reads as terrain
     land: true,
@@ -77,7 +76,6 @@ export const readMapPrefs = (raw: string | null): MapLayerPrefs => {
     names: bool(source.names, DEFAULT_MAP_PREFS.names),
     basemap: {
       transportation: bool(storedBasemap.transportation, DEFAULT_MAP_PREFS.basemap.transportation),
-      citiesAndPoi: bool(storedBasemap.citiesAndPoi, DEFAULT_MAP_PREFS.basemap.citiesAndPoi),
       land: bool(storedBasemap.land, DEFAULT_MAP_PREFS.basemap.land),
     },
   };

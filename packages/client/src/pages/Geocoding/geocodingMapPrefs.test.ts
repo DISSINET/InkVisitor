@@ -17,7 +17,7 @@ describe("readMapPrefs", () => {
     const stored = JSON.stringify({
       ...DEFAULT_MAP_PREFS,
       others: true,
-      basemap: { transportation: true, citiesAndPoi: true, land: false },
+      basemap: { transportation: true, land: false },
     });
     const prefs = readMapPrefs(stored);
     expect(prefs.others).toBe(true);
@@ -48,7 +48,6 @@ describe("readMapPrefs", () => {
     const prefs = readMapPrefs(partial);
     expect(prefs.basemap.transportation).toBe(true);
     expect(prefs.basemap.land).toBe(false);
-    expect(prefs.basemap.citiesAndPoi).toBe(DEFAULT_MAP_PREFS.basemap.citiesAndPoi);
   });
 
   /**
@@ -76,9 +75,8 @@ describe("readMapPrefs", () => {
     expect(prefs.basemap.transportation).toBe(DEFAULT_MAP_PREFS.basemap.transportation);
   });
 
-  it("starts with a quiet basemap: no transport, no built-up detail, land kept", () => {
+  it("starts with a quiet basemap: no transport, land kept", () => {
     expect(DEFAULT_MAP_PREFS.basemap.transportation).toBe(false);
-    expect(DEFAULT_MAP_PREFS.basemap.citiesAndPoi).toBe(false);
     expect(DEFAULT_MAP_PREFS.basemap.land).toBe(true);
   });
 });

@@ -12,7 +12,7 @@
  */
 
 /** The parts of the basemap a researcher can switch off. */
-export type BasemapGroup = "transportation" | "citiesAndPoi" | "land";
+export type BasemapGroup = "transportation" | "land";
 
 export const BASEMAP_GROUPS: { id: BasemapGroup; title: string; note: string }[] = [
   {
@@ -21,21 +21,15 @@ export const BASEMAP_GROUPS: { id: BasemapGroup; title: string; note: string }[]
     note: "roads, railways, paths, airports and their names",
   },
   {
-    id: "citiesAndPoi",
-    title: "built-up detail",
-    note: "buildings and points of interest",
-  },
-  {
     id: "land",
     title: "land cover & use",
-    note: "woodland, grass, parks, sand, ice, built-up areas",
+    note: "woodland, grass, parks, sand, ice, built-up areas, buildings and points of interest",
   },
 ];
 
 const GROUP_SOURCE_LAYERS: Record<BasemapGroup, string[]> = {
   transportation: ["transportation", "transportation_name", "aeroway", "aerodrome_label"],
-  citiesAndPoi: ["building", "poi"],
-  land: ["landuse", "landcover", "park"],
+  land: ["landuse", "landcover", "park", "building", "poi"],
 };
 
 /**
@@ -130,7 +124,7 @@ interface StyleLayerSummary {
  * The style's flat fill stops at the zoom its extrusion starts, and extrusions
  * are never drawn here, so past that zoom a village shows no buildings at all.
  * This layer carries on from the flat fill with the same source, source layer
- * and paint, and goes through the same grouping, so the built-up switch owns it.
+ * and paint, and goes through the same grouping, so the land switch owns it.
  *
  * Returns the layer with the id of the layer it belongs directly above, or null
  * where the style has no flat building fill to continue or the layer is already
