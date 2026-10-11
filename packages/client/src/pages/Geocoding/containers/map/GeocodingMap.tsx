@@ -7,38 +7,19 @@ import { InterfaceEnums } from "@inkvisitor/shared/enums";
 import {
   GeoJsonGeometry,
   geometryAnchor,
-  geometryBbox,
-  parseGeometry,
   pointGeometry,
   serializeGeometry,
 } from "@inkvisitor/shared/types/geometry";
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
 import { EntityTag } from "components/advanced";
-import { useTheme } from "hooks";
 import { useDebounce } from "hooks";
-import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppSelector } from "redux/hooks";
 import { IcoSelection } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  BasemapLayer,
-  flatBuildingLayerFor,
-  groupedLayersOf,
-  neverDrawnLayerIds,
-} from "../../utils/map/basemapLayers";
-import {
-  LYR,
   Position,
-  addGeocodingLayers,
-  boundsOf,
-  hoverInfoAtPoint,
   lngLat,
-  pickMark,
-  focusPulse,
-  setFocusPulse,
-  setGeocodingMapData,
-  setHoveredSuggestion,
 } from "../../utils/map/geocodingMapLayers";
 import {
   MapLayerPrefs,
@@ -48,13 +29,9 @@ import {
 import {
   SEARCH_DEBOUNCE_MS,
   SEARCH_LIMIT,
-  EUROPE,
   FLY_SECONDS,
   FLY_TO_SUGGESTIONS,
-  FIT_PADDING,
-  FIT_SUGGESTIONS_MS,
   toMapZoom,
-  fromMapZoom,
   pickerAnchorIn,
 } from "../../utils/map/mapView";
 import { MapFooterControls } from "../../components/map/MapFooterControls";
@@ -64,13 +41,15 @@ import { GeometryDrawPanel } from "../../components/map/GeometryDrawPanel";
 import { RecentGeocodes } from "../../components/recent/RecentGeocodes";
 import { RecentGeocode } from "../../utils/write/recentGeocodes";
 import { useGeometryDraw } from "../../hooks/useGeometryDraw";
-import { BASEMAP_STYLE } from "../../utils/map/basemapStyle";
-import { registerMaplibreWorker } from "../../utils/map/maplibreWorker";
+import { useMapCamera } from "../../hooks/useMapCamera";
+import { useMapMarks } from "../../hooks/useMapMarks";
+import { useMapPointer } from "../../hooks/useMapPointer";
+import { useMapStyle } from "../../hooks/useMapStyle";
+import { useRegionDraw } from "../../hooks/useRegionDraw";
 import { AccuracyPicker } from "../../components/placeType/AccuracyPicker";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
-import { colourKeysFor, darkenPaintValue } from "../../utils/map/darkBasemap";
 import { engineSearch } from "../../utils/engine/engine";
-import { BOX_REFUSAL_MESSAGE, boxFromDrag, boxLabel, boxRefusal } from "../../utils/map/regionBox";
+import { boxLabel } from "../../utils/map/regionBox";
 import { EngineSearchHit, Suggestion } from "../../types/engine";
 import {
   StyledDrawClear,
@@ -84,11 +63,10 @@ import {
   StyledMarkCardMeta,
 } from "./GeocodingMapStyles";
 import { MapPending, afterAccuracy, menuAnchorFor } from "../../utils/map/mapAssign";
-import { FOCUS_MARK_MS, MapFocus, moveFor } from "../../utils/map/mapFocus";
+import { MapFocus } from "../../utils/map/mapFocus";
 import { useFocusRing } from "../../hooks/useFocusRing";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
 import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
-import { flightFor } from "../../utils/suggestions/suggestionRank";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
 /**
@@ -216,10 +194,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   onRegionBox,
 }) => {
   const placeTypes = usePlaceTypes();
-  // the renderer takes plain option objects rather than styled components, so
-  // the theme has to be read rather than inherited - the reason the mark colours
-  // were hardcoded and then never followed dark mode
-  const theme = useTheme();
   const themeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
   const basemap = themeId === "dark" ? "dark" : "light";
   const [term, setTerm] = useState("");
@@ -235,23 +209,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   const [manual, setManual] = useState({ lat: "", lon: "" });
   const debouncedTerm = useDebounce(term, SEARCH_DEBOUNCE_MS);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const hoverRef = useRef<maplibregl.Popup | null>(null);
-  /**
-   * The basemap's own layers, grouped by the switch that owns them.
-   *
-   * Refilled on every style load, never read back off the live map: the ids
-   * belong to the style that carries them, so a swapped style — which is how the
-   * dark basemap arrives — invalidates the previous set entirely.
-   */
-  const basemapLayers = useRef<BasemapLayer[]>([]);
-  /**
-   * Bumped each time a style finishes loading. Everything this page adds to the
-   * map is added in an effect keyed on it, because a style swap discards every
-   * source and layer that was sitting on the previous one.
-   */
-  const [styleEpoch, setStyleEpoch] = useState(0);
-
   /**
    * Whether the shape tool is open. While it is, a click on the map belongs to
    * the tool and does not start a point assignment.
@@ -262,47 +219,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
 
   /** The point last asked for by name, while its ring is up. */
   const ringed = useFocusRing(focus);
-
-  /**
-   * The Location the pointer is over, and where the pointer is.
-   *
-   * Held by the map rather than reported to the page, unlike a hovered
-   * suggestion: everything the card says is already here — the Locations it
-   * draws are this component's own prop — where a suggestion's card is drawn
-   * from a run the map never sees.
-   */
-  const [hoveredLocation, setHoveredLocation] = useState<{
-    id: string;
-    at: { left: number; top: number };
-  } | null>(null);
-
-  /**
-   * The hover reporter, held rather than closed over: the listener that calls it
-   * is registered once for the map's life, and a fresh function on every render
-   * of the page would otherwise tear it down and rebuild it.
-   */
-  const onHoverSuggestion = useRef(onHoverSuggestionProp);
-  useEffect(() => {
-    onHoverSuggestion.current = onHoverSuggestionProp;
-  }, [onHoverSuggestionProp]);
-
-  /**
-   * The hovered Location itself.
-   *
-   * Looked up rather than stored with the hover, so a card left open across a
-   * write shows what the Location now says instead of what it said when the
-   * pointer arrived. Null once it leaves the set the map draws — the selection
-   * moving to a different territory, say.
-   */
-  const hoveredCard = useMemo(() => {
-    if (!hoveredLocation) {
-      return null;
-    }
-    const location =
-      geocoded.find((one) => one.entity.id === hoveredLocation.id) ??
-      (selected?.entity.id === hoveredLocation.id ? selected : undefined);
-    return location ? { location, at: hoveredLocation.at } : null;
-  }, [hoveredLocation, geocoded, selected]);
 
   /**
    * The end of the two questions, whichever of them ended it.
@@ -418,121 +334,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   /* ------------------------------------------------------- drawing a region */
 
   /**
-   * Whether the next drag draws a rectangle instead of moving the map.
-   *
-   * A mode, and the only one this map has. It disarms itself the moment a box
-   * lands: drawing a region is a thing done once for a place the named list
-   * does not cover, and a map left in a state where it no longer pans is worse
-   * than a second press.
-   */
-  const [drawing, setDrawing] = useState(false);
-  /**
-   * Read by the handlers that were registered once for the map's life — the
-   * click that assigns a coordinate, and the hover that names what is under the
-   * pointer. Neither may act while a rectangle is being dragged out.
-   */
-  const drawingRef = useRef(false);
-  drawingRef.current = drawing;
-  /** The rectangle under the pointer, while it is still being dragged. */
-  const [drag, setDrag] = useState<GeocodingBbox | null>(null);
-  /** Why the last drag was not a region. Cleared by the next one. */
-  const [drawRefusal, setDrawRefusal] = useState<string | null>(null);
-  /**
-   * Whether the pointer or keyboard focus is on the region control or its
-   * note. The drawn region's coordinates are shown only then, since the button
-   * already says a region is set.
-   */
-  const [regionDetailsOpen, setRegionDetailsOpen] = useState(false);
-  /**
-   * Where the drag started, held across renders rather than inside the effect.
-   *
-   * A drag is one gesture and the page re-renders during it — the elapsed
-   * counter on a running request ticks four times a second — so a corner kept
-   * in the effect's own scope is lost to any re-registration, and the release
-   * that follows finds nothing to make a rectangle from.
-   */
-  const dragFrom = useRef<{ lat: number; lon: number } | null>(null);
-  /**
-   * The report, held rather than closed over, for the same reason the hover
-   * reporter is: it arrives fresh on every render of the page, and an effect
-   * depending on it would tear the drag's own listeners down mid-gesture.
-   */
-  const onRegionBoxRef = useRef(onRegionBox);
-  useEffect(() => {
-    onRegionBoxRef.current = onRegionBox;
-  }, [onRegionBox]);
-
-  /**
-   * The drag that makes a rectangle.
-   *
-   * Panning and box-zoom are switched off for as long as the mode is armed,
-   * because both are the same gesture — and a drag that both drew a box and
-   * moved the map underneath it would leave the box somewhere nobody put it.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !drawing) {
-      return;
-    }
-    map.dragPan.disable();
-    map.boxZoom.disable();
-    map.getCanvas().style.cursor = "crosshair";
-
-    const onDown = (event: maplibregl.MapMouseEvent) => {
-      event.preventDefault();
-      dragFrom.current = { lat: event.lngLat.lat, lon: event.lngLat.lng };
-      setDrawRefusal(null);
-      setDrag(boxFromDrag(dragFrom.current, dragFrom.current));
-    };
-    const onMove = (event: maplibregl.MapMouseEvent) => {
-      if (!dragFrom.current) {
-        return;
-      }
-      setDrag(boxFromDrag(dragFrom.current, { lat: event.lngLat.lat, lon: event.lngLat.lng }));
-    };
-    const onUp = (event: maplibregl.MapMouseEvent) => {
-      if (!dragFrom.current) {
-        return;
-      }
-      const box = boxFromDrag(dragFrom.current, {
-        lat: event.lngLat.lat,
-        lon: event.lngLat.lng,
-      });
-      dragFrom.current = null;
-      setDrag(null);
-      // the same refusals the engine answers 422 with, asked here instead: a
-      // click that did not move, and a drag across the antimeridian, both come
-      // out of an ordinary gesture, and a rectangle nobody can see any more is
-      // the worst possible place to explain one
-      const refusal = boxRefusal(box);
-      if (refusal) {
-        setDrawRefusal(BOX_REFUSAL_MESSAGE[refusal]);
-        return;
-      }
-      setDrawRefusal(null);
-      setDrawing(false);
-      onRegionBoxRef.current?.(box);
-    };
-
-    map.on("mousedown", onDown);
-    map.on("mousemove", onMove);
-    map.on("mouseup", onUp);
-    return () => {
-      map.off("mousedown", onDown);
-      map.off("mousemove", onMove);
-      map.off("mouseup", onUp);
-      map.dragPan.enable();
-      map.boxZoom.enable();
-      map.getCanvas().style.cursor = "";
-      dragFrom.current = null;
-      setDrag(null);
-    };
-    // only on the mode itself: the report is read off a ref, so nothing here is
-    // rebuilt by a render of the page, which happens four times a second while
-    // a request is running and would land in the middle of a drag
-  }, [drawing]);
-
-  /**
    * A switched-off group draws nothing, which one shared empty array says as
    * well as a fresh `[]` would — and says it without handing the effect below
    * a new reference on every render a switch happens not to touch, which is
@@ -546,17 +347,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     () => (layers.suggestions ? suggestions : NO_SUGGESTIONS),
     [layers.suggestions, suggestions],
   );
-
-  /**
-   * The run as the click handler sees it.
-   *
-   * Held rather than closed over: the page builds this array fresh on every
-   * render, and a listener keyed on it would be torn down and rebuilt as often.
-   */
-  const suggestionsRef = useRef(shownSuggestions);
-  useEffect(() => {
-    suggestionsRef.current = shownSuggestions;
-  }, [shownSuggestions]);
 
 
   /**
@@ -576,176 +366,19 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     ? suggestions.slice(0, FLY_TO_SUGGESTIONS).map((one): Position => [one.lat, one.lon])
     : [];
 
+  const { mapRef, styleEpoch, basemapLayers } = useMapStyle(containerRef, position, basemap);
+  const {
+    drawing,
+    setDrawing,
+    drawingRef,
+    drag,
+    drawRefusal,
+    setDrawRefusal,
+    regionDetailsOpen,
+    setRegionDetailsOpen,
+  } = useRegionDraw(mapRef, onRegionBox);
+
   /* ---------------------------------------------------------------- the map */
-
-  // Created once. Every later change reaches it through the effects below
-  // rather than by rebuilding it, because rebuilding throws away where the
-  // researcher had panned to.
-  useEffect(() => {
-    if (!containerRef.current) {
-      return;
-    }
-    registerMaplibreWorker();
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: BASEMAP_STYLE,
-      center: lngLat(position ?? EUROPE),
-      zoom: toMapZoom(position ? 9 : 5),
-    });
-    // the zoom sits top right, away from the search field on the other side
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
-    map.on("style.load", () => setStyleEpoch((epoch) => epoch + 1));
-    // the renderer reports a failed style, tile or glyph through this event and
-    // nowhere else: without a listener a basemap that never arrives is silent,
-    // and the page looks like one whose marks simply have nothing behind them
-    map.on("error", (event) => console.error("[geocoding map]", event.error?.message ?? event));
-    mapRef.current = map;
-    return () => {
-      hoverRef.current?.remove();
-      map.remove();
-      mapRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  /**
-   * Loads the style again when the theme changes.
-   *
-   * Everything the theme touches is written into the style once and never read
-   * back: the basemap's own colours are inverted in place, and this page's
-   * layers are created with theme colours baked into their paint. Neither can be
-   * undone by writing over it — the inversion has no inverse to apply, and the
-   * layers already exist, so the effect that creates them does nothing.
-   *
-   * Reloading gives both a clean sheet. `style.load` fires, the layers are
-   * created again in the new theme's colours, and the recolour below runs over
-   * a basemap that is once more in its own.
-   */
-  const themedStyle = useRef(basemap);
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || themedStyle.current === basemap) {
-      return;
-    }
-    themedStyle.current = basemap;
-    map.setStyle(BASEMAP_STYLE, { diff: false });
-  }, [basemap]);
-
-  /**
-   * Recolours the basemap for the theme.
-   *
-   * Every layer the style shipped, read back and written again with its
-   * lightness inverted — not a different style, so the layers, the switches and
-   * the classification are the same in both themes.
-   *
-   * Runs on every style load, because a style that has just loaded is drawn in
-   * its own colours until this has been over it.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    // keyed on the style load alone, never on the theme. A theme change reloads
-    // the style, so the load that follows carries the new theme with it — while
-    // running on the change itself would reach a style that is being torn down,
-    // and the renderer throws from every paint call until the new one is parsed
-    if (!map || styleEpoch === 0 || themedStyle.current !== "dark") {
-      return;
-    }
-    const style = map.getStyle();
-    if (!style) {
-      return;
-    }
-    for (const layer of style.layers ?? []) {
-      // this page's own marks are drawn from the theme already and must not be
-      // inverted a second time
-      if (layer.id.startsWith("geocoding-")) {
-        continue;
-      }
-      for (const key of colourKeysFor(layer.type)) {
-        const value = map.getPaintProperty(layer.id, key as never);
-        if (value === undefined) {
-          continue;
-        }
-        const recoloured = darkenPaintValue(value);
-        if (recoloured !== value) {
-          // the renderer types a paint value as the union of everything a style
-          // may hold; what goes back is what came out, with its colour leaves
-          // rewritten and its shape untouched
-          map.setPaintProperty(layer.id, key as never, recoloured as never);
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch]);
-
-  /**
-   * Classifies the style's own layers by the switch that should own each one,
-   * and hides the ones this page never draws.
-   *
-   * Recorded BEFORE this page adds anything of its own, so the classification
-   * describes the style as it shipped rather than the style with this page's
-   * marks mixed into it.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || styleEpoch === 0) {
-      return;
-    }
-    const style = map.getStyle();
-    if (!style) {
-      return;
-    }
-    let styleLayers = (style.layers ?? []) as Parameters<typeof groupedLayersOf>[0];
-    // the style draws buildings flat only up to the zoom its extrusions start at
-    const flatBuilding = flatBuildingLayerFor(style.layers ?? []);
-    if (flatBuilding) {
-      map.addLayer(flatBuilding.layer as never, flatBuilding.beforeId);
-      styleLayers = (map.getStyle()?.layers ?? styleLayers) as typeof styleLayers;
-    }
-    basemapLayers.current = groupedLayersOf(styleLayers);
-    if (basemapLayers.current.length === 0) {
-      // a style on another schema loads and draws perfectly well; it just leaves
-      // the switches with nothing to switch, which is invisible from the panel
-      console.warn(
-        "[geocoding map] no layer of the basemap style belongs to a known group - " +
-          "the basemap switches will do nothing. The style is probably not built " +
-          "on the OpenMapTiles schema.",
-      );
-    }
-
-    // extruded buildings draw over everything this page puts on the map, and a
-    // 3D reading of a map being used flat answers no question asked here
-    for (const id of neverDrawnLayerIds(styleLayers)) {
-      map.setLayoutProperty(id, "visibility", "none");
-    }
-  }, [styleEpoch]);
-
-  /**
-   * Everything this page draws, added on top of whichever style just loaded.
-   *
-   * Attempted rather than checked first. `style.load` says a style has parsed,
-   * and there is no public way to ask whether one is in flight — a theme flipped
-   * while the previous style was still arriving leaves this reaching a style
-   * that is being torn down, and the renderer throws rather than waiting.
-   * `styledata` is what says the next one has settled; it is raised by the
-   * renderer's own bookkeeping rather than by drawing, so it still arrives in a
-   * tab that is not being painted.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || styleEpoch === 0) {
-      return;
-    }
-    try {
-      addGeocodingLayers(map, theme);
-    } catch {
-      const again = () => setStyleEpoch((epoch) => epoch + 1);
-      map.once("styledata", again);
-      return () => {
-        map.off("styledata", again);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, theme]);
 
   /* ------------------------------------------------- what the map is showing */
 
@@ -753,345 +386,56 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   // puts the drawing tool's layers above them rather than beneath
   const draw = useGeometryDraw(mapRef, styleEpoch, shapeOpen);
 
-  // The page's own marks. Set as data on sources that already exist, so a change
-  // of selection or of suggestions never touches the layers themselves. One
-  // effect per source: a rectangle being dragged out must not re-send the
-  // Locations of the whole corpus, and a click must not re-send the rectangle.
-  const withMap = (apply: (map: maplibregl.Map) => void) => {
-    const map = mapRef.current;
-    if (map && styleEpoch !== 0) {
-      apply(map);
-    }
-  };
-
-  useEffect(() => {
-    withMap((map) => setGeocodingMapData(map, { others: shownOthers }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, shownOthers]);
-
-  useEffect(() => {
-    withMap((map) => setGeocodingMapData(map, { suggestions: shownSuggestions, leader }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, shownSuggestions, leader]);
-
-  useEffect(() => {
-    withMap((map) =>
-      setGeocodingMapData(map, {
-        selected: {
-          position,
-          name: selectedName,
-          id: selected?.entity.id,
-          // the shape tool draws the stored shape itself while it is being edited
-          geometry: shapeOpen ? null : (selected?.geometry ?? null),
-        },
-      }),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, position, selectedName, selected?.entity.id, selectedGeometryKey, shapeOpen]);
-
-  useEffect(() => {
-    withMap((map) =>
-      setGeocodingMapData(map, { pending: pending ? [pending.lat, pending.lon] : null }),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, pending]);
-
-  useEffect(() => {
-    withMap((map) => setGeocodingMapData(map, { focus: ringed?.at ?? null }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, ringed]);
-
-  // what is being dragged out takes precedence over what is stored, so the
-  // rectangle follows the pointer rather than jumping into place on release
-  useEffect(() => {
-    withMap((map) => setGeocodingMapData(map, { regionBox: drag ?? context.regionBbox ?? null }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleEpoch, drag, context.regionBbox]);
-
-  /**
-   * The basemap's borders and labels, and this page's own names.
-   *
-   * Recomputed in full for every layer on every run rather than incrementally,
-   * which is what lets the switches compose: turning a group off survives a
-   * theme change, and a theme change cannot reveal a group that is switched off,
-   * because both are decided here from the same state every time.
-   *
-   * Not gated on the style being fully loaded: that also waits on tiles, and a
-   * reader who flips a switch on a slow connection would watch nothing happen.
-   * The refs this reads are only filled once a style has loaded, and every call
-   * is guarded by `getLayer`.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-    const show = (id: string, on: boolean) => {
-      if (map.getLayer(id)) {
-        map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
-      }
-    };
-    for (const layer of basemapLayers.current) {
-      show(layer.id, layers.basemap[layer.group]);
-    }
-    show(LYR.othersName, layers.names);
-    show(LYR.suggestionName, layers.names);
-  }, [styleEpoch, layers]);
-
-  /* ----------------------------------------------------------- where it looks */
-
-  // Recentres when the selection changes, without rebuilding the map.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !position) {
-      return;
-    }
-    // a line or an area is framed whole; a point is centred
-    const selectedGeometry = selectedGeometryKey ? parseGeometry(selectedGeometryKey) : null;
-    const shape = selectedGeometry && selectedGeometry.type !== "Point" ? selectedGeometry : null;
-    if (shape) {
-      const [west, south, east, north] = geometryBbox(shape);
-      map.fitBounds(
-        [
-          [west, south],
-          [east, north],
-        ],
-        { padding: FIT_PADDING, maxZoom: toMapZoom(12), duration: 0 },
-      );
-      return;
-    }
-    map.jumpTo({ center: lngLat(position), zoom: Math.max(map.getZoom(), toMapZoom(9)) });
-  }, [position, selectedGeometryKey]);
-
-  /**
-   * Moves to the strongest suggestion once a run finishes.
-   *
-   * A run ends with a list on the right and a map showing wherever the
-   * researcher last was, which for an ungeocoded place is the whole of Europe.
-   * Flying to the first answers "where is it saying" before anyone has to read a
-   * coordinate. Guarded on the flattened coordinate rather than by a dependency
-   * array, because an array of two numbers is a new value on every render and
-   * the map would be taken back from someone who had panned away.
-   */
-  const flown = useRef<string | null>(null);
-  useEffect(() => {
-    const map = mapRef.current;
-    const { key, fly } = flightFor(flown.current, leaders[0] ?? null);
-    if (map && fly && leaders.length) {
-      map.fitBounds(boundsOf(leaders), {
-        padding: FIT_PADDING,
-        // never closer than the leader alone would have been, so a run whose
-        // strongest five sit on one village does not arrive at street level
-        maxZoom: toMapZoom(9),
-        duration: FIT_SUGGESTIONS_MS,
-      });
-    }
-    flown.current = key;
+  useMapMarks({
+    mapRef,
+    styleEpoch,
+    basemapLayers,
+    layers,
+    shownOthers,
+    shownSuggestions,
+    leader,
+    highlighted,
+    selected,
+    position,
+    selectedName,
+    selectedGeometryKey,
+    shapeOpen,
+    pending,
+    ringed,
+    drag,
+    regionBbox: context.regionBbox,
+  });
+  useMapCamera({ mapRef, position, selectedGeometryKey, leaders, focus });
+  const { hoveredLocation } = useMapPointer({
+    mapRef,
+    drawingRef,
+    shapeOpenRef,
+    shownSuggestions,
+    selected,
+    onSelectLocation,
+    onHoverSuggestion: onHoverSuggestionProp,
+    setPending,
   });
 
-  /**
-   * Moves to a point the researcher asked for, once per asking.
-   *
-   * Keyed on when rather than where: asking twice for the same suggestion is a
-   * request to go back to it, which a coordinate alone cannot express.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !focus) {
-      return;
-    }
-    const move = moveFor(focus, position, fromMapZoom(map.getZoom()));
-    if ("fit" in move) {
-      map.fitBounds(boundsOf(move.fit), {
-        padding: move.padding[0],
-        maxZoom: toMapZoom(move.maxZoom),
-        duration: FLY_SECONDS * 1000,
-      });
-      return;
-    }
-    map.flyTo({
-      center: lngLat(move.center),
-      zoom: toMapZoom(move.zoom),
-      duration: FLY_SECONDS * 1000,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focus?.at]);
 
   /**
-   * Breathes the focus ring for as long as one is up.
+   * The hovered Location itself.
    *
-   * Its age is measured from when it was asked for rather than from when this
-   * effect started, so a theme change part-way through — which restarts the
-   * effect along with the style — resumes the breath where it was instead of
-   * granting the ring a second life.
+   * Looked up rather than stored with the hover, so a card left open across a
+   * write shows what the Location now says instead of what it said when the
+   * pointer arrived. Null once it leaves the set the map draws — the selection
+   * moving to a different territory, say.
    */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ringed || styleEpoch === 0) {
-      return;
+  const hoveredCard = useMemo(() => {
+    if (!hoveredLocation) {
+      return null;
     }
-    let frame = 0;
-    const draw = () => {
-      const pulse = focusPulse(Date.now() - ringed.since, FOCUS_MARK_MS);
-      setFocusPulse(map, pulse.radius, pulse.opacity);
-      frame = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => cancelAnimationFrame(frame);
-  }, [ringed, styleEpoch]);
+    const location =
+      geocoded.find((one) => one.entity.id === hoveredLocation.id) ??
+      (selected?.entity.id === hoveredLocation.id ? selected : undefined);
+    return location ? { location, at: hoveredLocation.at } : null;
+  }, [hoveredLocation, geocoded, selected]);
 
-  /**
-   * The mark the reader is pointing at, rung.
-   *
-   * Keyed on the style epoch as well as the index: a style swap discards every
-   * source this page owns along with the states set on them, so the ring has to
-   * be put back once the new one has been drawn on.
-   */
-  const rung = useRef<number | null>(null);
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-    setHoveredSuggestion(map, highlighted, rung.current);
-    rung.current = highlighted;
-  }, [highlighted, styleEpoch, shownSuggestions]);
-
-  /* --------------------------------------------------------------- clicking */
-
-  /**
-   * One handler, with the marks considered before the pixel.
-   *
-   * A click on a mark is a click on the place it draws, not on the point under
-   * it — see `pickMark`, which states the precedence this depends on.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-    const onClick = (event: maplibregl.MapMouseEvent) => {
-      // a drag that drew a rectangle ends in a click, and it is a statement
-      // about the region rather than about a coordinate
-      if (drawingRef.current || shapeOpenRef.current) {
-        return;
-      }
-      const hit = pickMark(map, event.point);
-      if (hit.kind === "suggestion") {
-        const suggestion = suggestionsRef.current[hit.index];
-        if (!suggestion) {
-          return;
-        }
-        // the card describing this mark has been answered by the act of
-        // choosing it, and leaving it open puts a description of the place
-        // underneath the menu asking about that place
-        onHoverSuggestion.current?.(null, null);
-        // the suggestion's own coordinate, not the pixel that was clicked: the
-        // mark is ten pixels across and the place is the point at its centre
-        setPending({
-          lat: suggestion.lat,
-          lon: suggestion.lon,
-          x: event.point.x,
-          y: event.point.y,
-          suggestion: { index: hit.index, label: suggestion.label },
-        });
-        return;
-      }
-      // a mark that is not a suggestion is one of the Locations the list is
-      // showing, and clicking a place on the map is asking to work on it
-      if (hit.kind === "other") {
-        onSelectLocation?.(hit.id);
-        return;
-      }
-      if (hit.kind === "mark" || !selected) {
-        return;
-      }
-      // a half-finished click is abandoned by the picker's own backdrop, which
-      // covers the map while it is open — so a click here is always a fresh one
-      setPending({
-        lat: event.lngLat.lat,
-        // a click on a repeated copy of the world is the same place as on the first
-        lon: event.lngLat.wrap().lng,
-        x: event.point.x,
-        y: event.point.y,
-      });
-    };
-    map.on("click", onClick);
-    return () => {
-      map.off("click", onClick);
-    };
-  }, [onChooseSuggestion, onSelectLocation, selected]);
-
-  /**
-   * The name of whatever is under the pointer, and a pointer that says it can be
-   * clicked.
-   *
-   * A popup rather than a painted label: it is real text in the document, which
-   * is what keeps a name readable to anything that is not a pair of eyes on a
-   * canvas.
-   */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-    const onMove = (event: maplibregl.MapMouseEvent) => {
-      // while a rectangle is being drawn the pointer is saying where the corner
-      // goes, and naming whatever it passes over would fight the crosshair for
-      // the cursor as well as for the reader's attention
-      if (drawingRef.current || shapeOpenRef.current) {
-        return;
-      }
-      const info = hoverInfoAtPoint(map, event.point);
-      // every mark is something this page will act on when it is clicked, so
-      // every mark says so under the pointer
-      map.getCanvas().style.cursor = info.hasMark ? "pointer" : "";
-      // a suggestion is shown whole rather than named, by whoever holds the run
-      // it belongs to. The map has the mark and the point; the card needs the
-      // response behind it
-      onHoverSuggestion.current?.(
-        info.suggestionIndex,
-        info.suggestionIndex === null
-          ? null
-          : { left: event.originalEvent.clientX, top: event.originalEvent.clientY },
-      );
-      // a Location this page holds is shown as itself rather than named. Placed
-      // from the pointer in viewport coordinates, which is what the card is
-      // positioned in
-      setHoveredLocation(
-        info.locationId
-          ? {
-              id: info.locationId,
-              at: { left: event.originalEvent.clientX, top: event.originalEvent.clientY },
-            }
-          : null,
-      );
-      // a name already painted at this point needs no popup repeating it
-      if (!info.popupName) {
-        hoverRef.current?.remove();
-        hoverRef.current = null;
-        return;
-      }
-      const popup =
-        hoverRef.current ??
-        new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12 });
-      popup.setLngLat(event.lngLat).setText(info.popupName).addTo(map);
-      hoverRef.current = popup;
-    };
-    const onLeave = () => {
-      hoverRef.current?.remove();
-      hoverRef.current = null;
-      map.getCanvas().style.cursor = "";
-      onHoverSuggestion.current?.(null, null);
-      setHoveredLocation(null);
-    };
-    map.on("mousemove", onMove);
-    map.on("mouseout", onLeave);
-    return () => {
-      map.off("mousemove", onMove);
-      map.off("mouseout", onLeave);
-    };
-  }, []);
 
 
   return (

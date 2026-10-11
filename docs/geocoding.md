@@ -1024,7 +1024,7 @@ root; the rest is sorted by what it is:
   recently geocoded strip and the quick-geocode notice), `suggestion` (the
   suggestion box and the run's progress) and `map` (the shape drawing panel, the layers panel, the place search and the footer's coordinate fields, and the one square-toggle style the map's three edge buttons share),
   plus `shared/HintLayer`, the one hover hint every `data-hint` attribute uses.
-- `hooks/` — every `use…` hook and the place-type context.
+- `hooks/` — every `use…` hook and the place-type context. The map is built from `useMapStyle` (the renderer and its style), `useMapMarks`, `useMapCamera`, `useMapPointer` and `useRegionDraw`.
 - `utils/` — logic with no React: `engine` (the HTTP client, stream, fixture
   mode, integrity notes), `map` (basemap grouping, layers, preferences, focus,
   drawing), `suggestions` (labels, ranking, scatter, quick pick), `write` (the
