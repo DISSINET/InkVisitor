@@ -1,16 +1,9 @@
 import styled from "styled-components";
 
-/**
- * One row per source: a switch, a measurement and any further columns.
- *
- * A grid rather than a list, because the figures are the reason the panel
- * exists and they only say anything read down as a column: 621k in 340 cells
- * beside 2k in 1,292 is the whole difference between a source about a place and
- * a source about everywhere.
- */
+/** One row per source: a switch and any further columns, aligned down the list. */
 export const StyledGazetteerTable = styled.div<{ $extra?: string[] }>`
   display: grid;
-  grid-template-columns: ${({ $extra = [] }) => ($extra.length ? "auto auto" : "1fr auto")} ${({
+  grid-template-columns: ${({ $extra = [] }) => ($extra.length ? "auto" : "1fr")} ${({
     $extra = [],
   }) => $extra.join(" ")};
   align-items: center;
@@ -28,18 +21,13 @@ export const StyledGazetteerHead = styled.div`
     font-weight: ${({ theme }) => theme.fontWeight["medium"]};
     color: ${({ theme }) => theme.color["greyer"]};
   }
-
-  span:nth-child(2) {
-    text-align: right;
-  }
 `;
 
 /**
- * One source: a switch, a figure and any further cells, as a row of the grid.
+ * One source: a switch and any further cells, as a row of the grid.
  *
  * Has no box of its own, so it carries no styling; what is drawn faintly while a
- * source is switched off is its name and the figure, which are what the switch
- * is about. Cells to their right stay at full strength because they are edited
+ * source is switched off is its name, which is what the switch is about. Cells to their right stay at full strength because they are edited
  * independently of whether the source is asked.
  */
 export const StyledGazetteerRow = styled.div`
@@ -102,11 +90,6 @@ export const StyledGazetteerNote = styled.span`
   line-height: 1.4;
 `;
 
-/** A sentence under the whole table rather than inside one of its cells. */
-export const StyledGazetteerFootnote = styled(StyledGazetteerNote)`
-  grid-column: 1 / -1;
-`;
-
 export const StyledGazetteerLocked = styled(StyledGazetteerNote)`
   color: ${({ theme }) => theme.color["warningText"]};
 `;
@@ -116,19 +99,3 @@ export const StyledGazetteerUnwell = styled(StyledGazetteerNote)`
   color: ${({ theme }) => theme.color["danger"]};
 `;
 
-/**
- * What the engine counted, as one figure per row.
- *
- * `declared` where there is nothing to count: the source is a remote API, so
- * the engine falls back to how specific its own claim is, which always scores
- * below a measurement. The whole sentence is on the tooltip.
- */
-export const StyledGazetteerFigure = styled.span<{ $off: boolean }>`
-  opacity: ${({ $off }) => ($off ? 0.55 : 1)};
-  justify-self: end;
-  font-family: monospace;
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  white-space: nowrap;
-  color: ${({ theme }) => theme.color["greyer"]};
-  cursor: help;
-`;

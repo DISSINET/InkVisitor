@@ -3,16 +3,12 @@ import React from "react";
 import { engineSuggesters } from "./engine";
 import {
   LLM_SOURCE,
-  footprintFigure,
-  footprintNote,
   gazetteerRows,
   isHealthy,
   withSource,
 } from "./gazetteerCatalogue";
 import {
   StyledGazetteerCell,
-  StyledGazetteerFigure,
-  StyledGazetteerFootnote,
   StyledGazetteerHead,
   StyledGazetteerLabel,
   StyledGazetteerLocked,
@@ -34,13 +30,6 @@ import {
  * switch back on what the project switched off, so those rows are held down and
  * say why.
  *
- * Each row carries what the engine measured of that source, which is the half
- * of the decision nobody can make from the name. `sedac-india` holds 621,528
- * records in 340 one-degree cells and `native-land` holds 2,057 in 1,292 — one
- * is about a place and the other is about everywhere and thin, and the region
- * half of every score they contribute is computed from exactly that. A source
- * with no local records is not measured but declared, and a declaration always
- * scores below a measurement.
  */
 
 /**
@@ -96,7 +85,6 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
     <StyledGazetteerTable $extra={columns.map((column) => column.width)}>
       <StyledGazetteerHead>
         <span>gazetteer</span>
-        <span>what the engine measured of it</span>
         {columns.map((column) => (
           <span key={column.title}>{column.title}</span>
         ))}
@@ -133,21 +121,12 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
                 ) : null}
               </StyledGazetteerName>
             </StyledGazetteerSwitch>
-            <StyledGazetteerFigure $off={isOff} title={footprintNote(suggester)}>
-              {footprintFigure(suggester)}
-            </StyledGazetteerFigure>
             {columns.map((column) => (
               <StyledGazetteerCell key={column.title}>{column.render(name)}</StyledGazetteerCell>
             ))}
           </StyledGazetteerRow>
         );
       })}
-      {suggesters ? null : (
-        <StyledGazetteerFootnote>
-          The engine is unreachable, so what it measures of each source cannot be listed. The
-          switches still work and are still sent.
-        </StyledGazetteerFootnote>
-      )}
     </StyledGazetteerTable>
   );
 };

@@ -315,29 +315,17 @@ does: a source that was not asked cannot have contributed, and one switched back
 on has not been asked yet.
 
 **The project's list is one table with the resources.** In the global modal each
-source is one row: its switch, what the engine measured of it, the Resource
-entity a reference to it points at, and the record URL. The footer's Save writes
-all of it; the list itself is written only when it was changed from what the
-modal opened with, and after the roles, because both rewrite the one settings
-row. The personal modal shows the same table with the first two columns only.
+source is one row: its switch, the Resource entity a reference to it points at,
+and the record URL. The footer's Save writes all of it; the list itself is
+written only when it was changed from what the modal opened with, and after the
+roles, because both rewrite the one settings row. The personal modal shows the
+same table with the switch only.
 
-**Each row carries what the engine measured of that source**, from `footprint`
-on `GET /suggesters`. `cells` counts the one-degree squares the source holds any
-record in, so the pair says whether a source is large or merely spread —
-`sedac-india` is 621,528 records in 340 cells and `native-land` is 2,057 in
-1,292, one about a place and the other about everywhere and thin. That is
-precisely what the region half of every score those two contribute is computed
-from, and it is the half of the decision nobody can make from the name. The
-record count is rounded and the cell count is not: cells top out under two
-thousand and are the whole of what the column says, and rounding 1,292 to "1k"
-makes a source about everywhere read like one about a single country.
-
-A source with no local records is drawn as `declared` rather than as zero. It is
-a remote API, so the engine falls back to how specific its own declaration is,
-which always scores below a measurement — `gov` declares `silesia` and lands at
-0.97 on a Silesian query, but the tightest thing it declares containing Portugal
-is `europe`, so a Portuguese query lands at 0.82, barely above the 0.80 every
-generic source gets.
+The table does not show the footprint the engine measures of each source
+(`footprint` on `GET /suggesters`: how many records it holds and in how many
+one-degree squares). The figures were removed from the screen because a pair like
+"12k · 262 cells" does not say what to do with it; they remain in the engine's
+response.
 
 The list falls back to a static set of names when the engine is unreachable, and
 a source the engine has grown that the static list has never heard of is

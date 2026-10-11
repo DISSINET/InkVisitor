@@ -300,9 +300,8 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           <StyledFullRow>
             <StyledSectionNote>
               A source switched off here is never asked on your own runs — it costs nothing and
-              returns nothing. The figures say what the engine measured of each source&apos;s own
-              records, which is what the region half of every score it contributes is computed
-              from. Sources the project has switched off are held down: an owner sets those.
+              returns nothing. Sources the project has switched off are held down: an owner sets
+              those.
             </StyledSectionNote>
           </StyledFullRow>
           <StyledFullRow>
