@@ -167,13 +167,37 @@ comparable across two different contexts.** One measured `Breslau` query scored
 0.705 under the defaults and 0.656 under region alone. Nothing on this page pins
 anything to a score value.
 
-**Language holds a list.** It says what language the name being searched for is
-probably in — not which languages to search, since the naming step generates
-forms in other languages on purpose. Several are normal; none is no constraint.
-The engine accepts a bare string as a one-element list and resolves both into
-`query.criteria.languageIds`. A context saved before the field took several
-still carries one language on its own `language` key; `contextLanguages` reads
-that underneath the list and nothing writes it again.
+**Every field holds a list.** Region, period, language and kind of place each take
+several values, and several mean *any of them*: a source keeps its best score
+among the regions and is skipped only if it covers none of them, the periods are
+scored on the union of their spans so overlapping ones count once, a source
+matching any of the kinds of place scores in full, and the merge radius is the
+largest among them. Language is the one list whose order matters — it is the
+researcher's own statement of which is likelier. The engine (0.2.0) accepts these
+four only as lists: a bare string, an empty list or a blank entry is 422, so an
+unset field is left off the request and `listToSend` is the one place that is
+decided. A period is chosen from the engine's named periods; a typed range is not
+offered.
+
+A context saved before a field took several carries one value on its own key
+(`region`, `period`, `placeType`, `language`). `contextValues` reads the list and
+falls back to that key, and `withListFields` turns every layer into lists *before*
+the layers are merged — merged first, a researcher's own single value would sit
+beside the project's list and lose to it. A write sets the list and blanks the
+single key, because a cleared list would otherwise bring the old value back.
+
+**A drawn region is one of the region values.** While a box is drawn the region
+field shows it as a single chip, and the box is what is sent: the engine refuses
+a box and named regions together. The names stay stored beneath it. Taking the
+chip away drops the box and gives the names back; choosing a named region drops
+the box and sets the names.
+
+**The engine's `problems` are shown with the other notes on an answer.** An entry
+it did not know (`unknown-criterion`) was dropped and the rest of its list still
+applies; a reversed year range (`corrected-period`) was read the right way round.
+Its own sentence is shown, since it names the value. They sit with the notes for
+a request answered without its language-model stages, and are made by the same
+function.
 
 ### What the weights actually do, measured
 
@@ -450,7 +474,7 @@ whichever applies:
   were never weighed. Absent is not false: the preview frame omits the field
   because the stage has not run yet, which is why the band is computed on the
   final frame only. Each field is asked whether it *says* anything rather than
-  whether it is there, because `language` holds a list and an empty list is as
+  whether it is there, because every field is a list and an empty list is as
   truthy as a full one.
 - any source with `status: "failed"`, `partial` or `benched`.
 
