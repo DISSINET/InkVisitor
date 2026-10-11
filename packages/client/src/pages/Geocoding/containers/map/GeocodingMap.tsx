@@ -203,9 +203,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
    * is. `accuracy` set means the accuracy is chosen and the kind of place is
    * being asked for.
    */
-  const [pending, setPending] = useState<MapPending | null>(
-    null,
-  );
+  const [pending, setPending] = useState<MapPending | null>(null);
   const [manual, setManual] = useState({ lat: "", lon: "" });
   const debouncedTerm = useDebounce(term, SEARCH_DEBOUNCE_MS);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -331,7 +329,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   useEffect(() => saveMapPrefs(layers), [layers]);
   const [showLayers, setShowLayers] = useState(false);
 
-  /* ------------------------------------------------------- drawing a region */
+  /* ------------------------------------------------------ what the map draws */
 
   /**
    * A switched-off group draws nothing, which one shared empty array says as
@@ -362,6 +360,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
    * of a long run is often a continent away — fitted in, the strongest five
    * would be a cluster of dots in the middle of an ocean.
    */
+  // rebuilt every render on purpose: `useMapCamera` runs a check each render
+  // and decides from the coordinates, so a memoised array would hide a change
   const leaders: Position[] = layers.suggestions
     ? suggestions.slice(0, FLY_TO_SUGGESTIONS).map((one): Position => [one.lat, one.lon])
     : [];
@@ -378,12 +378,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     setRegionDetailsOpen,
   } = useRegionDraw(mapRef, onRegionBox);
 
-  /* ---------------------------------------------------------------- the map */
+  /* ------------------------------------------------------ the map and its hooks */
 
-  /* ------------------------------------------------- what the map is showing */
-
-  // declared after the effect that adds this page's layers, so a rebuilt style
-  // puts the drawing tool's layers above them rather than beneath
+  // `useMapStyle` adds this page's layers, so the hooks below must stay after it:
+  // declared after it, a rebuilt style puts the drawing tool's layers above them
+  // rather than beneath
   const draw = useGeometryDraw(mapRef, styleEpoch, shapeOpen);
 
   useMapMarks({

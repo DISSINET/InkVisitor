@@ -46,7 +46,9 @@ export const useMapStyle = (
 ): UseMapStyle => {
   // the renderer takes plain option objects rather than styled components, so
   // the theme has to be read rather than inherited - the reason the mark colours
-  // were hardcoded and then never followed dark mode
+  // were hardcoded and then never followed dark mode. `basemap` comes from the
+  // store and `theme` from the styled-components context; both change on the
+  // same toggle and the layers are rebuilt on the style load that follows
   const theme = useTheme();
   const mapRef = useRef<maplibregl.Map | null>(null);
   const basemapLayers = useRef<BasemapLayer[]>([]);

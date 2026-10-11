@@ -23,6 +23,7 @@ interface UseMapPointer {
   selected: GeocodingLocation | undefined;
   onSelectLocation?: (entityId: string) => void;
   onHoverSuggestion?: (index: number | null, at: { left: number; top: number } | null) => void;
+  /** Must be stable (a state setter): the click listener is rebuilt when it changes. */
   setPending: (pending: MapPending) => void;
 }
 

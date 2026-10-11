@@ -3,7 +3,13 @@ import { MutableRefObject, useEffect, useRef } from "react";
 import { geometryBbox, parseGeometry } from "@inkvisitor/shared/types/geometry";
 import { Position, boundsOf, lngLat } from "../utils/map/geocodingMapLayers";
 import { MapFocus, moveFor } from "../utils/map/mapFocus";
-import { FIT_PADDING, FIT_SUGGESTIONS_MS, FLY_SECONDS, fromMapZoom, toMapZoom } from "../utils/map/mapView";
+import {
+  FIT_PADDING,
+  FIT_SUGGESTIONS_MS,
+  FLY_SECONDS,
+  fromMapZoom,
+  toMapZoom,
+} from "../utils/map/mapView";
 import { flightFor } from "../utils/suggestions/suggestionRank";
 
 /**

@@ -16,9 +16,7 @@ export interface UseRegionDraw {
   setDrawing: (armed: boolean | ((armed: boolean) => boolean)) => void;
   /** Read by handlers registered once for the map's life. */
   drawingRef: MutableRefObject<boolean>;
-  /** The rectangle under the pointer, while it is still being dragged. */
   drag: GeocodingBbox | null;
-  /** Why the last drag was not a region. Cleared by the next one. */
   drawRefusal: string | null;
   setDrawRefusal: (message: string | null) => void;
   regionDetailsOpen: boolean;
