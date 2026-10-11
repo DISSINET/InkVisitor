@@ -52,7 +52,7 @@ export const MatchTag: React.FC<MatchTag> = ({ match }) => {
       $source={match.source}
       $borderStyle={border.style}
       $faded={border.opacity < 1}
-      title={`${match.source} · ${label}\n${EXPLAINS[match.matchType] || ""}\n${match.lat.toFixed(
+      data-hint={`${match.source} · ${label}\n${EXPLAINS[match.matchType] || ""}\n${match.lat.toFixed(
         4,
       )}, ${match.lon.toFixed(4)}`}
     >

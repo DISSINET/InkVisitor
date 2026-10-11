@@ -2,7 +2,6 @@ import {
   EngineAuditEntry,
   StreamCandidate,
   EngineParameters,
-  EngineReverseResponse,
   EngineSearchResponse,
   EngineSuggester,
   FeedbackRequest,
@@ -254,14 +253,6 @@ export const engineSearch = (
     `/search?q=${encodeURIComponent(q)}&limit=${encodeURIComponent(String(limit))}`,
     { signal },
   );
-
-/** Names the place a map click landed on. Nothing depends on it having an answer. */
-export const engineReverse = (
-  lat: number,
-  lon: number,
-  signal?: AbortSignal,
-): Promise<EngineReverseResponse> =>
-  request<EngineReverseResponse>(`/reverse?lat=${lat}&lon=${lon}`, { signal });
 
 /**
  * Records what the researcher chose, or that nothing fitted. Append-only

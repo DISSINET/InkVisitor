@@ -1,5 +1,4 @@
 import {
-  IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
 import { Button, Input, Loader } from "components";
 import Dropdown from "components/advanced";
@@ -44,7 +43,6 @@ const HEADER_HEIGHT = HEADING_HEIGHT;
 interface GeocodingList {
   browse: UseGeocodingBrowse;
   selectedId: string | undefined;
-  roles: IGeocodingRoles;
   onSelect: (location: GeocodingLocation) => void;
   /** Records a kind of place on a Location without touching its coordinate. */
   onRetype: (location: GeocodingLocation, placeType: string | null) => void;
@@ -98,7 +96,6 @@ interface GeocodingList {
 export const GeocodingList: React.FC<GeocodingList> = ({
   browse,
   selectedId,
-  roles,
   onSelect,
   onRetype,
   onShowOnMap,
@@ -320,7 +317,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
             width="full"
             clearable
           />
-          <StyledArrangeIcon title="how the list is grouped">
+          <StyledArrangeIcon data-hint="how the list is grouped">
             <IcoListTree />
           </StyledArrangeIcon>
           <Dropdown.Single.Basic

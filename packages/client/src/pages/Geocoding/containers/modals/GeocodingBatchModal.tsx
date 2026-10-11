@@ -184,12 +184,12 @@ export const GeocodingBatchModal: React.FC<GeocodingBatchModal> = ({
                     as="button"
                     type="button"
                     $waiting={step.state === "waiting"}
-                    title={`open ${step.label} in the panel`}
+                    data-hint={`open ${step.label} in the panel`}
                     onClick={() => onOpenLocation(step)}
                   >
                     {step.label}
                   </StyledBatchLabel>
-                  <StyledBatchNote title={step.note}>
+                  <StyledBatchNote data-hint={step.note}>
                     {step.note ?? STATE_SAYS[step.state]}
                   </StyledBatchNote>
                   {/* only where there is a decision to make. A Location that was

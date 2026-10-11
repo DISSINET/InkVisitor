@@ -183,7 +183,7 @@ export const GeocodingFilterChips: React.FC<GeocodingFilterChips> = ({
             type="button"
             $on={set}
             aria-expanded={open?.key === chip.key}
-            title={set ? `${chip.label}: ${labelFor(chip)}` : `filter by ${chip.label}`}
+            data-hint={set ? `${chip.label}: ${labelFor(chip)}` : `filter by ${chip.label}`}
             onClick={(event) => {
               anchorOf.current = event.currentTarget;
               const box = event.currentTarget.getBoundingClientRect();

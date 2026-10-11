@@ -9,7 +9,7 @@ describe("readMapPrefs", () => {
   it("falls back to the defaults rather than throwing on unreadable storage", () => {
     expect(readMapPrefs("{not json")).toEqual(DEFAULT_MAP_PREFS);
     expect(readMapPrefs("null")).toEqual(DEFAULT_MAP_PREFS);
-    expect(readMapPrefs('"a string"')).toEqual(DEFAULT_MAP_PREFS);
+    expect(readMapPrefs("\"a string\"")).toEqual(DEFAULT_MAP_PREFS);
     expect(readMapPrefs("[]")).toEqual(DEFAULT_MAP_PREFS);
   });
 

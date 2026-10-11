@@ -1010,6 +1010,33 @@ it has rendered.
 
 ## How the page is put together
 
+The page lives in `packages/client/src/pages/Geocoding`. `GeocodingPage.tsx` holds
+the state the three panels share and is the only file at the root; the rest is
+sorted by what it is:
+
+- `containers/` — the stateful parts: `list` (the Locations list, its rows and
+  filters), `map`, `suggestions` (the suggestion cards and the query context
+  panel) and `modals` (activity, batch, context, overwrite, settings).
+- `components/` — presentational pieces reused across containers: `gazetteer`
+  (tag, card, mark, picker, match tag), `placeType` (picker, table, icons,
+  accuracy picker), `coordinate` (coordinate tag, mini map), `recent` (the
+  recently geocoded strip and the quick-geocode notice), `suggestion` (the
+  suggestion box and the run's progress) and `map` (the shape drawing panel),
+  plus `shared/HintLayer`, the one hover hint every `data-hint` attribute uses.
+- `hooks/` — every `use…` hook and the place-type context.
+- `utils/` — logic with no React: `engine` (the HTTP client, stream, fixture
+  mode, integrity notes), `map` (basemap grouping, layers, preferences, focus,
+  drawing), `suggestions` (labels, ranking, scatter, quick pick), `write` (the
+  plan and execution of a write, batches, recents), `context` (context fields,
+  settings, list groups, gazetteer data) and `test` (the render helper).
+- `types/` — the engine's contract (`engine.ts`) and page types (`page.ts`).
+- `fixtures/` — recorded data: the engine response served in fixture mode and the
+  basemap style layers the grouping tests run against.
+
+A hover hint is written as `data-hint="text"`, never as the browser's `title`:
+one listener on the document draws it with the app's tooltip, so a hint adds no
+element to the control that carries it.
+
 One collection feeds everything. `useGeocodingBrowse` runs the Location search
 and the batched lookup of the Value entities its props point at, and both the
 list and the map read the result — a map showing different places from the list

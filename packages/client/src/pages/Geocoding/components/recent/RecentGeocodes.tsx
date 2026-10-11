@@ -1,4 +1,3 @@
-import { IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import { IconWithTooltip } from "components";
 import { IcoChevronDown } from "Theme/icons";
 import { SuggestionCard } from "../../containers/suggestions/GeocodingSuggestions";
@@ -37,7 +36,6 @@ const CLOCK_MS = 30_000;
 const ARRIVE_MS = 1000;
 
 const NOOP = () => undefined;
-const NO_ROLES = {} as IGeocodingRoles;
 
 const keyOf = (entry: RecentGeocode) => `${entry.id}:${entry.at}`;
 
@@ -153,7 +151,6 @@ export const RecentGeocodes: React.FC<RecentGeocodes> = ({ recent, onShow }) => 
                     topScore={entry.suggestion.score}
                     mergeRadiusKm={undefined}
                     band={null}
-                    roles={NO_ROLES}
                     pendingHere={null}
                     accuracyMenuOpen={false}
                     menuAnchor={null}

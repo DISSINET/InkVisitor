@@ -36,6 +36,7 @@ import { GeocodingActivityModal } from "./containers/modals/GeocodingActivityMod
 import { GeocodingContextModal } from "./containers/modals/GeocodingContextModal";
 import { GeocodingOverwriteModal } from "./containers/modals/GeocodingOverwriteModal";
 import { GeocodingMap } from "./containers/map/GeocodingMap";
+import { HintLayer } from "./components/shared/HintLayer";
 import { QuickGeocodeToast } from "./components/recent/QuickGeocodeToast";
 import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./containers/suggestions/GeocodingSuggestions";
 import { StyledEngineDot, StyledEngineLabel, StyledEngineStatus } from "./GeocodingPageStyles";
@@ -583,7 +584,6 @@ export const GeocodingPage: React.FC = () => {
         break;
       }
     }
-    const written = done.length;
     setBulk(undefined);
     // opened again at the end whether or not it was watched: the run's whole
     // point is not having to watch it, and its verdict is what was being waited
@@ -869,6 +869,7 @@ export const GeocodingPage: React.FC = () => {
 
   return (
     <PlaceTypesProvider placeTypes={roles.placeTypes}>
+      <HintLayer />
       {/* Three panels rather than one holding a grid, the way MainPage composes
           its four. Box owns its own borders through the theme, which is also
           what stops the hairlines between panels reading as heavy ruled lines
@@ -878,7 +879,6 @@ export const GeocodingPage: React.FC = () => {
           <GeocodingList
             browse={browse}
             selectedId={selected?.entity.id}
-            roles={roles}
             onSelect={setSelected}
             onRetype={retype}
             marked={marked}
@@ -933,7 +933,7 @@ export const GeocodingPage: React.FC = () => {
              narrower box resizes the canvas, and the height is recomputed */
           disableScroll
           headerComponent={
-            <StyledEngineStatus title={engineLabel[engineState]}>
+            <StyledEngineStatus data-hint={engineLabel[engineState]}>
               {fixtureModeAvailable() ? (
                 <Button
                   label={isFixtureMode() ? "recorded" : "live"}
@@ -970,7 +970,6 @@ export const GeocodingPage: React.FC = () => {
                     : suggest.response?.suggestions.slice(0, VISIBLE_SUGGESTIONS)) || []
                 : []
             }
-            roles={roles}
             focus={focus}
             recent={recent}
             onShowRecent={(lat, lon) => setFocus((current) => nextFocus(current, lat, lon))}

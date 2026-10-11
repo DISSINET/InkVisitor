@@ -187,7 +187,6 @@ interface SuggestionCard {
   topScore: number;
   mergeRadiusKm: number | undefined;
   band: ReturnType<typeof bandOf>;
-  roles: IGeocodingRoles;
   /** This card's own slice of `pending`, or null while it is not the one being accepted. */
   pendingHere: PendingAccept;
   accuracyMenuOpen: boolean;
@@ -242,7 +241,6 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
   topScore,
   mergeRadiusKm,
   band,
-  roles,
   pendingHere,
   accuracyMenuOpen,
   menuAnchor,
@@ -276,7 +274,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       onMouseLeave={() => onHover?.(false)}
       role="group"
       aria-label={`suggestion ${index + 1}: ${suggestion.label}`}
-      title={preview ? undefined : "click to show this on the map"}
+      data-hint={preview ? undefined : "click to show this on the map"}
       tabIndex={preview ? -1 : 0}
       // the card is the place: reading one and asking where it is are the
       // same gesture. Controls inside do their own job, so a press that
@@ -302,7 +300,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
             can be read against each other without counting rows */}
         <StyledRank
           $offRegion={suggestion.offRegion}
-          title={
+          data-hint={
             suggestion.offRegion
               ? `${index + 1} of ${total} — outside the region asked for`
               : `${index + 1} of ${total}`
@@ -313,10 +311,10 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         {/* what kind of place it is, and nothing else. The same glyph opens
             the kind-of-place picker on a list row, so a mark that also
             travelled taught one symbol two jobs on one screen */}
-        <StyledKind title={placeTypeInfo(suggestion.placeType).label}>
+        <StyledKind data-hint={placeTypeInfo(suggestion.placeType).label}>
           <PlaceTypeIcon placeType={suggestion.placeType} />
         </StyledKind>
-        <StyledCardLabel title={suggestion.label}>
+        <StyledCardLabel data-hint={suggestion.label}>
           {placeName}
           {/* where it is, never truncated: four suggestions called Breslau
               are one name and four regions, and the region is the whole of
@@ -324,7 +322,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           {region ? <StyledRegion>{region}</StyledRegion> : null}
         </StyledCardLabel>
         {index === 0 && band?.clear ? (
-          <StyledLead title="clear leader — ahead of the rest by more than the engine's own margin">
+          <StyledLead data-hint="clear leader — ahead of the rest by more than the engine's own margin">
             <IcoStar />
           </StyledLead>
         ) : null}
@@ -338,7 +336,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
             strength rather than each card's, so every card in the band
             carries the same colour - which is what tied means. The figures
             are on the tooltip, where reading them is a decision */}
-        <StyledScore title={scoreArithmetic(suggestion)}>
+        <StyledScore data-hint={scoreArithmetic(suggestion)}>
           <StyledScoreBar $share={scoreShare(tied ? topScore : suggestion.score, topScore)} />
           {tied ? <StyledTied>tied</StyledTied> : suggestion.score.toFixed(2)}
         </StyledScore>
@@ -349,7 +347,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           <StyledThumb
             src={suggestion.attachment.url}
             alt=""
-            title={suggestion.attachment.attribution || suggestion.attachment.source}
+            data-hint={suggestion.attachment.attribution || suggestion.attachment.source}
             loading="lazy"
           />
         ) : null}
@@ -362,7 +360,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
             {spreadIsMeasured(suggestion) ? (
               <StyledTrust
                 $warn={scattered}
-                title={
+                data-hint={
                   scattered
                     ? `the sources place this ${suggestion.spreadKm.toFixed(0)} km apart, ` +
                       "so the coordinate is the middle of a group rather than the place"
@@ -487,7 +485,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
                 key={accuracy}
                 type="button"
                 $suggested={accuracy === leadAccuracy}
-                title={
+                data-hint={
                   accuracy === leadAccuracy
                     ? `${accuracy} — what the spread of its sources argues for`
                     : accuracy
@@ -879,7 +877,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           topScore={topScore}
           mergeRadiusKm={response.mergeRadiusKm}
           band={band}
-          roles={roles}
           pendingHere={null}
           accuracyMenuOpen={accuracyMenu === hovered.index}
           menuAnchor={menuAnchor}
@@ -954,7 +951,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           topScore={topScore}
           mergeRadiusKm={response.mergeRadiusKm}
           band={band}
-          roles={roles}
           pendingHere={pendingHere}
           highlighted={highlighted === index}
           onHover={(on) => onHoverCard?.(on ? index : null)}

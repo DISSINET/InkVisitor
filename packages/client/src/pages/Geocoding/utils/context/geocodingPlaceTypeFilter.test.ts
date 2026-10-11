@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   NO_PLACE_TYPE,
   matchesKinds,
-  matchesPlaceType,
   placeTypeOptionsFor,
 } from "../../hooks/useGeocodingBrowse";
 
@@ -58,25 +57,6 @@ describe("placeTypeOptionsFor", () => {
       NO_PLACE_TYPE,
     );
     expect(placeTypeOptionsFor([at("fortress")], kinds).map((o) => o.value)).not.toContain(NO_PLACE_TYPE);
-  });
-});
-
-describe("matchesPlaceType", () => {
-  it("keeps everything under any", () => {
-    expect(matchesPlaceType("fortress", "any")).toBe(true);
-    expect(matchesPlaceType(null, "any")).toBe(true);
-  });
-
-  it("keeps only that kind under a named one", () => {
-    expect(matchesPlaceType("fortress", "fortress")).toBe(true);
-    expect(matchesPlaceType("settlement", "fortress")).toBe(false);
-    expect(matchesPlaceType(null, "fortress")).toBe(false);
-  });
-
-  it("keeps only the untyped under the untyped choice", () => {
-    // this is the one a session that has to type the corpus first works from
-    expect(matchesPlaceType(null, NO_PLACE_TYPE)).toBe(true);
-    expect(matchesPlaceType("fortress", NO_PLACE_TYPE)).toBe(false);
   });
 });
 

@@ -78,7 +78,7 @@ export const footprintNote = (suggester: EngineSuggester | undefined): string =>
   }
   return (
     `${footprint.records.toLocaleString()} records across ${footprint.cells.toLocaleString()} ` +
-    `one-degree cells, counted from the source's own coordinates`
+    "one-degree cells, counted from the source's own coordinates"
   );
 };
 

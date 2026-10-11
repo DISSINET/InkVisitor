@@ -377,8 +377,8 @@ export const StyledParked = styled.div<{ $edge: "top" | "bottom"; $gutter: numbe
 /** A parked heading, drawn as the heading it is, with an edge to sit against. */
 export const StyledParkedHead = styled.div<{ $edge: "top" | "bottom" }>`
   height: ${HEADING_HEIGHT / 10}rem;
-  box-shadow: ${({ $edge }) =>
-    $edge === "top" ? "0 2px 3px rgba(0, 0, 0, 0.10)" : "0 -2px 3px rgba(0, 0, 0, 0.10)"};
+  box-shadow: ${({ $edge, theme }) =>
+    `0 ${$edge === "top" ? "2px" : "-2px"} 3px rgb(from ${theme.color["black"]} r g b / 0.1)`};
 `;
 
 /**

@@ -1,5 +1,5 @@
 import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext } from "react";
 
 /**
  * The project's kinds of place, for every component that draws or offers one.
@@ -19,12 +19,6 @@ export const PlaceTypesProvider: React.FC<{
 );
 
 export const usePlaceTypes = (): IGeocodingPlaceType[] => useContext(PlaceTypesContext);
-
-/** The kind with this id, or undefined — a kind removed from the settings is simply not found. */
-export const usePlaceType = (id: string | null | undefined): IGeocodingPlaceType | undefined => {
-  const all = usePlaceTypes();
-  return useMemo(() => (id ? all.find((one) => one.id === id) : undefined), [all, id]);
-};
 
 /** The kind with this id in a list, for code that is not a component. */
 export const findPlaceType = (

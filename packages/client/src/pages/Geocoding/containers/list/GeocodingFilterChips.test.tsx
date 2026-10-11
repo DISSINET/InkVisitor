@@ -85,9 +85,9 @@ afterEach(() => {
   view = null;
 });
 
-const menu = () => document.body.querySelector('[role="listbox"]');
+const menu = () => document.body.querySelector("[role=\"listbox\"]");
 const options = () =>
-  Array.from(document.body.querySelectorAll('[role="option"]')).map(
+  Array.from(document.body.querySelectorAll("[role=\"option\"]")).map(
     (node) => node.textContent?.trim() || "",
   );
 
@@ -99,7 +99,7 @@ describe("a chip that is not set", () => {
 
   it("offers nothing to drop, since there is nothing to drop", () => {
     mount();
-    expect(view!.all('[aria-label^="drop the"]')).toHaveLength(0);
+    expect(view!.all("[aria-label^=\"drop the\"]")).toHaveLength(0);
   });
 
   it("does not offer to clear everything", () => {
@@ -116,7 +116,7 @@ describe("a chip that is set", () => {
 
   it("carries its own control to drop it", () => {
     const { setFilter } = mount({ accuracy: "precise" });
-    click(view!.one('[aria-label="drop the accuracy filter"]'));
+    click(view!.one("[aria-label=\"drop the accuracy filter\"]"));
     expect(setFilter).toHaveBeenCalledWith("accuracy", ANY);
   });
 
@@ -124,13 +124,13 @@ describe("a chip that is set", () => {
     // a nested button would be invalid HTML and get reparented, so the control
     // is a span with a role - which makes the key handler the only route
     const { setFilter } = mount({ accuracy: "precise" });
-    press(view!.one('[aria-label="drop the accuracy filter"]'), "Enter");
+    press(view!.one("[aria-label=\"drop the accuracy filter\"]"), "Enter");
     expect(setFilter).toHaveBeenCalledWith("accuracy", ANY);
   });
 
   it("does not open the menu when its drop control is pressed", () => {
     mount({ accuracy: "precise" });
-    click(view!.one('[aria-label="drop the accuracy filter"]'));
+    click(view!.one("[aria-label=\"drop the accuracy filter\"]"));
     expect(menu()).toBe(null);
   });
 
@@ -192,14 +192,14 @@ describe("the menu", () => {
   it("marks the option in force", () => {
     mount({ accuracy: "precise" });
     click(view!.one("button"));
-    const selected = Array.from(document.body.querySelectorAll('[aria-selected="true"]'));
+    const selected = Array.from(document.body.querySelectorAll("[aria-selected=\"true\"]"));
     expect(selected.map((node) => node.textContent?.trim())).toEqual(["precise689"]);
   });
 
   it("sets the filter and closes when an option is chosen", () => {
     const { setFilter } = mount();
     click(view!.one("button"));
-    const precise = Array.from(document.body.querySelectorAll('[role="option"]')).find((node) =>
+    const precise = Array.from(document.body.querySelectorAll("[role=\"option\"]")).find((node) =>
       node.textContent?.startsWith("precise"),
     );
     click(precise || null);
@@ -219,7 +219,7 @@ describe("the menu", () => {
     click(view!.one("button"));
     expect(menu()?.getAttribute("aria-label")).toBe("accuracy");
     click(view!.all("button")[1]);
-    expect(document.body.querySelectorAll('[role="listbox"]')).toHaveLength(1);
+    expect(document.body.querySelectorAll("[role=\"listbox\"]")).toHaveLength(1);
     expect(menu()?.getAttribute("aria-label")).toBe("language");
   });
 });
@@ -258,11 +258,11 @@ describe("a value that is an empty string", () => {
 
   it("can be dropped, like any other value in force", () => {
     mountEmpty("");
-    expect(view!.all('[aria-label="drop the language filter"]')).toHaveLength(1);
+    expect(view!.all("[aria-label=\"drop the language filter\"]")).toHaveLength(1);
   });
 
   it("still reads as unset when nothing is chosen", () => {
     mountEmpty(ANY);
-    expect(view!.all('[aria-label^="drop the"]')).toHaveLength(0);
+    expect(view!.all("[aria-label^=\"drop the\"]")).toHaveLength(0);
   });
 });

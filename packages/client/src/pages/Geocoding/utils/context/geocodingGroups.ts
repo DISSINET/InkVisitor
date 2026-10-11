@@ -237,18 +237,6 @@ export const idsInRange = (items: ListItem[], from: number, to: number): string[
 };
 
 /**
- * Where a group's heading sits in the flattened list.
- *
- * The index the scroller is asked to go to when a group is chosen from the
- * index above the list. -1 where the group is not in the list at all, which is
- * the state between choosing a different arrangement and the list being rebuilt
- * around it — a scroll to -1 would land at the top and read as the list having
- * jumped for no reason.
- */
-export const headerIndexOf = (items: ListItem[], key: string): number =>
-  items.findIndex((item) => item.kind === "header" && item.group.key === key);
-
-/**
  * Where each group's heading sits, in pixels down the list.
  *
  * Computed rather than measured, because the list is virtualised: a heading that
@@ -334,36 +322,6 @@ export const parkedHeadings = <T extends { key: string }>(
     }
   }
   return { above, below };
-};
-
-/**
- * The group whose rows are on screen, given the first item the list has drawn.
- *
- * The first row at or after the index, and then that row's own heading. Taking
- * the nearest heading backwards instead would name a collapsed group that draws
- * nothing while the rows actually visible belong to the next one — which is the
- * state a part-finished corpus opens in.
- *
- * The backward scan is still what finds the heading: a virtualised list has
- * usually not rendered the heading for the rows at the top of the viewport.
- */
-export const groupAtIndex = (items: ListItem[], index: number): LocationGroup | null => {
-  const from = Math.max(0, Math.min(index, items.length - 1));
-  let at = from;
-  while (at < items.length && items[at].kind !== "row") {
-    at += 1;
-  }
-  // nothing but headings from here down: the last one is what the reader sees
-  if (at >= items.length) {
-    at = from;
-  }
-  for (; at >= 0; at -= 1) {
-    const item = items[at];
-    if (item?.kind === "header") {
-      return item.group;
-    }
-  }
-  return null;
 };
 
 /**

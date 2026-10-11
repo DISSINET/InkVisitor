@@ -5,7 +5,6 @@ import {
   MapFocus,
   moveFor,
   nextFocus,
-  popupAnchorFor,
 } from "./mapFocus";
 
 /**
@@ -87,28 +86,3 @@ describe("moveFor", () => {
   });
 });
 
-/**
- * A popup that opens upward from a control inside a scrolling list has to be
- * placed against the viewport, not the list. Placed inside it, the accuracy menu
- * lost 37 of its 50 pixels above the container and showed only its worst option.
- */
-describe("popupAnchorFor", () => {
-  it("opens upward from the control that opened it", () => {
-    expect(popupAnchorFor({ left: 120, top: 800 }, 1000)).toEqual({ left: 120, bottom: 200 });
-  });
-
-  it("leaves room above a control near the bottom of the window", () => {
-    const anchor = popupAnchorFor({ left: 0, top: 980 }, 1000);
-    expect(anchor.bottom).toBe(20);
-  });
-
-  it("gives a control at the top of the window the whole height above nothing", () => {
-    // the menu opens upward, so a control at the top has nowhere to go and the
-    // arithmetic must say so rather than placing it off screen
-    expect(popupAnchorFor({ left: 0, top: 0 }, 1000).bottom).toBe(1000);
-  });
-
-  it("keeps the control's own left edge, so the two line up", () => {
-    expect(popupAnchorFor({ left: 437, top: 100 }, 1000).left).toBe(437);
-  });
-});

@@ -1,9 +1,7 @@
 import {
-  GEOCODING_PLACE_TYPES,
   GeocodingAccuracy,
   GeocodingBbox,
   IGeocodingContext,
-  IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
 import { InterfaceEnums } from "@inkvisitor/shared/enums";
 import {
@@ -181,7 +179,6 @@ interface GeocodingMap {
   geocoded: GeocodingLocation[];
   context: IGeocodingContext;
   userOptions: UserOptions | undefined;
-  roles: IGeocodingRoles;
   /**
    * A suggestion accepted from the map, with both questions already answered.
    *
@@ -327,7 +324,7 @@ const MapLayersPanel: React.FC<MapLayersPanel> = ({
     <StyledLayersToggle
       type="button"
       $open={open}
-      title="display"
+      data-hint="display"
       aria-expanded={open}
       onClick={onToggleOpen}
     >
@@ -463,7 +460,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   onShowRecent,
   geocoded,
   context,
-  roles,
   onChooseSuggestion,
   highlighted = null,
   leader = null,
@@ -1453,7 +1449,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
             $armed={drawing}
             $set={!!context.regionBbox}
             aria-pressed={drawing}
-            title={
+            data-hint={
               drawing
                 ? "drag a rectangle over the area the query is about, or press again to stop"
                 : "draw the region on the map, for an area the engine's own list does not name"
@@ -1485,7 +1481,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
               {context.regionBbox && !drawing ? (
                 <StyledDrawClear
                   type="button"
-                  title="drop the drawn region and go back to the named one"
+                  data-hint="drop the drawn region and go back to the named one"
                   onClick={() => onRegionBox(null)}
                 >
                   clear

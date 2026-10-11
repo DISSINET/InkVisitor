@@ -169,17 +169,6 @@ export const matchesKinds = (kinds: string[], filter: string): boolean => {
   return kinds.includes(filter);
 };
 
-/** Whether a Location survives the place type filter. */
-export const matchesPlaceType = (placeType: string | null, filter: string): boolean => {
-  if (filter === ANY) {
-    return true;
-  }
-  if (filter === NO_PLACE_TYPE) {
-    return !placeType;
-  }
-  return placeType === filter;
-};
-
 export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse => {
   const [filters, setFilters] = useState<GeocodingFilters>({
     label: "",

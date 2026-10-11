@@ -78,20 +78,3 @@ export const moveFor = (
         padding: FIT_PADDING,
       }
     : { center: [focus.lat, focus.lon], zoom: Math.max(currentZoom, FOCUS_MIN_ZOOM) };
-
-/**
- * Where a popup opened from a control should sit, in viewport coordinates.
- *
- * Measured from the control and placed against the bottom edge, because the
- * popup opens upward and its height is not known until it is rendered. It is
- * fixed to the viewport rather than to the list, which scrolls: opened inside
- * the list, a menu lost most of itself above the container and showed only its
- * last option — on a control that leads to a write.
- */
-export const popupAnchorFor = (
-  control: { left: number; top: number },
-  viewportHeight: number,
-): { left: number; bottom: number } => ({
-  left: control.left,
-  bottom: viewportHeight - control.top,
-});

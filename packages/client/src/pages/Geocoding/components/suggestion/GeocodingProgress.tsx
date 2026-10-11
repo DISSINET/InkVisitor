@@ -139,7 +139,7 @@ export const GeocodingProgress: React.FC<GeocodingProgress> = ({
                       key={source}
                       $state={sourceState}
                       $share={largest > 0 ? (count || 0) / largest : 0}
-                      title={reason || `${source}: ${count ?? "no answer yet"}`}
+                      data-hint={reason || `${source}: ${count ?? "no answer yet"}`}
                     >
                       <GazetteerHover source={source}>
                         <StyledSourceName $source={source}>{source}</StyledSourceName>

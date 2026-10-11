@@ -37,7 +37,7 @@ describe("readRecent", () => {
   it("is empty where nothing is stored or the value is unreadable", () => {
     expect(readRecent(null)).toEqual([]);
     expect(readRecent("{nope")).toEqual([]);
-    expect(readRecent('{"id":"a"}')).toEqual([]);
+    expect(readRecent("{\"id\":\"a\"}")).toEqual([]);
   });
 
   it("keeps the entries that are whole and drops the ones that are not", () => {

@@ -93,7 +93,7 @@ describe("consumeSuggestStream", () => {
     const onProvisional = vi.fn();
     const result = await consumeSuggestStream(
       streamOf([
-        'event: accepted\ndata: {"phase":"accepted","requestId":"e07a3678"}\n\n',
+        "event: accepted\ndata: {\"phase\":\"accepted\",\"requestId\":\"e07a3678\"}\n\n",
         frame("provisional", preview),
         frame("final", answer),
       ]),
@@ -110,7 +110,7 @@ describe("consumeSuggestStream", () => {
     // is not a wrong list but a crash in whatever reads one
     await expect(
       consumeSuggestStream(
-        streamOf(['event: accepted\ndata: {"phase":"accepted","requestId":"e07a3678"}\n\n']),
+        streamOf(["event: accepted\ndata: {\"phase\":\"accepted\",\"requestId\":\"e07a3678\"}\n\n"]),
         vi.fn(),
         vi.fn(),
       ),
@@ -121,8 +121,8 @@ describe("consumeSuggestStream", () => {
     await expect(
       consumeSuggestStream(
         streamOf([
-          'event: accepted\ndata: {"phase":"accepted","requestId":"e07a3678"}\n\n',
-          'event: error\ndata: {"phase":"error","message":"upstream refused"}\n\n',
+          "event: accepted\ndata: {\"phase\":\"accepted\",\"requestId\":\"e07a3678\"}\n\n",
+          "event: error\ndata: {\"phase\":\"error\",\"message\":\"upstream refused\"}\n\n",
         ]),
         vi.fn(),
         vi.fn(),

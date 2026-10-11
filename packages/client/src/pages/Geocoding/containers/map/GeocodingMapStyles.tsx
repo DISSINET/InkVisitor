@@ -403,14 +403,6 @@ export const StyledLayerCount = styled.span`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
-export const StyledLayersNote = styled.div`
-  margin-top: ${({ theme }) => theme.space[2]};
-  padding-top: ${({ theme }) => theme.space[1]};
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][400]};
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  color: ${({ theme }) => theme.color["greyer"]};
-`;
-
 /**
  * Puts every switch in this panel back where it started.
  *

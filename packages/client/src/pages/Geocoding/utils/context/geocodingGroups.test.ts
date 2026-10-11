@@ -3,9 +3,7 @@ import { GeocodingAccuracy, defaultPlaceTypes } from "@inkvisitor/shared/types/g
 import {
   COLLAPSED_BY_DEFAULT,
   flatten,
-  groupAtIndex,
   groupsOf,
-  headerIndexOf,
   headingOffsets,
   idsInRange,
   parkedHeadings,
@@ -177,40 +175,6 @@ describe("flatten", () => {
   it("keeps a heading for a group with no rows", () => {
     const items = flatten(groupsOf([done("Roma")], "coords", {}));
     expect(items.filter((item) => item.kind === "header")).toHaveLength(2);
-  });
-});
-
-describe("headerIndexOf", () => {
-  it("finds the row the scroller must reach for each group", () => {
-    const items = flatten(groupsOf([done("Roma"), at("Aura"), at("Pisa")], "coords", {}));
-    expect(headerIndexOf(items, "geocoded")).toBe(0);
-    // one heading, one geocoded row, then the second heading
-    expect(headerIndexOf(items, "ungeocoded")).toBe(2);
-  });
-
-  /**
-   * Between choosing a different arrangement and the list being rebuilt around
-   * it, the index still names the previous arrangement's groups. Scrolling to a
-   * missing group would land at row 0 and read as the list having jumped on its
-   * own, so a caller has to be able to tell that it is not there.
-   */
-  it("reports -1 for a group the list does not hold", () => {
-    const items = flatten(groupsOf([done("Roma")], "coords", {}));
-    expect(headerIndexOf(items, "settlement")).toBe(-1);
-  });
-
-  it("points at a heading, never at a row", () => {
-    const items = flatten(groupsOf([done("Roma"), at("Aura")], "coords", {}));
-    for (const key of ["geocoded", "ungeocoded"]) {
-      expect(items[headerIndexOf(items, key)].kind).toBe("header");
-    }
-  });
-
-  it("still finds a collapsed group, which is how it is reached to be opened", () => {
-    const items = flatten(groupsOf([done("Roma"), at("Aura")], "coords", {}, { ungeocoded: true }));
-    const index = headerIndexOf(items, "ungeocoded");
-    expect(index).toBeGreaterThanOrEqual(0);
-    expect(items[index].kind).toBe("header");
   });
 });
 
@@ -414,60 +378,6 @@ describe("a collapsed group", () => {
       const held = groups.reduce((total, one) => total + one.total, 0);
       expect(held).toBe(corpus.length);
     }
-  });
-});
-
-describe("groupAtIndex", () => {
-  const items = flatten(groupsOf([done("Roma"), done("Odra"), at("Aura")], "coords", {}));
-  // [geocoded, Roma, Odra, ungeocoded, Aura]
-
-  it("names the group a row belongs to", () => {
-    expect(groupAtIndex(items, 1)?.key).toBe("geocoded");
-    expect(groupAtIndex(items, 2)?.key).toBe("geocoded");
-    expect(groupAtIndex(items, 4)?.key).toBe("ungeocoded");
-  });
-
-  it("names the group a heading opens", () => {
-    expect(groupAtIndex(items, 0)?.key).toBe("geocoded");
-    expect(groupAtIndex(items, 3)?.key).toBe("ungeocoded");
-  });
-
-  it("looks backwards, since the heading is usually off screen", () => {
-    // the whole point: a virtualised list has not rendered the heading for the
-    // rows at the top of the viewport
-    const long = flatten(groupsOf(Array.from({ length: 40 }, (_, i) => done(`p${i}`)), "coords", {}));
-    expect(groupAtIndex(long, 39)?.key).toBe("geocoded");
-  });
-
-  it("holds at the last group when the index runs past the end", () => {
-    expect(groupAtIndex(items, 99)?.key).toBe("ungeocoded");
-  });
-
-  it("has nothing to name when there is nothing in the list", () => {
-    expect(groupAtIndex([], 0)).toBe(null);
-  });
-});
-
-describe("groupAtIndex, past a group that draws nothing", () => {
-  it("names the group whose rows are on screen, not the collapsed one above", () => {
-    // how a part-finished corpus opens: the geocoded group is collapsed and
-    // draws no rows, so every row on screen belongs to the group below it
-    const items = flatten(groupsOf([done("Roma"), at("Aura")], "coords", {}, { geocoded: true }));
-    // [geocoded (0 rows), ungeocoded, Aura]
-    expect(groupAtIndex(items, 0)?.key).toBe("ungeocoded");
-  });
-
-  it("still names a collapsed group once its own rows are drawn", () => {
-    const items = flatten(groupsOf([done("Roma"), at("Aura")], "coords", { Roma: 1 }, { geocoded: true }));
-    // [geocoded, Roma, ungeocoded, Aura]
-    expect(groupAtIndex(items, 0)?.key).toBe("geocoded");
-  });
-
-  it("names the heading at the top when the list draws no rows at all", () => {
-    // [geocoded (0 rows), ungeocoded (0 rows)] — nothing below to name, so the
-    // bar names what the reader is actually looking at
-    const items = flatten(groupsOf([done("Roma")], "coords", {}, { geocoded: true }));
-    expect(groupAtIndex(items, 0)?.key).toBe("geocoded");
   });
 });
 

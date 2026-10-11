@@ -403,13 +403,13 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
         <StyledContextToggle
           type="button"
           aria-expanded={open}
-          title={open ? "fold the query context away" : "show the query context"}
+          data-hint={open ? "fold the query context away" : "show the query context"}
           onClick={toggle}
         >
           <StyledContextCaret $open={open}>
             <IcoChevronDown />
           </StyledContextCaret>
-          <StyledContextTitle title={NOTE}>query context</StyledContextTitle>
+          <StyledContextTitle data-hint={NOTE}>query context</StyledContextTitle>
           {open ? null : (
             <StyledContextSummary>
               {QUERY_FIELDS.map((field, index) => (
@@ -418,7 +418,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
                   <StyledContextSummaryPart
                     $set={valuesOf(field).length > 0}
                     $overridden={overridden(field)}
-                    title={queryFieldLabel[field]}
+                    data-hint={queryFieldLabel[field]}
                   >
                     {summaryOf(field)}
                   </StyledContextSummaryPart>
@@ -461,7 +461,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
               {overridden(field) ? (
                 <StyledContextGlobal
                   type="button"
-                  title={
+                  data-hint={
                     drawnOverNothing(field)
                       ? "drop the drawn region, leaving the query with no region at all"
                       : `use the project's ${queryFieldLabel[field]} instead of your own`

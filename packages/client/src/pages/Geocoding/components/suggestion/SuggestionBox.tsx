@@ -54,17 +54,17 @@ export const SuggestionBox: React.FC<SuggestionBox> = ({
       type={onChoose ? "button" : undefined}
       $pressable={!!onChoose}
       onClick={onChoose}
-      title={onChoose ? actionLabel : undefined}
+      data-hint={onChoose ? actionLabel : undefined}
       aria-label={onChoose ? `${actionLabel}: ${suggestion.label}` : suggestion.label}
     >
       {suggestion.attachment ? (
         <StyledThumb src={suggestion.attachment.url} alt="" loading="lazy" />
       ) : null}
       <StyledBoxMain>
-        <StyledBoxName title={suggestion.label}>
+        <StyledBoxName data-hint={suggestion.label}>
           {rank}. {name}
         </StyledBoxName>
-        {region ? <StyledBoxRegion title={region}>{region}</StyledBoxRegion> : null}
+        {region ? <StyledBoxRegion data-hint={region}>{region}</StyledBoxRegion> : null}
         <StyledBoxAt>
           {suggestion.lat.toFixed(4)}, {suggestion.lon.toFixed(4)} · {suggestion.signals.agreement}{" "}
           sources

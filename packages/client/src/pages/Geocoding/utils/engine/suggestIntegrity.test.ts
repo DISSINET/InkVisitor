@@ -50,11 +50,11 @@ describe("degradationsOf", () => {
         code: "unknown-criterion",
         field: "region",
         value: "Atlantis",
-        message: 'region "Atlantis" is not a known value and was ignored',
+        message: "region \"Atlantis\" is not a known value and was ignored",
       },
     ];
     expect(problemsOf(response({ problems: problems as never }))).toEqual([
-      'region "Atlantis" is not a known value and was ignored',
+      "region \"Atlantis\" is not a known value and was ignored",
     ]);
     // a changed question is not a missing stage, and is not told as one
     expect(degradationsOf(response({ problems: problems as never }))).toEqual([]);

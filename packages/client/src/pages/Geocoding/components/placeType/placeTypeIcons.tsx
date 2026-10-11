@@ -1,6 +1,5 @@
 import {
   ENGINE_PLACE_TYPE_INFO,
-  GEOCODING_PLACE_TYPES,
   GeocodingPlaceType,
   IGeocodingPlaceType,
 } from "@inkvisitor/shared/types/geocoding";
@@ -105,9 +104,6 @@ export interface PlaceTypeInfo {
   description: string;
 }
 
-/** The value used where a Location states no kind of place. */
-export const NO_PLACE_TYPE_VALUE = "";
-
 export const UNKNOWN_PLACE_TYPE: PlaceTypeInfo = {
   icon: IcoPlaceUnknown,
   label: "kind not recorded",
@@ -133,9 +129,6 @@ export const PlaceTypeIcon: React.FC<{ placeType: string | null | undefined }> =
   const Icon = placeTypeInfo(placeType).icon;
   return <Icon />;
 };
-
-/** The engine's types in the engine's order. */
-export const ENGINE_TYPES: readonly GeocodingPlaceType[] = GEOCODING_PLACE_TYPES;
 
 /** What a project's kind is called and covers; the unknown mark where it has none. */
 export const kindInfo = (kind: IGeocodingPlaceType | null | undefined): PlaceTypeInfo =>

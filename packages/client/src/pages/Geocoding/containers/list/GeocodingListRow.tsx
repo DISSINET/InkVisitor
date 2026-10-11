@@ -51,7 +51,7 @@ export const GroupHeading: React.FC<{
   <StyledGroupHead
     type="button"
     aria-expanded={!group.collapsed}
-    title={onGoTo ? `go to ${group.label}` : undefined}
+    data-hint={onGoTo ? `go to ${group.label}` : undefined}
     onClick={() => (onGoTo ? onGoTo(group.key) : onToggle(group.key))}
   >
     <StyledGroupLabel>
@@ -213,7 +213,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           tabIndex={-1}
           $marked={marked.has(location.entity.id)}
           $any={marked.size > 0}
-          title={
+          data-hint={
             marked.has(location.entity.id)
               ? "drop this from the marked set"
               : "mark this — shift-click to mark a run"
@@ -262,7 +262,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           <StyledRowType
             type="button"
             data-row-type
-            title={`${kindInfo(kind).label} — click to change`}
+            data-hint={`${kindInfo(kind).label} — click to change`}
             aria-label={`kind of place: ${kindInfo(kind).label}`}
             $unset={!location.placeType}
             onClick={(event) => {
@@ -278,7 +278,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           </StyledRowType>
         ) : (
           <StyledRowTypeStatic
-            title={`${kindInfo(kind).label} — recorded with a coordinate, and this Location has none`}
+            data-hint={`${kindInfo(kind).label} — recorded with a coordinate, and this Location has none`}
             aria-label={`kind of place: ${kindInfo(kind).label}`}
             $unset={!location.placeType}
           >
@@ -323,7 +323,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           {location.isGeocoded ? (
             <StyledRowAction
               type="button"
-              title="show this on the map"
+              data-hint="show this on the map"
               aria-label={`show ${location.entity.labels[0]} on the map`}
               onClick={(event) => {
                 event.stopPropagation();
@@ -372,7 +372,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
               {!location.isGeocoded ? (
                 <StyledRowAction
                   type="button"
-                  title="ask the engine for this place"
+                  data-hint="ask the engine for this place"
                   aria-label={`geocode ${location.entity.labels[0]}`}
                   onClick={(event) => {
                     event.stopPropagation();

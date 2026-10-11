@@ -56,7 +56,7 @@ describe("isGeoJsonGeometry", () => {
 
   it("accepts the exact fragment the project uses as its example", () => {
     const fragment = JSON.parse(
-      '{"type":"Point","coordinates":[7.8815769,42.9408553]}',
+      "{\"type\":\"Point\",\"coordinates\":[7.8815769,42.9408553]}",
     ) as unknown;
     expect(isGeoJsonGeometry(fragment)).toBe(true);
   });
