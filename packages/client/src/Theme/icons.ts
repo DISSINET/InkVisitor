@@ -147,7 +147,7 @@ export { TbMountain as IcoPlaceMountain } from "react-icons/tb";
 export { TbRipple as IcoPlaceRiver } from "react-icons/tb";
 export { TbRoad as IcoPlaceRoad } from "react-icons/tb";
 export { TbSwords as IcoPlaceBattlefield } from "react-icons/tb";
-export { TbDatabase as IcoSource } from "react-icons/tb";
+export { TbBook2 as IcoSource } from "react-icons/tb";
 export { TbBuildingCastle as IcoPlaceCastle } from "react-icons/tb";
 export { TbBuildingBridge as IcoPlaceBridge } from "react-icons/tb";
 export { TbBuildingMonument as IcoPlaceMonument } from "react-icons/tb";
