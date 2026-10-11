@@ -135,7 +135,7 @@ interface GeocodingContextPanel {
   context: IGeocodingContext;
   /** What each field holds with no personal value on it. */
   projectContext: IGeocodingContext;
-  /** One dimension of the question, as the list of values it now holds. */
+  /** One dimension of the question, as the list of values it holds. */
   onChange: (field: QueryField, values: string[]) => void;
   /** How much one dimension counts, over the engine's own default. */
   onWeightChange: (field: QueryField, weight: number) => void;

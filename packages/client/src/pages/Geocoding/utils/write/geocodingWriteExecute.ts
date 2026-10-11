@@ -110,7 +110,7 @@ export const executeGeocodingWrite = async (
     return { ok: false, reason: "The location could not be updated, so nothing was written." };
   }
 
-  // only now: until the update landed, these Values were still the live ones
+  // after the update lands: until then these Values are still the live ones
   const undeleted: string[] = [];
   for (const valueId of plan.displacedValueIds) {
     try {

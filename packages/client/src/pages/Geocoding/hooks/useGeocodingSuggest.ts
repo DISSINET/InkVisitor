@@ -1,16 +1,16 @@
 import { IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EngineProgress, engineSuggestStream, watchEngineProgress } from "../utils/engine/engine";
-import { StreamCandidate, SuggestRequest, SuggestResponse } from "../types/engine";
+import { StreamCandidate, SuggestResponse } from "../types/engine";
 import { buildSuggestQuery } from "../utils/engine/suggestQuery";
 
 /**
  * Running one `/suggest` and reporting on it while it runs.
  *
  * At most one request is in flight, because the page geocodes the one Location
- * the researcher has selected. The engine now publishes a `requestId` on the
- * stream's opening frame, so concurrent requests could be told apart on the
- * progress stream; nothing here needs them.
+ * the researcher has selected. The stream's opening frame carries a
+ * `requestId`, which would tell concurrent requests apart on the progress
+ * stream; nothing here needs that.
  *
  * The response is held until the researcher accepts or rejects it, because
  * `POST /feedback` requires the whole `suggestions` array back even on a

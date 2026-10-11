@@ -337,7 +337,7 @@ const fixtureStream = async (
  *
  * Keyed on `requestId` from the stream's `accepted` frame, which is the `id` on
  * the audit entries. That identifies the request rather than the browser, so two
- * requests from one browser no longer have to be told apart by their start times.
+ * requests from one browser are told apart without comparing their start times.
  *
  * The stream is process-global - every client's entries arrive and are filtered
  * here - so nothing carried on it may be treated as private.

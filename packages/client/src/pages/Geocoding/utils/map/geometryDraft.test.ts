@@ -1,4 +1,4 @@
-import { GeoJsonGeometry } from "@inkvisitor/shared/types/geometry";
+import { GeoJsonGeometry, GeoPosition } from "@inkvisitor/shared/types/geometry";
 import { describe, expect, it } from "vitest";
 import { DrawnShape, draftToGeometry, geometryToShapes, kindOfGeometry } from "./geometryDraft";
 
@@ -7,8 +7,8 @@ import { DrawnShape, draftToGeometry, geometryToShapes, kindOfGeometry } from ".
  * than saved as something the page would not read back.
  */
 
-const square = [[0, 0], [4, 0], [4, 4], [0, 4], [0, 0]];
-const triangle = [[10, 10], [14, 10], [12, 14], [10, 10]];
+const square: GeoPosition[] = [[0, 0], [4, 0], [4, 4], [0, 4], [0, 0]];
+const triangle: GeoPosition[] = [[10, 10], [14, 10], [12, 14], [10, 10]];
 
 const point = (at: number[]): DrawnShape => ({ mode: "point", coordinates: at });
 const line = (...at: number[][]): DrawnShape => ({ mode: "linestring", coordinates: at });
@@ -79,8 +79,8 @@ describe("geometryToShapes", () => {
     [{ type: "MultiPoint", coordinates: [[1, 2], [3, 4]] }],
     [{ type: "LineString", coordinates: [[0, 0], [1, 1]] }],
     [{ type: "MultiLineString", coordinates: [[[0, 0], [1, 1]], [[2, 2], [3, 3]]] }],
-    [{ type: "Polygon", coordinates: [square as any] }],
-    [{ type: "MultiPolygon", coordinates: [[square as any], [triangle as any]] }],
+    [{ type: "Polygon", coordinates: [square] }],
+    [{ type: "MultiPolygon", coordinates: [[square], [triangle]] }],
   ])("loads a %s and builds the same geometry back", (geometry) => {
     const shapes = geometryToShapes(geometry);
     expect(draftToGeometry(shapes)).toEqual({ geometry });

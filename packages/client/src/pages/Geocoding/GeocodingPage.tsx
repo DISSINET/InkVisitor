@@ -63,6 +63,15 @@ const WEIGHT_SAVE_DELAY_MS = 400;
 /** How long the notice of a quick geocode stays up, which is long enough to act on. */
 const QUICK_TOAST_MS = 12_000;
 
+/**
+ * How long the hovered card survives the pointer leaving its mark.
+ *
+ * Long enough to reach it. The card sits beside the mark rather than on it, so
+ * the pointer crosses bare map on the way — and the map reports that as
+ * hovering nothing, which would close the card being reached for.
+ */
+const HOVER_GRACE_MS = 260;
+
 export const GeocodingPage: React.FC = () => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
@@ -90,7 +99,31 @@ export const GeocodingPage: React.FC = () => {
    */
   const storedKey = JSON.stringify(stored);
   const [context, setContext] = useState<IGeocodingContext>(stored);
-  useEffect(() => setContext(JSON.parse(storedKey) as IGeocodingContext), [storedKey]);
+  /**
+   * How many saves are waiting to land, so the local copy is not re-seeded under
+   * them.
+   *
+   * Each save's success refetches the user, and a refetch after the first of two
+   * quick edits arrives before the second has been saved: re-seeding then would
+   * put the stored state over the second edit until its own refetch.
+   */
+  const unsaved = useRef(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const holdSave = () => {
+    unsaved.current += 1;
+    setIsSaving(true);
+  };
+  const releaseSave = () => {
+    unsaved.current -= 1;
+    if (unsaved.current === 0) {
+      setIsSaving(false);
+    }
+  };
+  useEffect(() => {
+    if (!isSaving) {
+      setContext(JSON.parse(storedKey) as IGeocodingContext);
+    }
+  }, [storedKey, isSaving]);
 
   /**
    * Saves the query context as this researcher's own defaults.
@@ -117,8 +150,16 @@ export const GeocodingPage: React.FC = () => {
     onError: () => toast.error("Your geocoding context could not be saved."),
   });
 
+  const save = (patch: IGeocodingContext) => {
+    holdSave();
+    saveContext
+      .mutateAsync(patch)
+      .catch(() => undefined)
+      .finally(releaseSave);
+  };
+
   /**
-   * One dimension of the question, as the list of values it now holds.
+   * One dimension of the question, as the list of values it holds.
    *
    * An empty list is stored rather than removed, because that is what the
    * layering reads as "nothing said here", and it lets the project's own answer
@@ -150,7 +191,7 @@ export const GeocodingPage: React.FC = () => {
       ...valuesPatch(field, values.length ? values : contextValues(projectContext, field)),
       ...(field === "region" && values.length ? { regionBbox: null } : {}),
     }));
-    saveContext.mutate(patch);
+    save(patch);
   };
 
   /**
@@ -188,11 +229,19 @@ export const GeocodingPage: React.FC = () => {
     pendingWeights.current = { ...pendingWeights.current, [field]: weight };
     if (weightSave.current) {
       clearTimeout(weightSave.current);
+    } else {
+      // held from the first move, since the edit is already local and the save
+      // is still a pause away
+      holdSave();
     }
     weightSave.current = setTimeout(() => {
       const contextWeights = pendingWeights.current;
       pendingWeights.current = {};
-      saveContext.mutate({ contextWeights });
+      weightSave.current = null;
+      saveContext
+        .mutateAsync({ contextWeights })
+        .catch(() => undefined)
+        .finally(releaseSave);
     }, WEIGHT_SAVE_DELAY_MS);
   };
 
@@ -206,7 +255,7 @@ export const GeocodingPage: React.FC = () => {
    */
   const setRegionBox = (box: GeocodingBbox | null) => {
     setContext((current) => ({ ...current, regionBbox: box }));
-    saveContext.mutate({ regionBbox: box });
+    save({ regionBbox: box });
   };
 
   /** Drops every personal query value, so all four fall back to the project's. */
@@ -220,7 +269,7 @@ export const GeocodingPage: React.FC = () => {
       regionBbox: projectContext.regionBbox ?? null,
       contextWeights: projectContext.contextWeights,
     }));
-    saveContext.mutate({
+    save({
       ...Object.assign({}, ...QUERY_FIELDS.map((field) => valuesPatch(field, []))),
       regionBbox: null,
       // the stored options are merged rather than replaced, so a weight is
@@ -701,13 +750,6 @@ export const GeocodingPage: React.FC = () => {
    */
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   /**
-   * Selecting one of the other Locations drawn on the map.
-   *
-   * Held stable across renders: the map registers its click handler once per
-   * change of this function, and a fresh one on every render of this page would
-   * tear that listener down and rebuild it on every keystroke elsewhere.
-   */
-  /**
    * The suggestion the pointer is over on the map, and where on screen.
    *
    * Held by the page because the two panels that need it sit either side of it:
@@ -719,14 +761,6 @@ export const GeocodingPage: React.FC = () => {
     at: { left: number; top: number };
   } | null>(null);
 
-  /**
-   * How long the hovered card survives the pointer leaving its mark.
-   *
-   * Long enough to reach it. The card sits beside the mark rather than on it, so
-   * the pointer crosses bare map on the way — and the map reports that as
-   * hovering nothing, which would close the card being reached for.
-   */
-  const HOVER_GRACE_MS = 260;
   const closeHover = useRef<number | null>(null);
 
   const hoverOnMap = useCallback(
@@ -755,6 +789,13 @@ export const GeocodingPage: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Selecting one of the other Locations drawn on the map.
+   *
+   * Held stable across renders: the map registers its click handler once per
+   * change of this function, and a fresh one on every render of this page would
+   * tear that listener down and rebuild it on every keystroke elsewhere.
+   */
   const selectOnMap = useCallback(
     (entityId: string) => {
       const location = browse.geocoded.find((one) => one.entity.id === entityId);
@@ -876,8 +917,8 @@ export const GeocodingPage: React.FC = () => {
    * What the dot says, as opposed to what the engine is doing.
    *
    * An engine that answers while the project has assigned no Concepts is not a
-   * page that works, and green would say it was — the state that used to be
-   * spelled out beside the dot has to survive in the dot itself.
+   * page that works, and green would say it was — the dot has to carry the
+   * unconfigured state itself.
    */
   const engineDotState: EngineState =
     engineState === "up" && !isConfigured ? "unconfigured" : engineState;

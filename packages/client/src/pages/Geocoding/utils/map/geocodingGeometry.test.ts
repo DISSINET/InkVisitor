@@ -1,5 +1,6 @@
 import {
   GeoJsonGeometry,
+  GeoPosition,
   geometryAnchor,
   geometryBbox,
   geometryEquals,
@@ -17,7 +18,7 @@ import { describe, expect, it } from "vitest";
  * was written, and the single point that stands for a shape.
  */
 
-const ring = [[0, 0], [10, 0], [10, 6], [0, 0]];
+const ring: GeoPosition[] = [[0, 0], [10, 0], [10, 6], [0, 0]];
 
 describe("isGeoJsonGeometry", () => {
   it.each<[string, unknown]>([
@@ -69,8 +70,8 @@ describe("serializing and parsing", () => {
       { type: "MultiPoint", coordinates: [[1, 2], [3, 4]] },
       { type: "LineString", coordinates: [[1, 2], [3, 4]] },
       { type: "MultiLineString", coordinates: [[[1, 2], [3, 4]], [[5, 6], [7, 8]]] },
-      { type: "Polygon", coordinates: [ring] as any },
-      { type: "MultiPolygon", coordinates: [[ring], [ring]] as any },
+      { type: "Polygon", coordinates: [ring] },
+      { type: "MultiPolygon", coordinates: [[ring], [ring]] },
     ];
     for (const geometry of geometries) {
       expect(parseGeometry(serializeGeometry(geometry))).toEqual(geometry);
@@ -80,7 +81,7 @@ describe("serializing and parsing", () => {
   it("rounds to six decimals and drops an altitude", () => {
     const stored = serializeGeometry({
       type: "Point",
-      coordinates: [7.881576912345, 42.940855312345, 300] as any,
+      coordinates: [7.881576912345, 42.940855312345, 300] as unknown as GeoPosition,
     });
     expect(JSON.parse(stored)).toEqual({ type: "Point", coordinates: [7.881577, 42.940855] });
   });
@@ -116,7 +117,7 @@ describe("geometryAnchor", () => {
       lon: 5,
       lat: 10,
     });
-    expect(geometryAnchor({ type: "Polygon", coordinates: [ring as any] })).toEqual({
+    expect(geometryAnchor({ type: "Polygon", coordinates: [ring] })).toEqual({
       lon: 5,
       lat: 3,
     });
@@ -129,7 +130,7 @@ describe("geometryAnchor", () => {
     expect(
       geometryAnchor({
         type: "MultiPolygon",
-        coordinates: [[ring as any], [[[20, 20], [30, 20], [30, 30], [20, 20]]]],
+        coordinates: [[ring], [[[20, 20], [30, 20], [30, 30], [20, 20]]]],
       }),
     ).toEqual({ lon: 15, lat: 15 });
   });
@@ -143,11 +144,11 @@ describe("geometryAnchor", () => {
 
 describe("geometryBbox, geometryEquals and geometryVertexCount", () => {
   it("measures a bounding box as west, south, east, north", () => {
-    expect(geometryBbox({ type: "Polygon", coordinates: [ring as any] })).toEqual([0, 0, 10, 6]);
+    expect(geometryBbox({ type: "Polygon", coordinates: [ring] })).toEqual([0, 0, 10, 6]);
   });
 
   it("counts every position", () => {
-    expect(geometryVertexCount({ type: "MultiPolygon", coordinates: [[ring as any], [ring as any]] })).toBe(8);
+    expect(geometryVertexCount({ type: "MultiPolygon", coordinates: [[ring], [ring]] })).toBe(8);
   });
 
   it("treats a difference below the stored precision as equal and a real one as different", () => {

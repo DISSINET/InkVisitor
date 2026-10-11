@@ -532,7 +532,7 @@ interface GeocodingSuggestions {
   context: IGeocodingContext;
   /** What each context field holds with no personal value on it. */
   projectContext: IGeocodingContext;
-  /** One dimension of the question, as the list of values it now holds. */
+  /** One dimension of the question, as the list of values it holds. */
   onContextChange: (field: QueryField, values: string[]) => void;
   /** How much one of the four dimensions counts when sources are weighed. */
   onContextWeight: (field: QueryField, weight: number) => void;
@@ -638,6 +638,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
    * own accept answers it on the way in; choosing a suggestion off the map does
    * not, because a marker states which place is meant and nothing about how
    * precisely it is known.
+   *
+   * The engine's own `placeType` is a starting point and not an answer: a
+   * suggestion often carries none, and the twelve are decided by what the
+   * researcher knows the place to be rather than by what the sources called it.
    */
   const [pending, setPending] = useState<PendingAccept>(null);
   /** The card whose other accuracies are open, if any. */
@@ -793,13 +797,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     onAccept(suggestion, accuracy, provenanceOf(suggestion), placeType, feedback);
   };
 
-  /**
-   * An accuracy chosen on a card, waiting for the kind of place to go with it.
-   *
-   * The engine's own `placeType` is a starting point and not an answer: a
-   * suggestion often carries none, and the twelve are decided by what the
-   * researcher knows the place to be rather than by what the sources called it.
-   */
   /**
    * What choosing an accuracy leads to: the kind of place, or the write.
    *

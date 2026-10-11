@@ -281,7 +281,6 @@ export const GeocodingList: React.FC<GeocodingList> = ({
         rowProps={rowProps}
         rowCount={items.length}
         rowHeight={(index: number) => (items[index]?.kind === "header" ? HEADER_HEIGHT : ROW_HEIGHT)}
-        style={{ height: "100%" }}
         overscanCount={8}
         rowComponent={GeocodingListRow}
       />

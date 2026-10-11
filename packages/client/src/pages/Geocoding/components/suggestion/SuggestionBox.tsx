@@ -20,9 +20,9 @@ import {
  * picture, a score and a coordinate, which is what tells four places called
  * Riva apart when the question is only "which one".
  *
- * Pressable where `onChoose` is given and inert otherwise, because it is also
- * used to show what a run already decided — and a record of what happened is
- * not a control.
+ * Pressable where `onChoose` is given and inert elsewhere, because it also
+ * shows what a run already decided — and a record of what happened is not a
+ * control.
  */
 
 interface SuggestionBox {

@@ -36,6 +36,7 @@ export const StyledListBody = styled.div`
      rows. A group heading is a full-width band with its count against the right
      edge, which is exactly where an overlay scrollbar sits. */
   [role="listbox"] {
+    height: 100%;
     scrollbar-gutter: stable;
   }
 `;

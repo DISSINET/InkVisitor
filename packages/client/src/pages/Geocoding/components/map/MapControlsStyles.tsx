@@ -233,7 +233,7 @@ export const StyledLayerCount = styled.span`
 /**
  * Puts every switch in this panel back where it started.
  *
- * The panel now carries six of them and remembers each one, so a map that has
+ * The panel carries six of them and remembers each one, so a map that has
  * drifted somewhere unhelpful over several sessions has no other way back short
  * of reasoning about which switch did it.
  */

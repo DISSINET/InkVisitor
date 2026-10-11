@@ -21,9 +21,10 @@ The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString
 `MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
 `[longitude, latitude]`, rounded to six decimals. A Location holds exactly one
 geometry; several shapes of one kind are stored as the matching `Multi*` type and
-a mix of kinds is refused. The Value entity is always newly created — never shared
+a mix of kinds is refused. Each geometry gets its own Value entity, never shared
 between two Locations, because editing a shared Value would silently move both
-places.
+places. Writing the same geometry again keeps the Value the Location already
+carries.
 
 Wherever a single point is needed — a list row, a map mark, "show on map" — a
 `Point` stands for itself and any other geometry stands for the centre of its
@@ -31,8 +32,9 @@ bounding box.
 
 Accuracy is one of four Concepts: `geo-accuracy:precise`,
 `geo-accuracy:approximate`, `geo-accuracy:region`, `geo-accuracy:unknown`. It is
-chosen by the researcher when accepting a suggestion, not derived from the
-engine's numbers.
+chosen by the researcher when accepting a suggestion. Quick geocode and the batch
+take it from how closely the sources agree on the place, not from the engine's own
+numbers.
 
 Type is drawn from a fixed dictionary matching the engine's normalised place-type
 vocabulary. When the engine returns a type with no corresponding Concept
@@ -176,8 +178,8 @@ largest among them. Language is the one list whose order matters — it is the
 researcher's own statement of which is likelier. The engine (0.2.0) accepts these
 four only as lists: a bare string, an empty list or a blank entry is 422, so an
 unset field is left off the request and `listToSend` is the one place that is
-decided. A period is chosen from the engine's named periods; a typed range is not
-offered.
+decided. A period is chosen from the engine's named periods or typed as a year or a range
+of years.
 
 A context saved before a field took several carries one value on its own key
 (`region`, `period`, `placeType`, `language`). `contextValues` reads the list and
@@ -364,9 +366,9 @@ Where the engine has not been reached, or does not list the source, the tag is
 the bare name with no mark and no card: an empty card would claim the engine said
 something. The catalogue is one request an hour shared by every tag.
 
-The table no longer shows the footprint column the engine measures of each source
+The table does not show the footprint column the engine measures of each source
 (`footprint` on `GET /suggesters`: records held and the one-degree squares they
-fall in). A pair like "12k · 262 cells" did not say what to do with it, so it is
+fall in). A pair like "12k · 262 cells" says nothing to act on, so it is
 stated as a sentence on the card instead — "11,766 records, spread over 262
 one-degree map squares" — and an online source says its size is not measured.
 
@@ -1010,8 +1012,8 @@ it has rendered.
 ## How the page is put together
 
 The page lives in `packages/client/src/pages/Geocoding`. `GeocodingPage.tsx` holds
-the state the three panels share and is the only file at the root; the rest is
-sorted by what it is:
+the state the three panels share and, with its styles file, is all that sits at the
+root; the rest is sorted by what it is:
 
 - `containers/` — the stateful parts: `list` (the Locations list, its rows and
   filters), `map`, `suggestions` (the suggestion cards and the query context

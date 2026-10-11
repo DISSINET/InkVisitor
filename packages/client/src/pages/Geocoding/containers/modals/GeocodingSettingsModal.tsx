@@ -126,8 +126,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       if (draft.placeTypes.some((one) => !one.name.trim())) {
         throw new Error("Every kind of place needs a name.");
       }
-      // the draft holds every role, so a role the researcher unlinked is one
-      // this object no longer carries — it has to replace, not merge
+      // the draft holds every role, so a role the researcher unlinked is absent
+      // from this object — it has to replace, not merge
       await putGeocodingRoles(draft);
       // after the roles, not beside them: both rewrite the one settings row, and
       // two writes in flight would leave only whichever landed last
