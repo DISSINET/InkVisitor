@@ -48,7 +48,7 @@ import { GazetteerPicker } from "./GazetteerPicker";
 /**
  * Assigning the entities that give a coordinate its meaning.
  *
- * Owner and admin only, because which Concept means `geo:x` decides what
+ * Owner and admin only, because which Concept means `geo:geometry` decides what
  * "geocoded" means: if one user could point it elsewhere, the same Location
  * would read as geocoded for them and not for anyone else.
  *
@@ -88,8 +88,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   const assignedIds = useMemo(
     () =>
       [
-        draft.x,
-        draft.y,
+        draft.geometry,
         draft.accuracy,
         draft.type,
         ...Object.values(draft.accuracyValues),
@@ -227,15 +226,12 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A coordinate is four metaproperties on a Location. Which Concept plays which role is
+            A geocoded Location carries three metaproperties: a GeoJSON geometry, an accuracy and a kind of place. Which Concept plays which role is
             set once for the project — it is what &ldquo;geocoded&rdquo; means, so it cannot differ
             between users.
           </StyledSectionNote>
-          {row("geo:x — longitude", draft.x, EntityEnums.Class.Concept, (id) =>
-            setDraft((d) => ({ ...d, x: id ?? "" })),
-          )}
-          {row("geo:y — latitude", draft.y, EntityEnums.Class.Concept, (id) =>
-            setDraft((d) => ({ ...d, y: id ?? "" })),
+          {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
+            setDraft((d) => ({ ...d, geometry: id ?? "" })),
           )}
           {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, accuracy: id ?? "" })),

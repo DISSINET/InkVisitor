@@ -5,11 +5,17 @@ import {
   GeocodingPlaceType,
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
+import {
+  GeoJsonGeometry,
+  geometryEquals,
+  isGeoJsonGeometry,
+  serializeGeometry,
+} from "@inkvisitor/shared/types/geometry";
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
 import { CEntity, CProp, CReference } from "constructors";
 
 /**
- * Planning a coordinate write.
+ * Planning a geometry write.
  *
  * Separated from the calls that execute it so the ordering, the replacement and
  * the provenance can be tested without a server. The plan says what will happen;
@@ -28,8 +34,8 @@ export interface GeocodingWriteInput {
   /** The Location as last read. The executor re-reads before writing anything. */
   location: IEntity;
   roles: IGeocodingRoles;
-  lon: number;
-  lat: number;
+  /** The one GeoJSON geometry the Location will carry. */
+  geometry: GeoJsonGeometry;
   accuracy: GeocodingAccuracy;
   /**
    * The kind of place to record. A value sets it, `null` removes it, and
@@ -38,15 +44,15 @@ export interface GeocodingWriteInput {
   placeType?: GeocodingPlaceType | null;
   provenance?: GeocodingProvenance[];
   /**
-   * The coordinate the Location already carries, where it has one.
+   * The geometry the Location already carries, where it has one.
    *
-   * A write that keeps the coordinate and changes only the kind of place - the
-   * common correction - would otherwise mint two fresh Value entities for the
-   * same longitude and latitude and orphan the pair it replaced. The orphans
-   * survive whenever something else refers to them or the account cannot delete,
-   * so they accumulate on exactly the operation done most often.
+   * A write that keeps the geometry and changes only the kind of place - the
+   * common correction - would otherwise mint a fresh Value entity for the same
+   * shape and orphan the one it replaced. The orphans survive whenever something
+   * else refers to them or the account cannot delete, so they accumulate on
+   * exactly the operation done most often.
    */
-  current?: { lon: number | null; lat: number | null } | null;
+  current?: GeoJsonGeometry | null;
   /** Supplies the language the created Value entities are given. */
   userOptions: UserOptions;
 }
@@ -65,9 +71,9 @@ export interface GeocodingWritePlan {
   /** What the Location carried before. The platform's audit records only the new state. */
   previous: { props: IProp[]; references: IReference[] };
   /**
-   * True when a coordinate already on the Location is being replaced by a
-   * different one. False for a first coordinate, and false for a write that
-   * leaves the coordinate where it is and changes only what kind of place it is.
+   * True when a geometry already on the Location is being replaced by a
+   * different one. False for a first geometry, and false for a write that
+   * leaves the geometry where it is and changes only what kind of place it is.
    */
   isOverwrite: boolean;
 }
@@ -78,13 +84,6 @@ export type GeocodingWriteBlock = { blocked: string };
 export const isBlocked = (
   result: GeocodingWritePlan | GeocodingWriteBlock,
 ): result is GeocodingWriteBlock => "blocked" in result;
-
-/**
- * Six decimal places is about 0.1 m at the equator — finer than any source here
- * can justify, and far finer than a mouse click. A raw float from a map event
- * carries fifteen, which reads as a precision claim nobody made.
- */
-export const formatCoordinate = (value: number): string => String(Number(value.toFixed(6)));
 
 const propFor = (typeId: string, valueId: string): IProp => {
   const prop = CProp();
@@ -102,7 +101,7 @@ const valueEntity = (label: string, userOptions: UserOptions): IEntity => {
 };
 
 /**
- * Builds everything a coordinate write needs, or refuses with a reason.
+ * Builds everything a geometry write needs, or refuses with a reason.
  *
  * Refuses rather than degrades: a place type the project has no Concept for
  * would otherwise be silently dropped, which is how a controlled vocabulary
@@ -114,8 +113,7 @@ export const planGeocodingWrite = (
   const {
     location,
     roles,
-    lon,
-    lat,
+    geometry,
     accuracy,
     placeType,
     provenance = [],
@@ -123,8 +121,15 @@ export const planGeocodingWrite = (
     current,
   } = input;
 
-  if (!roles.x || !roles.y || !roles.accuracy) {
+  if (!roles.geometry || !roles.accuracy) {
     return { blocked: "The geocoding Concepts are not assigned yet — set them in the settings." };
+  }
+
+  // whatever is written must be readable back: a click on a repeated copy of
+  // the world, or a source that answered NaN, would otherwise store a geometry
+  // the page then reports as unreadable
+  if (!isGeoJsonGeometry(geometry)) {
+    return { blocked: "That is not a valid GeoJSON geometry — a position is outside the earth." };
   }
 
   const accuracyId = roles.accuracyValues[accuracy];
@@ -153,39 +158,30 @@ export const planGeocodingWrite = (
   const previousProps = location.props || [];
   const previousReferences = location.references || [];
 
-  // the same coordinate written again is the same coordinate: its Value entities
-  // are kept where the Location already carries them
-  const unchanged =
-    !!current &&
-    current.lon != null &&
-    current.lat != null &&
-    formatCoordinate(current.lon) === formatCoordinate(lon) &&
-    formatCoordinate(current.lat) === formatCoordinate(lat);
-  const keptLon = unchanged
-    ? previousProps.find((prop) => prop.type?.entityId === roles.x && !!prop.value?.entityId)
-    : undefined;
-  const keptLat = unchanged
-    ? previousProps.find((prop) => prop.type?.entityId === roles.y && !!prop.value?.entityId)
+  // the same geometry written again is the same geometry: its Value entity is
+  // kept where the Location already carries it
+  const unchanged = geometryEquals(current, geometry);
+  const keptGeometry = unchanged
+    ? previousProps.find((prop) => prop.type?.entityId === roles.geometry && !!prop.value?.entityId)
     : undefined;
 
   // every role this write owns; whatever the Location carried for them is
-  // replaced rather than added to, so a second write never leaves two longitudes
+  // replaced rather than added to, so a second write never leaves two geometries
   const ownedTypes = [
-    keptLon ? "" : roles.x,
-    keptLat ? "" : roles.y,
+    keptGeometry ? "" : roles.geometry,
     roles.accuracy,
     placeTypeId || clearsPlaceType ? roles.type : "",
   ].filter(Boolean);
   const displaced = previousProps.filter((prop) => ownedTypes.includes(prop.type?.entityId));
 
-  const lonValue = keptLon ? undefined : valueEntity(formatCoordinate(lon), userOptions);
-  const latValue = keptLat ? undefined : valueEntity(formatCoordinate(lat), userOptions);
-  const newValues: IEntity[] = [lonValue, latValue].filter((entity): entity is IEntity => !!entity);
+  const geometryValue = keptGeometry
+    ? undefined
+    : valueEntity(serializeGeometry(geometry), userOptions);
+  const newValues: IEntity[] = geometryValue ? [geometryValue] : [];
 
   const props: IProp[] = [
     ...previousProps.filter((prop) => !ownedTypes.includes(prop.type?.entityId)),
-    ...(lonValue ? [propFor(roles.x, lonValue.id)] : []),
-    ...(latValue ? [propFor(roles.y, latValue.id)] : []),
+    ...(geometryValue ? [propFor(roles.geometry, geometryValue.id)] : []),
     propFor(roles.accuracy, accuracyId),
   ];
   if (placeTypeId) {
@@ -209,21 +205,19 @@ export const planGeocodingWrite = (
     newValues,
     props,
     references,
-    // Only the coordinate Values, which this feature mints and nothing else
+    // Only the geometry Values, which this feature mints and nothing else
     // names. The accuracy and place type roles point at Concepts drawn from the
     // project's own vocabulary — a previous accuracy or a previous type is a
     // Concept other Locations use, and offering it for deletion asks the server
     // to remove a term from the vocabulary because one place stopped using it.
     displacedValueIds: displaced
-      .filter((prop) => prop.type?.entityId === roles.x || prop.type?.entityId === roles.y)
+      .filter((prop) => prop.type?.entityId === roles.geometry)
       .map((prop) => prop.value?.entityId)
       .filter((id): id is string => !!id),
     previous: { props: previousProps, references: previousReferences },
-    // the coordinate Values it replaces, so a first coordinate and a kept one
+    // the geometry Value it replaces, so a first geometry and a kept one
     // both read as false however much else the write changes
-    isOverwrite: displaced.some(
-      (prop) => prop.type?.entityId === roles.x || prop.type?.entityId === roles.y,
-    ),
+    isOverwrite: displaced.some((prop) => prop.type?.entityId === roles.geometry),
   };
 };
 
@@ -240,7 +234,7 @@ export const coordinateChanged = (
   after: IEntity,
   roles: IGeocodingRoles,
 ): boolean => {
-  const owned = [roles.x, roles.y, roles.accuracy, roles.type].filter(Boolean);
+  const owned = [roles.geometry, roles.accuracy, roles.type].filter(Boolean);
   const signature = (entity: IEntity) =>
     JSON.stringify(
       (entity.props || [])

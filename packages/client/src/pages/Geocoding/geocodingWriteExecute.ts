@@ -3,7 +3,7 @@ import { IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import { GeocodingWritePlan, coordinateChanged } from "./geocodingWrite";
 
 /**
- * Executing a coordinate write.
+ * Executing a geometry write.
  *
  * The ordering here is the only safety available. `PUT /entities/:entityId`
  * persists the raw request body, and RethinkDB's `update` replaces arrays rather
@@ -50,8 +50,8 @@ export const executeGeocodingWrite = async (
 
   // children first: a create that fails leaves unreferenced Value entities,
   // which are attached to nothing and invisible in the corpus. The Location
-  // cannot end up carrying a longitude and no latitude, because it has not been
-  // touched yet.
+  // cannot end up carrying a geometry that does not exist, because it has not
+  // been touched yet.
   for (const value of plan.newValues) {
     try {
       await gateway.createEntity(value);
@@ -59,7 +59,7 @@ export const executeGeocodingWrite = async (
     } catch {
       return {
         ok: false,
-        reason: "Could not create the coordinate values, so nothing was written to the location.",
+        reason: "Could not create the geometry value, so nothing was written to the location.",
       };
     }
   }
@@ -75,7 +75,7 @@ export const executeGeocodingWrite = async (
     return {
       ok: false,
       reason:
-        "This location's coordinate changed while you were working on it. Nothing was written — reload and decide again.",
+        "This location's geometry changed while you were working on it. Nothing was written — reload and decide again.",
     };
   }
 

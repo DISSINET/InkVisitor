@@ -142,6 +142,7 @@ export { TbBuildingFortress as IcoPlaceFortress } from "react-icons/tb";
 export { TbDroplet as IcoPlaceLake } from "react-icons/tb";
 export { TbQuestionMark as IcoPlaceUnknown } from "react-icons/tb";
 export { TbMap2 as IcoPlaceRegion } from "react-icons/tb";
+export { TbPolygon as IcoDrawShape } from "react-icons/tb";
 export { TbMountain as IcoPlaceMountain } from "react-icons/tb";
 export { TbRipple as IcoPlaceRiver } from "react-icons/tb";
 export { TbRoad as IcoPlaceRoad } from "react-icons/tb";
@@ -245,6 +246,13 @@ export { TbReplace as IcoReplaceTb } from "react-icons/tb";
 export { TbSettings as IcoSettings } from "react-icons/tb";
 export { TbStack2 as IcoLayers } from "react-icons/tb";
 export { TbFilter as IcoFilter } from "react-icons/tb";
+/** One mark per GeoJSON geometry type, for the coordinate tag. */
+export { TbMapPin as IcoGeomPoint } from "react-icons/tb";
+export { TbMapPins as IcoGeomMultiPoint } from "react-icons/tb";
+export { TbRoute as IcoGeomLine } from "react-icons/tb";
+export { TbRoute2 as IcoGeomMultiLine } from "react-icons/tb";
+export { TbPolygon as IcoGeomPolygon } from "react-icons/tb";
+export { TbHexagons as IcoGeomMultiPolygon } from "react-icons/tb";
 export { TbCurrentLocation as IcoFlyTo } from "react-icons/tb";
 /** Starting a geocoding run. One mark for the verb, wherever it is offered. */
 export { TbMapSearch as IcoGeocode } from "react-icons/tb";

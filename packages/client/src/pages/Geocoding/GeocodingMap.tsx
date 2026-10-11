@@ -7,6 +7,14 @@ import {
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
 import { InterfaceEnums } from "@inkvisitor/shared/enums";
+import {
+  GeoJsonGeometry,
+  geometryAnchor,
+  geometryBbox,
+  parseGeometry,
+  pointGeometry,
+  serializeGeometry,
+} from "@inkvisitor/shared/types/geometry";
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
 import { Button, Input } from "components";
 import { EntityTag } from "components/advanced";
@@ -15,7 +23,7 @@ import { useDebounce } from "hooks";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppSelector } from "redux/hooks";
-import { IcoLayers, IcoSearch, IcoSelection } from "Theme/icons";
+import { IcoGeomPoint, IcoLayers, IcoSearch, IcoSelection } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   BASEMAP_GROUPS,
@@ -43,6 +51,12 @@ import {
   loadMapPrefs,
   saveMapPrefs,
 } from "./geocodingMapPrefs";
+import { GeometryDrawPanel } from "./GeometryDrawPanel";
+import { RecentGeocodes } from "./RecentGeocodes";
+import { RecentGeocode } from "./recentGeocodes";
+import { useGeometryDraw } from "./useGeometryDraw";
+import { BASEMAP_STYLE } from "./basemapStyle";
+import { CoordinateHover } from "./CoordinateTag";
 import { registerMaplibreWorker } from "./maplibreWorker";
 import { AccuracyPicker } from "./AccuracyPicker";
 import { PlaceTypePicker } from "./PlaceTypePicker";
@@ -113,18 +127,6 @@ const FIT_PADDING = 64;
 /** How long fitting the strongest suggestions of a finished run takes to settle. */
 const FIT_SUGGESTIONS_MS = 800;
 
-/**
- * The basemap. One style, in both themes.
- *
- * Free and keyless, and built on the OpenMapTiles schema, which is what
- * `basemapLayers` classifies against — a style on another schema would load and
- * draw but leave the layer switches with nothing to switch.
- *
- * The dark theme recolours this rather than loading a dark style of its own:
- * see `darkBasemap`. The two themes then draw the same map, with the same layers
- * under the same switches.
- */
-const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
 /**
  * Zoom levels here are one lower than the same scale in `mapFocus`.
@@ -158,6 +160,7 @@ const pickerAnchorIn = (
 /** No Locations and no suggestions each resolve to one shared, stable empty array. */
 const NO_LOCATIONS: GeocodingLocation[] = [];
 const NO_SUGGESTIONS: Suggestion[] = [];
+const NO_RECENT: RecentGeocode[] = [];
 
 interface GeocodingMap {
   selected: GeocodingLocation | undefined;
@@ -166,6 +169,9 @@ interface GeocodingMap {
    * makes asking twice for the same point fly twice.
    */
   focus: MapFocus | null;
+  /** The places just geocoded in this browser, newest first. */
+  recent?: RecentGeocode[];
+  onShowRecent?: (lat: number, lon: number) => void;
   /**
    * The geocoded Locations the list is showing. The list's filters are the
    * page's one statement about what is being worked on, so a place the list
@@ -222,12 +228,11 @@ interface GeocodingMap {
    */
   onHoverSuggestion?: (index: number | null, at: { left: number; top: number } | null) => void;
   onAssign: (
-    lat: number,
-    lon: number,
+    geometry: GeoJsonGeometry,
     accuracy: GeocodingAccuracy,
     /**
      * What kind of place to record. `undefined` leaves whatever the Location
-     * already carries, which is the right answer for a coordinate correction.
+     * already carries, which is the right answer for a geometry correction.
      */
     placeType?: GeocodingPlaceType | null,
   ) => void;
@@ -281,7 +286,10 @@ const MapSearchBox: React.FC<MapSearchBox> = ({ term, onTermChange, hits, onPick
           >
             {hit.label}
             <StyledSearchHitMeta>
-              {hit.lat.toFixed(4)}, {hit.lon.toFixed(4)} · {hit.source}
+              <CoordinateHover lat={hit.lat} lon={hit.lon}>
+                <IcoGeomPoint />
+              </CoordinateHover>{" "}
+              {hit.source}
               {hit.type ? ` · ${hit.type}` : ""}
             </StyledSearchHitMeta>
           </StyledSearchHit>
@@ -461,6 +469,8 @@ const MapFooterControls: React.FC<MapFooterControls> = ({
 export const GeocodingMap: React.FC<GeocodingMap> = ({
   selected,
   focus,
+  recent,
+  onShowRecent,
   geocoded,
   context,
   roles,
@@ -509,6 +519,14 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
    * source and layer that was sitting on the previous one.
    */
   const [styleEpoch, setStyleEpoch] = useState(0);
+
+  /**
+   * Whether the shape tool is open. While it is, a click on the map belongs to
+   * the tool and does not start a point assignment.
+   */
+  const [shapeOpen, setShapeOpen] = useState(false);
+  const shapeOpenRef = useRef(false);
+  shapeOpenRef.current = shapeOpen;
 
   /** The point last asked for by name, while its ring is up. */
   const ringed = useFocusRing(focus);
@@ -572,7 +590,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     if (at.suggestion) {
       onChooseSuggestion(at.suggestion.index, accuracy, placeType);
     } else {
-      onAssign(at.lat, at.lon, accuracy, placeType);
+      onAssign(at.geometry ?? pointGeometry(at.lon, at.lat), accuracy, placeType);
     }
     setPending(null);
   };
@@ -597,6 +615,14 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     [selected?.isGeocoded, selected?.lat, selected?.lon],
   );
 
+  /**
+   * The selected geometry as its stored text. Deriving a Location builds a new
+   * geometry object on every refetch, so effects that move the camera depend on
+   * the text, which only changes when the shape does.
+   */
+  const selectedGeometryKey =
+    selected?.isGeocoded && selected.geometry ? serializeGeometry(selected.geometry) : "";
+
   /* the selected Location's own coordinate stays the most prominent thing on
      the map, named with the accuracy it was recorded at */
   const selectedName = selected ? `${selected.entity.labels[0]} · ${selected.accuracy}` : "";
@@ -616,7 +642,17 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   }, [debouncedTerm, engineReachable]);
 
   // the selection changing invalidates a half-finished click
-  useEffect(() => setPending(null), [selected?.entity.id]);
+  useEffect(() => {
+    setPending(null);
+    setShapeOpen(false);
+  }, [selected?.entity.id]);
+
+  // the shape tool closes once the Location carries a different geometry, which
+  // is the write landing; a cancelled or refused write leaves the drawing where
+  // it was
+  useEffect(() => {
+    setShapeOpen(false);
+  }, [selectedGeometryKey]);
 
   // backing out of a popup with Escape is the platform convention, and the
   // menu opens over a map where a stray click is easy to make
@@ -981,6 +1017,10 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
 
   /* ------------------------------------------------- what the map is showing */
 
+  // declared after the effect that adds this page's layers, so a rebuilt style
+  // puts the drawing tool's layers above them rather than beneath
+  const draw = useGeometryDraw(mapRef, styleEpoch, shapeOpen);
+
   // The page's own marks. Set as data on a source that already exists, so a
   // change of selection or of suggestions never touches the layers themselves.
   useEffect(() => {
@@ -992,7 +1032,13 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       others: shownOthers,
       suggestions: shownSuggestions,
       leader,
-      selected: { position, name: selectedName, id: selected?.entity.id },
+      selected: {
+        position,
+        name: selectedName,
+        id: selected?.entity.id,
+        // the shape tool draws the stored shape itself while it is being edited
+        geometry: shapeOpen ? null : (selected?.geometry ?? null),
+      },
       pending: pending ? [pending.lat, pending.lon] : null,
       focus: ringed?.at ?? null,
       // what is being dragged out takes precedence over what is stored, so the
@@ -1007,6 +1053,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     position,
     selectedName,
     selected?.entity.id,
+    selectedGeometryKey,
+    shapeOpen,
     pending,
     ringed,
     drag,
@@ -1051,8 +1099,22 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     if (!map || !position) {
       return;
     }
+    // a line or an area is framed whole; a point is centred
+    const selectedGeometry = selectedGeometryKey ? parseGeometry(selectedGeometryKey) : null;
+    const shape = selectedGeometry && selectedGeometry.type !== "Point" ? selectedGeometry : null;
+    if (shape) {
+      const [west, south, east, north] = geometryBbox(shape);
+      map.fitBounds(
+        [
+          [west, south],
+          [east, north],
+        ],
+        { padding: FIT_PADDING, maxZoom: toMapZoom(12), duration: 0 },
+      );
+      return;
+    }
     map.jumpTo({ center: lngLat(position), zoom: Math.max(map.getZoom(), toMapZoom(9)) });
-  }, [position]);
+  }, [position, selectedGeometryKey]);
 
   /**
    * Moves to the strongest suggestion once a run finishes.
@@ -1164,7 +1226,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     const onClick = (event: maplibregl.MapMouseEvent) => {
       // a drag that drew a rectangle ends in a click, and it is a statement
       // about the region rather than about a coordinate
-      if (drawingRef.current) {
+      if (drawingRef.current || shapeOpenRef.current) {
         return;
       }
       const hit = pickMark(map, event.point);
@@ -1201,7 +1263,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       // covers the map while it is open — so a click here is always a fresh one
       setPending({
         lat: event.lngLat.lat,
-        lon: event.lngLat.lng,
+        // a click on a repeated copy of the world is the same place as on the first
+        lon: event.lngLat.wrap().lng,
         x: event.point.x,
         y: event.point.y,
       });
@@ -1229,7 +1292,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       // while a rectangle is being drawn the pointer is saying where the corner
       // goes, and naming whatever it passes over would fight the crosshair for
       // the cursor as well as for the reader's attention
-      if (drawingRef.current) {
+      if (drawingRef.current || shapeOpenRef.current) {
         return;
       }
       const info = hoverInfoAtPoint(map, event.point);
@@ -1289,6 +1352,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       {/* the renderer draws into this element and owns everything inside it;
           every mark on it is a layer set from the effects above */}
       <StyledMapCanvas ref={containerRef} data-map-canvas />
+
+      <RecentGeocodes
+        recent={recent ?? NO_RECENT}
+        onShow={(entry) => onShowRecent?.(entry.lat, entry.lon)}
+      />
 
       {/* what the mark under the pointer is, so several marks in one town can be
           told apart before one of them is clicked. Placed from the pointer and
@@ -1400,8 +1468,13 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
                 ? "drag a rectangle over the area the query is about, or press again to stop"
                 : "draw the region on the map, for an area the engine's own list does not name"
             }
+            onMouseEnter={() => setRegionDetailsOpen(true)}
+            onMouseLeave={() => setRegionDetailsOpen(false)}
+            onFocus={() => setRegionDetailsOpen(true)}
+            onBlur={() => setRegionDetailsOpen(false)}
             onClick={() => {
               setDrawRefusal(null);
+              setShapeOpen(false);
               setDrawing((armed) => !armed);
             }}
           >
@@ -1432,6 +1505,31 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           ) : null}
         </>
       ) : null}
+
+      <GeometryDrawPanel
+        open={shapeOpen}
+        onToggle={() => {
+          // both tools take the drag, so only one is armed at a time
+          setDrawing(false);
+          setShapeOpen((open) => !open);
+        }}
+        disabled={!selected}
+        draw={draw}
+        stored={selected?.geometry ?? null}
+        onSave={(geometry: GeoJsonGeometry) => {
+          const map = mapRef.current;
+          const box = geometryAnchor(geometry);
+          // the menu is positioned inside the map, at the shape's anchor
+          const at = map?.project([box.lon, box.lat]);
+          setPending({
+            lat: box.lat,
+            lon: box.lon,
+            geometry,
+            x: at?.x ?? 0,
+            y: at?.y ?? 0,
+          });
+        }}
+      />
 
       <MapLayersPanel
         open={showLayers}

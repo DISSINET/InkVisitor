@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 import { collectGeoValueIds, deriveGeocoding } from "./geocodingDerivation";
 
 /**
- * Covers invariant I1: a Location is geocoded only when geo:x, geo:y and
- * geo:accuracy are all present AND each value resolves to an existing entity
- * with a non-empty label.
+ * Covers invariant I1: a Location is geocoded only when geo:geometry and
+ * geo:accuracy are both present AND the geometry value resolves to an existing
+ * entity whose label is one valid GeoJSON geometry.
  *
  * The cases that matter are the ones where props exist and the answer is still
  * "not geocoded" — a test that only proved a well-formed Location reads as
@@ -16,8 +16,7 @@ import { collectGeoValueIds, deriveGeocoding } from "./geocodingDerivation";
  */
 
 const roles: IGeocodingRoles = {
-  x: "concept-x",
-  y: "concept-y",
+  geometry: "concept-geometry",
   accuracy: "concept-accuracy",
   type: "concept-type",
   accuracyValues: {
@@ -42,28 +41,29 @@ const location = (props: IProp[]): IEntity =>
 
 const entity = (id: string, label: string): IEntity => ({ id, labels: [label] }) as IEntity;
 
+const point = (lon: number, lat: number) => JSON.stringify({ type: "Point", coordinates: [lon, lat] });
+
 const wellFormed = location([
-  prop("concept-x", "v-lon"),
-  prop("concept-y", "v-lat"),
+  prop("concept-geometry", "v-geo"),
   prop("concept-accuracy", "value-precise"),
 ]);
 
 const values = {
-  "v-lon": entity("v-lon", "17.033"),
-  "v-lat": entity("v-lat", "51.107"),
+  "v-geo": entity("v-geo", point(17.033, 51.107)),
 };
 
 describe("deriveGeocoding", () => {
   it("reads a well-formed Location", () => {
     const result = deriveGeocoding(wellFormed, roles, values);
     expect(result.isGeocoded).toBe(true);
+    expect(result.geometry).toEqual({ type: "Point", coordinates: [17.033, 51.107] });
     expect(result.lon).toBe(17.033);
     expect(result.lat).toBe(51.107);
     expect(result.accuracy).toBe(GeocodingAccuracy.Precise);
     expect(result.problem).toBeNull();
   });
 
-  it("does not confuse the axes — x is longitude, y is latitude", () => {
+  it("does not confuse the axes — GeoJSON is [longitude, latitude]", () => {
     // the failure this guards would put the whole corpus in the Gulf of Guinea
     // while every individual number still looked plausible
     const result = deriveGeocoding(wellFormed, roles, values);
@@ -71,52 +71,75 @@ describe("deriveGeocoding", () => {
     expect(result.lat).toBe(51.107);
   });
 
-  it("is not geocoded when a value entity no longer exists", () => {
-    const result = deriveGeocoding(wellFormed, roles, { "v-lat": values["v-lat"] });
-    expect(result.isGeocoded).toBe(false);
-    expect(result.problem).toContain("longitude");
+  it("anchors a polygon at the centre of its bounding box", () => {
+    const polygon = JSON.stringify({
+      type: "Polygon",
+      coordinates: [[[10, 40], [20, 40], [20, 50], [10, 40]]],
+    });
+    const result = deriveGeocoding(wellFormed, roles, { "v-geo": entity("v-geo", polygon) });
+    expect(result.isGeocoded).toBe(true);
+    expect(result.geometry?.type).toBe("Polygon");
+    expect(result.lon).toBe(15);
+    expect(result.lat).toBe(45);
   });
 
-  it("is not geocoded when a value entity has a blank label", () => {
-    const result = deriveGeocoding(wellFormed, roles, {
-      ...values,
-      "v-lon": entity("v-lon", "   "),
-    });
-    expect(result.isGeocoded).toBe(false);
+  it("reads every one of the six geometry types", () => {
+    const labels = [
+      { type: "Point", coordinates: [1, 2] },
+      { type: "MultiPoint", coordinates: [[1, 2], [3, 4]] },
+      { type: "LineString", coordinates: [[1, 2], [3, 4]] },
+      { type: "MultiLineString", coordinates: [[[1, 2], [3, 4]]] },
+      { type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] },
+      { type: "MultiPolygon", coordinates: [[[[0, 0], [1, 0], [1, 1], [0, 0]]]] },
+    ];
+    for (const label of labels) {
+      const result = deriveGeocoding(wellFormed, roles, {
+        "v-geo": entity("v-geo", JSON.stringify(label)),
+      });
+      expect(result.isGeocoded, label.type).toBe(true);
+      expect(result.geometry?.type).toBe(label.type);
+    }
   });
 
-  it("is not geocoded when a coordinate is not a number", () => {
-    const result = deriveGeocoding(wellFormed, roles, {
-      ...values,
-      "v-lat": entity("v-lat", "somewhere near the river"),
-    });
+  it("is not geocoded when the value entity no longer exists", () => {
+    const result = deriveGeocoding(wellFormed, roles, {});
     expect(result.isGeocoded).toBe(false);
+    expect(result.problem).toContain("geometry");
   });
 
-  it("rejects a latitude outside the earth's range", () => {
-    const result = deriveGeocoding(wellFormed, roles, {
-      ...values,
-      "v-lat": entity("v-lat", "151.107"),
-    });
+  it.each([
+    ["a blank label", "   "],
+    ["text that is not JSON", "somewhere near the river"],
+    ["the legacy bare number", "17.033"],
+    ["a GeometryCollection", JSON.stringify({ type: "GeometryCollection", geometries: [] })],
+    ["a Feature rather than a geometry", JSON.stringify({ type: "Feature", geometry: null })],
+    ["a latitude outside the earth's range", point(17, 151.1)],
+    ["a longitude outside the earth's range", point(181, 51)],
+    ["a line of one position", JSON.stringify({ type: "LineString", coordinates: [[1, 2]] })],
+    [
+      "a ring that does not close",
+      JSON.stringify({ type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1]]] }),
+    ],
+    ["an empty MultiPoint", JSON.stringify({ type: "MultiPoint", coordinates: [] })],
+    ["a position of strings", JSON.stringify({ type: "Point", coordinates: ["1", "2"] })],
+  ])("is not geocoded for %s", (_name, label) => {
+    const result = deriveGeocoding(wellFormed, roles, { "v-geo": entity("v-geo", label) });
     expect(result.isGeocoded).toBe(false);
+    expect(result.geometry).toBeNull();
+    expect(result.problem).toContain("cannot be read");
   });
 
   it("accepts a legitimate zero and a negative coordinate", () => {
     const result = deriveGeocoding(wellFormed, roles, {
-      "v-lon": entity("v-lon", "0"),
-      "v-lat": entity("v-lat", "-33.9"),
+      "v-geo": entity("v-geo", point(0, -33.9)),
     });
     expect(result.isGeocoded).toBe(true);
     expect(result.lon).toBe(0);
     expect(result.lat).toBe(-33.9);
   });
 
-  it("is not geocoded when accuracy is missing, even with both coordinates", () => {
-    const result = deriveGeocoding(
-      location([prop("concept-x", "v-lon"), prop("concept-y", "v-lat")]),
-      roles,
-      values,
-    );
+  it("is not geocoded when accuracy is missing, even with a geometry", () => {
+    const result = deriveGeocoding(location([prop("concept-geometry", "v-geo")]), roles, values);
     expect(result.isGeocoded).toBe(false);
     expect(result.problem).toContain("accuracy");
   });
@@ -124,8 +147,7 @@ describe("deriveGeocoding", () => {
   it("is not geocoded when accuracy points at an unconfigured Concept", () => {
     const result = deriveGeocoding(
       location([
-        prop("concept-x", "v-lon"),
-        prop("concept-y", "v-lat"),
+        prop("concept-geometry", "v-geo"),
         prop("concept-accuracy", "some-other-concept"),
       ]),
       roles,
@@ -143,7 +165,7 @@ describe("deriveGeocoding", () => {
     expect(result.problem).toBeNull();
   });
 
-  it("reads place type independently of whether the coordinate is usable", () => {
+  it("reads place type independently of whether the geometry is usable", () => {
     const result = deriveGeocoding(
       location([prop("concept-type", "value-settlement")]),
       roles,
@@ -154,17 +176,28 @@ describe("deriveGeocoding", () => {
   });
 
   it("reads nothing and reports nothing when the roles are unassigned", () => {
-    const unconfigured = { ...roles, x: "", y: "", accuracy: "" };
+    const unconfigured = { ...roles, geometry: "", accuracy: "" };
     const result = deriveGeocoding(wellFormed, unconfigured, values);
     expect(result.isGeocoded).toBe(false);
     expect(result.problem).toBeNull();
+  });
+
+  it("ignores props that still use the retired longitude and latitude Concepts", () => {
+    const legacy = location([
+      prop("old-x", "v-lon"),
+      prop("old-y", "v-lat"),
+      prop("concept-accuracy", "value-precise"),
+    ]);
+    const result = deriveGeocoding(legacy, roles, {});
+    expect(result.isGeocoded).toBe(false);
+    expect(result.problem).toContain("geometry");
   });
 });
 
 describe("collectGeoValueIds", () => {
   it("gathers every configured role's value id", () => {
     expect(collectGeoValueIds([wellFormed], roles).sort()).toEqual(
-      ["v-lat", "v-lon", "value-precise"].sort(),
+      ["v-geo", "value-precise"].sort(),
     );
   });
 
@@ -174,7 +207,7 @@ describe("collectGeoValueIds", () => {
   });
 
   it("ignores roles that are not assigned", () => {
-    expect(collectGeoValueIds([wellFormed], { ...roles, x: "" })).not.toContain("v-lon");
+    expect(collectGeoValueIds([wellFormed], { ...roles, geometry: "" })).not.toContain("v-geo");
   });
 
   it("returns nothing for Locations with no geocoding props", () => {

@@ -9,19 +9,26 @@ own API reference lives in its repository; nothing here restates it.
 
 ## How a coordinate is stored
 
-Coordinates are metaproperties on the Location entity, not fields on
-`ILocationData`. Three sibling props carry them:
+The geometry is a metaproperty on the Location entity, not a field on
+`ILocationData`. Three sibling props carry it:
 
 | prop type | prop value | example |
 |-----------|------------|---------|
-| Concept `geo:x` | Value entity | `"17.033"` |
-| Concept `geo:y` | Value entity | `"51.107"` |
+| Concept `geo:geometry` | Value entity | `{"type":"Point","coordinates":[17.033,51.107]}` |
 | Concept `geo:accuracy` | Concept | `geo-accuracy:precise` |
 | Concept `geo:type` | Concept | `geo-type:settlement` |
 
-`geo:x` is longitude and `geo:y` is latitude, following the GIS axis order. The
-Value entities are always newly created — never shared between two Locations,
-because editing a shared Value would silently move both places.
+The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString`,
+`MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
+`[longitude, latitude]`, rounded to six decimals. A Location holds exactly one
+geometry; several shapes of one kind are stored as the matching `Multi*` type and
+a mix of kinds is refused. The Value entity is always newly created — never shared
+between two Locations, because editing a shared Value would silently move both
+places.
+
+Wherever a single point is needed — a list row, a map mark, "show on map" — a
+`Point` stands for itself and any other geometry stands for the centre of its
+bounding box.
 
 Accuracy is one of four Concepts: `geo-accuracy:precise`,
 `geo-accuracy:approximate`, `geo-accuracy:region`, `geo-accuracy:unknown`. It is
@@ -33,13 +40,14 @@ vocabulary. When the engine returns a type with no corresponding Concept
 configured, the page warns and refuses rather than inventing one — a controlled
 vocabulary that grows from external input is not controlled.
 
-A Location counts as **geocoded** when all three of `geo:x`, `geo:y` and
-`geo:accuracy` are present and each one's value resolves to a non-empty entity.
-A prop pointing at a Value that was deleted, or at a Value with a blank label,
-does not count — a coordinate that cannot be read is not a coordinate. One
+A Location counts as **geocoded** when both `geo:geometry` and `geo:accuracy`
+are present and the geometry's value resolves to an entity whose label is a valid
+GeoJSON geometry. A prop pointing at a Value that was deleted, or at a Value whose
+label is blank, not JSON, out of range or an open ring, does not count — a
+geometry that cannot be read is not a geometry. One
 Location in the converted set, `diocesis Tudensis`, is exactly that shape.
 
-`geo:type` is not part of the test. It records what kind of place the coordinate
+`geo:type` is not part of the test. It records what kind of place the geometry
 refers to, and its absence does not make the coordinate unusable.
 
 None of these Concept identities is hardcoded. Which Concept plays which role is
@@ -85,7 +93,7 @@ panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
 The **global** modal is reached from the menu's tools section beside Global
-validations. It assigns thirty-five entities: the four coordinate roles, the four
+validations. It assigns thirty-four entities: the three geometry, accuracy and kind roles, the four
 accuracy values, the twelve place types and fifteen gazetteer Resources. Each
 field selects an existing entity or creates one, so a fresh deployment needs no
 seeding job — and the ten gazetteers whose record URL ends with the identifier
@@ -99,7 +107,7 @@ which language model the engine may use.
 The split is not about trust. Creating an entity here follows the same rules as
 everywhere else in the application — `POST /entities` is open to every role, and
 nothing in this feature narrows that. What is owner-only is deciding *which*
-Concept means `geo:x`, because that decision is what "geocoded" means. Were a
+Concept means `geo:geometry`, because that decision is what "geocoded" means. Were a
 user able to override it, the same Location would read as geocoded for one person
 and not for another, the counts would disagree, and the ungeocoded filter would
 show two different lists to two people looking at one corpus.
@@ -238,7 +246,11 @@ so the map carries a control that arms a drag and turns the rectangle it produce
 into `regionBbox`, `[minLon, minLat, maxLon, maxLat]`. The box stays drawn on the
 map — dashed, under every mark, because it is a claim about where to look rather
 than a boundary anyone surveyed — and the region picker gains a "custom region"
-entry that is selected for as long as it is set.
+entry that is selected for as long as it is set. The control is highlighted while
+a box is set, and the box's coordinates and the link that drops it appear only
+while the pointer or keyboard focus is on the control — the highlight already
+says a region is in force, and the numbers are wanted rarely enough that showing
+them always costs more map than it saves.
 
 `region` and `regionBbox` are **mutually exclusive**: the engine answers 422 to a
 request carrying both rather than reconciling them. The page makes that refusal
@@ -484,10 +496,16 @@ in the menu that opens where the click landed. Leaving the kind undecided there
 keeps whatever the Location carries: a map click corrects where a place is and
 says nothing about what it is.
 
+A shape can also be drawn instead of picked. The shape tool under the map's
+layers and region switches draws points, lines and polygons; several shapes of
+one kind are saved together as one `Multi*` geometry, and a mix of kinds is
+refused when saving. The saved shape then asks the same two questions at its
+centre. "Edit current shape" loads the stored geometry back into the tool.
+
 The kind of place is corrected far more often than a coordinate is, so it can be
 changed from the panel head without re-running the engine. That write keeps the
-coordinate exactly as it stands — including the Value entities behind it, which
-are reused rather than minted afresh, since orphaning a pair on every correction
+geometry exactly as it stands — including the Value entity behind it, which
+is reused rather than minted afresh, since orphaning one on every correction
 accumulates on the most frequent operation.
 
 The list filters by kind of place, and its options come from the Locations the
@@ -725,12 +743,16 @@ Location that is no longer the one being read.
 
 The basemap is a vector style, so what it draws is switchable too. Three groups
 are: transport (roads, railways, paths, airports and their names), built-up
-detail (buildings, parks, points of interest), and land cover and use. Four
+detail (buildings and points of interest), and land cover and use (woodland,
+grass, parks, sand, ice and built-up areas). Four
 things are not, and carry no switch at all — administrative borders, place
 names, water and waterways, and the shaded relief. Those are what a place is
 judged against, so a control that could remove them would only ever be a way to
 break the page quietly. Extruded buildings are never drawn: they are a 3D
 reading of a map being used flat, and they cover the marks this page puts on it.
+The style draws flat building footprints only up to zoom 14 and extrusions beyond
+it, so the page adds a flat fill, copied from the style's own, that carries on
+from zoom 14; it belongs to the built-up switch like the footprints it continues.
 
 The groups are read from the style the server sends, by the source layer each of
 its layers draws from, rather than from the style's own layer names — `place`
@@ -739,6 +761,45 @@ built on it, while a name like `label_country_2` belongs to one style and is
 exactly what a restyle changes. A layer whose source the page does not recognise
 is left visible: a style carrying something new shows it, rather than hiding part
 of a map for a reason no switch explains.
+
+## Recently geocoded
+
+A strip over the map's left edge, under the search field, lists the places this
+browser has just been given a coordinate, newest first, twelve at most. A
+researcher moving down the list leaves each place as it is written, and where it
+ended up is the question that follows a few minutes later; choosing an entry takes
+the map to it. A place written twice appears once, at its latest write.
+
+It is fed by the writer, once per geometry that was saved, so every route that
+writes — a suggestion, a map click, a quick geocode, a batch — appears without
+having to remember to. A batch therefore fills it. It is kept in the browser's
+local storage and nowhere else, like the map's switches: it is a memory of what
+this researcher did, not a statement about the data, and the record of what was
+written, and by whom, is on the Location itself.
+
+An entry that arrives while the strip is on screen grows into the head of the
+list rather than appearing, so a write made from the other side of the page is
+noticed; entries already there when the page opens do not animate.
+
+## Showing a position
+
+A coordinate is shown as a mark and not as numbers. The mark says what kind of
+geometry the place has — a point, several points, a line, several lines, an area,
+several areas — and on hover or focus a card gives the numbers and a small map of
+where in the world they are, fixed at about the scale of a country however small
+the geometry, so that "which part of the world" is answered without reading a
+latitude. A geometry larger than a country sets the scale instead and is fitted.
+Choosing the mark copies the position. For anything but a point the position is
+the centre of the shape's bounding box, and the card says so and gives the box.
+
+The same card answers every place a position was once printed: the head of the
+suggestions panel, each suggestion, the map's search hits, the notice a quick
+geocode leaves, and the status dot on a located row in the list. The dot is the
+list's only mark of position; the numbers no longer take a column of every row.
+
+The map in the card is the page's own basemap, not interactive and not recoloured
+for the dark theme, built when the card opens and removed when it closes so that
+at most one is alive. It carries the basemap's attribution.
 
 ## Reading a suggestion's spread
 
@@ -812,6 +873,12 @@ the bar says how many that is before the button is pressed.
 A run is sequential and can be stopped. What it wrote is unmarked and everything
 else stays marked, so the set left behind is exactly the Locations still wanting
 a person — including the ones a stopped run never reached.
+
+A quick geocode that wrote says so in a notice that stays up for twelve seconds:
+the place it matched and where that is, the kind of place, the accuracy, how many
+sources stood behind it, and the position. The whole notice is a way to the map,
+since by the time it lands the researcher has usually looked away and the first
+thing they want is to see the answer.
 
 A window reports on the run. It opens when the run starts and again when it ends,
 and can be closed in between without stopping anything: the point of a batch is

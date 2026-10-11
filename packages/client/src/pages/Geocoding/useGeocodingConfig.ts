@@ -16,7 +16,7 @@ import { useMemo } from "react";
  * Resolves the Geocoding page's configuration.
  *
  * Roles come only from the project-wide settings row: which Concept means
- * `geo:x` decides what "geocoded" means, so one answer has to serve everyone.
+ * `geo:geometry` decides what "geocoded" means, so one answer has to serve everyone.
  * Context layers — code default, then project, then the user's own — and layers
  * per field, so someone who has set only a region still inherits the rest.
  *
@@ -36,7 +36,7 @@ export interface ResolvedGeocodingConfig {
    * "your own value" only means something against the one it replaced.
    */
   projectContext: IGeocodingContext;
-  /** False until an owner has assigned at least the two coordinate Concepts. */
+  /** False until an owner has assigned at least the geometry Concept. */
   isConfigured: boolean;
   /** Role names still unassigned, for a message that says what is missing. */
   missingRoles: string[];
@@ -137,8 +137,7 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
     };
 
     const missingRoles = [
-      !roles.x && "longitude Concept",
-      !roles.y && "latitude Concept",
+      !roles.geometry && "geometry Concept",
       !roles.accuracy && "accuracy Concept",
       !roles.type && "place type Concept",
     ].filter((entry): entry is string => !!entry);
@@ -147,9 +146,9 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
       roles,
       context,
       projectContext,
-      // the two coordinate Concepts are what a write and the geocoded/ungeocoded
-      // distinction both need; the other two only limit what a write may carry
-      isConfigured: !!roles.x && !!roles.y,
+      // the geometry Concept is what a write and the geocoded/ungeocoded
+      // distinction both need; the others only limit what a write may carry
+      isConfigured: !!roles.geometry,
       missingRoles,
       isLoading: loadingSettings || loadingUser,
     };

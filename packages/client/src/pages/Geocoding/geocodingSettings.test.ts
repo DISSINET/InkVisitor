@@ -29,8 +29,7 @@ const { nextBaseUrls, patchGeocodingRoles, putGeocodingRoles, withEntry } = awai
 );
 
 const stored: IGeocodingRoles = {
-  x: "c-x",
-  y: "c-y",
+  geometry: "c-geo",
   accuracy: "c-acc",
   type: "c-type",
   accuracyValues: { [GeocodingAccuracy.Precise]: "v-precise" },
@@ -75,10 +74,10 @@ describe("putGeocodingRoles", () => {
     expect(written().placeTypes.fortress).toBe("v-fortress");
   });
 
-  it("writes a cleared coordinate role as empty", async () => {
-    await putGeocodingRoles({ ...stored, x: "" });
-    expect(written().x).toBe("");
-    expect(written().y).toBe("c-y");
+  it("writes a cleared geometry role as empty", async () => {
+    await putGeocodingRoles({ ...stored, geometry: "" });
+    expect(written().geometry).toBe("");
+    expect(written().accuracy).toBe("c-acc");
   });
 
   it("writes a dropped gazetteer resource as dropped", async () => {

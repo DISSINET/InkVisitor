@@ -1,6 +1,9 @@
 import { IEntity } from "@inkvisitor/shared/types";
+import { GeoJsonGeometry } from "@inkvisitor/shared/types/geometry";
 import { IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import { useQueryClient } from "@tanstack/react-query";
+import type { Suggestion } from "./engineTypes";
+import type { WrittenGeometry } from "./useRecentGeocodes";
 import api from "api";
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
@@ -89,17 +92,18 @@ const gateway = (locationLabel: string): GeocodingWriteGateway => ({
     }),
 });
 
-/** A write held back because it would replace a coordinate somebody already set. */
+/** A write held back because it would replace a geometry somebody already set. */
 export interface PendingOverwrite {
   label: string;
-  from: { lat: number; lon: number };
-  to: { lat: number; lon: number };
+  from: GeoJsonGeometry;
+  to: GeoJsonGeometry;
   input: GeocodingWriteInput;
+  suggestion?: Suggestion;
 }
 
 export interface UseGeocodingWriter {
   /**
-   * Records one coordinate.
+   * Records one geometry.
    *
    * `quiet` is for a run over many Locations: it holds back the per-write
    * success line and the refetch, because forty of each is forty notifications
@@ -118,6 +122,8 @@ export interface UseGeocodingWriter {
        * gesture into as many gestures as there are Locations.
        */
       confirmed?: boolean;
+      /** The suggestion the geometry was taken from, kept with the recent entry so its evidence can be read again. */
+      suggestion?: Suggestion;
     },
   ) => Promise<boolean>;
   isWriting: boolean;
@@ -125,7 +131,7 @@ export interface UseGeocodingWriter {
   blocked: string | null;
   clearBlocked: () => void;
   /**
-   * A write waiting to be confirmed because it replaces an existing coordinate.
+   * A write waiting to be confirmed because it replaces an existing geometry.
    *
    * Held here rather than asked for by the caller: every path that writes would
    * otherwise have to remember to ask, and the one that forgot would be the one
@@ -136,7 +142,10 @@ export interface UseGeocodingWriter {
   cancelOverwrite: () => void;
 }
 
-export const useGeocodingWriter = (roles: IGeocodingRoles): UseGeocodingWriter => {
+export const useGeocodingWriter = (
+  roles: IGeocodingRoles,
+  onWritten?: (written: WrittenGeometry) => void,
+): UseGeocodingWriter => {
   const queryClient = useQueryClient();
   const [isWriting, setIsWriting] = useState(false);
   const [blocked, setBlocked] = useState<string | null>(null);
@@ -146,25 +155,25 @@ export const useGeocodingWriter = (roles: IGeocodingRoles): UseGeocodingWriter =
   const write = useCallback(
     async (
       input: GeocodingWriteInput,
-      options: { quiet?: boolean; confirmed?: boolean } = {},
+      options: { quiet?: boolean; confirmed?: boolean; suggestion?: Suggestion } = {},
     ): Promise<boolean> => {
-      const { quiet = false, confirmed = false } = options;
+      const { quiet = false, confirmed = false, suggestion } = options;
       const plan = planGeocodingWrite(input);
       if (isBlocked(plan)) {
         setBlocked(plan.blocked);
         return false;
       }
 
-      // a coordinate somebody already set is not replaced without being told
+      // a geometry somebody already set is not replaced without being told
       // what is being lost, and the previous one is only nameable here
       if (plan.isOverwrite && !confirmed) {
-        const { lat, lon } = input.current || {};
-        if (lat != null && lon != null) {
+        if (input.current) {
           setPendingOverwrite({
             label: input.location.labels?.[0] || input.location.id,
-            from: { lat, lon },
-            to: { lat: input.lat, lon: input.lon },
+            from: input.current,
+            to: input.geometry,
             input,
+            suggestion,
           });
           return false;
         }
@@ -191,33 +200,40 @@ export const useGeocodingWriter = (roles: IGeocodingRoles): UseGeocodingWriter =
           // Said even in a quiet run: it is the one outcome that is neither a
           // success nor a failure, and a run must not swallow it
           toast.info(
-            `Coordinate saved. ${outcome.undeletedValueIds.length} replaced value(s) were kept because something else still refers to them.`,
+            `Geometry saved. ${outcome.undeletedValueIds.length} replaced value(s) were kept because something else still refers to them.`,
           );
         } else if (!quiet) {
-          toast.success(`Coordinate saved for ${label}.`);
+          toast.success(`Geometry saved for ${label}.`);
         }
 
         // the list, the map and the counts all read one collection, so one
-        // invalidation is what puts the new coordinate on screen
+        // invalidation is what puts the new geometry on screen
         if (!quiet) {
           queryClient.invalidateQueries({ queryKey: ["geocoding-locations"] });
           queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
         }
+        onWritten?.({
+          id: input.location.id,
+          label,
+          geometry: input.geometry,
+          accuracy: input.accuracy,
+          suggestion,
+        });
         return true;
       } finally {
         setIsWriting(false);
       }
     },
-    [roles, queryClient],
+    [roles, queryClient, onWritten],
   );
 
   const confirmOverwrite = useCallback(async () => {
     if (!pendingOverwrite) {
       return false;
     }
-    const { input } = pendingOverwrite;
+    const { input, suggestion } = pendingOverwrite;
     setPendingOverwrite(null);
-    return write(input, { confirmed: true });
+    return write(input, { confirmed: true, suggestion });
   }, [pendingOverwrite, write]);
 
   return {

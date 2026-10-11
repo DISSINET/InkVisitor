@@ -6,6 +6,7 @@ import {
   IGeocodingContextWeights,
 } from "@inkvisitor/shared/types/geocoding";
 import { IUserOptions } from "@inkvisitor/shared/types";
+import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Box, Button, Panel } from "components";
@@ -36,6 +37,7 @@ import { GeocodingActivityModal } from "./GeocodingActivityModal";
 import { GeocodingContextModal } from "./GeocodingContextModal";
 import { GeocodingOverwriteModal } from "./GeocodingOverwriteModal";
 import { GeocodingMap } from "./GeocodingMap";
+import { QuickGeocodeToast } from "./QuickGeocodeToast";
 import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./GeocodingSuggestions";
 import { StyledEngineDot, StyledEngineLabel, StyledEngineStatus } from "./GeocodingPageStyles";
 import { EngineState } from "./types";
@@ -45,6 +47,7 @@ import { useGeocodingPanels } from "./useGeocodingPanels";
 import { GeocodingLocation } from "./useGeocodingLocations";
 import { useGeocodingSuggest } from "./useGeocodingSuggest";
 import { useGeocodingWriter } from "./useGeocodingWriter";
+import { useRecentGeocodes } from "./useRecentGeocodes";
 
 /**
  * How long after the last movement of a weight slider it is written.
@@ -53,6 +56,9 @@ import { useGeocodingWriter } from "./useGeocodingWriter";
  * pressing regeocode saves what is being asked about.
  */
 const WEIGHT_SAVE_DELAY_MS = 400;
+
+/** How long the notice of a quick geocode stays up, which is long enough to act on. */
+const QUICK_TOAST_MS = 12_000;
 
 export const GeocodingPage: React.FC = () => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
@@ -160,11 +166,14 @@ export const GeocodingPage: React.FC = () => {
    * they belong in.
    */
   const pendingWeights = useRef<IGeocodingContextWeights>({});
-  useEffect(() => () => {
-    if (weightSave.current) {
-      clearTimeout(weightSave.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (weightSave.current) {
+        clearTimeout(weightSave.current);
+      }
+    },
+    [],
+  );
   const setContextWeight = (field: QueryField, weight: number) => {
     setContext((current) => ({
       ...current,
@@ -332,9 +341,7 @@ export const GeocodingPage: React.FC = () => {
    * points at a different place in the list.
    */
   const nextToDo = (writingId: string) =>
-    browse.visible.find(
-      (location) => !location.isGeocoded && location.entity.id !== writingId,
-    );
+    browse.visible.find((location) => !location.isGeocoded && location.entity.id !== writingId);
 
   /**
    * Runs a write and moves on.
@@ -343,9 +350,12 @@ export const GeocodingPage: React.FC = () => {
    * has just risen to the top of that group — the researcher works down from
    * there while what they finished sits directly above the boundary.
    */
-  const writeAndAdvance = async (input: Parameters<typeof write>[0]) => {
+  const writeAndAdvance = async (
+    input: Parameters<typeof write>[0],
+    options?: Parameters<typeof write>[1],
+  ) => {
     const next = nextToDo(input.location.id);
-    if (await write(input)) {
+    if (await write(input, options)) {
       browse.markWritten(input.location.id);
       setSelected(next);
       return;
@@ -408,20 +418,20 @@ export const GeocodingPage: React.FC = () => {
       {
         location: location.entity,
         roles,
-        lat: pick.take.lat,
-        lon: pick.take.lon,
+        geometry: pointGeometry(pick.take.lon, pick.take.lat),
         accuracy: pick.accuracy,
         // the same rule every other path follows: a kind is written only where
         // the corpus named one to stand for all of them, and never guessed at
-        placeType: context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
+        placeType:
+          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
         provenance: provenanceOf(pick.take),
-        current: location,
+        current: location.geometry,
         userOptions: user.options,
       },
       // a quick geocode is the answer to "geocode this", and stopping to ask
       // whether it may replace what is there turns one gesture into two —
       // asked of a run of ninety, into ninety
-      { quiet: options.quiet, confirmed: true },
+      { quiet: options.quiet, confirmed: true, suggestion: pick.take },
     );
     if (written) {
       browse.markWritten(location.entity.id);
@@ -461,9 +471,20 @@ export const GeocodingPage: React.FC = () => {
     if (result.written && result.taken) {
       const { suggestion, accuracy } = result.taken;
       refreshLocations();
+      const show = () => {
+        setFocus((current) => nextFocus(current, suggestion.lat, suggestion.lon));
+        toast.dismiss(toastId);
+      };
+      // held long enough to be read and used, and the whole notice is a way to
+      // the map: the researcher has usually looked away by the time it lands
       toast.success(
-        `${label} — ${suggestion.lat.toFixed(4)}, ${suggestion.lon.toFixed(4)} · ${accuracy}`,
-        { toastId },
+        <QuickGeocodeToast
+          label={label}
+          suggestion={suggestion}
+          accuracy={accuracy}
+          onShow={show}
+        />,
+        { toastId, autoClose: QUICK_TOAST_MS, onClick: show },
       );
       return;
     }
@@ -491,13 +512,12 @@ export const GeocodingPage: React.FC = () => {
       {
         location: location.entity,
         roles,
-        lat: suggestion.lat,
-        lon: suggestion.lon,
+        geometry: pointGeometry(suggestion.lon, suggestion.lat),
         accuracy,
         placeType:
           context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
         provenance: provenanceOf(suggestion),
-        current: location,
+        current: location.geometry,
         userOptions: user.options,
       },
       { quiet: true, confirmed: true },
@@ -684,10 +704,7 @@ export const GeocodingPage: React.FC = () => {
         closeHover.current = null;
       }
       if (index === null || !at) {
-        closeHover.current = window.setTimeout(
-          () => setHoveredSuggestion(null),
-          HOVER_GRACE_MS,
-        );
+        closeHover.current = window.setTimeout(() => setHoveredSuggestion(null), HOVER_GRACE_MS);
         return;
       }
       setHoveredSuggestion({ index, at });
@@ -733,11 +750,11 @@ export const GeocodingPage: React.FC = () => {
   const advanceTo = useRef<GeocodingLocation | undefined>(undefined);
 
   /**
-   * Records what kind of place a Location is, leaving its coordinate alone.
+   * Records what kind of place a Location is, leaving its geometry alone.
    *
-   * The coordinate and accuracy are written back unchanged because the write
+   * The geometry and accuracy are written back unchanged because the write
    * replaces every role it owns, and a partial one would leave a Location with a
-   * kind and no longitude. A Location with no coordinate has nothing to write
+   * kind and no geometry. A Location with no geometry has nothing to write
    * against, so the mark on its row is a label rather than a control.
    */
   const retype = async (
@@ -745,18 +762,17 @@ export const GeocodingPage: React.FC = () => {
     placeType: GeocodingPlaceType | null,
     options?: { quiet?: boolean },
   ): Promise<boolean> => {
-    if (!user?.options || location.lat == null || location.lon == null) {
+    if (!user?.options || !location.geometry) {
       return false;
     }
     return write(
       {
         location: location.entity,
         roles,
-        lat: location.lat,
-        lon: location.lon,
+        geometry: location.geometry,
         accuracy: location.accuracy || GeocodingAccuracy.Unknown,
         placeType,
-        current: location,
+        current: location.geometry,
         userOptions: user.options,
       },
       options,
@@ -776,8 +792,9 @@ export const GeocodingPage: React.FC = () => {
       setSelected(fresh);
     }
   }, [browse.all, selected]);
+  const { recent, record: recordRecent } = useRecentGeocodes();
   const { write, blocked, clearBlocked, pendingOverwrite, confirmOverwrite, cancelOverwrite } =
-    useGeocodingWriter(roles);
+    useGeocodingWriter(roles, recordRecent);
 
   // a refused write says why. Without this the researcher cannot tell an accept
   // that worked from one the project's configuration silently rejected.
@@ -892,7 +909,9 @@ export const GeocodingPage: React.FC = () => {
             engineReady={engineReady}
             onShowOnMap={(location) =>
               location.lat != null && location.lon != null
-                ? setFocus((current) => nextFocus(current, location.lat as number, location.lon as number))
+                ? setFocus((current) =>
+                    nextFocus(current, location.lat as number, location.lon as number),
+                  )
                 : undefined
             }
             // selecting is what the rest of the page is gated on, so the row
@@ -961,26 +980,27 @@ export const GeocodingPage: React.FC = () => {
             }
             roles={roles}
             focus={focus}
+            recent={recent}
+            onShowRecent={(lat, lon) => setFocus((current) => nextFocus(current, lat, lon))}
             onRegionBox={setRegionBox}
             onChooseSuggestion={chooseOnMap}
             onSelectLocation={selectOnMap}
             onHoverSuggestion={hoverOnMap}
             highlighted={highlighted}
             leader={leader}
-            onAssign={(lat, lon, accuracy, placeType) => {
+            onAssign={(geometry, accuracy, placeType) => {
               if (!selected || !user?.options) {
                 return;
               }
               writeAndAdvance({
                 location: selected.entity,
                 roles,
-                lat,
-                lon,
+                geometry,
                 accuracy,
                 // an undecided kind of place keeps whatever the Location carries,
                 // which is what a coordinate correction means
                 placeType: placeType === undefined ? selected.placeType : placeType,
-                current: selected,
+                current: selected.geometry,
                 userOptions: user.options,
               });
             }}
@@ -1025,20 +1045,22 @@ export const GeocodingPage: React.FC = () => {
               if (!selected || !user?.options) {
                 return;
               }
-              writeAndAdvance({
-                location: selected.entity,
-                roles,
-                lat: suggestion.lat,
-                lon: suggestion.lon,
-                accuracy,
-                // the researcher's answer, not the engine's: a suggestion often
-                // carries no type, and the twelve are a judgement about the
-                // place rather than a summary of what the sources called it
-                placeType,
-                provenance,
-                current: selected,
-                userOptions: user.options,
-              });
+              writeAndAdvance(
+                {
+                  location: selected.entity,
+                  roles,
+                  geometry: pointGeometry(suggestion.lon, suggestion.lat),
+                  accuracy,
+                  // the researcher's answer, not the engine's: a suggestion often
+                  // carries no type, and the twelve are a judgement about the
+                  // place rather than a summary of what the sources called it
+                  placeType,
+                  provenance,
+                  current: selected.geometry,
+                  userOptions: user.options,
+                },
+                { suggestion },
+              );
             }}
           />
         </Box>

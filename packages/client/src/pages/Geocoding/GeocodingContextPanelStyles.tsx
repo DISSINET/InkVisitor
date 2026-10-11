@@ -126,6 +126,29 @@ export const StyledContextGrid = styled.div`
   margin-top: ${({ theme }) => theme.space[3]};
 `;
 
+/**
+ * Names the weight column, over the sliders.
+ *
+ * Drawn in the column's own cell and left to the first row of the grid, so it
+ * sits exactly over the sliders however wide the labels beside them are.
+ */
+export const StyledContextColumnTitle = styled.div`
+  grid-column: 3;
+  font-family: monospace;
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** The mark that says a value is not the project's. */
+export const StyledDepartureMark = styled.span`
+  display: inline-flex;
+  align-items: center;
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color["warning"]};
+`;
+
 /** The weight, as one control and the number it is sitting at. */
 export const StyledWeightCell = styled.div`
   display: flex;
@@ -173,6 +196,9 @@ export const StyledWeightValue = styled.span<{ $moved: boolean; $off: boolean }>
  * theirs is readable without opening anything.
  */
 export const StyledContextLabel = styled.label<{ $overridden: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
   font-family: monospace;
   font-size: ${({ theme }) => theme.fontSize.xxs};
   white-space: nowrap;

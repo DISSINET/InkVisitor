@@ -40,7 +40,7 @@ import { QuickStrategy } from "./quickGeocode";
  * are settings about the page rather than about a place, and none of them can
  * make an answer stale.
  *
- * Roles are absent by design. Which Concept means `geo:x` is set for the whole
+ * Roles are absent by design. Which Concept means `geo:geometry` is set for the whole
  * project, because it decides what "geocoded" means — were it overridable here,
  * the same Location would read as geocoded for one person and not for another.
  */

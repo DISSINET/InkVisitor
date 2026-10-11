@@ -37,7 +37,7 @@ const readSettings = async (): Promise<IGeocodingSettings> => {
  * Assigns some roles without disturbing the rest.
  *
  * Assignment replaces: a role holds one entity id, never a list, so two Concepts
- * can never both be live as `geo:x`. The nested maps merge by key so assigning
+ * can never both be live as `geo:geometry`. The nested maps merge by key so assigning
  * one place type leaves the other eleven alone.
  */
 export const patchGeocodingRoles = async (partial: Partial<IGeocodingRoles>): Promise<void> => {

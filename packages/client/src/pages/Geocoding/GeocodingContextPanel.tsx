@@ -1,8 +1,8 @@
 import { DEFAULT_CONTEXT_WEIGHTS, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "components";
+import { Button, IconWithTooltip } from "components";
 import Dropdown from "components/advanced";
-import { IcoChevronDown, IcoGeocode } from "Theme/icons";
+import { IcoChevronDown, IcoGeocode, IcoWarning } from "Theme/icons";
 import React, { useState } from "react";
 import { engineParameters } from "./engine";
 import {
@@ -29,6 +29,8 @@ import {
 } from "./geocodingContextFields";
 import {
   StyledContextCaret,
+  StyledContextColumnTitle,
+  StyledDepartureMark,
   StyledContextGlobal,
   StyledContextGrid,
   StyledContextHead,
@@ -88,6 +90,12 @@ const OPEN_KEY = "geocoding:contextPanelOpen";
  * on the heading afterwards.
  */
 const USED_KEY = "geocoding:contextPanelUsed";
+
+/** A weight in the words the tooltip uses: its place on the 0–10 scale, "normal" in the middle. */
+const weightWords = (weight: number, field: QueryField): string => {
+  const step = weightToStep(weight, field);
+  return weight === 0 ? "off" : step === NEUTRAL_STEP ? "normal" : `${step}/10`;
+};
 
 const NOTE =
   "Sent with every request, and saved as your own defaults. The engine uses these to choose " +
@@ -189,6 +197,84 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
   const drawnOverNothing = (field: QueryField) =>
     field === "region" && !!context.regionBbox && !projectContext.region;
 
+  /**
+   * What the project holds for a field, in the words the picker uses.
+   *
+   * "nothing" where the project is silent, since a field that departs from a
+   * silent project is still a departure the reader should be told about.
+   */
+  const projectSays = (field: QueryField): string => {
+    if (field === "language") {
+      return contextLanguages(projectContext).length
+        ? optionLabels(parameters, field, contextLanguages(projectContext))
+        : "nothing";
+    }
+    return projectContext[field]
+      ? optionLabel(parameters, field, projectContext[field])
+      : "nothing";
+  };
+
+  const departureMark = (
+    <StyledDepartureMark>
+      <IcoWarning />
+    </StyledDepartureMark>
+  );
+
+  /**
+   * Whether a value is not the project's, silence included.
+   *
+   * `overridden` leaves out a value set where the project says nothing, because
+   * there is no answer to go back to. The mark is about the question being asked
+   * rather than the way back, so it also covers that case.
+   */
+  const departs = (field: QueryField) =>
+    overridden(field) ||
+    (field === "language"
+      ? languages.length > 0 && contextLanguages(projectContext).length === 0
+      : !!context[field] && !projectContext[field]);
+
+  /** The mark and its tooltip for a value that is not the project's. */
+  const valueDeparture = (field: QueryField) => {
+    if (!departs(field)) {
+      return null;
+    }
+    const projectHolds = projectSays(field) !== "nothing";
+    const text = drawnOverNothing(field)
+      ? "A region drawn on the map is used, and the project names none. Dropping it leaves the query with no region."
+      : field === "region" && context.regionBbox
+        ? `A region drawn on the map is used instead of the project's (${projectSays(field)}).`
+        : `You chose ${summaryOf(field)}; ` +
+          (projectHolds
+            ? `the project's default is ${projectSays(field)}. `
+            : "the project sets no default. ") +
+          "Your choice is sent with every request and saved as your own default.";
+    return (
+      <IconWithTooltip
+        icon={departureMark}
+        tooltipLabel={`Differs from the project's ${queryFieldLabel[field]}`}
+        tooltipText={text}
+        tooltipPosition="bottom-start"
+      />
+    );
+  };
+
+  /** The mark for a weight that is not the project's. */
+  const weightDeparture = (field: QueryField) => {
+    const mine = contextWeight(context, field);
+    const theirs = contextWeight(projectContext, field);
+    if (mine === theirs) {
+      return null;
+    }
+    return (
+      <IconWithTooltip
+        icon={departureMark}
+        tooltipLabel="Differs from the project's importance"
+        tooltipText={`${queryFieldLabel[field]} counts ${weightWords(mine, field)} here; the project has it at ${weightWords(theirs, field)}. Yours is sent with every request.`}
+        tooltipPosition="bottom-end"
+      />
+    );
+  };
+
   /** What the folded line says one field holds. */
   const summaryOf = (field: QueryField): string => {
     if (field === "language") {
@@ -237,6 +323,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
         <StyledWeightValue $moved={moved} $off={weight === 0}>
           {weight === 0 ? "off" : step === NEUTRAL_STEP ? "normal" : String(step)}
         </StyledWeightValue>
+        {weightDeparture(field)}
       </StyledWeightCell>
     );
   };
@@ -337,10 +424,12 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
         )}
 
         <StyledContextGrid>
+          <StyledContextColumnTitle>importance /10</StyledContextColumnTitle>
           {QUERY_FIELDS.map((field) => (
             <React.Fragment key={field}>
               <StyledContextLabel $overridden={overridden(field)}>
                 {queryFieldLabel[field]}
+                {valueDeparture(field)}
               </StyledContextLabel>
               {fieldControl(field)}
               {weightCell(field)}

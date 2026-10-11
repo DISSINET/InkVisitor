@@ -854,9 +854,6 @@ export const StyledKind = styled.span`
  */
 export const StyledHeadCoordinate = styled.span`
   flex: 0 0 auto;
-  /* a coordinate is monospace and its width is known, so giving it one keeps the
-     column straight whether or not the row above carried an "off-region" chip */
-  width: 11.5rem;
   text-align: right;
   font-family: monospace;
   font-size: ${({ theme }) => theme.fontSize.xxs};

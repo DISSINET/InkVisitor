@@ -1,5 +1,6 @@
 import * as maplibregl from "maplibre-gl";
 import { ThemeType } from "Theme/theme";
+import { GeoJsonGeometry } from "@inkvisitor/shared/types/geometry";
 import { GeocodingLocation } from "./useGeocodingLocations";
 import { Suggestion } from "./engineTypes";
 import { OFF_REGION_FILL, SUGGESTION_MARK, scoreShare, scoreStep } from "./suggestionRank";
@@ -16,6 +17,8 @@ import { OFF_REGION_FILL, SUGGESTION_MARK, scoreShare, scoreStep } from "./sugge
 export const SRC = {
   regionBox: "geocoding-region-box",
   others: "geocoding-others",
+  othersShapes: "geocoding-others-shapes",
+  selectedShape: "geocoding-selected-shape",
   suggestions: "geocoding-suggestions",
   pending: "geocoding-pending",
   selected: "geocoding-selected",
@@ -26,6 +29,12 @@ export const LYR = {
   regionBoxFill: "geocoding-region-box-fill",
   regionBoxLine: "geocoding-region-box-line",
   others: "geocoding-others-circle",
+  othersShapeFill: "geocoding-others-shape-fill",
+  othersShapeLine: "geocoding-others-shape-line",
+  othersShapePoints: "geocoding-others-shape-points",
+  selectedShapePoints: "geocoding-selected-shape-points",
+  selectedShapeFill: "geocoding-selected-shape-fill",
+  selectedShapeLine: "geocoding-selected-shape-line",
   othersName: "geocoding-others-name",
   suggestions: "geocoding-suggestions-circle",
   suggestionRank: "geocoding-suggestions-rank",
@@ -87,12 +96,7 @@ export const boundsOf = (points: Position[]): maplibregl.LngLatBounds => {
  * `id` is what a feature state attaches to — the renderer keys them by it and
  * silently ignores a state set against a feature that has none.
  */
-const point = (
-  lat: number,
-  lon: number,
-  properties: Record<string, unknown>,
-  id?: number,
-) => ({
+const point = (lat: number, lon: number, properties: Record<string, unknown>, id?: number) => ({
   type: "Feature" as const,
   id,
   geometry: { type: "Point" as const, coordinates: [lon, lat] },
@@ -117,6 +121,23 @@ export const othersData = (locations: GeocodingLocation[]) =>
         }),
       ),
   );
+
+/**
+ * The outlines of every Location whose geometry is more than a point.
+ *
+ * A Point is already its own mark, and every other shape is also marked at its
+ * anchor — the outline says how far it reaches, the mark says where it is named.
+ */
+export const shapesData = (geometries: { id: string; geometry: GeoJsonGeometry | null }[]) => ({
+  type: "FeatureCollection" as const,
+  features: geometries
+    .filter((one) => one.geometry && one.geometry.type !== "Point")
+    .map((one) => ({
+      type: "Feature" as const,
+      geometry: one.geometry as GeoJsonGeometry,
+      properties: { id: one.id },
+    })),
+});
 
 export const suggestionsData = (suggestions: Suggestion[], leader: number | null = null) => {
   // the ramp is measured against this run's own best answer, which is the only
@@ -255,6 +276,79 @@ export const addGeocodingLayers = (map: maplibregl.Map, theme: ThemeType): void 
     },
   });
 
+  // The reach of a Location whose geometry is a line or an area, under every
+  // mark: the outline is the ground the anchor mark sits on.
+  addLayer({
+    id: LYR.othersShapeFill,
+    type: "fill",
+    source: SRC.othersShapes,
+    filter: [
+      "any",
+      ["==", ["geometry-type"], "Polygon"],
+      ["==", ["geometry-type"], "MultiPolygon"],
+    ],
+    paint: {
+      "fill-color": theme.color["greyer"] as string,
+      "fill-opacity": 0.12,
+    },
+  });
+  addLayer({
+    id: LYR.othersShapeLine,
+    type: "line",
+    source: SRC.othersShapes,
+    paint: {
+      "line-color": theme.color["greyer"] as string,
+      "line-width": 1.5,
+      "line-opacity": 0.7,
+    },
+  });
+  // the parts of a MultiPoint, which has no line or area to draw
+  addLayer({
+    id: LYR.othersShapePoints,
+    type: "circle",
+    source: SRC.othersShapes,
+    filter: ["==", ["geometry-type"], "Point"],
+    paint: {
+      "circle-radius": 3,
+      "circle-color": theme.color["greyer"] as string,
+      "circle-opacity": 0.6,
+    },
+  });
+  addLayer({
+    id: LYR.selectedShapeFill,
+    type: "fill",
+    source: SRC.selectedShape,
+    filter: [
+      "any",
+      ["==", ["geometry-type"], "Polygon"],
+      ["==", ["geometry-type"], "MultiPolygon"],
+    ],
+    paint: {
+      "fill-color": theme.color["success"] as string,
+      "fill-opacity": 0.2,
+    },
+  });
+  addLayer({
+    id: LYR.selectedShapeLine,
+    type: "line",
+    source: SRC.selectedShape,
+    paint: {
+      "line-color": theme.color["success"] as string,
+      "line-width": 2.5,
+    },
+  });
+  addLayer({
+    id: LYR.selectedShapePoints,
+    type: "circle",
+    source: SRC.selectedShape,
+    filter: ["==", ["geometry-type"], "Point"],
+    paint: {
+      "circle-radius": 5,
+      "circle-color": theme.color["success"] as string,
+      "circle-opacity": 0.8,
+    },
+  });
+
   // Added before every mark so the ring sits under them: it points at what is
   // already drawn there, and drawn over the top it would hide it.
   addLayer({
@@ -363,19 +457,7 @@ export const addGeocodingLayers = (map: maplibregl.Map, theme: ThemeType): void 
         theme.color["success"] as string,
         ["==", ["get", "lead"], 1],
         theme.color["warning"] as string,
-        [
-          "match",
-          ["get", "step"],
-          0,
-          ramp[0],
-          1,
-          ramp[1],
-          2,
-          ramp[2],
-          3,
-          ramp[3],
-          ramp[4],
-        ],
+        ["match", ["get", "step"], 0, ramp[0], 1, ramp[1], 2, ramp[2], 3, ramp[3], ramp[4]],
       ],
     },
   });
@@ -501,7 +583,13 @@ export interface GeocodingMapData {
    * withheld to make visible.
    */
   leader: number | null;
-  selected: { position: Position | null; name: string; id?: string };
+  selected: {
+    position: Position | null;
+    name: string;
+    id?: string;
+    /** The outline to draw, where the Location's geometry is more than a point. */
+    geometry?: GeoJsonGeometry | null;
+  };
   pending: Position | null;
   /**
    * The point last asked for by name, ringed until the asking is replaced or
@@ -526,12 +614,23 @@ export interface GeocodingMapData {
 export const setGeocodingMapData = (map: maplibregl.Map, data: GeocodingMapData): void => {
   const set = (
     id: string,
-    source: ReturnType<typeof pointData> | ReturnType<typeof boxData>,
+    source:
+      | ReturnType<typeof pointData>
+      | ReturnType<typeof boxData>
+      | ReturnType<typeof shapesData>,
   ) =>
     (map.getSource(id) as maplibregl.GeoJSONSource | undefined)?.setData(
       source as Parameters<maplibregl.GeoJSONSource["setData"]>[0],
     );
   set(SRC.others, othersData(data.others));
+  set(
+    SRC.othersShapes,
+    shapesData(data.others.map((one) => ({ id: one.entity.id, geometry: one.geometry }))),
+  );
+  set(
+    SRC.selectedShape,
+    shapesData([{ id: data.selected.id ?? "", geometry: data.selected.geometry ?? null }]),
+  );
   set(SRC.suggestions, suggestionsData(data.suggestions, data.leader));
   set(
     SRC.selected,
@@ -554,25 +653,53 @@ export const setGeocodingMapData = (map: maplibregl.Map, data: GeocodingMapData)
  * flight throws rather than waiting; the frame after it lands draws on the new
  * style, so a dropped frame costs nothing.
  */
-export const setFocusPulse = (
-  map: maplibregl.Map,
-  radius: number,
-  opacity: number,
-): void => {
+export const setFocusPulse = (map: maplibregl.Map, radius: number, opacity: number): void => {
   try {
     if (!map.getLayer(LYR.focusHalo) || !map.getLayer(LYR.focusRing)) {
       return;
     }
     map.setPaintProperty(LYR.focusHalo, "circle-radius", radius);
     map.setPaintProperty(LYR.focusRing, "circle-radius", radius);
-    map.setPaintProperty(
-      LYR.focusHalo,
-      "circle-stroke-opacity",
-      opacity * FOCUS_BACKING_OPACITY,
-    );
+    map.setPaintProperty(LYR.focusHalo, "circle-stroke-opacity", opacity * FOCUS_BACKING_OPACITY);
     map.setPaintProperty(LYR.focusRing, "circle-stroke-opacity", opacity);
   } catch {
     // a style is being swapped in; the next frame draws on the one that arrives
+  }
+};
+
+/** How much of its opacity a suggestion keeps while another one is pointed at. */
+const DIMMED_SHARE = 0.45;
+
+const unlessHovered = (full: unknown) =>
+  [
+    "*",
+    full,
+    ["case", ["boolean", ["feature-state", "hovered"], false], 1, DIMMED_SHARE],
+  ] as maplibregl.ExpressionSpecification;
+
+/**
+ * Fades every suggestion mark but the hovered one, as the list fades its cards.
+ *
+ * The same fact drawn in both panels: a reader pointing at one place is asking
+ * which of them it is, and the rest are in the way of the answer. Set as paint
+ * rather than as a state on each mark, so it costs four property writes however
+ * many suggestions are drawn.
+ */
+const dimOtherSuggestions = (map: maplibregl.Map, on: boolean): void => {
+  const fill = [
+    "case",
+    ["==", ["get", "offRegion"], 1],
+    OFF_REGION_FILL,
+    SUGGESTION_MARK.fillOpacity,
+  ] as maplibregl.ExpressionSpecification;
+  if (map.getLayer(LYR.suggestions)) {
+    map.setPaintProperty(LYR.suggestions, "circle-opacity", on ? unlessHovered(fill) : fill);
+    map.setPaintProperty(LYR.suggestions, "circle-stroke-opacity", on ? unlessHovered(1) : 1);
+  }
+  for (const id of [LYR.suggestionRank, LYR.suggestionName]) {
+    if (map.getLayer(id)) {
+      map.setPaintProperty(id, "text-opacity", on ? unlessHovered(1) : 1);
+    }
   }
 };
 
@@ -600,6 +727,7 @@ export const setHoveredSuggestion = (
     return;
   }
   try {
+    dimOtherSuggestions(map, index !== null);
     if (previous !== null && previous !== index) {
       map.setFeatureState({ source: SRC.suggestions, id: previous }, { hovered: false });
     }

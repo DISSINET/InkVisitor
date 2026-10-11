@@ -3,7 +3,7 @@
  *
  * Two levels. Roles — which Concept or Resource entity plays which part — are
  * project-wide and set only by an owner or admin, because a role assignment is
- * what "geocoded" means: if one user could point `x` at a different Concept, the
+ * what "geocoded" means: if one user could point `geometry` at a different Concept, the
  * same Location would read as geocoded for them and not for anyone else.
  *
  * Context is the query a researcher happens to be working in, so it layers:
@@ -46,10 +46,11 @@ export type GeocodingPlaceType = (typeof GEOCODING_PLACE_TYPES)[number];
  * geocoding is unavailable.
  */
 export interface IGeocodingRoles {
-  /** Concept whose prop carries longitude. Its presence is what makes a Location geocoded. */
-  x: string;
-  /** Concept whose prop carries latitude. */
-  y: string;
+  /**
+   * Concept whose prop carries the geometry: a Value entity whose label is one
+   * GeoJSON geometry. Its presence is what makes a Location geocoded.
+   */
+  geometry: string;
   /** Concept whose prop carries the accuracy. */
   accuracy: string;
   /** Concept whose prop carries the place type. */
@@ -241,8 +242,7 @@ export interface IGeocodingUserSettings {
 export const GEOCODING_SETTINGS_KEY = "geocoding";
 
 export const emptyGeocodingRoles = (): IGeocodingRoles => ({
-  x: "",
-  y: "",
+  geometry: "",
   accuracy: "",
   type: "",
   accuracyValues: {},

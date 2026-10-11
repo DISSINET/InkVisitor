@@ -56,7 +56,7 @@ importers:
         version: 30.4.1(supports-color@8.1.1)
       jsdom:
         specifier: ^27.0.1
-        version: 27.4.0(@noble/hashes@1.8.0)(supports-color@5.5.0)
+        version: 27.4.0(@noble/hashes@1.8.0)(supports-color@8.1.1)
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -201,6 +201,12 @@ importers:
       styled-components:
         specifier: ^6.4.1
         version: 6.4.2(react-dom@19.2.6(react@19.2.6))(react-native@0.85.3(@babel/core@7.29.0(supports-color@8.1.1))(@types/react@19.2.15)(react@19.2.6)(supports-color@8.1.1))(react@19.2.6)
+      terra-draw:
+        specifier: 1.37.0
+        version: 1.37.0
+      terra-draw-maplibre-gl-adapter:
+        specifier: 1.5.0
+        version: 1.5.0(maplibre-gl@6.13.0)(terra-draw@1.37.0)
       uuid:
         specifier: ^13.0.2
         version: 13.0.2
@@ -6468,6 +6474,15 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
+  terra-draw-maplibre-gl-adapter@1.5.0:
+    resolution: {integrity: sha512-wUv7WDIKln+cWkJOJZ68cOLwFhcBXlSN3GF56Dx8GLnmTTnQEZbIyzWRHjsxhn+TOXvxBOlCDl5JmCghIW3L4g==}
+    peerDependencies:
+      maplibre-gl: '>=4'
+      terra-draw: ^1.0.0
+
+  terra-draw@1.37.0:
+    resolution: {integrity: sha512-t8aGT6tZM+ZTygPg3nRG0/B/OtjiQfrjJauMB1MLyJTFvt4gDNSgk7InFIYzGc/zOwHICJEEDn8Hq+pKzC8mag==}
+
   terser-webpack-plugin@5.6.0:
     resolution: {integrity: sha512-Eum+5ajkaOhf5KbM26osvv21kLD7BaGqQ1UA4Ami4arYwylmGUQTgHFpHDdmJod1q4QXa66p0to/FBKID+J1vA==}
     engines: {node: '>= 10.13.0'}
@@ -12112,13 +12127,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@7.0.6(supports-color@5.5.0):
-    dependencies:
-      agent-base: 7.1.4
-      debug: 4.4.3(supports-color@5.5.0)
-    transitivePeerDependencies:
-      - supports-color
-
   https-proxy-agent@7.0.6(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
@@ -13037,7 +13045,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  jsdom@27.4.0(@noble/hashes@1.8.0)(supports-color@5.5.0):
+  jsdom@27.4.0(@noble/hashes@1.8.0)(supports-color@8.1.1):
     dependencies:
       '@acemir/cssom': 0.9.31
       '@asamuzakjp/dom-selector': 6.8.1
@@ -13047,7 +13055,7 @@ snapshots:
       decimal.js: 10.6.0
       html-encoding-sniffer: 6.0.0(@noble/hashes@1.8.0)
       http-proxy-agent: 7.0.2(supports-color@5.5.0)
-      https-proxy-agent: 7.0.6(supports-color@5.5.0)
+      https-proxy-agent: 7.0.6(supports-color@8.1.1)
       is-potential-custom-element-name: 1.0.1
       parse5: 8.0.1
       saxes: 6.0.0
@@ -14854,6 +14862,13 @@ snapshots:
   tabbable@6.4.0: {}
 
   tapable@2.3.3: {}
+
+  terra-draw-maplibre-gl-adapter@1.5.0(maplibre-gl@6.13.0)(terra-draw@1.37.0):
+    dependencies:
+      maplibre-gl: 6.13.0
+      terra-draw: 1.37.0
+
+  terra-draw@1.37.0: {}
 
   terser-webpack-plugin@5.6.0(clean-css@5.3.3)(html-minifier-terser@6.1.0)(lightningcss@1.32.0)(postcss@8.5.15)(uglify-js@3.19.3)(webpack@5.107.1):
     dependencies:

@@ -1,4 +1,5 @@
 import { IEntity } from "@inkvisitor/shared/types";
+import { GeoJsonGeometry, geometryAnchor, parseGeometry } from "@inkvisitor/shared/types/geometry";
 import {
   GeocodingAccuracy,
   GeocodingPlaceType,
@@ -17,9 +18,14 @@ import {
 export interface DerivedGeocoding {
   /** True only when I1 is satisfied in full. */
   isGeocoded: boolean;
-  /** Longitude, from `geo:x`. Null whenever the Location is not geocoded. */
+  /** The GeoJSON geometry. Null whenever the Location is not geocoded. */
+  geometry: GeoJsonGeometry | null;
+  /**
+   * Longitude of the anchor — the point itself for a Point, the centre of the
+   * bounding box for any other shape. Null whenever the Location is not geocoded.
+   */
   lon: number | null;
-  /** Latitude, from `geo:y`. */
+  /** Latitude of the anchor. */
   lat: number | null;
   accuracy: GeocodingAccuracy | null;
   /** Present independently of `isGeocoded` — a type says nothing about a coordinate. */
@@ -34,6 +40,7 @@ export interface DerivedGeocoding {
 
 const ungeocoded = (problem: string | null): DerivedGeocoding => ({
   isGeocoded: false,
+  geometry: null,
   lon: null,
   lat: null,
   accuracy: null,
@@ -53,7 +60,7 @@ const propOfType = (entity: IEntity, conceptId: string) =>
  * take a second, batched fetch.
  */
 export const collectGeoValueIds = (entities: IEntity[], roles: IGeocodingRoles): string[] => {
-  const wanted = [roles.x, roles.y, roles.accuracy, roles.type].filter(Boolean);
+  const wanted = [roles.geometry, roles.accuracy, roles.type].filter(Boolean);
   const ids = new Set<string>();
   for (const entity of entities) {
     for (const conceptId of wanted) {
@@ -64,19 +71,6 @@ export const collectGeoValueIds = (entities: IEntity[], roles: IGeocodingRoles):
     }
   }
   return [...ids];
-};
-
-/**
- * A coordinate that cannot be read is not a coordinate: a blank label, a
- * non-number, or a value outside the earth's range all mean ungeocoded rather
- * than a point rendered somewhere wrong.
- */
-const readCoordinate = (label: string | undefined, limit: number): number | null => {
-  const parsed = Number((label || "").trim());
-  if (!label || !label.trim() || !Number.isFinite(parsed) || Math.abs(parsed) > limit) {
-    return null;
-  }
-  return parsed;
 };
 
 /** Reverses a role map — stored as name → entity id, read here id → name. */
@@ -103,51 +97,50 @@ export const deriveGeocoding = (
   roles: IGeocodingRoles,
   values: Record<string, IEntity>,
 ): DerivedGeocoding => {
-  if (!roles.x || !roles.y || !roles.accuracy) {
+  if (!roles.geometry || !roles.accuracy) {
     return ungeocoded(null);
   }
 
   const placeTypeId = propOfType(entity, roles.type)?.value?.entityId;
   const placeType = nameForEntity<GeocodingPlaceType>(roles.placeTypes, placeTypeId);
 
-  const xProp = propOfType(entity, roles.x);
-  const yProp = propOfType(entity, roles.y);
+  const geometryProp = propOfType(entity, roles.geometry);
   const accuracyProp = propOfType(entity, roles.accuracy);
 
-  if (!xProp && !yProp && !accuracyProp) {
+  if (!geometryProp && !accuracyProp) {
     return { ...ungeocoded(null), placeType };
   }
 
-  const missing = [!xProp && "longitude", !yProp && "latitude", !accuracyProp && "accuracy"].filter(
-    Boolean,
-  );
+  const missing = [!geometryProp && "geometry", !accuracyProp && "accuracy"].filter(Boolean);
   if (missing.length) {
     return { ...ungeocoded(`missing ${missing.join(" and ")}`), placeType };
   }
 
-  const lon = readCoordinate(values[xProp!.value.entityId]?.labels?.[0], 180);
-  const lat = readCoordinate(values[yProp!.value.entityId]?.labels?.[0], 90);
+  // a geometry that cannot be read is not a geometry: a blank label, text that
+  // is not GeoJSON, or a position outside the earth's range all mean ungeocoded
+  // rather than a shape rendered somewhere wrong
+  const geometry = parseGeometry(values[geometryProp!.value.entityId]?.labels?.[0]);
   const accuracy = nameForEntity<GeocodingAccuracy>(
     roles.accuracyValues,
     accuracyProp!.value.entityId,
   );
 
-  if (lon === null || lat === null) {
-    const unreadable = [lon === null && "longitude", lat === null && "latitude"].filter(Boolean);
-    return { ...ungeocoded(`${unreadable.join(" and ")} cannot be read`), placeType };
+  if (!geometry) {
+    return { ...ungeocoded("geometry cannot be read"), placeType };
   }
   if (!accuracy) {
     return { ...ungeocoded("accuracy is not one of the configured values"), placeType };
   }
 
-  return { isGeocoded: true, lon, lat, accuracy, placeType, problem: null };
+  const { lon, lat } = geometryAnchor(geometry);
+  return { isGeocoded: true, geometry, lon, lat, accuracy, placeType, problem: null };
 };
 
 /**
  * Whether a coordinate can be read yet.
  *
- * A coordinate is two props pointing at Value entities, fetched in a second
- * request. Read before those land, every stored coordinate looks unreadable and
+ * A geometry is a prop pointing at a Value entity, fetched in a second
+ * request. Read before those land, every stored geometry looks unreadable and
  * every geocoded Location looks not geocoded — which is a claim about the corpus
  * rather than about the fetch, and the panel prints it in the colour it keeps
  * for a corpus that is broken.

@@ -1,3 +1,4 @@
+import { GeoJsonGeometry } from "@inkvisitor/shared/types/geometry";
 import { GeocodingAccuracy, GeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
 
 /**
@@ -9,10 +10,16 @@ import { GeocodingAccuracy, GeocodingPlaceType } from "@inkvisitor/shared/types/
  * that cannot be exercised without a browser.
  */
 
-/** A coordinate picked on the map, part-way through being written. */
+/** A coordinate or a drawn shape picked on the map, part-way through being written. */
 export interface MapPending {
+  /** The point itself, or the anchor of `geometry` where the pick is a drawn shape. */
   lat: number;
   lon: number;
+  /**
+   * The drawn shape this pick is. Absent for a point: the write then makes a
+   * Point from `lon` and `lat`.
+   */
+  geometry?: GeoJsonGeometry;
   /** Where the menu sits, in the map container's own coordinates. */
   x: number;
   y: number;

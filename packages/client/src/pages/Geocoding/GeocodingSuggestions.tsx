@@ -9,6 +9,7 @@ import { Button, Input, Tooltip } from "components";
 import { IcoChevronDown, IcoGeocode, IcoStar, IcoWarning } from "Theme/icons";
 import Dropdown from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
+import { CoordinateTag } from "./CoordinateTag";
 import { engineFeedback } from "./engine";
 import { FeedbackReason, SuggestResponse, Suggestion } from "./engineTypes";
 import { GeocodingProgress } from "./GeocodingProgress";
@@ -328,7 +329,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         ) : null}
         {suggestion.offRegion ? <StyledOffRegion>off-region</StyledOffRegion> : null}
         <StyledHeadCoordinate>
-          {suggestion.lat.toFixed(4)}, {suggestion.lon.toFixed(4)}
+          <CoordinateTag lat={suggestion.lat} lon={suggestion.lon} />
         </StyledHeadCoordinate>
         {/* inside a band the panel draws no order: a decimal saying "0.52
             beats 0.44" outranks any softer mark, because a number is read
@@ -1026,9 +1027,19 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           <StyledTargetLine>
             <StyledTarget>{name}</StyledTarget>
             <StyledCurrent>
-              {selected.isGeocoded
-                ? `${selected.lat?.toFixed(4)}, ${selected.lon?.toFixed(4)} · ${selected.accuracy}`
-                : "not geocoded"}
+              {selected.isGeocoded ? (
+                <>
+                  <CoordinateTag
+                    geometry={selected.geometry ?? undefined}
+                    lat={selected.lat ?? undefined}
+                    lon={selected.lon ?? undefined}
+                    accuracy={selected.accuracy ?? undefined}
+                  />{" "}
+                  {selected.accuracy}
+                </>
+              ) : (
+                "not geocoded"
+              )}
             </StyledCurrent>
           </StyledTargetLine>
         ) : null}

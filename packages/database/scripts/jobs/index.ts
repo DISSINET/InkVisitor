@@ -14,6 +14,7 @@ import replaceAuditsPolymorphicJob from "./replace-audits-polymorphic";
 import ensureIndexesJob from "./ensure-indexes";
 import createSavedQueriesTableJob from "./create-saved-queries-table";
 import fixEditorEntityAclJob from "./fix-editor-entity-acl";
+import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -33,6 +34,7 @@ const alljobs: Record<string, IJob> = {
   ensureIndexesJob,
   createSavedQueriesTableJob,
   fixEditorEntityAclJob,
+  migrateGeocodingGeometryJob,
 };
 
 export default alljobs;

@@ -12,6 +12,7 @@ import React from "react";
 import { ClipLoader } from "react-spinners";
 import { RowComponentProps } from "react-window";
 import { useTheme } from "hooks";
+import { CoordinateHover } from "./CoordinateTag";
 import {
   StyledGroupCaret,
   StyledGroupCount,
@@ -233,19 +234,24 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
         {/* the row says whether it has a coordinate whatever the list is grouped
             by, so it still reads under "kind of place" or under one flat list,
             where no heading says it */}
-        <IconWithTooltip
-          tooltipPosition="right"
-          tooltipText={
-            location.isGeocoded
-              ? `${location.lat?.toFixed(4)}, ${location.lon?.toFixed(4)} · ${location.accuracy}`
-              : location.problem || "no coordinate recorded"
-          }
-          icon={
-            <StyledRowMark
-              $state={location.isGeocoded ? "geocoded" : location.problem ? "problem" : "none"}
-            />
-          }
-        />
+        {/* the dot holds the coordinate, and says it with the card every
+            coordinate on this page is read from, when asked */}
+        {location.isGeocoded ? (
+          <CoordinateHover
+            geometry={location.geometry ?? undefined}
+            lat={location.lat ?? undefined}
+            lon={location.lon ?? undefined}
+            accuracy={location.accuracy ?? undefined}
+          >
+            <StyledRowMark $state="geocoded" />
+          </CoordinateHover>
+        ) : (
+          <IconWithTooltip
+            tooltipPosition="right"
+            tooltipText={location.problem || "no coordinate recorded"}
+            icon={<StyledRowMark $state={location.problem ? "problem" : "none"} />}
+          />
+        )}
         {/* the mark is the control: a kind of place is corrected far more often
             than it is first set, and reaching it should not mean selecting the
             row and losing whatever is being judged beside it */}
