@@ -9,7 +9,20 @@ import { SuggestResponse } from "../../types/engine";
  * `degradationsOf` so the two are never told in one sentence.
  */
 export const problemsOf = (response: SuggestResponse): string[] =>
-  (response.problems ?? []).map((problem) => problem.message);
+  (response.problems ?? [])
+    .filter((problem) => !BUDGET_CODES.includes(problem.code))
+    .map((problem) => problem.message);
+
+const BUDGET_CODES: string[] = ["llm-budget-spent", "llm-budget-low"];
+
+/**
+ * Whether the engine's daily language-model allowance was used up for this
+ * answer. Said as a degradation rather than a problem: the answer is real and
+ * weaker, and running it again tomorrow gives a better one. `llm-budget-low`
+ * skipped nothing, so it is not reported.
+ */
+export const budgetSpent = (response: SuggestResponse): boolean =>
+  (response.problems ?? []).some((problem) => problem.code === "llm-budget-spent");
 
 /**
  * What went wrong in a request the engine still answered with HTTP 200.
@@ -26,11 +39,23 @@ export const problemsOf = (response: SuggestResponse): string[] =>
  */
 export const degradationsOf = (response: SuggestResponse): string[] => {
   const notes: string[] = [];
+  const spent = budgetSpent(response);
+  if (spent) {
+    // one sentence for both stages it takes away, so the two notes below do not
+    // repeat it
+    notes.push(
+      "the engine's language-model allowance for today is used up, so no historical name " +
+        "variants were generated and your context was not weighed — results are less complete right now"
+    );
+  }
 
   // "none" is the augment stage saying it had no model to ask
-  if ((response.query.candidates || []).some((candidate) => candidate.llmProvider === "none")) {
+  if (
+    !spent &&
+    (response.query.candidates || []).some((candidate) => candidate.llmProvider === "none")
+  ) {
     notes.push(
-      "only the name as written was searched — no historical name variants were generated",
+      "only the name as written was searched — no historical name variants were generated"
     );
   }
 
@@ -45,17 +70,17 @@ export const degradationsOf = (response: SuggestResponse): string[] => {
     !!period?.length ||
     !!place_type?.length ||
     !!language?.length;
-  if (criteria && response.contextEvaluated === false) {
+  if (!spent && criteria && response.contextEvaluated === false) {
     notes.push("your period, region and language were not weighed against the results");
   }
 
   const broken = response.sources.filter(
-    (source) => source.status === "failed" || source.partial || source.benched,
+    (source) => source.status === "failed" || source.partial || source.benched
   );
   if (broken.length) {
     notes.push(
       `${broken.length} ${broken.length === 1 ? "source" : "sources"} did not answer in full: ` +
-        broken.map((source) => source.name).join(", "),
+        broken.map((source) => source.name).join(", ")
     );
   }
 

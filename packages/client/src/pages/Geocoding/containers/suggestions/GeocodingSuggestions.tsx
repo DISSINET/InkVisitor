@@ -666,7 +666,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
 
   const [degradedAnchor, setDegradedAnchor] = useState<HTMLDivElement | null>(null);
   const [degradedHovered, setDegradedHovered] = useState(false);
-  const [note, setNote] = useState("");
 
   const { isRunning, elapsedMs, stage, error, isProvisional } = suggest;
   const name = selected?.entity.labels[0] || "";
@@ -771,9 +770,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
       chosen: null,
       suggestions: response.suggestions,
       reason,
-      note: note.trim() || undefined,
     });
-    setNote("");
     suggest.clear();
   };
 
@@ -1255,13 +1252,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
             options={REASONS}
             value={reason}
             onChange={(value) => setReason(value as FeedbackReason)}
-          />
-          <Input
-            value={note}
-            onChangeFn={setNote}
-            placeholder="note (optional)"
-            changeOnType
-            width="full"
           />
         </StyledReject>
       ) : null}

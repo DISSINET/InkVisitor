@@ -15,6 +15,7 @@ import {
   fixtureSuggestResponse,
   isFixtureMode,
 } from "./fixtureMode";
+import { tooLargeReason } from "./engineLimits";
 
 /**
  * Client for the HGA-Engine.
@@ -25,6 +26,33 @@ import {
  */
 
 export const ENGINE_URL = (process.env.HGA_ENGINE_URL || "").replace(/\/+$/, "");
+
+/**
+ * Sent as a bearer token on the routes that run a request, where the engine
+ * asks for one. Built into the bundle, so it names this service to the engine
+ * and is not a secret. Unset, no header is sent.
+ */
+const ENGINE_API_KEY = process.env.HGA_ENGINE_API_KEY || "";
+
+const keyHeader = (): Record<string, string> =>
+  ENGINE_API_KEY ? { Authorization: `Bearer ${ENGINE_API_KEY}` } : {};
+
+/** The engine answered, with a status that is not a success. */
+export class EngineStatusError extends Error {
+  constructor(
+    readonly status: number,
+    path: string
+  ) {
+    super(`Geocoding engine returned ${status} for ${path}`);
+    this.name = "EngineStatusError";
+  }
+}
+
+/** The engine refused the key this build carries, or wants one it does not carry. */
+const keyRefused = (status: number): boolean => status === 401 || status === 403;
+
+const KEY_MESSAGE =
+  "The geocoding engine refused this installation's key. Its HGA_ENGINE_API_KEY setting is missing or wrong.";
 
 /**
  * Names this application to the engine's audit log. The same value for every
@@ -42,7 +70,7 @@ export class EngineUnreachableError extends Error {
     super(
       ENGINE_URL
         ? `The geocoding engine at ${ENGINE_URL} did not respond.`
-        : "No geocoding engine address is configured for this deployment.",
+        : "No geocoding engine address is configured for this deployment."
     );
     this.name = "EngineUnreachableError";
     this.cause = cause;
@@ -68,7 +96,7 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     throw new EngineUnreachableError(err);
   }
   if (!response.ok) {
-    throw new Error(`Geocoding engine returned ${response.status} for ${path}`);
+    throw new EngineStatusError(response.status, path);
   }
   return (await response.json()) as T;
 };
@@ -133,7 +161,7 @@ export const engineSuggestStream = async (
   query: SuggestRequest,
   onProvisional: (response: SuggestResponse) => void,
   onAccepted: (requestId: string) => void,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<SuggestResponse> => {
   if (isFixtureMode()) {
     return fixtureStream(onProvisional, onAccepted, signal);
@@ -141,11 +169,15 @@ export const engineSuggestStream = async (
   if (!ENGINE_URL) {
     throw new EngineUnreachableError();
   }
+  const tooLarge = tooLargeReason(query);
+  if (tooLarge) {
+    throw new Error(tooLarge);
+  }
   let response: Response;
   try {
     response = await fetch(`${ENGINE_URL}/suggest/stream`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...keyHeader() },
       body: JSON.stringify({ ...query, clientId: getClientId() }),
       signal,
     });
@@ -155,8 +187,11 @@ export const engineSuggestStream = async (
     }
     throw new EngineUnreachableError(err);
   }
+  if (keyRefused(response.status)) {
+    throw new Error(KEY_MESSAGE);
+  }
   if (!response.ok || !response.body) {
-    throw new Error(`Geocoding engine returned ${response.status} for /suggest/stream`);
+    throw new EngineStatusError(response.status, "/suggest/stream");
   }
 
   return consumeSuggestStream(response.body, onProvisional, onAccepted);
@@ -174,7 +209,7 @@ export const engineSuggestStream = async (
 const consumeSuggestStream = async (
   body: ReadableStream<Uint8Array>,
   onProvisional: (response: SuggestResponse) => void,
-  onAccepted: (requestId: string) => void,
+  onAccepted: (requestId: string) => void
 ): Promise<SuggestResponse> => {
   const reader = body.getReader();
   const decoder = new TextDecoder();
@@ -247,11 +282,11 @@ const consumeSuggestStream = async (
 export const engineSearch = (
   q: string,
   limit: number,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<EngineSearchResponse> =>
   request<EngineSearchResponse>(
     `/search?q=${encodeURIComponent(q)}&limit=${encodeURIComponent(String(limit))}`,
-    { signal },
+    { signal }
   );
 
 /**
@@ -286,8 +321,17 @@ export const engineFeedback = async (body: FeedbackRequest): Promise<void> => {
 export const engineRecentRequests = (signal?: AbortSignal): Promise<EngineAuditEntry[]> =>
   request<{ audit: EngineAuditEntry[] } | EngineAuditEntry[]>(
     `/state?clientId=${encodeURIComponent(getClientId())}`,
-    { signal },
-  ).then((body) => (Array.isArray(body) ? body : body.audit || []));
+    { signal }
+  )
+    .then((body) => (Array.isArray(body) ? body : body.audit || []))
+    // a production engine lists its requests only to a caller holding its admin
+    // token, which a browser never holds: the list is then empty, not an error
+    .catch((err) => {
+      if (err instanceof EngineStatusError && err.status === 401) {
+        return [];
+      }
+      throw err;
+    });
 
 /**
  * The recorded response, delivered in the frames a cold request uses, so the
@@ -298,7 +342,7 @@ export const engineRecentRequests = (signal?: AbortSignal): Promise<EngineAuditE
 const fixtureStream = async (
   onProvisional: (response: SuggestResponse) => void,
   onAccepted: (requestId: string) => void,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<SuggestResponse> => {
   // cancelling has to behave the same way it does against the real engine, or
   // the cancel path is only ever exercised in production
@@ -339,8 +383,9 @@ const fixtureStream = async (
  * the audit entries. That identifies the request rather than the browser, so two
  * requests from one browser are told apart without comparing their start times.
  *
- * The stream is process-global - every client's entries arrive and are filtered
- * here - so nothing carried on it may be treated as private.
+ * The stream is asked for this one request, which is all a production engine
+ * gives an anonymous caller; a development engine would send every client's
+ * entries, so they are still picked out by id here.
  *
  * Returns a function that closes the subscription.
  */
@@ -363,14 +408,16 @@ export interface EngineProgress {
 
 export const watchEngineProgress = (
   requestId: string,
-  onProgress: (progress: EngineProgress) => void,
+  onProgress: (progress: EngineProgress) => void
 ): (() => void) => {
   if (!ENGINE_URL) {
     return () => undefined;
   }
   let source: EventSource;
   try {
-    source = new EventSource(`${ENGINE_URL}/state/stream`);
+    source = new EventSource(
+      `${ENGINE_URL}/state/stream?requestId=${encodeURIComponent(requestId)}`
+    );
   } catch {
     return () => undefined;
   }

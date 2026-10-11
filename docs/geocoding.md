@@ -201,6 +201,26 @@ Its own sentence is shown, since it names the value. They sit with the notes for
 a request answered without its language-model stages, and are made by the same
 function.
 
+The engine's two budget codes carry no field or value and are switched on by
+`code`, not read as a sentence. `llm-budget-spent` (the day's language-model
+allowance is used up) is told as a degradation, once, in place of the two notes it
+would otherwise duplicate — no name variants, no context rating — because the
+answer is real and weaker; `llm-budget-low` skipped nothing and is not shown.
+
+**What the engine refuses for size** (HTTP 422): a name over 200 characters, more
+than ten entries in a context list, an entry over 100 characters, more than 50
+disabled sources. The context pickers stop at ten with a sentence, the request
+builder holds an older saved list to ten, and a name over 200 characters is refused
+before any request with a sentence saying so (`engineLimits.ts`).
+
+**A production engine guards its request list.** The progress stream is opened for
+one request (`/state/stream?requestId=`), which is all an anonymous caller may
+read. The list of recent requests needs the engine's admin token, which a browser
+never holds, so against a production engine it is empty rather than an error.
+`HGA_ENGINE_API_KEY`, where set at build time, is sent as a bearer token on
+`/suggest/stream`; it is built into the bundle and so identifies the installation
+and is not a secret. A refused key is reported as a configuration problem.
+
 ### What the weights actually do, measured
 
 Ten runs against the live engine, one query asked repeatedly with only
@@ -994,7 +1014,8 @@ verbatim `suggestions` array. Nothing recorded there influences scoring at
 runtime.
 
 Rejecting every suggestion posts `chosen: null` with a **reason** — `not-found`,
-`ambiguous` or `other` — and an optional note. That control exists because
+`ambiguous` or `other`. The engine no longer stores a free-text note, so none is
+asked for. That control exists because
 without it the stream is positive-only, and a positive-only stream can show the
 ranking was sometimes right but never that it was wrong. The category is not
 dressing on the note: hundreds of free-text remarks written mid-task are not

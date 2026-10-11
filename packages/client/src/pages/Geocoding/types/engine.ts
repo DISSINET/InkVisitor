@@ -284,17 +284,22 @@ export interface SuggestRequest {
 }
 
 /**
- * Something the engine did not take as sent.
+ * Something the engine reports about a request it still answered.
  *
  * Switch on `code`; `message` is written for display and may be reworded.
  * `unknown-criterion` is an entry that matched nothing and was dropped, the rest
  * of its list still applying; `corrected-period` is a reversed range read the
- * right way round.
+ * right way round. Both name the entry in `field` and `value`.
+ *
+ * `llm-budget-spent` says the engine's daily language-model allowance is used
+ * up, so the answer was computed without model-generated name variants and
+ * without context rating; `llm-budget-low` says at least 80 % is used and
+ * nothing was skipped. The two budget codes carry no `field` and no `value`.
  */
 export interface EngineProblem {
-  code: "unknown-criterion" | "corrected-period";
-  field: "region" | "period" | "language" | "place_type";
-  value: string;
+  code: "unknown-criterion" | "corrected-period" | "llm-budget-spent" | "llm-budget-low";
+  field?: "region" | "period" | "language" | "place_type";
+  value?: string;
   message: string;
 }
 
@@ -423,7 +428,6 @@ export interface FeedbackRequest {
   /** Required even on a rejection — the engine stores it verbatim for re-scoring. */
   suggestions: Suggestion[];
   reason?: FeedbackReason;
-  note?: string;
 }
 
 /**

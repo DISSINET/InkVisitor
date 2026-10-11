@@ -5,6 +5,7 @@ import Dropdown from "components/advanced";
 import { IcoChevronDown, IcoGeocode, IcoWarning } from "Theme/icons";
 import React, { useState } from "react";
 import { engineParameters } from "../../utils/engine/engine";
+import { ENGINE_LIMITS } from "../../utils/engine/engineLimits";
 import {
   QUERY_FIELDS,
   QueryField,
@@ -161,6 +162,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
   const [used, setUsed] = useState(() => localStorage.getItem(USED_KEY) === "yes");
   const [rangeDraft, setRangeDraft] = useState("");
   const [rangeError, setRangeError] = useState(false);
+  const [cappedField, setCappedField] = useState<QueryField | null>(null);
 
   /** Every edit goes through here, because the first one retires the note. */
   const noteRetired = () => {
@@ -169,7 +171,9 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
   };
   const change = (field: QueryField, values: string[]) => {
     noteRetired();
-    onChange(field, values);
+    // the engine refuses a list of more than ten
+    setCappedField(values.length > ENGINE_LIMITS.listEntries ? field : null);
+    onChange(field, values.slice(0, ENGINE_LIMITS.listEntries));
   };
 
   const toggle = () =>
@@ -357,8 +361,21 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
         onChange={(values) => change(field, values)}
       />
     );
+    const capNote =
+      cappedField === field ? (
+        <StyledContextFieldNote>
+          The engine takes at most {ENGINE_LIMITS.listEntries} values for one field.
+        </StyledContextFieldNote>
+      ) : null;
     if (field !== "period") {
-      return picker;
+      return capNote ? (
+        <StyledContextFieldStack>
+          {picker}
+          {capNote}
+        </StyledContextFieldStack>
+      ) : (
+        picker
+      );
     }
     // the engine's named periods do not cover every span a name was in use, so
     // a year or a range can be added beside them
@@ -393,6 +410,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
             era: 1400, -200, 1200-1400.
           </StyledContextFieldNote>
         ) : null}
+        {capNote}
       </StyledContextFieldStack>
     );
   };

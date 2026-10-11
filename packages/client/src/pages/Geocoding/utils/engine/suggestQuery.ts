@@ -1,5 +1,6 @@
 import { IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { SuggestRequest } from "../../types/engine";
+import { ENGINE_LIMITS, withinListLimits } from "./engineLimits";
 import {
   contextLanguages,
   contextValues,
@@ -20,13 +21,13 @@ import {
  */
 export const buildSuggestQuery = (name: string, context: IGeocodingContext): SuggestRequest => ({
   name,
-  region: regionToSend(context),
+  region: withinListLimits(regionToSend(context)),
   regionBbox: regionBoxToSend(context),
-  period: listToSend(contextValues(context, "period")),
-  language: listToSend(contextLanguages(context)),
-  place_type: listToSend(contextValues(context, "placeType")),
+  period: withinListLimits(listToSend(contextValues(context, "period"))),
+  language: withinListLimits(listToSend(contextLanguages(context))),
+  place_type: withinListLimits(listToSend(contextValues(context, "placeType"))),
   contextWeights: weightsToSend(context),
-  disabledSources: disabledSourcesToSend(context),
+  disabledSources: disabledSourcesToSend(context)?.slice(0, ENGINE_LIMITS.disabledSources),
   taskCategory: context.taskCategory,
   dedupeDiacritics: context.dedupeDiacritics,
 });

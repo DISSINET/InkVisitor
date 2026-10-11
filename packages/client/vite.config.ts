@@ -146,6 +146,7 @@ export default defineConfig(({ command, mode }) => {
       "process.env.ROOT_URL": JSON.stringify(env.ROOT_URL || ""),
       "process.env.APIURL": JSON.stringify(env.APIURL || ""),
       "process.env.HGA_ENGINE_URL": JSON.stringify(env.HGA_ENGINE_URL || ""),
+      "process.env.HGA_ENGINE_API_KEY": JSON.stringify(env.HGA_ENGINE_API_KEY || ""),
       "process.env.ENV": JSON.stringify(appEnv),
       "process.env.BUILD_TIMESTAMP": JSON.stringify(
         process.env.BUILD_TIMESTAMP || ""
