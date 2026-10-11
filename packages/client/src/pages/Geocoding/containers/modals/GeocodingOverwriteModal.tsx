@@ -41,9 +41,15 @@ export const GeocodingOverwriteModal: React.FC<GeocodingOverwriteModal> = ({
     <ModalHeader title={`${pending.label} already has a geometry`} onClose={onCancel} />
     <ModalContent column>
       <StyledSectionNote>
-        It sits at <strong>{describeGeometry(pending.from)}</strong> and this replaces it with{" "}
-        <strong>{describeGeometry(pending.to)}</strong>. The old geometry is not kept anywhere it can be read
-        back.
+        {pending.from ? (
+          <>
+            It sits at <strong>{describeGeometry(pending.from)}</strong>
+          </>
+        ) : (
+          <>Its current geometry cannot be read</>
+        )}{" "}
+        and this replaces it with <strong>{describeGeometry(pending.to)}</strong>. The old geometry is not
+        kept anywhere it can be read back.
       </StyledSectionNote>
     </ModalContent>
     <ModalFooter>

@@ -33,6 +33,8 @@ export interface GeocodingWriteGateway {
     previous: GeocodingWritePlan["previous"];
     deleting: string[];
   }) => void;
+  /** Takes back the newest record for a Location, for a write that did not land. */
+  discardPrevious: (locationId: string) => void;
 }
 
 export type GeocodingWriteOutcome =
@@ -48,6 +50,18 @@ export const executeGeocodingWrite = async (
 ): Promise<GeocodingWriteOutcome> => {
   const created: string[] = [];
 
+  // Values this write minted are attached to nothing once it is refused, and
+  // nothing else would ever find them
+  const discardCreated = async () => {
+    for (const valueId of created) {
+      try {
+        await gateway.deleteEntity(valueId);
+      } catch {
+        // best effort: the refusal being reported matters more than the tidy-up
+      }
+    }
+  };
+
   // children first: a create that fails leaves unreferenced Value entities,
   // which are attached to nothing and invisible in the corpus. The Location
   // cannot end up carrying a geometry that does not exist, because it has not
@@ -57,6 +71,7 @@ export const executeGeocodingWrite = async (
       await gateway.createEntity(value);
       created.push(value.id);
     } catch {
+      await discardCreated();
       return {
         ok: false,
         reason: "Could not create the geometry value, so nothing was written to the location.",
@@ -68,10 +83,12 @@ export const executeGeocodingWrite = async (
   try {
     current = await gateway.readEntity(locationId);
   } catch {
+    await discardCreated();
     return { ok: false, reason: "Could not re-read the location before writing, so nothing was written." };
   }
 
   if (coordinateChanged(before, current, roles)) {
+    await discardCreated();
     return {
       ok: false,
       reason:
@@ -88,6 +105,8 @@ export const executeGeocodingWrite = async (
   try {
     await gateway.updateEntity(locationId, { props: plan.props, references: plan.references });
   } catch {
+    gateway.discardPrevious(locationId);
+    await discardCreated();
     return { ok: false, reason: "The location could not be updated, so nothing was written." };
   }
 

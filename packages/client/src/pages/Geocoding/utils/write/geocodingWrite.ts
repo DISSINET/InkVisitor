@@ -219,6 +219,18 @@ export const planGeocodingWrite = (
 };
 
 /**
+ * Whether a write has to stop and ask before it replaces a geometry.
+ *
+ * Decided on what the Location carries rather than on whether the page could
+ * read it: a geometry Value that will not parse is still somebody's geometry,
+ * and the write deletes it all the same.
+ */
+export const needsOverwriteConfirmation = (
+  plan: Pick<GeocodingWritePlan, "isOverwrite">,
+  confirmed: boolean,
+): boolean => plan.isOverwrite && !confirmed;
+
+/**
  * Whether the Location changed underneath a flow that has been open for the
  * length of an engine call plus however long a researcher took to decide.
  *

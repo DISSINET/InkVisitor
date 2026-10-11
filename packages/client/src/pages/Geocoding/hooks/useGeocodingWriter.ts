@@ -12,6 +12,7 @@ import {
   GeocodingWriteInput,
   GeocodingWritePlan,
   isBlocked,
+  needsOverwriteConfirmation,
   planGeocodingWrite,
 } from "../utils/write/geocodingWrite";
 import { KindGateway, executeKindChange } from "../utils/write/geocodingKindWrite";
@@ -46,10 +47,27 @@ const RECORD_LIMIT = 50;
  * Per browser, which is weak — but it is the difference between "we can tell you
  * what that coordinate used to be" and "nothing anywhere knows".
  */
+const readHistory = (): GeocodingWriteRecord[] => {
+  const stored = window.localStorage.getItem(RECORD_KEY);
+  return stored ? JSON.parse(stored) : [];
+};
+
+const forget = (locationId: string) => {
+  try {
+    const history = readHistory();
+    const index = history.findIndex((record) => record.locationId === locationId);
+    if (index >= 0) {
+      history.splice(index, 1);
+      window.localStorage.setItem(RECORD_KEY, JSON.stringify(history));
+    }
+  } catch {
+    /* nothing was kept, so nothing needs taking back */
+  }
+};
+
 const remember = (record: GeocodingWriteRecord) => {
   try {
-    const stored = window.localStorage.getItem(RECORD_KEY);
-    const history: GeocodingWriteRecord[] = stored ? JSON.parse(stored) : [];
+    const history = readHistory();
     history.unshift(record);
     window.localStorage.setItem(RECORD_KEY, JSON.stringify(history.slice(0, RECORD_LIMIT)));
   } catch {
@@ -85,6 +103,7 @@ const gateway = (locationLabel: string): GeocodingWriteGateway => ({
   deleteEntity: async (entityId) => {
     await api.entityDelete(entityId);
   },
+  discardPrevious: forget,
   recordPrevious: ({ locationId, previous, deleting }) =>
     remember({
       at: new Date().toISOString(),
@@ -116,7 +135,8 @@ const kindGateway: KindGateway = {
 /** A write held back because it would replace a geometry somebody already set. */
 export interface PendingOverwrite {
   label: string;
-  from: GeoJsonGeometry;
+  /** What is being replaced, or null when the Location carries a geometry the page cannot read. */
+  from: GeoJsonGeometry | null;
   to: GeoJsonGeometry;
   input: GeocodingWriteInput;
   suggestion?: Suggestion;
@@ -200,18 +220,16 @@ export const useGeocodingWriter = (
 
       // a geometry somebody already set is not replaced without being told
       // what is being lost, and the previous one is only nameable here
-      if (plan.isOverwrite && !confirmed) {
-        if (input.current) {
-          setPendingOverwrite({
-            label: input.location.labels?.[0] || input.location.id,
-            from: input.current,
-            to: input.geometry,
-            input,
-            suggestion,
-            afterWrite,
-          });
-          return false;
-        }
+      if (needsOverwriteConfirmation(plan, confirmed)) {
+        setPendingOverwrite({
+          label: input.location.labels?.[0] || input.location.id,
+          from: input.current ?? null,
+          to: input.geometry,
+          input,
+          suggestion,
+          afterWrite,
+        });
+        return false;
       }
 
       setIsWriting(true);

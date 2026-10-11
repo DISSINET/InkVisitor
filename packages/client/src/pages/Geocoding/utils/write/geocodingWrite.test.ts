@@ -13,7 +13,12 @@ import {
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
 import { CEntity, CProp } from "constructors";
 import { describe, expect, it, vi } from "vitest";
-import { GeocodingWritePlan, isBlocked, planGeocodingWrite } from "./geocodingWrite";
+import {
+  GeocodingWritePlan,
+  isBlocked,
+  needsOverwriteConfirmation,
+  planGeocodingWrite,
+} from "./geocodingWrite";
 import { GeocodingWriteGateway, executeGeocodingWrite } from "./geocodingWriteExecute";
 
 /**
@@ -350,6 +355,28 @@ describe("planGeocodingWrite, what counts as replacing a geometry", () => {
   });
 });
 
+describe("needsOverwriteConfirmation", () => {
+  it("asks for a Location whose existing geometry the page could not read", () => {
+    // `current` is undefined for an unreadable Value, yet the write deletes it
+    const plan = planOf({
+      ...baseInput,
+      location: location([prop("c-geo", "unparseable-geo")]),
+      current: undefined,
+    });
+    expect(plan.isOverwrite).toBe(true);
+    expect(needsOverwriteConfirmation(plan, false)).toBe(true);
+  });
+
+  it("does not ask when the replacement has already been agreed to", () => {
+    const plan = planOf({ ...baseInput, location: location([prop("c-geo", "old-geo")]) });
+    expect(needsOverwriteConfirmation(plan, true)).toBe(false);
+  });
+
+  it("does not ask for a Location with no geometry", () => {
+    expect(needsOverwriteConfirmation(planOf(baseInput), false)).toBe(false);
+  });
+});
+
 /**
  * Three answers, not two. Clearing a kind of place is a statement the researcher
  * makes; leaving it alone is what a coordinate correction does, and collapsing
@@ -407,6 +434,7 @@ describe("executeGeocodingWrite", () => {
     updateEntity: vi.fn().mockResolvedValue(undefined),
     deleteEntity: vi.fn().mockResolvedValue(undefined),
     recordPrevious: vi.fn(),
+    discardPrevious: vi.fn(),
     ...overrides,
   });
 
@@ -427,6 +455,30 @@ describe("executeGeocodingWrite", () => {
     expect(g.updateEntity).not.toHaveBeenCalled();
   });
 
+  it("deletes the Values it created when the write is refused, so none are left attached to nothing", async () => {
+    const g = gateway({
+      readEntity: vi.fn().mockResolvedValue(location([prop("c-geo", "someone-elses-geo")])),
+    });
+    const plan = planOf(baseInput);
+    await executeGeocodingWrite("L1", location(), plan, roles, g);
+    const created = plan.newValues.map((value) => value.id);
+    expect(created.length).toBeGreaterThan(0);
+    for (const id of created) {
+      expect(g.deleteEntity).toHaveBeenCalledWith(id);
+    }
+  });
+
+  it("deletes the Values it created and takes back the history record when the update fails", async () => {
+    const g = gateway({ updateEntity: vi.fn().mockRejectedValue(new Error("boom")) });
+    const plan = planOf(baseInput);
+    const result = await executeGeocodingWrite("L1", location(), plan, roles, g);
+    expect(result.ok).toBe(false);
+    expect(g.discardPrevious).toHaveBeenCalledWith("L1");
+    for (const value of plan.newValues) {
+      expect(g.deleteEntity).toHaveBeenCalledWith(value.id);
+    }
+  });
+
   it("refuses when the geometry changed under it, and writes nothing", async () => {
     const g = gateway({
       readEntity: vi.fn().mockResolvedValue(location([prop("c-geo", "someone-elses-geo")])),
@@ -435,7 +487,8 @@ describe("executeGeocodingWrite", () => {
     expect(result.ok).toBe(false);
     expect(!result.ok && result.reason).toContain("changed while you were working");
     expect(g.updateEntity).not.toHaveBeenCalled();
-    expect(g.deleteEntity).not.toHaveBeenCalled();
+    // what somebody else wrote is never touched
+    expect(g.deleteEntity).not.toHaveBeenCalledWith("someone-elses-geo");
   });
 
   it("proceeds when an unrelated prop changed — only the geometry is grounds to refuse", async () => {
@@ -476,7 +529,8 @@ describe("executeGeocodingWrite", () => {
     const g = gateway({ updateEntity: vi.fn().mockRejectedValue(new Error("boom")) });
     const result = await executeGeocodingWrite("L1", location(), plan, roles, g);
     expect(result.ok).toBe(false);
-    expect(g.deleteEntity).not.toHaveBeenCalled();
+    // the Value the Location still carries stays; only what this write minted goes
+    expect(g.deleteEntity).not.toHaveBeenCalledWith("old-geo");
   });
 
   it("succeeds and reports a Value the checked delete refused to remove", async () => {
