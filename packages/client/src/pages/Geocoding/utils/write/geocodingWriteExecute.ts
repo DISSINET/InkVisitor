@@ -41,6 +41,28 @@ export type GeocodingWriteOutcome =
   | { ok: true; orphanedValueIds: string[]; undeletedValueIds: string[] }
   | { ok: false; reason: string };
 
+/**
+ * Whether the Location now carries a Value this write created, after an update
+ * that reported failure. "unknown" where that cannot be told: the re-read failed,
+ * or the write created nothing to look for.
+ */
+const updateLanded = async (
+  locationId: string,
+  created: string[],
+  gateway: GeocodingWriteGateway,
+): Promise<"yes" | "no" | "unknown"> => {
+  if (!created.length) {
+    return "unknown";
+  }
+  try {
+    const entity = await gateway.readEntity(locationId);
+    const held = JSON.stringify([entity.props, entity.references]);
+    return created.some((id) => held.includes(id)) ? "yes" : "no";
+  } catch {
+    return "unknown";
+  }
+};
+
 export const executeGeocodingWrite = async (
   locationId: string,
   before: IEntity,
@@ -105,9 +127,22 @@ export const executeGeocodingWrite = async (
   try {
     await gateway.updateEntity(locationId, { props: plan.props, references: plan.references });
   } catch {
-    gateway.discardPrevious(locationId);
-    await discardCreated();
-    return { ok: false, reason: "The location could not be updated, so nothing was written." };
+    // a rejected request is not proof the update did not land: the response can
+    // be lost after the server has applied it, and deleting Values the Location
+    // now points at would leave it pointing at nothing
+    const landed = await updateLanded(locationId, created, gateway);
+    if (landed === "no") {
+      gateway.discardPrevious(locationId);
+      await discardCreated();
+      return { ok: false, reason: "The location could not be updated, so nothing was written." };
+    }
+    if (landed === "unknown") {
+      return {
+        ok: false,
+        reason:
+          "The location may or may not have been updated — reload it and check before writing again.",
+      };
+    }
   }
 
   // after the update lands: until then these Values are still the live ones

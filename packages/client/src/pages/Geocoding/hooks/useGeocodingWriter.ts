@@ -52,10 +52,10 @@ const readHistory = (): GeocodingWriteRecord[] => {
   return stored ? JSON.parse(stored) : [];
 };
 
-const forget = (locationId: string) => {
+const forget = (at: string) => {
   try {
     const history = readHistory();
-    const index = history.findIndex((record) => record.locationId === locationId);
+    const index = history.findIndex((record) => record.at === at);
     if (index >= 0) {
       history.splice(index, 1);
       window.localStorage.setItem(RECORD_KEY, JSON.stringify(history));
@@ -83,36 +83,47 @@ export const readGeocodingWriteHistory = (): GeocodingWriteRecord[] => {
   }
 };
 
-const gateway = (locationLabel: string): GeocodingWriteGateway => ({
-  createEntity: async (entity) => {
-    await api.entityCreate(entity);
-  },
-  readEntity: async (entityId) => {
-    const response = await api.entitiesGet([entityId]);
-    const entity = response.data?.[0];
-    if (!entity) {
-      throw new Error(`location ${entityId} could not be re-read`);
-    }
-    return entity;
-  },
-  updateEntity: async (entityId, changes) => {
-    await api.entityUpdate(entityId, changes);
-  },
-  // the route that refuses an entity something else still points at, never a
-  // raw delete
-  deleteEntity: async (entityId) => {
-    await api.entityDelete(entityId);
-  },
-  discardPrevious: forget,
-  recordPrevious: ({ locationId, previous, deleting }) =>
-    remember({
-      at: new Date().toISOString(),
-      locationId,
-      locationLabel,
-      previous,
-      deletedValueIds: deleting,
-    }),
-});
+const gateway = (locationLabel: string): GeocodingWriteGateway => {
+  let recordedAt: string | null = null;
+  return {
+    createEntity: async (entity) => {
+      await api.entityCreate(entity);
+    },
+    readEntity: async (entityId) => {
+      const response = await api.entitiesGet([entityId]);
+      const entity = response.data?.[0];
+      if (!entity) {
+        throw new Error(`location ${entityId} could not be re-read`);
+      }
+      return entity;
+    },
+    updateEntity: async (entityId, changes) => {
+      await api.entityUpdate(entityId, changes);
+    },
+    // the route that refuses an entity something else still points at, never a
+    // raw delete
+    deleteEntity: async (entityId) => {
+      await api.entityDelete(entityId);
+    },
+    // the record this write made, found by its own timestamp: another write's
+    // record for the same Location must survive this one failing
+    discardPrevious: () => {
+      if (recordedAt) {
+        forget(recordedAt);
+      }
+    },
+    recordPrevious: ({ locationId, previous, deleting }) => {
+      recordedAt = new Date().toISOString();
+      remember({
+        at: recordedAt,
+        locationId,
+        locationLabel,
+        previous,
+        deletedValueIds: deleting,
+      });
+    },
+  };
+};
 
 const kindGateway: KindGateway = {
   readClassifications: async (locationId) => {

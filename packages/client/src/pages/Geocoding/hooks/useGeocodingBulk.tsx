@@ -98,10 +98,10 @@ export const useGeocodingBulk = ({
    */
   const cancelBulk = useRef(false);
   /** The engine request a quick geocode or a batch step has in flight, so stopping a run can drop it. */
-  const quickAbort = useRef<AbortController | null>(null);
+  const inFlight = useRef<Set<AbortController>>(new Set());
   const stopBulk = () => {
     cancelBulk.current = true;
-    quickAbort.current?.abort();
+    inFlight.current.forEach((controller) => controller.abort());
   };
 
   /**
@@ -122,6 +122,13 @@ export const useGeocodingBulk = ({
       setBulk(`${done + 1} of ${targets.length}`);
       if (!(await retype(location, placeType, { quiet: true }))) {
         setBulk(undefined);
+        // what was written stays written and is no longer marked, as when a run
+        // is stopped by hand
+        setMarked((current) => {
+          const next = new Set(current);
+          targets.slice(0, done).forEach((written) => next.delete(written.entity.id));
+          return next;
+        });
         refresh();
         toast.error(`Stopped after ${done} of ${targets.length}. The rest were not written.`);
         return;
@@ -189,7 +196,7 @@ export const useGeocodingBulk = ({
     // the researcher opens meanwhile cannot abort this one, and an engine that
     // fails is told apart from one that found nothing
     const controller = new AbortController();
-    quickAbort.current = controller;
+    inFlight.current.add(controller);
     let response: SuggestResponse;
     try {
       response = await engineSuggestStream(
@@ -207,9 +214,7 @@ export const useGeocodingBulk = ({
         error: err instanceof Error ? err.message : "The geocoding engine did not answer.",
       };
     } finally {
-      if (quickAbort.current === controller) {
-        quickAbort.current = null;
-      }
+      inFlight.current.delete(controller);
     }
     const pick = quickPick(response, {
       strategy: context.quickStrategy ?? "clearWinner",
@@ -247,9 +252,12 @@ export const useGeocodingBulk = ({
       // asked of a run of ninety, into ninety
       { quiet: options.quiet, confirmed: true, suggestion: pick.take },
     );
-    if (written) {
-      markWritten(location.entity.id);
+    if (!written) {
+      // the writer has said why, in its own message; what is reported here is
+      // that the engine answered and the coordinate was not saved
+      return { written: false, error: "the coordinate could not be saved" };
     }
+    markWritten(location.entity.id);
     return { written, taken: { suggestion: pick.take, accuracy: pick.accuracy } };
   };
 
@@ -358,20 +366,20 @@ export const useGeocodingBulk = ({
   };
 
   /**
-   * Geocodes every marked Location that has no coordinate.
+   * Geocodes every marked Location.
    *
    * Sequential, and stopped the same way the kind-of-place run is: one request
    * is in flight at a time because the engine's own progress stream reports one,
    * and because a researcher watching a hundred of these wants to be able to
    * stop after the third.
    *
-   * Every marked Location, including the ones that already have a coordinate.
-   * Re-geocoding is the point of running it over those: the engine's answer has
-   * moved on, or the context has, and what is recorded should follow. The write
-   * would otherwise stop to ask before replacing each one, so the run says in
-   * advance that it has been asked — and what each Location previously held is
-   * kept in this browser's write history, which is where a replaced coordinate
-   * can still be read.
+   * Including the ones that already have a coordinate: re-geocoding is the point
+   * of running it over those, since the engine's answer or the context has moved
+   * on and what is recorded should follow. The replacement is agreed to once, for
+   * the whole run, so the write does not ask per Location — and what each
+   * Location previously held is kept in this browser's write history, where a
+   * replaced coordinate can still be read. A geometry the page could not read has
+   * nothing readable to keep, and is replaced all the same.
    */
   const geocodeMarked = async () => {
     const targets = locations.filter((location) => marked.has(location.entity.id));

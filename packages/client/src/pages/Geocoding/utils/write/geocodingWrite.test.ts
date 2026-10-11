@@ -468,6 +468,21 @@ describe("executeGeocodingWrite", () => {
     }
   });
 
+  it("keeps the Values it created when the update reported failure but the Location now points at them", async () => {
+    const plan = planOf(baseInput);
+    const created = plan.newValues[0].id;
+    const g = gateway({
+      updateEntity: vi.fn().mockRejectedValue(new Error("response lost")),
+      readEntity: vi
+        .fn()
+        .mockResolvedValueOnce(location())
+        .mockResolvedValue(location([prop("c-geo", created)])),
+    });
+    await executeGeocodingWrite("L1", location(), plan, roles, g);
+    expect(g.deleteEntity).not.toHaveBeenCalledWith(created);
+    expect(g.discardPrevious).not.toHaveBeenCalled();
+  });
+
   it("deletes the Values it created and takes back the history record when the update fails", async () => {
     const g = gateway({ updateEntity: vi.fn().mockRejectedValue(new Error("boom")) });
     const plan = planOf(baseInput);

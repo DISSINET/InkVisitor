@@ -1,6 +1,7 @@
 import { IGeocodingContext, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import React, { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import breslau from "../fixtures/suggest-breslau.json";
 import { render, Rendered } from "../utils/test/renderForTest";
 import { GeocodingLocation } from "./useGeocodingLocations";
 import { UseGeocodingBulk, useGeocodingBulk } from "./useGeocodingBulk";
@@ -21,17 +22,19 @@ const location = (id: string): GeocodingLocation =>
 
 const places = ["Roma", "Pavia", "Siena"].map(location);
 
+const write = vi.hoisted(() => vi.fn());
+
 let bulk: UseGeocodingBulk;
 const Probe = (props: { marked: Set<string> }) => {
   bulk = useGeocodingBulk({
     user: { options: {} } as never,
     roles: {} as IGeocodingRoles,
-    context: {} as IGeocodingContext,
+    context: { quickStrategy: "topScore", quickTakeOffRegion: true } as IGeocodingContext,
     locations: places,
     markWritten: vi.fn(),
     marked: props.marked,
     setMarked: vi.fn(),
-    write: vi.fn().mockResolvedValue(true),
+    write,
     retype: vi.fn().mockResolvedValue(true),
     refresh: vi.fn(),
     clearSuggestions: vi.fn(),
@@ -44,6 +47,7 @@ const Probe = (props: { marked: Set<string> }) => {
 let view: Rendered;
 beforeEach(() => {
   stream.mockReset();
+  write.mockReset();
   Object.values(toasts).forEach((fn) => fn.mockReset());
   view = render(<Probe marked={new Set(places.map((one) => one.entity.id))} />);
 });
@@ -98,5 +102,19 @@ describe("stopping a run", () => {
     expect(stateOf("Roma")).toBe("skipped");
     expect(bulk.batch?.stopped).toBe(true);
     expect(stream).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("a batch whose write is refused", () => {
+  it("files the step as failed with a reason and stops, rather than reporting the engine as silent", async () => {
+    stream.mockResolvedValue(breslau);
+    write.mockResolvedValue(false);
+    await act(async () => {
+      await bulk.geocodeMarked();
+    });
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(stateOf("Roma")).toBe("failed");
+    expect(bulk.batch?.steps[0].note).toContain("could not be saved");
+    expect(stateOf("Pavia")).toBe("waiting");
   });
 });
