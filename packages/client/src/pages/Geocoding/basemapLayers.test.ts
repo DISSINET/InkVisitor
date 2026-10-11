@@ -47,7 +47,8 @@ describe("groupedLayersOf", () => {
   });
 
   it("puts building footprints and built-up ground under one group", () => {
-    expect(idsIn("builtUp").sort()).toEqual(["building", "landuse_residential"]);
+    expect(idsIn("builtUp")).toContain("building");
+    expect(idsIn("builtUp")).toContain("landuse_residential");
   });
 
   it("puts points of interest under their own group", () => {
@@ -56,9 +57,12 @@ describe("groupedLayersOf", () => {
     expect(ids).not.toContain("building");
   });
 
-  it("splits the one landuse source layer by class: housing is built-up ground, a cemetery is land use", () => {
+  it("splits the one landuse source layer by class: housing, hospitals and schools are built-up ground, a cemetery is land use", () => {
     expect(idsIn("land")).not.toContain("landuse_residential");
-    expect(idsIn("land")).toEqual(expect.arrayContaining(["landuse_cemetery", "landuse_school"]));
+    expect(idsIn("builtUp")).toEqual(
+      expect.arrayContaining(["landuse_residential", "landuse_hospital", "landuse_school"]),
+    );
+    expect(idsIn("land")).toEqual(expect.arrayContaining(["landuse_cemetery", "landuse_pitch"]));
   });
 
   it("leaves a landuse layer it cannot read the class of in land use", () => {

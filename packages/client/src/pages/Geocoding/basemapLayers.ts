@@ -23,12 +23,12 @@ export const BASEMAP_GROUPS: { id: BasemapGroup; title: string; note: string }[]
   {
     id: "land",
     title: "land cover & use",
-    note: "woodland, grass, parks, sand, ice, cemeteries, schools",
+    note: "woodland, grass, parks, sand, ice, cemeteries",
   },
   {
     id: "builtUp",
     title: "built-up areas & buildings",
-    note: "the shaded ground of towns and villages, and building footprints",
+    note: "the shaded ground of towns and villages, institutional grounds, and building footprints",
   },
   {
     id: "poi",
@@ -53,7 +53,19 @@ const GROUP_SOURCE_LAYERS: Record<BasemapGroup, string[]> = {
  * filter names one of these classes, and is land use otherwise — which includes
  * a layer with no filter, since a switch should not claim what it cannot read.
  */
-const BUILT_UP_CLASSES = ["residential", "suburb", "neighbourhood", "commercial", "industrial", "retail"];
+const BUILT_UP_CLASSES = [
+  "residential",
+  "suburb",
+  "neighbourhood",
+  "commercial",
+  "industrial",
+  "retail",
+  "hospital",
+  "school",
+  "university",
+  "college",
+  "kindergarten",
+];
 
 const namesBuiltUpClass = (filter: unknown): boolean => {
   const text = JSON.stringify(filter ?? null);

@@ -756,12 +756,12 @@ Location that is no longer the one being read.
 
 The basemap is a vector style, so what it draws is switchable too. Four groups
 are: transport (roads, railways, paths, airports and their names), land cover and
-use (woodland, grass, parks, sand, ice, cemeteries, schools), built-up areas and
-buildings (the shaded ground of towns and villages, and building footprints), and
+use (woodland, grass, parks, sand, ice, cemeteries), built-up areas and
+buildings (the shaded ground of towns and villages, hospital and school grounds, and building footprints), and
 points of interest. Only land cover and use starts on: this is a map for places as
 they stood across centuries, so what is modern is left out until asked for, and
 borders, names, water and relief are always drawn. The built-up areas are one class of the
-style's `landuse` source layer, which also holds cemeteries and schools, so a
+style's `landuse` source layer, which also holds cemeteries and pitches, so a
 `landuse` layer is built-up ground when its filter names a built-up class
 (`residential`, `commercial` and the like) and is land use otherwise. Four
 things are not, and carry no switch at all — administrative borders, place

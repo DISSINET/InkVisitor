@@ -71,7 +71,6 @@ import {
   StyledLayerCount,
   StyledLayerRow,
   StyledLayersHead,
-  StyledLayersNote,
   StyledLayersPanel,
   StyledLayersReset,
   StyledLayersToggle,
@@ -327,7 +326,7 @@ const MapLayersPanel: React.FC<MapLayersPanel> = ({
     <StyledLayersToggle
       type="button"
       $open={open}
-      title="what the map draws"
+      title="display"
       aria-expanded={open}
       onClick={onToggleOpen}
     >
@@ -336,7 +335,7 @@ const MapLayersPanel: React.FC<MapLayersPanel> = ({
 
     {open ? (
       <StyledLayersPanel role="group" aria-label="Map layers">
-        <StyledLayersHead>what the map draws</StyledLayersHead>
+        <StyledLayersHead>display</StyledLayersHead>
         <StyledLayerRow>
           <input
             type="checkbox"
@@ -374,12 +373,9 @@ const MapLayersPanel: React.FC<MapLayersPanel> = ({
             <StyledLayerCount>rather than on hover</StyledLayerCount>
           </span>
         </StyledLayerRow>
-        <StyledLayersNote>
-          The map draws what the list draws. Narrow the filters on the left to narrow this.
-        </StyledLayersNote>
 
         {/* the basemap's own drawing, as distinct from this page's marks */}
-        <StyledLayersHead>what the basemap draws</StyledLayersHead>
+        <StyledLayersHead>basemap</StyledLayersHead>
         {BASEMAP_GROUPS.map((group) => (
           <StyledLayerRow key={group.id}>
             <input
@@ -398,13 +394,6 @@ const MapLayersPanel: React.FC<MapLayersPanel> = ({
             </span>
           </StyledLayerRow>
         ))}
-        {/* said rather than implied: a reader looking for a borders switch
-            should find out here that there is none because there never needs
-            to be one, not conclude the panel is missing it */}
-        <StyledLayersNote>
-          Borders, place names, water and relief are always drawn — they are what a place
-          is judged against.
-        </StyledLayersNote>
         <StyledLayersReset
           type="button"
           onClick={() => onChange(DEFAULT_MAP_PREFS)}
