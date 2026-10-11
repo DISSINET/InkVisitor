@@ -12,7 +12,7 @@
  */
 
 /** The parts of the basemap a researcher can switch off. */
-export type BasemapGroup = "transportation" | "land";
+export type BasemapGroup = "transportation" | "land" | "builtUp" | "buildings" | "poi";
 
 export const BASEMAP_GROUPS: { id: BasemapGroup; title: string; note: string }[] = [
   {
@@ -23,13 +23,47 @@ export const BASEMAP_GROUPS: { id: BasemapGroup; title: string; note: string }[]
   {
     id: "land",
     title: "land cover & use",
-    note: "woodland, grass, parks, sand, ice, built-up areas, buildings and points of interest",
+    note: "woodland, grass, parks, sand, ice, cemeteries, schools",
+  },
+  {
+    id: "builtUp",
+    title: "built-up areas",
+    note: "the shaded ground of towns and villages: housing, commerce, industry",
+  },
+  {
+    id: "buildings",
+    title: "buildings",
+    note: "building footprints",
+  },
+  {
+    id: "poi",
+    title: "points of interest",
+    note: "shops, stations, churches and other marked places",
   },
 ];
 
 const GROUP_SOURCE_LAYERS: Record<BasemapGroup, string[]> = {
   transportation: ["transportation", "transportation_name", "aeroway", "aerodrome_label"],
-  land: ["landuse", "landcover", "park", "building", "poi"],
+  land: ["landuse", "landcover", "park"],
+  builtUp: [],
+  buildings: ["building"],
+  poi: ["poi"],
+};
+
+/**
+ * The `landuse` classes that are built-up ground, from the OpenMapTiles schema.
+ *
+ * `landuse` is one source layer holding both the ground of a town and a
+ * cemetery or a school, and a style draws each class as its own layer with a
+ * filter on `class`. So a layer of this source layer is built-up ground when its
+ * filter names one of these classes, and is land use otherwise — which includes
+ * a layer with no filter, since a switch should not claim what it cannot read.
+ */
+const BUILT_UP_CLASSES = ["residential", "suburb", "neighbourhood", "commercial", "industrial", "retail"];
+
+const namesBuiltUpClass = (filter: unknown): boolean => {
+  const text = JSON.stringify(filter ?? null);
+  return BUILT_UP_CLASSES.some((name) => text.includes(`"${name}"`));
 };
 
 /**
@@ -58,9 +92,12 @@ export interface BasemapLayer {
   group: BasemapGroup;
 }
 
-const groupOf = (sourceLayer: string | undefined): BasemapGroup | null => {
+const groupOf = (sourceLayer: string | undefined, filter?: unknown): BasemapGroup | null => {
   if (!sourceLayer) {
     return null;
+  }
+  if (sourceLayer === "landuse" && namesBuiltUpClass(filter)) {
+    return "builtUp";
   }
   for (const group of Object.keys(GROUP_SOURCE_LAYERS) as BasemapGroup[]) {
     if (GROUP_SOURCE_LAYERS[group].includes(sourceLayer)) {
@@ -86,11 +123,11 @@ const groupOf = (sourceLayer: string | undefined): BasemapGroup | null => {
  * put back exactly what `neverDrawnLayerIds` hides.
  */
 export const groupedLayersOf = (
-  layers: { id: string; type: string; "source-layer"?: string }[],
+  layers: { id: string; type: string; "source-layer"?: string; filter?: unknown }[],
 ): BasemapLayer[] =>
   layers
     .filter((layer) => layer.type !== "fill-extrusion")
-    .map((layer) => ({ id: layer.id, group: groupOf(layer["source-layer"]) }))
+    .map((layer) => ({ id: layer.id, group: groupOf(layer["source-layer"], layer.filter) }))
     .filter((entry): entry is BasemapLayer => entry.group !== null);
 
 /**
@@ -124,7 +161,7 @@ interface StyleLayerSummary {
  * The style's flat fill stops at the zoom its extrusion starts, and extrusions
  * are never drawn here, so past that zoom a village shows no buildings at all.
  * This layer carries on from the flat fill with the same source, source layer
- * and paint, and goes through the same grouping, so the land switch owns it.
+ * and paint, and goes through the same grouping, so the buildings switch owns it.
  *
  * Returns the layer with the id of the layer it belongs directly above, or null
  * where the style has no flat building fill to continue or the layer is already

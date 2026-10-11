@@ -17,7 +17,12 @@ import {
  * it survives what a style actually contains — a fixture written to match the
  * implementation would pass while the live style broke it.
  */
-const layers = libertyLayers as { id: string; type: string; "source-layer"?: string }[];
+const layers = libertyLayers as {
+  id: string;
+  type: string;
+  "source-layer"?: string;
+  filter?: unknown;
+}[];
 
 const idsIn = (group: BasemapGroup) =>
   groupedLayersOf(layers)
@@ -41,11 +46,25 @@ describe("groupedLayersOf", () => {
     );
   });
 
-  it("puts buildings and points of interest under land, with the built-up areas they stand in", () => {
-    const ids = idsIn("land");
-    expect(ids).toEqual(
-      expect.arrayContaining(["building", "poi_r1", "poi_transit", "landuse_residential"]),
-    );
+  it("puts building footprints under buildings and nothing else there", () => {
+    expect(idsIn("buildings")).toEqual(["building"]);
+  });
+
+  it("puts points of interest under their own group", () => {
+    const ids = idsIn("poi");
+    expect(ids).toEqual(expect.arrayContaining(["poi_r1", "poi_transit"]));
+    expect(ids).not.toContain("building");
+  });
+
+  it("splits the one landuse source layer by class: housing is built-up ground, a cemetery is land use", () => {
+    expect(idsIn("builtUp")).toEqual(["landuse_residential"]);
+    expect(idsIn("land")).not.toContain("landuse_residential");
+    expect(idsIn("land")).toEqual(expect.arrayContaining(["landuse_cemetery", "landuse_school"]));
+  });
+
+  it("leaves a landuse layer it cannot read the class of in land use", () => {
+    const unfiltered = [{ id: "landuse_x", type: "fill", "source-layer": "landuse" }];
+    expect(groupedLayersOf(unfiltered)).toEqual([{ id: "landuse_x", group: "land" }]);
   });
 
   it("puts land cover, land use and parks under land", () => {
@@ -56,7 +75,6 @@ describe("groupedLayersOf", () => {
         "park_outline",
         "landcover_wood",
         "landcover_ice",
-        "landuse_residential",
         "landuse_cemetery",
       ]),
     );
@@ -112,14 +130,14 @@ describe("neverDrawnLayerIds", () => {
     expect(neverDrawnLayerIds(layers)).toEqual(["building-3d"]);
   });
 
-  it("leaves the flat building fill alone, which the land switch owns", () => {
+  it("leaves the flat building fill alone, which the buildings switch owns", () => {
     expect(neverDrawnLayerIds(layers)).not.toContain("building");
-    expect(idsIn("land")).toContain("building");
+    expect(idsIn("buildings")).toContain("building");
   });
 
   /**
    * The regression this guards: `building-3d` shares the `building` source
-   * layer with the flat footprint the land switch owns, so a grouping that
+   * layer with the flat footprint the buildings switch owns, so a grouping that
    * read only the source layer would put the extrusion under that switch too.
    * Turning the switch on would then set the very layer `neverDrawnLayerIds`
    * hides back to visible.
@@ -161,7 +179,7 @@ describe("flatBuildingLayerFor", () => {
     expect(added?.beforeId).toBe("building-3d");
   });
 
-  it("is grouped with the flat fill it continues, so the land switch owns it", () => {
+  it("is grouped with the flat fill it continues, so the buildings switch owns it", () => {
     const added = flatBuildingLayerFor(style);
     const withIt = [...style, { ...added!.layer, id: FLAT_BUILDING_LAYER_ID }] as {
       id: string;
@@ -169,7 +187,7 @@ describe("flatBuildingLayerFor", () => {
       "source-layer"?: string;
     }[];
     expect(groupedLayersOf(withIt).find((l) => l.id === FLAT_BUILDING_LAYER_ID)?.group).toBe(
-      "land",
+      "buildings",
     );
   });
 

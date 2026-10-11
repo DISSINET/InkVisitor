@@ -41,6 +41,11 @@ export const DEFAULT_MAP_PREFS: MapLayerPrefs = {
     // on by default: without it the map is white behind its lines, and woodland
     // against open ground is the one modern surface that still reads as terrain
     land: true,
+    // built-up ground was part of land cover and use, which is on; buildings and
+    // points of interest are the clutter the quiet default leaves out
+    builtUp: true,
+    buildings: false,
+    poi: false,
   },
 };
 
@@ -77,6 +82,9 @@ export const readMapPrefs = (raw: string | null): MapLayerPrefs => {
     basemap: {
       transportation: bool(storedBasemap.transportation, DEFAULT_MAP_PREFS.basemap.transportation),
       land: bool(storedBasemap.land, DEFAULT_MAP_PREFS.basemap.land),
+      builtUp: bool(storedBasemap.builtUp, DEFAULT_MAP_PREFS.basemap.builtUp),
+      buildings: bool(storedBasemap.buildings, DEFAULT_MAP_PREFS.basemap.buildings),
+      poi: bool(storedBasemap.poi, DEFAULT_MAP_PREFS.basemap.poi),
     },
   };
 };
