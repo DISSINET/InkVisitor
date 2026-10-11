@@ -753,45 +753,60 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   // puts the drawing tool's layers above them rather than beneath
   const draw = useGeometryDraw(mapRef, styleEpoch, shapeOpen);
 
-  // The page's own marks. Set as data on a source that already exists, so a
-  // change of selection or of suggestions never touches the layers themselves.
-  useEffect(() => {
+  // The page's own marks. Set as data on sources that already exist, so a change
+  // of selection or of suggestions never touches the layers themselves. One
+  // effect per source: a rectangle being dragged out must not re-send the
+  // Locations of the whole corpus, and a click must not re-send the rectangle.
+  const withMap = (apply: (map: maplibregl.Map) => void) => {
     const map = mapRef.current;
-    if (!map || styleEpoch === 0) {
-      return;
+    if (map && styleEpoch !== 0) {
+      apply(map);
     }
-    setGeocodingMapData(map, {
-      others: shownOthers,
-      suggestions: shownSuggestions,
-      leader,
-      selected: {
-        position,
-        name: selectedName,
-        id: selected?.entity.id,
-        // the shape tool draws the stored shape itself while it is being edited
-        geometry: shapeOpen ? null : (selected?.geometry ?? null),
-      },
-      pending: pending ? [pending.lat, pending.lon] : null,
-      focus: ringed?.at ?? null,
-      // what is being dragged out takes precedence over what is stored, so the
-      // rectangle follows the pointer rather than jumping into place on release
-      regionBox: drag ?? context.regionBbox ?? null,
-    });
-  }, [
-    styleEpoch,
-    shownOthers,
-    shownSuggestions,
-    leader,
-    position,
-    selectedName,
-    selected?.entity.id,
-    selectedGeometryKey,
-    shapeOpen,
-    pending,
-    ringed,
-    drag,
-    context.regionBbox,
-  ]);
+  };
+
+  useEffect(() => {
+    withMap((map) => setGeocodingMapData(map, { others: shownOthers }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleEpoch, shownOthers]);
+
+  useEffect(() => {
+    withMap((map) => setGeocodingMapData(map, { suggestions: shownSuggestions, leader }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleEpoch, shownSuggestions, leader]);
+
+  useEffect(() => {
+    withMap((map) =>
+      setGeocodingMapData(map, {
+        selected: {
+          position,
+          name: selectedName,
+          id: selected?.entity.id,
+          // the shape tool draws the stored shape itself while it is being edited
+          geometry: shapeOpen ? null : (selected?.geometry ?? null),
+        },
+      }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleEpoch, position, selectedName, selected?.entity.id, selectedGeometryKey, shapeOpen]);
+
+  useEffect(() => {
+    withMap((map) =>
+      setGeocodingMapData(map, { pending: pending ? [pending.lat, pending.lon] : null }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleEpoch, pending]);
+
+  useEffect(() => {
+    withMap((map) => setGeocodingMapData(map, { focus: ringed?.at ?? null }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleEpoch, ringed]);
+
+  // what is being dragged out takes precedence over what is stored, so the
+  // rectangle follows the pointer rather than jumping into place on release
+  useEffect(() => {
+    withMap((map) => setGeocodingMapData(map, { regionBox: drag ?? context.regionBbox ?? null }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [styleEpoch, drag, context.regionBbox]);
 
   /**
    * The basemap's borders and labels, and this page's own names.

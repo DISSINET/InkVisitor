@@ -610,8 +610,16 @@ export interface GeocodingMapData {
 /**
  * Sets the page's own marks as data on sources that already exist, so a
  * change of selection or of suggestions never touches the layers themselves.
+ *
+ * Only the sources whose input is given are set. Handing a source its data
+ * re-tiles it in the renderer's worker, and the Locations drawn from the whole
+ * corpus are the expensive ones: a drag that moves a rectangle must not pay for
+ * them.
  */
-export const setGeocodingMapData = (map: maplibregl.Map, data: GeocodingMapData): void => {
+export const setGeocodingMapData = (
+  map: maplibregl.Map,
+  data: Partial<GeocodingMapData>,
+): void => {
   const set = (
     id: string,
     source:
@@ -622,23 +630,35 @@ export const setGeocodingMapData = (map: maplibregl.Map, data: GeocodingMapData)
     (map.getSource(id) as maplibregl.GeoJSONSource | undefined)?.setData(
       source as Parameters<maplibregl.GeoJSONSource["setData"]>[0],
     );
-  set(SRC.others, othersData(data.others));
-  set(
-    SRC.othersShapes,
-    shapesData(data.others.map((one) => ({ id: one.entity.id, geometry: one.geometry }))),
-  );
-  set(
-    SRC.selectedShape,
-    shapesData([{ id: data.selected.id ?? "", geometry: data.selected.geometry ?? null }]),
-  );
-  set(SRC.suggestions, suggestionsData(data.suggestions, data.leader));
-  set(
-    SRC.selected,
-    pointData(data.selected.position, { name: data.selected.name, id: data.selected.id ?? "" }),
-  );
-  set(SRC.pending, pointData(data.pending));
-  set(SRC.focus, pointData(data.focus));
-  set(SRC.regionBox, boxData(data.regionBox));
+  if (data.others) {
+    set(SRC.others, othersData(data.others));
+    set(
+      SRC.othersShapes,
+      shapesData(data.others.map((one) => ({ id: one.entity.id, geometry: one.geometry }))),
+    );
+  }
+  if (data.selected) {
+    set(
+      SRC.selectedShape,
+      shapesData([{ id: data.selected.id ?? "", geometry: data.selected.geometry ?? null }]),
+    );
+    set(
+      SRC.selected,
+      pointData(data.selected.position, { name: data.selected.name, id: data.selected.id ?? "" }),
+    );
+  }
+  if (data.suggestions) {
+    set(SRC.suggestions, suggestionsData(data.suggestions, data.leader ?? null));
+  }
+  if (data.pending !== undefined) {
+    set(SRC.pending, pointData(data.pending));
+  }
+  if (data.focus !== undefined) {
+    set(SRC.focus, pointData(data.focus));
+  }
+  if (data.regionBox !== undefined) {
+    set(SRC.regionBox, boxData(data.regionBox));
+  }
 };
 
 /**

@@ -80,6 +80,27 @@ describe("the ring that answers a request to show a point", () => {
   });
 });
 
+describe("setting only some of the page's marks", () => {
+  it("leaves every source it was not given untouched, so a drag does not re-send the corpus", () => {
+    const { map, data } = recordingMap();
+    addGeocodingLayers(anyMap(map), theme);
+    const before = { ...data };
+    setGeocodingMapData(anyMap(map), { regionBox: [1, 2, 3, 4] });
+    expect(data[SRC.regionBox]).toBeDefined();
+    for (const id of [SRC.others, SRC.othersShapes, SRC.suggestions, SRC.selected, SRC.pending]) {
+      expect(data[id], id).toBe(before[id]);
+    }
+  });
+
+  it("sets the selected point and its outline together, since both read one selection", () => {
+    const { map, data } = recordingMap();
+    addGeocodingLayers(anyMap(map), theme);
+    setGeocodingMapData(anyMap(map), { selected: { position: [51.1, 17.0], name: "Breslau", id: "L1" } });
+    expect(data[SRC.selected]).toBeDefined();
+    expect(data[SRC.selectedShape]).toBeDefined();
+  });
+});
+
 describe("the breath the ring is drawn with", () => {
   const life = FOCUS_MARK_MS;
   const everyFrame = Array.from({ length: life / 16 }, (_, i) => focusPulse(i * 16, life));
