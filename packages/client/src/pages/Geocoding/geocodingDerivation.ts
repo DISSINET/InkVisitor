@@ -1,10 +1,6 @@
 import { IEntity } from "@inkvisitor/shared/types";
 import { GeoJsonGeometry, geometryAnchor, parseGeometry } from "@inkvisitor/shared/types/geometry";
-import {
-  GeocodingAccuracy,
-  GeocodingPlaceType,
-  IGeocodingRoles,
-} from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 
 /**
  * Turning a Location's metaproperties into a coordinate.
@@ -28,8 +24,13 @@ export interface DerivedGeocoding {
   /** Latitude of the anchor. */
   lat: number | null;
   accuracy: GeocodingAccuracy | null;
-  /** Present independently of `isGeocoded` — a type says nothing about a coordinate. */
-  placeType: GeocodingPlaceType | null;
+  /**
+   * The id of the project's kind of place, independent of `isGeocoded` — a kind
+   * says nothing about a coordinate. Not a prop, so it is not derived here: a
+   * Location has a kind by a Classification relation, which the collection of
+   * Locations joins in.
+   */
+  placeType: string | null;
   /**
    * Why a Location with coordinate props still reads as ungeocoded, for a list
    * that would otherwise show an unexplained gap. Null when there is nothing to
@@ -60,7 +61,7 @@ const propOfType = (entity: IEntity, conceptId: string) =>
  * take a second, batched fetch.
  */
 export const collectGeoValueIds = (entities: IEntity[], roles: IGeocodingRoles): string[] => {
-  const wanted = [roles.geometry, roles.accuracy, roles.type].filter(Boolean);
+  const wanted = [roles.geometry, roles.accuracy].filter(Boolean);
   const ids = new Set<string>();
   for (const entity of entities) {
     for (const conceptId of wanted) {
@@ -101,19 +102,16 @@ export const deriveGeocoding = (
     return ungeocoded(null);
   }
 
-  const placeTypeId = propOfType(entity, roles.type)?.value?.entityId;
-  const placeType = nameForEntity<GeocodingPlaceType>(roles.placeTypes, placeTypeId);
-
   const geometryProp = propOfType(entity, roles.geometry);
   const accuracyProp = propOfType(entity, roles.accuracy);
 
   if (!geometryProp && !accuracyProp) {
-    return { ...ungeocoded(null), placeType };
+    return ungeocoded(null);
   }
 
   const missing = [!geometryProp && "geometry", !accuracyProp && "accuracy"].filter(Boolean);
   if (missing.length) {
-    return { ...ungeocoded(`missing ${missing.join(" and ")}`), placeType };
+    return ungeocoded(`missing ${missing.join(" and ")}`);
   }
 
   // a geometry that cannot be read is not a geometry: a blank label, text that
@@ -126,14 +124,14 @@ export const deriveGeocoding = (
   );
 
   if (!geometry) {
-    return { ...ungeocoded("geometry cannot be read"), placeType };
+    return ungeocoded("geometry cannot be read");
   }
   if (!accuracy) {
-    return { ...ungeocoded("accuracy is not one of the configured values"), placeType };
+    return ungeocoded("accuracy is not one of the configured values");
   }
 
   const { lon, lat } = geometryAnchor(geometry);
-  return { isGeocoded: true, geometry, lon, lat, accuracy, placeType, problem: null };
+  return { isGeocoded: true, geometry, lon, lat, accuracy, placeType: null, problem: null };
 };
 
 /**

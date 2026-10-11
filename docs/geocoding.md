@@ -10,13 +10,12 @@ own API reference lives in its repository; nothing here restates it.
 ## How a coordinate is stored
 
 The geometry is a metaproperty on the Location entity, not a field on
-`ILocationData`. Three sibling props carry it:
+`ILocationData`. Two sibling props carry it:
 
 | prop type | prop value | example |
 |-----------|------------|---------|
 | Concept `geo:geometry` | Value entity | `{"type":"Point","coordinates":[17.033,51.107]}` |
 | Concept `geo:accuracy` | Concept | `geo-accuracy:precise` |
-| Concept `geo:type` | Concept | `geo-type:settlement` |
 
 The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString`,
 `MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
@@ -47,8 +46,9 @@ label is blank, not JSON, out of range or an open ring, does not count — a
 geometry that cannot be read is not a geometry. One
 Location in the converted set, `diocesis Tudensis`, is exactly that shape.
 
-`geo:type` is not part of the test. It records what kind of place the geometry
-refers to, and its absence does not make the coordinate unusable.
+The kind of place is not a prop. A Location has a kind by being the subject of a
+Classification relation to the kind's Concept, and a Location without one is
+still geocoded: the kind says what the place is, not where.
 
 None of these Concept identities is hardcoded. Which Concept plays which role is
 configuration, so a deployment whose data uses different Concepts points the
@@ -93,8 +93,8 @@ panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
 The **global** modal is reached from the menu's tools section beside Global
-validations. It assigns thirty-four entities: the three geometry, accuracy and kind roles, the four
-accuracy values, the twelve place types and fifteen gazetteer Resources. Each
+validations. It assigns the geometry and accuracy roles, the four
+accuracy values, the project's own place types and fifteen gazetteer Resources. Each
 field selects an existing entity or creates one, so a fresh deployment needs no
 seeding job — and the ten gazetteers whose record URL ends with the identifier
 have their base URL prefilled from the engine's own builders.
@@ -471,7 +471,19 @@ place regardless. What they cannot do is notice this by looking at the list.
 
 ## Recording what kind of place it is
 
-A coordinate answers where; the twelve place types answer what. They are asked
+A coordinate answers where; the project's place types answer what. The project
+defines its own list in the global settings — a name, the Concept a Location is
+classified under, a mark chosen from a set of thirty-four, a description and,
+optionally, the engine type it answers to. The engine's twelve types are a
+separate vocabulary: they say what to ask the gazetteers for, while a place type
+says what the project calls a Location. The default list is one kind per engine
+type. When several kinds answer to one engine type, the starred favourite is
+offered first and the picker says how many match. The table counts the Locations
+classified under each kind's Concept, and assigning a Concept another kind holds
+moves it, since a Concept stands for one kind. A Location can carry several kinds;
+the page shows and edits the first one in the project's order, and writing a kind
+replaces the Location's other kinds while leaving every other Classification
+alone. The kinds are asked
 for rather than inferred, in a second step after the accuracy: a suggestion
 frequently carries no type of its own, and where it does, the type is what the
 sources called the record rather than what the researcher knows the place to be.
@@ -485,9 +497,12 @@ Three things follow from the vocabulary being the project's own:
 - "record place type" in the personal context turns the second step off. A
   project that has not mapped the twelve has nothing to write, and the coordinate
   is worth recording without them.
-- The accuracy and place type props point at Concepts, not at Values this page
-  owns. A write never offers a previous accuracy or a previous type for deletion:
-  that Concept belongs to the vocabulary and to every other Location using it.
+- The accuracy prop points at a Concept, not at a Value this page owns. A write
+  never offers a previous accuracy for deletion: that Concept belongs to the
+  vocabulary and to every other Location using it.
+- The kind is written after the props, as a relation, so a failure there is
+  reported while the geometry stays saved; the new Classification is created
+  before the old one is removed.
 
 Setting a coordinate from the map asks the same two questions in the same order,
 in the menu that opens where the click landed. Leaving the kind undecided there

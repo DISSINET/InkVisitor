@@ -1,12 +1,11 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import {
-  GEOCODING_PLACE_TYPES,
   GeocodingAccuracy,
   IGeocodingContext,
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
@@ -32,6 +31,7 @@ import {
   StyledRowControls,
   StyledRowLabel,
   StyledFullRow,
+  StyledKindsRow,
   StyledSectionHeading,
   StyledSectionNote,
   StyledScrollRow,
@@ -46,6 +46,8 @@ import {
 } from "./geocodingSettings";
 import { GazetteerColumn, GazetteerPicker } from "./GazetteerPicker";
 import { StyledGazetteerNote } from "./GazetteerPickerStyles";
+import { PlaceTypeTable } from "./PlaceTypeTable";
+import { PLACE_TYPE_ASSIGNMENTS_KEY, usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
 
 /**
  * Assigning the entities that give a coordinate its meaning.
@@ -90,13 +92,24 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       [
         draft.geometry,
         draft.accuracy,
-        draft.type,
         ...Object.values(draft.accuracyValues),
-        ...Object.values(draft.placeTypes),
+        ...draft.placeTypes.map((one) => one.conceptId),
         ...Object.values(draft.resources),
       ].filter((id): id is string => !!id),
     [draft],
   );
+
+  // the counts are of Locations, and a Classification can have any entity as its
+  // subject, so the Locations are listed once to count against
+  const { data: locationIds } = useQuery({
+    queryKey: ["geocoding-all-location-ids"],
+    queryFn: async () => {
+      const response = await api.entitiesSearch({ class: EntityEnums.Class.Location });
+      return new Set((response.data ?? []).map((entity) => entity.id));
+    },
+    staleTime: 60_000,
+  });
+  const assignments = usePlaceTypeAssignments(draft.placeTypes, locationIds);
 
   const { data: assignedEntities } = useEntitiesQuery("geocoding-settings", assignedIds);
 
@@ -110,6 +123,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
   const save = useMutation({
     mutationFn: async () => {
+      if (draft.placeTypes.some((one) => !one.name.trim())) {
+        throw new Error("Every kind of place needs a name.");
+      }
       // the draft holds every role, so a role the researcher unlinked is one
       // this object no longer carries — it has to replace, not merge
       await putGeocodingRoles(draft);
@@ -135,10 +151,15 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       queryClient.invalidateQueries({ queryKey: ["geocoding-settings"] });
       queryClient.invalidateQueries({ queryKey: ["geocoding-locations"] });
       queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
+      queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
       toast.success("Geocoding settings saved.");
       onClose();
     },
-    onError: () => {
+    onError: (error) => {
+      if (error instanceof Error && error.message === "Every kind of place needs a name.") {
+        toast.error(error.message);
+        return;
+      }
       // a save is several writes, and the earlier ones may have landed
       queryClient.invalidateQueries({ queryKey: ["geocoding-settings"] });
       toast.error(
@@ -280,7 +301,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A geocoded Location carries three metaproperties: a GeoJSON geometry, an accuracy and a kind of place. Which Concept plays which role is
+            A geocoded Location carries two metaproperties: a GeoJSON geometry and an accuracy. Which Concept plays which role is
             set once for the project — it is what &ldquo;geocoded&rdquo; means, so it cannot differ
             between users.
           </StyledSectionNote>
@@ -289,9 +310,6 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
           )}
           {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, accuracy: id ?? "" })),
-          )}
-          {row("geo:type", draft.type, EntityEnums.Class.Concept, (id) =>
-            setDraft((d) => ({ ...d, type: id ?? "" })),
           )}
 
           <StyledSectionHeading>Accuracy values</StyledSectionHeading>
@@ -309,15 +327,24 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Place types</StyledSectionHeading>
           <StyledSectionNote>
-            Twelve, matching the engine&apos;s own vocabulary. A type with no Concept assigned
-            blocks the write rather than being dropped — a controlled vocabulary that grows from
-            outside is not controlled.
+            The project&apos;s own kinds of place, free to define. A Location has a kind by being
+            classified under the kind&apos;s Concept, so assign one Concept per kind — picking a
+            Concept another kind holds moves it. The engine type connects a suggestion&apos;s own
+            type to your kinds: when several of yours answer to one, the starred one is offered
+            first. A kind with no Concept blocks the write rather than being dropped.
           </StyledSectionNote>
-          {GEOCODING_PLACE_TYPES.map((placeType) =>
-            row(placeType, draft.placeTypes[placeType], EntityEnums.Class.Concept, (id) =>
-              setDraft((d) => ({ ...d, placeTypes: withEntry(d.placeTypes, placeType, id) })),
-            ),
-          )}
+          <StyledKindsRow>
+            <PlaceTypeTable
+              value={draft.placeTypes}
+              onChange={(placeTypes) => setDraft((d) => ({ ...d, placeTypes }))}
+              renderConcept={(conceptId, set) =>
+                picker(conceptId || undefined, EntityEnums.Class.Concept, set)
+              }
+              counts={assignments.countByType}
+              countsLoading={assignments.isLoading || !locationIds}
+              countsFailed={!!assignments.error}
+            />
+          </StyledKindsRow>
 
           <StyledSectionHeading>Gazetteers</StyledSectionHeading>
           <StyledSectionNote>

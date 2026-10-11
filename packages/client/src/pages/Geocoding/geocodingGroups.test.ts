@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy, defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
 import {
   COLLAPSED_BY_DEFAULT,
   flatten,
@@ -122,17 +122,26 @@ describe("groupsOf, by a field a Location may not carry", () => {
   ];
 
   it("gives the Locations carrying no value a named group", () => {
-    const groups = groupsOf(corpus, "placeType", {});
+    const groups = groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes());
     const missing = groups.find((group) => group.label === "no kind recorded");
     expect(missing?.rows.map((row) => row.entity.id)).toEqual(["Aura", "Steinau"]);
   });
 
+  it("names a group by what the project calls the kind, not by its id", () => {
+    const renamed = defaultPlaceTypes().map((one) =>
+      one.id === "river" ? { ...one, name: "watercourse" } : one,
+    );
+    const labels = groupsOf(corpus, "placeType", {}, {}, renamed).map((group) => group.label);
+    expect(labels).toContain("watercourse");
+    expect(labels).not.toContain("river");
+  });
+
   it("sorts that group last, because it is the one about absence", () => {
-    expect(groupsOf(corpus, "placeType", {}).at(-1)?.label).toBe("no kind recorded");
+    expect(groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes()).at(-1)?.label).toBe("no kind recorded");
   });
 
   it("sorts the rest by name, so the arrangement does not move as values change", () => {
-    const labels = groupsOf(corpus, "placeType", {})
+    const labels = groupsOf(corpus, "placeType", {}, {}, defaultPlaceTypes())
       .map((group) => group.label)
       .filter((label) => label !== "no kind recorded");
     expect(labels).toEqual([...labels].sort());

@@ -2,6 +2,7 @@ import {
   GEOCODING_SETTINGS_KEY,
   GeocodingAccuracy,
   IGeocodingRoles,
+  defaultPlaceTypes,
 } from "@inkvisitor/shared/types/geocoding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -31,9 +32,14 @@ const { nextBaseUrls, patchGeocodingContext, patchGeocodingRoles, putGeocodingRo
 const stored: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
-  type: "c-type",
-  accuracyValues: { [GeocodingAccuracy.Precise]: "v-precise" },
-  placeTypes: { settlement: "v-settlement", fortress: "v-fortress" },
+  accuracyValues: {
+    [GeocodingAccuracy.Precise]: "v-precise",
+    [GeocodingAccuracy.Approximate]: "v-approx",
+  },
+  placeTypes: [
+    { ...defaultPlaceTypes()[0], conceptId: "v-settlement" },
+    { ...defaultPlaceTypes()[1], conceptId: "v-fortress" },
+  ],
   resources: { wikidata: "r-wikidata", geonames: "r-geonames" },
 };
 
@@ -48,9 +54,9 @@ beforeEach(() => {
 
 describe("withEntry", () => {
   it("removes the key rather than blanking it, so a reader asking whether it exists is told no", () => {
-    const next = withEntry(stored.placeTypes, "settlement", null);
-    expect("settlement" in next).toBe(false);
-    expect(next.fortress).toBe("v-fortress");
+    const next = withEntry(stored.accuracyValues, GeocodingAccuracy.Precise, null);
+    expect(GeocodingAccuracy.Precise in next).toBe(false);
+    expect(next[GeocodingAccuracy.Approximate]).toBe("v-approx");
   });
 
   it("sets the key without touching the others", () => {
@@ -59,19 +65,22 @@ describe("withEntry", () => {
   });
 
   it("leaves the map it was given alone", () => {
-    withEntry(stored.placeTypes, "settlement", null);
-    expect(stored.placeTypes.settlement).toBe("v-settlement");
+    withEntry(stored.accuracyValues, GeocodingAccuracy.Precise, null);
+    expect(stored.accuracyValues[GeocodingAccuracy.Precise]).toBe("v-precise");
   });
 });
 
 describe("putGeocodingRoles", () => {
-  it("writes a dropped place type as dropped", async () => {
+  it("writes the list of place types as given, a removed kind gone and a new one present", async () => {
     await putGeocodingRoles({
       ...stored,
-      placeTypes: withEntry(stored.placeTypes, "settlement", null),
+      placeTypes: [
+        stored.placeTypes[1],
+        { ...defaultPlaceTypes()[0], id: "catholic-church", name: "catholic church", conceptId: "c-cc" },
+      ],
     });
-    expect("settlement" in written().placeTypes).toBe(false);
-    expect(written().placeTypes.fortress).toBe("v-fortress");
+    expect(written().placeTypes.map((one) => one.id)).toEqual(["fortress", "catholic-church"]);
+    expect(written().placeTypes[1].conceptId).toBe("c-cc");
   });
 
   it("writes a cleared geometry role as empty", async () => {
@@ -100,9 +109,35 @@ describe("putGeocodingRoles", () => {
 });
 
 describe("patchGeocodingRoles", () => {
-  it("merges the maps, so a caller holding one key cannot express a removal", async () => {
-    await patchGeocodingRoles({ placeTypes: withEntry(stored.placeTypes, "settlement", null) });
-    expect(written().placeTypes.settlement).toBe("v-settlement");
+  it("merges the keyed maps, so a caller holding one key cannot express a removal", async () => {
+    await patchGeocodingRoles({
+      accuracyValues: withEntry(stored.accuracyValues, GeocodingAccuracy.Precise, null),
+    });
+    expect(written().accuracyValues[GeocodingAccuracy.Precise]).toBe("v-precise");
+  });
+
+  it("replaces the list of place types whole", async () => {
+    await patchGeocodingRoles({ placeTypes: [stored.placeTypes[1]] });
+    expect(written().placeTypes.map((one) => one.id)).toEqual(["fortress"]);
+  });
+
+  it("reads a row written before the list existed as the default list with its Concepts", async () => {
+    settingGet.mockResolvedValue({
+      data: {
+        data: {
+          value: {
+            roles: { ...stored, placeTypes: { settlement: "old-settlement", river: "old-river" } },
+            context: {},
+          },
+        },
+      },
+    });
+    await patchGeocodingRoles({ geometry: "c-geo-2" });
+    const kinds = written().placeTypes;
+    expect(kinds).toHaveLength(12);
+    expect(kinds.find((one) => one.id === "settlement")?.conceptId).toBe("old-settlement");
+    expect(kinds.find((one) => one.id === "river")?.conceptId).toBe("old-river");
+    expect(kinds.find((one) => one.id === "lake")?.conceptId).toBe("");
   });
 });
 

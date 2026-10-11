@@ -147,6 +147,28 @@ export { TbMountain as IcoPlaceMountain } from "react-icons/tb";
 export { TbRipple as IcoPlaceRiver } from "react-icons/tb";
 export { TbRoad as IcoPlaceRoad } from "react-icons/tb";
 export { TbSwords as IcoPlaceBattlefield } from "react-icons/tb";
+export { TbBuildingCastle as IcoPlaceCastle } from "react-icons/tb";
+export { TbBuildingBridge as IcoPlaceBridge } from "react-icons/tb";
+export { TbBuildingMonument as IcoPlaceMonument } from "react-icons/tb";
+export { TbTower as IcoPlaceTower } from "react-icons/tb";
+export { TbHome as IcoPlaceHouse } from "react-icons/tb";
+export { TbBuildingWarehouse as IcoPlaceWarehouse } from "react-icons/tb";
+export { TbSchool as IcoPlaceSchool } from "react-icons/tb";
+export { TbBuildingHospital as IcoPlaceHospital } from "react-icons/tb";
+export { TbTrees as IcoPlaceForest } from "react-icons/tb";
+export { TbWall as IcoPlaceWall } from "react-icons/tb";
+export { TbTent as IcoPlaceTent } from "react-icons/tb";
+export { TbBuildingLighthouse as IcoPlaceLighthouse } from "react-icons/tb";
+export { TbShip as IcoPlaceShip } from "react-icons/tb";
+export { TbPick as IcoPlaceMine } from "react-icons/tb";
+export { TbCross as IcoPlaceCross } from "react-icons/tb";
+export { TbMoon as IcoPlaceMoon } from "react-icons/tb";
+export { TbStar as IcoPlaceStar } from "react-icons/tb";
+export { TbGrave2 as IcoPlaceGrave } from "react-icons/tb";
+export { TbFountain as IcoPlaceFountain } from "react-icons/tb";
+export { TbWheat as IcoPlaceWheat } from "react-icons/tb";
+export { TbFlag as IcoPlaceFlag } from "react-icons/tb";
+export { TbHorse as IcoPlaceHorse } from "react-icons/tb";
 
 // gr
 export { GrClone as IcoCloneAlt } from "react-icons/gr";

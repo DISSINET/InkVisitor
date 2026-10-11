@@ -1,6 +1,5 @@
 import {
   GeocodingAccuracy,
-  GeocodingPlaceType,
   IGeocodingContext,
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
@@ -17,7 +16,8 @@ import { GeocodingProvenance } from "./geocodingWrite";
 import { MatchTag } from "./MatchTag";
 import { ACCURACY_ORDER, AccuracyPicker } from "./AccuracyPicker";
 import { PlaceTypePicker } from "./PlaceTypePicker";
-import { PlaceTypeIcon, placeTypeInfo } from "./placeTypeIcons";
+import { KindIcon, PlaceTypeIcon, kindInfo, placeTypeInfo } from "./placeTypeIcons";
+import { findPlaceType, usePlaceTypes } from "./placeTypesContext";
 import { degradationsOf } from "./suggestIntegrity";
 import { splitLabel } from "./suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "./suggestionRank";
@@ -205,7 +205,7 @@ interface SuggestionCard {
     anchor: { left: number; top: number; bottom: number },
   ) => void;
   onCancelPending: () => void;
-  onChooseKind: (accuracy: GeocodingAccuracy, placeType: GeocodingPlaceType | null) => void;
+  onChooseKind: (accuracy: GeocodingAccuracy, placeType: string | null) => void;
   /**
    * Drawn as evidence only, with nothing on it to press.
    *
@@ -511,14 +511,13 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
       {pendingHere && pendingHere.accuracy !== null && pendingHere.anchor ? (
         <PlaceTypePicker
           anchor={pendingHere.anchor}
-          roles={roles}
           current={null}
           suggested={suggestion.placeType}
           clearLabel="record no kind of place"
           onChoose={(placeType) =>
             onChooseKind(
               pendingHere.accuracy as GeocodingAccuracy,
-              placeType as GeocodingPlaceType | null,
+              placeType as string | null,
             )
           }
           onClose={onCancelPending}
@@ -557,7 +556,7 @@ interface GeocodingSuggestions {
   chosenOnMap: {
     index: number;
     accuracy: GeocodingAccuracy;
-    placeType?: GeocodingPlaceType | null;
+    placeType?: string | null;
     at: number;
   } | null;
   /**
@@ -586,7 +585,7 @@ interface GeocodingSuggestions {
      * the second — a corrected coordinate is not a claim about what the place
      * is.
      */
-    placeType: GeocodingPlaceType | null | undefined,
+    placeType: string | null | undefined,
   ) => void;
   /**
    * The suggestion the pointer is over on the map, and where on screen it is.
@@ -604,7 +603,7 @@ interface GeocodingSuggestions {
    * Records a kind of place on the selected Location without touching its
    * coordinate. Absent while the Location has no coordinate to keep.
    */
-  onRetype: ((placeType: GeocodingPlaceType | null) => void) | undefined;
+  onRetype: ((placeType: string | null) => void) | undefined;
 }
 
 export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
@@ -629,6 +628,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   onShowOnMap,
   onRetype,
 }) => {
+  const placeTypes = usePlaceTypes();
 
   /** The cards showing every match rather than the strongest few. */
   const [expandedMatches, setAllMatches] = useState<Set<number>>(() => new Set());
@@ -772,7 +772,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   const accept = (
     suggestion: Suggestion,
     accuracy: GeocodingAccuracy,
-    placeType: GeocodingPlaceType | null | undefined,
+    placeType: string | null | undefined,
   ) => {
     setPending(null);
     onAccept(suggestion, accuracy, provenanceOf(suggestion), placeType);
@@ -1057,8 +1057,8 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                 setPickingHead({ left: box.left, top: box.top, bottom: box.bottom });
               }}
             >
-              <PlaceTypeIcon placeType={selected.placeType} />
-              {placeTypeInfo(selected.placeType).label}
+              <KindIcon kind={findPlaceType(placeTypes, selected.placeType)} />
+              {kindInfo(findPlaceType(placeTypes, selected.placeType)).label}
             </StyledRetypeButton>
           </StyledRetype>
         ) : null}
@@ -1066,11 +1066,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
         {pickingHead && onRetype ? (
           <PlaceTypePicker
             anchor={pickingHead}
-            roles={roles}
             current={selected?.placeType}
             clearLabel="record no kind of place"
             onChoose={(placeType) => {
-              onRetype(placeType as GeocodingPlaceType | null);
+              onRetype(placeType as string | null);
               setPickingHead(null);
             }}
             onClose={() => setPickingHead(null)}

@@ -1,3 +1,4 @@
+import { RelationEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { GeoJsonGeometry } from "@inkvisitor/shared/types/geometry";
 import { IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
@@ -13,7 +14,9 @@ import {
   isBlocked,
   planGeocodingWrite,
 } from "./geocodingWrite";
+import { KindGateway, executeKindChange } from "./geocodingKindWrite";
 import { GeocodingWriteGateway, executeGeocodingWrite } from "./geocodingWriteExecute";
+import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./usePlaceTypeAssignments";
 
 /**
  * Wires the coordinate write to the API and the query cache.
@@ -91,6 +94,24 @@ const gateway = (locationLabel: string): GeocodingWriteGateway => ({
       deletedValueIds: deleting,
     }),
 });
+
+const kindGateway: KindGateway = {
+  readClassifications: async (locationId) => {
+    const response = await api.relationsGet(
+      locationId,
+      { relationType: RelationEnums.Type.Classification },
+      true,
+      { ignoreErrorToast: true },
+    );
+    return response.data ?? [];
+  },
+  createRelation: async (relation) => {
+    await api.relationCreate(relation);
+  },
+  deleteRelation: async (relationId) => {
+    await api.relationDelete(relationId);
+  },
+};
 
 /** A write held back because it would replace a geometry somebody already set. */
 export interface PendingOverwrite {
@@ -195,6 +216,25 @@ export const useGeocodingWriter = (
           return false;
         }
 
+        // the kind of place is a relation, so it can only follow the props: the
+        // geometry is already saved, and a failure here is said, not hidden
+        let kindFailed = false;
+        if (plan.kindConceptId !== undefined) {
+          const kind = await executeKindChange(
+            input.location.id,
+            roles.placeTypes,
+            plan.kindConceptId,
+            kindGateway,
+          );
+          if (!kind.ok) {
+            kindFailed = true;
+            toast.error(`Geometry saved for ${label}. ${kind.reason}`);
+          }
+          if (!quiet) {
+            queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
+          }
+        }
+
         if (outcome.undeletedValueIds.length) {
           // the checked delete refusing is the guard working, not this failing.
           // Said even in a quiet run: it is the one outcome that is neither a
@@ -202,7 +242,7 @@ export const useGeocodingWriter = (
           toast.info(
             `Geometry saved. ${outcome.undeletedValueIds.length} replaced value(s) were kept because something else still refers to them.`,
           );
-        } else if (!quiet) {
+        } else if (!quiet && !kindFailed) {
           toast.success(`Geometry saved for ${label}.`);
         }
 

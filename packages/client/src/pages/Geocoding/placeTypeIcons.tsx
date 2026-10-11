@@ -1,32 +1,103 @@
-import { GEOCODING_PLACE_TYPES, GeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
+import {
+  ENGINE_PLACE_TYPE_INFO,
+  GEOCODING_PLACE_TYPES,
+  GeocodingPlaceType,
+  IGeocodingPlaceType,
+} from "@inkvisitor/shared/types/geocoding";
 import React from "react";
 import {
   IcoPlaceArchaeological,
   IcoPlaceBattlefield,
+  IcoPlaceBridge,
+  IcoPlaceCastle,
+  IcoPlaceCross,
+  IcoPlaceFlag,
   IcoPlaceFortress,
+  IcoPlaceForest,
+  IcoPlaceFountain,
+  IcoPlaceGrave,
+  IcoPlaceHorse,
+  IcoPlaceHospital,
+  IcoPlaceHouse,
   IcoPlaceIsland,
   IcoPlaceLake,
+  IcoPlaceLighthouse,
+  IcoPlaceMine,
+  IcoPlaceMonument,
+  IcoPlaceMoon,
   IcoPlaceMountain,
   IcoPlacePort,
   IcoPlaceRegion,
   IcoPlaceReligious,
   IcoPlaceRiver,
   IcoPlaceRoad,
+  IcoPlaceSchool,
   IcoPlaceSettlement,
+  IcoPlaceShip,
+  IcoPlaceStar,
+  IcoPlaceTent,
+  IcoPlaceTower,
   IcoPlaceUnknown,
+  IcoPlaceWall,
+  IcoPlaceWarehouse,
+  IcoPlaceWheat,
 } from "Theme/icons";
 
 /**
- * One mark per kind of place, all from the same drawn set, each with the words
- * that say what it covers.
+ * One mark per kind of place, all from the same drawn set.
  *
  * A kind of place is read at a glance, in a list where every other row differs
  * only by its name — so the marks have to be distinguishable from each other at
- * one size, which is a property of the set rather than of any one icon. The
- * description exists because the twelve are the engine's vocabulary rather than
- * ordinary English: "religious" covers a chapel and a monastery, and nobody
- * guesses that from the word.
+ * one size, which is a property of the set rather than of any one icon.
+ *
+ * Two vocabularies use it. The engine's twelve types name what a suggestion is,
+ * and the project's own kinds name what a Location is; a project kind carries
+ * the key of the mark it wants.
  */
+
+/** The marks a project can give a kind, by the key stored on it. */
+export const PLACE_ICONS: Record<string, React.ComponentType> = {
+  settlement: IcoPlaceSettlement,
+  fortress: IcoPlaceFortress,
+  religious: IcoPlaceReligious,
+  region: IcoPlaceRegion,
+  river: IcoPlaceRiver,
+  lake: IcoPlaceLake,
+  mountain: IcoPlaceMountain,
+  island: IcoPlaceIsland,
+  road: IcoPlaceRoad,
+  archaeological: IcoPlaceArchaeological,
+  battlefield: IcoPlaceBattlefield,
+  port: IcoPlacePort,
+  castle: IcoPlaceCastle,
+  bridge: IcoPlaceBridge,
+  monument: IcoPlaceMonument,
+  tower: IcoPlaceTower,
+  house: IcoPlaceHouse,
+  warehouse: IcoPlaceWarehouse,
+  school: IcoPlaceSchool,
+  hospital: IcoPlaceHospital,
+  forest: IcoPlaceForest,
+  wall: IcoPlaceWall,
+  tent: IcoPlaceTent,
+  lighthouse: IcoPlaceLighthouse,
+  ship: IcoPlaceShip,
+  mine: IcoPlaceMine,
+  cross: IcoPlaceCross,
+  moon: IcoPlaceMoon,
+  star: IcoPlaceStar,
+  grave: IcoPlaceGrave,
+  fountain: IcoPlaceFountain,
+  wheat: IcoPlaceWheat,
+  flag: IcoPlaceFlag,
+  horse: IcoPlaceHorse,
+};
+
+export const PLACE_ICON_KEYS = Object.keys(PLACE_ICONS);
+
+/** The mark for a key, or the unknown mark for one the set does not have. */
+export const placeIcon = (key: string | null | undefined): React.ComponentType =>
+  (key && PLACE_ICONS[key]) || IcoPlaceUnknown;
 
 export interface PlaceTypeInfo {
   icon: React.ComponentType;
@@ -43,75 +114,16 @@ export const UNKNOWN_PLACE_TYPE: PlaceTypeInfo = {
   description: "Nothing on this Location says what kind of place it is.",
 };
 
-const INFO: Record<GeocodingPlaceType, PlaceTypeInfo> = {
-  settlement: {
-    icon: IcoPlaceSettlement,
-    label: "settlement",
-    description: "Somewhere people lived: a city, town, village or hamlet.",
-  },
-  fortress: {
-    icon: IcoPlaceFortress,
-    label: "fortress",
-    description: "A castle, fort or fortified seat, walled and held rather than farmed.",
-  },
-  religious: {
-    icon: IcoPlaceReligious,
-    label: "religious house",
-    description: "A church, chapel, monastery, abbey or other religious foundation.",
-  },
-  region: {
-    icon: IcoPlaceRegion,
-    label: "region",
-    description: "An area rather than a point: a province, duchy, diocese or district.",
-  },
-  river: {
-    icon: IcoPlaceRiver,
-    label: "river",
-    description: "A river or stream. Its coordinate stands for a course, not a spot.",
-  },
-  lake: {
-    icon: IcoPlaceLake,
-    label: "lake",
-    description: "A lake, pond or other standing water.",
-  },
-  mountain: {
-    icon: IcoPlaceMountain,
-    label: "mountain",
-    description: "A peak, hill or range.",
-  },
-  island: {
-    icon: IcoPlaceIsland,
-    label: "island",
-    description: "An island or group of them.",
-  },
-  road: {
-    icon: IcoPlaceRoad,
-    label: "road",
-    description: "A road, route or pass, whose coordinate stands for a line.",
-  },
-  archaeological: {
-    icon: IcoPlaceArchaeological,
-    label: "archaeological site",
-    description: "Remains rather than a settlement in use: ruins, a dig, an abandoned site.",
-  },
-  battlefield: {
-    icon: IcoPlaceBattlefield,
-    label: "battlefield",
-    description: "Where a battle or siege happened, named for the event rather than the place.",
-  },
-  port: {
-    icon: IcoPlacePort,
-    label: "port",
-    description: "A harbour, quay or landing place.",
-  },
+/** What an engine type is called and covers, or the unknown mark for anything else. */
+export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeInfo => {
+  const known = placeType && ENGINE_PLACE_TYPE_INFO[placeType as GeocodingPlaceType];
+  return known
+    ? { icon: placeIcon(known.icon), label: known.label, description: known.description }
+    : UNKNOWN_PLACE_TYPE;
 };
 
-/** What a kind of place is called and covers, or the unknown mark for anything else. */
-export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeInfo =>
-  (placeType && INFO[placeType as GeocodingPlaceType]) || UNKNOWN_PLACE_TYPE;
-
 /**
- * The mark for a kind of place. A kind the engine has added since, or none at
+ * The mark for an engine type. A type the engine has added since, or none at
  * all, draws the unknown mark rather than nothing — an absent icon reads as a
  * rendering fault, and "nobody has said" is a fact worth showing.
  */
@@ -122,6 +134,17 @@ export const PlaceTypeIcon: React.FC<{ placeType: string | null | undefined }> =
   return <Icon />;
 };
 
-/** Every kind in the vocabulary's order, for a control that offers all of them. */
-export const placeTypeChoices = (): { value: string; info: PlaceTypeInfo }[] =>
-  GEOCODING_PLACE_TYPES.map((placeType) => ({ value: placeType, info: INFO[placeType] }));
+/** The engine's types in the engine's order. */
+export const ENGINE_TYPES: readonly GeocodingPlaceType[] = GEOCODING_PLACE_TYPES;
+
+/** What a project's kind is called and covers; the unknown mark where it has none. */
+export const kindInfo = (kind: IGeocodingPlaceType | null | undefined): PlaceTypeInfo =>
+  kind
+    ? { icon: placeIcon(kind.icon), label: kind.name, description: kind.description }
+    : UNKNOWN_PLACE_TYPE;
+
+/** The mark for a project's kind, or the unknown mark for none. */
+export const KindIcon: React.FC<{ kind: IGeocodingPlaceType | null | undefined }> = ({ kind }) => {
+  const Icon = kindInfo(kind).icon;
+  return <Icon />;
+};

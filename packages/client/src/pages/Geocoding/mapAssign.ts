@@ -1,5 +1,5 @@
 import { GeoJsonGeometry } from "@inkvisitor/shared/types/geometry";
-import { GeocodingAccuracy, GeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy } from "@inkvisitor/shared/types/geocoding";
 
 /**
  * The two questions a coordinate set by hand has to answer, and where the menu
@@ -38,7 +38,7 @@ export interface MapPending {
 }
 
 export type MapAssignStep =
-  | { write: { accuracy: GeocodingAccuracy; placeType?: GeocodingPlaceType | null } }
+  | { write: { accuracy: GeocodingAccuracy; placeType?: string | null } }
   | { ask: MapPending };
 
 /**
@@ -56,7 +56,7 @@ export const afterAccuracy = (
   pending: MapPending,
   accuracy: GeocodingAccuracy,
   recordPlaceType: boolean | undefined,
-  defaultPlaceType?: GeocodingPlaceType | null,
+  defaultPlaceType?: string | null,
 ): MapAssignStep =>
   recordPlaceType === false
     ? { write: defaultPlaceType ? { accuracy, placeType: defaultPlaceType } : { accuracy } }

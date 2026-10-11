@@ -41,6 +41,146 @@ export const GEOCODING_PLACE_TYPES = [
 export type GeocodingPlaceType = (typeof GEOCODING_PLACE_TYPES)[number];
 
 /**
+ * What each engine type is called and covers. Words rather than a code because
+ * the twelve are the engine's vocabulary: "religious" covers a chapel and a
+ * monastery, and nobody guesses that from the word. `icon` is a key into the
+ * client's icon set.
+ */
+export const ENGINE_PLACE_TYPE_INFO: Record<
+  GeocodingPlaceType,
+  { label: string; description: string; icon: string }
+> = {
+  settlement: {
+    label: "settlement",
+    description: "Somewhere people lived: a city, town, village or hamlet.",
+    icon: "settlement",
+  },
+  fortress: {
+    label: "fortress",
+    description: "A castle, fort or fortified seat, walled and held rather than farmed.",
+    icon: "fortress",
+  },
+  religious: {
+    label: "religious house",
+    description: "A church, chapel, monastery, abbey or other religious foundation.",
+    icon: "religious",
+  },
+  region: {
+    label: "region",
+    description: "An area rather than a point: a province, duchy, diocese or district.",
+    icon: "region",
+  },
+  river: {
+    label: "river",
+    description: "A river or stream. Its coordinate stands for a course, not a spot.",
+    icon: "river",
+  },
+  lake: {
+    label: "lake",
+    description: "A lake, pond or other standing water.",
+    icon: "lake",
+  },
+  mountain: {
+    label: "mountain",
+    description: "A peak, hill or range.",
+    icon: "mountain",
+  },
+  island: {
+    label: "island",
+    description: "An island or group of them.",
+    icon: "island",
+  },
+  road: {
+    label: "road",
+    description: "A road, route or pass, whose coordinate stands for a line.",
+    icon: "road",
+  },
+  archaeological: {
+    label: "archaeological site",
+    description: "Remains rather than a settlement in use: ruins, a dig, an abandoned site.",
+    icon: "archaeological",
+  },
+  battlefield: {
+    label: "battlefield",
+    description: "Where a battle or siege happened, named for the event rather than the place.",
+    icon: "battlefield",
+  },
+  port: {
+    label: "port",
+    description: "A harbour, quay or landing place.",
+    icon: "port",
+  },
+};
+
+/**
+ * A kind of place as the project defines it.
+ *
+ * Distinct from the engine's twelve: the engine's types say what to ask the
+ * gazetteers for, and these say what the project calls a Location. A Location
+ * has a kind by being the subject of a Classification relation to `conceptId`.
+ */
+export interface IGeocodingPlaceType {
+  /** Stable and never shown; what a default and a write refer to. */
+  id: string;
+  name: string;
+  description: string;
+  /** A key into the client's icon set. */
+  icon: string;
+  /** The Concept a Location is classified under. Empty means not assigned yet. */
+  conceptId: string;
+  /**
+   * The engine type this kind answers to, or null for a kind no gazetteer has a
+   * word for. It decides which of the project's kinds a suggestion's own type
+   * points at.
+   */
+  engineType: GeocodingPlaceType | null;
+  /** The kind offered first for its engine type; at most one per engine type. */
+  favorite: boolean;
+}
+
+/** One kind per engine type, each paired with its own — the list a project starts from. */
+export const defaultPlaceTypes = (): IGeocodingPlaceType[] =>
+  GEOCODING_PLACE_TYPES.map((engineType) => ({
+    id: engineType,
+    name: ENGINE_PLACE_TYPE_INFO[engineType].label,
+    description: ENGINE_PLACE_TYPE_INFO[engineType].description,
+    icon: ENGINE_PLACE_TYPE_INFO[engineType].icon,
+    conceptId: "",
+    engineType,
+    favorite: true,
+  }));
+
+/**
+ * The list a stored value stands for.
+ *
+ * A row written before the list existed holds a map from engine type to Concept;
+ * it becomes the default list with those Concepts assigned. Anything else that
+ * is not a list is the default list, so a settings row is never the reason the
+ * page has no kinds to offer.
+ */
+export const normalizePlaceTypes = (stored: unknown): IGeocodingPlaceType[] => {
+  if (Array.isArray(stored)) {
+    return stored
+      .filter((one) => one && typeof one === "object" && typeof one.id === "string")
+      .map((one) => ({
+        id: one.id,
+        name: typeof one.name === "string" ? one.name : one.id,
+        description: typeof one.description === "string" ? one.description : "",
+        icon: typeof one.icon === "string" ? one.icon : "unknown",
+        conceptId: typeof one.conceptId === "string" ? one.conceptId : "",
+        engineType: GEOCODING_PLACE_TYPES.includes(one.engineType) ? one.engineType : null,
+        favorite: !!one.favorite,
+      }));
+  }
+  const legacy: Record<string, unknown> =
+    stored && typeof stored === "object" ? (stored as Record<string, unknown>) : {};
+  return defaultPlaceTypes().map((one) => ({
+    ...one,
+    conceptId: typeof legacy[one.id] === "string" ? (legacy[one.id] as string) : "",
+  }));
+};
+
+/**
  * Entity ids, one per role. Empty means unassigned — the page then still lists,
  * filters and takes a coordinate from a map click, and only engine-driven
  * geocoding is unavailable.
@@ -53,12 +193,13 @@ export interface IGeocodingRoles {
   geometry: string;
   /** Concept whose prop carries the accuracy. */
   accuracy: string;
-  /** Concept whose prop carries the place type. */
-  type: string;
   /** Concept per accuracy value — these are the prop's possible values. */
   accuracyValues: Partial<Record<GeocodingAccuracy, string>>;
-  /** Concept per engine place type. An unmapped type blocks the write rather than being invented. */
-  placeTypes: Partial<Record<GeocodingPlaceType, string>>;
+  /**
+   * The project's kinds of place. A kind with no Concept blocks the write
+   * rather than being invented.
+   */
+  placeTypes: IGeocodingPlaceType[];
   /**
    * Resource per engine suggester name, keyed by the engine's own slug. Fifteen
    * of the sixteen suggesters are gazetteers; `llm-coords` is the model's own
@@ -196,7 +337,7 @@ export interface IGeocodingContext {
    * leaving the field untouched when the researcher picks "leave each one
    * alone" for a corpus that previously had a kind named.
    */
-  defaultPlaceType?: GeocodingPlaceType | null;
+  defaultPlaceType?: string | null;
   /**
    * Whether the engine treats two name forms differing only by accents as one.
    *
@@ -244,9 +385,8 @@ export const GEOCODING_SETTINGS_KEY = "geocoding";
 export const emptyGeocodingRoles = (): IGeocodingRoles => ({
   geometry: "",
   accuracy: "",
-  type: "",
   accuracyValues: {},
-  placeTypes: {},
+  placeTypes: defaultPlaceTypes(),
   resources: {},
 });
 

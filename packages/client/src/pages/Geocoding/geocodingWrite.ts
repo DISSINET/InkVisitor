@@ -1,10 +1,6 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IReference } from "@inkvisitor/shared/types";
-import {
-  GeocodingAccuracy,
-  GeocodingPlaceType,
-  IGeocodingRoles,
-} from "@inkvisitor/shared/types/geocoding";
+import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import {
   GeoJsonGeometry,
   geometryEquals,
@@ -38,10 +34,12 @@ export interface GeocodingWriteInput {
   geometry: GeoJsonGeometry;
   accuracy: GeocodingAccuracy;
   /**
-   * The kind of place to record. A value sets it, `null` removes it, and
-   * `undefined` leaves whatever the Location already states.
+   * The id of the project's kind of place to record. A value sets it, `null`
+   * removes it, and `undefined` leaves whatever the Location already states.
+   * Recorded as a Classification relation once the props are written, not as a
+   * prop, so it is carried on the plan for the executor rather than in `props`.
    */
-  placeType?: GeocodingPlaceType | null;
+  placeType?: string | null;
   provenance?: GeocodingProvenance[];
   /**
    * The geometry the Location already carries, where it has one.
@@ -68,6 +66,11 @@ export interface GeocodingWritePlan {
    * and only through the route that refuses a still-referenced entity.
    */
   displacedValueIds: string[];
+  /**
+   * The Concept the Location is to be classified under, `null` where its kinds
+   * are to be removed, and `undefined` where they are left alone.
+   */
+  kindConceptId: string | null | undefined;
   /** What the Location carried before. The platform's audit records only the new state. */
   previous: { props: IProp[]; references: IReference[] };
   /**
@@ -103,9 +106,9 @@ const valueEntity = (label: string, userOptions: UserOptions): IEntity => {
 /**
  * Builds everything a geometry write needs, or refuses with a reason.
  *
- * Refuses rather than degrades: a place type the project has no Concept for
+ * Refuses rather than degrades: a kind of place the project has no Concept for
  * would otherwise be silently dropped, which is how a controlled vocabulary
- * stops being controlled. The caller offers to create the Concept.
+ * stops being controlled.
  */
 export const planGeocodingWrite = (
   input: GeocodingWriteInput,
@@ -139,20 +142,20 @@ export const planGeocodingWrite = (
 
   /**
    * `null` and `undefined` are different answers. `null` is "this Location
-   * states no kind of place", which removes the prop; `undefined` is "not my
-   * business", which leaves whatever is there — what a coordinate correction
-   * means, since it says nothing about what the place is.
+   * states no kind of place", which removes its Classifications; `undefined` is
+   * "not my business", which leaves whatever is there — what a coordinate
+   * correction means, since it says nothing about what the place is.
    */
-  const clearsPlaceType = placeType === null;
-  let placeTypeId: string | undefined;
+  let kindConceptId: string | null | undefined = placeType === null ? null : undefined;
   if (placeType) {
-    placeTypeId = roles.placeTypes[placeType];
-    if (!placeTypeId) {
-      return { blocked: `No Concept is assigned for the kind of place "${placeType}".` };
+    const kind = roles.placeTypes.find((one) => one.id === placeType);
+    if (!kind) {
+      return { blocked: `The kind of place "${placeType}" is not defined in the settings.` };
     }
-    if (!roles.type) {
-      return { blocked: "No Concept is assigned for the kind-of-place role." };
+    if (!kind.conceptId) {
+      return { blocked: `No Concept is assigned for the kind of place "${kind.name}".` };
     }
+    kindConceptId = kind.conceptId;
   }
 
   const previousProps = location.props || [];
@@ -167,11 +170,7 @@ export const planGeocodingWrite = (
 
   // every role this write owns; whatever the Location carried for them is
   // replaced rather than added to, so a second write never leaves two geometries
-  const ownedTypes = [
-    keptGeometry ? "" : roles.geometry,
-    roles.accuracy,
-    placeTypeId || clearsPlaceType ? roles.type : "",
-  ].filter(Boolean);
+  const ownedTypes = [keptGeometry ? "" : roles.geometry, roles.accuracy].filter(Boolean);
   const displaced = previousProps.filter((prop) => ownedTypes.includes(prop.type?.entityId));
 
   const geometryValue = keptGeometry
@@ -184,9 +183,6 @@ export const planGeocodingWrite = (
     ...(geometryValue ? [propFor(roles.geometry, geometryValue.id)] : []),
     propFor(roles.accuracy, accuracyId),
   ];
-  if (placeTypeId) {
-    props.push(propFor(roles.type, placeTypeId));
-  }
 
   // `llm-coords` is the model's own guess rather than a gazetteer: it has no
   // record to cite, so it never becomes a reference
@@ -205,11 +201,12 @@ export const planGeocodingWrite = (
     newValues,
     props,
     references,
+    kindConceptId,
     // Only the geometry Values, which this feature mints and nothing else
-    // names. The accuracy and place type roles point at Concepts drawn from the
-    // project's own vocabulary — a previous accuracy or a previous type is a
-    // Concept other Locations use, and offering it for deletion asks the server
-    // to remove a term from the vocabulary because one place stopped using it.
+    // names. The accuracy role points at Concepts drawn from the project's own
+    // vocabulary — a previous accuracy is a Concept other Locations use, and
+    // offering it for deletion asks the server to remove a term from the
+    // vocabulary because one place stopped using it.
     displacedValueIds: displaced
       .filter((prop) => prop.type?.entityId === roles.geometry)
       .map((prop) => prop.value?.entityId)
@@ -234,7 +231,7 @@ export const coordinateChanged = (
   after: IEntity,
   roles: IGeocodingRoles,
 ): boolean => {
-  const owned = [roles.geometry, roles.accuracy, roles.type].filter(Boolean);
+  const owned = [roles.geometry, roles.accuracy].filter(Boolean);
   const signature = (entity: IEntity) =>
     JSON.stringify(
       (entity.props || [])

@@ -6,6 +6,7 @@ import {
   IGeocodingSettings,
   defaultGeocodingContext,
   emptyGeocodingRoles,
+  normalizePlaceTypes,
 } from "@inkvisitor/shared/types/geocoding";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
@@ -122,6 +123,9 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
     const roles: IGeocodingRoles = {
       ...emptyGeocodingRoles(),
       ...(stored?.roles || {}),
+      // a row from before the list existed holds a map, which this turns into
+      // the default list with its Concepts
+      placeTypes: normalizePlaceTypes(stored?.roles?.placeTypes),
     };
 
     const projectContext = layerGeocodingContext<IGeocodingContext>(
@@ -139,7 +143,6 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
     const missingRoles = [
       !roles.geometry && "geometry Concept",
       !roles.accuracy && "accuracy Concept",
-      !roles.type && "place type Concept",
     ].filter((entry): entry is string => !!entry);
 
     return {

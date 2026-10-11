@@ -1,4 +1,5 @@
 import { DropdownItem } from "@inkvisitor/shared/types";
+import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
 import { GeocodingLocation } from "./useGeocodingLocations";
 
 /**
@@ -138,6 +139,8 @@ export const groupsOf = (
   groupBy: GroupBy,
   writeOrder: WriteOrder,
   collapsed: Collapsed = {},
+  /** The project's kinds, to name a group by what the kind is called. */
+  placeTypes: IGeocodingPlaceType[] = [],
 ): LocationGroup[] => {
   if (groupBy === "none") {
     return [group("all", "all locations", locations, writeOrder, collapsed)];
@@ -168,7 +171,7 @@ export const groupsOf = (
   if (groupBy === "placeType") {
     return bucketBy(
       locations,
-      (location) => location.placeType,
+      (location) => placeTypes.find((one) => one.id === location.placeType)?.name,
       "no kind recorded",
       writeOrder,
       collapsed,

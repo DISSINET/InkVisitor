@@ -30,7 +30,8 @@ import {
   StyledRowTypeStatic,
 } from "./GeocodingListStyles";
 import { ListItem, LocationGroup } from "./geocodingGroups";
-import { PlaceTypeIcon, placeTypeInfo } from "./placeTypeIcons";
+import { KindIcon, kindInfo } from "./placeTypeIcons";
+import { findPlaceType, usePlaceTypes } from "./placeTypesContext";
 import { QUICK_STRATEGY_MEANING, QuickStrategy } from "./quickGeocode";
 import { GeocodingLocation } from "./useGeocodingLocations";
 
@@ -156,6 +157,7 @@ const stepRow = (from: HTMLElement, delta: number, props: GeocodingListRowProps)
 export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>) => {
   const { index, style, items, selectedId, engineReady, marked } = props;
   const theme = useTheme();
+  const kinds = usePlaceTypes();
   const item = items[index];
   if (!item) {
     return <div style={style} />;
@@ -168,6 +170,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
     );
   }
   const location = item.location;
+  const kind = findPlaceType(kinds, location.placeType);
   const busy = props.quickBusyId === location.entity.id;
   return (
     <div style={style}>
@@ -259,8 +262,8 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           <StyledRowType
             type="button"
             data-row-type
-            title={`${placeTypeInfo(location.placeType).label} — click to change`}
-            aria-label={`kind of place: ${placeTypeInfo(location.placeType).label}`}
+            title={`${kindInfo(kind).label} — click to change`}
+            aria-label={`kind of place: ${kindInfo(kind).label}`}
             $unset={!location.placeType}
             onClick={(event) => {
               event.stopPropagation();
@@ -271,15 +274,15 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
               });
             }}
           >
-            <PlaceTypeIcon placeType={location.placeType} />
+            <KindIcon kind={kind} />
           </StyledRowType>
         ) : (
           <StyledRowTypeStatic
-            title={`${placeTypeInfo(location.placeType).label} — recorded with a coordinate, and this Location has none`}
-            aria-label={`kind of place: ${placeTypeInfo(location.placeType).label}`}
+            title={`${kindInfo(kind).label} — recorded with a coordinate, and this Location has none`}
+            aria-label={`kind of place: ${kindInfo(kind).label}`}
             $unset={!location.placeType}
           >
-            <PlaceTypeIcon placeType={location.placeType} />
+            <KindIcon kind={kind} />
           </StyledRowTypeStatic>
         )}
         <StyledRowMain>

@@ -2,8 +2,8 @@ import { entityStatusDict } from "@inkvisitor/shared/dictionaries";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { DropdownItem } from "@inkvisitor/shared/types";
 import {
-  GEOCODING_PLACE_TYPES,
   GeocodingAccuracy,
+  IGeocodingPlaceType,
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
 import { useOrderedLanguageDict } from "hooks/react-query";
@@ -124,21 +124,27 @@ export interface UseGeocodingBrowse {
  * which reads as the filter being broken rather than the corpus being untyped —
  * so with none present it says so and offers nothing to choose.
  */
-export const placeTypeOptionsFor = (locations: { placeType: string | null }[]): DropdownItem[] => {
+export const placeTypeOptionsFor = (
+  locations: { placeType: string | null; placeTypes?: string[] }[],
+  placeTypes: IGeocodingPlaceType[],
+): DropdownItem[] => {
   const present = new Set<string>();
   let untyped = false;
   for (const location of locations) {
     if (location.placeType) {
       present.add(location.placeType);
+      for (const kind of location.placeTypes ?? []) {
+        present.add(kind);
+      }
     } else {
       untyped = true;
     }
   }
   // in vocabulary order rather than by how many carry each, so the list does not
   // reorder itself as places are typed
-  const typed = GEOCODING_PLACE_TYPES.filter((placeType) => present.has(placeType)).map(
-    (placeType) => ({ value: placeType as string, label: placeType as string }),
-  );
+  const typed = placeTypes
+    .filter((placeType) => present.has(placeType.id))
+    .map((placeType) => ({ value: placeType.id, label: placeType.name }));
   if (!typed.length) {
     return [{ value: ANY, label: "no kinds recorded yet" }];
   }
@@ -147,6 +153,20 @@ export const placeTypeOptionsFor = (locations: { placeType: string | null }[]): 
     ...typed,
     ...(untyped ? [{ value: NO_PLACE_TYPE, label: "no kind recorded" }] : []),
   ];
+};
+
+/**
+ * Whether a Location survives the place type filter, given every kind it has.
+ * A Location with several kinds is found under each of them.
+ */
+export const matchesKinds = (kinds: string[], filter: string): boolean => {
+  if (filter === ANY) {
+    return true;
+  }
+  if (filter === NO_PLACE_TYPE) {
+    return kinds.length === 0;
+  }
+  return kinds.includes(filter);
 };
 
 /** Whether a Location survives the place type filter. */
@@ -239,7 +259,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
   const visible = useMemo(
     () =>
       beforePlaceType.filter((location) =>
-        matchesPlaceType(location.placeType, filters.placeType),
+        matchesKinds(location.placeTypes, filters.placeType),
       ),
     [beforePlaceType, filters.placeType],
   );
@@ -250,11 +270,14 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
   );
 
   const groups = useMemo(
-    () => groupsOf(visible, groupBy, writeOrder, collapsed),
-    [visible, groupBy, writeOrder, collapsed],
+    () => groupsOf(visible, groupBy, writeOrder, collapsed, roles.placeTypes),
+    [visible, groupBy, writeOrder, collapsed, roles.placeTypes],
   );
 
-  const placeTypeOptions = useMemo(() => placeTypeOptionsFor(beforePlaceType), [beforePlaceType]);
+  const placeTypeOptions = useMemo(
+    () => placeTypeOptionsFor(beforePlaceType, roles.placeTypes),
+    [beforePlaceType, roles.placeTypes],
+  );
 
   /**
    * What each option of each client-side filter would leave.
@@ -266,7 +289,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
   const optionCounts = useMemo(() => {
     const counts: Record<string, Record<string, number>> = { accuracy: {}, placeType: {} };
     const underPlaceType = locations.filter((location) =>
-      matchesPlaceType(location.placeType, filters.placeType),
+      matchesKinds(location.placeTypes, filters.placeType),
     );
     counts.accuracy[ANY] = underPlaceType.length;
     for (const accuracy of Object.values(GeocodingAccuracy)) {
@@ -281,13 +304,13 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     counts.placeType[NO_PLACE_TYPE] = underAccuracy.filter(
       (location) => !location.placeType,
     ).length;
-    for (const placeType of GEOCODING_PLACE_TYPES) {
-      counts.placeType[placeType] = underAccuracy.filter(
-        (location) => location.placeType === placeType,
+    for (const placeType of roles.placeTypes) {
+      counts.placeType[placeType.id] = underAccuracy.filter((location) =>
+        location.placeTypes.includes(placeType.id),
       ).length;
     }
     return counts;
-  }, [locations, filters.accuracy, filters.placeType]);
+  }, [locations, filters.accuracy, filters.placeType, roles.placeTypes]);
 
   const clearFilters = useCallback(
     () =>

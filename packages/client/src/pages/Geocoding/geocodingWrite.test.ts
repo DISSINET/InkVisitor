@@ -1,6 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
-import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
+import {
+  GeocodingAccuracy,
+  IGeocodingRoles,
+  defaultPlaceTypes,
+} from "@inkvisitor/shared/types/geocoding";
 import {
   GeoJsonGeometry,
   parseGeometry,
@@ -24,9 +28,11 @@ import { GeocodingWriteGateway, executeGeocodingWrite } from "./geocodingWriteEx
 const roles: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
-  type: "c-type",
   accuracyValues: { [GeocodingAccuracy.Precise]: "v-precise" },
-  placeTypes: { settlement: "v-settlement" },
+  placeTypes: [
+    { ...defaultPlaceTypes()[0], conceptId: "v-settlement" },
+    { ...defaultPlaceTypes()[1], conceptId: "" },
+  ],
   resources: { wikidata: "r-wikidata", geonames: "r-geonames" },
 };
 
@@ -247,11 +253,10 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
     expect(plan.displacedValueIds).toEqual(["v-geo"]);
   });
 
-  it("still writes the place type it was called for", () => {
+  it("still carries the kind of place it was called for, as a Concept to classify under", () => {
     const plan = retype(same);
-    expect(plan.props.find((p) => p.type.entityId === "c-type")?.value.entityId).toBe(
-      "v-settlement",
-    );
+    expect(plan.kindConceptId).toBe("v-settlement");
+    expect(plan.props.some((p) => p.type.entityId === "c-type")).toBe(false);
   });
 
   it("replaces the geometry when it moved, however slightly", () => {
@@ -281,11 +286,7 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
 describe("planGeocodingWrite, what it offers for deletion", () => {
   const replaced = (over: { accuracy: GeocodingAccuracy; placeType?: "settlement" }) =>
     planGeocodingWrite({
-      location: location([
-        prop("c-geo", "v-geo"),
-        prop("c-acc", "v-unknown"),
-        prop("c-type", "v-fortress"),
-      ]),
+      location: location([prop("c-geo", "v-geo"), prop("c-acc", "v-unknown")]),
       roles: {
         ...roles,
         accuracyValues: {
@@ -302,11 +303,6 @@ describe("planGeocodingWrite, what it offers for deletion", () => {
   it("never offers the Concept a previous accuracy pointed at", () => {
     const plan = replaced({ accuracy: GeocodingAccuracy.Precise });
     expect(plan.displacedValueIds).not.toContain("v-unknown");
-  });
-
-  it("never offers the Concept a previous place type pointed at", () => {
-    const plan = replaced({ accuracy: GeocodingAccuracy.Precise, placeType: "settlement" });
-    expect(plan.displacedValueIds).not.toContain("v-fortress");
   });
 
   it("offers exactly the geometry Value it replaced", () => {
@@ -360,8 +356,8 @@ describe("planGeocodingWrite, what counts as replacing a geometry", () => {
  * them makes the control that offers "no kind of place" do nothing at all.
  */
 describe("planGeocodingWrite, clearing versus leaving the kind of place", () => {
-  const typed = () =>
-    location([prop("c-geo", "v-geo"), prop("c-type", "v-fortress")]);
+  // a prop of the retired type role: the plan must neither read nor remove it
+  const typed = () => location([prop("c-geo", "v-geo"), prop("c-type", "v-fortress")]);
 
   const planWith = (placeType: "settlement" | null | undefined) =>
     planGeocodingWrite({
@@ -373,24 +369,34 @@ describe("planGeocodingWrite, clearing versus leaving the kind of place", () => 
       userOptions,
     }) as GeocodingWritePlan;
 
-  it("removes the kind of place when told there is none", () => {
-    expect(planWith(null).props.filter((p) => p.type.entityId === "c-type")).toHaveLength(0);
+  it("asks for the kinds to be removed when told there is none", () => {
+    expect(planWith(null).kindConceptId).toBeNull();
   });
 
-  it("leaves the kind of place alone when not told anything", () => {
-    const kept = planWith(undefined).props.filter((p) => p.type.entityId === "c-type");
+  it("asks for nothing to change when not told anything", () => {
+    expect(planWith(undefined).kindConceptId).toBeUndefined();
+  });
+
+  it("names the Concept to classify under when told a kind", () => {
+    expect(planWith("settlement").kindConceptId).toBe("v-settlement");
+  });
+
+  it("never touches props it does not own, whatever the kind", () => {
+    const kept = planWith("settlement").props.filter((p) => p.type.entityId === "c-type");
     expect(kept).toHaveLength(1);
     expect(kept[0].value.entityId).toBe("v-fortress");
   });
 
-  it("replaces the kind of place when told a different one", () => {
-    const set = planWith("settlement").props.filter((p) => p.type.entityId === "c-type");
-    expect(set).toHaveLength(1);
-    expect(set[0].value.entityId).toBe("v-settlement");
-  });
-
-  it("does not offer the Concept it removed for deletion", () => {
-    expect(planWith(null).displacedValueIds).not.toContain("v-fortress");
+  it("refuses a kind that is not in the settings", () => {
+    const result = planGeocodingWrite({
+      location: typed(),
+      roles,
+      geometry: pointGeometry(1, 2),
+      accuracy: GeocodingAccuracy.Precise,
+      placeType: "nonexistent",
+      userOptions,
+    });
+    expect(isBlocked(result) && result.blocked).toContain("not defined");
   });
 });
 

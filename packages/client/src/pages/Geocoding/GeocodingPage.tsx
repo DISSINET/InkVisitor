@@ -1,7 +1,6 @@
 import {
   GeocodingAccuracy,
   GeocodingBbox,
-  GeocodingPlaceType,
   IGeocodingContext,
   IGeocodingContextWeights,
 } from "@inkvisitor/shared/types/geocoding";
@@ -45,6 +44,8 @@ import { useGeocodingBrowse } from "./useGeocodingBrowse";
 import { useGeocodingConfig } from "./useGeocodingConfig";
 import { useGeocodingPanels } from "./useGeocodingPanels";
 import { GeocodingLocation } from "./useGeocodingLocations";
+import { PlaceTypesProvider } from "./placeTypesContext";
+import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./usePlaceTypeAssignments";
 import { useGeocodingSuggest } from "./useGeocodingSuggest";
 import { useGeocodingWriter } from "./useGeocodingWriter";
 import { useRecentGeocodes } from "./useRecentGeocodes";
@@ -283,6 +284,7 @@ export const GeocodingPage: React.FC = () => {
   const refreshLocations = () => {
     queryClient.invalidateQueries({ queryKey: ["geocoding-locations"] });
     queryClient.invalidateQueries({ queryKey: ["geocoding-values"] });
+    queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
   };
 
   /**
@@ -293,7 +295,7 @@ export const GeocodingPage: React.FC = () => {
    * stops the run — every row carries the same kind, so a project with no
    * Concept for it refuses all of them and forty toasts say it forty times.
    */
-  const retypeMarked = async (placeType: GeocodingPlaceType | null) => {
+  const retypeMarked = async (placeType: string | null) => {
     const targets = browse.all.filter(
       (location) => marked.has(location.entity.id) && location.isGeocoded,
     );
@@ -644,7 +646,7 @@ export const GeocodingPage: React.FC = () => {
   const [chosenOnMap, setChosenOnMap] = useState<{
     index: number;
     accuracy: GeocodingAccuracy;
-    placeType?: GeocodingPlaceType | null;
+    placeType?: string | null;
     at: number;
   } | null>(null);
   const mapChoices = useRef(0);
@@ -739,7 +741,7 @@ export const GeocodingPage: React.FC = () => {
   const chooseOnMap = (
     index: number,
     accuracy: GeocodingAccuracy,
-    placeType?: GeocodingPlaceType | null,
+    placeType?: string | null,
   ) => {
     mapChoices.current += 1;
     setChosenOnMap({ index, accuracy, placeType, at: mapChoices.current });
@@ -759,7 +761,7 @@ export const GeocodingPage: React.FC = () => {
    */
   const retype = async (
     location: GeocodingLocation,
-    placeType: GeocodingPlaceType | null,
+    placeType: string | null,
     options?: { quiet?: boolean },
   ): Promise<boolean> => {
     if (!user?.options || !location.geometry) {
@@ -876,7 +878,7 @@ export const GeocodingPage: React.FC = () => {
   };
 
   return (
-    <>
+    <PlaceTypesProvider placeTypes={roles.placeTypes}>
       {/* Three panels rather than one holding a grid, the way MainPage composes
           its four. Box owns its own borders through the theme, which is also
           what stops the hairlines between panels reading as heavy ruled lines
@@ -1110,6 +1112,6 @@ export const GeocodingPage: React.FC = () => {
           }}
         />
       ) : null}
-    </>
+    </PlaceTypesProvider>
   );
 };

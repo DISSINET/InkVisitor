@@ -1,6 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp } from "@inkvisitor/shared/types";
-import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
+import {
+  GeocodingAccuracy,
+  IGeocodingRoles,
+  defaultPlaceTypes,
+} from "@inkvisitor/shared/types/geocoding";
 import { CProp } from "constructors";
 import { describe, expect, it } from "vitest";
 import { collectGeoValueIds, deriveGeocoding } from "./geocodingDerivation";
@@ -18,12 +22,11 @@ import { collectGeoValueIds, deriveGeocoding } from "./geocodingDerivation";
 const roles: IGeocodingRoles = {
   geometry: "concept-geometry",
   accuracy: "concept-accuracy",
-  type: "concept-type",
   accuracyValues: {
     [GeocodingAccuracy.Precise]: "value-precise",
     [GeocodingAccuracy.Approximate]: "value-approximate",
   },
-  placeTypes: { settlement: "value-settlement" },
+  placeTypes: defaultPlaceTypes(),
   resources: {},
 };
 
@@ -165,13 +168,15 @@ describe("deriveGeocoding", () => {
     expect(result.problem).toBeNull();
   });
 
-  it("reads place type independently of whether the geometry is usable", () => {
+  it("leaves the kind of place to the Classification relations, whatever props say", () => {
+    // a kind is a relation the collection of Locations joins in, so a prop that
+    // still carries one is not read as a kind
     const result = deriveGeocoding(
       location([prop("concept-type", "value-settlement")]),
       roles,
       {},
     );
-    expect(result.placeType).toBe("settlement");
+    expect(result.placeType).toBeNull();
     expect(result.isGeocoded).toBe(false);
   });
 

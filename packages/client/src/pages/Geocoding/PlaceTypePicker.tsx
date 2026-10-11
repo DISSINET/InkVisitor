@@ -1,4 +1,3 @@
-import { IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -9,7 +8,9 @@ import {
   StyledPickerPanel,
   StyledPickerTitle,
 } from "./PlaceTypePickerStyles";
-import { NO_PLACE_TYPE_VALUE, UNKNOWN_PLACE_TYPE, placeTypeChoices } from "./placeTypeIcons";
+import { UNKNOWN_PLACE_TYPE, kindInfo, placeTypeInfo } from "./placeTypeIcons";
+import { kindsForEngineType } from "./placeTypeEdits";
+import { usePlaceTypes } from "./placeTypesContext";
 
 /**
  * The one control for choosing what kind of place something is.
@@ -131,10 +132,12 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
 
 interface PlaceTypePicker {
   anchor: FloatingPickerAnchor;
-  roles: IGeocodingRoles;
   /** Marked as where the value stands, if anywhere. */
   current: string | null | undefined;
-  /** Marked as what the sources called it, which is a starting point and not an answer. */
+  /**
+   * The engine type the sources gave, which is a starting point and not an
+   * answer: the kinds that answer to it are marked, the favourite first.
+   */
   suggested?: string | null;
   /** The wording for choosing no kind at all, or absent to leave that out. */
   clearLabel?: string;
@@ -144,56 +147,72 @@ interface PlaceTypePicker {
 
 export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   anchor,
-  roles,
   current,
   suggested,
   clearLabel,
   onChoose,
   onClose,
-}) => (
-  <FloatingPicker anchor={anchor} ariaLabel="Kind of place" onClose={onClose}>
-    <StyledPickerTitle>what kind of place is it?</StyledPickerTitle>
+}) => {
+  const kinds = usePlaceTypes();
+  // the favourite leads the kinds that answer to the suggestion; the rest keep
+  // the order the project listed them in
+  const answering = kindsForEngineType(kinds, suggested);
+  const ordered = [...answering, ...kinds.filter((one) => !answering.includes(one))];
+  const engineLabel = suggested ? placeTypeInfo(suggested).label : "";
 
-    {clearLabel ? (
-      <StyledPickerOption
-        type="button"
-        role="option"
-        aria-selected={!current}
-        $current={!current}
-        onClick={() => onChoose(null)}
-      >
-        <UNKNOWN_PLACE_TYPE.icon />
-        <StyledPickerLabel>
-          {clearLabel}
-          <StyledPickerDescription>{UNKNOWN_PLACE_TYPE.description}</StyledPickerDescription>
-        </StyledPickerLabel>
-      </StyledPickerOption>
-    ) : null}
+  return (
+    <FloatingPicker anchor={anchor} ariaLabel="Kind of place" onClose={onClose}>
+      <StyledPickerTitle>what kind of place is it?</StyledPickerTitle>
+      {answering.length > 1 ? (
+        <StyledPickerDescription>
+          {answering.length} of your kinds answer to &ldquo;{engineLabel}&rdquo;, the sources&apos;
+          word for it — the starred one is your favourite.
+        </StyledPickerDescription>
+      ) : null}
 
-    {placeTypeChoices().map(({ value, info }) => {
-      const mapped = !!roles.placeTypes[value as keyof typeof roles.placeTypes];
-      const Icon = info.icon;
-      return (
+      {clearLabel ? (
         <StyledPickerOption
-          key={value}
           type="button"
           role="option"
-          aria-selected={current === value}
-          disabled={!mapped}
-          $current={current === value}
-          $suggested={suggested === value}
-          onClick={() => onChoose(value)}
+          aria-selected={!current}
+          $current={!current}
+          onClick={() => onChoose(null)}
         >
-          <Icon />
+          <UNKNOWN_PLACE_TYPE.icon />
           <StyledPickerLabel>
-            {info.label}
-            {suggested === value ? " · what the sources call it" : ""}
-            <StyledPickerDescription>
-              {mapped ? info.description : "No Concept is assigned for this kind."}
-            </StyledPickerDescription>
+            {clearLabel}
+            <StyledPickerDescription>{UNKNOWN_PLACE_TYPE.description}</StyledPickerDescription>
           </StyledPickerLabel>
         </StyledPickerOption>
-      );
-    })}
-  </FloatingPicker>
-);
+      ) : null}
+
+      {ordered.map((kind) => {
+        const mapped = !!kind.conceptId;
+        const fits = answering.includes(kind);
+        const info = kindInfo(kind);
+        const Icon = info.icon;
+        return (
+          <StyledPickerOption
+            key={kind.id}
+            type="button"
+            role="option"
+            aria-selected={current === kind.id}
+            disabled={!mapped}
+            $current={current === kind.id}
+            $suggested={fits}
+            onClick={() => onChoose(kind.id)}
+          >
+            <Icon />
+            <StyledPickerLabel>
+              {info.label}
+              {fits ? (kind.favorite && answering.length > 1 ? " ★ favourite" : " · what the sources call it") : ""}
+              <StyledPickerDescription>
+                {mapped ? info.description : "No Concept is assigned for this kind."}
+              </StyledPickerDescription>
+            </StyledPickerLabel>
+          </StyledPickerOption>
+        );
+      })}
+    </FloatingPicker>
+  );
+};

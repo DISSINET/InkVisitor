@@ -1,8 +1,7 @@
 import {
-  GEOCODING_PLACE_TYPES,
   GeocodingAccuracy,
-  GeocodingPlaceType,
   IGeocodingContext,
+  IGeocodingPlaceType,
 } from "@inkvisitor/shared/types/geocoding";
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +18,7 @@ import Dropdown from "components/advanced";
 import { IconWithTooltip } from "components";
 import { IcoInfo } from "Theme/icons";
 import React, { useState } from "react";
+import { usePlaceTypes } from "./placeTypesContext";
 import { toast } from "react-toastify";
 import {
   StyledFullRow,
@@ -69,9 +69,9 @@ const yesNoOptions = [
  */
 const NO_DEFAULT_PLACE_TYPE = "none";
 
-const defaultPlaceTypeOptions = [
+const defaultPlaceTypeOptions = (placeTypes: IGeocodingPlaceType[]) => [
   { value: NO_DEFAULT_PLACE_TYPE, label: "nothing — leave each one alone" },
-  ...GEOCODING_PLACE_TYPES.map((placeType) => ({ value: placeType, label: placeType })),
+  ...placeTypes.map((placeType) => ({ value: placeType.id, label: placeType.name })),
 ];
 
 /** The keys this modal owns. The query fields belong to the panel, and writing
@@ -115,6 +115,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
+  const placeTypes = usePlaceTypes();
   /**
    * The preferences as they will be written, which is this researcher's layer
    * alone.
@@ -244,13 +245,13 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
                 "parishes, a list of monasteries. Leave it at nothing to record no kind at all.",
               <Dropdown.Single.Basic
                 width="full"
-                options={defaultPlaceTypeOptions}
+                options={defaultPlaceTypeOptions(placeTypes)}
                 value={draft.defaultPlaceType ?? NO_DEFAULT_PLACE_TYPE}
                 onChange={(value) =>
                   setDraft((d) => ({
                     ...d,
                     defaultPlaceType:
-                      value === NO_DEFAULT_PLACE_TYPE ? null : (value as GeocodingPlaceType),
+                      value === NO_DEFAULT_PLACE_TYPE ? null : value,
                   }))
                 }
               />,

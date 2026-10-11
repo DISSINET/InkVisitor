@@ -11,6 +11,7 @@ import {
   collectGeoValueIds,
   deriveGeocoding,
 } from "./geocodingDerivation";
+import { usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
 
 /**
  * The one collection the list, the map and every count read.
@@ -24,6 +25,12 @@ import {
 
 export interface GeocodingLocation extends DerivedGeocoding {
   entity: IResponseEntity;
+  /**
+   * Every kind of place the Location is classified under. `placeType` is the
+   * first of them, in the order the project lists its kinds — the one the page
+   * shows and edits while a Location is read as having a single kind.
+   */
+  placeTypes: string[];
 }
 
 /** Filters the server can answer. Geocoded state and accuracy cannot be asked of it. */
@@ -72,6 +79,8 @@ export const useGeocodingLocations = (
     [entities, roles],
   );
 
+  const assignments = usePlaceTypeAssignments(roles.placeTypes);
+
   const { data: values, isFetching: loadingValues } = useEntitiesQuery(
     "geocoding-values",
     valueIds,
@@ -97,16 +106,21 @@ export const useGeocodingLocations = (
       byId[value.id] = value;
     }
 
-    const locations: GeocodingLocation[] = (entities || []).map((entity) => ({
-      entity,
-      ...deriveGeocoding(entity, roles, byId),
-    }));
+    const locations: GeocodingLocation[] = (entities || []).map((entity) => {
+      const kinds = assignments.typesByLocation.get(entity.id) ?? [];
+      return {
+        entity,
+        ...deriveGeocoding(entity, roles, byId),
+        placeType: kinds[0] ?? null,
+        placeTypes: kinds,
+      };
+    });
 
     return {
       locations,
       geocodedCount: locations.filter((location) => location.isGeocoded).length,
-      isLoading: loadingEntities || loadingValues,
+      isLoading: loadingEntities || loadingValues || assignments.isLoading,
       error,
     };
-  }, [entities, values, valueIds, roles, loadingEntities, loadingValues, error]);
+  }, [entities, values, valueIds, roles, loadingEntities, loadingValues, error, assignments]);
 };

@@ -2,7 +2,6 @@ import {
   GEOCODING_PLACE_TYPES,
   GeocodingAccuracy,
   GeocodingBbox,
-  GeocodingPlaceType,
   IGeocodingContext,
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
@@ -92,7 +91,8 @@ import {
 import { MapPending, afterAccuracy, menuAnchorFor } from "./mapAssign";
 import { FOCUS_MARK_MS, MapFocus, moveFor } from "./mapFocus";
 import { useFocusRing } from "./useFocusRing";
-import { PlaceTypeIcon, placeTypeInfo } from "./placeTypeIcons";
+import { KindIcon, kindInfo } from "./placeTypeIcons";
+import { findPlaceType, usePlaceTypes } from "./placeTypesContext";
 import { flightFor } from "./suggestionRank";
 import { GeocodingLocation } from "./useGeocodingLocations";
 
@@ -194,7 +194,7 @@ interface GeocodingMap {
   onChooseSuggestion: (
     index: number,
     accuracy: GeocodingAccuracy,
-    placeType?: GeocodingPlaceType | null,
+    placeType?: string | null,
   ) => void;
   /**
    * The suggestion under the pointer, from either side of the page.
@@ -234,7 +234,7 @@ interface GeocodingMap {
      * What kind of place to record. `undefined` leaves whatever the Location
      * already carries, which is the right answer for a geometry correction.
      */
-    placeType?: GeocodingPlaceType | null,
+    placeType?: string | null,
   ) => void;
   engineReachable: boolean;
   /** The candidates currently being judged, drawn so the decision can be spatial. */
@@ -484,6 +484,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   suggestions,
   onRegionBox,
 }) => {
+  const placeTypes = usePlaceTypes();
   // the renderer takes plain option objects rather than styled components, so
   // the theme has to be read rather than inherited - the reason the mark colours
   // were hardcoded and then never followed dark mode
@@ -585,7 +586,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   const finish = (
     at: MapPending,
     accuracy: GeocodingAccuracy,
-    placeType?: GeocodingPlaceType | null,
+    placeType?: string | null,
   ) => {
     if (at.suggestion) {
       onChooseSuggestion(at.suggestion.index, accuracy, placeType);
@@ -1377,8 +1378,8 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
             disableCopyToClipboard
           />
           <StyledMarkCardMeta>
-            <PlaceTypeIcon placeType={hoveredCard.location.placeType} />
-            {placeTypeInfo(hoveredCard.location.placeType).label}
+            <KindIcon kind={findPlaceType(placeTypes, hoveredCard.location.placeType)} />
+            {kindInfo(findPlaceType(placeTypes, hoveredCard.location.placeType)).label}
             {hoveredCard.location.accuracy ? ` · ${hoveredCard.location.accuracy}` : ""}
           </StyledMarkCardMeta>
           <StyledMarkCardAt>
@@ -1437,7 +1438,6 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       {pending?.accuracy ? (
         <PlaceTypePicker
           anchor={pickerAnchor(pending)}
-          roles={roles}
           current={selected?.placeType}
           clearLabel={
             selected?.placeType ? `keep it as ${selected.placeType}` : "record no kind of place"
@@ -1446,7 +1446,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
             finish(
               pending,
               pending.accuracy as GeocodingAccuracy,
-              placeType as GeocodingPlaceType | null,
+              placeType as string | null,
             )
           }
           onClose={() => setPending(null)}

@@ -1,5 +1,4 @@
 import {
-  GeocodingPlaceType,
   IGeocodingRoles,
 } from "@inkvisitor/shared/types/geocoding";
 import { Button, Input, Loader } from "components";
@@ -48,7 +47,7 @@ interface GeocodingList {
   roles: IGeocodingRoles;
   onSelect: (location: GeocodingLocation) => void;
   /** Records a kind of place on a Location without touching its coordinate. */
-  onRetype: (location: GeocodingLocation, placeType: GeocodingPlaceType | null) => void;
+  onRetype: (location: GeocodingLocation, placeType: string | null) => void;
   /** Moves the map to a Location that already has a coordinate. */
   onShowOnMap: (location: GeocodingLocation) => void;
   /** Selects a Location and runs the engine on it. */
@@ -66,7 +65,7 @@ interface GeocodingList {
    * Absent while a bulk write is in flight, which is what stops a second one
    * being started over the first.
    */
-  onMarkedRetype: ((placeType: GeocodingPlaceType | null) => void) | undefined;
+  onMarkedRetype: ((placeType: string | null) => void) | undefined;
   /** How far a bulk write has got, for the bar to say. Absent when none is running. */
   markedProgress: string | undefined;
   /** Stops a run after the write in flight. */
@@ -297,11 +296,10 @@ export const GeocodingList: React.FC<GeocodingList> = ({
       {picking ? (
         <PlaceTypePicker
           anchor={picking.anchor}
-          roles={roles}
           current={picking.location.placeType}
           clearLabel="record no kind of place"
           onChoose={(placeType) => {
-            onRetype(picking.location, placeType as GeocodingPlaceType | null);
+            onRetype(picking.location, placeType as string | null);
             setPicking(null);
           }}
           onClose={() => setPicking(null)}
@@ -446,11 +444,10 @@ export const GeocodingList: React.FC<GeocodingList> = ({
       {pickingMarked && onMarkedRetype ? (
         <PlaceTypePicker
           anchor={pickingMarked}
-          roles={roles}
           current={undefined}
           clearLabel={`record no kind of place on ${reachable}`}
           onChoose={(placeType) => {
-            onMarkedRetype(placeType as GeocodingPlaceType | null);
+            onMarkedRetype(placeType as string | null);
             setPickingMarked(null);
           }}
           onClose={() => setPickingMarked(null)}

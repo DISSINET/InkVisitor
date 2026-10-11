@@ -114,3 +114,9 @@ export const StyledScrollRow = styled.div`
   min-width: 0;
   overflow-x: auto;
 `;
+
+/** The table of the project's kinds of place, laid across both columns. */
+export const StyledKindsRow = styled.div`
+  grid-column: 1 / -1;
+  min-width: 0;
+`;

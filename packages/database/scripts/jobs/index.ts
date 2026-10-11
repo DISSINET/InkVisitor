@@ -15,6 +15,7 @@ import ensureIndexesJob from "./ensure-indexes";
 import createSavedQueriesTableJob from "./create-saved-queries-table";
 import fixEditorEntityAclJob from "./fix-editor-entity-acl";
 import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
+import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -35,6 +36,7 @@ const alljobs: Record<string, IJob> = {
   createSavedQueriesTableJob,
   fixEditorEntityAclJob,
   migrateGeocodingGeometryJob,
+  migrateGeocodingPlaceTypesJob,
 };
 
 export default alljobs;
