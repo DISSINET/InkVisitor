@@ -1,6 +1,7 @@
 import React from "react";
 import { CoordinateTag } from "./CoordinateTag";
 import { Suggestion } from "./engineTypes";
+import { GazetteerTag } from "./GazetteerTag";
 import { PlaceTypeIcon, placeTypeInfo } from "./placeTypeIcons";
 import {
   StyledQuickToast,
@@ -48,9 +49,18 @@ export const QuickGeocodeToast: React.FC<QuickGeocodeToast> = ({
       <StyledQuickToastMeta>
         <CoordinateTag lat={suggestion.lat} lon={suggestion.lon} accuracy={accuracy} /> {accuracy}
         {suggestion.placeType ? ` · ${kind.label}` : ""}
-        {suggestion.sources.length
-          ? ` · ${suggestion.sources.length} source${suggestion.sources.length === 1 ? "" : "s"}: ${suggestion.sources.slice(0, 4).join(", ")}${suggestion.sources.length > 4 ? "…" : ""}`
-          : ""}
+        {suggestion.sources.length ? (
+          <>
+            {` · ${suggestion.sources.length} source${suggestion.sources.length === 1 ? "" : "s"}: `}
+            {suggestion.sources.slice(0, 4).map((source, index) => (
+              <React.Fragment key={source}>
+                {index ? ", " : ""}
+                <GazetteerTag source={source} />
+              </React.Fragment>
+            ))}
+            {suggestion.sources.length > 4 ? "…" : ""}
+          </>
+        ) : null}
       </StyledQuickToastMeta>
       <StyledQuickToastAction type="button" onClick={onShow}>
         show on the map

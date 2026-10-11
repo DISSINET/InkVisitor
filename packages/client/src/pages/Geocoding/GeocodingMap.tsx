@@ -58,6 +58,7 @@ import { BASEMAP_STYLE } from "./basemapStyle";
 import { CoordinateHover } from "./CoordinateTag";
 import { registerMaplibreWorker } from "./maplibreWorker";
 import { AccuracyPicker } from "./AccuracyPicker";
+import { GazetteerTag } from "./GazetteerTag";
 import { PlaceTypePicker } from "./PlaceTypePicker";
 import { colourKeysFor, darkenPaintValue } from "./darkBasemap";
 import { engineSearch } from "./engine";
@@ -288,7 +289,7 @@ const MapSearchBox: React.FC<MapSearchBox> = ({ term, onTermChange, hits, onPick
               <CoordinateHover lat={hit.lat} lon={hit.lon}>
                 <IcoGeomPoint />
               </CoordinateHover>{" "}
-              {hit.source}
+              <GazetteerTag source={hit.source} />
               {hit.type ? ` · ${hit.type}` : ""}
             </StyledSearchHitMeta>
           </StyledSearchHit>

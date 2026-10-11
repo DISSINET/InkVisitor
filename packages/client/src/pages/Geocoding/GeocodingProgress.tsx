@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { GazetteerHover } from "./GazetteerTag";
 import {
   StyledBoard,
   StyledBoardSlot,
@@ -140,7 +141,9 @@ export const GeocodingProgress: React.FC<GeocodingProgress> = ({
                       $share={largest > 0 ? (count || 0) / largest : 0}
                       title={reason || `${source}: ${count ?? "no answer yet"}`}
                     >
-                      <StyledSourceName $source={source}>{source}</StyledSourceName>
+                      <GazetteerHover source={source}>
+                        <StyledSourceName $source={source}>{source}</StyledSourceName>
+                      </GazetteerHover>
                       <StyledSourceCount $state={sourceState}>
                         {sourceState === "excluded"
                           ? "—"

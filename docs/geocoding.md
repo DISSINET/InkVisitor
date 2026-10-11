@@ -345,11 +345,31 @@ written only when it was changed from what the modal opened with, and after the
 roles, because both rewrite the one settings row. The personal modal shows the
 same table with the switch only.
 
-The table does not show the footprint the engine measures of each source
-(`footprint` on `GET /suggesters`: how many records it holds and in how many
-one-degree squares). The figures were removed from the screen because a pair like
-"12k · 262 cells" does not say what to do with it; they remain in the engine's
-response.
+**A gazetteer is one tag wherever the page names it.** `GazetteerTag` draws a
+source's name with a mark for what kind of source it is — a database for one
+whose records the engine holds, a cloud for one it asks online, sparks for the
+model's own guess — and `GazetteerHover` gives any face the page already draws
+the same mark and the same card. Hovering or focusing it shows what
+`GET /suggesters` says about the source: whether it is local records or an online
+service, its licence as chips (commercial use allowed or not, credit required,
+share-alike), its description, what it is good for (regions, periods, languages
+and kinds of place, written as words rather than slugs and codes), what it
+cannot do, how large its data is, the credit wording, the citation and the
+homepage. It is used in the gazetteer table of both modals, on every match tag
+in the suggestion cards, in the progress strip, in the map's place search and in
+the quick-geocode notice, so a source is explained identically everywhere and
+one the engine adds is explained everywhere at once. The card stays open briefly
+after the pointer leaves so the homepage link can be reached.
+
+Where the engine has not been reached, or does not list the source, the tag is
+the bare name with no mark and no card: an empty card would claim the engine said
+something. The catalogue is one request an hour shared by every tag.
+
+The table no longer shows the footprint column the engine measures of each source
+(`footprint` on `GET /suggesters`: records held and the one-degree squares they
+fall in). A pair like "12k · 262 cells" did not say what to do with it, so it is
+stated as a sentence on the card instead — "11,766 records, spread over 262
+one-degree map squares" — and an online source says its size is not measured.
 
 The list falls back to a static set of names when the engine is unreachable, and
 a source the engine has grown that the static list has never heard of is

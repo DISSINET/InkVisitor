@@ -1,5 +1,6 @@
 import React from "react";
 import { EngineMatch, MatchType } from "./engineTypes";
+import { GazetteerHover } from "./GazetteerTag";
 import { StyledMatchTag, StyledMatchTagName, StyledMatchTagSource } from "./MatchTagStyles";
 
 /**
@@ -55,7 +56,9 @@ export const MatchTag: React.FC<MatchTag> = ({ match }) => {
         4,
       )}, ${match.lon.toFixed(4)}`}
     >
-      <StyledMatchTagSource $source={match.source}>{match.source}</StyledMatchTagSource>
+      <GazetteerHover source={match.source}>
+        <StyledMatchTagSource $source={match.source}>{match.source}</StyledMatchTagSource>
+      </GazetteerHover>
       <StyledMatchTagName>
         {match.sourceUrl ? (
           <a href={match.sourceUrl} target="_blank" rel="noreferrer">
