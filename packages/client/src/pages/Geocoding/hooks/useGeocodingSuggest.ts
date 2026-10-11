@@ -2,15 +2,7 @@ import { IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EngineProgress, engineSuggestStream, watchEngineProgress } from "../utils/engine/engine";
 import { StreamCandidate, SuggestRequest, SuggestResponse } from "../types/engine";
-import {
-  contextLanguages,
-  contextValues,
-  disabledSourcesToSend,
-  listToSend,
-  regionBoxToSend,
-  regionToSend,
-  weightsToSend,
-} from "../utils/context/geocodingContextFields";
+import { buildSuggestQuery } from "../utils/engine/suggestQuery";
 
 /**
  * Running one `/suggest` and reporting on it while it runs.
@@ -162,22 +154,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
       setResponseContext(null);
       setIsProvisional(false);
 
-      // a drawn box and a named region are mutually exclusive on the engine —
-      // both together is a 422 rather than a merge — so `regionToSend` yields
-      // nothing whenever a box is in force
-      const languages = contextLanguages(context);
-      const query: SuggestRequest = {
-        name,
-        region: regionToSend(context),
-        regionBbox: regionBoxToSend(context),
-        period: listToSend(contextValues(context, "period")),
-        language: listToSend(languages),
-        place_type: listToSend(contextValues(context, "placeType")),
-        contextWeights: weightsToSend(context),
-        disabledSources: disabledSourcesToSend(context),
-        taskCategory: context.taskCategory,
-        dedupeDiacritics: context.dedupeDiacritics,
-      };
+      const query = buildSuggestQuery(name, context);
 
       try {
         const result = await engineSuggestStream(
@@ -186,6 +163,9 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
           // before the rating lands; the engine skips it entirely when the
           // answer is already in its cache
           (provisional) => {
+            if (!isCurrent()) {
+              return;
+            }
             setResponse(provisional);
             setResponseFor(locationId);
             setResponseContext(context);
@@ -210,6 +190,9 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
           },
           controller.signal,
         );
+        if (!isCurrent()) {
+          return result;
+        }
         // replaced, not merged: the rating re-sorts the list, so patching the
         // fields of what is on screen would render an order the engine
         // disagrees with
@@ -220,7 +203,7 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
         return result;
       } catch (err) {
         // cancelling is the researcher's own doing and is not a failure
-        if (!(err instanceof DOMException && err.name === "AbortError")) {
+        if (isCurrent() && !(err instanceof DOMException && err.name === "AbortError")) {
           setError(err instanceof Error ? err.message : "The geocoding engine did not answer.");
         }
         return null;

@@ -584,6 +584,8 @@ interface GeocodingSuggestions {
      * is.
      */
     placeType: string | null | undefined,
+    /** Run once the write has landed, and not before: a refused or cancelled one never runs it. */
+    afterWrite: () => void,
   ) => void;
   /**
    * The suggestion the pointer is over on the map, and where on screen it is.
@@ -777,14 +779,18 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     placeType: string | null | undefined,
   ) => {
     setPending(null);
-    onAccept(suggestion, accuracy, provenanceOf(suggestion), placeType);
-    if (response) {
-      engineFeedback({
-        query: response.query,
-        chosen: suggestion,
-        suggestions: response.suggestions,
-      });
-    }
+    // reported to the engine once the coordinate is saved: a write that is
+    // blocked, refused or left unconfirmed was not a choice the engine should
+    // learn from
+    const feedback = response
+      ? () =>
+          engineFeedback({
+            query: response.query,
+            chosen: suggestion,
+            suggestions: response.suggestions,
+          })
+      : () => undefined;
+    onAccept(suggestion, accuracy, provenanceOf(suggestion), placeType, feedback);
   };
 
   /**

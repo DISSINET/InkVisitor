@@ -14,7 +14,8 @@ import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { ENGINE_URL, engineHealth } from "./utils/engine/engine";
+import { ENGINE_URL, engineHealth, engineSuggestStream } from "./utils/engine/engine";
+import { buildSuggestQuery } from "./utils/engine/suggestQuery";
 import { fixtureModeAvailable, isFixtureMode, setFixtureMode } from "./utils/engine/fixtureMode";
 import {
   QUERY_FIELDS,
@@ -28,7 +29,7 @@ import { MapFocus, nextFocus } from "./utils/map/mapFocus";
 import { bandOf } from "./utils/suggestions/suggestionRank";
 import { isTaken, quickPick } from "./utils/suggestions/quickGeocode";
 import { BatchRun, BatchStep, batchStarting, choicesFrom, withStep } from "./utils/write/geocodingBatch";
-import { Suggestion } from "./types/engine";
+import { SuggestResponse, Suggestion } from "./types/engine";
 import { scatterOf } from "./utils/suggestions/suggestionScatter";
 import { GeocodingBatchModal } from "./containers/modals/GeocodingBatchModal";
 import { provenanceOf } from "./utils/suggestions/suggestionProvenance";
@@ -270,6 +271,12 @@ export const GeocodingPage: React.FC = () => {
    * worse outcome than one more Location than was asked for.
    */
   const cancelBulk = useRef(false);
+  /** The engine request a quick geocode or a batch step has in flight, so stopping a run can drop it. */
+  const quickAbort = useRef<AbortController | null>(null);
+  const stopBulk = () => {
+    cancelBulk.current = true;
+    quickAbort.current?.abort();
+  };
 
   /** What one write does for itself, done once for a run of them. */
   const refreshLocations = () => {
@@ -377,6 +384,8 @@ export const GeocodingPage: React.FC = () => {
   ): Promise<{
     written: boolean;
     skipped?: string;
+    /** Why the engine could not be asked or did not answer; the run is not "skipped", it failed. */
+    error?: string;
     choices?: Suggestion[];
     /**
      * The radius this run's matches were grouped within, so a choice made
@@ -389,7 +398,32 @@ export const GeocodingPage: React.FC = () => {
     if (!name || !user?.options) {
       return { written: false, skipped: "the Location has no name to search for" };
     }
-    const response = await suggest.run(location.entity.id, name, context);
+    // asked on its own request rather than through the panel's, so a Location
+    // the researcher opens meanwhile cannot abort this one, and an engine that
+    // fails is told apart from one that found nothing
+    const controller = new AbortController();
+    quickAbort.current = controller;
+    let response: SuggestResponse;
+    try {
+      response = await engineSuggestStream(
+        buildSuggestQuery(name, context),
+        () => undefined,
+        () => undefined,
+        controller.signal,
+      );
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return { written: false, skipped: "the run was stopped before this one was asked" };
+      }
+      return {
+        written: false,
+        error: err instanceof Error ? err.message : "The geocoding engine did not answer.",
+      };
+    } finally {
+      if (quickAbort.current === controller) {
+        quickAbort.current = null;
+      }
+    }
     const pick = quickPick(response, {
       strategy: context.quickStrategy ?? "clearWinner",
       takeOffRegion: context.quickTakeOffRegion,
@@ -400,11 +434,11 @@ export const GeocodingPage: React.FC = () => {
       return {
         written: false,
         skipped: pick.skip,
-        choices: choicesFrom(response?.suggestions ?? []),
+        choices: choicesFrom(response.suggestions),
         // carried with the choices: a spread only means something against the
         // distance the engine was willing to merge, which comes from the kind
         // of place rather than from a constant
-        mergeRadiusKm: response?.mergeRadiusKm,
+        mergeRadiusKm: response.mergeRadiusKm,
       };
     }
     const written = await write(
@@ -479,6 +513,10 @@ export const GeocodingPage: React.FC = () => {
         />,
         { toastId, autoClose: QUICK_TOAST_MS, onClick: show },
       );
+      return;
+    }
+    if (result.error) {
+      toast.error(`${label} was not geocoded: ${result.error}`, { toastId });
       return;
     }
     toast.warn(
@@ -574,13 +612,15 @@ export const GeocodingPage: React.FC = () => {
       } else {
         setBatch((run) =>
           withStep(run, location.entity.id, result.skipped ? "skipped" : "failed", {
-            note: result.skipped,
+            note: result.skipped ?? result.error,
             choices: result.choices,
             mergeRadiusKm: result.mergeRadiusKm,
           }),
         );
       }
-      if (cancelBulk.current) {
+      // an engine that is down is down for every Location after this one, and
+      // asking ninety more would file ninety identical failures
+      if (cancelBulk.current || result.error) {
         break;
       }
     }
@@ -895,9 +935,7 @@ export const GeocodingPage: React.FC = () => {
             quickBusyId={quickBusy}
             quickStrategy={context.quickStrategy ?? "clearWinner"}
             markedProgress={bulk}
-            onCancelMarkedRetype={() => {
-              cancelBulk.current = true;
-            }}
+            onCancelMarkedRetype={stopBulk}
             engineReady={engineReady}
             onShowOnMap={(location) =>
               location.lat != null && location.lon != null
@@ -1031,7 +1069,7 @@ export const GeocodingPage: React.FC = () => {
             chosenOnMap={chosenOnMap}
             onShowAll={() => setShowAll(true)}
             onShowOnMap={(lat, lon) => setFocus((current) => nextFocus(current, lat, lon))}
-            onAccept={(suggestion, accuracy, provenance, placeType) => {
+            onAccept={(suggestion, accuracy, provenance, placeType, afterWrite) => {
               if (!selected || !user?.options) {
                 return;
               }
@@ -1049,7 +1087,7 @@ export const GeocodingPage: React.FC = () => {
                   current: selected.geometry,
                   userOptions: user.options,
                 },
-                { suggestion },
+                { suggestion, afterWrite },
               );
             }}
           />
@@ -1070,13 +1108,7 @@ export const GeocodingPage: React.FC = () => {
         <GeocodingBatchModal
           run={batch}
           onClose={() => setShowBatch(false)}
-          onStop={
-            batch.done
-              ? undefined
-              : () => {
-                  cancelBulk.current = true;
-                }
-          }
+          onStop={batch.done ? undefined : stopBulk}
           onAssign={assignFromBatch}
           onOpenLocation={(step) => {
             const location = browse.all.find((one) => one.entity.id === step.id);

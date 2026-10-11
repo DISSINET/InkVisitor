@@ -120,6 +120,7 @@ export interface PendingOverwrite {
   to: GeoJsonGeometry;
   input: GeocodingWriteInput;
   suggestion?: Suggestion;
+  afterWrite?: () => void;
 }
 
 export interface UseGeocodingWriter {
@@ -145,6 +146,13 @@ export interface UseGeocodingWriter {
       confirmed?: boolean;
       /** The suggestion the geometry was taken from, kept with the recent entry so its evidence can be read again. */
       suggestion?: Suggestion;
+      /**
+       * Run once the geometry is saved, and only then.
+       *
+       * Carried through a held overwrite, so a confirmation that is later
+       * cancelled never runs it.
+       */
+      afterWrite?: () => void;
     },
   ) => Promise<boolean>;
   isWriting: boolean;
@@ -176,9 +184,14 @@ export const useGeocodingWriter = (
   const write = useCallback(
     async (
       input: GeocodingWriteInput,
-      options: { quiet?: boolean; confirmed?: boolean; suggestion?: Suggestion } = {},
+      options: {
+        quiet?: boolean;
+        confirmed?: boolean;
+        suggestion?: Suggestion;
+        afterWrite?: () => void;
+      } = {},
     ): Promise<boolean> => {
-      const { quiet = false, confirmed = false, suggestion } = options;
+      const { quiet = false, confirmed = false, suggestion, afterWrite } = options;
       const plan = planGeocodingWrite(input);
       if (isBlocked(plan)) {
         setBlocked(plan.blocked);
@@ -195,6 +208,7 @@ export const useGeocodingWriter = (
             to: input.geometry,
             input,
             suggestion,
+            afterWrite,
           });
           return false;
         }
@@ -259,6 +273,7 @@ export const useGeocodingWriter = (
           accuracy: input.accuracy,
           suggestion,
         });
+        afterWrite?.();
         return true;
       } finally {
         setIsWriting(false);
@@ -271,9 +286,9 @@ export const useGeocodingWriter = (
     if (!pendingOverwrite) {
       return false;
     }
-    const { input, suggestion } = pendingOverwrite;
+    const { input, suggestion, afterWrite } = pendingOverwrite;
     setPendingOverwrite(null);
-    return write(input, { confirmed: true, suggestion });
+    return write(input, { confirmed: true, suggestion, afterWrite });
   }, [pendingOverwrite, write]);
 
   return {
