@@ -215,8 +215,10 @@ before any request with a sentence saying so (`engineLimits.ts`).
 
 **A production engine guards its request list.** The progress stream is opened for
 one request (`/state/stream?requestId=`), which is all an anonymous caller may
-read. The list of recent requests needs the engine's admin token, which a browser
-never holds, so against a production engine it is empty rather than an error.
+read. The engine's list of recent requests needs its admin token, which a browser never
+holds, so the activity screen lists the requests this browser sent instead: the
+latest fifty, kept in `localStorage` by `requestLog.ts`, finished or failed, never
+those of other browsers and never sent anywhere.
 `HGA_ENGINE_API_KEY`, where set at build time, is sent as a bearer token on
 `/suggest/stream`; it is built into the bundle and so identifies the installation
 and is not a secret. A refused key is reported as a configuration problem.

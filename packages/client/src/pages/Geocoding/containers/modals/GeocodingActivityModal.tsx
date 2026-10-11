@@ -1,24 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { Button, ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import React from "react";
-import { engineRecentRequests } from "../../utils/engine/engine";
+import { readRequestLog } from "../../utils/engine/requestLog";
 import { readGeocodingWriteHistory } from "../../hooks/useGeocodingWriter";
-import {
-  StyledSourceLine,
-  StyledSourceReport,
-} from "../suggestions/GeocodingSuggestionsStyles";
+import { StyledSourceLine, StyledSourceReport } from "../suggestions/GeocodingSuggestionsStyles";
 import { StyledSectionNote } from "./GeocodingSettingsModalStyles";
 
 /**
- * What has been asked of the engine lately, and what this browser wrote.
+ * What this browser has asked of the engine lately, and what it wrote.
  *
- * The two halves have different scopes and the copy says so. Engine requests
- * are every InkVisitor request the engine served, because `clientId` names the
- * application rather than the browser; the write history is local to this
- * browser and never leaves it.
- *
- * Read on demand rather than streamed: the live stream exists to report on a
- * request in flight, and this is for looking back afterwards.
+ * Both halves are kept in this browser and never leave it. The engine's own
+ * request list needs an admin token, which a browser does not hold.
  */
 
 const when = (ms: number) => new Date(ms).toLocaleTimeString();
@@ -30,41 +21,36 @@ interface GeocodingActivityModal {
 export const GeocodingActivityModal: React.FC<GeocodingActivityModal> = ({ onClose }) => {
   // read once on open: this is a log to look back at, not a live view
   const [writes] = React.useState(() => readGeocodingWriteHistory());
-  const { data, isFetching, error } = useQuery({
-    queryKey: ["geocoding-activity"],
-    queryFn: ({ signal }) => engineRecentRequests(signal),
-    retry: false,
-  });
+  const [requests] = React.useState(() => readRequestLog());
 
   return (
     <Modal showModal onClose={onClose} width="fat">
       <ModalHeader title="Geocoding activity" onClose={onClose} />
       <ModalContent column>
         <StyledSectionNote>
-          <strong>Engine requests.</strong> Every geocoding request the engine has served for
-          InkVisitor, not only this browser&apos;s. The engine&apos;s log is process-global, so
-          nothing here should be treated as private.
+          <strong>Engine requests.</strong> What this browser has asked the geocoding engine, the
+          latest fifty. Requests from other browsers are not shown, and nothing here leaves this
+          browser.
         </StyledSectionNote>
         <StyledSourceReport>
-          {error ? "The engine did not answer." : null}
-          {!error && !isFetching && !(data || []).length ? "Nothing asked for yet." : null}
-          {(data || []).map((entry) => (
+          {requests.length ? null : "Nothing asked for yet."}
+          {requests.map((entry) => (
             <StyledSourceLine
-              key={entry.id}
-              $status={entry.status === "finished" ? "ran" : entry.status}
+              key={`${entry.id ?? "none"}-${entry.startedAt}`}
+              $status={entry.status === "finished" ? "ran" : "failed"}
             >
               {when(entry.startedAt)} · {entry.name} · {entry.status}
-              {entry.durationMs ? ` · ${(entry.durationMs / 1000).toFixed(1)}s` : ""}
+              {` · ${(entry.durationMs / 1000).toFixed(1)}s`}
+              {entry.suggestions !== undefined ? ` · ${entry.suggestions} suggestions` : ""}
               {entry.error ? ` · ${entry.error}` : ""}
-              {entry.lastLog ? ` · ${entry.lastLog}` : ""}
             </StyledSourceLine>
           ))}
         </StyledSourceReport>
 
         <StyledSectionNote>
-          Coordinates written from this browser, and what each one replaced. The
-          platform&apos;s audit records the new state and not the old one, so this is the only
-          place a replaced coordinate is kept — and it is kept here, not on the server.
+          Coordinates written from this browser, and what each one replaced. The platform&apos;s
+          audit records the new state and not the old one, so this is the only place a replaced
+          coordinate is kept — and it is kept here, not on the server.
         </StyledSectionNote>
         <StyledSourceReport>
           {writes.length ? null : "Nothing written from this browser yet."}
@@ -80,8 +66,6 @@ export const GeocodingActivityModal: React.FC<GeocodingActivityModal> = ({ onClo
             </StyledSourceLine>
           ))}
         </StyledSourceReport>
-
-        <Loader show={isFetching} />
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>

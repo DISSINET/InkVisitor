@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Where a production engine answers differently from a development one: its
- * request list, which needs a token a browser does not hold; the request itself,
- * which refuses a name that is too long and may ask for a key; and the progress
- * stream, which is asked for one request.
+ * Where a production engine answers differently from a development one: the
+ * request itself, which refuses a name that is too long and may ask for a key,
+ * and the progress stream, which is asked for one request. Each request also
+ * leaves a line in this browser's own log.
  *
  * The engine address and key are read when the module loads, so each test loads
  * it afresh with them set.
@@ -25,24 +25,25 @@ describe("against an engine with an address", () => {
     vi.unstubAllEnvs();
   });
 
-  it("lists no recent requests, without an error, when the engine answers 401", async () => {
-    vi.mocked(fetch).mockResolvedValue(new Response("{}", { status: 401 }));
-    const { engineRecentRequests } = await load();
-    await expect(engineRecentRequests()).resolves.toEqual([]);
-  });
-
-  it("still fails the request list on any other status", async () => {
-    vi.mocked(fetch).mockResolvedValue(new Response("{}", { status: 500 }));
-    const { engineRecentRequests } = await load();
-    await expect(engineRecentRequests()).rejects.toThrow("500");
-  });
-
   it("refuses a name past the engine's limit with a sentence and without a request", async () => {
     const { engineSuggestStream } = await load();
     await expect(engineSuggestStream({ name: "x".repeat(201) }, vi.fn(), vi.fn())).rejects.toThrow(
       "at most 200"
     );
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("logs a request that failed, and not one the researcher abandoned", async () => {
+    window.localStorage.clear();
+    vi.mocked(fetch).mockResolvedValue(new Response("", { status: 500 }));
+    const { engineSuggestStream } = await load();
+    await engineSuggestStream({ name: "Breslau" }, vi.fn(), vi.fn()).catch(() => undefined);
+    vi.mocked(fetch).mockRejectedValue(new DOMException("stopped", "AbortError"));
+    await engineSuggestStream({ name: "Zobten" }, vi.fn(), vi.fn()).catch(() => undefined);
+    const { readRequestLog } = await import("./requestLog");
+    expect(readRequestLog().map((entry) => [entry.name, entry.status])).toEqual([
+      ["Breslau", "failed"],
+    ]);
   });
 
   it("sends no key header where the build has no key", async () => {

@@ -16,6 +16,7 @@ import {
   isFixtureMode,
 } from "./fixtureMode";
 import { tooLargeReason } from "./engineLimits";
+import { recordRequest } from "./requestLog";
 
 /**
  * Client for the HGA-Engine.
@@ -157,7 +158,7 @@ export const engineSuggesters = (signal?: AbortSignal): Promise<EngineSuggester[
  * `sources[]` is written once at the end of the fan-out and never revised, so
  * the suggester report can be trusted from the first frame.
  */
-export const engineSuggestStream = async (
+const runSuggestStream = async (
   query: SuggestRequest,
   onProvisional: (response: SuggestResponse) => void,
   onAccepted: (requestId: string) => void,
@@ -195,6 +196,50 @@ export const engineSuggestStream = async (
   }
 
   return consumeSuggestStream(response.body, onProvisional, onAccepted);
+};
+
+/** Runs the request and keeps a line of it in this browser's own log, whichever way it ends. */
+export const engineSuggestStream = async (
+  query: SuggestRequest,
+  onProvisional: (response: SuggestResponse) => void,
+  onAccepted: (requestId: string) => void,
+  signal?: AbortSignal,
+): Promise<SuggestResponse> => {
+  const startedAt = Date.now();
+  let id: string | null = null;
+  try {
+    const response = await runSuggestStream(
+      query,
+      onProvisional,
+      (requestId) => {
+        id = requestId;
+        onAccepted(requestId);
+      },
+      signal,
+    );
+    recordRequest({
+      id,
+      name: query.name,
+      startedAt,
+      durationMs: Date.now() - startedAt,
+      status: "finished",
+      suggestions: response.suggestions.length,
+    });
+    return response;
+  } catch (err) {
+    // a request the researcher moved on from is not one that failed
+    if (!(err instanceof DOMException && err.name === "AbortError")) {
+      recordRequest({
+        id,
+        name: query.name,
+        startedAt,
+        durationMs: Date.now() - startedAt,
+        status: "failed",
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+    throw err;
+  }
 };
 
 /**
@@ -306,32 +351,6 @@ export const engineFeedback = async (body: FeedbackRequest): Promise<void> => {
     /* telemetry is not worth interrupting the researcher for */
   }
 };
-
-/**
- * Recent geocoding requests, from the engine's audit log.
- *
- * `clientId` names the application rather than the browser, so this is every
- * InkVisitor request the engine has served, not only this tab's. That is the
- * intended reading: the log answers "what has been asked of the engine lately",
- * and the running request is followed by id instead.
- *
- * Filtering happens on the engine, which holds every client's entries. It is
- * not a privacy boundary.
- */
-export const engineRecentRequests = (signal?: AbortSignal): Promise<EngineAuditEntry[]> =>
-  request<{ audit: EngineAuditEntry[] } | EngineAuditEntry[]>(
-    `/state?clientId=${encodeURIComponent(getClientId())}`,
-    { signal }
-  )
-    .then((body) => (Array.isArray(body) ? body : body.audit || []))
-    // a production engine lists its requests only to a caller holding its admin
-    // token, which a browser never holds: the list is then empty, not an error
-    .catch((err) => {
-      if (err instanceof EngineStatusError && err.status === 401) {
-        return [];
-      }
-      throw err;
-    });
 
 /**
  * The recorded response, delivered in the frames a cold request uses, so the
