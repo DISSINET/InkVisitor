@@ -1,6 +1,6 @@
 import { DEFAULT_CONTEXT_WEIGHTS, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { useQuery } from "@tanstack/react-query";
-import { Button, IconWithTooltip } from "components";
+import { Button, IconWithTooltip, Tooltip } from "components";
 import Dropdown from "components/advanced";
 import { IcoChevronDown, IcoGeocode, IcoWarning } from "Theme/icons";
 import React, { useState } from "react";
@@ -14,7 +14,6 @@ import {
   contextLanguages,
   contextMultiOptions,
   contextOptions,
-  NEUTRAL_STEP,
   WEIGHT_STEPS,
   contextWeight,
   isWeightDefault,
@@ -91,10 +90,38 @@ const OPEN_KEY = "geocoding:contextPanelOpen";
  */
 const USED_KEY = "geocoding:contextPanelUsed";
 
-/** A weight in the words the tooltip uses: its place on the 0–10 scale, "normal" in the middle. */
-const weightWords = (weight: number, field: QueryField): string => {
-  const step = weightToStep(weight, field);
-  return weight === 0 ? "off" : step === NEUTRAL_STEP ? "normal" : `${step}/10`;
+/** A weight as the slider shows it: its place on the 0–10 scale, or "off". */
+const weightWords = (weight: number, field: QueryField): string =>
+  weight === 0 ? "off" : `${weightToStep(weight, field)}/10`;
+
+/**
+ * Shows a note on a control while the pointer or focus is on it.
+ *
+ * The app's own tooltip rather than the browser's `title`, which cannot be
+ * placed and sits over any other tooltip opened beside it.
+ */
+const Hint: React.FC<{ text: string; children: React.ReactNode }> = ({ text, children }) => {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  return (
+    <>
+      <StyledWeightCell
+        ref={setAnchor}
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+        onFocus={() => setVisible(true)}
+        onBlur={() => setVisible(false)}
+      >
+        {children}
+      </StyledWeightCell>
+      <Tooltip
+        visible={visible}
+        referenceElement={anchor}
+        position="bottom-end"
+        content={<span>{text}</span>}
+      />
+    </>
+  );
 };
 
 const NOTE =
@@ -233,44 +260,46 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
       ? languages.length > 0 && contextLanguages(projectContext).length === 0
       : !!context[field] && !projectContext[field]);
 
-  /** The mark and its tooltip for a value that is not the project's. */
-  const valueDeparture = (field: QueryField) => {
-    if (!departs(field)) {
+  /**
+   * The one mark for a row that is not the project's, and what differs.
+   *
+   * The value and the weight are one question about one dimension, so they share
+   * a mark in the first column and a tooltip that names whichever differs.
+   */
+  const departure = (field: QueryField) => {
+    const mine = contextWeight(context, field);
+    const theirs = contextWeight(projectContext, field);
+    const valueDiffers = departs(field);
+    const weightDiffers = mine !== theirs;
+    if (!valueDiffers && !weightDiffers) {
       return null;
     }
     const projectHolds = projectSays(field) !== "nothing";
-    const text = drawnOverNothing(field)
-      ? "A region drawn on the map is used, and the project names none. Dropping it leaves the query with no region."
-      : field === "region" && context.regionBbox
-        ? `A region drawn on the map is used instead of the project's (${projectSays(field)}).`
-        : `You chose ${summaryOf(field)}; ` +
-          (projectHolds
-            ? `the project's default is ${projectSays(field)}. `
-            : "the project sets no default. ") +
-          "Your choice is sent with every request and saved as your own default.";
+    const sentences: string[] = [];
+    if (valueDiffers) {
+      sentences.push(
+        drawnOverNothing(field)
+          ? "A region drawn on the map is used, and the project names none. Dropping it leaves the query with no region."
+          : field === "region" && context.regionBbox
+            ? `A region drawn on the map is used instead of the project's (${projectSays(field)}).`
+            : `You chose ${summaryOf(field)}; ` +
+                (projectHolds
+                  ? `the project's default is ${projectSays(field)}.`
+                  : "the project sets no default."),
+      );
+    }
+    if (weightDiffers) {
+      sentences.push(
+        `Its importance is ${weightWords(mine, field)}; the project has it at ${weightWords(theirs, field)}.`,
+      );
+    }
+    sentences.push("Yours is sent with every request and saved as your own default.");
     return (
       <IconWithTooltip
         icon={departureMark}
         tooltipLabel={`Differs from the project's ${queryFieldLabel[field]}`}
-        tooltipText={text}
+        tooltipText={sentences.join(" ")}
         tooltipPosition="bottom-start"
-      />
-    );
-  };
-
-  /** The mark for a weight that is not the project's. */
-  const weightDeparture = (field: QueryField) => {
-    const mine = contextWeight(context, field);
-    const theirs = contextWeight(projectContext, field);
-    if (mine === theirs) {
-      return null;
-    }
-    return (
-      <IconWithTooltip
-        icon={departureMark}
-        tooltipLabel="Differs from the project's importance"
-        tooltipText={`${queryFieldLabel[field]} counts ${weightWords(mine, field)} here; the project has it at ${weightWords(theirs, field)}. Yours is sent with every request.`}
-        tooltipPosition="bottom-end"
       />
     );
   };
@@ -301,7 +330,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
       `${queryFieldWeightNote[field]} The middle of the slider is what the engine does ` +
       `unasked, which for this one is ${DEFAULT_CONTEXT_WEIGHTS[field]}; the top is double that.`;
     return (
-      <StyledWeightCell title={note}>
+      <Hint text={note}>
         <StyledWeightSlider
           type="range"
           min={0}
@@ -309,7 +338,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
           step={1}
           value={step}
           aria-label={`how much ${queryFieldLabel[field]} counts`}
-          aria-valuetext={step === 0 ? "off" : step === NEUTRAL_STEP ? "normal" : String(step)}
+          aria-valuetext={step === 0 ? "off" : String(step)}
           $moved={moved}
           onChange={(event) => {
             noteRetired();
@@ -321,10 +350,9 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
             numbers do not line up into a column that can be read down. The
             number itself is on the tooltip, where it is wanted once */}
         <StyledWeightValue $moved={moved} $off={weight === 0}>
-          {weight === 0 ? "off" : step === NEUTRAL_STEP ? "normal" : String(step)}
+          {weight === 0 ? "off" : String(step)}
         </StyledWeightValue>
-        {weightDeparture(field)}
-      </StyledWeightCell>
+      </Hint>
     );
   };
 
@@ -429,7 +457,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
             <React.Fragment key={field}>
               <StyledContextLabel $overridden={overridden(field)}>
                 {queryFieldLabel[field]}
-                {valueDeparture(field)}
+                {departure(field)}
               </StyledContextLabel>
               {fieldControl(field)}
               {weightCell(field)}
