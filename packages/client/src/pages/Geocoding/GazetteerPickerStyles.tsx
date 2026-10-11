@@ -99,3 +99,107 @@ export const StyledGazetteerUnwell = styled(StyledGazetteerNote)`
   color: ${({ theme }) => theme.color["danger"]};
 `;
 
+
+/** The source's name and the control that opens what is known about it. */
+export const StyledGazetteerNameCell = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledGazetteerMore = styled.button<{ $open: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  margin-top: ${({ theme }) => theme.space[1]};
+  padding: 0 ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme, $open }) => ($open ? theme.color["primary"] : theme.color["greyer"])};
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  svg {
+    transform: ${({ $open }) => ($open ? "rotate(180deg)" : "none")};
+  }
+
+  &:hover {
+    color: ${({ theme }) => theme.color["primary"]};
+  }
+`;
+
+/** What is known about one source, laid across the whole table under its row. */
+export const StyledGazetteerDetail = styled.div`
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[2]};
+  margin: 0 0 ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[3]};
+  background: ${({ theme }) => theme.color["gray"][100]};
+  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  line-height: 1.5;
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
+export const StyledDetailChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledDetailChip = styled.span<{ $tone: "good" | "caution" | "bad" | "neutral" }>`
+  padding: 0 ${({ theme }) => theme.space[2]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme, $tone }) =>
+    $tone === "caution"
+      ? theme.color["warningText"]
+      : $tone === "bad"
+        ? theme.color["danger"]
+        : $tone === "good"
+          ? theme.color["success"]
+          : theme.color["greyer"]};
+  background: ${({ theme }) => theme.color["white"]};
+  border: 1px solid
+    ${({ theme, $tone }) =>
+      $tone === "caution"
+        ? theme.color["warning"]
+        : $tone === "bad"
+          ? theme.color["danger"]
+          : $tone === "good"
+            ? theme.color["success"]
+            : theme.color["gray"][400]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+`;
+
+/** A label beside what it labels, in a column that lines up down the card. */
+export const StyledDetailRow = styled.div`
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: ${({ theme }) => theme.space[2]};
+  align-items: start;
+`;
+
+export const StyledDetailLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+/** What the source cannot do, set apart because it is the part that changes a decision. */
+export const StyledDetailLimits = styled.div`
+  padding: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color["warningText"]};
+  background: ${({ theme }) => theme.color["white"]};
+  border-left: 3px solid ${({ theme }) => theme.color["warning"]};
+`;
+
+export const StyledDetailLink = styled.a`
+  color: ${({ theme }) => theme.color["primary"]};
+  word-break: break-all;
+`;
+
+export const StyledDetailSmall = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;

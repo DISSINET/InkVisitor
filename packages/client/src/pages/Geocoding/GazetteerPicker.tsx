@@ -1,17 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
+import { IcoChevronDown } from "Theme/icons";
+import { GazetteerDetail } from "./GazetteerDetail";
 import { engineSuggesters } from "./engine";
-import {
-  LLM_SOURCE,
-  gazetteerRows,
-  isHealthy,
-  withSource,
-} from "./gazetteerCatalogue";
+import { LLM_SOURCE, gazetteerRows, isHealthy, withSource } from "./gazetteerCatalogue";
 import {
   StyledGazetteerCell,
   StyledGazetteerHead,
   StyledGazetteerLabel,
   StyledGazetteerLocked,
+  StyledGazetteerMore,
+  StyledGazetteerNameCell,
   StyledGazetteerName,
   StyledGazetteerNote,
   StyledGazetteerRow,
@@ -77,6 +76,18 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
     retry: false,
   });
 
+  // which rows have their description open; the engine's words are long, so
+  // they are read on request rather than stretching every row
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
+  const toggle = (name: string) =>
+    setOpen((current) => {
+      const next = new Set(current);
+      if (!next.delete(name)) {
+        next.add(name);
+      }
+      return next;
+    });
+
   const rows = gazetteerRows(suggesters);
   const off = new Set(disabled);
   const locked = new Set(lockedOff);
@@ -94,36 +105,50 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
         const isOff = lockedHere || off.has(name);
         return (
           <StyledGazetteerRow key={name}>
-            <StyledGazetteerSwitch>
-              <input
-                type="checkbox"
-                checked={!isOff}
-                disabled={lockedHere}
-                aria-label={`ask ${name}`}
-                onChange={(event) => onChange(withSource(disabled, name, !event.target.checked))}
-              />
-              <StyledGazetteerName>
-                <StyledGazetteerLabel $off={isOff}>{name}</StyledGazetteerLabel>
-                {name === LLM_SOURCE ? (
-                  <StyledGazetteerNote>
-                    the model&apos;s own guess, not a gazetteer
-                  </StyledGazetteerNote>
-                ) : null}
-                {suggester && !isHealthy(suggester) ? (
-                  <StyledGazetteerUnwell>
-                    {suggester.health.reason || suggester.health.status}
-                  </StyledGazetteerUnwell>
-                ) : null}
-                {lockedHere ? (
-                  <StyledGazetteerLocked>
-                    off for the whole project — an owner sets this
-                  </StyledGazetteerLocked>
-                ) : null}
-              </StyledGazetteerName>
-            </StyledGazetteerSwitch>
+            <StyledGazetteerNameCell>
+              <StyledGazetteerSwitch>
+                <input
+                  type="checkbox"
+                  checked={!isOff}
+                  disabled={lockedHere}
+                  aria-label={`ask ${name}`}
+                  onChange={(event) => onChange(withSource(disabled, name, !event.target.checked))}
+                />
+                <StyledGazetteerName>
+                  <StyledGazetteerLabel $off={isOff}>{name}</StyledGazetteerLabel>
+                  {name === LLM_SOURCE ? (
+                    <StyledGazetteerNote>
+                      the model&apos;s own guess, not a gazetteer
+                    </StyledGazetteerNote>
+                  ) : null}
+                  {suggester && !isHealthy(suggester) ? (
+                    <StyledGazetteerUnwell>
+                      {suggester.health.reason || suggester.health.status}
+                    </StyledGazetteerUnwell>
+                  ) : null}
+                  {lockedHere ? (
+                    <StyledGazetteerLocked>
+                      off for the whole project — an owner sets this
+                    </StyledGazetteerLocked>
+                  ) : null}
+                </StyledGazetteerName>
+              </StyledGazetteerSwitch>
+              {suggester ? (
+                <StyledGazetteerMore
+                  type="button"
+                  $open={open.has(name)}
+                  aria-expanded={open.has(name)}
+                  aria-label={`what is known about ${name}`}
+                  onClick={() => toggle(name)}
+                >
+                  <IcoChevronDown />
+                </StyledGazetteerMore>
+              ) : null}
+            </StyledGazetteerNameCell>
             {columns.map((column) => (
               <StyledGazetteerCell key={column.title}>{column.render(name)}</StyledGazetteerCell>
             ))}
+            {suggester && open.has(name) ? <GazetteerDetail suggester={suggester} /> : null}
           </StyledGazetteerRow>
         );
       })}
