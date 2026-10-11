@@ -346,9 +346,8 @@ roles, because both rewrite the one settings row. The personal modal shows the
 same table with the switch only.
 
 **A gazetteer is one tag wherever the page names it.** `GazetteerTag` draws a
-source's name with a mark for what kind of source it is — a database for one
-whose records the engine holds, a cloud for one it asks online, sparks for the
-model's own guess — and `GazetteerHover` gives any face the page already draws
+source's name with one mark, the same for every source whatever its kind, and
+`GazetteerHover` gives any face the page already draws
 the same mark and the same card. Hovering or focusing it shows what
 `GET /suggesters` says about the source: whether it is local records or an online
 service, its licence as chips (commercial use allowed or not, credit required,

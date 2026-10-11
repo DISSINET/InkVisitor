@@ -80,12 +80,11 @@ describe("GazetteerTag", () => {
     expect(text).toContain("commercial use allowed");
   });
 
-  it("marks the kind of source with an icon beside its name, a different one for each kind", async () => {
+  it("draws the same icon beside every source, whatever its kind", async () => {
     const shapeOf = async (name: string, category: "file" | "service") => {
       catalogue.list = [{ ...suggester(name), category }];
       await mount(<GazetteerTag source={name} />);
-      const svg = view!.container.querySelector("svg");
-      const path = svg?.innerHTML ?? "";
+      const path = view!.container.querySelector("svg")?.innerHTML ?? "";
       view!.unmount();
       return path;
     };
@@ -93,7 +92,7 @@ describe("GazetteerTag", () => {
     const service = await shapeOf("geonames", "service");
     const model = await shapeOf("llm-coords", "service");
     expect(records).not.toBe("");
-    expect(new Set([records, service, model]).size).toBe(3);
+    expect(new Set([records, service, model]).size).toBe(1);
   });
 
   it("is the bare name, with nothing to hover, where the engine has not heard of the source", async () => {

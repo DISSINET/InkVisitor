@@ -3,8 +3,6 @@ import { EngineSuggester } from "../../types/engine";
 import {
   ALL_SOURCES,
   LLM_SOURCE,
-  footprintFigure,
-  footprintNote,
   gazetteerRows,
   isHealthy,
   withSource,
@@ -56,41 +54,6 @@ describe("gazetteerRows", () => {
 
   it("puts the model's own guess last, apart from the gazetteers", () => {
     expect(ALL_SOURCES[ALL_SOURCES.length - 1]).toBe(LLM_SOURCE);
-  });
-});
-
-describe("what the engine measured", () => {
-  it("gives the two figures where there are records to count", () => {
-    const measured = suggester("sedac-india", { footprint: { records: 621528, cells: 340 } });
-    expect(footprintFigure(measured)).toBe("622k · 340 cells");
-    expect(footprintNote(measured)).toContain("621,528 records");
-  });
-
-  /**
-   * A source with no local records is not measured but declared, and the engine
-   * scores a declaration below a measurement. Drawing it as `0 · 0 cells` would
-   * say the opposite — that it was measured and found empty.
-   */
-  /**
-   * Cells are the whole of what the column says. Rounded to thousands, a source
-   * about everywhere and thin reads exactly like one about a single country.
-   */
-  it("keeps the cell count exact, where the record count is rounded", () => {
-    const thin = suggester("native-land", { footprint: { records: 2057, cells: 1292 } });
-    const concentrated = suggester("sedac", { footprint: { records: 621528, cells: 340 } });
-    expect(footprintFigure(thin)).toBe("2k · 1,292 cells");
-    expect(footprintFigure(concentrated)).toBe("622k · 340 cells");
-    expect(footprintFigure(thin)).not.toBe(footprintFigure(concentrated));
-  });
-
-  it("says a source was declared rather than measured where nothing was counted", () => {
-    expect(footprintFigure(suggester("gov"))).toBe("declared");
-    expect(footprintNote(suggester("gov"))).toContain("declares");
-  });
-
-  it("says nothing is known when the engine was never reached", () => {
-    expect(footprintFigure(undefined)).toBe("—");
-    expect(footprintNote(undefined)).toContain("not been reached");
   });
 });
 

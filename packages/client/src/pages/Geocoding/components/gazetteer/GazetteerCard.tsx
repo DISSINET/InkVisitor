@@ -42,7 +42,7 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
   return (
     <StyledGazetteerCard>
       <StyledCardTitle>
-        <GazetteerMark source={suggester.name} category={category} />
+        <GazetteerMark />
         {suggester.name}
       </StyledCardTitle>
       <StyledCardChips>

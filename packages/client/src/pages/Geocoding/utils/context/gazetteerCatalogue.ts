@@ -53,56 +53,6 @@ export const gazetteerRows = (suggesters: EngineSuggester[] | undefined): Gazett
   return rows;
 };
 
-/**
- * What the engine measured of a source's own records, in words.
- *
- * `cells` counts the one-degree squares the source holds any record in, so the
- * two numbers together say whether a source is large or merely spread: 621,528
- * records in 340 cells is a source that is about one place, and 2,057 in 1,292
- * is one that is about everywhere and thin.
- *
- * A source with no local records is not measured at all — it is a remote API,
- * and the engine falls back to how specific its own declaration is. That always
- * scores below a measurement, which is the sentence this has to convey.
- */
-export const footprintNote = (suggester: EngineSuggester | undefined): string => {
-  if (!suggester) {
-    return "the engine has not been reached, so nothing is known about this one";
-  }
-  const { footprint } = suggester;
-  if (!footprint) {
-    return (
-      "no local records to measure — its region relevance comes from what it declares " +
-      "about itself, which always scores below a measurement"
-    );
-  }
-  return (
-    `${footprint.records.toLocaleString()} records across ${footprint.cells.toLocaleString()} ` +
-    "one-degree cells, counted from the source's own coordinates"
-  );
-};
-
-/** The short form, for a column that has to line up down the list. */
-export const footprintFigure = (suggester: EngineSuggester | undefined): string => {
-  if (!suggester) {
-    return "—";
-  }
-  if (!suggester.footprint) {
-    return "declared";
-  }
-  const { records, cells } = suggester.footprint;
-  // records are compacted and cells are not: records run to six figures and
-  // their exact value decides nothing, while cells top out under two thousand
-  // and are the whole of what the column says — 2,057 records over 1,292 cells
-  // is a source about everywhere and thin, and rounding that to "1k cells"
-  // makes it read the same as one about a single country
-  return `${compact(records)} · ${cells.toLocaleString()} cells`;
-};
-
-/** Thousands as `34k`, so sixteen rows of figures stay a column rather than a paragraph. */
-const compact = (value: number): string =>
-  value >= 1000 ? `${Math.round(value / 1000).toLocaleString()}k` : String(value);
-
 /** Whether the engine says this source can answer at all. */
 export const isHealthy = (suggester: EngineSuggester | undefined): boolean =>
   !suggester || suggester.health.status === "ready";

@@ -57,7 +57,7 @@ export const GazetteerHover: React.FC<GazetteerHover> = ({ source, children }) =
         onFocus={show}
         onBlur={hide}
       >
-        <GazetteerMark source={source} category={suggester.category} />
+        <GazetteerMark />
         {children}
       </StyledGazetteerAnchor>
       <Tooltip
