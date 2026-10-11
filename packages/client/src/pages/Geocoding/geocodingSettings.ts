@@ -27,9 +27,14 @@ const readSettings = async (): Promise<IGeocodingSettings> => {
       roles: { ...emptyGeocodingRoles(), ...(stored?.roles || {}) },
       context: stored?.context || {},
     };
-  } catch {
-    // no row yet: a project that has never opened the settings modal
-    return { roles: emptyGeocodingRoles(), context: {} };
+  } catch (error) {
+    // no row yet: a project that has never opened the settings modal. Any other
+    // failure is not an empty row, and treating it as one would let the write
+    // that follows replace everything stored with what this call defaulted to
+    if ((error as { response?: { status?: number } }).response?.status === 404) {
+      return { roles: emptyGeocodingRoles(), context: {} };
+    }
+    throw error;
   }
 };
 

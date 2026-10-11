@@ -24,7 +24,7 @@ vi.mock("api", () => ({
   },
 }));
 
-const { nextBaseUrls, patchGeocodingRoles, putGeocodingRoles, withEntry } = await import(
+const { nextBaseUrls, patchGeocodingContext, patchGeocodingRoles, putGeocodingRoles, withEntry } = await import(
   "./geocodingSettings",
 );
 
@@ -103,6 +103,20 @@ describe("patchGeocodingRoles", () => {
   it("merges the maps, so a caller holding one key cannot express a removal", async () => {
     await patchGeocodingRoles({ placeTypes: withEntry(stored.placeTypes, "settlement", null) });
     expect(written().placeTypes.settlement).toBe("v-settlement");
+  });
+});
+
+describe("patchGeocodingContext", () => {
+  it("starts from empty settings where no row exists yet", async () => {
+    settingGet.mockRejectedValue({ response: { status: 404 } });
+    await patchGeocodingContext({ disabledSources: ["tgn"] });
+    expect(settingUpdate.mock.calls[0][1].value.context).toEqual({ disabledSources: ["tgn"] });
+  });
+
+  it("writes nothing where the read failed for any other reason, so stored roles are not replaced", async () => {
+    settingGet.mockRejectedValue({ response: { status: 500 } });
+    await expect(patchGeocodingContext({ disabledSources: ["tgn"] })).rejects.toBeDefined();
+    expect(settingUpdate).not.toHaveBeenCalled();
   });
 });
 
