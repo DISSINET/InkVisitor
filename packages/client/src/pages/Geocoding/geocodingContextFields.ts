@@ -269,8 +269,12 @@ export const regionBoxToSend = (context: IGeocodingContext): GeocodingBbox | und
  * with 422 rather than choosing between them, and the box is the more recent
  * statement of where to look.
  */
-export const regionToSend = (context: IGeocodingContext): string | undefined =>
-  context.regionBbox ? undefined : context.region || undefined;
+export const regionToSend = (context: IGeocodingContext): string[] | undefined =>
+  context.regionBbox || !context.region ? undefined : [context.region];
+
+/** One value as the engine's list, or nothing at all: an empty field is left off the request. */
+export const listToSend = (value: string | null | undefined): string[] | undefined =>
+  value ? [value] : undefined;
 
 /** Whether an answer found under `then` still answers what `now` asks. */
 export const queryContextChanged = (then: IGeocodingContext, now: IGeocodingContext): boolean =>

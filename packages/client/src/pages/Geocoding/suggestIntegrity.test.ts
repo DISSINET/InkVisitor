@@ -10,7 +10,7 @@ const response = (over: Partial<SuggestResponse> = {}): SuggestResponse =>
   ({
     suggestions: [],
     sources: [],
-    query: { name: "Kanth", region: "silesia", candidates: [{ llmProvider: "groq" }] },
+    query: { name: "Kanth", region: ["silesia"], candidates: [{ llmProvider: "groq" }] },
     contextEvaluated: true,
     elapsed_ms: 5000,
     ...over,
@@ -31,6 +31,31 @@ describe("degradationsOf", () => {
 
   it("catches criteria that were sent and never weighed", () => {
     expect(degradationsOf(response({ contextEvaluated: false }))[0]).toContain("not weighed");
+  });
+
+  it("treats an empty list as no criterion, where a bare empty array would read as set", () => {
+    expect(
+      degradationsOf(
+        response({
+          contextEvaluated: false,
+          query: { name: "Kanth", region: [], period: [], place_type: [], language: [] } as never,
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it("shows the engine's own sentence for what it ignored or corrected", () => {
+    const problems = [
+      {
+        code: "unknown-criterion",
+        field: "region",
+        value: "Atlantis",
+        message: 'region "Atlantis" is not a known value and was ignored',
+      },
+    ];
+    expect(degradationsOf(response({ problems: problems as never }))).toEqual([
+      'region "Atlantis" is not a known value and was ignored',
+    ]);
   });
 
   it("stays quiet about the context stage when no criteria were sent to weigh", () => {

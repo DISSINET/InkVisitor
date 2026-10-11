@@ -13,6 +13,7 @@ import {
   queryContextChanged,
   regionBoxToSend,
   regionOptions,
+  listToSend,
   regionToSend,
   regionValue,
   stepToWeight,
@@ -160,13 +161,13 @@ describe("what a request carries for the region", () => {
   });
 
   it("sends the named region where nothing is drawn", () => {
-    expect(regionToSend({ region: "europe" })).toBe("europe");
+    expect(regionToSend({ region: "europe" })).toEqual(["europe"]);
     expect(regionBoxToSend({ region: "europe" })).toBeUndefined();
   });
 
   it("keeps the name stored under a box, so clearing the box gives it back", () => {
     const context = { region: "europe", regionBbox: [1, 2, 3, 4] as [number, number, number, number] };
-    expect(regionToSend({ ...context, regionBbox: null })).toBe("europe");
+    expect(regionToSend({ ...context, regionBbox: null })).toEqual(["europe"]);
   });
 
   it("names the drawn region in the picker, and only while one is drawn", () => {
@@ -301,5 +302,14 @@ describe("the gazetteers a request refuses", () => {
     expect(
       queryContextChanged({ disabledSources: ["gov"] }, { disabledSources: ["gov"] }),
     ).toBe(false);
+  });
+});
+
+describe("listToSend", () => {
+  it("wraps one value as the engine's list and leaves an empty field off the request", () => {
+    expect(listToSend("settlement")).toEqual(["settlement"]);
+    expect(listToSend("")).toBeUndefined();
+    expect(listToSend(null)).toBeUndefined();
+    expect(listToSend(undefined)).toBeUndefined();
   });
 });

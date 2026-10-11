@@ -29,13 +29,19 @@ export const degradationsOf = (response: SuggestResponse): string[] => {
   // because `language` takes a list and an empty one is as truthy as a full one
   const { region, regionBbox, period, language, place_type } = response.query;
   const criteria =
-    !!region ||
+    !!region?.length ||
     !!regionBbox ||
-    !!period ||
-    !!place_type ||
-    (Array.isArray(language) ? language.length > 0 : !!language);
+    !!period?.length ||
+    !!place_type?.length ||
+    !!language?.length;
   if (criteria && response.contextEvaluated === false) {
     notes.push("your period, region and language were not weighed against the results");
+  }
+
+  // what the engine did not take as sent: an entry it ignored, a range it turned
+  // round. Its own sentence is shown, since it names the value
+  for (const problem of response.problems ?? []) {
+    notes.push(problem.message);
   }
 
   const broken = response.sources.filter(

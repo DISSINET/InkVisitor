@@ -182,17 +182,24 @@ export interface ContextWeights {
 export interface SuggestRequest {
   name: string;
   /**
-   * What language the name is probably in. One or several; a bare string is
-   * read as a one-element list.
+   * What language the name is probably in, most likely first.
    *
    * It says what the engine has been handed rather than which languages to
    * search — the naming step generates forms in other languages deliberately —
    * so it lifts a source indexing one of them and never penalises one that
    * does not.
    */
-  language?: string | string[];
-  period?: string;
-  region?: string;
+  language?: string[];
+  /**
+   * Named periods, year ranges ("1200-1400") or single years ("1400"). Several
+   * mean any of them, scored on the union of their spans.
+   *
+   * Like `region`, `place_type` and `language`, a list only: a bare string, an
+   * empty list or a blank entry is 422, and an unused field is left off.
+   */
+  period?: string[];
+  /** Named regions. Several mean any of them: a source is skipped only if it covers none. */
+  region?: string[];
   /**
    * A hand-drawn area, `[minLon, minLat, maxLon, maxLat]`, for what the named
    * region list does not cover.
@@ -207,7 +214,8 @@ export interface SuggestRequest {
    * models an area badly misleads the engine along its own corners.
    */
   regionBbox?: [number, number, number, number];
-  place_type?: string;
+  /** Several mean any of them; the merge radius is the largest among them. */
+  place_type?: string[];
   /**
    * How much each dimension counts on the weighted mean behind source
    * relevance. Every field optional; the engine's defaults are
@@ -266,17 +274,34 @@ export interface SuggestRequest {
    * corrected here rather than vetoing every source that declares a period.
    */
   criteria?: {
-    regionId?: string;
-    regionBbox?: [number, number, number, number];
-    periodId?: string;
-    periodRange?: { start: number; end: number };
+    regionIds?: string[];
+    /** One box per region, or the hand-drawn one. */
+    regionBboxes?: [number, number, number, number][];
+    periodRanges?: { start: number; end: number; id?: string }[];
     languageIds?: string[];
-    placeTypeId?: string;
+    placeTypeIds?: string[];
   };
+}
+
+/**
+ * Something the engine did not take as sent.
+ *
+ * Switch on `code`; `message` is written for display and may be reworded.
+ * `unknown-criterion` is an entry that matched nothing and was dropped, the rest
+ * of its list still applying; `corrected-period` is a reversed range read the
+ * right way round.
+ */
+export interface EngineProblem {
+  code: "unknown-criterion" | "corrected-period";
+  field: "region" | "period" | "language" | "place_type";
+  value: string;
+  message: string;
 }
 
 export interface SuggestResponse {
   suggestions: Suggestion[];
+  /** Always present from the engine; absent on an answer recorded before it existed. */
+  problems?: EngineProblem[];
   query: SuggestRequest;
   sources: SourceOutcome[];
   /**
