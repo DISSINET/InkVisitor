@@ -314,14 +314,12 @@ Switching one off makes an answer on screen stale, exactly as a context field
 does: a source that was not asked cannot have contributed, and one switched back
 on has not been asked yet.
 
-**The project's list saves itself**, on its own button beside the section rather
-than on the modal's footer Save. Every other section of the global modal assigns
-an entity to a role, and that is what the footer writes; this says which sources
-the engine may ask, which is a different kind of decision. One button covering
-both would mean opening the modal to correct a Concept and, by pressing the only
-button there is, also committing whatever the gazetteer list happened to say.
-The section says so while it holds anything unwritten, and Cancel discards it
-like anything else in the modal.
+**The project's list is one table with the resources.** In the global modal each
+source is one row: its switch, what the engine measured of it, the Resource
+entity a reference to it points at, and the record URL. The footer's Save writes
+all of it; the list itself is written only when it was changed from what the
+modal opened with, and after the roles, because both rewrite the one settings
+row. The personal modal shows the same table with the first two columns only.
 
 **Each row carries what the engine measured of that source**, from `footprint`
 on `GET /suggesters`. `cells` counts the one-degree squares the source holds any

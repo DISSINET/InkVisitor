@@ -24,6 +24,7 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { IcoUnlink } from "Theme/icons";
 import { GAZETTEERS, GAZETTEER_BASE_URLS } from "./gazetteerBaseUrls";
+import { LLM_SOURCE } from "./gazetteerCatalogue";
 import {
   StyledBaseUrl,
   StyledDangling,
@@ -31,11 +32,10 @@ import {
   StyledRowControls,
   StyledRowLabel,
   StyledFullRow,
-  StyledSectionAction,
-  StyledSectionActionNote,
   StyledSectionHeading,
   StyledSectionNote,
   StyledSettingsGrid,
+  StyledUnsavedNote,
 } from "./GeocodingSettingsModalStyles";
 import {
   nextBaseUrls,
@@ -43,7 +43,8 @@ import {
   putGeocodingRoles,
   withEntry,
 } from "./geocodingSettings";
-import { GazetteerPicker } from "./GazetteerPicker";
+import { GazetteerColumn, GazetteerPicker } from "./GazetteerPicker";
+import { StyledGazetteerNote } from "./GazetteerPickerStyles";
 
 /**
  * Assigning the entities that give a coordinate its meaning.
@@ -75,15 +76,13 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     projectContext.disabledSources ?? [],
   );
   /**
-   * The list as it is stored, so the section can say whether it holds anything
-   * unwritten. Advanced by its own save rather than re-read, because the
-   * settings query is refetched in the background and would otherwise move
-   * under a list being edited.
+   * The list as the modal opened it, so Save writes the list only when it was
+   * changed. Held in state rather than read from the prop: the settings query is
+   * refetched in the background and would otherwise move under a list being
+   * edited.
    */
-  const [savedSources, setSavedSources] = useState<string[]>(
-    projectContext.disabledSources ?? [],
-  );
-  const sourcesChanged = disabledSources.join(",") !== savedSources.join(",");
+  const [openedSources] = useState(() => (projectContext.disabledSources ?? []).join(","));
+  const sourcesChanged = disabledSources.join(",") !== openedSources;
 
   const assignedIds = useMemo(
     () =>
@@ -108,34 +107,16 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     return map;
   }, [assignedEntities]);
 
-  /**
-   * The gazetteer list, written on its own.
-   *
-   * Everything else in this modal assigns an entity to a role; this says which
-   * sources the engine may ask, which is a different kind of decision with a
-   * different blast radius. One Save covering both would mean opening the modal
-   * to correct a Concept and, by pressing the only button there is, also
-   * committing whatever the gazetteer list happened to say.
-   *
-   * A replace rather than a merge, for the reason the roles are: this list is
-   * the whole of what the project switches off, so a source switched back on is
-   * one it no longer carries.
-   */
-  const saveSources = useMutation({
-    mutationFn: () => patchGeocodingContext({ disabledSources }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["geocoding-settings"] });
-      setSavedSources(disabledSources);
-      toast.success("Gazetteer list saved.");
-    },
-    onError: () => toast.error("The gazetteer list could not be saved."),
-  });
-
   const save = useMutation({
     mutationFn: async () => {
       // the draft holds every role, so a role the researcher unlinked is one
       // this object no longer carries — it has to replace, not merge
       await putGeocodingRoles(draft);
+      // after the roles, not beside them: both rewrite the one settings row, and
+      // two writes in flight would leave only whichever landed last
+      if (sourcesChanged) {
+        await patchGeocodingContext({ disabledSources });
+      }
       // a Resource created here carries no base url; the deep link needs one,
       // and only the entity detail form otherwise offers the field
       for (const [source, url] of Object.entries(baseUrls)) {
@@ -156,7 +137,13 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       toast.success("Geocoding settings saved.");
       onClose();
     },
-    onError: () => toast.error("The geocoding settings could not be saved."),
+    onError: () => {
+      // a save is several writes, and the earlier ones may have landed
+      queryClient.invalidateQueries({ queryKey: ["geocoding-settings"] });
+      toast.error(
+        "The geocoding settings could not be saved completely. Some changes may have been written; reopen this window to see which.",
+      );
+    },
   });
 
   const renderAssigned = (id: string, unlink: () => void) => {
@@ -183,38 +170,91 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     );
   };
 
+  /**
+   * What fills a role: the entity it points at, or the suggester that picks one.
+   *
+   * A role holds one entity, so the suggester is what an empty role looks like
+   * and the tag is what a filled one looks like. Offering both would make
+   * picking a second entity a silent replacement of the first.
+   */
+  const picker = (
+    id: string | undefined,
+    entityClass: EntityEnums.Class,
+    set: (entityId: string | null) => void,
+  ) => (
+    <StyledPick>
+      {id ? (
+        renderAssigned(id, () => set(null))
+      ) : (
+        <EntitySuggester
+          categoryTypes={[entityClass]}
+          alwaysShowCreateModal
+          /* the suggester adds the class box and the create button to this,
+             and the whole control has to stay inside the slot so the column
+             beside it starts where the assigned rows put it */
+          inputWidth={130}
+          onPicked={(entity) => set(entity.id)}
+        />
+      )}
+    </StyledPick>
+  );
+
   const row = (
     label: string,
     id: string | undefined,
     entityClass: EntityEnums.Class,
     set: (entityId: string | null) => void,
-    extra?: React.ReactNode,
   ) => (
     <React.Fragment key={label}>
       <StyledRowLabel>{label}</StyledRowLabel>
       <StyledRowControls>
-        {/* a role holds one entity, so the suggester is what an empty role looks
-            like and the tag is what a filled one looks like. Offering both would
-            make picking a second entity a silent replacement of the first */}
-        <StyledPick>
-          {id ? (
-            renderAssigned(id, () => set(null))
-          ) : (
-            <EntitySuggester
-              categoryTypes={[entityClass]}
-              alwaysShowCreateModal
-              /* the suggester adds the class box and the create button to this,
-                 and the whole control has to stay inside the slot so the base
-                 URL field beside it starts where the assigned rows put it */
-              inputWidth={130}
-              onPicked={(entity) => set(entity.id)}
-            />
-          )}
-        </StyledPick>
-        {extra}
+        {picker(id, entityClass, set)}
       </StyledRowControls>
     </React.Fragment>
   );
+
+  /**
+   * The resource and record URL of each source, beside its switch.
+   *
+   * `llm-coords` is the model's own coordinate guess: it has no record to cite and
+   * never receives a reference, so it has no resource to assign. A source the
+   * engine has grown that this page has never heard of is shown the same way,
+   * because a Resource for it would have no base URL to prefill and nothing
+   * would read it.
+   */
+  const gazetteerColumns: GazetteerColumn[] = [
+    {
+      title: "resource",
+      width: "21rem",
+      render: (source) =>
+        GAZETTEERS.includes(source) ? (
+          picker(draft.resources[source], EntityEnums.Class.Resource, (id) => {
+            setDraft((d) => ({ ...d, resources: withEntry(d.resources, source, id) }));
+            setBaseUrls((current) => nextBaseUrls(current, source, id, GAZETTEER_BASE_URLS[source]));
+          })
+        ) : (
+          <StyledGazetteerNote>
+            {source === LLM_SOURCE ? "no record to cite" : "no resource for this source"}
+          </StyledGazetteerNote>
+        ),
+    },
+    {
+      title: "record URL",
+      width: "minmax(14rem, 1fr)",
+      render: (source) =>
+        GAZETTEERS.includes(source) ? (
+          <StyledBaseUrl>
+            <Input
+              value={baseUrls[source] ?? GAZETTEER_BASE_URLS[source] ?? ""}
+              onChangeFn={(value) => setBaseUrls((current) => ({ ...current, [source]: value }))}
+              placeholder="no record url"
+              changeOnType
+              width="full"
+            />
+          </StyledBaseUrl>
+        ) : null,
+    },
+  ];
 
   return (
     <Modal showModal onClose={onClose} width="fat" fullHeight>
@@ -265,67 +305,31 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
             ),
           )}
 
-          <StyledSectionHeading>Which gazetteers the engine asks</StyledSectionHeading>
+          <StyledSectionHeading>Gazetteers</StyledSectionHeading>
           <StyledSectionNote>
-            Switched off here, a source is never asked for this project — so it costs nothing and
-            returns nothing. Set it for a source this corpus has no use for, or one whose licence
-            does not cover this work; a researcher can switch further ones off for their own runs,
-            but cannot switch these back on. This list has its own save, because it is the one
-            thing here that is not an entity assignment.
+            One row per source the engine can ask. Switched off, a source is never asked for this
+            project, so it costs nothing and returns nothing: use it for a source this corpus has
+            no use for, or one whose licence does not cover this work. A researcher can switch
+            further sources off for their own runs, but cannot switch these back on. The resource
+            is the entity a reference to the source points at, and the record URL plus the stored
+            identifier rebuilds a link back into it; a source whose record URL does not end in the
+            identifier is left blank.
           </StyledSectionNote>
           <StyledFullRow>
-            <GazetteerPicker disabled={disabledSources} onChange={setDisabledSources} />
+            <GazetteerPicker
+              disabled={disabledSources}
+              onChange={setDisabledSources}
+              columns={gazetteerColumns}
+            />
           </StyledFullRow>
-          {/* its own button, because this is the one section of the modal that
-              is not a role assignment — and a reader who came here to correct a
-              Concept should not commit the gazetteer list by pressing Save */}
-          <StyledFullRow>
-            <StyledSectionAction>
-              <Button
-                label="Save the gazetteer list"
-                color="primary"
-                disabled={!sourcesChanged || saveSources.isPending}
-                onClick={() => saveSources.mutate()}
-              />
-              {sourcesChanged ? (
-                <StyledSectionActionNote>
-                  not saved yet — the button below saves the assignments, not this list
-                </StyledSectionActionNote>
-              ) : null}
-            </StyledSectionAction>
-          </StyledFullRow>
-
-          <StyledSectionHeading>Gazetteer resources</StyledSectionHeading>
-          <StyledSectionNote>
-            Fifteen, not sixteen: <code>llm-coords</code> is the model&apos;s own coordinate guess,
-            has no record to cite, and never receives a reference. The base URL plus the stored
-            identifier reconstructs a link back into the source; five of these publish no record URL
-            and are left blank.
-          </StyledSectionNote>
-          {GAZETTEERS.map((source) =>
-            row(
-              source,
-              draft.resources[source],
-              EntityEnums.Class.Resource,
-              (id) => {
-                setDraft((d) => ({ ...d, resources: withEntry(d.resources, source, id) }));
-                setBaseUrls((current) =>
-                  nextBaseUrls(current, source, id, GAZETTEER_BASE_URLS[source]),
-                );
-              },
-              <StyledBaseUrl>
-                <Input
-                  value={baseUrls[source] ?? GAZETTEER_BASE_URLS[source] ?? ""}
-                  onChangeFn={(value) =>
-                    setBaseUrls((current) => ({ ...current, [source]: value }))
-                  }
-                  placeholder="no record url"
-                  changeOnType
-                  width="full"
-                />
-              </StyledBaseUrl>,
-            ),
-          )}
+          {sourcesChanged ? (
+            <StyledFullRow>
+              <StyledUnsavedNote>
+                The switches above are changed. Save writes them for the whole project, together
+                with everything else in this window.
+              </StyledUnsavedNote>
+            </StyledFullRow>
+          ) : null}
         </StyledSettingsGrid>
       </ModalContent>
       <ModalFooter>

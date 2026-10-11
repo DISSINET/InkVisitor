@@ -35,26 +35,6 @@ export const StyledFullRow = styled.div`
   grid-column: 1 / -1;
 `;
 
-/**
- * A section that saves itself, and whether it has anything to save.
- *
- * One section of the global modal is not a role assignment, and the footer's
- * Save writes the assignments. Its own button sits with it rather than in the
- * footer, so the two are never mistaken for each other.
- */
-export const StyledSectionAction = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[3]};
-  margin-top: ${({ theme }) => theme.space[2]};
-`;
-
-export const StyledSectionActionNote = styled.span`
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  color: ${({ theme }) => theme.color["warningText"]};
-  line-height: 1.5;
-`;
-
 export const StyledRowLabel = styled.div`
   display: flex;
   align-items: center;
@@ -113,4 +93,11 @@ export const StyledDangling = styled.span`
 export const StyledBaseUrl = styled.div`
   flex: 1;
   min-width: 12rem;
+`;
+
+/** Said under the gazetteer table while its switches differ from what is stored. */
+export const StyledUnsavedNote = styled.div`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["warningText"]};
+  line-height: 1.5;
 `;

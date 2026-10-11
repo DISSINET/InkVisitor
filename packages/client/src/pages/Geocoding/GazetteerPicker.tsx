@@ -10,7 +10,9 @@ import {
   withSource,
 } from "./gazetteerCatalogue";
 import {
+  StyledGazetteerCell,
   StyledGazetteerFigure,
+  StyledGazetteerFootnote,
   StyledGazetteerHead,
   StyledGazetteerLabel,
   StyledGazetteerLocked,
@@ -41,6 +43,21 @@ import {
  * scores below a measurement.
  */
 
+/**
+ * A further column of the table, filled per source.
+ *
+ * Where the table is also the place a source's other properties are edited — the
+ * project's resource and record URL — the switch and the figures stay as they are
+ * and the extra cells sit to their right on the same row, so one source is one
+ * line however many things are said about it.
+ */
+export interface GazetteerColumn {
+  title: string;
+  /** The column's width in the grid: a length, or `1fr` for the one that takes the rest. */
+  width: string;
+  render: (name: string) => React.ReactNode;
+}
+
 interface GazetteerPicker {
   /** The names switched off at this layer, which is what the control edits. */
   disabled: string[];
@@ -53,12 +70,14 @@ interface GazetteerPicker {
    * one line.
    */
   lockedOff?: string[];
+  columns?: GazetteerColumn[];
 }
 
 export const GazetteerPicker: React.FC<GazetteerPicker> = ({
   disabled,
   onChange,
   lockedOff = [],
+  columns = [],
 }) => {
   // the same query key the context panel uses for `/parameters` has its own
   // entry; this one is the catalogue, and both are answered once per hour
@@ -74,16 +93,19 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
   const locked = new Set(lockedOff);
 
   return (
-    <StyledGazetteerTable>
+    <StyledGazetteerTable $extra={columns.map((column) => column.width)}>
       <StyledGazetteerHead>
         <span>gazetteer</span>
         <span>what the engine measured of it</span>
+        {columns.map((column) => (
+          <span key={column.title}>{column.title}</span>
+        ))}
       </StyledGazetteerHead>
       {rows.map(({ name, suggester }) => {
         const lockedHere = locked.has(name);
         const isOff = lockedHere || off.has(name);
         return (
-          <StyledGazetteerRow key={name} $off={isOff}>
+          <StyledGazetteerRow key={name}>
             <StyledGazetteerSwitch>
               <input
                 type="checkbox"
@@ -111,17 +133,20 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
                 ) : null}
               </StyledGazetteerName>
             </StyledGazetteerSwitch>
-            <StyledGazetteerFigure title={footprintNote(suggester)}>
+            <StyledGazetteerFigure $off={isOff} title={footprintNote(suggester)}>
               {footprintFigure(suggester)}
             </StyledGazetteerFigure>
+            {columns.map((column) => (
+              <StyledGazetteerCell key={column.title}>{column.render(name)}</StyledGazetteerCell>
+            ))}
           </StyledGazetteerRow>
         );
       })}
       {suggesters ? null : (
-        <StyledGazetteerNote>
+        <StyledGazetteerFootnote>
           The engine is unreachable, so what it measures of each source cannot be listed. The
           switches still work and are still sent.
-        </StyledGazetteerNote>
+        </StyledGazetteerFootnote>
       )}
     </StyledGazetteerTable>
   );
