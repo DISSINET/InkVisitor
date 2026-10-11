@@ -50,7 +50,7 @@ interface PlaceTypeTable {
 }
 
 /** The icon grid is about this tall; it opens upward where there is no room below the button. */
-const PANEL_HEIGHT = 140;
+const PANEL_HEIGHT = 230;
 
 const NO_ENGINE_TYPE = "none";
 

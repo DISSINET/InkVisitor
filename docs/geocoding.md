@@ -506,7 +506,7 @@ place regardless. What they cannot do is notice this by looking at the list.
 
 A coordinate answers where; the project's place types answer what. The project
 defines its own list in the global settings — a name, the Concept a Location is
-classified under, a mark chosen from a set of thirty-four, a description and,
+classified under, a mark chosen from a set of sixty-two, a description and,
 optionally, the engine type it answers to. The engine's twelve types are a
 separate vocabulary: they say what to ask the gazetteers for, while a place type
 says what the project calls a Location. The default list is one kind per engine

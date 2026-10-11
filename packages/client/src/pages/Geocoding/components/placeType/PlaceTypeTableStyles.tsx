@@ -78,7 +78,7 @@ export const StyledIconPanel = styled.div<{ $top: number; $left: number }>`
   left: ${({ $left }) => $left}px;
   z-index: 10001;
   display: grid;
-  grid-template-columns: repeat(7, 2.2rem);
+  grid-template-columns: repeat(10, 2.2rem);
   gap: ${({ theme }) => theme.space[1]};
   margin-top: ${({ theme }) => theme.space[1]};
   padding: ${({ theme }) => theme.space[2]};
