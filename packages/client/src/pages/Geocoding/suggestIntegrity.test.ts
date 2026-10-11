@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SuggestResponse } from "./engineTypes";
-import { degradationsOf } from "./suggestIntegrity";
+import { degradationsOf, problemsOf } from "./suggestIntegrity";
 
 /**
  * The engine answers 200 whether or not its language-model stages ran, so every
@@ -44,7 +44,7 @@ describe("degradationsOf", () => {
     ).toEqual([]);
   });
 
-  it("shows the engine's own sentence for what it ignored or corrected", () => {
+  it("shows the engine's own sentence for what it ignored or corrected, apart from the degradations", () => {
     const problems = [
       {
         code: "unknown-criterion",
@@ -53,9 +53,11 @@ describe("degradationsOf", () => {
         message: 'region "Atlantis" is not a known value and was ignored',
       },
     ];
-    expect(degradationsOf(response({ problems: problems as never }))).toEqual([
+    expect(problemsOf(response({ problems: problems as never }))).toEqual([
       'region "Atlantis" is not a known value and was ignored',
     ]);
+    // a changed question is not a missing stage, and is not told as one
+    expect(degradationsOf(response({ problems: problems as never }))).toEqual([]);
   });
 
   it("stays quiet about the context stage when no criteria were sent to weigh", () => {

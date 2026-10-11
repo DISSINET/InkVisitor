@@ -1,6 +1,17 @@
 import { SuggestResponse } from "./engineTypes";
 
 /**
+ * What the engine changed about the question, in its own words.
+ *
+ * Not a degradation: an entry it did not know or a range it turned round is
+ * the question being read differently from how it was asked, and nothing is
+ * missing from the answer or worth running again. Kept apart from
+ * `degradationsOf` so the two are never told in one sentence.
+ */
+export const problemsOf = (response: SuggestResponse): string[] =>
+  (response.problems ?? []).map((problem) => problem.message);
+
+/**
  * What went wrong in a request the engine still answered with HTTP 200.
  *
  * A rate-limited language model does not fail the request. `augment` falls back
@@ -36,12 +47,6 @@ export const degradationsOf = (response: SuggestResponse): string[] => {
     !!language?.length;
   if (criteria && response.contextEvaluated === false) {
     notes.push("your period, region and language were not weighed against the results");
-  }
-
-  // what the engine did not take as sent: an entry it ignored, a range it turned
-  // round. Its own sentence is shown, since it names the value
-  for (const problem of response.problems ?? []) {
-    notes.push(problem.message);
   }
 
   const broken = response.sources.filter(

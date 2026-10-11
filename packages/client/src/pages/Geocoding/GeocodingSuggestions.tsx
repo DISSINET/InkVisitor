@@ -18,7 +18,7 @@ import { ACCURACY_ORDER, AccuracyPicker } from "./AccuracyPicker";
 import { PlaceTypePicker } from "./PlaceTypePicker";
 import { KindIcon, PlaceTypeIcon, kindInfo, placeTypeInfo } from "./placeTypeIcons";
 import { findPlaceType, usePlaceTypes } from "./placeTypesContext";
-import { degradationsOf } from "./suggestIntegrity";
+import { degradationsOf, problemsOf } from "./suggestIntegrity";
 import { splitLabel } from "./suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "./suggestionRank";
 import { provenanceOf } from "./suggestionProvenance";
@@ -39,6 +39,7 @@ import {
   StyledDegradedFullText,
   StyledDegradedIcon,
   StyledDegradedTip,
+  StyledProblems,
   StyledEmptyPanel,
   StyledNoSelection,
   StyledHoverCard,
@@ -685,6 +686,11 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     [response, isProvisional],
   );
 
+  const problems = useMemo(
+    () => (response && !isProvisional ? problemsOf(response) : []),
+    [response, isProvisional],
+  );
+
   // the strip shows two words, so the sentences behind it are the only form a
   // screen reader or a keyboard user ever gets
   const degradedSummary = degradations.length
@@ -1161,6 +1167,14 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
             }
           />
         </>
+      ) : null}
+
+      {problems.length ? (
+        <StyledProblems role="note">
+          {problems.map((message) => (
+            <span key={message}>{message}</span>
+          ))}
+        </StyledProblems>
       ) : null}
 
       {/* a run of several seconds that then finishes silently leaves anyone

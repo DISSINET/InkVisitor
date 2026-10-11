@@ -539,6 +539,23 @@ export const StyledDegradedFullText = styled.span`
   white-space: nowrap;
 `;
 
+/**
+ * What the engine changed about the question: an entry it ignored, a range it
+ * turned round. Written out in the strip rather than behind a tooltip, since it
+ * is a sentence or two and names the value that was changed.
+ */
+export const StyledProblems = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  margin: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[GUTTER]};
+  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+  border-left: 3px solid ${({ theme }) => theme.color["primary"]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+  font-size: ${({ theme }) => theme.fontSize.xs};
+  color: ${({ theme }) => theme.color["black"]};
+`;
+
 /** The banner text, in the tooltip the strip opens. */
 export const StyledDegradedTip = styled.div`
   max-width: 28rem;
