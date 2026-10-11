@@ -69,14 +69,14 @@ export const StyledIconAnchor = styled.div`
 export const StyledIconBackdrop = styled.div`
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 10000;
 `;
 
-export const StyledIconPanel = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 11;
+export const StyledIconPanel = styled.div<{ $top: number; $left: number }>`
+  position: fixed;
+  top: ${({ $top }) => $top}px;
+  left: ${({ $left }) => $left}px;
+  z-index: 10001;
   display: grid;
   grid-template-columns: repeat(7, 2.2rem);
   gap: ${({ theme }) => theme.space[1]};
@@ -95,8 +95,7 @@ export const StyledIconChoice = styled.button<{ $current: boolean }>`
   width: 2.2rem;
   height: 2.2rem;
   font-size: ${({ theme }) => theme.fontSize.lg};
-  color: ${({ theme, $current }) =>
-    $current ? theme.color["white"] : theme.color["black"]};
+  color: ${({ theme, $current }) => ($current ? theme.color["white"] : theme.color["black"])};
   background: ${({ theme, $current }) => ($current ? theme.color["primary"] : "transparent")};
   border: 1px solid transparent;
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};

@@ -7,6 +7,7 @@ import {
 import { Button, IconWithTooltip, Input } from "components";
 import Dropdown from "components/advanced";
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash } from "Theme/icons";
 import { v4 as uuidv4 } from "uuid";
 import { PLACE_ICON_KEYS, placeIcon } from "./placeTypeIcons";
@@ -48,6 +49,9 @@ interface PlaceTypeTable {
   countsFailed: boolean;
 }
 
+/** The icon grid is about this tall; it opens upward where there is no room below the button. */
+const PANEL_HEIGHT = 140;
+
 const NO_ENGINE_TYPE = "none";
 
 const engineOptions = [
@@ -66,7 +70,9 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   countsLoading,
   countsFailed,
 }) => {
-  const [iconFor, setIconFor] = useState<string | null>(null);
+  // the grid is drawn in the body at the button's own position: the table scrolls
+  // sideways, which clips anything positioned inside it
+  const [iconFor, setIconFor] = useState<{ id: string; top: number; left: number } | null>(null);
 
   const patch = (id: string, changes: Partial<IGeocodingPlaceType>) =>
     onChange(value.map((one) => (one.id === id ? { ...one, ...changes } : one)));
@@ -104,38 +110,60 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
             <StyledIconAnchor>
               <StyledIconButton
                 type="button"
-                $open={iconFor === kind.id}
+                $open={iconFor?.id === kind.id}
                 aria-label={`mark for ${kind.name || "this kind"}`}
-                onClick={() => setIconFor(iconFor === kind.id ? null : kind.id)}
+                onClick={(event) => {
+                  const box = event.currentTarget.getBoundingClientRect();
+                  setIconFor(
+                    iconFor?.id === kind.id
+                      ? null
+                      : {
+                          id: kind.id,
+                          top:
+                            box.bottom + PANEL_HEIGHT > window.innerHeight
+                              ? box.top - PANEL_HEIGHT
+                              : box.bottom,
+                          left: box.left,
+                        }
+                  );
+                }}
               >
                 <Icon />
               </StyledIconButton>
-              {iconFor === kind.id ? (
-                <>
-                  <StyledIconBackdrop onClick={() => setIconFor(null)} />
-                  <StyledIconPanel role="listbox" aria-label="Marks">
-                    {PLACE_ICON_KEYS.map((key) => {
-                      const Choice = placeIcon(key);
-                      return (
-                        <StyledIconChoice
-                          key={key}
-                          type="button"
-                          role="option"
-                          aria-selected={kind.icon === key}
-                          aria-label={key}
-                          $current={kind.icon === key}
-                          onClick={() => {
-                            patch(kind.id, { icon: key });
-                            setIconFor(null);
-                          }}
-                        >
-                          <Choice />
-                        </StyledIconChoice>
-                      );
-                    })}
-                  </StyledIconPanel>
-                </>
-              ) : null}
+              {iconFor?.id === kind.id
+                ? createPortal(
+                    <>
+                      <StyledIconBackdrop onClick={() => setIconFor(null)} />
+                      <StyledIconPanel
+                        role="listbox"
+                        aria-label="Marks"
+                        $top={iconFor.top}
+                        $left={iconFor.left}
+                      >
+                        {PLACE_ICON_KEYS.map((key) => {
+                          const Choice = placeIcon(key);
+                          return (
+                            <StyledIconChoice
+                              key={key}
+                              type="button"
+                              role="option"
+                              aria-selected={kind.icon === key}
+                              aria-label={key}
+                              $current={kind.icon === key}
+                              onClick={() => {
+                                patch(kind.id, { icon: key });
+                                setIconFor(null);
+                              }}
+                            >
+                              <Choice />
+                            </StyledIconChoice>
+                          );
+                        })}
+                      </StyledIconPanel>
+                    </>,
+                    document.body
+                  )
+                : null}
             </StyledIconAnchor>
             <Input
               value={kind.name}
@@ -145,7 +173,9 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               width="full"
             />
             <StyledKindCell>
-              {renderConcept(kind.conceptId, (conceptId) => onChange(assignConcept(value, kind.id, conceptId)))}
+              {renderConcept(kind.conceptId, (conceptId) =>
+                onChange(assignConcept(value, kind.id, conceptId))
+              )}
             </StyledKindCell>
             <Dropdown.Single.Basic
               width="full"
@@ -156,8 +186,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                   pairEngineType(
                     value,
                     kind.id,
-                    next === NO_ENGINE_TYPE ? null : (next as GeocodingPlaceType),
-                  ),
+                    next === NO_ENGINE_TYPE ? null : (next as GeocodingPlaceType)
+                  )
                 )
               }
             />
@@ -184,7 +214,13 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               />
             </StyledFavorite>
             <StyledKindCount>
-              {!kind.conceptId ? "–" : countsFailed ? "?" : countsLoading ? "…" : (counts[kind.id] ?? 0)}
+              {!kind.conceptId
+                ? "–"
+                : countsFailed
+                  ? "?"
+                  : countsLoading
+                    ? "…"
+                    : (counts[kind.id] ?? 0)}
             </StyledKindCount>
             <Input
               value={kind.description}
@@ -204,7 +240,13 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         );
       })}
       <StyledKindActions>
-        <Button icon={<IcoPlus />} label="add a kind of place" color="primary" inverted onClick={add} />
+        <Button
+          icon={<IcoPlus />}
+          label="add a kind of place"
+          color="primary"
+          inverted
+          onClick={add}
+        />
       </StyledKindActions>
     </StyledKindScroll>
   );
