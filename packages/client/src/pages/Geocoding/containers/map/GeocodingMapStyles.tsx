@@ -1,15 +1,6 @@
-import styled, { DefaultTheme } from "styled-components";
-
-/*
- * The map's top-right corner stacks the renderer's zoom control under the layers
- * toggle, and the layers panel drops from beneath it. Both clear the toggle by
- * the inset it sits in, its height, and that inset again as the gap, so a
- * resized toggle carries them with it.
- */
-const TOGGLE_SIZE = "2.6rem";
-const LAYER_LINE = "1.4rem";
-const belowToggle = ({ theme }: { theme: DefaultTheme }) =>
-  `calc(${theme.space[2]} + ${TOGGLE_SIZE} + ${theme.space[2]})`;
+import styled from "styled-components";
+import { StyledMapToggle } from "../../components/map/MapControlsStyles";
+import { belowToggle, TOGGLE_SIZE } from "../../components/map/MapControlsStyles";
 
 /**
  * The element the renderer draws into.
@@ -125,141 +116,6 @@ export const StyledMapPanel = styled.div`
  * fixed at 26rem, which is wider than the map when the other two panels are
  * dragged open.
  */
-/*
- * Everything drawn over the map sits at 2.
- *
- * High enough to clear the canvas and the renderer's own controls, which is all
- * these have to do — and low enough to stay under a modal's overlay, which is at
- * 500. A control that outranks the overlay is a control still offering to be
- * pressed while the page has been dimmed behind a dialogue.
- */
-export const StyledMapSearch = styled.div`
-  position: absolute;
-  top: ${({ theme }) => theme.space[2]};
-  left: ${({ theme }) => theme.space[2]};
-  z-index: 2;
-  width: 26rem;
-  max-width: calc(100% - ${({ theme }) => theme.space[8]});
-  background-color: ${({ theme }) => theme.color["white"]};
-  border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-  overflow: hidden;
-
-  input {
-    border: none;
-    border-radius: 0;
-    height: 2.6rem;
-  }
-
-  &:focus-within {
-    border-color: ${({ theme }) => theme.color["primary"]};
-  }
-`;
-
-export const StyledSearchHits = styled.div`
-  max-height: 22rem;
-  overflow-y: auto;
-`;
-
-export const StyledSearchHit = styled.button`
-  display: block;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  border: none;
-  border-top: 1px solid ${({ theme }) => theme.color["gray"][200]};
-  background-color: transparent;
-  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme }) => theme.color["black"]};
-
-  &:hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
-  }
-`;
-
-export const StyledSearchHitMeta = styled.div`
-  font-family: monospace;
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  color: ${({ theme }) => theme.color["greyer"]};
-`;
-
-/**
- * Setting a coordinate, in one place.
- *
- * The two ways of doing it — clicking the map and typing the pair — sat at
- * opposite bottom corners, so the sentence naming the act was as far from the
- * fields that perform it as the map is wide. Left-anchored rather than
- * full-width: the right corner belongs to the renderer's attribution.
- */
-export const StyledMapFooter = styled.div`
-  position: absolute;
-  bottom: ${({ theme }) => theme.space[2]};
-  left: ${({ theme }) => theme.space[2]};
-  z-index: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
-  max-width: calc(100% - ${({ theme }) => theme.space[8]});
-  padding: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme }) => theme.color["white"]};
-  border: 1px solid ${({ theme }) => theme.color["gray"][400]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-`;
-
-/**
- * Names the act the fields beside it perform.
- *
- * Whole, never truncated: the panel is draggable to a third of its width and a
- * sentence cut to "click the …" says less than nothing. The strip wraps instead,
- * so a narrow map gets two short lines rather than one unreadable one.
- */
-export const StyledMapHint = styled.div`
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  color: ${({ theme }) => theme.color["greyer"]};
-`;
-
-/** A keyboard path to the same act the map click performs. */
-export const StyledManualEntry = styled.form`
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[1]};
-`;
-
-/**
- * The map's own controls, folded away by default.
- *
- * Everything behind it changes what is drawn and nothing else, so it is not a
- * setting the project shares — the researcher who wants only the place in front
- * of them is not making a decision anybody else has to live with.
- */
-export const StyledLayersToggle = styled.button<{ $open: boolean }>`
-  position: absolute;
-  top: ${({ theme }) => theme.space[2]};
-  right: ${({ theme }) => theme.space[2]};
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: ${TOGGLE_SIZE};
-  height: ${TOGGLE_SIZE};
-  cursor: pointer;
-  border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $open }) =>
-    $open ? theme.color["gray"][200] : theme.color["white"]};
-  color: ${({ theme }) => theme.color["black"]};
-  font-size: ${({ theme }) => theme.fontSize.lg};
-
-  &:hover {
-    border-color: ${({ theme }) => theme.color["primary"]};
-  }
-`;
-
 /**
  * Arming the drawing of a region.
  *
@@ -268,31 +124,12 @@ export const StyledLayersToggle = styled.button<{ $open: boolean }>`
  * a mode — the next drag makes a rectangle instead of moving the map — and a
  * mode the reader cannot see they are in is a map that has stopped working.
  */
-export const StyledDrawToggle = styled.button<{ $armed: boolean; $set: boolean }>`
-  position: absolute;
-  top: ${belowToggle};
-  right: ${({ theme }) => theme.space[2]};
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: ${TOGGLE_SIZE};
-  height: ${TOGGLE_SIZE};
-  cursor: pointer;
-  border: 1px solid
-    ${({ theme, $armed, $set }) =>
-      $armed || $set ? theme.color["primary"] : theme.color["gray"][500]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $armed, $set }) =>
-    $armed ? theme.color["primary"] : $set ? theme.color["gray"][200] : theme.color["white"]};
-  color: ${({ theme, $armed, $set }) =>
-    $armed ? theme.color["white"] : $set ? theme.color["primary"] : theme.color["black"]};
-  font-size: ${({ theme }) => theme.fontSize.lg};
-
-  &:hover {
-    border-color: ${({ theme }) => theme.color["primary"]};
-  }
-`;
+export const StyledDrawToggle = styled(StyledMapToggle).attrs<{ $armed: boolean; $set: boolean }>(
+  ({ $armed, $set }) => ({
+    $slot: 1,
+    $tone: $armed ? "armed" : $set ? "set" : "idle",
+  }),
+)<{ $armed: boolean; $set: boolean }>``;
 
 /**
  * What the drawn region is, and the way out of it.
@@ -348,82 +185,6 @@ export const StyledDrawClear = styled.button`
 
   &:hover {
     color: ${({ theme }) => theme.color["danger"]};
-  }
-`;
-
-export const StyledLayersPanel = styled.div`
-  position: absolute;
-  top: ${belowToggle};
-  right: ${({ theme }) => theme.space[2]};
-  z-index: 2;
-  width: 22rem;
-  padding: ${({ theme }) => theme.space[2]};
-  border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme }) => theme.color["white"]};
-  box-shadow: ${({ theme }) => theme.boxShadow["high"]};
-`;
-
-export const StyledLayersHead = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[1]};
-
-  &:not(:first-child) {
-    margin-top: ${({ theme }) => theme.space[2]};
-  }
-
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
-  color: ${({ theme }) => theme.color["greyer"]};
-`;
-
-export const StyledLayerRow = styled.label`
-  display: flex;
-  align-items: flex-start;
-  gap: ${({ theme }) => theme.space[2]};
-  padding: ${({ theme }) => theme.space[1]} 0;
-  cursor: pointer;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  line-height: ${LAYER_LINE};
-  color: ${({ theme }) => theme.color["black"]};
-
-  /* a checkbox's own margins push it off the first line of its label; sized to
-     that line and stripped of them, every box sits level with its title */
-  input[type="checkbox"] {
-    flex: none;
-    width: ${LAYER_LINE};
-    height: ${LAYER_LINE};
-    margin: 0;
-  }
-`;
-
-export const StyledLayerCount = styled.span`
-  display: block;
-  line-height: 1.3;
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  color: ${({ theme }) => theme.color["greyer"]};
-`;
-
-/**
- * Puts every switch in this panel back where it started.
- *
- * The panel now carries six of them and remembers each one, so a map that has
- * drifted somewhere unhelpful over several sessions has no other way back short
- * of reasoning about which switch did it.
- */
-export const StyledLayersReset = styled.button`
-  margin-top: ${({ theme }) => theme.space[2]};
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: ${({ theme }) => theme.fontSize.xxs};
-  color: ${({ theme }) => theme.color["primary"]};
-  text-decoration: underline;
-
-  &:disabled {
-    cursor: default;
-    color: ${({ theme }) => theme.color["gray"][600]};
-    text-decoration: none;
   }
 `;
 

@@ -1,4 +1,5 @@
 import styled, { DefaultTheme } from "styled-components";
+import { StyledMapToggle } from "./MapControlsStyles";
 
 /**
  * The geometry drawing controls, in the column of map controls on the right.
@@ -11,33 +12,10 @@ const TOGGLE_SIZE = "2.6rem";
 const SLOT = ({ theme }: { theme: DefaultTheme }) =>
   `calc(${theme.space[2]} + (${TOGGLE_SIZE} + ${theme.space[2]}) * 2)`;
 
-export const StyledShapeToggle = styled.button<{ $armed: boolean }>`
-  position: absolute;
-  top: ${SLOT};
-  right: ${({ theme }) => theme.space[2]};
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: ${TOGGLE_SIZE};
-  height: ${TOGGLE_SIZE};
-  cursor: pointer;
-  border: 1px solid
-    ${({ theme, $armed }) => ($armed ? theme.color["primary"] : theme.color["gray"][500])};
-  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $armed }) =>
-    $armed ? theme.color["primary"] : theme.color["white"]};
-  color: ${({ theme, $armed }) => ($armed ? theme.color["white"] : theme.color["black"])};
-  font-size: ${({ theme }) => theme.fontSize.lg};
-
-  &:hover:not(:disabled) {
-    border-color: ${({ theme }) => theme.color["primary"]};
-  }
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-`;
+export const StyledShapeToggle = styled(StyledMapToggle).attrs<{ $armed: boolean }>(({ $armed }) => ({
+  $slot: 2,
+  $tone: $armed ? "armed" : "idle",
+}))<{ $armed: boolean }>``;
 
 export const StyledShapePanel = styled.div`
   position: absolute;

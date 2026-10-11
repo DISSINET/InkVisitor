@@ -13,17 +13,15 @@ import {
   serializeGeometry,
 } from "@inkvisitor/shared/types/geometry";
 import { UserOptions } from "@inkvisitor/shared/types/response-user";
-import { Button, Input } from "components";
 import { EntityTag } from "components/advanced";
 import { useTheme } from "hooks";
 import { useDebounce } from "hooks";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppSelector } from "redux/hooks";
-import { IcoGeomPoint, IcoLayers, IcoSearch, IcoSelection } from "Theme/icons";
+import { IcoSelection } from "Theme/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  BASEMAP_GROUPS,
   BasemapLayer,
   flatBuildingLayerFor,
   groupedLayersOf,
@@ -43,20 +41,32 @@ import {
   setHoveredSuggestion,
 } from "../../utils/map/geocodingMapLayers";
 import {
-  DEFAULT_MAP_PREFS,
   MapLayerPrefs,
   loadMapPrefs,
   saveMapPrefs,
 } from "../../utils/map/geocodingMapPrefs";
+import {
+  SEARCH_DEBOUNCE_MS,
+  SEARCH_LIMIT,
+  EUROPE,
+  FLY_SECONDS,
+  FLY_TO_SUGGESTIONS,
+  FIT_PADDING,
+  FIT_SUGGESTIONS_MS,
+  toMapZoom,
+  fromMapZoom,
+  pickerAnchorIn,
+} from "../../utils/map/mapView";
+import { MapFooterControls } from "../../components/map/MapFooterControls";
+import { MapLayersPanel } from "../../components/map/MapLayersPanel";
+import { MapSearchBox } from "../../components/map/MapSearchBox";
 import { GeometryDrawPanel } from "../../components/map/GeometryDrawPanel";
 import { RecentGeocodes } from "../../components/recent/RecentGeocodes";
 import { RecentGeocode } from "../../utils/write/recentGeocodes";
 import { useGeometryDraw } from "../../hooks/useGeometryDraw";
 import { BASEMAP_STYLE } from "../../utils/map/basemapStyle";
-import { CoordinateHover } from "../../components/coordinate/CoordinateTag";
 import { registerMaplibreWorker } from "../../utils/map/maplibreWorker";
 import { AccuracyPicker } from "../../components/placeType/AccuracyPicker";
-import { GazetteerTag } from "../../components/gazetteer/GazetteerTag";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
 import { colourKeysFor, darkenPaintValue } from "../../utils/map/darkBasemap";
 import { engineSearch } from "../../utils/engine/engine";
@@ -67,21 +77,8 @@ import {
   StyledDrawNote,
   StyledDrawRefusal,
   StyledDrawToggle,
-  StyledLayerCount,
-  StyledLayerRow,
-  StyledLayersHead,
-  StyledLayersPanel,
-  StyledLayersReset,
-  StyledLayersToggle,
-  StyledManualEntry,
   StyledMapCanvas,
-  StyledMapFooter,
-  StyledMapHint,
   StyledMapPanel,
-  StyledMapSearch,
-  StyledSearchHit,
-  StyledSearchHitMeta,
-  StyledSearchHits,
   StyledMarkCard,
   StyledMarkCardAt,
   StyledMarkCardMeta,
@@ -108,52 +105,6 @@ import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
  * Clicking assigns a coordinate directly and needs no engine at all — which is
  * what keeps the page usable when the engine is unreachable.
  */
-
-const SEARCH_DEBOUNCE_MS = 400;
-const SEARCH_LIMIT = 6;
-const EUROPE: Position = [48, 12];
-
-/** Long enough to read as travel rather than as a jump, short enough to wait for. */
-const FLY_SECONDS = 0.7;
-
-/** How many of the strongest suggestions the map fits when a run finishes. */
-const FLY_TO_SUGGESTIONS = 5;
-
-/** Room around a fitted set, so no suggestion sits against an edge. */
-const FIT_PADDING = 64;
-
-/** How long fitting the strongest suggestions of a finished run takes to settle. */
-const FIT_SUGGESTIONS_MS = 800;
-
-
-/**
- * Zoom levels here are one lower than the same scale in `mapFocus`.
- *
- * That module states its levels against 256px tiles; this renderer counts
- * against 512px ones. Converting at the boundary keeps those constants stated in
- * the units their own reasoning is written in — "never closer than a street" is
- * a claim about scale, and it is checked by tests that name the number.
- */
-const ZOOM_SHIFT = 1;
-const toMapZoom = (zoom: number) => zoom - ZOOM_SHIFT;
-const fromMapZoom = (zoom: number) => zoom + ZOOM_SHIFT;
-
-/**
- * Where a picker opens for a coordinate picked on the map.
- *
- * The pending point is measured inside the map element and the pickers are
- * placed against the viewport, so the container's own position is the
- * difference between the two.
- */
-const pickerAnchorIn = (
-  container: HTMLElement | null,
-  pending: { x: number; y: number },
-): { left: number; top: number; bottom: number } => {
-  const box = container?.getBoundingClientRect();
-  const left = (box?.left ?? 0) + pending.x;
-  const top = (box?.top ?? 0) + pending.y;
-  return { left, top, bottom: top };
-};
 
 /** No Locations and no suggestions each resolve to one shared, stable empty array. */
 const NO_LOCATIONS: GeocodingLocation[] = [];
@@ -246,212 +197,6 @@ interface GeocodingMap {
    */
   onRegionBox?: (box: GeocodingBbox | null) => void;
 }
-
-/**
- * Moving the map by name: the field and the hits that drop out of it.
- *
- * A separate component rather than inline JSX because the search box is a
- * complete, self-contained control — a field, a debounced list, and one
- * action per row — and naming it lets the effects and the pickers around it
- * read as the rest of what the map does.
- */
-interface MapSearchBox {
-  term: string;
-  onTermChange: (value: string) => void;
-  hits: EngineSearchHit[];
-  onPick: (hit: EngineSearchHit) => void;
-}
-
-const MapSearchBox: React.FC<MapSearchBox> = ({ term, onTermChange, hits, onPick }) => (
-  <StyledMapSearch>
-    <Input
-      value={term}
-      onChangeFn={onTermChange}
-      placeholder="find a place to move the map…"
-      icon={<IcoSearch />}
-      changeOnType
-      width="full"
-      clearable
-    />
-    {hits.length ? (
-      <StyledSearchHits>
-        {hits.map((hit) => (
-          <StyledSearchHit
-            key={`${hit.source}-${hit.sourceId}-${hit.lat}`}
-            type="button"
-            onClick={() => onPick(hit)}
-          >
-            {hit.label}
-            <StyledSearchHitMeta>
-              <CoordinateHover lat={hit.lat} lon={hit.lon}>
-                <IcoGeomPoint />
-              </CoordinateHover>{" "}
-              <GazetteerTag source={hit.source} />
-              {hit.type ? ` · ${hit.type}` : ""}
-            </StyledSearchHitMeta>
-          </StyledSearchHit>
-        ))}
-      </StyledSearchHits>
-    ) : null}
-  </StyledMapSearch>
-);
-
-/**
- * The map's own controls, folded away behind one toggle.
- *
- * Everything behind it changes what is drawn and nothing else, so it is not a
- * setting the project shares — the researcher who wants only the place in
- * front of them is not making a decision anybody else has to live with.
- */
-interface MapLayersPanel {
-  open: boolean;
-  onToggleOpen: () => void;
-  layers: MapLayerPrefs;
-  onChange: (next: MapLayerPrefs) => void;
-  othersCount: number;
-  suggestionsCount: number;
-}
-
-const MapLayersPanel: React.FC<MapLayersPanel> = ({
-  open,
-  onToggleOpen,
-  layers,
-  onChange,
-  othersCount,
-  suggestionsCount,
-}) => (
-  <>
-    <StyledLayersToggle
-      type="button"
-      $open={open}
-      data-hint="display"
-      aria-expanded={open}
-      onClick={onToggleOpen}
-    >
-      <IcoLayers />
-    </StyledLayersToggle>
-
-    {open ? (
-      <StyledLayersPanel role="group" aria-label="Map layers">
-        <StyledLayersHead>display</StyledLayersHead>
-        <StyledLayerRow>
-          <input
-            type="checkbox"
-            checked={layers.others}
-            onChange={(event) => onChange({ ...layers, others: event.target.checked })}
-          />
-          <span>
-            other locations
-            <StyledLayerCount>
-              {othersCount} in the list{othersCount ? "" : " — the filters leave none"}
-            </StyledLayerCount>
-          </span>
-        </StyledLayerRow>
-        <StyledLayerRow>
-          <input
-            type="checkbox"
-            checked={layers.suggestions}
-            onChange={(event) => onChange({ ...layers, suggestions: event.target.checked })}
-          />
-          <span>
-            suggestions
-            <StyledLayerCount>
-              {suggestionsCount ? `${suggestionsCount} being judged` : "none on screen"}
-            </StyledLayerCount>
-          </span>
-        </StyledLayerRow>
-        <StyledLayerRow>
-          <input
-            type="checkbox"
-            checked={layers.names}
-            onChange={(event) => onChange({ ...layers, names: event.target.checked })}
-          />
-          <span>
-            names always shown
-            <StyledLayerCount>rather than on hover</StyledLayerCount>
-          </span>
-        </StyledLayerRow>
-
-        {/* the basemap's own drawing, as distinct from this page's marks */}
-        <StyledLayersHead>basemap</StyledLayersHead>
-        {BASEMAP_GROUPS.map((group) => (
-          <StyledLayerRow key={group.id}>
-            <input
-              type="checkbox"
-              checked={layers.basemap[group.id]}
-              onChange={(event) =>
-                onChange({
-                  ...layers,
-                  basemap: { ...layers.basemap, [group.id]: event.target.checked },
-                })
-              }
-            />
-            <span>
-              {group.title}
-              <StyledLayerCount>{group.note}</StyledLayerCount>
-            </span>
-          </StyledLayerRow>
-        ))}
-        <StyledLayersReset
-          type="button"
-          onClick={() => onChange(DEFAULT_MAP_PREFS)}
-          disabled={JSON.stringify(layers) === JSON.stringify(DEFAULT_MAP_PREFS)}
-        >
-          reset to defaults
-        </StyledLayersReset>
-      </StyledLayersPanel>
-    ) : null}
-  </>
-);
-
-/**
- * Naming the act of setting a coordinate and performing it without a mouse.
- *
- * The sentence naming the act and the fields that perform it are one strip:
- * clicking is a mouse gesture and the pair of fields is the same act without
- * one, so a reader who cannot click finds the alternative where the instruction
- * they cannot follow is written.
- */
-interface MapFooterControls {
-  selected: GeocodingLocation | undefined;
-  manual: { lat: string; lon: string };
-  onManualChange: React.Dispatch<React.SetStateAction<{ lat: string; lon: string }>>;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
-}
-
-const MapFooterControls: React.FC<MapFooterControls> = ({
-  selected,
-  manual,
-  onManualChange,
-  onSubmit,
-}) => (
-  <StyledMapFooter>
-    <StyledMapHint>
-      {selected
-        ? `click the map to set a coordinate for ${selected.entity.labels[0]}, or`
-        : "select a location to begin"}
-    </StyledMapHint>
-    {selected ? (
-      <StyledManualEntry onSubmit={onSubmit}>
-        <Input
-          value={manual.lat}
-          onChangeFn={(value) => onManualChange((m) => ({ ...m, lat: value }))}
-          placeholder="latitude"
-          changeOnType
-          width={90}
-        />
-        <Input
-          value={manual.lon}
-          onChangeFn={(value) => onManualChange((m) => ({ ...m, lon: value }))}
-          placeholder="longitude"
-          changeOnType
-          width={90}
-        />
-        <Button label="set" color="primary" onClick={() => undefined} />
-      </StyledManualEntry>
-    ) : null}
-  </StyledMapFooter>
-);
 
 export const GeocodingMap: React.FC<GeocodingMap> = ({
   selected,
