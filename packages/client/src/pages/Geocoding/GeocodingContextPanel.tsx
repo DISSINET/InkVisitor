@@ -6,25 +6,21 @@ import { IcoChevronDown, IcoGeocode, IcoWarning } from "Theme/icons";
 import React, { useState } from "react";
 import { engineParameters } from "./engine";
 import {
-  CUSTOM_REGION,
   QUERY_FIELDS,
   QueryField,
-  SingleQueryField,
-  UNSET,
-  contextLanguages,
   contextMultiOptions,
-  contextOptions,
+  contextValues,
+  regionMultiOptions,
+  regionValues,
+  sameValues,
   WEIGHT_STEPS,
   contextWeight,
   isWeightDefault,
   stepToWeight,
   weightToStep,
-  optionLabel,
   optionLabels,
   queryFieldLabel,
   queryFieldWeightNote,
-  regionOptions,
-  regionValue,
 } from "./geocodingContextFields";
 import {
   StyledContextCaret,
@@ -136,9 +132,8 @@ interface GeocodingContextPanel {
   context: IGeocodingContext;
   /** What each field holds with no personal value on it. */
   projectContext: IGeocodingContext;
-  onChange: (field: SingleQueryField, value: string) => void;
-  /** The languages the name is stated to be in. Several are normal. */
-  onLanguagesChange: (values: string[]) => void;
+  /** One dimension of the question, as the list of values it now holds. */
+  onChange: (field: QueryField, values: string[]) => void;
   /** How much one dimension counts, over the engine's own default. */
   onWeightChange: (field: QueryField, weight: number) => void;
   /** Drops every personal value, returning the fields and weights to the project's. */
@@ -155,7 +150,6 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
   context,
   projectContext,
   onChange,
-  onLanguagesChange,
   onWeightChange,
   onReset,
   onRegeocode,
@@ -168,9 +162,9 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
     localStorage.setItem(USED_KEY, "yes");
     setUsed(true);
   };
-  const change = (field: SingleQueryField, value: string) => {
+  const change = (field: QueryField, values: string[]) => {
     noteRetired();
-    onChange(field, value);
+    onChange(field, values);
   };
 
   const toggle = () =>
@@ -188,7 +182,10 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
     retry: false,
   });
 
-  const languages = contextLanguages(context);
+  /** What a field holds, a drawn region standing as the one value of the region field. */
+  const valuesOf = (field: QueryField) =>
+    field === "region" ? regionValues(context) : contextValues(context, field);
+  const projectValues = (field: QueryField) => contextValues(projectContext, field);
 
   /**
    * Whether this field departs from an answer the project already gave.
@@ -198,16 +195,13 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
    * every row would be four lines of nothing to go back to.
    */
   const overridden = (field: QueryField) => {
-    if (field === "language") {
-      const theirs = contextLanguages(projectContext);
-      return theirs.length > 0 && theirs.join(",") !== languages.join(",");
-    }
     if (field === "region" && context.regionBbox) {
       // a drawn box replaces whatever region the project named, and replaces
       // "no region" with an area, which is a departure either way
       return true;
     }
-    return !!projectContext[field] && (context[field] || UNSET) !== projectContext[field];
+    const theirs = projectValues(field);
+    return theirs.length > 0 && !sameValues(field, theirs, valuesOf(field));
   };
   const anyOverridden =
     QUERY_FIELDS.some(overridden) ||
@@ -222,7 +216,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
    * a project answer to return to: the box replaced an absence.
    */
   const drawnOverNothing = (field: QueryField) =>
-    field === "region" && !!context.regionBbox && !projectContext.region;
+    field === "region" && !!context.regionBbox && !projectValues(field).length;
 
   /**
    * What the project holds for a field, in the words the picker uses.
@@ -230,16 +224,8 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
    * "nothing" where the project is silent, since a field that departs from a
    * silent project is still a departure the reader should be told about.
    */
-  const projectSays = (field: QueryField): string => {
-    if (field === "language") {
-      return contextLanguages(projectContext).length
-        ? optionLabels(parameters, field, contextLanguages(projectContext))
-        : "nothing";
-    }
-    return projectContext[field]
-      ? optionLabel(parameters, field, projectContext[field])
-      : "nothing";
-  };
+  const projectSays = (field: QueryField): string =>
+    projectValues(field).length ? optionLabels(parameters, field, projectValues(field)) : "nothing";
 
   const departureMark = (
     <StyledDepartureMark>
@@ -256,9 +242,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
    */
   const departs = (field: QueryField) =>
     overridden(field) ||
-    (field === "language"
-      ? languages.length > 0 && contextLanguages(projectContext).length === 0
-      : !!context[field] && !projectContext[field]);
+    (valuesOf(field).length > 0 && projectValues(field).length === 0);
 
   /**
    * The one mark for a row that is not the project's, and what differs.
@@ -306,13 +290,10 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
 
   /** What the folded line says one field holds. */
   const summaryOf = (field: QueryField): string => {
-    if (field === "language") {
-      return optionLabels(parameters, field, languages);
-    }
     if (field === "region" && context.regionBbox) {
       return "custom region";
     }
-    return optionLabel(parameters, field, context[field]);
+    return optionLabels(parameters, field, contextValues(context, field));
   };
 
   /**
@@ -357,48 +338,19 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
   };
 
   /** The control this field is answered with. Only language holds a list. */
-  const fieldControl = (field: QueryField) => {
-    if (field === "language") {
-      return (
-        <Dropdown.Multi.Basic
-          width="full"
-          options={contextMultiOptions(parameters, field, languages)}
-          value={languages}
-          placeholder="—"
-          onChange={(values) => {
-            noteRetired();
-            onLanguagesChange(values);
-          }}
-        />
-      );
-    }
-    if (field === "region") {
-      return (
-        <Dropdown.Single.Basic
-          width="full"
-          options={regionOptions(parameters, context)}
-          value={regionValue(context)}
-          onChange={(value) => {
-            // the drawn entry is where the picker already is whenever it is
-            // offered at all, so choosing it asks for nothing; every other
-            // choice is a named region, which replaces the box
-            if ((value as string) === CUSTOM_REGION) {
-              return;
-            }
-            change(field, (value as string) || UNSET);
-          }}
-        />
-      );
-    }
-    return (
-      <Dropdown.Single.Basic
-        width="full"
-        options={contextOptions(parameters, field, context[field])}
-        value={context[field] ?? UNSET}
-        onChange={(value) => change(field, (value as string) || UNSET)}
-      />
-    );
-  };
+  const fieldControl = (field: QueryField) => (
+    <Dropdown.Multi.Basic
+      width="full"
+      options={
+        field === "region"
+          ? regionMultiOptions(parameters, context)
+          : contextMultiOptions(parameters, field, contextValues(context, field))
+      }
+      value={valuesOf(field)}
+      placeholder="—"
+      onChange={(values) => change(field, values)}
+    />
+  );
 
   return (
     <StyledContextPanel>
@@ -419,7 +371,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
                 <React.Fragment key={field}>
                   {index ? <StyledContextSeparator>·</StyledContextSeparator> : null}
                   <StyledContextSummaryPart
-                    $set={field === "language" ? languages.length > 0 : !!context[field] || (field === "region" && !!context.regionBbox)}
+                    $set={valuesOf(field).length > 0}
                     $overridden={overridden(field)}
                     title={queryFieldLabel[field]}
                   >
@@ -470,7 +422,9 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
                       : `use the project's ${queryFieldLabel[field]} instead of your own`
                   }
                   onClick={() =>
-                    field === "language" ? onLanguagesChange([]) : change(field, UNSET)
+                    // a drawn box is dropped by naming the project's regions in its
+                    // place; a field with no box is cleared, which lets them through
+                    change(field, field === "region" && context.regionBbox ? projectValues(field) : [])
                   }
                 >
                   {/* a drawn region over a project that names none is not
@@ -479,11 +433,7 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
                       though it were a value */}
                   {drawnOverNothing(field)
                     ? "drop the drawn region"
-                    : `project default: ${
-                        field === "language"
-                          ? optionLabels(parameters, field, contextLanguages(projectContext))
-                          : optionLabel(parameters, field, projectContext[field])
-                      }`}
+                    : `project default: ${optionLabels(parameters, field, projectValues(field))}`}
                 </StyledContextGlobal>
               ) : null}
             </React.Fragment>

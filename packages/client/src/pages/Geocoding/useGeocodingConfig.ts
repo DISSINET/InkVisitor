@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import { useMemo } from "react";
+import { withListFields } from "./geocodingContextFields";
 
 /**
  * Resolves the Geocoding page's configuration.
@@ -130,12 +131,15 @@ export const useGeocodingConfig = (): ResolvedGeocodingConfig => {
 
     const projectContext = layerGeocodingContext<IGeocodingContext>(
       defaultGeocodingContext(),
-      stored?.context,
+      stored?.context && withListFields(stored.context),
     );
 
     const personal = user?.options?.geocoding?.context;
     const context: IGeocodingContext = {
-      ...layerGeocodingContext<IGeocodingContext>(projectContext, personal),
+      ...layerGeocodingContext<IGeocodingContext>(
+        projectContext,
+        personal && withListFields(personal),
+      ),
       contextWeights: layerContextWeights(projectContext.contextWeights, personal?.contextWeights),
       disabledSources: unionSources(projectContext.disabledSources, personal?.disabledSources),
     };

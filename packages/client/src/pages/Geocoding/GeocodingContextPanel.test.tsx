@@ -18,7 +18,6 @@ const mount = (
   props: Partial<React.ComponentProps<typeof GeocodingContextPanel>> = {},
 ) => {
   const onChange = vi.fn();
-  const onLanguagesChange = vi.fn();
   const onWeightChange = vi.fn();
   const onReset = vi.fn();
   const client = new QueryClient({
@@ -30,14 +29,13 @@ const mount = (
         context={{ region: "europe" }}
         projectContext={{}}
         onChange={onChange}
-        onLanguagesChange={onLanguagesChange}
         onWeightChange={onWeightChange}
         onReset={onReset}
         {...props}
       />
     </QueryClientProvider>,
   );
-  return { onChange, onLanguagesChange, onWeightChange, onReset };
+  return { onChange, onWeightChange, onReset };
 };
 
 const globals = () =>
@@ -62,7 +60,7 @@ describe("the project's own value", () => {
       projectContext: { region: "europe" },
     });
     click(globals()[0]);
-    expect(onChange).toHaveBeenCalledWith("region", "");
+    expect(onChange).toHaveBeenCalledWith("region", []);
   });
 
   it("is not named where the project says nothing", () => {
@@ -83,6 +81,31 @@ describe("the project's own value", () => {
     view!.unmount();
     mount({ context: { region: "occitania" }, projectContext: { region: "europe" } });
     expect(view!.texts("button")).toContain("use the project's defaults");
+  });
+});
+
+describe("several values", () => {
+  it("names every project value on the link, and says a different set differs", () => {
+    mount({
+      context: { regions: ["occitania"] },
+      projectContext: { regions: ["europe", "asia"] },
+    });
+    expect(globals().map((node) => node.textContent)).toEqual([
+      "project default: europe, asia",
+    ]);
+  });
+
+  it("does not call the same set in another order a departure", () => {
+    mount({
+      context: { periods: ["b", "a"] },
+      projectContext: { periods: ["a", "b"] },
+    });
+    expect(globals()).toHaveLength(0);
+  });
+
+  it("reads a project's single value as a one-value list", () => {
+    mount({ context: { regions: ["europe"] }, projectContext: { region: "europe" } });
+    expect(globals()).toHaveLength(0);
   });
 });
 

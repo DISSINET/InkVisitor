@@ -4,6 +4,7 @@ import { EngineProgress, engineSuggestStream, watchEngineProgress } from "./engi
 import { StreamCandidate, SuggestRequest, SuggestResponse } from "./engineTypes";
 import {
   contextLanguages,
+  contextValues,
   disabledSourcesToSend,
   listToSend,
   regionBoxToSend,
@@ -169,9 +170,9 @@ export const useGeocodingSuggest = (): UseGeocodingSuggest => {
         name,
         region: regionToSend(context),
         regionBbox: regionBoxToSend(context),
-        period: listToSend(context.period),
-        language: languages.length ? languages : undefined,
-        place_type: listToSend(context.placeType),
+        period: listToSend(contextValues(context, "period")),
+        language: listToSend(languages),
+        place_type: listToSend(contextValues(context, "placeType")),
         contextWeights: weightsToSend(context),
         disabledSources: disabledSourcesToSend(context),
         taskCategory: context.taskCategory,

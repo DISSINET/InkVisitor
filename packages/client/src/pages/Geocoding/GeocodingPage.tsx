@@ -18,10 +18,10 @@ import { ENGINE_URL, engineHealth } from "./engine";
 import { fixtureModeAvailable, isFixtureMode, setFixtureMode } from "./fixtureMode";
 import {
   QUERY_FIELDS,
+  CUSTOM_REGION,
   QueryField,
-  SingleQueryField,
-  UNSET,
-  contextLanguages,
+  contextValues,
+  valuesPatch,
 } from "./geocodingContextFields";
 import { GeocodingList } from "./GeocodingList";
 import { MapFocus, nextFocus } from "./mapFocus";
@@ -115,37 +115,40 @@ export const GeocodingPage: React.FC = () => {
     onError: () => toast.error("Your geocoding context could not be saved."),
   });
 
-  const setContextField = (field: SingleQueryField, value: string) => {
+  /**
+   * One dimension of the question, as the list of values it now holds.
+   *
+   * An empty list is stored rather than removed, because that is what the
+   * layering reads as "nothing said here", and it lets the project's own answer
+   * through. The single-value field an older save carries is blanked beside it,
+   * or a cleared list would bring that value back.
+   */
+  const setContextValues = (field: QueryField, chosen: string[]) => {
+    // the drawn region sits among the named ones as a value of its own, so what
+    // is chosen has to be read for what happened to it
+    const values = field === "region" ? chosen.filter((value) => value !== CUSTOM_REGION) : chosen;
+    if (field === "region" && context.regionBbox && !values.length) {
+      // the drawn entry left alone changes nothing; taking it away drops the
+      // box and gives back whatever names were stored beneath it
+      if (!chosen.includes(CUSTOM_REGION)) {
+        setRegionBox(null);
+      }
+      return;
+    }
     // a named region and a hand-drawn box are two answers to the same question,
     // and the engine refuses a request carrying both — so naming a region drops
     // whatever was drawn rather than leaving an area nothing will send
     const patch: IGeocodingContext =
-      field === "region"
-        ? ({ region: value, regionBbox: null } as IGeocodingContext)
-        : ({ [field]: value } as IGeocodingContext);
+      field === "region" && values.length
+        ? { ...valuesPatch(field, values), regionBbox: null }
+        : valuesPatch(field, values);
     setContext((current) => ({
       ...current,
-      ...patch,
-      [field]: value || (projectContext[field] ?? undefined),
+      // empty falls back to the project's answer, as the layering will on reload
+      ...valuesPatch(field, values.length ? values : contextValues(projectContext, field)),
+      ...(field === "region" && values.length ? { regionBbox: null } : {}),
     }));
     saveContext.mutate(patch);
-  };
-
-  /**
-   * The languages the name being searched for is stated to be in.
-   *
-   * Written as a list on its own field. The single-value field a context saved
-   * earlier still carries is read underneath it and never written, so clearing
-   * the list here falls back to the project's answer in whichever shape the
-   * project stored it.
-   */
-  const setContextLanguages = (values: string[]) => {
-    setContext((current) => ({
-      ...current,
-      languages: values.length ? values : contextLanguages(projectContext),
-      language: undefined,
-    }));
-    saveContext.mutate({ languages: values });
   };
 
   /**
@@ -208,28 +211,15 @@ export const GeocodingPage: React.FC = () => {
   const resetContext = () => {
     setContext((current) => ({
       ...current,
-      ...Object.fromEntries(
-        QUERY_FIELDS.filter((field) => field !== "language").map((field) => [
-          field,
-          projectContext[field],
-        ]),
+      ...Object.assign(
+        {},
+        ...QUERY_FIELDS.map((field) => valuesPatch(field, contextValues(projectContext, field))),
       ),
-      languages: contextLanguages(projectContext),
-      // the single-value field is read only where `languages` says nothing, and
-      // the line above has just given it the project's answer
-      language: undefined,
       regionBbox: projectContext.regionBbox ?? null,
       contextWeights: projectContext.contextWeights,
     }));
     saveContext.mutate({
-      // `language` is deliberately absent: it is the single-value field a
-      // context saved earlier still carries, read underneath `languages` and
-      // written by nothing — a reset that blanked it would be this page writing
-      // the very key it stopped writing
-      ...(Object.fromEntries(
-        QUERY_FIELDS.filter((field) => field !== "language").map((field) => [field, UNSET]),
-      ) as IGeocodingContext),
-      languages: [],
+      ...Object.assign({}, ...QUERY_FIELDS.map((field) => valuesPatch(field, []))),
       regionBbox: null,
       // the stored options are merged rather than replaced, so a weight is
       // dropped by writing nothing over it rather than by leaving it out
@@ -1027,8 +1017,7 @@ export const GeocodingPage: React.FC = () => {
             roles={roles}
             context={context}
             projectContext={projectContext}
-            onContextChange={setContextField}
-            onContextLanguages={setContextLanguages}
+            onContextChange={setContextValues}
             onContextWeight={setContextWeight}
             onContextReset={resetContext}
             userOptions={user?.options}

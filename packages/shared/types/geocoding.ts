@@ -254,6 +254,18 @@ export type GeocodingBbox = [number, number, number, number];
 
 /** The query context a request is made in. Every field is optional to the engine. */
 export interface IGeocodingContext {
+  /**
+   * Named regions, any of which the place may be in. None means no constraint.
+   *
+   * A hand-drawn `regionBbox` takes the place of these while one is set.
+   */
+  regions?: string[];
+  /**
+   * One region, as this field was stored before it took several.
+   *
+   * Read, and turned into `regions`, when `regions` says nothing; written only
+   * as an empty string, to blank a value an older save left behind.
+   */
   region?: string;
   /**
    * An area drawn by hand, for what the named region list does not cover.
@@ -268,6 +280,9 @@ export interface IGeocodingContext {
    * corners. Prefer a named region wherever one fits.
    */
   regionBbox?: GeocodingBbox | null;
+  /** Named periods, any of which may apply. None means no constraint. */
+  periods?: string[];
+  /** One period, as stored before the field took several. Read like `region`. */
   period?: string;
   /**
    * What language the name being searched for is probably in — several are
@@ -286,6 +301,9 @@ export interface IGeocodingContext {
    * the single-value field outlives the change on any deployment that had one.
    */
   language?: string;
+  /** Kinds of place the name may be, any of them. None means no constraint. */
+  placeTypes?: string[];
+  /** One kind of place, as stored before the field took several. Read like `region`. */
   placeType?: string;
   /**
    * Gazetteers the engine is not to ask, by its own source name.

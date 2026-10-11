@@ -4,7 +4,11 @@ import {
   CUSTOM_REGION,
   QUERY_FIELDS,
   contextLanguages,
-  contextOptions,
+  contextMultiOptions,
+  contextValues,
+  sameValues,
+  valuesPatch,
+  withListFields,
   NEUTRAL_STEP,
   WEIGHT_STEPS,
   contextWeight,
@@ -12,10 +16,10 @@ import {
   optionLabel,
   queryContextChanged,
   regionBoxToSend,
-  regionOptions,
+  regionMultiOptions,
   listToSend,
   regionToSend,
-  regionValue,
+  regionValues,
   stepToWeight,
   weightToStep,
   weightsToSend,
@@ -34,30 +38,27 @@ const parameters = {
   placeTypes: [{ id: "settlement", label: "Settlement" }],
 } as unknown as EngineParameters;
 
-describe("contextOptions", () => {
-  it("offers the vocabulary the engine published, under a blank", () => {
-    expect(contextOptions(parameters, "region", undefined)).toEqual([
-      { value: "", label: "—" },
+describe("contextMultiOptions", () => {
+  it("offers the vocabulary the engine published, with no blank entry", () => {
+    expect(contextMultiOptions(parameters, "region", [])).toEqual([
       { value: "europe", label: "Europe" },
     ]);
   });
 
-  it("keeps the value already held when the engine has never heard of it", () => {
-    // a vocabulary that changed under a stored value, and the stored value is
-    // still what the engine will be sent
-    const options = contextOptions(parameters, "region", "occitania");
+  it("keeps a value already held when the engine has never heard of it", () => {
+    const options = contextMultiOptions(parameters, "region", ["occitania"]);
     expect(options.map((option) => option.value)).toContain("occitania");
   });
 
-  it("keeps the value already held when the engine cannot be reached at all", () => {
-    // the whole point: with no vocabularies, a field drawn without its own
-    // value reads as blank, and the next press on it blanks it for real
-    const options = contextOptions(undefined, "language", "de");
-    expect(options.map((option) => option.value)).toEqual(["", "de"]);
+  it("keeps the values already held when the engine cannot be reached at all", () => {
+    // with no vocabularies a field drawn without its own values reads as blank,
+    // and the next press on it blanks it for real
+    const options = contextMultiOptions(undefined, "language", ["de", "la"]);
+    expect(options.map((option) => option.value)).toEqual(["de", "la"]);
   });
 
   it("does not repeat a value that is already in the vocabulary", () => {
-    const options = contextOptions(parameters, "language", "de");
+    const options = contextMultiOptions(parameters, "language", ["de"]);
     expect(options.filter((option) => option.value === "de")).toHaveLength(1);
   });
 });
@@ -171,14 +172,56 @@ describe("what a request carries for the region", () => {
   });
 
   it("names the drawn region in the picker, and only while one is drawn", () => {
-    expect(regionValue({ region: "europe" })).toBe("europe");
-    expect(regionValue({ region: "europe", regionBbox: [1, 2, 3, 4] })).toBe(CUSTOM_REGION);
-    expect(regionOptions(undefined, { region: "europe" }).map((one) => one.value)).not.toContain(
-      CUSTOM_REGION,
-    );
+    expect(regionValues({ region: "europe" })).toEqual(["europe"]);
+    expect(regionValues({ regions: ["europe", "asia"] })).toEqual(["europe", "asia"]);
+    expect(regionValues({ region: "europe", regionBbox: [1, 2, 3, 4] })).toEqual([CUSTOM_REGION]);
     expect(
-      regionOptions(undefined, { regionBbox: [1, 2, 3, 4] }).map((one) => one.value),
+      regionMultiOptions(undefined, { region: "europe" }).map((one) => one.value),
+    ).not.toContain(CUSTOM_REGION);
+    expect(
+      regionMultiOptions(undefined, { regionBbox: [1, 2, 3, 4] }).map((one) => one.value),
     ).toContain(CUSTOM_REGION);
+  });
+
+  it("sends every named region, which the engine reads as any of them", () => {
+    expect(regionToSend({ regions: ["silesia", "bohemia"] })).toEqual(["silesia", "bohemia"]);
+  });
+});
+
+describe("values held as lists", () => {
+  it("reads the list, and falls back to the single value an older save carries", () => {
+    expect(contextValues({ regions: ["a", "b"], region: "x" }, "region")).toEqual(["a", "b"]);
+    expect(contextValues({ period: "1400" }, "period")).toEqual(["1400"]);
+    expect(contextValues({ placeTypes: [] }, "placeType")).toEqual([]);
+  });
+
+  it("turns every layer into lists before layers are merged, so a personal single value beats a project list", () => {
+    const personal = withListFields({ region: "occitania" });
+    expect(personal.regions).toEqual(["occitania"]);
+    expect("region" in personal).toBe(false);
+  });
+
+  it("writes the list and blanks the single value, so clearing does not bring an old value back", () => {
+    expect(valuesPatch("region", [])).toEqual({ regions: [], region: "" });
+    expect(valuesPatch("placeType", ["settlement"])).toEqual({
+      placeTypes: ["settlement"],
+      placeType: "",
+    });
+  });
+
+  it("compares sets without their order, and language with it", () => {
+    expect(sameValues("region", ["a", "b"], ["b", "a"])).toBe(true);
+    expect(sameValues("language", ["de", "la"], ["la", "de"])).toBe(false);
+  });
+
+  it("makes an answer stale when a value is added to a set, not when it is reordered", () => {
+    expect(
+      queryContextChanged({ periods: ["a"] }, { periods: ["a", "b"] }),
+    ).toBe(true);
+    expect(
+      queryContextChanged({ periods: ["a", "b"] }, { periods: ["b", "a"] }),
+    ).toBe(false);
+    expect(queryContextChanged({ period: "a" }, { periods: ["a"] })).toBe(false);
   });
 });
 
@@ -306,10 +349,9 @@ describe("the gazetteers a request refuses", () => {
 });
 
 describe("listToSend", () => {
-  it("wraps one value as the engine's list and leaves an empty field off the request", () => {
-    expect(listToSend("settlement")).toEqual(["settlement"]);
-    expect(listToSend("")).toBeUndefined();
-    expect(listToSend(null)).toBeUndefined();
+  it("keeps the engine's list and leaves an empty field off the request", () => {
+    expect(listToSend(["settlement", "fortress"])).toEqual(["settlement", "fortress"]);
+    expect(listToSend([])).toBeUndefined();
     expect(listToSend(undefined)).toBeUndefined();
   });
 });

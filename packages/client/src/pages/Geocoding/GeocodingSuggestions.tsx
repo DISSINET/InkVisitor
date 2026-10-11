@@ -92,7 +92,7 @@ import {
 } from "./GeocodingSuggestionsStyles";
 import { GeocodingLocation } from "./useGeocodingLocations";
 import { GeocodingContextPanel } from "./GeocodingContextPanel";
-import { QueryField, SingleQueryField, queryContextChanged } from "./geocodingContextFields";
+import { QueryField, queryContextChanged } from "./geocodingContextFields";
 import { UseGeocodingSuggest } from "./useGeocodingSuggest";
 
 /**
@@ -533,9 +533,8 @@ interface GeocodingSuggestions {
   context: IGeocodingContext;
   /** What each context field holds with no personal value on it. */
   projectContext: IGeocodingContext;
-  onContextChange: (field: SingleQueryField, value: string) => void;
-  /** The languages the name is stated to be in. Several are normal to the engine. */
-  onContextLanguages: (values: string[]) => void;
+  /** One dimension of the question, as the list of values it now holds. */
+  onContextChange: (field: QueryField, values: string[]) => void;
   /** How much one of the four dimensions counts when sources are weighed. */
   onContextWeight: (field: QueryField, weight: number) => void;
   onContextReset: () => void;
@@ -612,7 +611,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   context,
   projectContext,
   onContextChange,
-  onContextLanguages,
   onContextWeight,
   onContextReset,
   suggest,
@@ -1010,7 +1008,6 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
         context={context}
         projectContext={projectContext}
         onChange={onContextChange}
-        onLanguagesChange={onContextLanguages}
         onWeightChange={onContextWeight}
         onReset={onContextReset}
         onRegeocode={
