@@ -1,7 +1,6 @@
 import { pointGeometry, serializeGeometry } from "@inkvisitor/shared/types/geometry";
 import { Connection, r } from "rethinkdb-ts";
 import { v4 as uuidv4 } from "uuid";
-import { IJob } from ".";
 
 const SETTINGS_KEY = "geocoding";
 const GEOMETRY_LABEL = "geo:geometry";
@@ -29,7 +28,7 @@ const readCoordinate = (label: unknown, limit: number): number | null => {
  * them. The
  * `geo:x` and `geo:y` Concepts themselves are left in place.
  */
-const migrateGeocodingGeometryJob: IJob = async (db: Connection): Promise<void> => {
+const migrateGeocodingGeometryJob = async (db: Connection): Promise<void> => {
   const settings: any = await r.table("settings").get(SETTINGS_KEY).run(db);
   const roles = settings?.value?.roles;
   if (!roles) {
