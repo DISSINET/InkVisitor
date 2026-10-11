@@ -883,7 +883,7 @@ export const GeocodingPage: React.FC = () => {
           its four. Box owns its own borders through the theme, which is also
           what stops the hairlines between panels reading as heavy ruled lines
           in dark mode. */}
-      <Panel width={panels.listWidth} widthVarIndex={0}>
+      <Panel width={panels.listWidth}>
         <Box label="Locations" height={contentHeight}>
           <GeocodingList
             browse={browse}
@@ -932,7 +932,7 @@ export const GeocodingPage: React.FC = () => {
         setSeparatorXPosition={panels.setListSeparator}
       />
 
-      <Panel width={panels.mapWidth} widthVarIndex={1}>
+      <Panel width={panels.mapWidth}>
         <Box
           label="Map"
           height={contentHeight}
@@ -1016,7 +1016,7 @@ export const GeocodingPage: React.FC = () => {
         setSeparatorXPosition={panels.setSuggestionsSeparator}
       />
 
-      <Panel width={panels.suggestionsWidth} widthVarIndex={2}>
+      <Panel width={panels.suggestionsWidth}>
         <Box label="Suggestions" height={contentHeight}>
           <GeocodingSuggestions
             selected={selected}
