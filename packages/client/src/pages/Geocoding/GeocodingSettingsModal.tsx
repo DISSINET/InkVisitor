@@ -34,6 +34,7 @@ import {
   StyledFullRow,
   StyledSectionHeading,
   StyledSectionNote,
+  StyledScrollRow,
   StyledSettingsGrid,
   StyledUnsavedNote,
 } from "./GeocodingSettingsModalStyles";
@@ -241,23 +242,36 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     {
       title: "record URL",
       width: "minmax(14rem, 1fr)",
-      render: (source) =>
-        GAZETTEERS.includes(source) ? (
+      render: (source) => {
+        if (!GAZETTEERS.includes(source)) {
+          return null;
+        }
+        // the URL lives on the Resource entity, so a source with none has nothing
+        // to hold it; what is shown is what Save writes: an edit made here, or
+        // else what the entity already stores
+        const resourceId = draft.resources[source];
+        const stored = resourceId
+          ? ((byId[resourceId]?.data as { partValueBaseURL?: string } | undefined)
+              ?.partValueBaseURL ?? "")
+          : "";
+        return (
           <StyledBaseUrl>
             <Input
-              value={baseUrls[source] ?? GAZETTEER_BASE_URLS[source] ?? ""}
+              value={resourceId ? (baseUrls[source] ?? stored) : ""}
               onChangeFn={(value) => setBaseUrls((current) => ({ ...current, [source]: value }))}
-              placeholder="no record url"
+              placeholder={resourceId ? "no record url" : "assign a resource first"}
+              disabled={!resourceId}
               changeOnType
               width="full"
             />
           </StyledBaseUrl>
-        ) : null,
+        );
+      },
     },
   ];
 
   return (
-    <Modal showModal onClose={onClose} width="fat" fullHeight>
+    <Modal showModal onClose={onClose} width={1300} fullHeight>
       <ModalHeader title="Global geocoding settings" onClose={onClose} />
       {/* the sections are a fixed length — twelve place types and fifteen
           gazetteers — so the body outgrows any viewport and scrolls inside
@@ -315,13 +329,13 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
             identifier rebuilds a link back into it; a source whose record URL does not end in the
             identifier is left blank.
           </StyledSectionNote>
-          <StyledFullRow>
+          <StyledScrollRow>
             <GazetteerPicker
               disabled={disabledSources}
               onChange={setDisabledSources}
               columns={gazetteerColumns}
             />
-          </StyledFullRow>
+          </StyledScrollRow>
           {sourcesChanged ? (
             <StyledFullRow>
               <StyledUnsavedNote>

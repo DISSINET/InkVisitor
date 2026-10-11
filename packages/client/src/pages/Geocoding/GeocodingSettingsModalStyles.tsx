@@ -101,3 +101,16 @@ export const StyledUnsavedNote = styled.div`
   color: ${({ theme }) => theme.color["warningText"]};
   line-height: 1.5;
 `;
+
+/**
+ * A wide control laid across both columns, scrolling sideways where the modal is
+ * narrower than it.
+ *
+ * `min-width: 0` is what lets a grid item shrink below its content, without
+ * which the scroll never starts and the table pushes the modal's body wider.
+ */
+export const StyledScrollRow = styled.div`
+  grid-column: 1 / -1;
+  min-width: 0;
+  overflow-x: auto;
+`;
