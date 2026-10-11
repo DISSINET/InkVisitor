@@ -1,6 +1,6 @@
 import { DEFAULT_CONTEXT_WEIGHTS, IGeocodingContext } from "@inkvisitor/shared/types/geocoding";
 import { useQuery } from "@tanstack/react-query";
-import { Button, IconWithTooltip, Tooltip } from "components";
+import { Button, IconWithTooltip, Input, Tooltip } from "components";
 import Dropdown from "components/advanced";
 import { IcoChevronDown, IcoGeocode, IcoWarning } from "Theme/icons";
 import React, { useState } from "react";
@@ -10,6 +10,7 @@ import {
   QueryField,
   contextMultiOptions,
   contextValues,
+  parsePeriodRange,
   regionMultiOptions,
   regionValues,
   sameValues,
@@ -25,6 +26,8 @@ import {
 import {
   StyledContextCaret,
   StyledContextColumnTitle,
+  StyledContextFieldNote,
+  StyledContextFieldStack,
   StyledDepartureMark,
   StyledContextGlobal,
   StyledContextGrid,
@@ -156,6 +159,8 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
 }) => {
   const [open, setOpen] = useState(() => localStorage.getItem(OPEN_KEY) !== "no");
   const [used, setUsed] = useState(() => localStorage.getItem(USED_KEY) === "yes");
+  const [rangeDraft, setRangeDraft] = useState("");
+  const [rangeError, setRangeError] = useState(false);
 
   /** Every edit goes through here, because the first one retires the note. */
   const noteRetired = () => {
@@ -338,19 +343,59 @@ export const GeocodingContextPanel: React.FC<GeocodingContextPanel> = ({
   };
 
   /** The control this field is answered with. Only language holds a list. */
-  const fieldControl = (field: QueryField) => (
-    <Dropdown.Multi.Basic
-      width="full"
-      options={
-        field === "region"
-          ? regionMultiOptions(parameters, context)
-          : contextMultiOptions(parameters, field, contextValues(context, field))
+  const fieldControl = (field: QueryField) => {
+    const picker = (
+      <Dropdown.Multi.Basic
+        width="full"
+        options={
+          field === "region"
+            ? regionMultiOptions(parameters, context)
+            : contextMultiOptions(parameters, field, contextValues(context, field))
+        }
+        value={valuesOf(field)}
+        placeholder="—"
+        onChange={(values) => change(field, values)}
+      />
+    );
+    if (field !== "period") {
+      return picker;
+    }
+    // the engine's named periods do not cover every span a name was in use, so
+    // a year or a range can be added beside them
+    const addRange = () => {
+      const parsed = parsePeriodRange(rangeDraft);
+      if (!parsed) {
+        setRangeError(true);
+        return;
       }
-      value={valuesOf(field)}
-      placeholder="—"
-      onChange={(values) => change(field, values)}
-    />
-  );
+      setRangeError(false);
+      setRangeDraft("");
+      const held = valuesOf(field);
+      change(field, held.includes(parsed) ? held : [...held, parsed]);
+    };
+    return (
+      <StyledContextFieldStack>
+        {picker}
+        <Input
+          width="full"
+          value={rangeDraft}
+          onChangeFn={(value) => {
+            setRangeDraft(value);
+            setRangeError(false);
+          }}
+          onEnterPressFn={addRange}
+          changeOnType
+          placeholder="or type a year or range, such as 1200-1400, then press enter"
+        />
+        {rangeError ? (
+          <StyledContextFieldNote>
+            Not a year or a range of years. Years are whole numbers, negative before the common
+            era: 1400, -200, 1200-1400.
+          </StyledContextFieldNote>
+        ) : null}
+      </StyledContextFieldStack>
+    );
+  };
 
   return (
     <StyledContextPanel>

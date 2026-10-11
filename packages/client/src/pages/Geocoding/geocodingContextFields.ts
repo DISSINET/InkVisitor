@@ -191,6 +191,21 @@ export const contextValues = (context: IGeocodingContext, field: QueryField): st
 };
 
 /**
+ * A year or a range of years as the engine reads one: `1400`, `-200`, `1200-1400`.
+ *
+ * Null where the text is neither. A reversed range is passed on as typed: the
+ * engine reads it the right way round and says so, which is better told to the
+ * researcher by it than corrected silently here.
+ */
+export const parsePeriodRange = (text: string): string | null => {
+  const match = /^(-?\d{1,4})(?:\s*[-–—]\s*(-?\d{1,4}))?$/.exec(text.trim());
+  if (!match) {
+    return null;
+  }
+  return match[2] === undefined ? match[1] : `${match[1]}-${match[2]}`;
+};
+
+/**
  * Whether two lists of values say the same thing.
  *
  * Region, period and kind of place are sets, so the order they were chosen in

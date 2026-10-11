@@ -18,6 +18,7 @@ import {
   regionBoxToSend,
   regionMultiOptions,
   listToSend,
+  parsePeriodRange,
   regionToSend,
   regionValues,
   stepToWeight,
@@ -353,5 +354,25 @@ describe("listToSend", () => {
     expect(listToSend(["settlement", "fortress"])).toEqual(["settlement", "fortress"]);
     expect(listToSend([])).toBeUndefined();
     expect(listToSend(undefined)).toBeUndefined();
+  });
+});
+
+describe("parsePeriodRange", () => {
+  it("reads a year, a negative year and a range the way the engine does", () => {
+    expect(parsePeriodRange("1400")).toBe("1400");
+    expect(parsePeriodRange("-200")).toBe("-200");
+    expect(parsePeriodRange("1200-1400")).toBe("1200-1400");
+    expect(parsePeriodRange(" 1200 – 1400 ")).toBe("1200-1400");
+    expect(parsePeriodRange("-200--100")).toBe("-200--100");
+  });
+
+  it("passes a reversed range on as typed, for the engine to turn round and report", () => {
+    expect(parsePeriodRange("1400-1200")).toBe("1400-1200");
+  });
+
+  it("refuses text that is not a year or a range, as the engine does for 1400s", () => {
+    for (const text of ["", "1400s", "c. 1400", "medieval", "1200-", "12345"]) {
+      expect(parsePeriodRange(text), text).toBeNull();
+    }
   });
 });

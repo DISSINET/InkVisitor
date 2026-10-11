@@ -141,6 +141,20 @@ export const StyledContextColumnTitle = styled.div`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
+/** A field's picker with anything that adds to it beneath, in the one grid cell. */
+export const StyledContextFieldStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
+  min-width: 0;
+`;
+
+/** Said under the year-range field when what was typed is not a year or a range. */
+export const StyledContextFieldNote = styled.div`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["danger"]};
+`;
+
 /** The mark that says a value is not the project's. */
 export const StyledDepartureMark = styled.span`
   display: inline-flex;
