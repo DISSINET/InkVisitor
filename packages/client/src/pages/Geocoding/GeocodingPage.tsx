@@ -14,41 +14,41 @@ import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { ENGINE_URL, engineHealth } from "./engine";
-import { fixtureModeAvailable, isFixtureMode, setFixtureMode } from "./fixtureMode";
+import { ENGINE_URL, engineHealth } from "./utils/engine/engine";
+import { fixtureModeAvailable, isFixtureMode, setFixtureMode } from "./utils/engine/fixtureMode";
 import {
   QUERY_FIELDS,
   CUSTOM_REGION,
   QueryField,
   contextValues,
   valuesPatch,
-} from "./geocodingContextFields";
-import { GeocodingList } from "./GeocodingList";
-import { MapFocus, nextFocus } from "./mapFocus";
-import { bandOf } from "./suggestionRank";
-import { isTaken, quickPick } from "./quickGeocode";
-import { BatchRun, BatchStep, batchStarting, choicesFrom, withStep } from "./geocodingBatch";
-import { Suggestion } from "./engineTypes";
-import { scatterOf } from "./suggestionScatter";
-import { GeocodingBatchModal } from "./GeocodingBatchModal";
-import { provenanceOf } from "./suggestionProvenance";
-import { GeocodingActivityModal } from "./GeocodingActivityModal";
-import { GeocodingContextModal } from "./GeocodingContextModal";
-import { GeocodingOverwriteModal } from "./GeocodingOverwriteModal";
-import { GeocodingMap } from "./GeocodingMap";
-import { QuickGeocodeToast } from "./QuickGeocodeToast";
-import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./GeocodingSuggestions";
+} from "./utils/context/geocodingContextFields";
+import { GeocodingList } from "./containers/list/GeocodingList";
+import { MapFocus, nextFocus } from "./utils/map/mapFocus";
+import { bandOf } from "./utils/suggestions/suggestionRank";
+import { isTaken, quickPick } from "./utils/suggestions/quickGeocode";
+import { BatchRun, BatchStep, batchStarting, choicesFrom, withStep } from "./utils/write/geocodingBatch";
+import { Suggestion } from "./types/engine";
+import { scatterOf } from "./utils/suggestions/suggestionScatter";
+import { GeocodingBatchModal } from "./containers/modals/GeocodingBatchModal";
+import { provenanceOf } from "./utils/suggestions/suggestionProvenance";
+import { GeocodingActivityModal } from "./containers/modals/GeocodingActivityModal";
+import { GeocodingContextModal } from "./containers/modals/GeocodingContextModal";
+import { GeocodingOverwriteModal } from "./containers/modals/GeocodingOverwriteModal";
+import { GeocodingMap } from "./containers/map/GeocodingMap";
+import { QuickGeocodeToast } from "./components/recent/QuickGeocodeToast";
+import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./containers/suggestions/GeocodingSuggestions";
 import { StyledEngineDot, StyledEngineLabel, StyledEngineStatus } from "./GeocodingPageStyles";
-import { EngineState } from "./types";
-import { useGeocodingBrowse } from "./useGeocodingBrowse";
-import { useGeocodingConfig } from "./useGeocodingConfig";
-import { useGeocodingPanels } from "./useGeocodingPanels";
-import { GeocodingLocation } from "./useGeocodingLocations";
-import { PlaceTypesProvider } from "./placeTypesContext";
-import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./usePlaceTypeAssignments";
-import { useGeocodingSuggest } from "./useGeocodingSuggest";
-import { useGeocodingWriter } from "./useGeocodingWriter";
-import { useRecentGeocodes } from "./useRecentGeocodes";
+import { EngineState } from "./types/page";
+import { useGeocodingBrowse } from "./hooks/useGeocodingBrowse";
+import { useGeocodingConfig } from "./hooks/useGeocodingConfig";
+import { useGeocodingPanels } from "./hooks/useGeocodingPanels";
+import { GeocodingLocation } from "./hooks/useGeocodingLocations";
+import { PlaceTypesProvider } from "./hooks/placeTypesContext";
+import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./hooks/usePlaceTypeAssignments";
+import { useGeocodingSuggest } from "./hooks/useGeocodingSuggest";
+import { useGeocodingWriter } from "./hooks/useGeocodingWriter";
+import { useRecentGeocodes } from "./hooks/useRecentGeocodes";
 
 /**
  * How long after the last movement of a weight slider it is written.

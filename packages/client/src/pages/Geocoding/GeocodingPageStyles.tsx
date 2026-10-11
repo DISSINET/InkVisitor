@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { EngineState } from "./types";
+import { EngineState } from "./types/page";
 
 export const StyledEngineStatus = styled.div`
   display: inline-flex;
