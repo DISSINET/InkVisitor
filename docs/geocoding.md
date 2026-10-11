@@ -754,11 +754,13 @@ slowing it down. It fades over its last three-quarters of a second and is gone
 six seconds after it was asked for, so a ring is never left standing over a
 Location that is no longer the one being read.
 
-The basemap is a vector style, so what it draws is switchable too. Five groups
+The basemap is a vector style, so what it draws is switchable too. Four groups
 are: transport (roads, railways, paths, airports and their names), land cover and
-use (woodland, grass, parks, sand, ice, cemeteries, schools), built-up areas (the
-shaded ground of towns and villages), buildings, and points of interest. Transport,
-buildings and points of interest start off. The built-up areas are one class of the
+use (woodland, grass, parks, sand, ice, cemeteries, schools), built-up areas and
+buildings (the shaded ground of towns and villages, and building footprints), and
+points of interest. Only land cover and use starts on: this is a map for places as
+they stood across centuries, so what is modern is left out until asked for, and
+borders, names, water and relief are always drawn. The built-up areas are one class of the
 style's `landuse` source layer, which also holds cemeteries and schools, so a
 `landuse` layer is built-up ground when its filter names a built-up class
 (`residential`, `commercial` and the like) and is land use otherwise. Four
@@ -769,7 +771,7 @@ break the page quietly. Extruded buildings are never drawn: they are a 3D
 reading of a map being used flat, and they cover the marks this page puts on it.
 The style draws flat building footprints only up to zoom 14 and extrusions beyond
 it, so the page adds a flat fill, copied from the style's own, that carries on
-from zoom 14; it belongs to the buildings switch like the footprints it continues.
+from zoom 14; it belongs to the built-up switch like the footprints it continues.
 
 The groups are read from the style the server sends, by the source layer each of
 its layers draws from, rather than from the style's own layer names — `place`

@@ -17,7 +17,7 @@ describe("readMapPrefs", () => {
     const stored = JSON.stringify({
       ...DEFAULT_MAP_PREFS,
       others: true,
-      basemap: { transportation: true, land: false, builtUp: false, buildings: true, poi: true },
+      basemap: { transportation: true, land: false, builtUp: false, poi: true },
     });
     const prefs = readMapPrefs(stored);
     expect(prefs.others).toBe(true);
@@ -75,11 +75,10 @@ describe("readMapPrefs", () => {
     expect(prefs.basemap.transportation).toBe(DEFAULT_MAP_PREFS.basemap.transportation);
   });
 
-  it("starts with a quiet basemap: no transport, buildings or points of interest; land and built-up ground kept", () => {
+  it("starts with a quiet basemap: only land use is on: no transport, built-up areas or points of interest", () => {
     expect(DEFAULT_MAP_PREFS.basemap.transportation).toBe(false);
     expect(DEFAULT_MAP_PREFS.basemap.land).toBe(true);
-    expect(DEFAULT_MAP_PREFS.basemap.builtUp).toBe(true);
-    expect(DEFAULT_MAP_PREFS.basemap.buildings).toBe(false);
+    expect(DEFAULT_MAP_PREFS.basemap.builtUp).toBe(false);
     expect(DEFAULT_MAP_PREFS.basemap.poi).toBe(false);
   });
 });

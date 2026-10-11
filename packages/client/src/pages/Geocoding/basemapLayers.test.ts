@@ -46,8 +46,8 @@ describe("groupedLayersOf", () => {
     );
   });
 
-  it("puts building footprints under buildings and nothing else there", () => {
-    expect(idsIn("buildings")).toEqual(["building"]);
+  it("puts building footprints and built-up ground under one group", () => {
+    expect(idsIn("builtUp").sort()).toEqual(["building", "landuse_residential"]);
   });
 
   it("puts points of interest under their own group", () => {
@@ -57,7 +57,6 @@ describe("groupedLayersOf", () => {
   });
 
   it("splits the one landuse source layer by class: housing is built-up ground, a cemetery is land use", () => {
-    expect(idsIn("builtUp")).toEqual(["landuse_residential"]);
     expect(idsIn("land")).not.toContain("landuse_residential");
     expect(idsIn("land")).toEqual(expect.arrayContaining(["landuse_cemetery", "landuse_school"]));
   });
@@ -130,14 +129,14 @@ describe("neverDrawnLayerIds", () => {
     expect(neverDrawnLayerIds(layers)).toEqual(["building-3d"]);
   });
 
-  it("leaves the flat building fill alone, which the buildings switch owns", () => {
+  it("leaves the flat building fill alone, which the built-up switch owns", () => {
     expect(neverDrawnLayerIds(layers)).not.toContain("building");
-    expect(idsIn("buildings")).toContain("building");
+    expect(idsIn("builtUp")).toContain("building");
   });
 
   /**
    * The regression this guards: `building-3d` shares the `building` source
-   * layer with the flat footprint the buildings switch owns, so a grouping that
+   * layer with the flat footprint the built-up switch owns, so a grouping that
    * read only the source layer would put the extrusion under that switch too.
    * Turning the switch on would then set the very layer `neverDrawnLayerIds`
    * hides back to visible.
@@ -179,7 +178,7 @@ describe("flatBuildingLayerFor", () => {
     expect(added?.beforeId).toBe("building-3d");
   });
 
-  it("is grouped with the flat fill it continues, so the buildings switch owns it", () => {
+  it("is grouped with the flat fill it continues, so the built-up switch owns it", () => {
     const added = flatBuildingLayerFor(style);
     const withIt = [...style, { ...added!.layer, id: FLAT_BUILDING_LAYER_ID }] as {
       id: string;
@@ -187,7 +186,7 @@ describe("flatBuildingLayerFor", () => {
       "source-layer"?: string;
     }[];
     expect(groupedLayersOf(withIt).find((l) => l.id === FLAT_BUILDING_LAYER_ID)?.group).toBe(
-      "buildings",
+      "builtUp",
     );
   });
 
