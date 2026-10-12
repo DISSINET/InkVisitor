@@ -121,9 +121,11 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               >
                 <StyledWarningKind>
                   {kindLabel(anchor.type)}
-                  <StyledWarningParagraph>
-                    · paragraph {anchor.segmentIndex + 1}
-                  </StyledWarningParagraph>
+                  {anchor.paragraphNumber !== undefined && (
+                    <StyledWarningParagraph>
+                      · paragraph {anchor.paragraphNumber}
+                    </StyledWarningParagraph>
+                  )}
                 </StyledWarningKind>
                 <StyledWarningBody>
                   <StyledWarningInfo>

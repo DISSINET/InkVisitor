@@ -2036,6 +2036,7 @@ class Text {
     segmentIndex: number;
     position: number;
     attributes?: Record<string, string>;
+    paragraphNumber?: number;
   }> {
     const issues: Array<{
       tagName: string;
@@ -2043,6 +2044,7 @@ class Text {
       segmentIndex: number;
       position: number;
       attributes?: Record<string, string>;
+      paragraphNumber?: number;
     }> = [];
 
     // Each name's tags in document order: segments are already ordered, and
@@ -2072,6 +2074,7 @@ class Text {
         segmentIndex: tag.segmentIndex,
         position: tag.position,
         attributes: tag.attributes,
+        paragraphNumber: this.segments[tag.segmentIndex]?.paragraphNumber,
       });
     };
 
