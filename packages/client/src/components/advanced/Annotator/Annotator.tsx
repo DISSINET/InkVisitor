@@ -1527,10 +1527,39 @@ export const TextAnnotator = ({
     goToParagraphInputRef.current?.select();
   }, [goToParagraphFocusRequest]);
 
-  useKeypress("g", () => isSearchAllowed && openGoToParagraph(), [isSearchAllowed], true);
+  // Ctrl/Cmd+G opens the field only with a document loaded and while focus is not
+  // in another text field, so the browser keeps its own "find next" otherwise.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "g" || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      if (!isSearchAllowed) return;
+      const target = e.target as HTMLElement | null;
+      const inOtherField =
+        target !== goToParagraphInputRef.current &&
+        (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable);
+      if (inOtherField) return;
+      e.preventDefault();
+      openGoToParagraph();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSearchAllowed]);
 
-  const goToParagraph = (paragraphNumber: number) => {
+  // A field left open across a document switch would come back unfocused, with
+  // nothing to close it.
+  useEffect(() => {
+    setIsGoToParagraphOpen(false);
+  }, [documentId, isSearchAllowed]);
+
+  const goToParagraph = (input: string) => {
     if (!annotator) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    if (!/^\d+$/.test(trimmed)) {
+      toast.warning(`"${trimmed}" is not a paragraph number.`);
+      return;
+    }
+    const paragraphNumber = Number(trimmed);
     if (annotator.scrollToParagraph(paragraphNumber)) {
       setIsGoToParagraphOpen(false);
     } else {

@@ -14,6 +14,7 @@ import {
   StyledAnnotatorToolbarCluster,
   StyledAnnotatorToolbarGroup,
   StyledDisplayModeButtonIconWrapper,
+  StyledGoToParagraphField,
   TOOLBAR_ICON_SIZE,
 } from "./AnnotatorToolbarStyles";
 
@@ -35,7 +36,8 @@ interface AnnotatorToolbar {
   isGoToParagraphOpen: boolean;
   onGoToParagraphClick: () => void;
   onGoToParagraphClose: () => void;
-  onGoToParagraph: (paragraphNumber: number) => void;
+  /** Receives the typed text as is; the host parses it and reports bad input. */
+  onGoToParagraph: (input: string) => void;
   goToParagraphInputRef: React.RefObject<HTMLInputElement | null>;
 
   /** Warnings chip, when this host has not supplied its own. */
@@ -120,23 +122,21 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       <StyledAnnotatorToolbarCluster>
         {isSearchAllowed &&
           (isGoToParagraphOpen ? (
-            // A text field, because the number field's stepper buttons take focus and close it
-            <Input
-              width={80}
-              value={paragraphInput}
-              changeOnType
-              inputRef={goToParagraphInputRef}
-              placeholder="paragraph"
-              onChangeFn={setParagraphInput}
-              onEnterPressFn={() => {
-                const paragraphNumber = Number(paragraphInput.trim());
-                if (Number.isInteger(paragraphNumber) && paragraphNumber > 0) {
-                  onGoToParagraph(paragraphNumber);
-                }
-              }}
-              onEscapePressFn={onGoToParagraphClose}
-              onBlur={onGoToParagraphClose}
-            />
+            // Escape only closes the field; past it, a modal or the annotator would act on it too
+            <StyledGoToParagraphField onKeyDown={(e) => e.key === "Escape" && e.stopPropagation()}>
+              {/* A text field, because the number field's stepper buttons take focus and close it */}
+              <Input
+                width={80}
+                value={paragraphInput}
+                changeOnType
+                inputRef={goToParagraphInputRef}
+                placeholder="paragraph"
+                onChangeFn={setParagraphInput}
+                onEnterPressFn={() => onGoToParagraph(paragraphInput)}
+                onEscapePressFn={onGoToParagraphClose}
+                onBlur={onGoToParagraphClose}
+              />
+            </StyledGoToParagraphField>
           ) : (
             <Button
               size={ButtonSize.Small}
