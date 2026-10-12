@@ -225,6 +225,8 @@ export class Segment {
     measurer?: TextMeasurer;
   };
   segmentIndex: number = -1; // index of this segment in the text
+  /** 1-based number among the non-empty paragraphs; undefined for an empty one. */
+  paragraphNumber?: number;
 
   /**
    * Creates a new Segment from raw text.
@@ -500,14 +502,14 @@ class Text {
   }
 
   /**
-   * 1-based number of the paragraph whose first visual line is `absLine`, or
-   * undefined on a soft-wrapped continuation line and outside `[0, noLines)`.
-   * Paragraphs are the newline-separated segments, empty ones included, so the
-   * number does not depend on the wrap width.
+   * Number of the paragraph whose first visual line is `absLine` (see
+   * {@link Segment.paragraphNumber}), or undefined on an empty paragraph, a
+   * soft-wrapped continuation line and outside `[0, noLines)`. Paragraphs are
+   * the newline-separated segments, so the number does not depend on the wrap width.
    */
   paragraphNumberStartingAt(absLine: number): number | undefined {
-    const i = this.segmentIndexForLine(absLine);
-    return i !== -1 && absLine === this.segments[i].lineStart ? i + 1 : undefined;
+    const segment = this.segmentForLine(absLine);
+    return segment && absLine === segment.lineStart ? segment.paragraphNumber : undefined;
   }
 
   /**
@@ -734,12 +736,17 @@ class Text {
       return n;
     };
 
+    let paragraphCount = 0;
     for (
       let segmentIndex = 0;
       segmentIndex < this.segments.length;
       segmentIndex++
     ) {
       const segment = this.segments[segmentIndex];
+
+      // Paragraphs are counted on the tag-free text, the way plain-text tools count
+      // them: an empty or tag-only line takes no number and does not advance the count.
+      segment.paragraphNumber = segment.parsed ? ++paragraphCount : undefined;
 
       /* if (
         this.dirtySegment !== undefined &&
