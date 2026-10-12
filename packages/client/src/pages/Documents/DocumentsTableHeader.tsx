@@ -1,11 +1,11 @@
 import { Button, Checkbox } from "components";
 import React from "react";
-import { FaDownload } from "react-icons/fa";
 import { DocumentSortField, DocumentSortState } from "./types";
 import {
   StyledActionsHeaderCell,
   StyledBulkExportCount,
   StyledBulkExportWrap,
+  StyledExportIcon,
   StyledGridHeader,
   StyledSelectHeaderCell,
   StyledSortableHeaderCell,
@@ -80,7 +80,7 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
     <StyledActionsHeaderCell>
       <StyledBulkExportWrap>
         <Button
-          icon={<FaDownload />}
+          icon={<StyledExportIcon />}
           color="info"
           disabled={selectedCount === 0}
           tooltipLabel={
