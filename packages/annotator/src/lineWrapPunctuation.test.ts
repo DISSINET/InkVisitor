@@ -132,6 +132,7 @@ describe("annotator: typing punctuation at a full line keeps the cursor on scree
     mockCanvas.style.height = "600px";
     document.body.appendChild(mockCanvas);
     annotator = new Annotator(mockCanvas, "");
+    annotator.setParagraphIndent(false); // wrap geometry without the first-line indent
     annotator.setMode(EditMode.RAW);
   });
 

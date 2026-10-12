@@ -218,7 +218,6 @@ export class Segment {
   wrappedFor?: {
     text: string;
     parsed: string;
-    isFirst: boolean;
     mode: EditMode;
     budget: number;
     paragraphIndent: number;
@@ -410,9 +409,7 @@ class Text {
   }
 
   /**
-   * Indent applied to a paragraph's first line. Three paragraphs get none:
-   * - the document's first, which has nothing above it to be confused with (the
-   *   same reason typesetting leaves an opening paragraph flush);
+   * Indent applied to a paragraph's first line. Two kinds of paragraph get none:
    * - one whose text already begins with hand-typed indentation — a tab, or a
    *   run of two or more whitespace chars — since some documents were written
    *   with the indent typed in and would otherwise double it. A single leading
@@ -429,12 +426,7 @@ class Text {
     const text = segment.parsed;
     const leadingWs = /^\s+/.exec(text)?.[0];
     const handIndented = leadingWs !== undefined && leadingWs !== " ";
-    if (
-      !this.paragraphIndent ||
-      segment.segmentIndex === 0 ||
-      !text.trim() ||
-      handIndented
-    ) {
+    if (!this.paragraphIndent || !text.trim() || handIndented) {
       return 0;
     }
     return Math.min(
@@ -792,7 +784,6 @@ class Text {
         cached &&
         cached.text === text &&
         cached.parsed === segment.parsed &&
-        cached.isFirst === (segment.segmentIndex === 0) &&
         cached.mode === this.mode &&
         cached.budget === maxWidth &&
         cached.paragraphIndent === this.paragraphIndent &&
@@ -944,7 +935,6 @@ class Text {
       segment.wrappedFor = {
         text,
         parsed: segment.parsed,
-        isFirst: segment.segmentIndex === 0,
         mode: this.mode,
         budget: maxWidth,
         paragraphIndent: this.paragraphIndent,
