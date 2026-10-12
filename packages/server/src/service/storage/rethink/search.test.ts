@@ -2,18 +2,20 @@ import { StatementTerritory } from "@models/statement/statement";
 import { prepareStatement } from "@models/statement/statement.test";
 import Territory, { TerritoryParent } from "@models/territory/territory";
 import entities from "@modules/entities";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { deleteEntities } from "@service/shorthands";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, RequestSearch } from "@inkvisitor/shared/types";
-import Entity from "./entity";
-import { prepareEntity } from "./entity.test";
+import Entity from "@models/entity/entity";
+import { prepareEntity } from "@models/entity/entity.test";
 import {
-  SearchQuery,
+  searchEntities,
   sortByLength,
   sortByRequiredOrder,
   sortByWordMatch,
-} from "./response-search";
+} from "@models/entity/response-search";
+import { SearchQuery } from "./search";
+import { unwrap } from "./conn";
 
 describe("models/response-search", function () {
   describe("search by territory", function () {
@@ -37,8 +39,7 @@ describe("models/response-search", function () {
       req.entityIds = undefined;
 
       it("entity ids should empty", async () => {
-        const query = new SearchQuery(db.connection);
-        await query.fromRequest(req);
+        await searchEntities(db.connection, req);
         expect(req.entityIds).toEqual([]);
       });
     });
@@ -59,8 +60,7 @@ describe("models/response-search", function () {
         await st1a.save(db.connection);
         await st2a.save(db.connection);
 
-        const query = new SearchQuery(db.connection);
-        await query.fromRequest(req);
+        await searchEntities(db.connection, req);
         expect(req.entityIds).toEqual(st1a.getEntitiesIds());
       });
     });
@@ -97,8 +97,7 @@ describe("models/response-search", function () {
         await st1a.save(db.connection);
         await st2a.save(db.connection);
 
-        const query = new SearchQuery(db.connection);
-        await query.fromRequest(req);
+        await searchEntities(db.connection, req);
         // Result order across sub-territories is not guaranteed by the query;
         // compare as an unordered id set.
         expect([...(req.entityIds ?? [])].sort()).toEqual(
@@ -142,9 +141,9 @@ describe("models/response-search", function () {
           .split(" ")
           .map((w) => w.trim());
         for (const word of words) {
-          const entities = await new SearchQuery(db.connection)
+          const entities = await new SearchQuery()
             .whereLabel(`*${word}*`)
-            .do();
+            .run(unwrap(db.connection));
           try {
             expect(entities).toHaveLength(1);
           } catch (e) {
@@ -168,9 +167,9 @@ describe("models/response-search", function () {
           "Teměř Jr",
         ];
         for (const part of parts) {
-          const entities = await new SearchQuery(db.connection)
+          const entities = await new SearchQuery()
             .whereLabel(part)
-            .do();
+            .run(unwrap(db.connection));
           try {
             expect(entities).toHaveLength(1);
           } catch (e) {
@@ -216,21 +215,21 @@ describe("models/response-search", function () {
 
     it("should NOT match an entity whose id merely contains the search term", async () => {
       const ids = (
-        await new SearchQuery(db.connection).whereLabelOrId("dea*").do()
+        await new SearchQuery().whereLabelOrId("dea*").run(unwrap(db.connection))
       ).map((e) => e.id);
       expect(ids).not.toContain(idSubstringEntity.id);
     });
 
     it("should match an entity whose id starts with the search term", async () => {
       const ids = (
-        await new SearchQuery(db.connection).whereLabelOrId("dea*").do()
+        await new SearchQuery().whereLabelOrId("dea*").run(unwrap(db.connection))
       ).map((e) => e.id);
       expect(ids).toContain(idPrefixEntity.id);
     });
 
     it("should still match an entity by label prefix", async () => {
       const ids = (
-        await new SearchQuery(db.connection).whereLabelOrId("dea*").do()
+        await new SearchQuery().whereLabelOrId("dea*").run(unwrap(db.connection))
       ).map((e) => e.id);
       expect(ids).toContain(labelPrefixEntity.id);
     });
@@ -349,9 +348,9 @@ describe("models/response-search", function () {
 
     describe("search for non existing language", () => {
       it("should return empty list", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereLanguage(EntityEnums.Language.Hungarian)
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(0);
         } catch (e) {
@@ -362,9 +361,9 @@ describe("models/response-search", function () {
 
     describe("search for existing language present in 2 entities", () => {
       it("should return list of 2 results", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereLanguage(EntityEnums.Language.Czech)
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(2);
         } catch (e) {
@@ -406,9 +405,9 @@ describe("models/response-search", function () {
 
     describe("search for entities by evading a class values", () => {
       it("should return empty list if not wanting any of stored classes", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereNotClass([entity1, entity2, entity3].map((e) => e.class))
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(0);
         } catch (e) {
@@ -417,9 +416,9 @@ describe("models/response-search", function () {
       });
 
       it("should return entities which does not have particular classes", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereNotClass([entity1, entity2].map((e) => e.class))
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(2);
           expect(entities.find((e) => e.id === entity4.id)).toBeTruthy();
@@ -431,9 +430,9 @@ describe("models/response-search", function () {
 
     describe("search for specific class", () => {
       it("should return list of 2 results if there are 2 entities with the same class", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereClass(entity3.class)
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(2);
         } catch (e) {
@@ -442,9 +441,9 @@ describe("models/response-search", function () {
       });
 
       it("should return list of 1 result if there is only one entity with the class", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereClass(entity1.class)
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(1);
         } catch (e) {
@@ -484,10 +483,10 @@ describe("models/response-search", function () {
 
     describe("search for class while restricting results by id", () => {
       it("should return empty list if class-entity does not have provided id", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereEntityIds([entity2.id, entity3.id, entity4.id])
           .whereClass(entity1.class)
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(0);
         } catch (e) {
@@ -498,10 +497,10 @@ describe("models/response-search", function () {
       });
 
       it("should return entities that match both filters", async () => {
-        const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery()
           .whereEntityIds([entity1, entity2, entity3, entity4].map((e) => e.id))
           .whereClass(entity3.class)
-          .do();
+          .run(unwrap(db.connection));
         try {
           expect(entities).toHaveLength(2);
           expect(entities.find((e) => e.id === entity3.id)).toBeTruthy();

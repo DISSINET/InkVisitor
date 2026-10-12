@@ -4,8 +4,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { pool } from "@middlewares/db";
-import { Db } from "@service/rethink";
-import { r } from "rethinkdb-ts";
+import { Db, storage } from "@service/storage";
 
 describe("Users signin", function () {
   // The ephemeral test DB seeds no acl_permissions, so the otherwise-public
@@ -14,24 +13,20 @@ describe("Users signin", function () {
   beforeAll(async () => {
     const db = new Db();
     await db.initDb();
-    await r
-      .table("acl_permissions")
-      .insert({
+    await storage.acl.insert(db.connection, {
         controller: "users",
         method: "POST",
         route: "signin",
         roles: [],
         public: true,
-      })
-      .run(db.connection);
+      });
     // Another suite (users.password) mutates the seeded admin's password and
     // does not restore it; reset it here so this signin assertion is
     // independent of test execution order.
-    await r
-      .table("users")
-      .filter({ name: "admin" })
-      .update({ password: "admin" })
-      .run(db.connection);
+    const admin = await storage.users.byLogin(db.connection, "admin", true);
+    if (admin) {
+      await storage.users.update(db.connection, admin.id, { password: "admin" });
+    }
     await db.close();
   });
 

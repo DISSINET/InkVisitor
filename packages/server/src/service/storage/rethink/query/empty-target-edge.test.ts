@@ -3,7 +3,7 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
-import { provisionEntityIndexes } from "../../test/schema";
+import { provisionEntityIndexes } from "../provision";
 
 // Verifies against the ACTUAL ReQL that an edge target left empty - no pinned
 // entity, no status - means "any" for the edges that otherwise look their

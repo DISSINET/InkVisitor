@@ -7,7 +7,7 @@ import Entity from "@models/entity/entity";
 import Territory from "@models/territory/territory";
 import Relation from "./relation";
 import Identification from "./identification";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { EntityTooltip } from "@inkvisitor/shared/types";
 
 const MAX_NEST_LVL = 3;
@@ -40,7 +40,7 @@ export interface ISubordinateExpansionOptions {
  * @param conn
  */
 export const getActionEventNodes = async (
-  conn: Connection,
+  conn: Conn,
   parentId: string,
   asClass: EntityEnums.Class,
   nestLvl = 0
@@ -84,7 +84,7 @@ export const getActionEventNodes = async (
  * @param conn
  */
 export const getSuperclassTrees = async (
-  conn: Connection,
+  conn: Conn,
   parentId: string,
   asClass: EntityEnums.Class,
   nestLvl = 0
@@ -142,7 +142,7 @@ export const getSuperclassTrees = async (
  * @returns
  */
 export const getSynonymCloud = async (
-  conn: Connection,
+  conn: Conn,
   asClass: EntityEnums.Class,
   entityId: string
 ): Promise<EntityTooltip.ISynonymCloud | undefined> => {
@@ -173,7 +173,7 @@ export const getSynonymCloud = async (
  * @returns
  */
 export const getIdentifications = async (
-  conn: Connection,
+  conn: Conn,
   entityId: string
 ): Promise<EntityTooltip.IIdentification[]> => {
   const out: EntityTooltip.IIdentification[] = [];
@@ -203,7 +203,7 @@ export const getIdentifications = async (
  * @param conn
  */
 export const getSuperordinateEntityTree = async (
-  conn: Connection,
+  conn: Conn,
   asClass: EntityEnums.Class,
   parentId: string
 ): Promise<EntityTooltip.ISuperordinateEntityTree> => {
@@ -324,7 +324,7 @@ export const collectIdsFromIdentificationConnections = (
  * @returns unique equivalent entity ids, excluding the inputs
  */
 export const getEquivalentEntityIds = async (
-  conn: Connection,
+  conn: Conn,
   entityIds: string[]
 ): Promise<string[]> => {
   const result = new Set<string>();
@@ -394,7 +394,7 @@ export const getEquivalentEntityIds = async (
  * @returns unique subordinate entity ids, excluding the inputs
  */
 export const getSubordinateEntityIds = async (
-  conn: Connection,
+  conn: Conn,
   entityIds: string[],
   opts?: ISubordinateExpansionOptions
 ): Promise<string[]> => {

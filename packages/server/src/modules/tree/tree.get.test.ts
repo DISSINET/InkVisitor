@@ -10,7 +10,7 @@ import { apiPath } from "@common/constants";
 import app from "../../server";
 import Territory from "@models/territory/territory";
 import { IResponseTree, IStatement, ITerritory } from "@inkvisitor/shared/types";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import treeCache from "@service/treeCache";
 

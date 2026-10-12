@@ -4,6 +4,9 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree } from "@inkvisitor/shared/types";
 import { Query } from "@inkvisitor/shared/types/query";
 import treeCache from "@service/treeCache";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import { ExploreResolvers } from "../../types";
 import { getEdgeInstance } from "./edge";
 
 // Verifies the territory-tree edges (CT: / CT:D / I_CT:) against the ACTUAL
@@ -13,8 +16,8 @@ import { getEdgeInstance } from "./edge";
 // when a RethinkDB is reachable on DB_HOST/DB_PORT (defaults localhost:28015).
 //
 // treeCache is empty under NODE_ENV=test, so the tree is stubbed into its
-// idMap: CT: / CT:D read ancestor paths from it and getSubordinateEntityIds
-// (I_CT: with SUB on) walks its children.
+// idMap, whose children getSubordinateEntityIds (I_CT: with SUB on) walks.
+// CT: / CT:D read ancestor paths through the resolvers, from the same TREE.
 const HOST = process.env.DB_HOST || "localhost";
 const PORT = Number(process.env.DB_PORT) || 28015;
 const TMP_DB = "iv_test_territory_tree_edge";
@@ -58,6 +61,14 @@ const RELATION_FIXTURES = [
   { id: "ide-a-b1", type: RelationEnums.Type.Identification, entityIds: [T_A, T_B1] },
 ];
 
+const PATHS = new Map(TREE.map(([id, , path]) => [id, path]));
+
+const RESOLVERS: ExploreResolvers = {
+  expand: (c, id, opts) => getNodeExpansionIds(c, id, opts),
+  subordinates: (c, ids) => getSubordinateEntityIds(c, ids),
+  territoryPath: (id) => PATHS.get(id) ?? [],
+};
+
 const DISCOURAGED: Query.INodeParams = {
   entityStatuses: [EntityEnums.Status.Discouraged],
 };
@@ -79,7 +90,7 @@ const runEdge = async (
       params,
       edges: [],
     },
-  });
+  }, RESOLVERS);
   await edge.prepare(conn);
   return edge.run(r.table(ENTITIES)).distinct().run(conn) as Promise<string[]>;
 };

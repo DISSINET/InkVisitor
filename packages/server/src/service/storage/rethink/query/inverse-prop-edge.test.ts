@@ -3,7 +3,10 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
-import { provisionEntityIndexes } from "../../test/schema";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import { ExploreResolvers } from "../../types";
+import { provisionEntityIndexes } from "../provision";
 
 // Verifies the inverse entity-prop edges (I_EP:T / I_HP:V) against the ACTUAL
 // ReQL: given an origin entity, they match the prop types / values in its own
@@ -54,6 +57,12 @@ const FIXTURES = [
   concept(C_UNUSED),
 ];
 
+const RESOLVERS: ExploreResolvers = {
+  expand: (c, id, opts) => getNodeExpansionIds(c, id, opts),
+  subordinates: (c, ids) => getSubordinateEntityIds(c, ids),
+  territoryPath: () => [],
+};
+
 const runEdge = async (
   edgeType: Query.EdgeType,
   params: Query.INodeParams,
@@ -71,7 +80,7 @@ const runEdge = async (
       params,
       edges: [],
     },
-  });
+  }, RESOLVERS);
   await edge.prepare(conn);
   return edge.run(r.table(TABLE)).distinct().run(conn) as Promise<string[]>;
 };

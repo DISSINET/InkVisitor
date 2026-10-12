@@ -4,8 +4,12 @@ import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import { getEdgeInstance } from "./edge";
-import QuerySearch from "./search";
-import { clearQueryBaseCache } from "./query-base-cache";
+import { wrap } from "../conn";
+import QuerySearch from "@service/query/search";
+import { clearQueryBaseCache } from "@service/query/query-base-cache";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
+import { ExploreResolvers } from "../../types";
 
 // Verifies the per-node expansion toggles (includeEquivalents /
 // includeSubordinates, #2969) against the ACTUAL ReQL of the edges, plus the
@@ -109,6 +113,12 @@ const RELATION_FIXTURES = [
   },
 ];
 
+const RESOLVERS: ExploreResolvers = {
+  expand: (c, id, opts) => getNodeExpansionIds(c, id, opts),
+  subordinates: (c, ids) => getSubordinateEntityIds(c, ids),
+  territoryPath: () => [],
+};
+
 const runEdge = async (
   edgeType: Query.EdgeType,
   params: Query.INodeParams,
@@ -126,7 +136,7 @@ const runEdge = async (
       params,
       edges: [],
     },
-  });
+  }, RESOLVERS);
   // the node evaluator always calls prepare() before run() - the expansion is
   // resolved there
   await edge.prepare(conn);
@@ -301,8 +311,8 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
       filters: Explore.IExploreSearchFilter[] = []
     ): Promise<string[]> => {
       const search = makeSearch(params, filters);
-      await search.run(conn);
-      await search.getResults(conn);
+      await search.run(wrap(conn));
+      await search.getResults(wrap(conn));
       return search.results?.items ?? [];
     };
 
@@ -312,8 +322,8 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
       params: Query.INodeParams
     ): Promise<IResponseQueryEntity[]> => {
       const search = makeSearch(params);
-      await search.run(conn);
-      return search.getResults(conn);
+      await search.run(wrap(conn));
+      return search.getResults(wrap(conn));
     };
 
     const rowById = (rows: IResponseQueryEntity[], id: string) =>
@@ -478,8 +488,8 @@ describe("target expansion toggles on pinned edge targets (real ReQL)", () => {
         indices: number[]
       ): Promise<IResponseQueryEntity[]> => {
         const search = makeSearch(params);
-        await search.run(conn);
-        return search.getResults(conn, indices);
+        await search.run(wrap(conn));
+        return search.getResults(wrap(conn), indices);
       };
 
       test("only the picked rows come back, keeping their position in the full list", async () => {
