@@ -318,18 +318,43 @@ export const StyledWarningsListHeader = styled.div`
 
 export const StyledWarningRow = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.space[1]};
+  gap: ${({ theme }) => theme.space[4]};
   padding: 0.5rem 1rem;
-  padding-right: 1.25rem;
+  padding-right: 0.5rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
 `;
 
-export const StyledWarningBody = styled.div`
+export const StyledWarningMain = styled.div`
   display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[4]};
+  flex-direction: column;
+  justify-content: center;
+  gap: ${({ theme }) => theme.space[1]};
+  flex: 1;
+  min-width: 0;
+`;
+
+/**
+ * Each action stacks its icon above a short label. Content sits at the bottom so
+ * the labels share a baseline even when one icon is drawn smaller.
+ */
+export const StyledWarningActions = styled.div`
+  display: flex;
+  align-self: center;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
+  && button {
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    min-width: 4.8rem;
+  }
+  && button svg {
+    font-size: ${({ theme }) => theme.fontSize["base"]};
+  }
+  && button span {
+    margin-left: 0;
+  }
 `;
 
 export const StyledWarningInfo = styled.div`

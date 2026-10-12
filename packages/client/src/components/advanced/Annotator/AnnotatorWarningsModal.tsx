@@ -1,7 +1,7 @@
 import { AsymmetricalAnchor } from "@inkvisitor/annotator/src/lib";
 import { IResponseEntity } from "@inkvisitor/shared/types";
 import { TOOLBAR_ICON_SIZE } from "./AnnotatorToolbar/AnnotatorToolbarStyles";
-import { ButtonGroup, Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { Loader, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { Button } from "components/basic/Button/Button";
 import { EntityTagById } from "components/advanced/EntityTag/EntityTagById";
 import { WARNING_ANCHOR_ENTITIES_KEY, useEntitiesQuery } from "hooks/react-query";
@@ -11,9 +11,10 @@ import { FaScissors } from "react-icons/fa6";
 import { TbAnchor } from "react-icons/tb";
 import { ButtonSize } from "types";
 import {
-  StyledWarningBody,
+  StyledWarningActions,
   StyledWarningInfo,
   StyledWarningKind,
+  StyledWarningMain,
   StyledWarningParagraph,
   StyledWarningRow,
   StyledWarningsList,
@@ -119,15 +120,15 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               <StyledWarningRow
                 key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
               >
-                <StyledWarningKind>
-                  {kindLabel(anchor.type)}
-                  {anchor.paragraphNumber !== undefined && (
-                    <StyledWarningParagraph>
-                      · paragraph {anchor.paragraphNumber}
-                    </StyledWarningParagraph>
-                  )}
-                </StyledWarningKind>
-                <StyledWarningBody>
+                <StyledWarningMain>
+                  <StyledWarningKind>
+                    {kindLabel(anchor.type)}
+                    {anchor.paragraphNumber !== undefined && (
+                      <StyledWarningParagraph>
+                        · paragraph {anchor.paragraphNumber}
+                      </StyledWarningParagraph>
+                    )}
+                  </StyledWarningKind>
                   <StyledWarningInfo>
                     {isFetchingEntities && !entityMap[anchor.tagName] ? (
                       <Loader size={12} show noBackground />
@@ -142,28 +143,35 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                       />
                     )}
                   </StyledWarningInfo>
-                  <ButtonGroup>
-                    <Button
-                      icon={<TbAnchor />}
-                      label="scroll to"
-                      color="primary"
-                      tooltipLabel="scroll to anchor in text (RAW mode)"
-                      onClick={() => {
-                        onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
-                        // Close so the (now RAW-mode, scrolled) text is visible.
-                        onOpenChange(false);
-                      }}
-                    />
-                    <Button
-                      icon={<FaScissors />}
-                      label="remove"
-                      color="danger"
-                      inverted
-                      tooltipLabel="unlink broken anchor"
-                      onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
-                    />
-                  </ButtonGroup>
-                </StyledWarningBody>
+                </StyledWarningMain>
+                <StyledWarningActions>
+                  <Button
+                    icon={<TbAnchor />}
+                    label="locate"
+                    color="primary"
+                    inverted
+                    noBackground
+                    noBorder
+                    textRegular
+                    tooltipLabel="scroll to anchor in text (RAW mode)"
+                    onClick={() => {
+                      onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
+                      // Close so the (now RAW-mode, scrolled) text is visible.
+                      onOpenChange(false);
+                    }}
+                  />
+                  <Button
+                    icon={<FaScissors size="0.8em" />}
+                    label="remove"
+                    color="danger"
+                    inverted
+                    noBackground
+                    noBorder
+                    textRegular
+                    tooltipLabel="unlink broken anchor"
+                    onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
+                  />
+                </StyledWarningActions>
               </StyledWarningRow>
             ))}
           </StyledWarningsList>
