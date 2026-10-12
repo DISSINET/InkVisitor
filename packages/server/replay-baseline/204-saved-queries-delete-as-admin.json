@@ -1,0 +1,14 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/saved-queries/<uuid-12>"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

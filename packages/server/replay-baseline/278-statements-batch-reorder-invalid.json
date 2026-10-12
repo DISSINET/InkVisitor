@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/statements/batch-reorder",
+    "body": {
+      "updates": [
+        {
+          "id": "s1"
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "invalid updates payload",
+      "result": false
+    }
+  }
+}

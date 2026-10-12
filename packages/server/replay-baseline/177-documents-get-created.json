@@ -1,0 +1,70 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "GET",
+    "path": "/api/documents/doc-replay"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "anchors": [
+        {
+          "anchor": "p1",
+          "children": [],
+          "class": "P",
+          "content": "Minda",
+          "indexEnd": 14,
+          "indexStart": 0
+        },
+        {
+          "anchor": "l1",
+          "children": [],
+          "class": "L",
+          "content": "Brno",
+          "indexEnd": 36,
+          "indexStart": 23
+        },
+        {
+          "anchor": "p12",
+          "children": [],
+          "class": "P",
+          "content": "someone",
+          "indexEnd": 63,
+          "indexStart": 45
+        },
+        {
+          "anchor": "l1",
+          "children": [],
+          "class": "L",
+          "content": "Brno",
+          "indexEnd": 82,
+          "indexStart": 69
+        }
+      ],
+      "content": "<p1>Minda</p1> went to <l1>Brno</l1> and met <p12>someone</p12> near <l1>Brno</l1>.",
+      "createdAt": "<datetime>",
+      "entityIds": {
+        "A": [],
+        "B": [],
+        "C": [],
+        "E": [],
+        "G": [],
+        "L": [
+          "l1"
+        ],
+        "O": [],
+        "P": [
+          "p1",
+          "p12"
+        ],
+        "R": [],
+        "S": [],
+        "T": [],
+        "V": []
+      },
+      "id": "doc-replay",
+      "title": "Replay doc"
+    }
+  }
+}

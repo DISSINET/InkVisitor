@@ -1,0 +1,29 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchSetAttribute",
+    "body": {
+      "changes": {
+        "attribute": "pos",
+        "concept": {
+          "from": "",
+          "to": "adj"
+        }
+      },
+      "entityIds": [
+        "rp-c",
+        "rp-a",
+        "rp-p"
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "Updated 1/3 entities (2 skipped: not relevant / no match)",
+      "result": true
+    }
+  }
+}

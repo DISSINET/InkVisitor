@@ -1,0 +1,643 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?status=1&class=A"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a33",
+        "labels": [
+          "die"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": [
+              "empty"
+            ]
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a1",
+        "labels": [
+          "told"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a31",
+        "labels": [
+          "kill"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a11",
+        "labels": [
+          "listen"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a32",
+        "labels": [
+          "murder"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a502",
+        "labels": [
+          "consume"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a503",
+        "labels": [
+          "have fun"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a3",
+        "labels": [
+          "sacrifice"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-maee",
+        "labels": [
+          "a-has-maee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a4",
+        "labels": [
+          "take place"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a505",
+        "labels": [
+          "have coffee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a506",
+        "labels": [
+          "take coffee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-mval-1",
+        "labels": [
+          "a-has-mval-1"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-mval-2",
+        "labels": [
+          "a-has-mval-2"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-hasnt-mval",
+        "labels": [
+          "a-hasnt-mval"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a2",
+        "labels": [
+          "is possessed"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a5",
+        "labels": [
+          "drink coffee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-not-maee",
+        "labels": [
+          "a-has-not-maee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a501",
+        "labels": [
+          "drink beverage"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a34",
+        "labels": [
+          "being sacrificed"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a504",
+        "labels": [
+          "entertain or relax"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a507",
+        "labels": [
+          "sip coffee from a cup"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a508",
+        "labels": [
+          "have a coffee as a first thing in the morning"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

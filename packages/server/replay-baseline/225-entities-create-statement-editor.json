@@ -1,0 +1,151 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "S",
+      "data": {
+        "actants": [
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "classifications": [],
+            "elvl": "1",
+            "entityId": "p1",
+            "id": "rp-se-s",
+            "identifications": [],
+            "logic": "1",
+            "partitivity": "1",
+            "position": "s",
+            "props": [],
+            "virtuality": "1"
+          },
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "classifications": [],
+            "elvl": "1",
+            "entityId": "c1",
+            "id": "rp-se-a1",
+            "identifications": [],
+            "logic": "1",
+            "partitivity": "1",
+            "position": "a1",
+            "props": [],
+            "virtuality": "1"
+          }
+        ],
+        "actions": [
+          {
+            "actionId": "a1",
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "certainty": "1",
+            "elvl": "1",
+            "id": "rp-se-act",
+            "logic": "1",
+            "mood": [],
+            "moodvariant": "1",
+            "props": []
+          }
+        ],
+        "tags": [],
+        "territory": {
+          "order": 7,
+          "territoryId": "t1"
+        },
+        "text": "Editor statement."
+      },
+      "detail": "",
+      "id": "rp-se",
+      "labels": [
+        ""
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "p1",
+              "id": "rp-se-s",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            },
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "c1",
+              "id": "rp-se-a1",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "a1",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "a1",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "rp-se-act",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 7,
+            "territoryId": "t1"
+          },
+          "text": "Editor statement."
+        },
+        "detail": "",
+        "id": "rp-se",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      },
+      "result": true
+    }
+  }
+}

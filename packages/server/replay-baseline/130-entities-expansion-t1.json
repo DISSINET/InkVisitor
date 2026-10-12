@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/t1/expansion?subordinates=true"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "equivalents": [],
+      "subordinates": [],
+      "totals": {
+        "equivalents": 0,
+        "subordinates": 0
+      },
+      "truncated": {
+        "equivalents": false,
+        "subordinates": false
+      }
+    }
+  }
+}

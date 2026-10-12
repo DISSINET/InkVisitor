@@ -1,0 +1,15 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "GET",
+    "path": "/api/saved-queries"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": [],
+      "result": true
+    }
+  }
+}

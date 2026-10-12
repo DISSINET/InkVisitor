@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/users/2"
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "user cannot be deleted",
+      "result": false
+    }
+  }
+}

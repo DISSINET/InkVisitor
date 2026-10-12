@@ -1,0 +1,33 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/documents/doc-replay"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "anchors": [],
+      "content": "Minda stayed in Brno.",
+      "createdAt": "<datetime>",
+      "entityIds": {
+        "A": [],
+        "B": [],
+        "C": [],
+        "E": [],
+        "G": [],
+        "L": [],
+        "O": [],
+        "P": [],
+        "R": [],
+        "S": [],
+        "T": [],
+        "V": []
+      },
+      "id": "doc-replay",
+      "title": "Replay doc renamed",
+      "updatedAt": "<datetime>"
+    }
+  }
+}

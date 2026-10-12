@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/documents",
+    "body": {
+      "id": "doc-bad"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "ModelNotValidError",
+      "message": "Invalid request data",
+      "result": false
+    }
+  }
+}

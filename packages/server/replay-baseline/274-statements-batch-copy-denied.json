@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "POST",
+    "path": "/api/statements/batch-copy?ids=s1",
+    "body": {
+      "territoryId": "rp-t"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PATCH",
+    "path": "/api/documents/doc-replay/removeAnchors?entityIds=p1",
+    "body": {}
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

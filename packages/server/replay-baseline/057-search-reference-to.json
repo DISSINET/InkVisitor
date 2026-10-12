@@ -1,0 +1,40 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?haveReferenceTo=dissinet-resource"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "in general - who gives advice",
+        "id": "<uuid-2>",
+        "labels": [
+          "advisor"
+        ],
+        "language": "eng",
+        "legacyId": "C1449",
+        "notes": [
+          "Import batch [January2023] 2023-01-21 18:58:21.366042"
+        ],
+        "props": [],
+        "references": [
+          {
+            "id": "<uuid-3>",
+            "resource": "dissinet-resource",
+            "value": "<uuid-2>"
+          }
+        ],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}
