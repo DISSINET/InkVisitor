@@ -168,3 +168,33 @@ describe("going to a paragraph", () => {
     expect([a.cursor.xLine, a.cursor.yLine]).toEqual([2, 1]);
   });
 });
+
+describe("vertical movement after going to a paragraph", () => {
+  const keyDown = (a: Annotator, key: string) =>
+    a.keys.onKeyDown({
+      key,
+      ctrlKey: false,
+      metaKey: false,
+      altKey: false,
+      shiftKey: false,
+      preventDefault: () => {},
+    } as unknown as KeyboardEvent);
+
+  test("ArrowDown after the jump starts from the paragraph start, not an earlier column", () => {
+    const canvas = document.createElement("canvas");
+    canvas.style.width = "800px";
+    canvas.style.height = "600px";
+    document.body.appendChild(canvas);
+    const a = new Annotator(canvas, "");
+    a.setMode(EditMode.RAW);
+    a.onReplaceText("aaaaaaaaaa\nbbbbbbbbbb\ncccccccccc\ndddddddddd");
+
+    a.cursor.setPosition(5, 0);
+    keyDown(a, "ArrowDown"); // remembers column 5
+    expect([a.cursor.xLine, a.cursor.yLine]).toEqual([5, 1]);
+
+    a.scrollToParagraph(3);
+    keyDown(a, "ArrowDown");
+    expect([a.cursor.xLine, a.cursor.yLine]).toEqual([0, 3]);
+  });
+});

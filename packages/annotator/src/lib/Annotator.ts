@@ -4556,8 +4556,8 @@ export class Annotator {
       return false;
     }
     this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
-    this.cursor.xLine = 0;
-    this.cursor.yLine = absLine;
+    // setPosition also drops the column remembered by earlier up/down moves
+    this.cursor.setPosition(0, absLine);
     this.cursor.resetHighlight();
     this.draw();
     this.element.focus({ preventScroll: true });
