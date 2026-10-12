@@ -27,13 +27,20 @@ export interface Step {
   strip?: string[];
   /** pin the order of unordered lists after normalization (see normalize.ts) */
   sort?: SortSpec[];
+  /**
+   * order pins applied only when comparing a PostgreSQL run: lists the baseline
+   * recorded in RethinkDB storage order, or ordered by RethinkDB's cross-type
+   * rule that places a Date before ISO strings, which PostgreSQL orders
+   * chronologically
+   */
+  pgSort?: SortSpec[];
   /** response values (dot paths) saved as {{name}} for later paths and bodies */
   capture?: Record<string, string>;
   /** record status and content type only (file downloads) */
   binary?: boolean;
 }
 
-type Opts = Partial<Pick<Step, "saveSessionAs" | "strip" | "sort" | "capture" | "binary">>;
+type Opts = Partial<Pick<Step, "saveSessionAs" | "strip" | "sort" | "pgSort" | "capture" | "binary">>;
 
 const step = (as: Actor, method: Method, name: string, path: string, body?: unknown, opts: Opts = {}): Step =>
   ({ name, as, method, path: `/api${path}`, body, ...opts });
@@ -167,6 +174,9 @@ const relationOrder: Opts = { sort: [{ at: "", by: ["type", "entityIds", "id"] }
 const savedQueryOrder: Opts = { sort: [{ at: "data", by: ["name"] }] };
 // search results are ordered by label match and label length only; ties keep storage order
 const searchOrder: Opts = { sort: [{ at: "", by: ["id"], within: "labels.0.length" }] };
+// order pins for the PostgreSQL comparison only (see Step.pgSort)
+const pgById: Opts = { pgSort: [{ at: "", by: ["id"] }] };
+const pgSettingsById: Opts = { pgSort: [{ at: "data.settings", by: ["id"] }] };
 // explore rows are sorted by raw id on the server, which floats for generated ids;
 // rowI is that raw position
 const exploreOrder: Opts = {
@@ -200,15 +210,15 @@ const reads = (suffix: string): Step[] => [
   get("admin", `users-me${suffix}`, "/users/me"),
   get("editor", `users-me-editor${suffix}`, "/users/me"),
   get("admin", `users-list${suffix}`, "/users"),
-  get("admin", `users-list-label${suffix}`, "/users?label=edit"),
+  get("admin", `users-list-label${suffix}`, "/users?label=edit", pgById),
   get("viewer", `users-simplified${suffix}`, "/users/simplified", byId),
   get("admin", `users-get-editor${suffix}`, "/users/3"),
   get("admin", `users-bookmarks-editor${suffix}`, "/users/3/bookmarks"),
   get("admin", `acls-list${suffix}`, "/acls", aclOrder),
   get("admin", `settings-get-key${suffix}`, "/settings/validation_SValency"),
-  get("admin", `settings-get-group-validations${suffix}`, "/settings/group/validations"),
+  get("admin", `settings-get-group-validations${suffix}`, "/settings/group/validations", pgSettingsById),
   get("viewer", `settings-get-group-app${suffix}`, "/settings/group/app"),
-  get("admin", `documents-list${suffix}`, "/documents"),
+  get("admin", `documents-list${suffix}`, "/documents", pgById),
   get("editor", `documents-get-1${suffix}`, "/documents/1"),
   get("editor", `saved-queries-list-editor${suffix}`, "/saved-queries", savedQueryOrder),
   get("viewer", `saved-queries-list-viewer${suffix}`, "/saved-queries", savedQueryOrder),
@@ -550,7 +560,7 @@ const writes: Step[] = [
   put("admin", "settings-put-group-missing", "/settings/group/nope", [{ id: "x", value: 1 }]),
   put("editor", "settings-put-key-denied", "/settings/validation_SValency", { value: true }),
   get("admin", "settings-get-key-after", "/settings/validation_SValency"),
-  get("admin", "settings-get-group-after", "/settings/group/validations"),
+  get("admin", "settings-get-group-after", "/settings/group/validations", pgSettingsById),
   // users
   post("admin", "users-create", "/users", {
     id: "u-replay",
@@ -614,7 +624,7 @@ const writes: Step[] = [
   get("admin", "documents-get-after-anchor-removal", "/documents/doc-replay"),
   del("admin", "documents-delete-editor-doc", "/documents/doc-replay-editor"),
   del("admin", "documents-delete-missing", "/documents/doc-replay-editor"),
-  get("admin", "documents-list-after", "/documents"),
+  get("admin", "documents-list-after", "/documents", pgById),
   // saved queries
   post("editor", "saved-queries-create-private", "/saved-queries", { name: "Replay private", shared: false, data: savedQueryData("c3") }, { capture: { sqPrivate: "data.id" } }),
   post("editor", "saved-queries-create-shared", "/saved-queries", { name: "Replay shared", shared: true, data: savedQueryData("c2") }, { capture: { sqShared: "data.id" } }),
