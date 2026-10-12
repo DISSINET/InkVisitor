@@ -1,276 +1,18 @@
-import { IUser } from "@inkvisitor/shared/types/user";
-import { hashPassword } from "../../server/src/common/auth";
-import { IAudit, IEntity } from "@inkvisitor/shared/types";
-import { Relation } from "@inkvisitor/shared/types/relation";
-import { confirm } from "./import/prompts";
-import { DbSchema, checkRelation, TableSchema } from "./import/common";
-import { DbSchemaIndexes } from "./import/indexes";
-import { EntityEnums } from "@inkvisitor/shared/enums";
-import { question } from "./import/prompts";
-import { DbHelper } from "./import/db";
-import { getEnv } from "./import/common";
+import { confirm, question } from "./import/prompts";
+import { DbSchema, flag, getEnv, getEnvOptional, positionals } from "./import/common";
+import {
+  dataFilePath,
+  datasets,
+  findRawDatasets,
+  prepareRawDataset,
+} from "./import/datasets";
+import { feedTable } from "./import/feed";
+import { SeedTarget } from "./import/target";
+import { createTargets } from "./import/targets";
+import { RethinkTarget } from "./import/targets/rethinkdb";
 import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
 import jobs from "./jobs/index";
-import * as fs from "fs";
-import * as path from "path";
-
-const MAX_LOAD_JSON_BYTES = 100 * 1024 * 1024;
-
-const defaultSettingsTable: TableSchema = {
-  tableName: "settings",
-  data: require("../datasets/default/settings.json"),
-};
-
-// Materialized stats tables for each time unit
-const materializedStatsTables = {
-  statsMaterializedDay: {
-    tableName: "stats_materialized_day",
-  },
-  statsMaterializedWeek: {
-    tableName: "stats_materialized_week",
-  },
-  statsMaterializedMonth: {
-    tableName: "stats_materialized_month",
-  },
-  statsMaterializedYear: {
-    tableName: "stats_materialized_year",
-  },
-};
-
-const savedQueriesTables = {
-  savedQueries: {
-    tableName: "saved_queries",
-  },
-};
-
-/**
- * Scans the datasets directory and finds directories that match keys in the datasets object
- * These can be used as 'raw' datasets
- * @returns Array of raw dataset names (directory names that match dataset keys)
- */
-function findRawDatasets(): string[] {
-  const datasetsDir = path.join(__dirname, "../datasets");
-  const rawDatasets: string[] = [];
-
-  if (!fs.existsSync(datasetsDir)) {
-    return rawDatasets;
-  }
-
-  const datasetKeys = Object.keys(datasets);
-  const entries = fs.readdirSync(datasetsDir, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const dirName = entry.name;
-      
-      if (
-        !datasetKeys.includes(dirName)
-      ) {
-        rawDatasets.push(dirName);
-      }
-    }
-  }
-
-  return rawDatasets;
-}
-
-const datasets: Record<string, DbSchema> = {
-  empty: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: require("../datasets/default/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/empty/entities.json"),
-      transform: function () {
-        this.data = this.data.map((entity: IEntity) => {
-          if (!entity.createdAt) {
-            entity.createdAt = new Date();
-          }
-          return entity;
-        });
-      },
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/empty/audits.json"),
-      transform: function () {
-        this.data = this.data.map((audit: IAudit) => {
-          audit.date = new Date(audit.date);
-          return audit;
-        });
-      },
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/empty/relations.json"),
-    },
-    documents: {
-      tableName: "documents",
-      data: require("../datasets/default/documents.json"),
-    },
-    ...materializedStatsTables,
-    ...savedQueriesTables,
-  },
-
-  relationstest: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: require("../datasets/default/users.json"),
-      transform: function () {
-        // get a list of all entities
-        const entities = require("../datasets/relationstest/entities.json");
-        const allTIds = entities
-          .filter((e: any) => e.class === EntityEnums.Class.Territory)
-          .map((e: any) => e.id);
-
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          user.rights = user.rights.filter((r: any) =>
-            allTIds.includes(r.territory)
-          );
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/relationstest/entities.json"),
-      transform: function () {
-        this.data = this.data.map((entity: IEntity) => {
-          if (!entity.createdAt) {
-            entity.createdAt = new Date();
-          }
-          return entity;
-        });
-      },
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/empty/audits.json"),
-      transform: function () {
-        this.data = this.data.map((audit: IAudit) => {
-          audit.date = new Date(audit.date);
-          return audit;
-        });
-      },
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/relationstest/relations.json"),
-      transform: function () {
-        // check validity
-        const entities = require("../datasets/relationstest/entities.json");
-        const allEntityIds = entities.map((e: any) => e.id);
-        this.data = this.data.filter((relation: Relation.IRelation) => {
-          return checkRelation(relation, allEntityIds);
-        });
-
-        this.data = this.data.map((relation: Relation.IRelation) => {
-          if (!relation.order) {
-            relation.order = 1;
-          }
-          return relation;
-        });
-      },
-    },
-    documents: {
-      tableName: "documents",
-      data: require("../datasets/default/documents.json"),
-    },
-    ...materializedStatsTables,
-    ...savedQueriesTables,
-  },
-
-  all_parsed: {
-    settings: defaultSettingsTable,
-    users: {
-      tableName: "users",
-      data: require("../datasets/all_parsed/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/all_parsed/entities.json"),
-      transform: function () {
-        this.data = this.data.map((entity: IEntity) => {
-          if (!entity.createdAt) {
-            entity.createdAt = new Date();
-          }
-
-          // fix missing entity pos
-          if (entity.class === EntityEnums.Class.Concept) {
-            if (!entity.data.pos) {
-              entity.data.pos = EntityEnums.ConceptPartOfSpeech.Empty;
-            }
-          }
-          if (entity.class === EntityEnums.Class.Action) {
-            if (!entity.data.pos) {
-              entity.data.pos = EntityEnums.ActionPartOfSpeech.Verb;
-            }
-          }
-
-          return entity;
-        });
-      },
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/all_parsed/audits.json"),
-      transform: function () {
-        this.data = this.data.map((audit: IAudit) => {
-          audit.date = new Date(audit.date);
-          return audit;
-        });
-      },
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/all_parsed/relations.json"),
-      transform: function () {
-        this.data = this.data.map((relation: Relation.IRelation) => {
-          if (!relation.order) {
-            relation.order = 1;
-          }
-          return relation;
-        });
-      },
-    },
-    documents: {
-      tableName: "documents",
-      data: require("../datasets/default/documents.json"),
-    },
-    ...materializedStatsTables,
-    ...savedQueriesTables,
-  },
-};
 
 enum MODES {
   NOTHING = 0,
@@ -282,7 +24,7 @@ enum MODES {
 class Importer {
   mode: MODES = MODES.NOTHING;
 
-  db: DbHelper;
+  targets: SeedTarget[];
   ssh?: SshHelper;
   datasetName?: string;
   dataset?: DbSchema;
@@ -291,8 +33,7 @@ class Importer {
     for (const mode of initialModes) {
       this.mode = this.mode | mode;
     }
-
-    this.db = new DbHelper();
+    this.targets = createTargets(flag("target") ?? getEnvOptional("DB_TARGET") ?? "rethinkdb");
   }
 
   /**
@@ -312,30 +53,50 @@ class Importer {
     return !!(this.mode & mode);
   }
 
+  /** the RethinkDB target; jobs and the ssh tunnel only exist for it */
+  private get rethink(): RethinkTarget | undefined {
+    return this.targets.find((t): t is RethinkTarget => t.kind === "rethinkdb");
+  }
+
+  /** the selected database; run() points every target at this one name */
+  private get dbName(): string {
+    return this.targets[0].dbName;
+  }
+
+  private useDb(name: string) {
+    for (const target of this.targets) {
+      target.useDb(name);
+    }
+  }
+
   /**
    * Starts the lifecycle by initiating the optional ssh connection and mandatory db connection.
    * Then starts polling for user input and doing actions afterwards.
    */
   async run(): Promise<void> {
+    const rethink = this.rethink;
     if (
-      this.modeEnabled(MODES.USE_SSH) ||
-      (await confirm("Use SSH connection?"))
+      rethink &&
+      (this.modeEnabled(MODES.USE_SSH) || (await confirm("Use SSH connection?")))
     ) {
       this.ssh = new SshHelper({
         sshIp: getEnv("SSH_IP"),
         sshPassword: getEnv("SSH_PASSWORD"),
         sshUsername: getEnv("SSH_USERNAME"),
-        dstPort: this.db.dbConfig.port,
-        localPort: this.db.dbConfig.port,
+        dstPort: rethink.dbConfig.port,
+        localPort: rethink.dbConfig.port,
       });
       await this.ssh.startSshTunnel();
     }
 
-    await this.db.connect();
-
-    if (process.argv.length > 2 && process.argv[2]) {
-      this.db.useDb(process.argv[2]);
+    for (const target of this.targets) {
+      await target.connect();
     }
+
+    // each target defaults to its own env name, so the first one's wins and
+    // every target holds the database the menu shows
+    const [dbName] = positionals();
+    this.useDb(dbName ?? this.targets[0].dbName);
 
     do {
       const lastAction = await this.selectAction();
@@ -355,7 +116,9 @@ class Importer {
     if (this.ssh) {
       await this.ssh.end();
     }
-    await this.db.end();
+    for (const target of this.targets) {
+      await target.end();
+    }
   }
 
   /**
@@ -409,41 +172,30 @@ class Importer {
       },
     };
 
-    if (!this.datasetName || !this.db.dbConfig.name) {
+    if (!this.datasetName || !this.dbName) {
       delete menu["X"];
       delete menu["C"];
       delete menu["T"];
     }
 
-    if (!this.db.dbConfig.name) {
+    if (!this.dbName || !this.rethink) {
       delete menu["J"];
     }
 
     const info: string[] = [];
+    info.push(`target=${colors.green(this.targets.map((t) => t.kind).join("+"))}`);
     info.push(`ssh=${!!this.ssh ? colors.green("true") : colors.red("false")}`);
     if (this.datasetName) {
-      info.push(
-        `dataset=${
-          this.datasetName
-            ? colors.green(this.datasetName)
-            : colors.red("not set")
-        }`
-      );
+      info.push(`dataset=${colors.green(this.datasetName)}`);
     }
-    if (this.db.dbConfig.name) {
-      info.push(
-        `db=${
-          this.db.dbConfig.name
-            ? colors.green(this.db.dbConfig.name)
-            : colors.red("not set")
-        }`
-      );
+    if (this.dbName) {
+      info.push(`db=${colors.green(this.dbName)}`);
     }
 
     console.log(`\nImport app${info.length ? ": " + info.join(", ") : ""}`);
     console.log(
       `To specify db from the command line, use ${colors.yellow(
-        "npm start <dbname>"
+        "npm start <dbname> [--target=rethinkdb]"
       )}\n`
     );
     Object.values(menu).forEach((item) => console.log(item.description));
@@ -471,7 +223,7 @@ class Importer {
    * @returns Promise<void>
    */
   async selectDb(): Promise<void> {
-    const dbNames = await this.db.dbList();
+    const dbNames = await this.targets[0].dbList();
     console.log(
       `Databases: ${[
         "",
@@ -491,7 +243,7 @@ class Importer {
       ""
     );
 
-    this.db.useDb(dbName);
+    this.useDb(dbName);
   }
 
   /**
@@ -501,14 +253,13 @@ class Importer {
   async selectDataset(): Promise<void> {
     const regularDatasets = Object.keys(datasets);
     const rawDatasets = findRawDatasets();
-    
-    // Combine regular and raw datasets for display
+
     const allDatasetOptions: Array<{ name: string; isRaw: boolean; index: number }> = [];
-    
+
     regularDatasets.forEach((key, i) => {
       allDatasetOptions.push({ name: key, isRaw: false, index: i + 1 });
     });
-    
+
     rawDatasets.forEach((key, i) => {
       allDatasetOptions.push({ name: key, isRaw: true, index: regularDatasets.length + i + 1 });
     });
@@ -516,7 +267,7 @@ class Importer {
     console.log(
       `Datasets: ${[
         "",
-        ...allDatasetOptions.map((opt) => 
+        ...allDatasetOptions.map((opt) =>
           `${opt.name}${opt.isRaw ? " (raw)" : ""} (${opt.index})`
         ),
       ].join("\n- ")}`
@@ -538,82 +289,18 @@ class Importer {
     );
 
     const selectedOption = allDatasetOptions.find((opt) => opt.name === dataset);
-    
-    if (selectedOption?.isRaw) {
-      // Handle raw dataset
-      this.datasetName = dataset;
-      this.dataset = await this.prepareRawDataset(dataset);
-    
-    } else {
-      // Handle regular dataset
-      this.dataset = datasets[dataset];
-      for (const table of Object.values(this.dataset)) {
-        if (!table.indexes) {
-          table.indexes = DbSchemaIndexes[table.tableName as keyof DbSchema];
-        }
-      }
-      this.datasetName = dataset;
-    }
-  }
-
-  snakeToCamel(str: string): string {
-    return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-  }
-
-  /**
-   * Prepares a raw dataset from a directory
-   * @param datasetName Name of the raw dataset directory
-   * @returns Promise<void>
-   */
-  async prepareRawDataset(datasetName: string): Promise<DbSchema> {
-    const entries = fs.readdirSync(path.join(__dirname, "../datasets", datasetName), { withFileTypes: true });
-    const datasetTables: DbSchema = {
-      settings: {
-        tableName: "settings",
-      },
-      users: {
-        tableName: "users",
-      },
-      aclPermissions: {
-        tableName: "acl_permissions",
-      },
-      entities: {
-        tableName: "entities",
-      },
-      audits: {
-        tableName: "audits",
-      },
-      relations: {
-        tableName: "relations",
-      },
-      documents: {
-        tableName: "documents",
-      },
-      ...materializedStatsTables,
-      ...savedQueriesTables,
-    };
-
-    for (const entry of entries) {
-      if (entry.isFile() && entry.name.endsWith(".json")) {
-        const dataFilePath = path.join(path.join(__dirname, "../datasets", datasetName), entry.name);
-        if (fs.existsSync(dataFilePath)) {
-          const tableKey = this.snakeToCamel(entry.name.replace(".json", ""));
-          const tableConfig = datasetTables[tableKey as keyof DbSchema];
-          tableConfig.indexes = DbSchemaIndexes[tableKey as keyof DbSchema];
-          const stat = fs.statSync(dataFilePath);
-          if (stat.size > MAX_LOAD_JSON_BYTES) {
-            tableConfig.dataFilePath = dataFilePath;
-          } else {
-            tableConfig.data = JSON.parse(fs.readFileSync(dataFilePath, "utf8"));
-          }
-        }
-      }
-    }
-
-    return datasetTables;
+    this.datasetName = dataset;
+    this.dataset = selectedOption?.isRaw
+      ? await prepareRawDataset(dataset)
+      : datasets[dataset];
   }
 
   async selectJob(): Promise<void> {
+    const rethink = this.rethink;
+    if (!rethink) {
+      console.log(colors.red("Jobs run against RethinkDB only"));
+      return;
+    }
     console.log(
       `Jobs: ${[
         "",
@@ -637,7 +324,16 @@ class Importer {
       ""
     );
 
-    await jobs[job](this.db.getConnection());
+    await jobs[job](rethink.getConnection());
+  }
+
+  /** drops and recreates the selected database with every table and index, on every target */
+  private async recreate(): Promise<void> {
+    for (const target of this.targets) {
+      await target.dbDrop();
+      await target.dbCreate();
+      await target.createTables();
+    }
   }
 
   /**
@@ -645,64 +341,14 @@ class Importer {
    * @returns Promise<void>
    */
   async dropAndImport(): Promise<void> {
-    if (!this.dataset || !this.db.dbConfig.name) {
+    if (!this.dataset || !this.datasetName || !this.dbName) {
       console.log(colors.red("Dataset / database name not set"));
       return;
     }
 
-    await this.db.dbDrop();
-    await this.db.dbCreate();
-
-    for (const tableConfig of Object.values(this.dataset)) {
-      await this.db.createTable(tableConfig);
-    }
-    
-    for (const tableConfig of Object.values(this.dataset)) {
-      const dataFilePath = this.getDataFilePath(tableConfig);
-      const useLargeImport = dataFilePath && this.isLargeFile(dataFilePath);
-      if (tableConfig.data && Array.isArray(tableConfig.data)) {
-        if (useLargeImport) {
-          console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
-          await this.db.importLargeData(tableConfig, dataFilePath!);
-        } else {
-          await this.db.importData(tableConfig);
-        }
-      } else if (dataFilePath && useLargeImport) {
-        console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
-        await this.db.importLargeData(tableConfig, dataFilePath);
-      } else if (tableConfig.data === null) {
-        console.log(colors.gray(`Skipping ${tableConfig.tableName} - no data configured`));
-      } else {
-        console.log(colors.gray(`Skipping ${tableConfig.tableName} - data is not an array`));
-      }
-    }
-  }
-
-  /**
-   * Gets the data file path for a table configuration
-   * @param tableConfig Table configuration
-   * @returns string | null
-   */
-  private getDataFilePath(tableConfig: TableSchema): string | null {
-    if (tableConfig.dataFilePath) return tableConfig.dataFilePath;
-    if (!this.datasetName) return null;
-    const dataDir = path.join(__dirname, "../datasets", this.datasetName);
-    const jsonFile = path.join(dataDir, `${tableConfig.tableName}.json`);
-    return fs.existsSync(jsonFile) ? jsonFile : null;
-  }
-
-  /**
-   * Checks if a file is large enough to require streaming
-   * @param filePath Path to the file
-   * @returns boolean
-   */
-  private isLargeFile(filePath: string): boolean {
-    try {
-      const stats = fs.statSync(filePath);
-      const fileSizeMB = stats.size / (1024 * 1024);
-      return fileSizeMB > 50; // Files larger than 50MB use streaming
-    } catch (error) {
-      return false;
+    await this.recreate();
+    for (const table of Object.values(this.dataset)) {
+      await feedTable(this.targets, table, dataFilePath(this.datasetName, table));
     }
   }
 
@@ -711,16 +357,12 @@ class Importer {
    * @returns Promise<void>
    */
   async dropAndCreate(): Promise<void> {
-    if (!this.dataset || !this.db.dbConfig.name) {
+    if (!this.dataset || !this.dbName) {
       console.log(colors.red("Dataset / database name not set"));
       return;
     }
 
-    await this.db.dbDrop();
-    await this.db.dbCreate();
-    for (const tableConfig of Object.values(this.dataset)) {
-      await this.db.createTable(tableConfig);
-    }
+    await this.recreate();
   }
 
   /**
@@ -728,7 +370,7 @@ class Importer {
    * @returns Promise<void>
    */
   async createSingleTable(): Promise<void> {
-    if (!this.dataset || !this.db.dbConfig.name) {
+    if (!this.dataset || !this.datasetName || !this.dbName) {
       console.log(colors.red("Dataset / database name not set"));
       return;
     }
@@ -753,20 +395,9 @@ class Importer {
 
     // await this.db.dropTable(chosenTable);
     // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
-    
+
     const tableConfig = this.dataset[chosenTable as keyof DbSchema];
-    if (tableConfig.data && Array.isArray(tableConfig.data)) {
-      // Check if this is a large file that needs special handling
-      const dataFilePath = this.getDataFilePath(tableConfig);
-      if (dataFilePath && this.isLargeFile(dataFilePath)) {
-        console.log(colors.yellow(`Using large file import for: ${tableConfig.tableName}`));
-        await this.db.importLargeData(tableConfig, dataFilePath);
-      } else {
-        await this.db.importData(tableConfig);
-      }
-    } else {
-      console.log(colors.yellow(`No data to import for table ${chosenTable}`));
-    }
+    await feedTable(this.targets, tableConfig, dataFilePath(this.datasetName, tableConfig));
   }
 }
 
