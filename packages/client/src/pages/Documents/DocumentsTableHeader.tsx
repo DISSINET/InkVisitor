@@ -81,6 +81,7 @@ export const DocumentsTableHeader: React.FC<DocumentsTableHeaderProps> = ({
       <StyledBulkExportWrap>
         <Button
           icon={<StyledExportIcon />}
+          shape="square"
           color="info"
           disabled={selectedCount === 0}
           tooltipLabel={

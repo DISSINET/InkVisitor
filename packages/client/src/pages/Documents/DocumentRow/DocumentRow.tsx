@@ -140,6 +140,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         <ButtonGroup>
           <Button
             icon={<StyledExportIcon />}
+            shape="square"
             color="primary"
             inverted
             disabled={!canManage}
@@ -149,6 +150,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           {/* TODO: allow all users to open document on BE */}
           <Button
             icon={<IcoFileText />}
+            shape="square"
             color="info"
             inverted
             onClick={() => handleDocumentOpen(document.id)}
@@ -156,6 +158,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
           <Button
             icon={<IcoTrash />}
+            shape="square"
             color="danger"
             inverted
             disabled={!canManage}
