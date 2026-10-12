@@ -7,9 +7,7 @@ import { Button, ButtonGroup, Checkbox, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { FaDownload } from "react-icons/fa";
 import { IcoTrash } from "Theme/icons";
-import { RiFileEditFill } from "react-icons/ri";
 import { EntityColors } from "types";
 import {
   StyledActionsCell,
@@ -17,6 +15,8 @@ import {
   StyledCountTag,
   StyledDisabledSelect,
   StyledDocumentRow,
+  StyledExportIcon,
+  StyledOpenIcon,
   StyledReference,
   StyledSelectCell,
   StyledTitle,
@@ -31,7 +31,7 @@ interface DocumentRow {
   canManage: boolean;
   selected: boolean;
   onToggleSelected: (id: string) => void;
-  handleDocumentEdit: (id: string) => void;
+  handleDocumentOpen: (id: string) => void;
   handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
@@ -53,7 +53,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   canManage,
   selected,
   onToggleSelected,
-  handleDocumentEdit,
+  handleDocumentOpen,
   handleDocumentExport,
   setDocToDelete,
   updateDocumentMutation,
@@ -140,7 +140,8 @@ export const DocumentRow: React.FC<DocumentRow> = ({
       <StyledActionsCell>
         <ButtonGroup>
           <Button
-            icon={<FaDownload />}
+            icon={<StyledExportIcon />}
+            shape="square"
             color="primary"
             inverted
             disabled={!canManage}
@@ -149,14 +150,16 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
           {/* TODO: allow all users to open document on BE */}
           <Button
-            icon={<RiFileEditFill />}
-            color="warning"
+            icon={<StyledOpenIcon />}
+            shape="square"
+            color="info"
             inverted
-            onClick={() => handleDocumentEdit(document.id)}
+            onClick={() => handleDocumentOpen(document.id)}
             tooltipLabel={"open document"}
           />
           <Button
             icon={<IcoTrash />}
+            shape="square"
             color="danger"
             inverted
             disabled={!canManage}

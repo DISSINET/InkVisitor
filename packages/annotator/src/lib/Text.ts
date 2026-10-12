@@ -222,13 +222,14 @@ export class Segment {
   wrappedFor?: {
     text: string;
     parsed: string;
-    isFirst: boolean;
     mode: EditMode;
     budget: number;
     paragraphIndent: number;
     measurer?: TextMeasurer;
   };
   segmentIndex: number = -1; // index of this segment in the text
+  /** 1-based number among the paragraphs with text; undefined for a blank one. */
+  paragraphNumber?: number;
 
   /**
    * Creates a new Segment from raw text.
@@ -412,9 +413,7 @@ class Text {
   }
 
   /**
-   * Indent applied to a paragraph's first line. Three paragraphs get none:
-   * - the document's first, which has nothing above it to be confused with (the
-   *   same reason typesetting leaves an opening paragraph flush);
+   * Indent applied to a paragraph's first line. Two kinds of paragraph get none:
    * - one whose text already begins with hand-typed indentation — a tab, or a
    *   run of two or more whitespace chars — since some documents were written
    *   with the indent typed in and would otherwise double it. A single leading
@@ -431,12 +430,7 @@ class Text {
     const text = segment.parsed;
     const leadingWs = /^\s+/.exec(text)?.[0];
     const handIndented = leadingWs !== undefined && leadingWs !== " ";
-    if (
-      !this.paragraphIndent ||
-      segment.segmentIndex === 0 ||
-      !text.trim() ||
-      handIndented
-    ) {
+    if (!this.paragraphIndent || !text.trim() || handIndented) {
       return 0;
     }
     return Math.min(
@@ -501,6 +495,33 @@ class Text {
     }
     const segment = this.segmentForLine(absLine);
     return segment && absLine === segment.lineStart ? segment.indent : 0;
+  }
+
+  /**
+   * Number of the paragraph whose first visual line is `absLine` (see
+   * {@link Segment.paragraphNumber}), or undefined on an empty paragraph, a
+   * soft-wrapped continuation line and outside `[0, noLines)`. Paragraphs are
+   * the newline-separated segments, so the number does not depend on the wrap width.
+   */
+  paragraphNumberStartingAt(absLine: number): number | undefined {
+    const segment = this.segmentForLine(absLine);
+    return segment && absLine === segment.lineStart ? segment.paragraphNumber : undefined;
+  }
+
+  /** First visual line of paragraph `paragraphNumber`, or undefined when there is none. */
+  paragraphStartLine(paragraphNumber: number): number | undefined {
+    return this.segments.find((s) => s.paragraphNumber === paragraphNumber)?.lineStart;
+  }
+
+  /** Number of non-empty paragraphs, i.e. the highest {@link Segment.paragraphNumber}. */
+  paragraphCount(): number {
+    for (let i = this.segments.length - 1; i >= 0; i--) {
+      const paragraphNumber = this.segments[i].paragraphNumber;
+      if (paragraphNumber !== undefined) {
+        return paragraphNumber;
+      }
+    }
+    return 0;
   }
 
   /**
@@ -727,12 +748,18 @@ class Text {
       return n;
     };
 
+    let paragraphCount = 0;
     for (
       let segmentIndex = 0;
       segmentIndex < this.segments.length;
       segmentIndex++
     ) {
       const segment = this.segments[segmentIndex];
+
+      // Paragraphs are counted on the tag-free text, the way plain-text tools count
+      // them: a line that is empty, tag-only or only whitespace (spaces, tabs, the
+      // \r of a CRLF file) takes no number and does not advance the count.
+      segment.paragraphNumber = segment.parsed.trim() ? ++paragraphCount : undefined;
 
       /* if (
         this.dirtySegment !== undefined &&
@@ -762,7 +789,6 @@ class Text {
         cached &&
         cached.text === text &&
         cached.parsed === segment.parsed &&
-        cached.isFirst === (segment.segmentIndex === 0) &&
         cached.mode === this.mode &&
         cached.budget === maxWidth &&
         cached.paragraphIndent === this.paragraphIndent &&
@@ -914,7 +940,6 @@ class Text {
       segment.wrappedFor = {
         text,
         parsed: segment.parsed,
-        isFirst: segment.segmentIndex === 0,
         mode: this.mode,
         budget: maxWidth,
         paragraphIndent: this.paragraphIndent,
