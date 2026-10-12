@@ -11,8 +11,10 @@ import { FaScissors } from "react-icons/fa6";
 import { TbAnchor } from "react-icons/tb";
 import { ButtonSize } from "types";
 import {
+  StyledWarningBody,
   StyledWarningInfo,
   StyledWarningKind,
+  StyledWarningParagraph,
   StyledWarningRow,
   StyledWarningsList,
   StyledWarningsListHeader,
@@ -117,47 +119,55 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               <StyledWarningRow
                 key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
               >
-                <StyledWarningInfo>
-                  <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
-                  {isFetchingEntities && !entityMap[anchor.tagName] ? (
-                    <Loader size={12} show noBackground />
-                  ) : (
-                    <EntityTagById
-                      entityId={anchor.tagName}
-                      entity={entityMap[anchor.tagName]}
-                      disableToast
-                      fullWidth
-                      disableTooltip={false}
-                      disableDoubleClick={false}
+                <StyledWarningKind>
+                  {kindLabel(anchor.type)}
+                  <StyledWarningParagraph>
+                    · paragraph {anchor.segmentIndex + 1}
+                  </StyledWarningParagraph>
+                </StyledWarningKind>
+                <StyledWarningBody>
+                  <StyledWarningInfo>
+                    {isFetchingEntities && !entityMap[anchor.tagName] ? (
+                      <Loader size={12} show noBackground />
+                    ) : (
+                      <EntityTagById
+                        entityId={anchor.tagName}
+                        entity={entityMap[anchor.tagName]}
+                        disableToast
+                        fullWidth
+                        disableTooltip={false}
+                        disableDoubleClick={false}
+                      />
+                    )}
+                  </StyledWarningInfo>
+                  <ButtonGroup>
+                    <Button
+                      icon={<TbAnchor />}
+                      label="scroll to"
+                      color="primary"
+                      tooltipLabel="scroll to anchor in text (RAW mode)"
+                      onClick={() => {
+                        onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
+                        // Close so the (now RAW-mode, scrolled) text is visible.
+                        onOpenChange(false);
+                      }}
                     />
-                  )}
-                </StyledWarningInfo>
-                <ButtonGroup>
-                  <Button
-                    icon={<TbAnchor />}
-                    label="scroll to"
-                    color="primary"
-                    tooltipLabel="scroll to anchor in text (RAW mode)"
-                    onClick={() => {
-                      onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
-                      // Close so the (now RAW-mode, scrolled) text is visible.
-                      onOpenChange(false);
-                    }}
-                  />
-                  <Button
-                    icon={<FaScissors />}
-                    label="remove"
-                    color="success"
-                    tooltipLabel="unlink broken anchor"
-                    onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
-                  />
-                </ButtonGroup>
+                    <Button
+                      icon={<FaScissors />}
+                      label="remove"
+                      color="danger"
+                      inverted
+                      tooltipLabel="unlink broken anchor"
+                      onClick={() => onUnlink(anchor.tagName, anchor.position, anchor.segmentIndex)}
+                    />
+                  </ButtonGroup>
+                </StyledWarningBody>
               </StyledWarningRow>
             ))}
           </StyledWarningsList>
         </ModalContent>
         <ModalFooter note="Anchors must have matching opening and closing tags">
-          <Button label="close" color="primary" inverted onClick={() => onOpenChange(false)} />
+          <Button label="Close" color="primary" inverted onClick={() => onOpenChange(false)} />
         </ModalFooter>
       </Modal>
     </>

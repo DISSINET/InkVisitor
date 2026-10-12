@@ -318,20 +318,31 @@ export const StyledWarningsListHeader = styled.div`
 
 export const StyledWarningRow = styled.div`
   display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.space[4]};
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space[1]};
   padding: 0.5rem 1rem;
   padding-right: 1.25rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
 `;
 
+export const StyledWarningBody = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[4]};
+`;
+
 export const StyledWarningInfo = styled.div`
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
   flex: 1;
   min-width: 0;
+`;
+
+export const StyledWarningParagraph = styled.span`
+  font-variant-caps: normal;
+  color: ${({ theme }) => theme.color.greyer};
 `;
 
 export const StyledWarningKind = styled.div`
