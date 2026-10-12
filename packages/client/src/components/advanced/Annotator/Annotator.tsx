@@ -357,6 +357,9 @@ export const TextAnnotator = ({
   const [isSecondStepOpen, setIsSecondStepOpen] = useState(false);
   const findInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [isGoToParagraphOpen, setIsGoToParagraphOpen] = useState(false);
+  const goToParagraphInputRef = useRef<HTMLInputElement | null>(null);
+
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
 
@@ -1507,6 +1510,34 @@ export const TextAnnotator = ({
     findInputRef.current?.select();
   }, [findFocusRequest]);
 
+  // Bumped on every open request, so a Ctrl/Cmd+G while the field is already
+  // open still re-focuses it.
+  const [goToParagraphFocusRequest, setGoToParagraphFocusRequest] = useState(0);
+
+  const openGoToParagraph = () => {
+    setIsGoToParagraphOpen(true);
+    setGoToParagraphFocusRequest((request) => request + 1);
+  };
+
+  // Runs after the render that mounted the field, so the ref is set.
+  useEffect(() => {
+    if (goToParagraphFocusRequest === 0) return;
+    goToParagraphInputRef.current?.focus();
+    goToParagraphInputRef.current?.select();
+  }, [goToParagraphFocusRequest]);
+
+  useKeypress("g", () => isSearchAllowed && openGoToParagraph(), [isSearchAllowed], true);
+
+  const goToParagraph = (paragraphNumber: number) => {
+    if (!annotator) return;
+    if (annotator.scrollToParagraph(paragraphNumber)) {
+      setIsGoToParagraphOpen(false);
+    } else {
+      const last = annotator.text.paragraphCount();
+      toast.warning(`There is no paragraph ${paragraphNumber}. The last one is ${last}.`);
+    }
+  };
+
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
     goToNextOccurence,
@@ -1836,6 +1867,11 @@ export const TextAnnotator = ({
             isSavePending={isSaving || isSavingWithoutRefresh}
             isSearchAllowed={isSearchAllowed}
             onFindClick={() => setIsFindOpen(true)}
+            isGoToParagraphOpen={isGoToParagraphOpen}
+            onGoToParagraphClick={openGoToParagraph}
+            onGoToParagraphClose={() => setIsGoToParagraphOpen(false)}
+            onGoToParagraph={goToParagraph}
+            goToParagraphInputRef={goToParagraphInputRef}
             warningChip={
               !hideWarningChip && asymmetricalAnchors.length > 0 ? (
                 <WarningsChip

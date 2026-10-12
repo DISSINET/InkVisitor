@@ -4,6 +4,7 @@
  * Empty lines take no number, and soft-wrapped continuation lines stay blank, so
  * the numbers do not shift when the wrap width changes.
  */
+import { Annotator } from "./lib/Annotator";
 import Text from "./lib/Text";
 import { EditMode } from "./lib/constants";
 import { Lines } from "./lib/Lines";
@@ -116,5 +117,49 @@ describe("Lines gutter draws paragraph numbers", () => {
     lines.draw(viewport(1, 3), (l) => t.paragraphNumberStartingAt(l));
 
     expect(calls).toEqual([{ s: "2", x: 0, y: 30 }]);
+  });
+});
+
+describe("going to a paragraph", () => {
+  test("Text.paragraphStartLine finds the first visual line of a numbered paragraph", () => {
+    // "abcdef" wraps to two lines; the empty line has no number
+    const t = new Text("abcdef\n\nxy", 999, tenPx, 30);
+    expect(t.paragraphStartLine(1)).toBe(0);
+    expect(t.paragraphStartLine(2)).toBe(3);
+    expect(t.paragraphStartLine(0)).toBeUndefined();
+    expect(t.paragraphStartLine(3)).toBeUndefined();
+  });
+
+  test("Text.paragraphCount is the last paragraph number, trailing empty lines ignored", () => {
+    expect(new Text("a\n\nb\n\n", 999, tenPx, 30).paragraphCount()).toBe(2);
+    expect(new Text("", 999, tenPx, 30).paragraphCount()).toBe(0);
+  });
+
+  const setup = (value: string) => {
+    const canvas = document.createElement("canvas");
+    canvas.style.width = "800px";
+    canvas.style.height = "600px";
+    document.body.appendChild(canvas);
+    const a = new Annotator(canvas, "");
+    a.setMode(EditMode.RAW);
+    a.onReplaceText(value);
+    return a;
+  };
+
+  test("Annotator.scrollToParagraph puts a collapsed caret at the paragraph start", () => {
+    const a = setup("\nfirst\n\nsecond\nthird");
+    a.cursor.setPosition(3, 1);
+
+    expect(a.scrollToParagraph(2)).toBe(true);
+    expect([a.cursor.xLine, a.cursor.yLine]).toEqual([0, 3]);
+    expect(a.cursor.isSelected()).toBe(false);
+  });
+
+  test("Annotator.scrollToParagraph leaves the caret alone for a missing paragraph", () => {
+    const a = setup("first\nsecond");
+    a.cursor.setPosition(2, 1);
+
+    expect(a.scrollToParagraph(3)).toBe(false);
+    expect([a.cursor.xLine, a.cursor.yLine]).toEqual([2, 1]);
   });
 });

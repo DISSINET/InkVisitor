@@ -512,6 +512,22 @@ class Text {
     return segment && absLine === segment.lineStart ? segment.paragraphNumber : undefined;
   }
 
+  /** First visual line of paragraph `paragraphNumber`, or undefined when there is none. */
+  paragraphStartLine(paragraphNumber: number): number | undefined {
+    return this.segments.find((s) => s.paragraphNumber === paragraphNumber)?.lineStart;
+  }
+
+  /** Number of non-empty paragraphs, i.e. the highest {@link Segment.paragraphNumber}. */
+  paragraphCount(): number {
+    for (let i = this.segments.length - 1; i >= 0; i--) {
+      const paragraphNumber = this.segments[i].paragraphNumber;
+      if (paragraphNumber !== undefined) {
+        return paragraphNumber;
+      }
+    }
+    return 0;
+  }
+
   /**
    * Does `absLine` hold the end of a paragraph, i.e. is it the last visual line
    * of its segment? True for the last line of the document as well — the

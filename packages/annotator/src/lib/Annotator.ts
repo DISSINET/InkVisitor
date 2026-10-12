@@ -4545,6 +4545,25 @@ export class Annotator {
   }
 
   /**
+   * Scrolls paragraph `paragraphNumber` (as numbered in the gutter) to the top,
+   * puts a collapsed caret at its start and focuses the canvas.
+   * Returns false, changing nothing, when the document has no such paragraph.
+   */
+  scrollToParagraph(paragraphNumber: number): boolean {
+    const absLine = this.text.paragraphStartLine(paragraphNumber);
+    if (absLine === undefined) {
+      return false;
+    }
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+    this.cursor.xLine = 0;
+    this.cursor.yLine = absLine;
+    this.cursor.resetHighlight();
+    this.draw();
+    this.element.focus({ preventScroll: true });
+    return true;
+  }
+
+  /**
    * Opens or closes headroom above line 1, so a floating bar pinned to the
    * canvas top can be scrolled clear of it. Only worth having while such a bar
    * is on screen — otherwise it is blank rows a user can scroll into for no

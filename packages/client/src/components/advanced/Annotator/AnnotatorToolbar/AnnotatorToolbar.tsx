@@ -1,13 +1,13 @@
 import { EditMode } from "@inkvisitor/annotator/src/lib";
-import { Button, Loader } from "components";
+import { Button, Input, Loader } from "components";
 import { SwitchGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { BsFileTextFill } from "react-icons/bs";
 import { FaHighlighter, FaRegSave } from "react-icons/fa";
 import { HiCodeBracket } from "react-icons/hi2";
 import { useTheme } from "styled-components";
 import { ButtonSize } from "types";
-import { IcoSearch, IcoUndo } from "Theme/icons";
+import { IcoListNumbered, IcoSearch, IcoUndo } from "Theme/icons";
 import {
   StyledAnnotatorToolbar,
   StyledAnnotatorToolbarButtonWrap,
@@ -31,6 +31,13 @@ interface AnnotatorToolbar {
   isSearchAllowed: boolean;
   onFindClick: () => void;
 
+  /** While open, the go-to-paragraph button is replaced by its number field. */
+  isGoToParagraphOpen: boolean;
+  onGoToParagraphClick: () => void;
+  onGoToParagraphClose: () => void;
+  onGoToParagraph: (paragraphNumber: number) => void;
+  goToParagraphInputRef: React.RefObject<HTMLInputElement | null>;
+
   /** Warnings chip, when this host has not supplied its own. */
   warningChip?: ReactNode;
   /**
@@ -51,10 +58,23 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
   isSavePending,
   isSearchAllowed,
   onFindClick,
+  isGoToParagraphOpen,
+  onGoToParagraphClick,
+  onGoToParagraphClose,
+  onGoToParagraph,
+  goToParagraphInputRef,
   warningChip,
   toolbarExtras,
 }) => {
   const theme = useTheme();
+  const [paragraphInput, setParagraphInput] = useState("");
+
+  // The field starts empty each time it opens.
+  useEffect(() => {
+    if (!isGoToParagraphOpen) {
+      setParagraphInput("");
+    }
+  }, [isGoToParagraphOpen]);
 
   const modeButton = (mode: EditMode, icon: ReactNode, tooltipLabel: string) => (
     <Button
@@ -98,6 +118,37 @@ export const AnnotatorToolbar: React.FC<AnnotatorToolbar> = ({
       </StyledAnnotatorToolbarCluster>
 
       <StyledAnnotatorToolbarCluster>
+        {isSearchAllowed &&
+          (isGoToParagraphOpen ? (
+            // A text field, because the number field's stepper buttons take focus and close it
+            <Input
+              width={80}
+              value={paragraphInput}
+              changeOnType
+              inputRef={goToParagraphInputRef}
+              placeholder="paragraph"
+              onChangeFn={setParagraphInput}
+              onEnterPressFn={() => {
+                const paragraphNumber = Number(paragraphInput.trim());
+                if (Number.isInteger(paragraphNumber) && paragraphNumber > 0) {
+                  onGoToParagraph(paragraphNumber);
+                }
+              }}
+              onEscapePressFn={onGoToParagraphClose}
+              onBlur={onGoToParagraphClose}
+            />
+          ) : (
+            <Button
+              size={ButtonSize.Small}
+              icon={<IcoListNumbered size={TOOLBAR_ICON_SIZE} />}
+              color="info"
+              inverted
+              onClick={onGoToParagraphClick}
+              tooltipLabel="go to paragraph (Ctrl+G)"
+              tooltipPosition="top"
+            />
+          ))}
+
         {isSearchAllowed && (
           <Button
             size={ButtonSize.Small}
