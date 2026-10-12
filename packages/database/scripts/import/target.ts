@@ -1,6 +1,6 @@
 import { TableSchema } from "./common";
 
-export type TargetKind = "rethinkdb";
+export type TargetKind = "rethinkdb" | "postgres";
 
 /**
  * How one insert landed. `duplicates` are rows dropped because the id is
