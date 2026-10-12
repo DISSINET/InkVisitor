@@ -7,7 +7,7 @@ import { Button, ButtonGroup, Checkbox, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { IcoFileText, IcoTrash } from "Theme/icons";
+import { IcoTrash } from "Theme/icons";
 import { EntityColors } from "types";
 import {
   StyledActionsCell,
@@ -16,6 +16,7 @@ import {
   StyledDisabledSelect,
   StyledDocumentRow,
   StyledExportIcon,
+  StyledOpenIcon,
   StyledReference,
   StyledSelectCell,
   StyledTitle,
@@ -149,7 +150,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
           {/* TODO: allow all users to open document on BE */}
           <Button
-            icon={<IcoFileText />}
+            icon={<StyledOpenIcon />}
             shape="square"
             color="info"
             inverted
