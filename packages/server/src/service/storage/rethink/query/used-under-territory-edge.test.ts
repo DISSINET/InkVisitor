@@ -3,7 +3,7 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
-import { provisionEntityIndexes } from "../../test/schema";
+import { provisionEntityIndexes } from "../provision";
 
 // Verifies the ACTUAL ReQL of the EUT: edge ("used in statements under T"):
 // every entity USED in a statement directly under the

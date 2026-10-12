@@ -1,5 +1,5 @@
 import { IResponsePermission } from "@inkvisitor/shared/types";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { IDbModel } from "@models/common";
 import { HttpMethods, UserEnums } from "@inkvisitor/shared/enums";
 
@@ -27,11 +27,11 @@ export default class AclPermission implements IDbModel, IResponsePermission {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(dbInstance: Connection | undefined): Promise<boolean> {
-    const result = await rethink
-      .table(AclPermission.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(dbInstance);
+  async save(dbInstance: Conn | undefined): Promise<boolean> {
+    const result = await storage.acl.insert(dbInstance as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -41,22 +41,14 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   }
 
   update(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    return rethink
-      .table(AclPermission.table)
-      .get(this.id)
-      .update(updateData)
-      .run(dbInstance);
+    return storage.acl.update(dbInstance as Conn, this.id, updateData);
   }
 
-  delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink
-      .table(AclPermission.table)
-      .get(this.id)
-      .delete()
-      .run(dbInstance);
+  delete(dbInstance: Conn): Promise<WriteResult> {
+    return storage.acl.delete(dbInstance, this.id);
   }
 
   isValid(): boolean {
@@ -73,31 +65,21 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   }
 
   static async findByRoute(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     controller: string,
     method: HttpMethods,
     route: string
   ): Promise<AclPermission[]> {
-    const data = await rethink
-      .table(AclPermission.table)
-      .filter({
-        controller,
-        method,
-        route,
-      })
-      .run(dbInstance);
+    const data = await storage.acl.byRoute(dbInstance as Conn, controller, method, route);
 
     return data.map((d) => new AclPermission(d));
   }
 
   static async findById(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     id: string
   ): Promise<AclPermission | null> {
-    const data = await rethink
-      .table(AclPermission.table)
-      .get(id)
-      .run(dbInstance);
+    const data = await storage.acl.get(dbInstance as Conn, id);
 
     if (!data) {
       return null;
@@ -106,9 +88,8 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   }
 
   static async fetchAll(
-    dbInstance: Connection | undefined
+    dbInstance: Conn | undefined
   ): Promise<IResponsePermission[]> {
-    const data = await rethink.table(AclPermission.table).run(dbInstance);
-    return data;
+    return storage.acl.all(dbInstance as Conn);
   }
 }

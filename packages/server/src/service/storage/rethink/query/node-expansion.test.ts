@@ -2,7 +2,10 @@ import "ts-jest";
 import { r, Connection } from "rethinkdb-ts";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
-import { getNodeExpansionIds } from "./node-expansion";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import { ExploreResolvers } from "../../types";
+import { wrap } from "../conn";
 import { getEdgeInstance } from "./edge";
 
 // Verifies getNodeExpansionIds against real ReQL, and that EdgeI.prepare()
@@ -69,6 +72,12 @@ const RELATION_FIXTURES = [
 
 const sorted = (a: string[]) => [...a].sort();
 
+const RESOLVERS: ExploreResolvers = {
+  expand: (c, id, opts) => getNodeExpansionIds(c, id, opts),
+  subordinates: (c, ids) => getSubordinateEntityIds(c, ids),
+  territoryPath: () => [],
+};
+
 describe("getNodeExpansionIds", () => {
   let conn: Connection;
 
@@ -97,7 +106,7 @@ describe("getNodeExpansionIds", () => {
   });
 
   test("both toggles off: empty groups, no expansion", async () => {
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: false,
       subordinates: false,
     });
@@ -105,7 +114,7 @@ describe("getNodeExpansionIds", () => {
   });
 
   test("equivalents only", async () => {
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: true,
       subordinates: false,
     });
@@ -114,7 +123,7 @@ describe("getNodeExpansionIds", () => {
   });
 
   test("subordinates only", async () => {
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: false,
       subordinates: true,
     });
@@ -123,7 +132,7 @@ describe("getNodeExpansionIds", () => {
   });
 
   test("both on: an id reachable either way is reported as an equivalent only", async () => {
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: true,
       subordinates: true,
     });
@@ -133,7 +142,7 @@ describe("getNodeExpansionIds", () => {
   });
 
   test("the pinned entity never appears in either group", async () => {
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: true,
       subordinates: true,
     });
@@ -142,7 +151,7 @@ describe("getNodeExpansionIds", () => {
   });
 
   test("unrelated entities never appear", async () => {
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: true,
       subordinates: true,
     });
@@ -167,10 +176,10 @@ describe("getNodeExpansionIds", () => {
         params,
         edges: [],
       },
-    });
+    }, RESOLVERS);
     await edge.prepare(conn);
 
-    const res = await getNodeExpansionIds(conn, CONCEPT_A, {
+    const res = await getNodeExpansionIds(wrap(conn), CONCEPT_A, {
       equivalents: true,
       subordinates: true,
     });

@@ -1,7 +1,7 @@
 import "ts-jest";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { prepareEntity } from "./entity.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { clean } from "@modules/common.test";
 import EntityWarnings from "./warnings";
 import { prepareRelation } from "@models/relation/relation.test";

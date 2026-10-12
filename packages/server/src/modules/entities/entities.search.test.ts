@@ -2,7 +2,7 @@ import { apiPath } from "@common/constants";
 import Document from "@models/document/document";
 import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { deleteEntities } from "@service/shorthands";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { BadParams } from "@inkvisitor/shared/types/errors";

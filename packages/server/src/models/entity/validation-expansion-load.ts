@@ -3,7 +3,7 @@ import { getNodeExpansionIds } from "@service/query/node-expansion";
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { ITerritory } from "@inkvisitor/shared/types";
 import { EValidationExpansionKind } from "@inkvisitor/shared/types/territory";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 import {
   ValidationExpansionMap,
@@ -28,7 +28,7 @@ const EXPANSIONS_IN_PARALLEL = 8;
  * @returns expansion ids per (kind, entity id); empty when no rule asks for any
  */
 export const buildValidationExpansionMap = async (
-  conn: Connection,
+  conn: Conn,
   territories: ITerritory[]
 ): Promise<ValidationExpansionMap> => {
   const map: ValidationExpansionMap = new Map();

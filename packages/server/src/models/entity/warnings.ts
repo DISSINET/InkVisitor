@@ -16,7 +16,7 @@ import { IActionValency } from "@inkvisitor/shared/types/action";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import { PropSpecKind } from "@inkvisitor/shared/types/prop";
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import Entity from "./entity";
 import { buildValidationExpansionMap } from "./validation-expansion-load";
 
@@ -55,7 +55,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async getWarnings(conn: Connection): Promise<IWarning[]> {
+  async getWarnings(conn: Conn): Promise<IWarning[]> {
     const settings = await Setting.getSettingsAll(conn);
 
     const warnings: IWarning[] = [];
@@ -156,7 +156,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasDM(conn: Connection): Promise<IWarning | null> {
+  async hasDM(conn: Conn): Promise<IWarning | null> {
     const entity = await findEntityById(conn, this.entityId);
 
     if (!entity || !entity.detail || entity.detail.trim().length === 0) {
@@ -170,7 +170,7 @@ export default class EntityWarnings {
   }
 
   async getTBasedWarnings(
-    conn: Connection,
+    conn: Conn,
     entity: Entity,
     rootTerritory: ITerritory
   ): Promise<IWarning[]> {
@@ -224,7 +224,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasSCLM(conn: Connection): Promise<IWarning | null> {
+  async hasSCLM(conn: Conn): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Concept) {
       return null;
     }
@@ -260,7 +260,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasISYNC(conn: Connection): Promise<IWarning | null> {
+  async hasISYNC(conn: Conn): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Concept) {
       return null;
     }
@@ -361,7 +361,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasISYNCAEE(conn: Connection): Promise<IWarning | null> {
+  async hasISYNCAEE(conn: Conn): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }
@@ -472,7 +472,7 @@ export default class EntityWarnings {
     return null;
   }
 
-  async hasMVAL(conn: Connection): Promise<IWarning | null> {
+  async hasMVAL(conn: Conn): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }
@@ -504,7 +504,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasAVAL(conn: Connection): Promise<IWarning[] | null> {
+  async hasAVAL(conn: Conn): Promise<IWarning[] | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }
@@ -584,7 +584,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasMAEE(conn: Connection): Promise<IWarning | null> {
+  async hasMAEE(conn: Conn): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }
@@ -612,7 +612,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasPSM(conn: Connection): Promise<IWarning | null> {
+  async hasPSM(conn: Conn): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Concept) {
       return null;
     }
@@ -637,7 +637,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasLM(conn: Connection): Promise<IWarning | null> {
+  async hasLM(conn: Conn): Promise<IWarning | null> {
     const entity = await findEntityById(conn, this.entityId);
 
     if (!entity || entity.language === EntityEnums.Language.Empty) {
@@ -655,7 +655,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasVETM(conn: Connection): Promise<IWarning[] | null> {
+  async hasVETM(conn: Conn): Promise<IWarning[] | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }

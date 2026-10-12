@@ -1,13 +1,13 @@
 import "ts-jest";
 import { Explore } from "@inkvisitor/shared/types/query";
 import Statement from "@models/statement/statement";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import {
   applyCoOccurrenceFilter,
   getCoOccurrenceFilter,
 } from "./explore-cooccurrence-filter";
 
-const db = {} as Connection;
+const db = {} as Conn;
 
 const coOccurrenceFilter = (
   entityIds: string[]

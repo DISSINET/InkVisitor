@@ -3,7 +3,11 @@ import { r, Connection } from "rethinkdb-ts";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import { ExploreResolvers } from "../../types";
 import SearchNode from "./nodes";
+import { wrap } from "../conn";
 
 // Verifies the entityStatuses node param against the ACTUAL ReQL: on a target
 // node it narrows what an edge may point AT (the "which entities use a
@@ -109,6 +113,12 @@ const RELATION_FIXTURES = [
   },
 ];
 
+const RESOLVERS: ExploreResolvers = {
+  expand: (c, id, opts) => getNodeExpansionIds(c, id, opts),
+  subordinates: (c, ids) => getSubordinateEntityIds(c, ids),
+  territoryPath: () => [],
+};
+
 const runEdge = async (
   edgeType: Query.EdgeType,
   params: Query.INodeParams,
@@ -126,7 +136,7 @@ const runEdge = async (
       params,
       edges: [],
     },
-  });
+  }, RESOLVERS);
   // the node evaluator always calls prepare() before run() - the status
   // constraint is resolved into the target-id set there
   await edge.prepare(conn);
@@ -400,8 +410,7 @@ describe("entityStatuses node param (real ReQL)", () => {
         params,
         edges: [],
       });
-      const results = await node.run(conn);
-      return results.items ?? [];
+      return node.run(wrap(conn));
     };
 
     test("the base set is narrowed to the given statuses", async () => {

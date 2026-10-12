@@ -8,7 +8,7 @@ import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 
 describe("Entities get method", function () {

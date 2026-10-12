@@ -1,57 +1,28 @@
-import { Connection, r } from "rethinkdb-ts";
 import session from "express-session";
-import DbPool from "./rethink-pool";
+import { Conn, DbPool, SessionRow, storage } from "@service/storage";
 
-export const SESSIONS_TABLE = "sessions";
-
-interface SessionRow {
-  id: string;
-  userId?: string;
-  data: string;
-  expiresAt: number;
-}
-
-export async function ensureSessionsTable(conn: Connection): Promise<void> {
-  const tables = (await r.tableList().run(conn)) as string[];
-  if (tables.includes(SESSIONS_TABLE)) {
-    return;
-  }
-
-  await r.tableCreate(SESSIONS_TABLE).run(conn);
-  await r.table(SESSIONS_TABLE).indexCreate("userId").run(conn);
-  await r.table(SESSIONS_TABLE).indexCreate("expiresAt").run(conn);
-  console.log(`[startup] created RethinkDB table ${SESSIONS_TABLE}`);
+export async function ensureSessionsTable(conn: Conn): Promise<void> {
+  await storage.sessions.ensure(conn);
 }
 
 export async function invalidateUserSessions(
-  conn: Connection,
+  conn: Conn,
   userId: string
 ): Promise<void> {
-  await r
-    .table(SESSIONS_TABLE)
-    .getAll(userId, { index: "userId" })
-    .delete()
-    .run(conn);
+  await storage.sessions.deleteByUser(conn, userId);
 }
 
 /**
  * Deletes every session whose expiry has already passed. The store also removes
  * expired rows lazily on get(), but a session that is never accessed again would
- * otherwise linger forever - this sweep reclaims those. Uses the expiresAt index
- * so it is a bounded range delete rather than a full table scan (expiresAt is an
- * epoch-ms timestamp, so 0 is a safe lower bound).
+ * otherwise linger forever - this sweep reclaims those.
  * @returns number of rows removed
  */
-export async function reapExpiredSessions(conn: Connection): Promise<number> {
-  const result = await r
-    .table(SESSIONS_TABLE)
-    .between(0, Date.now(), { index: "expiresAt", rightBound: "closed" })
-    .delete()
-    .run(conn);
-  return result.deleted ?? 0;
+export function reapExpiredSessions(conn: Conn): Promise<number> {
+  return storage.sessions.deleteExpired(conn, Date.now());
 }
 
-export class RethinkSessionStore extends session.Store {
+export class StorageSessionStore extends session.Store {
   private pool: DbPool;
   private ready: Promise<void> | null = null;
 
@@ -75,7 +46,7 @@ export class RethinkSessionStore extends session.Store {
     return this.ready;
   }
 
-  private async withConn<T>(fn: (conn: Connection) => Promise<T>): Promise<T> {
+  private async withConn<T>(fn: (conn: Conn) => Promise<T>): Promise<T> {
     const db = await this.pool.acquire();
     try {
       return await fn(db.connection);
@@ -91,14 +62,11 @@ export class RethinkSessionStore extends session.Store {
     this.ensureReady()
       .then(() =>
         this.withConn(async (conn) => {
-          const row = (await r
-            .table(SESSIONS_TABLE)
-            .get(sid)
-            .run(conn)) as SessionRow | null;
+          const row = await storage.sessions.get(conn, sid);
 
           if (!row || row.expiresAt <= Date.now()) {
             if (row) {
-              await r.table(SESSIONS_TABLE).get(sid).delete().run(conn);
+              await storage.sessions.delete(conn, sid);
             }
             return null;
           }
@@ -125,20 +93,14 @@ export class RethinkSessionStore extends session.Store {
     };
 
     this.ensureReady()
-      .then(() =>
-        this.withConn((conn) =>
-          r.table(SESSIONS_TABLE).insert(row, { conflict: "replace" }).run(conn)
-        )
-      )
+      .then(() => this.withConn((conn) => storage.sessions.set(conn, row)))
       .then(() => callback?.())
       .catch((err) => callback?.(err));
   }
 
   destroy(sid: string, callback?: (err?: unknown) => void): void {
     this.ensureReady()
-      .then(() =>
-        this.withConn((conn) => r.table(SESSIONS_TABLE).get(sid).delete().run(conn))
-      )
+      .then(() => this.withConn((conn) => storage.sessions.delete(conn, sid)))
       .then(() => callback?.())
       .catch((err) => callback?.(err));
   }

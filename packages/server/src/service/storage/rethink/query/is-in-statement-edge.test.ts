@@ -3,7 +3,10 @@ import { r, Connection } from "rethinkdb-ts";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import { getEdgeInstance } from "./edge";
-import { provisionEntityIndexes } from "../../test/schema";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
+import { getSubordinateEntityIds } from "@models/relation/functions";
+import { ExploreResolvers } from "../../types";
+import { provisionEntityIndexes } from "../provision";
 
 // Verifies the ACTUAL ReQL of the IS: edge ("is in S: any position", aka
 // XIsInS): given a target Statement S, it should return every entity USED in S
@@ -120,6 +123,12 @@ const FIXTURES = [
   ent(A_OTHER),
 ];
 
+const RESOLVERS: ExploreResolvers = {
+  expand: (c, id, opts) => getNodeExpansionIds(c, id, opts),
+  subordinates: (c, ids) => getSubordinateEntityIds(c, ids),
+  territoryPath: () => [],
+};
+
 const runEdge = async (
   params: Query.INodeParams,
   conn: Connection
@@ -136,7 +145,7 @@ const runEdge = async (
       params,
       edges: [],
     },
-  });
+  }, RESOLVERS);
   await edge.prepare(conn);
   return edge.run(r.table(TABLE)).distinct().run(conn) as Promise<string[]>;
 };
