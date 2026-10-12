@@ -340,7 +340,10 @@ export const StyledWarningInfo = styled.div`
   min-width: 0;
 `;
 
+// Normal case: small caps shrink letters but not digits, so the number would tower over them.
 export const StyledWarningParagraph = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-variant-caps: normal;
   color: ${({ theme }) => theme.color.mutedText};
 `;
 
