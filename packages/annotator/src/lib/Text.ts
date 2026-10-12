@@ -500,6 +500,17 @@ class Text {
   }
 
   /**
+   * 1-based number of the paragraph whose first visual line is `absLine`, or
+   * undefined on a soft-wrapped continuation line and outside `[0, noLines)`.
+   * Paragraphs are the newline-separated segments, empty ones included, so the
+   * number does not depend on the wrap width.
+   */
+  paragraphNumberStartingAt(absLine: number): number | undefined {
+    const i = this.segmentIndexForLine(absLine);
+    return i !== -1 && absLine === this.segments[i].lineStart ? i + 1 : undefined;
+  }
+
+  /**
    * Does `absLine` hold the end of a paragraph, i.e. is it the last visual line
    * of its segment? True for the last line of the document as well — the
    * document's final paragraph ends there even without a trailing newline.

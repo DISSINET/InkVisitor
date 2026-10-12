@@ -3622,7 +3622,7 @@ export class Annotator {
     if (this.lines) {
       this.lines.font = this.font;
       this.lines.lineHeight = this.lineHeight;
-      this.lines.draw(this.viewport, this.text.noLines);
+      this.lines.draw(this.viewport, (absLine) => this.text.paragraphNumberStartingAt(absLine));
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;

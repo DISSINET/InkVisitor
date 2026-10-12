@@ -40,7 +40,7 @@ describe("proportional soft-wrap caret affinity", () => {
   });
 });
 
-// ── line-number gutter is independent of proportional ─────────────────
+// ── paragraph-number gutter is independent of proportional ────────────
 describe("gutter is charWidth/proportional-independent", () => {
   const mkLines = (lineHeight: number, charWidth: number) => {
     const calls: { s: string; x: number; y: number }[] = [];
@@ -66,17 +66,19 @@ describe("gutter is charWidth/proportional-independent", () => {
 
   test("draws one number per content line at lineHeight-based y and x=0, regardless of charWidth", () => {
     const vp = { scrollOffsetY: 0, lineStart: 0, lineEnd: 4 } as unknown as Viewport;
+    // 3 content lines, one paragraph each
+    const numberAt = (absLine: number) => (absLine >= 0 && absLine < 3 ? absLine + 1 : undefined);
 
     // A huge charWidth must not move the gutter — it only uses lineHeight.
     const a = mkLines(20, 999);
-    a.lines.draw(vp, 3); // 3 content lines
+    a.lines.draw(vp, numberAt);
     expect(a.calls.map((c) => c.s)).toEqual(["1", "2", "3"]);
     expect(a.calls.map((c) => c.x)).toEqual([0, 0, 0]);
     expect(a.calls.map((c) => c.y)).toEqual([10, 30, 50]); // (row + 0.5) * 20
 
     // Same layout with a tiny charWidth → identical gutter (proves independence).
     const b = mkLines(20, 1);
-    b.lines.draw(vp, 3);
+    b.lines.draw(vp, numberAt);
     expect(b.calls).toEqual(a.calls);
   });
 });

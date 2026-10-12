@@ -2,7 +2,7 @@ import { DEFAULT_FONT, DEFAULT_FONT_SIZE } from "./constants";
 import Viewport from "./Viewport";
 
 /**
- * Lines is canvas wrapper for writing no. lines
+ * Lines is canvas wrapper for the gutter with paragraph numbers
  */
 export class Lines {
   // canvas element
@@ -50,8 +50,12 @@ export class Lines {
     this.font = `${DEFAULT_FONT_SIZE * ratio}px ${DEFAULT_FONT}`;
   }
 
-  /** Rows at absolute index < 0 or ≥ `contentLineCount` are blank in the gutter (e.g. the leading/trailing scroll buffer). */
-  draw(viewport: Viewport, contentLineCount: number) {
+  /**
+   * `paragraphNumberAt` gives the number to draw on an absolute visual line;
+   * rows it returns undefined for (soft-wrapped continuations, the
+   * leading/trailing scroll buffer) are blank in the gutter.
+   */
+  draw(viewport: Viewport, paragraphNumberAt: (absLine: number) => number | undefined) {
     this.ctx.reset();
 
     this.width = this.element.width;
@@ -76,13 +80,13 @@ export class Lines {
 
     const renderEndCond = viewport.lineEnd - viewport.lineStart;
     for (let row = 0; row <= renderEndCond; row++) {
-      const absLine = viewport.lineStart + row;
-      if (absLine < 0 || absLine >= contentLineCount) {
+      const paragraphNumber = paragraphNumberAt(viewport.lineStart + row);
+      if (paragraphNumber === undefined) {
         continue;
       }
       // Same Y as Annotator.draw for each text row
       this.ctx.fillText(
-        String(absLine + 1),
+        String(paragraphNumber),
         0,
         (row + 0.5) * this.lineHeight
       );
