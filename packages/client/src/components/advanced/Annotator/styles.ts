@@ -341,8 +341,7 @@ export const StyledWarningInfo = styled.div`
 `;
 
 export const StyledWarningParagraph = styled.span`
-  font-variant-caps: normal;
-  color: ${({ theme }) => theme.color.greyer};
+  color: ${({ theme }) => theme.color.mutedText};
 `;
 
 export const StyledWarningKind = styled.div`
