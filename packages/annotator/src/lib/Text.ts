@@ -40,6 +40,9 @@ export class Tag {
   segmentIndex: number;
 
   private tagContent: string; // div id="12"
+  // Length of the markup as written in the raw text. Unset on a tag built in
+  // code, whose markup is the one getTag() writes.
+  private readonly markupLength?: number;
   attributes: Record<string, string>;
 
   /**
@@ -49,17 +52,20 @@ export class Tag {
    * @param tag - The tag name (e.g., "person", "location" along with attributes)
    * @param closing - Whether this is a closing tag (default: false)
    * @param segmentIndex - The index of the segment containing this tag
+   * @param markupLength - Length of the tag's markup in the raw text, when parsed from it
    */
   constructor(
     position: number,
     tag: string,
     closing?: boolean,
-    segmentIndex?: number
+    segmentIndex?: number,
+    markupLength?: number
   ) {
     this.position = position;
     this.tagContent = tag;
     this.closing = closing;
     this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
+    this.markupLength = markupLength;
     this.attributes = this.parseAttributes(tag);
   }
 
@@ -127,8 +133,12 @@ export class Tag {
     return openTag;
   }
 
+  /**
+   * Length of the tag in the raw text. getTag() rebuilds the markup in its
+   * canonical form, which can be shorter than what is written (`</sic >`).
+   */
   getTagLength(): number {
-    return this.getTag().length;
+    return this.markupLength ?? this.getTag().length;
   }
 
   /**
@@ -260,14 +270,14 @@ export class Segment {
     let match;
     while ((match = openingRegex.exec(this.raw)) !== null) {
       this.openingTags.push(
-        new Tag(match.index, match[1], false, this.segmentIndex)
+        new Tag(match.index, match[1], false, this.segmentIndex, match[0].length)
       );
     }
 
     // Find closing tags
     while ((match = closingRegex.exec(this.raw)) !== null) {
       this.closingTags.push(
-        new Tag(match.index, match[1], true, this.segmentIndex)
+        new Tag(match.index, match[1], true, this.segmentIndex, match[0].length)
       );
     }
 

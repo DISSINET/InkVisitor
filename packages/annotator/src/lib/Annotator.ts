@@ -68,9 +68,9 @@ import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 // Opening tags: <tagname attr="value"> or <tagname>
 // Handles UUIDs, alphanumeric, hyphens, underscores, and attributes
 const openingTagRegex = /<([a-zA-Z0-9\-_]+(?:\s+[^>]*)?)>/g;
-// Closing tags: </tagname>
+// Closing tags: </tagname> or </tagname >
 // Handles UUIDs, alphanumeric, hyphens, underscores
-export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)>/g;
+export const closingTagRegex = /<\/([a-zA-Z0-9\-_]+)\s*>/g;
 // General tag removal regex
 export const tagRemovalRegex = /<\/?[^<>]+?>/g;
 // Creates a new regex instance for opening tags (no shared state)
@@ -92,7 +92,7 @@ export const createSpecificOpeningTagRegex = (tagName: string) =>
  * tag has no attributes; an opening tag may. Literal "<"/">" sequences that
  * don't form a valid tag are ordinary text characters.
  */
-const wholeTagRegex = /^(?:<\/[a-zA-Z0-9\-_]+>|<[a-zA-Z0-9\-_]+(?:\s+[^>]*)?>)$/;
+const wholeTagRegex = /^(?:<\/[a-zA-Z0-9\-_]+\s*>|<[a-zA-Z0-9\-_]+(?:\s+[^>]*)?>)$/;
 
 /** Extracts the tag name from a complete markup string like `</e1>` or `<e1 elvl="1">`. */
 const getTagNameFromMarkup = (markup: string): string =>
