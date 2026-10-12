@@ -8,8 +8,7 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { FaDownload } from "react-icons/fa";
-import { IcoTrash } from "Theme/icons";
-import { RiFileEditFill } from "react-icons/ri";
+import { IcoFileText, IcoTrash } from "Theme/icons";
 import { EntityColors } from "types";
 import {
   StyledActionsCell,
@@ -31,7 +30,7 @@ interface DocumentRow {
   canManage: boolean;
   selected: boolean;
   onToggleSelected: (id: string) => void;
-  handleDocumentEdit: (id: string) => void;
+  handleDocumentOpen: (id: string) => void;
   handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
@@ -53,7 +52,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   canManage,
   selected,
   onToggleSelected,
-  handleDocumentEdit,
+  handleDocumentOpen,
   handleDocumentExport,
   setDocToDelete,
   updateDocumentMutation,
@@ -149,10 +148,10 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
           {/* TODO: allow all users to open document on BE */}
           <Button
-            icon={<RiFileEditFill />}
-            color="warning"
+            icon={<IcoFileText />}
+            color="primary"
             inverted
-            onClick={() => handleDocumentEdit(document.id)}
+            onClick={() => handleDocumentOpen(document.id)}
             tooltipLabel={"open document"}
           />
           <Button
