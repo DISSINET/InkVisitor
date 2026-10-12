@@ -117,20 +117,6 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
               <StyledWarningRow
                 key={`${anchor.tagName}-${anchor.segmentIndex}-${anchor.position}-${index}`}
               >
-                <Button
-                  icon={<TbAnchor />}
-                  size={ButtonSize.Large}
-                  color="success"
-                  inverted
-                  noBorder
-                  shape="rounded-md"
-                  tooltipLabel="scroll to anchor in text (RAW mode)"
-                  onClick={() => {
-                    onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
-                    // Close so the (now RAW-mode, scrolled) text is visible.
-                    onOpenChange(false);
-                  }}
-                />
                 <StyledWarningInfo>
                   <StyledWarningKind>{kindLabel(anchor.type)}</StyledWarningKind>
                   {isFetchingEntities && !entityMap[anchor.tagName] ? (
@@ -147,6 +133,17 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
                   )}
                 </StyledWarningInfo>
                 <ButtonGroup>
+                  <Button
+                    icon={<TbAnchor />}
+                    label="scroll to"
+                    color="primary"
+                    tooltipLabel="scroll to anchor in text (RAW mode)"
+                    onClick={() => {
+                      onScrollTo(anchor.tagName, anchor.position, anchor.segmentIndex);
+                      // Close so the (now RAW-mode, scrolled) text is visible.
+                      onOpenChange(false);
+                    }}
+                  />
                   <Button
                     icon={<FaScissors />}
                     label="remove"

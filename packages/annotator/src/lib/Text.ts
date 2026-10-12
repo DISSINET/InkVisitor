@@ -35,6 +35,9 @@ export enum CaretAffinity {
 export class Tag {
   readonly position: number; // raw position in segment text
   readonly closing?: boolean;
+  // `<tag />` or `<tag attr="1"/>`: complete on its own, never part of a pair.
+  // openingTagRegex captures these as opening tags with a trailing "/".
+  readonly selfClosing: boolean;
   // Index of the segment containing this tag. Written by Text.prepareSegments
   // when segment reuse shifts the segment (and its tags) to a new position.
   segmentIndex: number;
@@ -59,6 +62,7 @@ export class Tag {
     this.position = position;
     this.tagContent = tag;
     this.closing = closing;
+    this.selfClosing = !closing && tag.trimEnd().endsWith("/");
     this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
     this.attributes = this.parseAttributes(tag);
   }
@@ -2022,6 +2026,9 @@ class Text {
     // Collect all opening and closing tags
     for (const segment of this.segments) {
       for (const tag of segment.openingTags) {
+        if (tag.selfClosing) {
+          continue;
+        }
         const name = tag.getTagName();
         if (!openingTagsByName.has(name)) {
           openingTagsByName.set(name, []);
