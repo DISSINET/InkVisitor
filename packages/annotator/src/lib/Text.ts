@@ -35,6 +35,9 @@ export enum CaretAffinity {
 export class Tag {
   readonly position: number; // raw position in segment text
   readonly closing?: boolean;
+  // `<tag />` or `<tag attr="1"/>`: complete on its own, never part of a pair.
+  // openingTagRegex captures these as opening tags with a trailing "/".
+  readonly selfClosing: boolean;
   // Index of the segment containing this tag. Written by Text.prepareSegments
   // when segment reuse shifts the segment (and its tags) to a new position.
   segmentIndex: number;
@@ -59,6 +62,7 @@ export class Tag {
     this.position = position;
     this.tagContent = tag;
     this.closing = closing;
+    this.selfClosing = !closing && tag.trimEnd().endsWith("/");
     this.segmentIndex = segmentIndex ?? -1; // Default to -1 if not provided
     this.attributes = this.parseAttributes(tag);
   }
@@ -2032,6 +2036,7 @@ class Text {
     segmentIndex: number;
     position: number;
     attributes?: Record<string, string>;
+    paragraphNumber?: number;
   }> {
     const issues: Array<{
       tagName: string;
@@ -2039,65 +2044,57 @@ class Text {
       segmentIndex: number;
       position: number;
       attributes?: Record<string, string>;
+      paragraphNumber?: number;
     }> = [];
 
-    const openingTagsByName = new Map<string, Tag[]>();
-    const closingTagsByName = new Map<string, Tag[]>();
-
-    // Collect all opening and closing tags
+    // Each name's tags in document order: segments are already ordered, and
+    // within a segment opening and closing tags sort by position.
+    const tagsByName = new Map<string, Tag[]>();
     for (const segment of this.segments) {
-      for (const tag of segment.openingTags) {
+      const tags = [
+        ...segment.openingTags.filter((tag) => !tag.selfClosing),
+        ...segment.closingTags,
+      ].sort((a, b) => a.position - b.position);
+      for (const tag of tags) {
         const name = tag.getTagName();
-        if (!openingTagsByName.has(name)) {
-          openingTagsByName.set(name, []);
+        if (!tagsByName.has(name)) {
+          tagsByName.set(name, []);
         }
-        openingTagsByName.get(name)!.push(tag);
-      }
-
-      for (const tag of segment.closingTags) {
-        const name = tag.getTagName();
-        if (!closingTagsByName.has(name)) {
-          closingTagsByName.set(name, []);
-        }
-        closingTagsByName.get(name)!.push(tag);
+        tagsByName.get(name)!.push(tag);
       }
     }
 
-    // Find orphaned opening tags
-    for (const [tagName, openings] of openingTagsByName) {
-      const closings = closingTagsByName.get(tagName) || [];
-      if (openings.length > closings.length) {
-        // More openings than closings - last ones are orphaned
-        for (let i = closings.length; i < openings.length; i++) {
-          const orphan = openings[i];
-          issues.push({
-            tagName,
-            type: 'orphaned-opening',
-            segmentIndex: orphan.segmentIndex,
-            position: orphan.position,
-            attributes: orphan.attributes,
-          });
+    const addIssue = (
+      tag: Tag,
+      type: 'orphaned-opening' | 'orphaned-closing'
+    ) => {
+      issues.push({
+        tagName: tag.getTagName(),
+        type,
+        segmentIndex: tag.segmentIndex,
+        position: tag.position,
+        attributes: tag.attributes,
+        paragraphNumber: this.segments[tag.segmentIndex]?.paragraphNumber,
+      });
+    };
+
+    // A closing tag closes the latest still-open tag of its name before it;
+    // with none open, it is orphaned. Tags left open at the end are orphaned.
+    for (const tags of tagsByName.values()) {
+      const open: Tag[] = [];
+      for (const tag of tags) {
+        if (!tag.closing) {
+          open.push(tag);
+        } else if (!open.pop()) {
+          addIssue(tag, 'orphaned-closing');
         }
       }
+      open.forEach((tag) => addIssue(tag, 'orphaned-opening'));
     }
 
-    // Find orphaned closing tags
-    for (const [tagName, closings] of closingTagsByName) {
-      const openings = openingTagsByName.get(tagName) || [];
-      if (closings.length > openings.length) {
-        // More closings than openings - first ones are orphaned
-        for (let i = openings.length; i < closings.length; i++) {
-          const orphan = closings[i];
-          issues.push({
-            tagName,
-            type: 'orphaned-closing',
-            segmentIndex: orphan.segmentIndex,
-            position: orphan.position,
-            attributes: orphan.attributes,
-          });
-        }
-      }
-    }
+    issues.sort(
+      (a, b) => a.segmentIndex - b.segmentIndex || a.position - b.position
+    );
 
     return issues;
   }
