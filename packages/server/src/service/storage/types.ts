@@ -256,7 +256,7 @@ export interface ExplorePlan {
 }
 
 export interface Storage {
-  readonly kind: "rethinkdb";
+  readonly kind: "rethinkdb" | "postgres";
   /** throws when the connection settings are missing from the environment */
   assertConfigured(): void;
   /** a dedicated connection; `db: null` opens it without selecting a database */

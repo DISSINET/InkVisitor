@@ -3,12 +3,13 @@ import { DbEnums } from "@inkvisitor/shared/enums";
 /**
  * Indexes the server depends on at request time. If any of these are
  * missing the corresponding route throws a runtime error - we'd rather
- * fail-fast at boot with an actionable message. The adapter checks this
- * list at startup against indexList().
+ * fail-fast at boot with an actionable message. Both adapters check this
+ * list at startup: RethinkDB against indexList(), PostgreSQL against
+ * pg_indexes under the names from postgres/provision.ts.
  *
- * Adding a new dependency? Add an entry here and declare the index in the
- * catalogue in rethink/provision.ts; the operator-run ensureIndexesJob in
- * packages/database creates missing ones from it.
+ * Adding a new dependency? Add an entry here and declare the index in both
+ * catalogues; the operator-run ensureIndexesJob in packages/database creates
+ * missing RethinkDB ones from its list.
  */
 export interface RequiredIndex {
   table: string;

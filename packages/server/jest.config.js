@@ -86,6 +86,8 @@ const UNIT_TEST_PATHS = [
   "src/service/storage/rethink/query/nesting.test.ts",
   "src/service/storage/catalogue.test.ts",
   "src/service/storage/config.test.ts",
+  "src/service/storage/postgres/sql.test.ts",
+  "src/service/storage/postgres/search.test.ts",
   "src/models/stats/event-type-fold.test.ts",
   "src/models/stats/hybrid-stats.test.ts",
   "src/models/stats/stats-aggregator.test.ts",
@@ -141,6 +143,12 @@ module.exports = {
       testPathIgnorePatterns: [
         "/node_modules/",
         "/build/",
+        // the suites under the RethinkDB adapter run ReQL against a live
+        // RethinkDB; on the PostgreSQL adapter the global setup provisions no
+        // RethinkDB database for them
+        ...(process.env.DB_ADAPTER === "postgres"
+          ? ["/src/service/storage/rethink/"]
+          : []),
         ...UNIT_TEST_PATHS.map((p) => p.replace(/\./g, "\\.") + "$"),
       ],
       // Build a fresh, uniquely-provisioned ephemeral test DB once per run and
