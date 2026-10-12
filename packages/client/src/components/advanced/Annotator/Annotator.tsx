@@ -1665,7 +1665,12 @@ export const TextAnnotator = ({
           }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
-          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+          // Only keys aimed at the canvas: the toolbar's fields sit in this column too.
+          if (
+            !canEditDocument &&
+            annotatorMode !== EditMode.HIGHLIGHT &&
+            e.target === mainCanvas.current
+          ) {
             const isEditingKey =
               (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
               e.key === "Backspace" ||
