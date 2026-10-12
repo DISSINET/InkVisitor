@@ -224,7 +224,7 @@ export class Segment {
     measurer?: TextMeasurer;
   };
   segmentIndex: number = -1; // index of this segment in the text
-  /** 1-based number among the non-empty paragraphs; undefined for an empty one. */
+  /** 1-based number among the paragraphs with text; undefined for a blank one. */
   paragraphNumber?: number;
 
   /**
@@ -753,8 +753,9 @@ class Text {
       const segment = this.segments[segmentIndex];
 
       // Paragraphs are counted on the tag-free text, the way plain-text tools count
-      // them: an empty or tag-only line takes no number and does not advance the count.
-      segment.paragraphNumber = segment.parsed ? ++paragraphCount : undefined;
+      // them: a line that is empty, tag-only or only whitespace (spaces, tabs, the
+      // \r of a CRLF file) takes no number and does not advance the count.
+      segment.paragraphNumber = segment.parsed.trim() ? ++paragraphCount : undefined;
 
       /* if (
         this.dirtySegment !== undefined &&

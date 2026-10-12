@@ -64,6 +64,11 @@ describe("Text.paragraphNumberStartingAt", () => {
     ]);
   });
 
+  test("lines holding only spaces, tabs or a CRLF \\r are empty", () => {
+    const t = new Text("a\r\n\r\n  \n\t\nb\r", 999, tenPx, 30);
+    expect(numbersOf(t)).toEqual([1, undefined, undefined, undefined, 2]);
+  });
+
   test("a line holding only tags is empty in every mode", () => {
     const t = new Text("<x>\nab</x>\ncd", 999, tenPx, 30);
     for (const mode of [EditMode.RAW, EditMode.HIGHLIGHT, EditMode.SEMI]) {
