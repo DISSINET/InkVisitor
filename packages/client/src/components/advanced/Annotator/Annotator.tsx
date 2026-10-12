@@ -333,8 +333,9 @@ export const TextAnnotator = ({
     },
   });
 
-  // Fits four digits at the largest font size option (15px, digits up to ~0.62em wide)
-  const wLineNumbers = displayLineNumbers ? 40 : 0;
+  // Four right-aligned digits at the largest font size option (15px, up to ~37px
+  // wide), the annotator's 8px gap before the text, and a small left margin
+  const wLineNumbers = displayLineNumbers ? 48 : 0;
   const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);

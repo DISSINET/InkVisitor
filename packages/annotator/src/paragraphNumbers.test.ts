@@ -116,7 +116,7 @@ describe("Lines gutter draws paragraph numbers", () => {
     const { lines, calls } = mkLines(20);
     lines.draw(viewport(1, 3), (l) => t.paragraphNumberStartingAt(l));
 
-    expect(calls).toEqual([{ s: "2", x: 0, y: 30 }]);
+    expect(calls).toEqual([{ s: "2", x: 32, y: 30 }]); // right edge (40) minus the 8px gap
   });
 });
 
