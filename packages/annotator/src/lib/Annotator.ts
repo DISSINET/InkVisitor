@@ -3622,7 +3622,8 @@ export class Annotator {
     if (this.lines) {
       this.lines.font = this.font;
       this.lines.lineHeight = this.lineHeight;
-      this.lines.draw(this.viewport, this.text.noLines);
+      this.lines.ratio = this.ratio;
+      this.lines.draw(this.viewport, (absLine) => this.text.paragraphNumberStartingAt(absLine));
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;
@@ -4542,6 +4543,25 @@ export class Annotator {
   scrollToLine(absLine: number, lineOffset: number = 0) {
     this.viewport.scrollTo(absLine + lineOffset, this.scrollExtentLineCount());
     this.draw();
+  }
+
+  /**
+   * Scrolls paragraph `paragraphNumber` (as numbered in the gutter) to the top,
+   * puts a collapsed caret at its start and focuses the canvas.
+   * Returns false, changing nothing, when the document has no such paragraph.
+   */
+  scrollToParagraph(paragraphNumber: number): boolean {
+    const absLine = this.text.paragraphStartLine(paragraphNumber);
+    if (absLine === undefined) {
+      return false;
+    }
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+    // setPosition also drops the column remembered by earlier up/down moves
+    this.cursor.setPosition(0, absLine);
+    this.cursor.resetHighlight();
+    this.draw();
+    this.element.focus({ preventScroll: true });
+    return true;
   }
 
   /**

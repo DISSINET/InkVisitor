@@ -333,7 +333,9 @@ export const TextAnnotator = ({
     },
   });
 
-  const wLineNumbers = displayLineNumbers ? 50 : 0;
+  // Four right-aligned digits at the largest font size option (15px, up to ~37px
+  // wide), the annotator's 8px gap before the text, and a small left margin
+  const wLineNumbers = displayLineNumbers ? 48 : 0;
   const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
@@ -355,6 +357,9 @@ export const TextAnnotator = ({
   const [isFindOpen, setIsFindOpen] = useState(false);
   const [isSecondStepOpen, setIsSecondStepOpen] = useState(false);
   const findInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [isGoToParagraphOpen, setIsGoToParagraphOpen] = useState(false);
+  const goToParagraphInputRef = useRef<HTMLInputElement | null>(null);
 
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
@@ -1506,6 +1511,63 @@ export const TextAnnotator = ({
     findInputRef.current?.select();
   }, [findFocusRequest]);
 
+  // Bumped on every open request, so a Ctrl/Cmd+G while the field is already
+  // open still re-focuses it.
+  const [goToParagraphFocusRequest, setGoToParagraphFocusRequest] = useState(0);
+
+  const openGoToParagraph = () => {
+    setIsGoToParagraphOpen(true);
+    setGoToParagraphFocusRequest((request) => request + 1);
+  };
+
+  // Runs after the render that mounted the field, so the ref is set.
+  useEffect(() => {
+    if (goToParagraphFocusRequest === 0) return;
+    goToParagraphInputRef.current?.focus();
+    goToParagraphInputRef.current?.select();
+  }, [goToParagraphFocusRequest]);
+
+  // Ctrl/Cmd+G opens the field only with a document loaded and while focus is not
+  // in another text field, so the browser keeps its own "find next" otherwise.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "g" || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      if (!isSearchAllowed) return;
+      const target = e.target as HTMLElement | null;
+      const inOtherField =
+        target !== goToParagraphInputRef.current &&
+        (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable);
+      if (inOtherField) return;
+      e.preventDefault();
+      openGoToParagraph();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSearchAllowed]);
+
+  // A field left open across a document switch would come back unfocused, with
+  // nothing to close it.
+  useEffect(() => {
+    setIsGoToParagraphOpen(false);
+  }, [documentId, isSearchAllowed]);
+
+  const goToParagraph = (input: string) => {
+    if (!annotator) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    if (!/^\d+$/.test(trimmed)) {
+      toast.warning(`"${trimmed}" is not a paragraph number.`);
+      return;
+    }
+    const paragraphNumber = Number(trimmed);
+    if (annotator.scrollToParagraph(paragraphNumber)) {
+      setIsGoToParagraphOpen(false);
+    } else {
+      const last = annotator.text.paragraphCount();
+      toast.warning(`There is no paragraph ${paragraphNumber}. The last one is ${last}.`);
+    }
+  };
+
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
     goToNextOccurence,
@@ -1633,7 +1695,12 @@ export const TextAnnotator = ({
           }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
-          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+          // Only keys aimed at the canvas: the toolbar's fields sit in this column too.
+          if (
+            !canEditDocument &&
+            annotatorMode !== EditMode.HIGHLIGHT &&
+            e.target === mainCanvas.current
+          ) {
             const isEditingKey =
               (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
               e.key === "Backspace" ||
@@ -1835,6 +1902,11 @@ export const TextAnnotator = ({
             isSavePending={isSaving || isSavingWithoutRefresh}
             isSearchAllowed={isSearchAllowed}
             onFindClick={() => setIsFindOpen(true)}
+            isGoToParagraphOpen={isGoToParagraphOpen}
+            onGoToParagraphClick={openGoToParagraph}
+            onGoToParagraphClose={() => setIsGoToParagraphOpen(false)}
+            onGoToParagraph={goToParagraph}
+            goToParagraphInputRef={goToParagraphInputRef}
             warningChip={
               !hideWarningChip && asymmetricalAnchors.length > 0 ? (
                 <WarningsChip

@@ -41,9 +41,10 @@ describe("which lines carry the indent", () => {
     expect(t.lineXOrigin(start + 2)).toBe(0);
   });
 
-  test("the document's first paragraph stays flush", () => {
+  test("the document's first paragraph is indented like the rest", () => {
     const t = mkText("first paragraph here\nsecond", 4);
-    expect(t.lineXOrigin(0)).toBe(0);
+    expect(t.lineXOrigin(0)).toBe(4);
+    expect(t.lineXOrigin(t.segments[1].lineStart)).toBe(4);
   });
 
   test("a paragraph already starting with typed spaces is not indented again", () => {

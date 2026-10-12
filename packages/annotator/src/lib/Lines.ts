@@ -1,8 +1,11 @@
 import { DEFAULT_FONT, DEFAULT_FONT_SIZE } from "./constants";
 import Viewport from "./Viewport";
 
+/** Space (CSS px) between a right-aligned paragraph number and the text column. */
+const NUMBER_GAP_PX = 8;
+
 /**
- * Lines is canvas wrapper for writing no. lines
+ * Lines is canvas wrapper for the gutter with paragraph numbers
  */
 export class Lines {
   // canvas element
@@ -50,8 +53,12 @@ export class Lines {
     this.font = `${DEFAULT_FONT_SIZE * ratio}px ${DEFAULT_FONT}`;
   }
 
-  /** Rows at absolute index < 0 or ≥ `contentLineCount` are blank in the gutter (e.g. the leading/trailing scroll buffer). */
-  draw(viewport: Viewport, contentLineCount: number) {
+  /**
+   * `paragraphNumberAt` gives the number to draw on an absolute visual line;
+   * rows it returns undefined for (soft-wrapped continuations, the
+   * leading/trailing scroll buffer) are blank in the gutter.
+   */
+  draw(viewport: Viewport, paragraphNumberAt: (absLine: number) => number | undefined) {
     this.ctx.reset();
 
     this.width = this.element.width;
@@ -73,19 +80,18 @@ export class Lines {
     this.ctx.font = this.font;
     this.ctx.fillStyle = this.fontColor;
     this.ctx.textBaseline = "middle";
+    // Right-aligned so numbers of any length end at the same x, next to the text.
+    this.ctx.textAlign = "right";
+    const x = this.width - NUMBER_GAP_PX * this.ratio;
 
     const renderEndCond = viewport.lineEnd - viewport.lineStart;
     for (let row = 0; row <= renderEndCond; row++) {
-      const absLine = viewport.lineStart + row;
-      if (absLine < 0 || absLine >= contentLineCount) {
+      const paragraphNumber = paragraphNumberAt(viewport.lineStart + row);
+      if (paragraphNumber === undefined) {
         continue;
       }
       // Same Y as Annotator.draw for each text row
-      this.ctx.fillText(
-        String(absLine + 1),
-        0,
-        (row + 0.5) * this.lineHeight
-      );
+      this.ctx.fillText(String(paragraphNumber), x, (row + 0.5) * this.lineHeight);
     }
 
     this.ctx.restore();

@@ -1,5 +1,6 @@
 import styled, { css } from "styled-components";
 import { StyledScrollbar } from "components/basic/CustomScrollbar/CustomScrollbarStyles";
+import { IcoDownload, IcoFileText } from "Theme/icons";
 
 /**
  * Documents grid can scroll on both axes; the library’s gutter margin/padding can break horizontal extent.
@@ -286,4 +287,14 @@ export const StyledInputWrap = styled.div`
     ${theme.color.uploadDocumentBg} 12px
   )
   `};
+`;
+
+/** The solid export glyph reads larger than the others at the same size, so it is 1px smaller. */
+export const StyledExportIcon = styled(IcoDownload)`
+  font-size: calc(${({ theme }) => theme.fontSize.xs} - 1px);
+`;
+
+/** The thin outline of the open glyph reads smaller than the others at the same size, so it is 1px bigger. */
+export const StyledOpenIcon = styled(IcoFileText)`
+  font-size: calc(${({ theme }) => theme.fontSize.xs} + 1px);
 `;

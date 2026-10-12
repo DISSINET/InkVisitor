@@ -9,12 +9,12 @@ import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
 import { StyledDocumentModalAnnotator } from "./DocumentModalStyles";
 
-interface DocumentModalEdit {
+interface DocumentModalView {
   documentId: string;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
 }
-const DocumentModalEdit: React.FC<DocumentModalEdit> = ({ documentId, onClose, anchor }) => {
+const DocumentModalView: React.FC<DocumentModalView> = ({ documentId, onClose, anchor }) => {
   const [show, setShow] = useState(false);
   useEffect(() => {
     setShow(true);
@@ -100,4 +100,4 @@ const DocumentModalEdit: React.FC<DocumentModalEdit> = ({ documentId, onClose, a
   );
 };
 
-export default DocumentModalEdit;
+export default DocumentModalView;
