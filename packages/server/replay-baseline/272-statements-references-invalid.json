@@ -1,0 +1,21 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/statements/references?ids=rp-s",
+    "body": [
+      {
+        "id": ""
+      }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "bad references data",
+      "result": false
+    }
+  }
+}

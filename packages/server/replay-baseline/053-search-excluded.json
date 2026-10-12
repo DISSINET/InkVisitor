@@ -1,0 +1,1601 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?label=*a*&excluded=S,T,C"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "B",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "probably a pug",
+        "id": "b1",
+        "labels": [
+          "a dog"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-maee",
+        "labels": [
+          "a-has-maee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-mval-1",
+        "labels": [
+          "a-has-mval-1"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-mval-2",
+        "labels": [
+          "a-has-mval-2"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-hasnt-mval",
+        "labels": [
+          "a-hasnt-mval"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {},
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a-has-not-maee",
+        "labels": [
+          "a-has-not-maee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "E",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "e1",
+        "labels": [
+          "a sacrificy of pug"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a507",
+        "labels": [
+          "sip coffee from a cup"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1206",
+        "labels": [
+          "a room in Faculty of Arts"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1204",
+        "labels": [
+          "A favorite neighborhood of David"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p12",
+        "labels": [
+          "another priest, mentioned in a different T"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a508",
+        "labels": [
+          "have a coffee as a first thing in the morning"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c1001",
+        "labels": [
+          "name"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c521",
+        "labels": [
+          "gate"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c211b",
+        "labels": [
+          "carlin"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c22",
+        "labels": [
+          "manmal"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c23",
+        "labels": [
+          "animal"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c504",
+        "labels": [
+          "valley"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "in general - who gives advice",
+        "id": "<uuid-2>",
+        "labels": [
+          "advisor"
+        ],
+        "language": "eng",
+        "legacyId": "C1449",
+        "notes": [
+          "Import batch [January2023] 2023-01-21 18:58:21.366042"
+        ],
+        "props": [],
+        "references": [
+          {
+            "id": "<uuid-3>",
+            "resource": "dissinet-resource",
+            "value": "<uuid-2>"
+          }
+        ],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c211c",
+        "labels": [
+          "carlino"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c401",
+        "labels": [
+          "village"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l6",
+        "labels": [
+          "Moravia"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l8",
+        "labels": [
+          "Czechia"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a503",
+        "labels": [
+          "have fun"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c1000",
+        "labels": [
+          "nickname"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c5",
+        "labels": [
+          "mountain"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l4",
+        "labels": [
+          "cat town"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a3",
+        "labels": [
+          "sacrifice"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c31",
+        "labels": [
+          "sacrifice"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c70",
+        "labels": [
+          "father of"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a4",
+        "labels": [
+          "take place"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c3",
+        "labels": [
+          "occupation"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c907",
+        "labels": [
+          "relaxation"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a505",
+        "labels": [
+          "have coffee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a506",
+        "labels": [
+          "take coffee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c52",
+        "labels": [
+          "temple gate"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c903",
+        "labels": [
+          "consumation"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c905",
+        "labels": [
+          "energy gain"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l7",
+        "labels": [
+          "Cat kingdom"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p11",
+        "labels": [
+          "saint Tiger"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c524",
+        "labels": [
+          "sacred place"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c55",
+        "labels": [
+          "temple walls"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c80",
+        "labels": [
+          "localization"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c32",
+        "labels": [
+          "religious act"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c54",
+        "labels": [
+          "temple garden"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c901",
+        "labels": [
+          "having coffee"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c908",
+        "labels": [
+          "entertainment"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1207",
+        "labels": [
+          "Davids office"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l5",
+        "labels": [
+          "Mauw mountain"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a501",
+        "labels": [
+          "drink beverage"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c1105",
+        "labels": [
+          "workshop place"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c1107",
+        "labels": [
+          "event location"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c904",
+        "labels": [
+          "coffein intake"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c46",
+        "labels": [
+          "abstract things"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a34",
+        "labels": [
+          "being sacrificed"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-sclm-warning",
+        "labels": [
+          "has-sclm-warning"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c51",
+        "labels": [
+          "temple sanctuary"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c44",
+        "labels": [
+          "morality metaphor"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l3",
+        "labels": [
+          "temple of cat god"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p1",
+        "labels": [
+          "Minda, the priest"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a504",
+        "labels": [
+          "entertain or relax"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-isync-superclass-1",
+        "labels": [
+          "isync-superclass-1"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-isync-superclass-2",
+        "labels": [
+          "isync-superclass-2"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c1106",
+        "labels": [
+          "work-related place"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1201",
+        "labels": [
+          "Arne Novaka street"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c42",
+        "labels": [
+          "religious character"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l10",
+        "labels": [
+          "South Moravia region"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c906",
+        "labels": [
+          "energetic transmission"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1203",
+        "labels": [
+          "Veveří fantasy kingdom"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "R",
+        "createdAt": "<datetime>",
+        "data": {
+          "partValueBaseURL": "",
+          "partValueLabel": "",
+          "url": "https://dissinet.cz/"
+        },
+        "detail": "",
+        "id": "dissinet-resource",
+        "labels": [
+          "DISSINET Database (DDB1)"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c404",
+        "labels": [
+          "geographical localization"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "T",
+        "createdAt": "<datetime>",
+        "data": {
+          "parent": {
+            "order": 2,
+            "territoryId": "T0"
+          }
+        },
+        "detail": "",
+        "id": "t1",
+        "labels": [
+          "priest Minda and their stories"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1202",
+        "labels": [
+          "The location of the Battle for ERC"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l2",
+        "labels": [
+          "sanctuary of the temple of cat god"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-hasnt-isync-1",
+        "labels": [
+          "hasnt-isync-1 (is in syn cloud, has SCL) "
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-hasnt-isync-2",
+        "labels": [
+          "hasnt-isync-2 (is in syn cloud, has SCL) "
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-4",
+        "labels": [
+          "has-isync-4 (is in syn cloud, but without SCL) "
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-1",
+        "labels": [
+          "has-isync-1 (is in syn cloud, but has first SCL) "
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-2",
+        "labels": [
+          "has-isync-2 (is in syn cloud, but has first SCL) "
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-3",
+        "labels": [
+          "has-isync-3 (is in syn cloud, but has second SCL) "
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

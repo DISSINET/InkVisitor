@@ -1,0 +1,27 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/users/3",
+    "body": {
+      "options": {
+        "defaultLanguage": "eng",
+        "defaultTerritory": "t1",
+        "searchLanguages": [
+          "eng"
+        ],
+        "workingLanguages": [
+          "eng",
+          "lat"
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

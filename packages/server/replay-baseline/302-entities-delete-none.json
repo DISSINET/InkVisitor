@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "DELETE",
+    "path": "/api/entities",
+    "body": {}
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "at least one entity id needs to be provided",
+      "result": false
+    }
+  }
+}

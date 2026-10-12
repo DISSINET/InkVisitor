@@ -1,0 +1,67 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?entityIds=p1,c2,l1,rp-c"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p1",
+        "labels": [
+          "Minda, the priest"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c2",
+        "labels": [
+          "priest"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1",
+        "labels": [
+          "Brno"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

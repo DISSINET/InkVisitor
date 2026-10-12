@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/users/u-missing",
+    "body": {
+      "name": "x"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "UserDoesNotExits",
+      "message": "user with id u-missing does not exist",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/stats/aggregate",
+    "body": {
+      "fromDate": 1546300800000,
+      "timeUnits": [
+        "month"
+      ],
+      "toDate": 1924992000000
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "Successfully aggregated stats data from 2019-01-01T00:00:00.000Z to 2031-01-01T00:00:00.000Z. Processed 18 records across 1 time units and 2 aggregation types.",
+      "recordsProcessed": 18
+    }
+  }
+}
