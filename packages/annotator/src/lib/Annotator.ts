@@ -3484,9 +3484,8 @@ export class Annotator {
           // Each FOCUS item dims everything outside its own span, so with
           // several spans of one entity the washes stack over the whole text
           // and no line reads as "inside". The veil is drawn only for an entity
-          // with exactly one opening and one closing tag: getTagPosition pairs
-          // the nth opening with the nth closing tag, so an unpaired tag shifts
-          // the pairing and the span would cover the wrong text.
+          // with exactly one opening and one closing tag, so an entity with an
+          // orphaned tag gets none.
           const tagCount = this.text.countTags(tagName);
           const isSingleAnchor = tagCount.opening === 1 && tagCount.closing === 1;
           const spanSchemas = isSingleAnchor
@@ -4562,7 +4561,7 @@ export class Annotator {
     let occurrence = 0;
     outer: for (const segment of this.text.segments) {
       for (const open of segment.openingTags) {
-        if (open.getTagName() === tag) {
+        if (open.getTagName() === tag && !open.selfClosing) {
           if (occurrence === index) {
             openingTag = open;
             break outer;

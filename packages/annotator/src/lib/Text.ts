@@ -325,6 +325,11 @@ export interface SegmentPosition {
   rawTextIndex: number;
 }
 
+interface TagInSegment {
+  tag: Tag;
+  segment: Segment;
+}
+
 /**
  * Text provides more abstract control over the provided raw text.
  *
@@ -1986,62 +1991,52 @@ class Text {
   }
 
   /**
-   * Finds the position of a specific tag occurrence. Pairs the nth opening
-   * tag with the nth closing tag; self-closing tags are skipped, as they have
-   * no closing partner.
+   * Pairs the tags of one name in document order: a closing tag closes the
+   * latest still-open tag of its name before it, as in validateAnchors.
+   * Orphaned and self-closing tags are left out. Pairs are ordered by their
+   * opening tag, so a nested anchor follows the one around it.
+   */
+  private pairTags(tag: string): Array<{ opening: TagInSegment; closing: TagInSegment }> {
+    const pairs: Array<{ opening: TagInSegment; closing: TagInSegment; order: number }> = [];
+    const open: Array<TagInSegment & { order: number }> = [];
+    let order = 0;
+    for (const segment of this.segments) {
+      const tags = [
+        ...segment.openingTags.filter((t) => t.getTagName() === tag && !t.selfClosing),
+        ...segment.closingTags.filter((t) => t.getTagName() === tag),
+      ].sort((a, b) => a.position - b.position);
+      for (const t of tags) {
+        if (!t.closing) {
+          open.push({ tag: t, segment, order: order++ });
+          continue;
+        }
+        const opening = open.pop();
+        if (opening) {
+          pairs.push({ opening, closing: { tag: t, segment }, order: opening.order });
+        }
+      }
+    }
+    return pairs.sort((a, b) => a.order - b.order);
+  }
+
+  /**
+   * Finds the position of a specific anchor occurrence, counting only paired
+   * tags (see pairTags), so an orphaned tag is never drawn as an anchor.
    *
    * @param tag - The tag name to search for
    * @param index - The occurrence index (0-based, default: 0)
    * @returns Array containing start and end coordinates of the tag, or empty array if not found
    */
   getTagPosition(tag: string, index: number = 0): IAbsCoordinates[] {
-    let openingTagMatch: { tag: Tag; segment: Segment } | null = null;
-    let closingTagMatch: { tag: Tag; segment: Segment } | null = null;
-
-    let openingTagIndex = 0;
-    let closingTagIndex = 0;
-
-    // Search for the opening tag
-    for (const segment of this.segments) {
-      for (const openingTag of segment.openingTags) {
-        if (openingTag.getTagName() === tag && !openingTag.selfClosing) {
-          if (openingTagIndex === index) {
-            openingTagMatch = { tag: openingTag, segment };
-            break;
-          }
-          openingTagIndex++;
-        }
-      }
-      if (openingTagMatch) break;
-    }
-
-    // Search for the closing tag
-    for (const segment of this.segments) {
-      for (const closingTag of segment.closingTags) {
-        if (closingTag.getTagName() === tag) {
-          if (closingTagIndex === index) {
-            closingTagMatch = { tag: closingTag, segment };
-            break;
-          }
-          closingTagIndex++;
-        }
-      }
-      if (closingTagMatch) break;
-    }
-
-    // Check if both tags were found
-    if (!openingTagMatch || !closingTagMatch) {
+    const pair = this.pairTags(tag)[index];
+    if (!pair) {
       // console.warn(`Tag "${tag}" with occurrence ${occurrence} not found.`);
       return [];
     }
 
     // Calculate the parsed positions of the opening and closing tags
-    const start = openingTagMatch.segment.findTagParsedPosition(
-      openingTagMatch.tag
-    );
-    const end = closingTagMatch.segment.findTagParsedPosition(
-      closingTagMatch.tag
-    );
+    const start = pair.opening.segment.findTagParsedPosition(pair.opening.tag);
+    const end = pair.closing.segment.findTagParsedPosition(pair.closing.tag);
 
     // Return the coordinates
     return [
