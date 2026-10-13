@@ -59,13 +59,18 @@ export const StyledCanvasWrapper = styled.div<StyledCanvasWrapperProps>`
   flex-direction: row;
 `;
 
+// The canvases draw their own selection; a native browser selection over them
+// paints a flat blue tint across the whole element.
 export const StyledMainCanvas = styled.canvas`
   outline: none;
   cursor: text;
+  user-select: none;
 `;
 
 // css doesn't load on the canvas element, so we use inline styles
-export const StyledLinesCanvas = styled.canvas``;
+export const StyledLinesCanvas = styled.canvas`
+  user-select: none;
+`;
 
 interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorDoneButton = styled.div`
