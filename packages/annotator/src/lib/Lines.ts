@@ -3,6 +3,8 @@ import Viewport from "./Viewport";
 
 /** Space (CSS px) between a right-aligned paragraph number and the text column. */
 const NUMBER_GAP_PX = 8;
+/** Space (CSS px) between the gutter's left edge and the widest number. */
+const NUMBER_MARGIN_PX = 4;
 
 /**
  * Lines is canvas wrapper for the gutter with paragraph numbers
@@ -51,6 +53,30 @@ export class Lines {
     // Buffer-space line height (device px), same value the Annotator draws with.
     this.lineHeight = lineHeight;
     this.font = `${DEFAULT_FONT_SIZE * ratio}px ${DEFAULT_FONT}`;
+  }
+
+  // widest digit advance (device px), keyed by the font it was measured in
+  private digitWidthCache?: { font: string; width: number };
+
+  /**
+   * CSS px the gutter needs so numbers up to `maxNumber` fit at the current
+   * font. Digit-count based, so it only changes at 10, 100, 1000... paragraphs.
+   */
+  requiredWidth(maxNumber: number): number {
+    if (this.digitWidthCache?.font !== this.font) {
+      this.ctx.font = this.font;
+      let width = 0;
+      for (let d = 0; d <= 9; d++) {
+        width = Math.max(width, this.ctx.measureText(String(d)).width);
+      }
+      this.digitWidthCache = { font: this.font, width };
+    }
+    const digits = String(Math.max(1, maxNumber)).length;
+    return (
+      Math.ceil((digits * this.digitWidthCache.width) / this.ratio) +
+      NUMBER_GAP_PX +
+      NUMBER_MARGIN_PX
+    );
   }
 
   /**

@@ -333,9 +333,10 @@ export const TextAnnotator = ({
     },
   });
 
-  // Four right-aligned digits at the largest font size option (15px, up to ~37px
-  // wide), the annotator's 8px gap before the text, and a small left margin
-  const wLineNumbers = displayLineNumbers ? 48 : 0;
+  // Measured by the annotator from the highest paragraph number and the font;
+  // the initial value only holds until the first report.
+  const [gutterWidth, setGutterWidth] = useState<number>(48);
+  const wLineNumbers = displayLineNumbers ? gutterWidth : 0;
   const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
@@ -939,6 +940,7 @@ export const TextAnnotator = ({
 
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
+      newAnnotator.onGutterWidthChange(setGutterWidth);
     }
 
     newAnnotator.onSelectText(({ text, anchors, index }) => {
@@ -1035,7 +1037,7 @@ export const TextAnnotator = ({
     if (annotator && mainCanvas.current) {
       annotator?.resize();
     }
-  }, [width, canvasHeight]);
+  }, [width, canvasHeight, wLineNumbers]);
 
   useEffect(() => {
     if (storedAnnotatorScrollPosition !== null) {

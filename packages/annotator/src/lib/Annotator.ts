@@ -435,6 +435,9 @@ export class Annotator {
   onHighlightCb?: (entityId: string) => HighlightSchema | HighlightSchema[] | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
+  onGutterWidthChangeCb?: (width: number) => void;
+  // last width passed to onGutterWidthChangeCb
+  reportedGutterWidth?: number;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
   onAnchorTagHoverCb?: (tag: Tag | null, position: { x: number; y: number } | null) => void;
 
@@ -1277,6 +1280,31 @@ export class Annotator {
 
   onScroll(cb: (line: number) => void) {
     this.onScrollCb = cb;
+  }
+
+  /**
+   * Registers callback receiving the gutter width (CSS px) that fits the
+   * highest paragraph number at the current font. Fires on registration and
+   * whenever that width changes; the host sizes the gutter canvas from it and
+   * calls {@link resize}.
+   */
+  onGutterWidthChange(cb: (width: number) => void) {
+    this.onGutterWidthChangeCb = cb;
+    this.reportedGutterWidth = undefined;
+    this.reportGutterWidth();
+  }
+
+  private reportGutterWidth(): void {
+    if (!this.lines || !this.onGutterWidthChangeCb) {
+      return;
+    }
+    this.lines.font = this.font;
+    this.lines.ratio = this.ratio;
+    const width = this.lines.requiredWidth(this.text.paragraphCount());
+    if (width !== this.reportedGutterWidth) {
+      this.reportedGutterWidth = width;
+      this.onGutterWidthChangeCb(width);
+    }
   }
 
   /**
@@ -2178,6 +2206,7 @@ export class Annotator {
     this.element.removeEventListener("blur", this.boundOnCanvasBlur);
 
     this.onScrollCb = undefined;
+    this.onGutterWidthChangeCb = undefined;
     this.scroller = undefined;
     this.lines = undefined;
   }
@@ -3641,6 +3670,7 @@ export class Annotator {
       this.lines.lineHeight = this.lineHeight;
       this.lines.ratio = this.ratio;
       this.lines.draw(this.viewport, (absLine) => this.text.paragraphNumberStartingAt(absLine));
+      this.reportGutterWidth();
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;
