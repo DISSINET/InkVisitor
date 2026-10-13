@@ -161,6 +161,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [territoryId, secondPanelExpanded, dispatch]);
 
+  // A url that names an entity detail asks to see it, whatever state the user
+  // last left the second panel and the detail box in.
+  useEffect(() => {
+    if (!selectedDetailId && detailIdArray.length === 0) {
+      return;
+    }
+    if (!secondPanelExpanded) {
+      // the page is still assembling itself, so no travel - same as above
+      skipTravelForPanelState.current = true;
+      dispatch(setSecondPanelExpanded(true));
+    }
+    if (detailBoxState === DetailBoxState.Minimized) {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  }, []);
+
   const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
     const prev = prevEditorStateRef.current;
