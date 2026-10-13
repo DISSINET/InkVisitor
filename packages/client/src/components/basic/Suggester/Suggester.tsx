@@ -51,6 +51,9 @@ import { IcoMinus, IcoPlusBold } from "Theme/icons";
 // free to overhang the input and its container
 const SUGGESTION_LIST_MIN_WIDTH = 320;
 
+// px; the type bar is all that separates the class box from the input
+const TYPE_BAR_WIDTH = 5;
+
 interface Suggester {
   marginTop?: boolean;
   suggestions: EntitySuggestion[];
@@ -355,7 +358,7 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const { refs, floatingStyles, middlewareData, placement, isPositioned, context } = useFloating({
+  const { refs, floatingStyles, middlewareData, isPositioned, context } = useFloating({
     open: isFocused || isHovered,
     // only the hover half can be dismissed; focus closes the list on blur
     onOpenChange: (open) => {
@@ -376,6 +379,11 @@ export const Suggester: React.FC<Suggester> = ({
           elements.floating.style.maxWidth = `${Math.max(0, availableWidth)}px`;
         },
       }),
+      // how far the list starts left of the input, after flip and shift
+      {
+        name: "overhang",
+        fn: ({ x, rects }) => ({ data: { left: rects.reference.x - x } }),
+      },
       hide(),
     ],
   });
@@ -389,10 +397,10 @@ export const Suggester: React.FC<Suggester> = ({
   // cannot report the input as hidden before the list is positioned again
   const isListHidden = isPositioned && !!middlewareData.hide?.referenceHidden;
 
-  // a list moved left by flip or shift covers the spot where the class menu
+  // a list moved left past the type bar covers the spot where the class menu
   // opens, so it gives way while that menu is open
-  const isListMovedLeft = placement.endsWith("-end") || (middlewareData.shift?.x ?? 0) < 0;
-  const isListUnderCategoryMenu = isCategoryMenuOpen && isListMovedLeft;
+  const isListOverCategory = (middlewareData.overhang?.left ?? 0) > TYPE_BAR_WIDTH;
+  const isListUnderCategoryMenu = isCategoryMenuOpen && isListOverCategory;
 
   // an input scrolled out of view closes its list; clicking the input reopens it
   useEffect(() => {
@@ -505,7 +513,7 @@ export const Suggester: React.FC<Suggester> = ({
             entityLetter={category}
             color={categoryIsOffered ? undefined : "grey"}
             noMargin
-            width={5}
+            width={TYPE_BAR_WIDTH}
             dimColor={disabled}
           />
 
@@ -606,15 +614,18 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  <SuggesterKeyPress
-                    onArrowDown={() => {
-                      if (selected < suggestions.length - 1) setSelected(selected + 1);
-                    }}
-                    onArrowUp={() => {
-                      if (selected > -1) setSelected(selected - 1);
-                    }}
-                    dependencyArr={[selected]}
-                  />
+                  {/* the arrow keys belong to the class menu while it is open */}
+                  {!isCategoryMenuOpen && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < suggestions.length - 1) setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
                 </>
               ) : null}
 
@@ -625,15 +636,18 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  <SuggesterKeyPress
-                    onArrowDown={() => {
-                      if (selected < preSuggestions.length - 1) setSelected(selected + 1);
-                    }}
-                    onArrowUp={() => {
-                      if (selected > -1) setSelected(selected - 1);
-                    }}
-                    dependencyArr={[selected]}
-                  />
+                  {/* the arrow keys belong to the class menu while it is open */}
+                  {!isCategoryMenuOpen && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < preSuggestions.length - 1) setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
                 </>
               ) : null}
             </StyledSuggesterList>

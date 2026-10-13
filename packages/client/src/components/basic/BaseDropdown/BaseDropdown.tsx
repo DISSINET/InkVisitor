@@ -3,7 +3,7 @@ import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Loader, Tooltip } from "components";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 import {
   ActionMeta,
@@ -122,6 +122,16 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   // ClearIndicator); react-select still drives it through onMenuOpen/onMenuClose
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
+  // the cleanup also runs on unmount, so a dropdown removed with its menu open
+  // still reports it closed
+  const onMenuOpenChangeRef = useRef(onMenuOpenChange);
+  onMenuOpenChangeRef.current = onMenuOpenChange;
+  useEffect(() => {
+    if (!menuIsOpen) return;
+    onMenuOpenChangeRef.current?.(true);
+    return () => onMenuOpenChangeRef.current?.(false);
+  }, [menuIsOpen]);
+
   const SuggesterDropdownIndicator = (props: DropdownIndicatorProps) => (
     <components.DropdownIndicator {...props}>
       <StyledFaChevronDown size={9} $suggester={suggester} />
@@ -153,14 +163,8 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
       >
         <StyledSelect
           menuIsOpen={menuIsOpen}
-          onMenuOpen={() => {
-            setMenuIsOpen(true);
-            onMenuOpenChange?.(true);
-          }}
-          onMenuClose={() => {
-            setMenuIsOpen(false);
-            onMenuOpenChange?.(false);
-          }}
+          onMenuOpen={() => setMenuIsOpen(true)}
+          onMenuClose={() => setMenuIsOpen(false)}
           $suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
