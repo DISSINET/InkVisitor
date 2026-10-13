@@ -160,6 +160,16 @@ describe("going to a paragraph", () => {
     expect(a.cursor.isSelected()).toBe(false);
   });
 
+  test("Annotator.scrollToParagraph moves the caret offsets with the visual caret", () => {
+    const a = setup("first\nsecond\nthird");
+    a.cursor.moveToOffset(a.text, 2);
+
+    a.scrollToParagraph(3);
+    // "third" starts at raw offset 13
+    expect(a.cursor.head).toBe(13);
+    expect(a.cursor.anchor).toBe(13);
+  });
+
   test("Annotator.scrollToParagraph leaves the caret alone for a missing paragraph", () => {
     const a = setup("first\nsecond");
     a.cursor.setPosition(2, 1);

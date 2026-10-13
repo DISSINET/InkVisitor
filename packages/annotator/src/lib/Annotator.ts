@@ -4604,9 +4604,9 @@ export class Annotator {
       return false;
     }
     this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
-    // setPosition also drops the column remembered by earlier up/down moves
-    this.cursor.setPosition(0, absLine);
-    this.cursor.resetHighlight();
+    // moving by offset collapses the selection onto the new caret and drops
+    // the column remembered by earlier up/down moves
+    this.cursor.moveToOffset(this.text, this.text.offsetFromVisual(0, absLine));
     this.draw();
     this.element.focus({ preventScroll: true });
     return true;
