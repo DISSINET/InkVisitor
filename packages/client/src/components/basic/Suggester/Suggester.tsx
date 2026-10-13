@@ -173,6 +173,7 @@ export const Suggester: React.FC<Suggester> = ({
     [showCreateModal, isFocused],
   );
 
+  const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
   const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
 
@@ -353,7 +354,7 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const { refs, floatingStyles, middlewareData, placement, context } = useFloating({
+  const { refs, floatingStyles, middlewareData, placement, isPositioned, context } = useFloating({
     open: isFocused || isHovered,
     // only the hover half can be dismissed; focus closes the list on blur
     onOpenChange: (open) => {
@@ -383,17 +384,21 @@ export const Suggester: React.FC<Suggester> = ({
   const dismiss = useDismiss(context, { escapeKey: false });
   const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
-  const isListHidden = !!middlewareData.hide?.referenceHidden;
+  // isPositioned drops when the list closes, so data kept from its last open
+  // cannot report the input as hidden before the list is positioned again
+  const isListHidden = isPositioned && !!middlewareData.hide?.referenceHidden;
 
   // a list moved left by flip or shift covers the spot where the class menu
   // opens, so it gives way while that menu is open
   const isListMovedLeft = placement.endsWith("-end") || (middlewareData.shift?.x ?? 0) < 0;
   const isListUnderCategoryMenu = isCategoryMenuOpen && isListMovedLeft;
 
-  // the hidden list stays mounted, so drop the selection to keep Enter from
-  // picking a row the user cannot see
+  // an input scrolled out of view closes its list; clicking the input reopens it
   useEffect(() => {
-    if (isListHidden) setSelected(-1);
+    if (!isListHidden) return;
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && wrapRef.current?.contains(focused)) focused.blur();
+    setIsHovered(false);
   }, [isListHidden]);
 
   const theme = useTheme();
@@ -444,7 +449,11 @@ export const Suggester: React.FC<Suggester> = ({
 
   return (
     // the wrap is necessary for flex to work and render the clear button properly
-    <StyledSuggesterWrap $fullWidth={inputWidth === "full"} $maxWidth={maxWidth}>
+    <StyledSuggesterWrap
+      ref={wrapRef}
+      $fullWidth={inputWidth === "full"}
+      $maxWidth={maxWidth}
+    >
       {/* the drop ref covers the warning icon too - a pointer crossing onto it
           would otherwise leave the target, hide the icon, and land back on the
           target, flickering for as long as it hovers there */}
@@ -566,8 +575,9 @@ export const Suggester: React.FC<Suggester> = ({
           <FloatingPortal id="page-content">
             <StyledSuggesterList
               ref={refs.setFloating}
-              // hidden, not unmounted: autoUpdate only runs while the list is
-              // mounted, so it must stay to report the input scrolling back
+              // under the class menu the list is hidden, not unmounted, so it
+              // keeps its scroll position; an out-of-view input closes it on the
+              // next effect, and this covers the frame before
               $hidden={isListHidden || isListUnderCategoryMenu}
               data-suggester-portal="true"
               {...getFloatingProps({
@@ -589,17 +599,15 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  {!isListHidden && (
-                    <SuggesterKeyPress
-                      onArrowDown={() => {
-                        if (selected < suggestions.length - 1) setSelected(selected + 1);
-                      }}
-                      onArrowUp={() => {
-                        if (selected > -1) setSelected(selected - 1);
-                      }}
-                      dependencyArr={[selected]}
-                    />
-                  )}
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < suggestions.length - 1) setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
                 </>
               ) : null}
 
@@ -610,17 +618,15 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  {!isListHidden && (
-                    <SuggesterKeyPress
-                      onArrowDown={() => {
-                        if (selected < preSuggestions.length - 1) setSelected(selected + 1);
-                      }}
-                      onArrowUp={() => {
-                        if (selected > -1) setSelected(selected - 1);
-                      }}
-                      dependencyArr={[selected]}
-                    />
-                  )}
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < preSuggestions.length - 1) setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
                 </>
               ) : null}
             </StyledSuggesterList>
