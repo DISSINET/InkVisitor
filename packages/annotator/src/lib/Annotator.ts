@@ -4480,6 +4480,7 @@ export class Annotator {
         for (const open of segment.openingTags) {
           if (
             open.getTagName() === anchorName &&
+            !open.selfClosing &&
             open.getAbsoluteTagPosition(this.text.segments) < indexStart
           ) {
             newOccurrenceIndex++;

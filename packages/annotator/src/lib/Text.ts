@@ -1986,7 +1986,9 @@ class Text {
   }
 
   /**
-   * Finds the position of a specific tag occurrence.
+   * Finds the position of a specific tag occurrence. Pairs the nth opening
+   * tag with the nth closing tag; self-closing tags are skipped, as they have
+   * no closing partner.
    *
    * @param tag - The tag name to search for
    * @param index - The occurrence index (0-based, default: 0)
@@ -2002,7 +2004,7 @@ class Text {
     // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
-        if (openingTag.getTagName() === tag) {
+        if (openingTag.getTagName() === tag && !openingTag.selfClosing) {
           if (openingTagIndex === index) {
             openingTagMatch = { tag: openingTag, segment };
             break;

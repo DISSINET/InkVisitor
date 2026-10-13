@@ -27,3 +27,15 @@ describe("validateAnchors with self-closing tags", () => {
     ]);
   });
 });
+
+describe("getTagPosition with self-closing tags", () => {
+  test("a self-closing tag is not paired with the closing tag of a later anchor", () => {
+    const text = new Text("<e1 /> intro <e1>focus</e1>", 1000);
+    const segment = text.segments[0];
+    const pairedOpening = segment.openingTags.find((tag) => !tag.selfClosing)!;
+    const start = segment.findTagParsedPosition(pairedOpening);
+
+    expect(text.getTagPosition("e1", 0)[0]).toEqual({ xLine: start.x, yLine: start.y });
+    expect(text.getTagPosition("e1", 1)).toEqual([]);
+  });
+});
