@@ -6,7 +6,9 @@ import {
   offset,
   shift,
   size,
+  useDismiss,
   useFloating,
+  useInteractions,
 } from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
@@ -350,7 +352,12 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const { refs, floatingStyles, middlewareData } = useFloating({
+  const { refs, floatingStyles, middlewareData, context } = useFloating({
+    open: isFocused || isHovered,
+    // only the hover half can be dismissed; focus closes the list on blur
+    onOpenChange: (open) => {
+      if (!open) setIsHovered(false);
+    },
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
     // near the right edge flip first tries bottom-end, aligning the list to the
@@ -369,6 +376,11 @@ export const Suggester: React.FC<Suggester> = ({
       hide(),
     ],
   });
+
+  // a press outside the input and the list closes a list that missed its
+  // mouseleave; Escape is handled by useKeypress
+  const dismiss = useDismiss(context, { escapeKey: false });
+  const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
   const isListHidden = !!middlewareData.hide?.referenceHidden;
 
@@ -426,17 +438,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   return (
     // the wrap is necessary for flex to work and render the clear button properly
-    <StyledSuggesterWrap
-      $fullWidth={inputWidth === "full"}
-      $maxWidth={maxWidth}
-      // focus moving to another element outside the list (e.g. another
-      // suggester) closes it even if the list missed its mouseleave; the row
-      // buttons prevent the mousedown, so picking keeps focus in the input
-      onBlur={(event) => {
-        const next = event.relatedTarget;
-        if (next && !refs.floating.current?.contains(next)) setIsHovered(false);
-      }}
-    >
+    <StyledSuggesterWrap $fullWidth={inputWidth === "full"} $maxWidth={maxWidth}>
       {/* the drop ref covers the warning icon too - a pointer crossing onto it
           would otherwise leave the target, hide the icon, and land back on the
           target, flickering for as long as it hovers there */}
@@ -493,6 +495,7 @@ export const Suggester: React.FC<Suggester> = ({
             style={{
               width: "100%",
             }}
+            {...getReferenceProps()}
           >
             <Input
               type="text"
@@ -560,13 +563,15 @@ export const Suggester: React.FC<Suggester> = ({
               // mounted, so it must stay to report the input scrolling back
               $hidden={isListHidden}
               data-suggester-portal="true"
-              onMouseDown={(event) => {
-                // Prevent annotator click-away handlers from closing while interacting
-                // with the suggester dropdown rendered in a portal. (e.g. annotator highlight menu)
-                event.stopPropagation();
-              }}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
+              {...getFloatingProps({
+                onMouseDown: (event) => {
+                  // Prevent annotator click-away handlers from closing while interacting
+                  // with the suggester dropdown rendered in a portal. (e.g. annotator highlight menu)
+                  event.stopPropagation();
+                },
+                onMouseEnter: () => setIsHovered(true),
+                onMouseLeave: () => setIsHovered(false),
+              })}
               style={{
                 ...floatingStyles,
               }}
