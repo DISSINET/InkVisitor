@@ -1,4 +1,13 @@
-import { FloatingPortal, autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react";
+import {
+  FloatingPortal,
+  autoUpdate,
+  flip,
+  hide,
+  offset,
+  shift,
+  size,
+  useFloating,
+} from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
@@ -164,19 +173,19 @@ export const Suggester: React.FC<Suggester> = ({
   const inputRef = useRef<HTMLDivElement>(null);
   const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
 
-  // measure the input width when focused
+  // measure the input width when focused, in tenths of rem like the other widths
   useEffect(() => {
     if (isFocused && inputRef.current) {
       const width = inputRef.current.getBoundingClientRect().width;
-      setResultWidth(width);
+      const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      setResultWidth((width / remPx) * 10);
     }
   }, [isFocused]);
 
-  // Explicit override wins over the measured input width so the results list can
-  // intentionally be wider than the input.
+  // suggestionListWidth pins an exact width; otherwise the list follows the input
+  // but keeps SUGGESTION_LIST_MIN_WIDTH, also before the input is measured
   const effectiveResultWidth =
-    suggestionListWidth ??
-    (resultWidth !== undefined ? Math.max(resultWidth, SUGGESTION_LIST_MIN_WIDTH) : undefined);
+    suggestionListWidth ?? Math.max(resultWidth ?? 0, SUGGESTION_LIST_MIN_WIDTH);
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -344,9 +353,21 @@ export const Suggester: React.FC<Suggester> = ({
   const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    // shift slides the list back into the viewport when it is wider than the
-    // space to the right of the input
-    middleware: [offset(1), flip({ padding: 10 }), shift({ padding: 10 })],
+    // near the right edge flip first tries bottom-end, aligning the list to the
+    // input's right edge; shift slides it into view when neither alignment
+    // fits, and size caps it to the boundary width
+    middleware: [
+      offset(1),
+      flip({ padding: 10 }),
+      shift({ padding: 10 }),
+      size({
+        padding: 10,
+        apply({ availableWidth, elements }) {
+          elements.floating.style.maxWidth = `${Math.max(0, availableWidth)}px`;
+        },
+      }),
+      hide(),
+    ],
   });
 
   const theme = useTheme();
@@ -513,10 +534,13 @@ export const Suggester: React.FC<Suggester> = ({
           <StyledAiOutlineWarning size={22} color={theme.color.warning} />
         )}
 
-        {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (
+        {(isFocused || isHovered) && (
           <FloatingPortal id="page-content">
             <StyledSuggesterList
               ref={refs.setFloating}
+              // hidden, not unmounted: autoUpdate only runs while the list is
+              // mounted, so it must stay to report the input scrolling back
+              $hidden={!!middlewareData.hide?.referenceHidden}
               data-suggester-portal="true"
               onMouseDown={(event) => {
                 // Prevent annotator click-away handlers from closing while interacting

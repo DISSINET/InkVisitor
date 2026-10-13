@@ -120,25 +120,27 @@ export const StyledEmptyCategory = styled.div<{ $width: number }>`
   color: ${({ theme }) => theme.color["gray"]["600"]};
 `;
 
-export const StyledSuggesterList = styled.div`
+interface StyledSuggesterList {
+  $hidden: boolean;
+}
+export const StyledSuggesterList = styled.div<StyledSuggesterList>`
   /* Rendered in a #page-content portal that forms no stacking context, so this
      competes at the body level with the modal wrap (z 500). Match the other
      floating portal menus (Tooltip, DatePicker) so the dropdown clears modals. */
   z-index: 10000;
+  visibility: ${({ $hidden }) => ($hidden ? "hidden" : "visible")};
 `;
 interface StyledRelativePosition {
-  $width?: number;
+  $width: number;
 }
 export const StyledRelativePosition = styled.div<StyledRelativePosition>`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  min-width: 16.1rem;
   /* max-width: 24rem; */
-  /* the explicit width is capped to the viewport minus the 1rem shift padding
-     on each side */
-  max-width: ${({ $width }) => (!$width ? "24rem" : "calc(100vw - 2rem)")};
-  width: ${({ $width }) => ($width ? `${$width / 10}rem` : "")};
+  /* the floating list's max-width comes from the size middleware */
+  max-width: 100%;
+  width: ${({ $width }) => `${$width / 10}rem`};
 
   overflow: hidden;
   display: grid;
