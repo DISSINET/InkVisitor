@@ -3443,36 +3443,53 @@ export class Annotator {
         const hlResult = this.onHighlightCb(tagName);
         const schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         if (schemas.length) {
+          const occurences: IAbsCoordinates[][] = [];
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
             occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
-              // The occurrence being resized is drawn separately as an animated
-              // pulse (below), so drop its fill/underline schemas to avoid
-              // double-painting. Its ANCHOR corner markers are kept: for
-              // Territory anchors they are the only visual, and hiding them makes
-              // the anchor look deleted (#2887). Matched by occurrence (opening
-              // position), so sibling anchors of the same entity are unaffected.
-              const isResized =
-                resizeSpan != null &&
-                this.resizeAnchor?.tagName === tagName &&
-                occurence[0].xLine === resizeSpan.start.xLine &&
-                occurence[0].yLine === resizeSpan.start.yLine;
-              const occSchemas = isResized
-                ? schemas.filter((s) => s.mode === HighlightMode.ANCHOR)
-                : schemas;
-              for (const schema of occSchemas) {
-                higlightItems.push({
-                  schema,
-                  start: occurence[0],
-                  end: occurence[1],
-                  tag,
-                });
-              }
+              occurences.push(occurence);
             }
             i++;
           } while (!!occurence.length);
+
+          // Each FOCUS item dims everything outside its own span, so with
+          // several spans of one entity the washes stack over the whole text
+          // and no line reads as "inside". The veil is drawn only for an entity
+          // with exactly one opening and one closing tag: getTagPosition pairs
+          // the nth opening with the nth closing tag, so an unpaired tag shifts
+          // the pairing and the span would cover the wrong text.
+          const tagCount = this.text.countTags(tagName);
+          const isSingleAnchor = tagCount.opening === 1 && tagCount.closing === 1;
+          const spanSchemas = isSingleAnchor
+            ? schemas
+            : schemas.filter((s) => s.mode !== HighlightMode.FOCUS);
+
+          for (const occ of occurences) {
+            // The occurrence being resized is drawn separately as an animated
+            // pulse (below), so drop its fill/underline schemas to avoid
+            // double-painting. Its ANCHOR corner markers are kept: for
+            // Territory anchors they are the only visual, and hiding them makes
+            // the anchor look deleted (#2887). Matched by occurrence (opening
+            // position), so sibling anchors of the same entity are unaffected.
+            const isResized =
+              resizeSpan != null &&
+              this.resizeAnchor?.tagName === tagName &&
+              occ[0].xLine === resizeSpan.start.xLine &&
+              occ[0].yLine === resizeSpan.start.yLine;
+            const occSchemas = isResized
+              ? spanSchemas.filter((s) => s.mode === HighlightMode.ANCHOR)
+              : spanSchemas;
+            for (const schema of occSchemas) {
+              higlightItems.push({
+                schema,
+                start: occ[0],
+                end: occ[1],
+                tag,
+              });
+            }
+          }
         }
       }
 

@@ -1964,6 +1964,28 @@ class Text {
   }
 
   /**
+   * Counts the opening and closing tags of one name, unpaired ones included.
+   * Self-closing tags are neither.
+   */
+  countTags(tag: string): { opening: number; closing: number } {
+    let opening = 0;
+    let closing = 0;
+    for (const segment of this.segments) {
+      for (const openingTag of segment.openingTags) {
+        if (openingTag.getTagName() === tag && !openingTag.selfClosing) {
+          opening++;
+        }
+      }
+      for (const closingTag of segment.closingTags) {
+        if (closingTag.getTagName() === tag) {
+          closing++;
+        }
+      }
+    }
+    return { opening, closing };
+  }
+
+  /**
    * Finds the position of a specific tag occurrence.
    *
    * @param tag - The tag name to search for
