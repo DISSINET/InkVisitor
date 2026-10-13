@@ -175,6 +175,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
+  const textInputRef = useRef<HTMLInputElement>(null);
   const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
 
   // measure the input width when focused, in tenths of rem like the other widths
@@ -474,7 +475,12 @@ export const Suggester: React.FC<Suggester> = ({
             <Dropdown.Single.Entity
               value={category}
               options={dropdownOptions}
-              onChange={onChangeCategory}
+              onChange={(option) => {
+                onChangeCategory(option);
+                // react-select keeps focus on Tab, so typing and the arrow keys
+                // would reach the class menu instead of the suggestions
+                textInputRef.current?.focus();
+              }}
               width={categoryBoxWidth}
               // the control is only wide enough for a single class letter, so a
               // worded fallback would spill over the type bar and the input
@@ -514,6 +520,7 @@ export const Suggester: React.FC<Suggester> = ({
             {...getReferenceProps()}
           >
             <Input
+              inputRef={textInputRef}
               type="text"
               value={typed}
               onChangeFn={(newType: string) => onTypeFn(newType)}
