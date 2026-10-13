@@ -662,12 +662,12 @@ export const TextAnnotator = ({
 
       const mutation = quiet ? updateDocumentMutationQuiet : updateDocumentMutation;
 
+      // content alone: the server rebuilds anchors and entityIds from it, and
+      // each anchors node repeats its text, so the full document can outgrow
+      // the proxy's request size limit
       await mutation.mutateAsync({
         id: documentId,
-        doc: {
-          ...dataDocument,
-          content: annotator.text.value,
-        },
+        doc: { content: annotator.text.value },
       });
     }
   };
