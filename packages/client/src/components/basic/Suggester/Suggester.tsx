@@ -160,6 +160,7 @@ export const Suggester: React.FC<Suggester> = ({
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(false);
@@ -352,7 +353,7 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const { refs, floatingStyles, middlewareData, context } = useFloating({
+  const { refs, floatingStyles, middlewareData, placement, context } = useFloating({
     open: isFocused || isHovered,
     // only the hover half can be dismissed; focus closes the list on blur
     onOpenChange: (open) => {
@@ -383,6 +384,11 @@ export const Suggester: React.FC<Suggester> = ({
   const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
   const isListHidden = !!middlewareData.hide?.referenceHidden;
+
+  // a list moved left by flip or shift covers the spot where the class menu
+  // opens, so it gives way while that menu is open
+  const isListMovedLeft = placement.endsWith("-end") || (middlewareData.shift?.x ?? 0) < 0;
+  const isListUnderCategoryMenu = isCategoryMenuOpen && isListMovedLeft;
 
   // the hidden list stays mounted, so drop the selection to keep Enter from
   // picking a row the user cannot see
@@ -469,6 +475,7 @@ export const Suggester: React.FC<Suggester> = ({
                 setIsFocused(true);
               }}
               onBlur={() => setIsFocused(false)}
+              onMenuOpenChange={setIsCategoryMenuOpen}
               disableTyping
               suggester
               disabled={disabled}
@@ -561,7 +568,7 @@ export const Suggester: React.FC<Suggester> = ({
               ref={refs.setFloating}
               // hidden, not unmounted: autoUpdate only runs while the list is
               // mounted, so it must stay to report the input scrolling back
-              $hidden={isListHidden}
+              $hidden={isListHidden || isListUnderCategoryMenu}
               data-suggester-portal="true"
               {...getFloatingProps({
                 onMouseDown: (event) => {

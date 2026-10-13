@@ -51,6 +51,7 @@ interface BaseDropdown {
   // single entity dropdown props
   onFocus?: () => void;
   onBlur?: () => void;
+  onMenuOpenChange?: (isOpen: boolean) => void;
   autoFocus?: boolean;
   suggester?: boolean;
   // dropdown type settings
@@ -91,6 +92,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   disabled = false,
   onFocus = () => {},
   onBlur = () => {},
+  onMenuOpenChange,
   autoFocus = false,
   disableTyping = false,
   suggester = false,
@@ -151,8 +153,14 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
       >
         <StyledSelect
           menuIsOpen={menuIsOpen}
-          onMenuOpen={() => setMenuIsOpen(true)}
-          onMenuClose={() => setMenuIsOpen(false)}
+          onMenuOpen={() => {
+            setMenuIsOpen(true);
+            onMenuOpenChange?.(true);
+          }}
+          onMenuClose={() => {
+            setMenuIsOpen(false);
+            onMenuOpenChange?.(false);
+          }}
           $suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
