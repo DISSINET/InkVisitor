@@ -156,7 +156,7 @@ export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
     ${({ theme, $hasTrailingIcons }) => ($hasTrailingIcons ? "3rem" : theme.space[2])};
   align-items: center;
   background-color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.color["blue"][100] : "transparent"};
+    $isSelected ? theme.color["suggestionSelected"] : "transparent"};
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
   margin-left: ${({ theme }) => theme.space[2]};
