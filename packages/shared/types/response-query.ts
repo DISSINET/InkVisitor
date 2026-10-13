@@ -20,6 +20,28 @@ export interface IResponseQueryEntity {
     string,
     IEntity | IEntity[] | number | number[] | string | string[] | IUser | IUser[]
   >;
+  /**
+   * Trees for the cells of property columns, by column id and then by the cell
+   * entity they sit under. In "Entity Property value" columns the key is a
+   * value and the nodes are the first-level props with that value, each with
+   * its subproperties. In "Entity Property types" columns the key is a type
+   * and the nodes are the subproperty types used under its props, merged so
+   * each appears once per level, with only `type` set. Present for a column
+   * once one of its shown props has subproperties; then it covers every entity
+   * the cell shows. Kept apart from columnData so its cells stay flat entity
+   * lists.
+   */
+  columnSubProps?: Record<string, Record<string, IResponseQuerySubProp[]>>;
+}
+
+/**
+ * One prop resolved for display: its type and value entities and its nested
+ * subproperties. A side whose entity is unset or missing is left out.
+ */
+export interface IResponseQuerySubProp {
+  type?: IEntity;
+  value?: IEntity;
+  children: IResponseQuerySubProp[];
 }
 
 export interface IResponseQuery {

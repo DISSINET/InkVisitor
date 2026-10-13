@@ -232,6 +232,10 @@ export default class QuerySearch {
             columnsContext
           ),
         };
+        const columnSubProps = await this.results!.columnSubProps(db, entity, columns);
+        if (columnSubProps) {
+          row.columnSubProps = columnSubProps;
+        }
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)
         if (this.equivalentIds.has(entity.id)) {
