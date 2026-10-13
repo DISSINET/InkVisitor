@@ -49,3 +49,9 @@
 - If adding icon, first check Theme/icons.ts if this or similar icon exists in our app
 - Never use the native `title` attribute for hover hints. Use the app's
   `Tooltip` component (or `IconWithTooltip` for a lone icon) from `components`.
+
+## Annotator
+
+- Anchors are always paired `<uuid>…</uuid>` tags. Self-closing tags
+  (`<lb/>`, `<pb n="2"/>`) only come from imported documents and are never
+  anchors; skip them wherever tags are paired or counted.
