@@ -418,7 +418,17 @@ export const Suggester: React.FC<Suggester> = ({
 
   return (
     // the wrap is necessary for flex to work and render the clear button properly
-    <StyledSuggesterWrap $fullWidth={inputWidth === "full"} $maxWidth={maxWidth}>
+    <StyledSuggesterWrap
+      $fullWidth={inputWidth === "full"}
+      $maxWidth={maxWidth}
+      // focus moving to another element outside the list (e.g. another
+      // suggester) closes it even if the list missed its mouseleave; a click on
+      // a row moves focus to no element and keeps the list open for onPick
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (next && !refs.floating.current?.contains(next)) setIsHovered(false);
+      }}
+    >
       {/* the drop ref covers the warning icon too - a pointer crossing onto it
           would otherwise leave the target, hide the icon, and land back on the
           target, flickering for as long as it hovers there */}
