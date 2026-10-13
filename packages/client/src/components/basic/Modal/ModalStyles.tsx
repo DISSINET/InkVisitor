@@ -68,9 +68,7 @@ export const StyledCard = styled(animated.div)<Card>`
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border: ${({ theme, $noBorder }) =>
-    $noBorder
-      ? "none"
-      : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
+    $noBorder ? "none" : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
   box-shadow: ${({ theme, $noBorder }) => ($noBorder ? theme.boxShadow["high"] : "")};
 `;
 
@@ -156,8 +154,8 @@ export const StyledScrollEdge = styled.div<StyledScrollEdge>`
   z-index: 1;
   height: ${space6};
   pointer-events: none;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   --modal-edge-mask: linear-gradient(
     to ${({ $edge }) => ($edge === "top" ? "bottom" : "top")},
     #000,
