@@ -2033,7 +2033,22 @@ class Text {
       // console.warn(`Tag "${tag}" with occurrence ${occurrence} not found.`);
       return [];
     }
+    return this.pairCoordinates(pair);
+  }
 
+  /**
+   * Finds the anchor whose opening tag starts at absRawIndex in the raw text,
+   * paired as in getTagPosition. Returns an empty array when no paired opening
+   * tag of that name starts there.
+   */
+  getTagPositionAt(tag: string, absRawIndex: number): IAbsCoordinates[] {
+    const pair = this.pairTags(tag).find(
+      (p) => p.opening.tag.getAbsoluteTagPosition(this.segments) === absRawIndex
+    );
+    return pair ? this.pairCoordinates(pair) : [];
+  }
+
+  private pairCoordinates(pair: { opening: TagInSegment; closing: TagInSegment }): IAbsCoordinates[] {
     // Calculate the parsed positions of the opening and closing tags
     const start = pair.opening.segment.findTagParsedPosition(pair.opening.tag);
     const end = pair.closing.segment.findTagParsedPosition(pair.closing.tag);

@@ -4471,20 +4471,7 @@ export class Annotator {
       this.text.calculateLines();
 
       // Find the newly added anchor and select it
-      const anchorName = openTag.getTagName();
-      let newOccurrenceIndex = 0;
-      for (const segment of this.text.segments) {
-        for (const open of segment.openingTags) {
-          if (
-            open.getTagName() === anchorName &&
-            !open.selfClosing &&
-            open.getAbsoluteTagPosition(this.text.segments) < indexStart
-          ) {
-            newOccurrenceIndex++;
-          }
-        }
-      }
-      const tagPosition = this.text.getTagPosition(anchorName, newOccurrenceIndex);
+      const tagPosition = this.text.getTagPositionAt(openTag.getTagName(), indexStart);
       if (tagPosition && tagPosition.length === 2) {
         this.cursor.selectStart = tagPosition[0];
         this.cursor.selectEnd = tagPosition[1];
