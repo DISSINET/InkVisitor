@@ -91,6 +91,8 @@ const darkTheme = {
 
     statsChartCursor: "rgba(246, 246, 255, 0.08)", // gentle primary tint for hovered column
 
+    suggestionSelected: "#2e3f7a", // tableSelection
+
     // the light theme's hues, lifted to hold >=4.5:1 on the dark page
     xmlTag: "#7FAEE9",
     xmlAttr: "#EF86A0",

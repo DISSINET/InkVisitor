@@ -142,6 +142,8 @@ const theme = {
     statsTooltipLabelBackground: "#718096", // gray 600
     statsChartCursor: "rgba(9, 16, 52, 0.06)", // gentle primary tint for hovered column
 
+    suggestionSelected: "#CCD5F4", // blue 100
+
     // Annotator XML view syntax colours (#3269). Three hue families spread
     // around the wheel (OKLCH H260 blue, H5 rose, H168 teal-green) so the
     // roles are told apart by hue at a glance, as in code editors. All hold
