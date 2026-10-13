@@ -1203,8 +1203,10 @@ export class Annotator {
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const extent = this.scrollExtentLineCount();
-    const positionBeforeRel = extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
+    // Rows above line 0 (the start buffer) hold no text, so a viewport parked
+    // there keeps its line index; otherwise the text at its top is kept on top.
+    const topOffset =
+      this.viewport.lineStart >= 0 ? this.text.offsetFromVisual(0, this.viewport.lineStart) : -1;
 
     this.viewport.updateLineEnd(noLinesViewport);
     // Keep the proportional wrap budget in sync with the new width
@@ -1225,12 +1227,8 @@ export class Annotator {
       this.refreshHoverHighlightRegions();
     }
 
-    // this function tries to keep the same relative position of the text even its not perfect
-    // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
-    this.viewport.scrollTo(
-      Math.floor(positionBeforeRel * this.scrollExtentLineCount()),
-      this.scrollExtentLineCount()
-    );
+    const topLine = topOffset >= 0 ? this.text.visualFromOffset(topOffset)?.yLine : undefined;
+    this.viewport.scrollTo(topLine ?? this.viewport.lineStart, this.scrollExtentLineCount());
 
     // The track spans startBuffer rows above line 0 too, so the runner's
     // share of it is measured against the full buffered extent.
