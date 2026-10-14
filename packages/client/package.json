@@ -25,6 +25,7 @@
     "build:data-import-persecutio": "vite build --mode data-import-persecutio",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
     "rebuild:annotator": "bash scripts/rebuild-annotator.sh"
   },
   "author": "",
@@ -84,7 +85,6 @@
     "@types/styled-components": "^5.1.36",
     "@vitejs/plugin-react": "^5.2.0",
     "babel-plugin-styled-components": "^2.1.4",
-    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
     "react-spring": "^10.0.3",
     "socket.io-client": "^4.8.3",

@@ -366,7 +366,7 @@ class Importer {
     let that = this;
     const menu: Record<
       string,
-      { description: string; action: Function; lastAction?: boolean }
+      { description: string; action: () => unknown; lastAction?: boolean }
     > = {
       L: {
         description: `Enter '${colors.yellow("L")}' to switch databases`,

@@ -69,7 +69,7 @@ export const StatsChart = ({ data, height, width }: StatsChartProps) => {
 
   const dataCategories = getDataCategories(aggregateBy, userKeyMap, values);
 
-  const categoryColors = getCategoryMap(dataCategories);
+  const categoryColors = getCategoryMap(dataCategories, theme.color.greyer);
 
   const dataChart = useMemo<ChartDataPoint[]>(() => {
     return transformDataForChart(values, dataCategories, aggregateBy, userKeyMap);
