@@ -1,0 +1,21 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/users/me",
+    "body": {
+      "options": {
+        "starredTemplates": [
+          ""
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

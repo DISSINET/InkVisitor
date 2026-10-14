@@ -3,7 +3,7 @@ import request from "supertest";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import Document from "@models/document/document";
 import { deleteDocuments } from "@service/shorthands";
 import { pool } from "@middlewares/db";

@@ -3,7 +3,7 @@ import { ResponseSearch } from "@models/entity/response-search";
 import { Setting } from "@models/setting/setting";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearchRootValidity } from "@inkvisitor/shared/types/request-search";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 type RootValidityFilter = Extract<
   Explore.IExploreSearchFilter,
@@ -22,7 +22,7 @@ export const getRootValidityFilter = (
  * unchanged unless the filter requests Valid or Invalid. Order is preserved.
  */
 export const applyRootValidityFilter = async (
-  db: Connection,
+  db: Conn,
   ids: string[],
   filter: RootValidityFilter
 ): Promise<string[]> => {

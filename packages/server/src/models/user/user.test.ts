@@ -1,6 +1,5 @@
 import "ts-jest";
-import { r as rethink } from "rethinkdb-ts";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { clean } from "@modules/common.test";
 import User, { BookmarkFolder, StoredTerritory } from "@models/user/user";
 import { IUser } from "@inkvisitor/shared/types";
@@ -273,9 +272,50 @@ describe("models/user", function () {
       // The User constructor drops deletedAt (fillFlatObject skips fields whose
       // class default is undefined), so assert the persisted soft-delete marker
       // on the raw db row rather than the rehydrated model.
-      const rawRow = await rethink.table(User.table).get(user1.id).run(db.connection);
+      const rawRow = await storage.users.get(db.connection, user1.id);
       expect(rawRow).toBeTruthy();
       expect((rawRow as any).deletedAt).toBeTruthy();
+    });
+  });
+
+  describe("User.hasOtherOwner", function () {
+    let db: Db;
+    const owner = prepareUser();
+    owner.role = UserEnums.Role.Owner;
+    owner.active = true;
+
+    /** whether `owner` sees another owner while one with `fields` is stored */
+    const withOtherOwner = async (fields: Partial<IUser>): Promise<boolean> => {
+      const other = prepareUser();
+      await storage.users.insert(db.connection, { ...other, role: UserEnums.Role.Owner, active: true, ...fields });
+      try {
+        return await User.hasOtherOwner(db.connection, owner.id);
+      } finally {
+        await storage.users.delete(db.connection, other.id);
+      }
+    };
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await owner.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await storage.users.delete(db.connection, owner.id);
+      await clean(db);
+    });
+
+    it("ignores a trashed owner", async () => {
+      expect(await withOtherOwner({ deletedAt: new Date() })).toBe(false);
+    });
+
+    it("ignores an inactive owner", async () => {
+      expect(await withOtherOwner({ active: false })).toBe(false);
+    });
+
+    it("counts an active owner that is not trashed", async () => {
+      expect(await withOtherOwner({})).toBe(true);
     });
   });
 });

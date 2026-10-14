@@ -1,0 +1,61 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?entityIds[]=a1&entityIds[]=b1"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": [
+              "empty"
+            ]
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a1",
+        "labels": [
+          "told"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "B",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "probably a pug",
+        "id": "b1",
+        "labels": [
+          "a dog"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

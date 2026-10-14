@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { clean } from "@modules/common.test";
 import { AuditScope } from "@inkvisitor/shared/types";
 import { deleteAudits } from "@service/shorthands";

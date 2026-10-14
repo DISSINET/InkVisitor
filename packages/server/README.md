@@ -36,6 +36,11 @@ Commands (via `jest`):
 - `pnpm test:integration` — only the database-backed tests (serial).
 - `pnpm test -t "<name>"` — only tests whose `describe`/`it` name matches the pattern.
 
+End-to-end gates, each against a throwaway database only. The commands run from the repository root:
+
+- `pnpm -C packages/server replay` - the API replay (437 recorded steps); zero differences expected.
+- `pnpm -C packages/client test:e2e` - the Playwright frontend smoke suite (login, territory tree, statement editing, entity detail, search, explorer, users, global validations) against a server booted on `inkvisitor_smoke_test`, ports 3301 (API) and 8301 (vite). Once per machine: `pnpm -C packages/client exec playwright install chromium`.
+
 If you use Visual Studio Code, the `Jest Runner` extension is handy for running
 individual tests.
 
@@ -72,13 +77,13 @@ Please refer to exported [postman collection](./postman/inkvisitor_api.postman_c
 
 ## Authorization
 
-The API uses HttpOnly cookie sessions stored in RethinkDB. Sign in via `POST /users/signin` with `{ "login", "password" }`; the response includes the user profile and the server sets the session cookie. Sign out via `POST /users/signout`.
+The API uses HttpOnly cookie sessions stored through the storage layer in RethinkDB. Sign in via `POST /users/signin` with `{ "login", "password" }`; the response includes the user profile and the server sets the session cookie. Sign out via `POST /users/signout`.
 
 ### Session cookies
 
 - **Name** — `inkvisitor.sid.<ENV>` by default (`SESSION_COOKIE_NAME` to override). Set a unique `ENV` per instance when several deployments share a domain so cookies do not overwrite each other.
 - **Flags** — `HttpOnly`, `SameSite` (default `lax`), `Secure` when `NODE_ENV=production` or `HTTPS=1`, path `/`.
-- **Storage** — RethinkDB session store; rolling expiry via `SESSION_MAX_AGE` (default 30 days).
+- **Storage** — sessions stored through the storage layer in RethinkDB; rolling expiry via `SESSION_MAX_AGE` (default 30 days).
 
 ### CSRF protection
 

@@ -1,0 +1,277 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/statements/rp-s"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "S",
+      "createdAt": "<datetime>",
+      "data": {
+        "actants": [
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "classifications": [],
+            "elvl": "1",
+            "entityId": "rp-p",
+            "id": "rp-s-s",
+            "identifications": [],
+            "logic": "1",
+            "partitivity": "1",
+            "position": "s",
+            "props": [],
+            "virtuality": "1"
+          },
+          {
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "classifications": [],
+            "elvl": "1",
+            "entityId": "rp-c",
+            "id": "rp-s-a1",
+            "identifications": [],
+            "logic": "1",
+            "partitivity": "1",
+            "position": "a1",
+            "props": [],
+            "virtuality": "1"
+          }
+        ],
+        "actions": [
+          {
+            "actionId": "rp-a",
+            "bundleEnd": false,
+            "bundleOperator": "a",
+            "bundleStart": false,
+            "certainty": "1",
+            "elvl": "1",
+            "id": "rp-s-act",
+            "logic": "1",
+            "mood": [],
+            "moodvariant": "1",
+            "props": []
+          }
+        ],
+        "tags": [],
+        "territory": {
+          "order": 6,
+          "territoryId": "t1"
+        },
+        "text": "Replay person told a replay concept."
+      },
+      "detail": "",
+      "entities": {
+        "T0": {
+          "class": "T",
+          "createdAt": "<datetime>",
+          "data": {
+            "parent": false
+          },
+          "detail": "",
+          "id": "T0",
+          "isTemplate": false,
+          "labels": [
+            "root"
+          ],
+          "language": "lat",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "rp-a": {
+          "class": "A",
+          "createdAt": "<datetime>",
+          "data": {
+            "entities": {
+              "a1": [],
+              "a2": [],
+              "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+              "a1": "",
+              "a2": "",
+              "s": ""
+            }
+          },
+          "detail": "",
+          "id": "rp-a",
+          "labels": [
+            "replay action"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "rp-c": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "updated detail",
+          "id": "rp-c",
+          "labels": [
+            "replay concept renamed",
+            "alt label"
+          ],
+          "language": "eng",
+          "notes": [
+            "note"
+          ],
+          "props": [],
+          "references": [],
+          "status": "1",
+          "updatedAt": "<datetime>"
+        },
+        "rp-p": {
+          "class": "P",
+          "createdAt": "<datetime>",
+          "data": {
+            "logicalType": "1"
+          },
+          "detail": "editor touched this",
+          "id": "rp-p",
+          "labels": [
+            "replay person"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1",
+          "updatedAt": "<datetime>"
+        },
+        "rp-s": {
+          "class": "S",
+          "createdAt": "<datetime>",
+          "data": {
+            "actants": [
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "rp-p",
+                "id": "rp-s-s",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "s",
+                "props": [],
+                "virtuality": "1"
+              },
+              {
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "classifications": [],
+                "elvl": "1",
+                "entityId": "rp-c",
+                "id": "rp-s-a1",
+                "identifications": [],
+                "logic": "1",
+                "partitivity": "1",
+                "position": "a1",
+                "props": [],
+                "virtuality": "1"
+              }
+            ],
+            "actions": [
+              {
+                "actionId": "rp-a",
+                "bundleEnd": false,
+                "bundleOperator": "a",
+                "bundleStart": false,
+                "certainty": "1",
+                "elvl": "1",
+                "id": "rp-s-act",
+                "logic": "1",
+                "mood": [],
+                "moodvariant": "1",
+                "props": []
+              }
+            ],
+            "tags": [],
+            "territory": {
+              "order": 6,
+              "territoryId": "t1"
+            },
+            "text": "Replay person told a replay concept."
+          },
+          "detail": "",
+          "id": "rp-s",
+          "labels": [
+            ""
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "t1": {
+          "class": "T",
+          "createdAt": "<datetime>",
+          "data": {
+            "parent": {
+              "order": 2,
+              "territoryId": "T0"
+            }
+          },
+          "detail": "",
+          "id": "t1",
+          "labels": [
+            "priest Minda and their stories"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        }
+      },
+      "id": "rp-s",
+      "labels": [
+        ""
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "right": "admin",
+      "status": "1",
+      "usedInDocuments": [],
+      "warnings": [
+        {
+          "origin": "rp-s",
+          "position": {
+            "entityId": "rp-a",
+            "section": "Statement",
+            "subSection": "a1"
+          },
+          "type": "AVU"
+        },
+        {
+          "origin": "rp-s",
+          "position": {
+            "entityId": "rp-a",
+            "section": "Statement",
+            "subSection": "s"
+          },
+          "type": "AVU"
+        }
+      ]
+    }
+  }
+}

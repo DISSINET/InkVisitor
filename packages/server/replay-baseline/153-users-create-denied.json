@@ -1,0 +1,21 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/users",
+    "body": {
+      "email": "x@example.com",
+      "name": "x",
+      "role": "viewer"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

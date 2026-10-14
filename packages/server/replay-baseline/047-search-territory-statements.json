@@ -1,0 +1,148 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?class=S&territoryId=t1"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [
+                {
+                  "certainty": "3",
+                  "elvl": "1",
+                  "entityId": "c211",
+                  "id": "s2_a2_i1",
+                  "logic": "1",
+                  "mood": [],
+                  "moodvariant": "1"
+                }
+              ],
+              "elvl": "1",
+              "entityId": "b1",
+              "id": "s2_a2",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            },
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "c41",
+              "id": "s2_a3",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "a1",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "a2",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "s2_a1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 2,
+            "territoryId": "t1"
+          },
+          "text": "...his dog (probably a pug) is possessed by evil..."
+        },
+        "detail": "",
+        "id": "s2",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "b1",
+              "id": "s3_a2",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "a3",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "s3_a1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 3,
+            "territoryId": "t1"
+          },
+          "text": "...and should be sacrificed."
+        },
+        "detail": "",
+        "id": "s3",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

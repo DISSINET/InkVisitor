@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/documents",
+    "body": {
+      "content": "plain text without anchors",
+      "id": "doc-replay-editor",
+      "title": "Editor doc"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

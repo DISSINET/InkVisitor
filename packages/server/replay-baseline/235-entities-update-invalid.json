@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/entities/rp-c",
+    "body": {
+      "class": "Z"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "ModelNotValidError",
+      "message": "unknown class for entity",
+      "result": false
+    }
+  }
+}

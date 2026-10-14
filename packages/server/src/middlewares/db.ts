@@ -1,10 +1,9 @@
 import { Response, Request, NextFunction } from "express";
-import { rethinkConfig } from "@service/rethink";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
-import DbPool from "@service/rethink-pool";
+import { DbPool, poolOptions } from "@service/storage";
 import { DbHandle } from "@service/dbHandle";
 
-export const pool = new DbPool(rethinkConfig);
+export const pool = new DbPool(poolOptions);
 
 // Dedicated pool for the session store. It MUST NOT share `pool`: express-session
 // writes the session inside its res.end wrapper (every request, because rolling is
@@ -13,7 +12,7 @@ export const pool = new DbPool(rethinkConfig);
 // deadlocks the pool the moment the client fires a burst of parallel requests.
 // A separate, smaller pool decouples session I/O from request I/O entirely.
 export const sessionPool = new DbPool({
-  ...rethinkConfig,
+  ...poolOptions,
   max: parseInt(process.env.SESSION_POOL_CONNECTIONS || "", 10) || 5,
 });
 

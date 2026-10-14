@@ -1,6 +1,6 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { DocumentDoesNotExist } from "@inkvisitor/shared/types/errors";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";

@@ -1,0 +1,67 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "A",
+      "data": {
+        "entities": {
+          "a1": [],
+          "a2": [],
+          "s": []
+        },
+        "pos": "verb",
+        "valencies": {
+          "a1": "",
+          "a2": "",
+          "s": ""
+        }
+      },
+      "detail": "",
+      "id": "rp-a",
+      "labels": [
+        "replay action"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "rp-a",
+        "labels": [
+          "replay action"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      },
+      "result": true
+    }
+  }
+}

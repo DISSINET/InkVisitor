@@ -1,5 +1,5 @@
-import { r } from "rethinkdb-ts";
-import { connectAdmin, getTestDbName } from "./db";
+import { storage } from "../service/storage";
+import { closeTestDb, openTestDb } from "./db";
 import { adminSeed } from "./fixtures";
 
 /**
@@ -27,44 +27,31 @@ import { adminSeed } from "./fixtures";
  * pure-unit run without RethinkDB is unaffected.
  */
 const MUTABLE_TABLES = [
-  "entities",
-  "relations",
-  "audits",
-  "documents",
-  "settings",
+  storage.entities,
+  storage.relations,
+  storage.audits,
+  storage.documents,
+  storage.settings,
 ];
 
 beforeAll(async () => {
   let conn;
   try {
-    conn = await connectAdmin();
+    conn = await openTestDb();
   } catch {
-    // No RethinkDB reachable (e.g. a unit-only run) - nothing to isolate.
+    // No database reachable (e.g. a unit-only run) - nothing to isolate.
     return;
   }
   try {
-    conn.use(getTestDbName());
     for (const table of MUTABLE_TABLES) {
-      await r
-        .table(table)
-        .delete()
-        .run(conn)
-        .catch(() => undefined); // table may not exist yet
+      await table.deleteAll(conn).catch(() => undefined); // table may not exist yet
     }
     // Restore the canonical admin: drop every user, then re-insert the seed so
     // id "1" is present, active, and back to its default password regardless of
     // what an earlier file did.
-    await r
-      .table("users")
-      .delete()
-      .run(conn)
-      .catch(() => undefined);
-    await r
-      .table("users")
-      .insert(adminSeed)
-      .run(conn)
-      .catch(() => undefined);
+    await storage.users.deleteAll(conn).catch(() => undefined);
+    await storage.users.insert(conn, adminSeed).catch(() => undefined);
   } finally {
-    await conn.close();
+    await closeTestDb(conn);
   }
 });

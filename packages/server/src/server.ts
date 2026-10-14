@@ -36,9 +36,9 @@ import rateLimit from "express-rate-limit";
 import "@models/events/register";
 import { Request, Response } from "express";
 import { TooManyRequestsError } from "@inkvisitor/shared/types/errors";
-import { r as rethink } from "rethinkdb-ts";
 import timeout from "connect-timeout";
 import { pool } from "@middlewares/db";
+import { storage } from "@service/storage";
 
 const server = express();
 
@@ -125,7 +125,7 @@ server.use(apiPathOld, router);
 const buildTimestamp = process.argv[2] || "";
 
 router.get("/health", async function (req, res) {
-  await rethink.tableList().run(req.db.connection);
+  await storage.tableList(req.db.connection);
   res.json({
     result: true,
     buildTimestamp,

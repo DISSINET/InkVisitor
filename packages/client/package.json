@@ -12,6 +12,7 @@
     "preinstall": "npx only-allow pnpm",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
@@ -69,6 +70,7 @@
     "uuid": "^13.0.2"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@redux-devtools/extension": "^3.3.0",
     "@tanstack/react-query-devtools": "^5.100.10",
     "@types/d3": "^7.4.3",

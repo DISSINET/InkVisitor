@@ -1,0 +1,199 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/p1/tooltip"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "class": "P",
+      "createdAt": "<datetime>",
+      "data": {
+        "logicalType": "1"
+      },
+      "detail": "",
+      "entities": {
+        "c1": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "c1",
+          "labels": [
+            "everyhing"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "c2": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "c2",
+          "labels": [
+            "priest"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "c3": {
+          "class": "C",
+          "createdAt": "<datetime>",
+          "data": {
+            "pos": ""
+          },
+          "detail": "",
+          "id": "c3",
+          "labels": [
+            "occupation"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "p1": {
+          "class": "P",
+          "createdAt": "<datetime>",
+          "data": {
+            "logicalType": "1"
+          },
+          "detail": "",
+          "id": "p1",
+          "labels": [
+            "Minda, the priest"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        },
+        "p12": {
+          "class": "P",
+          "createdAt": "<datetime>",
+          "data": {
+            "logicalType": "1"
+          },
+          "detail": "",
+          "id": "p12",
+          "labels": [
+            "another priest, mentioned in a different T"
+          ],
+          "language": "eng",
+          "notes": [],
+          "props": [],
+          "references": [],
+          "status": "1"
+        }
+      },
+      "id": "p1",
+      "labels": [
+        "Minda, the priest"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "relations": {
+        "A1S": {
+          "connections": [],
+          "iConnections": []
+        },
+        "A2S": {
+          "connections": [],
+          "iConnections": []
+        },
+        "AEE": {
+          "connections": [],
+          "iConnections": []
+        },
+        "CLA": {
+          "connections": [
+            {
+              "entityIds": [
+                "p1",
+                "c2"
+              ],
+              "id": "rel-81",
+              "order": 1,
+              "subtrees": [
+                {
+                  "entityIds": [
+                    "c2",
+                    "c3"
+                  ],
+                  "id": "rel-1",
+                  "order": 1,
+                  "subtrees": [
+                    {
+                      "entityIds": [
+                        "c3",
+                        "c1"
+                      ],
+                      "id": "rel-2",
+                      "order": 1,
+                      "subtrees": [],
+                      "type": "SCL"
+                    }
+                  ],
+                  "type": "SCL"
+                }
+              ],
+              "type": "CLA"
+            }
+          ],
+          "iConnections": []
+        },
+        "IDE": {
+          "connections": [
+            {
+              "certainty": "2",
+              "entityIds": [
+                "p1",
+                "p12"
+              ],
+              "id": "rel-98",
+              "order": 1,
+              "subtrees": [],
+              "type": "IDE"
+            }
+          ]
+        },
+        "SCL": {
+          "connections": [],
+          "iConnections": []
+        },
+        "SOE": {
+          "connections": [],
+          "iConnections": []
+        },
+        "SUS": {
+          "connections": [],
+          "iConnections": []
+        },
+        "SYN": {
+          "connections": []
+        },
+        "warnings": []
+      },
+      "right": "admin",
+      "status": "1",
+      "usedInDocuments": []
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/settings/validation_SValency"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "id": "validation_SValency",
+        "public": false,
+        "value": false
+      },
+      "result": true
+    }
+  }
+}

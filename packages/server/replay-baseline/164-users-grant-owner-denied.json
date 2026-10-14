@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/users/3",
+    "body": {
+      "role": "owner"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "user role cannot be changed",
+      "result": false
+    }
+  }
+}

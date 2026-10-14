@@ -1,4 +1,4 @@
-import { Connection, r } from "rethinkdb-ts";
+import { Conn, storage } from "../service/storage";
 
 /**
  * A database name is only safe for the test suite if it is unmistakably a
@@ -26,16 +26,14 @@ export function getTestDbName(): string {
 }
 
 /**
- * Raw rethinkdb-ts connection used by globalSetup/globalTeardown to administer
- * the test database (drop/create/provision). Deliberately does NOT pass a `db`,
- * so it can create the database before using it. Short timeout so a missing
- * RethinkDB surfaces quickly instead of hanging the whole run.
+ * Dedicated connection to the test database for setup/teardown work. Short
+ * timeout so a missing database server surfaces quickly instead of hanging
+ * the whole run.
  */
-export async function connectAdmin(): Promise<Connection> {
-  return r.connect({
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT) || 28015,
-    password: process.env.DB_AUTH || undefined,
-    timeout: 5,
-  });
+export function openTestDb(): Promise<Conn> {
+  return storage.openConnection({ db: getTestDbName(), timeoutSeconds: 5 });
+}
+
+export function closeTestDb(conn: Conn): Promise<void> {
+  return storage.closeConnection(conn, { noreplyWait: false });
 }
