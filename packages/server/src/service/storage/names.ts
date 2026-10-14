@@ -1,4 +1,4 @@
-/** Physical table names. */
+/** Physical table names, the same on both backends. */
 export const TABLE = {
   entities: "entities",
   relations: "relations",

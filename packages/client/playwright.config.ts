@@ -4,6 +4,7 @@ import path from "path";
 // Frontend smoke suite: boots the API on the smoke database (see
 // packages/server/src/scripts/smoke-server.ts) and vite with the API url, then
 // drives chromium through the screens that need a working storage backend.
+// DB_ADAPTER=postgres in the environment runs the same suite on PostgreSQL.
 const API_PORT = 3301;
 const CLIENT_PORT = 8301;
 export const OWNER_STATE = path.join(__dirname, "e2e", ".auth", "owner.json");

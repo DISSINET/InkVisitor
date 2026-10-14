@@ -12,14 +12,14 @@ import { createTargets } from "./import/targets";
 /**
  * Non-interactive drop + create + import of one dataset, the same import code
  * as the interactive `pnpm start`:
- *   pnpm seed --db=<name> --dataset=<name> [--target=rethinkdb] [env]
+ *   pnpm seed --db=<name> --dataset=<name> [--target=rethinkdb|postgres|both] [env]
  */
 async function main(): Promise<void> {
   const dbName = flag("db");
   const datasetName = flag("dataset");
   if (!dbName || !datasetName) {
     throw new Error(
-      "usage: seed --db=<name> --dataset=<name> [--target=rethinkdb] [env]"
+      "usage: seed --db=<name> --dataset=<name> [--target=rethinkdb|postgres|both] [env]"
     );
   }
   const dataset = datasets[datasetName]

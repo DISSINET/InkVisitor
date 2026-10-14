@@ -8,13 +8,15 @@ import { REQUIRED, RequiredIndex } from "../requiredIndexes";
  * Table + secondary-index provisioning for throwaway databases (jest, replay)
  * and the startup check that the indexes the routes depend on exist.
  *
- * TABLES is the one RethinkDB index list. The seeder in packages/database
- * imports it through its @service alias.
+ * TABLES is the one RethinkDB index list. The seeder and the storage diff in
+ * packages/database import it through their @service alias, and the
+ * PostgreSQL catalogue in ../postgres/provision.ts mirrors it name for name.
  */
 
 /**
- * A secondary index as data. RethinkDB builds it from `keys`. No `keys` means
- * the index is over the field called `name`.
+ * A secondary index as data. RethinkDB builds it from `keys`; the storage diff
+ * in packages/database evaluates `keys` per row to compare against the
+ * PostgreSQL mirror. No `keys` means the index is over the field called `name`.
  */
 export interface IndexDef {
   name: string;

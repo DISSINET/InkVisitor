@@ -33,9 +33,9 @@ export function reviveTimes(value: unknown): unknown {
 }
 
 /**
- * Rows as a target stores them. Ids are assigned before any write so a row
- * keeps one id wherever it is written; TIME wire objects become Dates so the
- * stored instant does not depend on the target.
+ * Rows as every target stores them. Ids are assigned here so the same row can
+ * be written to more than one database and still match by id; TIME wire
+ * objects become Dates so both backends see the same instant.
  */
 export function prepareRows<T extends Record<string, any>>(rows: T[]): T[] {
   for (const row of rows) {

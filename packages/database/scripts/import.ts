@@ -195,7 +195,7 @@ class Importer {
     console.log(`\nImport app${info.length ? ": " + info.join(", ") : ""}`);
     console.log(
       `To specify db from the command line, use ${colors.yellow(
-        "npm start <dbname> [--target=rethinkdb]"
+        "npm start <dbname> [--target=rethinkdb|postgres|both]"
       )}\n`
     );
     Object.values(menu).forEach((item) => console.log(item.description));
