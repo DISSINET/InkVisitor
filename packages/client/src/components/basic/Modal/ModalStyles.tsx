@@ -18,7 +18,11 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "500")};
+  /* the ladder is the theme's own — see the note on zIndex there. Read from it
+     rather than written here, because what has to stay under a dialog is
+     decided in the files that draw those things and not in this one */
+  z-index: ${({ theme, $lowerZIndex }) =>
+    $lowerZIndex ? theme.zIndex.modalLower : theme.zIndex.modal};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;

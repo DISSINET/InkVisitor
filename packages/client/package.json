@@ -42,6 +42,7 @@
     "d3-axis-for-react": "^1.1.1",
     "immutability-helper": "^3.1.1",
     "jszip": "^3.10.1",
+    "maplibre-gl": "^6.6.0",
     "prismjs": "^1.30.0",
     "react": "^19.2.6",
     "react-dnd": "^16.0.1",
@@ -66,6 +67,8 @@
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
     "styled-components": "^6.4.1",
+    "terra-draw": "1.37.0",
+    "terra-draw-maplibre-gl-adapter": "1.5.0",
     "uuid": "^13.0.2"
   },
   "devDependencies": {

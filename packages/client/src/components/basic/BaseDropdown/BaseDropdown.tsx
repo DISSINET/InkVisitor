@@ -41,6 +41,15 @@ interface BaseDropdown {
   // appearance props
   width?: number | "full";
   placeholder?: string;
+  /**
+   * What the control is called, where nothing on screen names it.
+   *
+   * A dropdown whose only text is its current value tells a screen reader the
+   * value and nothing about the question - "coordinates", with no way to learn
+   * that it arranges a list. Set it wherever the control has no visible label
+   * beside it.
+   */
+  ariaLabel?: string;
   noOptionsMessage?: string;
   icon?: React.ReactNode;
   tooltipLabel?: string;
@@ -86,6 +95,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   hideSelectedOptions = false,
   noDropDownIndicator = false,
   placeholder = "Select",
+  ariaLabel,
   noOptionsMessage = "No option selected",
   isClearable = false,
   isMulti = false,
@@ -185,6 +195,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
           className="react-select-container"
           classNamePrefix="react-select"
+          aria-label={ariaLabel}
           placeholder={placeholder}
           noOptionsMessage={() => noOptionsMessage}
           isClearable={isClearable}
