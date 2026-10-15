@@ -80,5 +80,4 @@ Owner only: Import entities from JSON in the Detail box: up to 10 entities, past
 ## Deployment
 
 - Run `fixEditorEntityAclJob` again. It now also opens `GET entities/:entityId/relations` to editors; without it they get "Endpoint not allowed" when removing an entity from a relation cell in the Explorer.
-- Only if the geocoding engine requires a key: add `HGA_ENGINE_API_KEY=<key>` to the client env secret of each mode (`CLIENT_ENV_*`). Leave it out otherwise; the build does not require it, and the key is built into the client, so it identifies the installation and is not a secret.
 - Clear `usedTemplate` on the one template that had a new template created from it before #3289 — it points at its own copy and should be empty.
