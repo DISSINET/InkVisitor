@@ -15,6 +15,8 @@ export interface AsymmetricalAnchor {
   segmentIndex: number;
   position: number;
   attributes?: Record<string, string>;
+  /** Paragraph number as shown in the gutter; unset on a paragraph with no text. */
+  paragraphNumber?: number;
 }
 
 export interface AsymmetricalAnchorWarning {
@@ -99,7 +101,8 @@ export class Warnings {
 function anchorsKey(anchors: AsymmetricalAnchor[]): string {
   return anchors
     .map(
-      (a) => `${a.tagName}|${a.type}|${a.segmentIndex}|${a.position}`
+      (a) =>
+        `${a.tagName}|${a.type}|${a.segmentIndex}|${a.position}|${a.paragraphNumber}`
     )
     .sort()
     .join(",");
