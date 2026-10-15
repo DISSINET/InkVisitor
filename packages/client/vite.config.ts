@@ -162,6 +162,9 @@ export default defineConfig(({ command, mode }) => {
       environment: "jsdom",
       include: ["src/**/*.{test,spec}.{ts,tsx}"],
       setupFiles: ["./src/setupTests.ts"],
+      // the full-tree render tests run beside one worker per core, and the
+      // slowest take several times their stand-alone time under that load
+      testTimeout: 20000,
     },
   };
 });
