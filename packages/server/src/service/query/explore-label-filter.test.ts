@@ -37,6 +37,14 @@ describe("explore-label-filter", () => {
     expect(labelFilterToRegExp("basket").test("Alt label")).toBeFalsy();
   });
 
+  it("labelFilterToRegExp treats quote marks and apostrophes as interchangeable", () => {
+    expect(labelFilterToRegExp("heretics' presence").test("heretics\u2019 presence")).toBeTruthy();
+    expect(labelFilterToRegExp("heretics\u2019 presence").test("heretics' presence")).toBeTruthy();
+    expect(labelFilterToRegExp('"Pater"').test("\u201EPater\u201C")).toBeTruthy();
+    expect(labelFilterToRegExp("'Pater'").test("\u00ABPater\u00BB")).toBeTruthy();
+    expect(labelFilterToRegExp("heretics' presence").test("heretics presence")).toBeFalsy();
+  });
+
   it("entityLabelMatchesFilter checks any entity labels entry", () => {
     expect(entityLabelMatchesFilter(entity.labels, labelFilter("alt"))).toBeTruthy();
     expect(entityLabelMatchesFilter(entity.labels, labelFilter("missing"))).toBeFalsy();

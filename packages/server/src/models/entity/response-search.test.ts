@@ -181,6 +181,55 @@ describe("models/response-search", function () {
     });
   });
 
+  describe("search with quotes and apostrophes", function () {
+    let db: Db;
+
+    const [, apostropheEntity] = prepareEntity();
+    apostropheEntity.labels = ["heretics\u2019 presence"];
+
+    const [, quotedEntity] = prepareEntity();
+    quotedEntity.labels = ["\u201EPater noster\u201C prayer"];
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await deleteEntities(db);
+
+      await apostropheEntity.save(db.connection);
+      await quotedEntity.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await db.close();
+    });
+
+    it("should match a typographic apostrophe when typing a straight one", async () => {
+      const byLabel = await new SearchQuery(db.connection)
+        .whereLabel("heretics' presence")
+        .do();
+      expect(byLabel.map((e) => e.id)).toEqual([apostropheEntity.id]);
+
+      const byLabelOrId = await new SearchQuery(db.connection)
+        .whereLabelOrId("heretics' pres*")
+        .do();
+      expect(byLabelOrId.map((e) => e.id)).toEqual([apostropheEntity.id]);
+    });
+
+    it("should treat single and double quote marks as interchangeable", async () => {
+      for (const query of ['"Pater noster"', "'Pater noster'", "\u00ABPater*"]) {
+        const ids = (
+          await new SearchQuery(db.connection).whereLabel(query).do()
+        ).map((e) => e.id);
+        try {
+          expect(ids).toEqual([quotedEntity.id]);
+        } catch (e) {
+          throw new Error(`${query} not satisfied`);
+        }
+      }
+    });
+  });
+
   describe("search by labelOrId", function () {
     let db: Db;
 

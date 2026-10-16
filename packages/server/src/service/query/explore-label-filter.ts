@@ -1,5 +1,5 @@
 import Entity from "@models/entity/entity";
-import { SearchQuery } from "@models/entity/response-search";
+import { quoteCharPattern, SearchQuery } from "@models/entity/response-search";
 import { IEntity } from "@inkvisitor/shared/types";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
@@ -37,7 +37,7 @@ const toDiacriticPattern = (text: string): string =>
   text
     .toLowerCase()
     .split("")
-    .map((char) => DIACRITIC_CHAR_MAP[char] ?? escapeRegExp(char))
+    .map((char) => DIACRITIC_CHAR_MAP[char] ?? quoteCharPattern(char) ?? escapeRegExp(char))
     .join("");
 
 /**
