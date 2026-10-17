@@ -14,6 +14,8 @@ import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
+import { IcoMenuFold, IcoMenuUnfold } from "Theme/icons";
+import { ButtonSize } from "types";
 import { ENGINE_URL, engineHealth } from "./utils/engine/engine";
 import { fixtureModeAvailable, isFixtureMode, setFixtureMode } from "./utils/engine/fixtureMode";
 import {
@@ -617,8 +619,24 @@ export const GeocodingPage: React.FC = () => {
           its four. Box owns its own borders through the theme, which is also
           what stops the hairlines between panels reading as heavy ruled lines
           in dark mode. */}
-      <Panel width={panels.listWidth}>
-        <Box label="Locations" height={contentHeight}>
+      <Panel width={panels.listWidth} widthVarIndex={0}>
+        <Box
+          label="Locations"
+          height={contentHeight}
+          isExpanded={panels.listExpanded}
+          onHeaderClick={panels.toggleList}
+          disableHeaderClick
+          buttons={[
+            <Button
+              key="fold"
+              onClick={panels.toggleList}
+              inverted
+              shape="square"
+              size={ButtonSize.Small}
+              icon={panels.listExpanded ? <IcoMenuFold /> : <IcoMenuUnfold />}
+            />,
+          ]}
+        >
           <GeocodingList
             browse={browse}
             selectedId={selected?.entity.id}
@@ -657,13 +675,15 @@ export const GeocodingPage: React.FC = () => {
         </Box>
       </Panel>
 
-      <LayoutSeparatorVertical
-        separatorXPosition={panels.separators.list}
-        resolveDrag={panels.resolveListDrag}
-        setSeparatorXPosition={panels.setListSeparator}
-      />
+      {panels.listExpanded ? (
+        <LayoutSeparatorVertical
+          separatorXPosition={panels.separators.list}
+          resolveDrag={panels.resolveListDrag}
+          setSeparatorXPosition={panels.setListSeparator}
+        />
+      ) : null}
 
-      <Panel width={panels.mapWidth}>
+      <Panel width={panels.mapWidth} widthVarIndex={1}>
         <Box
           label="Map"
           height={contentHeight}
@@ -699,6 +719,8 @@ export const GeocodingPage: React.FC = () => {
           }
         >
           <GeocodingMap
+            canvasWidth={panels.mapCanvasWidth}
+            covered={panels.mapCovered}
             selected={selected}
             geocoded={browse.geocoded}
             context={context}
@@ -740,14 +762,32 @@ export const GeocodingPage: React.FC = () => {
         </Box>
       </Panel>
 
-      <LayoutSeparatorVertical
-        separatorXPosition={panels.separators.suggestions}
-        resolveDrag={panels.resolveSuggestionsDrag}
-        setSeparatorXPosition={panels.setSuggestionsSeparator}
-      />
+      {panels.suggestionsExpanded ? (
+        <LayoutSeparatorVertical
+          separatorXPosition={panels.separators.suggestions}
+          resolveDrag={panels.resolveSuggestionsDrag}
+          setSeparatorXPosition={panels.setSuggestionsSeparator}
+        />
+      ) : null}
 
-      <Panel width={panels.suggestionsWidth}>
-        <Box label="Suggestions" height={contentHeight}>
+      <Panel width={panels.suggestionsWidth} widthVarIndex={2}>
+        <Box
+          label="Suggestions"
+          height={contentHeight}
+          isExpanded={panels.suggestionsExpanded}
+          onHeaderClick={panels.toggleSuggestions}
+          disableHeaderClick
+          buttons={[
+            <Button
+              key="fold"
+              onClick={panels.toggleSuggestions}
+              inverted
+              shape="square"
+              size={ButtonSize.Small}
+              icon={panels.suggestionsExpanded ? <IcoMenuUnfold /> : <IcoMenuFold />}
+            />,
+          ]}
+        >
           <GeocodingSuggestions
             selected={selected}
             hovered={hoveredSuggestion}

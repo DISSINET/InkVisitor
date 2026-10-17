@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { panelWidthVar } from "utils/layoutUtils";
 import { StyledMapToggle } from "../../components/map/MapControlsStyles";
 import { belowToggle, TOGGLE_SIZE } from "../../components/map/MapControlsStyles";
 
@@ -14,6 +16,22 @@ import { belowToggle, TOGGLE_SIZE } from "../../components/map/MapControlsStyles
  * arrives it is all there is behind the marks — which is why it is a surface
  * colour rather than nothing.
  */
+/**
+ * Holds the canvas at one place on screen, whatever the panels beside it do.
+ *
+ * As wide as the map can ever be, from the folded list's strip to the folded
+ * suggestions' strip, and pulled left by the list's live width. The panels
+ * slide over it during a fold or a drag, and the renderer never redraws for a
+ * size change, which it would on every frame of one.
+ */
+export const StyledMapStage = styled.div<{ $width: number }>`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(${COLLAPSED_PANEL_WIDTH / 10}rem - var(${panelWidthVar(0)}));
+  width: ${({ $width }) => $width / 10}rem;
+`;
+
 export const StyledMapCanvas = styled.div`
   height: 100%;
   width: 100%;
@@ -56,6 +74,18 @@ export const StyledMapPanel = styled.div`
      column ends up under whichever of them is drawn */
   .maplibregl-ctrl-bottom-right {
     bottom: ${({ theme }) => theme.space[1]};
+  }
+
+  /* the renderer pins its controls to the canvas corners, and the canvas runs
+     under both side panels: each corner is moved in by what covers it */
+  .maplibregl-ctrl-top-left,
+  .maplibregl-ctrl-bottom-left {
+    left: calc(var(${panelWidthVar(0)}) - ${COLLAPSED_PANEL_WIDTH / 10}rem);
+  }
+
+  .maplibregl-ctrl-top-right,
+  .maplibregl-ctrl-bottom-right {
+    right: calc(var(${panelWidthVar(2)}) - ${COLLAPSED_PANEL_WIDTH / 10}rem);
   }
 
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl {

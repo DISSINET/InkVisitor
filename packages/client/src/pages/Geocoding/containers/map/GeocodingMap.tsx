@@ -57,6 +57,7 @@ import {
   StyledDrawRefusal,
   StyledDrawToggle,
   StyledMapCanvas,
+  StyledMapStage,
   StyledMapPanel,
   StyledMarkCard,
   StyledMarkCardAt,
@@ -90,6 +91,10 @@ const NO_SUGGESTIONS: Suggestion[] = [];
 const NO_RECENT: RecentGeocode[] = [];
 
 interface GeocodingMap {
+  /** Width of the canvas, which stays put while the panels beside it move. */
+  canvasWidth: number;
+  /** How much of the canvas the side panels hide on each side. */
+  covered: { left: number; right: number };
   selected: GeocodingLocation | undefined;
   /**
    * A point the researcher asked to see, and when they asked. The moment is what
@@ -177,6 +182,8 @@ interface GeocodingMap {
 }
 
 export const GeocodingMap: React.FC<GeocodingMap> = ({
+  canvasWidth,
+  covered,
   selected,
   focus,
   recent,
@@ -367,6 +374,35 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     : [];
 
   const { mapRef, styleEpoch, basemapLayers } = useMapStyle(containerRef, position, basemap);
+
+  /**
+   * Centres every camera move on the uncovered part of the canvas.
+   *
+   * The padding changes with the centre that keeps the same place under the
+   * same pixel, so a panel folding or a separator landing leaves the map where
+   * it was. The first padding moves the centre with it instead: the map was
+   * just created on a centre meant for what can be seen.
+   */
+  const padded = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    // negative before the layout has been measured
+    if (!map || covered.left < 0 || covered.right < 0) {
+      return;
+    }
+    const current = map.getPadding();
+    const padding = { ...current, left: covered.left, right: covered.right };
+    if (!padded.current) {
+      padded.current = true;
+      map.jumpTo({ padding });
+      return;
+    }
+    const { clientWidth, clientHeight } = map.getContainer();
+    const x = covered.left + (clientWidth - covered.left - covered.right) / 2;
+    const { top = 0, bottom = 0 } = current;
+    const y = top + (clientHeight - top - bottom) / 2;
+    map.jumpTo({ center: map.unproject([x, y]), padding });
+  }, [mapRef, covered.left, covered.right]);
   const {
     drawing,
     setDrawing,
@@ -441,7 +477,9 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
     <StyledMapPanel data-map-panel>
       {/* the renderer draws into this element and owns everything inside it;
           every mark on it is a layer set from the effects above */}
-      <StyledMapCanvas ref={containerRef} data-map-canvas />
+      <StyledMapStage $width={canvasWidth}>
+        <StyledMapCanvas ref={containerRef} data-map-canvas />
+      </StyledMapStage>
 
       <RecentGeocodes
         recent={recent ?? NO_RECENT}
@@ -644,12 +682,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
             return;
           }
           // the same two questions the map click asks, anchored to the form
-          // rather than to a point nobody clicked. Measured against the map
-          // panel, which is what the menu is positioned inside - the strip
-          // the form now sits in is not that element
+          // rather than to a point nobody clicked. Measured against the
+          // canvas, which is what a map click's point is measured in
           const anchor = menuAnchorFor(
             event.currentTarget.getBoundingClientRect(),
-            event.currentTarget.closest("[data-map-panel]")?.getBoundingClientRect(),
+            containerRef.current?.getBoundingClientRect(),
           );
           setPending({ lat, lon, ...anchor });
           setManual({ lat: "", lon: "" });
