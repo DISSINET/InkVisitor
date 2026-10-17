@@ -212,16 +212,8 @@ export const StyledRowMarkBox = styled.span<{ $marked: boolean; $any: boolean }>
   flex: 0 0 auto;
   width: 1.6rem;
   height: 1.6rem;
-  cursor: pointer;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme, $marked }) =>
-    $marked ? theme.color["success"] : theme.color["gray"][500]};
   opacity: ${({ $marked, $any }) => ($marked || $any ? 1 : 0)};
   transition: opacity 0.15s ease-in-out;
-
-  &:hover {
-    color: ${({ theme }) => theme.color["success"]};
-  }
 `;
 
 /**

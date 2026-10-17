@@ -1,6 +1,12 @@
+import { Checkbox } from "components";
 import React from "react";
 import { GazetteerHover } from "./GazetteerTag";
-import { LLM_SOURCE, gazetteerRows, isHealthy, withSource } from "../../utils/context/gazetteerCatalogue";
+import {
+  LLM_SOURCE,
+  gazetteerRows,
+  isHealthy,
+  withSource,
+} from "../../utils/context/gazetteerCatalogue";
 import {
   StyledGazetteerCell,
   StyledGazetteerHead,
@@ -83,12 +89,10 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
         return (
           <StyledGazetteerRow key={name}>
             <StyledGazetteerSwitch>
-              <input
-                type="checkbox"
-                checked={!isOff}
+              <Checkbox
+                value={!isOff}
                 disabled={lockedHere}
-                aria-label={`ask ${name}`}
-                onChange={(event) => onChange(withSource(disabled, name, !event.target.checked))}
+                onChangeFn={(value) => onChange(withSource(disabled, name, !value))}
               />
               <StyledGazetteerName>
                 <GazetteerHover source={name}>

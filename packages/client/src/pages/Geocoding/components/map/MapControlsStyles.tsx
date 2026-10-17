@@ -203,7 +203,7 @@ export const StyledLayersHead = styled.div`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
-export const StyledLayerRow = styled.label`
+export const StyledLayerRow = styled.div`
   display: flex;
   align-items: flex-start;
   gap: ${({ theme }) => theme.space[2]};
@@ -212,15 +212,16 @@ export const StyledLayerRow = styled.label`
   font-size: ${({ theme }) => theme.fontSize.xs};
   line-height: ${LAYER_LINE};
   color: ${({ theme }) => theme.color["black"]};
+`;
 
-  /* a checkbox's own margins push it off the first line of its label; sized to
-     that line and stripped of them, every box sits level with its title */
-  input[type="checkbox"] {
-    flex: none;
-    width: ${LAYER_LINE};
-    height: ${LAYER_LINE};
-    margin: 0;
-  }
+/**
+ * Holds the box beside the row's title, not its note. Centred on the title's
+ * lowercase letters rather than its line, which sits higher than the text reads.
+ */
+export const StyledLayerBox = styled.div`
+  display: flex;
+  flex: none;
+  margin-top: 0.2rem;
 `;
 
 export const StyledLayerCount = styled.span`

@@ -42,22 +42,11 @@ export const StyledGazetteerCell = styled.div`
   min-width: 0;
 `;
 
-export const StyledGazetteerSwitch = styled.label`
+export const StyledGazetteerSwitch = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[1]} 0;
-  cursor: pointer;
-
-  input {
-    margin-top: 0.2rem;
-    cursor: pointer;
-    accent-color: ${({ theme }) => theme.color["primary"]};
-  }
-
-  input:disabled {
-    cursor: not-allowed;
-  }
 `;
 
 export const StyledGazetteerName = styled.span`

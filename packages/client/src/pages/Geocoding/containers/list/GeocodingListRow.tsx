@@ -1,13 +1,6 @@
 import { EntityTag } from "components/advanced";
-import { IconWithTooltip } from "components";
-import {
-  IcoBolt,
-  IcoCheckboxChecked,
-  IcoCheckboxUnchecked,
-  IcoChevronDown,
-  IcoFlyTo,
-  IcoGeocode,
-} from "Theme/icons";
+import { Checkbox, IconWithTooltip } from "components";
+import { IcoBolt, IcoChevronDown, IcoFlyTo, IcoGeocode } from "Theme/icons";
 import React from "react";
 import { ClipLoader } from "react-spinners";
 import { RowComponentProps } from "react-window";
@@ -207,10 +200,6 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             the row's click is a selection and the two are different questions:
             what the map is answering about, and what a write would reach */}
         <StyledRowMarkBox
-          role="checkbox"
-          aria-checked={marked.has(location.entity.id)}
-          aria-label={`mark ${location.entity.labels[0] || location.entity.id}`}
-          tabIndex={-1}
           $marked={marked.has(location.entity.id)}
           $any={marked.size > 0}
           data-hint={
@@ -227,12 +216,19 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
               event.preventDefault();
             }
           }}
+          // the whole cell marks, though the box is smaller than it; the box's
+          // own click stops at the box and never reaches here
           onClick={(event) => {
             event.stopPropagation();
             props.onMarkRow(index, !marked.has(location.entity.id), event.shiftKey);
           }}
         >
-          {marked.has(location.entity.id) ? <IcoCheckboxChecked /> : <IcoCheckboxUnchecked />}
+          <Checkbox
+            value={marked.has(location.entity.id)}
+            color="success"
+            onChangeFn={(value, event) => props.onMarkRow(index, value, !!event?.shiftKey)}
+            size={12}
+          />
         </StyledRowMarkBox>
         {/* the row says whether it has a coordinate whatever the list is grouped
             by, so it still reads under "kind of place" or under one flat list,

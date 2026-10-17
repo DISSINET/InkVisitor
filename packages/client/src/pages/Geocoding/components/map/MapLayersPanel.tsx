@@ -1,8 +1,10 @@
+import { Checkbox } from "components";
 import { IcoLayers } from "Theme/icons";
 import { BASEMAP_GROUPS } from "../../utils/map/basemapLayers";
 import { DEFAULT_MAP_PREFS, MapLayerPrefs } from "../../utils/map/geocodingMapPrefs";
 import React from "react";
 import {
+  StyledLayerBox,
   StyledLayerCount,
   StyledLayerRow,
   StyledLayersHead,
@@ -49,12 +51,14 @@ export const MapLayersPanel: React.FC<MapLayersPanel> = ({
     {open ? (
       <StyledLayersPanel role="group" aria-label="Map layers">
         <StyledLayersHead>display</StyledLayersHead>
-        <StyledLayerRow>
-          <input
-            type="checkbox"
-            checked={layers.others}
-            onChange={(event) => onChange({ ...layers, others: event.target.checked })}
-          />
+        <StyledLayerRow onClick={() => onChange({ ...layers, others: !layers.others })}>
+          <StyledLayerBox>
+            <Checkbox
+              size={12}
+              value={layers.others}
+              onChangeFn={(value) => onChange({ ...layers, others: value })}
+            />
+          </StyledLayerBox>
           <span>
             other locations
             <StyledLayerCount>
@@ -62,12 +66,14 @@ export const MapLayersPanel: React.FC<MapLayersPanel> = ({
             </StyledLayerCount>
           </span>
         </StyledLayerRow>
-        <StyledLayerRow>
-          <input
-            type="checkbox"
-            checked={layers.suggestions}
-            onChange={(event) => onChange({ ...layers, suggestions: event.target.checked })}
-          />
+        <StyledLayerRow onClick={() => onChange({ ...layers, suggestions: !layers.suggestions })}>
+          <StyledLayerBox>
+            <Checkbox
+              size={12}
+              value={layers.suggestions}
+              onChangeFn={(value) => onChange({ ...layers, suggestions: value })}
+            />
+          </StyledLayerBox>
           <span>
             suggestions
             <StyledLayerCount>
@@ -75,12 +81,14 @@ export const MapLayersPanel: React.FC<MapLayersPanel> = ({
             </StyledLayerCount>
           </span>
         </StyledLayerRow>
-        <StyledLayerRow>
-          <input
-            type="checkbox"
-            checked={layers.names}
-            onChange={(event) => onChange({ ...layers, names: event.target.checked })}
-          />
+        <StyledLayerRow onClick={() => onChange({ ...layers, names: !layers.names })}>
+          <StyledLayerBox>
+            <Checkbox
+              size={12}
+              value={layers.names}
+              onChangeFn={(value) => onChange({ ...layers, names: value })}
+            />
+          </StyledLayerBox>
           <span>
             names always shown
             <StyledLayerCount>rather than on hover</StyledLayerCount>
@@ -90,17 +98,24 @@ export const MapLayersPanel: React.FC<MapLayersPanel> = ({
         {/* the basemap's own drawing, as distinct from this page's marks */}
         <StyledLayersHead>basemap</StyledLayersHead>
         {BASEMAP_GROUPS.map((group) => (
-          <StyledLayerRow key={group.id}>
-            <input
-              type="checkbox"
-              checked={layers.basemap[group.id]}
-              onChange={(event) =>
-                onChange({
-                  ...layers,
-                  basemap: { ...layers.basemap, [group.id]: event.target.checked },
-                })
-              }
-            />
+          <StyledLayerRow
+            key={group.id}
+            onClick={() =>
+              onChange({
+                ...layers,
+                basemap: { ...layers.basemap, [group.id]: !layers.basemap[group.id] },
+              })
+            }
+          >
+            <StyledLayerBox>
+              <Checkbox
+                size={12}
+                value={layers.basemap[group.id]}
+                onChangeFn={(value) =>
+                  onChange({ ...layers, basemap: { ...layers.basemap, [group.id]: value } })
+                }
+              />
+            </StyledLayerBox>
             <span>
               {group.title}
               <StyledLayerCount>{group.note}</StyledLayerCount>
