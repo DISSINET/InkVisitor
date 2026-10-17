@@ -8,6 +8,9 @@ import styled from "styled-components";
  * chosen, and reading a wrong answer is exactly the moment it needs changing.
  */
 export const StyledContextPanel = styled.div`
+  /* grows with the grid when the panel is narrower than it, so the background
+     scrolls along with the fields */
+  min-width: min-content;
   padding: ${({ theme }) => theme.space[3]} ${({ theme }) => theme.space[4]};
   background-color: ${({ theme }) => theme.color["gray"][100]};
   border-bottom: 1px solid ${({ theme }) => theme.color["gray"][400]};
@@ -120,7 +123,9 @@ export const StyledContextNote = styled.div`
  */
 export const StyledContextGrid = styled.div`
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* the fields keep a usable width and a long value truncates inside its own
+     field: below that the panel scrolls rather than squashing the row */
+  grid-template-columns: auto minmax(14rem, 1fr) auto;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
   margin-top: ${({ theme }) => theme.space[3]};
