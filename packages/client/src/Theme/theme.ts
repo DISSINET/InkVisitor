@@ -144,12 +144,7 @@ const theme = {
 
     suggestionSelected: "#CCD5F4", // blue 100
 
-    // Annotator XML view syntax colours (#3269). Three hue families spread
-    // around the wheel (OKLCH H260 blue, H5 rose, H168 teal-green) so the
-    // roles are told apart by hue at a glance, as in code editors. All hold
-    // >=4.5:1 on white.
-    // Tag names are entity ids, so they run long and repeat on every line;
-    // the blue stays low-chroma to keep that bulk quiet.
+    // Annotator XML view syntax colours
     xmlTag: "#3E639F",
     xmlAttr: "#B93B63",
     // quotes recede but stay punctuation, not an artefact: 4.8:1 on white,
@@ -183,26 +178,22 @@ const theme = {
     },
 
     /**
-     * One colour per gazetteer, so a match can name its source at a glance.
-     *
-     * Sixteen fixed slugs the engine publishes, written out rather than derived
-     * from the name: a hash gives no control over which two end up alike, and
-     * these are read side by side on one card.
+     * One colour per gazetteer
      */
     gazetteer: {
-      "geonames": "#2b6cb0",
-      "nominatim": "#2c7a7b",
-      "wikipedia": "#6b46c1",
-      "wikidata": "#805ad5",
-      "tgn": "#b7791f",
-      "whg": "#2f855a",
-      "gov": "#c05621",
-      "idai": "#975a16",
-      "viabundus": "#3182ce",
+      geonames: "#2b6cb0",
+      nominatim: "#2c7a7b",
+      wikipedia: "#6b46c1",
+      wikidata: "#805ad5",
+      tgn: "#b7791f",
+      whg: "#2f855a",
+      gov: "#c05621",
+      idai: "#975a16",
+      viabundus: "#3182ce",
       "native-land": "#276749",
-      "pleiades": "#9b2c2c",
-      "chgis": "#b83280",
-      "syriaca": "#553c9a",
+      pleiades: "#9b2c2c",
+      chgis: "#b83280",
+      syriaca: "#553c9a",
       "hgis-indias": "#7b341e",
       "sedac-india": "#4a5568",
       "llm-coords": "#718096",
@@ -210,29 +201,8 @@ const theme = {
 
     /**
      * How strong a score is, weakest first.
-     *
-     * Sequential rather than diverging: a score orders one query and says
-     * nothing about right or wrong, so the ramp carries intensity and never a
-     * verdict. Five steps because a reader can tell five apart and cannot tell
-     * twenty.
-     *
-     * Built from the interface's own blues rather than a colour of its own —
-     * the primary at the strong end, the success blue in the middle — so a page
-     * of scores reads as part of the application instead of as a chart dropped
-     * into it. It carries no yellow: gold marks a clear winner, which is a
-     * different claim from a high score and is drawn in its own channel.
-     *
-     * Light and dark run in opposite directions. On white, weak is pale and
-     * strong is deep; on a dark ground a pale mark is the loudest thing on the
-     * screen, so weak is dark and strong is bright.
      */
-    scoreScale: [
-      "#ccd8f0",
-      "#9aaee0",
-      "#6174c2",
-      "#33447f",
-      "#091034",
-    ],
+    scoreScale: ["#ccd8f0", "#9aaee0", "#6174c2", "#33447f", "#091034"],
 
     tagBorderColor: {
       // EntityTag status
@@ -350,14 +320,7 @@ const theme = {
     stripes: "repeating-linear-gradient( -45deg, #cbd5e0, #cbd5e0, 1px, #fff 1px, #fff 12px)",
   },
   /**
-   * The stacking order of what is drawn over a page, for the cases where one
-   * of them has to be above or below another.
-   *
-   * Stated here because the constraint is between files: a card drawn by the
-   * map and a picker drawn by a panel have to agree, and a number written in
-   * each of them separately is agreement by coincidence. `modal` is the value
-   * the Modal component uses, repeated here so the others can be read against
-   * it — everything below it is page furniture and must stay under a dialog.
+   * Geocoding stacking order
    */
   zIndex: {
     /** What a mark on the map is, shown under the pointer. */
@@ -372,9 +335,6 @@ const theme = {
     modal: 500,
     /**
      * A modal asked to sit under the page furniture rather than over it.
-     *
-     * Below everything above, which is the whole point of the flag: a dialog
-     * opened this way is deliberately not the thing being looked at.
      */
     modalLower: 90,
   },
