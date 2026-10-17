@@ -235,6 +235,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               inverted
               tooltipLabel="remove this kind from the list — Classifications already made stay"
               onClick={() => onChange(value.filter((one) => one.id !== kind.id))}
+              shape="square"
             />
           </StyledKindRow>
         );

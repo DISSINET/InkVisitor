@@ -6,14 +6,7 @@ import {
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
+import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import Dropdown from "components/advanced";
 import { IconWithTooltip } from "components";
 import { IcoInfo } from "Theme/icons";
@@ -129,7 +122,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
   const [draft, setDraft] = useState<IGeocodingContext>(() => ({
     ...context,
     disabledSources: (context.disabledSources ?? []).filter(
-      (source) => !(projectContext.disabledSources ?? []).includes(source),
+      (source) => !(projectContext.disabledSources ?? []).includes(source)
     ),
   }));
 
@@ -142,9 +135,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
       api.usersUpdate(userId, {
         options: {
           geocoding: {
-            context: Object.fromEntries(
-              PREFERENCE_FIELDS.map((field) => [field, draft[field]]),
-            ),
+            context: Object.fromEntries(PREFERENCE_FIELDS.map((field) => [field, draft[field]])),
           },
         } as unknown as IUserOptions,
       }),
@@ -184,7 +175,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
   return (
     <Modal showModal onClose={onClose} width="normal">
       <ModalHeader title="My geocoding preferences" onClose={onClose} />
-      <ModalContent column>
+      <ModalContent column enableScroll>
         <StyledSettingsGrid>
           <StyledSectionHeading>Working preferences</StyledSectionHeading>
           <StyledSectionNote>
@@ -202,7 +193,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
               options={yesNoOptions}
               value={draft.autoSearch === false ? "no" : "yes"}
               onChange={(value) => setDraft((d) => ({ ...d, autoSearch: value === "yes" }))}
-            />,
+            />
           )}
           {row(
             "map click",
@@ -216,7 +207,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
               onChange={(value) =>
                 setDraft((d) => ({ ...d, mapClickAccuracy: value as GeocodingAccuracy }))
               }
-            />,
+            />
           )}
           <StyledSectionHeading>What is written</StyledSectionHeading>
           <StyledSectionNote>
@@ -232,7 +223,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
               options={yesNoOptions}
               value={draft.recordPlaceType === false ? "no" : "yes"}
               onChange={(value) => setDraft((d) => ({ ...d, recordPlaceType: value === "yes" }))}
-            />,
+            />
           )}
           {/* only where the question is switched off: with it on, every write
               already carries an answer chosen for that Location, and a blanket
@@ -250,17 +241,16 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
                 onChange={(value) =>
                   setDraft((d) => ({
                     ...d,
-                    defaultPlaceType:
-                      value === NO_DEFAULT_PLACE_TYPE ? null : value,
+                    defaultPlaceType: value === NO_DEFAULT_PLACE_TYPE ? null : value,
                   }))
                 }
-              />,
+              />
             )}
           <StyledSectionHeading>What the engine searches</StyledSectionHeading>
           <StyledSectionNote>
-            How the question is put to the gazetteers. Both of these change which answers come
-            back, so a run with either altered is a different query and is not served from the
-            cache of the last one.
+            How the question is put to the gazetteers. Both of these change which answers come back,
+            so a run with either altered is a different query and is not served from the cache of
+            the last one.
           </StyledSectionNote>
           {row(
             "fold accents",
@@ -274,7 +264,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
               options={yesNoOptions}
               value={draft.dedupeDiacritics ? "yes" : "no"}
               onChange={(value) => setDraft((d) => ({ ...d, dedupeDiacritics: value === "yes" }))}
-            />,
+            />
           )}
           {row(
             "model",
@@ -291,7 +281,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
                   taskCategory: value as IGeocodingContext["taskCategory"],
                 }))
               }
-            />,
+            />
           )}
 
           <StyledFullRow>
@@ -317,9 +307,9 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
 
           <StyledSectionHeading>Geocoding without reading the run</StyledSectionHeading>
           <StyledSectionNote>
-            What the bolt on a row, and the geocode over a marked set, are allowed to accept
-            when nobody is reading the answer. Neither ever replaces a coordinate that is
-            already recorded.
+            What the bolt on a row, and the geocode over a marked set, are allowed to accept when
+            nobody is reading the answer. Neither ever replaces a coordinate that is already
+            recorded.
           </StyledSectionNote>
           {row(
             "quick geocode",
@@ -337,7 +327,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
               onChange={(value) =>
                 setDraft((d) => ({ ...d, quickStrategy: value as QuickStrategy }))
               }
-            />,
+            />
           )}
           {row(
             "off-region",
@@ -352,10 +342,8 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
               width="full"
               options={yesNoOptions}
               value={draft.quickTakeOffRegion ? "yes" : "no"}
-              onChange={(value) =>
-                setDraft((d) => ({ ...d, quickTakeOffRegion: value === "yes" }))
-              }
-            />,
+              onChange={(value) => setDraft((d) => ({ ...d, quickTakeOffRegion: value === "yes" }))}
+            />
           )}
         </StyledSettingsGrid>
       </ModalContent>
