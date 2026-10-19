@@ -435,6 +435,9 @@
                 "defaultLanguage": "",
                 "defaultStatementLanguage": "",
                 "defaultTerritory": "",
+                "geocoding": {
+                  "context": {}
+                },
                 "hideStatementElementsOrderTable": false,
                 "promotedTemplateClass": "*",
                 "searchLanguages": [],
@@ -627,6 +630,9 @@
                 "defaultLanguage": "eng",
                 "defaultStatementLanguage": "",
                 "defaultTerritory": "t1",
+                "geocoding": {
+                  "context": {}
+                },
                 "hideStatementElementsOrderTable": false,
                 "promotedTemplateClass": "C",
                 "searchLanguages": [
