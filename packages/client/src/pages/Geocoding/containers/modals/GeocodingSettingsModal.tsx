@@ -10,6 +10,7 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
+  CancelButton,
   Input,
   Loader,
   Modal,
@@ -47,7 +48,10 @@ import {
 import { GazetteerColumn, GazetteerPicker } from "../../components/gazetteer/GazetteerPicker";
 import { StyledGazetteerNote } from "../../components/gazetteer/GazetteerPickerStyles";
 import { PlaceTypeTable } from "../../components/placeType/PlaceTypeTable";
-import { PLACE_TYPE_ASSIGNMENTS_KEY, usePlaceTypeAssignments } from "../../hooks/usePlaceTypeAssignments";
+import {
+  PLACE_TYPE_ASSIGNMENTS_KEY,
+  usePlaceTypeAssignments,
+} from "../../hooks/usePlaceTypeAssignments";
 
 /**
  * Assigning the entities that give a coordinate its meaning.
@@ -76,7 +80,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   const [draft, setDraft] = useState<IGeocodingRoles>(roles);
   const [baseUrls, setBaseUrls] = useState<Record<string, string>>({});
   const [disabledSources, setDisabledSources] = useState<string[]>(
-    projectContext.disabledSources ?? [],
+    projectContext.disabledSources ?? []
   );
   /**
    * The list as the modal opened it, so Save writes the list only when it was
@@ -96,7 +100,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         ...draft.placeTypes.map((one) => one.conceptId),
         ...Object.values(draft.resources),
       ].filter((id): id is string => !!id),
-    [draft],
+    [draft]
   );
 
   // the counts are of Locations, and a Classification can have any entity as its
@@ -163,7 +167,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       // a save is several writes, and the earlier ones may have landed
       queryClient.invalidateQueries({ queryKey: ["geocoding-settings"] });
       toast.error(
-        "The geocoding settings could not be saved completely. Some changes may have been written; reopen this window to see which.",
+        "The geocoding settings could not be saved completely. Some changes may have been written; reopen this window to see which."
       );
     },
   });
@@ -188,7 +192,11 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       );
     }
     return (
-      <EntityTag entity={entity} unlinkButton={{ onClick: unlink, tooltipLabel: "unlink entity" }} />
+      <EntityTag
+        entity={entity}
+        fullWidth
+        unlinkButton={{ onClick: unlink, tooltipLabel: "unlink entity" }}
+      />
     );
   };
 
@@ -202,7 +210,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   const picker = (
     id: string | undefined,
     entityClass: EntityEnums.Class,
-    set: (entityId: string | null) => void,
+    set: (entityId: string | null) => void
   ) => (
     <StyledPick>
       {id ? (
@@ -225,13 +233,11 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
     label: string,
     id: string | undefined,
     entityClass: EntityEnums.Class,
-    set: (entityId: string | null) => void,
+    set: (entityId: string | null) => void
   ) => (
     <React.Fragment key={label}>
       <StyledRowLabel>{label}</StyledRowLabel>
-      <StyledRowControls>
-        {picker(id, entityClass, set)}
-      </StyledRowControls>
+      <StyledRowControls>{picker(id, entityClass, set)}</StyledRowControls>
     </React.Fragment>
   );
 
@@ -252,7 +258,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         GAZETTEERS.includes(source) ? (
           picker(draft.resources[source], EntityEnums.Class.Resource, (id) => {
             setDraft((d) => ({ ...d, resources: withEntry(d.resources, source, id) }));
-            setBaseUrls((current) => nextBaseUrls(current, source, id, GAZETTEER_BASE_URLS[source]));
+            setBaseUrls((current) =>
+              nextBaseUrls(current, source, id, GAZETTEER_BASE_URLS[source])
+            );
           })
         ) : (
           <StyledGazetteerNote>
@@ -301,15 +309,15 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A geocoded Location carries two metaproperties: a GeoJSON geometry and an accuracy. Which Concept plays which role is
-            set once for the project — it is what &ldquo;geocoded&rdquo; means, so it cannot differ
-            between users.
+            A geocoded Location carries two metaproperties: a GeoJSON geometry and an accuracy.
+            Which Concept plays which role is set once for the project — it is what
+            &ldquo;geocoded&rdquo; means, so it cannot differ between users.
           </StyledSectionNote>
           {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
-            setDraft((d) => ({ ...d, geometry: id ?? "" })),
+            setDraft((d) => ({ ...d, geometry: id ?? "" }))
           )}
           {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
-            setDraft((d) => ({ ...d, accuracy: id ?? "" })),
+            setDraft((d) => ({ ...d, accuracy: id ?? "" }))
           )}
 
           <StyledSectionHeading>Accuracy values</StyledSectionHeading>
@@ -321,8 +329,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
               setDraft((d) => ({
                 ...d,
                 accuracyValues: withEntry(d.accuracyValues, accuracy, id),
-              })),
-            ),
+              }))
+            )
           )}
 
           <StyledSectionHeading>Place types</StyledSectionHeading>
@@ -349,10 +357,10 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
           <StyledSectionHeading>Gazetteers</StyledSectionHeading>
           <StyledSectionNote>
             One row per source the engine can ask. Switched off, a source is never asked for this
-            project, so it costs nothing and returns nothing: use it for a source this corpus has
-            no use for, or one whose licence does not cover this work. A researcher can switch
-            further sources off for their own runs, but cannot switch these back on. The resource
-            is the entity a reference to the source points at, and the record URL plus the stored
+            project, so it costs nothing and returns nothing: use it for a source this corpus has no
+            use for, or one whose licence does not cover this work. A researcher can switch further
+            sources off for their own runs, but cannot switch these back on. The resource is the
+            entity a reference to the source points at, and the record URL plus the stored
             identifier rebuilds a link back into it; a source whose record URL does not end in the
             identifier is left blank.
           </StyledSectionNote>
@@ -375,7 +383,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="greyer" onClick={onClose} />
+          <CancelButton onClick={onClose} />
           <Button
             label="Save"
             color="primary"

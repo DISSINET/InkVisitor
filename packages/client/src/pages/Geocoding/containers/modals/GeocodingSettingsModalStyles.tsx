@@ -68,15 +68,15 @@ export const StyledRowControls = styled.div`
 /**
  * One slot per row, holding either the entity a role points at or the suggester
  * that fills it — never both, since a filled role is changed by unlinking it
- * first. The width is fixed so that what follows on a gazetteer row, its base
- * URL field, starts at the same place down the whole column.
+ * first. The slot fills what its parent gives it; the gazetteer table fixes its
+ * own column so the base URL field starts at the same place down the column.
  */
 export const StyledPick = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
-  flex-shrink: 0;
-  width: 21rem;
+  flex: 1;
+  width: 100%;
   min-width: 0;
 `;
 
