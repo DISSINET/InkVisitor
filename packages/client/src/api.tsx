@@ -448,6 +448,9 @@ class Api {
       if (err.response?.status === 503) {
         return new errors.NetworkError();
       }
+      if (err.response?.status === 413) {
+        return new errors.RequestTooLargeError();
+      }
       const data = err.response?.data;
       if (typeof data === "string") {
         return new errors.NetworkError();
@@ -486,6 +489,10 @@ class Api {
       }
       if (ax.code === AxiosError.ERR_NETWORK || ax.code === AxiosError.ERR_BAD_RESPONSE) {
         out.error = errors.NetworkError.TYPE;
+        return out;
+      }
+      if (ax.response?.status === 413) {
+        out.error = errors.RequestTooLargeError.TYPE;
         return out;
       }
       const d = ax.response?.data;

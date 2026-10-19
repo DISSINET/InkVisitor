@@ -1,6 +1,6 @@
 import { animated } from "@react-spring/web";
 import { IoClose } from "react-icons/io5";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
 import { space5, space6 } from "Theme/theme-space-shortcut";
 
@@ -18,7 +18,11 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "500")};
+  /* the ladder is the theme's own — see the note on zIndex there. Read from it
+     rather than written here, because what has to stay under a dialog is
+     decided in the files that draw those things and not in this one */
+  z-index: ${({ theme, $lowerZIndex }) =>
+    $lowerZIndex ? theme.zIndex.modalLower : theme.zIndex.modal};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;
@@ -68,9 +72,7 @@ export const StyledCard = styled(animated.div)<Card>`
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border: ${({ theme, $noBorder }) =>
-    $noBorder
-      ? "none"
-      : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
+    $noBorder ? "none" : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
   box-shadow: ${({ theme, $noBorder }) => ($noBorder ? theme.boxShadow["high"] : "")};
 `;
 
@@ -132,27 +134,39 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   padding: ${({ $noPadding }) => ($noPadding ? "0" : `${space6} ${space5}`)};
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-
-  ${({ $enableScroll, $noPadding }) =>
-    $enableScroll &&
-    !$noPadding &&
-    css`
-      /* Softens the top edge, which a modal with no header has nothing else to
-         frame - the footer's own border already closes off the bottom. The fade
-         is exactly the body's top padding, so at rest it lies over empty space
-         and shows nothing; a row only dissolves once it scrolls into it. */
-      --modal-scroll-fade: ${space6};
-      -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0,
-        #000 var(--modal-scroll-fade)
-      );
-      mask-image: linear-gradient(
-        to bottom,
-        transparent 0,
-        #000 var(--modal-scroll-fade)
-      );
-    `}
+`;
+// holds the scrolling body plus its edge blurs, which must sit outside the
+// scroller to stay put while the rows move under them
+export const StyledCardBodyFrame = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+`;
+interface StyledScrollEdge {
+  $edge: "top" | "bottom";
+}
+export const StyledScrollEdge = styled.div<StyledScrollEdge>`
+  /* The strip is exactly the body's vertical padding, so at rest it lies over
+     empty space and shows nothing; a row only blurs once it scrolls into it.
+     The mask makes the blur strongest at the edge and fade out inwards. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  ${({ $edge }) => $edge}: 0;
+  z-index: 1;
+  height: ${space6};
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  --modal-edge-mask: linear-gradient(
+    to ${({ $edge }) => ($edge === "top" ? "bottom" : "top")},
+    #000,
+    transparent
+  );
+  -webkit-mask-image: var(--modal-edge-mask);
+  mask-image: var(--modal-edge-mask);
 `;
 interface StyledFooter {
   $spaceBetween?: boolean;

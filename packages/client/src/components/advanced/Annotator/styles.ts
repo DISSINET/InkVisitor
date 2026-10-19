@@ -59,13 +59,18 @@ export const StyledCanvasWrapper = styled.div<StyledCanvasWrapperProps>`
   flex-direction: row;
 `;
 
+// The canvases draw their own selection; a native browser selection over them
+// paints a flat blue tint across the whole element.
 export const StyledMainCanvas = styled.canvas`
   outline: none;
   cursor: text;
+  user-select: none;
 `;
 
 // css doesn't load on the canvas element, so we use inline styles
-export const StyledLinesCanvas = styled.canvas``;
+export const StyledLinesCanvas = styled.canvas`
+  user-select: none;
+`;
 
 interface StyledAnnotatorMenuProps {}
 export const StyledAnnotatorDoneButton = styled.div`
@@ -318,20 +323,58 @@ export const StyledWarningsListHeader = styled.div`
 
 export const StyledWarningRow = styled.div`
   display: flex;
-  align-items: center;
   gap: ${({ theme }) => theme.space[4]};
   padding: 0.5rem 1rem;
-  padding-right: 1.25rem;
+  padding-right: 0.5rem;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   background-color: ${({ theme }) => theme.color.blue[50]};
 `;
 
-export const StyledWarningInfo = styled.div`
+export const StyledWarningMain = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: ${({ theme }) => theme.space[1]};
   flex: 1;
   min-width: 0;
+`;
+
+/**
+ * Each action stacks its icon above a short label. Content sits at the bottom so
+ * the labels share a baseline even when one icon is drawn smaller.
+ */
+export const StyledWarningActions = styled.div`
+  display: flex;
+  align-self: center;
+  flex-shrink: 0;
+  gap: ${({ theme }) => theme.space[1]};
+  && button {
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    min-width: 4.8rem;
+  }
+  && button svg {
+    font-size: ${({ theme }) => theme.fontSize["base"]};
+  }
+  && button span {
+    margin-left: 0;
+  }
+`;
+
+export const StyledWarningInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  flex: 1;
+  min-width: 0;
+`;
+
+// Normal case: small caps shrink letters but not digits, so the number would tower over them.
+export const StyledWarningParagraph = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-variant-caps: normal;
+  color: ${({ theme }) => theme.color.mutedText};
 `;
 
 export const StyledWarningKind = styled.div`

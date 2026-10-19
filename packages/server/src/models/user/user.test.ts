@@ -21,6 +21,7 @@ const prepareUserData = (): IUser => {
       workingLanguages: [],
       hideStatementElementsOrderTable: false,
       askBeforePropDelete: true,
+      geocoding: { context: {} },
       starredTemplates: ["template1"],
       promotedTemplateClass: EntityEnums.Class.Statement,
     } as IUser["options"],
@@ -58,6 +59,30 @@ describe("models/user", function () {
 
       it("should return full user", () => {
         expect(JSON.parse(JSON.stringify(fullUser))).toEqual(fullData);
+      });
+    });
+
+    describe("geocoding options", () => {
+      it("should start every user with an empty geocoding context", () => {
+        expect(new User({}).options.geocoding).toEqual({ context: {} });
+      });
+
+      it("should keep the context a user saved", () => {
+        const user = new User({
+          options: {
+            geocoding: { context: { regions: ["Iberia"], autoSearch: false } },
+          } as IUser["options"],
+        });
+        expect(user.options.geocoding).toEqual({
+          context: { regions: ["Iberia"], autoSearch: false },
+        });
+      });
+
+      it("should not share the default context between users", () => {
+        const first = new User({});
+        const second = new User({});
+        first.options.geocoding!.context.regions = ["Iberia"];
+        expect(second.options.geocoding).toEqual({ context: {} });
       });
     });
   });

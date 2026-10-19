@@ -3,7 +3,7 @@ import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Loader, Tooltip } from "components";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 import {
   ActionMeta,
@@ -41,6 +41,15 @@ interface BaseDropdown {
   // appearance props
   width?: number | "full";
   placeholder?: string;
+  /**
+   * What the control is called, where nothing on screen names it.
+   *
+   * A dropdown whose only text is its current value tells a screen reader the
+   * value and nothing about the question - "coordinates", with no way to learn
+   * that it arranges a list. Set it wherever the control has no visible label
+   * beside it.
+   */
+  ariaLabel?: string;
   noOptionsMessage?: string;
   icon?: React.ReactNode;
   tooltipLabel?: string;
@@ -51,6 +60,7 @@ interface BaseDropdown {
   // single entity dropdown props
   onFocus?: () => void;
   onBlur?: () => void;
+  onMenuOpenChange?: (isOpen: boolean) => void;
   autoFocus?: boolean;
   suggester?: boolean;
   // dropdown type settings
@@ -85,12 +95,14 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   hideSelectedOptions = false,
   noDropDownIndicator = false,
   placeholder = "Select",
+  ariaLabel,
   noOptionsMessage = "No option selected",
   isClearable = false,
   isMulti = false,
   disabled = false,
   onFocus = () => {},
   onBlur = () => {},
+  onMenuOpenChange,
   autoFocus = false,
   disableTyping = false,
   suggester = false,
@@ -119,6 +131,16 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   // the menu is controlled so that the clear button can dismiss it (see
   // ClearIndicator); react-select still drives it through onMenuOpen/onMenuClose
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+
+  // the cleanup also runs on unmount, so a dropdown removed with its menu open
+  // still reports it closed
+  const onMenuOpenChangeRef = useRef(onMenuOpenChange);
+  onMenuOpenChangeRef.current = onMenuOpenChange;
+  useEffect(() => {
+    if (!menuIsOpen) return;
+    onMenuOpenChangeRef.current?.(true);
+    return () => onMenuOpenChangeRef.current?.(false);
+  }, [menuIsOpen]);
 
   const SuggesterDropdownIndicator = (props: DropdownIndicatorProps) => (
     <components.DropdownIndicator {...props}>
@@ -173,6 +195,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
           className="react-select-container"
           classNamePrefix="react-select"
+          aria-label={ariaLabel}
           placeholder={placeholder}
           noOptionsMessage={() => noOptionsMessage}
           isClearable={isClearable}
