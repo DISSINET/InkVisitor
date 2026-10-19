@@ -115,15 +115,23 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   });
   const assignments = usePlaceTypeAssignments(draft.placeTypes, locationIds);
 
-  const { data: assignedEntities } = useEntitiesQuery("geocoding-settings", assignedIds);
+  // every pick changes the id list and so the query key; the previous batch
+  // keeps the other rows on screen while the new one loads
+  const { data: assignedEntities, isFetching: loadingAssigned } = useEntitiesQuery(
+    "geocoding-settings",
+    assignedIds,
+    { keepPrevious: true }
+  );
+  // what the suggester handed over, so a picked tag shows before its fetch lands
+  const [picked, setPicked] = useState<Record<string, IEntity>>({});
 
   const byId = useMemo(() => {
-    const map: Record<string, IEntity> = {};
+    const map: Record<string, IEntity> = { ...picked };
     for (const entity of assignedEntities || []) {
       map[entity.id] = entity;
     }
     return map;
-  }, [assignedEntities]);
+  }, [assignedEntities, picked]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -174,6 +182,10 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
   const renderAssigned = (id: string, unlink: () => void) => {
     const entity = byId[id];
+    // an id the batch has not answered for yet is not a deleted one
+    if (!entity && loadingAssigned) {
+      return null;
+    }
     // /entities/batch drops ids it cannot find, and nothing tidies settings when
     // an entity is deleted, so a stored id can outlive what it points at. The
     // unlink is the only way out of that state from here
@@ -223,7 +235,10 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
              and the whole control has to stay inside the slot so the column
              beside it starts where the assigned rows put it */
           inputWidth={130}
-          onPicked={(entity) => set(entity.id)}
+          onPicked={(entity) => {
+            setPicked((current) => ({ ...current, [entity.id]: entity }));
+            set(entity.id);
+          }}
         />
       )}
     </StyledPick>
