@@ -11,26 +11,49 @@ export interface KeyedRow {
   keys: unknown;
 }
 
+const PAGE = 1000;
+
+/** the key function on `row`; a missing field is no key, like in the index build */
+const keysOf = (index: IndexDef, row: RDatum): RDatum =>
+  r.expr(index.keys ? index.keys(row) : row(index.name)).default(null);
+
 /**
  * [id, keys] per row in id order. `keys` is null when the key function raises
  * on the row, which is exactly the row RethinkDB leaves out of the index; a
  * function that ran and produced nothing yields an empty array instead.
+ * `.default(null)` only covers a missing field; any other error (a string
+ * where the function expects an array) aborts the whole query, so the rows go
+ * page by page and a page that raises is evaluated row by row.
  */
 export async function* rethinkKeys(
   conn: Connection,
   table: string,
   index: IndexDef
 ): AsyncGenerator<KeyedRow> {
-  const cursor = await r
-    .table(table)
-    .orderBy({ index: "id" })
-    .map((row: RDatum) => ({
-      id: row("id"),
-      keys: r.expr(index.keys ? index.keys(row) : row(index.name)).default(null),
-    }))
-    .getCursor(conn);
-  for await (const row of cursor) {
-    yield row;
+  let after: unknown = r.minval;
+  for (;;) {
+    const page = r
+      .table(table)
+      .between(after, r.maxval, { index: "id", leftBound: "open" })
+      .orderBy({ index: "id" })
+      .limit(PAGE);
+    let rows: KeyedRow[];
+    try {
+      rows = await page.map((row: RDatum) => ({ id: row("id"), keys: keysOf(index, row) })).run(conn);
+    } catch {
+      rows = [];
+      for (const doc of await page.run(conn)) {
+        rows.push({
+          id: doc.id,
+          keys: await keysOf(index, r.expr(doc)).run(conn).catch(() => null),
+        });
+      }
+    }
+    yield* rows;
+    if (rows.length < PAGE) {
+      return;
+    }
+    after = rows[rows.length - 1].id;
   }
 }
 
