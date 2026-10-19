@@ -313,7 +313,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
           <Input
             value={filters.label}
             onChangeFn={(value) => setFilter("label", value)}
-            placeholder="search name…"
+            placeholder="Locations"
             icon={<IcoSearch />}
             changeOnType
             width="full"
