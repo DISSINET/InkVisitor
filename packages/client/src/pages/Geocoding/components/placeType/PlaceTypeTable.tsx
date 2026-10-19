@@ -27,6 +27,7 @@ import {
   StyledKindRow,
   StyledKindScroll,
 } from "./PlaceTypeTableStyles";
+import { ButtonSize } from "types";
 
 /**
  * The project's own kinds of place.
@@ -247,6 +248,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
           color="primary"
           inverted
           onClick={add}
+          size={ButtonSize.Medium}
         />
       </StyledKindActions>
     </StyledKindScroll>
