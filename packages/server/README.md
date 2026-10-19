@@ -43,6 +43,7 @@ PostgreSQL gates, each against a throwaway database only. The commands run from 
 - `pnpm -C packages/server replay` and `PG_PORT=<host port> pnpm -C packages/server replay --adapter=postgres` - the API replay (437 recorded steps) on either adapter; zero differences expected on both. Never `--record` on PostgreSQL.
 - `pnpm -C packages/database seed:check` - seeds every dataset into both backends and diffs them (`--all` includes the heavy datasets).
 - `pnpm -C packages/client test:e2e` and `PG_PORT=<host port> DB_ADAPTER=postgres pnpm -C packages/client test:e2e` - the Playwright frontend smoke suite (login, territory tree, statement editing, entity detail, search, explorer, users, global validations) against a server booted on `inkvisitor_smoke_test`, ports 3301 (API) and 8301 (vite). Once per machine: `pnpm -C packages/client exec playwright install chromium`.
+- `pnpm -C packages/database migrate --db=<name> <env>` - moves an existing RethinkDB database into PostgreSQL (export, schema, import, diff); see the database README.
 
 Known differences on malformed rows (the PostgreSQL adapter stays lenient where RethinkDB raises or silently drops a row; each is pinned by an `itPg` case in the contract suites):
 

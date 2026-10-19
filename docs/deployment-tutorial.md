@@ -50,7 +50,7 @@ docker compose up -d database
 
 RethinkDB now runs in the `inkvisitor-database` container with its driver port on `28015` and its admin dashboard on `http://localhost:8080`.
 
-The compose file also defines an optional `postgres` service (TimescaleDB image, container `inkvisitor-postgres`, port `5432`), the alternative storage backend from [#3256](https://github.com/DISSINET/InkVisitor/issues/3256). The application uses it only when the server runs with `DB_ADAPTER=postgres`; RethinkDB stays the default. Start it with `docker compose up -d postgres`, verify with `pnpm -C packages/server pg:check` / `pnpm -C packages/database pg:check` after copying the `PG_*` block from the `example.env` files, and seed it with `pnpm -C packages/database seed --db=<name> --dataset=<dataset> --target=postgres`.
+The compose file also defines an optional `postgres` service (TimescaleDB image, container `inkvisitor-postgres`, port `5432`), the alternative storage backend from [#3256](https://github.com/DISSINET/InkVisitor/issues/3256). The application uses it only when the server runs with `DB_ADAPTER=postgres`; RethinkDB stays the default. Start it with `docker compose up -d postgres`, verify with `pnpm -C packages/server pg:check` / `pnpm -C packages/database pg:check` after copying the `PG_*` block from the `example.env` files, and seed it with `pnpm -C packages/database seed --db=<name> --dataset=<dataset> --target=postgres`. An existing RethinkDB database moves over with `pnpm -C packages/database migrate --db=<name> <env>` (database README, "Migrating a RethinkDB database to PostgreSQL").
 
 #### 2. Import the database schema and initial data
 
