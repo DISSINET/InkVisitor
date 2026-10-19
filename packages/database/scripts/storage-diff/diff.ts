@@ -37,10 +37,14 @@ export interface TableReport {
   indexes: IndexReport[];
 }
 
+/** a table absent in RethinkDB counts as empty, so an empty PostgreSQL table matches it */
+const rowsMatch = (t: TableReport): boolean =>
+  t.rethink === t.postgres || (t.rethink === -1 && t.postgres === 0);
+
 export function hasDifferences(reports: TableReport[]): boolean {
   return reports.some(
     (t) =>
-      t.rethink !== t.postgres ||
+      !rowsMatch(t) ||
       t.missingInPg > 0 ||
       t.extraInPg > 0 ||
       t.differing > 0 ||
@@ -217,9 +221,9 @@ export async function diffDatabases(
 
 export function printReports(reports: TableReport[]): void {
   for (const t of reports) {
-    const clean =
-      t.rethink === t.postgres && !t.missingInPg && !t.extraInPg && !t.differing && t.indexes.every((i) => !i.differing);
-    const head = `${clean ? colors.green("ok  ") : colors.red("DIFF")} ${t.table}: rethinkdb ${t.rethink} rows, postgres ${t.postgres} rows`;
+    const clean = !hasDifferences([t]);
+    const rethinkCount = t.rethink === -1 ? "absent" : `${t.rethink} rows`;
+    const head = `${clean ? colors.green("ok  ") : colors.red("DIFF")} ${t.table}: rethinkdb ${rethinkCount}, postgres ${t.postgres} rows`;
     console.log(head);
     if (t.missingInPg) {
       console.log(`      missing in postgres: ${t.missingInPg} (e.g. ${t.examples.missing.join(", ")})`);
