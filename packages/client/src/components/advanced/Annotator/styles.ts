@@ -351,11 +351,12 @@ export const StyledWarningActions = styled.div`
   && button {
     flex-direction: column;
     justify-content: flex-end;
-    gap: 0.2rem;
+    gap: 0.1rem;
     min-width: 4.8rem;
   }
   && button svg {
     font-size: ${({ theme }) => theme.fontSize["base"]};
+    height: 1.6rem;
   }
   && button span {
     margin-left: 0;
