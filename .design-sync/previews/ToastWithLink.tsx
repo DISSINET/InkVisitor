@@ -34,7 +34,7 @@ export const Default = () => (
 export const LongMessage = () => (
   <ToastChrome>
     <ToastWithLink linkText="Reload" onLinkClick={() => {}}>
-      A new version was deployed. This tab still runs the previous one — reload when convenient.
+      A new version is available.
     </ToastWithLink>
   </ToastChrome>
 );
