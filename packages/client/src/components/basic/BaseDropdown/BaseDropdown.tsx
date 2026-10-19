@@ -206,10 +206,14 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           value={value}
           icon={icon}
           styles={{
+            // replaces react-select's own indicator style rather than extending
+            // it, so the centring that style carried has to be restated here;
+            // the suggester's class letter is aligned against the plain box
             dropdownIndicator: () => {
-              return {
-                display: noDropDownIndicator || isOneOptionSingleEntitySelect ? "none" : "",
-              };
+              if (noDropDownIndicator || isOneOptionSingleEntitySelect) {
+                return { display: "none" };
+              }
+              return suggester ? { display: "" } : { display: "flex", alignItems: "center" };
             },
             menuPortal: (base) => ({
               ...base,
