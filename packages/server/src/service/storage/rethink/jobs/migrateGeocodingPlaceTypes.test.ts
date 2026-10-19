@@ -1,6 +1,6 @@
 import { Connection, r } from "rethinkdb-ts";
-import { connectAdmin, getTestDbName } from "./db";
-import migrateGeocodingPlaceTypesJob from "../../../database/scripts/jobs/migrate-geocoding-place-types";
+import { getTestDbName } from "../../../../test/db";
+import migrateGeocodingPlaceTypesJob from "../../../../../../database/scripts/jobs/migrate-geocoding-place-types";
 
 /**
  * The geo:type → Classification migration against a real RethinkDB, so the
@@ -37,7 +37,12 @@ const classifications = async (locationId: string): Promise<string[]> =>
 const location = async (id: string): Promise<any> => r.table("entities").get(id).run(conn);
 
 beforeAll(async () => {
-  conn = await connectAdmin();
+  conn = await r.connect({
+    host: process.env.DB_HOST || "localhost",
+    port: Number(process.env.DB_PORT) || 28015,
+    password: process.env.DB_AUTH || undefined,
+    timeout: 5,
+  });
   conn.use(getTestDbName());
 });
 

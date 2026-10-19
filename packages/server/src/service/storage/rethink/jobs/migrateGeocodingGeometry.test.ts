@@ -1,6 +1,6 @@
 import { Connection, r } from "rethinkdb-ts";
-import { connectAdmin, getTestDbName } from "./db";
-import migrateGeocodingGeometryJob from "../../../database/scripts/jobs/migrate-geocoding-geometry";
+import { getTestDbName } from "../../../../test/db";
+import migrateGeocodingGeometryJob from "../../../../../../database/scripts/jobs/migrate-geocoding-geometry";
 
 /**
  * The geo:x / geo:y → geo:geometry migration against a real RethinkDB, so the
@@ -32,7 +32,12 @@ const geometryOf = async (loc: any): Promise<any> => {
 };
 
 beforeAll(async () => {
-  conn = await connectAdmin();
+  conn = await r.connect({
+    host: process.env.DB_HOST || "localhost",
+    port: Number(process.env.DB_PORT) || 28015,
+    password: process.env.DB_AUTH || undefined,
+    timeout: 5,
+  });
   conn.use(getTestDbName());
 });
 
