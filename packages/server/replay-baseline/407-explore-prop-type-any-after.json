@@ -212,6 +212,9 @@
                 "defaultLanguage": "",
                 "defaultStatementLanguage": "",
                 "defaultTerritory": "",
+                "geocoding": {
+                  "context": {}
+                },
                 "hideStatementElementsOrderTable": false,
                 "promotedTemplateClass": "*",
                 "searchLanguages": [],

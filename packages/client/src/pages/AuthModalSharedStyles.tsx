@@ -1,13 +1,17 @@
 import { TbMailFilled } from "react-icons/tb";
 import styled, { DefaultTheme } from "styled-components";
+import { ThemeColor } from "Theme/theme";
 
-// The logo asset is white + light blue, so the band keeps the fixed dark muni
-// background in both light and dark mode.
-export const StyledLogoBand = styled.div`
+interface StyledLogoBand {
+  $color: keyof ThemeColor;
+}
+// Same per-instance color as the app header, so each deployment is recognizable
+// before login too.
+export const StyledLogoBand = styled.div<StyledLogoBand>`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ theme }) => theme.color["muni"]};
+  background-color: ${({ theme, $color }) => theme.color[$color]};
   /* horizontal padding matches StyledContentWrap's side margin, so the logo
      spans exactly the same column as the form below it at any modal width */
   padding: ${({ theme }) => `${theme.space[7]} ${theme.space[12]}`};
