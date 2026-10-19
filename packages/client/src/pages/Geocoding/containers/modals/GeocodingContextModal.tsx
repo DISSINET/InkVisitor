@@ -6,7 +6,15 @@ import {
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import {
+  Button,
+  ButtonGroup,
+  CancelButton,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import Dropdown from "components/advanced";
 import { IconWithTooltip } from "components";
 import { IcoInfo } from "Theme/icons";
@@ -349,7 +357,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
-          <Button label="Cancel" color="greyer" onClick={onClose} />
+          <CancelButton onClick={onClose} />
           <Button
             label="Save"
             color="primary"
