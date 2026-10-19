@@ -143,13 +143,13 @@ describe("patchGeocodingRoles", () => {
 
 describe("patchGeocodingContext", () => {
   it("starts from empty settings where no row exists yet", async () => {
-    settingGet.mockRejectedValue({ response: { status: 404 } });
+    settingGet.mockRejectedValue({ result: false, error: "NotFound", message: "Entry not found" });
     await patchGeocodingContext({ disabledSources: ["tgn"] });
     expect(settingUpdate.mock.calls[0][1].value.context).toEqual({ disabledSources: ["tgn"] });
   });
 
   it("writes nothing where the read failed for any other reason, so stored roles are not replaced", async () => {
-    settingGet.mockRejectedValue({ response: { status: 500 } });
+    settingGet.mockRejectedValue({ result: false, error: "InternalServerError", message: "" });
     await expect(patchGeocodingContext({ disabledSources: ["tgn"] })).rejects.toBeDefined();
     expect(settingUpdate).not.toHaveBeenCalled();
   });

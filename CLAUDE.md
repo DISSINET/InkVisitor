@@ -49,6 +49,7 @@
 - If adding icon, first check Theme/icons.ts if this or similar icon exists in our app
 - Never use the native `title` attribute for hover hints. Use the app's
   `Tooltip` component (or `IconWithTooltip` for a lone icon) from `components`.
+- Never end an input placeholder with an ellipsis (`…` or `...`).
 
 ## Annotator
 

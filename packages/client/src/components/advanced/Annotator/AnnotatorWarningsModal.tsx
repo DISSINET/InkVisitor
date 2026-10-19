@@ -87,7 +87,7 @@ export const AnnotatorWarningsModal: React.FC<AnnotatorWarningsModalProps> = ({
   const { data: anchorEntities, isFetching: isFetchingEntities } = useEntitiesQuery(
     WARNING_ANCHOR_ENTITIES_KEY,
     anchorIds,
-    { enabled: open },
+    { enabled: open }
   );
 
   const entityMap = useMemo(() => {

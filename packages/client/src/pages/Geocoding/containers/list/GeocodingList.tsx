@@ -52,6 +52,8 @@ interface GeocodingList {
   onGeocode: (location: GeocodingLocation) => void;
   /** Whether the engine can be asked at all. */
   engineReady: boolean;
+  /** Why the engine cannot be asked, for the controls it switches off. */
+  engineBlockedReason?: string;
   /** The Locations a bulk action would apply to, by entity id. */
   marked: Set<string>;
   /** Marks or unmarks a run of rows — one id, or a range from a shift-click. */
@@ -101,6 +103,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
   onShowOnMap,
   onGeocode,
   engineReady,
+  engineBlockedReason,
   marked,
   onMark,
   onClearMarks,
@@ -310,7 +313,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
           <Input
             value={filters.label}
             onChangeFn={(value) => setFilter("label", value)}
-            placeholder="search name…"
+            placeholder="Locations"
             icon={<IcoSearch />}
             changeOnType
             width="full"
@@ -426,7 +429,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
                             ? ` ${toReplace} already have a coordinate and it will be replaced.`
                             : ""
                         }`
-                      : "the geocoding engine is not answering"
+                      : engineBlockedReason
                   }
                   onClick={onMarkedGeocode}
                 />

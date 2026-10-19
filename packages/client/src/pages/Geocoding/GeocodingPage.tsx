@@ -4,6 +4,7 @@ import {
   IGeocodingContext,
   IGeocodingContextWeights,
 } from "@inkvisitor/shared/types/geocoding";
+import { UserEnums } from "@inkvisitor/shared/enums";
 import { IUserOptions } from "@inkvisitor/shared/types";
 import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,6 +33,11 @@ import { GeocodingBatchModal } from "./containers/modals/GeocodingBatchModal";
 import { GeocodingActivityModal } from "./containers/modals/GeocodingActivityModal";
 import { GeocodingContextModal } from "./containers/modals/GeocodingContextModal";
 import { GeocodingOverwriteModal } from "./containers/modals/GeocodingOverwriteModal";
+import { GeocodingSettingsModal } from "./containers/modals/GeocodingSettingsModal";
+import {
+  GeocodingSetupNotice,
+  listMissingRoles,
+} from "./containers/suggestions/GeocodingSetupNotice";
 import { GeocodingMap } from "./containers/map/GeocodingMap";
 import { HintLayer } from "./components/shared/HintLayer";
 import { GeocodingSuggestions, VISIBLE_SUGGESTIONS } from "./containers/suggestions/GeocodingSuggestions";
@@ -557,6 +563,7 @@ export const GeocodingPage: React.FC = () => {
 
   const [showContext, setShowContext] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // the engine is a separate service that may not be deployed yet; every part of
   // this page except engine-driven suggestions works without it
@@ -612,6 +619,15 @@ export const GeocodingPage: React.FC = () => {
     down: `geocoding engine unreachable at ${ENGINE_URL} — manual assignment only`,
   };
 
+  const rolesMissing = engineState === "up" && !isConfigured;
+  const engineBlockedReason = engineReady
+    ? undefined
+    : rolesMissing
+      ? `geocoding is off until the project assigns ${listMissingRoles(missingRoles)}`
+      : engineLabel[engineState];
+  // the same rule as the menu entry that opens the modal
+  const canEditSettings = user?.role === UserEnums.Role.Owner;
+
   return (
     <PlaceTypesProvider placeTypes={roles.placeTypes}>
       <HintLayer />
@@ -658,6 +674,7 @@ export const GeocodingPage: React.FC = () => {
             markedProgress={bulk}
             onCancelMarkedRetype={stopBulk}
             engineReady={engineReady}
+            engineBlockedReason={engineBlockedReason}
             onShowOnMap={(location) =>
               location.lat != null && location.lon != null
                 ? setFocus((current) =>
@@ -803,6 +820,15 @@ export const GeocodingPage: React.FC = () => {
             userOptions={user?.options}
             suggest={suggest}
             engineReady={engineReady}
+            engineBlockedReason={engineBlockedReason}
+            setupNotice={
+              rolesMissing ? (
+                <GeocodingSetupNotice
+                  missingRoles={missingRoles}
+                  onOpenSettings={canEditSettings ? () => setShowSettings(true) : undefined}
+                />
+              ) : null
+            }
             onRetype={
               selected?.isGeocoded && user?.options
                 ? (placeType) => retype(selected, placeType)
@@ -846,6 +872,13 @@ export const GeocodingPage: React.FC = () => {
         />
       ) : null}
       {showActivity ? <GeocodingActivityModal onClose={() => setShowActivity(false)} /> : null}
+      {showSettings ? (
+        <GeocodingSettingsModal
+          roles={roles}
+          projectContext={projectContext}
+          onClose={() => setShowSettings(false)}
+        />
+      ) : null}
 
       {batch && showBatch ? (
         <GeocodingBatchModal

@@ -83,9 +83,15 @@ export const StyledMapPanel = styled.div`
     left: calc(var(${panelWidthVar(0)}) - ${COLLAPSED_PANEL_WIDTH / 10}rem);
   }
 
+  /* the stage is placed inside the Box's side frame, so the canvas ends one
+     frame further right than the folded strip, and the visible map one frame
+     short of the panel: two frame widths beyond what the panel covers */
   .maplibregl-ctrl-top-right,
   .maplibregl-ctrl-bottom-right {
-    right: calc(var(${panelWidthVar(2)}) - ${COLLAPSED_PANEL_WIDTH / 10}rem);
+    right: calc(
+      var(${panelWidthVar(2)}) - ${COLLAPSED_PANEL_WIDTH / 10}rem + 2 *
+        ${({ theme }) => theme.borderWidth[4]}
+    );
   }
 
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl {

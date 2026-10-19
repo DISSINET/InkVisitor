@@ -31,7 +31,7 @@ export const MapSearchBox: React.FC<MapSearchBox> = ({ term, onTermChange, hits,
     <Input
       value={term}
       onChangeFn={onTermChange}
-      placeholder="find a place to move the map…"
+      placeholder="go to a place"
       icon={<IcoSearch />}
       changeOnType
       width="full"

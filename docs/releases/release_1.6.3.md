@@ -1,8 +1,8 @@
-# What's changed [Oct 17, 2026]
+# What's changed [Oct 19, 2026]
 
-## Geocoding
+## Geocoding (#313)
 
-- New Geocoding page: lists Locations, asks the HGA-Engine for coordinates, and saves the chosen one as a GeoJSON geometry prop on the Location (#3267)
+- New Geocoding page: lists Locations, asks the HGA-Engine for coordinates, and saves the chosen one as a GeoJSON geometry prop on the Location
 - Suggestions are ranked and shown on a MapLibre map, with links to their gazetteer records (GeoNames, Wikidata, Pleiades, WHG)
 - Each answer has an editable query context beside it (kind of place, region drawn as a rectangle on the map), kept per user
 - Draw a point, line or polygon for a Location by hand when no suggestion fits

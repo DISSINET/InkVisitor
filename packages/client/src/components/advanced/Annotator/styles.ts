@@ -351,11 +351,12 @@ export const StyledWarningActions = styled.div`
   && button {
     flex-direction: column;
     justify-content: flex-end;
-    gap: 0.2rem;
+    gap: 0.1rem;
     min-width: 4.8rem;
   }
   && button svg {
     font-size: ${({ theme }) => theme.fontSize["base"]};
+    height: 1.6rem;
   }
   && button span {
     margin-left: 0;
@@ -439,20 +440,6 @@ export const StyledMoveAnchorFooter = styled.div`
 export const StyledAnchorCell = styled.div`
   width: 100%;
   display: flex;
-`;
-
-/**
- * Wraps the open-Statement-in-editor button inside the tag's button slot;
- * visible only while the pointer is over the anchor cell, so the extra action
- * does not crowd every Statement tag at rest. Visibility is CSS-driven from
- * the cell because EntityTag memoizes on the button slot's presence, not its
- * content — React state in the cell would never reach a mounted slot.
- */
-export const StyledAnchorOpenStatementButton = styled.div`
-  display: none;
-  ${StyledAnchorCell}:hover & {
-    display: flex;
-  }
 `;
 
 /**

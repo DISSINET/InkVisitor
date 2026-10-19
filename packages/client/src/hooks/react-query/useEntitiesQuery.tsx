@@ -1,5 +1,5 @@
 // batch-fetch a set of entities by ids
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import api from "api";
 
 // The prefix keeps each caller's cache entries separate, so invalidating one
@@ -7,9 +7,14 @@ import api from "api";
 export function useEntitiesQuery(
   queryKeyPrefix: string,
   entityIds: string[],
-  options: { enabled?: boolean; staleTime?: number } = {},
+  options: {
+    enabled?: boolean;
+    staleTime?: number;
+    /** Hold the last batch while a changed id list loads, rather than no data. */
+    keepPrevious?: boolean;
+  } = {},
 ) {
-  const { enabled = true, staleTime } = options;
+  const { enabled = true, staleTime, keepPrevious = false } = options;
 
   return useQuery({
     queryKey: [queryKeyPrefix, entityIds],
@@ -19,5 +24,6 @@ export function useEntitiesQuery(
     },
     enabled: api.isLoggedIn() && entityIds.length > 0 && enabled,
     staleTime,
+    placeholderData: keepPrevious ? keepPreviousData : undefined,
   });
 }
