@@ -569,6 +569,10 @@ interface GeocodingSuggestions {
   onHoverCard?: (index: number | null) => void;
   onShowAll: () => void;
   engineReady: boolean;
+  /** Why the engine cannot be asked, for the controls it switches off. */
+  engineBlockedReason?: string;
+  /** Shown above everything else, for a page that cannot geocode yet. */
+  setupNotice?: React.ReactNode;
   onAccept: (
     suggestion: Suggestion,
     accuracy: GeocodingAccuracy,
@@ -621,6 +625,8 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   onHoverCard,
   onShowAll,
   engineReady,
+  engineBlockedReason,
+  setupNotice,
   onAccept,
   hovered,
   onHoldHover,
@@ -1002,6 +1008,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
 
   return (
     <StyledSuggestionsPanel>
+      {setupNotice}
       {/* the question, before anything that answers it: the criteria a
           suggestion is judged against belong beside the suggestion, and a
           coastal town in Portugal reads as plausible until "region: europe"
@@ -1087,9 +1094,11 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
             icon={<IcoGeocode />}
             color="primary"
             tooltipLabel={
-              selected?.isGeocoded
-                ? "ask the engine again — the coordinate it has now is kept until you accept another"
-                : undefined
+              !engineReady
+                ? engineBlockedReason
+                : selected?.isGeocoded
+                  ? "ask the engine again — the coordinate it has now is kept until you accept another"
+                  : undefined
             }
             disabled={!engineReady || isRunningForThis}
             onClick={() => suggest.run(selected.entity.id, name, context)}
