@@ -35,8 +35,10 @@ const readSettings = async (): Promise<IGeocodingSettings> => {
   } catch (error) {
     // no row yet: a project that has never opened the settings modal. Any other
     // failure is not an empty row, and treating it as one would let the write
-    // that follows replace everything stored with what this call defaulted to
-    if ((error as { response?: { status?: number } }).response?.status === 404) {
+    // that follows replace everything stored with what this call defaulted to.
+    // The api rethrows the response body, whose `error` is the server's error
+    // class name; a literal, since the client build minifies class names
+    if ((error as { error?: string } | undefined)?.error === "NotFound") {
       return { roles: emptyGeocodingRoles(), context: {} };
     }
     throw error;
