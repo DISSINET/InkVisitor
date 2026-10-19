@@ -8,7 +8,7 @@ import { apiPath } from "@common/constants";
 import app from "../../server";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import { findEntityById } from "@service/shorthands";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import "ts-jest";
 import { prepareEntity } from "@models/entity/entity.test";
 import { AuditScope } from "@inkvisitor/shared/types";

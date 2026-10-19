@@ -1,0 +1,25 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchSetAttribute",
+    "body": {
+      "changes": {
+        "attribute": "color",
+        "to": "x"
+      },
+      "entityIds": [
+        "rp-c"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "changes.attribute must be language or pos",
+      "result": false
+    }
+  }
+}

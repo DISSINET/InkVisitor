@@ -4,7 +4,7 @@ import { getEntitiesDataByClass } from "@service/shorthands";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResponseTree, IStatement, ITerritory } from "@inkvisitor/shared/types";
 import { TerritoriesBrokenError } from "@inkvisitor/shared/types/errors";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
@@ -123,7 +123,7 @@ export class TreeCreator {
   }
 
   static async countStatements(
-    db: Connection
+    db: Conn
   ): Promise<Record<string, number>> {
     const statements = (
       await getEntitiesDataByClass<IStatement>(db, EntityEnums.Class.Statement)
@@ -145,7 +145,7 @@ export class TreeCreator {
 
 export class TreeCache {
   tree: TreeCreator;
-  db: Connection | undefined;
+  db: Conn | undefined;
 
   constructor() {
     this.tree = new TreeCreator();
@@ -170,10 +170,10 @@ export class TreeCache {
 
     const [territoriesData, statementsCountMap] = await Promise.all([
       getEntitiesDataByClass<ITerritory>(
-        this.db as Connection,
+        this.db as Conn,
         EntityEnums.Class.Territory
       ),
-      TreeCreator.countStatements(this.db as Connection),
+      TreeCreator.countStatements(this.db as Conn),
     ]);
 
     newTree.createParentMap(
@@ -325,7 +325,7 @@ export class TreeCache {
 const treeCache: TreeCache = new TreeCache();
 export default treeCache;
 
-export async function prepareTreeCache(db: Connection) {
+export async function prepareTreeCache(db: Conn) {
   treeCache.db = db;
   await treeCache.initialize();
 }

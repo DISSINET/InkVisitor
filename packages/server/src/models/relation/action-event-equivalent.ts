@@ -1,7 +1,7 @@
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import Superclass from "./superclass";
 
 export default class ActionEventEquivalent
@@ -18,7 +18,7 @@ export default class ActionEventEquivalent
   }
 
   static async getActionEventEquivalentForwardConnections(
-    conn: Connection,
+    conn: Conn,
     entityId: string,
     asClass: EntityEnums.Class,
     maxNestLvl: number,
@@ -74,7 +74,7 @@ export default class ActionEventEquivalent
   }
 
   static async getActionEventEquivalentInverseConnections(
-    conn: Connection,
+    conn: Conn,
     parentId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IActionEventEquivalent[]> {

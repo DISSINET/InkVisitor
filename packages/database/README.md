@@ -36,6 +36,17 @@ If you are running the import for the first time, make sure all the packages are
 
 Before you start, copy the [`.env.example`](packages/database/env/.env.example) into your local [.env](packages/database/env/.env) file and fill variables inside (`SSH*` variables are optional).
 
+### Targets
+
+The seeder writes to RethinkDB by default (`--target=rethinkdb`). `DB_TARGET` in the env file sets the default; the command line flag wins. The tables and indexes come from the RethinkDB index list in `packages/server/src/service/storage/rethink/provision.ts`.
+
+### Non-interactive seeding
+
+- `pnpm seed --db=<name> --dataset=<name> [--target=rethinkdb] [env]` drops, recreates and imports without prompts.
+- `pnpm test` runs the unit checks of the pure helpers (`node:test`, no database).
+
+The optional `[env]` picks `env/.env.<env>`; with nothing given `env/.env` is used.
+
 Import example (this will remove and import the database anew):
 
 - if prompted whether to use the **SSH connection**, use `n` + `<enter>` to stay in the local environment

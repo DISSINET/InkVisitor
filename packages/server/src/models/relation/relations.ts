@@ -1,7 +1,7 @@
 import { nonenumerable } from "@common/decorators";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { IWarning, Relation as RelationTypes } from "@inkvisitor/shared/types";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import Actant1Semantics from "./actant1-semantics";
 import Actant2Semantics from "./actant2-semantics";
@@ -81,7 +81,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this.warnings = [];
   }
 
-  async prepareSuperclasses(dbConn: Connection): Promise<void> {
+  async prepareSuperclasses(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Superclass.getSuperclassForwardConnections(
         dbConn,
@@ -99,7 +99,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.Superclass] = { connections, iConnections };
   }
 
-  async prepareSuperordinateEntitys(dbConn: Connection): Promise<void> {
+  async prepareSuperordinateEntitys(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       SuperordinateEntity.getSuperordinateEntityForwardConnections(
         dbConn,
@@ -120,7 +120,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareSynonyms(dbConn: Connection): Promise<void> {
+  async prepareSynonyms(dbConn: Conn): Promise<void> {
     this[RelationEnums.Type.Synonym] = {
       connections: await Synonym.getSynonymForwardConnections(
         dbConn,
@@ -130,7 +130,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareAntonyms(dbConn: Connection): Promise<void> {
+  async prepareAntonyms(dbConn: Conn): Promise<void> {
     this[RelationEnums.Type.Antonym] = {
       connections: await Antonym.getAntonymForwardConnections(
         dbConn,
@@ -139,7 +139,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareHolonyms(dbConn: Connection): Promise<void> {
+  async prepareHolonyms(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Holonym.getHolonymForwardConnections(
         dbConn,
@@ -155,7 +155,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.Holonym] = { connections, iConnections };
   }
 
-  async preparePropertyReciprocals(dbConn: Connection): Promise<void> {
+  async preparePropertyReciprocals(dbConn: Conn): Promise<void> {
     this[RelationEnums.Type.PropertyReciprocal] = {
       connections:
         await PropertyReciprocal.getPropertyReciprocalForwardConnections(
@@ -166,7 +166,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareSubjectActant1Reciprocals(dbConn: Connection): Promise<void> {
+  async prepareSubjectActant1Reciprocals(dbConn: Conn): Promise<void> {
     this[RelationEnums.Type.SubjectActant1Reciprocal] = {
       connections:
         await SubjectActant1Reciprocal.getSubjectActant1ReciprocalForwardConnections(
@@ -177,7 +177,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareActionEventEquivalents(dbConn: Connection): Promise<void> {
+  async prepareActionEventEquivalents(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       ActionEventEquivalent.getActionEventEquivalentForwardConnections(
         dbConn,
@@ -198,7 +198,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareClassifications(dbConn: Connection): Promise<void> {
+  async prepareClassifications(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Classification.getClassificationForwardConnections(
         dbConn,
@@ -212,7 +212,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.Classification] = { connections, iConnections };
   }
 
-  async prepareIdentifications(dbConn: Connection): Promise<void> {
+  async prepareIdentifications(dbConn: Conn): Promise<void> {
     this[RelationEnums.Type.Identification] = {
       connections: await Identification.getIdentificationForwardConnections(
         dbConn,
@@ -224,7 +224,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareImplications(dbConn: Connection): Promise<void> {
+  async prepareImplications(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Implication.getImplicationForwardConnections(
         dbConn,
@@ -240,7 +240,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.Implication] = { connections, iConnections };
   }
 
-  async prepareSubjectSemantics(dbConn: Connection): Promise<void> {
+  async prepareSubjectSemantics(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       SubjectSemantics.getSubjectSemanticsForwardConnections(
         dbConn,
@@ -256,7 +256,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.SubjectSemantics] = { connections, iConnections };
   }
 
-  async prepareActant1Semantics(dbConn: Connection): Promise<void> {
+  async prepareActant1Semantics(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Actant1Semantics.getActant1SemanticsForwardConnections(
         dbConn,
@@ -272,7 +272,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.Actant1Semantics] = { connections, iConnections };
   }
 
-  async prepareActant2Semantics(dbConn: Connection): Promise<void> {
+  async prepareActant2Semantics(dbConn: Conn): Promise<void> {
     const [connections, iConnections] = await Promise.all([
       Actant2Semantics.getActant2SemanticsForwardConnections(
         dbConn,
@@ -288,7 +288,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     this[RelationEnums.Type.Actant2Semantics] = { connections, iConnections };
   }
 
-  async prepareRelateds(dbConn: Connection): Promise<void> {
+  async prepareRelateds(dbConn: Conn): Promise<void> {
     this[RelationEnums.Type.Related] = {
       connections: await Related.getRelatedForwardConnections(
         dbConn,

@@ -1,11 +1,10 @@
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
 import { createMockTree } from "@modules/common.test";
 import User from "@models/user/user";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
-import { r as rethink } from "rethinkdb-ts";
 import { findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { ITerritory } from "@inkvisitor/shared/types";
@@ -37,12 +36,14 @@ describe("entities update - moving a territory", () => {
     const seeded = (defaultAcl as Array<Record<string, unknown>>).filter(
       (row) => row.controller === "entities" && row.method === "PUT"
     );
-    await rethink
-      .table("acl_permissions")
-      .filter({ controller: "entities", method: "PUT" })
-      .delete()
-      .run(db.connection);
-    await rethink.table("acl_permissions").insert(seeded).run(db.connection);
+    const stale = (await storage.acl.all(db.connection)).filter(
+      (row) => row.controller === "entities" && row.method === "PUT"
+    );
+    await storage.acl.deleteMany(
+      db.connection,
+      stale.map((row) => row.id)
+    );
+    await storage.acl.insert(db.connection, seeded);
 
     await new User({
       id: editorId,
@@ -61,7 +62,7 @@ describe("entities update - moving a territory", () => {
   });
 
   afterAll(async () => {
-    await rethink.table("users").getAll(editorId).delete().run(db.connection);
+    await storage.users.deleteMany(db.connection, [editorId]);
     await db.close();
     await pool.end();
   });

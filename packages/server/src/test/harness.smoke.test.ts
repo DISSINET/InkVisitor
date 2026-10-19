@@ -1,8 +1,7 @@
 import request from "supertest";
-import { r } from "rethinkdb-ts";
 import app from "../server";
 import { apiPath } from "@common/constants";
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import { pool } from "@middlewares/db";
 
@@ -21,16 +20,7 @@ describe("test harness (db + auth)", () => {
     const db = new Db();
     await db.initDb();
     try {
-      const entityIndexes = await r
-        .table("entities")
-        .indexList()
-        .run(db.connection);
-      expect(entityIndexes).toContain("class");
-      const relationIndexes = await r
-        .table("relations")
-        .indexList()
-        .run(db.connection);
-      expect(relationIndexes).toContain("entityIds");
+      await expect(storage.assertRequiredIndexes(db.connection)).resolves.toBeUndefined();
     } finally {
       await db.close();
     }
@@ -40,9 +30,7 @@ describe("test harness (db + auth)", () => {
     const db = new Db();
     await db.initDb();
     try {
-      const admin = (await r.table("users").get("1").run(db.connection)) as {
-        name: string;
-      } | null;
+      const admin = await storage.users.get(db.connection, "1");
       expect(admin).toBeTruthy();
       expect(admin?.name).toBe("admin");
     } finally {

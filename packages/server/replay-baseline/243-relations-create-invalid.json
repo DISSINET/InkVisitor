@@ -1,0 +1,24 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/relations",
+    "body": {
+      "entityIds": [
+        "rp-c",
+        "rp-c"
+      ],
+      "id": "rp-rel-bad",
+      "type": "SCL"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "RelationAsymetricalPathExist",
+      "message": "'replay concept renamed', that you attempted to use as superclass, is set as a subclass. Relation not created.",
+      "result": false
+    }
+  }
+}

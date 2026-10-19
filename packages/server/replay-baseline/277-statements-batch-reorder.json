@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/statements/batch-reorder",
+    "body": {
+      "updates": [
+        {
+          "id": "s1",
+          "order": 5
+        },
+        {
+          "id": "s2",
+          "order": 0
+        },
+        {
+          "id": "rp-se",
+          "order": 1
+        }
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "message": "3 statements reordered",
+      "result": true
+    }
+  }
+}

@@ -25,7 +25,7 @@ import {
 import { EventType } from "@inkvisitor/shared/types/stats";
 import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
 import { Router } from "express";
-import { Connection, r as rethink } from "rethinkdb-ts";
+import { Conn, storage } from "@service/storage";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "../index";
 import { filterDocumentContent } from "./export";
@@ -36,7 +36,7 @@ import { filterDocumentContent } from "./export";
  * (in Manage Users) the Resource that links to it via data.documentId.
  */
 async function userCanManageDocument(
-  conn: Connection,
+  conn: Conn,
   documentId: string,
   user: User
 ): Promise<boolean> {
@@ -57,7 +57,7 @@ async function userCanManageDocument(
  * per-document call would walk the entity table once per id.
  */
 async function documentsManageableByUser(
-  conn: Connection,
+  conn: Conn,
   documentIds: string[],
   user: User
 ): Promise<Set<string>> {
@@ -121,11 +121,7 @@ export default Router()
       // anchors and entityIds are persisted on each row. We don't
       // recompute them on read - documents pre-dating preprocess must
       // be re-saved (any edit triggers it) to populate the fields.
-      const docs = (await rethink
-        .table(Document.table)
-        .orderBy(rethink.asc("createdAt"))
-        .without("content", "anchors")
-        .run(request.db.connection)) as IDocument[];
+      const docs = await storage.documents.listMeta(request.db.connection);
 
       return docs.map((d) => {
         const document = new Document(d);

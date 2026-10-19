@@ -1,7 +1,7 @@
 import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, NotFound } from "@inkvisitor/shared/types/errors";
 import { apiPath } from "@common/constants";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { pool } from "@middlewares/db";
 import { SettingGroupDict } from "@inkvisitor/shared/dictionaries/settinggroup";
 import { globalValidationsDict } from "@inkvisitor/shared/enums/warning";
