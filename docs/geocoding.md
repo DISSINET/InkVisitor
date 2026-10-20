@@ -216,9 +216,9 @@ builder holds an older saved list to ten, and a name over 200 characters is refu
 before any request with a sentence saying so (`engineLimits.ts`).
 
 **A production engine guards its request list.** The progress stream is opened for
-one request (`/state/stream?requestId=`), which is all an anonymous caller may
-read. The engine's list of recent requests needs its admin token, which a browser never
-holds, so the activity screen lists the requests this browser sent instead: the
+one request (`/state/stream?requestId=`), which the proxy forwards as-is. The
+engine's list of recent requests needs its admin token, which neither the browser
+nor the proxy holds, so the activity screen lists the requests this browser sent instead: the
 latest fifty, kept in `localStorage` by `requestLog.ts`, finished or failed, never
 those of other browsers and never sent anywhere.
 The engine address and key are server environment variables (`HGA_ENGINE_URL`,
