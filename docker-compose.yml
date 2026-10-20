@@ -52,6 +52,9 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_SECRET: ${SMTP_SECRET:-}
       MAILER_SENDER: ${MAILER_SENDER:-}
+      # HGA-Engine behind the Geocoding page (blank = page works without suggestions)
+      HGA_ENGINE_URL: ${HGA_ENGINE_URL:-}
+      HGA_ENGINE_API_KEY: ${HGA_ENGINE_API_KEY:-}
     ports:
       - "3000:3000"
     networks:
