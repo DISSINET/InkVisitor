@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { IcoMenuFold, IcoMenuUnfold } from "Theme/icons";
 import { ButtonSize } from "types";
-import { ENGINE_URL, engineHealth } from "./utils/engine/engine";
+import { engineHealth } from "./utils/engine/engine";
 import { fixtureModeAvailable, isFixtureMode, setFixtureMode } from "./utils/engine/fixtureMode";
 import {
   QUERY_FIELDS,
@@ -567,20 +567,20 @@ export const GeocodingPage: React.FC = () => {
 
   // the engine is a separate service that may not be deployed yet; every part of
   // this page except engine-driven suggestions works without it
-  const { data: engineReachable, isFetching: checkingEngine } = useQuery({
-    queryKey: ["geocoding-engine-health", ENGINE_URL],
+  const { data: engineReachable } = useQuery({
+    queryKey: ["geocoding-engine-health"],
     queryFn: ({ signal }) => engineHealth(signal),
-    enabled: !!ENGINE_URL,
     refetchInterval: 60000,
   });
 
-  const engineState: EngineState = !ENGINE_URL
-    ? "unconfigured"
-    : checkingEngine && engineReachable === undefined
+  const engineState: EngineState =
+    engineReachable === undefined
       ? "checking"
-      : engineReachable
-        ? "up"
-        : "down";
+      : !engineReachable.configured
+        ? "unconfigured"
+        : engineReachable.ok
+          ? "up"
+          : "down";
 
   const engineReady = engineState === "up" && isConfigured;
 
@@ -614,9 +614,9 @@ export const GeocodingPage: React.FC = () => {
     unconfigured: "no engine address configured for this deployment",
     checking: "contacting the geocoding engine…",
     up: isConfigured
-      ? `geocoding engine reachable at ${ENGINE_URL}`
+      ? "geocoding engine reachable"
       : `engine reachable — but no ${missingRoles.join(", ")} assigned yet`,
-    down: `geocoding engine unreachable at ${ENGINE_URL} — manual assignment only`,
+    down: "geocoding engine unreachable - manual assignment only",
   };
 
   const rolesMissing = engineState === "up" && !isConfigured;
