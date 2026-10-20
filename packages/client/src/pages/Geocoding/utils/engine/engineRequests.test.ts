@@ -51,6 +51,17 @@ describe("against the engine through the API", () => {
     expect(headers.Authorization).toBeUndefined();
   });
 
+  it("marks a POST with the client header and leaves a GET without it", async () => {
+    const { engineFeedback, engineHealth } = await load();
+    await engineFeedback({ query: { name: "Breslau" }, chosen: null, suggestions: [] });
+    const post = vi.mocked(fetch).mock.calls[0][1];
+    expect((post?.headers as Record<string, string>)["X-InkVisitor-Client"]).toBe("1");
+    expect(post?.credentials).toBe("include");
+    await engineHealth();
+    const get = vi.mocked(fetch).mock.calls[1][1];
+    expect(get?.headers as Record<string, string>).not.toHaveProperty("X-InkVisitor-Client");
+  });
+
   it("sends no clientId; the server sets it", async () => {
     const { engineSuggestStream } = await load();
     await engineSuggestStream({ name: "Breslau" }, vi.fn(), vi.fn()).catch(() => undefined);
