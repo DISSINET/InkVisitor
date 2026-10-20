@@ -279,13 +279,20 @@ describe("geocoding proxy", () => {
     respond["/suggest/stream"] = { status: 422, body: '{"error":"too long"}' };
     const r = await post("/geocoding/suggest/stream", "{}");
     expect(r.status).toBe(422);
+    expect(r.headers.get("content-type")).toMatch(/^application\/json/);
     expect(await r.text()).toBe('{"error":"too long"}');
+  });
+
+  it("answers 400 to a state stream without requestId and never calls the engine", async () => {
+    const r = await fetch(proxyUrl + "/geocoding/state/stream?all=1");
+    expect(r.status).toBe(400);
+    expect(seen).toHaveLength(0);
   });
 
   it("aborts the upstream request when the browser disconnects", async () => {
     respond["/state/stream"] = { stream: "open" };
     const browser = new AbortController();
-    const r = await fetch(proxyUrl + "/geocoding/state/stream?requestId=r1", {
+    const r = await fetch(proxyUrl + "/geocoding/state/stream?requestId=r1&limit=5", {
       signal: browser.signal,
     });
     expect(r.status).toBe(200);

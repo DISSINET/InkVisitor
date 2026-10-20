@@ -14,6 +14,7 @@ import {
 import { Readable, pipeline } from "node:stream";
 import { promisify } from "node:util";
 import {
+  BadParams,
   GeocodingEngineError,
   GeocodingEngineUnconfiguredError,
 } from "@inkvisitor/shared/types/errors";
@@ -42,13 +43,15 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === "object" && !Array.isArray(v);
 
 /**
- * Sends the request to the engine. GET carries the incoming query string;
- * POST carries the incoming JSON object with clientId set by the server.
+ * Sends the request to the engine. GET carries the incoming query string, or
+ * `query` when given; POST carries the incoming JSON object with clientId set
+ * by the server.
  */
 export const engineRequest = async (
   req: Request,
   path: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  query?: string
 ): Promise<Response> => {
   const base = engineUrl();
   if (!base) {
@@ -57,7 +60,8 @@ export const engineRequest = async (
 
   const isPost = req.method === "POST";
   const q = req.url.indexOf("?");
-  const url = base + path + (!isPost && q >= 0 ? req.url.slice(q) : "");
+  const incoming = q >= 0 ? req.url.slice(q) : "";
+  const url = base + path + (isPost ? "" : query ?? incoming);
 
   let r: Response;
   try {
@@ -76,7 +80,7 @@ export const engineRequest = async (
     if ((err as Error).name === "AbortError") {
       throw err;
     }
-    throw new GeocodingEngineError();
+    throw new GeocodingEngineError(undefined, (err as Error).message);
   }
 
   if (r.status === 401 || r.status === 403) {
@@ -108,30 +112,40 @@ export const engineRoute =
 /** Relays the engine's status and body unchanged. */
 export const relayJson = (path: string) =>
   engineRoute(async (req, res) => {
-    const r = await engineRequest(req, path);
+    const r = await engineRequest(
+      req,
+      path,
+      AbortSignal.timeout(15000)
+    );
     res.status(r.status).type("json").send(await r.text());
   });
 
 /**
  * Relays the engine's event stream frame by frame. Closing the browser
  * connection aborts the upstream fetch, so an abandoned watch never holds an
- * engine connection open.
+ * engine connection open. The content type is set here, never copied from
+ * upstream, so a body the engine or its ingress sends cannot render as HTML
+ * on the app origin.
  */
-export const relayStream = (path: string) =>
+export const relayStream = (
+  path: string,
+  query?: (req: Request) => string
+) =>
   engineRoute(async (req, res) => {
+    const q = query?.(req);
     const controller = new AbortController();
     res.on("close", () => controller.abort());
+    // the ACL check awaits a database round trip before this handler runs,
+    // and a browser that left during it has already fired close
+    if (res.destroyed) controller.abort();
     try {
-      const r = await engineRequest(req, path, controller.signal);
+      const r = await engineRequest(req, path, controller.signal, q);
       if (!r.ok || !r.body) {
-        res.status(r.status).send(await r.text());
+        res.status(r.status).type("json").send(await r.text());
         return;
       }
       res.status(r.status);
-      res.setHeader(
-        "Content-Type",
-        r.headers.get("Content-Type") || "text/event-stream"
-      );
+      res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       // stops an nginx in front of the server from buffering the frames
       res.setHeader("X-Accel-Buffering", "no");
@@ -145,6 +159,19 @@ export const relayStream = (path: string) =>
       }
     }
   });
+
+/**
+ * Forwards only requestId: the engine's admin token shares the bearer header,
+ * and with it in HGA_ENGINE_API_KEY any other parameter could list every
+ * request the engine holds.
+ */
+const stateQuery = (req: Request): string => {
+  const id = req.query.requestId;
+  if (typeof id !== "string" || !id) {
+    throw new BadParams("requestId is required");
+  }
+  return `?requestId=${encodeURIComponent(id)}`;
+};
 
 // always 200: the answer itself says whether the engine is configured and up
 const health = engineRoute(async (_req, res) => {
@@ -172,4 +199,4 @@ export default Router()
   .get("/search", relayJson("/search"))
   .post("/feedback", relayJson("/feedback"))
   .post("/suggest/stream", relayStream("/suggest/stream"))
-  .get("/state/stream", relayStream("/state/stream"));
+  .get("/state/stream", relayStream("/state/stream", stateQuery));
