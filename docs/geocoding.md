@@ -116,10 +116,10 @@ user able to override it, the same Location would read as geocoded for one perso
 and not for another, the counts would disagree, and the ungeocoded filter would
 show two different lists to two people looking at one corpus.
 
-The engine's address is **not** a setting. It is a build-time environment
-variable, because it is deployment infrastructure rather than project
-configuration, and because a settable address would let anyone point the page at
-a host of their choosing and post research data to it.
+The engine's address is **not** a setting. It is a server environment variable
+(`HGA_ENGINE_URL`), read by the proxy, because it is deployment infrastructure
+rather than project configuration, and because a settable address would let
+anyone point the page at a host of their choosing and post research data to it.
 
 The Resource rows are driven by the engine's own `GET /suggesters` list, so the
 modal shows one row per gazetteer slug rather than asking anyone to type it.
