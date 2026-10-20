@@ -19,6 +19,7 @@ import SettingsRouter from "@modules/settings";
 import DocumentsRouter from "@modules/documents";
 import BackupsRouter from "@modules/backups";
 import SavedQueriesRouter from "@modules/saved-queries";
+import GeocodingRouter from "@modules/geocoding";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
@@ -58,6 +59,13 @@ server.use(
       if (req.path.includes("/backups/download")) {
         return false;
       }
+      // Server-Sent Events frames must reach the browser as they are written
+      if (
+        req.path.endsWith("/geocoding/suggest/stream") ||
+        req.path.endsWith("/geocoding/state/stream")
+      ) {
+        return false;
+      }
       return compression.filter(req, res);
     },
   })
@@ -74,9 +82,26 @@ if (staticPath === "/") {
 
 server.use(express.json({ limit: "150mb" }));
 server.use(express.urlencoded({ extended: true, limit: "150mb" }));
-server.use((req, res, next) =>
-  timeout(req.path.endsWith("/backups/download") ? "5m" : "20s")(req, res, next)
-);
+const requestTimeout = (path: string): string | null => {
+  if (
+    path.endsWith("/backups/download") ||
+    path.endsWith("/geocoding/suggest/stream")
+  ) {
+    return "5m";
+  }
+  // the engine state watch stays open until the browser closes it
+  if (path.endsWith("/geocoding/state/stream")) {
+    return null;
+  }
+  return "20s";
+};
+server.use((req, res, next) => {
+  const limit = requestTimeout(req.path);
+  if (limit === null) {
+    return next();
+  }
+  timeout(limit)(req, res, next);
+});
 
 if (process.env.NODE_ENV === "development") {
   server.use(morgan("dev"));
@@ -167,6 +192,7 @@ router.use("/pythondata", PythonApiRouter);
 router.use("/settings", SettingsRouter);
 router.use("/backups", BackupsRouter);
 router.use("/saved-queries", SavedQueriesRouter);
+router.use("/geocoding", GeocodingRouter);
 
 server.all("*", catchAll);
 

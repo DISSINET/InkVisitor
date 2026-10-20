@@ -152,6 +152,14 @@ class Acl {
       return null;
     }
 
+    // Geocoding (HGA-Engine proxy) is open to any logged-in user: the Geocoding
+    // page sits behind login only and the engine enforces its own quota. No
+    // acl_permissions row is seeded, so this also keeps the auto-created
+    // roles:[] row from denying every non-admin.
+    if (controller === "geocoding") {
+      return null;
+    }
+
     // The entities batch read (POST /entities/batch) is the bulk equivalent of
     // the public GET /entities/:entityId; it backs e.g. fetching the entities
     // behind a document's anchors. Allow it for any logged-in user (it has no
