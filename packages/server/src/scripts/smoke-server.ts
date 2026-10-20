@@ -4,8 +4,9 @@ import path from "path";
 /**
  * API for the frontend smoke suite (packages/client/e2e): drops and seeds the
  * smoke database with the replay seed, boots the server on the fixed smoke
- * port and keeps running until this process is killed. DB_HOST/DB_PORT point
- * at the database, with the same defaults as the replay.
+ * port and keeps running until this process is killed. DB_ADAPTER selects the
+ * backend (rethinkdb by default); DB_HOST/DB_PORT and PG_* point at the
+ * databases, with the same defaults as the replay.
  */
 const SMOKE_PORT = 3301;
 // the vite server of packages/client/playwright.config.ts, which calls the
@@ -13,17 +14,24 @@ const SMOKE_PORT = 3301;
 const CLIENT_ORIGIN = "http://127.0.0.1:8301";
 const SMOKE_LOG = path.join(os.tmpdir(), "inkvisitor-smoke-server.log");
 
+const adapter = process.env.DB_ADAPTER || "rethinkdb";
+process.env.DB_ADAPTER = adapter;
 process.env.DB_NAME = "inkvisitor_smoke_test";
+process.env.PG_HOST ||= "localhost";
+process.env.PG_PORT ||= "5432";
+process.env.PG_USER ||= "inkvisitor";
+process.env.PG_PASS ||= "inkvisitor";
 
-// the storage module reads its connection settings when it loads, after the
+// the seed picks its adapter when the storage module loads, after the
 // environment above is in place
 const { seedReplayDb } = require("../replay/seed") as typeof import("../replay/seed");
 const { startServer, waitForHealth } = require("../replay/server") as typeof import("../replay/server");
 
 async function main(): Promise<void> {
-  console.log(`[smoke-server] seeding ${process.env.DB_NAME}`);
+  console.log(`[smoke-server] seeding ${process.env.DB_NAME} on ${adapter}`);
   await seedReplayDb();
   const server = startServer(SMOKE_PORT, {
+    adapter,
     instance: "inkvisitor-smoke",
     logFile: SMOKE_LOG,
     corsOrigins: CLIENT_ORIGIN,
@@ -46,7 +54,7 @@ async function main(): Promise<void> {
     server.kill();
     throw e;
   }
-  console.log(`[smoke-server] ready on http://127.0.0.1:${SMOKE_PORT}, log ${SMOKE_LOG}`);
+  console.log(`[smoke-server] ${adapter} ready on http://127.0.0.1:${SMOKE_PORT}, log ${SMOKE_LOG}`);
 }
 
 main().catch((e) => {

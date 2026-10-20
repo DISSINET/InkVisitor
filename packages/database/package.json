@@ -13,7 +13,10 @@
     "fix-labels": "npx ts-node -r ./scripts/register-paths.ts scripts/fix-labels.ts",
     "parse-niort": "npx ts-node -r ./scripts/register-paths.ts scripts/parse-casestudy.ts niort 36f5a334-4611-4da3-81c0-a7ec8d600a59 production tunnel",
     "typecheck": "tsc --noEmit",
+    "pg:check": "npx ts-node -r ./scripts/register-paths.ts scripts/pg-check.ts",
     "seed": "npx ts-node -r ./scripts/register-paths.ts scripts/seed.ts",
+    "storage:diff": "npx ts-node -r ./scripts/register-paths.ts scripts/storage-diff/run.ts",
+    "seed:check": "npx ts-node -r ./scripts/register-paths.ts scripts/seed-check.ts",
     "test": "node -r ts-node/register -r ./scripts/register-paths.ts --test 'scripts/**/*.test.ts'"
   },
   "author": "",
@@ -24,6 +27,7 @@
     "colors": "^1.4.0",
     "dotenv": "^16.6.1",
     "googleapis": "^118.0.0",
+    "pg": "^8.23.0",
     "readline": "^1.3.0",
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
@@ -39,6 +43,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.41",
+    "@types/pg": "^8.23.1",
     "@types/ssh2": "^1.15.5",
     "@types/tunnel-ssh": "^5.1.0",
     "@typescript/native": "npm:typescript@^7.0.2",

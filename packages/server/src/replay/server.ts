@@ -10,6 +10,8 @@ import path from "path";
 const SERVER_ROOT = path.resolve(__dirname, "../..");
 
 export interface ServerOptions {
+  /** storage backend, rethinkdb or postgres */
+  adapter: string;
   /** ENV of the process, the session cookie name derives from it */
   instance: string;
   /** stdout and stderr of the server */
@@ -50,6 +52,11 @@ export function startServer(port: number, opts: ServerOptions): ChildProcess {
     DB_AUTH: process.env.DB_AUTH || "",
     DB_POOL_CONNECTIONS: "10",
     SECRET: "replay-secret",
+    DB_ADAPTER: opts.adapter,
+    PG_HOST: process.env.PG_HOST,
+    PG_PORT: process.env.PG_PORT,
+    PG_USER: process.env.PG_USER,
+    PG_PASS: process.env.PG_PASS,
   };
   return spawn(
     process.execPath,

@@ -1,15 +1,22 @@
 import { DbEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { Conn, Row, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../test/db";
-import { TABLES } from "./rethink/provision";
+import { TABLE } from "./names";
+import { EXTRA_INDEXES, TABLES as PG_TABLES } from "./postgres/provision";
+import { q } from "./postgres/tables";
+import { resetWatchers } from "./postgres/invalidation";
 
 /**
- * Behaviour of the storage adapter, run with `pnpm test`. Every
+ * Behaviour of the storage adapter, the same file on both backends: run with
+ * `pnpm test` (RethinkDB) and `pnpm test:contract:pg` (PostgreSQL). Every
  * operation the models call on the standalone tables is exercised here with
  * its ordering and filtering pinned. isolate.ts empties the mutable tables and
  * re-seeds the admin user before this file; acl_permissions and the stats
  * tables are not reset, so those blocks clean up after themselves.
  */
+const onPostgres = storage.kind === "postgres";
+const itPg = onPostgres ? it : it.skip;
+
 let conn: Conn;
 beforeAll(async () => {
   conn = await openTestDb();
@@ -23,7 +30,7 @@ const ids = (rows: { id: string }[]) => rows.map((r) => r.id).sort();
 describe("connection", () => {
   it("lists every catalogue table", async () => {
     const tables = await storage.tableList(conn);
-    for (const table of Object.keys(TABLES)) {
+    for (const table of Object.keys(PG_TABLES)) {
       expect(tables).toContain(table);
     }
   });
@@ -175,6 +182,14 @@ describe("generic store", () => {
     expect(await settings.get(conn, "s1")).toEqual({ id: "s1", value: { a: 1, b: 2 }, public: false });
   });
 
+  // RethinkDB supports the combination; PostgreSQL refuses it, as its conflict
+  // statement returns written rows only
+  itPg("insert refuses returnChanges with conflict replace", async () => {
+    await expect(
+      settings.insert(conn, [{ id: "g1", value: 1 }], { conflict: "replace", returnChanges: true })
+    ).rejects.toThrow("not implemented");
+  });
+
   it("deletes one, many with changes, and all", async () => {
     await settings.insert(conn, [{ id: "a", value: 1 }, { id: "b", value: 2 }, { id: "c", value: 3 }]);
     expect((await settings.delete(conn, "a")).deleted).toBe(1);
@@ -308,6 +323,28 @@ describe("dates", () => {
     const row = await storage.savedQueries.get(conn, "dt-q2");
     expect(row?.createdAt).toEqual(created);
     expect(row?.updatedAt).toEqual(updated);
+  });
+});
+
+describe("in-process invalidation on postgres", () => {
+  afterEach(() => {
+    if (onPostgres) resetWatchers();
+  });
+
+  itPg("calls the handlers with the written ids and onClear on deleteAll", async () => {
+    const changed: string[] = [];
+    let cleared = 0;
+    storage.watch("test", TABLE.settings, {
+      onClear: () => cleared++,
+      onChange: (newVal, oldVal) => changed.push(newVal?.id ?? oldVal?.id ?? "?"),
+    });
+    await storage.settings.insert(conn, { id: "w1", value: 1 });
+    await storage.settings.update(conn, "w1", { value: 2 });
+    await storage.settings.update(conn, "w1", { value: 2 });
+    await storage.settings.delete(conn, "w1");
+    await storage.settings.deleteAll(conn);
+    expect(changed).toEqual(["w1", "w1", "w1"]);
+    expect(cleared).toBe(1);
   });
 });
 
@@ -495,6 +532,9 @@ describe("entities", () => {
   afterAll(async () => {
     await storage.entities.deleteAll(conn);
   });
+  afterEach(() => {
+    if (onPostgres) resetWatchers();
+  });
 
   it("get and getMany return nested documents intact", async () => {
     const [c1] = await storage.entities.getMany(conn, ["c-1"]);
@@ -552,6 +592,24 @@ describe("entities", () => {
     expect(await storage.entities.statementTerritoryPairs(conn, [], [IDX.StatementEntities])).toEqual([]);
   });
 
+  itPg("statementTerritoryPairs returns nothing for an empty index list", async () => {
+    expect(await storage.entities.statementTerritoryPairs(conn, ["c-1"], [])).toEqual([]);
+  });
+
+  itPg("updateStatementTerritoryOrders notifies the watchers of the moved ids only", async () => {
+    const changed: string[] = [];
+    storage.watch("test", TABLE.entities, {
+      onClear: () => undefined,
+      onChange: (newVal) => changed.push(newVal?.id ?? "?"),
+    });
+    await storage.entities.updateStatementTerritoryOrders(
+      conn,
+      [{ id: "s-2", territoryId: "t-child", order: 2 }, { id: "nope", territoryId: "t-child", order: 0 }],
+      new Date()
+    );
+    expect(changed).toEqual(["s-2"]);
+  });
+
   // last: it moves s-1 out of t-root
   it("updateStatementTerritoryOrders moves the listed statements and skips unknown ids", async () => {
     const at = new Date("2024-05-06T07:08:09.000Z");
@@ -568,6 +626,14 @@ describe("entities", () => {
     expect(await storage.entities.get(conn, "nope")).toBeNull();
     expect(ids(await storage.entities.statementsByIndex(conn, IDX.StatementTerritory, "t-child"))).toEqual(["s-1", "s-2"]);
     expect(await storage.entities.statementsByIndex(conn, IDX.StatementTerritory, "t-root")).toEqual([]);
+  });
+
+  itPg("provisions the extra indexes", async () => {
+    const res = await q(conn, "SELECT tablename, indexname FROM pg_indexes WHERE schemaname = 'public'");
+    const present = res.rows.map((row: { tablename: string; indexname: string }) => `${row.tablename}.${row.indexname}`);
+    for (const extra of EXTRA_INDEXES) {
+      expect(present).toContain(`${extra.table}.${extra.name}`);
+    }
   });
 });
 
@@ -668,7 +734,7 @@ describe("audits", () => {
     expect((await storage.audits.page(conn, { skip: 0, take: 1, from: new Date("2024-03-01T12:00:00Z") })).map((a) => a.id)).toEqual(["au-3"]);
   });
 
-  // grouped rows compare as sets: the group order is not part of the contract
+  // grouped rows compare as sets: the backends order groups differently
   const byGroup = (rows: { group: string[]; reduction: number }[]) =>
     [...rows].sort((a, b) => (a.group.join("|") < b.group.join("|") ? -1 : 1));
 

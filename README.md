@@ -134,6 +134,17 @@ cd packages/database && pnpm install && pnpm start && cd -
 docker compose up -d inkvisitor
 ```
 
+Optional: run the application on PostgreSQL (TimescaleDB image) instead of RethinkDB ([#3256](https://github.com/DISSINET/InkVisitor/issues/3256)). RethinkDB stays the default; a server process selects the PostgreSQL adapter with `DB_ADAPTER=postgres`.
+
+```bash
+docker compose up -d postgres                                    # host port 5432, override with PG_PORT=5433
+pnpm -C packages/server pg:check                                 # connectivity and ctype check via env/.env.development (PG_* block)
+pnpm -C packages/database seed --db=inkvisitor --dataset=default --target=postgres   # the same dataset into PostgreSQL
+DB_ADAPTER=postgres pnpm -C packages/server start                # the API on PostgreSQL
+```
+
+The gates that keep both backends in step (server suite, API replay, storage diff, frontend smoke) are listed in [packages/server/README.md](./packages/server/README.md).
+
 For Kubernetes manifests, see [kube/](./kube). The setup will likely need to be adapted to your cluster.
 
 ## ACL - access control list

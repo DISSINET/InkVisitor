@@ -16,7 +16,7 @@ export interface DbSchema {
   savedQueries: TableSchema;
 }
 export interface TableSchema {
-  /** physical table name */
+  /** physical table name, the same on every backend */
   tableName: string;
   data?: any;
   dataFilePath?: string;

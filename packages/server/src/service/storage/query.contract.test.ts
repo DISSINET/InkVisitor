@@ -8,7 +8,8 @@ import { closeTestDb, openTestDb } from "../../test/db";
 
 /**
  * Behaviour of entity search, the label lookups and the explore evaluator,
- * run with `pnpm test`. Every expectation is a literal id
+ * the same file on both backends: `pnpm test` runs it on RethinkDB and
+ * `pnpm test:contract:pg` on PostgreSQL. Every expectation is a literal id
  * list read off the fixture below, so a failure on RethinkDB is a wrong
  * expectation. isolate.ts empties the tables before this file.
  */
@@ -19,6 +20,8 @@ beforeAll(async () => {
 afterAll(async () => {
   await closeTestDb(conn);
 });
+
+const itPg = storage.kind === "postgres" ? it : it.skip;
 
 const C = EntityEnums.Class;
 const sorted = (list: string[]) => [...list].sort();
@@ -161,6 +164,11 @@ describe("entity search", () => {
     expect(await search({ excluded: [C.Territory], haveReferenceTo: "r-2" })).toEqual([]);
   });
 
+  // RethinkDB raises on t-root's string `references`; PostgreSQL skips the row
+  itPg("haveReferenceTo over the whole table skips a string references field", async () => {
+    expect(await search({ haveReferenceTo: "r-1" })).toEqual(["c-1", "s-1"]);
+  });
+
   it("matches labels word by word in every wildcard form", async () => {
     expect(await search({ label: "star" })).toEqual(["c-2", "c-3"]);
     expect(await search({ label: "sta" })).toEqual([]);
@@ -186,6 +194,11 @@ describe("entity search", () => {
     expect(await search({ labelOrId: "(city)" })).toEqual(["l-1"]);
     expect(await search({ labelOrId: "(city" })).toEqual(["l-1"]);
     expect(await search({ labelOrId: "star" })).toEqual(["c-2", "c-3"]);
+  });
+
+  // RethinkDB returns ["p-1"]: its filter skips p-2, which has no `labels`
+  itPg("labelOrId matches the id prefix of an entity without labels", async () => {
+    expect(await search({ labelOrId: "p-" })).toEqual(["p-1", "p-2"]);
   });
 
   it("idsMatchingLabel keeps the given ids whose label matches; labelsOf returns labels only when present", async () => {
@@ -312,6 +325,11 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(() => storage.explore.plan(node({}, [edge("NOPE")]), resolvers)).toThrow(InternalServerError);
     expect(() => storage.explore.plan(node({}, [edge("NOPE")]), resolvers)).toThrow("unknown edge type: NOPE");
   });
+
+  // RethinkDB builds an ordered-relation edge for it: its dispatch reads the relation maps without an own-key check
+  itPg("rejects an Object.prototype key as an edge type", () => {
+    expect(() => storage.explore.plan(node({}, [edge("hasOwnProperty")]), resolvers)).toThrow(InternalServerError);
+  });
 });
 
 describe("explore: statement edges", () => {
@@ -366,6 +384,11 @@ describe("explore: statement edges", () => {
     expect(await explore(S, [edge("SUT:", { entityId: "t-root" })])).toEqual(["s-1"]);
     expect(await explore(S, [edge("SUT:", { entityId: "t-child" })])).toEqual(["s-2"]);
     expect(await explore(S, [edge("SUT:")])).toEqual(["s-1", "s-2"]);
+  });
+
+  // RethinkDB returns ["s-1"]: its StatementEntities and StatementDataProps index bodies read data.actions and data.tags unguarded, so s-3 is in neither
+  itPg("I_IS: finds a statement without actions or tags through the indexes", async () => {
+    expect(await explore(S, [edge("I_IS:", { entityId: "p-2" })])).toEqual(["s-1", "s-3"]);
   });
 
   it("EUT: and IS: emit every entity used in the selected statements", async () => {
@@ -534,6 +557,11 @@ describe("explore: edges and node params of 1.6.1", () => {
     expect(await explore(S, [edge("I_IS:", { entityClasses: [C.Action] })])).toEqual(["s-1", "s-4"]);
   });
 
+  // RethinkDB drops s-3 (no data.actions) from the class-narrowed scan; the lax jsonpath keeps it
+  itPg("I_IS: with a class keeps a statement without actions", async () => {
+    expect(await explore(S, [edge("I_IS:", { entityClasses: [C.Person] })])).toEqual(["s-1", "s-2", "s-3", "s-4"]);
+  });
+
   it("IS:S, IS:A1, IS:A2, IS:PS and IS:A emit the entity in that position of the target statements", async () => {
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:S", { entityId: "s-1" })])).toEqual(["p-1"]);
     expect(await explore({ entityClasses: [C.Location] }, [edge("IS:A1", { entityId: "s-1" })])).toEqual(["l-1"]);
@@ -544,6 +572,11 @@ describe("explore: edges and node params of 1.6.1", () => {
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:S")])).toEqual(["p-1", "p-2", "p-3"]);
     expect(await explore({ entityClasses: [C.Person] }, [edge("IS:", { entityId: "s-4" })])).toEqual(["p-3", "p-4"]);
     expect(await explore({ entityClasses: [C.Action] }, [edge("IS:")])).toEqual(["a-1", "a-2"]);
+  });
+
+  // RethinkDB raises on s-3 (data.actions read inside concatMap); PostgreSQL reads an absent array as empty
+  itPg("IS:A without a target skips a statement without actions", async () => {
+    expect(await explore({ entityClasses: [C.Action] }, [edge("IS:A")])).toEqual(["a-1", "a-2"]);
   });
 
   it("the territory edges read the lineage, the subtree and the direct territory", async () => {
@@ -569,5 +602,12 @@ describe("explore: edges and node params of 1.6.1", () => {
   it("I_HR:R emits the resources the pinned target entities reference", async () => {
     expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R", { entityId: "c-1" })])).toEqual(["r-1"]);
     expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R", { entityId: "s-1" })])).toEqual(["r-1"]);
+  });
+
+  // RethinkDB raises on an entity without `references` (runIsReferenceResourceEdge reads e("references") unguarded inside concatMap); PostgreSQL reads it as empty
+  itPg("I_HR:R without a pinned target reads every entity of the classes and skips a string references field", async () => {
+    expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R", { entityClasses: [C.Concept] })])).toEqual(["r-1"]);
+    expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R", { entityClasses: [C.Person] })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Resource] }, [edge("I_HR:R")])).toEqual(["r-1"]);
   });
 });
