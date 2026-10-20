@@ -325,6 +325,7 @@ class GeocodingEngineError extends CustomError {
   public static code = 502;
   public static title = "Geocoding engine error";
   public static message = "The geocoding engine did not respond.";
+  loggable = true;
 }
 
 /**
