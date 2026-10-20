@@ -414,3 +414,9 @@ export const defaultGeocodingContext = (): IGeocodingContext => ({
   taskCategory: "quick",
   recordPlaceType: true,
 });
+
+/** What GET /geocoding/health answers: whether an engine address is set, and whether the engine answered. */
+export interface IGeocodingHealth {
+  configured: boolean;
+  ok?: boolean;
+}
