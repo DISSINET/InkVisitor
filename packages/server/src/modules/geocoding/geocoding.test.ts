@@ -18,8 +18,9 @@ interface IStubReply {
   // keeps the connection open without ever answering
   hang?: boolean;
   // answers as an event stream: "end" sends both frames 150 ms apart and ends,
-  // "open" sends the first frame and keeps the response open
-  stream?: "end" | "open";
+  // "open" sends the first frame and keeps the response open, "silent" keeps
+  // the response open without sending headers
+  stream?: "end" | "open" | "silent";
 }
 
 const FRAME_ACCEPTED = 'event: accepted\ndata: {"requestId":"r1"}\n\n';
@@ -45,6 +46,19 @@ const listen = (server: http.Server) =>
 
 const close = (server: http.Server) =>
   new Promise<void>((resolve) => server.close(() => resolve()));
+
+// whether the stub saw its stream response closed early within ms
+const closedWithin = async (ms: number) => {
+  let timer: NodeJS.Timeout | undefined;
+  const closed = await Promise.race([
+    upstreamClosed.then(() => true),
+    new Promise<boolean>((resolve) => {
+      timer = setTimeout(() => resolve(false), ms);
+    }),
+  ]);
+  clearTimeout(timer);
+  return closed;
+};
 
 const post = (path: string, body?: string) =>
   fetch(proxyUrl + path, {
@@ -73,6 +87,10 @@ beforeAll(async () => {
         // req emits close as soon as its body is read, the response's close
         // is the one that tracks the connection
         res.on("close", () => !res.writableEnded && markUpstreamClosed());
+        if (reply.stream === "silent") {
+          hanging.push(res);
+          return;
+        }
         res.writeHead(reply.status || 200, {
           "Content-Type": "text/event-stream",
         });
@@ -274,15 +292,21 @@ describe("geocoding proxy", () => {
     await r.body!.getReader().read();
     browser.abort();
 
-    let timer: NodeJS.Timeout | undefined;
-    const closed = await Promise.race([
-      upstreamClosed.then(() => true),
-      new Promise<boolean>((resolve) => {
-        timer = setTimeout(() => resolve(false), 1000);
-      }),
-    ]);
-    clearTimeout(timer);
-    expect(closed).toBe(true);
+    expect(await closedWithin(1000)).toBe(true);
     expect(seen[0].url).toBe("/state/stream?requestId=r1");
+  });
+
+  it("aborts the upstream request when the browser disconnects before the engine answers", async () => {
+    respond["/state/stream"] = { stream: "silent" };
+    const browser = new AbortController();
+    const pending = fetch(
+      proxyUrl + "/geocoding/state/stream?requestId=r2",
+      { signal: browser.signal }
+    ).catch((err) => err);
+    setTimeout(() => browser.abort(), 50);
+    expect((await pending).name).toBe("AbortError");
+
+    expect(await closedWithin(1000)).toBe(true);
+    expect(seen[0].url).toBe("/state/stream?requestId=r2");
   });
 });
