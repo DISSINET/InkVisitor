@@ -385,9 +385,9 @@ const fixtureStream = async (
  * the audit entries. That identifies the request rather than the browser, so two
  * requests from one browser are told apart without comparing their start times.
  *
- * The stream is asked for this one request, which is all a production engine
- * gives an anonymous caller; a development engine would send every client's
- * entries, so they are still picked out by id here.
+ * The stream is asked for this one request's entries and the proxy forwards
+ * the query as-is; a development engine would still send every client's
+ * entries, so they are picked out by id here.
  *
  * Returns a function that closes the subscription.
  */

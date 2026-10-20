@@ -2,7 +2,9 @@
 
 The Geocoding page turns a historical place name on a Location entity into
 coordinates, using the HGA-Engine — a stateless HTTP service that queries 16
-gazetteers and returns ranked coordinate suggestions with full provenance.
+gazetteers and returns ranked coordinate suggestions with full provenance. The
+browser reaches the engine through the InkVisitor API's `/geocoding` proxy, which
+holds the engine address and key.
 
 This file records what the page stores and the decisions behind it. The engine's
 own API reference lives in its repository; nothing here restates it.
@@ -219,9 +221,10 @@ read. The engine's list of recent requests needs its admin token, which a browse
 holds, so the activity screen lists the requests this browser sent instead: the
 latest fifty, kept in `localStorage` by `requestLog.ts`, finished or failed, never
 those of other browsers and never sent anywhere.
-`HGA_ENGINE_API_KEY`, where set at build time, is sent as a bearer token on
-`/suggest/stream`; it is built into the bundle and so identifies the installation
-and is not a secret. A refused key is reported as a configuration problem.
+The engine address and key are server environment variables (`HGA_ENGINE_URL`,
+`HGA_ENGINE_API_KEY`). The proxy forwards exactly the routes this page uses,
+attaches the key as a bearer token and sets `clientId`; a key the engine refuses
+surfaces as a 502 whose message names the server setting.
 
 ### What the weights actually do, measured
 
@@ -435,7 +438,7 @@ which is the `id` on the audit entries. That identifies the request rather than
 the browser that sent it, so the stage line cannot be driven by anything else
 this browser, or anyone else's, has running.
 
-`clientId` is therefore not an identifier here at all. The page sends a constant
+`clientId` is therefore not an identifier here at all. The server sends a constant
 `inkvisitor-<env>` for every browser: the engine's response cache excludes it
 from the key, so varying it buys nothing, and a per-browser value would let the
 engine's audit log correlate one researcher's whole session. What follows from
