@@ -23,7 +23,7 @@ The project uses several environments (`./env/X.env`) and each of them has a ded
 ### 1) Run inside docker (recommended)
 
 Rethinkdb can be run as a containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker [compose](https://docs.docker.com/compose/install/) are requirements.
-Run `docker-compose up -d database` from the root directory.
+Run `docker compose up -d rethinkdb` from the root directory.
 
 ### 2) Install & run as a separate service
 

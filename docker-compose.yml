@@ -10,9 +10,9 @@ x-logging: &logging
       max-file: "2"
 
 services:
-  database:
+  rethinkdb:
     image: rethinkdb
-    container_name: "inkvisitor-database"
+    container_name: "inkvisitor-rethinkdb"
     restart: always
     <<: *logging
     networks:
@@ -59,15 +59,23 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       # Instance id — session cookie name (inkvisitor.sid.<ENV>). Must match client build mode.
       ENV: ${ENV:-production}
-      DOMAIN: ${DOMAIN:-localhost}
+      DOMAIN: ${DOMAIN:-localhost:3000}
       STATIC_PATH: ${STATIC_PATH:-/}
       PORT: ${PORT:-3000}
       # Database (DB_HOST is fixed to the compose service name)
-      DB_HOST: database
+      DB_HOST: rethinkdb
       DB_PORT: ${DB_PORT:-28015}
       DB_NAME: ${DB_NAME:-inkvisitor}
       DB_AUTH: ${DB_AUTH:-}
       DB_POOL_CONNECTIONS: ${DB_POOL_CONNECTIONS:-10}
+      # Storage backend: rethinkdb (default) or postgres. DB_NAME names the
+      # database on both; PG_HOST/PG_PORT are the compose service and its
+      # in-network port, not the host port mapping.
+      DB_ADAPTER: ${DB_ADAPTER:-rethinkdb}
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${PG_USER:-inkvisitor}
+      PG_PASS: ${PG_PASS:-inkvisitor}
       # JWT signing secret — CHANGE THIS before exposing the instance
       SECRET: ${SECRET:-change-me-before-deploying}
       # SMTP (leave empty to disable outgoing mail)

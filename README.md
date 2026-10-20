@@ -124,7 +124,7 @@ Quick start with the published Docker image (defaults in [docker-compose.yml](./
 
 ```bash
 # 1. Start the database
-docker compose up -d database
+docker compose up -d rethinkdb
 
 # 2. Import the schema (host-side CLI: decline SSH, press D to pick dataset, X to import)
 cp packages/database/env/example.env packages/database/env/.env
