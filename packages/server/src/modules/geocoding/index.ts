@@ -11,11 +11,16 @@ import {
   Response as ExpressResponse,
   Router,
 } from "express";
+import { Readable, pipeline } from "node:stream";
+import { promisify } from "node:util";
 import {
   GeocodingEngineError,
   GeocodingEngineUnconfiguredError,
 } from "@inkvisitor/shared/types/errors";
 import { IGeocodingHealth } from "@inkvisitor/shared/types/geocoding";
+
+// node:stream/promises is missing from the pinned @types/node
+const pipe = promisify(pipeline);
 
 export const engineUrl = (): string =>
   (process.env.HGA_ENGINE_URL || "").replace(/\/+$/, "");
@@ -107,6 +112,40 @@ export const relayJson = (path: string) =>
     res.status(r.status).type("json").send(await r.text());
   });
 
+/**
+ * Relays the engine's event stream frame by frame. Closing the browser
+ * connection aborts the upstream fetch, so an abandoned watch never holds an
+ * engine connection open.
+ */
+export const relayStream = (path: string) =>
+  engineRoute(async (req, res) => {
+    const controller = new AbortController();
+    res.on("close", () => controller.abort());
+    try {
+      const r = await engineRequest(req, path, controller.signal);
+      if (!r.ok || !r.body) {
+        res.status(r.status).send(await r.text());
+        return;
+      }
+      res.status(r.status);
+      res.setHeader(
+        "Content-Type",
+        r.headers.get("Content-Type") || "text/event-stream"
+      );
+      res.setHeader("Cache-Control", "no-cache");
+      // stops an nginx in front of the server from buffering the frames
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders();
+      // Readable.fromWeb is missing from the pinned @types/node
+      await pipe((Readable as any).fromWeb(r.body), res);
+    } catch (err) {
+      // a disconnected browser has nothing left to receive
+      if (!controller.signal.aborted) {
+        throw err;
+      }
+    }
+  });
+
 // always 200: the answer itself says whether the engine is configured and up
 const health = engineRoute(async (_req, res) => {
   if (!engineUrl()) {
@@ -131,4 +170,6 @@ export default Router()
   .get("/parameters", relayJson("/parameters"))
   .get("/suggesters", relayJson("/suggesters"))
   .get("/search", relayJson("/search"))
-  .post("/feedback", relayJson("/feedback"));
+  .post("/feedback", relayJson("/feedback"))
+  .post("/suggest/stream", relayStream("/suggest/stream"))
+  .get("/state/stream", relayStream("/state/stream"));

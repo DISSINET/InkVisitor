@@ -17,7 +17,13 @@ interface IStubReply {
   body?: string;
   // keeps the connection open without ever answering
   hang?: boolean;
+  // answers as an event stream: "end" sends both frames 150 ms apart and ends,
+  // "open" sends the first frame and keeps the response open
+  stream?: "end" | "open";
 }
+
+const FRAME_ACCEPTED = 'event: accepted\ndata: {"requestId":"r1"}\n\n';
+const FRAME_FINAL = "event: final\ndata: {}\n\n";
 
 let stub: http.Server;
 let proxy: http.Server;
@@ -26,6 +32,10 @@ let proxyUrl: string;
 let seen: IStubRequest[] = [];
 let respond: Record<string, IStubReply> = {};
 let hanging: http.ServerResponse[] = [];
+let secondFrameAt = 0;
+// resolves when a stream response's connection closes before the stub ended it
+let upstreamClosed: Promise<void>;
+let markUpstreamClosed: () => void;
 
 const urlOf = (server: http.Server) =>
   `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
@@ -59,6 +69,24 @@ beforeAll(async () => {
         hanging.push(res);
         return;
       }
+      if (reply.stream) {
+        // req emits close as soon as its body is read, the response's close
+        // is the one that tracks the connection
+        res.on("close", () => !res.writableEnded && markUpstreamClosed());
+        res.writeHead(reply.status || 200, {
+          "Content-Type": "text/event-stream",
+        });
+        res.write(FRAME_ACCEPTED);
+        if (reply.stream === "open") {
+          hanging.push(res);
+          return;
+        }
+        setTimeout(() => {
+          secondFrameAt = Date.now();
+          res.end(FRAME_FINAL);
+        }, 150);
+        return;
+      }
       res.writeHead(reply.status || 200, {
         "Content-Type": "application/json",
         ...reply.headers,
@@ -87,6 +115,8 @@ beforeEach(() => {
   process.env.ENV = "test-instance";
   seen = [];
   respond = {};
+  secondFrameAt = 0;
+  upstreamClosed = new Promise((resolve) => (markUpstreamClosed = resolve));
 });
 
 afterEach(() => {
@@ -199,5 +229,60 @@ describe("geocoding proxy", () => {
     const r = await fetch(proxyUrl + "/geocoding/suggesters");
     expect(r.status).toBe(502);
     expect((await r.json()).message).toContain("HGA_ENGINE_API_KEY");
+  });
+
+  it("relays stream frames as they arrive, with the stream headers", async () => {
+    respond["/suggest/stream"] = { stream: "end" };
+    const r = await post(
+      "/geocoding/suggest/stream",
+      JSON.stringify({ name: "Breslau" })
+    );
+    expect(r.status).toBe(200);
+    expect(r.headers.get("content-type")).toMatch(/^text\/event-stream/);
+    expect(r.headers.get("cache-control")).toBe("no-cache");
+    expect(r.headers.get("x-accel-buffering")).toBe("no");
+
+    const reader = r.body!.getReader();
+    const decoder = new TextDecoder();
+    let text = "";
+    let firstChunkAt = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      firstChunkAt = firstChunkAt || Date.now();
+      text += decoder.decode(value, { stream: true });
+    }
+    expect(secondFrameAt).toBeGreaterThan(0);
+    expect(firstChunkAt).toBeLessThan(secondFrameAt);
+    expect(text).toBe(FRAME_ACCEPTED + FRAME_FINAL);
+  });
+
+  it("relays a non-2xx stream status with the engine's body and does not stream", async () => {
+    respond["/suggest/stream"] = { status: 422, body: '{"error":"too long"}' };
+    const r = await post("/geocoding/suggest/stream", "{}");
+    expect(r.status).toBe(422);
+    expect(await r.text()).toBe('{"error":"too long"}');
+  });
+
+  it("aborts the upstream request when the browser disconnects", async () => {
+    respond["/state/stream"] = { stream: "open" };
+    const browser = new AbortController();
+    const r = await fetch(proxyUrl + "/geocoding/state/stream?requestId=r1", {
+      signal: browser.signal,
+    });
+    expect(r.status).toBe(200);
+    await r.body!.getReader().read();
+    browser.abort();
+
+    let timer: NodeJS.Timeout | undefined;
+    const closed = await Promise.race([
+      upstreamClosed.then(() => true),
+      new Promise<boolean>((resolve) => {
+        timer = setTimeout(() => resolve(false), 1000);
+      }),
+    ]);
+    clearTimeout(timer);
+    expect(closed).toBe(true);
+    expect(seen[0].url).toBe("/state/stream?requestId=r1");
   });
 });
