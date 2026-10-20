@@ -17,5 +17,6 @@
 
 ## Deployment
 
-- The client build requires `HGA_ENGINE_URL`; add it to the env file and to the `CLIENT_ENV_*` secret for each mode in CI, or the build fails.
+- `HGA_ENGINE_URL` and `HGA_ENGINE_API_KEY` are now server environment variables (compose `.env`, kube ConfigMap); the client build no longer reads them, so they can be dropped from the `CLIENT_ENV_*` secrets. The browser reaches the engine through `/api/geocoding/*`.
+- The reverse proxy in front of the server must not buffer `/api/geocoding/suggest/stream` and `/api/geocoding/state/stream` and must allow a read timeout of at least 5 minutes on them (nginx honours the `X-Accel-Buffering: no` header the server sends; other proxies need it in their config).
 - If a database holds geocoding data in the earlier shape, run `migrateGeocodingGeometryJob` (`geo:x`/`geo:y` props to one `geo:geometry` prop) and `migrateGeocodingPlaceTypesJob` (`geo:type` metaprop to a Classification relation).
