@@ -194,6 +194,9 @@ export const DocumentsPage: React.FC = ({}) => {
   );
 
   const [openedDocumentId, setOpenedDocumentId] = useState<string | false>(false);
+  const openedDocumentResource = documentsWithResources.find(
+    (item) => item.document.id === openedDocumentId,
+  )?.resource;
 
   const handleDocumentOpen = (id: string) => {
     setOpenedDocumentId(id);
@@ -300,7 +303,13 @@ export const DocumentsPage: React.FC = ({}) => {
       </Panel>
 
       {openedDocumentId && (
-        <DocumentModalView documentId={openedDocumentId} onClose={handleModalClose} />
+        <DocumentModalView
+          documentId={openedDocumentId}
+          onClose={handleModalClose}
+          canEditDocument={canManageDocument(
+            openedDocumentResource ? openedDocumentResource.id : false,
+          )}
+        />
       )}
       {exportedDocuments.length > 0 && (
         <DocumentModalExport documents={exportedDocuments} onClose={handleModalClose} />

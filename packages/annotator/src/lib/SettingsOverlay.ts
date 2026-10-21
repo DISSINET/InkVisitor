@@ -504,6 +504,9 @@ export class SettingsOverlay {
 
   private readonly onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
+      // The overlay sits above everything else, so the key ends here; a modal
+      // around the annotator would otherwise close on the same press.
+      e.stopPropagation();
       this.close();
     }
   };

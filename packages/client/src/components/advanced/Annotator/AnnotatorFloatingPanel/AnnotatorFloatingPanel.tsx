@@ -8,7 +8,7 @@ import {
   useFloating,
 } from "@floating-ui/react";
 import { Button } from "components";
-import useKeypress from "hooks/useKeyPress";
+import { useKeyLayer } from "components/basic/Modal/layerStack";
 import React, { ReactNode, useLayoutEffect, useMemo } from "react";
 import { FaTimes } from "react-icons/fa";
 import { MdChevronLeft, MdDragIndicator } from "react-icons/md";
@@ -87,7 +87,9 @@ export const AnnotatorFloatingPanel: React.FC<AnnotatorFloatingPanel> = ({
     });
   }, []);
 
-  useKeypress("Escape", onClose);
+  // A layer of its own, so Escape and Ctrl+Enter from the canvas stop here and
+  // do not reach the modal the annotator sits in (the Documents page).
+  useKeyLayer(true, { onEscape: onClose });
 
   return (
     <FloatingPortal id="page">
@@ -96,6 +98,21 @@ export const AnnotatorFloatingPanel: React.FC<AnnotatorFloatingPanel> = ({
           refs.setFloating(node);
         }}
         style={floatingStyles}
+        // Keys typed in the panel are handled here; past it, closing the panel
+        // takes it off the layer stack and the key would fall to the modal below.
+        // Modals opened from the panel (entity create) are portaled elsewhere in
+        // the DOM but still bubble through here, so they are left alone.
+        onKeyDown={(e) => {
+          if (!e.currentTarget.contains(e.target as Node)) {
+            return;
+          }
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            onClose();
+          } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            e.stopPropagation();
+          }
+        }}
       >
         <StyledFloatingPanelDraggable
           ref={draggableRef}

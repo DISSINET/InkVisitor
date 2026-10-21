@@ -14,7 +14,7 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Box, Button, Checkbox, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
-import { isAnyModalOpen } from "components/basic/Modal/modalStack";
+import { isAnyLayerOpen } from "components/basic/Modal/layerStack";
 import { useUserQuery } from "hooks/react-query";
 import { DetailPanelRevealProvider } from "hooks/useDetailPanelReveal";
 import { useSearchParams } from "hooks/useSearchParamsContext";
@@ -258,7 +258,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
-      if (isAnyModalOpen()) return;
+      if (isAnyLayerOpen()) return;
       const focused = document.activeElement;
       const tag = (focused?.tagName ?? "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") {
