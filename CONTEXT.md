@@ -151,8 +151,7 @@ _Avoid_: type alone
 The review state of an entity: pending, approved, discouraged, warning, or unfinished. Entities an editor creates start as pending until an admin or owner approves them. Discouraged entities stay findable but should not be reused.
 
 **Validation**:
-A data-quality rule whose failures show as warnings. Global validations apply to the whole database and only the owner sets them; other validations are set on a territory.
-_To confirm_: the manual describes only global validations, not those set on a territory.
+A data-quality rule set on a territory, checked for every statement under it, whose failures show as warnings. Global validations are the rules set on the root territory, so they cover the whole database. Only the owner edits them, in the Global validations window, which also switches each kind of warning on or off for the whole database.
 
 **Protocol**:
 The metadata of a top-level territory describing its data collection choices: project, data collection methods, guidelines, dates, and related publications.
