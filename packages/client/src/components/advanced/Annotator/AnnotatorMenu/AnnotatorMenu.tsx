@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { List } from "react-window";
 
 import { AnchorOpenTagRef, MoveAnchorBoundaryResult, Tag } from "@inkvisitor/annotator/src/lib";
@@ -7,9 +7,8 @@ import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonGroup, IconWithTooltip, Loader, SwitchGroup } from "components";
 import { Button } from "components/basic/Button/Button";
-import { isTopmostModal, pushModal, removeModal } from "components/basic/Modal/modalStack";
+import { useKeyLayer } from "components/basic/Modal/layerStack";
 import { useSearchParams } from "hooks";
-import useKeypress from "hooks/useKeyPress";
 import {
   FaAnchor,
   FaBolt,
@@ -221,18 +220,7 @@ export const TextAnnotatorMenu = ({
 
   const movingEntity = movingAnchor ? entities[movingAnchor.tagName] || undefined : undefined;
 
-  // The menu takes a place on the modal stack, so a modal opened from it
-  // (entity create) gets Escape and Ctrl+Enter before the menu does.
-  const menuId = useRef(Symbol("annotator-menu")).current;
-  useEffect(() => {
-    pushModal(menuId);
-    return () => removeModal(menuId);
-  }, [menuId]);
-
-  const tryCloseMenu = useCallback(() => {
-    if (!isTopmostModal(menuId)) {
-      return;
-    }
+  const tryCloseMenu = () => {
     // Esc inside move mode cancels the buffered moves (revert); a second Esc
     // then closes the menu.
     if (movingAnchor) {
@@ -240,24 +228,11 @@ export const TextAnnotatorMenu = ({
       return;
     }
     onEscapePressed();
-  }, [onEscapePressed, movingAnchor, finishMove, menuId]);
+  };
 
-  // Escape is caught on the document, which the key reaches before the window
-  // where every open modal listens for it; stopping it there keeps the modal the
-  // menu sits in (the Documents page annotator) open.
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || !isTopmostModal(menuId)) {
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      tryCloseMenu();
-    };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [tryCloseMenu, menuId]);
-  useKeypress("Enter", tryCloseMenu, undefined, true);
+  // As a layer, the menu closes before the modal it sits in (the Documents page
+  // annotator), and a modal opened from it (entity create) closes before it.
+  useKeyLayer(true, { onEscape: tryCloseMenu, onCtrlEnter: tryCloseMenu });
 
   const [activeTerritoryElvl, setActiveTerritoryElvl] = useState<EntityEnums.Elvl>(
     EntityEnums.Elvl.Textual,

@@ -1,11 +1,10 @@
 import { config, useSpring } from "@react-spring/web";
 import { ThemeColor } from "Theme/theme";
 import { Loader } from "components";
-import React, { FC, ReactNode, useEffect, useRef } from "react";
+import React, { FC, ReactNode } from "react";
 import { ButtonSize } from "types";
 import { ButtonDefaultsProvider } from "../Button/ButtonDefaults";
-import { ModalKeyPress } from "./ModalKeyPress";
-import { isTopmostModal, pushModal, removeModal } from "./modalStack";
+import { useKeyLayer } from "./layerStack";
 import {
   StyledBackground,
   StyledCard,
@@ -69,17 +68,10 @@ export const Modal: FC<Modal> = ({
     config: config.stiff,
   });
 
-  const modalId = useRef(Symbol("modal")).current;
-
-  // the key handlers below live on the window, so the stack is what tells this
-  // modal whether the key was meant for it or for one opened over it
-  useEffect(() => {
-    if (!showModal) {
-      return;
-    }
-    pushModal(modalId);
-    return () => removeModal(modalId);
-  }, [showModal, modalId]);
+  useKeyLayer(showModal, {
+    onEscape: () => !disableEscapeClose && onClose(),
+    onCtrlEnter: onEnterPress,
+  });
 
   return (
     <>
@@ -107,18 +99,6 @@ export const Modal: FC<Modal> = ({
             </StyledModalWrap>,
             document.body,
           )}
-          <ModalKeyPress
-            onEnter={() => {
-              if (isTopmostModal(modalId)) {
-                onEnterPress();
-              }
-            }}
-            onEscape={() => {
-              if (!disableEscapeClose && isTopmostModal(modalId)) {
-                onClose();
-              }
-            }}
-          />
         </>
       )}
     </>

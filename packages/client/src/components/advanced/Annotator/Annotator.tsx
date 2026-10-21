@@ -1730,9 +1730,9 @@ export const TextAnnotator = ({
           }
         }}
         onKeyDown={(e) => {
-          // An open highlight menu handles Escape itself and keeps it from the
-          // modal below; clearing the selection here would unmount the menu
-          // before its listener runs and let the key through to the modal.
+          // An open highlight menu is the top key layer and handles Escape
+          // itself; clearing the selection here would unmount it before the key
+          // reaches the window, and the modal below would take the key instead.
           if (e.key === "Escape" && !isMenuDisplayed) {
             clearSelection();
           }
