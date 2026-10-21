@@ -18,6 +18,8 @@ External documentation can be found [here](https://docs.religionistika.phil.muni
 
 ## Data model
 
+The terms of the data model and the app, as the research team uses them, are defined in [CONTEXT.md](CONTEXT.md).
+
 ### Purpose
 
 The data model upon which InkVisitor is built is destined to capture complex natural-language data with all their **uncertainties, narrative perspective, and semantic nuance**. It does so in the semantically rich form of **quadruples**, which are an extended form of semantic triples destined to capture, more naturally than triples, the structure of languages with two grammatical objects (e.g., “Mary gave a present to Peter”: subject, verb, object 1, object 2) as well as with chains of statements (e.g., “Mary told Peter – that she would give him a present”) and multiple sentence constituents.
