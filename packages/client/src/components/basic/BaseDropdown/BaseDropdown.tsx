@@ -169,9 +169,11 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
         $disabledAppearance={disabledAppearance}
         $suggester={suggester}
         tabIndex={!disabled && !searchable ? 0 : -1}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
+        // floating-ui returns its own onFocus/onBlur, so ours go through
+        // getReferenceProps to be merged rather than overwritten by the spread
         {...dd.getReferenceProps({
+          onFocus: handleFocus,
+          onBlur: handleBlur,
           onKeyDown: dd.onControlKeyDown,
           onClick: () => {
             if (!disabled) {
