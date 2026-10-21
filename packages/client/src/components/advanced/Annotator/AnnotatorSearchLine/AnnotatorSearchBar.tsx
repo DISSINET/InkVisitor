@@ -1,5 +1,6 @@
 import { EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { Button, Checkbox, Input } from "components";
+import { useKeyLayer } from "components/basic/Modal/layerStack";
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { HiOutlineArrowDown, HiOutlineArrowUp } from "react-icons/hi";
@@ -82,6 +83,10 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
 }) => {
   const occurencesCount = searchOccurences?.length ?? 0;
   const isHighlightMode = annotatorMode === EditMode.HIGHLIGHT;
+
+  // A layer of its own, so Escape from the canvas closes the search before the
+  // modal the annotator sits in (the Documents page).
+  useKeyLayer(true, { onEscape: onClose });
 
   // Keeping focus in the query field means the flag toggles can be used without
   // breaking a typing run.
