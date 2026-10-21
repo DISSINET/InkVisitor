@@ -71,7 +71,7 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
   } = useDocumentQuery(documentId);
 
   return (
-    <Modal width="fat" showModal={show} onClose={handleClose} fullHeight narrowGutter lowerZIndex>
+    <Modal width={900} showModal={show} onClose={handleClose} fullHeight narrowGutter lowerZIndex>
       <ModalHeader
         title={
           dataDocumentIsFetching
