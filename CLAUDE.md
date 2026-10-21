@@ -1,5 +1,11 @@
 # Project guidance for Claude
 
+## Vocabulary
+
+- Issues are written in the research team's vocabulary. Read `CONTEXT.md` for what
+  terms such as territory, subT, metaprop, elvl, or anchor mean before acting on an
+  issue, and use the same words in code, comments, and PRs.
+
 ## Git commits
 
 - **Do not add Claude/Anthropic co-authorship to commits.** Never append a
