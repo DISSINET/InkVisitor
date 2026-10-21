@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchAddRelation",
+    "body": {
+      "entityIds": [
+        "rp-c"
+      ],
+      "relationType": "SYN",
+      "targetEntityId": "c3"
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "BadParams",
+      "message": "relation type SYN cannot be added in batch",
+      "result": false
+    }
+  }
+}

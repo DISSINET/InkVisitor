@@ -4,7 +4,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { successfulGenericResponse } from "@modules/common.test";
 import Document from "@models/document/document";
 import { pool } from "@middlewares/db";

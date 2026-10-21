@@ -1,6 +1,6 @@
 {
   "name": "dissinet.ddb.client",
-  "version": "1.6.1",
+  "version": "1.6.3",
   "description": "",
   "main": "index.js",
   "engines": {
@@ -12,6 +12,7 @@
     "preinstall": "npx only-allow pnpm",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
@@ -42,6 +43,7 @@
     "d3-axis-for-react": "^1.1.1",
     "immutability-helper": "^3.1.1",
     "jszip": "^3.10.1",
+    "maplibre-gl": "^6.6.0",
     "prismjs": "^1.30.0",
     "react": "^19.2.6",
     "react-dnd": "^16.0.1",
@@ -65,11 +67,13 @@
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
     "styled-components": "^6.4.1",
+    "terra-draw": "1.37.0",
+    "terra-draw-maplibre-gl-adapter": "1.5.0",
     "uuid": "^13.0.2"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@redux-devtools/extension": "^3.3.0",
-    "@tanstack/eslint-plugin-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.100.10",
     "@types/d3": "^7.4.3",
     "@types/node": "^24.12.4",
@@ -82,15 +86,13 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/react-table": "^7.7.20",
     "@types/styled-components": "^5.1.36",
-    "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^5.2.0",
     "babel-plugin-styled-components": "^2.1.4",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
     "react-spring": "^10.0.3",
     "socket.io-client": "^4.8.3",
-    "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-plugin-styled-components": "^3.0.0",
+    "typescript": "^7.0.2",
     "vite": "8.0.3",
     "vitest": "^4.1.7"
   }

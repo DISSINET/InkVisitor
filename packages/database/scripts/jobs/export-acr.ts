@@ -2,7 +2,8 @@ import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 import Resource from "@models/resource/resource";
 import Value from "@models/value/value";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
+import { unwrap } from "@service/storage/rethink/conn";
 import { DbEnums, EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import {
   IAction,
@@ -37,7 +38,7 @@ export async function getEntitiesDataByClass<T>(
   db: Connection,
   entityClass: EntityEnums.Class
 ): Promise<T[]> {
-  const connection = db instanceof Db ? db.connection : db;
+  const connection = db instanceof Db ? unwrap(db.connection) : db;
   return rethink
     .table(Entity.table)
     .getAll(entityClass, { index: DbEnums.Indexes.Class })

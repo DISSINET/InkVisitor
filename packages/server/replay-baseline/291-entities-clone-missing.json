@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/rp-missing/clone",
+    "body": {}
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "EntityDoesNotExist",
+      "message": "cannot copy entity - does not exist",
+      "result": false
+    }
+  }
+}

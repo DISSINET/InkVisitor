@@ -28,6 +28,7 @@ const mk = (text: string, mode: EditMode = EditMode.RAW): Annotator => {
   c.style.height = "600px";
   document.body.appendChild(c);
   const a = new Annotator(c, text);
+  a.setParagraphIndent(false); // wrap geometry without the first-line indent
   a.setMode(mode);
   a.text.updateCharsAtLine(10); // force a soft wrap at column 10
   return a;

@@ -1,4 +1,4 @@
-import { WriteResult } from "rethinkdb-ts";
+import { WriteResult } from "@service/storage";
 
 /** How many documents one bulk write query carries. */
 export const WRITE_CHUNK = 1000;
@@ -20,6 +20,6 @@ export function chunksOf<T>(items: T[], size: number = WRITE_CHUNK): T[][] {
  */
 export function writtenIds(result: WriteResult): string[] {
   return (result.changes ?? [])
-    .filter((change) => !(change as { error?: string }).error && change.new_val)
+    .filter((change) => !change.error && change.new_val)
     .map((change) => (change.new_val as { id: string }).id);
 }

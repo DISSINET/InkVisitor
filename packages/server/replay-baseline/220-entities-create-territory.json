@@ -1,0 +1,53 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "T",
+      "data": {
+        "parent": {
+          "order": 5,
+          "territoryId": "t1"
+        }
+      },
+      "detail": "",
+      "id": "rp-t",
+      "labels": [
+        "replay territory"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "T",
+        "createdAt": "<datetime>",
+        "data": {
+          "parent": {
+            "order": 0,
+            "territoryId": "t1"
+          }
+        },
+        "detail": "",
+        "id": "rp-t",
+        "labels": [
+          "replay territory"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      },
+      "result": true
+    }
+  }
+}

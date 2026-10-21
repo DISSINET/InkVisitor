@@ -39,7 +39,7 @@ export const StyledHead = styled.div<StyledHead>`
   padding: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
   line-height: 2rem;
-  font-family: Muni;
+  font-family: ${({ theme }) => theme.fontFamily["heading"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-style: normal;
   text-transform: uppercase;
@@ -136,7 +136,7 @@ export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   display: ${({ $showContentLabel }) => ($showContentLabel ? "initial" : "none")};
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-family: Muni;
+  font-family: ${({ theme }) => theme.fontFamily["heading"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
   color: ${({ theme }) => theme.color["gray"]["600"]};

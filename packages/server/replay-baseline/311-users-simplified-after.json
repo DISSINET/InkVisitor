@@ -1,0 +1,41 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "GET",
+    "path": "/api/users/simplified"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "id": "0",
+        "name": "import"
+      },
+      {
+        "id": "1",
+        "name": "admin"
+      },
+      {
+        "id": "2",
+        "name": "owner"
+      },
+      {
+        "id": "3",
+        "name": "editor1"
+      },
+      {
+        "id": "4",
+        "name": "editor2"
+      },
+      {
+        "id": "5",
+        "name": "viewer1"
+      },
+      {
+        "id": "6",
+        "name": "inactive"
+      }
+    ]
+  }
+}

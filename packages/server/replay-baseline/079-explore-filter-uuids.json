@@ -1,0 +1,473 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/query",
+    "body": {
+      "explore": {
+        "filters": [
+          {
+            "ids": [
+              "p1",
+              "c1",
+              "rp-c",
+              "missing"
+            ],
+            "type": "uuids"
+          }
+        ],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-scl",
+              "name": "col-scl",
+              "params": {
+                "relationType": "SCL"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-cla-inverse",
+              "name": "col-cla-inverse",
+              "params": {
+                "inverse": true,
+                "relationType": "CLA"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-c3",
+              "name": "col-prop-c3",
+              "params": {
+                "propertyType": "c3"
+              },
+              "type": "EPV"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-types",
+              "name": "col-prop-types",
+              "params": {},
+              "type": "EPT"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-resources",
+              "name": "col-ref-resources",
+              "params": {},
+              "type": "ERR"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-values",
+              "name": "col-ref-values",
+              "params": {
+                "resource": "dissinet-resource"
+              },
+              "type": "ERV"
+            },
+            {
+              "editable": false,
+              "id": "col-statements",
+              "name": "col-statements",
+              "params": {},
+              "type": "ES"
+            },
+            {
+              "editable": false,
+              "id": "col-created-by",
+              "name": "col-created-by",
+              "params": {},
+              "type": "EUC"
+            },
+            {
+              "editable": false,
+              "id": "col-edited-by",
+              "name": "col-edited-by",
+              "params": {},
+              "type": "EUE"
+            },
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            },
+            {
+              "editable": false,
+              "id": "col-used-in",
+              "name": "col-used-in",
+              "params": {},
+              "type": "EUI"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [],
+        "id": "n1",
+        "operator": "and",
+        "params": {},
+        "type": "Entity"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "entities": [
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Person",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "definite",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": [
+              {
+                "class": "T",
+                "createdAt": "<datetime>",
+                "data": {
+                  "parent": {
+                    "order": 2,
+                    "territoryId": "T0"
+                  }
+                },
+                "detail": "",
+                "id": "t1",
+                "labels": [
+                  "priest Minda and their stories"
+                ],
+                "language": "eng",
+                "notes": [],
+                "props": [],
+                "references": [],
+                "status": "1"
+              }
+            ]
+          },
+          "entity": {
+            "class": "P",
+            "createdAt": "<datetime>",
+            "data": {
+              "logicalType": "1"
+            },
+            "detail": "",
+            "id": "p1",
+            "labels": [
+              "Minda, the priest"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": 0
+        },
+        {
+          "columnData": {
+            "col-alt-labels": "",
+            "col-cla-inverse": [],
+            "col-class": "Concept",
+            "col-detail": "",
+            "col-language": "English",
+            "col-logical-type": "",
+            "col-pos": "",
+            "col-prop-c3": [],
+            "col-prop-types": [],
+            "col-ref-resources": [],
+            "col-ref-values": [],
+            "col-scl": [],
+            "col-status": "approved",
+            "col-used-in": []
+          },
+          "entity": {
+            "class": "C",
+            "createdAt": "<datetime>",
+            "data": {
+              "pos": ""
+            },
+            "detail": "",
+            "id": "c1",
+            "labels": [
+              "everyhing"
+            ],
+            "language": "eng",
+            "notes": [],
+            "props": [],
+            "references": [],
+            "status": "1"
+          },
+          "right": "admin",
+          "rowI": 1
+        }
+      ],
+      "entityIds": [
+        "p1",
+        "c1"
+      ],
+      "expansion": {
+        "equivalents": 0,
+        "subordinates": 0
+      },
+      "explore": {
+        "filters": [
+          {
+            "ids": [
+              "p1",
+              "c1",
+              "rp-c",
+              "missing"
+            ],
+            "type": "uuids"
+          }
+        ],
+        "limit": 50,
+        "offset": 0,
+        "view": {
+          "columns": [
+            {
+              "editable": false,
+              "id": "col-scl",
+              "name": "col-scl",
+              "params": {
+                "relationType": "SCL"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-cla-inverse",
+              "name": "col-cla-inverse",
+              "params": {
+                "inverse": true,
+                "relationType": "CLA"
+              },
+              "type": "ER"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-c3",
+              "name": "col-prop-c3",
+              "params": {
+                "propertyType": "c3"
+              },
+              "type": "EPV"
+            },
+            {
+              "editable": false,
+              "id": "col-prop-types",
+              "name": "col-prop-types",
+              "params": {},
+              "type": "EPT"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-resources",
+              "name": "col-ref-resources",
+              "params": {},
+              "type": "ERR"
+            },
+            {
+              "editable": false,
+              "id": "col-ref-values",
+              "name": "col-ref-values",
+              "params": {
+                "resource": "dissinet-resource"
+              },
+              "type": "ERV"
+            },
+            {
+              "editable": false,
+              "id": "col-statements",
+              "name": "col-statements",
+              "params": {},
+              "type": "ES"
+            },
+            {
+              "editable": false,
+              "id": "col-created-by",
+              "name": "col-created-by",
+              "params": {},
+              "type": "EUC"
+            },
+            {
+              "editable": false,
+              "id": "col-edited-by",
+              "name": "col-edited-by",
+              "params": {},
+              "type": "EUE"
+            },
+            {
+              "editable": false,
+              "id": "col-edits",
+              "name": "col-edits",
+              "params": {},
+              "type": "EUEN"
+            },
+            {
+              "editable": false,
+              "id": "col-created",
+              "name": "col-created",
+              "params": {},
+              "type": "EDC"
+            },
+            {
+              "editable": false,
+              "id": "col-status",
+              "name": "col-status",
+              "params": {},
+              "type": "EST"
+            },
+            {
+              "editable": false,
+              "id": "col-language",
+              "name": "col-language",
+              "params": {},
+              "type": "ELA"
+            },
+            {
+              "editable": false,
+              "id": "col-alt-labels",
+              "name": "col-alt-labels",
+              "params": {},
+              "type": "EAL"
+            },
+            {
+              "editable": false,
+              "id": "col-pos",
+              "name": "col-pos",
+              "params": {},
+              "type": "EPOS"
+            },
+            {
+              "editable": false,
+              "id": "col-detail",
+              "name": "col-detail",
+              "params": {},
+              "type": "EDET"
+            },
+            {
+              "editable": false,
+              "id": "col-parent-territory",
+              "name": "col-parent-territory",
+              "params": {},
+              "type": "EPRT"
+            },
+            {
+              "editable": false,
+              "id": "col-logical-type",
+              "name": "col-logical-type",
+              "params": {},
+              "type": "ELT"
+            },
+            {
+              "editable": false,
+              "id": "col-class",
+              "name": "col-class",
+              "params": {},
+              "type": "ECL"
+            },
+            {
+              "editable": false,
+              "id": "col-used-in",
+              "name": "col-used-in",
+              "params": {},
+              "type": "EUI"
+            }
+          ],
+          "mode": "table"
+        }
+      },
+      "query": {
+        "edges": [],
+        "id": "n1",
+        "operator": "and",
+        "params": {},
+        "type": "Entity"
+      },
+      "total": 2
+    }
+  }
+}

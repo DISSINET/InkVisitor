@@ -42,7 +42,7 @@ export function useNewVersionCheck() {
       if (baseline !== buildTimestamp) {
         toast.info(
           <ToastWithLink
-            children={"A new version was deployed. This tab still runs the previous one — reload when convenient."}
+            children={"A new version is available."}
             linkText={"Reload"}
             onLinkClick={() => window.location.reload()}
           />,

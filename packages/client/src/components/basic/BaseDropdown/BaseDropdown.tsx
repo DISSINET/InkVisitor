@@ -42,6 +42,15 @@ interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
   // appearance
   width?: number | "full";
   placeholder?: string;
+  /**
+   * What the control is called, where nothing on screen names it.
+   *
+   * A dropdown whose only text is its current value tells a screen reader the
+   * value and nothing about the question - "coordinates", with no way to learn
+   * that it arranges a list. Set it wherever the control has no visible label
+   * beside it.
+   */
+  ariaLabel?: string;
   noOptionsMessage?: string;
   icon?: React.ReactNode;
   tooltipLabel?: string;
@@ -59,6 +68,7 @@ interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
   autoFocus?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
+  onMenuOpenChange?: (isOpen: boolean) => void;
   // customization
   renderOption?: (option: O, state: OptionRenderState) => React.ReactNode;
   renderValue?: (option: O) => React.ReactNode;
@@ -79,6 +89,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   searchable = true,
   width,
   placeholder = "Select",
+  ariaLabel,
   noOptionsMessage = "No option selected",
   icon,
   tooltipLabel,
@@ -94,6 +105,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   autoFocus = false,
   onFocus = () => {},
   onBlur = () => {},
+  onMenuOpenChange,
   renderOption,
   renderValue,
   renderChip,
@@ -126,6 +138,16 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
       (inputRef.current ?? (dd.refs.domReference.current as HTMLElement | null))?.focus();
     }
   }, [autoFocus]);
+
+  // the cleanup also runs on unmount, so a dropdown removed with its menu open
+  // still reports it closed
+  const onMenuOpenChangeRef = useRef(onMenuOpenChange);
+  onMenuOpenChangeRef.current = onMenuOpenChange;
+  useEffect(() => {
+    if (!dd.open) return;
+    onMenuOpenChangeRef.current?.(true);
+    return () => onMenuOpenChangeRef.current?.(false);
+  }, [dd.open]);
 
   /* fire onFocus/onBlur only when focus enters/leaves the whole control —
      3 call sites lazy-load their options in onFocus */
@@ -184,6 +206,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
         $disabled={disabled}
         $disabledAppearance={disabledAppearance}
         $suggester={suggester}
+        aria-label={ariaLabel}
         tabIndex={!disabled && !searchable ? 0 : -1}
         // floating-ui returns its own onFocus/onBlur, so ours go through
         // getReferenceProps to be merged rather than overwritten by the spread
@@ -253,6 +276,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
           {searchable && !disabled && (
             <StyledSearchInput
               ref={inputRef}
+              aria-label={ariaLabel}
               $chars={dd.search ? dd.search.length + 1 : showPlaceholder ? placeholder.length : 0}
               $suggester={suggester}
               $fill={showPlaceholder}

@@ -1,37 +1,12 @@
-import Audit from "@models/audit/audit";
-import { AuditScope } from "@inkvisitor/shared/types";
 import {
   Aggregation,
   IStatsAggregationParams,
-  TimeUnit,
 } from "@inkvisitor/shared/types/stats";
-import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
+import { Conn, storage } from "@service/storage";
 import {
   expandEventTypesForStats,
   foldStatsValuesByEventType,
 } from "./event-type-fold";
-
-/**
- * Builds the RethinkDB reduction expression that buckets an audit row's `date`
- * field into the requested time unit (yyyy / yyyy-mm / yyyy-mm-dd / week-start).
- */
-function timeBucketFor(timeUnit: TimeUnit): (doc: RDatum) => RDatum {
-  switch (timeUnit) {
-    case TimeUnit.DAY:
-      return (doc: RDatum) => doc("date").toISO8601().slice(0, 10);
-    case TimeUnit.WEEK:
-      return (doc: RDatum) => {
-        const date = doc("date");
-        return date.sub(date.dayOfWeek().sub(1).mul(86400)).toISO8601().slice(0, 10);
-      };
-    case TimeUnit.MONTH:
-      return (doc: RDatum) => doc("date").toISO8601().slice(0, 7);
-    case TimeUnit.YEAR:
-      return (doc: RDatum) => doc("date").toISO8601().slice(0, 4);
-    default:
-      throw new Error("Invalid time unit");
-  }
-}
 
 /**
  * Core audit-stats aggregation shared by the global `/stats` endpoint
@@ -45,15 +20,13 @@ function timeBucketFor(timeUnit: TimeUnit): (doc: RDatum) => RDatum {
  * the bridge that turns a query-filtered entity subset into "stats over that
  * subset". An empty list yields an empty result.
  *
- * `fromDate`/`toDate` are optional: when both are set the scan is narrowed with
- * the `date` index `between`; when omitted (e.g. the Explorer stats view, which
- * has no time filter) the `between` is skipped entirely and all dates are
- * counted.
+ * `fromDate`/`toDate` are optional: when omitted (e.g. the Explorer stats view,
+ * which has no time filter) all dates are counted.
  *
  * @returns values map: dateBucket -> aggregationKey -> count
  */
 export async function aggregateAuditStats(
-  db: Connection,
+  db: Conn,
   params: Omit<IStatsAggregationParams, "fromDate" | "toDate"> & {
     fromDate?: number;
     toDate?: number;
@@ -68,39 +41,14 @@ export async function aggregateAuditStats(
     return {};
   }
 
-  const timeBucket = timeBucketFor(timeUnit);
-
-  const matchesEventType = (doc: RDatum) =>
-    rethink.expr(expandEventTypesForStats(eventType)).contains(doc("type"));
-
-  // Narrow with the `date` index only when a window is given; otherwise scan all
-  // dates. Both branches end in .filter() so `query` keeps one consistent type
-  // for the entityIds reassignment below.
-  let query =
-    fromDate !== undefined && toDate !== undefined
-      ? rethink
-          .table(Audit.table)
-          .between(new Date(fromDate), new Date(toDate), { index: "date" })
-          .filter(matchesEventType)
-      : rethink.table(Audit.table).filter(matchesEventType);
-
-  if (entityIds) {
-    query = query.filter((doc: RDatum) =>
-      doc("auditScope")
-        .eq(AuditScope.Entity)
-        .and(rethink.expr(entityIds).contains(doc("modelId")))
-    );
-  }
-
-  const aggregatedData = (await query
-    .group(timeBucket, (doc: RDatum) =>
-      aggregateBy === Aggregation.ACTIVITY_TYPE ? doc("type") : doc(aggregateBy)
-    )
-    .count()
-    .run(db)) as unknown as {
-    group: [string, string];
-    reduction: number;
-  }[];
+  const aggregatedData = await storage.audits.countByBucket(db, {
+    from: fromDate !== undefined && toDate !== undefined ? new Date(fromDate) : undefined,
+    to: fromDate !== undefined && toDate !== undefined ? new Date(toDate) : undefined,
+    eventTypes: expandEventTypesForStats(eventType),
+    timeUnit,
+    groupBy: [aggregateBy === Aggregation.ACTIVITY_TYPE ? "type" : aggregateBy],
+    entityIds,
+  });
 
   const newValues: Record<string, Record<string, number>> = {};
   for (const item of aggregatedData) {

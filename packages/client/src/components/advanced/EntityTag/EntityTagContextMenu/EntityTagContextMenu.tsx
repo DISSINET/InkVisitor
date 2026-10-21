@@ -67,8 +67,14 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   const detailBoxState: DetailBoxState = useAppSelector(
     (state) => state.layout.mainPage.detailBoxState,
   );
-  const { setTerritoryId, setStatementId, detailIdArray, selectedDetailId, promoteDetailId } =
-    useSearchParams();
+  const {
+    territoryId,
+    setTerritoryId,
+    setStatementId,
+    detailIdArray,
+    selectedDetailId,
+    promoteDetailId,
+  } = useSearchParams();
   const { revealEditor, revealDetail } = useDetailPanelReveal();
 
   const entityLabel = useMemo(() => getEntityLabel(entity), [entity]);
@@ -220,6 +226,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
   };
 
   const isStatement = entity.class === EntityEnums.Class.Statement;
+  const isStatementTemplate = isStatement && !!entity.isTemplate;
 
   // a statement template carries no territory, and every other class is reached
   // through the entities it is used in rather than a place in the tree
@@ -231,15 +238,18 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
         : undefined;
 
   // the editor shows whichever statement is selected inside the opened
-  // territory, so a statement needs both ids set
+  // territory, so a statement needs both ids set; a statement template opens
+  // next to whichever territory is already open
   const goToTerritory = () => {
-    if (!targetTerritoryId) {
+    if (!targetTerritoryId && !isStatementTemplate) {
       return;
     }
     const statementToSelect = isStatement ? entity.id : undefined;
 
     if (location.pathname === "/") {
-      setTerritoryId(targetTerritoryId);
+      if (targetTerritoryId) {
+        setTerritoryId(targetTerritoryId);
+      }
       if (statementToSelect) {
         setStatementId(statementToSelect);
       }
@@ -250,7 +260,10 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     // the hash carries the whole main page state, so the detail tabs open on
     // this page have to be written into it to survive the route change
     const params = new URLSearchParams();
-    params.set("territory", targetTerritoryId);
+    const territoryToOpen = targetTerritoryId ?? territoryId;
+    if (territoryToOpen) {
+      params.set("territory", territoryToOpen);
+    }
     if (statementToSelect) {
       params.set("statement", statementToSelect);
     }
@@ -309,7 +322,7 @@ export const EntityTagContextMenu: React.FC<EntityTagContextMenu> = ({
     // only the main page and the explorer mount a detail box to open into
     hasDetailPanel &&
       renderItem("detail", "Open in detail", <IcoCardText size={ICON_SIZE} />, openInDetail),
-    (isExplorer ? opensEditorInPlace : targetTerritoryId) &&
+    (isExplorer ? opensEditorInPlace : targetTerritoryId || isStatementTemplate) &&
       renderItem(
         "territory",
         isStatement ? "Open statement in editor" : "Go to territory",

@@ -1,0 +1,23 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "POST",
+    "path": "/api/relations",
+    "body": {
+      "entityIds": [
+        "rp-c",
+        "c1",
+        "c2"
+      ],
+      "id": "rp-rel-2",
+      "type": "SYN"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

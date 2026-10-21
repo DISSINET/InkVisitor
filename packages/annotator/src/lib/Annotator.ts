@@ -435,6 +435,9 @@ export class Annotator {
   onHighlightCb?: (entityId: string) => HighlightSchema | HighlightSchema[] | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
+  onGutterWidthChangeCb?: (width: number) => void;
+  // last width passed to onGutterWidthChangeCb
+  reportedGutterWidth?: number;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
   onAnchorTagHoverCb?: (tag: Tag | null, position: { x: number; y: number } | null) => void;
 
@@ -1200,8 +1203,10 @@ export class Annotator {
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const extent = this.scrollExtentLineCount();
-    const positionBeforeRel = extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
+    // Rows above line 0 (the start buffer) hold no text, so a viewport parked
+    // there keeps its line index; otherwise the text at its top is kept on top.
+    const topOffset =
+      this.viewport.lineStart >= 0 ? this.text.offsetFromVisual(0, this.viewport.lineStart) : -1;
 
     this.viewport.updateLineEnd(noLinesViewport);
     // Keep the proportional wrap budget in sync with the new width
@@ -1222,12 +1227,8 @@ export class Annotator {
       this.refreshHoverHighlightRegions();
     }
 
-    // this function tries to keep the same relative position of the text even its not perfect
-    // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
-    this.viewport.scrollTo(
-      Math.floor(positionBeforeRel * this.scrollExtentLineCount()),
-      this.scrollExtentLineCount()
-    );
+    const topLine = topOffset >= 0 ? this.text.visualFromOffset(topOffset)?.yLine : undefined;
+    this.viewport.scrollTo(topLine ?? this.viewport.lineStart, this.scrollExtentLineCount());
 
     // The track spans startBuffer rows above line 0 too, so the runner's
     // share of it is measured against the full buffered extent.
@@ -1277,6 +1278,31 @@ export class Annotator {
 
   onScroll(cb: (line: number) => void) {
     this.onScrollCb = cb;
+  }
+
+  /**
+   * Registers callback receiving the gutter width (CSS px) that fits the
+   * highest paragraph number at the current font. Fires on registration and
+   * whenever that width changes; the host sizes the gutter canvas from it and
+   * calls {@link resize}.
+   */
+  onGutterWidthChange(cb: (width: number) => void) {
+    this.onGutterWidthChangeCb = cb;
+    this.reportedGutterWidth = undefined;
+    this.reportGutterWidth();
+  }
+
+  private reportGutterWidth(): void {
+    if (!this.lines || !this.onGutterWidthChangeCb) {
+      return;
+    }
+    this.lines.font = this.font;
+    this.lines.ratio = this.ratio;
+    const width = this.lines.requiredWidth(this.text.paragraphCount());
+    if (width !== this.reportedGutterWidth) {
+      this.reportedGutterWidth = width;
+      this.onGutterWidthChangeCb(width);
+    }
   }
 
   /**
@@ -2178,6 +2204,7 @@ export class Annotator {
     this.element.removeEventListener("blur", this.boundOnCanvasBlur);
 
     this.onScrollCb = undefined;
+    this.onGutterWidthChangeCb = undefined;
     this.scroller = undefined;
     this.lines = undefined;
   }
@@ -3443,36 +3470,52 @@ export class Annotator {
         const hlResult = this.onHighlightCb(tagName);
         const schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         if (schemas.length) {
+          const occurences: IAbsCoordinates[][] = [];
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
             occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
-              // The occurrence being resized is drawn separately as an animated
-              // pulse (below), so drop its fill/underline schemas to avoid
-              // double-painting. Its ANCHOR corner markers are kept: for
-              // Territory anchors they are the only visual, and hiding them makes
-              // the anchor look deleted (#2887). Matched by occurrence (opening
-              // position), so sibling anchors of the same entity are unaffected.
-              const isResized =
-                resizeSpan != null &&
-                this.resizeAnchor?.tagName === tagName &&
-                occurence[0].xLine === resizeSpan.start.xLine &&
-                occurence[0].yLine === resizeSpan.start.yLine;
-              const occSchemas = isResized
-                ? schemas.filter((s) => s.mode === HighlightMode.ANCHOR)
-                : schemas;
-              for (const schema of occSchemas) {
-                higlightItems.push({
-                  schema,
-                  start: occurence[0],
-                  end: occurence[1],
-                  tag,
-                });
-              }
+              occurences.push(occurence);
             }
             i++;
           } while (!!occurence.length);
+
+          // Each FOCUS item dims everything outside its own span, so with
+          // several spans of one entity the washes stack over the whole text
+          // and no line reads as "inside". The veil is drawn only for an entity
+          // with exactly one opening and one closing tag, so an entity with an
+          // orphaned tag gets none.
+          const tagCount = this.text.countTags(tagName);
+          const isSingleAnchor = tagCount.opening === 1 && tagCount.closing === 1;
+          const spanSchemas = isSingleAnchor
+            ? schemas
+            : schemas.filter((s) => s.mode !== HighlightMode.FOCUS);
+
+          for (const occ of occurences) {
+            // The occurrence being resized is drawn separately as an animated
+            // pulse (below), so drop its fill/underline schemas to avoid
+            // double-painting. Its ANCHOR corner markers are kept: for
+            // Territory anchors they are the only visual, and hiding them makes
+            // the anchor look deleted (#2887). Matched by occurrence (opening
+            // position), so sibling anchors of the same entity are unaffected.
+            const isResized =
+              resizeSpan != null &&
+              this.resizeAnchor?.tagName === tagName &&
+              occ[0].xLine === resizeSpan.start.xLine &&
+              occ[0].yLine === resizeSpan.start.yLine;
+            const occSchemas = isResized
+              ? spanSchemas.filter((s) => s.mode === HighlightMode.ANCHOR)
+              : spanSchemas;
+            for (const schema of occSchemas) {
+              higlightItems.push({
+                schema,
+                start: occ[0],
+                end: occ[1],
+                tag,
+              });
+            }
+          }
         }
       }
 
@@ -3622,7 +3665,9 @@ export class Annotator {
     if (this.lines) {
       this.lines.font = this.font;
       this.lines.lineHeight = this.lineHeight;
-      this.lines.draw(this.viewport, this.text.noLines);
+      this.lines.ratio = this.ratio;
+      this.lines.draw(this.viewport, (absLine) => this.text.paragraphNumberStartingAt(absLine));
+      this.reportGutterWidth();
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;
@@ -4426,19 +4471,7 @@ export class Annotator {
       this.text.calculateLines();
 
       // Find the newly added anchor and select it
-      const anchorName = openTag.getTagName();
-      let newOccurrenceIndex = 0;
-      for (const segment of this.text.segments) {
-        for (const open of segment.openingTags) {
-          if (
-            open.getTagName() === anchorName &&
-            open.getAbsoluteTagPosition(this.text.segments) < indexStart
-          ) {
-            newOccurrenceIndex++;
-          }
-        }
-      }
-      const tagPosition = this.text.getTagPosition(anchorName, newOccurrenceIndex);
+      const tagPosition = this.text.getTagPositionAt(openTag.getTagName(), indexStart);
       if (tagPosition && tagPosition.length === 2) {
         this.cursor.selectStart = tagPosition[0];
         this.cursor.selectEnd = tagPosition[1];
@@ -4515,7 +4548,7 @@ export class Annotator {
     let occurrence = 0;
     outer: for (const segment of this.text.segments) {
       for (const open of segment.openingTags) {
-        if (open.getTagName() === tag) {
+        if (open.getTagName() === tag && !open.selfClosing) {
           if (occurrence === index) {
             openingTag = open;
             break outer;
@@ -4542,6 +4575,25 @@ export class Annotator {
   scrollToLine(absLine: number, lineOffset: number = 0) {
     this.viewport.scrollTo(absLine + lineOffset, this.scrollExtentLineCount());
     this.draw();
+  }
+
+  /**
+   * Scrolls paragraph `paragraphNumber` (as numbered in the gutter) to the top,
+   * puts a collapsed caret at its start and focuses the canvas.
+   * Returns false, changing nothing, when the document has no such paragraph.
+   */
+  scrollToParagraph(paragraphNumber: number): boolean {
+    const absLine = this.text.paragraphStartLine(paragraphNumber);
+    if (absLine === undefined) {
+      return false;
+    }
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+    // moving by offset collapses the selection onto the new caret and drops
+    // the column remembered by earlier up/down moves
+    this.cursor.moveToOffset(this.text, this.text.offsetFromVisual(0, absLine));
+    this.draw();
+    this.element.focus({ preventScroll: true });
+    return true;
   }
 
   /**

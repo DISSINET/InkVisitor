@@ -24,6 +24,18 @@ export default defineConfig(({ command, mode }) => {
           `locally, copy env/example.env to .env.${mode}.`,
       );
     }
+
+    // Keys whose blank value would only show up in the built app, long after
+    // the build that dropped it. APIURL is not one: blank means the api is
+    // served from the app's own origin.
+    for (const key of [] as string[]) {
+      if (!env[key]) {
+        throw new Error(
+          `Client env for mode "${mode}" has no ${key}. ` +
+            `Add it to ${envFile}, and to the CLIENT_ENV_* secret for this mode in CI.`,
+        );
+      }
+    }
   }
 
   const appEnv = env.ENV || mode;
@@ -148,6 +160,10 @@ export default defineConfig(({ command, mode }) => {
       globals: true,
       environment: "jsdom",
       include: ["src/**/*.{test,spec}.{ts,tsx}"],
+      setupFiles: ["./src/setupTests.ts"],
+      // the full-tree render tests run beside one worker per core, and the
+      // slowest take several times their stand-alone time under that load
+      testTimeout: 20000,
     },
   };
 });

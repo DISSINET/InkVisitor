@@ -18,6 +18,8 @@ External documentation can be found [here](https://docs.religionistika.phil.muni
 
 ## Data model
 
+The terms of the data model and the app, as the research team uses them, are defined in [CONTEXT.md](CONTEXT.md).
+
 ### Purpose
 
 The data model upon which InkVisitor is built is destined to capture complex natural-language data with all their **uncertainties, narrative perspective, and semantic nuance**. It does so in the semantically rich form of **quadruples**, which are an extended form of semantic triples destined to capture, more naturally than triples, the structure of languages with two grammatical objects (e.g., “Mary gave a present to Peter”: subject, verb, object 1, object 2) as well as with chains of statements (e.g., “Mary told Peter – that she would give him a present”) and multiple sentence constituents.
@@ -124,7 +126,7 @@ Quick start with the published Docker image (defaults in [docker-compose.yml](./
 
 ```bash
 # 1. Start the database
-docker compose up -d database
+docker compose up -d rethinkdb
 
 # 2. Import the schema (host-side CLI: decline SSH, press D to pick dataset, X to import)
 cp packages/database/env/example.env packages/database/env/.env
@@ -133,6 +135,17 @@ cd packages/database && pnpm install && pnpm start && cd -
 # 3. Run the application (pulls the published image automatically)
 docker compose up -d inkvisitor
 ```
+
+Optional: run the application on PostgreSQL (TimescaleDB image) instead of RethinkDB ([#3256](https://github.com/DISSINET/InkVisitor/issues/3256)). RethinkDB stays the default; a server process selects the PostgreSQL adapter with `DB_ADAPTER=postgres`.
+
+```bash
+docker compose up -d postgres                                    # host port 5432, override with PG_PORT=5433
+pnpm -C packages/server pg:check                                 # connectivity and ctype check via env/.env.development (PG_* block)
+pnpm -C packages/database seed --db=inkvisitor --dataset=default --target=postgres   # the same dataset into PostgreSQL
+DB_ADAPTER=postgres pnpm -C packages/server start                # the API on PostgreSQL
+```
+
+The gates that keep both backends in step (server suite, API replay, storage diff, frontend smoke) are listed in [packages/server/README.md](./packages/server/README.md).
 
 For Kubernetes manifests, see [kube/](./kube). The setup will likely need to be adapted to your cluster.
 

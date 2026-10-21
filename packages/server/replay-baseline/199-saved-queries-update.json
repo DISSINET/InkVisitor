@@ -1,0 +1,62 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/saved-queries/<uuid-12>",
+    "body": {
+      "name": "Replay private renamed",
+      "shared": true
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "createdAt": "<datetime>",
+        "data": {
+          "filters": [
+            {
+              "label": "a",
+              "type": "label"
+            }
+          ],
+          "includeEquivalents": false,
+          "includeSubordinates": true,
+          "query": {
+            "edges": [
+              {
+                "id": "sq-e1",
+                "logic": "positive",
+                "node": {
+                  "edges": [],
+                  "id": "sq-n2",
+                  "operator": "and",
+                  "params": {
+                    "entityId": "c3"
+                  },
+                  "type": "Entity"
+                },
+                "params": {},
+                "type": "R:SCL"
+              }
+            ],
+            "id": "sq-n1",
+            "operator": "and",
+            "params": {
+              "entityClasses": [
+                "C"
+              ]
+            },
+            "type": "Entity"
+          }
+        },
+        "id": "<uuid-12>",
+        "name": "Replay private renamed",
+        "ownerId": "3",
+        "shared": true
+      },
+      "result": true
+    }
+  }
+}

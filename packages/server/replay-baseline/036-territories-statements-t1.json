@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "GET",
+    "path": "/api/territories/t1/statements"
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "cannot view entity t1",
+      "result": false
+    }
+  }
+}

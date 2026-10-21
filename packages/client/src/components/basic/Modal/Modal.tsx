@@ -10,6 +10,7 @@ import {
   StyledBackground,
   StyledCard,
   StyledCardBody,
+  StyledCardBodyFrame,
   StyledCardContent,
   StyledCardHeader,
   StyledCardIcon,
@@ -22,6 +23,7 @@ import {
   StyledModalInputLabel,
   StyledModalInputWrap,
   StyledModalWrap,
+  StyledScrollEdge,
 } from "./ModalStyles";
 import ReactDOM from "react-dom";
 
@@ -213,7 +215,7 @@ export const ModalContent: FC<ModalContent> = ({
   isLoading,
   noPadding = false,
 }) => {
-  return (
+  const body = (
     <StyledCardBody
       $column={column}
       $enableScroll={enableScroll}
@@ -223,6 +225,16 @@ export const ModalContent: FC<ModalContent> = ({
       {children}
       <Loader show={isLoading} size={36} />
     </StyledCardBody>
+  );
+  if (!enableScroll || noPadding) {
+    return body;
+  }
+  return (
+    <StyledCardBodyFrame>
+      {body}
+      <StyledScrollEdge $edge="top" />
+      <StyledScrollEdge $edge="bottom" />
+    </StyledCardBodyFrame>
   );
 };
 

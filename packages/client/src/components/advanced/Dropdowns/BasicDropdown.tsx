@@ -23,6 +23,8 @@ interface BasicDropdown<T = string> {
   options: (BasicDropdownOption<T> | BasicDropdownGroup<T>)[];
   icon?: React.ReactNode;
   placeholder?: string;
+  /** What the control is called, where nothing on screen names it. */
+  ariaLabel?: string;
   tooltipLabel?: string;
   tooltipContent?: string;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
@@ -41,6 +43,7 @@ export const BasicDropdown = <T extends string>({
   options,
   icon,
   placeholder,
+  ariaLabel,
   tooltipLabel,
   tooltipContent,
   tooltipPosition,
@@ -60,6 +63,7 @@ export const BasicDropdown = <T extends string>({
       onChange={(selected) => onChange((selected[0]?.value ?? "") as T)}
       options={options}
       placeholder={placeholder}
+      ariaLabel={ariaLabel}
       tooltipLabel={tooltipLabel}
       tooltipContent={tooltipContent}
       tooltipPosition={tooltipPosition}

@@ -1,4 +1,4 @@
-# What's changed [Oct 7, 2026]
+# What's changed [Oct 9, 2026]
 
 ## Explorer
 
@@ -37,10 +37,10 @@
 - Sequential anchoring can attach several Entities to one match in one go (#3249)
 - Syntax highlighting in the RAW (XML) view, in both light and dark mode (#3269)
 - Ctrl/Cmd+F seeds the find panel with the current text selection
-- Find & replace resumes at the correct occurrence after a replace
+- Find & replace resumes at the correct occurrence after a replace when replacing only upper/lower case
 - Next / Previous search notifies when it wraps around the document (#3094)
 - Cmd+Backspace / Cmd+Delete next to a tag in the RAW (XML) view delete the whole tag (#3269)
-- Large documents load much faster: a 200k-word document drops from about 52 s to 0.2 s (#3269)
+- Large documents load faster
 
 ## Validation rules
 
@@ -64,6 +64,7 @@
 - Removed the new metaproperty / reference add buttons from the Detail box (#3235)
 - Stacked modals handle Enter and Esc for the topmost modal only; Enter in an open modal no longer runs the Explorer search
 - Emails show the InkVisitor logo as a PNG, so Gmail and Outlook display it, and fall back to a text wordmark when the logo file cannot be found
+- Elvl now auto-switch related to default Statement language instead of working languages
 
 Owner only: Import entities from JSON in the Detail box: up to 10 entities, pasted or loaded from a .json file, are validated, previewed and created together, and rolled back if a write fails (#3273)
 

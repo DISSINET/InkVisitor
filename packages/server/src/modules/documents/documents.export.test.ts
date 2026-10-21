@@ -8,7 +8,7 @@ import { pool } from "@middlewares/db";
 import Document from "@models/document/document";
 import Resource from "@models/resource/resource";
 import User from "@models/user/user";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { clean, testErroneousResponse } from "@modules/common.test";
 import {
   createAgentWithUserId,

@@ -28,6 +28,7 @@ interface EntitySingleDropdown<T = string> {
   onChange: (value: T) => void;
   onFocus?: () => void;
   onBlur?: () => void;
+  onMenuOpenChange?: (isOpen: boolean) => void;
   autoFocus?: boolean;
   suggester?: boolean;
   disableTyping?: boolean;
@@ -47,6 +48,7 @@ export const EntitySingleDropdown = <T extends string>({
   onChange,
   onFocus,
   onBlur,
+  onMenuOpenChange,
   autoFocus,
   suggester,
   disableTyping,
@@ -67,6 +69,7 @@ export const EntitySingleDropdown = <T extends string>({
       placeholder={placeholder}
       onFocus={onFocus}
       onBlur={onBlur}
+      onMenuOpenChange={onMenuOpenChange}
       suggester={suggester}
       searchable={!disableTyping}
       disabled={disabled || isOneOptionSelect}
