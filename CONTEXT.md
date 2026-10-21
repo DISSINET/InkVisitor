@@ -65,6 +65,7 @@ _Avoid_: argument, participant
 
 **Pseudo-actant**:
 An entity attached to a statement outside the three syntactic positions.
+_To confirm_: inferred from the data model; the manual has no definition yet.
 
 **Coreference resolution**:
 Filling an actant slot the text leaves implicit but recoverable from context, such as the dropped subject of a Latin verb or the inquisitor a deponent answers. It does not change the actant's epistemic level.
@@ -151,6 +152,7 @@ The review state of an entity: pending, approved, discouraged, warning, or unfin
 
 **Validation**:
 A data-quality rule whose failures show as warnings. Global validations apply to the whole database and only the owner sets them; other validations are set on a territory.
+_To confirm_: the manual describes only global validations, not those set on a territory.
 
 **Protocol**:
 The metadata of a top-level territory describing its data collection choices: project, data collection methods, guidelines, dates, and related publications.
