@@ -16,7 +16,7 @@ The data a CASTEMO project produces: entities as nodes, tied by props, relations
 Any record in the database: a statement, a territory, or one of the things statements talk about. Every entity has a UUID, an entity type, a label, a label language, a detail, and a status.
 
 **Entity type** (entity class):
-The kind of an entity, shown as a one-letter badge. The manual counts 11, remembered as SPECTRABLOG: S (Statement), P (Person), E (Event), C (Concept), T (Territory), R (Resource), A (Action), B (Living Being), L (Location), O (Object, a physical thing), G (Group). V (Value) holds literal values. Institutions are coded as Groups when they act, as Locations when they are places such as a manuscript's repository.
+The kind of an entity, shown as a one-letter badge: S (Statement), P (Person), E (Event), C (Concept), T (Territory), R (Resource), A (Action), B (Living Being), L (Location), O (Object, a physical thing), G (Group), V (Value). The manual's mnemonic SPECTRABLOG names all but Value. Institutions are coded as Groups when they act, as Locations when they are places such as a manuscript's repository.
 _Avoid_: type alone (it also names the prop type and the logical type)
 
 **PLOGESTRB**:
