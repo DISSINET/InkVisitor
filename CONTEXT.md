@@ -97,7 +97,7 @@ An entity's identifier from an earlier database, kept for traceability.
 
 **Prop** (property):
 A type-value pair attached to an entity, its origin, and read with "has": the prop type says what is described ("age"), the prop value says what it is ("40"). An entity with two values of the same kind gets two props with the same type.
-_Avoid_: attribute, field
+_Avoid_: attribute (an entity's own fields, such as label and detail), field (an input in the app)
 
 **In-statement prop**:
 A prop attached from within a statement, to an actant or an action. It belongs to that statement's context and territory.
