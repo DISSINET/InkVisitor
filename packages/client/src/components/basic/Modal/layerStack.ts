@@ -7,6 +7,10 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 //
 // One window listener serves every layer, so the key reaches the top layer
 // alone, whatever order the layers were mounted in.
+//
+// A layer that closes itself from its own React key handler must stop the key
+// there. React 18 commits that close, and takes the layer off the stack, before
+// the key reaches the window, so the same press would go on to the layer below.
 
 export interface KeyLayer {
   onEscape?: () => void;

@@ -56,16 +56,34 @@ describe("layerStack", () => {
     expect(first.onEscape).not.toHaveBeenCalled();
   });
 
-  it("sends Ctrl+Enter and Cmd+Enter to the top layer, plain Enter to none", () => {
-    const top = { onCtrlEnter: vi.fn() };
+  it("sends Ctrl+Enter and Cmd+Enter to the last opened layer only", () => {
+    const batch = { onCtrlEnter: vi.fn() };
+    const confirm = { onCtrlEnter: vi.fn() };
 
-    withLayers([top], () => {
-      press("Enter");
+    withLayers([batch, confirm], () => {
       press("Enter", { ctrlKey: true });
       press("Enter", { metaKey: true });
     });
 
-    expect(top.onCtrlEnter).toHaveBeenCalledTimes(2);
+    expect(confirm.onCtrlEnter).toHaveBeenCalledTimes(2);
+    expect(batch.onCtrlEnter).not.toHaveBeenCalled();
+  });
+
+  it("keeps Ctrl+Enter from the layer below when the top layer has no handler for it", () => {
+    const batch = { onCtrlEnter: vi.fn() };
+    const panel = { onEscape: vi.fn() };
+
+    withLayers([batch, panel], () => press("Enter", { ctrlKey: true }));
+
+    expect(batch.onCtrlEnter).not.toHaveBeenCalled();
+  });
+
+  it("leaves plain Enter alone", () => {
+    const top = { onCtrlEnter: vi.fn() };
+
+    withLayers([top], () => press("Enter"));
+
+    expect(top.onCtrlEnter).not.toHaveBeenCalled();
   });
 
   it("ignores the keys with Shift or Alt held", () => {
@@ -81,14 +99,24 @@ describe("layerStack", () => {
     expect(top.onCtrlEnter).not.toHaveBeenCalled();
   });
 
-  it("stops listening once every layer has closed", () => {
-    const only = { onEscape: vi.fn() };
+  it("listens on the window only while a layer is open", () => {
+    const add = vi.spyOn(window, "addEventListener");
+    const remove = vi.spyOn(window, "removeEventListener");
+    try {
+      const removeFirst = pushLayer({});
+      const removeSecond = pushLayer({});
+      expect(add).toHaveBeenCalledTimes(1);
 
-    pushLayer(only)();
-    press("Escape");
+      removeFirst();
+      expect(remove).not.toHaveBeenCalled();
 
-    expect(only.onEscape).not.toHaveBeenCalled();
-    expect(isAnyLayerOpen()).toBe(false);
+      removeSecond();
+      expect(remove).toHaveBeenCalledTimes(1);
+      expect(remove).toHaveBeenCalledWith("keydown", add.mock.calls[0][1]);
+    } finally {
+      add.mockRestore();
+      remove.mockRestore();
+    }
   });
 
   it("reports a layer open until the last one closes", () => {

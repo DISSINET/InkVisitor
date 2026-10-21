@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { EntityEnums } from "@inkvisitor/shared/enums";
-import { Modal, ModalContent, ModalHeader } from "components";
+import { Modal, ModalContent, ModalHeader, Submit } from "components";
 import { useDocumentQuery } from "hooks/react-query";
 import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
@@ -26,6 +26,10 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
   useEffect(() => {
     setShow(true);
   }, []);
+
+  const [hasUnsavedTextEdits, setHasUnsavedTextEdits] = useState(false);
+  const [showDiscardSubmit, setShowDiscardSubmit] = useState(false);
+  const handleClose = () => (hasUnsavedTextEdits ? setShowDiscardSubmit(true) : onClose());
 
   // The width the canvas has is the modal body's, which only the body knows, so
   // it is measured rather than restated here as the modal width less an
@@ -63,14 +67,14 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
   } = useDocumentQuery(documentId);
 
   return (
-    <Modal width={800} showModal={show} onClose={onClose} fullHeight lowerZIndex>
+    <Modal width={800} showModal={show} onClose={handleClose} fullHeight lowerZIndex>
       <ModalHeader
         title={
           dataDocumentIsFetching
             ? "Loading..."
             : `${dataDocument ? getShortLabelByLetterCount(dataDocument.title, 90) : "no label"}`
         }
-        onClose={onClose}
+        onClose={handleClose}
       />
 
       <ModalContent column noPadding>
@@ -97,6 +101,7 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
                 canEditAnchors={false}
                 disableCreate
                 noBorderRadius
+                onUnsavedTextEditsChange={setHasUnsavedTextEdits}
               />
             </AnnotatorProvider>
           ) : (
@@ -104,6 +109,15 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
           )}
         </StyledDocumentModalAnnotator>
       </ModalContent>
+
+      <Submit
+        title="Unsaved text changes"
+        text="You have unsaved text edits. Close the document and discard them?"
+        submitLabel="Discard"
+        show={showDiscardSubmit}
+        onSubmit={onClose}
+        onCancel={() => setShowDiscardSubmit(false)}
+      />
     </Modal>
   );
 };
