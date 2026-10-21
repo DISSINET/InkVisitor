@@ -76,7 +76,7 @@ import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorS
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
-import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
+import { MAX_SEARCH_TERM_LENGTH, useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorColumn,
   StyledAnnotatorMenu,
@@ -145,6 +145,12 @@ interface TextAnnotatorProps {
    * already restricted upstream). The server still enforces the same rule.
    */
   canEditDocument?: boolean;
+  /**
+   * Narrows anchor editing (highlight menu, sequential anchoring) below
+   * canEditDocument, for hosts that allow text edits but not anchoring.
+   * Defaults to canEditDocument.
+   */
+  canEditAnchors?: boolean;
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -195,6 +201,7 @@ export const TextAnnotator = ({
   disableCreate = false,
   overlayZIndex,
   canEditDocument = true,
+  canEditAnchors = canEditDocument,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -1226,10 +1233,15 @@ export const TextAnnotator = ({
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
-  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // When anchors are read-only (e.g. an Editor viewing an unassigned
   // document) the selection menu still appears, but only as a minimal,
   // view-only variant: clipboard + anchors in selection, no create/edit.
-  const isMenuReadOnly = !canEditDocument;
+  const isMenuReadOnly = !canEditDocument || !canEditAnchors;
+
+  const clearSelection = () => {
+    setSelectedText("");
+    annotator?.clearSelection();
+  };
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
@@ -1489,12 +1501,12 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      // A canvas selection always wins over what the input holds; with no
-      // selection the term stays put. search() matches within a single line, so
-      // the whitespace of a selection spanning a break is collapsed to keep it
-      // findable.
+      // A canvas selection wins over what the input holds; with no selection,
+      // or one longer than a search can run, the term stays put. search()
+      // matches within a single line, so the whitespace of a selection spanning
+      // a break is collapsed to keep it findable.
       const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
-      if (selection) {
+      if (selection && selection.length <= MAX_SEARCH_TERM_LENGTH) {
         setSearchTerm(selection);
       }
       setIsFindOpen(true);
@@ -1718,9 +1730,11 @@ export const TextAnnotator = ({
           }
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            setSelectedText("");
-            annotator?.clearSelection();
+          // An open highlight menu is the top key layer and handles Escape
+          // itself; clearing the selection here would unmount it before the key
+          // reaches the window, and the modal below would take the key instead.
+          if (e.key === "Escape" && !isMenuDisplayed) {
+            clearSelection();
           }
         }}
       >
@@ -1743,10 +1757,7 @@ export const TextAnnotator = ({
                   {dataDocument && (
                     <TextAnnotatorMenu
                       menuDragHandleProps={menuDragHandleProps}
-                      onEscapePressed={() => {
-                        setSelectedText("");
-                        annotator?.clearSelection();
-                      }}
+                      onEscapePressed={clearSelection}
                       anchors={selectedAnchors}
                       text={selectedText}
                       entities={storedEntities}
@@ -1868,8 +1879,9 @@ export const TextAnnotator = ({
             <AnnotatorSearchBar
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
+              onEscape={() => (isMenuDisplayed ? clearSelection() : setIsFindOpen(false))}
               onOpenSecondStep={() => setIsSecondStepOpen(true)}
-              canEdit={canEditDocument}
+              canEdit={annotatorMode === EditMode.HIGHLIGHT ? !isMenuReadOnly : canEditDocument}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               findInputRef={findInputRef}
