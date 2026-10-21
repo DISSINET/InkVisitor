@@ -24,6 +24,11 @@ import {
 interface AnnotatorSearchBar {
   annotatorMode: EditMode;
   onClose: () => void;
+  /**
+   * Escape in the query field; defaults to onClose. The key goes no further,
+   * so each press closes one layer: the highlight menu, then the search.
+   */
+  onEscape?: () => void;
   /** Opens the mode's second step — sequential anchoring, or find & replace. */
   onOpenSecondStep: () => void;
   /** False for a document the user may not edit: no anchoring, no replacing. */
@@ -56,6 +61,7 @@ interface AnnotatorSearchBar {
 export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   annotatorMode,
   onClose,
+  onEscape = onClose,
   onOpenSecondStep,
   canEdit,
   searchTerm,
@@ -95,12 +101,13 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   return (
     <StyledAnnotatorSearchBarWrap>
       <StyledAnnotatorSearchBar>
-        <StyledSearchBarInput>
+        {/* past the field, a modal or the annotator would act on Escape too */}
+        <StyledSearchBarInput onKeyDown={(e) => e.key === "Escape" && e.stopPropagation()}>
           <Input
             value={searchTerm}
             onChangeFn={(newText: string) => setSearchTerm(newText)}
             onEnterPressFn={goToNextOccurence}
-            onEscapePressFn={onClose}
+            onEscapePressFn={onEscape}
             changeOnType
             valueControlled
             autoFocus

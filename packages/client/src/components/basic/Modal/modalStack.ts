@@ -1,7 +1,9 @@
 // Every open modal listens for Escape and Ctrl+Enter on the window, so a key
 // press reaches all of them at once. The stack records the order modals opened
 // in, and only the one on top acts on the key - a confirmation opened over
-// another modal closes itself and leaves the one beneath it standing.
+// another modal closes itself and leaves the one beneath it standing. The
+// annotator highlight menu takes a place on the stack too, though it is not a
+// Modal.
 
 const openModals: symbol[] = [];
 

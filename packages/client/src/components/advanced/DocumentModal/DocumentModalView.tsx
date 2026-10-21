@@ -13,8 +13,15 @@ interface DocumentModalView {
   documentId: string;
   onClose: () => void;
   anchor?: { entityId: string; occurence?: number };
+  /** Allows editing the text and the XML; anchors stay read-only either way. */
+  canEditDocument?: boolean;
 }
-const DocumentModalView: React.FC<DocumentModalView> = ({ documentId, onClose, anchor }) => {
+const DocumentModalView: React.FC<DocumentModalView> = ({
+  documentId,
+  onClose,
+  anchor,
+  canEditDocument = false,
+}) => {
   const [show, setShow] = useState(false);
   useEffect(() => {
     setShow(true);
@@ -84,9 +91,10 @@ const DocumentModalView: React.FC<DocumentModalView> = ({ documentId, onClose, a
                     newAnnotator?.scrollToAnchor(anchor?.entityId, anchor?.occurence || 0);
                 }}
                 thisTerritoryEntityId={anchor?.entityId}
-                // Documents page annotator is view/search only; editing anchors
-                // and content happens in the Main page annotator box.
-                canEditDocument={false}
+                // Anchors are added and removed in the Main page annotator box,
+                // where the territory and statement context is at hand.
+                canEditDocument={canEditDocument}
+                canEditAnchors={false}
                 disableCreate
                 noBorderRadius
               />

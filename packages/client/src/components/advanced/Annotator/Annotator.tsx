@@ -145,6 +145,12 @@ interface TextAnnotatorProps {
    * already restricted upstream). The server still enforces the same rule.
    */
   canEditDocument?: boolean;
+  /**
+   * Narrows anchor editing (highlight menu, sequential anchoring) below
+   * canEditDocument, for hosts that allow text edits but not anchoring.
+   * Defaults to canEditDocument.
+   */
+  canEditAnchors?: boolean;
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -195,6 +201,7 @@ export const TextAnnotator = ({
   disableCreate = false,
   overlayZIndex,
   canEditDocument = true,
+  canEditAnchors = canEditDocument,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -1226,10 +1233,15 @@ export const TextAnnotator = ({
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
-  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // When anchors are read-only (e.g. an Editor viewing an unassigned
   // document) the selection menu still appears, but only as a minimal,
   // view-only variant: clipboard + anchors in selection, no create/edit.
-  const isMenuReadOnly = !canEditDocument;
+  const isMenuReadOnly = !canEditDocument || !canEditAnchors;
+
+  const clearSelection = () => {
+    setSelectedText("");
+    annotator?.clearSelection();
+  };
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
@@ -1718,9 +1730,11 @@ export const TextAnnotator = ({
           }
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            setSelectedText("");
-            annotator?.clearSelection();
+          // An open highlight menu handles Escape itself and keeps it from the
+          // modal below; clearing the selection here would unmount the menu
+          // before its listener runs and let the key through to the modal.
+          if (e.key === "Escape" && !isMenuDisplayed) {
+            clearSelection();
           }
         }}
       >
@@ -1743,10 +1757,7 @@ export const TextAnnotator = ({
                   {dataDocument && (
                     <TextAnnotatorMenu
                       menuDragHandleProps={menuDragHandleProps}
-                      onEscapePressed={() => {
-                        setSelectedText("");
-                        annotator?.clearSelection();
-                      }}
+                      onEscapePressed={clearSelection}
                       anchors={selectedAnchors}
                       text={selectedText}
                       entities={storedEntities}
@@ -1868,8 +1879,9 @@ export const TextAnnotator = ({
             <AnnotatorSearchBar
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
+              onEscape={() => (isMenuDisplayed ? clearSelection() : setIsFindOpen(false))}
               onOpenSecondStep={() => setIsSecondStepOpen(true)}
-              canEdit={canEditDocument}
+              canEdit={annotatorMode === EditMode.HIGHLIGHT ? !isMenuReadOnly : canEditDocument}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               findInputRef={findInputRef}

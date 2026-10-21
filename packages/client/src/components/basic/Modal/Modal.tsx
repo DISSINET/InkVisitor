@@ -86,12 +86,7 @@ export const Modal: FC<Modal> = ({
       {showModal && (
         <>
           {ReactDOM.createPortal(
-            <StyledModalWrap
-              $lowerZIndex={lowerZIndex}
-              // data-attribute-modal is used to prevent closing of the annotator highlight menu
-              // while interacting with EntityCreateModal
-              data-attribute-modal="true"
-            >
+            <StyledModalWrap $lowerZIndex={lowerZIndex}>
               {!disableBackground && (
                 <StyledBackground
                   style={animatedMount}
