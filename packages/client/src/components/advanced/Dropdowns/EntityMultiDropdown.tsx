@@ -6,6 +6,7 @@ import { BaseDropdown } from "components";
 import React from "react";
 import { EntityColors } from "types";
 import {
+  StyledEntityChip,
   StyledEntityMultiValue,
   StyledEntityOptionClass,
   StyledEntityValue,
@@ -98,12 +99,15 @@ export const EntityMultiDropdown = <T extends string>({
       closeMenuOnSelect={closeMenuOnSelect}
       hiddenChipValues={[allEntities.value]}
       chipLimit={effectiveChipLimit}
-      renderChip={(o) => (
-        <StyledEntityMultiValue
-          $color={EntityColors[o.value]?.color ?? "transparent"}
-        >
-          {shortLabel ? o.value : o.label}
-        </StyledEntityMultiValue>
+      renderChip={(o, remove) => (
+        <StyledEntityChip>
+          <StyledEntityMultiValue
+            $color={EntityColors[o.value]?.color ?? "transparent"}
+          >
+            {shortLabel ? o.value : o.label}
+          </StyledEntityMultiValue>
+          {remove}
+        </StyledEntityChip>
       )}
       renderOption={(o, { selected }) => {
         const isEntityClass = Object.values(EntityEnums.Class).includes(

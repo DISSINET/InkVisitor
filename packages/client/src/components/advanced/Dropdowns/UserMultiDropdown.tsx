@@ -1,6 +1,7 @@
 import { DropdownItem } from "@inkvisitor/shared/types";
 import { IcoCheckboxChecked, IcoCheckboxUnchecked } from "Theme/icons";
 import { BaseDropdown } from "components";
+import { StyledChipBody } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
 import { FaRegUser } from "react-icons/fa";
 import {
@@ -54,13 +55,16 @@ export const UserMultiDropdown = ({
       closeMenuOnSelect={closeMenuOnSelect}
       chipDensity="compact"
       chipLimit={limitSelectedItems}
-      renderChip={(o) => (
-        <StyledUserMultiValue>
-          <StyledUserMultiValueIcon>
-            <FaRegUser size={12} />
-          </StyledUserMultiValueIcon>
-          <StyledUserMultiValueLabel>{o.label}</StyledUserMultiValueLabel>
-        </StyledUserMultiValue>
+      renderChip={(o, remove) => (
+        <StyledChipBody>
+          <StyledUserMultiValue>
+            <StyledUserMultiValueIcon>
+              <FaRegUser size={12} />
+            </StyledUserMultiValueIcon>
+            <StyledUserMultiValueLabel>{o.label}</StyledUserMultiValueLabel>
+          </StyledUserMultiValue>
+          {remove}
+        </StyledChipBody>
       )}
       renderOption={(o, { selected }) => (
         <StyledUserOptionRow>

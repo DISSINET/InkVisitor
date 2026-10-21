@@ -88,16 +88,18 @@ export const StyledControlIcon = styled.div`
 interface StyledValueArea {
   $density?: "default" | "compact";
   $suggester?: boolean;
+  $single?: boolean;
+  $nowrap?: boolean;
 }
 export const StyledValueArea = styled.div<StyledValueArea>`
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: ${({ $nowrap }) => ($nowrap ? "nowrap" : "wrap")};
   overflow: hidden;
-  padding: ${({ $density, theme }) =>
-    $density === "compact" ? theme.space[1] : "0"};
+  padding: ${({ $density, $single, $suggester }) =>
+    $density === "compact" ? "0.2rem" : $single && !$suggester ? "0.4rem 0" : "0"};
   gap: ${({ $density }) => ($density === "compact" ? "0.2rem" : "0")};
   align-content: ${({ $density }) =>
     $density === "compact" ? "flex-start" : ""};
@@ -131,45 +133,65 @@ export const StyledSingleValue = styled.div<StyledSingleValue>`
   font-weight: ${({ $suggester }) => ($suggester ? "bold" : "inherit")};
   margin-left: ${({ theme, $suggester }) =>
     $suggester ? theme.space[4] : theme.space[2]};
+  /* in the suggester's one-letter class box this margin is what clips the
+     class label down to its first letter, clear of the chevron */
+  margin-right: 2px;
   transform: ${({ $suggester }) => ($suggester ? "translateY(-6%)" : "")};
 `;
 
-/* Chip shell: layout + remove button only. Visual identity (background,
-   border, padding) lives in the chip BODY components so each variant fully
-   owns its look without flags. */
-export const StyledChipShell = styled.div`
+/* Chip shell: layout only. Visual identity (background, border, padding) lives
+   in the chip BODY components so each variant fully owns its look without
+   flags; the body also receives the remove button, so the cross sits inside
+   its border. Compact chips are spaced by the value area's gap instead. */
+interface StyledChipShell {
+  $density?: "default" | "compact";
+}
+export const StyledChipShell = styled.div<StyledChipShell>`
   display: inline-flex;
   align-items: center;
   min-width: 0;
   max-width: 100%;
-  margin: 1px;
+  margin: ${({ $density }) => ($density === "compact" ? "0" : "2px")};
 `;
 
-export const StyledDefaultChipBody = styled.div`
+export const StyledChipBody = styled.div`
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
   min-width: 0;
+  max-width: 100%;
   background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
   border: 1px solid ${({ theme }) => theme.color["blue"][300]};
-  border-radius: 1px;
-  color: ${({ theme }) => theme.color["black"]};
+  border-radius: 2px;
+  color: ${({ theme }) => theme.color["gray"][700]};
+`;
+
+export const StyledDefaultChipLabel = styled.div`
+  min-width: 0;
   padding: 0.2rem;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["black"]};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const StyledChipRemove = styled.button`
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   border: none;
+  border-radius: 2px;
   background: transparent;
   cursor: pointer;
-  padding: 0 0.2rem;
-  color: ${({ theme }) => theme.color["black"]};
+  padding: 0 0.4rem;
+  color: inherit;
   &:hover {
     color: ${({ theme }) => theme.color["danger"]};
   }
 `;
 
 export const StyledChipOverflow = styled.div`
+  flex-shrink: 0;
   padding: 0.2rem 0.2rem 0.2rem 0.3rem;
   color: ${({ theme }) => theme.color["primary"]};
   white-space: nowrap;
@@ -179,6 +201,7 @@ export const StyledChipOverflow = styled.div`
 interface StyledSearchInput {
   $chars: number;
   $suggester?: boolean;
+  $fill?: boolean;
 }
 export const StyledSearchInput = styled.input<StyledSearchInput>`
   border: none;
@@ -191,7 +214,14 @@ export const StyledSearchInput = styled.input<StyledSearchInput>`
     $suggester || $chars === 0 ? "0" : theme.space[2]};
   padding: 0;
   min-width: ${({ $chars }) => ($chars === 0 ? "0" : "2px")};
+  /* ch is the width of "0", narrower than letters like "m", so a placeholder
+     sized in ch alone gets clipped; $fill lets it take the free row */
   width: ${({ $chars }) => ($chars === 0 ? "2px" : `${$chars}ch`)};
+  flex-grow: ${({ $fill }) => ($fill ? 1 : 0)};
+  &::placeholder {
+    color: ${({ theme }) => theme.color["gray"][500]};
+    opacity: 1;
+  }
 `;
 
 export const StyledIndicators = styled.div`
@@ -220,7 +250,7 @@ interface StyledChevron {
 export const StyledChevron = styled.div<StyledChevron>`
   display: flex;
   align-items: center;
-  padding: ${({ theme, $suggester }) => ($suggester ? "0" : theme.space[2])};
+  padding: 0;
   padding-right: ${({ $suggester }) => ($suggester ? "0.3rem" : "0.4rem")};
   color: ${({ theme }) => theme.color["primary"]};
 `;
@@ -275,6 +305,7 @@ export const StyledGroupHeading = styled.div`
   padding: ${({ theme }) => `${theme.space[2]} ${theme.space[5]}`};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  text-transform: uppercase;
   color: ${({ theme }) => theme.color["gray"][600]};
   background-color: ${({ theme }) => theme.color["gray"][100]};
 `;

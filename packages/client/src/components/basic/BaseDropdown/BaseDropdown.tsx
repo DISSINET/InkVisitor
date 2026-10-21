@@ -6,13 +6,14 @@ import { Loader, Tooltip } from "components";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   StyledChevron,
+  StyledChipBody,
   StyledChipOverflow,
   StyledChipRemove,
   StyledChipShell,
   StyledClear,
   StyledControl,
   StyledControlIcon,
-  StyledDefaultChipBody,
+  StyledDefaultChipLabel,
   StyledDefaultOptionRow,
   StyledDropdownWrap,
   StyledGroupHeading,
@@ -61,7 +62,9 @@ interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
   // customization
   renderOption?: (option: O, state: OptionRenderState) => React.ReactNode;
   renderValue?: (option: O) => React.ReactNode;
-  renderChip?: (option: O) => React.ReactNode;
+  // `remove` is the chip's cross (null while disabled); the body places it
+  // inside its own border
+  renderChip?: (option: O, remove: React.ReactNode) => React.ReactNode;
   chipLimit?: number;
   chipSummary?: (count: number, total: number) => React.ReactNode;
   hiddenChipValues?: string[];
@@ -149,6 +152,19 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   const showPlaceholder = selectedArray.length === 0 && !dd.search;
   const singleValue = !multi && selectedArray.length > 0 ? selectedArray[0] : undefined;
 
+  const renderRemove = (option: O) =>
+    disabled ? null : (
+      <StyledChipRemove
+        tabIndex={-1}
+        onClick={(e) => {
+          e.stopPropagation();
+          dd.removeChip(option);
+        }}
+      >
+        <IcoClose size={14} />
+      </StyledChipRemove>
+    );
+
   return (
     <StyledDropdownWrap
       // lets global key handlers tell a dropdown's focused control apart from other inputs
@@ -184,45 +200,36 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
       >
         {icon && <StyledControlIcon>{icon}</StyledControlIcon>}
 
-        <StyledValueArea $density={chipDensity} $suggester={suggester}>
+        <StyledValueArea
+          $density={chipDensity}
+          $suggester={suggester}
+          $single={!multi}
+          // a limited row of default chips stays one line, its chips shrinking
+          // to fit; compact chips may wrap onto further rows
+          $nowrap={chipLimit != null && chipDensity === "default"}
+        >
           {/* multi: chips or the collapsed summary */}
           {multi &&
             (collapse ? (
-              <StyledChipShell>
-                <StyledDefaultChipBody>
-                  {chipSummary!(selectedArray.length, items.length)}
-                </StyledDefaultChipBody>
-                {!disabled && (
-                  <StyledChipRemove
-                    tabIndex={-1}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      dd.removeChip(selectedArray[selectedArray.length - 1]);
-                    }}
-                  >
-                    <IcoClose size={12} />
-                  </StyledChipRemove>
-                )}
+              <StyledChipShell $density={chipDensity}>
+                <StyledChipBody>
+                  <StyledDefaultChipLabel>
+                    {chipSummary!(selectedArray.length, items.length)}
+                  </StyledDefaultChipLabel>
+                  {renderRemove(selectedArray[selectedArray.length - 1])}
+                </StyledChipBody>
               </StyledChipShell>
             ) : (
               <>
                 {visibleChips.map((o) => (
-                  <StyledChipShell key={`${o.label}-${o.value}`}>
+                  <StyledChipShell key={`${o.label}-${o.value}`} $density={chipDensity}>
                     {renderChip ? (
-                      renderChip(o)
+                      renderChip(o, renderRemove(o))
                     ) : (
-                      <StyledDefaultChipBody>{o.label}</StyledDefaultChipBody>
-                    )}
-                    {!disabled && (
-                      <StyledChipRemove
-                        tabIndex={-1}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          dd.removeChip(o);
-                        }}
-                      >
-                        <IcoClose size={12} />
-                      </StyledChipRemove>
+                      <StyledChipBody>
+                        <StyledDefaultChipLabel>{o.label}</StyledDefaultChipLabel>
+                        {renderRemove(o)}
+                      </StyledChipBody>
                     )}
                   </StyledChipShell>
                 ))}
@@ -248,6 +255,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
               ref={inputRef}
               $chars={dd.search ? dd.search.length + 1 : showPlaceholder ? placeholder.length : 0}
               $suggester={suggester}
+              $fill={showPlaceholder}
               value={dd.search}
               placeholder={showPlaceholder ? placeholder : ""}
               onChange={(e) => {
@@ -272,7 +280,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
             </StyledClear>
           )}
           {loading && <Loader show size={7} loaderStyle="beat" />}
-          {chevron && !disabled && (
+          {chevron && (
             <StyledChevron $suggester={suggester}>
               <IcoChevronDown size={9} />
             </StyledChevron>

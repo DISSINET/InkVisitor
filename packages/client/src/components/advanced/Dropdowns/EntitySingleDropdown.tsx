@@ -4,7 +4,11 @@ import { BaseDropdown, Tooltip, TypeBar } from "components";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { EntityColors } from "types";
-import { StyledEntitySingleValue, StyledEntityValue } from "./DropdownStyles";
+import {
+  StyledEntitySingleOptionRow,
+  StyledEntitySingleValue,
+  StyledEntityValue,
+} from "./DropdownStyles";
 
 /* Wraps the dropdown so the entity-class TypeBar sits flush on the left and is
    clipped to the rounded corners (same look as the suggester). */
@@ -118,14 +122,16 @@ const EntityOptionContent = ({
 
   return (
     <>
-      <StyledEntityValue
-        ref={setReferenceElement}
-        color={EntityColors[option.value]?.color ?? "transparent"}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        {option.label}
-      </StyledEntityValue>
+      <StyledEntitySingleOptionRow>
+        <StyledEntityValue
+          ref={setReferenceElement}
+          color={EntityColors[option.value]?.color ?? "transparent"}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          {option.label}
+        </StyledEntityValue>
+      </StyledEntitySingleOptionRow>
       {!disableTooltip &&
         option.value !== EntityEnums.Extension.Any &&
         option.value !== "" && (
