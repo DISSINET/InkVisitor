@@ -12,7 +12,7 @@ import {
   IcoReplaceTb,
   IcoWholeWord,
 } from "Theme/icons";
-import { MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
+import { MAX_SEARCH_TERM_LENGTH, MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorSearchBar,
   StyledAnnotatorSearchBarWrap,
@@ -92,16 +92,18 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   // breaking a typing run.
   const refocusInput = () => findInputRef.current?.focus();
 
-  // A query below the hook's threshold never runs, so it would otherwise leave
-  // the counter blank with nothing to say why.
+  // A query outside the hook's length range never runs, so it would otherwise
+  // leave the counter blank with nothing to say why.
   const resultsLabel =
     searchTerm.length > 0 && searchTerm.length < MIN_SEARCH_TERM_LENGTH
       ? `min ${MIN_SEARCH_TERM_LENGTH} characters`
-      : searchOccurences === null
-        ? ""
-        : occurencesCount === 0
-          ? "no results"
-          : `${searchActiveOccurence + 1} of ${occurencesCount}`;
+      : searchTerm.length > MAX_SEARCH_TERM_LENGTH
+        ? `max ${MAX_SEARCH_TERM_LENGTH} characters`
+        : searchOccurences === null
+          ? ""
+          : occurencesCount === 0
+            ? "no results"
+            : `${searchActiveOccurence + 1} of ${occurencesCount}`;
 
   return (
     <StyledAnnotatorSearchBarWrap>

@@ -76,7 +76,7 @@ import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorS
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
-import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
+import { MAX_SEARCH_TERM_LENGTH, useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorColumn,
   StyledAnnotatorMenu,
@@ -1501,12 +1501,12 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      // A canvas selection always wins over what the input holds; with no
-      // selection the term stays put. search() matches within a single line, so
-      // the whitespace of a selection spanning a break is collapsed to keep it
-      // findable.
+      // A canvas selection wins over what the input holds; with no selection,
+      // or one longer than a search can run, the term stays put. search()
+      // matches within a single line, so the whitespace of a selection spanning
+      // a break is collapsed to keep it findable.
       const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
-      if (selection) {
+      if (selection && selection.length <= MAX_SEARCH_TERM_LENGTH) {
         setSearchTerm(selection);
       }
       setIsFindOpen(true);
