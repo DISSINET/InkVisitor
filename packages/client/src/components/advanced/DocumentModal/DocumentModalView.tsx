@@ -68,7 +68,7 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
     data: dataDocument,
     error: errorDocument,
     isFetching: dataDocumentIsFetching,
-  } = useDocumentQuery(documentId);
+  } = useDocumentQuery(documentId, { refetchOnWindowFocus: !hasUnsavedTextEdits });
 
   return (
     <Modal width={800} showModal={show} onClose={handleClose} fullHeight narrowGutter lowerZIndex>
@@ -84,7 +84,7 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
       <ModalContent column noPadding>
         <StyledDocumentModalAnnotator ref={slotRef}>
           <StyledDocumentModalAnnotatorFill>
-            {document ? (
+            {dataDocument || dataDocumentIsFetching || errorDocument ? (
               <AnnotatorProvider>
                 <TextAnnotator
                   documentId={documentId}
