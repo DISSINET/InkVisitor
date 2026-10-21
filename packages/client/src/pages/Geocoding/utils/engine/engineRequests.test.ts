@@ -1,28 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Where a production engine answers differently from a development one: the
- * request itself, which refuses a name that is too long and may ask for a key,
- * and the progress stream, which is asked for one request. Each request also
- * leaves a line in this browser's own log.
- *
- * The engine address and key are read when the module loads, so each test loads
- * it afresh with them set.
+ * What reaches the engine through the InkVisitor API: the request itself, which
+ * refuses a name that is too long and carries the session rather than a key,
+ * the health states the proxy reports, and the progress stream, which is asked
+ * for one request. Each request also leaves a line in this browser's own log.
  */
-const load = async (key = "") => {
+const load = async () => {
   vi.resetModules();
-  vi.stubEnv("HGA_ENGINE_URL", "http://engine.test");
-  vi.stubEnv("HGA_ENGINE_API_KEY", key);
   return import("./engine");
 };
 
-describe("against an engine with an address", () => {
+describe("against the engine through the API", () => {
   beforeEach(() => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("", { status: 500 }));
   });
   afterEach(() => {
     vi.restoreAllMocks();
-    vi.unstubAllEnvs();
   });
 
   it("refuses a name past the engine's limit with a sentence and without a request", async () => {
@@ -46,38 +40,74 @@ describe("against an engine with an address", () => {
     ]);
   });
 
-  it("sends no key header where the build has no key", async () => {
-    vi.mocked(fetch).mockResolvedValue(new Response("", { status: 500 }));
-    const { engineSuggestStream } = await load();
+  it("sends the session and the client header, and no engine key", async () => {
+    const { engineSuggestStream, ENGINE_URL } = await load();
     await engineSuggestStream({ name: "Breslau" }, vi.fn(), vi.fn()).catch(() => undefined);
-    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<string, string>;
+    const [url, init] = vi.mocked(fetch).mock.calls[0];
+    expect(url).toBe(`${ENGINE_URL}/suggest/stream`);
+    expect(init?.credentials).toBe("include");
+    const headers = init?.headers as Record<string, string>;
+    expect(headers["X-InkVisitor-Client"]).toBe("1");
     expect(headers.Authorization).toBeUndefined();
   });
 
-  it("sends the key as a bearer token, and names a refused key as a configuration problem", async () => {
-    vi.mocked(fetch).mockResolvedValue(new Response("", { status: 401 }));
-    const { engineSuggestStream } = await load("a-test-key");
+  it("marks a POST with the client header and leaves a GET without it", async () => {
+    const { engineFeedback, engineHealth } = await load();
+    await engineFeedback({ query: { name: "Breslau" }, chosen: null, suggestions: [] });
+    const post = vi.mocked(fetch).mock.calls[0][1];
+    expect((post?.headers as Record<string, string>)["X-InkVisitor-Client"]).toBe("1");
+    expect(post?.credentials).toBe("include");
+    await engineHealth();
+    const get = vi.mocked(fetch).mock.calls[1][1];
+    expect(get?.headers as Record<string, string>).not.toHaveProperty("X-InkVisitor-Client");
+  });
+
+  it("sends no clientId; the server sets it", async () => {
+    const { engineSuggestStream } = await load();
+    await engineSuggestStream({ name: "Breslau" }, vi.fn(), vi.fn()).catch(() => undefined);
+    const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string);
+    expect(body).not.toHaveProperty("clientId");
+  });
+
+  it("reports the proxy's message when the engine is refused or down", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        '{"result":false,"error":"GeocodingEngineError","message":"check HGA_ENGINE_API_KEY on the server"}',
+        { status: 502 }
+      )
+    );
+    const { engineSuggestStream } = await load();
     await expect(engineSuggestStream({ name: "Breslau" }, vi.fn(), vi.fn())).rejects.toThrow(
       "HGA_ENGINE_API_KEY"
     );
-    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<string, string>;
-    expect(headers.Authorization).toBe("Bearer a-test-key");
   });
 
-  it("follows progress with the request's own id on the stream address", async () => {
-    const opened: string[] = [];
+  it("reads the three health states from the proxy", async () => {
+    const { engineHealth } = await load();
+    vi.mocked(fetch).mockResolvedValue(new Response('{"configured":false}', { status: 200 }));
+    await expect(engineHealth()).resolves.toEqual({ configured: false });
+    vi.mocked(fetch).mockRejectedValue(new TypeError("Failed to fetch"));
+    await expect(engineHealth()).resolves.toEqual({ configured: true, ok: false });
+    vi.mocked(fetch).mockResolvedValue(new Response("", { status: 401 }));
+    await expect(engineHealth()).resolves.toEqual({ configured: true, ok: false });
+  });
+
+  it("follows progress with the request's own id on the stream address, with credentials", async () => {
+    const opened: [string, EventSourceInit | undefined][] = [];
     vi.stubGlobal(
       "EventSource",
       class {
-        constructor(url: string) {
-          opened.push(url);
+        constructor(url: string, init?: EventSourceInit) {
+          opened.push([url, init]);
         }
         close() {}
       }
     );
-    const { watchEngineProgress } = await load();
+    const { watchEngineProgress, ENGINE_URL } = await load();
     watchEngineProgress("req 1", vi.fn())();
-    expect(opened).toEqual(["http://engine.test/state/stream?requestId=req%201"]);
+    expect(opened).toEqual([
+      [`${ENGINE_URL}/state/stream?requestId=req%201`, { withCredentials: true }],
+    ]);
     vi.unstubAllGlobals();
   });
 });

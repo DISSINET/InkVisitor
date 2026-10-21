@@ -310,6 +310,25 @@ class InternalServerError extends CustomError {
 }
 
 /**
+ * GeocodingEngineUnconfiguredError will be thrown by the geocoding proxy when the deployment has no engine address
+ */
+class GeocodingEngineUnconfiguredError extends CustomError {
+  public static code = 503;
+  public static title = "Geocoding engine not configured";
+  public static message = "No geocoding engine is configured for this deployment.";
+}
+
+/**
+ * GeocodingEngineError will be thrown by the geocoding proxy when the engine is unreachable or refuses the server's key
+ */
+class GeocodingEngineError extends CustomError {
+  public static code = 502;
+  public static title = "Geocoding engine error";
+  public static message = "The geocoding engine did not respond.";
+  loggable = true;
+}
+
+/**
  * UnauthorizedError will be thrown during request, which does not contain authorization data (without jwt token)
  */
 class UnauthorizedError extends CustomError {
@@ -543,6 +562,8 @@ const allErrors: Record<string, any> = {
   UnauthorizedError,
   PermissionDeniedError,
   InternalServerError,
+  GeocodingEngineUnconfiguredError,
+  GeocodingEngineError,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,
@@ -604,6 +625,8 @@ export {
   UnauthorizedError,
   PermissionDeniedError,
   InternalServerError,
+  GeocodingEngineUnconfiguredError,
+  GeocodingEngineError,
   ModelNotValidError,
   BadCredentialsError,
   NotFound,

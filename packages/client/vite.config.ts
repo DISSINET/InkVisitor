@@ -25,10 +25,10 @@ export default defineConfig(({ command, mode }) => {
       );
     }
 
-    // A blank value here is only visible to whoever opens the geocoding page in
-    // the built app, long after the build that dropped it. APIURL is not checked:
-    // blank means the api is served from the app's own origin.
-    for (const key of ["HGA_ENGINE_URL"]) {
+    // Keys whose blank value would only show up in the built app, long after
+    // the build that dropped it. APIURL is not one: blank means the api is
+    // served from the app's own origin.
+    for (const key of [] as string[]) {
       if (!env[key]) {
         throw new Error(
           `Client env for mode "${mode}" has no ${key}. ` +
@@ -146,8 +146,6 @@ export default defineConfig(({ command, mode }) => {
     define: {
       "process.env.ROOT_URL": JSON.stringify(env.ROOT_URL || ""),
       "process.env.APIURL": JSON.stringify(env.APIURL || ""),
-      "process.env.HGA_ENGINE_URL": JSON.stringify(env.HGA_ENGINE_URL || ""),
-      "process.env.HGA_ENGINE_API_KEY": JSON.stringify(env.HGA_ENGINE_API_KEY || ""),
       "process.env.ENV": JSON.stringify(appEnv),
       "process.env.BUILD_TIMESTAMP": JSON.stringify(
         process.env.BUILD_TIMESTAMP || ""

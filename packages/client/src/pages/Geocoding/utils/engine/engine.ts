@@ -1,3 +1,6 @@
+import { IResponseGeneric } from "@inkvisitor/shared/types";
+import { IGeocodingHealth } from "@inkvisitor/shared/types/geocoding";
+import api from "api";
 import {
   EngineAuditEntry,
   StreamCandidate,
@@ -21,72 +24,55 @@ import { recordRequest } from "./requestLog";
 /**
  * Client for the HGA-Engine.
  *
- * The engine is a separate service reached straight from the browser, not
- * through the InkVisitor server, so nothing here goes via `api.tsx`. It holds no
- * session and needs no credentials.
+ * The engine is reached through the InkVisitor API, which attaches the session
+ * and the engine key; the browser never holds either. Every call sends the
+ * session cookie, and every POST the client header the API requires of it.
  */
 
-export const ENGINE_URL = (process.env.HGA_ENGINE_URL || "").replace(/\/+$/, "");
+export const ENGINE_URL = `${api.apiUrl}/geocoding`;
 
-/**
- * Sent as a bearer token on the routes that run a request, where the engine
- * asks for one. Built into the bundle, so it names this service to the engine
- * and is not a secret. Unset, no header is sent.
- */
-const ENGINE_API_KEY = process.env.HGA_ENGINE_API_KEY || "";
-
-const keyHeader = (): Record<string, string> =>
-  ENGINE_API_KEY ? { Authorization: `Bearer ${ENGINE_API_KEY}` } : {};
-
-/** The engine answered, with a status that is not a success. */
+/** The engine, or the API in front of it, answered with a status that is not a success. */
 export class EngineStatusError extends Error {
   constructor(
     readonly status: number,
-    path: string
+    path: string,
+    message?: string
   ) {
-    super(`Geocoding engine returned ${status} for ${path}`);
+    super(message || `Geocoding engine returned ${status} for ${path}`);
     this.name = "EngineStatusError";
   }
 }
 
-/** The engine refused the key this build carries, or wants one it does not carry. */
-const keyRefused = (status: number): boolean => status === 401 || status === 403;
-
-const KEY_MESSAGE =
-  "The geocoding engine refused this installation's key. Its HGA_ENGINE_API_KEY setting is missing or wrong.";
-
-/**
- * Names this application to the engine's audit log. The same value for every
- * InkVisitor browser, deliberately: the engine's response cache excludes
- * `clientId` from its key, so nothing is gained by varying it, and a per-browser
- * id would let the engine's log correlate one researcher's whole session.
- *
- * The progress line follows `requestId` instead, which identifies a request
- * rather than whoever sent it.
- */
-export const getClientId = (): string => `inkvisitor-${process.env.ENV || "dev"}`;
+/** Carries the API's own `message` when the body is its generic error response. */
+const statusError = async (response: Response, path: string): Promise<EngineStatusError> => {
+  let message: string | undefined;
+  try {
+    message = ((await response.json()) as IResponseGeneric).message;
+  } catch {
+    /* not a JSON body; the status alone describes it */
+  }
+  return new EngineStatusError(response.status, path, message);
+};
 
 export class EngineUnreachableError extends Error {
   constructor(cause?: unknown) {
-    super(
-      ENGINE_URL
-        ? `The geocoding engine at ${ENGINE_URL} did not respond.`
-        : "No geocoding engine address is configured for this deployment."
-    );
+    super("The geocoding engine did not respond.");
     this.name = "EngineUnreachableError";
     this.cause = cause;
   }
 }
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  if (!ENGINE_URL) {
-    throw new EngineUnreachableError();
-  }
   let response: Response;
   try {
     response = await fetch(`${ENGINE_URL}${path}`, {
       ...init,
-      headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(init?.method === "POST" ? { "X-InkVisitor-Client": "1" } : {}),
+        ...(init?.headers || {}),
+      },
     });
   } catch (err) {
     // an aborted request is the caller's own doing and must not read as a
@@ -97,25 +83,24 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     throw new EngineUnreachableError(err);
   }
   if (!response.ok) {
-    throw new EngineStatusError(response.status, path);
+    throw await statusError(response, path);
   }
   return (await response.json()) as T;
 };
 
 /**
- * Liveness only. The endpoint also reports cache hit rates, rate-limiter state
- * and remaining language-model allowance, and grows further fields over time —
- * nothing here reads them, so nothing here breaks when it does.
+ * Whether this deployment has an engine, and whether it answered. An expired
+ * session or an API that does not respond carries no health body and reads as
+ * an engine that is configured and down.
  */
-export const engineHealth = async (signal?: AbortSignal): Promise<boolean> => {
+export const engineHealth = async (signal?: AbortSignal): Promise<IGeocodingHealth> => {
   try {
-    await request<{ ok: boolean }>("/health", { signal });
-    return true;
+    return await request<IGeocodingHealth>("/health", { signal });
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw err;
     }
-    return false;
+    return { configured: true, ok: false };
   }
 };
 
@@ -167,9 +152,6 @@ const runSuggestStream = async (
   if (isFixtureMode()) {
     return fixtureStream(onProvisional, onAccepted, signal);
   }
-  if (!ENGINE_URL) {
-    throw new EngineUnreachableError();
-  }
   const tooLarge = tooLargeReason(query);
   if (tooLarge) {
     throw new Error(tooLarge);
@@ -178,8 +160,9 @@ const runSuggestStream = async (
   try {
     response = await fetch(`${ENGINE_URL}/suggest/stream`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...keyHeader() },
-      body: JSON.stringify({ ...query, clientId: getClientId() }),
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "X-InkVisitor-Client": "1" },
+      body: JSON.stringify(query),
       signal,
     });
   } catch (err) {
@@ -188,10 +171,10 @@ const runSuggestStream = async (
     }
     throw new EngineUnreachableError(err);
   }
-  if (keyRefused(response.status)) {
-    throw new Error(KEY_MESSAGE);
+  if (!response.ok) {
+    throw await statusError(response, "/suggest/stream");
   }
-  if (!response.ok || !response.body) {
+  if (!response.body) {
     throw new EngineStatusError(response.status, "/suggest/stream");
   }
 
@@ -345,7 +328,7 @@ export const engineFeedback = async (body: FeedbackRequest): Promise<void> => {
   try {
     await request<{ id: string; recorded: boolean }>("/feedback", {
       method: "POST",
-      body: JSON.stringify({ ...body, clientId: getClientId() }),
+      body: JSON.stringify(body),
     });
   } catch {
     /* telemetry is not worth interrupting the researcher for */
@@ -402,9 +385,9 @@ const fixtureStream = async (
  * the audit entries. That identifies the request rather than the browser, so two
  * requests from one browser are told apart without comparing their start times.
  *
- * The stream is asked for this one request, which is all a production engine
- * gives an anonymous caller; a development engine would send every client's
- * entries, so they are still picked out by id here.
+ * The stream is asked for this one request's entries and the proxy forwards
+ * the query as-is; a development engine would still send every client's
+ * entries, so they are picked out by id here.
  *
  * Returns a function that closes the subscription.
  */
@@ -429,13 +412,11 @@ export const watchEngineProgress = (
   requestId: string,
   onProgress: (progress: EngineProgress) => void
 ): (() => void) => {
-  if (!ENGINE_URL) {
-    return () => undefined;
-  }
   let source: EventSource;
   try {
     source = new EventSource(
-      `${ENGINE_URL}/state/stream?requestId=${encodeURIComponent(requestId)}`
+      `${ENGINE_URL}/state/stream?requestId=${encodeURIComponent(requestId)}`,
+      { withCredentials: true }
     );
   } catch {
     return () => undefined;

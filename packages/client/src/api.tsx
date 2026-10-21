@@ -112,7 +112,7 @@ const triggerDownload = (blob: Blob, fileName: string) => {
 
 class Api {
   private baseUrl: string;
-  private apiUrl: string;
+  readonly apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
   private ws?: Socket;
