@@ -9,6 +9,17 @@ import {
   StyledTitleTail,
 } from "./DocumentTitleStyles";
 
+/**
+ * Splits a title into the head that end-ellipsizes and the tail kept visible,
+ * rendered by `StyledTitleHead` and `StyledTitleTail`.
+ */
+export const splitTitleTail = (title: string, tailChars: number): [string, string] => {
+  // A title barely longer than the tail would truncate to almost pure tail;
+  // keep such short titles whole (the head span alone end-ellipsizes them).
+  const splitAt = title.length > tailChars + 3 ? title.length - tailChars : title.length;
+  return [title.slice(0, splitAt), title.slice(splitAt)];
+};
+
 interface DocumentTitle {
   title?: string;
   size?: "sm" | "md" | "lg";
@@ -33,11 +44,7 @@ export const DocumentTitle: React.FC<DocumentTitle> = ({
 
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
 
-  // A title barely longer than the tail would truncate to almost pure tail;
-  // keep such short titles whole (the head span alone end-ellipsizes them).
-  const splitAt = title.length > tailChars + 3 ? title.length - tailChars : title.length;
-  const head = title.slice(0, splitAt);
-  const tail = title.slice(splitAt);
+  const [head, tail] = splitTitleTail(title, tailChars);
 
   return (
     <React.Fragment>

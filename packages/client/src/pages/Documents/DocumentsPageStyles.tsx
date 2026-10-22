@@ -220,23 +220,28 @@ export const StyledDisabledSelect = styled.div`
   cursor: not-allowed;
 `;
 
-export const StyledTitleWrap = styled.div`
+export const StyledTitleWrap = styled.div<{ $editable: boolean }>`
   display: flex;
   align-items: center;
   min-width: 0;
-  cursor: pointer;
+  cursor: ${({ $editable }) => ($editable ? "text" : "default")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding: 0px 1rem 0px 0.8rem;
 `;
-export const StyledTitle = styled.div`
-  color: ${({ theme }) => theme.color["black"]};
+/** Head and tail spans inside give the middle ellipsis of `DocumentTitle` */
+export const StyledTitle = styled.div<{ $editable: boolean }>`
+  display: flex;
+  min-width: 0;
   max-width: 100%;
-  display: inline-block;
-  vertical-align: middle;
-  white-space: nowrap;
-  overflow: hidden !important;
-  text-overflow: ellipsis;
-  padding: 0.3rem 0;
+  color: ${({ theme }) => theme.color["black"]};
+  padding: 0.3rem ${({ theme }) => theme.space[1]};
+  margin-left: -${({ theme }) => theme.space[1]};
+  border-radius: ${({ theme }) => theme.borderRadius.default};
+
+  ${StyledTitleWrap}:hover & {
+    outline: ${({ theme, $editable }) =>
+      $editable ? `1px dashed ${theme.color["gray"][450]}` : "none"};
+  }
 `;
 export const StyledReference = styled.div`
   display: grid;
