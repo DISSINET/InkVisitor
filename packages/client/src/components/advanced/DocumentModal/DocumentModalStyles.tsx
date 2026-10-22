@@ -148,3 +148,9 @@ export const StyledDocumentModalAnnotatorFill = styled.div`
   flex-direction: column;
   align-items: center;
 `;
+
+/** Head and tail spans inside give the middle ellipsis of `DocumentTitle` */
+export const StyledDocumentModalTitle = styled.div`
+  display: flex;
+  min-width: 0;
+`;

@@ -162,7 +162,9 @@ export const ModalHeader: FC<ModalHeader> = ({
     <>
       <StyledCardHeader $color={color}>
         {icon && <StyledCardIcon $color={iconColor}>{icon}</StyledCardIcon>}
-        <StyledCardTitle $boldTitle={boldTitle}>{title}</StyledCardTitle>
+        <StyledCardTitle $boldTitle={boldTitle} $hasClose={!!onClose}>
+          {title}
+        </StyledCardTitle>
         {content && <StyledCardContent>{content}</StyledCardContent>}
         {onClose && (
           <StyledCloseIconWrap onClick={onClose}>

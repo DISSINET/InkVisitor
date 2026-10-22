@@ -3,13 +3,15 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Modal, ModalContent, ModalHeader, Submit } from "components";
 import { useDocumentQuery } from "hooks/react-query";
-import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
 import { CANVAS_WRAPPER_PADDING_PX } from "../Annotator/styles";
+import { splitTitleTail } from "../DocumentTitle/DocumentTitle";
+import { StyledTitleHead, StyledTitleTail } from "../DocumentTitle/DocumentTitleStyles";
 import {
   StyledDocumentModalAnnotator,
   StyledDocumentModalAnnotatorFill,
+  StyledDocumentModalTitle,
 } from "./DocumentModalStyles";
 
 interface DocumentModalView {
@@ -70,13 +72,22 @@ const DocumentModalView: React.FC<DocumentModalView> = ({
     isFetching: dataDocumentIsFetching,
   } = useDocumentQuery(documentId, { refetchOnWindowFocus: !hasUnsavedTextEdits });
 
+  const [titleHead, titleTail] = splitTitleTail(dataDocument?.title ?? "", 7);
+
   return (
     <Modal width={800} showModal={show} onClose={handleClose} fullHeight narrowGutter lowerZIndex>
       <ModalHeader
         title={
-          dataDocumentIsFetching
-            ? "Loading..."
-            : `${dataDocument ? getShortLabelByLetterCount(dataDocument.title, 90) : "no label"}`
+          dataDocumentIsFetching ? (
+            "Loading..."
+          ) : dataDocument ? (
+            <StyledDocumentModalTitle>
+              <StyledTitleHead>{titleHead}</StyledTitleHead>
+              {titleTail && <StyledTitleTail>{titleTail}</StyledTitleTail>}
+            </StyledDocumentModalTitle>
+          ) : (
+            "no label"
+          )
         }
         onClose={handleClose}
       />

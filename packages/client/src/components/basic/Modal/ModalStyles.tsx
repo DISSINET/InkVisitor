@@ -108,9 +108,15 @@ export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
 `;
 interface StyledCardTitle {
   $boldTitle?: boolean;
+  $hasClose?: boolean;
 }
 export const StyledCardTitle = styled.h2<StyledCardTitle>`
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* the close icon is absolutely positioned over the header's right edge */
+  padding-right: ${({ theme, $hasClose }) => ($hasClose ? theme.space[8] : 0)};
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["lg"]};

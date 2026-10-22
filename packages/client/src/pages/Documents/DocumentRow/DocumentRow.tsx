@@ -5,6 +5,11 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { splitTitleTail } from "components/advanced/DocumentTitle/DocumentTitle";
+import {
+  StyledTitleHead,
+  StyledTitleTail,
+} from "components/advanced/DocumentTitle/DocumentTitleStyles";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { IcoTrash } from "Theme/icons";
@@ -111,6 +116,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   });
 
   const { ref: titleRef, width: titleWidth = 0 } = useResizeObserver<HTMLDivElement>();
+  const [titleHead, titleTail] = splitTitleTail(localTitle, 7);
 
   return (
     <StyledDocumentRow>
@@ -123,7 +129,11 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           </StyledDisabledSelect>
         )}
       </StyledSelectCell>
-      <StyledTitleWrap ref={titleRef} onClick={canManage ? setEditMode : undefined}>
+      <StyledTitleWrap
+        ref={titleRef}
+        $editable={canManage}
+        onClick={canManage ? setEditMode : undefined}
+      >
         {canManage && editMode ? (
           <Input
             value={localTitle}
@@ -134,7 +144,10 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             width={titleWidth}
           />
         ) : (
-          <StyledTitle>{localTitle}</StyledTitle>
+          <StyledTitle $editable={canManage}>
+            <StyledTitleHead>{titleHead}</StyledTitleHead>
+            {titleTail && <StyledTitleTail>{titleTail}</StyledTitleTail>}
+          </StyledTitle>
         )}
       </StyledTitleWrap>
       <StyledActionsCell>
