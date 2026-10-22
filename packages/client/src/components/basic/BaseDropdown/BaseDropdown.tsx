@@ -1,44 +1,45 @@
+import { FloatingPortal } from "@floating-ui/react";
 import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
 import { allEntities } from "@inkvisitor/shared/dictionaries/entity";
-import { EntityEnums } from "@inkvisitor/shared/enums";
-import { heightHeader } from "Theme/constants";
+import { IcoChevronDown, IcoClose } from "Theme/icons";
 import { Loader, Tooltip } from "components";
-import React, { useEffect, useRef, useState } from "react";
-import { useTheme } from "styled-components";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActionMeta,
-  ClearIndicatorProps,
-  ControlProps,
-  DropdownIndicatorProps,
-  MultiValueProps,
-  OptionProps,
-  SingleValueProps,
-  ValueContainerProps,
-  components,
-} from "react-select";
-import {
-  StyledClearIconWrap,
-  StyledFaChevronDown,
-  StyledSelect,
-  StyledSelectWrapper,
-  StyledValueIconWrap,
+  StyledChevron,
+  StyledChipBody,
+  StyledChipOverflow,
+  StyledChipRemove,
+  StyledChipShell,
+  StyledClear,
+  StyledControl,
+  StyledControlIcon,
+  StyledDefaultChipLabel,
+  StyledDefaultOptionRow,
+  StyledDropdownWrap,
+  StyledGroupHeading,
+  StyledIndicators,
+  StyledMenu,
+  StyledNoOptions,
+  StyledOption,
+  StyledPlaceholder,
+  StyledSearchInput,
+  StyledSingleValue,
+  StyledValueArea,
 } from "./BaseDropdownStyles";
-import { DropdownItem } from "@inkvisitor/shared/types";
+import { flattenOptions } from "./dropdownLogic";
+import { BaseDropdownGroup, BaseDropdownItem, ChangeMeta, OptionRenderState } from "./types";
+import { useDropdown } from "./useDropdown";
 
-// `menuLabel` replaces `label` inside the open menu only, where a group heading
-// can already say what the label repeats; the control and the typing filter
-// keep matching the full `label`
-export type BaseDropdownItem = DropdownItem & { menuLabel?: string };
-export interface BaseDropdownGroup {
-  label: string;
-  options: BaseDropdownItem[];
-}
+type Position = AutoPlacement | BasePlacement | VariationPlacement;
 
-interface BaseDropdown {
-  options?: (BaseDropdownItem | BaseDropdownGroup)[];
-  value?: DropdownItem | DropdownItem[] | null;
-  onChange: (selectedOption: DropdownItem[], event?: ActionMeta<unknown>) => void;
-  // appearance props
+interface BaseDropdown<O extends BaseDropdownItem = BaseDropdownItem> {
+  // a group renders its label as a heading above its options
+  options?: (O | BaseDropdownGroup<O>)[];
+  value?: O | O[] | null;
+  onChange: (selected: O[], meta: ChangeMeta<O>) => void;
+  multi?: boolean;
+  searchable?: boolean;
+  // appearance
   width?: number | "full";
   placeholder?: string;
   /**
@@ -56,242 +57,341 @@ interface BaseDropdown {
   // plain-text tooltip for a single-value dropdown, in place of the bold
   // tooltipLabel - for a sentence rather than a name
   tooltipContent?: string;
-  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
-  // single entity dropdown props
+  tooltipPosition?: Position;
+  suggester?: boolean;
+  disabled?: boolean;
+  disabledAppearance?: "stripes" | "quiet";
+  chevron?: boolean;
+  clearable?: boolean;
+  loading?: boolean;
+  closeMenuOnSelect?: boolean;
+  autoFocus?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
   onMenuOpenChange?: (isOpen: boolean) => void;
-  autoFocus?: boolean;
-  suggester?: boolean;
-  // dropdown type settings
-  isMulti?: boolean;
-  entityDropdown?: boolean;
-  userDropdown?: boolean;
-  attributeDropdown?: boolean;
-  compactChips?: boolean;
-  //
-  disableTyping?: boolean;
-  disabled?: boolean;
-  // override lib components
-  customComponents?: Partial<typeof components>;
-  // for logging / debugging purposes
-  loggerId?: string;
-  // currently unused props
-  isClearable?: boolean;
-  hideSelectedOptions?: boolean;
-  noDropDownIndicator?: boolean;
-  limitSelectedItems?: number;
-  closeMenuOnSelect?: boolean;
-  shortLabel?: boolean;
-  loading?: boolean;
-  roundCorners?: boolean;
+  // customization
+  renderOption?: (option: O, state: OptionRenderState) => React.ReactNode;
+  renderValue?: (option: O) => React.ReactNode;
+  // `remove` is the chip's cross (null while disabled); the body places it
+  // inside its own border
+  renderChip?: (option: O, remove: React.ReactNode) => React.ReactNode;
+  chipLimit?: number;
+  chipSummary?: (count: number, total: number) => React.ReactNode;
+  hiddenChipValues?: string[];
+  chipDensity?: "default" | "compact";
 }
-export const BaseDropdown: React.FC<BaseDropdown> = ({
+
+export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   options = [],
   value,
   onChange,
-  customComponents = undefined,
+  multi = false,
+  searchable = true,
   width,
-  hideSelectedOptions = false,
-  noDropDownIndicator = false,
   placeholder = "Select",
   ariaLabel,
   noOptionsMessage = "No option selected",
-  isClearable = false,
-  isMulti = false,
-  disabled = false,
-  onFocus = () => {},
-  onBlur = () => {},
-  onMenuOpenChange,
-  autoFocus = false,
-  disableTyping = false,
-  suggester = false,
-
   icon,
   tooltipLabel,
   tooltipContent,
   tooltipPosition = "top",
-  entityDropdown = false,
-  userDropdown = false,
-  attributeDropdown,
-  compactChips = false,
-
-  loggerId,
-  limitSelectedItems,
-  closeMenuOnSelect = true,
-  shortLabel = false,
+  suggester = false,
+  disabled = false,
+  disabledAppearance = "stripes",
+  chevron = true,
+  clearable = false,
   loading = false,
-  roundCorners = true,
-}) => {
-  const theme = useTheme();
-  const isOneOptionSingleEntitySelect = options.length < 2 && !isMulti && entityDropdown;
+  closeMenuOnSelect = true,
+  autoFocus = false,
+  onFocus = () => {},
+  onBlur = () => {},
+  onMenuOpenChange,
+  renderOption,
+  renderValue,
+  renderChip,
+  chipLimit,
+  chipSummary,
+  hiddenChipValues = [],
+  chipDensity = "default",
+}: BaseDropdown<O>) => {
+  const selectedArray: O[] =
+    value == null ? [] : Array.isArray(value) ? value : [value];
 
-  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement | null>(null);
+  const { items, groupOf } = useMemo(() => flattenOptions(options), [options]);
+
+  const dd = useDropdown<O>({
+    options: items,
+    value: selectedArray,
+    multi,
+    searchable: searchable && !disabled,
+    disabled,
+    closeMenuOnSelect,
+    onChange,
+  });
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [wrapperEl, setWrapperEl] = useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
-  // the menu is controlled so that the clear button can dismiss it (see
-  // ClearIndicator); react-select still drives it through onMenuOpen/onMenuClose
-  const [menuIsOpen, setMenuIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (autoFocus) {
+      (inputRef.current ?? (dd.refs.domReference.current as HTMLElement | null))?.focus();
+    }
+  }, [autoFocus]);
 
   // the cleanup also runs on unmount, so a dropdown removed with its menu open
   // still reports it closed
   const onMenuOpenChangeRef = useRef(onMenuOpenChange);
   onMenuOpenChangeRef.current = onMenuOpenChange;
   useEffect(() => {
-    if (!menuIsOpen) return;
+    if (!dd.open) return;
     onMenuOpenChangeRef.current?.(true);
     return () => onMenuOpenChangeRef.current?.(false);
-  }, [menuIsOpen]);
+  }, [dd.open]);
 
-  const SuggesterDropdownIndicator = (props: DropdownIndicatorProps) => (
-    <components.DropdownIndicator {...props}>
-      <StyledFaChevronDown size={9} $suggester={suggester} />
-    </components.DropdownIndicator>
-  );
-
-  const localCustomComponents = {
-    Option,
-    SingleValue,
-    MultiValue,
-    ValueContainer,
-    DropdownIndicator: SuggesterDropdownIndicator,
-    ClearIndicator,
-    Control,
-    MenuPortal,
+  /* fire onFocus/onBlur only when focus enters/leaves the whole control —
+     3 call sites lazy-load their options in onFocus */
+  const handleFocus = (e: React.FocusEvent) => {
+    if (!(e.relatedTarget && e.currentTarget.contains(e.relatedTarget))) {
+      onFocus();
+    }
+  };
+  const handleBlur = (e: React.FocusEvent) => {
+    const next = e.relatedTarget;
+    if (next && e.currentTarget.contains(next)) return;
+    if (next && dd.refs.floating.current?.contains(next)) return;
+    onBlur();
   };
 
-  return (
-    <>
-      <StyledSelectWrapper
-        width={width}
-        ref={setReferenceElement}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+  // chips visible in the control (multi): hidden values (ANY) never render
+  const chips = selectedArray.filter(
+    (o) => !hiddenChipValues.includes(o.value)
+  );
+  const visibleChips = chipLimit != null ? chips.slice(0, chipLimit) : chips;
+  const overflowCount = chips.length - visibleChips.length;
+  const collapse = multi && chipSummary && selectedArray.length > 1;
+
+  const showPlaceholder = selectedArray.length === 0 && !dd.search;
+  const singleValue = !multi && selectedArray.length > 0 ? selectedArray[0] : undefined;
+
+  const renderRemove = (option: O) =>
+    disabled ? null : (
+      <StyledChipRemove
+        tabIndex={-1}
         onClick={(e) => {
           e.stopPropagation();
-          setShowTooltip(false);
+          dd.removeChip(option);
         }}
       >
-        <StyledSelect
-          menuIsOpen={menuIsOpen}
-          onMenuOpen={() => setMenuIsOpen(true)}
-          onMenuClose={() => setMenuIsOpen(false)}
-          $suggester={suggester}
-          onFocus={onFocus}
-          autoFocus={autoFocus}
-          onBlur={onBlur}
-          isMulti={isMulti}
-          isDisabled={disabled || isOneOptionSingleEntitySelect}
-          isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
-          isOptionDisabled={(option) => ((option as DropdownItem).isDisabled ? true : false)}
-          formatOptionLabel={(option, { context }) => {
-            const item = option as BaseDropdownItem;
-            return context === "menu" && item.menuLabel ? item.menuLabel : item.label;
-          }}
-          attributeDropdown={attributeDropdown}
-          entityDropdown={entityDropdown}
-          compactChips={compactChips}
-          roundCorners={roundCorners}
-          userDropdown={userDropdown}
-          wildCardChar={(value as DropdownItem)?.label === EntityEnums.Extension.Any}
-          className="react-select-container"
-          classNamePrefix="react-select"
-          aria-label={ariaLabel}
-          placeholder={placeholder}
-          noOptionsMessage={() => noOptionsMessage}
-          isClearable={isClearable}
-          captureMenuScroll={false}
-          closeMenuOnSelect={closeMenuOnSelect}
-          components={{ ...localCustomComponents, ...customComponents }}
-          isSearchable={!disableTyping}
-          value={value}
-          icon={icon}
-          styles={{
-            // replaces react-select's own indicator style rather than extending
-            // it, so the centring that style carried has to be restated here;
-            // the suggester's class letter is aligned against the plain box
-            dropdownIndicator: () => {
-              if (noDropDownIndicator || isOneOptionSingleEntitySelect) {
-                return { display: "none" };
-              }
-              return suggester ? { display: "" } : { display: "flex", alignItems: "center" };
-            },
-            menuPortal: (base) => ({
-              ...base,
-              marginTop: `${-heightHeader}px`,
-              zIndex: 9999,
-            }),
-            // react-select's own gutter is 8px and sits on whichever side faces
-            // the control, so the gap has to be set per placement to look the
-            // same whether the menu opens downwards or flips above. A downward
-            // menu keeps a gutter below it: react-select subtracts marginBottom
-            // when it trims the menu to the space left, so a menu cut short
-            // still ends clear of the page edge
-            menu: (base, state) => ({
-              ...base,
-              marginTop: state.placement === "bottom" ? "2px" : 0,
-              marginBottom: state.placement === "top" ? "2px" : theme.space[3],
-            }),
-          }}
-          menuPortalTarget={document.getElementById("page-content")!}
-          menuPosition="absolute"
-          menuPlacement="auto"
-          // menuPlacement="auto" shrinks this cap to whatever room the control
-          // has inside #page-content, so a menu opened near the page edge stays
-          // fully visible instead of being clipped by its overflow
-          maxMenuHeight={320}
-          // the flip threshold: with room for at least this much, "auto" keeps
-          // the menu below the control and trims it to the space available;
-          // under it the menu would be too squeezed to use, so it flips above
-          minMenuHeight={180}
-          // the portal parent (#page-content) is overflow:hidden and never
-          // scrolls for the user, but scrollTop is still writable: letting
-          // react-select scroll it into view would shift the whole page
-          menuShouldScrollIntoView={false}
-          onChange={(selected: unknown, event: ActionMeta<unknown>) => {
-            const selectedOptions: DropdownItem[] =
-              selected == null
-                ? []
-                : Array.isArray(selected)
-                  ? selected
-                  : [selected as DropdownItem];
+        <IcoClose size={14} />
+      </StyledChipRemove>
+    );
 
-            if (!isMulti) {
-              return onChange(selectedOptions);
-            } else {
-              return onChange(selectedOptions, event);
+  return (
+    <StyledDropdownWrap
+      // lets global key handlers tell a dropdown's focused control apart from other inputs
+      data-dropdown
+      $width={width}
+      ref={setWrapperEl}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowTooltip(false);
+      }}
+    >
+      <StyledControl
+        ref={dd.refs.setReference}
+        $focused={dd.open}
+        $disabled={disabled}
+        $disabledAppearance={disabledAppearance}
+        $suggester={suggester}
+        aria-label={ariaLabel}
+        tabIndex={!disabled && !searchable ? 0 : -1}
+        // floating-ui returns its own onFocus/onBlur, so ours go through
+        // getReferenceProps to be merged rather than overwritten by the spread
+        {...dd.getReferenceProps({
+          onFocus: handleFocus,
+          onBlur: handleBlur,
+          onKeyDown: dd.onControlKeyDown,
+          onClick: () => {
+            if (!disabled) {
+              inputRef.current?.focus();
             }
-          }}
-          options={options}
-          width={width}
-          hideSelectedOptions={hideSelectedOptions}
-          loggerId={loggerId}
-          limitSelectedItems={limitSelectedItems}
-          shortLabel={shortLabel}
-        />
-        {loading && <Loader show size={7} loaderStyle="beat" />}
-      </StyledSelectWrapper>
+          },
+        })}
+      >
+        {icon && <StyledControlIcon>{icon}</StyledControlIcon>}
 
-      {/* Tooltip */}
+        <StyledValueArea
+          $density={chipDensity}
+          $suggester={suggester}
+          $single={!multi}
+          // a limited row of default chips stays one line, its chips shrinking
+          // to fit; compact chips may wrap onto further rows
+          $nowrap={chipLimit != null && chipDensity === "default"}
+        >
+          {/* multi: chips or the collapsed summary */}
+          {multi &&
+            (collapse ? (
+              <StyledChipShell $density={chipDensity}>
+                <StyledChipBody>
+                  <StyledDefaultChipLabel>
+                    {chipSummary!(selectedArray.length, items.length)}
+                  </StyledDefaultChipLabel>
+                  {renderRemove(selectedArray[selectedArray.length - 1])}
+                </StyledChipBody>
+              </StyledChipShell>
+            ) : (
+              <>
+                {visibleChips.map((o) => (
+                  <StyledChipShell key={`${o.label}-${o.value}`} $density={chipDensity}>
+                    {renderChip ? (
+                      renderChip(o, renderRemove(o))
+                    ) : (
+                      <StyledChipBody>
+                        <StyledDefaultChipLabel>{o.label}</StyledDefaultChipLabel>
+                        {renderRemove(o)}
+                      </StyledChipBody>
+                    )}
+                  </StyledChipShell>
+                ))}
+                {overflowCount > 0 && (
+                  <StyledChipOverflow>+{overflowCount} more</StyledChipOverflow>
+                )}
+              </>
+            ))}
+
+          {/* single: current value (hidden while typing a filter) */}
+          {singleValue && !dd.search && (
+            <StyledSingleValue $suggester={suggester}>
+              {renderValue ? renderValue(singleValue) : singleValue.label}
+            </StyledSingleValue>
+          )}
+
+          {showPlaceholder && (!searchable || disabled) && (
+            <StyledPlaceholder>{placeholder}</StyledPlaceholder>
+          )}
+
+          {searchable && !disabled && (
+            <StyledSearchInput
+              ref={inputRef}
+              aria-label={ariaLabel}
+              $chars={dd.search ? dd.search.length + 1 : showPlaceholder ? placeholder.length : 0}
+              $suggester={suggester}
+              $fill={showPlaceholder}
+              value={dd.search}
+              placeholder={showPlaceholder ? placeholder : ""}
+              onChange={(e) => {
+                dd.setSearch(e.target.value);
+                if (!dd.open) {
+                  dd.setOpen(true);
+                }
+              }}
+            />
+          )}
+        </StyledValueArea>
+
+        <StyledIndicators>
+          {clearable && !disabled && selectedArray.length > 0 && (
+            <StyledClear
+              onClick={(e) => {
+                e.stopPropagation();
+                dd.clear();
+              }}
+            >
+              <IcoClose size={14} />
+            </StyledClear>
+          )}
+          {loading && <Loader show size={7} loaderStyle="beat" />}
+          {chevron && (
+            <StyledChevron $suggester={suggester}>
+              <IcoChevronDown size={9} />
+            </StyledChevron>
+          )}
+        </StyledIndicators>
+      </StyledControl>
+
+      {dd.open && (
+        <FloatingPortal id="page-content">
+          <StyledMenu
+            ref={dd.refs.setFloating}
+            style={dd.floatingStyles}
+            {...dd.getFloatingProps({
+              // ancestor popovers dismiss on pointerdown; stop both phases so
+              // clicking menu options doesn't collapse a popover hosting this dropdown
+              onPointerDown: (e) => e.stopPropagation(),
+              onMouseDown: (e) => e.stopPropagation(),
+            })}
+          >
+            {dd.filtered.length === 0 && (
+              <StyledNoOptions>{noOptionsMessage}</StyledNoOptions>
+            )}
+            {dd.filtered.map((option, i) => {
+              const state: OptionRenderState = {
+                selected: dd.isSelected(option),
+                highlighted: dd.activeIndex === i,
+                disabled: !!option.isDisabled,
+              };
+              const group = groupOf.get(option);
+              const startsGroup =
+                group !== undefined && (i === 0 || groupOf.get(dd.filtered[i - 1]) !== group);
+              return (
+                <React.Fragment key={`${option.label}-${option.value}`}>
+                  {startsGroup && <StyledGroupHeading>{group}</StyledGroupHeading>}
+                  <StyledOption
+                    ref={(el) => {
+                      dd.itemsRef.current[i] = el;
+                    }}
+                    $highlighted={state.highlighted}
+                    $selected={state.selected}
+                    $disabled={state.disabled}
+                    {...dd.getItemProps({
+                      // active/selected keys drive floating-ui's
+                      // aria-activedescendant wiring — do not drop them
+                      active: state.highlighted,
+                      selected: state.selected,
+                      onClick: () => dd.selectOption(option),
+                    })}
+                  >
+                    {renderOption ? (
+                      renderOption(option, state)
+                    ) : (
+                      <StyledDefaultOptionRow>
+                        {option.value === allEntities.value ? (
+                          <i>{option.label}</i>
+                        ) : (
+                          option.menuLabel ?? option.label
+                        )}
+                      </StyledDefaultOptionRow>
+                    )}
+                  </StyledOption>
+                </React.Fragment>
+              );
+            })}
+          </StyledMenu>
+        </FloatingPortal>
+      )}
+
+      {/* control tooltip — unchanged behavior from the old implementation */}
       {(tooltipLabel || tooltipContent) && (
         <Tooltip
-          disabled={isMulti && (value as DropdownItem[])?.length === 0}
+          disabled={multi && selectedArray.length === 0}
           content={
             <p>
-              {isMulti ? (
+              {multi ? (
                 <>
                   <b>
-                    {(value as DropdownItem[]).map((v, key) => {
-                      return (
-                        <React.Fragment key={key}>
-                          {v.value !== allEntities.value && (
-                            <>
-                              {v.label}
-                              {key !== (value as DropdownItem[])?.length - 1 && ", "}
-                            </>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
+                    {selectedArray.map((v, key) => (
+                      <React.Fragment key={key}>
+                        {v.value !== allEntities.value && (
+                          <>
+                            {v.label}
+                            {key !== selectedArray.length - 1 && ", "}
+                          </>
+                        )}
+                      </React.Fragment>
+                    ))}
                   </b>{" "}
                   ({tooltipLabel})
                 </>
@@ -303,107 +403,10 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
             </p>
           }
           visible={showTooltip}
-          referenceElement={referenceElement}
+          referenceElement={wrapperEl}
           position={tooltipPosition}
         />
       )}
-    </>
-  );
-};
-
-const SingleValue = (props: SingleValueProps): React.ReactElement => {
-  return (
-    <>
-      <components.SingleValue {...props}></components.SingleValue>
-    </>
-  );
-};
-
-const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  return <components.Option {...props} />;
-};
-
-const ClearIndicator = (props: ClearIndicatorProps): React.ReactElement => {
-  const { onMouseDown, onTouchEnd, ...innerProps } = props.innerProps ?? {};
-
-  // clearing the value means the user wants nothing selected, so the open menu
-  // goes with it
-  const closeMenuAfter =
-    <E extends React.SyntheticEvent<HTMLDivElement>>(handler?: (event: E) => void) =>
-    (event: E) => {
-      handler?.(event);
-      props.selectProps.onMenuClose();
-    };
-
-  return (
-    <components.ClearIndicator
-      {...props}
-      innerProps={{
-        ...innerProps,
-        onMouseDown: closeMenuAfter(onMouseDown),
-        onTouchEnd: closeMenuAfter(onTouchEnd),
-      }}
-    >
-      <StyledClearIconWrap>
-        <components.CrossIcon size={14} />
-      </StyledClearIconWrap>
-    </components.ClearIndicator>
-  );
-};
-
-const ValueContainer = ({
-  children,
-  ...props
-}: { children: any } & ValueContainerProps<any, any, any> & {
-    selectProps: StyledSelect;
-  }): React.ReactElement => {
-  const currentValues: DropdownItem[] = [...props.getValue()];
-  let toBeRendered = children;
-
-  return <components.ValueContainer {...props}>{toBeRendered}</components.ValueContainer>;
-};
-
-// If multiple, values are not merged into all options, this component is rendered separately for every single value
-const MultiValue = (
-  props: MultiValueProps<any> & { selectProps: StyledSelect },
-): React.ReactElement => {
-  let labelToBeDisplayed = `${props.data.label}`;
-
-  return (
-    <components.MultiValue {...props}>
-      <span>{labelToBeDisplayed}</span>
-    </components.MultiValue>
-  );
-};
-
-
-const Control = ({
-  children,
-  ...props
-}: ControlProps<any, any, any> & { selectProps: StyledSelect }) => {
-  const { icon } = props.selectProps;
-
-  return (
-    <components.Control {...props}>
-      {icon && <StyledValueIconWrap>{icon}</StyledValueIconWrap>}
-      {children}
-    </components.Control>
-  );
-};
-
-const MenuPortal: typeof components.MenuPortal = (props: any & { selectProps: StyledSelect }) => {
-  const { entityDropdown, userDropdown } = props.selectProps;
-
-  return (
-    <components.MenuPortal
-      {...props}
-      className={
-        entityDropdown
-          ? "react-select__entity-dropdown"
-          : userDropdown
-            ? "react-select__user-dropdown"
-            : ""
-      }
-    />
+    </StyledDropdownWrap>
   );
 };

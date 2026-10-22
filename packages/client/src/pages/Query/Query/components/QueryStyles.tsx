@@ -1,5 +1,10 @@
 import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import styled from "styled-components";
+import {
+  StyledControl,
+  StyledSearchInput,
+  StyledSingleValue,
+} from "components/basic/BaseDropdown/BaseDropdownStyles";
 
 export const StyledNodeContainer = styled.div<{ $column?: boolean }>`
   display: flex;
@@ -34,7 +39,7 @@ export const StyledGraphNode = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
 
-  .react-select__input-container {
+  ${StyledSearchInput} {
     color: ${({ theme }) => theme.color.white};
   }
 `;
@@ -64,14 +69,14 @@ export const StyledNodeExpansionToggles = styled.div`
 `;
 
 export const StyledNodeTypeSelect = styled.div`
-  .react-select__control {
+  ${StyledControl} {
     background-color: transparent;
     border: none;
     text-align: center;
   }
-  .react-select__single-value {
+  ${StyledSingleValue} {
     color: ${({ theme }) => theme.color.primary};
-    font-weight: 900 !important;
+    font-weight: 900;
     font-size: large;
   }
 `;
