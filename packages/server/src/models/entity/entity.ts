@@ -543,6 +543,7 @@ export default class Entity implements IEntity, IDbModel {
         entitySOEs,
         entityLanguages,
         entityStatuses,
+        entityLabelContains,
         tieType,
         propType,
         allowedClasses,
@@ -596,12 +597,20 @@ export default class Entity implements IEntity, IDbModel {
           soeEs.map((e) => e.id)
         ).some((id) => acceptedSOEs.includes(id));
 
+      const labelText = entityLabelContains?.trim().toLowerCase();
+      const labelCheck =
+        !labelText ||
+        (this.labels ?? []).some((label) =>
+          label.toLowerCase().includes(labelText)
+        );
+
       if (
         entityCheck &&
         classificationCheck &&
         languageCheck &&
         statusCheck &&
-        soeCheck
+        soeCheck &&
+        labelCheck
       ) {
         // CLASSIFICATION TIE
         if (tieType === EProtocolTieType.Classification) {
