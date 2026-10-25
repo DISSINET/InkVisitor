@@ -4,6 +4,7 @@ import {
   GeocodingAccuracy,
   IGeocodingContext,
   IGeocodingRoles,
+  rolesShareAConcept,
 } from "@inkvisitor/shared/types/geocoding";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -64,6 +65,9 @@ import {
  * Every field selects an existing entity or creates one, so a fresh deployment
  * needs no seeding job.
  */
+
+const NAMELESS = "Every location type needs a name.";
+const SHARED_CONCEPT = "One Concept cannot be used for two of the coordinate roles.";
 
 interface GeocodingSettingsModal {
   roles: IGeocodingRoles;
@@ -138,7 +142,12 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   const save = useMutation({
     mutationFn: async () => {
       if (draft.placeTypes.some((one) => !one.name.trim())) {
-        throw new Error("Every location type needs a name.");
+        throw new Error(NAMELESS);
+      }
+      // the roles are told apart by their Concept, so one Concept in two of them
+      // would make the geometry and the accuracy under it the same thing
+      if (rolesShareAConcept(draft)) {
+        throw new Error(SHARED_CONCEPT);
       }
       // the draft holds every role, so a role the researcher unlinked is absent
       // from this object — it has to replace, not merge
@@ -170,7 +179,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       onClose();
     },
     onError: (error) => {
-      if (error instanceof Error && error.message === "Every location type needs a name.") {
+      if (error instanceof Error && [NAMELESS, SHARED_CONCEPT].includes(error.message)) {
         toast.error(error.message);
         return;
       }
