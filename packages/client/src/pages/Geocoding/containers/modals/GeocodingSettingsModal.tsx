@@ -350,11 +350,9 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
-            The project&apos;s own location types, free to define. A Location has a location type by being
-            classified under the location type&apos;s Concept, so assign one Concept per location type — picking a
-            Concept another location type holds moves it. The gazetteer location type connects a suggestion&apos;s own
-            type to your location types: when several of yours answer to one, the starred one is offered
-            first. A location type with no Concept blocks the write rather than being dropped.
+            The project&apos;s location typology. The gazetteer location type select maps it onto
+            the gazetteers&apos; general typology, which is then used for prioritising the proper
+            category. A Concept must be assigned if you want to geocode that general type.
           </StyledSectionNote>
           <StyledKindsRow>
             <PlaceTypeTable
