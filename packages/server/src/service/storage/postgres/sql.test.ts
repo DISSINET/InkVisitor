@@ -32,7 +32,7 @@ describe("postgres sql helpers", () => {
     expect(
       indexPredicate("audits", DbEnums.Indexes.AuditScopeModelId, [["entity", "e1"], ["document", null]], 1)
     ).toEqual({
-      sql: "((doc->>'auditScope'), (doc->>'modelId')) IN (($2, $3), ($4, $5))",
+      sql: "(audit_scope, model_id) IN (($2, $3), ($4, $5))",
       params: ["entity", "e1", "document", null],
     });
   });

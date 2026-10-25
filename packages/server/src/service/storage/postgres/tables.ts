@@ -31,7 +31,7 @@ import {
 } from "../types";
 import { query } from "./conn";
 import { notifyChanged, notifyCleared } from "./invalidation";
-import { pgIndexName } from "./provision";
+import { COLUMNS, col, pgIndexName } from "./provision";
 import { encode, ident, indexPredicate, revive } from "./sql";
 
 const EMPTY: WriteResult = { deleted: 0, errors: 0, inserted: 0, replaced: 0, skipped: 0, unchanged: 0 };
@@ -357,9 +357,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
 
 // ---- stores ---------------------------------------------------------------
 
-/** a field name spliced into SQL as a string literal; quotes are doubled */
-const literal = (text: string): string => `'${text.replace(/'/g, "''")}'`;
-
 const NOT_TRASHED = `NOT (doc ? 'deletedAt')`;
 
 export const users: UserStore = {
@@ -528,20 +525,33 @@ export const documents: DocumentStore = {
   },
 };
 
-/** the stored day (an ISO UTC string's first ten characters) as a midnight instant, what ReQL `.date()` compares */
-const AUDIT_DAY = `left(doc->>'date', 10) || 'T00:00:00.000Z'`;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** audit document field -> generated column, for the fields a group key may read */
+const AUDIT_COLUMN_OF_FIELD: Record<string, string> = {};
+for (const [column, path] of Object.entries(COLUMNS.audits)) {
+  AUDIT_COLUMN_OF_FIELD[path] = col(column);
+}
+
+function auditColumn(field: string): string {
+  const column = AUDIT_COLUMN_OF_FIELD[field];
+  if (!column) {
+    throw new Error(`postgres: audits has no generated column for ${field}`);
+  }
+  return column;
+}
 
 /** the audit's UTC timestamp bucketed as ReQL does it: yyyy / yyyy-mm / yyyy-mm-dd / the Monday of its ISO week */
 function bucketSql(timeUnit: TimeUnit): string {
   switch (timeUnit) {
     case TimeUnit.DAY:
-      return `left(doc->>'date', 10)`;
+      return `left(date, 10)`;
     case TimeUnit.WEEK:
-      return `to_char(date_trunc('week', (doc->>'date')::timestamptz AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`;
+      return `to_char(date_trunc('week', date::timestamptz AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`;
     case TimeUnit.MONTH:
-      return `left(doc->>'date', 7)`;
+      return `left(date, 7)`;
     case TimeUnit.YEAR:
-      return `left(doc->>'date', 4)`;
+      return `left(date, 4)`;
     default:
       throw new Error("Invalid time unit");
   }
@@ -559,7 +569,7 @@ export const audits: AuditStore = {
     const where = byScopeAndModel(scope, modelId);
     return firstDoc<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY doc->>'date', id LIMIT 1`, where.params)
+      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date, id LIMIT 1`, where.params)
     );
   },
 
@@ -567,7 +577,7 @@ export const audits: AuditStore = {
     const where = byScopeAndModel(scope, modelId);
     return firstDoc<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY doc->>'date' DESC, id LIMIT 1`, where.params)
+      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date DESC, id LIMIT 1`, where.params)
     );
   },
 
@@ -575,7 +585,7 @@ export const audits: AuditStore = {
     const where = byScopeAndModel(scope, modelId);
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY doc->>'date' DESC, id LIMIT $3`, [
+      await q(conn, `SELECT doc FROM audits WHERE ${where.sql} ORDER BY date DESC, id LIMIT $3`, [
         ...where.params,
         n,
       ])
@@ -588,36 +598,43 @@ export const audits: AuditStore = {
       await q(
         conn,
         `SELECT doc FROM audits
-         WHERE ${auditsRelationEntityIds}(doc) && $1::text[] AND doc->>'auditScope' = $2
-         ORDER BY doc->>'date' DESC, id LIMIT $3`,
+         WHERE ${auditsRelationEntityIds}(doc) && $1::text[] AND audit_scope = $2
+         ORDER BY date DESC, id LIMIT $3`,
         [[entityId], AuditScope.Relation, n]
       )
     );
   },
 
   async earliestDate(conn) {
-    const res = await q(conn, `SELECT min(doc->>'date') AS d FROM audits`);
+    const res = await q(conn, `SELECT min(date) AS d FROM audits`);
     const d = res.rows[0]?.d as string | null;
     return d ? new Date(d) : null;
   },
 
   async onDate(conn, date) {
+    // an audit's day is a midnight instant, so any other instant matches nothing
+    if (date.getTime() % DAY_MS !== 0) {
+      return [];
+    }
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE ${AUDIT_DAY} = $1 ORDER BY id`, [date.toISOString()])
+      await q(conn, `SELECT doc FROM audits WHERE date >= $1 AND date < $2 ORDER BY id`, [
+        date.toISOString(),
+        new Date(date.getTime() + DAY_MS).toISOString(),
+      ])
     );
   },
 
   async entityScopedInRange(conn, after, before) {
     const params: unknown[] = [AuditScope.Entity];
-    let sql = `SELECT doc FROM audits WHERE doc->>'auditScope' = $1`;
+    let sql = `SELECT doc FROM audits WHERE audit_scope = $1`;
     if (after) {
       params.push(after.toISOString());
-      sql += ` AND doc->>'date' >= $${params.length}`;
+      sql += ` AND date >= $${params.length}`;
     }
     if (before) {
       params.push(before.toISOString());
-      sql += ` AND doc->>'date' <= $${params.length}`;
+      sql += ` AND date <= $${params.length}`;
     }
     return docs<IAudit>(TABLE.audits, await q(conn, `${sql} ORDER BY id`, params));
   },
@@ -625,7 +642,7 @@ export const audits: AuditStore = {
   async byTypeAndUser(conn, type: EventType, user) {
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE doc->>'type' = $1 AND doc->>'user' = $2 ORDER BY id`, [type, user])
+      await q(conn, `SELECT doc FROM audits WHERE type = $1 AND "user" = $2 ORDER BY id`, [type, user])
     );
   },
 
@@ -634,25 +651,26 @@ export const audits: AuditStore = {
       TABLE.audits,
       await q(
         conn,
-        `SELECT doc FROM audits WHERE ${AUDIT_DAY} >= $1 ORDER BY doc->>'date', id OFFSET $2 LIMIT $3`,
-        [filter.from.toISOString(), filter.skip, filter.take]
+        `SELECT doc FROM audits WHERE date >= $1 ORDER BY date, id OFFSET $2 LIMIT $3`,
+        // audits whose UTC day-midnight is >= from: from rounded up to a midnight
+        [new Date(Math.ceil(filter.from.getTime() / DAY_MS) * DAY_MS).toISOString(), filter.skip, filter.take]
       )
     );
   },
 
   async countByBucket(conn, params: AuditCountParams) {
     const values: unknown[] = [params.eventTypes];
-    const where = [`doc->>'type' = ANY($1::text[])`];
+    const where = [`type = ANY($1::text[])`];
     if (params.from !== undefined && params.to !== undefined) {
       values.push(params.from.toISOString(), params.to.toISOString());
       // ReQL between: left-closed, right-open
-      where.push(`doc->>'date' >= $2 AND doc->>'date' < $3`);
+      where.push(`date >= $2 AND date < $3`);
     }
     if (params.entityIds) {
       values.push(AuditScope.Entity, params.entityIds);
-      where.push(`doc->>'auditScope' = $${values.length - 1} AND doc->>'modelId' = ANY($${values.length}::text[])`);
+      where.push(`audit_scope = $${values.length - 1} AND model_id = ANY($${values.length}::text[])`);
     }
-    const keys = [bucketSql(params.timeUnit), ...params.groupBy.map((field) => `doc->>${literal(field)}`)];
+    const keys = [bucketSql(params.timeUnit), ...params.groupBy.map(auditColumn)];
     const positions = keys.map((_, i) => i + 1).join(", ");
     const res = await q(
       conn,

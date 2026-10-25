@@ -10,7 +10,7 @@
     "test": "jest --runInBand",
     "test:unit": "jest --selectProjects unit",
     "test:integration": "jest --selectProjects integration --runInBand",
-    "test:contract:pg": "DB_ADAPTER=postgres jest --selectProjects integration --runInBand src/service/storage/contract.test.ts src/service/storage/query.contract.test.ts src/test/harness.smoke.test.ts",
+    "test:contract:pg": "DB_ADAPTER=postgres jest --selectProjects integration --runInBand src/service/storage/contract.test.ts src/service/storage/query.contract.test.ts src/service/storage/postgres/schema.test.ts src/test/harness.smoke.test.ts",
     "test:pg": "DB_ADAPTER=postgres jest --runInBand",
     "start": "ENV_FILE=development nodemon",
     "dev": "ENV_FILE=development nodemon",
