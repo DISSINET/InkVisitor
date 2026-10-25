@@ -72,4 +72,22 @@ describe("PlaceTypeTable", () => {
     });
     expect(document.body.textContent).not.toContain("The twelve types the gazetteers use");
   });
+
+  it("shows an unknown count for a location type whose Concept is not yet answered, not zero", () => {
+    const kinds = defaultPlaceTypes().map((one, index) => ({ ...one, conceptId: `c-${index}` }));
+    view = render(
+      <PlaceTypeTable
+        value={kinds}
+        onChange={() => undefined}
+        renderConcept={() => null}
+        counts={{}}
+        pendingTypes={[kinds[1].id]}
+        countsLoading={false}
+        countsFailed={false}
+      />,
+    );
+    const counts = view.all("[class*='Count'], [class*='count']").map((node) => node.textContent);
+    expect(counts.filter((text) => text?.includes("…"))).toHaveLength(1);
+    expect(counts.filter((text) => text?.trim() === "0")).toHaveLength(kinds.length - 1);
+  });
 });

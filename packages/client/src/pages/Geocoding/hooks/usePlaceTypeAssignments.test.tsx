@@ -71,16 +71,27 @@ const Probe = (props: { types: IGeocodingPlaceType[]; only?: Set<string> }) => {
 };
 
 let view: Rendered;
+let client: QueryClient;
+const settle = () =>
+  act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  });
 const mount = async (props: React.ComponentProps<typeof Probe>) => {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   view = render(
     <QueryClientProvider client={client}>
       <Probe {...props} />
     </QueryClientProvider>,
   );
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 20));
-  });
+  await settle();
+};
+const remount = async (props: React.ComponentProps<typeof Probe>) => {
+  view.update(
+    <QueryClientProvider client={client}>
+      <Probe {...props} />
+    </QueryClientProvider>,
+  );
+  await settle();
 };
 
 const answer = (response: IResponseClassifiedUnder) =>
@@ -160,6 +171,22 @@ describe("usePlaceTypeAssignments", () => {
     answer({ entities: {}, truncated: ["c-settlement"] });
     await mount({ types });
     expect(result.truncatedTypes).toEqual(["settlement"]);
+  });
+
+  it("calls the count of a Concept just assigned unknown rather than zero while its answer is awaited", async () => {
+    answer({ entities: { a: [one("c-settlement", "c-settlement")] }, truncated: [] });
+    await mount({ types });
+    expect(result.pendingTypes).toEqual([]);
+
+    // the next answer never arrives
+    api.entitiesClassifiedUnder.mockReturnValue(new Promise(() => undefined));
+    await remount({
+      types: types.map((one) => (one.id === "unassigned" ? { ...one, conceptId: "c-new" } : one)),
+    });
+
+    expect(result.pendingTypes).toEqual(["unassigned"]);
+    // what was already answered stays on screen meanwhile
+    expect(result.countByType.settlement).toBe(1);
   });
 
   it("fetches the Concepts a type is inferred through, and only those, for the tooltip", async () => {

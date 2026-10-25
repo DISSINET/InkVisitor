@@ -379,6 +379,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
               counts={assignments.countByType}
               inferredCounts={assignments.inferredByType}
               truncatedTypes={assignments.truncatedTypes}
+              pendingTypes={assignments.pendingTypes}
               countsLoading={assignments.isLoading || !locationIds}
               countsFailed={!!assignments.error}
             />

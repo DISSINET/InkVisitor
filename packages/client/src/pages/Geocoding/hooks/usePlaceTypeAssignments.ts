@@ -48,6 +48,12 @@ export interface PlaceTypeAssignments {
   inferredByType: Record<string, number>;
   /** Location types whose subclasses were too many to follow, so that some Locations are missing. */
   truncatedTypes: string[];
+  /**
+   * Location types whose Concept the answer on hand was not asked about, which is
+   * what a Concept just assigned is while its answer is awaited; their counts are
+   * not zero but unknown.
+   */
+  pendingTypes: string[];
   /** The label of each Concept a Location is only inferred to have a type through. */
   viaLabels: Record<string, string>;
   isLoading: boolean;
@@ -98,8 +104,10 @@ export const usePlaceTypeAssignments = (
 
   const { data, isLoading, error } = useQuery({
     queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY, concepts],
-    queryFn: async (): Promise<IResponseClassifiedUnder> =>
-      (await api.entitiesClassifiedUnder(concepts, { ignoreErrorToast: true })).data,
+    queryFn: async (): Promise<{ response: IResponseClassifiedUnder; asked: string[] }> => ({
+      response: (await api.entitiesClassifiedUnder(concepts, { ignoreErrorToast: true })).data,
+      asked: concepts,
+    }),
     enabled: concepts.length > 0,
     retry: false,
     staleTime: 30_000,
@@ -112,7 +120,7 @@ export const usePlaceTypeAssignments = (
   // the server answers with ids; the few Concepts in question are fetched once
   const viaIds = useMemo(() => {
     const ids = new Set<string>();
-    Object.values((data ?? EMPTY).entities).forEach((classified) =>
+    Object.values((data?.response ?? EMPTY).entities).forEach((classified) =>
       classified.forEach((one) => one.inferred && ids.add(one.via)),
     );
     return [...ids].sort();
@@ -127,7 +135,7 @@ export const usePlaceTypeAssignments = (
   );
 
   return useMemo(() => {
-    const response = data ?? EMPTY;
+    const response = data?.response ?? EMPTY;
     const typesByLocation = new Map<string, LocationTypeEntry[]>();
     const countByType: Record<string, number> = {};
     const inferredByType: Record<string, number> = {};
@@ -160,11 +168,16 @@ export const usePlaceTypeAssignments = (
       .filter((placeType) => placeType.conceptId && response.truncated.includes(placeType.conceptId))
       .map((placeType) => placeType.id);
 
+    const pendingTypes = placeTypes
+      .filter((placeType) => placeType.conceptId && !data?.asked.includes(placeType.conceptId))
+      .map((placeType) => placeType.id);
+
     return {
       typesByLocation,
       countByType,
       inferredByType,
       truncatedTypes,
+      pendingTypes,
       viaLabels,
       isLoading,
       error: error ?? null,

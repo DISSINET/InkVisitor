@@ -53,6 +53,8 @@ interface PlaceTypeTable {
   inferredCounts?: Record<string, number>;
   /** The location types whose Concept has more subclasses than could be followed. */
   truncatedTypes?: string[];
+  /** The location types whose count is not yet known, as against zero. */
+  pendingTypes?: string[];
   countsLoading: boolean;
   /** The counts could not be read, so they are not shown as zero. */
   countsFailed: boolean;
@@ -123,6 +125,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   counts,
   inferredCounts = {},
   truncatedTypes = [],
+  pendingTypes = [],
   countsLoading,
   countsFailed,
 }) => {
@@ -277,10 +280,14 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                 ? "–"
                 : countsFailed
                   ? "?"
-                  : countsLoading
+                  : countsLoading || pendingTypes.includes(kind.id)
                     ? "…"
                     : (counts[kind.id] ?? 0)}
-              {kind.conceptId && !countsFailed && !countsLoading && inferredCounts[kind.id] ? (
+              {kind.conceptId &&
+              !countsFailed &&
+              !countsLoading &&
+              !pendingTypes.includes(kind.id) &&
+              inferredCounts[kind.id] ? (
                 <IconWithTooltip
                   icon={<StyledKindInferred>+{inferredCounts[kind.id]}</StyledKindInferred>}
                   tooltipText={`${inferredCounts[kind.id]} of these are classified under a subclass or a synonym of this Concept, not under the Concept itself.`}
