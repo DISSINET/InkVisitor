@@ -298,9 +298,9 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           </StyledFullRow>
           <StyledFullRow>
             <StyledSectionNote>
-              A source switched off here is never asked on your own runs — it costs nothing and
-              returns nothing. Sources the project has switched off are held down: an owner sets
-              those.
+              Gazetteers not checked here are not searched on your own runs. A gazetteer shown as
+              off for the whole project can be switched on only in the global settings, by an owner
+              or admin.
             </StyledSectionNote>
           </StyledFullRow>
           <StyledFullRow>

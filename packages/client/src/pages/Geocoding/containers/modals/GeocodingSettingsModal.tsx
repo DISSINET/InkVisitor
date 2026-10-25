@@ -369,13 +369,10 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Gazetteers</StyledSectionHeading>
           <StyledSectionNote>
-            One row per source the engine can ask. Switched off, a source is never asked for this
-            project, so it costs nothing and returns nothing: use it for a source this corpus has no
-            use for, or one whose licence does not cover this work. A researcher can switch further
-            sources off for their own runs, but cannot switch these back on. The resource is the
-            entity a reference to the source points at, and the record URL plus the stored
-            identifier rebuilds a link back into it; a source whose record URL does not end in the
-            identifier is left blank.
+            Gazetteers not checked in the checkbox to the left are not searched. Resource: the
+            entity that stands for the gazetteer when its coordinates are cited. Record URL: the
+            beginning of the link to a record in the gazetteer, to which the record&apos;s identifier
+            is added; leave it empty where a gazetteer&apos;s links do not end in the identifier.
           </StyledSectionNote>
           <StyledScrollRow>
             <GazetteerPicker
