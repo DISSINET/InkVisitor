@@ -23,7 +23,7 @@ import {
 
 /**
  * What the engine says about one source, laid out to be read before deciding
- * whether to ask it: what it is, what it is good for, what it cannot do, and on
+ * whether to ask it: what it is, what it is good for, its limitations, and on
  * what terms its data may be used.
  *
  * Everything here comes from `GET /suggesters`; nothing is written by this page.
@@ -85,7 +85,7 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
 
       {info.limitations ? (
         <StyledCardRow>
-          <StyledCardLabel>cannot do</StyledCardLabel>
+          <StyledCardLabel>limitations</StyledCardLabel>
           <StyledCardLimits>{info.limitations}</StyledCardLimits>
         </StyledCardRow>
       ) : null}

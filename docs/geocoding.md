@@ -379,8 +379,8 @@ the same mark and the same card. Hovering or focusing it shows what
 `GET /suggesters` says about the source: whether it is local records or an online
 service, its licence as chips (commercial use allowed or not, credit required,
 share-alike), its description, what it is good for (regions, periods, languages
-and kinds of place, written as words rather than slugs and codes), what it
-cannot do, how large its data is, the credit wording, the citation and the
+and kinds of place, written as words rather than slugs and codes), its
+limitations, how large its data is, the credit wording, the citation and the
 homepage. It is used in the gazetteer table of both modals, on every match tag
 in the suggestion cards, in the progress strip, in the map's place search and in
 the quick-geocode notice, so a source is explained identically everywhere and

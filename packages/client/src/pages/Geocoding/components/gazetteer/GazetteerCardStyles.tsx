@@ -5,7 +5,7 @@ import styled from "styled-components";
  *
  * Drawn for the tooltip it sits in: dark, so the text inherits the tooltip's
  * colour and every border is the text's own, thinned. The one thing set apart is
- * what the source cannot do, because it is the part that changes a decision.
+ * the source's limitations, because it is the part that changes a decision.
  */
 export const StyledGazetteerCard = styled.div`
   display: flex;
@@ -63,7 +63,7 @@ export const StyledCardLabel = styled.span`
   opacity: 0.65;
 `;
 
-/** What the source cannot do, set apart because it is the part that changes a decision. */
+/** The source's limitations, set apart because they are the part that changes a decision. */
 export const StyledCardLimits = styled.div`
   padding-left: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["warningMessage"]};

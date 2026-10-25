@@ -76,6 +76,8 @@ describe("GazetteerTag", () => {
     expect(text).toContain("A gazetteer of the Hanseatic trade network.");
     expect(text).toContain("low countries");
     expect(text).toContain("German");
+    expect(text).toContain("limitations");
+    expect(text).not.toContain("cannot do");
     expect(text).toContain("Places off the trade routes are absent.");
     expect(text).toContain("commercial use allowed");
   });

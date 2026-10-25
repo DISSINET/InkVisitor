@@ -11,7 +11,7 @@ import { useGazetteer } from "../../hooks/useGazetteerCatalogue";
  * A gazetteer, wherever the page names one.
  *
  * Hovering or focusing it shows what the engine says about the source — what it
- * is, what it is good for, what it cannot do and on what terms its data may be
+ * is, what it is good for, its limitations and on what terms its data may be
  * used. It is one component so the answer is the same in the settings table, on
  * a match, in the progress strip and on the map, and so a source added to the
  * engine is explained everywhere at once.
