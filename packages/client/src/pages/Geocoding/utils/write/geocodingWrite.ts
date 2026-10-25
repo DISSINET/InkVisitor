@@ -58,7 +58,10 @@ export interface GeocodingWriteInput {
 export interface GeocodingWritePlan {
   /** Value entities to create, in the order they are created. */
   newValues: IEntity[];
-  /** The Location's complete new props array — the update replaces, never appends. */
+  /**
+   * The Location's complete new props array — the update replaces, never appends.
+   * The accuracy is a child of the geometry prop, not a prop beside it.
+   */
   props: IProp[];
   references: IReference[];
   /**
@@ -94,6 +97,14 @@ const propFor = (typeId: string, valueId: string): IProp => {
   prop.value.entityId = valueId;
   return prop;
 };
+
+/**
+ * The roles a child of the geometry prop can hold, which this write owns.
+ *
+ * Whatever else a researcher hung under the geometry (another subproperty of
+ * their own) is carried over untouched.
+ */
+const childRoles = (roles: IGeocodingRoles): string[] => [roles.accuracy].filter(Boolean);
 
 // CEntity leaves `data` empty; every Value in this corpus carries a logicalType,
 // so the created ones match rather than being a recognisably different shape
@@ -168,8 +179,10 @@ export const planGeocodingWrite = (
     ? previousProps.find((prop) => prop.type?.entityId === roles.geometry && !!prop.value?.entityId)
     : undefined;
 
-  // every role this write owns; whatever the Location carried for them is
-  // replaced rather than added to, so a second write never leaves two geometries
+  // every role this write owns at the top level; whatever the Location carried
+  // for them is replaced rather than added to, so a second write never leaves two
+  // geometries. The accuracy belongs here too: an earlier version wrote it beside
+  // the geometry, and that prop goes where the accuracy is written under it
   const ownedTypes = [keptGeometry ? "" : roles.geometry, roles.accuracy].filter(Boolean);
   const displaced = previousProps.filter((prop) => ownedTypes.includes(prop.type?.entityId));
 
@@ -178,10 +191,25 @@ export const planGeocodingWrite = (
     : valueEntity(serializeGeometry(geometry), userOptions);
   const newValues: IEntity[] = geometryValue ? [geometryValue] : [];
 
+  const owned = childRoles(roles);
+  const ownChildren = [propFor(roles.accuracy, accuracyId)];
+  // the geometry prop the Location keeps carries its other children over; a new
+  // one starts with only what this write says about it
+  const geometryProp: IProp = keptGeometry
+    ? {
+        ...keptGeometry,
+        children: [
+          ...(keptGeometry.children || []).filter((child) => !owned.includes(child.type?.entityId)),
+          ...ownChildren,
+        ],
+      }
+    : { ...propFor(roles.geometry, geometryValue!.id), children: ownChildren };
+
   const props: IProp[] = [
-    ...previousProps.filter((prop) => !ownedTypes.includes(prop.type?.entityId)),
-    ...(geometryValue ? [propFor(roles.geometry, geometryValue.id)] : []),
-    propFor(roles.accuracy, accuracyId),
+    ...previousProps
+      .filter((prop) => !ownedTypes.includes(prop.type?.entityId))
+      .map((prop) => (prop === keptGeometry ? geometryProp : prop)),
+    ...(keptGeometry ? [] : [geometryProp]),
   ];
 
   // `llm-coords` is the model's own guess rather than a gazetteer: it has no
@@ -244,11 +272,19 @@ export const coordinateChanged = (
   roles: IGeocodingRoles,
 ): boolean => {
   const owned = [roles.geometry, roles.accuracy].filter(Boolean);
+  const ownedChildren = childRoles(roles);
   const signature = (entity: IEntity) =>
     JSON.stringify(
       (entity.props || [])
         .filter((prop) => owned.includes(prop.type?.entityId))
-        .map((prop) => [prop.type.entityId, prop.value?.entityId])
+        .map((prop) => [
+          prop.type.entityId,
+          prop.value?.entityId,
+          (prop.children || [])
+            .filter((child) => ownedChildren.includes(child.type?.entityId))
+            .map((child) => [child.type.entityId, child.value?.entityId])
+            .sort(),
+        ])
         .sort(),
     );
   return signature(before) !== signature(after);

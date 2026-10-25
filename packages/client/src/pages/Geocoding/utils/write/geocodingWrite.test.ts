@@ -15,6 +15,7 @@ import { CEntity, CProp } from "constructors";
 import { describe, expect, it, vi } from "vitest";
 import {
   GeocodingWritePlan,
+  coordinateChanged,
   isBlocked,
   needsOverwriteConfirmation,
   planGeocodingWrite,
@@ -82,9 +83,17 @@ describe("planGeocodingWrite", () => {
       type: "Point",
       coordinates: [17.033, 51.107],
     });
-    const byType = Object.fromEntries(plan.props.map((p) => [p.type.entityId, p.value.entityId]));
-    expect(byType["c-geo"]).toBe(plan.newValues[0].id);
-    expect(byType["c-acc"]).toBe("v-precise");
+    const geometry = plan.props.find((p) => p.type.entityId === "c-geo")!;
+    expect(geometry.value.entityId).toBe(plan.newValues[0].id);
+  });
+
+  it("writes the accuracy as a subproperty of the geometry, not as a prop beside it", () => {
+    const plan = planOf(baseInput);
+    const geometry = plan.props.find((p) => p.type.entityId === "c-geo")!;
+    expect(geometry.children.map((c) => [c.type.entityId, c.value.entityId])).toEqual([
+      ["c-acc", "v-precise"],
+    ]);
+    expect(plan.props.some((p) => p.type.entityId === "c-acc")).toBe(false);
   });
 
   it("rounds a coordinate to a precision the source can justify", () => {
@@ -352,6 +361,101 @@ describe("planGeocodingWrite, what counts as replacing a geometry", () => {
       pointGeometry(17.0384, 51.1079),
     );
     expect(kept.isOverwrite).toBe(false);
+  });
+});
+
+/**
+ * The accuracy is a subproperty of the geometry. An earlier version wrote it as
+ * a prop beside the geometry, and Locations written then still carry that shape
+ * until a migration moves them, so the write has to take either as its starting
+ * point and leave the new shape behind.
+ */
+describe("planGeocodingWrite, the accuracy under the geometry", () => {
+  const withChildren = (parent: IProp, children: IProp[]): IProp => {
+    parent.children = children;
+    return parent;
+  };
+  const childrenOf = (plan: GeocodingWritePlan, type = "c-geo") =>
+    plan.props.find((p) => p.type.entityId === type)!.children;
+  const same = pointGeometry(17.0384, 51.1079);
+
+  it("leaves no accuracy prop beside the geometry where the Location had one", () => {
+    const plan = planOf({
+      ...baseInput,
+      location: location([prop("c-geo", "old-geo"), prop("c-acc", "v-precise")]),
+    });
+    expect(plan.props.filter((p) => p.type.entityId === "c-acc")).toEqual([]);
+    expect(childrenOf(plan).map((c) => c.type.entityId)).toEqual(["c-acc"]);
+  });
+
+  it("moves the accuracy of a geometry that stayed under it, keeping the geometry prop itself", () => {
+    const geometry = withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old")]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+    });
+    const kept = plan.props.find((p) => p.type.entityId === "c-geo")!;
+    expect(kept.id).toBe(geometry.id);
+    expect(kept.children.map((c) => c.value.entityId)).toEqual(["v-precise"]);
+    expect(plan.newValues).toEqual([]);
+  });
+
+  it("migrates the shape beside the geometry when the geometry itself did not move", () => {
+    const geometry = prop("c-geo", "v-geo");
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry, prop("c-acc", "v-old")]),
+    });
+    expect(plan.props.map((p) => p.type.entityId)).toEqual(["c-geo"]);
+    expect(plan.props[0].id).toBe(geometry.id);
+    expect(childrenOf(plan).map((c) => c.value.entityId)).toEqual(["v-precise"]);
+  });
+
+  it("carries over what a researcher hung under the geometry beside the accuracy", () => {
+    const note = prop("c-note", "v-note");
+    const geometry = withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old"), note]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+    });
+    expect(childrenOf(plan).map((c) => c.type.entityId).sort()).toEqual(["c-acc", "c-note"]);
+    expect(childrenOf(plan).find((c) => c.type.entityId === "c-note")).toBe(note);
+  });
+
+  it("keeps the previous shape in the record, so what was there can be restored", () => {
+    const before = [withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old")])];
+    const plan = planOf({ ...baseInput, location: location(before) });
+    expect(plan.previous.props).toEqual(before);
+  });
+});
+
+describe("coordinateChanged", () => {
+  const withChildren = (parent: IProp, children: IProp[]): IProp => {
+    parent.children = children;
+    return parent;
+  };
+  const geocoded = (accuracy: string, extra: IProp[] = []) =>
+    location([withChildren(prop("c-geo", "v-geo"), [prop("c-acc", accuracy), ...extra])]);
+
+  it("sees someone else change the accuracy under the geometry", () => {
+    expect(coordinateChanged(geocoded("v-precise"), geocoded("v-approximate"), roles)).toBe(true);
+  });
+
+  it("sees the accuracy move from beside the geometry to under it as the same coordinate", () => {
+    const beside = location([prop("c-geo", "v-geo"), prop("c-acc", "v-precise")]);
+    expect(coordinateChanged(beside, geocoded("v-precise"), roles)).toBe(true);
+  });
+
+  it("is not moved by a subproperty the page does not own", () => {
+    expect(
+      coordinateChanged(geocoded("v-precise"), geocoded("v-precise", [prop("c-note", "v-n")]), roles),
+    ).toBe(false);
   });
 });
 

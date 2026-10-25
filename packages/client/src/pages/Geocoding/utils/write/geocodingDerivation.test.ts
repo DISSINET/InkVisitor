@@ -46,7 +46,17 @@ const entity = (id: string, label: string): IEntity => ({ id, labels: [label] })
 
 const point = (lon: number, lat: number) => JSON.stringify({ type: "Point", coordinates: [lon, lat] });
 
-const wellFormed = location([
+// the accuracy is a subproperty of the geometry prop
+const nested = (geometryValue: string, accuracyValue: string): IProp => {
+  const geometry = prop("concept-geometry", geometryValue);
+  geometry.children = [prop("concept-accuracy", accuracyValue)];
+  return geometry;
+};
+
+const wellFormed = location([nested("v-geo", "value-precise")]);
+
+// the shape written before the accuracy moved under the geometry
+const besideEachOther = location([
   prop("concept-geometry", "v-geo"),
   prop("concept-accuracy", "value-precise"),
 ]);
@@ -64,6 +74,28 @@ describe("deriveGeocoding", () => {
     expect(result.lat).toBe(51.107);
     expect(result.accuracy).toBe(GeocodingAccuracy.Precise);
     expect(result.problem).toBeNull();
+  });
+
+  it("still reads the shape that kept the accuracy beside the geometry, until it is migrated", () => {
+    const result = deriveGeocoding(besideEachOther, roles, values);
+    expect(result.isGeocoded).toBe(true);
+    expect(result.accuracy).toBe(GeocodingAccuracy.Precise);
+  });
+
+  it("reads the accuracy under the geometry before a stale one beside it", () => {
+    const both = location([
+      nested("v-geo", "value-approximate"),
+      prop("concept-accuracy", "value-precise"),
+    ]);
+    expect(deriveGeocoding(both, roles, values).accuracy).toBe(GeocodingAccuracy.Approximate);
+  });
+
+  it("does not read an accuracy hung under some other prop as the geometry's", () => {
+    const other = prop("some-other-concept", "v-other");
+    other.children = [prop("concept-accuracy", "value-precise")];
+    const result = deriveGeocoding(location([prop("concept-geometry", "v-geo"), other]), roles, values);
+    expect(result.isGeocoded).toBe(false);
+    expect(result.problem).toContain("accuracy");
   });
 
   it("does not confuse the axes — GeoJSON is [longitude, latitude]", () => {
@@ -149,10 +181,7 @@ describe("deriveGeocoding", () => {
 
   it("is not geocoded when accuracy points at an unconfigured Concept", () => {
     const result = deriveGeocoding(
-      location([
-        prop("concept-geometry", "v-geo"),
-        prop("concept-accuracy", "some-other-concept"),
-      ]),
+      location([nested("v-geo", "some-other-concept")]),
       roles,
       values,
     );
@@ -200,15 +229,15 @@ describe("deriveGeocoding", () => {
 });
 
 describe("collectGeoValueIds", () => {
-  it("gathers every configured role's value id", () => {
-    expect(collectGeoValueIds([wellFormed], roles).sort()).toEqual(
-      ["v-geo", "value-precise"].sort(),
-    );
+  it("gathers the geometry value, which is the only one with a label to read", () => {
+    // the accuracy is told apart by its id, so nothing is fetched for it
+    expect(collectGeoValueIds([wellFormed], roles)).toEqual(["v-geo"]);
+    expect(collectGeoValueIds([besideEachOther], roles)).toEqual(["v-geo"]);
   });
 
-  it("deduplicates across Locations, so a shared Concept is fetched once", () => {
+  it("deduplicates across Locations, so a shared value is fetched once", () => {
     const ids = collectGeoValueIds([wellFormed, wellFormed], roles);
-    expect(ids.filter((id) => id === "value-precise")).toHaveLength(1);
+    expect(ids).toEqual(["v-geo"]);
   });
 
   it("ignores roles that are not assigned", () => {

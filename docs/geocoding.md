@@ -12,12 +12,20 @@ own API reference lives in its repository; nothing here restates it.
 ## How a coordinate is stored
 
 The geometry is a metaproperty on the Location entity, not a field on
-`ILocationData`. Two sibling props carry it:
+`ILocationData`. One prop carries it, and the accuracy is that prop's
+subproperty:
 
-| prop type | prop value | example |
-|-----------|------------|---------|
-| Concept `geo:geometry` | Value entity | `{"type":"Point","coordinates":[17.033,51.107]}` |
-| Concept `geo:accuracy` | Concept | `geo-accuracy:precise` |
+| level | prop type | prop value | example |
+|-------|-----------|------------|---------|
+| first | Concept `geo:geometry` | Value entity | `{"type":"Point","coordinates":[17.033,51.107]}` |
+| second, under the geometry | Concept `geo:accuracy` | Concept | `geo-accuracy:precise` |
+
+Locations written before the accuracy moved under the geometry carry it as a
+second first-level prop beside the geometry. The page reads either shape, prefers
+the one under the geometry where both are there, and writes only the nested one,
+removing the prop beside it; `nestGeocodingAccuracyJob` moves the rest in one go
+and lists the Locations it will not touch (an accuracy with no geometry, several of
+either, or two accuracies that disagree).
 
 The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString`,
 `MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
@@ -43,8 +51,8 @@ vocabulary. When the engine returns a type with no corresponding Concept
 configured, the page warns and refuses rather than inventing one — a controlled
 vocabulary that grows from external input is not controlled.
 
-A Location counts as **geocoded** when both `geo:geometry` and `geo:accuracy`
-are present and the geometry's value resolves to an entity whose label is a valid
+A Location counts as **geocoded** when it has a `geo:geometry` prop with a
+`geo:accuracy` subproperty and the geometry's value resolves to an entity whose label is a valid
 GeoJSON geometry. A prop pointing at a Value that was deleted, or at a Value whose
 label is blank, not JSON, out of range or an open ring, does not count — a
 geometry that cannot be read is not a geometry. One
@@ -1115,7 +1123,9 @@ That shape cannot be adopted by pointing settings at it, because one Value entit
 cannot serve two sibling props. 1099 of them have been converted into the four-prop
 form — accuracy taken from the precision child where it existed (681 `precise`,
 361 `approximate`) and `unknown` for the 57 without one. The remaining Location,
-`diocesis Tudensis`, has a coordinate prop whose value points at nothing.
+`diocesis Tudensis`, has a coordinate prop whose value points at nothing. That
+conversion wrote the accuracy beside the geometry, the shape `nestGeocodingAccuracyJob`
+moves under it.
 
 The legacy props were left in place rather than deleted, so the conversion is
 reversible and the original strings stay readable. They are inert: nothing reads
