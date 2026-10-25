@@ -325,10 +325,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A geocoded Location carries a GeoJSON geometry, and under it, as subproperties, the
-            accuracy and the sources of the coordinate. Which Concept plays which role is set once
-            for the project — it is what &ldquo;geocoded&rdquo; means, so it cannot differ between
-            users.
+            Choose (or create) the Concept holding geographic coordinates in GeoJSON format, the
+            Concept holding localisation accuracy, and the Concept holding the source of knowledge.
           </StyledSectionNote>
           {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, geometry: id ?? "" }))
