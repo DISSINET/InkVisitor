@@ -22,6 +22,35 @@ export const StyledKindHeader = styled.div`
   color: ${({ theme }) => theme.color["greyer"]};
 `;
 
+/** A column title with a help mark beside it. */
+export const StyledKindHeadHelp = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[1]};
+  cursor: help;
+`;
+
+/** What each gazetteer location type covers, set out in the tooltip of its column title. */
+export const StyledEngineTypeHelp = styled.div`
+  max-width: 28rem;
+  text-align: left;
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: ${({ theme }) => theme.space[1]} ${({ theme }) => theme.space[2]};
+    margin: ${({ theme }) => theme.space[2]} 0 0;
+  }
+
+  dt {
+    font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+  }
+
+  dd {
+    margin: 0;
+  }
+`;
+
 export const StyledKindRow = styled.div`
   display: grid;
   grid-template-columns: ${COLUMNS};

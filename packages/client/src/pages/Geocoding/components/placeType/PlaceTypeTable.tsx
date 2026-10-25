@@ -8,7 +8,7 @@ import { Button, IconWithTooltip, Input } from "components";
 import Dropdown from "components/advanced";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash } from "Theme/icons";
+import { IcoInfo, IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash } from "Theme/icons";
 import { v4 as uuidv4 } from "uuid";
 import { PLACE_ICON_KEYS, placeIcon } from "./placeTypeIcons";
 import { assignConcept, makeFavorite, pairEngineType } from "../../utils/write/placeTypeEdits";
@@ -21,7 +21,9 @@ import {
   StyledIconPanel,
   StyledKindActions,
   StyledKindCell,
+  StyledEngineTypeHelp,
   StyledKindCount,
+  StyledKindHeadHelp,
   StyledKindHeadRight,
   StyledKindHeader,
   StyledKindRow,
@@ -98,7 +100,29 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         <span />
         <span>name</span>
         <span>Concept a Location is classified under</span>
-        <span>gazetteer location type</span>
+        {/* a location type such as "church" is paired with one of twelve names that
+            mean more than they say, and "religious house" is the one that covers it,
+            so the header says what each of them covers */}
+        <StyledKindHeadHelp>
+          <span>gazetteer location type</span>
+          <IconWithTooltip
+            icon={<IcoInfo />}
+            tooltipPosition="bottom"
+            tooltipContent={
+              <StyledEngineTypeHelp>
+                <p>The twelve types the gazetteers use. Choose the one that covers your location type:</p>
+                <dl>
+                  {GEOCODING_PLACE_TYPES.map((engineType) => (
+                    <React.Fragment key={engineType}>
+                      <dt>{ENGINE_PLACE_TYPE_INFO[engineType].label}</dt>
+                      <dd>{ENGINE_PLACE_TYPE_INFO[engineType].description}</dd>
+                    </React.Fragment>
+                  ))}
+                </dl>
+              </StyledEngineTypeHelp>
+            }
+          />
+        </StyledKindHeadHelp>
         <span />
         <StyledKindHeadRight>locations</StyledKindHeadRight>
         <span>description</span>
