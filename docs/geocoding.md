@@ -92,7 +92,7 @@ written together in any case.
 
 The **global** modal is owner-or-admin, alongside Global validations, and holds
 the Concept and Resource assignments and the place-type dictionary. The query
-context — region, period, language, kind of place — is edited on the Suggestions
+context — region, period, language, gazetteer location type — is edited on the Suggestions
 panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
@@ -171,11 +171,11 @@ comparable across two different contexts.** One measured `Breslau` query scored
 0.705 under the defaults and 0.656 under region alone. Nothing on this page pins
 anything to a score value.
 
-**Every field holds a list.** Region, period, language and kind of place each take
+**Every field holds a list.** Region, period, language and gazetteer location type each take
 several values, and several mean *any of them*: a source keeps its best score
 among the regions and is skipped only if it covers none of them, the periods are
 scored on the union of their spans so overlapping ones count once, a source
-matching any of the kinds of place scores in full, and the merge radius is the
+matching any of the gazetteer location types scores in full, and the merge radius is the
 largest among them. Language is the one list whose order matters — it is the
 researcher's own statement of which is likelier. The engine (0.2.0) accepts these
 four only as lists: a bare string, an empty list or a blank entry is 422, so an
@@ -377,7 +377,7 @@ a source's name in the gazetteer table of both modals a mark and a card. Hoverin
 or focusing it shows what `GET /suggesters` says about the source: whether it is
 local records or an online service, its licence as chips (commercial use allowed
 or not, credit required, share-alike), its description, what it is good for
-(regions, periods, languages and kinds of place, written as words rather than
+(regions, periods, languages and gazetteer location types, written as words rather than
 slugs and codes), its limitations, how large its data is, the credit wording, the
 citation and the homepage. The card stays open briefly after the pointer leaves
 so the homepage link can be reached.
@@ -516,7 +516,7 @@ whichever applies:
 - `query.candidates[].llmProvider === "none"` — no name variants were generated,
   so only the name as written was searched.
 - `contextEvaluated === false`, when the request carried any criterion at all —
-  a region named or drawn, a period, a language, a kind of place. Those criteria
+  a region named or drawn, a period, a language, a gazetteer location type. Those criteria
   were never weighed. Absent is not false: the preview frame omits the field
   because the stage has not run yet, which is why the band is computed on the
   final frame only. Each field is asked whether it *says* anything rather than
@@ -532,10 +532,11 @@ place regardless. What they cannot do is notice this by looking at the list.
 A coordinate answers where; the project's location types answer what. The project
 defines its own list in the global settings — a name, the Concept a Location is
 classified under, a mark chosen from a set of sixty-two, a description and,
-optionally, the engine type it answers to. The engine's twelve types are a
-separate vocabulary: they say what to ask the gazetteers for, while a place type
-says what the project calls a Location. The default list is one kind per engine
-type. When several kinds answer to one engine type, the starred favourite is
+optionally, the gazetteer location type it answers to. The gazetteer location
+types, the engine's twelve, are a separate vocabulary: they say what to ask the
+gazetteers for, while a location type says what the project calls a Location. The
+default list is one location type per gazetteer location type. When several
+location types answer to one gazetteer location type, the starred favourite is
 offered first and the picker says how many match. The table counts the Locations
 classified under each location type's Concept, and assigning a Concept another location type holds
 moves it, since a Concept stands for one location type. A Location can carry several location types;

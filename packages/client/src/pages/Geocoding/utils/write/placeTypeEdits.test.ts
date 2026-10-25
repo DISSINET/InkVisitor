@@ -35,7 +35,7 @@ describe("assignConcept", () => {
 });
 
 describe("pairEngineType", () => {
-  it("makes the first kind to answer to an engine type its favourite", () => {
+  it("makes the first kind to answer to a gazetteer location type its favourite", () => {
     const next = pairEngineType([kind("a")], "a", "religious");
     expect(next[0]).toMatchObject({ engineType: "religious", favorite: true });
   });
@@ -46,14 +46,14 @@ describe("pairEngineType", () => {
     expect(next.map((one) => one.favorite)).toEqual([true, false]);
   });
 
-  it("drops the star with the engine type", () => {
+  it("drops the star with the gazetteer location type", () => {
     const next = pairEngineType([kind("a", { engineType: "religious", favorite: true })], "a", null);
     expect(next[0]).toMatchObject({ engineType: null, favorite: false });
   });
 });
 
 describe("makeFavorite", () => {
-  it("moves the star to the chosen kind and leaves other engine types alone", () => {
+  it("moves the star to the chosen kind and leaves other gazetteer location types alone", () => {
     const list = [
       kind("a", { engineType: "religious", favorite: true }),
       kind("b", { engineType: "religious" }),
@@ -62,7 +62,7 @@ describe("makeFavorite", () => {
     expect(makeFavorite(list, "b").map((one) => one.favorite)).toEqual([false, true, true]);
   });
 
-  it("does nothing for a kind with no engine type, which has nothing to be favourite of", () => {
+  it("does nothing for a kind with no gazetteer location type, which has nothing to be favourite of", () => {
     const list = [kind("a")];
     expect(makeFavorite(list, "a")).toBe(list);
   });
@@ -78,7 +78,7 @@ describe("kindsForEngineType", () => {
     expect(kindsForEngineType(list, "religious").map((one) => one.id)).toEqual(["b", "a"]);
   });
 
-  it("is empty for no engine type and for one no kind answers to", () => {
+  it("is empty for no gazetteer location type and for one no kind answers to", () => {
     expect(kindsForEngineType([kind("a", { engineType: "river" })], null)).toEqual([]);
     expect(kindsForEngineType([kind("a", { engineType: "river" })], "lake")).toEqual([]);
   });

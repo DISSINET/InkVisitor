@@ -41,7 +41,7 @@ export const GEOCODING_PLACE_TYPES = [
 export type GeocodingPlaceType = (typeof GEOCODING_PLACE_TYPES)[number];
 
 /**
- * What each engine type is called and covers. Words rather than a code because
+ * What each gazetteer location type is called and covers. Words rather than a code because
  * the twelve are the engine's vocabulary: "religious" covers a chapel and a
  * monastery, and nobody guesses that from the word. `icon` is a key into the
  * client's icon set.
@@ -129,16 +129,16 @@ export interface IGeocodingPlaceType {
   /** The Concept a Location is classified under. Empty means not assigned yet. */
   conceptId: string;
   /**
-   * The engine type this kind answers to, or null for a kind no gazetteer has a
-   * word for. It decides which of the project's kinds a suggestion's own type
+   * The gazetteer location type this location type answers to, or null for a location type no gazetteer has a
+   * word for. It decides which of the project's location types a suggestion's own type
    * points at.
    */
   engineType: GeocodingPlaceType | null;
-  /** The kind offered first for its engine type; at most one per engine type. */
+  /** The location type offered first for its gazetteer location type; at most one per gazetteer location type. */
   favorite: boolean;
 }
 
-/** One kind per engine type, each paired with its own — the list a project starts from. */
+/** One kind per gazetteer location type, each paired with its own — the list a project starts from. */
 export const defaultPlaceTypes = (): IGeocodingPlaceType[] =>
   GEOCODING_PLACE_TYPES.map((engineType) => ({
     id: engineType,
@@ -153,7 +153,7 @@ export const defaultPlaceTypes = (): IGeocodingPlaceType[] =>
 /**
  * The list a stored value stands for.
  *
- * A row written before the list existed holds a map from engine type to Concept;
+ * A row written before the list existed holds a map from gazetteer location type to Concept;
  * it becomes the default list with those Concepts assigned. Anything else that
  * is not a list is the default list, so a settings row is never the reason the
  * page has no location types to offer.

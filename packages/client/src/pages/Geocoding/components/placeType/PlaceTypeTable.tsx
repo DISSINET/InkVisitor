@@ -33,9 +33,9 @@ import { ButtonSize } from "types";
  * The project's own location types.
  *
  * Free to define: a name, the Concept a Location is classified under, a mark,
- * the engine type it answers to and a description. The engine type is what
+ * the gazetteer location type it answers to and a description. The gazetteer location type is what
  * connects a suggestion's own type to the project's vocabulary, and the star
- * marks the kind offered first where several answer to the same engine type.
+ * marks the location type offered first where several answer to the same gazetteer location type.
  */
 
 interface PlaceTypeTable {
@@ -56,7 +56,7 @@ const PANEL_HEIGHT = 230;
 const NO_ENGINE_TYPE = "none";
 
 const engineOptions = [
-  { value: NO_ENGINE_TYPE, label: "no engine type" },
+  { value: NO_ENGINE_TYPE, label: "no gazetteer location type" },
   ...GEOCODING_PLACE_TYPES.map((engineType) => ({
     value: engineType,
     label: ENGINE_PLACE_TYPE_INFO[engineType].label,
@@ -98,7 +98,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         <span />
         <span>name</span>
         <span>Concept a Location is classified under</span>
-        <span>engine type</span>
+        <span>gazetteer location type</span>
         <span />
         <StyledKindHeadRight>locations</StyledKindHeadRight>
         <span>description</span>
@@ -198,8 +198,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               disabled={!kind.engineType}
               aria-label={
                 kind.favorite
-                  ? "favourite for its engine type"
-                  : "make this the favourite for its engine type"
+                  ? "favourite for its gazetteer location type"
+                  : "make this the favourite for its gazetteer location type"
               }
               aria-pressed={kind.favorite}
               onClick={() => onChange(makeFavorite(value, kind.id))}
@@ -208,8 +208,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                 icon={kind.favorite ? <IcoStarFilled /> : <IcoStarOutline />}
                 tooltipText={
                   kind.engineType
-                    ? "the favourite is the kind offered first when a suggestion has this engine type"
-                    : "choose an engine type to make this a favourite"
+                    ? "the favourite is the location type offered first when a suggestion has this gazetteer location type"
+                    : "choose a gazetteer location type to make this a favourite"
                 }
                 tooltipPosition="top"
               />

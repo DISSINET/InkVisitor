@@ -350,11 +350,11 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
 
           <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
-            The project&apos;s own kinds of place, free to define. A Location has a kind by being
-            classified under the kind&apos;s Concept, so assign one Concept per kind — picking a
-            Concept another kind holds moves it. The engine type connects a suggestion&apos;s own
-            type to your kinds: when several of yours answer to one, the starred one is offered
-            first. A kind with no Concept blocks the write rather than being dropped.
+            The project&apos;s own location types, free to define. A Location has a location type by being
+            classified under the location type&apos;s Concept, so assign one Concept per location type — picking a
+            Concept another location type holds moves it. The gazetteer location type connects a suggestion&apos;s own
+            type to your location types: when several of yours answer to one, the starred one is offered
+            first. A location type with no Concept blocks the write rather than being dropped.
           </StyledSectionNote>
           <StyledKindsRow>
             <PlaceTypeTable

@@ -105,7 +105,7 @@ export const StyledIconChoice = styled.button<{ $current: boolean }>`
   }
 `;
 
-/** The favourite toggle: filled while this kind is the one offered first for its engine type. */
+/** The favourite toggle: filled while this location type is the one offered first for its gazetteer location type. */
 export const StyledFavorite = styled.button<{ $on: boolean }>`
   display: inline-flex;
   align-items: center;

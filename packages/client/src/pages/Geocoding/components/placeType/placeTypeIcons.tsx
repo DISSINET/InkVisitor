@@ -166,7 +166,7 @@ export const UNKNOWN_PLACE_TYPE: PlaceTypeInfo = {
   description: "No location type is recorded for this Location.",
 };
 
-/** What an engine type is called and covers, or the unknown mark for anything else. */
+/** What a gazetteer location type is called and covers, or the unknown mark for anything else. */
 export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeInfo => {
   const known = placeType && ENGINE_PLACE_TYPE_INFO[placeType as GeocodingPlaceType];
   return known
@@ -175,7 +175,7 @@ export const placeTypeInfo = (placeType: string | null | undefined): PlaceTypeIn
 };
 
 /**
- * The mark for an engine type. A type the engine has added since, or none at
+ * The mark for a gazetteer location type. A type the engine has added since, or none at
  * all, draws the unknown mark rather than nothing — an absent icon reads as a
  * rendering fault, and "nobody has said" is a fact worth showing.
  */

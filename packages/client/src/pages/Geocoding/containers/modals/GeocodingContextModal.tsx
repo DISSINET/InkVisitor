@@ -188,7 +188,7 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           <StyledSectionHeading>Working preferences</StyledSectionHeading>
           <StyledSectionNote>
             How this page behaves while you work. What the engine is asked — region, period,
-            language, kind of place — is edited in the Suggestions panel, beside the answer it
+            language, gazetteer location type — is edited in the Suggestions panel, beside the answer it
             produced.
           </StyledSectionNote>
           {row(

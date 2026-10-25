@@ -78,7 +78,7 @@ export const GazetteerCard: React.FC<GazetteerCard> = ({ suggester }) => {
           </StyledCardCoverage>
         ) : (
           <span>
-            declares no particular region, period, language or kind of place — asked about anything
+            declares no particular region, period, language or gazetteer location type — asked about anything
           </span>
         )}
       </StyledCardRow>

@@ -135,8 +135,8 @@ interface PlaceTypePicker {
   /** Marked as where the value stands, if anywhere. */
   current: string | null | undefined;
   /**
-   * The engine type the sources gave, which is a starting point and not an
-   * answer: the kinds that answer to it are marked, the favourite first.
+   * The gazetteer location type the sources gave, which is a starting point and not an
+   * answer: the location types that answer to it are marked, the favourite first.
    */
   suggested?: string | null;
   /** The wording for choosing no location type at all, or absent to leave that out. */
