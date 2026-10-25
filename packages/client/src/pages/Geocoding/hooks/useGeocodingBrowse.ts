@@ -76,6 +76,8 @@ export interface UseGeocodingBrowse {
   /** The labels of the Concepts the Locations' inferred location types come through, by id. */
   viaLabels: Record<string, string>;
   isLoading: boolean;
+  /** What the Locations are classified under could not be read; see `useGeocodingLocations`. */
+  typesError: boolean;
   error: unknown;
   filters: GeocodingFilters;
   setFilter: <K extends keyof GeocodingFilters>(key: K, value: GeocodingFilters[K]) => void;
@@ -224,7 +226,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     [users],
   );
 
-  const { locations, geocodedCount, viaLabels, isLoading, error } = useGeocodingLocations(roles, {
+  const { locations, geocodedCount, viaLabels, isLoading, typesError, error } = useGeocodingLocations(roles, {
     // one character matches most of the corpus, which is not a search
     label: filters.label.length > 1 ? filters.label : undefined,
     createdBy: filters.createdBy === ANY ? undefined : filters.createdBy,
@@ -325,6 +327,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     geocodedCount,
     viaLabels,
     isLoading,
+    typesError,
     error,
     filters,
     setFilter,

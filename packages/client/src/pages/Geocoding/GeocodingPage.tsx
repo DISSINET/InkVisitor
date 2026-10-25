@@ -71,6 +71,9 @@ const WEIGHT_SAVE_DELAY_MS = 400;
  */
 const HOVER_GRACE_MS = 260;
 
+/** The one message about location types that could not be read, kept single by its id. */
+const TYPES_UNREADABLE_TOAST = "geocoding-types-unreadable";
+
 export const GeocodingPage: React.FC = () => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
 
@@ -286,6 +289,20 @@ export const GeocodingPage: React.FC = () => {
   const browse = useGeocodingBrowse(roles);
   const panels = useGeocodingPanels();
 
+  // a Location whose classifications could not be read looks like one with no
+  // location type, which is not what it is, so the page says so for as long as that
+  // holds, and does not offer to change what it cannot see
+  useEffect(() => {
+    if (browse.typesError) {
+      toast.error(
+        "The location types of the Locations could not be read, so none are shown and they cannot be changed. Reload the page to try again.",
+        { toastId: TYPES_UNREADABLE_TOAST, autoClose: false },
+      );
+    } else {
+      toast.dismiss(TYPES_UNREADABLE_TOAST);
+    }
+  }, [browse.typesError]);
+
   /**
    * The Locations a bulk action applies to.
    *
@@ -478,7 +495,9 @@ export const GeocodingPage: React.FC = () => {
     placeType: string | null,
     options?: { quiet?: boolean },
   ): Promise<boolean> =>
-    editTypes(location.entity, placeType ? { add: [placeType] } : { clear: true }, options);
+    browse.typesError
+      ? Promise.resolve(false)
+      : editTypes(location.entity, placeType ? { add: [placeType] } : { clear: true }, options);
 
   /** Adds or removes one location type of a Location, as its own Classification. */
   const toggleType = (
@@ -486,7 +505,9 @@ export const GeocodingPage: React.FC = () => {
     placeType: string,
     on: boolean,
   ): Promise<boolean> =>
-    editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
+    browse.typesError
+      ? Promise.resolve(false)
+      : editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
 
   // `selected` is a snapshot taken when the row was clicked. After a write the
   // collection refetches, and under the default ungeocoded filter the row

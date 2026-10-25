@@ -56,6 +56,11 @@ export interface UseGeocodingLocations {
   viaLabels: Record<string, string>;
   /** True while either fetch is outstanding. */
   isLoading: boolean;
+  /**
+   * The request for what the Locations are classified under failed, so that every
+   * Location reads as having no location type whether it has one or not.
+   */
+  typesError: boolean;
   /** The Locations request failed — the InkVisitor server, not the geocoding engine. */
   error: unknown;
 }
@@ -106,7 +111,14 @@ export const useGeocodingLocations = (
      * keeps the Values it already has, so this only ever costs the first load.
      */
     if (!canDerive(valueIds, values)) {
-      return { locations: [], geocodedCount: 0, viaLabels: {}, isLoading: true, error };
+      return {
+        locations: [],
+        geocodedCount: 0,
+        viaLabels: {},
+        isLoading: true,
+        typesError: !!assignments.error,
+        error,
+      };
     }
 
     const byId: Record<string, IResponseEntity> = {};
@@ -131,6 +143,7 @@ export const useGeocodingLocations = (
       geocodedCount: locations.filter((location) => location.isGeocoded).length,
       viaLabels: assignments.viaLabels,
       isLoading: loadingEntities || loadingValues || assignments.isLoading,
+      typesError: !!assignments.error,
       error,
     };
   }, [entities, values, valueIds, roles, loadingEntities, loadingValues, error, assignments]);
