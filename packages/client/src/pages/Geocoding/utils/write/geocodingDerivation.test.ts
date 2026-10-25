@@ -22,6 +22,7 @@ import { collectGeoValueIds, deriveGeocoding } from "./geocodingDerivation";
 const roles: IGeocodingRoles = {
   geometry: "concept-geometry",
   accuracy: "concept-accuracy",
+  epistemicSource: "concept-source",
   accuracyValues: {
     [GeocodingAccuracy.Precise]: "value-precise",
     [GeocodingAccuracy.Approximate]: "value-approximate",

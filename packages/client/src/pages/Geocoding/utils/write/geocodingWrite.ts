@@ -104,7 +104,19 @@ const propFor = (typeId: string, valueId: string): IProp => {
  * Whatever else a researcher hung under the geometry (another subproperty of
  * their own) is carried over untouched.
  */
-const childRoles = (roles: IGeocodingRoles): string[] => [roles.accuracy].filter(Boolean);
+const childRoles = (roles: IGeocodingRoles): string[] =>
+  [roles.accuracy, roles.epistemicSource].filter(Boolean);
+
+/**
+ * The Resources of the gazetteers behind a coordinate, one each.
+ *
+ * A source with no Resource assigned has nothing to point at — `llm-coords` is
+ * the model's own guess and never has one — and two matches from one gazetteer
+ * are still one source of the coordinate.
+ */
+const sourceResources = (provenance: GeocodingProvenance[], roles: IGeocodingRoles): string[] => [
+  ...new Set(provenance.map((claim) => roles.resources[claim.source]).filter(Boolean)),
+];
 
 // CEntity leaves `data` empty; every Value in this corpus carries a logicalType,
 // so the created ones match rather than being a recognisably different shape
@@ -191,19 +203,38 @@ export const planGeocodingWrite = (
     : valueEntity(serializeGeometry(geometry), userOptions);
   const newValues: IEntity[] = geometryValue ? [geometryValue] : [];
 
-  const owned = childRoles(roles);
-  const ownChildren = [propFor(roles.accuracy, accuracyId)];
-  // the geometry prop the Location keeps carries its other children over; a new
-  // one starts with only what this write says about it
-  const geometryProp: IProp = keptGeometry
-    ? {
-        ...keptGeometry,
-        children: [
-          ...(keptGeometry.children || []).filter((child) => !owned.includes(child.type?.entityId)),
-          ...ownChildren,
-        ],
-      }
-    : { ...propFor(roles.geometry, geometryValue!.id), children: ownChildren };
+  // the sources are named only where the project has the role for them; the
+  // references below record them either way
+  const sources = roles.epistemicSource ? sourceResources(provenance, roles) : [];
+  const sourceChildren = (known: string[]) =>
+    sources
+      .filter((resourceId) => !known.includes(resourceId))
+      .map((resourceId) => propFor(roles.epistemicSource, resourceId));
+
+  // the geometry prop the Location keeps carries its other children over, and
+  // the sources it already names, to which the new ones are added: a coordinate
+  // that did not move is still the one those gazetteers supplied. A new geometry
+  // prop starts with only what this write says about it
+  let geometryProp: IProp;
+  if (keptGeometry) {
+    const children = keptGeometry.children || [];
+    const named = children
+      .filter((child) => child.type?.entityId === roles.epistemicSource)
+      .map((child) => child.value?.entityId);
+    geometryProp = {
+      ...keptGeometry,
+      children: [
+        ...children.filter((child) => child.type?.entityId !== roles.accuracy),
+        propFor(roles.accuracy, accuracyId),
+        ...sourceChildren(named),
+      ],
+    };
+  } else {
+    geometryProp = {
+      ...propFor(roles.geometry, geometryValue!.id),
+      children: [propFor(roles.accuracy, accuracyId), ...sourceChildren([])],
+    };
+  }
 
   const props: IProp[] = [
     ...previousProps

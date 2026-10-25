@@ -191,8 +191,17 @@ export interface IGeocodingRoles {
    * GeoJSON geometry. Its presence is what makes a Location geocoded.
    */
   geometry: string;
-  /** Concept whose prop carries the accuracy. */
+  /**
+   * Concept whose prop carries the accuracy. A subproperty of the geometry prop.
+   */
   accuracy: string;
+  /**
+   * Concept whose prop names the source of the coordinate: a subproperty of the
+   * geometry prop, valued with the Resource of a gazetteer that supplied it, one
+   * per gazetteer. Optional: a project that has not assigned it records the
+   * sources as references only.
+   */
+  epistemicSource: string;
   /** Concept per accuracy value — these are the prop's possible values. */
   accuracyValues: Partial<Record<GeocodingAccuracy, string>>;
   /**
@@ -403,6 +412,7 @@ export const GEOCODING_SETTINGS_KEY = "geocoding";
 export const emptyGeocodingRoles = (): IGeocodingRoles => ({
   geometry: "",
   accuracy: "",
+  epistemicSource: "",
   accuracyValues: {},
   placeTypes: defaultPlaceTypes(),
   resources: {},

@@ -34,6 +34,7 @@ import { GeocodingWriteGateway, executeGeocodingWrite } from "./geocodingWriteEx
 const roles: IGeocodingRoles = {
   geometry: "c-geo",
   accuracy: "c-acc",
+  epistemicSource: "c-source",
   accuracyValues: { [GeocodingAccuracy.Precise]: "v-precise" },
   placeTypes: [
     { ...defaultPlaceTypes()[0], conceptId: "v-settlement" },
@@ -435,6 +436,98 @@ describe("planGeocodingWrite, the accuracy under the geometry", () => {
   });
 });
 
+/**
+ * The gazetteers behind a coordinate are named as subproperties of the geometry,
+ * one per gazetteer, alongside the references that carry the record identifiers.
+ * The credit a licence asks for is owed to the gazetteer, however many of its
+ * records matched.
+ */
+describe("planGeocodingWrite, the sources of a coordinate", () => {
+  const from = (...sources: string[]) =>
+    sources.map((source) => ({ source, sourceId: `${source}-1` }));
+  const sourcesOf = (plan: GeocodingWritePlan) =>
+    plan.props
+      .find((p) => p.type.entityId === "c-geo")!
+      .children.filter((c) => c.type.entityId === "c-source")
+      .map((c) => c.value.entityId);
+  const same = pointGeometry(17.0384, 51.1079);
+
+  it("names each gazetteer that supplied the coordinate, under the geometry after the accuracy", () => {
+    const plan = planOf({ ...baseInput, provenance: from("wikidata", "geonames") });
+    const children = plan.props.find((p) => p.type.entityId === "c-geo")!.children;
+    expect(children.map((c) => c.type.entityId)).toEqual(["c-acc", "c-source", "c-source"]);
+    expect(sourcesOf(plan)).toEqual(["r-wikidata", "r-geonames"]);
+    expect(plan.props.some((p) => p.type.entityId === "c-source")).toBe(false);
+  });
+
+  it("names a gazetteer once, however many of its records matched", () => {
+    const plan = planOf({
+      ...baseInput,
+      provenance: [...from("geonames"), { source: "geonames", sourceId: "another" }],
+    });
+    expect(sourcesOf(plan)).toEqual(["r-geonames"]);
+  });
+
+  it("names nothing for a source with no Resource, as the model's own guess has none", () => {
+    expect(sourcesOf(planOf({ ...baseInput, provenance: from("llm-coords") }))).toEqual([]);
+  });
+
+  it("names nothing where the project has not assigned the role, and still writes the references", () => {
+    const plan = planOf({
+      ...baseInput,
+      roles: { ...roles, epistemicSource: "" },
+      provenance: from("wikidata"),
+    });
+    expect(plan.props.find((p) => p.type.entityId === "c-geo")!.children).toHaveLength(1);
+    expect(plan.references).toHaveLength(1);
+  });
+
+  it("names nothing for a coordinate that no gazetteer supplied", () => {
+    // a click on the map, or a shape drawn by hand
+    expect(sourcesOf(planOf(baseInput))).toEqual([]);
+  });
+
+  it("keeps the sources a coordinate that stayed already names, and adds only the new ones", () => {
+    const geometry = prop("c-geo", "v-geo");
+    geometry.children = [prop("c-acc", "v-old"), prop("c-source", "r-wikidata")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+      provenance: from("wikidata", "geonames"),
+    });
+    expect(sourcesOf(plan)).toEqual(["r-wikidata", "r-geonames"]);
+  });
+
+  it("does not take a change of type for a change of source", () => {
+    // a write that keeps the coordinate and changes only the location type
+    // carries no provenance, and must not strip what is already named
+    const geometry = prop("c-geo", "v-geo");
+    geometry.children = [prop("c-acc", "v-precise"), prop("c-source", "r-geonames")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([geometry]),
+      placeType: "settlement",
+    });
+    expect(sourcesOf(plan)).toEqual(["r-geonames"]);
+  });
+
+  it("does not carry the sources of a coordinate that moved onto the new one", () => {
+    const geometry = prop("c-geo", "old-geo");
+    geometry.children = [prop("c-acc", "v-precise"), prop("c-source", "r-geonames")];
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: pointGeometry(1, 2),
+      location: location([geometry]),
+    });
+    expect(sourcesOf(plan)).toEqual([]);
+  });
+});
+
 describe("coordinateChanged", () => {
   const withChildren = (parent: IProp, children: IProp[]): IProp => {
     parent.children = children;
@@ -447,9 +540,14 @@ describe("coordinateChanged", () => {
     expect(coordinateChanged(geocoded("v-precise"), geocoded("v-approximate"), roles)).toBe(true);
   });
 
-  it("sees the accuracy move from beside the geometry to under it as the same coordinate", () => {
+  it("counts the move of the accuracy from beside the geometry to under it as a change, and so refuses a write that raced a migration", () => {
     const beside = location([prop("c-geo", "v-geo"), prop("c-acc", "v-precise")]);
     expect(coordinateChanged(beside, geocoded("v-precise"), roles)).toBe(true);
+  });
+
+  it("sees someone else name a different source of the coordinate", () => {
+    const named = (resource: string) => geocoded("v-precise", [prop("c-source", resource)]);
+    expect(coordinateChanged(named("r-wikidata"), named("r-geonames"), roles)).toBe(true);
   });
 
   it("is not moved by a subproperty the page does not own", () => {

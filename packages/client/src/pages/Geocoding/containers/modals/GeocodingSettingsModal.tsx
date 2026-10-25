@@ -96,6 +96,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       [
         draft.geometry,
         draft.accuracy,
+        draft.epistemicSource,
         ...Object.values(draft.accuracyValues),
         ...draft.placeTypes.map((one) => one.conceptId),
         ...Object.values(draft.resources),
@@ -324,15 +325,19 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
         <StyledSettingsGrid>
           <StyledSectionHeading>Coordinate roles</StyledSectionHeading>
           <StyledSectionNote>
-            A geocoded Location carries two metaproperties: a GeoJSON geometry and an accuracy.
-            Which Concept plays which role is set once for the project — it is what
-            &ldquo;geocoded&rdquo; means, so it cannot differ between users.
+            A geocoded Location carries a GeoJSON geometry, and under it, as subproperties, the
+            accuracy and the sources of the coordinate. Which Concept plays which role is set once
+            for the project — it is what &ldquo;geocoded&rdquo; means, so it cannot differ between
+            users.
           </StyledSectionNote>
           {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, geometry: id ?? "" }))
           )}
           {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, accuracy: id ?? "" }))
+          )}
+          {row("geo:source — source of knowledge", draft.epistemicSource, EntityEnums.Class.Concept, (id) =>
+            setDraft((d) => ({ ...d, epistemicSource: id ?? "" }))
           )}
 
           <StyledSectionHeading>Accuracy values</StyledSectionHeading>

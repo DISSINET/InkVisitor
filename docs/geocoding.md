@@ -68,11 +68,25 @@ settings at them instead of migrating.
 
 ## Where the source of a coordinate is recorded
 
-The gazetteer that produced a coordinate is an entity reference: one Resource
-entity per gazetteer, reused across every Location, plus a Value entity holding
-that gazetteer's own identifier for the record. `IResourceData` already carries
-`partValueBaseURL`, so the base URL plus the value label reconstructs the deep
-link without storing a second URL.
+The gazetteer that produced a coordinate is recorded twice, for two readers. A
+reference is one Resource entity per gazetteer, reused across every Location, plus
+a Value entity holding that gazetteer's own identifier for the record.
+`IResourceData` already carries `partValueBaseURL`, so the base URL plus the value
+label reconstructs the deep link without storing a second URL. The licences of
+several gazetteers require them to be credited for what is taken from them, so
+the gazetteer is also named on the coordinate itself: a subproperty of the
+geometry prop, typed with the epistemic source Concept and valued with the
+gazetteer's Resource, once per gazetteer however many of its records matched. It
+is where someone reading the coordinate in Detail, or querying the Explorer, finds
+who it came from; the reference is where the record is.
+
+The Concept is the `epistemicSource` role of the global settings. Where it is not
+assigned the sources are recorded as references alone. A coordinate written by a
+click on the map or drawn by hand names none, since no gazetteer supplied it. A
+write that keeps the coordinate where it was keeps the sources already named and
+adds those of the new run; one that moves it starts with only the new ones.
+`addGeocodingSourcesJob` names the gazetteers of Locations written before, from
+the references they carry.
 
 Every source that contributed to an accepted suggestion gets a reference, with
 one exception: `llm-coords` is not a gazetteer but the language model's own
@@ -105,7 +119,7 @@ panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
 The **global** modal is reached from the menu's tools section beside Global
-validations. It assigns the geometry and accuracy roles, the four
+validations. It assigns the geometry, accuracy and epistemic source roles, the four
 accuracy values, the project's own place types and fifteen gazetteer Resources. Each
 field selects an existing entity or creates one, so a fresh deployment needs no
 seeding job — and the ten gazetteers whose record URL ends with the identifier

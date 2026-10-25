@@ -17,6 +17,7 @@ import fixEditorEntityAclJob from "./fix-editor-entity-acl";
 import migrateGeocodingGeometryJob from "./migrate-geocoding-geometry";
 import migrateGeocodingPlaceTypesJob from "./migrate-geocoding-place-types";
 import nestGeocodingAccuracyJob from "./nest-geocoding-accuracy";
+import addGeocodingSourcesJob from "./add-geocoding-sources";
 
 export type IJob = (db: Connection) => Promise<void>;
 
@@ -39,6 +40,7 @@ const alljobs: Record<string, IJob> = {
   migrateGeocodingGeometryJob,
   migrateGeocodingPlaceTypesJob,
   nestGeocodingAccuracyJob,
+  addGeocodingSourcesJob,
 };
 
 export default alljobs;
