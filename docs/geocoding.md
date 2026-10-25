@@ -648,11 +648,27 @@ one kind are saved together as one `Multi*` geometry, and a mix of kinds is
 refused when saving. The saved shape then asks the same two questions at its
 centre. "Edit current shape" loads the stored geometry back into the tool.
 
-The location type is corrected far more often than a coordinate is, so it can be
-changed from the panel head without re-running the engine. That write keeps the
-geometry exactly as it stands — including the Value entity behind it, which
-is reused rather than minted afresh, since orphaning one on every correction
-accumulates on the most frequent operation.
+The location type is corrected far more often than a coordinate is, so it is
+written on its own, as Classification relations and nothing else: a location type
+is never carried by the geometry write, and changing one cannot touch the
+coordinate, its accuracy or its sources, nor mint a Value entity to orphan.
+Because nothing but relations are written, it works as well on a Location that has
+no coordinate yet, which is the page's default view, as on one that has.
+
+**A Location can have several location types, and choosing one adds it.** In the
+step after the accuracy, in the menu of a map click and when a type is set on the
+marked Locations, one click adds one location type to those the Location has; it
+never replaces another, and a type the Location already has, or already comes
+under through a subclass or a synonym, is shown and not offered a second time —
+adding it would put a second Classification beside the one it comes from. Leaving
+the question alone is a row of its own ("leave the location type as it is"), and
+removing the location types of the marked Locations is another. In the list row
+and the panel head the picker is a set of ticks instead: a click ticks or unticks
+one location type and the list stays open to set several, a tick shows at once and
+goes back if the write is refused, and one write waits for the last. Unticking
+removes only that location type's own Classification. A location type that is
+only inferred is not offered to be unticked: the Classification it comes from is
+not the page's, and it is changed in Detail.
 
 The list filters by location type, and its options come from the Locations the
 other filters leave rather than from the vocabulary. That matters because the
@@ -674,9 +690,10 @@ guesses that from the word.
 
 A Location stating no location type draws a mark of its own rather than nothing. That is
 the state most of the corpus is in, and a blank space reads as a rendering fault
-rather than as a fact. Choosing it removes the location type: a value sets, `null` clears,
-and only leaving the question alone — which is what a map click does — keeps what
-is there.
+rather than as a fact. A map click or a drawn shape that leaves the question
+undecided writes nothing about it: not even the first of the Location's location
+types, which may be one it only comes under through a subclass, and which writing
+would turn into a Classification nobody made.
 
 ## Reading the order on the map
 

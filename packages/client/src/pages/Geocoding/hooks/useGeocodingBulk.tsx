@@ -113,9 +113,7 @@ export const useGeocodingBulk = ({
    * Concept for it refuses all of them and forty toasts say it forty times.
    */
   const retypeMarked = async (placeType: string | null) => {
-    const targets = locations.filter(
-      (location) => marked.has(location.entity.id) && location.isGeocoded,
-    );
+    const targets = locations.filter((location) => marked.has(location.entity.id));
     cancelBulk.current = false;
     let done = 0;
     for (const location of targets) {

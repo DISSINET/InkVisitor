@@ -274,30 +274,6 @@ export const StyledRowMark = styled.span<{ $state: "geocoded" | "problem" | "non
 `;
 
 /**
- * The location type where nothing can be done about it.
- *
- * A write owns the coordinate roles as well as the kind, so a Location with no
- * coordinate has nothing to write the location type against — the mark is a label there,
- * and drawing it as a button offered a picker whose choice went nowhere.
- */
-export const StyledRowTypeStatic = styled.span<{ $unset?: boolean; $inferred?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-width: 2.2rem;
-  height: 2.2rem;
-  padding: 0 ${({ theme }) => theme.space[1]};
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme, $unset }) =>
-    $unset ? theme.color["gray"][400] : theme.color["greyer"]};
-
-  svg {
-    opacity: ${({ $inferred }) => ($inferred ? 0.5 : 1)};
-  }
-`;
-
-/**
  * The bar above the list, naming the group whose rows are on screen.
  *
  * Outside the scroller rather than sticky inside it: the list is virtualised and

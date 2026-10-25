@@ -571,16 +571,10 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
       {pending?.accuracy ? (
         <PlaceTypePicker
           anchor={pickerAnchor(pending)}
-          current={selected?.placeType}
-          clearLabel={
-            selected?.placeType ? `keep it as ${selected.placeType}` : "record no location type"
-          }
+          held={selected?.typeEntries}
+          clearLabel="leave the location type as it is"
           onChoose={(placeType) =>
-            finish(
-              pending,
-              pending.accuracy as GeocodingAccuracy,
-              placeType as string | null,
-            )
+            finish(pending, pending.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
           onClose={() => setPending(null)}
         />

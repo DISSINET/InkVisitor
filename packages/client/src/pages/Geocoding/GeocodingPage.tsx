@@ -466,34 +466,27 @@ export const GeocodingPage: React.FC = () => {
   const advanceTo = useRef<GeocodingLocation | undefined>(undefined);
 
   /**
-   * Records what location type a Location is, leaving its geometry alone.
+   * Adds a location type to a Location, or removes every one the page can where
+   * told there is none, leaving its coordinate alone.
    *
-   * The geometry and accuracy are written back unchanged because the write
-   * replaces every role it owns, and a partial one would leave a Location with a
-   * location type and no geometry. A Location with no geometry has nothing to write
-   * against, so the mark on its row is a label rather than a control.
+   * Only its Classifications are written, so a Location with no coordinate takes
+   * a location type like any other. Adding one leaves the others, and a quiet
+   * write holds back the refetch for a run to make once.
    */
-  const retype = async (
+  const retype = (
     location: GeocodingLocation,
     placeType: string | null,
     options?: { quiet?: boolean },
-  ): Promise<boolean> => {
-    if (!user?.options || !location.geometry) {
-      return false;
-    }
-    return write(
-      {
-        location: location.entity,
-        roles,
-        geometry: location.geometry,
-        accuracy: location.accuracy || GeocodingAccuracy.Unknown,
-        placeType,
-        current: location.geometry,
-        userOptions: user.options,
-      },
-      options,
-    );
-  };
+  ): Promise<boolean> =>
+    editTypes(location.entity, placeType ? { add: [placeType] } : { clear: true }, options);
+
+  /** Adds or removes one location type of a Location, as its own Classification. */
+  const toggleType = (
+    location: GeocodingLocation,
+    placeType: string,
+    on: boolean,
+  ): Promise<boolean> =>
+    editTypes(location.entity, on ? { add: [placeType] } : { remove: [placeType] });
 
   // `selected` is a snapshot taken when the row was clicked. After a write the
   // collection refetches, and under the default ungeocoded filter the row
@@ -509,8 +502,15 @@ export const GeocodingPage: React.FC = () => {
     }
   }, [browse.all, selected]);
   const { recent, record: recordRecent } = useRecentGeocodes();
-  const { write, blocked, clearBlocked, pendingOverwrite, confirmOverwrite, cancelOverwrite } =
-    useGeocodingWriter(roles, recordRecent);
+  const {
+    write,
+    editTypes,
+    blocked,
+    clearBlocked,
+    pendingOverwrite,
+    confirmOverwrite,
+    cancelOverwrite,
+  } = useGeocodingWriter(roles, recordRecent);
 
   // a refused write says why. Without this the researcher cannot tell an accept
   // that worked from one the project's configuration silently rejected.
@@ -657,7 +657,7 @@ export const GeocodingPage: React.FC = () => {
             browse={browse}
             selectedId={selected?.entity.id}
             onSelect={setSelected}
-            onRetype={retype}
+            onToggleType={toggleType}
             marked={marked}
             onMark={mark}
             onClearMarks={() => setMarked(new Set())}
@@ -768,9 +768,10 @@ export const GeocodingPage: React.FC = () => {
                 roles,
                 geometry,
                 accuracy,
-                // an undecided location type keeps whatever the Location carries,
-                // which is what a coordinate correction means
-                placeType: placeType === undefined ? selected.placeType : placeType,
+                // an undecided location type says nothing about it: what the
+                // Location is classified under stays, and nothing is written for
+                // the first of them, which may only be inferred
+                placeType,
                 current: selected.geometry,
                 userOptions: user.options,
               });
@@ -829,10 +830,8 @@ export const GeocodingPage: React.FC = () => {
                 />
               ) : null
             }
-            onRetype={
-              selected?.isGeocoded && user?.options
-                ? (placeType) => retype(selected, placeType)
-                : undefined
+            onToggleType={
+              selected ? (placeType, on) => toggleType(selected, placeType, on) : undefined
             }
             showAll={showAll}
             chosenOnMap={chosenOnMap}

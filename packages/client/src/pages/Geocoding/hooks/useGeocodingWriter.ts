@@ -15,7 +15,7 @@ import {
   needsOverwriteConfirmation,
   planGeocodingWrite,
 } from "../utils/write/geocodingWrite";
-import { KindGateway, executeKindChange } from "../utils/write/geocodingKindWrite";
+import { KindGateway, executeKindChange, executeKindEdit } from "../utils/write/geocodingKindWrite";
 import { GeocodingWriteGateway, executeGeocodingWrite } from "../utils/write/geocodingWriteExecute";
 import { PLACE_TYPE_ASSIGNMENTS_KEY } from "./usePlaceTypeAssignments";
 
@@ -154,7 +154,29 @@ export interface PendingOverwrite {
   afterWrite?: () => void;
 }
 
+/** What to do to a Location's location types, by the project's location type ids. */
+export interface TypeEdit {
+  /** Location types to add, where the Location does not have them. */
+  add?: string[];
+  /** Location types whose own Classification is removed. */
+  remove?: string[];
+  /** Remove the Classification under every Concept a location type uses. */
+  clear?: boolean;
+}
+
 export interface UseGeocodingWriter {
+  /**
+   * Adds and removes location types on a Location, leaving its coordinate alone.
+   *
+   * Only its Classifications are written, so it works on a Location that has no
+   * coordinate and never creates or changes a prop. Resolves to whether the
+   * write was made; the reason it was not has been said in a message.
+   */
+  editTypes: (
+    location: IEntity,
+    edit: TypeEdit,
+    options?: { quiet?: boolean },
+  ) => Promise<boolean>;
   /**
    * Records one geometry.
    *
@@ -311,6 +333,49 @@ export const useGeocodingWriter = (
     [roles, queryClient, onWritten],
   );
 
+  const editTypes = useCallback(
+    async (
+      location: IEntity,
+      edit: TypeEdit,
+      options: { quiet?: boolean } = {},
+    ): Promise<boolean> => {
+      const label = location.labels?.[0] || location.id;
+      const kinds = [...(edit.add ?? []), ...(edit.remove ?? [])].map((id) =>
+        roles.placeTypes.find((one) => one.id === id),
+      );
+      const unmapped = kinds.find((kind) => !kind?.conceptId);
+      if (unmapped !== undefined || kinds.some((kind) => !kind)) {
+        toast.error(
+          `No Concept is assigned for the location type "${unmapped?.name ?? "unknown"}", so it was not recorded on ${label}.`,
+        );
+        return false;
+      }
+      const conceptsOf = (ids: string[] = []) =>
+        ids.map((id) => roles.placeTypes.find((one) => one.id === id)!.conceptId);
+
+      setIsWriting(true);
+      try {
+        const outcome = await executeKindEdit(
+          location.id,
+          roles.placeTypes,
+          { add: conceptsOf(edit.add), remove: conceptsOf(edit.remove), removeAll: edit.clear },
+          kindGateway,
+        );
+        if (!outcome.ok) {
+          toast.error(`${outcome.reason} (${label})`);
+        }
+        // a write that failed half way may still have changed what the Location has
+        if (!options.quiet) {
+          queryClient.invalidateQueries({ queryKey: [PLACE_TYPE_ASSIGNMENTS_KEY] });
+        }
+        return outcome.ok;
+      } finally {
+        setIsWriting(false);
+      }
+    },
+    [roles, queryClient],
+  );
+
   const confirmOverwrite = useCallback(async () => {
     if (!pendingOverwrite) {
       return false;
@@ -322,6 +387,7 @@ export const useGeocodingWriter = (
 
   return {
     write,
+    editTypes,
     isWriting,
     blocked,
     clearBlocked: () => setBlocked(null),

@@ -21,7 +21,6 @@ import {
   StyledRowTag,
   StyledRowType,
   StyledRowTypeMore,
-  StyledRowTypeStatic,
 } from "./GeocodingListStyles";
 import { ListItem, LocationGroup } from "../../utils/context/geocodingGroups";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
@@ -261,37 +260,25 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
         {/* the mark is the control: a location type is corrected far more often
             than it is first set, and reaching it should not mean selecting the
             row and losing whatever is being judged beside it */}
-        {location.isGeocoded ? (
-          <StyledRowType
-            type="button"
-            data-row-type
-            data-hint={`${typeWords}\nclick to change`}
-            aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
-            $unset={!location.placeType}
-            $inferred={inferred}
-            onClick={(event) => {
-              event.stopPropagation();
-              const box = event.currentTarget.getBoundingClientRect();
-              props.onPick({
-                location,
-                anchor: { left: box.left, top: box.top, bottom: box.bottom },
-              });
-            }}
-          >
-            <KindIcon kind={kind} />
-            {shown.length > 1 ? <StyledRowTypeMore>+{shown.length - 1}</StyledRowTypeMore> : null}
-          </StyledRowType>
-        ) : (
-          <StyledRowTypeStatic
-            data-hint={`${typeWords}\nrecorded with a coordinate, and this Location has none`}
-            aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
-            $unset={!location.placeType}
-            $inferred={inferred}
-          >
-            <KindIcon kind={kind} />
-            {shown.length > 1 ? <StyledRowTypeMore>+{shown.length - 1}</StyledRowTypeMore> : null}
-          </StyledRowTypeStatic>
-        )}
+        <StyledRowType
+          type="button"
+          data-row-type
+          data-hint={`${typeWords}\nclick to change`}
+          aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
+          $unset={!location.placeType}
+          $inferred={inferred}
+          onClick={(event) => {
+            event.stopPropagation();
+            const box = event.currentTarget.getBoundingClientRect();
+            props.onPick({
+              location,
+              anchor: { left: box.left, top: box.top, bottom: box.bottom },
+            });
+          }}
+        >
+          <KindIcon kind={kind} />
+          {shown.length > 1 ? <StyledRowTypeMore>+{shown.length - 1}</StyledRowTypeMore> : null}
+        </StyledRowType>
         <StyledRowMain>
           {/* the shared tag rather than a plain label: it carries the status
               border, the italic for an unlabelled entity and the hover card,
