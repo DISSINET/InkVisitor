@@ -372,24 +372,24 @@ written only when it was changed from what the modal opened with, and after the
 roles, because both rewrite the one settings row. The personal modal shows the
 same table with the switch only.
 
-**A gazetteer is one tag wherever the page names it.** `GazetteerTag` draws a
-source's name with one mark, the same for every source whatever its kind, and
-`GazetteerHover` gives any face the page already draws
-the same mark and the same card. Hovering or focusing it shows what
-`GET /suggesters` says about the source: whether it is local records or an online
-service, its licence as chips (commercial use allowed or not, credit required,
-share-alike), its description, what it is good for (regions, periods, languages
-and kinds of place, written as words rather than slugs and codes), its
-limitations, how large its data is, the credit wording, the citation and the
-homepage. It is used in the gazetteer table of both modals, on every match tag
-in the suggestion cards, in the progress strip, in the map's place search and in
-the quick-geocode notice, so a source is explained identically everywhere and
-one the engine adds is explained everywhere at once. The card stays open briefly
-after the pointer leaves so the homepage link can be reached.
+**A source is explained where it is chosen, and only there.** `GazetteerHover` gives
+a source's name in the gazetteer table of both modals a mark and a card. Hovering
+or focusing it shows what `GET /suggesters` says about the source: whether it is
+local records or an online service, its licence as chips (commercial use allowed
+or not, credit required, share-alike), its description, what it is good for
+(regions, periods, languages and kinds of place, written as words rather than
+slugs and codes), its limitations, how large its data is, the credit wording, the
+citation and the homepage. The card stays open briefly after the pointer leaves
+so the homepage link can be reached.
 
-Where the engine has not been reached, or does not list the source, the tag is
-the bare name with no mark and no card: an empty card would claim the engine said
-something. The catalogue is one request an hour shared by every tag.
+Beside a result — on a match tag, in the progress strip, in the map's place search
+and in the quick-geocode notice — a source is its name in its colour and nothing
+more. A card there would open over the answer being judged, as the mouse moves
+through the suggestions, and hide the thing the researcher is looking at.
+
+Where the engine has not been reached, or does not list the source, the settings
+name is the bare name with no mark and no card: an empty card would claim the
+engine said something. The catalogue is one request an hour shared by every card.
 
 The table does not show the footprint column the engine measures of each source
 (`footprint` on `GET /suggesters`: records held and the one-degree squares they

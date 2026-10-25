@@ -108,6 +108,4 @@ export const StyledGazetteerMark = styled.span`
 export const StyledGazetteerFace = styled.span<{ $color: string }>`
   font-family: monospace;
   color: ${({ $color }) => $color};
-  cursor: help;
-  border-bottom: 1px dotted currentColor;
 `;
