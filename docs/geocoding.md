@@ -91,8 +91,9 @@ several gazetteers require them to be credited for what is taken from them, so
 the gazetteer is also named on the coordinate itself: a subproperty of the
 geometry prop, typed with the epistemic source Concept and valued with the
 gazetteer's Resource, once per gazetteer however many of its records matched. It
-is where someone reading the coordinate in Detail, or querying the Explorer, finds
-who it came from; the reference is where the record is.
+is where someone reading the coordinate in Detail finds who it came from; the
+reference is where the record is. The Explorer's "has prop" edges read first-level
+props only, so a query cannot ask for the source.
 
 The Concept is the `epistemicSource` role of the global settings. Where it is not
 assigned the sources are recorded as references alone. A coordinate written by a
@@ -100,7 +101,12 @@ click on the map or drawn by hand names none, since no gazetteer supplied it. A
 write that keeps the coordinate where it was keeps the sources already named and
 adds those of the new run; one that moves it starts with only the new ones.
 `addGeocodingSourcesJob` names the gazetteers of Locations written before, from
-the references they carry.
+the references they carry. A reference does not say which coordinate it supplied,
+so the job credits a gazetteer only when the Value holding its record id was
+created within five minutes of the Value holding the current geometry, which is
+how one accepted suggestion writes them; a reference added by hand later, or left
+behind when the coordinate was moved, is not credited, and a Location whose Values
+carry no creation time is left alone.
 
 Every source that contributed to an accepted suggestion gets a reference, with
 one exception: `llm-coords` is not a gazetteer but the language model's own

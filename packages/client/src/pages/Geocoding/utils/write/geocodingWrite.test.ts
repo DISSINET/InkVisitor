@@ -452,17 +452,28 @@ describe("planGeocodingWrite, the accuracy under the geometry", () => {
     expect(childrenOf(plan)[0].id).toBe(beside.id);
   });
 
-  it("does not move a prop down under the geometry if that would push its children to a fourth level", () => {
+  it("refuses, rather than lose notes under notes, when the accuracy beside the geometry has them", () => {
     const grandchild = withChildren(prop("c-n1", "v1"), [prop("c-n2", "v2")]);
     const beside = withChildren(prop("c-acc", "v-old"), [grandchild]);
+    const result = planGeocodingWrite({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([prop("c-geo", "v-geo"), beside]),
+    });
+    expect(isBlocked(result) && result.blocked).toContain("notes under notes");
+  });
+
+  it("moves an accuracy prop beside the geometry that has notes of one level, whole", () => {
+    const beside = withChildren(prop("c-acc", "v-old"), [prop("c-n1", "v1")]);
     const plan = planOf({
       ...baseInput,
       geometry: same,
       current: same,
       location: location([prop("c-geo", "v-geo"), beside]),
     });
-    expect(childrenOf(plan)[0].id).not.toBe(beside.id);
-    expect(childrenOf(plan)[0].children).toEqual([]);
+    expect(childrenOf(plan)[0].id).toBe(beside.id);
+    expect(childrenOf(plan)[0].children.map((c) => c.type.entityId)).toEqual(["c-n1"]);
   });
 
   it("carries what a researcher hung under a geometry that is replaced onto the new one", () => {

@@ -41,6 +41,9 @@ export const nestAccuracyOf = async (
   if (!under && (accuracyProp.children || []).some((child: any) => (child.children || []).length)) {
     return { left: "the accuracy prop has children that have children of their own" };
   }
+  if (under && (accuracyProp.children || []).length) {
+    return { left: "the repeated accuracy beside the geometry has children, which dropping it would lose" };
+  }
 
   const nextGeometry = under
     ? geometryProp
@@ -63,8 +66,9 @@ export const nestAccuracyOf = async (
  * Moves each geocoded Location's accuracy prop from beside its geometry prop to
  * under it, as a subproperty.
  *
- * The page used to write the accuracy as a second top-level prop. A Location
- * that `nestAccuracyOf` cannot move safely is left alone and listed. A second run
+ * A Location written before the page nested the accuracy carries it as a second
+ * top-level prop. A Location that `nestAccuracyOf` cannot move safely is left
+ * alone and listed. A second run
  * finds nothing to move. A database still holding coordinates as `geo:x` and
  * `geo:y` has no geometry props yet: run `migrateGeocodingGeometryJob` first, or
  * this job lists every Location and has to be run again.

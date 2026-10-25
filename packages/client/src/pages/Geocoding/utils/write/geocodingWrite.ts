@@ -173,6 +173,19 @@ export const planGeocodingWrite = (
     return { blocked: `No Concept is assigned for the accuracy "${accuracy}".` };
   }
 
+  // an accuracy prop beside the geometry that has notes under its own notes would
+  // lose them, or push them to a level nothing shows, when it is written under the
+  // geometry; that is the researcher's to move, in Detail
+  const accuracyBeside = (location.props || []).find(
+    (prop) => prop.type?.entityId === roles.accuracy,
+  );
+  if (accuracyBeside?.children?.some((child) => child.children?.length)) {
+    return {
+      blocked:
+        "The accuracy of this location has notes under notes, which writing it under the coordinate would lose. Move or remove them in Detail first.",
+    };
+  }
+
   /**
    * `null` and `undefined` are different answers. `null` is "this Location
    * states no location type", which removes its Classifications; `undefined` is
@@ -203,8 +216,8 @@ export const planGeocodingWrite = (
 
   // every role this write owns at the top level; whatever the Location carried
   // for them is replaced rather than added to, so a second write never leaves two
-  // geometries. The accuracy belongs here too: an earlier version wrote it beside
-  // the geometry, and that prop goes where the accuracy is written under it
+  // geometries. The accuracy belongs here too: a Location can carry it beside the
+  // geometry, and that prop goes where the accuracy is written under it
   const ownedTypes = [keptGeometry ? "" : roles.geometry, roles.accuracy].filter(Boolean);
   const displaced = previousProps.filter((prop) => ownedTypes.includes(prop.type?.entityId));
 
@@ -224,8 +237,8 @@ export const planGeocodingWrite = (
       .map((resourceId) => propFor(roles.epistemicSource, resourceId));
 
   // an accuracy that is already there keeps its own prop — its certainty, its id,
-  // whatever hangs under it — and takes the new value; the one written beside
-  // the geometry by an earlier version is that same prop moved under it
+  // whatever hangs under it — and takes the new value; one carried beside the
+  // geometry is that same prop moved under it
   const accuracyOf = (base: IProp | undefined): IProp =>
     base ? { ...base, value: { ...base.value, entityId: accuracyId } } : propFor(roles.accuracy, accuracyId);
 
@@ -241,12 +254,9 @@ export const planGeocodingWrite = (
     const named = children
       .filter((child) => child.type?.entityId === roles.epistemicSource)
       .map((child) => child.value?.entityId);
-    // moved down a level, the prop beside the geometry would push anything two
-    // levels under it to a fourth, which nothing shows, so such a prop is not reused
-    const beside = previousProps.find((prop) => prop.type?.entityId === roles.accuracy);
     const existing =
       children.find((child) => child.type?.entityId === roles.accuracy) ??
-      (beside?.children?.some((child) => child.children?.length) ? undefined : beside);
+      previousProps.find((prop) => prop.type?.entityId === roles.accuracy);
     const accuracyProp = accuracyOf(existing);
     // the accuracy stays where it was among the children, and a repeat goes
     const at = children.findIndex((child) => child.type?.entityId === roles.accuracy);

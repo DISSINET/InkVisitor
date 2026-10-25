@@ -105,6 +105,16 @@ beforeEach(async () => {
           prop(61, ACCURACY, PRECISE, [prop(62, OTHER, uuid(98), [prop(63, OTHER, uuid(97))])]),
         ],
       },
+      // the same accuracy under and beside, and the one beside carries a note
+      {
+        id: uuid(19),
+        class: "L",
+        labels: ["noted repeat"],
+        props: [
+          prop(64, GEOMETRY, uuid(100), [prop(65, ACCURACY, PRECISE)]),
+          prop(66, ACCURACY, PRECISE, [prop(67, OTHER, uuid(96))]),
+        ],
+      },
       // not a Location
       {
         id: uuid(17),
@@ -155,6 +165,7 @@ describe("nest-geocoding-accuracy", () => {
     ["two geometry props", 15],
     ["two accuracy props", 16],
     ["an accuracy prop whose children have children", 18],
+    ["a repeated accuracy beside the geometry that carries a note", 19],
   ])("leaves a Location with %s untouched", async (_name, n) => {
     const before = await location(n);
     await nestGeocodingAccuracyJob(conn);

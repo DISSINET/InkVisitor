@@ -1,3 +1,4 @@
+import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Connection, r } from "rethinkdb-ts";
 import { getTestDbName } from "../../../../test/db";
 import addGeocodingSourcesJob, {
@@ -26,6 +27,17 @@ const prop = (n: number, type: string, value: string, children: any[] = []) => (
   children,
 });
 const reference = (n: number, resource: string) => ({ id: uuid(n), resource, value: uuid(n + 100) });
+
+const T0 = new Date("2026-01-01T00:00:00Z");
+const later = (ms: number) => new Date(T0.getTime() + ms);
+// the geometry and record id Values, with the time they were created where it is known
+const value = (n: number, createdAt?: Date) => ({
+  id: uuid(n),
+  class: "V",
+  labels: [`value ${n}`],
+  props: [],
+  ...(createdAt ? { createdAt } : {}),
+});
 
 let conn: Connection;
 
@@ -112,6 +124,48 @@ beforeEach(async () => {
         props: [prop(48, GEOMETRY, uuid(97))],
         references: [reference(60, WIKIDATA)],
       },
+      // geocoded from GeoNames, then moved by a click a day later: the reference
+      // is about the first coordinate
+      {
+        id: uuid(20),
+        class: "L",
+        labels: ["moved since"],
+        props: [prop(71, GEOMETRY, uuid(190))],
+        references: [reference(70, GEONAMES)],
+      },
+      // a reference added by hand, long after the coordinate was written
+      {
+        id: uuid(21),
+        class: "L",
+        labels: ["cited later"],
+        props: [prop(73, GEOMETRY, uuid(191))],
+        references: [reference(72, WIKIDATA)],
+      },
+      // Values that carry no creation time say nothing about being written together
+      {
+        id: uuid(22),
+        class: "L",
+        labels: ["undated"],
+        props: [prop(75, GEOMETRY, uuid(192))],
+        references: [reference(74, GEONAMES)],
+      },
+    ])
+    .run(conn);
+  await r
+    .table("entities")
+    .insert([
+      // the Value of a geometry and the Values of the record ids written with it
+      ...[90, 91, 92, 93, 94, 95, 96, 97, 98].map((n) => value(n, T0)),
+      ...[150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160].map((n) => value(n, later(2_000))),
+      // moved a day after the GeoNames record id was written
+      value(190, later(24 * 3_600_000)),
+      value(170, T0),
+      // cited a week after the coordinate was written
+      value(191, T0),
+      value(172, later(7 * 24 * 3_600_000)),
+      // neither has a creation time
+      value(192),
+      value(174),
     ])
     .run(conn);
 });
@@ -136,12 +190,19 @@ describe("add-geocoding-sources", () => {
     expect(loc.props[0].children[0].id).toBe(uuid(44));
   });
 
-  it("gives a new prop the levels of the geometry prop it hangs under, and an id of its own", async () => {
+  it("gives a new prop the levels the page gives the props it writes, and an id of its own", async () => {
     await addGeocodingSourcesJob(conn);
     const [child] = (await location(11)).props[0].children;
     expect(child.type.entityId).toBe(SOURCE);
-    expect(child.elvl).toBe("2");
-    expect(child.certainty).toBe("2");
+    expect(child.value.entityId).toBe(GEONAMES);
+    expect(child).toMatchObject({
+      elvl: EntityEnums.Elvl.Textual,
+      certainty: EntityEnums.Certainty.Empty,
+      logic: EntityEnums.Logic.Positive,
+      mood: [EntityEnums.Mood.Indication],
+      moodvariant: EntityEnums.MoodVariant.Realis,
+      children: [],
+    });
     expect(child.id).not.toBe(uuid(42));
   });
 
@@ -154,6 +215,21 @@ describe("add-geocoding-sources", () => {
     const before = await location(n);
     await addGeocodingSourcesJob(conn);
     expect(await location(n)).toEqual(before);
+  });
+
+  it("credits no gazetteer for a coordinate that was moved after the reference was written", async () => {
+    await addGeocodingSourcesJob(conn);
+    expect((await location(20)).props[0].children).toEqual([]);
+  });
+
+  it("credits no gazetteer for a reference that was added by hand long after the coordinate", async () => {
+    await addGeocodingSourcesJob(conn);
+    expect((await location(21)).props[0].children).toEqual([]);
+  });
+
+  it("credits nothing where the Values say nothing of when they were written", async () => {
+    await addGeocodingSourcesJob(conn);
+    expect((await location(22)).props[0].children).toEqual([]);
   });
 
   it("changes nothing on a second run", async () => {

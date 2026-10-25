@@ -55,7 +55,7 @@ describe("SuggestionCard, what the gazetteers call the place", () => {
   it("says it in words among the facts, and draws no mark for it beside the name", () => {
     const container = card({ ...first, placeType: "settlement" });
     expect(container.textContent).toContain("settlement by the gazetteers");
-    // the mark that used to stand beside the name carried the label as its hint
+    // a mark beside the name would carry the gazetteers' type as its hint
     expect(container.querySelector('[data-hint="settlement"]')).toBeNull();
   });
 

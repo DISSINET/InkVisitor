@@ -337,6 +337,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
           <StyledSectionNote>
             Choose (or create) the Concept holding geographic coordinates in GeoJSON format, the
             Concept holding localisation accuracy, and the Concept holding the source of knowledge.
+            Without the last one the gazetteers are recorded as references only, and the
+            coordinate does not name them.
           </StyledSectionNote>
           {row("concept for referencing geocoding in GeoJSON format", draft.geometry, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, geometry: id ?? "" }))
