@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 /**
- * The project's kinds of place, one row each, laid out as a table that scrolls
+ * The project's location types, one row each, laid out as a table that scrolls
  * sideways where the modal is narrower than it.
  */
 export const StyledKindScroll = styled.div`
@@ -44,7 +44,7 @@ export const StyledKindCount = styled.div`
   text-align: right;
 `;
 
-/** The mark a kind carries, as the button that opens the set to choose another. */
+/** The mark a location type carries, as the button that opens the set to choose another. */
 export const StyledIconButton = styled.button<{ $open: boolean }>`
   display: inline-flex;
   align-items: center;

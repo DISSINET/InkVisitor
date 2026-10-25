@@ -104,7 +104,7 @@ export interface GeocodingListRowProps {
   /** The Location a quick geocode is running on, if it is this one. */
   quickBusyId: string | null;
   onToggleGroup: (key: string) => void;
-  /** Opens the kind-of-place picker over the row's own mark. */
+  /** Opens the location-type picker over the row's own mark. */
   onPick: (picking: {
     location: GeocodingLocation;
     anchor: { left: number; top: number; bottom: number };
@@ -231,7 +231,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           />
         </StyledRowMarkBox>
         {/* the row says whether it has a coordinate whatever the list is grouped
-            by, so it still reads under "kind of place" or under one flat list,
+            by, so it still reads under "location type" or under one flat list,
             where no heading says it */}
         {/* the dot holds the coordinate, and says it with the card every
             coordinate on this page is read from, when asked */}
@@ -251,7 +251,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             icon={<StyledRowMark $state={location.problem ? "problem" : "none"} />}
           />
         )}
-        {/* the mark is the control: a kind of place is corrected far more often
+        {/* the mark is the control: a location type is corrected far more often
             than it is first set, and reaching it should not mean selecting the
             row and losing whatever is being judged beside it */}
         {location.isGeocoded ? (
@@ -259,7 +259,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             type="button"
             data-row-type
             data-hint={`${kindInfo(kind).label} — click to change`}
-            aria-label={`kind of place: ${kindInfo(kind).label}`}
+            aria-label={`location type: ${kindInfo(kind).label}`}
             $unset={!location.placeType}
             onClick={(event) => {
               event.stopPropagation();
@@ -275,7 +275,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
         ) : (
           <StyledRowTypeStatic
             data-hint={`${kindInfo(kind).label} — recorded with a coordinate, and this Location has none`}
-            aria-label={`kind of place: ${kindInfo(kind).label}`}
+            aria-label={`location type: ${kindInfo(kind).label}`}
             $unset={!location.placeType}
           >
             <KindIcon kind={kind} />

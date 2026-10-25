@@ -34,7 +34,7 @@ export interface GeocodingWriteInput {
   geometry: GeoJsonGeometry;
   accuracy: GeocodingAccuracy;
   /**
-   * The id of the project's kind of place to record. A value sets it, `null`
+   * The id of the project's location type to record. A value sets it, `null`
    * removes it, and `undefined` leaves whatever the Location already states.
    * Recorded as a Classification relation once the props are written, not as a
    * prop, so it is carried on the plan for the executor rather than in `props`.
@@ -44,7 +44,7 @@ export interface GeocodingWriteInput {
   /**
    * The geometry the Location already carries, where it has one.
    *
-   * A write that keeps the geometry and changes only the kind of place - the
+   * A write that keeps the geometry and changes only the location type - the
    * common correction - would otherwise mint a fresh Value entity for the same
    * shape and orphan the one it replaced. The orphans survive whenever something
    * else refers to them or the account cannot delete, so they accumulate on
@@ -67,7 +67,7 @@ export interface GeocodingWritePlan {
    */
   displacedValueIds: string[];
   /**
-   * The Concept the Location is to be classified under, `null` where its kinds
+   * The Concept the Location is to be classified under, `null` where its location types
    * are to be removed, and `undefined` where they are left alone.
    */
   kindConceptId: string | null | undefined;
@@ -76,7 +76,7 @@ export interface GeocodingWritePlan {
   /**
    * True when a geometry already on the Location is being replaced by a
    * different one. False for a first geometry, and false for a write that
-   * leaves the geometry where it is and changes only what kind of place it is.
+   * leaves the geometry where it is and changes only what location type it is.
    */
   isOverwrite: boolean;
 }
@@ -106,7 +106,7 @@ const valueEntity = (label: string, userOptions: UserOptions): IEntity => {
 /**
  * Builds everything a geometry write needs, or refuses with a reason.
  *
- * Refuses rather than degrades: a kind of place the project has no Concept for
+ * Refuses rather than degrades: a location type the project has no Concept for
  * would otherwise be silently dropped, which is how a controlled vocabulary
  * stops being controlled.
  */
@@ -142,7 +142,7 @@ export const planGeocodingWrite = (
 
   /**
    * `null` and `undefined` are different answers. `null` is "this Location
-   * states no kind of place", which removes its Classifications; `undefined` is
+   * states no location type", which removes its Classifications; `undefined` is
    * "not my business", which leaves whatever is there — what a coordinate
    * correction means, since it says nothing about what the place is.
    */
@@ -150,10 +150,10 @@ export const planGeocodingWrite = (
   if (placeType) {
     const kind = roles.placeTypes.find((one) => one.id === placeType);
     if (!kind) {
-      return { blocked: `The kind of place "${placeType}" is not defined in the settings.` };
+      return { blocked: `The location type "${placeType}" is not defined in the settings.` };
     }
     if (!kind.conceptId) {
-      return { blocked: `No Concept is assigned for the kind of place "${kind.name}".` };
+      return { blocked: `No Concept is assigned for the location type "${kind.name}".` };
     }
     kindConceptId = kind.conceptId;
   }

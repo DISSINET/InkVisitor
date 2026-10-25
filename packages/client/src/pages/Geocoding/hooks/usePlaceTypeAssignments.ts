@@ -6,9 +6,9 @@ import api from "api";
 import { useMemo } from "react";
 
 /**
- * Which of the project's kinds of place each Location has.
+ * Which of the project's location types each Location has.
  *
- * A Location has a kind by being the subject of a Classification to the kind's
+ * A Location has a location type by being the subject of a Classification to the location type's
  * Concept, and a search of Locations does not return relations. So the question
  * is asked from the other side: one request per assigned Concept returns every
  * Classification pointing at it, which is also what the count in the settings
@@ -22,7 +22,7 @@ export const PLACE_TYPE_ASSIGNMENTS_KEY = "geocoding-place-types";
 export interface PlaceTypeAssignments {
   /** Location id → ids of its kinds, in the order the kinds are listed. */
   typesByLocation: Map<string, string[]>;
-  /** Kind id → how many of the given Locations are classified under it. */
+  /** Location type id → how many of the given Locations are classified under it. */
   countByType: Record<string, number>;
   isLoading: boolean;
   /** A request failed — typically a role that may not read relations. */

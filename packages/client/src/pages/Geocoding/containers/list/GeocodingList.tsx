@@ -44,7 +44,7 @@ interface GeocodingList {
   browse: UseGeocodingBrowse;
   selectedId: string | undefined;
   onSelect: (location: GeocodingLocation) => void;
-  /** Records a kind of place on a Location without touching its coordinate. */
+  /** Records a location type on a Location without touching its coordinate. */
   onRetype: (location: GeocodingLocation, placeType: string | null) => void;
   /** Moves the map to a Location that already has a coordinate. */
   onShowOnMap: (location: GeocodingLocation) => void;
@@ -60,7 +60,7 @@ interface GeocodingList {
   onMark: (ids: string[], on: boolean) => void;
   onClearMarks: () => void;
   /**
-   * Records one kind of place across the marked set.
+   * Records one location type across the marked set.
    *
    * Absent while a bulk write is in flight, which is what stops a second one
    * being started over the first.
@@ -180,7 +180,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
     onMark(idsInRange(items, from, index), on);
   };
 
-  /** Where the marked set's own kind-of-place picker opens. */
+  /** Where the marked set's own location-type picker opens. */
   const [pickingMarked, setPickingMarked] = useState<{
     left: number;
     top: number;
@@ -188,10 +188,10 @@ export const GeocodingList: React.FC<GeocodingList> = ({
   } | null>(null);
 
   /**
-   * How many of the marked Locations a kind-of-place write can reach.
+   * How many of the marked Locations a location-type write can reach.
    *
    * Only those with a coordinate: the write owns the coordinate roles too, so
-   * there is nothing to record a kind against without one.
+   * there is nothing to record a location type against without one.
    */
   /**
    * How many of the marked Locations a geocode would replace rather than fill.
@@ -210,7 +210,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
     [all, marked],
   );
 
-  /** The row whose kind of place is being chosen, and where its mark sits. */
+  /** The row whose location type is being chosen, and where its mark sits. */
   const [picking, setPicking] = useState<{
     location: GeocodingLocation;
     anchor: { left: number; top: number; bottom: number };
@@ -296,7 +296,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
         <PlaceTypePicker
           anchor={picking.anchor}
           current={picking.location.placeType}
-          clearLabel="record no kind of place"
+          clearLabel="record no location type"
           onChoose={(placeType) => {
             onRetype(picking.location, placeType as string | null);
             setPicking(null);
@@ -359,7 +359,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
             { key: "createdBy", label: "created by", options: browse.createdByOptions },
             { key: "accuracy", label: "accuracy", options: accuracyOptions,
               counts: browse.optionCounts.accuracy },
-            { key: "placeType", label: "kind", options: browse.placeTypeOptions,
+            { key: "placeType", label: "location type", options: browse.placeTypeOptions,
               counts: browse.optionCounts.placeType },
             { key: "language", label: "language", options: browse.languageOptions },
             { key: "status", label: "status", options: browse.statusOptions },
@@ -404,13 +404,13 @@ export const GeocodingList: React.FC<GeocodingList> = ({
           ) : marked.size ? (
             <>
               <Button
-                label="set kind of place"
+                label="set location type"
                 color="primary"
                 disabled={!reachable}
                 tooltipLabel={
                   reachable
                     ? undefined
-                    : "none of the marked Locations has a coordinate to record a kind against"
+                    : "none of the marked Locations has a coordinate to record a location type against"
                 }
                 onClick={(event: React.MouseEvent<HTMLElement>) => {
                   const box = event.currentTarget.getBoundingClientRect();
@@ -444,7 +444,7 @@ export const GeocodingList: React.FC<GeocodingList> = ({
         <PlaceTypePicker
           anchor={pickingMarked}
           current={undefined}
-          clearLabel={`record no kind of place on ${reachable}`}
+          clearLabel={`record no location type on ${reachable}`}
           onChoose={(placeType) => {
             onMarkedRetype(placeType as string | null);
             setPickingMarked(null);

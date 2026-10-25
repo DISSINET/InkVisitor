@@ -50,9 +50,9 @@ label is blank, not JSON, out of range or an open ring, does not count — a
 geometry that cannot be read is not a geometry. One
 Location in the converted set, `diocesis Tudensis`, is exactly that shape.
 
-The kind of place is not a prop. A Location has a kind by being the subject of a
-Classification relation to the kind's Concept, and a Location without one is
-still geocoded: the kind says what the place is, not where.
+The location type is not a prop. A Location has a location type by being the subject of a
+Classification relation to the location type's Concept, and a Location without one is
+still geocoded: the location type says what the place is, not where.
 
 None of these Concept identities is hardcoded. Which Concept plays which role is
 configuration, so a deployment whose data uses different Concepts points the
@@ -411,7 +411,7 @@ done 687 · unreadable 0 · all 687` — because they count one population.
 
 That matters because the panel applies its filters in two places. Name, language
 and status go to the server and change what comes back; coordinate state,
-accuracy and kind of place are applied to what came back. A figure taken over the
+accuracy and location type are applied to what came back. A figure taken over the
 server's answer, printed beside a control that filters in the browser, moves for
 three of the six controls and sits still for the other three — and nothing on
 screen says which kind of control was just used. A count printed beside a filter
@@ -527,9 +527,9 @@ whichever applies:
 Nothing here blocks accepting a suggestion — the researcher may recognise the
 place regardless. What they cannot do is notice this by looking at the list.
 
-## Recording what kind of place it is
+## Recording what location type it is
 
-A coordinate answers where; the project's place types answer what. The project
+A coordinate answers where; the project's location types answer what. The project
 defines its own list in the global settings — a name, the Concept a Location is
 classified under, a mark chosen from a set of sixty-two, a description and,
 optionally, the engine type it answers to. The engine's twelve types are a
@@ -537,11 +537,11 @@ separate vocabulary: they say what to ask the gazetteers for, while a place type
 says what the project calls a Location. The default list is one kind per engine
 type. When several kinds answer to one engine type, the starred favourite is
 offered first and the picker says how many match. The table counts the Locations
-classified under each kind's Concept, and assigning a Concept another kind holds
-moves it, since a Concept stands for one kind. A Location can carry several kinds;
-the page shows and edits the first one in the project's order, and writing a kind
-replaces the Location's other kinds while leaving every other Classification
-alone. The kinds are asked
+classified under each location type's Concept, and assigning a Concept another location type holds
+moves it, since a Concept stands for one location type. A Location can carry several location types;
+the page shows and edits the first one in the project's order, and writing a location type
+replaces the Location's other location types while leaving every other Classification
+alone. The location types are asked
 for rather than inferred, in a second step after the accuracy: a suggestion
 frequently carries no type of its own, and where it does, the type is what the
 sources called the record rather than what the researcher knows the place to be.
@@ -558,36 +558,36 @@ Three things follow from the vocabulary being the project's own:
 - The accuracy prop points at a Concept, not at a Value this page owns. A write
   never offers a previous accuracy for deletion: that Concept belongs to the
   vocabulary and to every other Location using it.
-- The kind is written after the props, as a relation, so a failure there is
+- The location type is written after the props, as a relation, so a failure there is
   reported while the geometry stays saved; the new Classification is created
   before the old one is removed.
 
 Setting a coordinate from the map asks the same two questions in the same order,
-in the menu that opens where the click landed. Leaving the kind undecided there
+in the menu that opens where the click landed. Leaving the location type undecided there
 keeps whatever the Location carries: a map click corrects where a place is and
 says nothing about what it is.
 
 A shape can also be drawn instead of picked. The shape tool under the map's
 layers and region switches draws points, lines and polygons; several shapes of
-one kind are saved together as one `Multi*` geometry, and a mix of kinds is
+one location type are saved together as one `Multi*` geometry, and a mix of location types is
 refused when saving. The saved shape then asks the same two questions at its
 centre. "Edit current shape" loads the stored geometry back into the tool.
 
-The kind of place is corrected far more often than a coordinate is, so it can be
+The location type is corrected far more often than a coordinate is, so it can be
 changed from the panel head without re-running the engine. That write keeps the
 geometry exactly as it stands — including the Value entity behind it, which
 is reused rather than minted afresh, since orphaning one on every correction
 accumulates on the most frequent operation.
 
-The list filters by kind of place, and its options come from the Locations the
+The list filters by location type, and its options come from the Locations the
 other filters leave rather than from the vocabulary. That matters because the
 corpus does not state what a place is: a type appears only once a Location has
 been geocoded through this page, so on the ungeocoded view — the page's default —
-the control reads "no kinds recorded yet" and offers nothing, rather than
-offering twelve kinds that each empty the list. Options taken from its own result
+the control reads "no location types recorded yet" and offers nothing, rather than
+offering twelve location types that each empty the list. Options taken from its own result
 would instead vanish the moment one was chosen.
 
-Each kind carries a mark from one uniform-stroke set drawn for interface sizes.
+Each location type carries a mark from one uniform-stroke set drawn for interface sizes.
 A detailed mark loses its detail at sixteen pixels and becomes a smudge — a
 village of nine small roofs is a village at 48px and a grey blur in a list. The
 mark is the control: in the
@@ -597,9 +597,9 @@ saying what it covers, because the twelve are the engine's vocabulary rather tha
 ordinary English — "religious" covers a chapel and a monastery, and nobody
 guesses that from the word.
 
-A Location stating no kind draws a mark of its own rather than nothing. That is
+A Location stating no location type draws a mark of its own rather than nothing. That is
 the state most of the corpus is in, and a blank space reads as a rendering fault
-rather than as a fact. Choosing it removes the kind: a value sets, `null` clears,
+rather than as a fact. Choosing it removes the location type: a value sets, `null` clears,
 and only leaving the question alone — which is what a map click does — keeps what
 is there.
 
@@ -712,10 +712,10 @@ separate opens nothing at all: opening its first row would name a leader the
 engine declined to name.
 
 The line that names a place carries everything about the place itself: its rank,
-the symbol for what kind of place it is, its name, its coordinate at the end
+the symbol for what location type it is, its name, its coordinate at the end
 where it is read last — nobody scans a list of places by latitude — and a framed
-control that moves the map to it. The kind symbol is an indicator and nothing
-more: the same glyph opens the kind-of-place picker on a row of the locations
+control that moves the map to it. The location type symbol is an indicator and nothing
+more: the same glyph opens the location-type picker on a row of the locations
 list, so a symbol that also travelled taught one mark two jobs on one screen. A
 glyph alone reads as decoration, and the frame is what says a thing can be
 pressed.
@@ -784,7 +784,7 @@ researcher who wants only the place in front of them is not making a decision
 anybody else has to live with.
 
 Hovering a mark says what it is. A Location the page holds shows its own tag,
-its kind of place, how precisely it is known and its coordinate — enough to tell
+its location type, how precisely it is known and its coordinate — enough to tell
 several marks in one valley apart before choosing between them. A suggestion
 under the pointer shows the whole card the panel would show, and takes
 precedence where the two coincide, because a run's marks land on the places they
@@ -942,7 +942,7 @@ second setting turns the refusal off for a corpus that is genuinely spread.
 Three things they never decide. The accuracy comes from the spread of the
 suggestion's own matches, the same reading the card leads with — how precisely a
 coordinate locates a place is a fact about the sources, not a preference. The
-kind of place is written only where the corpus named one to stand for all of
+location type is written only where the corpus named one to stand for all of
 them, and is otherwise left alone. And neither ever replaces a coordinate that is
 already recorded: the batch runs over the marked Locations that have none, and
 the bar says how many that is before the button is pressed.
@@ -952,7 +952,7 @@ else stays marked, so the set left behind is exactly the Locations still wanting
 a person — including the ones a stopped run never reached.
 
 A quick geocode that wrote says so in a notice that stays up for twelve seconds:
-the place it matched and where that is, the kind of place, the accuracy, how many
+the place it matched and where that is, the location type, the accuracy, how many
 sources stood behind it, and the position. The whole notice is a way to the map,
 since by the time it lands the researcher has usually looked away and the first
 thing they want is to see the answer.

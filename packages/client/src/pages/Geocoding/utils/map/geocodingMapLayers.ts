@@ -807,7 +807,7 @@ export interface MarkHoverInfo {
    * The Location under the point, by entity id.
    *
    * Reported alongside the name rather than instead of it: a Location the page
-   * holds can be shown as itself — its tag, its kind of place, its accuracy —
+   * holds can be shown as itself — its tag, its location type, its accuracy —
    * where a mark that is only a coordinate has nothing but a name to show.
    */
   locationId: string | null;

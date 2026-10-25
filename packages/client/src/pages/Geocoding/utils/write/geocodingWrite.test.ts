@@ -197,7 +197,7 @@ describe("planGeocodingWrite", () => {
 });
 
 /**
- * Changing what kind of place a Location is, without moving it. Every other
+ * Changing what location type a Location is, without moving it. Every other
  * write mints a Value entity per coordinate; doing that here would orphan a pair
  * on the operation researchers repeat most, and an orphan survives whenever
  * something still refers to it or the account cannot delete.
@@ -258,7 +258,7 @@ describe("planGeocodingWrite, keeping a geometry that did not move", () => {
     expect(plan.displacedValueIds).toEqual(["v-geo"]);
   });
 
-  it("still carries the kind of place it was called for, as a Concept to classify under", () => {
+  it("still carries the location type it was called for, as a Concept to classify under", () => {
     const plan = retype(same);
     expect(plan.kindConceptId).toBe("v-settlement");
     expect(plan.props.some((p) => p.type.entityId === "c-type")).toBe(false);
@@ -319,7 +319,7 @@ describe("planGeocodingWrite, what it offers for deletion", () => {
 /**
  * `isOverwrite` gates the one confirmation on the page, so what counts as an
  * overwrite is the whole of its meaning: a first coordinate must not ask, and a
- * write that keeps the coordinate and changes only the kind of place must not
+ * write that keeps the coordinate and changes only the location type must not
  * ask either, or the dialog appears on the correction done most often.
  */
 describe("planGeocodingWrite, what counts as replacing a geometry", () => {
@@ -378,11 +378,11 @@ describe("needsOverwriteConfirmation", () => {
 });
 
 /**
- * Three answers, not two. Clearing a kind of place is a statement the researcher
+ * Three answers, not two. Clearing a location type is a statement the researcher
  * makes; leaving it alone is what a coordinate correction does, and collapsing
- * them makes the control that offers "no kind of place" do nothing at all.
+ * them makes the control that offers "no location type" do nothing at all.
  */
-describe("planGeocodingWrite, clearing versus leaving the kind of place", () => {
+describe("planGeocodingWrite, clearing versus leaving the location type", () => {
   // a prop of the retired type role: the plan must neither read nor remove it
   const typed = () => location([prop("c-geo", "v-geo"), prop("c-type", "v-fortress")]);
 

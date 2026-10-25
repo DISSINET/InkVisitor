@@ -25,9 +25,9 @@ export interface DerivedGeocoding {
   lat: number | null;
   accuracy: GeocodingAccuracy | null;
   /**
-   * The id of the project's kind of place, independent of `isGeocoded` — a kind
+   * The id of the project's location type, independent of `isGeocoded` — a location type
    * says nothing about a coordinate. Not a prop, so it is not derived here: a
-   * Location has a kind by a Classification relation, which the collection of
+   * Location has a location type by a Classification relation, which the collection of
    * Locations joins in.
    */
   placeType: string | null;

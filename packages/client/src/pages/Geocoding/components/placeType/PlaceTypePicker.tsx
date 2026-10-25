@@ -13,13 +13,13 @@ import { kindsForEngineType } from "../../utils/write/placeTypeEdits";
 import { usePlaceTypes } from "../../hooks/placeTypesContext";
 
 /**
- * The one control for choosing what kind of place something is.
+ * The one control for choosing what location type something is.
  *
  * Rendered into the document rather than into whatever opened it, because the
  * places it opens from — a virtualised list row, a menu already floating over
  * the map — clip their own children.
  *
- * A kind the project has mapped to no Concept is shown and disabled with the
+ * A location type the project has mapped to no Concept is shown and disabled with the
  * reason on it. Hiding it would misrepresent the vocabulary, and offering it
  * only for the write to refuse afterwards wastes the decision.
  */
@@ -64,7 +64,7 @@ interface FloatingPicker {
 
 /**
  * The backdrop, portal and positioned panel every picker built on this shape
- * shares — a card's accuracy list and its kind-of-place list open from a
+ * shares — a card's accuracy list and its location-type list open from a
  * click and close the same three ways (Escape, a click outside, choosing an
  * option), so only the options inside tell the two apart.
  */
@@ -139,7 +139,7 @@ interface PlaceTypePicker {
    * answer: the kinds that answer to it are marked, the favourite first.
    */
   suggested?: string | null;
-  /** The wording for choosing no kind at all, or absent to leave that out. */
+  /** The wording for choosing no location type at all, or absent to leave that out. */
   clearLabel?: string;
   onChoose: (placeType: string | null) => void;
   onClose: () => void;
@@ -154,19 +154,19 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   onClose,
 }) => {
   const kinds = usePlaceTypes();
-  // the favourite leads the kinds that answer to the suggestion; the rest keep
+  // the favourite leads the location types that answer to the suggestion; the rest keep
   // the order the project listed them in
   const answering = kindsForEngineType(kinds, suggested);
   const ordered = [...answering, ...kinds.filter((one) => !answering.includes(one))];
   const engineLabel = suggested ? placeTypeInfo(suggested).label : "";
 
   return (
-    <FloatingPicker anchor={anchor} ariaLabel="Kind of place" onClose={onClose}>
-      <StyledPickerTitle>what kind of place is it?</StyledPickerTitle>
+    <FloatingPicker anchor={anchor} ariaLabel="Location type" onClose={onClose}>
+      <StyledPickerTitle>what location type is it?</StyledPickerTitle>
       {answering.length > 1 ? (
         <StyledPickerDescription>
-          {answering.length} of your kinds answer to &ldquo;{engineLabel}&rdquo;, the sources&apos;
-          word for it — the starred one is your favourite.
+          {answering.length} of your location types answer to &ldquo;{engineLabel}&rdquo;, the
+          gazetteers&apos; word for it — the starred one is your favourite.
         </StyledPickerDescription>
       ) : null}
 

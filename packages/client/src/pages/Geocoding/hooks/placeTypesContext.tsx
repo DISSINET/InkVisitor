@@ -2,7 +2,7 @@ import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
 import React, { createContext, useContext } from "react";
 
 /**
- * The project's kinds of place, for every component that draws or offers one.
+ * The project's location types, for every component that draws or offers one.
  *
  * A list row, a map card, the suggestion panel and the pickers all need the same
  * list and none of them is near where it is loaded, so it is provided once
@@ -20,7 +20,7 @@ export const PlaceTypesProvider: React.FC<{
 
 export const usePlaceTypes = (): IGeocodingPlaceType[] => useContext(PlaceTypesContext);
 
-/** The kind with this id in a list, for code that is not a component. */
+/** The location type with this id in a list, for code that is not a component. */
 export const findPlaceType = (
   all: IGeocodingPlaceType[],
   id: string | null | undefined,

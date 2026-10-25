@@ -115,7 +115,7 @@ export const StyledScrollRow = styled.div`
   overflow-x: auto;
 `;
 
-/** The table of the project's kinds of place, laid across both columns. */
+/** The table of the project's location types, laid across both columns. */
 export const StyledKindsRow = styled.div`
   grid-column: 1 / -1;
   min-width: 0;

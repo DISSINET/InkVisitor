@@ -9,7 +9,7 @@ import { GeocodingPlaceType, IGeocodingPlaceType } from "@inkvisitor/shared/type
  * Assigns a Concept to a kind, or unlinks it where null.
  *
  * A Concept that another kind already holds moves: it stands for one kind,
- * because a Location classified under it would otherwise be two kinds at once
+ * because a Location classified under it would otherwise be two location types at once
  * and the count beside each would claim the same Locations.
  */
 export const assignConcept = (

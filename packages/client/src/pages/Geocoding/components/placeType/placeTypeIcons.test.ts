@@ -10,7 +10,7 @@ import {
 } from "./placeTypeIcons";
 
 /**
- * Most of the corpus states no kind of place, so the mark for "nobody has said"
+ * Most of the corpus states no location type, so the mark for "nobody has said"
  * is the one seen most often. An absent icon there would read as a rendering
  * fault rather than as the fact it is.
  */

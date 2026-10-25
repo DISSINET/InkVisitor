@@ -168,7 +168,7 @@ describe("deriveGeocoding", () => {
     expect(result.problem).toBeNull();
   });
 
-  it("leaves the kind of place to the Classification relations, whatever props say", () => {
+  it("leaves the location type to the Classification relations, whatever props say", () => {
     // a kind is a relation the collection of Locations joins in, so a prop that
     // still carries one is not read as a kind
     const result = deriveGeocoding(

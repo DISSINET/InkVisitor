@@ -175,7 +175,7 @@ export const __testing = {
 type PendingAccept = {
   index: number;
   accuracy: GeocodingAccuracy | null;
-  /** Where the kind picker opens from — the control that chose the accuracy. */
+  /** Where the location type picker opens from — the control that chose the accuracy. */
   anchor?: { left: number; top: number; bottom: number };
 } | null;
 
@@ -308,8 +308,8 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         >
           {index + 1}
         </StyledRank>
-        {/* what kind of place it is, and nothing else. The same glyph opens
-            the kind-of-place picker on a list row, so a mark that also
+        {/* what location type it is, and nothing else. The same glyph opens
+            the location-type picker on a list row, so a mark that also
             travelled taught one symbol two jobs on one screen */}
         <StyledKind data-hint={placeTypeInfo(suggestion.placeType).label}>
           <PlaceTypeIcon placeType={suggestion.placeType} />
@@ -504,7 +504,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         </StyledTypeStep>
       ) : null}
 
-      {/* the kind of place is asked with the same floating list the map
+      {/* the location type is asked with the same floating list the map
           asks it with, opened from the control that chose the accuracy —
           one control for one question, wherever the question comes up */}
       {pendingHere && pendingHere.accuracy !== null && pendingHere.anchor ? (
@@ -512,7 +512,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           anchor={pendingHere.anchor}
           current={null}
           suggested={suggestion.placeType}
-          clearLabel="record no kind of place"
+          clearLabel="record no location type"
           onChoose={(placeType) =>
             onChooseKind(
               pendingHere.accuracy as GeocodingAccuracy,
@@ -578,11 +578,11 @@ interface GeocodingSuggestions {
     accuracy: GeocodingAccuracy,
     provenance: GeocodingProvenance[],
     /**
-     * What kind of place to record.
+     * What location type to record.
      *
      * `null` and `undefined` are different answers, and the write acts on the
      * difference: `null` records that this Location states no kind, removing
-     * whatever it had; `undefined` says nothing about the kind and leaves it
+     * whatever it had; `undefined` says nothing about the location type and leaves it
      * standing. Accepting a suggestion where the question is switched off is
      * the second — a corrected coordinate is not a claim about what the place
      * is.
@@ -604,7 +604,7 @@ interface GeocodingSuggestions {
   /** Moves the map to a suggestion, without choosing it. */
   onShowOnMap: (lat: number, lon: number) => void;
   /**
-   * Records a kind of place on the selected Location without touching its
+   * Records a location type on the selected Location without touching its
    * coordinate. Absent while the Location has no coordinate to keep.
    */
   onRetype: ((placeType: string | null) => void) | undefined;
@@ -801,11 +801,11 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   };
 
   /**
-   * What choosing an accuracy leads to: the kind of place, or the write.
+   * What choosing an accuracy leads to: the location type, or the write.
    *
    * Every way of accepting a suggestion comes through here — the card's button,
    * the accuracy picker behind its caret, and the step a suggestion chosen off
-   * the map leads to. A project that records no kind of place has nothing to
+   * the map leads to. A project that records no location type has nothing to
    * ask, and that has to be true of all three: asking on one of them makes the
    * question appear only for suggestions picked a particular way.
    */
@@ -816,10 +816,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
     anchor?: { left: number; top: number; bottom: number },
   ) => {
     if (context.recordPlaceType === false) {
-      // the kind named once for the whole corpus, or none where none was named
-      // undefined rather than null where no kind was named for the corpus: the
+      // the location type named once for the whole corpus, or none where none was named
+      // undefined rather than null where no location type was named for the corpus: the
       // question is switched off, which is not the same as answering "none" —
-      // answering it would strip the kind off every Location whose coordinate
+      // answering it would strip the location type off every Location whose coordinate
       // is corrected
       accept(suggestion, accuracy, context.defaultPlaceType ?? undefined);
       return;
@@ -1051,10 +1051,10 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
         ) : null}
         {selected?.isGeocoded && onRetype ? (
           <StyledRetype>
-            {/* the kind of place is corrected far more often than the coordinate
+            {/* the location type is corrected far more often than the coordinate
                 is, and re-running the engine to change one word would throw away
                 a coordinate somebody already judged */}
-            <StyledTypeStepAside>kind of place</StyledTypeStepAside>
+            <StyledTypeStepAside>location type</StyledTypeStepAside>
             <StyledRetypeButton
               type="button"
               $unset={!selected.placeType}
@@ -1073,7 +1073,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
           <PlaceTypePicker
             anchor={pickingHead}
             current={selected?.placeType}
-            clearLabel="record no kind of place"
+            clearLabel="record no location type"
             onChoose={(placeType) => {
               onRetype(placeType as string | null);
               setPickingHead(null);

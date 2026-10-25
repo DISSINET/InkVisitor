@@ -30,7 +30,7 @@ import {
 import { ButtonSize } from "types";
 
 /**
- * The project's own kinds of place.
+ * The project's own location types.
  *
  * Free to define: a name, the Concept a Location is classified under, a mark,
  * the engine type it answers to and a description. The engine type is what
@@ -43,7 +43,7 @@ interface PlaceTypeTable {
   onChange: (next: IGeocodingPlaceType[]) => void;
   /** The assigned Concept with its unlink, or the suggester that picks one. */
   renderConcept: (conceptId: string, set: (conceptId: string | null) => void) => React.ReactNode;
-  /** Locations classified under each kind's Concept, by kind id. */
+  /** Locations classified under each location type's Concept, by location type id. */
   counts: Record<string, number>;
   countsLoading: boolean;
   /** The counts could not be read, so they are not shown as zero. */
@@ -234,7 +234,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               icon={<IcoTrash />}
               color="danger"
               inverted
-              tooltipLabel="remove this kind from the list — Classifications already made stay"
+              tooltipLabel="remove this location type from the list — Classifications already made stay"
               onClick={() => onChange(value.filter((one) => one.id !== kind.id))}
               shape="square"
             />
@@ -244,7 +244,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
       <StyledKindActions>
         <Button
           icon={<IcoPlus />}
-          label="add a kind of place"
+          label="add a location type"
           color="primary"
           inverted
           onClick={add}

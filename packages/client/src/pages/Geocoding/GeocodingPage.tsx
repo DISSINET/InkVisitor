@@ -466,11 +466,11 @@ export const GeocodingPage: React.FC = () => {
   const advanceTo = useRef<GeocodingLocation | undefined>(undefined);
 
   /**
-   * Records what kind of place a Location is, leaving its geometry alone.
+   * Records what location type a Location is, leaving its geometry alone.
    *
    * The geometry and accuracy are written back unchanged because the write
    * replaces every role it owns, and a partial one would leave a Location with a
-   * kind and no geometry. A Location with no geometry has nothing to write
+   * location type and no geometry. A Location with no geometry has nothing to write
    * against, so the mark on its row is a label rather than a control.
    */
   const retype = async (
@@ -768,7 +768,7 @@ export const GeocodingPage: React.FC = () => {
                 roles,
                 geometry,
                 accuracy,
-                // an undecided kind of place keeps whatever the Location carries,
+                // an undecided location type keeps whatever the Location carries,
                 // which is what a coordinate correction means
                 placeType: placeType === undefined ? selected.placeType : placeType,
                 current: selected.geometry,

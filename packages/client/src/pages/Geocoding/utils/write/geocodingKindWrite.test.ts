@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { KindGateway, executeKindChange, planKindChange } from "./geocodingKindWrite";
 
 /**
- * A kind of place is a Classification from the Location to the kind's Concept.
+ * A location type is a Classification from the Location to the kind's Concept.
  * The cases that matter are the ones that would delete or duplicate something:
  * a Classification under a Concept that is not a kind belongs to someone else.
  */
@@ -117,7 +117,7 @@ describe("executeKindChange", () => {
     const g = gateway({ deleteRelation: vi.fn().mockRejectedValue(new Error("no")) });
     const result = await executeKindChange("L1", kinds, "C-village", g);
     expect(result.ok).toBe(false);
-    expect(!result.ok && result.reason).toContain("new kind of place was saved");
+    expect(!result.ok && result.reason).toContain("new location type was saved");
   });
 
   it("writes nothing when the Location already has the kind", async () => {

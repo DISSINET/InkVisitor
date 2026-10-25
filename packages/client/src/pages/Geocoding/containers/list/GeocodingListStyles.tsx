@@ -161,7 +161,7 @@ export const StyledEmpty = styled.div`
  * word stays available on hover for the cases the shape does not settle.
  */
 /**
- * The kind of place, as its mark and as the control that changes it. `$unset`
+ * The location type, as its mark and as the control that changes it. `$unset`
  * is the state most of the corpus is in, drawn faintly so a row that states
  * nothing does not read as a row stating something.
  */
@@ -261,10 +261,10 @@ export const StyledRowMark = styled.span<{ $state: "geocoded" | "problem" | "non
 `;
 
 /**
- * The kind of place where nothing can be done about it.
+ * The location type where nothing can be done about it.
  *
  * A write owns the coordinate roles as well as the kind, so a Location with no
- * coordinate has nothing to write the kind against — the mark is a label there,
+ * coordinate has nothing to write the location type against — the mark is a label there,
  * and drawing it as a button offered a picker whose choice went nowhere.
  */
 export const StyledRowTypeStatic = styled.span<{ $unset?: boolean }>`

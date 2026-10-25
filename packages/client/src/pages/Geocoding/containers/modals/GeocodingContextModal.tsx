@@ -36,7 +36,7 @@ import { QuickStrategy } from "../../utils/suggestions/quickGeocode";
 /**
  * How this researcher works, as opposed to what they ask.
  *
- * The question itself — region, period, language, kind of place — is edited in
+ * The question itself — region, period, language, location type — is edited in
  * the Suggestions panel, where the answer it produced is on screen; these four
  * are settings about the page rather than about a place, and none of them can
  * make an answer stale.
@@ -222,10 +222,10 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
             What a coordinate carries beside itself, on every path that records one.
           </StyledSectionNote>
           {row(
-            "kind of place",
-            "Whether writing a coordinate also asks what kind of place it is — settlement, " +
+            "location type",
+            "Whether writing a coordinate also asks which location type it is — settlement, " +
               "fortress, river and so on. Turn it off where the project has no Concepts for " +
-              "those kinds, or where nobody is recording them.",
+              "those location types, or where nobody is recording them.",
             <Dropdown.Single.Basic
               width="full"
               options={yesNoOptions}
@@ -239,9 +239,10 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           {draft.recordPlaceType === false &&
             row(
               "code all as",
-              "With the question above off, this kind is written on every Location instead " +
-                "of asking. Right for a corpus that is all of one kind — a register of " +
-                "parishes, a list of monasteries. Leave it at nothing to record no kind at all.",
+              "With the question above off, this location type is written on every Location " +
+                "instead of asking. Right for a corpus that is all of one kind — a register of " +
+                "parishes, a list of monasteries. Leave it at nothing to record no location " +
+                "type at all.",
               <Dropdown.Single.Basic
                 width="full"
                 options={defaultPlaceTypeOptions(placeTypes)}

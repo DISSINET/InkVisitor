@@ -162,7 +162,7 @@ interface GeocodingMap {
     geometry: GeoJsonGeometry,
     accuracy: GeocodingAccuracy,
     /**
-     * What kind of place to record. `undefined` leaves whatever the Location
+     * What location type to record. `undefined` leaves whatever the Location
      * already carries, which is the right answer for a geometry correction.
      */
     placeType?: string | null,
@@ -207,7 +207,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   const [hits, setHits] = useState<EngineSearchHit[]>([]);
   /**
    * A coordinate waiting to be written, and how far through the two questions it
-   * is. `accuracy` set means the accuracy is chosen and the kind of place is
+   * is. `accuracy` set means the accuracy is chosen and the location type is
    * being asked for.
    */
   const [pending, setPending] = useState<MapPending | null>(null);
@@ -567,7 +567,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           anchor={pickerAnchor(pending)}
           current={selected?.placeType}
           clearLabel={
-            selected?.placeType ? `keep it as ${selected.placeType}` : "record no kind of place"
+            selected?.placeType ? `keep it as ${selected.placeType}` : "record no location type"
           }
           onChoose={(placeType) =>
             finish(

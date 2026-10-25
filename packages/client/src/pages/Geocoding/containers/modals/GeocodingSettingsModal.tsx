@@ -136,7 +136,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   const save = useMutation({
     mutationFn: async () => {
       if (draft.placeTypes.some((one) => !one.name.trim())) {
-        throw new Error("Every kind of place needs a name.");
+        throw new Error("Every location type needs a name.");
       }
       // the draft holds every role, so a role the researcher unlinked is absent
       // from this object — it has to replace, not merge
@@ -168,7 +168,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
       onClose();
     },
     onError: (error) => {
-      if (error instanceof Error && error.message === "Every kind of place needs a name.") {
+      if (error instanceof Error && error.message === "Every location type needs a name.") {
         toast.error(error.message);
         return;
       }
@@ -317,7 +317,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
   return (
     <Modal showModal onClose={onClose} width={1300} fullHeight>
       <ModalHeader title="Global geocoding settings" onClose={onClose} />
-      {/* the sections are a fixed length — twelve place types and fifteen
+      {/* the sections are a fixed length — twelve location types and fifteen
           gazetteers — so the body outgrows any viewport and scrolls inside
           the card, which keeps the footer and its save button in reach */}
       <ModalContent column enableScroll>
@@ -348,7 +348,7 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
             )
           )}
 
-          <StyledSectionHeading>Place types</StyledSectionHeading>
+          <StyledSectionHeading>Location types</StyledSectionHeading>
           <StyledSectionNote>
             The project&apos;s own kinds of place, free to define. A Location has a kind by being
             classified under the kind&apos;s Concept, so assign one Concept per kind — picking a

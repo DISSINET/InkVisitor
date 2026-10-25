@@ -26,8 +26,8 @@ import { usePlaceTypeAssignments } from "./usePlaceTypeAssignments";
 export interface GeocodingLocation extends DerivedGeocoding {
   entity: IResponseEntity;
   /**
-   * Every kind of place the Location is classified under. `placeType` is the
-   * first of them, in the order the project lists its kinds — the one the page
+   * Every location type the Location is classified under. `placeType` is the
+   * first of them, in the order the project lists its location types — the one the page
    * shows and edits while a Location is read as having a single kind.
    */
   placeTypes: string[];

@@ -659,7 +659,7 @@ export const StyledRetype = styled.div`
   }
 `;
 
-/** The panel head's kind of place: its mark, its name, and the way to change it. */
+/** The panel head's location type: its mark, its name, and the way to change it. */
 export const StyledRetypeButton = styled.button<{ $unset?: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -853,7 +853,7 @@ export const StyledMatchTags = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
 `;
 
-/** What kind of place it is. An indicator, with the word on its tooltip. */
+/** What location type it is. An indicator, with the word on its tooltip. */
 export const StyledKind = styled.span`
   display: inline-flex;
   align-items: center;

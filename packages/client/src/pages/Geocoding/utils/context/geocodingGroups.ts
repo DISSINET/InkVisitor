@@ -16,7 +16,7 @@ export type GroupBy = "coords" | "placeType" | "language" | "status" | "none";
 
 export const groupByOptions: DropdownItem[] = [
   { value: "coords", label: "coordinates" },
-  { value: "placeType", label: "kind of place" },
+  { value: "placeType", label: "location type" },
   { value: "language", label: "language" },
   { value: "status", label: "status" },
   { value: "none", label: "nothing — one list" },
@@ -92,7 +92,7 @@ const inWriteOrder = (rows: GeocodingLocation[], writeOrder: WriteOrder) =>
  * Bucketing by a field a Location may not carry.
  *
  * A Location with no value gets a named group rather than being dropped: the
- * list holds the same rows under every arrangement, and "no kind recorded" is
+ * list holds the same rows under every arrangement, and "no location type recorded" is
  * frequently the group a researcher is looking for.
  */
 const bucketBy = (
@@ -172,7 +172,7 @@ export const groupsOf = (
     return bucketBy(
       locations,
       (location) => placeTypes.find((one) => one.id === location.placeType)?.name,
-      "no kind recorded",
+      "no location type recorded",
       writeOrder,
       collapsed,
     );

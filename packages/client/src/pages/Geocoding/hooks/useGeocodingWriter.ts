@@ -259,7 +259,7 @@ export const useGeocodingWriter = (
           return false;
         }
 
-        // the kind of place is a relation, so it can only follow the props: the
+        // the location type is a relation, so it can only follow the props: the
         // geometry is already saved, and a failure here is said, not hidden
         let kindFailed = false;
         if (plan.kindConceptId !== undefined) {

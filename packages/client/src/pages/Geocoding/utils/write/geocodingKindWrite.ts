@@ -4,10 +4,10 @@ import { IGeocodingPlaceType } from "@inkvisitor/shared/types/geocoding";
 import { v4 as uuidv4 } from "uuid";
 
 /**
- * Recording a Location's kind of place.
+ * Recording a Location's location type.
  *
- * A kind is a Classification from the Location to the kind's Concept. Setting
- * one replaces the Location's other kinds and leaves every other Classification
+ * A location type is a Classification from the Location to the location type's Concept. Setting
+ * one replaces the Location's other location types and leaves every other Classification
  * alone — a Location can be classified under Concepts that mean nothing to this
  * page, and removing those would be erasing someone's data to tidy the page's
  * own.
@@ -24,7 +24,7 @@ export interface KindChange {
  * What a change to `conceptId` — or to no kind, where null — needs doing.
  *
  * `existing` is every Classification that has the Location as its subject, as
- * the server holds it now. Only those pointing at a Concept some kind uses are
+ * the server holds it now. Only those pointing at a Concept some location type uses are
  * the page's to remove.
  */
 export const planKindChange = (
@@ -55,7 +55,7 @@ export const planKindChange = (
   };
 };
 
-/** The calls a kind change needs, named so a test can supply them without a server. */
+/** The calls a location type change needs, named so a test can supply them without a server. */
 export interface KindGateway {
   readClassifications: (locationId: string) => Promise<Relation.IRelation[]>;
   createRelation: (relation: Relation.IRelation) => Promise<void>;
@@ -65,10 +65,10 @@ export interface KindGateway {
 export type KindOutcome = { ok: true; changed: boolean } | { ok: false; reason: string };
 
 /**
- * Applies a kind change, the new Classification first.
+ * Applies a location type change, the new Classification first.
  *
  * Created before the old ones are removed so a failure part-way leaves the
- * Location with a kind rather than none, and an extra one is a state the page
+ * Location with a location type rather than none, and an extra one is a state the page
  * already reads (the first listed wins).
  */
 export const executeKindChange = async (
@@ -81,7 +81,7 @@ export const executeKindChange = async (
   try {
     existing = await gateway.readClassifications(locationId);
   } catch {
-    return { ok: false, reason: "Could not read the location's current kind of place." };
+    return { ok: false, reason: "Could not read the location's current location type." };
   }
   const change = planKindChange(locationId, placeTypes, existing, conceptId);
   if (!change.create && !change.removeIds.length) {
@@ -91,7 +91,7 @@ export const executeKindChange = async (
     try {
       await gateway.createRelation(change.create);
     } catch {
-      return { ok: false, reason: "The kind of place could not be saved." };
+      return { ok: false, reason: "The location type could not be saved." };
     }
   }
   for (const id of change.removeIds) {
@@ -100,7 +100,7 @@ export const executeKindChange = async (
     } catch {
       return {
         ok: false,
-        reason: "The new kind of place was saved, but the previous one could not be removed.",
+        reason: "The new location type was saved, but the previous one could not be removed.",
       };
     }
   }
