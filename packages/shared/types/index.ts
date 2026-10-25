@@ -59,6 +59,7 @@ import { IDocument, IDocumentExport, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
 import { IResponseEntityExpansion } from "./response-entity-expansion";
+import { IClassifiedUnder, IResponseClassifiedUnder } from "./response-classified-under";
 import { IResponseStats } from "./response-stats";
 import { IBookmarkFolder, IStoredTerritory, IUser, IUserOptions, IUserRight } from "./user";
 
@@ -76,6 +77,7 @@ import { ISavedQuery, ISavedQueryCreate, ISavedQueryData, ISavedQueryUpdate } fr
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
 export { AuditScope };
 export { EXPANSION_RESPONSE_MAX } from "./response-entity-expansion";
+export { CLASSIFIED_UNDER_MAX_CONCEPTS } from "./response-classified-under";
 export type {
   ClassificationOrder,
   IBatchAttributeChange,
@@ -115,11 +117,13 @@ export type {
   IRequestPasswordResetData,
   IRequestQuery,
   IRequestStats,
+  IClassifiedUnder,
   IResource,
   IResourceData,
   IResponseAudit,
   IResponseBackup,
   IResponseBookmarkFolder,
+  IResponseClassifiedUnder,
   IResponseDetail,
   IResponseEntity,
   IResponseEntityExpansion,

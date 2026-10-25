@@ -186,6 +186,18 @@ class Acl {
       return null;
     }
 
+    // GET /entities/classified-under reads classifications and the superclass and
+    // synonym links between Concepts, which any logged-in user may see in the
+    // Concept's detail, to tell the Geocoding page which entities come under
+    // each of the project's location types. It has no seeded ACL entry either.
+    if (
+      controller === "entities" &&
+      route === "classified-under" &&
+      method === HttpMethods.Get
+    ) {
+      return null;
+    }
+
     // GET /entities/:entityId/tooltip, /detail and /expansion have no seeded
     // ACL entries. All are read-only companions to the public
     // GET /entities/:entityId, so any logged-in user may call them; entity-level

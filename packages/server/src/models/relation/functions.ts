@@ -308,6 +308,11 @@ export const collectIdsFromIdentificationConnections = (
   return acc;
 };
 
+/** What `getEquivalentEntityIds` follows, where a caller wants less than all of it. */
+export interface IEquivalentExpansionOptions {
+  synonymsOnly?: boolean;
+}
+
 /**
  * Returns the set of entity ids considered "equivalent" to the input entities,
  * used by the "include equivalents" search option (#2969). Equivalence covers:
@@ -321,11 +326,16 @@ export const collectIdsFromIdentificationConnections = (
  * The original input ids are removed from the result.
  * @param conn db connection
  * @param entityIds source entity ids to expand
+ * @param opts `synonymsOnly` stops at the synonym cloud: for entities that are
+ *   never Actions, Events or the subject of an identification, such as Concepts
+ *   that a classification points at, the other two have nothing to find, and
+ *   the identification walk costs a query per entity
  * @returns unique equivalent entity ids, excluding the inputs
  */
 export const getEquivalentEntityIds = async (
   conn: Conn,
-  entityIds: string[]
+  entityIds: string[],
+  opts?: IEquivalentExpansionOptions
 ): Promise<string[]> => {
   const result = new Set<string>();
 
@@ -335,10 +345,9 @@ export const getEquivalentEntityIds = async (
 
   // SYN (full transitive cloud) and AEE (single hop, both directions): batched,
   // just flatten the related ids
-  for (const type of [
-    RelationEnums.Type.Synonym,
-    RelationEnums.Type.ActionEventEquivalent,
-  ]) {
+  for (const type of opts?.synonymsOnly
+    ? [RelationEnums.Type.Synonym]
+    : [RelationEnums.Type.Synonym, RelationEnums.Type.ActionEventEquivalent]) {
     const relations = await Relation.findForEntities(conn, entityIds, type);
     for (const relation of relations) {
       for (const id of relation.entityIds) {
@@ -349,7 +358,7 @@ export const getEquivalentEntityIds = async (
 
   // IDE - per-entity transitive traversal (mirrors detail view), run in parallel
   const identificationTrees = await Promise.all(
-    entityIds.map((entityId) =>
+    (opts?.synonymsOnly ? [] : entityIds).map((entityId) =>
       Identification.getIdentificationForwardConnections(
         conn,
         entityId,
