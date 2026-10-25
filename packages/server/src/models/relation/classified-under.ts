@@ -32,8 +32,10 @@ import Relation from "./relation";
  * nothing new turns up, since a synonym of a subclass has subclasses of its own.
  * It terminates on a cycle: the set only grows.
  *
- * `truncated` is true when the subclass walk hit its safety limit, so that
- * Concepts further down are missing.
+ * The whole set is held to `SUBORDINATE_MAX_NODES`, the limit of the walk it is
+ * built on, which applies to one pass only. `truncated` is true when the set
+ * reached it, so that Concepts further down are missing; the set kept is the
+ * nearest of what was found.
  */
 export const getConceptsBelow = async (
   conn: Conn,
@@ -44,20 +46,24 @@ export const getConceptsBelow = async (
     concept,
     ...(await getEquivalentEntityIds(conn, [concept], synonymsOnly)),
   ]);
-  let truncated = false;
 
   for (;;) {
     const subclasses = await getSubordinateEntityIds(conn, [...known], {
       relationTypes: [RelationEnums.Type.Superclass],
       includeChildTerritories: false,
     });
-    truncated = truncated || subclasses.length >= SUBORDINATE_MAX_NODES;
     const grown = new Set<string>([...known, ...subclasses]);
     for (const id of await getEquivalentEntityIds(conn, [...grown], synonymsOnly)) {
       grown.add(id);
     }
+    if (grown.size >= SUBORDINATE_MAX_NODES) {
+      return {
+        below: new Set([...grown].slice(0, SUBORDINATE_MAX_NODES)),
+        truncated: true,
+      };
+    }
     if (grown.size === known.size) {
-      return { below: known, truncated };
+      return { below: known, truncated: false };
     }
     known = grown;
   }

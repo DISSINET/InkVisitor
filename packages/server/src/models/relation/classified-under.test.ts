@@ -167,17 +167,60 @@ describe("getClassifiedUnder", () => {
 describe("getClassifiedUnder, when the walk hits its limit", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  it("says which Concept was cut short", async () => {
-    jest
-      .spyOn(functions, "getSubordinateEntityIds")
-      .mockResolvedValue(
-        Array.from({ length: functions.SUBORDINATE_MAX_NODES }, (_, index) => `deep-${index}`)
+  const manyBelow = (round: { n: number }) =>
+    jest.spyOn(functions, "getSubordinateEntityIds").mockImplementation(async () => {
+      round.n += 1;
+      // a different thousand each time, as a very wide tree would give
+      return Array.from(
+        { length: functions.SUBORDINATE_MAX_NODES },
+        (_, index) => `deep-${round.n}-${index}`
       );
+    });
+
+  it("says which Concept was cut short", async () => {
+    manyBelow({ n: 0 });
     jest.spyOn(functions, "getEquivalentEntityIds").mockResolvedValue([]);
     jest.spyOn(Relation, "findForEntities").mockResolvedValue([]);
 
     const result = await getClassifiedUnder({} as any, ["broad"]);
 
     expect(result.truncated).toEqual(["broad"]);
+  });
+
+  it("stops at the limit rather than walking on through a wider and wider set", async () => {
+    const round = { n: 0 };
+    const walk = manyBelow(round);
+    jest.spyOn(functions, "getEquivalentEntityIds").mockResolvedValue([]);
+
+    const { below, truncated } = await getConceptsBelow({} as any, "broad");
+
+    expect(truncated).toBe(true);
+    expect(below.size).toBe(functions.SUBORDINATE_MAX_NODES);
+    expect(below.has("broad")).toBe(true);
+    expect(walk).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not say it was cut short for a set that merely took several passes", async () => {
+    // a chain of synonyms and subclasses that grows for a few rounds and ends
+    const subclasses: Record<string, string[]> = { a: ["b"], b: ["c"], c: [] };
+    jest
+      .spyOn(functions, "getSubordinateEntityIds")
+      .mockImplementation(async (_conn, ids): Promise<string[]> => {
+        const found: string[] = [];
+        for (const id of ids) {
+          for (const sub of subclasses[id] ?? []) {
+            if (!ids.includes(sub) && !found.includes(sub)) {
+              found.push(sub);
+            }
+          }
+        }
+        return found;
+      });
+    jest.spyOn(functions, "getEquivalentEntityIds").mockResolvedValue([]);
+
+    const { below, truncated } = await getConceptsBelow({} as any, "a");
+
+    expect([...below].sort()).toEqual(["a", "b", "c"]);
+    expect(truncated).toBe(false);
   });
 });
