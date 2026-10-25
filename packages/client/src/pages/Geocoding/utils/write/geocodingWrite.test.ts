@@ -429,6 +429,68 @@ describe("planGeocodingWrite, the accuracy under the geometry", () => {
     expect(childrenOf(plan).find((c) => c.type.entityId === "c-note")).toBe(note);
   });
 
+  it("keeps the accuracy prop it finds, with its id and what hangs under it, and changes only its value", () => {
+    const accuracy = withChildren(prop("c-acc", "v-old"), [prop("c-note", "v-note")]);
+    accuracy.certainty = EntityEnums.Certainty.Probable;
+    const geometry = withChildren(prop("c-geo", "v-geo"), [accuracy]);
+    const plan = planOf({ ...baseInput, geometry: same, current: same, location: location([geometry]) });
+    const [child] = childrenOf(plan);
+    expect(child.id).toBe(accuracy.id);
+    expect(child.value.entityId).toBe("v-precise");
+    expect(child.certainty).toBe(EntityEnums.Certainty.Probable);
+    expect(child.children.map((c) => c.type.entityId)).toEqual(["c-note"]);
+  });
+
+  it("moves the accuracy prop written beside the geometry under it as the same prop", () => {
+    const beside = prop("c-acc", "v-old");
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([prop("c-geo", "v-geo"), beside]),
+    });
+    expect(childrenOf(plan)[0].id).toBe(beside.id);
+  });
+
+  it("does not move a prop down under the geometry if that would push its children to a fourth level", () => {
+    const grandchild = withChildren(prop("c-n1", "v1"), [prop("c-n2", "v2")]);
+    const beside = withChildren(prop("c-acc", "v-old"), [grandchild]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: same,
+      current: same,
+      location: location([prop("c-geo", "v-geo"), beside]),
+    });
+    expect(childrenOf(plan)[0].id).not.toBe(beside.id);
+    expect(childrenOf(plan)[0].children).toEqual([]);
+  });
+
+  it("carries what a researcher hung under a geometry that is replaced onto the new one", () => {
+    const note = prop("c-note", "v-note");
+    const old = withChildren(prop("c-geo", "old-geo"), [
+      prop("c-acc", "v-precise"),
+      prop("c-source", "r-geonames"),
+      note,
+    ]);
+    const plan = planOf({
+      ...baseInput,
+      geometry: pointGeometry(1, 2),
+      current: same,
+      location: location([old]),
+    });
+    expect(childrenOf(plan).map((c) => c.type.entityId)).toEqual(["c-acc", "c-note"]);
+    expect(childrenOf(plan)[1]).toBe(note);
+  });
+
+  it.each([
+    ["the accuracy", { geometry: "c-geo", accuracy: "c-geo" }],
+    ["the source and the geometry", { epistemicSource: "c-geo" }],
+    ["the source and the accuracy", { epistemicSource: "c-acc" }],
+  ])("refuses to write when one Concept is given to %s", (_name, clash) => {
+    const result = planGeocodingWrite({ ...baseInput, roles: { ...roles, ...clash } });
+    expect(isBlocked(result) && result.blocked).toContain("one Concept to two roles");
+  });
+
   it("keeps the previous shape in the record, so what was there can be restored", () => {
     const before = [withChildren(prop("c-geo", "v-geo"), [prop("c-acc", "v-old")])];
     const plan = planOf({ ...baseInput, location: location(before) });

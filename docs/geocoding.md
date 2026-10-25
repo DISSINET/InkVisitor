@@ -25,7 +25,21 @@ second first-level prop beside the geometry. The page reads either shape, prefer
 the one under the geometry where both are there, and writes only the nested one,
 removing the prop beside it; `nestGeocodingAccuracyJob` moves the rest in one go
 and lists the Locations it will not touch (an accuracy with no geometry, several of
-either, or two accuracies that disagree).
+either, two accuracies that disagree, or an accuracy prop whose children have
+children, which moved down a level would sit on a fourth that nothing shows). A job
+writes a Location only if its props are still what the job read, because it reads
+them all at once and a researcher can save one while it runs; one saved in between
+is listed and left. A database still holding coordinates as `geo:x` and `geo:y` has
+no geometry props yet, so `migrateGeocodingGeometryJob` runs first.
+
+What reads the accuracy as a first-level prop stops finding it once it is nested.
+The Explorer's "has prop" edges and the validation rules of the property kind look
+at first-level props only, so a saved query or a rule that expects the accuracy
+there no longer matches and has to be rewritten. The jobs are
+for RethinkDB; a PostgreSQL deployment is migrated after the job has run, or
+holds the earlier shape until each Location is saved by the page. The server keeps
+an entity for up to a minute, so a Location read straight after a job can still
+show the earlier shape.
 
 The Value's label is one GeoJSON geometry — `Point`, `MultiPoint`, `LineString`,
 `MultiLineString`, `Polygon` or `MultiPolygon` — with positions as
@@ -1134,8 +1148,8 @@ props and references itself before writing.
 `precise` or `approximate`.
 
 That shape cannot be adopted by pointing settings at it, because one Value entity
-cannot serve two sibling props. 1099 of them have been converted into the four-prop
-form — accuracy taken from the precision child where it existed (681 `precise`,
+cannot serve two props at the first level. 1099 of them have been converted into the
+geometry-and-accuracy form — accuracy taken from the precision child where it existed (681 `precise`,
 361 `approximate`) and `unknown` for the 57 without one. The remaining Location,
 `diocesis Tudensis`, has a coordinate prop whose value points at nothing. That
 conversion wrote the accuracy beside the geometry, the shape `nestGeocodingAccuracyJob`
@@ -1143,7 +1157,7 @@ moves under it.
 
 The legacy props were left in place rather than deleted, so the conversion is
 reversible and the original strings stay readable. They are inert: nothing reads
-them, because geocoded state is read from the three configured Concepts above.
+them, because geocoded state is read from the configured Concepts above.
 
 ## Future versions
 

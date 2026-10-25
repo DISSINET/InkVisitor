@@ -409,6 +409,20 @@ export interface IGeocodingUserSettings {
 
 export const GEOCODING_SETTINGS_KEY = "geocoding";
 
+/**
+ * Whether two of the coordinate roles are given the same Concept.
+ *
+ * The geometry, the accuracy and the source are told apart by their Concept, so
+ * one Concept in two roles makes the geometry prop and the accuracy under it
+ * indistinguishable from each other. Unassigned roles are not a clash.
+ */
+export const rolesShareAConcept = (
+  roles: Pick<IGeocodingRoles, "geometry" | "accuracy" | "epistemicSource">,
+): boolean => {
+  const assigned = [roles.geometry, roles.accuracy, roles.epistemicSource].filter(Boolean);
+  return new Set(assigned).size !== assigned.length;
+};
+
 export const emptyGeocodingRoles = (): IGeocodingRoles => ({
   geometry: "",
   accuracy: "",

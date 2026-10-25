@@ -1,6 +1,8 @@
 import { Connection, r } from "rethinkdb-ts";
 import { getTestDbName } from "../../../../test/db";
-import addGeocodingSourcesJob from "../../../../../../database/scripts/jobs/add-geocoding-sources";
+import addGeocodingSourcesJob, {
+  nameSourcesOf,
+} from "../../../../../../database/scripts/jobs/add-geocoding-sources";
 
 /**
  * Naming the gazetteers behind a coordinate from the references a Location
@@ -159,6 +161,35 @@ describe("add-geocoding-sources", () => {
     const after = await r.table("entities").orderBy("id").run(conn);
     await addGeocodingSourcesJob(conn);
     expect(await r.table("entities").orderBy("id").run(conn)).toEqual(after);
+  });
+
+  it("writes nothing for a Location whose props changed after the job read them", async () => {
+    const read = await location(10);
+    await r
+      .table("entities")
+      .get(uuid(10))
+      .update({ props: [prop(70, GEOMETRY, uuid(80))] })
+      .run(conn);
+    const saved = await location(10);
+
+    const outcome = await nameSourcesOf(conn, read, GEOMETRY, SOURCE, new Set([WIKIDATA, GEONAMES]));
+
+    expect(outcome).toEqual({ left: "its props changed while the job ran" });
+    expect(await location(10)).toEqual(saved);
+  });
+
+  it("does nothing while one Concept is given to two roles", async () => {
+    await r
+      .table("settings")
+      .get("geocoding")
+      .replace({
+        id: "geocoding",
+        value: { roles: { geometry: GEOMETRY, epistemicSource: GEOMETRY, resources: { wikidata: WIKIDATA } } },
+      })
+      .run(conn);
+    const before = await r.table("entities").orderBy("id").run(conn);
+    await addGeocodingSourcesJob(conn);
+    expect(await r.table("entities").orderBy("id").run(conn)).toEqual(before);
   });
 
   it("does nothing while the project has not assigned the source Concept", async () => {

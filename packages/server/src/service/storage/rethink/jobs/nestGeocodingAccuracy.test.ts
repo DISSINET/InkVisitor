@@ -1,6 +1,8 @@
 import { Connection, r } from "rethinkdb-ts";
 import { getTestDbName } from "../../../../test/db";
-import nestGeocodingAccuracyJob from "../../../../../../database/scripts/jobs/nest-geocoding-accuracy";
+import nestGeocodingAccuracyJob, {
+  nestAccuracyOf,
+} from "../../../../../../database/scripts/jobs/nest-geocoding-accuracy";
 
 /**
  * The move of the accuracy prop from beside the geometry prop to under it,
@@ -93,6 +95,16 @@ beforeEach(async () => {
         labels: ["two accuracies"],
         props: [prop(55, GEOMETRY, uuid(97)), prop(56, ACCURACY, PRECISE), prop(57, ACCURACY, APPROXIMATE)],
       },
+      // moving the accuracy down a level would put its grandchildren on a fourth
+      {
+        id: uuid(18),
+        class: "L",
+        labels: ["deep accuracy"],
+        props: [
+          prop(60, GEOMETRY, uuid(99)),
+          prop(61, ACCURACY, PRECISE, [prop(62, OTHER, uuid(98), [prop(63, OTHER, uuid(97))])]),
+        ],
+      },
       // not a Location
       {
         id: uuid(17),
@@ -142,6 +154,7 @@ describe("nest-geocoding-accuracy", () => {
     ["an accuracy and no geometry", 14],
     ["two geometry props", 15],
     ["two accuracy props", 16],
+    ["an accuracy prop whose children have children", 18],
   ])("leaves a Location with %s untouched", async (_name, n) => {
     const before = await location(n);
     await nestGeocodingAccuracyJob(conn);
@@ -159,6 +172,33 @@ describe("nest-geocoding-accuracy", () => {
     const after = await r.table("entities").orderBy("id").run(conn);
     await nestGeocodingAccuracyJob(conn);
     expect(await r.table("entities").orderBy("id").run(conn)).toEqual(after);
+  });
+
+  it("writes nothing for a Location whose props changed after the job read them", async () => {
+    // a researcher saves the Location between the job's read and its write
+    const read = await location(10);
+    await r
+      .table("entities")
+      .get(uuid(10))
+      .update({ props: [prop(70, GEOMETRY, uuid(80))] })
+      .run(conn);
+    const saved = await location(10);
+
+    const outcome = await nestAccuracyOf(conn, read, GEOMETRY, ACCURACY);
+
+    expect(outcome).toEqual({ left: "its props changed while the job ran" });
+    expect(await location(10)).toEqual(saved);
+  });
+
+  it("does nothing while one Concept is given to two roles", async () => {
+    await r
+      .table("settings")
+      .get("geocoding")
+      .replace({ id: "geocoding", value: { roles: { geometry: GEOMETRY, accuracy: GEOMETRY } } })
+      .run(conn);
+    const before = await r.table("entities").orderBy("id").run(conn);
+    await nestGeocodingAccuracyJob(conn);
+    expect(await r.table("entities").orderBy("id").run(conn)).toEqual(before);
   });
 
   it("does nothing while the settings do not name both Concepts", async () => {

@@ -1,6 +1,10 @@
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IProp, IReference } from "@inkvisitor/shared/types";
-import { GeocodingAccuracy, IGeocodingRoles } from "@inkvisitor/shared/types/geocoding";
+import {
+  GeocodingAccuracy,
+  IGeocodingRoles,
+  rolesShareAConcept,
+} from "@inkvisitor/shared/types/geocoding";
 import {
   GeoJsonGeometry,
   geometryEquals,
@@ -150,6 +154,12 @@ export const planGeocodingWrite = (
   if (!roles.geometry || !roles.accuracy) {
     return { blocked: "The geocoding Concepts are not assigned yet — set them in the settings." };
   }
+  if (rolesShareAConcept(roles)) {
+    return {
+      blocked:
+        "The geocoding settings give one Concept to two roles — assign a different Concept to each.",
+    };
+  }
 
   // whatever is written must be readable back: a click on a repeated copy of
   // the world, or a source that answered NaN, would otherwise store a geometry
@@ -203,6 +213,8 @@ export const planGeocodingWrite = (
     : valueEntity(serializeGeometry(geometry), userOptions);
   const newValues: IEntity[] = geometryValue ? [geometryValue] : [];
 
+  const owned = childRoles(roles);
+
   // the sources are named only where the project has the role for them; the
   // references below record them either way
   const sources = roles.epistemicSource ? sourceResources(provenance, roles) : [];
@@ -211,28 +223,49 @@ export const planGeocodingWrite = (
       .filter((resourceId) => !known.includes(resourceId))
       .map((resourceId) => propFor(roles.epistemicSource, resourceId));
 
+  // an accuracy that is already there keeps its own prop — its certainty, its id,
+  // whatever hangs under it — and takes the new value; the one written beside
+  // the geometry by an earlier version is that same prop moved under it
+  const accuracyOf = (base: IProp | undefined): IProp =>
+    base ? { ...base, value: { ...base.value, entityId: accuracyId } } : propFor(roles.accuracy, accuracyId);
+
   // the geometry prop the Location keeps carries its other children over, and
   // the sources it already names, to which the new ones are added: a coordinate
   // that did not move is still the one those gazetteers supplied. A new geometry
-  // prop starts with only what this write says about it
+  // prop starts with what this write says about it, and with whatever else a
+  // researcher hung under the geometry it replaces, which is about the place and
+  // not about the coordinate that moved
   let geometryProp: IProp;
   if (keptGeometry) {
     const children = keptGeometry.children || [];
     const named = children
       .filter((child) => child.type?.entityId === roles.epistemicSource)
       .map((child) => child.value?.entityId);
+    // moved down a level, the prop beside the geometry would push anything two
+    // levels under it to a fourth, which nothing shows, so such a prop is not reused
+    const beside = previousProps.find((prop) => prop.type?.entityId === roles.accuracy);
+    const existing =
+      children.find((child) => child.type?.entityId === roles.accuracy) ??
+      (beside?.children?.some((child) => child.children?.length) ? undefined : beside);
+    const accuracyProp = accuracyOf(existing);
+    // the accuracy stays where it was among the children, and a repeat goes
+    const at = children.findIndex((child) => child.type?.entityId === roles.accuracy);
+    const without = children.filter((child) => child.type?.entityId !== roles.accuracy);
     geometryProp = {
       ...keptGeometry,
       children: [
-        ...children.filter((child) => child.type?.entityId !== roles.accuracy),
-        propFor(roles.accuracy, accuracyId),
+        ...(at === -1
+          ? [...without, accuracyProp]
+          : [...without.slice(0, at), accuracyProp, ...without.slice(at)]),
         ...sourceChildren(named),
       ],
     };
   } else {
+    const replaced = displaced.find((prop) => prop.type?.entityId === roles.geometry);
+    const carried = (replaced?.children || []).filter((child) => !owned.includes(child.type?.entityId));
     geometryProp = {
       ...propFor(roles.geometry, geometryValue!.id),
-      children: [propFor(roles.accuracy, accuracyId), ...sourceChildren([])],
+      children: [accuracyOf(undefined), ...carried, ...sourceChildren([])],
     };
   }
 
