@@ -804,13 +804,15 @@ separate opens nothing at all: opening its first row would name a leader the
 engine declined to name.
 
 The line that names a place carries everything about the place itself: its rank,
-the symbol for what gazetteer location type it is, its name, its coordinate at the end
-where it is read last — nobody scans a list of places by latitude — and a framed
-control that moves the map to it. The location type symbol is an indicator and nothing
-more: the same glyph opens the location-type picker on a row of the locations
-list, so a symbol that also travelled taught one mark two jobs on one screen. A
-glyph alone reads as decoration, and the frame is what says a thing can be
-pressed.
+its name, its coordinate at the end where it is read last — nobody scans a list of
+places by latitude — and a framed control that moves the map to it. What the
+gazetteers call it is not a mark on that line but words among the card's other
+facts, "settlement by the gazetteers": the marks on this page are the project's own
+location types, and the gazetteers' twelve are another vocabulary that is only
+wanted when a location type is chosen for the Location, where the picker says
+which of the project's answer to it. Nothing is said where no source named a type,
+since "not recorded" would be a claim about the Location. A glyph alone reads as
+decoration, and the frame is what says a thing can be pressed.
 
 Four kinds of mark, told apart by shape rather than by weight. A measurement —
 `10 sources`, `15.8 km apart` — has no edges, and its figure carries the weight

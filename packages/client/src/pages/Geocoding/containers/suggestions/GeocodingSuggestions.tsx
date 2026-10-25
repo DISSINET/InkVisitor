@@ -16,7 +16,12 @@ import { GeocodingProvenance } from "../../utils/write/geocodingWrite";
 import { MatchTag } from "../../components/gazetteer/MatchTag";
 import { ACCURACY_ORDER, AccuracyPicker } from "../../components/placeType/AccuracyPicker";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
-import { KindIcon, PlaceTypeIcon, kindInfo, placeTypeInfo } from "../../components/placeType/placeTypeIcons";
+import {
+  KindIcon,
+  UNKNOWN_PLACE_TYPE,
+  kindInfo,
+  placeTypeInfo,
+} from "../../components/placeType/placeTypeIcons";
 import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
 import { describeEntry, shownEntries } from "../../components/placeType/locationTypeText";
 import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
@@ -76,7 +81,7 @@ import {
   StyledTargetLine,
   StyledThumb,
   StyledHeadCoordinate,
-  StyledKind,
+  StyledGazetteerType,
   StyledMatchTags,
   StyledShowMatches,
   StyledRetype,
@@ -317,12 +322,6 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         >
           {index + 1}
         </StyledRank>
-        {/* what gazetteer location type the sources give it, and nothing else.
-            The same glyph opens the location-type picker on a list row, so a
-            mark that also travelled taught one symbol two jobs on one screen */}
-        <StyledKind data-hint={placeTypeInfo(suggestion.placeType).label}>
-          <PlaceTypeIcon placeType={suggestion.placeType} />
-        </StyledKind>
         <StyledCardLabel data-hint={suggestion.label}>
           {placeName}
           {/* where it is, never truncated: four suggestions called Breslau
@@ -389,6 +388,18 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
                 {suggestion.contextFit.toFixed(2)} <em>context</em>
               </StyledTrust>
             )}
+            {/* what the gazetteers think it is, as words and not as a mark: the
+                project's own location types are the marks on this page, and the
+                gazetteers' twelve are a different vocabulary, which is only
+                wanted at the moment a type is chosen for the Location, where the
+                picker says which of the project's answer to it. Said only where
+                a source said anything; "not recorded" would be a claim about
+                the Location */}
+            {suggestion.placeType && placeTypeInfo(suggestion.placeType) !== UNKNOWN_PLACE_TYPE ? (
+              <StyledGazetteerType data-hint={placeTypeInfo(suggestion.placeType).description}>
+                {placeTypeInfo(suggestion.placeType).label} <em>by the gazetteers</em>
+              </StyledGazetteerType>
+            ) : null}
           </StyledSignals>
 
           {/* a match is a gazetteer and the name it has for the place. Both
@@ -522,6 +533,7 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
           held={held}
           suggested={suggestion.placeType}
           clearLabel="leave the location type as it is"
+          clearDescription="Only the coordinate is written."
           onChoose={(placeType) =>
             onChooseKind(pendingHere.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }

@@ -857,13 +857,12 @@ export const StyledMatchTags = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
 `;
 
-/** The gazetteer location type of a suggestion. An indicator, with the word on its tooltip. */
-export const StyledKind = styled.span`
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-  font-size: ${({ theme }) => theme.fontSize.base};
-  color: ${({ theme }) => theme.color["greyer"]};
+/** What the gazetteers call a suggestion, in the quiet type of the other facts about it. */
+export const StyledGazetteerType = styled.span`
+  em {
+    font-style: normal;
+    opacity: 0.8;
+  }
 `;
 
 /**

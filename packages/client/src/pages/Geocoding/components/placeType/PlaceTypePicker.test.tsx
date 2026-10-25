@@ -157,10 +157,22 @@ describe("PlaceTypePicker, where one click chooses", () => {
     expect(onChoose).not.toHaveBeenCalled();
   });
 
-  it("offers choosing none, in the words it is given", () => {
+  it("offers choosing none, in the words it is given and with what it does under them", () => {
     const onChoose = vi.fn();
-    mount({ onChoose, clearLabel: "leave the location type as it is" });
+    mount({
+      onChoose,
+      clearLabel: "leave the location type as it is",
+      clearDescription: "Only the coordinate is written.",
+    });
+    expect(option("leave the location type as it is").textContent).toContain(
+      "Only the coordinate is written.",
+    );
     option("leave the location type as it is").click();
     expect(onChoose).toHaveBeenCalledWith(null);
+  });
+
+  it("does not say that no location type is recorded under a choice that leaves them alone", () => {
+    mount({ onChoose: vi.fn(), clearLabel: "leave the location type as it is" });
+    expect(option("leave the location type as it is").textContent).not.toContain("is recorded");
   });
 });

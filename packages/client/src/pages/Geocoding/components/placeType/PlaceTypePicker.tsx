@@ -156,6 +156,8 @@ interface PlaceTypePicker {
    * since unticking is how a location type goes.
    */
   clearLabel?: string;
+  /** What choosing none does, said under its wording. */
+  clearDescription?: string;
   /** One click chooses one location type, which is added to the others, and the list closes. */
   onChoose?: (placeType: string | null) => void;
   /**
@@ -172,6 +174,7 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   held,
   suggested,
   clearLabel,
+  clearDescription,
   onChoose,
   onToggle,
   onClose,
@@ -229,7 +232,9 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
           <UNKNOWN_PLACE_TYPE.icon />
           <StyledPickerLabel>
             {clearLabel}
-            <StyledPickerDescription>{UNKNOWN_PLACE_TYPE.description}</StyledPickerDescription>
+            {clearDescription ? (
+              <StyledPickerDescription>{clearDescription}</StyledPickerDescription>
+            ) : null}
           </StyledPickerLabel>
         </StyledPickerOption>
       ) : null}

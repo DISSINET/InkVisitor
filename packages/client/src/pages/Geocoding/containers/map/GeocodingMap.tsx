@@ -573,6 +573,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           anchor={pickerAnchor(pending)}
           held={selected?.typeEntries}
           clearLabel="leave the location type as it is"
+          clearDescription="Only the coordinate is written."
           onChoose={(placeType) =>
             finish(pending, pending.accuracy as GeocodingAccuracy, placeType ?? undefined)
           }
