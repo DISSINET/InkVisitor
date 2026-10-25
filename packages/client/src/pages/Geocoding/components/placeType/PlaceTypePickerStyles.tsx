@@ -31,6 +31,11 @@ export const StyledPickerPanel = styled.div<{
   box-shadow: ${({ theme }) => theme.boxShadow["high"]};
 `;
 
+/** The options as a list for assistive technology, laid out as if it were not there. */
+export const StyledPickerList = styled.div`
+  display: contents;
+`;
+
 export const StyledPickerTitle = styled.div`
   position: sticky;
   top: 0;

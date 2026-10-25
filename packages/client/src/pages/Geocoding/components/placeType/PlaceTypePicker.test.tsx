@@ -176,3 +176,48 @@ describe("PlaceTypePicker, where one click chooses", () => {
     expect(option("leave the location type as it is").textContent).not.toContain("is recorded");
   });
 });
+
+describe("PlaceTypePicker, for the keyboard and assistive technology", () => {
+  const press = (key: string) =>
+    act(async () => {
+      document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    });
+
+  it("takes focus to its first option when it opens, and gives it back to what opened it", () => {
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    opener.focus();
+    mount({ onToggle: vi.fn() });
+    expect(document.activeElement).toBe(option("settlement"));
+    view?.unmount();
+    view = null;
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it("moves between the options that can be chosen with the arrow keys, skipping the ones that cannot", async () => {
+    mount({ held: [entry("church", { inferred: true, via: "c-city" })], onToggle: vi.fn() });
+    expect(document.activeElement).toBe(option("settlement"));
+    await press("ArrowDown");
+    expect(document.activeElement).toBe(option("fortress"));
+    // church is only inferred and region has no Concept: neither can be chosen
+    await press("ArrowDown");
+    expect(document.activeElement).toBe(option("settlement"));
+    await press("ArrowUp");
+    expect(document.activeElement).toBe(option("fortress"));
+  });
+
+  it("says that several can be selected where it ticks, and not where one click chooses", () => {
+    mount({ onToggle: vi.fn() });
+    expect(document.querySelector("[role=listbox]")?.getAttribute("aria-multiselectable")).toBe("true");
+    view?.unmount();
+    mount({ onChoose: vi.fn() });
+    expect(document.querySelector("[role=listbox]")?.hasAttribute("aria-multiselectable")).toBe(false);
+  });
+
+  it("keeps the done button out of the list of options", () => {
+    mount({ onToggle: vi.fn() });
+    const done = [...document.querySelectorAll("button")].find((one) => one.textContent === "done")!;
+    expect(done).toBeTruthy();
+    expect(document.querySelector("[role=listbox]")?.contains(done)).toBe(false);
+  });
+});

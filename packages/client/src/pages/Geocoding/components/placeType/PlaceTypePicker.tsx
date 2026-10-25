@@ -9,6 +9,7 @@ import {
   StyledPickerDescription,
   StyledPickerFooter,
   StyledPickerLabel,
+  StyledPickerList,
   StyledPickerOption,
   StyledPickerPanel,
   StyledPickerTitle,
@@ -64,8 +65,12 @@ const useFloatingPickerPosition = (anchor: FloatingPickerAnchor) => {
 interface FloatingPicker {
   anchor: FloatingPickerAnchor;
   ariaLabel: string;
+  /** Several options can be selected at once. */
+  multiselectable?: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** Controls that are not options, kept out of the list. */
+  footer?: React.ReactNode;
 }
 
 /**
@@ -77,10 +82,40 @@ interface FloatingPicker {
 export const FloatingPicker: React.FC<FloatingPicker> = ({
   anchor,
   ariaLabel,
+  multiselectable,
   onClose,
   children,
+  footer,
 }) => {
   const { panel, position } = useFloatingPickerPosition(anchor);
+
+  // the keyboard goes in with the panel and back to what opened it, which the
+  // portal would otherwise leave focus behind on
+  useEffect(() => {
+    const opener = document.activeElement;
+    panel.current?.querySelector<HTMLElement>("[role=option]:not(:disabled)")?.focus();
+    return () => {
+      if (opener instanceof HTMLElement && document.contains(opener)) {
+        opener.focus();
+      }
+    };
+  }, [panel]);
+
+  const moveFocus = (event: React.KeyboardEvent) => {
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
+      return;
+    }
+    const options = Array.from(
+      panel.current?.querySelectorAll<HTMLElement>("[role=option]:not(:disabled)") ?? [],
+    );
+    if (!options.length) {
+      return;
+    }
+    event.preventDefault();
+    const at = options.indexOf(document.activeElement as HTMLElement);
+    const step = event.key === "ArrowDown" ? 1 : -1;
+    options[(at + step + options.length) % options.length].focus();
+  };
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -126,10 +161,18 @@ export const FloatingPicker: React.FC<FloatingPicker> = ({
         $top={position.top}
         $width={PANEL_WIDTH}
         $maxHeight={PANEL_MAX_HEIGHT}
-        role="listbox"
+        role="dialog"
         aria-label={ariaLabel}
+        onKeyDown={moveFocus}
       >
-        {children}
+        <StyledPickerList
+          role="listbox"
+          aria-label={ariaLabel}
+          aria-multiselectable={multiselectable || undefined}
+        >
+          {children}
+        </StyledPickerList>
+        {footer}
       </StyledPickerPanel>
     </>,
     document.body,
@@ -211,7 +254,19 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
   };
 
   return (
-    <FloatingPicker anchor={anchor} ariaLabel="Location type" onClose={onClose}>
+    <FloatingPicker
+      anchor={anchor}
+      ariaLabel="Location type"
+      multiselectable={toggling}
+      onClose={onClose}
+      footer={
+        toggling ? (
+          <StyledPickerFooter>
+            <Button label="done" color="primary" size={ButtonSize.Small} onClick={onClose} />
+          </StyledPickerFooter>
+        ) : null
+      }
+    >
       <StyledPickerTitle>
         {toggling ? "location types of this place" : "add a location type"}
       </StyledPickerTitle>
@@ -278,11 +333,6 @@ export const PlaceTypePicker: React.FC<PlaceTypePicker> = ({
           </StyledPickerOption>
         );
       })}
-      {toggling ? (
-        <StyledPickerFooter>
-          <Button label="done" color="primary" size={ButtonSize.Small} onClick={onClose} />
-        </StyledPickerFooter>
-      ) : null}
     </FloatingPicker>
   );
 };

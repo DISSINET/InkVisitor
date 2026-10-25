@@ -1095,6 +1095,11 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                   $unset={!entry}
                   $inferred={!!entry?.inferred}
                   data-hint={entry ? describeEntry(entry, placeTypes, viaLabel) : undefined}
+                  aria-label={
+                    entry
+                      ? `location type: ${describeEntry(entry, placeTypes, viaLabel)}`
+                      : "no location type, choose one"
+                  }
                   onClick={(event) => {
                     const box = event.currentTarget.getBoundingClientRect();
                     setPickingHead({ left: box.left, top: box.top, bottom: box.bottom });
