@@ -629,7 +629,7 @@ export const GeocodingPage: React.FC = () => {
   const canEditSettings = user?.role === UserEnums.Role.Owner;
 
   return (
-    <PlaceTypesProvider placeTypes={roles.placeTypes}>
+    <PlaceTypesProvider placeTypes={roles.placeTypes} viaLabels={browse.viaLabels}>
       <HintLayer />
       {/* Three panels rather than one holding a grid, the way MainPage composes
           its four. Box owns its own borders through the theme, which is also

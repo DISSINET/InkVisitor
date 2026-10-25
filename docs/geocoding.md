@@ -573,16 +573,54 @@ types, the engine's twelve, are a separate vocabulary: they say what to ask the
 gazetteers for, while a location type says what the project calls a Location. The
 default list is one location type per gazetteer location type. When several
 location types answer to one gazetteer location type, the starred favourite is
-offered first and the picker says how many match. The table counts the Locations
-classified under each location type's Concept, and assigning a Concept another location type holds
-moves it, since a Concept stands for one location type. A Location can carry several location types;
-the page shows and edits the first one in the project's order, and writing a location type
-replaces the Location's other location types while leaving every other Classification
-alone. The location types are asked
-for rather than inferred, in a second step after the accuracy: a suggestion
-frequently carries no type of its own, and where it does, the type is what the
-sources called the record rather than what the researcher knows the place to be.
+offered first and the picker says how many match. Assigning a Concept another
+location type holds moves it, since a Concept stands for one location type. The
+location types are asked for rather than inferred from the suggestion, in a second
+step after the accuracy: a suggestion frequently carries no type of its own, and
+where it does, the type is what the sources called the record rather than what the
+researcher knows the place to be.
 The engine's own `placeType` is marked as a starting point and never preselected.
+
+### Which location types a Location has
+
+A Location has a location type by being classified under the type's Concept, or
+under a subclass or a synonym of it, at any depth: what is classified "city" is a
+settlement where "city" is a subclass of the Concept assigned to settlement, and
+what is classified "civitas" is one too where civitas is a synonym of city. The
+page does not walk that hierarchy. It asks the server once for all the assigned
+Concepts, `GET /entities/classified-under`, and is told for every classified
+entity which of them it comes under, through which Concept, whether that is the
+assigned Concept itself (a **direct** location type) or not (an **inferred**
+one), and whether another of the project's types lies below this one on the same
+classification (**shadowed**). It is open to every logged-in user, a viewer
+among them, so the types read the same for everyone.
+
+Only superclass and synonym links count. The Explorer's "include subordinates"
+also follows part-of links, and a settlement part is not a settlement: on the
+Sept 2026 production data they add 190 Locations to "settlement" that are not.
+
+A location type is shadowed only by one that lies below it. A Location classified
+"city", with types for both "city" and "settlement", has both, and shows "city":
+the more specific one describes it, and "settlement" is hidden but still applies.
+A Location classified "cathedral town", which is below both a religious type and a
+settlement type through different parents, shows both, since neither is below the
+other. Two synonyms are not below each other and both show. Nothing here is
+computed from the number of steps between Concepts.
+
+A Location shows its types side by side: the ones it is classified under itself
+first, the inferred ones paler, each in the order the project lists them. A list
+row has room for one mark, which is the first, with a count of the others, and the
+hover says every one and, for an inferred one, where it comes from ("settlement —
+inferred from city"). The panel head and the map's card show them all. An
+inferred type cannot be removed from the page, which never edits what it did not
+create; the classification it comes from is changed in Detail. In the settings
+table a type's count is the Locations that read as it, with the share that is
+only inferred beside it, and a warning where the Concept has more subclasses than
+the walk can follow, so that some Locations are missing.
+
+What is classified is read as it was when the page asked, up to thirty seconds
+before: a subclass added in Detail shows on the Geocoding page after it is next
+reloaded or after a write on it.
 
 Three things follow from the vocabulary being the project's own:
 

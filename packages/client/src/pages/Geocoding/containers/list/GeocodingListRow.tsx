@@ -20,11 +20,13 @@ import {
   StyledRowProblem,
   StyledRowTag,
   StyledRowType,
+  StyledRowTypeMore,
   StyledRowTypeStatic,
 } from "./GeocodingListStyles";
 import { ListItem, LocationGroup } from "../../utils/context/geocodingGroups";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import { describeEntries, shownEntries } from "../../components/placeType/locationTypeText";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
 import { QUICK_STRATEGY_MEANING, QuickStrategy } from "../../utils/suggestions/quickGeocode";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
@@ -151,6 +153,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
   const { index, style, items, selectedId, engineReady, marked } = props;
   const theme = useTheme();
   const kinds = usePlaceTypes();
+  const viaLabel = useViaLabel();
   const item = items[index];
   if (!item) {
     return <div style={style} />;
@@ -164,6 +167,10 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
   }
   const location = item.location;
   const kind = findPlaceType(kinds, location.placeType);
+  const shown = shownEntries(location.typeEntries);
+  // the mark shows the first location type; the rest are counted and told on hover
+  const inferred = !!shown[0]?.inferred;
+  const typeWords = describeEntries(location.typeEntries, kinds, viaLabel);
   const busy = props.quickBusyId === location.entity.id;
   return (
     <div style={style}>
@@ -258,9 +265,10 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           <StyledRowType
             type="button"
             data-row-type
-            data-hint={`${kindInfo(kind).label} — click to change`}
-            aria-label={`location type: ${kindInfo(kind).label}`}
+            data-hint={`${typeWords}\nclick to change`}
+            aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
             $unset={!location.placeType}
+            $inferred={inferred}
             onClick={(event) => {
               event.stopPropagation();
               const box = event.currentTarget.getBoundingClientRect();
@@ -271,14 +279,17 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             }}
           >
             <KindIcon kind={kind} />
+            {shown.length > 1 ? <StyledRowTypeMore>+{shown.length - 1}</StyledRowTypeMore> : null}
           </StyledRowType>
         ) : (
           <StyledRowTypeStatic
-            data-hint={`${kindInfo(kind).label} — recorded with a coordinate, and this Location has none`}
-            aria-label={`location type: ${kindInfo(kind).label}`}
+            data-hint={`${typeWords}\nrecorded with a coordinate, and this Location has none`}
+            aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
             $unset={!location.placeType}
+            $inferred={inferred}
           >
             <KindIcon kind={kind} />
+            {shown.length > 1 ? <StyledRowTypeMore>+{shown.length - 1}</StyledRowTypeMore> : null}
           </StyledRowTypeStatic>
         )}
         <StyledRowMain>

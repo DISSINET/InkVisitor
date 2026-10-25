@@ -73,6 +73,8 @@ export interface UseGeocodingBrowse {
    */
   geocoded: GeocodingLocation[];
   geocodedCount: number;
+  /** The labels of the Concepts the Locations' inferred location types come through, by id. */
+  viaLabels: Record<string, string>;
   isLoading: boolean;
   error: unknown;
   filters: GeocodingFilters;
@@ -222,7 +224,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     [users],
   );
 
-  const { locations, geocodedCount, isLoading, error } = useGeocodingLocations(roles, {
+  const { locations, geocodedCount, viaLabels, isLoading, error } = useGeocodingLocations(roles, {
     // one character matches most of the corpus, which is not a search
     label: filters.label.length > 1 ? filters.label : undefined,
     createdBy: filters.createdBy === ANY ? undefined : filters.createdBy,
@@ -321,6 +323,7 @@ export const useGeocodingBrowse = (roles: IGeocodingRoles): UseGeocodingBrowse =
     visible,
     geocoded,
     geocodedCount,
+    viaLabels,
     isLoading,
     error,
     filters,

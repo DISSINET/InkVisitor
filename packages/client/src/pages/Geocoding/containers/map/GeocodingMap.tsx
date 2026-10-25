@@ -67,7 +67,8 @@ import { MapPending, afterAccuracy, menuAnchorFor } from "../../utils/map/mapAss
 import { MapFocus } from "../../utils/map/mapFocus";
 import { useFocusRing } from "../../hooks/useFocusRing";
 import { KindIcon, kindInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import { describeEntry, shownEntries } from "../../components/placeType/locationTypeText";
 import { GeocodingLocation } from "../../hooks/useGeocodingLocations";
 
 /**
@@ -201,6 +202,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
   onRegionBox,
 }) => {
   const placeTypes = usePlaceTypes();
+  const viaLabel = useViaLabel();
   const themeId: InterfaceEnums.Theme = useAppSelector((state) => state.theme);
   const basemap = themeId === "dark" ? "dark" : "light";
   const [term, setTerm] = useState("");
@@ -506,7 +508,11 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
           />
           <StyledMarkCardMeta>
             <KindIcon kind={findPlaceType(placeTypes, hoveredCard.location.placeType)} />
-            {kindInfo(findPlaceType(placeTypes, hoveredCard.location.placeType)).label}
+            {shownEntries(hoveredCard.location.typeEntries).length
+              ? shownEntries(hoveredCard.location.typeEntries)
+                  .map((entry) => describeEntry(entry, placeTypes, viaLabel))
+                  .join(", ")
+              : kindInfo(undefined).label}
             {hoveredCard.location.accuracy ? ` · ${hoveredCard.location.accuracy}` : ""}
           </StyledMarkCardMeta>
           <StyledMarkCardAt>

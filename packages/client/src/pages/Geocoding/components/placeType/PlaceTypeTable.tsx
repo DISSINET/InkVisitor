@@ -8,7 +8,7 @@ import { Button, IconWithTooltip, Input, Tooltip } from "components";
 import Dropdown from "components/advanced";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { IcoInfo, IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash } from "Theme/icons";
+import { IcoInfo, IcoPlus, IcoStarFilled, IcoStarOutline, IcoTrash, IcoWarning } from "Theme/icons";
 import { v4 as uuidv4 } from "uuid";
 import { PLACE_ICON_KEYS, placeIcon } from "./placeTypeIcons";
 import { assignConcept, makeFavorite, pairEngineType } from "../../utils/write/placeTypeEdits";
@@ -24,6 +24,7 @@ import {
   StyledKindCell,
   StyledEngineTypeHelp,
   StyledKindCount,
+  StyledKindInferred,
   StyledKindHeadHelp,
   StyledKindHeadRight,
   StyledKindHeader,
@@ -48,6 +49,10 @@ interface PlaceTypeTable {
   renderConcept: (conceptId: string, set: (conceptId: string | null) => void) => React.ReactNode;
   /** Locations classified under each location type's Concept, by location type id. */
   counts: Record<string, number>;
+  /** How many of each count are Locations that come under a subclass or a synonym of the Concept. */
+  inferredCounts?: Record<string, number>;
+  /** The location types whose Concept has more subclasses than could be followed. */
+  truncatedTypes?: string[];
   countsLoading: boolean;
   /** The counts could not be read, so they are not shown as zero. */
   countsFailed: boolean;
@@ -116,6 +121,8 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   onChange,
   renderConcept,
   counts,
+  inferredCounts = {},
+  truncatedTypes = [],
   countsLoading,
   countsFailed,
 }) => {
@@ -273,6 +280,21 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
                   : countsLoading
                     ? "…"
                     : (counts[kind.id] ?? 0)}
+              {kind.conceptId && !countsFailed && !countsLoading && inferredCounts[kind.id] ? (
+                <IconWithTooltip
+                  icon={<StyledKindInferred>+{inferredCounts[kind.id]}</StyledKindInferred>}
+                  tooltipText={`${inferredCounts[kind.id]} of these are classified under a subclass or a synonym of this Concept, not under the Concept itself.`}
+                  tooltipPosition="top"
+                />
+              ) : null}
+              {truncatedTypes.includes(kind.id) ? (
+                <IconWithTooltip
+                  icon={<IcoWarning />}
+                  color="warning"
+                  tooltipText="This Concept has more subclasses than can be followed, so Locations classified deeper down are not counted and show no location type. Assign a narrower Concept."
+                  tooltipPosition="top"
+                />
+              ) : null}
             </StyledKindCount>
             <Input
               value={kind.description}

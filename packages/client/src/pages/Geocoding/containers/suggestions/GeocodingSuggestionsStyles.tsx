@@ -660,12 +660,16 @@ export const StyledRetype = styled.div`
 `;
 
 /** The panel head's location type: its mark, its name, and the way to change it. */
-export const StyledRetypeButton = styled.button<{ $unset?: boolean }>`
+export const StyledRetypeButton = styled.button<{ $unset?: boolean; $inferred?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
   padding: 0 ${({ theme }) => theme.space[1]};
-  border: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  /* a type the Location only comes under through a subclass or a synonym is
+     drawn paler and with a broken line, as the one it is classified under is not */
+  border: 1px ${({ $inferred }) => ($inferred ? "dashed" : "solid")}
+    ${({ theme }) => theme.color["gray"][300]};
+  opacity: ${({ $inferred }) => ($inferred ? 0.7 : 1)};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   background-color: ${({ theme }) => theme.color["white"]};
   cursor: pointer;

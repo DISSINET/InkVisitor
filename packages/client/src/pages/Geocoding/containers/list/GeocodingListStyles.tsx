@@ -165,7 +165,7 @@ export const StyledEmpty = styled.div`
  * is the state most of the corpus is in, drawn faintly so a row that states
  * nothing does not read as a row stating something.
  */
-export const StyledRowType = styled.button<{ $unset?: boolean }>`
+export const StyledRowType = styled.button<{ $unset?: boolean; $inferred?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -185,10 +185,23 @@ export const StyledRowType = styled.button<{ $unset?: boolean }>`
   color: ${({ theme, $unset }) =>
     $unset ? theme.color["gray"][400] : theme.color["greyer"]};
 
+  /* a type the Location only comes under through a subclass or a synonym is
+     drawn paler than one it is classified under itself, with the same shape */
+  svg {
+    opacity: ${({ $inferred }) => ($inferred ? 0.5 : 1)};
+  }
+
   &:hover {
     background-color: ${({ theme }) => theme.color["gray"][300]};
     color: ${({ theme }) => theme.color["primary"]};
   }
+`;
+
+/** How many more location types a Location has than the one its mark shows. */
+export const StyledRowTypeMore = styled.span`
+  margin-left: ${({ theme }) => theme.space[1]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  font-family: monospace;
 `;
 
 /**
@@ -267,7 +280,7 @@ export const StyledRowMark = styled.span<{ $state: "geocoded" | "problem" | "non
  * coordinate has nothing to write the location type against — the mark is a label there,
  * and drawing it as a button offered a picker whose choice went nowhere.
  */
-export const StyledRowTypeStatic = styled.span<{ $unset?: boolean }>`
+export const StyledRowTypeStatic = styled.span<{ $unset?: boolean; $inferred?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -278,6 +291,10 @@ export const StyledRowTypeStatic = styled.span<{ $unset?: boolean }>`
   font-size: ${({ theme }) => theme.fontSize.base};
   color: ${({ theme, $unset }) =>
     $unset ? theme.color["gray"][400] : theme.color["greyer"]};
+
+  svg {
+    opacity: ${({ $inferred }) => ($inferred ? 0.5 : 1)};
+  }
 `;
 
 /**

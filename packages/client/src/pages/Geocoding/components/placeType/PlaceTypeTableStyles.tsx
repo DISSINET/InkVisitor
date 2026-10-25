@@ -78,9 +78,18 @@ export const StyledKindCell = styled.div`
 `;
 
 export const StyledKindCount = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.space[1]};
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color["black"]};
-  text-align: right;
+`;
+
+/** How many of a count are only inferred, paler than the count itself. */
+export const StyledKindInferred = styled.span`
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  color: ${({ theme }) => theme.color["greyer"]};
 `;
 
 /** The mark a location type carries, as the button that opens the set to choose another. */

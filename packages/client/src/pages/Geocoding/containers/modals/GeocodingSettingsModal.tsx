@@ -375,6 +375,8 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
                 picker(conceptId || undefined, EntityEnums.Class.Concept, set)
               }
               counts={assignments.countByType}
+              inferredCounts={assignments.inferredByType}
+              truncatedTypes={assignments.truncatedTypes}
               countsLoading={assignments.isLoading || !locationIds}
               countsFailed={!!assignments.error}
             />

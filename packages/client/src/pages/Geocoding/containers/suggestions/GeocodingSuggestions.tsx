@@ -17,7 +17,8 @@ import { MatchTag } from "../../components/gazetteer/MatchTag";
 import { ACCURACY_ORDER, AccuracyPicker } from "../../components/placeType/AccuracyPicker";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
 import { KindIcon, PlaceTypeIcon, kindInfo, placeTypeInfo } from "../../components/placeType/placeTypeIcons";
-import { findPlaceType, usePlaceTypes } from "../../hooks/placeTypesContext";
+import { findPlaceType, usePlaceTypes, useViaLabel } from "../../hooks/placeTypesContext";
+import { describeEntry, shownEntries } from "../../components/placeType/locationTypeText";
 import { degradationsOf, problemsOf } from "../../utils/engine/suggestIntegrity";
 import { splitLabel } from "../../utils/suggestions/suggestionLabel";
 import { bandOf, scoreShare, showsScore } from "../../utils/suggestions/suggestionRank";
@@ -634,6 +635,7 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
   onRetype,
 }) => {
   const placeTypes = usePlaceTypes();
+  const viaLabel = useViaLabel();
 
   /** The cards showing every match rather than the strongest few. */
   const [expandedMatches, setAllMatches] = useState<Set<number>>(() => new Set());
@@ -1055,17 +1057,31 @@ export const GeocodingSuggestions: React.FC<GeocodingSuggestions> = ({
                 is, and re-running the engine to change one word would throw away
                 a coordinate somebody already judged */}
             <StyledTypeStepAside>location type</StyledTypeStepAside>
-            <StyledRetypeButton
-              type="button"
-              $unset={!selected.placeType}
-              onClick={(event) => {
-                const box = event.currentTarget.getBoundingClientRect();
-                setPickingHead({ left: box.left, top: box.top, bottom: box.bottom });
-              }}
-            >
-              <KindIcon kind={findPlaceType(placeTypes, selected.placeType)} />
-              {kindInfo(findPlaceType(placeTypes, selected.placeType)).label}
-            </StyledRetypeButton>
+            {/* every location type the Location comes under, side by side, the
+                ones it is classified under itself first and the inferred ones
+                paler, with where each comes from on hover */}
+            {(shownEntries(selected.typeEntries).length
+              ? shownEntries(selected.typeEntries)
+              : [null]
+            ).map((entry) => {
+              const kind = findPlaceType(placeTypes, entry?.typeId);
+              return (
+                <StyledRetypeButton
+                  key={entry?.typeId ?? "none"}
+                  type="button"
+                  $unset={!entry}
+                  $inferred={!!entry?.inferred}
+                  data-hint={entry ? describeEntry(entry, placeTypes, viaLabel) : undefined}
+                  onClick={(event) => {
+                    const box = event.currentTarget.getBoundingClientRect();
+                    setPickingHead({ left: box.left, top: box.top, bottom: box.bottom });
+                  }}
+                >
+                  <KindIcon kind={kind} />
+                  {kindInfo(kind).label}
+                </StyledRetypeButton>
+              );
+            })}
           </StyledRetype>
         ) : null}
 

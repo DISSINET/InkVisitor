@@ -14,6 +14,7 @@ import {
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
+  IResponseClassifiedUnder,
   IResponseEntityExpansion,
   IResponseGeneric,
   IResponsePermission,
@@ -1615,6 +1616,26 @@ class Api {
       const response = await this.connection.get(`entities/${entityId}/expansion`, {
         ...options,
         params,
+      });
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * The entities classified under any of the Concepts, or under a subclass or a
+   * synonym of one, and how each got there. Only the classifications are
+   * answered for: the caller knows which of the entities it lists it cares about.
+   */
+  async entitiesClassifiedUnder(
+    concepts: string[],
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseClassifiedUnder>> {
+    try {
+      const response = await this.connection.get(`entities/classified-under`, {
+        ...options,
+        params: { concepts: concepts.join(",") },
       });
       return response;
     } catch (err) {
