@@ -853,7 +853,7 @@ export const StyledMatchTags = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
 `;
 
-/** What location type it is. An indicator, with the word on its tooltip. */
+/** The gazetteer location type of a suggestion. An indicator, with the word on its tooltip. */
 export const StyledKind = styled.span`
   display: inline-flex;
   align-items: center;

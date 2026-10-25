@@ -308,9 +308,9 @@ export const SuggestionCard: React.FC<SuggestionCard> = ({
         >
           {index + 1}
         </StyledRank>
-        {/* what location type it is, and nothing else. The same glyph opens
-            the location-type picker on a list row, so a mark that also
-            travelled taught one symbol two jobs on one screen */}
+        {/* what gazetteer location type the sources give it, and nothing else.
+            The same glyph opens the location-type picker on a list row, so a
+            mark that also travelled taught one symbol two jobs on one screen */}
         <StyledKind data-hint={placeTypeInfo(suggestion.placeType).label}>
           <PlaceTypeIcon placeType={suggestion.placeType} />
         </StyledKind>

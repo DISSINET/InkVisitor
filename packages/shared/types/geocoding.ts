@@ -310,9 +310,9 @@ export interface IGeocodingContext {
    * the single-value field outlives the change on any deployment that had one.
    */
   language?: string;
-  /** Location types the name may be, any of them. None means no constraint. */
+  /** Gazetteer location types the name may be, any of them. None means no constraint. */
   placeTypes?: string[];
-  /** One location type, as stored before the field took several. Read like `region`. */
+  /** One gazetteer location type, as stored before the field took several. Read like `region`. */
   placeType?: string;
   /**
    * Gazetteers the engine is not to ask, by its own source name.

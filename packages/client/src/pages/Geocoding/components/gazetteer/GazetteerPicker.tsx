@@ -110,7 +110,7 @@ export const GazetteerPicker: React.FC<GazetteerPicker> = ({
                 ) : null}
                 {lockedHere ? (
                   <StyledGazetteerLocked>
-                    off for the whole project — an owner or admin can switch it on
+                    off for the whole project — an owner can switch it on
                   </StyledGazetteerLocked>
                 ) : null}
               </StyledGazetteerName>

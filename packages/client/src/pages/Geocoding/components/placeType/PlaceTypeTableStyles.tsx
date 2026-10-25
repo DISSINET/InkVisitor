@@ -23,10 +23,20 @@ export const StyledKindHeader = styled.div`
 `;
 
 /** A column title with a help mark beside it. */
-export const StyledKindHeadHelp = styled.span`
+export const StyledKindHeadHelp = styled.div`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
+`;
+
+/** The mark that opens the help: a button, so it can be reached and opened from the keyboard. */
+export const StyledHelpMark = styled.button`
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
   cursor: help;
 `;
 

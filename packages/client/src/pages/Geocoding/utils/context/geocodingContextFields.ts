@@ -208,7 +208,7 @@ export const parsePeriodRange = (text: string): string | null => {
 /**
  * Whether two lists of values say the same thing.
  *
- * Region, period and location type are sets, so the order they were chosen in
+ * Region, period and gazetteer location type are sets, so the order they were chosen in
  * means nothing; language is the one list whose order is the researcher's own
  * statement of which is likelier.
  */

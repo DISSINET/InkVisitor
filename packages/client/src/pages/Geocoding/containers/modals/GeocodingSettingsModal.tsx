@@ -56,7 +56,8 @@ import {
 /**
  * Assigning the entities that give a coordinate its meaning.
  *
- * Owner and admin only, because which Concept means `geo:geometry` decides what
+ * Owner only (the menu hides the entry from everyone else), because which Concept means
+ * `geo:geometry` decides what
  * "geocoded" means: if one user could point it elsewhere, the same Location
  * would read as geocoded for them and not for anyone else.
  *

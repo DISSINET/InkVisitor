@@ -36,7 +36,7 @@ import { QuickStrategy } from "../../utils/suggestions/quickGeocode";
 /**
  * How this researcher works, as opposed to what they ask.
  *
- * The question itself — region, period, language, location type — is edited in
+ * The question itself — region, period, language, gazetteer location type — is edited in
  * the Suggestions panel, where the answer it produced is on screen; these four
  * are settings about the page rather than about a place, and none of them can
  * make an answer stale.
@@ -299,8 +299,8 @@ export const GeocodingContextModal: React.FC<GeocodingContextModal> = ({
           <StyledFullRow>
             <StyledSectionNote>
               Gazetteers not checked here are not searched on your own runs. A gazetteer shown as
-              off for the whole project can be switched on only in the global settings, by an owner
-              or admin.
+              off for the whole project can be switched on only in the global settings, by an
+              owner.
             </StyledSectionNote>
           </StyledFullRow>
           <StyledFullRow>

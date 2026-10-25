@@ -228,8 +228,8 @@ export const useGeocodingBulk = ({
         skipped: pick.skip,
         choices: choicesFrom(response.suggestions),
         // carried with the choices: a spread only means something against the
-        // distance the engine was willing to merge, which comes from the location type
-        // of place rather than from a constant
+        // distance the engine was willing to merge, which comes from the gazetteer
+        // location type rather than from a constant
         mergeRadiusKm: response.mergeRadiusKm,
       };
     }

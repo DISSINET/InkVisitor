@@ -36,8 +36,8 @@ export interface BatchStep {
    *
    * Kept beside the choices because it is what makes them readable: how far
    * apart a suggestion's sources sit only means something against the distance
-   * the engine was willing to merge, and that distance comes from the location type of
-   * place — 7.5 km for a church, 150 km for a region. Absent where the run
+   * the engine was willing to merge, and that distance comes from the gazetteer
+   * location type — 7.5 km for a church, 150 km for a region. Absent where the run
    * produced no answer to keep it from.
    */
   mergeRadiusKm?: number;

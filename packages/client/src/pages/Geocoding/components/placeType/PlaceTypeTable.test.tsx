@@ -35,7 +35,7 @@ describe("PlaceTypeTable", () => {
     );
     expect(document.body.textContent).not.toContain("The twelve types the gazetteers use");
 
-    const help = view.container.querySelector("svg")!.closest("div") as HTMLElement;
+    const help = view.container.querySelector("button[aria-label*='gazetteer location type']")!;
     await act(async () => {
       // React derives mouseenter from mouseover
       help.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
@@ -48,5 +48,28 @@ describe("PlaceTypeTable", () => {
     }
     // the one that covers a church is the one whose name does not say so
     expect(text).toContain("A church, chapel, monastery, abbey or other religious foundation.");
+  });
+
+  it("opens the same help from the keyboard", async () => {
+    view = render(
+      <PlaceTypeTable
+        value={defaultPlaceTypes()}
+        onChange={() => undefined}
+        renderConcept={() => null}
+        counts={{}}
+        countsLoading={false}
+        countsFailed={false}
+      />,
+    );
+    const help = view.container.querySelector("button[aria-label*='gazetteer location type']")!;
+    await act(async () => {
+      // React derives focus from focusin
+      help.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    });
+    expect(document.body.textContent).toContain("The twelve types the gazetteers use");
+    await act(async () => {
+      help.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    });
+    expect(document.body.textContent).not.toContain("The twelve types the gazetteers use");
   });
 });

@@ -17,7 +17,7 @@ import { splitLabel } from "../../utils/suggestions/suggestionLabel";
  *
  * A quick geocode is run from a list row and the answer is a coordinate on a
  * place the researcher has stopped watching, so the notice carries what was
- * decided and on what grounds — which place it matched, what location type it is, how
+ * decided and on what grounds — which place it matched, what gazetteer location type it is, how
  * many sources stood behind it — enough to tell a good answer from a lucky one
  * without opening the Location. The whole notice is the way to the map.
  */

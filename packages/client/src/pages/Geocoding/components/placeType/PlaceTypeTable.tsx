@@ -4,7 +4,7 @@ import {
   GeocodingPlaceType,
   IGeocodingPlaceType,
 } from "@inkvisitor/shared/types/geocoding";
-import { Button, IconWithTooltip, Input } from "components";
+import { Button, IconWithTooltip, Input, Tooltip } from "components";
 import Dropdown from "components/advanced";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
@@ -14,6 +14,7 @@ import { PLACE_ICON_KEYS, placeIcon } from "./placeTypeIcons";
 import { assignConcept, makeFavorite, pairEngineType } from "../../utils/write/placeTypeEdits";
 import {
   StyledFavorite,
+  StyledHelpMark,
   StyledIconAnchor,
   StyledIconBackdrop,
   StyledIconButton,
@@ -65,6 +66,51 @@ const engineOptions = [
   })),
 ];
 
+/**
+ * What each gazetteer location type covers, from the mark on the column title.
+ *
+ * A location type such as "church" is paired with one of twelve names that mean
+ * more than they say, and "religious house" is the one that covers it. Opened by
+ * hover or by focus, so it can be read from the keyboard.
+ */
+const EngineTypeHelp: React.FC = () => {
+  const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <StyledHelpMark
+        type="button"
+        ref={setAnchor}
+        aria-label="what each gazetteer location type covers"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+      >
+        <IcoInfo />
+      </StyledHelpMark>
+      <Tooltip
+        visible={open}
+        referenceElement={anchor}
+        position="bottom"
+        content={
+          <StyledEngineTypeHelp>
+            <p>The twelve types the gazetteers use. Choose the one that covers your location type:</p>
+            <dl>
+              {GEOCODING_PLACE_TYPES.map((engineType) => (
+                <React.Fragment key={engineType}>
+                  <dt>{ENGINE_PLACE_TYPE_INFO[engineType].label}</dt>
+                  <dd>{ENGINE_PLACE_TYPE_INFO[engineType].description}</dd>
+                </React.Fragment>
+              ))}
+            </dl>
+          </StyledEngineTypeHelp>
+        }
+      />
+    </>
+  );
+};
+
 export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
   value,
   onChange,
@@ -100,28 +146,9 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
         <span />
         <span>name</span>
         <span>Concept a Location is classified under</span>
-        {/* a location type such as "church" is paired with one of twelve names that
-            mean more than they say, and "religious house" is the one that covers it,
-            so the header says what each of them covers */}
         <StyledKindHeadHelp>
           <span>gazetteer location type</span>
-          <IconWithTooltip
-            icon={<IcoInfo />}
-            tooltipPosition="bottom"
-            tooltipContent={
-              <StyledEngineTypeHelp>
-                <p>The twelve types the gazetteers use. Choose the one that covers your location type:</p>
-                <dl>
-                  {GEOCODING_PLACE_TYPES.map((engineType) => (
-                    <React.Fragment key={engineType}>
-                      <dt>{ENGINE_PLACE_TYPE_INFO[engineType].label}</dt>
-                      <dd>{ENGINE_PLACE_TYPE_INFO[engineType].description}</dd>
-                    </React.Fragment>
-                  ))}
-                </dl>
-              </StyledEngineTypeHelp>
-            }
-          />
+          <EngineTypeHelp />
         </StyledKindHeadHelp>
         <span />
         <StyledKindHeadRight>locations</StyledKindHeadRight>
@@ -136,7 +163,7 @@ export const PlaceTypeTable: React.FC<PlaceTypeTable> = ({
               <StyledIconButton
                 type="button"
                 $open={iconFor?.id === kind.id}
-                aria-label={`mark for ${kind.name || "this kind"}`}
+                aria-label={`mark for ${kind.name || "this location type"}`}
                 onClick={(event) => {
                   const box = event.currentTarget.getBoundingClientRect();
                   setIconFor(

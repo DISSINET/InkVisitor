@@ -52,6 +52,7 @@ export const GazetteerHover: React.FC<GazetteerHover> = ({ source, children }) =
     <>
       <StyledGazetteerAnchor
         ref={setAnchor}
+        tabIndex={0}
         onMouseEnter={show}
         onMouseLeave={hide}
         onFocus={show}

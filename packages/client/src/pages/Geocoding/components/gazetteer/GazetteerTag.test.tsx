@@ -128,6 +128,35 @@ describe("GazetteerHover", () => {
   });
 });
 
+describe("where the card is offered", () => {
+  it("opens from the keyboard as well as from the pointer", async () => {
+    catalogue.list = [suggester("viabundus")];
+    await mount(face("viabundus"));
+    const host = view!.container.firstElementChild as HTMLElement;
+    expect(host.getAttribute("tabindex")).toBe("0");
+    await act(async () => {
+      host.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    });
+    expect(document.body.textContent).toContain("A gazetteer of the Hanseatic trade network.");
+  });
+
+  it("is used by the gazetteer tables of the settings and by nothing that shows a result", () => {
+    // the card is 1100px tall and opens over whatever sits beside the tag, so a
+    // second user of it would bring back the card over the answer being judged;
+    // the progress strip and the map search have no test of their own to catch it
+    const sources = import.meta.glob("../../**/*.tsx", {
+      query: "?raw",
+      import: "default",
+      eager: true,
+    }) as Record<string, string>;
+    const users = Object.entries(sources)
+      .filter(([path]) => !path.endsWith(".test.tsx"))
+      .filter(([, source]) => source.includes("<GazetteerHover"))
+      .map(([path]) => path.split("/").pop());
+    expect(users.sort()).toEqual(["GazetteerPicker.tsx", "GazetteerTag.tsx"]);
+  });
+});
+
 describe("a source beside a result", () => {
   const hover = async (target: Element) => {
     await act(async () => {

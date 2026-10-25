@@ -112,15 +112,15 @@ permission at all and a deny-all row has already been persisted for it — so a
 group would be unreadable by everyone but an owner. The whole object is read and
 written together in any case.
 
-The **global** modal is owner-or-admin, alongside Global validations, and holds
-the Concept and Resource assignments and the place-type dictionary. The query
+The **global** modal is owner-only, alongside Global validations, and holds
+the Concept and Resource assignments and the location type dictionary. The query
 context — region, period, language, gazetteer location type — is edited on the Suggestions
 panel rather than in a modal, beside the answer it produced; the **page** modal
 holds the working preferences around it.
 
 The **global** modal is reached from the menu's tools section beside Global
 validations. It assigns the geometry, accuracy and epistemic source roles, the four
-accuracy values, the project's own place types and fifteen gazetteer Resources. Each
+accuracy values, the project's own location types and fifteen gazetteer Resources. Each
 field selects an existing entity or creates one, so a fresh deployment needs no
 seeding job — and the ten gazetteers whose record URL ends with the identifier
 have their base URL prefilled from the engine's own builders.
@@ -167,7 +167,7 @@ the other three are claims a source makes about itself. A dimension weighted to
 an out-of-scope source outright, and a dimension weighted to nothing that went on
 deciding which sources ran would be a filter nobody asked for. Zeroing region
 therefore lets every gazetteer run on every request, which is slower — that is
-the trade being asked for. Language and place type never skip a source either
+the trade being asked for. Language and gazetteer location type never skip a source either
 way; they only lift one.
 
 **The slider is not the engine's own number.** The four dimensions do not share
@@ -575,7 +575,7 @@ Three things follow from the vocabulary being the project's own:
 - A type with no Concept assigned in the global settings is shown disabled, with
   the reason on it. Hiding it would misrepresent the vocabulary; offering it and
   refusing the write afterwards wastes the decision.
-- "record place type" in the personal context turns the second step off. A
+- "location type" in the personal context turns the second step off. A
   project that has not mapped the twelve has nothing to write, and the coordinate
   is worth recording without them.
 - The accuracy prop points at a Concept, not at a Value this page owns. A write
@@ -592,7 +592,7 @@ says nothing about what it is.
 
 A shape can also be drawn instead of picked. The shape tool under the map's
 layers and region switches draws points, lines and polygons; several shapes of
-one location type are saved together as one `Multi*` geometry, and a mix of location types is
+one kind are saved together as one `Multi*` geometry, and a mix of kinds is
 refused when saving. The saved shape then asks the same two questions at its
 centre. "Edit current shape" loads the stored geometry back into the tool.
 
@@ -735,7 +735,7 @@ separate opens nothing at all: opening its first row would name a leader the
 engine declined to name.
 
 The line that names a place carries everything about the place itself: its rank,
-the symbol for what location type it is, its name, its coordinate at the end
+the symbol for what gazetteer location type it is, its name, its coordinate at the end
 where it is read last — nobody scans a list of places by latitude — and a framed
 control that moves the map to it. The location type symbol is an indicator and nothing
 more: the same glyph opens the location-type picker on a row of the locations
@@ -911,7 +911,7 @@ never recentres, so a chain of matches each within the radius of its neighbour
 spans more than the radius.
 
 What it is measured against is `mergeRadiusKm`, on the response. That is derived
-from the place type rather than fixed — 7.5 km for a church, 12.5 km for a
+from the gazetteer location type rather than fixed — 7.5 km for a church, 12.5 km for a
 fortress, 25 km for a settlement, 150 km for a region — so any threshold written
 as a constant is wrong for every type but one.
 
@@ -1192,7 +1192,7 @@ the surface these would join: it already switches groups of layers and remembers
 the choice per browser.
 
 **F10 · Per-territory context overrides.** A default region, period, language and
-place type per territory, so a register from Languedoc does not inherit the
+gazetteer location type per territory, so a register from Languedoc does not inherit the
 project-wide region.
 
 **F11 · Choosing which sources become references.** Every contributing source is
