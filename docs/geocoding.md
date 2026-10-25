@@ -531,7 +531,7 @@ place regardless. What they cannot do is notice this by looking at the list.
 
 A coordinate answers where; the project's location types answer what. The project
 defines its own list in the global settings — a name, the Concept a Location is
-classified under, a mark chosen from a set of sixty-two, a description and,
+classified under, a mark chosen from a set of sixty-three, a description and,
 optionally, the gazetteer location type it answers to. The gazetteer location
 types, the engine's twelve, are a separate vocabulary: they say what to ask the
 gazetteers for, while a location type says what the project calls a Location. The

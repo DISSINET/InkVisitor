@@ -68,6 +68,7 @@ import {
   IcoPlaceCompass,
   IcoPlacePin,
   IcoPlaceFire,
+  IcoPlaceChurchTower,
 } from "Theme/icons";
 
 /**
@@ -146,6 +147,7 @@ export const PLACE_ICONS: Record<string, React.ComponentType> = {
   compass: IcoPlaceCompass,
   pin: IcoPlacePin,
   fire: IcoPlaceFire,
+  church: IcoPlaceChurchTower,
 };
 
 export const PLACE_ICON_KEYS = Object.keys(PLACE_ICONS);
