@@ -1,7 +1,7 @@
 import { defaultPlaceTypes } from "@inkvisitor/shared/types/geocoding";
 import { describe, expect, it } from "vitest";
 import { LocationTypeEntry } from "../../hooks/usePlaceTypeAssignments";
-import { describeEntries, describeEntry, shownEntries } from "./locationTypeText";
+import { defaultTypeFor, describeEntries, describeEntry, shownEntries } from "./locationTypeText";
 
 const types = defaultPlaceTypes().map((one) => ({ ...one, conceptId: `c-${one.id}` }));
 const entry = (typeId: string, over: Partial<LocationTypeEntry> = {}): LocationTypeEntry => ({
@@ -46,5 +46,36 @@ describe("describeEntries", () => {
     expect(describeEntries([entry("settlement", { shadowed: true })], types, label)).toBe(
       "location type not recorded",
     );
+  });
+});
+
+describe("defaultTypeFor", () => {
+  const corpus = { recordPlaceType: false, defaultPlaceType: "settlement" };
+
+  it("is the corpus-wide location type for a Location that has none", () => {
+    expect(defaultTypeFor(corpus, [])).toBe("settlement");
+  });
+
+  it("is none where the Location is classified under the type's Concept already", () => {
+    expect(defaultTypeFor(corpus, [entry("settlement")])).toBeUndefined();
+  });
+
+  it("is none where the Location only comes under the type through a subclass", () => {
+    expect(
+      defaultTypeFor(corpus, [entry("settlement", { inferred: true, via: "c-city" })]),
+    ).toBeUndefined();
+  });
+
+  it("is none where a narrower type shadows it, since the Location still comes under it", () => {
+    expect(defaultTypeFor(corpus, [entry("settlement", { shadowed: true })])).toBeUndefined();
+  });
+
+  it("is still the corpus-wide type for a Location that has a different one", () => {
+    expect(defaultTypeFor(corpus, [entry("fortress")])).toBe("settlement");
+  });
+
+  it("is none where the project asks for the location type each time, or named none", () => {
+    expect(defaultTypeFor({ recordPlaceType: true, defaultPlaceType: "settlement" }, [])).toBeUndefined();
+    expect(defaultTypeFor({ recordPlaceType: false, defaultPlaceType: null }, [])).toBeUndefined();
   });
 });

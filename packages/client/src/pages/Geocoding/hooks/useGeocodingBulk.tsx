@@ -7,6 +7,7 @@ import { pointGeometry } from "@inkvisitor/shared/types/geometry";
 import { useUserQuery } from "hooks/react-query/useUserQuery";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { defaultTypeFor } from "../components/placeType/locationTypeText";
 import { QuickGeocodeToast } from "../components/recent/QuickGeocodeToast";
 import { SuggestResponse, Suggestion } from "../types/engine";
 import { engineSuggestStream } from "../utils/engine/engine";
@@ -239,8 +240,7 @@ export const useGeocodingBulk = ({
         accuracy: pick.accuracy,
         // the same rule every other path follows: a location type is written only where
         // the corpus named one to stand for all of them, and never guessed at
-        placeType:
-          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
+        placeType: defaultTypeFor(context, location.typeEntries),
         provenance: provenanceOf(pick.take),
         current: location.geometry,
         userOptions: user.options,
@@ -338,8 +338,7 @@ export const useGeocodingBulk = ({
         roles,
         geometry: pointGeometry(suggestion.lon, suggestion.lat),
         accuracy,
-        placeType:
-          context.recordPlaceType === false ? (context.defaultPlaceType ?? undefined) : undefined,
+        placeType: defaultTypeFor(context, location.typeEntries),
         provenance: provenanceOf(suggestion),
         current: location.geometry,
         userOptions: user.options,

@@ -38,3 +38,22 @@ export const describeEntries = (
     ? shown.map((entry) => describeEntry(entry, placeTypes, viaLabel)).join("\n")
     : kindInfo(undefined).label;
 };
+
+/**
+ * The location type a coordinate written without asking is to carry: the one the
+ * corpus named for all of its Locations, or none when the project asks for each,
+ * none was named, or the Location already comes under it. A Location classified
+ * under a subclass or a synonym of the type's Concept comes under it, and a
+ * second Classification would only repeat what the first implies.
+ */
+export const defaultTypeFor = (
+  context: { recordPlaceType?: boolean; defaultPlaceType?: string | null },
+  entries: LocationTypeEntry[],
+): string | undefined => {
+  if (context.recordPlaceType !== false || !context.defaultPlaceType) {
+    return undefined;
+  }
+  return entries.some((entry) => entry.typeId === context.defaultPlaceType)
+    ? undefined
+    : context.defaultPlaceType;
+};

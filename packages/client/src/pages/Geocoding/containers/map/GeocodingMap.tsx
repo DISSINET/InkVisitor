@@ -48,6 +48,7 @@ import { useMapStyle } from "../../hooks/useMapStyle";
 import { useRegionDraw } from "../../hooks/useRegionDraw";
 import { AccuracyPicker } from "../../components/placeType/AccuracyPicker";
 import { PlaceTypePicker } from "../../components/placeType/PlaceTypePicker";
+import { defaultTypeFor } from "../../components/placeType/locationTypeText";
 import { engineSearch } from "../../utils/engine/engine";
 import { boxLabel } from "../../utils/map/regionBox";
 import { EngineSearchHit, Suggestion } from "../../types/engine";
@@ -556,7 +557,7 @@ export const GeocodingMap: React.FC<GeocodingMap> = ({
               pending,
               accuracy,
               context.recordPlaceType,
-              context.defaultPlaceType,
+              defaultTypeFor(context, selected?.typeEntries ?? []),
             );
             if ("write" in step) {
               finish(pending, step.write.accuracy, step.write.placeType);
