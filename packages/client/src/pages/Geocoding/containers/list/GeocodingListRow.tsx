@@ -20,6 +20,7 @@ import {
   StyledRowProblem,
   StyledRowTag,
   StyledRowType,
+  StyledRowTypeIcon,
   StyledRowTypeMore,
 } from "./GeocodingListStyles";
 import { ListItem, LocationGroup } from "../../utils/context/geocodingGroups";
@@ -142,6 +143,9 @@ const stepRow = (from: HTMLElement, delta: number, props: GeocodingListRowProps)
   }
 };
 
+/** How many location types a row draws; a Location with more has the rest counted. */
+const ROW_TYPE_MARKS = 3;
+
 /**
  * One row of the virtualised list: a group's heading, or a Location.
  *
@@ -165,10 +169,7 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
     );
   }
   const location = item.location;
-  const kind = findPlaceType(kinds, location.placeType);
   const shown = shownEntries(location.typeEntries);
-  // the mark shows the first location type; the rest are counted and told on hover
-  const inferred = !!shown[0]?.inferred;
   const typeWords = describeEntries(location.typeEntries, kinds, viaLabel);
   const busy = props.quickBusyId === location.entity.id;
   return (
@@ -266,7 +267,6 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
           data-hint={`${typeWords}\nclick to change`}
           aria-label={`location type: ${typeWords.replace(/\n/g, "; ")}`}
           $unset={!location.placeType}
-          $inferred={inferred}
           onClick={(event) => {
             event.stopPropagation();
             const box = event.currentTarget.getBoundingClientRect();
@@ -276,8 +276,16 @@ export const GeocodingListRow = (props: RowComponentProps<GeocodingListRowProps>
             });
           }}
         >
-          <KindIcon kind={kind} />
-          {shown.length > 1 ? <StyledRowTypeMore>+{shown.length - 1}</StyledRowTypeMore> : null}
+          {/* the location types side by side, up to the few a row has room for, and
+              the rest counted; the hover names every one */}
+          {(shown.length ? shown : [null]).slice(0, ROW_TYPE_MARKS).map((entry) => (
+            <StyledRowTypeIcon key={entry?.typeId ?? "none"} $inferred={!!entry?.inferred}>
+              <KindIcon kind={findPlaceType(kinds, entry?.typeId)} />
+            </StyledRowTypeIcon>
+          ))}
+          {shown.length > ROW_TYPE_MARKS ? (
+            <StyledRowTypeMore>+{shown.length - ROW_TYPE_MARKS}</StyledRowTypeMore>
+          ) : null}
         </StyledRowType>
         <StyledRowMain>
           {/* the shared tag rather than a plain label: it carries the status

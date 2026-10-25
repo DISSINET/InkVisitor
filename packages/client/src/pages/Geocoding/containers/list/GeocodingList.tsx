@@ -431,7 +431,6 @@ export const GeocodingList: React.FC<GeocodingList> = ({
           anchor={pickingMarked}
           clearLabel={`remove the location types of the ${marked.size} marked`}
           clearDescription="Removes the classifications under the Concepts of the project's location types, and no others."
-
           onChoose={(placeType) => {
             onMarkedRetype(placeType as string | null);
             setPickingMarked(null);
