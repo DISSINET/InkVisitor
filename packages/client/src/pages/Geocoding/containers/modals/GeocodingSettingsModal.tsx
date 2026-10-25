@@ -329,13 +329,13 @@ export const GeocodingSettingsModal: React.FC<GeocodingSettingsModal> = ({
             Choose (or create) the Concept holding geographic coordinates in GeoJSON format, the
             Concept holding localisation accuracy, and the Concept holding the source of knowledge.
           </StyledSectionNote>
-          {row("geo:geometry — GeoJSON geometry", draft.geometry, EntityEnums.Class.Concept, (id) =>
+          {row("concept for referencing geocoding in GeoJSON format", draft.geometry, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, geometry: id ?? "" }))
           )}
-          {row("geo:accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
+          {row("concept for localisation accuracy", draft.accuracy, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, accuracy: id ?? "" }))
           )}
-          {row("geo:source — source of knowledge", draft.epistemicSource, EntityEnums.Class.Concept, (id) =>
+          {row("concept for the source of knowledge", draft.epistemicSource, EntityEnums.Class.Concept, (id) =>
             setDraft((d) => ({ ...d, epistemicSource: id ?? "" }))
           )}
 
