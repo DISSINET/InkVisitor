@@ -21,6 +21,29 @@ export function pgIndexName(table: string, index: string): string {
   return `${table}_${index}`.toLowerCase().replace(/[^a-z0-9]+/g, "_");
 }
 
+/**
+ * STORED generated columns per table: column name -> the document path it is
+ * derived from (dot-separated for a nested field). The column is a copy of
+ * the field that an index can cover and a query can read without detoasting
+ * the document: `doc` stays the only thing written and the only thing read
+ * back, the column follows it. A table listed here declares its btree
+ * indexes on these column names, never on `doc->>` expressions, and
+ * schema.ts brings a live database to this declaration at every start.
+ */
+export const COLUMNS: Record<string, Record<string, string>> = {
+  audits: { date: "date", type: "type", user: "user", audit_scope: "auditScope", model_id: "modelId" },
+};
+
+/** the SQL expression a generated column is computed from: `doc->'a'->>'b'` for the path `a.b` */
+export function columnExpr(path: string): string {
+  const parts = path.split(".");
+  const last = parts.pop();
+  return `doc${parts.map((part) => `->'${part}'`).join("")}->>'${last}'`;
+}
+
+/** a generated column as a SQL identifier: `user` is a reserved word, the others are plain */
+export const col = (name: string): string => (name === "user" ? `"user"` : name);
+
 const btree = (name: string, ...columns: string[]): PgIndex => ({
   name,
   kind: "btree",
@@ -90,10 +113,12 @@ const entitiesIndexes: PgIndex[] = [
   ),
 ];
 
+// over the generated columns of COLUMNS.audits: the stats aggregation groups
+// on date, type and user and is answered from the index alone
 const auditsIndexes: PgIndex[] = [
-  btree(DbEnums.Indexes.AuditScopeModelId, "(doc->>'auditScope')", "(doc->>'modelId')"),
-  btree(DbEnums.Indexes.AuditDate, "(doc->>'date')"),
-  btree(DbEnums.Indexes.AuditDateTypeUser, "(doc->>'date')", "(doc->>'type')", "(doc->>'user')"),
+  btree(DbEnums.Indexes.AuditScopeModelId, "audit_scope", "model_id"),
+  btree(DbEnums.Indexes.AuditDate, "date"),
+  btree(DbEnums.Indexes.AuditDateTypeUser, "date", "type", col("user")),
   gin(DbEnums.Indexes.AuditRelationEntityIds, collect(["$.changes.entityIds[*]"])),
 ];
 
@@ -141,7 +166,19 @@ export const EXTRA_INDEXES: { table: string; name: string; expression: string }[
   { table: "relations", name: "relations_type", expression: "(doc->>'type')" },
   { table: "entities", name: "entities_territory_parent", expression: "(doc->'data'->'parent'->>'territoryId')" },
   { table: "entities", name: "entities_resource_document", expression: "(doc->'data'->>'documentId')" },
+  // the newest audits of one entity are read straight off the index end
+  { table: "audits", name: "audits_scope_model_date", expression: "audit_scope, model_id, date" },
+  { table: "audits", name: "audits_type_user", expression: `type, ${col("user")}` },
 ];
+
+/** the column definition of one generated column, as CREATE TABLE and ADD COLUMN take it */
+export const columnClause = (name: string, path: string): string =>
+  `${col(name)} text GENERATED ALWAYS AS (${columnExpr(path)}) STORED`;
+
+/** the generated-column clauses of `table`, in COLUMNS order; empty for a table without any */
+export function columnClauses(table: string): string[] {
+  return Object.entries(COLUMNS[table] ?? {}).map(([name, path]) => columnClause(name, path));
+}
 
 /** SQL expression giving a row's key(s) for `index`: text[] for gin, text or text[] for btree */
 export function keysSql(table: string, index: PgIndex): string {
@@ -198,9 +235,8 @@ export const SESSIONS_DDL = [
 export function ddl(): string[] {
   const statements: string[] = [MERGE_FUNCTION_DDL];
   for (const [table, indexes] of Object.entries(TABLES)) {
-    statements.push(
-      `CREATE TABLE ${table} (doc jsonb NOT NULL, id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY)`
-    );
+    const columns = ["doc jsonb NOT NULL", "id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY", ...columnClauses(table)];
+    statements.push(`CREATE TABLE ${table} (${columns.join(", ")})`);
     for (const index of indexes) {
       const ident = pgIndexName(table, index.name);
       if (index.kind === "gin") {
