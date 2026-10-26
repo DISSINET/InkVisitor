@@ -51,9 +51,11 @@ import/~$actants.xlsx
 
 database_data
 
-# full-database dumps taken for analysis; a single audits.json runs to hundreds
-# of MB, past what GitHub accepts, while filtered exports are small and kept
+# full-database dumps taken for analysis and the exports written by
+# `pnpm migrate`; a single audits.json runs to hundreds of MB, past what
+# GitHub accepts, while filtered exports are small and kept
 /packages/database/datasets/production-*/
+/packages/database/datasets/export-*/
 
 **/*.tar
 **/*.tar.gz
@@ -62,6 +64,7 @@ database_data
 
 # Claude Code project instructions (local only)
 CLAUDE.md
+.design
 # design-sync (claude.ai/design import)
 .ds-sync/
 ds-bundle/

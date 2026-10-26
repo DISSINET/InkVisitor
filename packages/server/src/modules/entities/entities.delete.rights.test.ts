@@ -1,4 +1,4 @@
-import { Db } from "@service/rethink";
+import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
 import Concept from "@models/concept/concept";
@@ -6,7 +6,6 @@ import Territory from "@models/territory/territory";
 import User from "@models/user/user";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { pool } from "@middlewares/db";
-import { r as rethink } from "rethinkdb-ts";
 import { findEntityById } from "@service/shorthands";
 import defaultAcl from "../../../../database/datasets/default/acl_permissions.json";
 
@@ -34,18 +33,15 @@ describe("entities delete - editor rights", () => {
         row.controller === "entities" &&
         (row.method === "DELETE" || row.route === ":entityId/restore")
     );
-    await rethink
-      .table("acl_permissions")
-      .filter((row: any) =>
-        row("controller")
-          .eq("entities")
-          .and(
-            row("method").eq("DELETE").or(row("route").eq(":entityId/restore"))
-          )
-      )
-      .delete()
-      .run(db.connection);
-    await rethink.table("acl_permissions").insert(seeded).run(db.connection);
+    const stale = (await storage.acl.all(db.connection)).filter(
+      (row) => row.controller === "entities" &&
+        (row.method === "DELETE" || row.route === ":entityId/restore")
+    );
+    await storage.acl.deleteMany(
+      db.connection,
+      stale.map((row) => row.id)
+    );
+    await storage.acl.insert(db.connection, seeded);
 
     await new User({
       id: editorId,
@@ -67,11 +63,7 @@ describe("entities delete - editor rights", () => {
   });
 
   afterAll(async () => {
-    await rethink
-      .table("users")
-      .getAll(editorId, viewerId)
-      .delete()
-      .run(db.connection);
+    await storage.users.deleteMany(db.connection, [editorId, viewerId]);
     await db.close();
     await pool.end();
   });

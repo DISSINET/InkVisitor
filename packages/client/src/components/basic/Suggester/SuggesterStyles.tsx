@@ -80,25 +80,15 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
       border-color: ${String(theme.color[$accentColor])};
     }
   `}
-  input[type="text"],
-  .react-select__control {
+  input[type="text"] {
     /* border-color: transparent !important; */
     border-color: transparent !important;
-  }
-
-  /* the class control is sized for a single letter; anything longer is clipped
-     here so it cannot reach the type bar and the input next to it */
-  .react-select__value-container {
-    overflow: hidden;
-    flex-wrap: nowrap;
   }
 
   ${({ $disabled, theme }) =>
     $disabled &&
     `
-    input[type="text"],
-    .react-select__control,
-    .react-select__control--is-disabled {
+    input[type="text"] {
       background: transparent !important;
     }
     input[type="text"]::placeholder {
@@ -120,23 +110,27 @@ export const StyledEmptyCategory = styled.div<{ $width: number }>`
   color: ${({ theme }) => theme.color["gray"]["600"]};
 `;
 
-export const StyledSuggesterList = styled.div`
+interface StyledSuggesterList {
+  $hidden: boolean;
+}
+export const StyledSuggesterList = styled.div<StyledSuggesterList>`
   /* Rendered in a #page-content portal that forms no stacking context, so this
      competes at the body level with the modal wrap (z 500). Match the other
      floating portal menus (Tooltip, DatePicker) so the dropdown clears modals. */
   z-index: 10000;
+  visibility: ${({ $hidden }) => ($hidden ? "hidden" : "visible")};
 `;
 interface StyledRelativePosition {
-  $width?: number;
+  $width: number;
 }
 export const StyledRelativePosition = styled.div<StyledRelativePosition>`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  min-width: 16.1rem;
   /* max-width: 24rem; */
-  max-width: ${({ $width }) => (!$width ? "24rem" : "")};
-  width: ${({ $width }) => ($width ? `${$width / 10}rem` : "")};
+  /* the floating list's max-width comes from the size middleware */
+  max-width: 100%;
+  width: ${({ $width }) => `${$width / 10}rem`};
 
   overflow: hidden;
   display: grid;
@@ -154,7 +148,7 @@ export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
     ${({ theme, $hasTrailingIcons }) => ($hasTrailingIcons ? "3rem" : theme.space[2])};
   align-items: center;
   background-color: ${({ theme, $isSelected }) =>
-    $isSelected ? theme.color["blue"][100] : "transparent"};
+    $isSelected ? theme.color["suggestionSelected"] : "transparent"};
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
   margin-left: ${({ theme }) => theme.space[2]};

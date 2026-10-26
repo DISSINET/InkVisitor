@@ -129,9 +129,7 @@ export const StyledExportInfoText = styled.div`
  * width minus a hand-tuned allowance for the body's own chrome.
  */
 export const StyledDocumentModalAnnotator = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -139,4 +137,20 @@ export const StyledDocumentModalAnnotator = styled.div`
   border-bottom-left-radius: 7px;
   border-bottom-right-radius: 7px;
   overflow: hidden;
+`;
+// Out of the flow, so the canvas's pixel height never props the modal body
+// open: the body can then shrink with the window, and the slot measured
+// around this follows it down.
+export const StyledDocumentModalAnnotatorFill = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+/** Head and tail spans inside give the middle ellipsis of `DocumentTitle` */
+export const StyledDocumentModalTitle = styled.div`
+  display: flex;
+  min-width: 0;
 `;

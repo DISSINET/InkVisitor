@@ -76,7 +76,7 @@ import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorS
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
-import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
+import { MAX_SEARCH_TERM_LENGTH, useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorColumn,
   StyledAnnotatorMenu,
@@ -145,6 +145,12 @@ interface TextAnnotatorProps {
    * already restricted upstream). The server still enforces the same rule.
    */
   canEditDocument?: boolean;
+  /**
+   * Narrows anchor editing (highlight menu, sequential anchoring) below
+   * canEditDocument, for hosts that allow text edits but not anchoring.
+   * Defaults to canEditDocument.
+   */
+  canEditAnchors?: boolean;
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -195,6 +201,7 @@ export const TextAnnotator = ({
   disableCreate = false,
   overlayZIndex,
   canEditDocument = true,
+  canEditAnchors = canEditDocument,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -333,7 +340,10 @@ export const TextAnnotator = ({
     },
   });
 
-  const wLineNumbers = displayLineNumbers ? 50 : 0;
+  // Measured by the annotator from the highest paragraph number and the font;
+  // the initial value only holds until the first report.
+  const [gutterWidth, setGutterWidth] = useState<number>(48);
+  const wLineNumbers = displayLineNumbers ? gutterWidth : 0;
   const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
@@ -355,6 +365,9 @@ export const TextAnnotator = ({
   const [isFindOpen, setIsFindOpen] = useState(false);
   const [isSecondStepOpen, setIsSecondStepOpen] = useState(false);
   const findInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [isGoToParagraphOpen, setIsGoToParagraphOpen] = useState(false);
+  const goToParagraphInputRef = useRef<HTMLInputElement | null>(null);
 
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
@@ -624,7 +637,7 @@ export const TextAnnotator = ({
     dragOffset: menuDragOffset,
   } = useAnnotatorMenuDrag();
 
-  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and dropdowns so they stay interactive. */
   // const handleMenuPointerDownCapture = useCallback(
   //   (e: React.PointerEvent<HTMLDivElement>) => {
   //     const target = e.target as HTMLElement;
@@ -657,12 +670,12 @@ export const TextAnnotator = ({
 
       const mutation = quiet ? updateDocumentMutationQuiet : updateDocumentMutation;
 
+      // content alone: the server rebuilds anchors and entityIds from it, and
+      // each anchors node repeats its text, so the full document can outgrow
+      // the proxy's request size limit
       await mutation.mutateAsync({
         id: documentId,
-        doc: {
-          ...dataDocument,
-          content: annotator.text.value,
-        },
+        doc: { content: annotator.text.value },
       });
     }
   };
@@ -838,7 +851,7 @@ export const TextAnnotator = ({
       // proportional-font picker). The annotator owns the choice + persistence;
       // the app just supplies the candidates, defaulting to the application font.
       a.setFontFamilyOptions([
-        { label: "Roboto (app sans)", value: '"Roboto", sans-serif' },
+        { label: "Roboto (app sans)", value: theme.fontFamily["body"] },
         // System option hidden for now because of inconsistent anchor highlight
         // { label: "System UI (system sans)", value: "system-ui, sans-serif" },
         { label: "Georgia (serif)", value: "Georgia, serif" },
@@ -934,6 +947,7 @@ export const TextAnnotator = ({
 
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
+      newAnnotator.onGutterWidthChange(setGutterWidth);
     }
 
     newAnnotator.onSelectText(({ text, anchors, index }) => {
@@ -1030,7 +1044,7 @@ export const TextAnnotator = ({
     if (annotator && mainCanvas.current) {
       annotator?.resize();
     }
-  }, [width, canvasHeight]);
+  }, [width, canvasHeight, wLineNumbers]);
 
   useEffect(() => {
     if (storedAnnotatorScrollPosition !== null) {
@@ -1219,10 +1233,15 @@ export const TextAnnotator = ({
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
-  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // When anchors are read-only (e.g. an Editor viewing an unassigned
   // document) the selection menu still appears, but only as a minimal,
   // view-only variant: clipboard + anchors in selection, no create/edit.
-  const isMenuReadOnly = !canEditDocument;
+  const isMenuReadOnly = !canEditDocument || !canEditAnchors;
+
+  const clearSelection = () => {
+    setSelectedText("");
+    annotator?.clearSelection();
+  };
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
@@ -1482,12 +1501,12 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      // A canvas selection always wins over what the input holds; with no
-      // selection the term stays put. search() matches within a single line, so
-      // the whitespace of a selection spanning a break is collapsed to keep it
-      // findable.
+      // A canvas selection wins over what the input holds; with no selection,
+      // or one longer than a search can run, the term stays put. search()
+      // matches within a single line, so the whitespace of a selection spanning
+      // a break is collapsed to keep it findable.
       const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
-      if (selection) {
+      if (selection && selection.length <= MAX_SEARCH_TERM_LENGTH) {
         setSearchTerm(selection);
       }
       setIsFindOpen(true);
@@ -1505,6 +1524,63 @@ export const TextAnnotator = ({
     findInputRef.current?.focus();
     findInputRef.current?.select();
   }, [findFocusRequest]);
+
+  // Bumped on every open request, so a Ctrl/Cmd+G while the field is already
+  // open still re-focuses it.
+  const [goToParagraphFocusRequest, setGoToParagraphFocusRequest] = useState(0);
+
+  const openGoToParagraph = () => {
+    setIsGoToParagraphOpen(true);
+    setGoToParagraphFocusRequest((request) => request + 1);
+  };
+
+  // Runs after the render that mounted the field, so the ref is set.
+  useEffect(() => {
+    if (goToParagraphFocusRequest === 0) return;
+    goToParagraphInputRef.current?.focus();
+    goToParagraphInputRef.current?.select();
+  }, [goToParagraphFocusRequest]);
+
+  // Ctrl/Cmd+G opens the field only with a document loaded and while focus is not
+  // in another text field, so the browser keeps its own "find next" otherwise.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "g" || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      if (!isSearchAllowed) return;
+      const target = e.target as HTMLElement | null;
+      const inOtherField =
+        target !== goToParagraphInputRef.current &&
+        (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable);
+      if (inOtherField) return;
+      e.preventDefault();
+      openGoToParagraph();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSearchAllowed]);
+
+  // A field left open across a document switch would come back unfocused, with
+  // nothing to close it.
+  useEffect(() => {
+    setIsGoToParagraphOpen(false);
+  }, [documentId, isSearchAllowed]);
+
+  const goToParagraph = (input: string) => {
+    if (!annotator) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    if (!/^\d+$/.test(trimmed)) {
+      toast.warning(`"${trimmed}" is not a paragraph number.`);
+      return;
+    }
+    const paragraphNumber = Number(trimmed);
+    if (annotator.scrollToParagraph(paragraphNumber)) {
+      setIsGoToParagraphOpen(false);
+    } else {
+      const last = annotator.text.paragraphCount();
+      toast.warning(`There is no paragraph ${paragraphNumber}. The last one is ${last}.`);
+    }
+  };
 
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
@@ -1633,7 +1709,12 @@ export const TextAnnotator = ({
           }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
-          if (!canEditDocument && annotatorMode !== EditMode.HIGHLIGHT) {
+          // Only keys aimed at the canvas: the toolbar's fields sit in this column too.
+          if (
+            !canEditDocument &&
+            annotatorMode !== EditMode.HIGHLIGHT &&
+            e.target === mainCanvas.current
+          ) {
             const isEditingKey =
               (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
               e.key === "Backspace" ||
@@ -1649,9 +1730,11 @@ export const TextAnnotator = ({
           }
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            setSelectedText("");
-            annotator?.clearSelection();
+          // An open highlight menu is the top key layer and handles Escape
+          // itself; clearing the selection here would unmount it before the key
+          // reaches the window, and the modal below would take the key instead.
+          if (e.key === "Escape" && !isMenuDisplayed) {
+            clearSelection();
           }
         }}
       >
@@ -1674,10 +1757,7 @@ export const TextAnnotator = ({
                   {dataDocument && (
                     <TextAnnotatorMenu
                       menuDragHandleProps={menuDragHandleProps}
-                      onEscapePressed={() => {
-                        setSelectedText("");
-                        annotator?.clearSelection();
-                      }}
+                      onEscapePressed={clearSelection}
                       anchors={selectedAnchors}
                       text={selectedText}
                       entities={storedEntities}
@@ -1799,8 +1879,9 @@ export const TextAnnotator = ({
             <AnnotatorSearchBar
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
+              onEscape={() => (isMenuDisplayed ? clearSelection() : setIsFindOpen(false))}
               onOpenSecondStep={() => setIsSecondStepOpen(true)}
-              canEdit={canEditDocument}
+              canEdit={annotatorMode === EditMode.HIGHLIGHT ? !isMenuReadOnly : canEditDocument}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               findInputRef={findInputRef}
@@ -1835,6 +1916,11 @@ export const TextAnnotator = ({
             isSavePending={isSaving || isSavingWithoutRefresh}
             isSearchAllowed={isSearchAllowed}
             onFindClick={() => setIsFindOpen(true)}
+            isGoToParagraphOpen={isGoToParagraphOpen}
+            onGoToParagraphClick={openGoToParagraph}
+            onGoToParagraphClose={() => setIsGoToParagraphOpen(false)}
+            onGoToParagraph={goToParagraph}
+            goToParagraphInputRef={goToParagraphInputRef}
             warningChip={
               !hideWarningChip && asymmetricalAnchors.length > 0 ? (
                 <WarningsChip

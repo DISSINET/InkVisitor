@@ -1,6 +1,6 @@
 import { Explore } from "@inkvisitor/shared/types/query";
 import Statement from "@models/statement/statement";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 
 export const getCoOccurrenceFilter = (
   filters: Explore.IExploreSearchFilter[]
@@ -19,7 +19,7 @@ export const getCoOccurrenceFilter = (
  * Order of the input ids is preserved.
  */
 export const applyCoOccurrenceFilter = async (
-  db: Connection,
+  db: Conn,
   items: string[],
   filter: Explore.IExploreCoOccurrenceFilter
 ): Promise<string[]> => {

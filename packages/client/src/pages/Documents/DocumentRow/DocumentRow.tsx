@@ -5,11 +5,14 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { splitTitleTail } from "components/advanced/DocumentTitle/DocumentTitle";
+import {
+  StyledTitleHead,
+  StyledTitleTail,
+} from "components/advanced/DocumentTitle/DocumentTitleStyles";
 import { useResizeObserver, useTheme } from "hooks";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { FaDownload } from "react-icons/fa";
 import { IcoTrash } from "Theme/icons";
-import { RiFileEditFill } from "react-icons/ri";
 import { EntityColors } from "types";
 import {
   StyledActionsCell,
@@ -17,6 +20,8 @@ import {
   StyledCountTag,
   StyledDisabledSelect,
   StyledDocumentRow,
+  StyledExportIcon,
+  StyledOpenIcon,
   StyledReference,
   StyledSelectCell,
   StyledTitle,
@@ -31,7 +36,7 @@ interface DocumentRow {
   canManage: boolean;
   selected: boolean;
   onToggleSelected: (id: string) => void;
-  handleDocumentEdit: (id: string) => void;
+  handleDocumentOpen: (id: string) => void;
   handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
@@ -53,7 +58,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   canManage,
   selected,
   onToggleSelected,
-  handleDocumentEdit,
+  handleDocumentOpen,
   handleDocumentExport,
   setDocToDelete,
   updateDocumentMutation,
@@ -111,6 +116,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   });
 
   const { ref: titleRef, width: titleWidth = 0 } = useResizeObserver<HTMLDivElement>();
+  const [titleHead, titleTail] = splitTitleTail(localTitle, 7);
 
   return (
     <StyledDocumentRow>
@@ -123,7 +129,11 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           </StyledDisabledSelect>
         )}
       </StyledSelectCell>
-      <StyledTitleWrap ref={titleRef} onClick={canManage ? setEditMode : undefined}>
+      <StyledTitleWrap
+        ref={titleRef}
+        $editable={canManage}
+        onClick={canManage ? setEditMode : undefined}
+      >
         {canManage && editMode ? (
           <Input
             value={localTitle}
@@ -134,13 +144,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             width={titleWidth}
           />
         ) : (
-          <StyledTitle>{localTitle}</StyledTitle>
+          <StyledTitle $editable={canManage}>
+            <StyledTitleHead>{titleHead}</StyledTitleHead>
+            {titleTail && <StyledTitleTail>{titleTail}</StyledTitleTail>}
+          </StyledTitle>
         )}
       </StyledTitleWrap>
       <StyledActionsCell>
         <ButtonGroup>
           <Button
-            icon={<FaDownload />}
+            icon={<StyledExportIcon />}
+            shape="square"
             color="primary"
             inverted
             disabled={!canManage}
@@ -149,14 +163,16 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
           {/* TODO: allow all users to open document on BE */}
           <Button
-            icon={<RiFileEditFill />}
-            color="warning"
+            icon={<StyledOpenIcon />}
+            shape="square"
+            color="info"
             inverted
-            onClick={() => handleDocumentEdit(document.id)}
+            onClick={() => handleDocumentOpen(document.id)}
             tooltipLabel={"open document"}
           />
           <Button
             icon={<IcoTrash />}
+            shape="square"
             color="danger"
             inverted
             disabled={!canManage}

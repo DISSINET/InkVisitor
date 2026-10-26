@@ -1,5 +1,6 @@
 import { EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
 import { Button, Checkbox, Input } from "components";
+import { useKeyLayer } from "components/basic/Modal/layerStack";
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 import { HiOutlineArrowDown, HiOutlineArrowUp } from "react-icons/hi";
@@ -11,7 +12,7 @@ import {
   IcoReplaceTb,
   IcoWholeWord,
 } from "Theme/icons";
-import { MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
+import { MAX_SEARCH_TERM_LENGTH, MIN_SEARCH_TERM_LENGTH } from "../hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorSearchBar,
   StyledAnnotatorSearchBarWrap,
@@ -24,6 +25,11 @@ import {
 interface AnnotatorSearchBar {
   annotatorMode: EditMode;
   onClose: () => void;
+  /**
+   * Escape in the query field; defaults to onClose. The key goes no further,
+   * so each press closes one layer: the highlight menu, then the search.
+   */
+  onEscape?: () => void;
   /** Opens the mode's second step — sequential anchoring, or find & replace. */
   onOpenSecondStep: () => void;
   /** False for a document the user may not edit: no anchoring, no replacing. */
@@ -56,6 +62,7 @@ interface AnnotatorSearchBar {
 export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   annotatorMode,
   onClose,
+  onEscape = onClose,
   onOpenSecondStep,
   canEdit,
   searchTerm,
@@ -77,30 +84,37 @@ export const AnnotatorSearchBar: React.FC<AnnotatorSearchBar> = ({
   const occurencesCount = searchOccurences?.length ?? 0;
   const isHighlightMode = annotatorMode === EditMode.HIGHLIGHT;
 
+  // A layer of its own, so Escape from the canvas closes the search before the
+  // modal the annotator sits in (the Documents page).
+  useKeyLayer(true, { onEscape: onClose });
+
   // Keeping focus in the query field means the flag toggles can be used without
   // breaking a typing run.
   const refocusInput = () => findInputRef.current?.focus();
 
-  // A query below the hook's threshold never runs, so it would otherwise leave
-  // the counter blank with nothing to say why.
+  // A query outside the hook's length range never runs, so it would otherwise
+  // leave the counter blank with nothing to say why.
   const resultsLabel =
     searchTerm.length > 0 && searchTerm.length < MIN_SEARCH_TERM_LENGTH
       ? `min ${MIN_SEARCH_TERM_LENGTH} characters`
-      : searchOccurences === null
-        ? ""
-        : occurencesCount === 0
-          ? "no results"
-          : `${searchActiveOccurence + 1} of ${occurencesCount}`;
+      : searchTerm.length > MAX_SEARCH_TERM_LENGTH
+        ? `max ${MAX_SEARCH_TERM_LENGTH} characters`
+        : searchOccurences === null
+          ? ""
+          : occurencesCount === 0
+            ? "no results"
+            : `${searchActiveOccurence + 1} of ${occurencesCount}`;
 
   return (
     <StyledAnnotatorSearchBarWrap>
       <StyledAnnotatorSearchBar>
-        <StyledSearchBarInput>
+        {/* past the field, a modal or the annotator would act on Escape too */}
+        <StyledSearchBarInput onKeyDown={(e) => e.key === "Escape" && e.stopPropagation()}>
           <Input
             value={searchTerm}
             onChangeFn={(newText: string) => setSearchTerm(newText)}
             onEnterPressFn={goToNextOccurence}
-            onEscapePressFn={onClose}
+            onEscapePressFn={onEscape}
             changeOnType
             valueControlled
             autoFocus

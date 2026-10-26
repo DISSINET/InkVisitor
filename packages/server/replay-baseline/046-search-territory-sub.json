@@ -1,0 +1,553 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities?territoryId=T0&subTerritorySearch=true"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [
+                {
+                  "certainty": "3",
+                  "elvl": "1",
+                  "entityId": "c211",
+                  "id": "s2_a2_i1",
+                  "logic": "1",
+                  "mood": [],
+                  "moodvariant": "1"
+                }
+              ],
+              "elvl": "1",
+              "entityId": "b1",
+              "id": "s2_a2",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            },
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "c41",
+              "id": "s2_a3",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "a1",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "a2",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "s2_a1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 2,
+            "territoryId": "t1"
+          },
+          "text": "...his dog (probably a pug) is possessed by evil..."
+        },
+        "detail": "",
+        "id": "s2",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "S",
+        "createdAt": "<datetime>",
+        "data": {
+          "actants": [
+            {
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "classifications": [],
+              "elvl": "1",
+              "entityId": "b1",
+              "id": "s3_a2",
+              "identifications": [],
+              "logic": "1",
+              "partitivity": "1",
+              "position": "s",
+              "props": [],
+              "virtuality": "1"
+            }
+          ],
+          "actions": [
+            {
+              "actionId": "a3",
+              "bundleEnd": false,
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "certainty": "1",
+              "elvl": "1",
+              "id": "s3_a1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "props": []
+            }
+          ],
+          "tags": [],
+          "territory": {
+            "order": 3,
+            "territoryId": "t1"
+          },
+          "text": "...and should be sacrificed."
+        },
+        "detail": "",
+        "id": "s3",
+        "labels": [
+          ""
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c211",
+        "labels": [
+          "pug"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": [
+              "empty"
+            ]
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a1",
+        "labels": [
+          "told"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c41",
+        "labels": [
+          "evil"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "B",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "probably a pug",
+        "id": "b1",
+        "labels": [
+          "a dog"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c2",
+        "labels": [
+          "priest"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c71",
+        "labels": [
+          "son of"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l11",
+        "labels": [
+          "street"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p2",
+        "labels": [
+          "someone"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a3",
+        "labels": [
+          "sacrifice"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a4",
+        "labels": [
+          "take place"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c3",
+        "labels": [
+          "occupation"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p11",
+        "labels": [
+          "saint Tiger"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "A",
+        "createdAt": "<datetime>",
+        "data": {
+          "entities": {
+            "a1": [],
+            "a2": [],
+            "s": []
+          },
+          "pos": "verb",
+          "valencies": {
+            "a1": "",
+            "a2": "",
+            "s": ""
+          }
+        },
+        "detail": "",
+        "id": "a2",
+        "labels": [
+          "is possessed"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "c80",
+        "labels": [
+          "localization"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l5",
+        "labels": [
+          "Mauw mountain"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l1200",
+        "labels": [
+          "DISSINET office"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "P",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "p1",
+        "labels": [
+          "Minda, the priest"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "E",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "e1",
+        "labels": [
+          "a sacrificy of pug"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "T",
+        "createdAt": "<datetime>",
+        "data": {
+          "parent": {
+            "order": 2,
+            "territoryId": "T0"
+          }
+        },
+        "detail": "",
+        "id": "t1",
+        "labels": [
+          "priest Minda and their stories"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      },
+      {
+        "class": "L",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "l2",
+        "labels": [
+          "sanctuary of the temple of cat god"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "right": "admin",
+        "status": "1"
+      }
+    ]
+  }
+}

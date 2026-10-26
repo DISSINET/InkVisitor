@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/entities/rp-se",
+    "body": {
+      "data": {
+        "text": "Editor statement, edited."
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

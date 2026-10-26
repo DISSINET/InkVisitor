@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "PUT",
+    "path": "/api/entities/rp-p",
+    "body": {
+      "detail": "editor touched this"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

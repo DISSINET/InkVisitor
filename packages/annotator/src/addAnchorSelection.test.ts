@@ -44,3 +44,19 @@ describe("addAnchor — entity already anchored in the document", () => {
     expect(a.cursor.selectStart).not.toEqual(first[0]);
   });
 });
+
+describe("addAnchor — orphaned tag of the same entity earlier in the document", () => {
+  test("selection lands on the new anchor, not on a span shifted by the orphan", () => {
+    // raw indices: "ddd" occupies 16..18, selection end at 19
+    const a = createAnnotator("aaa <e1>bbb ccc ddd");
+    a.cursor.selectStart = { xLine: 16, yLine: 0 };
+    a.cursor.selectEnd = { xLine: 19, yLine: 0 };
+    a.cursor.setTrueSelectionDirection();
+
+    a.addAnchor("e1");
+
+    expect(a.text.value).toBe("aaa <e1>bbb ccc <e1>ddd</e1>");
+    expect(a.cursor.isSelected()).toBe(true);
+    expect([a.cursor.selectStart, a.cursor.selectEnd]).toEqual(a.text.getTagPosition("e1", 0));
+  });
+});

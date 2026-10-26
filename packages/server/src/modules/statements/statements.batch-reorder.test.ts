@@ -4,7 +4,7 @@ import request from "supertest";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import { apiPath } from "@common/constants";
 import app from "../../server";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { findEntityById } from "@service/shorthands";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import treeCache from "@service/treeCache";

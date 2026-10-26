@@ -982,7 +982,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
                       <EntityDetailExpandIcon
                         isExpanded={isSectionExpanded(EntityDetailSection.Audits)}
                       />
-                      <StyledDetailSectionHeading>Audits</StyledDetailSectionHeading>
+                      <StyledDetailSectionHeading>Entity audits</StyledDetailSectionHeading>
                     </StyledDetailSectionHeader>
                     {isSectionExpanded(EntityDetailSection.Audits) && (
                       <StyledDetailSectionContent ref={auditSectionRef}>

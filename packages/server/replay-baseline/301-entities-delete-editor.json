@@ -1,0 +1,17 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "DELETE",
+    "path": "/api/entities/rp-ce"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "rp-ce": true
+      },
+      "result": true
+    }
+  }
+}

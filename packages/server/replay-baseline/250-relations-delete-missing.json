@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "editor",
+    "method": "DELETE",
+    "path": "/api/relations/rp-rel-2"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "RelationDoesNotExist",
+      "message": "Relation rp-rel-2 does not exist",
+      "result": false
+    }
+  }
+}

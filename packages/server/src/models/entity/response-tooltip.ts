@@ -17,7 +17,8 @@ export class ResponseTooltip
   constructor(entity: Entity) {
     super(entity);
     this.relations = new UsedRelations(entity.id, entity.class);
-    this.relations.maxListLen = 10;
+    // the tooltip renders only the entity's own (forward) connections
+    this.relations.withInverse = false;
     this.usedInDocuments = [];
   }
 

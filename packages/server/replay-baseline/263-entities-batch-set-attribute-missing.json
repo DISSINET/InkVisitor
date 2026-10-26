@@ -1,0 +1,26 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities/batchSetAttribute",
+    "body": {
+      "changes": {
+        "attribute": "language",
+        "from": null,
+        "to": "lat"
+      },
+      "entityIds": [
+        "nope"
+      ]
+    }
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "EntityDoesNotExist",
+      "message": "none of the provided entities were found",
+      "result": false
+    }
+  }
+}

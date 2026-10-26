@@ -1,11 +1,12 @@
 import "ts-jest";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { clean, newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
 import { prepareRelation } from "@models/relation/relation.test";
+import { UsedRelations } from "@models/relation/relations";
 import { ResponseTooltip } from "./response-tooltip";
 
 describe("test ResponseTooltip.getActionEventNodes", function () {
@@ -87,5 +88,21 @@ describe("test ResponseTooltip.getActionEventNodes", function () {
     const lvl1 = connections[0].subtrees;
 
     expect(lvl1).toHaveLength(1); // relation2
+  });
+
+  test("inverse connections are skipped", async () => {
+    // relation3 makes "4" the superclass of "3"
+    const superclass = new Entity({ id: "4", class: EntityEnums.Class.Concept });
+    const tooltip = new ResponseTooltip(superclass);
+    await tooltip.relations.prepare(request, [RelationEnums.Type.Superclass]);
+    expect(
+      tooltip.relations[RelationEnums.Type.Superclass]?.iConnections
+    ).toHaveLength(0);
+
+    const detail = new UsedRelations("4", EntityEnums.Class.Concept);
+    await detail.prepare(request, [RelationEnums.Type.Superclass]);
+    expect(
+      detail[RelationEnums.Type.Superclass]?.iConnections?.length
+    ).toBeGreaterThan(0);
   });
 });

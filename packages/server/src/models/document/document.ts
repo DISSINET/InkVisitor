@@ -1,7 +1,7 @@
 import { IDbModel } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { IDocument, IDocumentMeta } from "@inkvisitor/shared/types";
-import { DbEnums, EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
+import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { InternalServerError, ModelNotValidError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import { AnchorsNode } from "./anchors";
@@ -39,7 +39,7 @@ export default class Document implements IDocument, IDbModel {
    * Issues one DB round-trip to resolve referenced entities. Called by
    * every write path so the derived fields are persisted alongside content.
    */
-  async preprocess(conn: Connection): Promise<void> {
+  async preprocess(conn: Conn): Promise<void> {
     const ids = this.gatherEntityIds();
     this.entityIds = await this.findReferencedEntityIds(conn, ids);
     this.anchors = AnchorsNode.buildAnchorsTree(this.content, this.entityIds);
@@ -125,12 +125,12 @@ export default class Document implements IDocument, IDbModel {
 
   /**
    * Finds referenced entity ids
-   * @param conn Connection
+   * @param conn Conn
    * @param ids string[]
    * @returns Promise<Record<EntityEnums.Class, string[]>>
    */
   async findReferencedEntityIds(
-    conn: Connection,
+    conn: Conn,
     ids: string[]
   ): Promise<Record<EntityEnums.Class, string[]>> {
     const entities = await Entity.findEntitiesByIds(conn, ids);
@@ -174,13 +174,13 @@ export default class Document implements IDocument, IDbModel {
    * @param db db connection
    * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<boolean> {
+  async save(db: Conn | undefined): Promise<boolean> {
     this.createdAt = new Date();
 
-    const result = await rethink
-      .table(Document.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(db);
+    const result = await storage.documents.insert(db as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -195,41 +195,31 @@ export default class Document implements IDocument, IDbModel {
 
   /**
    * Alters the document using provided object
-   * @param db Connection
+   * @param db Conn
    * @returns updateData Partial<IDocument>
    */
   update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Partial<IDocument>
   ): Promise<WriteResult> {
     this.updatedAt = updateData.updatedAt = new Date();
     delete updateData.createdAt;
-    return rethink
-      .table(Document.table)
-      .get(this.id)
-      .update(updateData)
-      .run(db);
+    return storage.documents.update(db as Conn, this.id, updateData);
   }
 
   /**
    * Deletes the document
-   * @param db Connection
+   * @param db Conn
    * @returns boolean
    */
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on document with undefined id"
       );
     }
 
-    const result = await rethink
-      .table(Document.table)
-      .get(this.id)
-      .delete()
-      .run(db);
-
-    return result;
+    return storage.documents.delete(db, this.id);
   }
 
   /**
@@ -349,35 +339,30 @@ export default class Document implements IDocument, IDbModel {
 
   /**
    * search for single document by ids
-   * @param db Connection database connection
+   * @param db Conn database connection
    * @param documentId string id
    * @returns Promise<Document> wanted document
    */
   static async getDocumentById(
-    db: Connection,
+    db: Conn,
     documentId: string
   ): Promise<Document | null> {
-    const data = await rethink.table(Document.table).get(documentId).run(db);
+    const data = await storage.documents.get(db, documentId);
 
     return data ? new Document(data) : null;
   }
 
   /**
    * search for multiple documents by ids
-   * @param db Connection database connection
+   * @param db Conn database connection
    * @param documentIds string[] list of ids
    * @returns Promise<Document[]> list of documents
    */
   static async findDocumentsByIds(
-    db: Connection,
+    db: Conn,
     documentIds: string[]
   ): Promise<Document[]> {
-    // r.args spreads the list into getAll's key arguments - a bare array is
-    // read as one key and matches nothing
-    const entries = await rethink
-      .table(Document.table)
-      .getAll(rethink.args(documentIds))
-      .run(db);
+    const entries = await storage.documents.getMany(db, documentIds);
 
     return entries && entries.length ? entries.map((d) => new Document(d)) : [];
   }
@@ -389,31 +374,15 @@ export default class Document implements IDocument, IDbModel {
    * @returns
    */
   static async findByEntityId(
-    db: Connection,
+    db: Conn,
     entityId: string
   ): Promise<IDocumentMeta[]> {
     // No caller needs the (potentially large) content blob - consumers want
     // the document meta + anchors or just the ids - so content is dropped
-    // from the read (return type IDocumentMeta enforces that).
-    //
-    // The documents.entityIds multi-index flattens both the legacy string[]
-    // and the canonical Record<Class, string[]> shapes, so getAll touches
-    // only the matching documents instead of scanning the whole table. The
-    // index is a required boot dependency (see assertRequiredIndexes).
-    const entries = await rethink
-      .table(Document.table)
-      .getAll(entityId, { index: DbEnums.Indexes.DocumentEntityIds })
-      .without("content")
-      // getAll on a multi-index yields one row per matching index key, so a
-      // document that lists the same id more than once (a legacy flat array
-      // with duplicates, or an id bucketed under multiple classes) would come
-      // back multiple times. distinct() restores the single-occurrence
-      // semantics of the previous contains() filter (same approach as
-      // Relation.findForEntities).
-      .distinct()
-      .run(db);
-
-    return entries && entries.length ? (entries as IDocumentMeta[]) : [];
+    // from the read (return type IDocumentMeta enforces that). The lookup is
+    // index-backed; the index is a required boot dependency (see
+    // storage.assertRequiredIndexes).
+    return storage.documents.byEntityId(db, entityId);
   }
 
   /**
@@ -425,20 +394,13 @@ export default class Document implements IDocument, IDbModel {
    * @returns
    */
   static async findByEntityIds(
-    db: Connection,
+    db: Conn,
     entityIds: string[]
   ): Promise<IDocumentMeta[]> {
     if (!entityIds.length) {
       return [];
     }
-    const entries = await rethink
-      .table(Document.table)
-      .getAll(rethink.args(entityIds), { index: DbEnums.Indexes.DocumentEntityIds })
-      .without("content")
-      .distinct()
-      .run(db);
-
-    return entries && entries.length ? (entries as IDocumentMeta[]) : [];
+    return storage.documents.byEntityIds(db, entityIds);
   }
 
   /**
@@ -451,7 +413,7 @@ export default class Document implements IDocument, IDbModel {
    * @returns map of entity id -> anchor contents (in document order)
    */
   static async getAnchorTextsForEntities(
-    db: Connection,
+    db: Conn,
     entityIds: string[]
   ): Promise<Record<string, string[]>> {
     const out: Record<string, string[]> = {};
@@ -482,18 +444,15 @@ export default class Document implements IDocument, IDbModel {
 
   /**
    * Retrieves all documents
-   * @param db Connection database connection
+   * @param db Conn database connection
    * @returns Promise<IDocument[]> list of documents
    */
-  static async getAll(db: Connection): Promise<IDocument[]> {
-    const entries = await rethink
-      .table(Document.table)
-      .orderBy(rethink.asc("createdAt"))
-      .run(db);
+  static async getAll(db: Conn): Promise<IDocument[]> {
+    const entries = await storage.documents.allByCreatedAt(db);
     return entries && entries.length ? entries : [];
   }
 
-  static async backfillEntityIds(conn: Connection): Promise<number> {
+  static async backfillEntityIds(conn: Conn): Promise<number> {
     const docs = await Document.getAll(conn);
     let count = 0;
     for (const raw of docs) {
