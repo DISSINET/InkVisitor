@@ -16,15 +16,15 @@ describe("modules/audits GET", function () {
   });
 
   const db = new Db();
-  const firstAudit1980 = new Audit({ date: new Date("1980") });
-  const secondAudit1990 = new Audit({ date: new Date("1990") });
-  const secondAudit2000 = new Audit({ date: new Date("2000") });
+  const firstAudit1980 = new Audit({ user: "1", date: new Date("1980") });
+  const secondAudit1990 = new Audit({ user: "1", date: new Date("1990") });
+  const secondAudit2000 = new Audit({ user: "1", date: new Date("2000") });
 
   beforeAll(async () => {
     await db.initDb();
-    firstAudit1980.save(db.connection);
-    secondAudit1990.save(db.connection);
-    secondAudit2000.save(db.connection);
+    await firstAudit1980.save(db.connection);
+    await secondAudit1990.save(db.connection);
+    await secondAudit2000.save(db.connection);
   });
 
   afterAll(async () => {

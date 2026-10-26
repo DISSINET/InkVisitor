@@ -2,7 +2,7 @@ import { Client } from "pg";
 import colors from "colors/safe";
 import { getEnv, TableSchema } from "../common";
 import { InsertResult, SeedTarget } from "../target";
-import { provision } from "@service/storage/postgres/provision";
+import { addForeignKeys, provision } from "@service/storage/postgres/provision";
 
 /** a quoted SQL identifier */
 export const ident = (name: string): string => `"${name.replace(/"/g, '""')}"`;
@@ -98,8 +98,18 @@ export class PostgresTarget implements SeedTarget {
   }
 
   async createTables(): Promise<void> {
-    await provision(await this.client());
+    await provision(await this.client(), false);
     console.log(colors.green(`Tables and indexes created (postgres)`));
+  }
+
+  /**
+   * Added after the load rather than deferred in one transaction: feed.ts
+   * retries a refused batch row by row, which needs every batch committed on
+   * its own.
+   */
+  async addConstraints(): Promise<void> {
+    await addForeignKeys(await this.client());
+    console.log(colors.green(`Foreign keys added (postgres)`));
   }
 
   /**

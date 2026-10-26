@@ -25,6 +25,9 @@ afterAll(async () => {
   await closeTestDb(conn);
 });
 
+const insertUsers = (...userIds: string[]) =>
+  storage.users.insert(conn, userIds.map((id) => ({ id, name: id, email: `${id}@x` })));
+
 const ids = (rows: { id: string }[]) => rows.map((r) => r.id).sort();
 
 describe("connection", () => {
@@ -299,9 +302,9 @@ describe("dates", () => {
   it("come back as Date objects on every listed field", async () => {
     // ids prefixed dt- so they never collide with the fixtures of the other blocks
     const date = new Date("2024-03-02T10:20:30.123Z");
-    await storage.audits.insert(conn, { id: "dt-a1", auditScope: "entity", modelId: "m", user: "u", date, changes: {}, type: "edit" });
+    await storage.audits.insert(conn, { id: "dt-a1", auditScope: "entity", modelId: "m", user: "1", date, changes: {}, type: "edit" });
     await storage.documents.insert(conn, { id: "dt-d1", title: "t", content: "", createdAt: date, updatedAt: date });
-    await storage.savedQueries.insert(conn, { id: "dt-q1", name: "n", ownerId: "u", shared: false, data: {}, createdAt: date });
+    await storage.savedQueries.insert(conn, { id: "dt-q1", name: "n", ownerId: "1", shared: false, data: {}, createdAt: date });
     await storage.users.insert(conn, { id: "dt-u1", name: "x", email: "x@x", deletedAt: date });
     await storage.stats("day").insert(conn, { id: "dt-st1", date: "2024-03-02", lastUpdated: date });
     try {
@@ -312,17 +315,20 @@ describe("dates", () => {
       expect((await storage.stats("day").get(conn, "dt-st1"))?.lastUpdated).toEqual(date);
     } finally {
       await storage.stats("day").delete(conn, "dt-st1");
+      await storage.audits.delete(conn, "dt-a1");
+      await storage.savedQueries.delete(conn, "dt-q1");
     }
   });
 
   it("stores a Date carried by an update patch", async () => {
     const created = new Date("2024-03-02T00:00:00.000Z");
     const updated = new Date("2024-03-03T00:00:00.000Z");
-    await storage.savedQueries.insert(conn, { id: "dt-q2", name: "n", ownerId: "u", shared: false, data: {}, createdAt: created });
+    await storage.savedQueries.insert(conn, { id: "dt-q2", name: "n", ownerId: "1", shared: false, data: {}, createdAt: created });
     await storage.savedQueries.update(conn, "dt-q2", { updatedAt: updated });
     const row = await storage.savedQueries.get(conn, "dt-q2");
     expect(row?.createdAt).toEqual(created);
     expect(row?.updatedAt).toEqual(updated);
+    await storage.savedQueries.delete(conn, "dt-q2");
   });
 });
 
@@ -421,6 +427,7 @@ describe("acl", () => {
 describe("saved queries", () => {
   beforeAll(async () => {
     await storage.savedQueries.deleteAll(conn);
+    await insertUsers("u1", "u2");
     await storage.savedQueries.insert(conn, [
       { id: "q-s1", name: "Alpha", ownerId: "u1", shared: true, data: {}, createdAt: new Date("2024-01-01T00:00:00Z") },
       { id: "q-p1", name: "alpha", ownerId: "u1", shared: false, data: {}, createdAt: new Date("2024-01-03T00:00:00Z") },
@@ -429,6 +436,7 @@ describe("saved queries", () => {
   });
   afterAll(async () => {
     await storage.savedQueries.deleteAll(conn);
+    await storage.users.deleteMany(conn, ["u1", "u2"]);
   });
 
   it("idsWithName ignores case within the shared or the owner's private folder", async () => {
@@ -680,6 +688,7 @@ describe("audits", () => {
   });
   beforeAll(async () => {
     await storage.audits.deleteAll(conn);
+    await insertUsers("u1", "u2");
     await storage.audits.insert(conn, [
       audit("au-1", "2024-02-28T10:00:00Z", { type: "create" }),
       audit("au-2", "2024-03-01T23:59:59Z"),
@@ -689,6 +698,10 @@ describe("audits", () => {
       audit("au-6", "2024-03-06T12:00:00Z", { auditScope: "relation", modelId: "r1", type: "relation_create", changes: { entityIds: ["m1", "m2"] } }),
       audit("au-7", "2025-01-01T00:00:00Z", { auditScope: "relation", modelId: "r2", type: "relation_edit", changes: { entityIds: ["m2"] } }),
     ]);
+  });
+  afterAll(async () => {
+    await storage.audits.deleteAll(conn);
+    await storage.users.deleteMany(conn, ["u1", "u2"]);
   });
 
   it("firstFor, lastFor, lastNFor by scope and model, ordered by date", async () => {

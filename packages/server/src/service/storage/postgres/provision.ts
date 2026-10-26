@@ -25,13 +25,15 @@ export function pgIndexName(table: string, index: string): string {
 
 /**
  * what a generated column holds: the text of the field at a document path
- * (dot-separated for a nested field), the text[] of the string array at `ids`
+ * (dot-separated for a nested field), the same text at `ref` with "" stored
+ * as NULL (an unset reference, which a foreign key skips), the text[] of the
+ * string array at `ids`
  * in document order (an empty array when the field is not an array), or the
  * text[] the IMMUTABLE key function `fn(doc jsonb)` with the SQL `body`
  * returns. A key function exists before its table, and schema.ts drops it
  * together with the columns computed from it when the body changes.
  */
-export type ColumnSpec = string | { ids: string } | KeyFunction;
+export type ColumnSpec = string | { ref: string } | { ids: string } | KeyFunction;
 
 /** an IMMUTABLE SQL function `fn(doc jsonb) returns text[]` with the body `body` */
 type KeyFunction = { fn: string; body: string };
@@ -96,8 +98,8 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     language: "language",
     is_template: "isTemplate",
     used_template: "usedTemplate",
-    territory_id: "data.territory.territoryId",
-    parent_id: "data.parent.territoryId",
+    territory_id: { ref: "data.territory.territoryId" },
+    parent_id: { ref: "data.parent.territoryId" },
     document_id: "data.documentId",
     created_at: "createdAt",
     updated_at: "updatedAt",
@@ -176,9 +178,15 @@ const pathExpr = (path: string, text: boolean): string => {
 
 /** the SQL expression a generated column is computed from */
 export const columnExpr = (spec: ColumnSpec): string =>
-  typeof spec === "string" ? pathExpr(spec, true) : "fn" in spec ? `${spec.fn}(doc)` : `jsonb_text_array(${pathExpr(spec.ids, false)})`;
+  typeof spec === "string"
+    ? pathExpr(spec, true)
+    : "ref" in spec
+    ? `NULLIF(${pathExpr(spec.ref, true)}, '')`
+    : "fn" in spec
+    ? `${spec.fn}(doc)`
+    : `jsonb_text_array(${pathExpr(spec.ids, false)})`;
 
-export const columnType = (spec: ColumnSpec): string => (typeof spec === "string" ? "text" : "text[]");
+export const columnType = (spec: ColumnSpec): string => (typeof spec === "string" || "ref" in spec ? "text" : "text[]");
 
 /** a generated column as a SQL identifier: `user` is a reserved word, the others are plain */
 export const col = (name: string): string => (name === "user" ? `"user"` : name);
@@ -257,6 +265,55 @@ export const EXTRA_INDEXES: { table: string; name: string; expression: string }[
   { table: "saved_queries", name: "saved_queries_owner", expression: "owner_id" },
   { table: "acl_permissions", name: "acl_permissions_route", expression: "controller, method, route" },
 ];
+
+/**
+ * Foreign keys over generated columns, each referencing the `id` of a table.
+ * PostgreSQL takes only NO ACTION or RESTRICT on a generated column. Every
+ * referenced row is guarded by the models (a territory with children or
+ * statements is not deleted, users are soft-deleted), so RESTRICT only backs
+ * that up. A loader that inserts rows in an arbitrary order provisions with
+ * ddl(false) and adds these after the load.
+ */
+export const FOREIGN_KEYS: { table: string; name: string; column: string; references: string }[] = [
+  { table: "entities", name: "entities_territory_id_fkey", column: "territory_id", references: "entities" },
+  { table: "entities", name: "entities_parent_id_fkey", column: "parent_id", references: "entities" },
+  { table: "audits", name: "audits_user_fkey", column: "user", references: "users" },
+  { table: "saved_queries", name: "saved_queries_owner_id_fkey", column: "owner_id", references: "users" },
+];
+
+export type ForeignKey = (typeof FOREIGN_KEYS)[number];
+
+/** the constraint definition, exactly as pg_get_constraintdef prints it back */
+export const foreignKeyDef = (fk: ForeignKey): string =>
+  `FOREIGN KEY (${col(fk.column)}) REFERENCES ${fk.references}(id) ON DELETE RESTRICT`;
+
+export const foreignKeyDdl = (fk: ForeignKey): string => `ALTER TABLE ${fk.table} ADD CONSTRAINT ${fk.name} ${foreignKeyDef(fk)}`;
+
+/** the id of one row of `fk.table` whose reference has no row, with the missing id; null when there is none */
+export const danglingSql = (fk: ForeignKey): string =>
+  `SELECT c.id, c.${col(fk.column)} AS missing FROM ${fk.table} c ` +
+  `WHERE c.${col(fk.column)} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${fk.references} r WHERE r.id = c.${col(fk.column)}) LIMIT 1`;
+
+/**
+ * Adds the foreign keys, failing on the first one with a dangling row, named
+ * with one offending row so the data can be fixed by hand.
+ */
+export async function addForeignKeys(client: { query(sql: string): Promise<{ rows: any[] }> }, fks = FOREIGN_KEYS): Promise<string[]> {
+  const executed: string[] = [];
+  for (const fk of fks) {
+    const { rows } = await client.query(danglingSql(fk));
+    if (rows.length) {
+      throw new Error(
+        `cannot add the foreign key ${fk.name}: ${fk.table} row ${rows[0].id} has ${fk.column} = ${rows[0].missing}, ` +
+          `which is not an id in ${fk.references}. Fix or delete the dangling rows first.`
+      );
+    }
+    const statement = foreignKeyDdl(fk);
+    await client.query(statement);
+    executed.push(statement);
+  }
+  return executed;
+}
 
 /** the column definition of one generated column, as CREATE TABLE and ADD COLUMN take it */
 export const columnClause = (name: string, spec: ColumnSpec): string =>
@@ -354,9 +411,10 @@ END $$`,
 
 /**
  * Every statement that turns an empty database into the full schema, in order,
- * on the assumption that nothing is there yet.
+ * on the assumption that nothing is there yet; without the foreign keys when
+ * `foreignKeys` is false.
  */
-export function ddl(): string[] {
+export function ddl(foreignKeys = true): string[] {
   const statements: string[] = [MERGE_FUNCTION_DDL, TEXT_ARRAY_FUNCTION_DDL];
   for (const [table, indexes] of Object.entries(TABLES)) {
     statements.push(...keyFunctions(table).map(keyFunctionDdl));
@@ -374,13 +432,17 @@ export function ddl(): string[] {
   for (const extra of EXTRA_INDEXES) {
     statements.push(`CREATE INDEX ${extra.name} ON ${extra.table} (${extra.expression})`);
   }
+  if (foreignKeys) statements.push(...FOREIGN_KEYS.map(foreignKeyDdl));
   return statements;
 }
 
-export async function provision(client: {
-  query(sql: string): Promise<unknown>;
-}): Promise<void> {
-  for (const statement of ddl()) {
+export async function provision(
+  client: {
+    query(sql: string): Promise<unknown>;
+  },
+  foreignKeys = true
+): Promise<void> {
+  for (const statement of ddl(foreignKeys)) {
     await client.query(statement);
   }
 }

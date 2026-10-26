@@ -12,7 +12,7 @@ describe("Audit.createDeletionAudit", function () {
   describe("entity scope", () => {
     const db = new Db();
     const entityId = `entity-${Math.random().toString()}`;
-    const userId = `user-${Math.random().toString()}`;
+    const userId = "1";
 
     beforeAll(async () => {
       await db.initDb();
@@ -40,7 +40,7 @@ describe("Audit.createDeletionAudit", function () {
   describe("entity scope with snapshot", () => {
     const db = new Db();
     const entityId = `entity-${Math.random().toString()}`;
-    const userId = `user-${Math.random().toString()}`;
+    const userId = "1";
     const snapshot = { id: entityId, class: "P", labels: ["snapshot"] };
 
     beforeAll(async () => {
@@ -68,7 +68,7 @@ describe("Audit.createDeletionAudit", function () {
   describe("document scope", () => {
     const db = new Db();
     const documentId = `document-${Math.random().toString()}`;
-    const userId = `user-${Math.random().toString()}`;
+    const userId = "1";
 
     beforeAll(async () => {
       await db.initDb();

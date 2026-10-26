@@ -1,10 +1,26 @@
 import { Conn } from "../types";
 import { query } from "./conn";
-import { COLUMNS, ColumnSpec, EXTRA_INDEXES, TABLES, TEXT_ARRAY_FUNCTION_DDL, col, columnClause, keyFunctionDdl, keyFunctions, pgIndexName } from "./provision";
+import {
+  COLUMNS,
+  ColumnSpec,
+  EXTRA_INDEXES,
+  FOREIGN_KEYS,
+  ForeignKey,
+  TABLES,
+  TEXT_ARRAY_FUNCTION_DDL,
+  addForeignKeys,
+  col,
+  columnClause,
+  foreignKeyDef,
+  keyFunctionDdl,
+  keyFunctions,
+  pgIndexName,
+} from "./provision";
 
 /**
  * Brings a live database to the key functions and generated columns of
- * COLUMNS and the indexes over them, so a database provisioned by an older
+ * COLUMNS, the indexes over them and the FOREIGN_KEYS over those columns, so
+ * a database provisioned by an older
  * ddl() is upgraded in place at server start. Returns the DDL it executed,
  * empty when the database already matches.
  *
@@ -45,6 +61,15 @@ export async function syncSchema(conn: Conn): Promise<string[]> {
         await run(statement);
       }
     }
+    // after every table: a recreated column has lost the foreign key over it
+    const { drops, missing } = await foreignKeyChanges(conn);
+    for (const statement of drops) {
+      await run(statement);
+    }
+    if (missing.length) {
+      console.log("[startup] schema: adding foreign keys " + missing.map((fk) => fk.name).join(", "));
+      executed.push(...(await addForeignKeys({ query: (sql) => query(conn, sql) }, missing)));
+    }
     if (!executed.length) {
       console.log("[startup] schema in sync");
     }
@@ -52,6 +77,30 @@ export async function syncSchema(conn: Conn): Promise<string[]> {
   } finally {
     await query(conn, "SELECT pg_advisory_unlock($1)", [SCHEMA_LOCK_KEY]);
   }
+}
+
+/**
+ * The declared foreign keys that are missing, and DROP CONSTRAINT for those
+ * whose live definition differs (including one left NOT VALID), which then
+ * count as missing too.
+ */
+async function foreignKeyChanges(conn: Conn): Promise<{ drops: string[]; missing: ForeignKey[] }> {
+  const { rows } = await query<{ name: string; tablename: string; def: string }>(
+    conn,
+    `SELECT conname AS name, conrelid::regclass::text AS tablename, pg_get_constraintdef(oid) AS def
+     FROM pg_constraint WHERE connamespace = 'public'::regnamespace AND conname = ANY($1)`,
+    [FOREIGN_KEYS.map((fk) => fk.name)]
+  );
+  const live = new Map(rows.map((row) => [row.name, row]));
+  const drops: string[] = [];
+  const missing: ForeignKey[] = [];
+  for (const fk of FOREIGN_KEYS) {
+    const current = live.get(fk.name);
+    if (current?.tablename === fk.table && current.def === foreignKeyDef(fk)) continue;
+    if (current) drops.push(`ALTER TABLE ${current.tablename} DROP CONSTRAINT ${fk.name}`);
+    missing.push(fk);
+  }
+  return { drops, missing };
 }
 
 /** any constant no other code in the database takes an advisory lock on */
@@ -62,10 +111,12 @@ const SCHEMA_LOCK_KEY = 33340001;
  * columnExpr(spec): PostgreSQL stores the expression deparsed, with every
  * operator parenthesised and every key cast, e.g. `a.b` becomes
  * `((doc -> 'a'::text) ->> 'b'::text)` and `{ ids: "a" }` becomes
- * `jsonb_text_array((doc -> 'a'::text))`; a key function call stays `fn(doc)`
+ * `jsonb_text_array((doc -> 'a'::text))`; `{ ref: "a" }` becomes
+ * `NULLIF((doc ->> 'a'::text), ''::text)`; a key function call stays `fn(doc)`
  */
 export function deparsed(spec: ColumnSpec): string {
   if (typeof spec !== "string" && "fn" in spec) return `${spec.fn}(doc)`;
+  if (typeof spec !== "string" && "ref" in spec) return `NULLIF(${deparsed(spec.ref)}, ''::text)`;
   const parts = (typeof spec === "string" ? spec : spec.ids).split(".");
   const last = parts.pop();
   const object = parts.reduce((acc, part) => `(${acc} -> '${part}'::text)`, "doc");

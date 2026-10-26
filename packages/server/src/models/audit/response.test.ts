@@ -9,6 +9,7 @@ function prepareAudit(forEntityId: string, date: Date): [string, Audit] {
   const id = Math.random().toFixed();
   const a = new Audit({
     modelId: forEntityId,
+    user: "1",
     auditScope: AuditScope.Entity,
     date: date,
   });

@@ -16,8 +16,10 @@ Three kinds of generated column:
   computed by an IMMUTABLE key function of the same name as the index
   (`entities_props_recursive(doc)` and so on)
 
-There are no foreign keys. The dotted lines below are references the
-application resolves by id; nothing in the database enforces them.
+The solid lines below are foreign keys (`FOREIGN_KEYS` in provision.ts, ON
+DELETE RESTRICT); an empty `territoryId` is stored as NULL, so it references
+nothing. The dotted lines are references the application resolves by id;
+nothing in the database enforces them.
 
 ```mermaid
 erDiagram
@@ -29,8 +31,8 @@ erDiagram
     text language "doc.language"
     text is_template "doc.isTemplate"
     text used_template FK "doc.usedTemplate, idx"
-    text territory_id FK "doc.data.territory.territoryId (statements), idx"
-    text parent_id FK "doc.data.parent.territoryId (territories), idx"
+    text territory_id FK "doc.data.territory.territoryId, '' as NULL (statements), idx"
+    text parent_id FK "doc.data.parent.territoryId, '' as NULL (territories), idx"
     text document_id FK "doc.data.documentId (resources), idx"
     text created_at "doc.createdAt"
     text updated_at "doc.updatedAt"
@@ -137,16 +139,16 @@ erDiagram
     text last_updated "doc.lastUpdated, idx"
   }
 
-  entities }o..o| entities : "territory_id (statement in territory)"
-  entities }o..o| entities : "parent_id (territory parent)"
+  entities }o--o| entities : "territory_id (statement in territory)"
+  entities }o--o| entities : "parent_id (territory parent)"
   entities }o..o| entities : "used_template"
   entities }o..o{ entities : "key arrays (statement, prop, reference ids)"
   entities }o..o| documents : "document_id (resource)"
   relations }o..|{ entities : "entity_ids"
   audits }o..o| entities : "model_id when audit_scope = entity"
   audits }o..o| relations : "model_id when audit_scope = relation"
-  audits }o..o| users : "user"
-  saved_queries }o..|| users : "owner_id"
+  audits }o--o| users : "user"
+  saved_queries }o--|| users : "owner_id"
   sessions }o..o| users : "user_id"
   documents }o..o{ entities : "entity_ids (anchors)"
   users }o..o{ entities : "doc.rights territories, doc.bookmarks"

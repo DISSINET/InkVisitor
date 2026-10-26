@@ -5,8 +5,12 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { getAuthenticatedAgent } from "@modules/testAuth";
-import Statement, { StatementTerritory } from "@models/statement/statement";
-import { findEntityById } from "@service/shorthands";
+import Statement, {
+  StatementAction,
+  StatementTerritory,
+} from "@models/statement/statement";
+import Territory from "@models/territory/territory";
+import { createEntity, findEntityById } from "@service/shorthands";
 import { Db } from "@service/storage";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
@@ -48,8 +52,13 @@ describe("Entities clone", function () {
     });
 
     it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
-      const entity = new Statement({}); // invalid - empty territory
-      entity.data.territory = new StatementTerritory({ territoryId: "" });
+      const territory = new Territory({ id: `root-${Math.random()}` });
+      await createEntity(db, territory);
+      const entity = new Statement({}); // invalid - action without id
+      entity.data.territory = new StatementTerritory({
+        territoryId: territory.id,
+      });
+      entity.data.actions = [new StatementAction({ actionId: "any" })];
       const saved = await entity.save(db.connection); // should be saved without isValid test
       expect(saved).toBeTruthy();
 

@@ -122,6 +122,14 @@ async function main(): Promise<void> {
       }
     }
 
+    // last, so a dangling row is reported next to the import counts and the diff that explain it
+    try {
+      await postgres.addConstraints();
+    } catch (e) {
+      console.log(colors.red(e instanceof Error ? e.message : String(e)));
+      process.exitCode = 1;
+    }
+
     const line = `migrated ${dbName} -> ${pgName} (postgres) through datasets/${out} in ${seconds(started)} s`;
     console.log(process.exitCode ? colors.red(line) : colors.green(line));
   } finally {

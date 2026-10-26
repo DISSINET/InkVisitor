@@ -1,5 +1,5 @@
 import { TABLES as RETHINK } from "./rethink/provision";
-import { EXTRA_INDEXES, TABLES as PG, ddl } from "./postgres/provision";
+import { EXTRA_INDEXES, FOREIGN_KEYS, TABLES as PG, ddl, foreignKeyDdl } from "./postgres/provision";
 import { REQUIRED } from "./requiredIndexes";
 
 /**
@@ -34,8 +34,13 @@ describe("storage catalogues", () => {
     }
   });
 
+  it("add the foreign keys last, so a loader can leave them out", () => {
+    expect(ddl().slice(-FOREIGN_KEYS.length)).toEqual(FOREIGN_KEYS.map(foreignKeyDdl));
+    expect(ddl(false)).toEqual(ddl().slice(0, -FOREIGN_KEYS.length));
+  });
+
   it("create the postgres-only indexes last, on catalogue tables, under names the catalogue does not use", () => {
-    const statements = ddl();
+    const statements = ddl(false);
     expect(statements.slice(-EXTRA_INDEXES.length)).toEqual(
       EXTRA_INDEXES.map((i) => `CREATE INDEX ${i.name} ON ${i.table} (${i.expression})`)
     );

@@ -1,7 +1,7 @@
 import { Conn, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../../test/db";
 import { query } from "./conn";
-import { columnClause, COLUMNS, keyFunctionDdl, keyFunctions, SESSIONS_DDL } from "./provision";
+import { columnClause, COLUMNS, FOREIGN_KEYS, foreignKeyDdl, keyFunctionDdl, keyFunctions, SESSIONS_DDL } from "./provision";
 import { deparsed, syncSchema } from "./schema";
 
 /**
@@ -39,6 +39,9 @@ describePg("syncSchema", () => {
     expect(deparsed("date")).toBe("(doc ->> 'date'::text)");
     expect(deparsed("data.territory.territoryId")).toBe(
       "(((doc -> 'data'::text) -> 'territory'::text) ->> 'territoryId'::text)"
+    );
+    expect(deparsed({ ref: "data.territory.territoryId" })).toBe(
+      "NULLIF((((doc -> 'data'::text) -> 'territory'::text) ->> 'territoryId'::text), ''::text)"
     );
     expect(deparsed({ ids: "entityIds" })).toBe("jsonb_text_array((doc -> 'entityIds'::text))");
     expect(deparsed({ ids: "changes.entityIds" })).toBe("jsonb_text_array(((doc -> 'changes'::text) -> 'entityIds'::text))");
@@ -97,6 +100,8 @@ describePg("syncSchema", () => {
       `CREATE INDEX audits_date_type_user ON audits (date, type, "user")`,
       "CREATE INDEX audits_scope_model_date ON audits (audit_scope, model_id, date)",
       `CREATE INDEX audits_type_user ON audits (type, "user")`,
+      // dropping the column took the foreign key over it
+      `ALTER TABLE audits ADD CONSTRAINT audits_user_fkey FOREIGN KEY ("user") REFERENCES users(id) ON DELETE RESTRICT`,
     ]);
     expect(await indexdef("audits_date_type_user")).toBe(
       `CREATE INDEX audits_date_type_user ON public.audits USING btree (date, type, "user")`
@@ -228,6 +233,47 @@ describePg("syncSchema", () => {
       "CREATE INDEX documents_entityids ON documents USING gin (entity_ids)",
     ]);
     expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  const fk = (name: string) => FOREIGN_KEYS.find((key) => key.name === name)!;
+
+  it("restores a dropped foreign key", async () => {
+    await exec("ALTER TABLE saved_queries DROP CONSTRAINT saved_queries_owner_id_fkey");
+    expect(await syncSchema(conn)).toEqual([foreignKeyDdl(fk("saved_queries_owner_id_fkey"))]);
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("replaces a foreign key declared with another action", async () => {
+    await exec("ALTER TABLE entities DROP CONSTRAINT entities_parent_id_fkey");
+    await exec("ALTER TABLE entities ADD CONSTRAINT entities_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES entities(id)");
+    expect(await syncSchema(conn)).toEqual([
+      "ALTER TABLE entities DROP CONSTRAINT entities_parent_id_fkey",
+      foreignKeyDdl(fk("entities_parent_id_fkey")),
+    ]);
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("fails on a dangling row, naming the foreign key and the row", async () => {
+    await exec("ALTER TABLE entities DROP CONSTRAINT entities_parent_id_fkey");
+    await exec(`INSERT INTO entities (doc) VALUES ('{"id": "schema-test-orphan", "data": {"parent": {"territoryId": "schema-test-missing"}}}')`);
+    try {
+      await expect(syncSchema(conn)).rejects.toThrow(
+        "entities_parent_id_fkey: entities row schema-test-orphan has parent_id = schema-test-missing"
+      );
+    } finally {
+      await exec("DELETE FROM entities WHERE id = 'schema-test-orphan'");
+    }
+    expect(await syncSchema(conn)).toEqual([foreignKeyDdl(fk("entities_parent_id_fkey"))]);
+  });
+
+  it("stores an empty territory id as no reference", async () => {
+    await exec(`INSERT INTO entities (doc) VALUES ('{"id": "schema-test-empty", "data": {"territory": {"territoryId": ""}, "parent": {"territoryId": ""}}}')`);
+    try {
+      const { rows } = await query(conn, "SELECT territory_id, parent_id FROM entities WHERE id = 'schema-test-empty'");
+      expect(rows).toEqual([{ territory_id: null, parent_id: null }]);
+    } finally {
+      await exec("DELETE FROM entities WHERE id = 'schema-test-empty'");
+    }
   });
 
   it("refuses to touch an ordinary column under a declared name", async () => {
