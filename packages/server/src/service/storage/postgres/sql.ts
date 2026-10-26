@@ -11,6 +11,7 @@ export const ident = (name: string): string => `"${name.replace(/"/g, '""')}"`;
  * from every string value before serializing.
  */
 export function encode(value: unknown): string {
+  // oxlint-disable-next-line no-control-regex
   return JSON.stringify(value, (_key, v) => (typeof v === "string" ? v.replace(/\u0000/g, "") : v));
 }
 

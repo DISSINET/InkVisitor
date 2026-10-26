@@ -55,7 +55,7 @@ describe("against the engine through the API", () => {
     const { engineFeedback, engineHealth } = await load();
     await engineFeedback({ query: { name: "Breslau" }, chosen: null, suggestions: [] });
     const post = vi.mocked(fetch).mock.calls[0][1];
-    expect((post?.headers as Record<string, string>)["X-InkVisitor-Client"]).toBe("1");
+    expect(post?.headers).toHaveProperty("X-InkVisitor-Client", "1");
     expect(post?.credentials).toBe("include");
     await engineHealth();
     const get = vi.mocked(fetch).mock.calls[1][1];
