@@ -44,8 +44,6 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
       await api.entityUpdate(statementId, changes);
     },
     onSuccess: (data, variables) => {
-      console.log(data);
-      console.log(variables);
       // if (selectedDetailId === statementId ) {
       queryClient.invalidateQueries({ queryKey: ["entity"] });
       // }
@@ -400,9 +398,7 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
       <Loader
         show={
           isVisible &&
-          (isFetchingStatement ||
-            updateStatementMutation.isPending ||
-            (isExpanded && !showEditor))
+          (isFetchingStatement || updateStatementMutation.isPending || (isExpanded && !showEditor))
         }
       />
     </>

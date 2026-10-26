@@ -6,10 +6,16 @@ import {
   IStatementData,
 } from "@inkvisitor/shared/types";
 import update from "immutability-helper";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { FilteredActantObject } from "types";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 import { StyledEditorActantTableWrapper } from "./StatementEditorActantTableStyles";
+
+const toFilteredActants = (statement: IResponseStatement): FilteredActantObject[] =>
+  statement.data.actants.map((sActant, key) => {
+    const actant = statement.entities[sActant.entityId];
+    return { id: key, data: { actant, sActant } };
+  });
 
 interface StatementEditorActantTable {
   statement: IResponseStatement;
@@ -44,19 +50,16 @@ export const StatementEditorActantTable: React.FC<
 
   handleDataAttributeChange,
 }) => {
-  const [filteredActants, setFilteredActants] = useState<
-    FilteredActantObject[]
-  >([]);
-
-  useMemo(() => {
-    const filteredActants: FilteredActantObject[] = statement.data.actants.map(
-      (sActant, key) => {
-        const actant = statement.entities[sActant.entityId];
-        return { id: key, data: { actant, sActant } };
-      }
-    );
-    setFilteredActants(filteredActants);
-  }, [statement]);
+  // local copy of the actants so drag-reordering can update rows before the
+  // order is saved; rebuilt whenever a new statement object arrives
+  const [filteredActants, setFilteredActants] = useState<FilteredActantObject[]>(() =>
+    toFilteredActants(statement)
+  );
+  const [actantsSource, setActantsSource] = useState(statement);
+  if (actantsSource !== statement) {
+    setActantsSource(statement);
+    setFilteredActants(toFilteredActants(statement));
+  }
 
   const updateActantsOrder = () => {
     if (userCanEdit) {

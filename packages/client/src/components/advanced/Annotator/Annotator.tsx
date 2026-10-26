@@ -186,7 +186,7 @@ export const TextAnnotator = ({
   documentId = undefined,
   thisTerritoryEntityId = undefined,
 
-  forwardAnnotator = (undefined) => {},
+  forwardAnnotator = () => {},
   storedAnnotatorScrollPosition = null,
   setStoredAnnotatorScrollPosition,
 

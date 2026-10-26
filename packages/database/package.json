@@ -18,7 +18,8 @@
     "storage:diff": "npx ts-node -r ./scripts/register-paths.ts scripts/storage-diff/run.ts",
     "seed:check": "npx ts-node -r ./scripts/register-paths.ts scripts/seed-check.ts",
     "migrate": "npx ts-node -r ./scripts/register-paths.ts scripts/migrate/run.ts",
-    "test": "node -r ts-node/register -r ./scripts/register-paths.ts --test 'scripts/**/*.test.ts'"
+    "test": "node -r ts-node/register -r ./scripts/register-paths.ts --test 'scripts/**/*.test.ts'",
+    "lint": "oxlint"
   },
   "author": "",
   "license": "ISC",

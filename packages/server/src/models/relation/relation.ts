@@ -177,7 +177,7 @@ export default class Relation implements IRelationModel {
       return null;
     }
 
-    for (const pattern of rules?.allowedEntitiesPattern) {
+    for (const pattern of rules.allowedEntitiesPattern) {
       if (!rules.cloudType && pattern.length !== this.entityIds.length) {
         return new ModelNotValidError(
           `Pattern requires '${pattern.length}' entities`
