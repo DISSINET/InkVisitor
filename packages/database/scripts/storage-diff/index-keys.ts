@@ -118,13 +118,17 @@ export interface KeyComparison {
  * RethinkDB value tells the two apart - null is the `.default(null)` of a
  * function that raised (or a null field), an empty array is a function that
  * ran and legitimately produced no keys, and that one is a real difference.
+ *
+ * `emptyIsNull` is for an index over a reference column, which PostgreSQL
+ * stores as NULL when the id is "": RethinkDB's "" key is then no key.
  */
 export function compareKeys(
   rethinkRaw: unknown,
   pgRaw: unknown,
-  multi: boolean
+  multi: boolean,
+  emptyIsNull = false
 ): KeyComparison {
-  const rethink = normalizeKeys(rethinkRaw, multi);
+  const rethink = emptyIsNull && rethinkRaw === "" ? null : normalizeKeys(rethinkRaw, multi);
   const postgres = normalizeKeys(pgRaw, multi);
   if (firstDifference(rethink, postgres) === null) {
     return { verdict: "equal", rethink, postgres };

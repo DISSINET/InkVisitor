@@ -1,0 +1,19 @@
+[
+    {
+        "id": "0",
+        "email": "",
+        "name": "import",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    }
+]

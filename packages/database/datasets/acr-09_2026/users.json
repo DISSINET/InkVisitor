@@ -1,0 +1,240 @@
+[
+    {
+        "id": "02868c93-517e-4602-94b7-057ce1a393fd",
+        "email": "",
+        "name": "Katalin Suba",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "1",
+        "email": "",
+        "name": "admin",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "100",
+        "email": "",
+        "name": "David Zbíral",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "101",
+        "email": "",
+        "name": "Robert Shaw",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "102",
+        "email": "",
+        "name": "Davor Salihovic",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "103",
+        "email": "",
+        "name": "Katia Riccardo",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "105",
+        "email": "",
+        "name": "Reima Välimäki",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "107",
+        "email": "",
+        "name": "Larissa de Freitas Lyth",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "151",
+        "email": "",
+        "name": "Tomáš Hampejs",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "18fd8891-5824-47a7-bad4-4544bc23f370",
+        "email": "",
+        "name": "Saku Pihko",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "5a8b6aff-3dc1-40b2-9704-82b47a952d4c",
+        "email": "",
+        "name": "stanislaw.banach",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "6dc46dfb-af6f-4726-a3d9-65185ae958f9",
+        "email": "",
+        "name": "Soňa Hudíková",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "9ec0df8f-0f4e-459b-b847-7ad916caa417",
+        "email": "",
+        "name": "Jenni Kuuliala",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    },
+    {
+        "id": "bfb284c6-7180-4ae7-a5ef-e27f91121fd3",
+        "email": "",
+        "name": "Sari Katajala",
+        "role": "viewer",
+        "options": {
+            "defaultTerritory": "",
+            "defaultLanguage": "",
+            "searchLanguages": [],
+            "workingLanguages": []
+        },
+        "bookmarks": [],
+        "storedTerritories": [],
+        "rights": [],
+        "active": false,
+        "verified": false
+    }
+]

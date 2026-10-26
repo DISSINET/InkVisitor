@@ -29,6 +29,12 @@ test("only a rethinkdb key function that raised counts as lenient", () => {
   assert.equal(compareKeys(["x"], [], true).verdict, "differing");
 });
 
+test("an index over a reference column takes rethinkdb's empty id as no key", () => {
+  assert.equal(compareKeys("", null, false, true).verdict, "equal");
+  assert.equal(compareKeys("", "t1", false, true).verdict, "differing");
+  assert.equal(compareKeys("", null, false).verdict, "differing");
+});
+
 test("a comparison carries the normalized values it compared", () => {
   assert.deepEqual(compareKeys(["b", "a"], ["a"], true), {
     verdict: "differing",

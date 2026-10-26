@@ -2,7 +2,7 @@ import { r, Connection } from "rethinkdb-ts";
 import { Client } from "pg";
 import colors from "colors/safe";
 import { TABLES as RETHINK_TABLES } from "@service/storage/rethink/provision";
-import { pgIndexName, TABLES as PG_TABLES } from "@service/storage/postgres/provision";
+import { COLUMNS, pgIndexName, TABLES as PG_TABLES } from "@service/storage/postgres/provision";
 import { firstDifference, normalize } from "./deep-diff";
 import { compareKeys, normalizeKeys, pgKeys, rethinkKeys } from "./index-keys";
 import { mergeById, pgRows, rethinkRows } from "./sources";
@@ -111,6 +111,8 @@ async function diffIndexes(
     };
     // the catalogues agree on which indexes hold a set of keys, so one flag drives both sides
     const multi = rethinkIndex.multi;
+    const spec = pgIndex.kind === "btree" && pgIndex.columns.length === 1 ? COLUMNS[table][pgIndex.columns[0]] : undefined;
+    const emptyIsNull = typeof spec === "object" && "ref" in spec;
     const note = (id: string, rethink: unknown, postgres: unknown) => {
       report.differing++;
       if (report.examples.length < EXAMPLES) {
@@ -125,7 +127,7 @@ async function diffIndexes(
     };
     await mergeById(rethinkKeys(conn, table, rethinkIndex), pgKeys(client, table, pgIndex), {
       both: (a, b) => {
-        const { verdict, rethink, postgres } = compareKeys(a.keys, b.keys, multi);
+        const { verdict, rethink, postgres } = compareKeys(a.keys, b.keys, multi, emptyIsNull);
         if (verdict === "lenient") {
           noteLenient(a.id, postgres);
         } else if (verdict === "differing") {
