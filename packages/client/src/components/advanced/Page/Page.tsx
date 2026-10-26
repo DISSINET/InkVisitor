@@ -14,8 +14,8 @@ import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import theme, { ThemeColor } from "Theme/theme";
-import { getAppEnv } from "utils/appEnv";
+import { getHeaderColor } from "utils/appEnv";
+import { clearRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserId, getStoredUserRole } from "utils/userStorage";
 import { StyledPage, StyledPageContent } from "./PageStyles";
 
@@ -33,16 +33,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   const contentHeight: number = useAppSelector((state) => state.layout.contentHeight);
   const layoutWidth: number = useAppSelector((state) => state.layout.layoutWidth);
 
-  const environmentName = getAppEnv();
-
-  // Env names double as theme color keys, but an env can be deployed before its
-  // color exists. Fall back rather than resolving to an undefined background.
-  const headerColor: keyof ThemeColor =
-    environmentName === "production"
-      ? "muni"
-      : environmentName in theme.color
-        ? (environmentName as keyof ThemeColor)
-        : "black";
+  const headerColor = getHeaderColor();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,6 +71,9 @@ export const Page: React.FC<Page> = ({ children }) => {
       toast.success("You've been successfully logged out!");
 
       cleanAllParams();
+      // a deliberate logout ends at the login screen, not back where the
+      // previous session was
+      clearRedirectTarget();
 
       navigate("/login");
 

@@ -41,3 +41,20 @@ export const StyledFindReplaceButtonWrap = styled.div`
 export const StyledNoResults = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 `;
+
+/** Entity tags share a row with the suggester and wrap once they fill it. */
+export const StyledEntityMultiPickerRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+`;
+
+/** Grey note in the footer, in the slot the action button would otherwise fill. */
+export const StyledFindReplaceFooterInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color.gray["500"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;

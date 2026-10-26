@@ -34,6 +34,8 @@ interface RowCache {
   total: number;
   /** Full ordered ids for the query result (same length as total). */
   entityIds: string[];
+  /** Result-expansion counts for the whole result, replayed on cache hits. */
+  expansion?: IResponseQuery["expansion"];
 }
 
 const rowCacheStore = new Map<string, RowCache>();
@@ -124,6 +126,7 @@ export const useQueryData = ({
       entityIds: rowCache.entityIds ?? [],
       entities,
       total: rowCache.total,
+      expansion: rowCache.expansion,
     };
   };
 
@@ -132,6 +135,7 @@ export const useQueryData = ({
     entities: IResponseQueryEntity[],
     total: number,
     entityIds: string[],
+    expansion?: IResponseQuery["expansion"],
   ) => {
     const rowCache = getRowCache();
 
@@ -141,6 +145,7 @@ export const useQueryData = ({
     });
 
     rowCache.total = total;
+    rowCache.expansion = expansion;
     if (entityIds.length > 0) {
       rowCache.entityIds = entityIds;
     }
@@ -208,6 +213,7 @@ export const useQueryData = ({
           res.data.entities,
           res.data.total,
           res.data.entityIds ?? [],
+          res.data.expansion,
         );
         // console.log(
         //   `📦 Stored ${res.data.entities.length} rows [${exploreState.offset}-${

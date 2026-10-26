@@ -6,12 +6,14 @@ import {
   WIDTH_COLUMN_MAX,
   WIDTH_COLUMN_MIN,
   WIDTH_COLUMN_NARROW,
+  WIDTH_COLUMN_WIDE,
 } from "./constants";
-import { narrowColumnTypes, smallColumnTypes } from "./types";
+import { narrowColumnTypes, smallColumnTypes, wideColumnTypes } from "./types";
 
 export const getColumnWidth = (type: Explore.EExploreColumnType): number => {
   if (narrowColumnTypes.has(type)) return WIDTH_COLUMN_NARROW;
   if (smallColumnTypes.has(type)) return WIDTH_COLUMN_EUC;
+  if (wideColumnTypes.has(type)) return WIDTH_COLUMN_WIDE;
   return WIDTH_COLUMN_DEFAULT;
 };
 

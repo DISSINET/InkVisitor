@@ -4,11 +4,12 @@ import { Loader } from "components";
 import React, { FC, ReactNode } from "react";
 import { ButtonSize } from "types";
 import { ButtonDefaultsProvider } from "../Button/ButtonDefaults";
-import { ModalKeyPress } from "./ModalKeyPress";
+import { useKeyLayer } from "./layerStack";
 import {
   StyledBackground,
   StyledCard,
   StyledCardBody,
+  StyledCardBodyFrame,
   StyledCardContent,
   StyledCardHeader,
   StyledCardIcon,
@@ -21,6 +22,7 @@ import {
   StyledModalInputLabel,
   StyledModalInputWrap,
   StyledModalWrap,
+  StyledScrollEdge,
 } from "./ModalStyles";
 import ReactDOM from "react-dom";
 
@@ -41,6 +43,9 @@ interface Modal {
   /** Drops the card border in favor of a shadow, for cards whose content
    * bleeds to the edge (e.g. the auth pages' logo band). */
   noBorder?: boolean;
+  /** Leaves only a thin gap above and below the card, for content that needs
+   * every line of height. */
+  narrowGutter?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -56,10 +61,16 @@ export const Modal: FC<Modal> = ({
   fullHeight = false,
   lowerZIndex = false,
   noBorder = false,
+  narrowGutter = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
     config: config.stiff,
+  });
+
+  useKeyLayer(showModal, {
+    onEscape: () => !disableEscapeClose && onClose(),
+    onCtrlEnter: onEnterPress,
   });
 
   return (
@@ -67,12 +78,7 @@ export const Modal: FC<Modal> = ({
       {showModal && (
         <>
           {ReactDOM.createPortal(
-            <StyledModalWrap
-              $lowerZIndex={lowerZIndex}
-              // data-attribute-modal is used to prevent closing of the annotator highlight menu
-              // while interacting with EntityCreateModal
-              data-attribute-modal="true"
-            >
+            <StyledModalWrap $lowerZIndex={lowerZIndex}>
               {!disableBackground && (
                 <StyledBackground
                   style={animatedMount}
@@ -86,16 +92,13 @@ export const Modal: FC<Modal> = ({
                 isLoading={isLoading}
                 fullHeight={fullHeight}
                 noBorder={noBorder}
+                narrowGutter={narrowGutter}
               >
                 {children}
               </ModalCard>
             </StyledModalWrap>,
             document.body,
           )}
-          <ModalKeyPress
-            onEnter={onEnterPress}
-            onEscape={disableEscapeClose ? () => {} : onClose}
-          />
         </>
       )}
     </>
@@ -110,6 +113,7 @@ interface ModalCard {
   isLoading?: boolean;
   fullHeight: boolean;
   noBorder?: boolean;
+  narrowGutter?: boolean;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
@@ -119,6 +123,7 @@ export const ModalCard: FC<ModalCard> = ({
   isLoading,
   fullHeight,
   noBorder,
+  narrowGutter,
 }) => {
   return (
     <StyledCard
@@ -127,6 +132,7 @@ export const ModalCard: FC<ModalCard> = ({
       $maxWidth={maxWidth}
       $fullHeight={fullHeight}
       $noBorder={noBorder}
+      $narrowGutter={narrowGutter}
     >
       {children}
       <Loader show={isLoading} size={36} />
@@ -156,7 +162,9 @@ export const ModalHeader: FC<ModalHeader> = ({
     <>
       <StyledCardHeader $color={color}>
         {icon && <StyledCardIcon $color={iconColor}>{icon}</StyledCardIcon>}
-        <StyledCardTitle $boldTitle={boldTitle}>{title}</StyledCardTitle>
+        <StyledCardTitle $boldTitle={boldTitle} $hasClose={!!onClose}>
+          {title}
+        </StyledCardTitle>
         {content && <StyledCardContent>{content}</StyledCardContent>}
         {onClose && (
           <StyledCloseIconWrap onClick={onClose}>
@@ -184,7 +192,7 @@ export const ModalContent: FC<ModalContent> = ({
   isLoading,
   noPadding = false,
 }) => {
-  return (
+  const body = (
     <StyledCardBody
       $column={column}
       $enableScroll={enableScroll}
@@ -195,23 +203,31 @@ export const ModalContent: FC<ModalContent> = ({
       <Loader show={isLoading} size={36} />
     </StyledCardBody>
   );
+  if (!enableScroll || noPadding) {
+    return body;
+  }
+  return (
+    <StyledCardBodyFrame>
+      {body}
+      <StyledScrollEdge $edge="top" />
+      <StyledScrollEdge $edge="bottom" />
+    </StyledCardBodyFrame>
+  );
 };
 
 interface ModalFooter {
   children?: ReactNode;
-  column?: boolean;
   spaceBetween?: boolean;
   /** Optional gray text shown on the left side, vertically centered. */
   note?: ReactNode;
 }
 export const ModalFooter: FC<ModalFooter> = ({
   children,
-  column = false,
   spaceBetween = false,
   note,
 }) => {
   return (
-    <StyledFooter $column={column} $spaceBetween={spaceBetween}>
+    <StyledFooter $spaceBetween={spaceBetween}>
       {note && <StyledFooterNote>{note}</StyledFooterNote>}
       <ButtonDefaultsProvider size={ButtonSize.Large} shape="rounded-md" textRegular>
         {children}

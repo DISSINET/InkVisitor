@@ -114,8 +114,10 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
               passwordRepeat.length === 0
             }
             fullWidth
+            fullHeight
             label="Activate user"
-            color="success"
+            color="info"
+            shape="rounded-md"
             size={ButtonSize.Large}
           />
         </StyledSubmitWrap>

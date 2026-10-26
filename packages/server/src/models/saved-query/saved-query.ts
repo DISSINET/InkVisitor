@@ -1,6 +1,10 @@
+import {
+  MAX_SAVED_QUERY_DEPTH,
+  MAX_SAVED_QUERY_NODES,
+} from "@inkvisitor/shared/constants";
 import { ISavedQuery, ISavedQueryData } from "@inkvisitor/shared/types";
 import { IDbModel } from "@models/common";
-import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 
 export default class SavedQuery implements ISavedQuery, IDbModel {
   static table = "saved_queries";
@@ -15,7 +19,7 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
 
   constructor(data: Partial<ISavedQuery>) {
     this.id = data.id as string;
-    this.name = data.name || "";
+    this.name = (data.name || "").trim();
     this.ownerId = data.ownerId || "";
     this.shared = !!data.shared;
     this.data = data.data as ISavedQueryData;
@@ -25,13 +29,35 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
 
   isValid(): boolean {
     return (
-      !!this.name.trim() &&
+      !!this.name &&
       !!this.ownerId &&
       !!this.data &&
       typeof this.data.includeEquivalents === "boolean" &&
       typeof this.data.includeSubordinates === "boolean" &&
       (this.data.filters === undefined || Array.isArray(this.data.filters)) &&
+      (this.data.columns === undefined ||
+        (Array.isArray(this.data.columns) &&
+          this.data.columns.every(SavedQuery.isColumnValid))) &&
       SavedQuery.isQueryNodeValid(this.data.query)
+    );
+  }
+
+  /**
+   * Checks a stored Explorer column has the fields the table reads when a
+   * loaded query renders it.
+   */
+  static isColumnValid(column: unknown): boolean {
+    if (!column || typeof column !== "object") {
+      return false;
+    }
+    const c = column as Record<string, unknown>;
+    return (
+      typeof c.id === "string" &&
+      typeof c.name === "string" &&
+      typeof c.type === "string" &&
+      typeof c.editable === "boolean" &&
+      !!c.params &&
+      typeof c.params === "object"
     );
   }
 
@@ -39,8 +65,28 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
    * Recursively checks the stored query tree has the shape the client
    * expects when loading it (a malformed shared query would otherwise
    * crash the Explorer page for every user who clicks it).
+   *
+   * A tree deeper than MAX_SAVED_QUERY_DEPTH or wider than
+   * MAX_SAVED_QUERY_NODES is treated as malformed: the walk runs on untrusted
+   * JSON before anything about it is known, so its own recursion has to be the
+   * thing that is bounded.
    */
   static isQueryNodeValid(node: unknown): boolean {
+    return SavedQuery.walkQueryNode(node, 1, { visited: 0 });
+  }
+
+  private static walkQueryNode(
+    node: unknown,
+    depth: number,
+    budget: { visited: number }
+  ): boolean {
+    if (depth > MAX_SAVED_QUERY_DEPTH) {
+      return false;
+    }
+    budget.visited += 1;
+    if (budget.visited > MAX_SAVED_QUERY_NODES) {
+      return false;
+    }
     if (!node || typeof node !== "object") {
       return false;
     }
@@ -62,16 +108,16 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
       return (
         typeof e.type === "string" &&
         typeof e.logic === "string" &&
-        SavedQuery.isQueryNodeValid(e.node)
+        SavedQuery.walkQueryNode(e.node, depth + 1, budget)
       );
     });
   }
 
-  async save(dbInstance: Connection | undefined): Promise<boolean> {
-    const result = await rethink
-      .table(SavedQuery.table)
-      .insert({ ...this, id: this.id || undefined })
-      .run(dbInstance);
+  async save(dbInstance: Conn | undefined): Promise<boolean> {
+    const result = await storage.savedQueries.insert(dbInstance as Conn, {
+      ...this,
+      id: this.id || undefined,
+    });
 
     if (result.generated_keys) {
       this.id = result.generated_keys[0];
@@ -81,30 +127,50 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
   }
 
   update(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    return rethink
-      .table(SavedQuery.table)
-      .get(this.id)
-      .update({ ...updateData, updatedAt: new Date() })
-      .run(dbInstance);
+    return storage.savedQueries.update(dbInstance as Conn, this.id, {
+      ...updateData,
+      updatedAt: new Date(),
+    });
   }
 
-  delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink
-      .table(SavedQuery.table)
-      .get(this.id)
-      .delete()
-      .run(dbInstance);
+  delete(dbInstance: Conn): Promise<WriteResult> {
+    return storage.savedQueries.delete(dbInstance, this.id);
   }
 
   static async findById(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     id: string
   ): Promise<SavedQuery | null> {
-    const data = await rethink.table(SavedQuery.table).get(id).run(dbInstance);
-    return data ? new SavedQuery(data as ISavedQuery) : null;
+    const data = await storage.savedQueries.get(dbInstance as Conn, id);
+    return data ? new SavedQuery(data) : null;
+  }
+
+  /**
+   * Names are unique within a folder as the panel lists them: every shared
+   * query shares one namespace, each user's private queries another. Names
+   * that read the same collide, so the comparison ignores case (stored names
+   * are already trimmed by the constructor).
+   *
+   */
+  static async isNameTaken(
+    dbInstance: Conn | undefined,
+    name: string,
+    shared: boolean,
+    ownerId: string,
+    exceptId?: string
+  ): Promise<boolean> {
+    const normalized = name.trim().toLowerCase();
+    const ids = await storage.savedQueries.idsWithName(
+      dbInstance as Conn,
+      normalized,
+      shared,
+      ownerId
+    );
+
+    return ids.some((id) => id !== exceptId);
   }
 
   /**
@@ -112,17 +178,9 @@ export default class SavedQuery implements ISavedQuery, IDbModel {
    * plus everyone's shared ones. Newest first.
    */
   static async findVisibleForUser(
-    dbInstance: Connection | undefined,
+    dbInstance: Conn | undefined,
     userId: string
   ): Promise<ISavedQuery[]> {
-    const data = await rethink
-      .table(SavedQuery.table)
-      .filter((row: RDatum) =>
-        row("shared").eq(true).or(row("ownerId").eq(userId))
-      )
-      .orderBy(rethink.desc("createdAt"))
-      .run(dbInstance);
-
-    return data as ISavedQuery[];
+    return storage.savedQueries.visibleFor(dbInstance as Conn, userId);
   }
 }

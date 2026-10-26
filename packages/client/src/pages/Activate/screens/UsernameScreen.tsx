@@ -129,8 +129,10 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
               <Button
                 disabled={username.length < 2}
                 fullWidth
+                fullHeight
                 label="Set username"
-                color="success"
+                color="info"
+                shape="rounded-md"
                 size={ButtonSize.Large}
               />
             </StyledSubmitWrap>
@@ -148,7 +150,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           <Button
             icon={<FiLogIn />}
             label="login continue"
-            color="success"
+            color="info"
             onClick={handleLogin}
           />
         </StyledCenterColumn>

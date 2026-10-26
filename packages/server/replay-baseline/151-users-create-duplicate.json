@@ -1,0 +1,26 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/users",
+    "body": {
+      "bookmarks": [],
+      "email": "other@example.com",
+      "id": "u-replay-2",
+      "name": "replayuser",
+      "options": {},
+      "rights": [],
+      "role": "viewer",
+      "storedTerritories": []
+    }
+  },
+  "response": {
+    "status": 409,
+    "contentType": "application/json",
+    "body": {
+      "error": "UserNotUnique",
+      "message": "username is aready used",
+      "result": false
+    }
+  }
+}

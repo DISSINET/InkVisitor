@@ -169,6 +169,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
                 onPicked={(entity) => setTypeEntity(entity)}
                 placeholder="select metaprop type..."
                 inputWidth="full"
+                disableTemplatesAccept
               />
             )}
             {typeEntity && (
@@ -222,6 +223,7 @@ export const BatchActionAddMetaprop: React.FC<BatchActionAddMetapropProps> = ({
                 onPicked={(entity) => setValueEntity(entity)}
                 placeholder="select value..."
                 inputWidth="full"
+                disableTemplatesAccept
               />
             )}
             {valueEntity && (

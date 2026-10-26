@@ -161,8 +161,10 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                           passwordRepeat.length === 0
                         }
                         fullWidth
+                        fullHeight
                         label="Reset Password"
-                        color="success"
+                        color="info"
+                        shape="rounded-md"
                         size={ButtonSize.Large}
                       />
                     </StyledSubmitWrap>
@@ -173,7 +175,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                   {error !== false && <StyledErrorText>{error}</StyledErrorText>}
                   <StyledButtonWrap>
                     <Button
-                      color="success"
+                      color="info"
                       icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
                       label="back to login"
                       onClick={() => navigate("/login")}
@@ -196,7 +198,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               <Button
                 icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
                 label="Back to login"
-                color="success"
+                color="info"
                 onClick={() => navigate("/login")}
               />
             </StyledCenterColumn>

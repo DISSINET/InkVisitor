@@ -13,7 +13,7 @@ import {
 } from "@models/common";
 import { EntityEnums, UserEnums, DbEnums } from "@inkvisitor/shared/enums";
 import Entity from "@models/entity/entity";
-import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
+import { Conn, WriteResult, storage } from "@service/storage";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
@@ -260,6 +260,10 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
@@ -288,6 +292,19 @@ class Statement extends Entity implements IStatement {
     }
 
     return false;
+  }
+
+  /**
+   * Predicate for testing if the user can create the statement entry.
+   * A Statement lands in a Territory, so creating one is a write to that
+   * Territory and answers to the same right as editing it - the base Entity
+   * rule (anyone but a Viewer) would let an Editor drop statements into a
+   * branch he may only read, whether through a plain create or a clone.
+   * @param user
+   * @returns boolean representing the access
+   */
+  canBeCreatedByUser(user: User): boolean {
+    return this.canBeEditedByUser(user);
   }
 
   /**
@@ -327,6 +344,10 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
+
     // only editor should continue
     if (user.role !== UserEnums.Role.Editor) {
       return false;
@@ -357,7 +378,7 @@ class Statement extends Entity implements IStatement {
    * @returns Promise<boolean> to indicate result of the operation
    */
   async save(
-    db: Connection | undefined,
+    db: Conn | undefined,
     skipTreeCache = false
   ): Promise<boolean> {
     const siblings = await this.findTerritorySiblings(db);
@@ -384,7 +405,7 @@ class Statement extends Entity implements IStatement {
    * @returns write result of the db operation
    */
   async update(
-    db: Connection | undefined,
+    db: Conn | undefined,
     updateData: Record<string, unknown>,
     skipTreeCache = false
   ): Promise<WriteResult> {
@@ -425,7 +446,7 @@ class Statement extends Entity implements IStatement {
     return result;
   }
 
-  async delete(db: Connection): Promise<WriteResult> {
+  async delete(db: Conn): Promise<WriteResult> {
     const result = await super.delete(db);
 
     await treeCache.initialize();
@@ -440,15 +461,14 @@ class Statement extends Entity implements IStatement {
    * @returns map of order value as the key and statement data as the value
    */
   async findTerritorySiblings(
-    db: Connection | undefined
+    db: Conn | undefined
   ): Promise<Record<number, IStatement>> {
     if (this.data.territory) {
-      const list: IStatement[] = await rethink
-        .table(Entity.table)
-        .getAll(this.data.territory.territoryId, {
-          index: DbEnums.Indexes.StatementTerritory,
-        })
-        .run(db);
+      const list = (await storage.entities.byIndex(
+        db as Conn,
+        DbEnums.Indexes.StatementTerritory,
+        [this.data.territory.territoryId]
+      )) as IStatement[];
 
       const out: Record<number, IStatement> = {};
 
@@ -564,7 +584,7 @@ class Statement extends Entity implements IStatement {
   }
 
   async unlinkActantId(
-    db: Connection,
+    db: Conn,
     actantIdToUnlink: string
   ): Promise<boolean> {
     const indexToRemove = this.data.actants.findIndex(
@@ -582,7 +602,7 @@ class Statement extends Entity implements IStatement {
   }
 
   async unlinkActionId(
-    db: Connection,
+    db: Conn,
     actantIdToUnlink: string
   ): Promise<boolean> {
     const indexToRemove = this.data.actions.findIndex(
@@ -616,18 +636,14 @@ class Statement extends Entity implements IStatement {
    * @returns {Statement[]} list of found statements
    */
   static async findByTerritoryIds(
-    db: Connection,
+    db: Conn,
     territoryIds: string[]
   ): Promise<Statement[]> {
-    const list: IStatement[] = await rethink
-      .table(Entity.table)
-      .getAll.apply(
-        undefined,
-        (territoryIds as (string | { index: string })[]).concat({
-          index: DbEnums.Indexes.StatementTerritory,
-        })
-      )
-      .run(db);
+    const list = (await storage.entities.byIndex(
+      db,
+      DbEnums.Indexes.StatementTerritory,
+      territoryIds
+    )) as IStatement[];
 
     return list.map((data) => new Statement(data));
   }
@@ -657,7 +673,7 @@ class Statement extends Entity implements IStatement {
    * @returns list of statements data
    */
   static async findStatementsInTerritory(
-    db: Connection | undefined,
+    db: Conn | undefined,
     territoryId: string
   ): Promise<IStatement[]> {
     // Uses the `statement_territory` secondary index (data.territory.territoryId).
@@ -665,14 +681,14 @@ class Statement extends Entity implements IStatement {
     // filter so a future class or import script populating data.territory
     // can't leak into the result set - the index would still surface them
     // and the downstream sort/walks assume the Statement shape.
-    const statements = await rethink
-      .table(Entity.table)
-      .getAll(territoryId, { index: DbEnums.Indexes.StatementTerritory })
-      .filter({ class: EntityEnums.Class.Statement })
-      .run(db);
+    const statements = (await storage.entities.statementsByIndex(
+      db as Conn,
+      DbEnums.Indexes.StatementTerritory,
+      territoryId
+    )) as IStatement[];
 
     return statements.sort((a, b) => {
-      return a.data.territory.order - b.data.territory.order;
+      return (a.data.territory as StatementTerritory).order - (b.data.territory as StatementTerritory).order;
     });
   }
 
@@ -684,13 +700,14 @@ class Statement extends Entity implements IStatement {
    * @returns list of statements data
    */
   static async getLinkedEntities(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IStatement[]> {
-    const statements = await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.StatementEntities })
-      .run(db);
+    const statements = (await storage.entities.byIndex(
+      db as Conn,
+      DbEnums.Indexes.StatementEntities,
+      [entityId]
+    )) as IStatement[];
 
     return statements.sort((a, b) => {
       if (!a.data.territory) {
@@ -698,9 +715,57 @@ class Statement extends Entity implements IStatement {
       } else if (!b.data.territory) {
         return -1;
       } else {
-        return a.data.territory.order - b.data.territory.order;
+        return (a.data.territory as StatementTerritory).order - (b.data.territory as StatementTerritory).order;
       }
     });
+  }
+
+  /**
+   * Territories of the statements that reference each of the given entities,
+   * anywhere the entity-keyed indexes reach: statement props and references,
+   * actions, actants, tags, the statement's own territory, actant
+   * classifications/identifications, and in-statement prop type/value down to
+   * lvl3.
+   *
+   * Attribution happens in the database: each index pass walks the id list and
+   * tags every hit with the id it was looked up under, so a statement matching
+   * several entities is reported once per entity. Only the territory id crosses
+   * the wire - the statement bodies never leave the db.
+   *
+   * The indexes live on the shared entity table, so the class filter is what
+   * keeps non-statement hits out.
+   * @param db db connection
+   * @param entityIds ids to look up
+   * @returns entity id -> deduplicated territory ids, in no particular order
+   */
+  static async findUsedInTerritoryIds(
+    db: Conn | undefined,
+    entityIds: string[]
+  ): Promise<Record<string, string[]>> {
+    const territoryIdsByEntity: Record<string, Record<string, null>> = {};
+
+    const pairs = await storage.entities.statementTerritoryPairs(
+      db as Conn,
+      entityIds,
+      DbEnums.EntityIdReferenceIndexes
+    );
+
+    for (const pair of pairs) {
+      if (!pair.territoryId) {
+        continue;
+      }
+      if (!territoryIdsByEntity[pair.entityId]) {
+        territoryIdsByEntity[pair.entityId] = {};
+      }
+      territoryIdsByEntity[pair.entityId][pair.territoryId] = null;
+    }
+
+    const out: Record<string, string[]> = {};
+    for (const [entityId, ids] of Object.entries(territoryIdsByEntity)) {
+      out[entityId] = Object.keys(ids);
+    }
+
+    return out;
   }
 
   /**
@@ -711,13 +776,14 @@ class Statement extends Entity implements IStatement {
    * @returns
    */
   static async findByDataActantsCI(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IStatement[]> {
-    return await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
-      .run(db);
+    return (await storage.entities.byIndex(
+      db as Conn,
+      DbEnums.Indexes.StatementActantsCI,
+      [entityId]
+    )) as IStatement[];
   }
 
   /**
@@ -727,7 +793,7 @@ class Statement extends Entity implements IStatement {
    * @returns list of statements ids
    */
   static async getActantsIdsFromLinkedEntities(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<string[]> {
     const statements = await Statement.getLinkedEntities(db, entityId);
@@ -744,37 +810,105 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Returns ids that co-occur with entityId in any statement.
-   * Mirrors the StatementEntities index (actants, actions, tags, direct
-   * territory) plus the statement id itself, so every returned id would
-   * also find these statements if used as the co-occurrence input.
-   * Excludes territory ancestor lineage and nested prop/reference ids,
-   * which made co-occurrence search return many unrelated entities.
+   * Statements that reference any of `entityIds` in any position - action,
+   * actant, tag or direct territory (the StatementEntities index), or an
+   * in-statement prop type/value recursing to lvl3 (the StatementDataProps
+   * index). Both are multi indexes, so a statement matching several keys - or
+   * both indexes - arrives more than once and is deduplicated by id here.
+   * @param db db connection
+   * @param entityIds ids to look for
+   * @returns list of statements, each once
+   */
+  static async getLinkedEntitiesAnyPosition(db: Conn | undefined, entityIds: string[]): Promise<IStatement[]> {
+    if (!entityIds.length) {
+      return [];
+    }
+    // both multi indexes can return one statement several times, and the
+    // StatementDataProps index is shared with non-statement rows; both are
+    // settled here
+    const rows = [
+      ...(await storage.entities.byIndex(db as Conn, DbEnums.Indexes.StatementEntities, entityIds)),
+      ...(await storage.entities.byIndex(db as Conn, DbEnums.Indexes.StatementDataProps, entityIds)),
+    ];
+    const byId = new Map<string, IStatement>();
+    for (const row of rows) {
+      if (row.class === EntityEnums.Class.Statement) {
+        byId.set(row.id, row as IStatement);
+      }
+    }
+    return [...byId.values()];
+  }
+
+  /**
+   * Returns ids that co-occur with any of the passed entities in a statement.
+   * Coverage mirrors the two entity-keyed statement indexes - actions, actants,
+   * tags, direct territory, and in-statement prop type/value - plus the
+   * statement id itself, so every returned id would also find these statements
+   * if used as the co-occurrence input. The prop index stops at lvl3 while the
+   * prop walk here does not; the editor nests props no deeper, so only imported
+   * data with deeper props yields ids that do not find their statement back.
+   * Territory ancestor lineage, reference resource/value and actant
+   * classifications/identifications have no such index and stay out; including
+   * them made co-occurrence search return many unrelated entities.
+   * A passed id is part of the result only when it shares a statement with
+   * another passed id, so a single input never returns itself while each of
+   * two inputs that co-occur with each other is in the other's result.
+   * @param db db connection
+   * @param entityIds single id or list of ids; results are unioned
+   * @returns list of co-occurring ids
    */
   static async getCoOccurrentEntityIds(
-    db: Connection | undefined,
-    entityId: string
+    db: Conn | undefined,
+    entityIds: string | string[]
   ): Promise<string[]> {
-    const statements = await Statement.getLinkedEntities(db, entityId);
+    const inputIds = typeof entityIds === "string" ? [entityIds] : entityIds;
+    if (!inputIds.length) {
+      return [];
+    }
 
+    const statements = await Statement.getLinkedEntitiesAnyPosition(
+      db,
+      inputIds
+    );
+
+    const inputIdSet = new Set(inputIds);
+    const coOccurringInputIds = new Set<string>();
     const ids = new Set<string>();
     for (const s of statements) {
-      ids.add(s.id);
+      const statementIds = new Set<string>([s.id]);
       const territoryId = s.data.territory?.territoryId;
       if (territoryId) {
-        ids.add(territoryId);
+        statementIds.add(territoryId);
       }
       s.data.actions?.forEach((a) => {
-        if (a.actionId) ids.add(a.actionId);
+        if (a.actionId) statementIds.add(a.actionId);
+        Entity.extractIdsFromProps(a.props).forEach((id) => {
+          if (id) statementIds.add(id);
+        });
       });
       s.data.actants?.forEach((a) => {
-        if (a.entityId) ids.add(a.entityId);
+        if (a.entityId) statementIds.add(a.entityId);
+        Entity.extractIdsFromProps(a.props).forEach((id) => {
+          if (id) statementIds.add(id);
+        });
       });
       s.data.tags?.forEach((t) => {
-        if (t) ids.add(t);
+        if (t) statementIds.add(t);
       });
+
+      // the input list can be a pasted batch of thousands of ids, so inputs
+      // are looked up from the statement's few ids, not the other way round
+      const statementInputIds = [...statementIds].filter((id) =>
+        inputIdSet.has(id)
+      );
+      if (statementInputIds.length > 1) {
+        statementInputIds.forEach((id) => coOccurringInputIds.add(id));
+      }
+      statementIds.forEach((id) => ids.add(id));
     }
-    ids.delete(entityId);
+    inputIds.forEach((id) => {
+      if (!coOccurringInputIds.has(id)) ids.delete(id);
+    });
 
     return [...ids];
   }
@@ -788,16 +922,14 @@ class Statement extends Entity implements IStatement {
    * @returns list of statements data
    */
   static async findByDataPropsId(
-    db: Connection | undefined,
+    db: Conn | undefined,
     entityId: string
   ): Promise<IStatement[]> {
-    const statements: IStatement[] = await rethink
-      .table(Entity.table)
-      .getAll(entityId, { index: DbEnums.Indexes.StatementDataProps })
-      .filter({
-        class: EntityEnums.Class.Statement,
-      })
-      .run(db);
+    const statements = (await storage.entities.statementsByIndex(
+      db as Conn,
+      DbEnums.Indexes.StatementDataProps,
+      entityId
+    )) as IStatement[];
 
     // sort by order ASC
     return statements.sort((a, b) => {
@@ -807,7 +939,7 @@ class Statement extends Entity implements IStatement {
       if (!b.data.territory) {
         return 0;
       }
-      return a.data.territory.order - b.data.territory.order;
+      return (a.data.territory as StatementTerritory).order - (b.data.territory as StatementTerritory).order;
     });
   }
 

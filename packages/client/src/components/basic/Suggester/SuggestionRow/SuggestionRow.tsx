@@ -105,6 +105,9 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
   };
 
   const entityIsTemplate = entity.isTemplate || false;
+  // the trailing column is shared by every row, so it is reserved only when some
+  // suggestion in the list actually carries an icon
+  const hasTrailingIcons = items.some((item) => (item.icons?.length ?? 0) > 0);
 
   return (
     <StyledSuggestionRow
@@ -112,6 +115,7 @@ export const SuggestionRowEntityRow: React.FC<SuggestionRowEntityProps> = ({
       style={style}
       $twoIcons={entityIsTemplate && isInsideTemplate && !territoryWithoutParent}
       $isSelected={selected === index}
+      $hasTrailingIcons={hasTrailingIcons}
     >
       <StyledSuggestionLineActions>
         {!disableButtons && isNotDiscouraged && <>{renderIcons()}</>}

@@ -288,10 +288,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
 
   // permission gating (mirrors the old StatementListBox computation)
   const userCanEdit = useMemo(() => territory?.right !== UserEnums.RoleMode.Read, [territory]);
-  const canSelectResource = useMemo(
-    () => userCanEdit || userData?.role === UserEnums.Role.Editor,
-    [userCanEdit, userData?.role],
-  );
   const canEditDocument = useMemo(() => {
     if (userData?.role === UserEnums.Role.Owner || userData?.role === UserEnums.Role.Admin) {
       return true;
@@ -329,7 +325,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
         selectedDocumentIsFetching={selectedDocumentIsFetching}
         resources={resources || []}
         onResourcePickerFocus={() => refetchResources()}
-        canSelectResource={canSelectResource}
         canEditDocument={canEditDocument}
         lockHolderName={lockHolderName}
       />,
@@ -339,7 +334,6 @@ export const AnnotatorBox: React.FC<AnnotatorBox> = ({ height, width, onHeaderCh
     selectedDocumentIsFetching,
     selectedResource,
     resources,
-    canSelectResource,
     canEditDocument,
     lockHolderName,
   ]);

@@ -58,6 +58,7 @@ import {
 import { IDocument, IDocumentExport, IDocumentMeta } from "./document";
 import { IRequestStats } from "./request-stats";
 import { IResponseEntity } from "./response-entity";
+import { IResponseEntityExpansion } from "./response-entity-expansion";
 import { IResponseStats } from "./response-stats";
 import { IBookmarkFolder, IStoredTerritory, IUser, IUserOptions, IUserRight } from "./user";
 
@@ -65,13 +66,20 @@ import { Query } from "./query";
 import { IRequestActivationData } from "./request-activation";
 import { IRequestPasswordReset, IRequestPasswordResetData } from "./request-password-reset";
 import { IRequestQuery } from "./request-query";
+import {
+  IBatchAttributeChange,
+  IBatchSetAttributeChanges,
+} from "./request-batch";
 import { IResponseQuery, IResponseQueryEntity } from "./response-query";
 import { ISavedQuery, ISavedQueryCreate, ISavedQueryData, ISavedQueryUpdate } from "./saved-query";
 
 export { Query, Relation, RequestPermissionUpdate, RequestSearch };
 export { AuditScope };
+export { EXPANSION_RESPONSE_MAX } from "./response-entity-expansion";
 export type {
   ClassificationOrder,
+  IBatchAttributeChange,
+  IBatchSetAttributeChanges,
   EntityOrder,
   EntityTooltip,
   IAction,
@@ -114,6 +122,7 @@ export type {
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
+  IResponseEntityExpansion,
   IResponseGeneric,
   IResponsePermission,
   IResponseQuery,

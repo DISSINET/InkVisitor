@@ -1,4 +1,5 @@
 import { IEntity } from "@inkvisitor/shared/types";
+import { ThemeColor } from "Theme/theme";
 import {
   Button,
   ButtonGroup,
@@ -21,6 +22,12 @@ interface Submit {
   onCancel: () => void;
   loading?: boolean;
   submitLabel?: string;
+  /** Carries the weight of what the confirmation guards - danger for a removal,
+   * a plainer color for a change that can be made again. */
+  submitColor?: keyof ThemeColor;
+  /** Lets a click beside the dialog dismiss it, same as Cancel. The background
+   * is inert by default so a stray click cannot wave through a removal. */
+  bgClickCancels?: boolean;
 }
 export const Submit: React.FC<Submit> = ({
   title,
@@ -31,6 +38,8 @@ export const Submit: React.FC<Submit> = ({
   onCancel,
   loading = false,
   submitLabel = "Confirm",
+  submitColor = "danger",
+  bgClickCancels = false,
 }) => {
   return (
     <>
@@ -38,7 +47,7 @@ export const Submit: React.FC<Submit> = ({
         onEnterPress={onSubmit}
         onClose={onCancel}
         showModal={show}
-        disableBgClick
+        disableBgClick={!bgClickCancels}
         isLoading={loading}
         width="auto"
         maxWidth={600}
@@ -55,7 +64,7 @@ export const Submit: React.FC<Submit> = ({
         <ModalFooter>
           <ButtonGroup>
             <CancelButton onClick={onCancel} />
-            <Button label={submitLabel} color="danger" onClick={onSubmit} />
+            <Button label={submitLabel} color={submitColor} onClick={onSubmit} />
           </ButtonGroup>
         </ModalFooter>
       </Modal>

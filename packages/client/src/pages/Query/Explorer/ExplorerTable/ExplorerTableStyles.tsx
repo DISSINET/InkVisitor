@@ -79,7 +79,10 @@ export const StyledHeaderColumnControls = styled.span`
   padding-left: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-width 0.15s ease, opacity 0.12s ease, padding-left 0.15s ease;
+  transition:
+    max-width 0.15s ease,
+    opacity 0.12s ease,
+    padding-left 0.15s ease;
 `;
 
 export const StyledHeaderColumnContent = styled.div<{ $isDragging?: boolean }>`
@@ -207,6 +210,10 @@ export const StyledPagination = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
+/* Decorative marker for the last clicked row, drawn behind the row checkbox it
+   is centered on. Being positioned, it paints over the static checkbox and is
+   several times its size, so it has to stay transparent to the pointer for the
+   box underneath to stay clickable. */
 export const StyledFocusedCircle = styled.span`
   position: absolute;
   background-color: ${({ theme }) => theme.color.focusedCheckbox};
@@ -217,7 +224,32 @@ export const StyledFocusedCircle = styled.span`
   transform: translate(-50%, -50%);
   top: 50%;
   left: 50%;
+  pointer-events: none;
 `;
+/* One slot for the ordinal, used by the header, the loaded rows and the
+   placeholder rows alike, so the digits stay in one column while scrolling.
+   The table sets --qt-row-number-digits from the result count; with
+   tabular-nums every digit is exactly 1ch, so the slot is as wide as the
+   longest ordinal that can appear and no wider. */
+export const StyledRowNumber = styled.span`
+  flex-shrink: 0;
+  width: calc(var(--qt-row-number-digits, 2) * 1ch);
+  /* margin, not padding: box-sizing is border-box here, so padding would come
+     out of the 1ch-per-digit width and the widest ordinals would run into the
+     checkbox. */
+  margin-right: 0.5rem;
+  text-align: right;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-variant-numeric: tabular-nums;
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
+
+/* Keeps the row font size: 1ch is font-relative, so the header slot only lines
+   up with the rows below it while both are measured in the same font. */
+export const StyledHeaderRowNumber = styled(StyledRowNumber)`
+  color: inherit;
+`;
+
 export const StyledCheckboxWrapper = styled.div`
   position: relative;
   display: flex;
@@ -327,7 +359,9 @@ export const StyledIdsToggleWrapper = styled.div<{ $isActive?: boolean }>`
   box-shadow: ${({ theme, $isActive }) =>
     $isActive ? theme.boxShadow.normal : theme.boxShadow.high};
   filter: ${({ $isActive }) => ($isActive ? "brightness(0.94)" : "none")};
-  transition: filter 0.2s, box-shadow 0.2s;
+  transition:
+    filter 0.2s,
+    box-shadow 0.2s;
   &:hover {
     box-shadow: ${({ theme }) => theme.boxShadow.normal};
     filter: brightness(0.98);

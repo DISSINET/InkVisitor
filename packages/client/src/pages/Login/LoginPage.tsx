@@ -7,6 +7,7 @@ import { IoEnter } from "react-icons/io5";
 import { Navigate } from "react-router-dom";
 import { AuthLogoBand } from "pages/AuthLogoBand";
 import { StyledContentWrap } from "pages/AuthModalSharedStyles";
+import { consumeRedirectTarget } from "utils/redirectAfterLogin";
 import { StyledAttrBtnGroupWrap, StyledLoginCitation, StyledLoginText } from "./LoginPageStyles";
 import { GuestScreen } from "./screens/GuestScreen";
 import { LoginScreen } from "./screens/LoginScreen";
@@ -29,7 +30,11 @@ export const LoginPage: React.FC = () => {
     isGuestAccess ? LoginMode.guest : LoginMode.login
   );
   const [restartScreen, setRestartScreen] = useState(false);
-  const [redirectToMain, setRedirectToMain] = useState(false);
+  // the route the user originally opened, or the main page when they came to
+  // the login screen on their own
+  const [redirectPath, setRedirectPath] = useState<string | false>(false);
+
+  const handleLoggedIn = () => setRedirectPath(consumeRedirectTarget() ?? "/");
 
   // Password reset is reached through a link on the login screen, so the
   // switcher only appears when guest access adds a second entry mode.
@@ -63,8 +68,8 @@ export const LoginPage: React.FC = () => {
   const loginText = process.env.LOGIN_TEXT;
   const loginCitation = process.env.LOGIN_CITATION;
 
-  return redirectToMain ? (
-    <Navigate to="/" />
+  return redirectPath ? (
+    <Navigate to={redirectPath} replace />
   ) : (
     <Modal showModal disableBgClick width={320} noBorder>
       <AuthLogoBand />
@@ -83,11 +88,11 @@ export const LoginPage: React.FC = () => {
             setUsernameLocal={setUsernameLocal}
             password={password}
             setPassword={setPassword}
-            setRedirectToMain={setRedirectToMain}
+            onLoggedIn={handleLoggedIn}
             onPasswordReset={() => setLoginMode(LoginMode.password)}
           />
         )}
-        {loginMode === LoginMode.guest && <GuestScreen setRedirectToMain={setRedirectToMain} />}
+        {loginMode === LoginMode.guest && <GuestScreen onLoggedIn={handleLoggedIn} />}
         {loginMode === LoginMode.password && (
           <PasswordRecoverScreen
             emailLocal={emailLocal}

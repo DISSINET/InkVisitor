@@ -18,7 +18,11 @@ export const StyledModalWrap = styled.div<ModalWrap>`
   left: 0;
   right: 0;
   top: 0;
-  z-index: ${({ $lowerZIndex }) => ($lowerZIndex ? "90" : "500")};
+  /* the ladder is the theme's own — see the note on zIndex there. Read from it
+     rather than written here, because what has to stay under a dialog is
+     decided in the files that draw those things and not in this one */
+  z-index: ${({ theme, $lowerZIndex }) =>
+    $lowerZIndex ? theme.zIndex.modalLower : theme.zIndex.modal};
 `;
 export const StyledBackground = styled(animated.div)`
   position: absolute;
@@ -35,6 +39,7 @@ interface Card {
   $fullHeight: boolean;
   $maxWidth?: number;
   $noBorder?: boolean;
+  $narrowGutter?: boolean;
 }
 const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
@@ -60,15 +65,14 @@ export const StyledCard = styled(animated.div)<Card>`
   display: flex;
   flex-direction: column;
   margin: ${({ theme }) => `0 ${theme.space[8]}`};
-  max-height: calc(100vh - 8rem);
+  max-height: ${({ theme, $narrowGutter }) =>
+    `calc(100vh - 2 * ${$narrowGutter ? theme.space[4] : theme.space[16]})`};
   z-index: 155;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   border: ${({ theme, $noBorder }) =>
-    $noBorder
-      ? "none"
-      : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
+    $noBorder ? "none" : `${theme.borderWidth["default"]} solid ${theme.color["modalBorder"]}`};
   box-shadow: ${({ theme, $noBorder }) => ($noBorder ? theme.boxShadow["high"] : "")};
 `;
 
@@ -104,9 +108,15 @@ export const StyledCardIcon = styled.div<{ $color?: keyof ThemeColor }>`
 `;
 interface StyledCardTitle {
   $boldTitle?: boolean;
+  $hasClose?: boolean;
 }
 export const StyledCardTitle = styled.h2<StyledCardTitle>`
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* the close icon is absolutely positioned over the header's right edge */
+  padding-right: ${({ theme, $hasClose }) => ($hasClose ? theme.space[8] : 0)};
   font-weight: ${({ theme, $boldTitle }) =>
     $boldTitle ? theme.fontWeight["bold"] : theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["lg"]};
@@ -131,8 +141,40 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
+// holds the scrolling body plus its edge blurs, which must sit outside the
+// scroller to stay put while the rows move under them
+export const StyledCardBodyFrame = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+`;
+interface StyledScrollEdge {
+  $edge: "top" | "bottom";
+}
+export const StyledScrollEdge = styled.div<StyledScrollEdge>`
+  /* The strip is exactly the body's vertical padding, so at rest it lies over
+     empty space and shows nothing; a row only blurs once it scrolls into it.
+     The mask makes the blur strongest at the edge and fade out inwards. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  ${({ $edge }) => $edge}: 0;
+  z-index: 1;
+  height: ${space6};
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  --modal-edge-mask: linear-gradient(
+    to ${({ $edge }) => ($edge === "top" ? "bottom" : "top")},
+    #000,
+    transparent
+  );
+  -webkit-mask-image: var(--modal-edge-mask);
+  mask-image: var(--modal-edge-mask);
+`;
 interface StyledFooter {
-  $column?: boolean;
   $spaceBetween?: boolean;
 }
 export const StyledFooter = styled.div<StyledFooter>`
@@ -144,7 +186,6 @@ export const StyledFooter = styled.div<StyledFooter>`
   display: flex;
   flex-shrink: 0;
   justify-content: ${({ $spaceBetween }) => ($spaceBetween ? "space-between" : "flex-end")};
-  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${space5};
   --button-group-gap: 0.75rem;
 `;

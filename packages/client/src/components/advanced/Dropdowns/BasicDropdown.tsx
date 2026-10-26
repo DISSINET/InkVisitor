@@ -1,26 +1,40 @@
-import {
-  AutoPlacement,
-  BasePlacement,
-  VariationPlacement,
-} from "@popperjs/core";
 import { BaseDropdown } from "components";
 import React from "react";
+import { AutoPlacement, BasePlacement, VariationPlacement } from "@popperjs/core";
+
+interface BasicDropdownOption<T> {
+  value: T;
+  label: string;
+  // shorter label for the open menu; the control and typing filter use `label`
+  menuLabel?: string;
+  info?: string;
+  isDisabled?: boolean;
+}
+
+interface BasicDropdownGroup<T> {
+  label: string;
+  options: BasicDropdownOption<T>[];
+}
 
 interface BasicDropdown<T = string> {
   width?: number | "full";
   value: T | null;
   onChange: (value: T) => void;
-  options: { value: T; label: string; info?: string; isDisabled?: boolean }[];
+  options: (BasicDropdownOption<T> | BasicDropdownGroup<T>)[];
   icon?: React.ReactNode;
   placeholder?: string;
+  /** What the control is called, where nothing on screen names it. */
+  ariaLabel?: string;
   tooltipLabel?: string;
+  tooltipContent?: string;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   disableTyping?: boolean;
   disabled?: boolean;
   onFocus?: () => void;
+  // adds the clear cross to the control; clearing reports an empty string
+  isClearable?: boolean;
 
   noDropDownIndicator?: boolean;
-  loggerId?: string;
 }
 export const BasicDropdown = <T extends string>({
   width,
@@ -29,29 +43,35 @@ export const BasicDropdown = <T extends string>({
   options,
   icon,
   placeholder,
+  ariaLabel,
   tooltipLabel,
+  tooltipContent,
   tooltipPosition,
   disableTyping = false,
   disabled,
   onFocus,
-  loggerId,
+  isClearable = false,
   noDropDownIndicator = false,
 }: BasicDropdown<T>) => {
+  const flatOptions = options.flatMap((option) => ("options" in option ? option.options : option));
+
   return (
     <BaseDropdown
       width={width}
-      value={options.find((o) => o.value === value)}
-      onChange={(value) => onChange(value[0].value as T)}
+      value={flatOptions.find((o) => o.value === value) ?? null}
+      clearable={isClearable}
+      onChange={(selected) => onChange((selected[0]?.value ?? "") as T)}
       options={options}
       placeholder={placeholder}
+      ariaLabel={ariaLabel}
       tooltipLabel={tooltipLabel}
+      tooltipContent={tooltipContent}
       tooltipPosition={tooltipPosition}
       icon={icon}
-      noDropDownIndicator={noDropDownIndicator}
-      disableTyping={disableTyping}
+      chevron={!noDropDownIndicator}
+      searchable={!disableTyping}
       disabled={disabled}
       onFocus={onFocus}
-      loggerId={loggerId}
     />
   );
 };

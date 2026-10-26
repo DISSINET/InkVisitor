@@ -64,21 +64,35 @@ const UNIT_TEST_PATHS = [
   "src/models/document/anchors.audit.test.ts",
   "src/models/document/anchors.tagdiff.test.ts",
   "src/models/document/anchors.test.ts",
+  "src/models/entity/entity.rights.test.ts",
   "src/models/entity/response-search-root-validity.test.ts",
+  "src/models/entity/validation-expansion.test.ts",
+  "src/models/entity/entity.tvalidation.test.ts",
+  "src/models/entity/validation-expansion-load.test.ts",
+  "src/models/relation/subordinate-options.test.ts",
   "src/models/factory.test.ts",
   "src/models/relation/classification.test.ts",
   "src/models/relation/implication.test.ts",
   "src/models/relation/path.test.ts",
+  "src/models/relation/relation.rights.test.ts",
   "src/models/relation/related.test.ts",
   "src/models/relation/superordinate-entity.test.ts",
+  "src/models/resource/resource.rights.test.ts",
   "src/models/statement/PositionRules.test.ts",
+  "src/models/statement/statement.rights.test.ts",
   // No-op own test; its DB-touching exports are only used as helpers elsewhere.
   "src/modules/common.test.ts",
-  // Mocks rethinkdb-ts (jest.mock) - evaluateEdges runs against an in-memory proxy.
-  "src/service/query/nesting.test.ts",
+  "src/modules/geocoding/geocoding.test.ts",
+  // Mocks the driver (jest.mock) - evaluateEdges runs against an in-memory proxy.
+  "src/service/storage/rethink/query/nesting.test.ts",
+  "src/service/storage/catalogue.test.ts",
+  "src/service/storage/config.test.ts",
+  "src/service/storage/postgres/sql.test.ts",
+  "src/service/storage/postgres/search.test.ts",
   "src/models/stats/event-type-fold.test.ts",
   "src/models/stats/hybrid-stats.test.ts",
   "src/models/stats/stats-aggregator.test.ts",
+  "src/models/territory/territory.rights.test.ts",
   "src/service/documentPresence.test.ts",
   "src/service/mutex.test.ts",
   "src/service/query/explore-ids-filter.test.ts",
@@ -86,7 +100,7 @@ const UNIT_TEST_PATHS = [
   "src/service/query/explore-to-request-search.test.ts",
   "src/service/query/query-base-cache.test.ts",
   "src/service/query/results.test.ts",
-  "src/service/query/superordinate-edge.test.ts",
+  "src/service/storage/rethink/query/superordinate-edge.test.ts",
   "src/service/ttlCache.test.ts",
 ];
 
@@ -131,6 +145,12 @@ module.exports = {
       testPathIgnorePatterns: [
         "/node_modules/",
         "/build/",
+        // the suites under the RethinkDB adapter run ReQL against a live
+        // RethinkDB; on the PostgreSQL adapter the global setup provisions no
+        // RethinkDB database for them
+        ...(process.env.DB_ADAPTER === "postgres"
+          ? ["/src/service/storage/rethink/"]
+          : []),
         ...UNIT_TEST_PATHS.map((p) => p.replace(/\./g, "\\.") + "$"),
       ],
       // Build a fresh, uniquely-provisioned ephemeral test DB once per run and

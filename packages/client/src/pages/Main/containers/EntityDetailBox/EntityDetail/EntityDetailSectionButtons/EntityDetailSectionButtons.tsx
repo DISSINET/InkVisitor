@@ -1,12 +1,15 @@
 import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
-import { Button, ButtonGroup } from "components";
+import { Button } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
 import { MdDeleteSweep } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
-import { StyledSectionButtonsBorder } from "./EntityDetailSectionButtonsStyles";
+import {
+  StyledSectionButtonsBorder,
+  StyledSectionButtonsGroup,
+} from "./EntityDetailSectionButtonsStyles";
 import { IcoPlus } from "Theme/icons";
 
 interface EntityDetailSectionButtons {
@@ -31,7 +34,7 @@ export const EntityDetailSectionButtons: React.FC<EntityDetailSectionButtons> = 
 
   return (
     <>
-      <ButtonGroup $height={21} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+      <StyledSectionButtonsGroup $height={21}>
         <Button
           disabled={removeBtnDisabled}
           icon={<MdDeleteSweep size={18} />}
@@ -40,14 +43,17 @@ export const EntityDetailSectionButtons: React.FC<EntityDetailSectionButtons> = 
           tooltipLabel={removeBtnTooltip}
           onClick={() => setShowSubmit(true)}
         />
-        <StyledSectionButtonsBorder />
+        <StyledSectionButtonsBorder $rightMargin={widthTooNarrow} />
         <AttributeButtonGroup
+          iconsOnly={widthTooNarrow}
+          noMargin={widthTooNarrow}
           options={[
             {
               longValue: "append",
               shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
+              icon: widthTooNarrow ? <IcoPlus /> : undefined,
               shortIcon: <IcoPlus />,
             },
             {
@@ -55,17 +61,19 @@ export const EntityDetailSectionButtons: React.FC<EntityDetailSectionButtons> = 
               shortValue: "",
               onClick: () => setReplaceSection(true),
               selected: replaceSection,
+              icon: widthTooNarrow ? <TbReplace /> : undefined,
               shortIcon: <TbReplace />,
             },
           ]}
         />
-      </ButtonGroup>
+      </StyledSectionButtonsGroup>
       <EntitySuggester
         categoryTypes={suggesterCategoryTypes}
         onPicked={(entity: IEntity) => handleCopyFromEntity(entity, replaceSection)}
         excludedActantIds={[entityId]}
         disableCreate
-        inputWidth={widthTooNarrow ? 46 : 85}
+        inputWidth={"full"}
+        maxWidth={120}
         placeholder="another entity"
         disableTemplateInstantiation
       />

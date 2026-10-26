@@ -7,6 +7,9 @@ export interface ISavedQueryData {
   // Explorer-side filters (UUIDs, label, floating search) the user chose to
   // store with the query; optional, queries saved before this existed have none
   filters?: Explore.IExploreSearchFilter[];
+  // Explorer table columns in display order, with their user-given names;
+  // optional, queries saved before this existed have none
+  columns?: Explore.IExploreColumn[];
 }
 
 export interface ISavedQuery {

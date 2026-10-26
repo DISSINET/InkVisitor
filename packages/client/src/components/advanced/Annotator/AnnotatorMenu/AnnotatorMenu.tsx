@@ -7,8 +7,8 @@ import { IEntity, IResponseTerritory } from "@inkvisitor/shared/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonGroup, IconWithTooltip, Loader, SwitchGroup } from "components";
 import { Button } from "components/basic/Button/Button";
+import { useKeyLayer } from "components/basic/Modal/layerStack";
 import { useSearchParams } from "hooks";
-import useKeypress from "hooks/useKeyPress";
 import {
   FaAnchor,
   FaBolt,
@@ -228,21 +228,19 @@ export const TextAnnotatorMenu = ({
 
   const movingEntity = movingAnchor ? entities[movingAnchor.tagName] || undefined : undefined;
 
-  const tryCloseMenu = useCallback(() => {
+  const tryCloseMenu = () => {
     // Esc inside move mode cancels the buffered moves (revert); a second Esc
     // then closes the menu.
     if (movingAnchor) {
       finishMove(false);
       return;
     }
-    const isModalOpen = document.querySelector('[data-attribute-modal="true"]') !== null;
-    if (!isModalOpen) {
-      onEscapePressed();
-    }
-  }, [onEscapePressed, movingAnchor, finishMove]);
+    onEscapePressed();
+  };
 
-  useKeypress("Escape", tryCloseMenu);
-  useKeypress("Enter", tryCloseMenu, undefined, true);
+  // As a layer, the menu closes before the modal it sits in (the Documents page
+  // annotator), and a modal opened from it (entity create) closes before it.
+  useKeyLayer(true, { onEscape: tryCloseMenu, onCtrlEnter: tryCloseMenu });
 
   const [activeTerritoryElvl, setActiveTerritoryElvl] = useState<EntityEnums.Elvl>(
     EntityEnums.Elvl.Textual,

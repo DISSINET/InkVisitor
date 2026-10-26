@@ -9,6 +9,7 @@ import { getEntityClass, getRelationClass } from "@models/factory";
 import { copyRelations } from "@models/relation/functions";
 import Relation from "@models/relation/relation";
 import { getAuditByEntityId } from "@modules/audits";
+import { getNodeExpansionIds } from "@service/query/node-expansion";
 import QuerySearch from "@service/query/search";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums, RelationEnums } from "@inkvisitor/shared/enums";
@@ -21,11 +22,14 @@ import {
   IResourceData,
   IResponseDetail,
   IResponseEntity,
+  IResponseEntityExpansion,
   IResponseGeneric,
+  ITerritory,
   IUser,
   Relation as RelationType,
   RequestSearch,
   AuditScope,
+  EXPANSION_RESPONSE_MAX,
 } from "@inkvisitor/shared/types";
 import {
   AuditDoesNotExist,
@@ -37,11 +41,14 @@ import {
   InvalidDeleteError,
   ModelNotValidError,
   PermissionDeniedError,
+  TerritoryDoesNotExits,
 } from "@inkvisitor/shared/types/errors";
 import { IRequestQuery, IRequestQueryExport } from "@inkvisitor/shared/types/request-query";
+import { IBatchSetAttributeChanges } from "@inkvisitor/shared/types/request-batch";
 import { Explore } from "@inkvisitor/shared/types/query";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import Document from "@models/document/document";
+import Territory from "@models/territory/territory";
 import { IResponseQuery } from "@inkvisitor/shared/types/response-query";
 
 import {
@@ -96,6 +103,11 @@ export default Router()
       const response = new ResponseEntity(entity);
 
       await response.prepare(request);
+
+      // stamp document anchor spans onto a statement so its tag can show them
+      // as a label (response-only field, see IEntity.anchorTexts). Must run on
+      // the wrapped response - getEntityClass drops undeclared fields.
+      await Entity.applyAnchorTexts(request.db.connection, [response]);
 
       return response;
     })
@@ -413,6 +425,15 @@ export default Router()
         throw new EntityDoesNotExist(`entity with id ${entityId} does not exist`, entityId);
       }
 
+      // the id is copied out rather than held by reference: the merge below
+      // writes the update into existingEntity, mutating the parent object itself
+      const parentIdBeforeUpdate =
+        existingEntity.class === EntityEnums.Class.Territory &&
+        (existingEntity as ITerritory).data?.parent
+          ? ((existingEntity as ITerritory).data.parent as { territoryId: string })
+              .territoryId
+          : undefined;
+
       // get correct IDbModel implementation
       const model = getEntityClass({
         ...mergeDeep(existingEntity, entityData),
@@ -427,6 +448,39 @@ export default Router()
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be saved");
+      }
+
+      // Re-parenting a Territory through this route is the same operation the
+      // tree position route performs, and needs the same right on the branch it
+      // lands in: canBeEditedByUser derives the right for the moved Territory
+      // alone, which says nothing about where it is going.
+      if (existingEntity.class === EntityEnums.Class.Territory) {
+        const newParent = (model as Territory).data.parent;
+        const newParentId = newParent ? newParent.territoryId : undefined;
+        if (
+          newParentId &&
+          newParentId !== parentIdBeforeUpdate
+        ) {
+          const parentData = await findEntityById<ITerritory>(
+            request.db,
+            newParentId
+          );
+          if (!parentData || parentData.class !== EntityEnums.Class.Territory) {
+            throw new TerritoryDoesNotExits(
+              `territory ${newParentId} was not found`,
+              newParentId
+            );
+          }
+          if (
+            !new Territory(parentData).canBeEditedByUser(
+              request.getUserOrFail()
+            )
+          ) {
+            throw new PermissionDeniedError(
+              `cannot move territory under ${newParentId}`
+            );
+          }
+        }
       }
 
       await model.beforeSave(request.db.connection);
@@ -772,6 +826,96 @@ export default Router()
   )
   /**
    * @openapi
+   * /entities/{entityId}/expansion:
+   *   get:
+   *     description: Returns the entities added by the "include equivalents" / "include subordinates" query-node toggles
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the pinned entity
+   *       - in: query
+   *         name: equivalents
+   *         schema:
+   *           type: boolean
+   *         description: include SYN / IDE / AEE equivalents
+   *       - in: query
+   *         name: subordinates
+   *         schema:
+   *           type: boolean
+   *         description: include inverse SCL / SOE / HOL and child territories
+   *     responses:
+   *       200:
+   *         description: Returns IResponseEntityExpansion
+   */
+  .get(
+    "/:entityId/expansion",
+    asyncRouteHandler<IResponseEntityExpansion>(
+      async (
+        request: IRequest<
+          { entityId: string },
+          unknown,
+          { equivalents?: string; subordinates?: string }
+        >
+      ) => {
+        const entityId = request.params.entityId;
+
+        if (!entityId) {
+          throw new BadParams("entity id has to be set");
+        }
+
+        const entityData = await findEntityById(request.db, entityId);
+        if (!entityData) {
+          throw new EntityDoesNotExist(
+            `entity ${entityId} was not found`,
+            entityId
+          );
+        }
+
+        const ids = await getNodeExpansionIds(request.db.connection, entityId, {
+          equivalents: request.query.equivalents === "true",
+          subordinates: request.query.subordinates === "true",
+        });
+
+        const totals = {
+          equivalents: ids.equivalents.length,
+          subordinates: ids.subordinates.length,
+        };
+
+        // rows are capped across both groups, equivalents filled first; totals
+        // above stay exact so the node badge never shows a capped number
+        const equivalentIds = ids.equivalents.slice(0, EXPANSION_RESPONSE_MAX);
+        const subordinateIds = ids.subordinates.slice(
+          0,
+          Math.max(0, EXPANSION_RESPONSE_MAX - equivalentIds.length)
+        );
+
+        const [equivalents, subordinates] = await Promise.all([
+          Entity.findEntitiesByIds(request.db.connection, equivalentIds),
+          Entity.findEntitiesByIds(request.db.connection, subordinateIds),
+        ]);
+
+        return {
+          equivalents,
+          subordinates,
+          totals,
+          // compared against the id slice, not the resolved row count - a
+          // dangling relation id that no longer resolves to a live entity
+          // must not read as the cap having cut the list
+          truncated: {
+            equivalents: equivalentIds.length < ids.equivalents.length,
+            subordinates: subordinateIds.length < ids.subordinates.length,
+          },
+        };
+      }
+    )
+  )
+  /**
+   * @openapi
    * /entities/{entityId}/tooltip:
    *   get:
    *     description: Returns tooltip detail for entity entry
@@ -841,12 +985,22 @@ export default Router()
           entities: [],
           explore: querySearch.explore,
           total: entityIds.length,
+          expansion: querySearch.expansionCounts,
           stats,
           statsEntityLimit: EXPLORE_STATS_ENTITY_LIMIT,
         };
       }
 
       const results = await querySearch.getResults(request.db.connection);
+
+      // The table renders editable cells for a row only when its entity may be
+      // edited, so each row carries the mode the same rules produce elsewhere.
+      // Every path behind it reads the in-memory tree cache or the entity's own
+      // fields, so this costs no further queries.
+      const queryUser = request.getUserOrFail();
+      for (const row of results) {
+        row.right = getEntityClass({ ...row.entity }).getUserRoleMode(queryUser);
+      }
 
       const entityIds = querySearch.results?.items ?? [];
 
@@ -856,6 +1010,7 @@ export default Router()
         entities: results,
         explore: querySearch.explore,
         total: entityIds.length,
+        expansion: querySearch.expansionCounts,
       };
     })
   )
@@ -1030,10 +1185,11 @@ export default Router()
             entityIds: string[];
             resourceEntityId: string;
             valueEntityId?: string;
+            valueLabel?: string;
           }
         >
       ) => {
-        const { entityIds, resourceEntityId, valueEntityId } = request.body;
+        const { entityIds, resourceEntityId, valueEntityId, valueLabel } = request.body;
 
         if (
           !entityIds ||
@@ -1054,16 +1210,70 @@ export default Router()
 
         const user = request.getUserOrFail();
         const errors: Record<string, string> = {};
-        let updated = 0;
+
+        // the resource and a picked value are the only links this route adds,
+        // so one lookup tells whether either is a template, which only another
+        // template may use; a labelled batch never links the picked value, only
+        // a new V of its own
+        const addedIds = [resourceEntityId, valueLabel ? "" : valueEntityId].filter(
+          (id): id is string => !!id
+        );
+        const addsTemplate = (
+          await Entity.findEntitiesByIds(request.db.connection, addedIds)
+        ).some((entity) => entity.isTemplate);
+
+        // every entity is checked first and its writes collected, so a V is
+        // only minted for an entity that takes the reference; the writes then
+        // go out in bulk, since the global write lock is held for the request
+        const newValues: Entity[] = [];
+        const valueIdByEntity: Record<string, string> = {};
+        const updates: { id: string; data: Partial<IEntity> }[] = [];
 
         for (const entityData of entities) {
+          if (addsTemplate && !entityData.isTemplate) {
+            errors[entityData.id] = "cannot use template in entity instance";
+            continue;
+          }
+
+          // a V is an endpoint - the "40" of one entity is not the "40" of the
+          // next - so a labelled batch gives every entity a V of its own
+          let valueModel: Entity | undefined;
+          if (valueLabel) {
+            valueModel = getEntityClass({
+              id: randomUUID(),
+              class: EntityEnums.Class.Value,
+              labels: [valueLabel],
+              detail: "",
+              language: user.options.defaultLanguage,
+              data: {},
+              notes: [],
+              props: [],
+              references: [],
+              status: EntityEnums.Status.Approved,
+              isTemplate: false,
+            });
+
+            if (!valueModel.isValid()) {
+              errors[entityData.id] = "value model not valid";
+              continue;
+            }
+
+            if (!valueModel.canBeCreatedByUser(user)) {
+              errors[entityData.id] = "permission denied";
+              continue;
+            }
+          }
+
           const newRef: IReference = {
             id: randomUUID(),
             resource: resourceEntityId,
-            value: valueEntityId || "",
+            value: valueModel?.id || valueEntityId || "",
           };
-
-          const updatedRefs = [...entityData.references, newRef];
+          // a few legacy entities store references as "" rather than an array
+          const updatedRefs = [
+            ...(Array.isArray(entityData.references) ? entityData.references : []),
+            newRef,
+          ];
           const updateData: Partial<IEntity> = { references: updatedRefs };
 
           const model = getEntityClass({
@@ -1082,16 +1292,49 @@ export default Router()
             continue;
           }
 
-          await model.beforeSave(request.db.connection);
-          const result = await model.update(request.db.connection, updateData);
-
-          if (result.replaced || result.unchanged) {
-            await Audit.createNew(request, AuditScope.Entity, entityData.id, updateData, EventType.EDIT);
-            updated++;
-          } else {
-            errors[entityData.id] = "update failed";
+          if (valueModel) {
+            newValues.push(valueModel);
+            valueIdByEntity[entityData.id] = valueModel.id;
           }
+          updates.push({ id: entityData.id, data: updateData });
         }
+
+        const savedValues = await Entity.saveMany(request.db.connection, newValues);
+        const failedValueIds = new Set(savedValues.failed);
+        const savedValueIds = new Set(savedValues.written);
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          newValues
+            .filter((value) => savedValueIds.has(value.id))
+            .map((value) => ({ modelId: value.id, changes: value })),
+          EventType.CREATE
+        );
+
+        // an entity whose V did not make it in keeps its references as they are
+        const writableUpdates = updates.filter(({ id }) => {
+          const valueId = valueIdByEntity[id];
+          if (valueId && failedValueIds.has(valueId)) {
+            errors[id] = "value could not be created";
+            return false;
+          }
+          return true;
+        });
+
+        const { written, failed } = await Entity.updateEach(
+          request.db.connection,
+          writableUpdates
+        );
+        failed.forEach((id) => (errors[id] = "update failed"));
+        const updated = written.length;
+
+        const updateById = new Map(writableUpdates.map((update) => [update.id, update.data]));
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          written.map((id) => ({ modelId: id, changes: updateById.get(id) as object })),
+          EventType.EDIT
+        );
 
         return {
           result: updated > 0,
@@ -1204,6 +1447,159 @@ export default Router()
           message: `Created ${created}/${entities.length} relations${
             Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""
           }`,
+        };
+      }
+    )
+  )
+
+  .post(
+    "/batchSetAttribute",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          {
+            entityIds: string[];
+            changes: IBatchSetAttributeChanges;
+          }
+        >
+      ) => {
+        const { entityIds, changes } = request.body;
+
+        if (!entityIds || !Array.isArray(entityIds) || entityIds.length === 0) {
+          throw new BadParams("entityIds array must be provided");
+        }
+
+        if (!changes || (changes.attribute !== "language" && changes.attribute !== "pos")) {
+          throw new BadParams("changes.attribute must be language or pos");
+        }
+
+        if (changes.attribute === "language" && changes.to === undefined) {
+          throw new BadParams("changes.to must be provided");
+        }
+
+        if (changes.attribute === "pos" && !changes.concept && !changes.action) {
+          throw new BadParams("changes.concept or changes.action must be provided");
+        }
+
+        // an empty target would clear pos on every matched entity
+        if (
+          changes.attribute === "pos" &&
+          [changes.concept, changes.action].some((spec) => spec && !spec.to)
+        ) {
+          throw new BadParams("changes.concept.to and changes.action.to must name a part of speech");
+        }
+
+        await request.db.lock();
+
+        const entities = await Entity.findEntitiesByIds(request.db.connection, entityIds);
+
+        if (entities.length === 0) {
+          throw new EntityDoesNotExist("none of the provided entities were found", entityIds[0]);
+        }
+
+        const user = request.getUserOrFail();
+        const errors: Record<string, string> = {};
+        // an entity the attribute does not apply to, or whose current value is
+        // not the one being replaced, is left alone - not an error
+        let skipped = 0;
+        // entities to write, grouped by the update they share: one for a
+        // language change, one per target part of speech for pos. Every write
+        // goes out in bulk after the loop, since the global write lock is held
+        // for the whole request.
+        const groups = new Map<string, { update: Partial<IEntity>; ids: string[] }>();
+        const auditChanges: Record<string, Partial<IEntity>> = {};
+
+        for (const entityData of entities) {
+          let updateData: Partial<IEntity> | undefined;
+          let groupKey: string;
+          let groupUpdate: Partial<IEntity>;
+
+          if (changes.attribute === "language") {
+            const current = entityData.language || EntityEnums.Language.Empty;
+            if (changes.from !== null && current !== changes.from) {
+              skipped++;
+              continue;
+            }
+            if (current === changes.to) {
+              skipped++;
+              continue;
+            }
+            updateData = { language: changes.to };
+            groupKey = "language";
+            groupUpdate = updateData;
+          } else {
+            const spec =
+              entityData.class === EntityEnums.Class.Concept
+                ? changes.concept
+                : entityData.class === EntityEnums.Class.Action
+                  ? changes.action
+                  : undefined;
+
+            if (!spec) {
+              skipped++;
+              continue;
+            }
+
+            const current = (entityData.data as { pos?: string })?.pos || "";
+            if (spec.from !== null && current !== spec.from) {
+              skipped++;
+              continue;
+            }
+            if (current === spec.to) {
+              skipped++;
+              continue;
+            }
+            updateData = { data: { ...entityData.data, pos: spec.to } } as Partial<IEntity>;
+            groupKey = `pos:${spec.to}`;
+            // the database merges nested objects on update, so only pos changes
+            groupUpdate = { data: { pos: spec.to } } as Partial<IEntity>;
+          }
+
+          const model = getEntityClass({
+            ...mergeDeep(entityData, updateData),
+            class: entityData.class,
+            id: entityData.id,
+          });
+
+          if (!model.isValid()) {
+            errors[entityData.id] = "model not valid";
+            continue;
+          }
+
+          if (!model.canBeEditedByUser(user)) {
+            errors[entityData.id] = "permission denied";
+            continue;
+          }
+
+          // beforeSave is skipped on purpose: it only guards the entities an
+          // entity links to, which a language or pos change leaves as they are
+          const group = groups.get(groupKey) ?? { update: groupUpdate, ids: [] };
+          group.ids.push(entityData.id);
+          groups.set(groupKey, group);
+          auditChanges[entityData.id] = updateData;
+        }
+
+        const writtenIds: string[] = [];
+        for (const { update, ids } of groups.values()) {
+          const { written, failed } = await Entity.updateMany(request.db.connection, ids, update);
+          writtenIds.push(...written);
+          failed.forEach((id) => (errors[id] = "update failed"));
+        }
+        const updated = writtenIds.length;
+
+        await Audit.createMany(
+          request,
+          AuditScope.Entity,
+          writtenIds.map((id) => ({ modelId: id, changes: auditChanges[id] })),
+          EventType.EDIT
+        );
+
+        return {
+          result: updated > 0,
+          message: `Updated ${updated}/${entities.length} entities${
+            skipped ? ` (${skipped} skipped: not relevant / no match)` : ""
+          }${Object.keys(errors).length ? `. Errors: ${JSON.stringify(errors)}` : ""}`,
         };
       }
     )

@@ -1,0 +1,47 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "V",
+      "data": {
+        "logicalType": "1"
+      },
+      "detail": "",
+      "id": "rp-v",
+      "labels": [
+        "replay value"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "V",
+        "createdAt": "<datetime>",
+        "data": {
+          "logicalType": "1"
+        },
+        "detail": "",
+        "id": "rp-v",
+        "labels": [
+          "replay value"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+      },
+      "result": true
+    }
+  }
+}

@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Annotator, EditMode, Occurrence } from "@inkvisitor/annotator/src/lib";
+import { clampActiveOccurenceIndex } from "../AnnotatorSearchLine/replaceUtils";
 
 /** Shorter queries match too much of a document to be worth running. */
 export const MIN_SEARCH_TERM_LENGTH = 3;
+/**
+ * Longer queries are not run: every search compiles the whole term into one
+ * regular expression, and the browser throws on one past its size limit.
+ */
+export const MAX_SEARCH_TERM_LENGTH = 200;
+
+export const isSearchTermInRange = (term: string): boolean =>
+  term.length >= MIN_SEARCH_TERM_LENGTH && term.length <= MAX_SEARCH_TERM_LENGTH;
 
 const UNICODE_WORD_CHAR_CLASS = "[\\p{L}\\p{M}\\p{N}_]";
 const UNICODE_WORD_START_BOUNDARY = `(?<!${UNICODE_WORD_CHAR_CLASS})`;
@@ -137,6 +146,15 @@ export const useAnnotatorSearch = ({
         }
       }
       resetActiveOccurrenceOnSearchTermChange();
+
+      if (!termChanged) {
+        // A rerun over text that changed underneath the search (replace) can
+        // return fewer occurrences than the active index addresses. A term
+        // change already went back to 0 above.
+        setSearchActiveOccurence((active) =>
+          clampActiveOccurenceIndex(active, occurrences.length)
+        );
+      }
     },
     [debouncedSearchTerm, setSearchOccurences, setSearchActiveOccurence]
   );
@@ -152,7 +170,7 @@ export const useAnnotatorSearch = ({
       return;
     }
 
-    if (debouncedSearchTerm.length < MIN_SEARCH_TERM_LENGTH) {
+    if (!isSearchTermInRange(debouncedSearchTerm)) {
       const termChanged = searchTermRef.current !== debouncedSearchTerm;
       setSearchOccurences(null);
       setSearchActiveOccurence(0);

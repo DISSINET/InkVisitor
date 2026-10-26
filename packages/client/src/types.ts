@@ -126,8 +126,10 @@ export interface IPage {
     | "customize"
     | "stats"
     | "explorer"
+    | "geocoding"
     | "reset-layout"
-    | "global-validations";
+    | "global-validations"
+    | "global-geocoding";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string | false;
@@ -170,6 +172,12 @@ export interface EntityDragItem extends DragItem {
   entityClass: EntityEnums.Class;
   isTemplate: boolean;
   isDiscouraged: boolean;
+  /**
+   * Set when the user may only read this entity. Drop targets opt in to acting
+   * on it: one that moves the entity refuses to lift it, one that treats it as
+   * a destination refuses to land there. Merely linking it stays allowed.
+   */
+  entityIsReadOnly?: boolean;
 }
 export interface DraggedEntityReduxItem {
   index?: number;
@@ -394,6 +402,7 @@ export interface ITerritoryFilter {
   editorRights: boolean;
   withSubterritories: boolean;
   withStatements: boolean;
+  withDocument: boolean;
   filter: string;
   operator?: "and" | "or"; // "and" on default
 }

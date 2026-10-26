@@ -24,6 +24,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setThirdPanelExpanded } from "redux/features/layout/mainPage/thirdPanelExpandedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
@@ -504,6 +505,18 @@ export const StatementListBox: React.FC = () => {
       setSelectedRows(selectedRows.filter((r) => !deletedIds.includes(r)));
       dispatch(setRowsExpanded(rowsExpanded.filter((r) => !deletedIds.includes(r))));
 
+      // a detail tab left pointing at a deleted statement re-requests
+      // /entities/:id/detail, which answers EntityDoesNotExist
+      deletedIds.forEach((deletedId) => {
+        if (detailIdArray.includes(deletedId)) {
+          removeDetailId(deletedId);
+        }
+        queryClient.removeQueries({ queryKey: ["entity", deletedId] });
+      });
+      if (deletedIds.some((deletedId) => detailIdArray.includes(deletedId))) {
+        queryClient.invalidateQueries({ queryKey: [DETAIL_TAB_ENTITIES_KEY] });
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["tree"],
       });
@@ -790,6 +803,10 @@ export const StatementListBox: React.FC = () => {
                       statements={statementsWithOrder}
                       handleRowClick={(rowId: string) => {
                         dispatch(setShowWarnings(false));
+                        // the editor the click opens lives in the third panel,
+                        // and re-clicking the selected row leaves statementId
+                        // untouched, so expansion cannot ride on its change
+                        dispatch(setThirdPanelExpanded(true));
                         if (statementId !== rowId) {
                           setStatementId(rowId);
                         } else {

@@ -3,6 +3,7 @@ import { contentFingerprint } from "@inkvisitor/shared/utils/content-fingerprint
 import {
   EntityTooltip,
   IAudit,
+  IBatchSetAttributeChanges,
   IDocument,
   IDocumentExport,
   IEntity,
@@ -14,6 +15,7 @@ import {
   IResponseBookmarkFolder,
   IResponseDetail,
   IResponseEntity,
+  IResponseEntityExpansion,
   IResponseGeneric,
   IResponsePermission,
   IPropSpec,
@@ -35,6 +37,7 @@ import {
 } from "@inkvisitor/shared/types";
 import * as errors from "@inkvisitor/shared/types/errors";
 import { Explore } from "@inkvisitor/shared/types/query";
+import { ExpansionGroup } from "@inkvisitor/shared/types/response-entity-expansion";
 import { IRequestSearch } from "@inkvisitor/shared/types/request-search";
 import { ISetting, ISettingGroup } from "@inkvisitor/shared/types/settings";
 import { MAX_DOCUMENTS_EXPORT_BATCH } from "@inkvisitor/shared/constants";
@@ -44,6 +47,7 @@ import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { buildDocumentsZip } from "utils/documentExportZip";
+import { storeRedirectTargetFromWindow } from "utils/redirectAfterLogin";
 import {
   clearStoredUser,
   getStoredUserId,
@@ -109,7 +113,7 @@ const triggerDownload = (blob: Blob, fileName: string) => {
 
 class Api {
   private baseUrl: string;
-  private apiUrl: string;
+  readonly apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
   private ws?: Socket;
@@ -423,8 +427,20 @@ class Api {
             // Session is no longer valid - drop stale local user state so route
             // guards (isLoggedIn) reflect reality, then bounce to login.
             clearStoredUser();
-            // if handled by react router, then the toast could be visible
-            window.location.pathname = (process.env.ROOT_URL || "") + "/login";
+            // the bounce is a full page load, so the place the user was working
+            // in only survives when it is written down first
+            storeRedirectTargetFromWindow();
+            // a whole address rather than a path: the search and hash of the
+            // dead session have no business on the login screen, and they are
+            // written down above for the trip back
+            const rootUrl = process.env.ROOT_URL || "";
+            // ROOT_URL may be stored with or without slashes at either end. An
+            // address that does not open with one is read as relative to the
+            // directory the user happens to be in, and a trailing one meets the
+            // slash below as a doubled separator.
+            const trimmedRoot = rootUrl.replace(/^\/+/, "").replace(/\/+$/, "");
+            const basename = trimmedRoot ? `/${trimmedRoot}` : "";
+            window.location.assign(`${basename}/login`);
           }
         }
 
@@ -462,6 +478,17 @@ class Api {
     return this.dbStats;
   }
 
+  async health(
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<{ result: boolean; buildTimestamp?: string }>> {
+    try {
+      const response = await this.connection.get(`/health`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   handleError = (err: any | AxiosError) => {
     if (axios.isAxiosError(err)) {
       if (err.code === AxiosError.ECONNABORTED || err.code === AxiosError.ETIMEDOUT) {
@@ -469,6 +496,9 @@ class Api {
       }
       if (err.response?.status === 503) {
         return new errors.NetworkError();
+      }
+      if (err.response?.status === 413) {
+        return new errors.RequestTooLargeError();
       }
       const data = err.response?.data;
       if (typeof data === "string") {
@@ -508,6 +538,10 @@ class Api {
       }
       if (ax.code === AxiosError.ERR_NETWORK || ax.code === AxiosError.ERR_BAD_RESPONSE) {
         out.error = errors.NetworkError.TYPE;
+        return out;
+      }
+      if (ax.response?.status === 413) {
+        out.error = errors.RequestTooLargeError.TYPE;
         return out;
       }
       const d = ax.response?.data;
@@ -1618,6 +1652,26 @@ class Api {
   }
 
   /**
+   * Entities added to a pinned query-node entity by its EQ / SUB toggles.
+   * `totals` are exact even when the row lists were capped server-side.
+   */
+  async entityExpansion(
+    entityId: string,
+    params: Record<ExpansionGroup, boolean>,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseEntityExpansion>> {
+    try {
+      const response = await this.connection.get(`entities/${entityId}/expansion`, {
+        ...options,
+        params,
+      });
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
    * Relations
    */
   async relationUpdate(
@@ -1992,16 +2046,36 @@ class Api {
     }
   }
 
+  /**
+   * valueLabel makes the server create a V per entity in the batch, since a V
+   * is an endpoint and must not be shared between the entities it is added to.
+   */
   async batchEntityAddReference(
     entityIds: string[],
     resourceEntityId: string,
-    valueEntityId?: string,
+    valueLabel?: string,
     options?: IApiOptions,
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(
         `/entities/batchAddReference`,
-        { entityIds, resourceEntityId, valueEntityId },
+        { entityIds, resourceEntityId, valueLabel },
+        options,
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+  async batchEntitySetAttribute(
+    entityIds: string[],
+    changes: IBatchSetAttributeChanges,
+    options?: IApiOptions,
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/batchSetAttribute`,
+        { entityIds, changes },
         options,
       );
       return response;

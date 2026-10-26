@@ -153,11 +153,13 @@ export const Table: React.FC<Table<any>> = ({
       <StyledTableContainer>
         <StyledTable
           {...getTableProps()}
-          $noBorder={noBorder}
+          // an empty table has neither head nor rows, so its border would frame
+          // nothing and read as a stray line under the heading
+          $noBorder={noBorder || data.length === 0}
           $equalColumns={equalColumns}
         >
           {!disableHeader && data.length > 0 && (
-            <StyledTHead $noBorder={noBorder}>
+            <StyledTHead>
               {headerGroups.map((headerGroup, key) => (
                 <tr {...headerGroup.getHeaderGroupProps()} key={key}>
                   {headerGroup.headers.map((column, key) => (

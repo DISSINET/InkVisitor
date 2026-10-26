@@ -1,5 +1,4 @@
-import { Db } from "@service/rethink";
-import { r as rethink } from "rethinkdb-ts";
+import { Db, storage } from "@service/storage";
 import Relation from "./relation";
 import Synonym from "./synonym";
 import Audit from "@models/audit/audit";
@@ -24,55 +23,13 @@ function mockRequest(db: Db): IRequest {
   } as unknown as IRequest;
 }
 
-async function ensureDb(): Promise<void> {
-  const dbName = process.env.DB_NAME as string;
-  const dbs: string[] = await rethink.dbList().run(connection());
-  if (!dbs.includes(dbName)) {
-    await rethink.dbCreate(dbName).run(connection());
-  }
-}
-
-async function ensureTable(name: string): Promise<void> {
-  const tables: string[] = await rethink.tableList().run(connection());
-  if (!tables.includes(name)) {
-    await rethink.tableCreate(name).run(connection());
-  }
-}
-
-/**
- * Mirrors the relation_entityIds multi-index declared in the db schema
- * (packages/database/scripts/import/indexes.ts) so getRelationAuditsForEntity
- * can be exercised against the test DB.
- */
-async function ensureRelationEntityIdsIndex(): Promise<void> {
-  const indexes: string[] = await rethink
-    .table(Audit.table)
-    .indexList()
-    .run(connection());
-  if (!indexes.includes(DbEnums.Indexes.AuditRelationEntityIds)) {
-    await rethink
-      .table(Audit.table)
-      .indexCreate(
-        DbEnums.Indexes.AuditRelationEntityIds,
-        rethink.row("changes")("entityIds").default([]),
-        { multi: true }
-      )
-      .run(connection());
-    await rethink
-      .table(Audit.table)
-      .indexWait(DbEnums.Indexes.AuditRelationEntityIds)
-      .run(connection());
-  }
-}
-
 let db: Db;
 const connection = () => db.connection;
 
 async function relationAudits(modelId: string): Promise<Audit[]> {
-  return (await rethink
-    .table(Audit.table)
-    .filter({ auditScope: AuditScope.Relation, modelId })
-    .run(connection())) as Audit[];
+  return (await storage.audits.byIndex(connection(), DbEnums.Indexes.AuditScopeModelId, [
+    [AuditScope.Relation, modelId],
+  ])) as Audit[];
 }
 
 function newSuperclass(entityIds: string[]): Relation {
@@ -81,25 +38,22 @@ function newSuperclass(entityIds: string[]): Relation {
 
 describe("Relation audits", () => {
   beforeAll(async () => {
+    // the test database is provisioned with every table and index by globalSetup
     db = new Db();
     await db.initDb();
-    await ensureDb();
-    await ensureTable(Relation.table);
-    await ensureTable(Audit.table);
-    await ensureRelationEntityIdsIndex();
   });
 
   afterEach(async () => {
     // remove only the rows this suite produced
-    await rethink
-      .table(Audit.table)
-      .filter({ user: USER_ID })
-      .delete()
-      .run(connection());
+    const mine = (await storage.audits.all(connection())).filter((a) => a.user === USER_ID);
+    await storage.audits.deleteMany(
+      connection(),
+      mine.map((a) => a.id)
+    );
   });
 
   afterAll(async () => {
-    await connection().close();
+    await db.close();
   });
 
   it("save + afterSave writes one RELATION_CREATE audit with the snapshot", async () => {
@@ -156,10 +110,7 @@ describe("Relation audits", () => {
       EventType.RELATION_DELETE,
     ]);
 
-    const remaining = await rethink
-      .table(Relation.table)
-      .getAll(a.id, b.id)
-      .run(connection());
+    const remaining = await storage.relations.getMany(connection(), [a.id, b.id]);
     expect(remaining).toHaveLength(0);
   });
 
@@ -201,10 +152,7 @@ describe("Relation audits", () => {
     const rel = newSuperclass(["e1", "e2"]);
     await rel.save(connection());
 
-    const row = (await rethink
-      .table(Relation.table)
-      .get(rel.id)
-      .run(connection())) as Record<string, unknown>;
+    const row = (await storage.relations.get(connection(), rel.id)) as unknown as Record<string, unknown>;
     expect(row._auditEventType).toBeUndefined();
 
     await rel.delete(connection());

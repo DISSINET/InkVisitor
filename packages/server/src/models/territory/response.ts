@@ -13,6 +13,8 @@ import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
 import { findEntityById } from "@service/shorthands";
 import { Setting } from "@models/setting/setting";
+import { buildValidationExpansionMap } from "@models/entity/validation-expansion-load";
+import treeCache from "@service/treeCache";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
@@ -57,6 +59,27 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       ? await Setting.getSettingsAll(req.db.connection)
       : undefined;
 
+    // Validation rules are a property of the territory lineage, not of the
+    // statement, so the ids their fields accept are the same for every
+    // statement here - resolve them once instead of once per statement. The
+    // lineage is read from the same tree cache the statements use; when it
+    // holds nothing for this territory (e.g. NODE_ENV=test, cache not built)
+    // the map is left undefined and each statement resolves its own.
+    const lineageTerritories = [
+      this.id,
+      ...(treeCache.tree.idMap[this.id]?.path ?? []),
+    ]
+      .map((tid) => treeCache.tree.idMap[tid]?.territory as ITerritory)
+      .filter((territory) => !!territory);
+
+    const expansions =
+      useWarnings && lineageTerritories.length
+        ? await buildValidationExpansionMap(
+            req.db.connection,
+            lineageTerritories
+          )
+        : undefined;
+
     const responseStatements: ResponseStatement[] = [];
 
     if (usePreload) {
@@ -99,7 +122,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       if (useWarnings && !this.isTemplate) {
         // Each statement's getWarnings is an independent chain of DB
         // round-trips. Awaiting them one statement at a time serialized the
-        // whole territory; rethinkdb-ts multiplexes concurrent queries over
+        // whole territory; the database driver multiplexes concurrent queries over
         // the single per-request connection, so running them together
         // pipelines the work. Peak in-flight stays roughly the statement
         // count because each statement's own per-entity lookups remain
@@ -109,7 +132,8 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
           responseStatements.map(async (responseStatement) => {
             responseStatement.warnings = await responseStatement.getWarnings(
               req,
-              settings
+              settings,
+              expansions
             );
           })
         );

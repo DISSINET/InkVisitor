@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const StyledCloud = styled.div<{ $hasTopRight?: boolean }>`
   position: relative;
-  background-color: ${({ theme }) => theme.color["blue"][100]};
+  background-color: ${({ theme }) => theme.color["cloudBackground"]};
   border-radius: 1rem;
   padding: 0.5rem;
   padding-right: ${({ $hasTopRight, theme }) => ($hasTopRight ? theme.space[9] : "0.5rem")};

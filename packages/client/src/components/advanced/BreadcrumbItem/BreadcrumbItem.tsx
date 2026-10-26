@@ -5,6 +5,7 @@ import { Button, Loader } from "components";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
@@ -41,6 +42,9 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
   isSelected = false,
 }) => {
   const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
+  const location = useLocation();
+  // the explorer has no territory tree to go to
+  const canGoToTerritory = paramsTerritoryId !== territoryId && location.pathname !== "/explorer";
 
   const dispatch = useAppDispatch();
 
@@ -78,7 +82,7 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
                 entity={territoryData || treeTerritory || data || initialData}
                 isFavorited={isFavorited}
                 button={
-                  paramsTerritoryId !== territoryId && (
+                  canGoToTerritory && (
                     <Button
                       icon={<BsArrow90DegLeft />}
                       color="plain"

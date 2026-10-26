@@ -9,10 +9,10 @@ export const StyledContent = styled.div`
 
 interface StyledBoxWrap {}
 export const StyledBoxWrap = styled.div<StyledBoxWrap>`
-  max-width: 100%;
+  /* the box spans the page; its content decides what is centred within it */
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
   overflow: auto;
 `;

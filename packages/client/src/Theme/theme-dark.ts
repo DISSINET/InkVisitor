@@ -48,6 +48,7 @@ const darkTheme = {
     white: "#060c26",
     grey: "#6b6b6b",
     greyer: "#b5b5b5",
+    mutedText: "#a0aec0", // gray 500
     text: "#c7c7c7",
     primary: "#f6f6ff",
     statementHighlight: "rgba(158,170,215,1)", // success accent, matches opened-row bar
@@ -68,6 +69,7 @@ const darkTheme = {
     tagSelectedBackground: "#2e3f7a", // tableSelection - tableOpened is too close to the page
     tagSelectedColor: "#EBF0FA",
     tagItalic: "#D1DAEF",
+    cloudBackground: "#1E2330",
 
     treeNodeRead: "#718096",
     treeNodeWrite: "#f7fafc",
@@ -88,6 +90,14 @@ const darkTheme = {
     uploadDocumentBg: "#22315a",
 
     statsChartCursor: "rgba(246, 246, 255, 0.08)", // gentle primary tint for hovered column
+
+    suggestionSelected: "#2e3f7a", // tableSelection
+
+    // the light theme's hues, lifted to hold >=4.5:1 on the dark page
+    xmlTag: "#7FAEE9",
+    xmlAttr: "#EF86A0",
+    xmlQuote: "#8A93A8",
+    xmlValue: "#5DD0A9",
 
     pageBg: "#283040",
     menuHover: "#222A40",
@@ -125,6 +135,31 @@ const darkTheme = {
       class: "#E28FBB",
       ident: "#EAE3A3",
     },
+
+    /**
+     * One colour per gazetteer
+     */
+    gazetteer: {
+      geonames: "#90cdf4",
+      nominatim: "#81e6d9",
+      wikipedia: "#d6bcfa",
+      wikidata: "#b794f4",
+      tgn: "#f6e05e",
+      whg: "#9ae6b4",
+      gov: "#fbd38d",
+      idai: "#f6ad55",
+      viabundus: "#63b3ed",
+      "native-land": "#68d391",
+      pleiades: "#feb2b2",
+      chgis: "#fbb6ce",
+      syriaca: "#c3aed6",
+      "hgis-indias": "#f6c199",
+      "sedac-india": "#cbd5e0",
+      "llm-coords": "#a0aec0",
+    },
+
+    // How strong a score is, weakest first.
+    scoreScale: ["#26304f", "#3f5590", "#6174c2", "#9eaad7", "#d5ddf5"],
 
     tagBorderColor: {
       // EntityTag status

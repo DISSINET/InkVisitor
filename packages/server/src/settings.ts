@@ -7,7 +7,7 @@ dotenv.config({
   path: `.build_env`,
 });
 
-// will load .env.${ENV_FILE} if set
+// will load env/.env.${ENV_FILE} if set
 if (process.env.ENV_FILE) {
   console.log(`[Settings] loading .env file: .env.${process.env.ENV_FILE}`);
 

@@ -2,7 +2,7 @@ import { Server as SocketIO } from "socket.io";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import User from "@models/user/user";
 import { pool } from "@middlewares/db";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 
 export interface IDbStats {
   ts: number;

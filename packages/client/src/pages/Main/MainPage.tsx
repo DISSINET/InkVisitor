@@ -10,7 +10,8 @@ import {
 } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
-import { useUserQuery } from "hooks/react-query";
+import { EntityImportModal } from "./containers/EntityImportModal/EntityImportModal";
+import { useTreeQuery, useUserQuery } from "hooks/react-query";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, {
   ReactNode,
@@ -41,13 +42,16 @@ import {
   hiddenBoxHeight,
 } from "Theme/constants";
 import { ButtonSize, DetailBoxState, EditorBoxState } from "types";
+import { resolveDefaultTerritory, territoryHasStatements } from "utils/defaultTerritory";
 import { isLayoutUndersized } from "utils/layoutUtils";
 import {
   animateBoxHeightVars,
   animatePanelWidthVars,
   animateSeparatorPositionVars,
+  setPanelWidthVars,
 } from "utils/layoutTransition";
 import { getStoredUserRole } from "utils/userStorage";
+import { searchTree } from "utils/utils";
 import { RefreshBoxButton } from "./components/RefreshBoxButton";
 import { ToggleFourthPanelBoxButton } from "./components/ToggleFourthPanelBoxButton";
 import { MemoizedAnnotatorBox } from "./containers/AnnotatorBox/AnnotatorBox";
@@ -62,7 +66,7 @@ import { useBoxLayout } from "./hooks/useBoxLayout";
 import { usePanelToggles } from "./hooks/usePanelToggles";
 import { useTerritoryNavigation } from "./hooks/useTerritoryNavigation";
 import { useVerticalSeparators } from "./hooks/useVerticalSeparators";
-import { IcoPlusBold } from "Theme/icons";
+import { IcoCode, IcoPlusBold } from "Theme/icons";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -76,6 +80,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     clearAllDetailIds,
     selectedDetailId,
     appendDetailId,
+    appendMultipleDetailIds,
     setStatementId,
     setTerritoryId,
     editorOpened,
@@ -127,15 +132,50 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   }, [statementId]);
 
+  // Set while the default territory is being opened and it holds no statements.
+  // Opening a territory otherwise means the user asked for it and wants to see
+  // its statements; the default arrives on its own, and an empty list is not
+  // worth a panel.
+  const defaultTerritoryIsEmptyRef = useRef(false);
+
+  // Travel is how a panel shows the user what their click did. This collapse
+  // answers no click - it lands while the page is still assembling itself, and
+  // a panel sliding shut there reads as the page being slow. Holds the
+  // secondPanelExpanded value the skip is meant for, since other inputs move
+  // the widths too (the debounced layout width settles around this moment) and
+  // any of them would otherwise be the one that snaps.
+  const skipTravelForPanelState = useRef<boolean | null>(null);
+
   const prevTerritoryIdRef = useRef(territoryId);
   useEffect(() => {
     const isNewTerritory = prevTerritoryIdRef.current !== territoryId;
     prevTerritoryIdRef.current = territoryId;
 
     if (territoryId && isNewTerritory) {
+      const opensEmptyByDefault = defaultTerritoryIsEmptyRef.current;
+      defaultTerritoryIsEmptyRef.current = false;
+      // only when the widths are going to move, so that the flag cannot outlive
+      // this collapse and rob the user's next toggle of its travel
+      skipTravelForPanelState.current = opensEmptyByDefault && secondPanelExpanded ? false : null;
+      dispatch(setSecondPanelExpanded(!opensEmptyByDefault));
+    }
+  }, [territoryId, secondPanelExpanded, dispatch]);
+
+  // A url that names an entity detail asks to see it, whatever state the user
+  // last left the second panel and the detail box in.
+  useEffect(() => {
+    if (!selectedDetailId && detailIdArray.length === 0) {
+      return;
+    }
+    if (!secondPanelExpanded) {
+      // the page is still assembling itself, so no travel - same as above
+      skipTravelForPanelState.current = true;
       dispatch(setSecondPanelExpanded(true));
     }
-  }, [territoryId, dispatch]);
+    if (detailBoxState === DetailBoxState.Minimized) {
+      dispatch(setDetailBoxState(DetailBoxState.Normal));
+    }
+  }, []);
 
   const prevEditorStateRef = useRef({ editorOpened, editorBoxState });
   useEffect(() => {
@@ -197,6 +237,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+  const [showEntityImportModal, setShowEntityImportModal] = useState(false);
 
   // The annotator Box's header content lives in AnnotatorBox (it owns the
   // resource/document data it is built from); this page only owns the Box
@@ -228,17 +269,50 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // user data for current user
   const { data: user } = useUserQuery();
 
-  // Admin / Owner / Editor with writer rights
+  // The tree the default territory has to be reachable in; already being
+  // fetched for the tree box, so this shares that query.
+  const { data: treeData } = useTreeQuery();
+
+  // A load that carries no params at all - the app opened at its bare address -
+  // starts at the territory the user picked as their default. Decided once per
+  // visit to the page, as soon as both answers are in: a territory the user
+  // closes afterwards is a state of its own, not an invitation to jump back.
+  const defaultTerritoryResolved = useRef(false);
+  useEffect(() => {
+    if (defaultTerritoryResolved.current || !user || !treeData) {
+      return;
+    }
+    defaultTerritoryResolved.current = true;
+
+    const defaultTerritory = resolveDefaultTerritory({
+      user,
+      tree: treeData,
+      isCleanLoad: !territoryId && !statementId && detailIdArray.length === 0,
+    });
+
+    if (defaultTerritory) {
+      defaultTerritoryIsEmptyRef.current = !territoryHasStatements(treeData, defaultTerritory);
+      setTerritoryId(defaultTerritory);
+    }
+  }, [user, treeData]);
+
+  // Admin / Owner / Editor with writer rights.
+  // The tree node carries the right the server derived for that territory,
+  // which follows the assignment down the branch; a user's own rights entry
+  // names only the territory it was assigned to, so a write right on an
+  // ancestor never appears against its descendants.
   const hasWriteRightsToSelectedTerritory = useMemo(() => {
+    if (user?.role === UserEnums.Role.Admin || user?.role === UserEnums.Role.Owner) {
+      return true;
+    }
+    if (!treeData || !territoryId) {
+      return false;
+    }
+    const node = searchTree(treeData, territoryId);
     return (
-      (user?.role === UserEnums.Role.Editor &&
-        user?.rights?.some(
-          (right) => right.territory === territoryId && right.mode === UserEnums.RoleMode.Write,
-        )) ||
-      user?.role === UserEnums.Role.Admin ||
-      user?.role === UserEnums.Role.Owner
+      node?.right === UserEnums.RoleMode.Write || node?.right === UserEnums.RoleMode.Admin
     );
-  }, [user, territoryId]);
+  }, [user?.role, treeData, territoryId]);
 
   const {
     detailSeparatorY,
@@ -280,13 +354,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
     handleLayoutInit,
   } = useVerticalSeparators();
 
-  const { toggleFirstPanel, toggleSecondPanel, toggleThirdPanel, toggleFourthPanel } =
-    usePanelToggles({
-      treeSeparator,
-      centerSeparator,
-      searchSeparator,
-      onePercentOfLayoutWidth,
-    });
+  const {
+    toggleFirstPanel,
+    toggleSecondPanel,
+    toggleThirdPanel,
+    toggleFourthPanel,
+    expandThirdPanelLayout,
+  } = usePanelToggles({
+    treeSeparator,
+    centerSeparator,
+    searchSeparator,
+    onePercentOfLayoutWidth,
+  });
+
+  const prevThirdPanelExpandedRef = useRef(thirdPanelExpanded);
+  useEffect(() => {
+    const wasExpanded = prevThirdPanelExpandedRef.current;
+    prevThirdPanelExpandedRef.current = thirdPanelExpanded;
+
+    if (!wasExpanded && thirdPanelExpanded) {
+      expandThirdPanelLayout();
+    }
+  }, [thirdPanelExpanded]);
 
   const firstPanelButton = () => (
     <IconButton
@@ -414,11 +503,16 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
-    animatePanelWidthVars(
-      [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth],
-      "mainPage",
-    );
-  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth]);
+    const widths = [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth];
+
+    if (skipTravelForPanelState.current === secondPanelExpanded) {
+      skipTravelForPanelState.current = null;
+      setPanelWidthVars(widths, "mainPage");
+      return;
+    }
+
+    animatePanelWidthVars(widths, "mainPage");
+  }, [firstPanelWidth, secondPanelWidth, thirdPanelWidth, fourthPanelWidth, secondPanelExpanded]);
 
   // Same for the separators, which a drag on any one of them can move.
   useLayoutEffect(() => {
@@ -556,6 +650,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={firstPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["tree", "territory", "user"]}
               isHidden={!firstPanelExpanded}
             />,
@@ -645,6 +740,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 </>,
                 statementListOpened && territoryId && (
                   <RefreshBoxButton
+                    key="refresh"
                     queriesToRefresh={["territory", "statement", "user"]}
                     isHidden={false}
                   />
@@ -666,16 +762,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 buttons={[
                   <>
                     {userRole !== UserEnums.Role.Viewer && (
-                      <Button
-                        icon={<IcoPlusBold />}
-                        label="entity"
-                        inverted
-                        onClick={() => setShowEntityCreateModal(true)}
-                        tooltipLabel="create new entity"
-                      />
+                      <>
+                        <Button
+                          icon={<IcoPlusBold />}
+                          label="entity"
+                          inverted
+                          onClick={() => setShowEntityCreateModal(true)}
+                          tooltipLabel="create new entity"
+                        />
+                        {/* only owners may import entities */}
+                        {userRole === UserEnums.Role.Owner && (
+                          <Button
+                            icon={<IcoCode />}
+                            label="import"
+                            inverted
+                            onClick={() => setShowEntityImportModal(true)}
+                            tooltipLabel="import entities from JSON"
+                          />
+                        )}
+                      </>
                     )}
                   </>,
                   <IconButton
+                    key="maximize"
                     dataTestId="maximize-detail-box"
                     tooltipLabel={getMaximizeBtnTooltip()}
                     icon={
@@ -697,6 +806,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     )}
                   </>,
                   <IconButton
+                    key="close-all"
                     tooltipLabel="close all tabs"
                     icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                     onClick={() => {
@@ -746,6 +856,24 @@ const MainPage: React.FC<MainPage> = ({}) => {
               }
               if (entity.class === EntityEnums.Class.Territory) {
                 queryClient.invalidateQueries({ queryKey: ["tree"] });
+              }
+            }}
+          />
+        )}
+        {showEntityImportModal && (
+          <EntityImportModal
+            closeModal={() => setShowEntityImportModal(false)}
+            onImported={(entities) => {
+              queryClient.invalidateQueries({ queryKey: ["entity"] });
+              if (entities.some((entity) => entity.class === EntityEnums.Class.Territory)) {
+                queryClient.invalidateQueries({ queryKey: ["tree"] });
+              }
+              // Values are not opened in Detail, as after creating one
+              const detailIds = entities
+                .filter((entity) => entity.class !== EntityEnums.Class.Value)
+                .map((entity) => entity.id);
+              if (detailIds.length) {
+                appendMultipleDetailIds(detailIds);
               }
             }}
           />
@@ -830,7 +958,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
               thirdPanelButton(),
             ]}
           >
-            <MemoizedStatementEditorBox />
+            <MemoizedStatementEditorBox
+              isExpanded={thirdPanelExpanded}
+              isVisible={editorOpened && editorBoxState !== EditorBoxState.Minimized}
+            />
           </Box>
         )}
       </Panel>
@@ -845,10 +976,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           isExpanded={fourthPanelExpanded}
           buttons={[
             <RefreshBoxButton
+              key="refresh"
               queriesToRefresh={["search-templates", "search"]}
               isHidden={!fourthPanelExpanded}
             />,
-            <ToggleFourthPanelBoxButton boxToHide="search" />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="search" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -863,8 +995,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["bookmarks"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="bookmarks" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["bookmarks"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="bookmarks" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
@@ -879,8 +1015,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <RefreshBoxButton queriesToRefresh={["templates"]} isHidden={!fourthPanelExpanded} />,
-            <ToggleFourthPanelBoxButton boxToHide="templates" />,
+            <RefreshBoxButton
+              key="refresh"
+              queriesToRefresh={["templates"]}
+              isHidden={!fourthPanelExpanded}
+            />,
+            <ToggleFourthPanelBoxButton key="toggle" boxToHide="templates" />,
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}

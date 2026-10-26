@@ -1,8 +1,13 @@
-import { ThemeColor } from "Theme/theme";
+import { FlatThemeColor } from "Theme/theme";
+import {
+  StyledChipBody,
+  StyledChipRemove,
+} from "components/basic/BaseDropdown/BaseDropdownStyles";
 import styled from "styled-components";
 
 interface StyledEntityValue {
-  color?: keyof ThemeColor;
+  /* flat palette only — nested scales (blue, gray, …) are not valid CSS values */
+  color?: FlatThemeColor;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   display: flex;
@@ -13,23 +18,50 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-width: 4px;
   border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
 `;
+/* entity single values sit one step further from the edge than plain ones;
+   the wildcard "*" keeps the tight default */
+export const StyledEntitySingleValue = styled.span<{ $wildcard?: boolean }>`
+  margin-left: ${({ theme, $wildcard }) => ($wildcard ? "0" : theme.space[1])};
+`;
+
+export const StyledEntityChip = styled(StyledChipBody)`
+  background-color: ${({ theme }) => theme.color["white"]};
+  ${StyledChipRemove} {
+    padding: 0 0.2rem;
+  }
+`;
+
 interface StyledEntityMultiValue {
-  $color?: keyof ThemeColor;
+  $color?: FlatThemeColor;
 }
 export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: 0.2rem 0.2rem 0.2rem;
   padding-left: 0.3rem;
   border-left-style: solid;
   border-left-width: 4px;
-  border-left-color: ${({ theme, $color }) => ($color ? theme.color[$color] : "")};
-  border-radius: 0px;
+  border-left-color: ${({ theme, $color }) =>
+    $color ? theme.color[$color] : ""};
+  color: ${({ theme }) => theme.color["black"]};
+  font-weight: bold;
   font-size: 1.2rem;
 `;
 
 export const StyledOptionRow = styled.div`
   display: flex;
   align-items: center;
-  height: 2.5rem;
+  height: 3rem;
+  padding: 2px 2px 2px 0;
+`;
+/* the class bar fills the row height, so the row padding leaves a gap
+   between neighbouring bars */
+export const StyledEntitySingleOptionRow = styled.div`
+  display: grid;
+  min-height: 3rem;
+  padding: 2px 2px 2px 0;
 `;
 export const StyledOptionIconWrap = styled.div`
   margin: 0 0.2rem;
@@ -49,7 +81,8 @@ export const StyledUserOptionRow = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
-  height: 2.5rem;
+  height: 2.9rem;
+  padding: 2px 6px;
 `;
 export const StyledUserSingleValueRow = styled.div`
   display: flex;
@@ -96,12 +129,4 @@ export const StyledUserMultiValueLabel = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`;
-export const StyledUserMoreBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  padding: 1px 0.3rem;
-  font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme }) => theme.color["primary"]};
 `;

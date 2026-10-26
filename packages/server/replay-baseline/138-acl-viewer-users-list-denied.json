@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "GET",
+    "path": "/api/users"
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "Endpoint not allowed",
+      "result": false
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { createMockTree, clean } from "@modules/common.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { TreeCache } from "./treeCache";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { UserRight } from "@models/user/user";

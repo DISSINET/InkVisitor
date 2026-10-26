@@ -32,11 +32,13 @@ export const ExploreTableHeaderTooltip: React.FC<
     content: React.ReactNode;
   }> = [];
   for (const paramDef of paramsDef) {
-    const value = (column.params as Record<string, unknown>)[paramDef.id];
+    const params = column.params as Record<string, unknown>;
+    const value = params[paramDef.id];
     if (value === undefined || value === null) continue;
     const content = renderExploreColumnParamValue({
       value,
       paramDef,
+      params,
       entities,
     });
     if (content != null) paramRows.push({ paramDef, content });

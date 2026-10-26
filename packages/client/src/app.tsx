@@ -2,10 +2,10 @@ import { InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import api from "api";
-import { Toast } from "components";
+import { Loader, Toast } from "components";
 import { Page } from "components/advanced";
 import ErrorBoundary from "components/ErrorBoundary";
-import { useDebounce } from "hooks";
+import { useDebounce, useNewVersionCheck } from "hooks";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import {
@@ -22,11 +22,11 @@ import {
   UsersPage,
 } from "pages";
 import { StatsPage } from "pages/Stats/StatsPage";
-import React, { useEffect, useMemo } from "react";
+import React, { Suspense, useEffect, useLayoutEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Helmet } from "react-helmet-async";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -35,7 +35,20 @@ import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
+import { storeRedirectTarget } from "utils/redirectAfterLogin";
 import { getStoredUserRole } from "utils/userStorage";
+
+/**
+ * The geocoding page is the app's only route that carries a map renderer, and
+ * the renderer is larger than the rest of the route put together. Split out so
+ * that weight is fetched by the readers who open the page rather than by every
+ * reader who loads the app.
+ */
+const GeocodingPage = React.lazy(() =>
+  import("pages/Geocoding/GeocodingPage").then((module) => ({
+    default: module.GeocodingPage,
+  })),
+);
 
 const clockPerformance = (
   profilerId: any,
@@ -70,16 +83,30 @@ export const PublicPath = (props: any) => {
   return props.children;
 };
 
+// The redirect to /login drops the route the user asked for together with its
+// search and hash params, so it is recorded first and LoginPage returns them
+// there once the session exists. Written in layout effect rather than render:
+// sessionStorage is impure, StrictMode re-invokes the body, and a discarded
+// render would still leave a target behind. Layout (not passive) so it runs
+// before Navigate's effect replaces this route with /login.
+const RedirectToLogin = () => {
+  const location = useLocation();
+  useLayoutEffect(() => {
+    storeRedirectTarget(location);
+  }, [location]);
+  return <Navigate to="/login" replace />;
+};
+
 export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
-  return api.isLoggedIn() ? children : <Navigate to="/login" />;
+  return api.isLoggedIn() ? children : <RedirectToLogin />;
 };
 
 export const RequireOwner = ({ children }: { children: React.ReactNode }) => {
   if (!api.isLoggedIn()) {
-    return <Navigate to="/login" />;
+    return <RedirectToLogin />;
   }
   const isOwner = getStoredUserRole() === UserEnums.Role.Owner;
-  return isOwner ? children : <Navigate to="/" />;
+  return isOwner ? children : <Navigate to="/" replace />;
 };
 
 const queryClient = new QueryClient({
@@ -105,6 +132,8 @@ export const App: React.FC = () => {
   }, [selectedThemeId]);
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
+
+  useNewVersionCheck();
 
   useEffect(() => {
     if (debouncedHeight > 0) {
@@ -200,6 +229,16 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <UsersPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/geocoding"
+                      element={
+                        <RequireAuth>
+                          <Suspense fallback={<Loader show />}>
+                            <GeocodingPage />
+                          </Suspense>
                         </RequireAuth>
                       }
                     />

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "as": "anon",
+    "method": "GET",
+    "path": "/api/users/owner"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": "owner@owner.com",
+      "result": true
+    }
+  }
+}

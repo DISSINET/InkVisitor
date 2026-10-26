@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/rp-c/relations"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "entityIds": [
+          "rp-c",
+          "c3"
+        ],
+        "id": "rp-rel-1",
+        "order": 0,
+        "type": "SCL"
+      },
+      {
+        "entityIds": [
+          "c1",
+          "c2",
+          "rp-c"
+        ],
+        "id": "rp-rel-2",
+        "type": "SYN"
+      }
+    ]
+  }
+}

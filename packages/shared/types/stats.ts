@@ -30,7 +30,7 @@ export enum Aggregation {
  * list into the audit query floods the db connection pool, so the explorer caps
  * it and tells the user when the cap was hit.
  */
-export const EXPLORE_STATS_ENTITY_LIMIT = 100;
+export const EXPLORE_STATS_ENTITY_LIMIT = 500;
 
 /**
  * Core temporal-aggregation params shared by the global stats request

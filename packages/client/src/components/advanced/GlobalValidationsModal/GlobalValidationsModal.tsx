@@ -174,7 +174,11 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
     setTempIndexToRemove(false);
   };
 
-  const handleUpdateValidation = (key: number, changes: Partial<ITerritoryValidation>) => {
+  const handleUpdateValidation = (
+    key: number,
+    changes: Partial<ITerritoryValidation>,
+    onError?: () => void,
+  ) => {
     const validationsCopy = deepCopy(validations as ITerritoryValidation[]);
     const updatedObject: ITerritoryValidation = {
       ...validationsCopy[key],
@@ -185,11 +189,14 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
       updatedObject,
       ...validationsCopy.slice(key + 1),
     ];
-    updateEntityMutation.mutate({
-      data: {
-        validations: newValidation,
+    updateEntityMutation.mutate(
+      {
+        data: {
+          validations: newValidation,
+        },
       },
-    });
+      { onError },
+    );
   };
 
   const settingsKeyVal = (key: ValidationKey) => {
@@ -222,7 +229,12 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
 
   return (
     <>
-      <Modal showModal={showModal} onClose={() => setShowGlobalValidations(false)} width={650}>
+      <Modal
+        showModal={showModal}
+        onClose={() => setShowGlobalValidations(false)}
+        onEnterPress={() => setShowGlobalValidations(false)}
+        width={650}
+      >
         <ModalHeader
           title="Global validations"
           icon={<PiSealCheckFill size={20} style={{ marginTop: "-2px" }} />}
@@ -285,14 +297,20 @@ export const GlobalValidationsModal: React.FC<GlobalValidationsModal> = ({
                 </StyledSectionHeader>
                 <StyledValidationList>
                   {(validations as ITerritoryValidation[])?.map((validation, key) => {
+                    // rules have no id; the length in the key remounts every
+                    // rule once one is added or removed, so no rule keeps the
+                    // state of the one that sat at its index before
                     return (
-                      <React.Fragment key={key}>
+                      <React.Fragment key={`${validations.length}-${key}`}>
                         <ValidationRule
                           key={key}
                           validation={validation}
                           entities={rootTerritory.entities}
-                          updateValidationRule={(changes: Partial<ITerritoryValidation>) => {
-                            handleUpdateValidation(key, changes);
+                          updateValidationRule={(
+                            changes: Partial<ITerritoryValidation>,
+                            onError?: () => void,
+                          ) => {
+                            handleUpdateValidation(key, changes, onError);
                           }}
                           removeValidationRule={() => {
                             setTempIndexToRemove(key);

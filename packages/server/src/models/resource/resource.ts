@@ -3,7 +3,7 @@ import Entity from "@models/entity/entity";
 import User from "@models/user/user";
 import { EntityEnums, UserEnums } from "@inkvisitor/shared/enums";
 import { IResource, IResourceData } from "@inkvisitor/shared/types/resource";
-import { Connection, RDatum, r as rethink } from "rethinkdb-ts";
+import { Conn, storage } from "@service/storage";
 
 class ResourceData implements IResourceData, IModel {
   url = "";
@@ -41,29 +41,43 @@ class Resource extends Entity implements IResource {
   }
 
   /**
-   * Editors may edit a Resource only when it is assigned to them in Manage
-   * Users (annotate right). Owner/Admin always can; Viewer never.
+   * Owner/Admin always may. An Editor may edit a Resource that has no document
+   * attached; a Resource that carries a document requires the annotate right
+   * (assigned in Manage Users). Viewer never.
    */
   canBeEditedByUser(user: User): boolean {
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
     if (user.role !== UserEnums.Role.Editor) {
       return false;
+    }
+    if (!this.data.documentId) {
+      return true;
     }
     return user.hasAnnotateRightForResource(this.id);
   }
 
   /**
-   * Editors may delete a Resource only when it is assigned to them in Manage
-   * Users (annotate right). Owner/Admin always can; Viewer never.
+   * Owner/Admin always may. An Editor may delete a Resource that has no document
+   * attached; a Resource that carries a document requires the annotate right.
+   * Viewer never.
    */
   canBeDeletedByUser(user: User): boolean {
     if (user.hasRole([UserEnums.Role.Owner, UserEnums.Role.Admin])) {
       return true;
     }
+    if (this.isTemplateWritableByUser(user)) {
+      return true;
+    }
     if (user.role !== UserEnums.Role.Editor) {
       return false;
+    }
+    if (!this.data.documentId) {
+      return true;
     }
     return user.hasAnnotateRightForResource(this.id);
   }
@@ -76,18 +90,10 @@ class Resource extends Entity implements IResource {
    * @returns
    */
   static async findByDocumentId(
-    conn: Connection,
+    conn: Conn,
     docId: string
   ): Promise<IResource | null> {
-    const result = await rethink
-      .table(Entity.table)
-      .filter({
-        class: EntityEnums.Class.Resource,
-        data: {
-          documentId: docId,
-        },
-      })
-      .run(conn);
+    const result = await storage.entities.resourcesByDocumentId(conn, docId);
 
     return result && result.length ? (result[0] as IResource) : null;
   }
@@ -96,25 +102,19 @@ class Resource extends Entity implements IResource {
    * Resources linking to any of the given documents. data.documentId is not
    * indexed, so this walks the whole entity table - one walk for the whole
    * list instead of one per document id.
-   * @param conn Connection database connection
+   * @param conn Conn database connection
    * @param docIds string[] list of document ids
    * @returns Promise<IResource[]> matching resources
    */
   static async findByDocumentIds(
-    conn: Connection,
+    conn: Conn,
     docIds: string[]
   ): Promise<IResource[]> {
     if (!docIds.length) {
       return [];
     }
 
-    const result = await rethink
-      .table(Entity.table)
-      .filter({ class: EntityEnums.Class.Resource })
-      .filter((row: RDatum) =>
-        rethink.expr(docIds).contains(row("data")("documentId").default(""))
-      )
-      .run(conn);
+    const result = await storage.entities.resourcesByDocumentIds(conn, docIds);
 
     return (result || []) as IResource[];
   }

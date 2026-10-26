@@ -1,0 +1,19 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "PUT",
+    "path": "/api/users/3",
+    "body": {
+      "name": "hacked"
+    }
+  },
+  "response": {
+    "status": 403,
+    "contentType": "application/json",
+    "body": {
+      "error": "PermissionDeniedError",
+      "message": "user cannot be saved",
+      "result": false
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "viewer",
+    "method": "GET",
+    "path": "/api/entities/nope/expansion?equivalents=true"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "EntityDoesNotExist",
+      "message": "entity nope was not found",
+      "result": false
+    }
+  }
+}

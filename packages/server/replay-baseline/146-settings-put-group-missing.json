@@ -1,0 +1,22 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "PUT",
+    "path": "/api/settings/group/nope",
+    "body": [
+      {
+        "id": "x",
+        "value": 1
+      }
+    ]
+  },
+  "response": {
+    "status": 404,
+    "contentType": "application/json",
+    "body": {
+      "error": "NotFound",
+      "message": "No group with key nope found",
+      "result": false
+    }
+  }
+}

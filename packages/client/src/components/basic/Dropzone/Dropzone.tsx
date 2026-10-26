@@ -6,6 +6,7 @@ import { EntityDragItem, ItemTypes } from "types";
 import {
   StyledAiOutlineWarning,
   StyledDropzone,
+  StyledDropzoneWrap,
   StyledIconWrap,
 } from "./DropzoneStyles";
 
@@ -52,23 +53,19 @@ export const Dropzone: React.FC<Dropzone> = ({
     }),
   });
 
-  const opacity = isOver ? 0.5 : 1;
-
   const theme = useTheme();
 
   return (
     <>
       {!disabled ? (
-        <span style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
-          <StyledDropzone ref={dropRef as any} style={{ opacity: opacity }}>
-            {children}
-          </StyledDropzone>
+        <StyledDropzoneWrap ref={dropRef as any}>
+          <StyledDropzone $isOver={isOver}>{children}</StyledDropzone>
           <StyledIconWrap>
             {isWrongDropCategory && isOver && (
               <StyledAiOutlineWarning size={22} color={theme.color.warning} />
             )}
           </StyledIconWrap>
-        </span>
+        </StyledDropzoneWrap>
       ) : (
         <>{children}</>
       )}

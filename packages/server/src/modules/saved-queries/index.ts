@@ -10,6 +10,7 @@ import {
   InternalServerError,
   NotFound,
   PermissionDeniedError,
+  SavedQueryNameNotUnique,
 } from "@inkvisitor/shared/types/errors";
 import SavedQuery from "@models/saved-query/saved-query";
 import { Router } from "express";
@@ -30,6 +31,14 @@ const canShare = (user: ModeratingUser): boolean =>
     UserEnums.Role.Admin,
     UserEnums.Role.Editor,
   ]);
+
+// the folder a query lands in decides which names it may not reuse, so the
+// message names that folder rather than the query it collided with (a user
+// cannot see another user's private queries)
+const nameTakenMessage = (shared: boolean): string =>
+  shared
+    ? "a shared query with this name already exists"
+    : "you already have a query with this name";
 
 const canModerate = (existing: SavedQuery, user: ModeratingUser): boolean => {
   // shared queries: admins/owners moderate any, editors only the ones they
@@ -81,6 +90,16 @@ export default Router()
         if (!model.isValid()) {
           throw new BadParams("name and data.query have to be set");
         }
+        if (
+          await SavedQuery.isNameTaken(
+            request.db.connection,
+            model.name,
+            model.shared,
+            model.ownerId
+          )
+        ) {
+          throw new SavedQueryNameNotUnique(nameTakenMessage(model.shared));
+        }
 
         const saved = await model.save(request.db.connection);
         if (!saved) {
@@ -126,6 +145,22 @@ export default Router()
         });
         if (!next.isValid()) {
           throw new BadParams("name and data.query have to be set");
+        }
+
+        // renaming and moving a query between folders both change which names
+        // it competes with, so either one re-runs the check
+        if (body.name !== undefined || body.shared !== undefined) {
+          if (
+            await SavedQuery.isNameTaken(
+              request.db.connection,
+              next.name,
+              next.shared,
+              existing.ownerId,
+              existing.id
+            )
+          ) {
+            throw new SavedQueryNameNotUnique(nameTakenMessage(next.shared));
+          }
         }
 
         const updateData: ISavedQueryUpdate = {};

@@ -146,11 +146,28 @@ export const PARAGRAPH_MARK_CAP_LEAD_PX = 1;
 /** Thickness of the mark's stems and cap, in CSS px (scaled by ratio at draw time). */
 export const PARAGRAPH_MARK_LINE_WIDTH_PX = 1;
 
-/** Height of selection/background highlight as a fraction of line height (0–1). Smaller = narrower band, centered in the line. */
+/**
+ * Height of the selection/background highlight band as a multiple of the font
+ * size. The band wraps the letters, whose size the line-spacing setting does not
+ * touch, so one height serves every spacing.
+ */
+export const HIGHLIGHT_HEIGHT_EM = 1.33;
+
+/**
+ * Height of selection/background highlight as a fraction of line height (0–1).
+ * The fallback for a caller that measures no text band (a host driving
+ * {@link Highlighter} directly, or a context without font metrics).
+ */
 export const HIGHLIGHT_HEIGHT_RATIO = 0.75;
 
-/** Pixels to raise the underline above the bottom of the line band (UNDERLINE mode). Larger = smaller margin below text. */
-export const UNDERLINE_OFFSET_PX = 2;
+/**
+ * Distance in CSS px from the bottom of the text band down to the top of the
+ * underline bar (UNDERLINE mode), scaled by the device pixel ratio at draw time.
+ * Measured against the band rather than the line box, so the bar keeps its
+ * distance from the words at any line spacing. Negative values lift it into the
+ * band; the bar is clamped to stay inside the line.
+ */
+export const UNDERLINE_OFFSET_PX = 0;
 
 /**
  * #2325 — an entity span (BACKGROUND fill, UNDERLINE) leaves this many CSS px
@@ -159,8 +176,13 @@ export const UNDERLINE_OFFSET_PX = 2;
  * between them; each giving up its own edge parts them by twice this value, so
  * the layer underneath shows through as a separator and the pair reads as two
  * anchors. Applied only at a span's true start/end, never at soft-wrap edges.
+ *
+ * Fractional on purpose: a monospace cell holds almost no side bearing on a wide
+ * glyph (m, w), so a full pixel bitten off the leading edge puts the fill inside
+ * the ink. A sub-pixel inset lands as an antialiased edge — the separator still
+ * reads, and the glyph keeps its cell.
  */
-export const HIGHLIGHT_SPAN_EDGE_GAP_PX = 1;
+export const HIGHLIGHT_SPAN_EDGE_GAP_PX = 0.75;
 
 /** Fraction of one line height scrolled per frame while the pointer is outside the canvas (smooth autoscroll). */
 export const SELECTION_EDGE_SCROLL_SPEED = 0.22;
@@ -189,8 +211,18 @@ export const SELECTION_HANDLE_GRAB_CHAR_FACTOR = 1;
  * it. All values are in CSS px / line-relative ratios and scaled by the device
  * pixel ratio at draw time.
  */
-/** Vertical arm length as a fraction of one line height. */
-export const ANCHOR_MARKER_ARM_H_RATIO = 0.7;
+/**
+ * Vertical arm length as a multiple of the font size. Keyed to the text rather
+ * than to the line box: the marker frames the letters, whose size is unchanged
+ * by the line-spacing setting, so one glyph height serves every spacing.
+ */
+export const ANCHOR_MARKER_ARM_H_EM = 1.24;
+/**
+ * Ceiling on the arm length as a fraction of one line height. At the tightest
+ * spacings a font-sized arm would reach into the rows above and below, where it
+ * reads as a marker on the neighbouring line.
+ */
+export const ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO = 0.8;
 /** Horizontal arm length as a fraction of one character width. */
 export const ANCHOR_MARKER_ARM_W_RATIO = 0.8;
 /** Stroke width of the corner glyph, in CSS px (scaled by ratio at draw time). */

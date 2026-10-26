@@ -7,6 +7,22 @@ import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeSc
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { useTreeQuery } from "./react-query/useTreeQuery";
 
+// delayed so the tree has rendered any expand/collapse before measuring
+export const scrollToTerritoryInTree = (territoryId: string, treeFilterOpen: boolean) => {
+  setTimeout(() => {
+    const territoryInTree = document.getElementById(`territory${territoryId}`);
+    const territoryBox = document.getElementById(`Territories-box-content`);
+
+    // TODO: filter opened to choose scroll offset
+    if (territoryBox && territoryInTree) {
+      territoryBox?.scrollTo({
+        behavior: territoryInTree ? "smooth" : "auto",
+        top: territoryInTree ? territoryInTree.offsetTop - (treeFilterOpen ? 165 : 104) : 0,
+      });
+    }
+  }, 300);
+};
+
 const ScrollHandler = () => {
   const { statementId, territoryId } = useSearchParams();
 
@@ -57,18 +73,7 @@ const ScrollHandler = () => {
   useEffect(() => {
     if (treeStatus === "success" && !isFetchingTree) {
       if (!disableTreeScroll) {
-        setTimeout(() => {
-          const territoryInTree = document.getElementById(`territory${territoryId}`);
-          const territoryBox = document.getElementById(`Territories-box-content`);
-
-          // TODO: filter opened to choose scroll offset
-          if (territoryBox && territoryInTree) {
-            territoryBox?.scrollTo({
-              behavior: territoryInTree ? "smooth" : "auto",
-              top: territoryInTree ? territoryInTree.offsetTop - (treeFilterOpen ? 165 : 104) : 0,
-            });
-          }
-        }, 300);
+        scrollToTerritoryInTree(territoryId, treeFilterOpen);
       } else {
         dispatch(setDisableTreeScroll(false));
       }

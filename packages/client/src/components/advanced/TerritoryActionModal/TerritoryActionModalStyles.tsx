@@ -24,11 +24,13 @@ export const StyledBlueText = styled.p`
   color: ${({ theme }) => theme.color.success};
   font-weight: bold;
   margin-bottom: 0.2rem;
+  white-space: nowrap;
 `;
 export const StyledGreyText = styled.p`
   color: ${({ theme }) => theme.color.greyer};
   font-weight: bold;
   margin-bottom: 0.2rem;
+  white-space: nowrap;
 `;
 export const StyledInto = styled.i`
   margin-bottom: 0.5rem;
@@ -72,13 +74,4 @@ export const StyledTagList = styled.div`
 export const StyledTagWrap = styled.div`
   margin-bottom: 0.3rem;
   margin-right: 0.3rem;
-`;
-
-export const StyledNotes = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  margin-top: 2rem;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

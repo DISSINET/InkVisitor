@@ -16,6 +16,7 @@ const useDragDrop = ({
   entity,
   isTemplate,
   isDiscouraged,
+  entityIsReadOnly,
   propId,
   entityClass,
   disableDrag,
@@ -30,6 +31,7 @@ const useDragDrop = ({
   entity: IEntity | undefined;
   isTemplate: boolean;
   isDiscouraged: boolean;
+  entityIsReadOnly?: boolean;
   propId: string;
   entityClass: EntityEnums.ExtendedClass;
   disableDrag: boolean;
@@ -67,6 +69,7 @@ const useDragDrop = ({
       entityClass: entityClass as EntityEnums.Class,
       isTemplate,
       isDiscouraged,
+      entityIsReadOnly,
       entity: entity || false,
     },
     collect: (monitor: DragSourceMonitor) => ({

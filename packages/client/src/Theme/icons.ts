@@ -2,7 +2,6 @@
 
 // ai
 export { AiOutlineApartment as IcoApartment } from "react-icons/ai";
-export { AiOutlineCaretRight as IcoCaretRight } from "react-icons/ai";
 export { AiOutlineLink as IcoLinkOutline } from "react-icons/ai";
 export { AiOutlineTag as IcoTagOutline } from "react-icons/ai";
 export { AiOutlineTags as IcoTagsOutline } from "react-icons/ai";
@@ -74,6 +73,7 @@ export { FaFolder as IcoFolder } from "react-icons/fa";
 export { FaFolderOpen as IcoFolderOpen } from "react-icons/fa";
 export { FaGripVertical as IcoDragHandle } from "react-icons/fa";
 export { FaHeadSideVirus as IcoHeadVirus } from "react-icons/fa";
+export { FaMapMarkedAlt as IcoMapMarked } from "react-icons/fa";
 export { FaHighlighter as IcoHighlighter } from "react-icons/fa";
 export { FaHome as IcoHome } from "react-icons/fa";
 export { FaLink as IcoLink } from "react-icons/fa";
@@ -129,6 +129,47 @@ export { FaX as IcoX } from "react-icons/fa6";
 // fi
 export { FiLogIn as IcoLogin } from "react-icons/fi";
 export { FiMove as IcoMove } from "react-icons/fi";
+
+// the thirteen place types, from one uniform-stroke set drawn for interface
+// sizes — a detailed mark loses its detail at 16px and becomes a smudge, which
+// is what a village of nine little roofs became
+export { TbAnchor as IcoPlacePort } from "react-icons/tb";
+export { TbBeach as IcoPlaceIsland } from "react-icons/tb";
+export { TbBuildingArch as IcoPlaceArchaeological } from "react-icons/tb";
+export { TbBuildingChurch as IcoPlaceReligious } from "react-icons/tb";
+export { TbBuildingCommunity as IcoPlaceSettlement } from "react-icons/tb";
+export { TbBuildingFortress as IcoPlaceFortress } from "react-icons/tb";
+export { TbDroplet as IcoPlaceLake } from "react-icons/tb";
+export { TbQuestionMark as IcoPlaceUnknown } from "react-icons/tb";
+export { TbMap2 as IcoPlaceRegion } from "react-icons/tb";
+export { TbPolygon as IcoDrawShape } from "react-icons/tb";
+export { TbMountain as IcoPlaceMountain } from "react-icons/tb";
+export { TbRipple as IcoPlaceRiver } from "react-icons/tb";
+export { TbRoad as IcoPlaceRoad } from "react-icons/tb";
+export { TbSwords as IcoPlaceBattlefield } from "react-icons/tb";
+export { TbBook2 as IcoSource } from "react-icons/tb";
+export { TbBuildingCastle as IcoPlaceCastle } from "react-icons/tb";
+export { TbBuildingBridge as IcoPlaceBridge } from "react-icons/tb";
+export { TbBuildingMonument as IcoPlaceMonument } from "react-icons/tb";
+export { TbTower as IcoPlaceTower } from "react-icons/tb";
+export { TbHome as IcoPlaceHouse } from "react-icons/tb";
+export { TbBuildingWarehouse as IcoPlaceWarehouse } from "react-icons/tb";
+export { TbSchool as IcoPlaceSchool } from "react-icons/tb";
+export { TbBuildingHospital as IcoPlaceHospital } from "react-icons/tb";
+export { TbTrees as IcoPlaceForest } from "react-icons/tb";
+export { TbWall as IcoPlaceWall } from "react-icons/tb";
+export { TbTent as IcoPlaceTent } from "react-icons/tb";
+export { TbBuildingLighthouse as IcoPlaceLighthouse } from "react-icons/tb";
+export { TbShip as IcoPlaceShip } from "react-icons/tb";
+export { TbPick as IcoPlaceMine } from "react-icons/tb";
+export { TbCross as IcoPlaceCross } from "react-icons/tb";
+export { TbMoon as IcoPlaceMoon } from "react-icons/tb";
+export { TbStar as IcoPlaceStar } from "react-icons/tb";
+export { TbGrave2 as IcoPlaceGrave } from "react-icons/tb";
+export { TbFountain as IcoPlaceFountain } from "react-icons/tb";
+export { TbWheat as IcoPlaceWheat } from "react-icons/tb";
+export { TbFlag as IcoPlaceFlag } from "react-icons/tb";
+export { TbHorse as IcoPlaceHorse } from "react-icons/tb";
 
 // gr
 export { GrClone as IcoCloneAlt } from "react-icons/gr";
@@ -209,6 +250,7 @@ export { RiRotateLockLine as IcoRotateLock } from "react-icons/ri";
 export { RiTimeLine as IcoTimeline } from "react-icons/ri";
 
 // rx
+export { RxCaretRight as IcoCaretRight } from "react-icons/rx";
 export { RxFileText as IcoFileText } from "react-icons/rx";
 
 // tb
@@ -225,6 +267,18 @@ export { TbLockPlus as IcoLockAdd } from "react-icons/tb";
 export { TbMailFilled as IcoMailFilled } from "react-icons/tb";
 export { TbReplace as IcoReplaceTb } from "react-icons/tb";
 export { TbSettings as IcoSettings } from "react-icons/tb";
+export { TbStack2 as IcoLayers } from "react-icons/tb";
+export { TbFilter as IcoFilter } from "react-icons/tb";
+/** One mark per GeoJSON geometry type, for the coordinate tag. */
+export { TbMapPin as IcoGeomPoint } from "react-icons/tb";
+export { TbMapPins as IcoGeomMultiPoint } from "react-icons/tb";
+export { TbRoute as IcoGeomLine } from "react-icons/tb";
+export { TbRoute2 as IcoGeomMultiLine } from "react-icons/tb";
+export { TbPolygon as IcoGeomPolygon } from "react-icons/tb";
+export { TbHexagons as IcoGeomMultiPolygon } from "react-icons/tb";
+export { TbCurrentLocation as IcoFlyTo } from "react-icons/tb";
+/** Starting a geocoding run. One mark for the verb, wherever it is offered. */
+export { TbMapSearch as IcoGeocode } from "react-icons/tb";
 
 // ti
 export { TiDocumentText as IcoDocumentText } from "react-icons/ti";
@@ -240,3 +294,31 @@ export { VscClose as IcoCloseVsc } from "react-icons/vsc";
 export { VscCloseAll as IcoCloseAll } from "react-icons/vsc";
 export { VscCommentDiscussion as IcoCommentDiscussion } from "react-icons/vsc";
 export { VscDebugDisconnect as IcoDisconnect } from "react-icons/vsc";
+export { TbBuildingBank as IcoPlaceBank } from "react-icons/tb";
+export { TbCoin as IcoPlaceMarket } from "react-icons/tb";
+export { TbBuildingStore as IcoPlaceShop } from "react-icons/tb";
+export { TbBuildingFactory as IcoPlaceFactory } from "react-icons/tb";
+export { TbHammer as IcoPlaceWorkshop } from "react-icons/tb";
+export { TbBed as IcoPlaceInn } from "react-icons/tb";
+export { TbBeer as IcoPlaceTavern } from "react-icons/tb";
+export { TbBooks as IcoPlaceLibrary } from "react-icons/tb";
+export { TbBell as IcoPlaceBell } from "react-icons/tb";
+export { TbMosque as IcoPlaceMosque } from "react-icons/tb";
+export { TbTorii as IcoPlaceShrine } from "react-icons/tb";
+export { TbPyramid as IcoPlacePyramid } from "react-icons/tb";
+export { TbWindmill as IcoPlaceWindmill } from "react-icons/tb";
+export { TbTree as IcoPlaceTree } from "react-icons/tb";
+export { TbFish as IcoPlaceFish } from "react-icons/tb";
+export { TbVolcano as IcoPlaceVolcano } from "react-icons/tb";
+export { TbCactus as IcoPlaceDesert } from "react-icons/tb";
+export { TbSailboat as IcoPlaceSailboat } from "react-icons/tb";
+export { TbTrain as IcoPlaceRailway } from "react-icons/tb";
+export { TbDoor as IcoPlaceGate } from "react-icons/tb";
+export { TbCampfire as IcoPlaceCamp } from "react-icons/tb";
+export { TbCrown as IcoPlaceCrown } from "react-icons/tb";
+export { TbShield as IcoPlaceShield } from "react-icons/tb";
+export { TbSkull as IcoPlaceSkull } from "react-icons/tb";
+export { TbKey as IcoPlaceKey } from "react-icons/tb";
+export { TbCompass as IcoPlaceCompass } from "react-icons/tb";
+export { TbMapPin as IcoPlacePin } from "react-icons/tb";
+export { TbFlame as IcoPlaceFire } from "react-icons/tb";

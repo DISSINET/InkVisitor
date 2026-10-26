@@ -7,24 +7,42 @@ const checkmarkPop = keyframes`
   100% { transform: scale(1); }
 `;
 
-export const StyledCheckbox = styled.div`
-  color: ${({ theme }) => theme.color["black"]};
+// the box and its label form one control: the gap between them lives inside
+// this element so moving across it never leaves the hovered area
+interface StyledCheckbox {
+  $disabled?: boolean;
+}
+export const StyledCheckbox = styled.div<StyledCheckbox>`
+  color: ${({ theme, $disabled }) =>
+    $disabled ? theme.color["gray"][500] : theme.color["black"]};
   display: flex;
   align-items: center;
+  gap: 0.4rem;
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  width: fit-content;
+  ${({ $disabled }) =>
+    $disabled &&
+    css`
+      & * {
+        cursor: not-allowed;
+      }
+    `}
 `;
 
-// declared ahead of the indicator, which selects on it to share its hover state
-export const StyledLabel = styled.label`
+interface StyledLabel {
+  $disabled?: boolean;
+}
+export const StyledLabel = styled.label<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  margin-left: 0.2rem;
   user-select: none;
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   display: flex;
   align-items: center;
 `;
 
 interface StyledCheckboxIndicator {
   $checked: boolean;
+  $disabled?: boolean;
   $size: number;
   // accent colour for the border and checkmark when checked (defaults to "info")
   $color: FlatThemeColor;
@@ -42,22 +60,28 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   width: ${({ $size }) => $size}px;
   height: ${({ $size }) => $size}px;
   border: 2px solid
-    ${({ theme, $checked, $color }) =>
-      $checked ? theme.color[$color] : theme.color["gray"][400]};
+    ${({ theme, $checked, $color, $disabled }) =>
+      $disabled
+        ? theme.color["gray"][400]
+        : $checked
+          ? theme.color[$color]
+          : theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  background-color: ${({ theme, $checked, $color, $noFill }) =>
-    $checked && !$noFill ? theme.color[$color] : theme.color["white"]};
-  cursor: pointer;
+  background-color: ${({ theme, $checked, $color, $noFill, $disabled }) =>
+    $checked && !$noFill && !$disabled
+      ? theme.color[$color]
+      : theme.color["white"]};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   /* transition:
     background-color 0.15s ease,
     border-color 0.15s ease; */
 
   /* the label reads as part of the control, so it shares the box's hover state;
      keyboard focus reuses the same accent border cue */
-  &:hover,
   &:focus-visible,
-  ${StyledCheckbox}:has(${StyledLabel}:hover) & {
-    border-color: ${({ theme, $color }) => theme.color[$color]};
+  ${StyledCheckbox}:hover & {
+    border-color: ${({ theme, $color, $disabled }) =>
+      $disabled ? theme.color["gray"][400] : theme.color[$color]};
   }
 
   &:focus-visible {
@@ -65,8 +89,12 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   }
 
   svg {
-    color: ${({ theme, $color, $noFill }) =>
-      $noFill ? theme.color[$color] : theme.color["white"]};
+    color: ${({ theme, $color, $noFill, $disabled }) =>
+      $disabled
+        ? theme.color["gray"][500]
+        : $noFill
+          ? theme.color[$color]
+          : theme.color["white"]};
     ${({ $checked }) =>
       $checked &&
       css`
@@ -75,10 +103,9 @@ export const StyledCheckboxIndicator = styled.span<StyledCheckboxIndicator>`
   }
 `;
 
-export const StyledCheckboxWrapper = styled.span<{ $hasLabel?: boolean }>`
+export const StyledCheckboxWrapper = styled.span`
   display: flex;
   cursor: pointer;
-  margin-right: ${({ $hasLabel }) => ($hasLabel ? "0.2rem" : "0")};
 `;
 interface StyledIconOnlyCheckbox {
   $checked?: boolean;

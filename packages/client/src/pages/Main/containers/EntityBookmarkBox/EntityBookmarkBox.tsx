@@ -263,8 +263,8 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       <Submit
-        title={`Delete Bookmark folder ${removingFolderName}`}
-        text={`Do you really want do delete Bookmark folder ${removingFolderName}?`}
+        title={`Remove Bookmark folder ${removingFolderName}`}
+        text={`Do you really want to remove Bookmark folder ${removingFolderName}?`}
         show={removingFolder != false}
         onSubmit={() => acceptRemoveFolderMutation.mutate()}
         onCancel={() => cancelRemoveFolder()}

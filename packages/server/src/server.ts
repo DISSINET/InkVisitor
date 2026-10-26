@@ -19,13 +19,14 @@ import SettingsRouter from "@modules/settings";
 import DocumentsRouter from "@modules/documents";
 import BackupsRouter from "@modules/backups";
 import SavedQueriesRouter from "@modules/saved-queries";
+import GeocodingRouter from "@modules/geocoding";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
 import dbMiddleware from "@middlewares/db";
 import profilerMiddleware from "@middlewares/profiler";
 import headersProtectionMiddleware from "@middlewares/headers-protection";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
-import serveClientApp from "@middlewares/static-client";
+import serveClientApp, { serveAsset } from "@middlewares/static-client";
 import { authenticateRequest } from "@middlewares/auth";
 import {
   cookieParserMiddleware,
@@ -36,9 +37,9 @@ import rateLimit from "express-rate-limit";
 import "@models/events/register";
 import { Request, Response } from "express";
 import { TooManyRequestsError } from "@inkvisitor/shared/types/errors";
-import { r as rethink } from "rethinkdb-ts";
 import timeout from "connect-timeout";
 import { pool } from "@middlewares/db";
+import { storage } from "@service/storage";
 
 const server = express();
 
@@ -58,6 +59,13 @@ server.use(
       if (req.path.includes("/backups/download")) {
         return false;
       }
+      // Server-Sent Events frames must reach the browser as they are written
+      if (
+        req.path.endsWith("/geocoding/suggest/stream") ||
+        req.path.endsWith("/geocoding/state/stream")
+      ) {
+        return false;
+      }
       return compression.filter(req, res);
     },
   })
@@ -69,14 +77,31 @@ const staticPath = process.env.STATIC_PATH;
 if (staticPath === "/") {
   server.use(serveClientApp);
 } else if (staticPath) {
-  server.use(staticPath, express.static("../client/dist"));
+  server.use(staticPath, serveAsset);
 }
 
 server.use(express.json({ limit: "150mb" }));
 server.use(express.urlencoded({ extended: true, limit: "150mb" }));
-server.use((req, res, next) =>
-  timeout(req.path.endsWith("/backups/download") ? "5m" : "20s")(req, res, next)
-);
+const requestTimeout = (path: string): string | null => {
+  if (
+    path.endsWith("/backups/download") ||
+    path.endsWith("/geocoding/suggest/stream")
+  ) {
+    return "5m";
+  }
+  // the engine state watch stays open until the browser closes it
+  if (path.endsWith("/geocoding/state/stream")) {
+    return null;
+  }
+  return "20s";
+};
+server.use((req, res, next) => {
+  const limit = requestTimeout(req.path);
+  if (limit === null) {
+    return next();
+  }
+  timeout(limit)(req, res, next);
+});
 
 if (process.env.NODE_ENV === "development") {
   server.use(morgan("dev"));
@@ -86,20 +111,20 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
-if (process.env.NODE_ENV !== "development") {
-  server.use(
-    `${apiPath}/users/signin`,
-    rateLimit({
-      windowMs: 5 * 60 * 1000,
-      max: 5,
-      handler: (req: Request, res: Response, next: NextFunction, options) => {
-        throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
-      },
-      standardHeaders: true,
-      legacyHeaders: false,
-    })
-  );
-}
+server.use(
+  // the signin route is reachable under both router mounts; one limiter
+  // instance listed on both paths keeps a single bucket per client
+  [`${apiPath}/users/signin`, `${apiPathOld}/users/signin`],
+  rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 5,
+    handler: (req: Request, res: Response, next: NextFunction, options) => {
+      throw new TooManyRequestsError(`${TooManyRequestsError.title}: try again in 5 minutes`);
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 server.use(headersProtectionMiddleware);
 server.use(profilerMiddleware);
@@ -109,16 +134,26 @@ server.use(csrfProtection);
 server.use(apiPath, dbMiddleware);
 
 server.use(authenticateRequest);
-server.use(customizeRequest);
+// customizeRequest reads req.db, which only dbMiddleware sets, so both mount on
+// the same prefix. The browser sends the session cookie for every path of the
+// origin, so authenticateRequest resolves a user on non-api paths too - static
+// assets, the SPA fallback, unknown routes - where no db handle exists.
+server.use(apiPath, customizeRequest);
 
 const router = Router();
 server.use(apiPath, router);
 server.use(apiPathOld, router);
 
+// The Dockerfile CMD passes the image build timestamp as the process's first
+// argument; clients watch it across /health responses to detect a new deploy.
+// Empty outside the container (local dev runs pass no argument).
+const buildTimestamp = process.argv[2] || "";
+
 router.get("/health", async function (req, res) {
-  await rethink.tableList().run(req.db.connection);
+  await storage.tableList(req.db.connection);
   res.json({
     result: true,
+    buildTimestamp,
     db: {
       pool: {
         size: pool.pool.size,
@@ -157,6 +192,7 @@ router.use("/pythondata", PythonApiRouter);
 router.use("/settings", SettingsRouter);
 router.use("/backups", BackupsRouter);
 router.use("/saved-queries", SavedQueriesRouter);
+router.use("/geocoding", GeocodingRouter);
 
 server.all("*", catchAll);
 

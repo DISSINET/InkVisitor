@@ -3,7 +3,7 @@ import Group from "@models/group/group";
 import Location from "@models/location/location";
 import Person from "@models/person/person";
 import { newMockRequest } from "@modules/common.test";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { EntityEnums, StatementEnums, WarningTypeEnums } from "@inkvisitor/shared/enums";
 import { IEntity } from "@inkvisitor/shared/types";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";

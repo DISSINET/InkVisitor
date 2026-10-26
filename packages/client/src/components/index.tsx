@@ -21,6 +21,7 @@ import { IconFont } from "./basic/IconFont/IconFont";
 import { Input } from "./basic/Input/Input";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Loader } from "./basic/Loader/Loader";
+import { RoleBadge } from "./basic/RoleBadge/RoleBadge";
 import { Message } from "./basic/Message/Message";
 import { WarningIcon } from "./basic/Message/WarningIcon";
 import {
@@ -77,6 +78,7 @@ export {
   Input,
   LetterIcon,
   Loader,
+  RoleBadge,
   Message,
   Modal,
   ModalCard,

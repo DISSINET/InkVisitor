@@ -9,6 +9,7 @@
 import { Annotator } from "./lib/Annotator";
 import { EditMode, HighlightMode } from "./lib/constants";
 import { drawAnchorMarker } from "./lib/AnchorMarker";
+import Highlighter from "./lib/Highlighter";
 
 jest.mock("./lib/AnchorMarker", () => ({
   // Return a plausible bounding box keyed off the draw coords so the recorded
@@ -90,6 +91,55 @@ describe("Annotator draws Territory anchor markers (#2887)", () => {
     expect(byKind("end")[2]).toBe(byKind("start")[2]);
     // …and to its right, after the line's last character.
     expect(byKind("end")[1]).toBeGreaterThan(byKind("start")[1]);
+  });
+
+  test("the arm height follows the font size, not the line spacing", () => {
+    // The marker frames the letters; letters do not shrink when the lines are
+    // pulled together, so neither does the marker.
+    const armFor = (lineHeightRatio: number): number => {
+      markerMock.mockClear();
+      const a = mk("foo <T1>bar</T1> baz");
+      a.setMode(EditMode.HIGHLIGHT);
+      a.onHighlight(() => anchorSchema);
+      a.setLineHeightRatio(lineHeightRatio);
+      a.draw();
+      return markerMock.mock.calls[0][4].armH;
+    };
+    expect(armFor(2.5)).toBe(armFor(1.8));
+  });
+
+  test("a spacing too tight for a font-sized arm clamps it to the line", () => {
+    markerMock.mockClear();
+    const a = mk("foo <T1>bar</T1> baz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => anchorSchema);
+    a.setLineHeightRatio(1);
+    a.draw();
+    expect(markerMock.mock.calls[0][4].armH).toBeLessThan(a.lineHeight);
+  });
+
+  test("the marker centres on the capitals, not on the line box", () => {
+    // `textBaseline = "middle"` centres the em box, whose descender room a
+    // capital leaves empty, so the letters sit above the centre of the line.
+    markerMock.mockClear();
+    const a = mk("foo <T1>bar</T1> baz");
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => anchorSchema);
+    const ctx = (a as any).ctx as CanvasRenderingContext2D;
+    const measure = ctx.measureText.bind(ctx);
+    ctx.measureText = (t: string) =>
+      ({
+        ...measure(t),
+        actualBoundingBoxAscent: 10,
+        actualBoundingBoxDescent: 2,
+      } as TextMetrics);
+    // The metrics are memoized per font string, and this canvas was already
+    // measured (font-less jsdom, offset 0) by the draws above.
+    (a as any).capBandOffsetCache = undefined;
+    a.draw();
+
+    const yMid = markerMock.mock.calls[0][2];
+    expect(yMid).toBe(0.5 * a.lineHeight + (2 - 10) / 2);
   });
 
   test("no markers drawn when no ANCHOR schema is returned", () => {
@@ -220,5 +270,48 @@ describe("anchor markers during anchor resize (#2885)", () => {
     const kinds = markerMock.mock.calls.map((c) => c[3]);
     expect(kinds).toContain("start");
     expect(kinds).toContain("end");
+  });
+});
+
+// The active territory's FOCUS wash dims everything outside its span. With
+// several spans of one territory the washes would stack over the whole text, so
+// the wash is drawn only when the territory is anchored exactly once.
+describe("Active territory FOCUS wash", () => {
+  const focusSchemas = () => [
+    { mode: HighlightMode.FOCUS, style: { color: "#2079DF", opacity: 0.1 } },
+    anchorSchema,
+  ];
+
+  const drawnFocusCount = (text: string): number => {
+    const drawSpy = jest.spyOn(Highlighter.prototype, "draw");
+    const a = mk(text);
+    a.setMode(EditMode.HIGHLIGHT);
+    a.onHighlight(() => focusSchemas());
+    drawSpy.mockClear();
+    a.draw();
+    const count = drawSpy.mock.contexts.filter(
+      (h: unknown) => (h as Highlighter).hlMode === HighlightMode.FOCUS
+    ).length;
+    drawSpy.mockRestore();
+    return count;
+  };
+
+  test("a territory anchored once draws the wash", () => {
+    expect(drawnFocusCount("foo <T1>bar</T1> baz")).toBe(1);
+  });
+
+  test("a territory anchored twice draws no wash but keeps its markers", () => {
+    expect(drawnFocusCount("<T1>foo</T1> bar <T1>baz</T1>")).toBe(0);
+    const kinds = markerMock.mock.calls.map((c) => c[3]);
+    expect(kinds.filter((k) => k === "start")).toHaveLength(2);
+  });
+
+  test("an unpaired opening tag before the anchor drops the wash", () => {
+    // Pairing by index would span from the stray opening tag to the real close.
+    expect(drawnFocusCount("<T1>foo bar <T1>baz</T1>")).toBe(0);
+  });
+
+  test("an unpaired closing tag drops the wash", () => {
+    expect(drawnFocusCount("foo</T1> bar <T1>baz</T1>")).toBe(0);
   });
 });

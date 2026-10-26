@@ -11,19 +11,23 @@ import { IExtendedResponseTree, ITerritoryFilter } from "types";
 export function filterTreeByFilters(
   node: IResponseTree | null,
   filters: ITerritoryFilter,
-  favoriteIds: string[]
+  favoriteIds: string[],
+  documentTerritoryIds: Set<string>
 ): IResponseTree | null {
   if (!node) {
     return null;
   }
 
-  // a match keeps its subtree whole, so the children under a hit stay browsable
-  if (isNodeMatchingFilters(node, filters, favoriteIds)) {
-    return node;
-  }
-
+  // the match test belongs to the child, not to the node itself: the walk starts
+  // at the root, which satisfies the structural filters and would carry the whole
+  // tree through as a single hit
   const filteredChildren = node.children
-    .map((child) => filterTreeByFilters(child, filters, favoriteIds))
+    .map((child) =>
+      // a match keeps its subtree whole, so the children under a hit stay browsable
+      isNodeMatchingFilters(child, filters, favoriteIds, documentTerritoryIds)
+        ? child
+        : filterTreeByFilters(child, filters, favoriteIds, documentTerritoryIds)
+    )
     .filter((child): child is IResponseTree => child !== null);
 
   if (filteredChildren.length > 0) {
@@ -36,16 +40,22 @@ export function filterTreeByFilters(
 export function markNodesWithFilters(
   node: IResponseTree,
   filters: ITerritoryFilter,
-  favoriteIds: string[]
+  favoriteIds: string[],
+  documentTerritoryIds: Set<string>
 ): IExtendedResponseTree {
   const extendedNode: IExtendedResponseTree = {
     ...node,
-    foundByRecursion: isNodeMatchingFilters(node, filters, favoriteIds),
+    foundByRecursion: isNodeMatchingFilters(
+      node,
+      filters,
+      favoriteIds,
+      documentTerritoryIds
+    ),
     children: [],
   };
 
   extendedNode.children = node.children.map((child) =>
-    markNodesWithFilters(child, filters, favoriteIds)
+    markNodesWithFilters(child, filters, favoriteIds, documentTerritoryIds)
   );
 
   return extendedNode;
@@ -54,13 +64,15 @@ export function markNodesWithFilters(
 function isNodeMatchingFilters(
   node: IResponseTree,
   filters: ITerritoryFilter,
-  favoriteIds: string[]
+  favoriteIds: string[],
+  documentTerritoryIds: Set<string>
 ): boolean {
   const {
     starred,
     editorRights,
     withSubterritories,
     withStatements,
+    withDocument,
     filter: targetLabel,
     operator = "and", // default to "and" if not specified
   } = filters;
@@ -71,15 +83,22 @@ function isNodeMatchingFilters(
   const meetsWithSubterritoriesCondition = withSubterritories
     ? node.children.length > 0
     : true;
+  const meetsWithDocumentCondition = withDocument
+    ? documentTerritoryIds.has(node.territory.id)
+    : true;
   const meetsStarredCondition = starred
     ? favoriteIds.includes(node.territory.id)
     : true;
   const meetsEditorRightsCondition = editorRights
     ? node.right === UserEnums.RoleMode.Write
     : true;
+  // an entity may carry an empty labels array (see isFirstLabelEmpty), so the
+  // first label is not guaranteed to be there to lowercase
   const meetsFilterCondition =
     targetLabel.length === 0 ||
-    node.territory.labels[0].toLowerCase().includes(targetLabel.toLowerCase());
+    (node.territory.labels[0] ?? "")
+      .toLowerCase()
+      .includes(targetLabel.toLowerCase());
 
   // Apply AND/OR logic based on operator
   if (operator === "or") {
@@ -87,6 +106,7 @@ function isNodeMatchingFilters(
     const activeConditions = [
       withStatements ? meetsWithStatementsCondition : null,
       withSubterritories ? meetsWithSubterritoriesCondition : null,
+      withDocument ? meetsWithDocumentCondition : null,
       starred ? meetsStarredCondition : null,
       editorRights ? meetsEditorRightsCondition : null,
       targetLabel.length > 0 ? meetsFilterCondition : null,
@@ -104,6 +124,7 @@ function isNodeMatchingFilters(
     return (
       meetsWithStatementsCondition &&
       meetsWithSubterritoriesCondition &&
+      meetsWithDocumentCondition &&
       meetsStarredCondition &&
       meetsEditorRightsCondition &&
       meetsFilterCondition

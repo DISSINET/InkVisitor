@@ -2,8 +2,8 @@ import { Response, Request, NextFunction } from "express";
 
 const threshold = 200; // 200 ms
 
-// Slow query logging is on unless LOG_SLOW_QUERIES explicitly disables it, so
-// an unset variable keeps the previous behaviour.
+// Slow query logging is on unless LOG_SLOW_QUERIES explicitly disables it; an
+// unset variable leaves it enabled.
 const enabled = !["0", "false", "no", "off"].includes(
   (process.env.LOG_SLOW_QUERIES || "").trim().toLowerCase()
 );

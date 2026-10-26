@@ -14,17 +14,19 @@ import { Explore } from "@inkvisitor/shared/types/query";
 import api from "api";
 import { Box, Button, Checkbox, IconButton, Panel, SwitchGroup } from "components";
 import { LayoutSeparatorHorizontal, LayoutSeparatorVertical } from "components/advanced";
+import { isAnyLayerOpen } from "components/basic/Modal/layerStack";
 import { useUserQuery } from "hooks/react-query";
+import { DetailPanelRevealProvider } from "hooks/useDetailPanelReveal";
 import { useSearchParams } from "hooks/useSearchParamsContext";
 import { MemoizedEntityDetailBox } from "pages/Main/containers/EntityDetailBox/EntityDetailBox";
+import { MemoizedStatementEditorBox } from "pages/Main/containers/StatementEditorBox/StatementEditorBox";
 import { BiBarChartAlt2, BiHide, BiRefresh, BiTable } from "react-icons/bi";
-import { IcoSearch } from "Theme/icons";
+import { IcoHide, IcoSearch, IcoSquareFill } from "Theme/icons";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
-import { VscCloseAll } from "react-icons/vsc";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { COLLAPSED_PANEL_WIDTH } from "Theme/constants";
+import { COLLAPSED_PANEL_WIDTH, hiddenBoxHeight, maxTabCount } from "Theme/constants";
 import {
   animateBoxHeightVars,
   animatePanelWidthVars,
@@ -34,6 +36,8 @@ import {
 import { floorNumberToOneDecimal } from "utils/utils";
 import {
   QUERY_BUILDER_MIN_HEIGHT,
+  QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT,
+  QUERY_DETAIL_SEPARATOR_Y_PERCENT_POSITION,
   QUERY_LEFT_PANEL_MIN_WIDTH,
   QUERY_PAGE_SEPARATOR_X_PERCENT_POSITION,
   QUERY_RIGHT_PANEL_MIN_WIDTH,
@@ -48,7 +52,14 @@ import {
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
-import { StyledResultExpansionButtons } from "./ExplorerPageStyles";
+import {
+  StyledCloseAllIcon,
+  StyledCloseEditorIcon,
+  StyledExpansionCount,
+  StyledExpansionToggle,
+  StyledRestoreBoxIcon,
+  StyledResultExpansionButtons,
+} from "./ExplorerPageStyles";
 import { FloatingSearchContainer } from "./FloatingSearchContainer/FloatingSearchContainer";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import SavedQueriesPanel from "./SavedQueries/SavedQueriesPanel";
@@ -61,7 +72,7 @@ import {
   useQueryData,
 } from "./useQueryData";
 import { buildSearchSignature, buildStableSignature, isEdgeValid } from "./utils";
-import { ButtonSize } from "types";
+import { ButtonSize, EditorBoxState } from "types";
 
 interface ExplorerPage {}
 export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
@@ -78,9 +89,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     appendDetailId,
     setSelectedDetailId,
     replaceDetailIds,
+    statementId,
+    setStatementId,
   } = useSearchParams();
 
-  const QUERY_DETAIL_MAX_TABS = 14;
   const [queryState, queryStateDispatch] = useReducer(queryReducer, queryStateInitial);
 
   // Page-level result expansion (#2969): append the equivalents (SYN/IDE/AEE)
@@ -171,6 +183,21 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   };
   const isStatsView = exploreState.view.mode === Explore.EViewMode.Stats;
 
+  // table columns as the Table view shows them, also while the Stats view is up
+  const tableColumns =
+    exploreState.view.mode === Explore.EViewMode.Table
+      ? exploreState.view.columns
+      : lastColumnsRef.current;
+
+  const handleLoadTableColumns = (columns: Explore.IExploreColumn[]) => {
+    if (exploreState.view.mode === Explore.EViewMode.Table) {
+      exploreStateDispatch({ type: ExploreActionType.setColumns, payload: { columns } });
+    } else {
+      // the Table view picks these up when the user switches back to it
+      lastColumnsRef.current = columns;
+    }
+  };
+
   const queryClient = useQueryClient();
 
   const handleInvalidateQuery = () => {
@@ -204,20 +231,43 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
   // and re-fetch automatically because the cache key (stableSignature) changes.
   const [committedSearchSignature, setCommittedSearchSignature] = useState<string | null>(null);
 
+  // Expansion flags of the search that produced the results on screen. The
+  // toggles can be flipped without running a search, so the banner above the
+  // results describes these rather than the live toggle state.
+  const [committedExpansion, setCommittedExpansion] = useState({
+    equivalents: false,
+    subordinates: false,
+  });
+
   const handleRunSearch = useCallback(() => {
     setCommittedSearchSignature(searchSignature);
-  }, [searchSignature]);
+    setCommittedExpansion({
+      equivalents: includeEquivalents,
+      subordinates: includeSubordinates,
+    });
+  }, [searchSignature, includeEquivalents, includeSubordinates]);
 
   // Global Enter shortcut: run search unless focus is in a text input, textarea,
   // or select — except when that input lives inside a container marked with
   // [data-run-on-enter] (floating search panel, UUID filter panel), where Enter
   // should also trigger the search alongside any local handler on the input.
+  // A dropdown focuses its own hidden text input, so it would otherwise swallow
+  // Enter everywhere outside those containers; only an OPEN menu keeps Enter for
+  // itself, where the key picks the highlighted option. An open modal owns
+  // Enter (Ctrl+Enter applies it), so the search never runs behind one.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
-      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select") {
-        if (!document.activeElement?.closest("[data-run-on-enter]")) return;
+      if (isAnyLayerOpen()) return;
+      const focused = document.activeElement;
+      const tag = (focused?.tagName ?? "").toLowerCase();
+      // a dropdown's focus sits on its search input, or on the control itself
+      // when typing is off; aria-expanded lives on the control in both cases
+      const dropdown = focused?.closest("[data-dropdown]");
+      if (dropdown) {
+        if (dropdown.querySelector("[aria-expanded='true']")) return;
+      } else if (tag === "input" || tag === "textarea" || tag === "select") {
+        if (!focused?.closest("[data-run-on-enter]")) return;
       }
       handleRunSearch();
     };
@@ -472,7 +522,59 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     globalIncludeSubordinates: includeSubordinates,
   });
 
-  const isDetailOpen = !!(selectedDetailId || detailIdArray.length > 0);
+  // Rows the expansion added to the result that is actually displayed. A toggle
+  // change moves the query to a new cache key, so no count is shown between the
+  // toggle and the rerun rather than a number from the previous search.
+  const expansionCounts = queryData?.expansion;
+
+  // the detail panel holds the Detail box and, while a statement is open, the
+  // Editor box under it
+  const hasDetailTabs = !!(selectedDetailId || detailIdArray.length > 0);
+  const isDetailOpen = hasDetailTabs || !!statementId;
+  const isDetailPanelSplit = hasDetailTabs && !!statementId;
+
+  // Held as a percentage of the content height, so a window resize keeps the
+  // proportion between the Detail and Editor boxes.
+  const detailSeparatorYPercentStorageKey = "queryDetailSeparatorYPosition";
+  const [detailSeparatorYPercent, setDetailSeparatorYPercent] = useState<number>(() => {
+    const stored = Number(localStorage.getItem(detailSeparatorYPercentStorageKey));
+    return stored > 0 ? stored : QUERY_DETAIL_SEPARATOR_Y_PERCENT_POSITION;
+  });
+  const detailSeparatorYPosition = Math.min(
+    Math.max(
+      detailSeparatorYPercent * onePercentOfContentHeight,
+      QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT,
+    ),
+    contentHeight - QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT,
+  );
+
+  const handleDetailSeparatorYPositionChange = (yPosition: number) => {
+    const percent = floorNumberToOneDecimal(yPosition / onePercentOfContentHeight);
+    setDetailSeparatorYPercent(percent);
+    localStorage.setItem(detailSeparatorYPercentStorageKey, percent.toString());
+  };
+
+  // Maximizing or minimizing squeezes one of the two boxes down to its header.
+  // The editor alone in the panel has no box to share the height with.
+  const [editorBoxState, setEditorBoxState] = useState(EditorBoxState.Normal);
+  const editorBoxLayout = isDetailPanelSplit ? editorBoxState : EditorBoxState.Normal;
+
+  const handleMaximizeEditorBox = () => {
+    setEditorBoxState(
+      editorBoxLayout === EditorBoxState.Normal ? EditorBoxState.FullHeight : EditorBoxState.Normal,
+    );
+  };
+
+  const getEditorMaximizeBtnTooltip = () => {
+    switch (editorBoxLayout) {
+      case EditorBoxState.Minimized:
+        return "open editor box";
+      case EditorBoxState.FullHeight:
+        return "shrink editor box";
+      default:
+        return "maximize editor box";
+    }
+  };
 
   const queryLeftPanelExpandedStorageKey = "queryLeftPanelExpanded";
   const [queryLeftPanelExpanded, setQueryLeftPanelExpanded] = useState(
@@ -526,17 +628,56 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     });
   }, []);
 
+  // Called by the handlers that open a statement or an entity, through
+  // DetailPanelRevealProvider for the ones outside this page.
+  const revealEditorBox = useCallback(() => {
+    expandQueryDetailPanel();
+    setEditorBoxState((state) =>
+      state === EditorBoxState.Minimized ? EditorBoxState.Normal : state,
+    );
+  }, [expandQueryDetailPanel]);
+
+  const revealDetailBox = useCallback(() => {
+    expandQueryDetailPanel();
+    setEditorBoxState((state) =>
+      state === EditorBoxState.FullHeight ? EditorBoxState.Normal : state,
+    );
+  }, [expandQueryDetailPanel]);
+
+  // A box squeezed to its header opens back up from its header, and a collapsed
+  // panel expands from either box's strip. Any other header click does nothing.
+  const handleDetailPanelBoxHeaderClick = () => {
+    if (queryDetailPanelExpanded) {
+      setEditorBoxState(EditorBoxState.Normal);
+    } else {
+      toggleQueryDetailPanel();
+    }
+  };
+
+  const detailPanelReveal = useMemo(
+    () => ({ revealEditor: revealEditorBox, revealDetail: revealDetailBox }),
+    [revealEditorBox, revealDetailBox],
+  );
+
+  // a minimized or maximized editor left behind would come back the next time
+  // the Detail box opens
+  useEffect(() => {
+    if (!hasDetailTabs) {
+      setEditorBoxState(EditorBoxState.Normal);
+    }
+  }, [hasDetailTabs]);
+
   const openEntityInDetail = useCallback(
     (entityId: string) => {
-      expandQueryDetailPanel();
+      revealDetailBox();
 
       if (detailIdArray.includes(entityId)) {
         setSelectedDetailId(entityId);
       } else {
-        appendDetailId(entityId, QUERY_DETAIL_MAX_TABS);
+        appendDetailId(entityId, maxTabCount);
       }
     },
-    [appendDetailId, detailIdArray, expandQueryDetailPanel, setSelectedDetailId],
+    [appendDetailId, detailIdArray, revealDetailBox, setSelectedDetailId],
   );
 
   const openEntitiesInDetail = useCallback(
@@ -545,26 +686,28 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
         return;
       }
 
-      expandQueryDetailPanel();
+      revealDetailBox();
 
       let idsToAdd = entityIds;
-      if (entityIds.length > QUERY_DETAIL_MAX_TABS) {
+      if (entityIds.length > maxTabCount) {
         toast.info(
-          `Maximum number of tabs reached, only the first ${QUERY_DETAIL_MAX_TABS} displayed.`,
+          `Maximum number of tabs reached, only the first ${maxTabCount} displayed.`,
         );
-        idsToAdd = entityIds.slice(0, QUERY_DETAIL_MAX_TABS);
+        idsToAdd = entityIds.slice(0, maxTabCount);
       }
 
+      // the tab strip fills from the left and hides the tail behind its caret,
+      // so the entities opened here lead and the older ones give way first
       const filteredArray = detailIdArray.filter((id) => !idsToAdd.includes(id));
-      let newDetailIdArray = filteredArray.concat(idsToAdd);
-      if (newDetailIdArray.length > QUERY_DETAIL_MAX_TABS) {
-        newDetailIdArray = newDetailIdArray.slice(newDetailIdArray.length - QUERY_DETAIL_MAX_TABS);
+      let newDetailIdArray = idsToAdd.concat(filteredArray);
+      if (newDetailIdArray.length > maxTabCount) {
+        newDetailIdArray = newDetailIdArray.slice(0, maxTabCount);
       }
 
       replaceDetailIds(newDetailIdArray);
-      setSelectedDetailId(idsToAdd[idsToAdd.length - 1]);
+      setSelectedDetailId(idsToAdd[0]);
     },
-    [detailIdArray, expandQueryDetailPanel, replaceDetailIds, setSelectedDetailId],
+    [detailIdArray, revealDetailBox, replaceDetailIds, setSelectedDetailId],
   );
 
   useEffect(() => {
@@ -604,37 +747,96 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
     return isDetailOpen ? layoutWidth - detailPanelWidth : layoutWidth;
   }, [queryLeftPanelExpanded, isDetailOpen, layoutWidth, detailPanelWidth]);
 
+  // Opening the Detail panel takes width from the Query box, and its header
+  // holds the label filter, both expansion toggles and run search. The parts
+  // that survive without their text go first: the expansion counts (the pill
+  // still shows the state), then the words - the run-search icon and the eq/sub
+  // marks on the result tags carry the same meaning, and both keep a tooltip.
+  //
+  // Held as booleans rather than derived from leftPanelWidth so a separator drag
+  // can feed them the width it is writing to the CSS vars, ahead of the drop
+  // that lands that width in state. Fed per pointer event, so the ref keeps
+  // React out of every move that stays on one side of a breakpoint.
+  const [hideExpansionCounts, setHideExpansionCounts] = useState(false);
+  const [compactHeader, setCompactHeader] = useState(false);
+  const headerBreakpointsRef = useRef({ hideCounts: false, compact: false });
+
+  const applyHeaderBreakpoints = useCallback((width: number) => {
+    const hideCounts = width < 900;
+    const compact = width < 660;
+    const current = headerBreakpointsRef.current;
+    if (hideCounts === current.hideCounts && compact === current.compact) {
+      return;
+    }
+    headerBreakpointsRef.current = { hideCounts, compact };
+    setHideExpansionCounts(hideCounts);
+    setCompactHeader(compact);
+  }, []);
+
+  useEffect(() => {
+    applyHeaderBreakpoints(leftPanelWidth);
+  }, [leftPanelWidth, applyHeaderBreakpoints]);
+
   // The panels render from these variables. A separator drag overwrites them
   // directly for the duration of the drag and lands here on drop.
   useLayoutEffect(() => {
     animatePanelWidthVars([leftPanelWidth, detailPanelWidth], "explorerPage");
   }, [leftPanelWidth, detailPanelWidth]);
 
-  // Same for the two boxes the horizontal separator splits.
+  const getEditorBoxHeight = (detailSeparatorY: number) => {
+    if (!isDetailPanelSplit) {
+      return contentHeight;
+    }
+    switch (editorBoxLayout) {
+      case EditorBoxState.FullHeight:
+        return contentHeight - hiddenBoxHeight;
+      case EditorBoxState.Minimized:
+        return hiddenBoxHeight;
+      default:
+        return contentHeight - detailSeparatorY;
+    }
+  };
+
+  // A drag preview of either horizontal separator writes every box height, so
+  // the boxes of the other panel keep theirs through the drag.
+  const getBoxHeights = (queryBuilderHeight: number, detailSeparatorY: number) => {
+    const editorHeight = getEditorBoxHeight(detailSeparatorY);
+    return {
+      queryBuilder: queryBuilderHeight,
+      explorer: contentHeight - queryBuilderHeight,
+      queryDetail: isDetailPanelSplit ? contentHeight - editorHeight : contentHeight,
+      queryEditor: editorHeight,
+    };
+  };
+  const boxHeights = getBoxHeights(querySeparatorYPosition, detailSeparatorYPosition);
+
+  // Same for the boxes the horizontal separators split.
   useLayoutEffect(() => {
-    animateBoxHeightVars(
-      {
-        queryBuilder: querySeparatorYPosition,
-        explorer: contentHeight - querySeparatorYPosition,
-      },
-      "explorerPage",
-    );
-  }, [querySeparatorYPosition, contentHeight]);
+    animateBoxHeightVars(boxHeights, "explorerPage");
+  }, [
+    boxHeights.queryBuilder,
+    boxHeights.explorer,
+    boxHeights.queryDetail,
+    boxHeights.queryEditor,
+  ]);
+
+  const detailPanelToggleButton = (
+    <IconButton
+      key="toggle-query-detail-panel"
+      tooltipLabel={queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"}
+      icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
+      onClick={toggleQueryDetailPanel}
+    />
+  );
 
   return (
-    <>
+    <DetailPanelRevealProvider value={detailPanelReveal}>
       {queryLeftPanelExpanded && isExplorerNormal && querySeparatorYPosition > 0 && (
         <LayoutSeparatorHorizontal
           panelIndex={0}
           boxHeightVarKey="queryBuilder"
           applyPreview={(yPosition) =>
-            setBoxHeightVars(
-              {
-                queryBuilder: yPosition,
-                explorer: contentHeight - yPosition,
-              },
-              "explorerPage",
-            )
+            setBoxHeightVars(getBoxHeights(yPosition, detailSeparatorYPosition), "explorerPage")
           }
           topPositionMin={QUERY_BUILDER_MIN_HEIGHT}
           topPositionMax={contentHeight - QUERY_SEARCH_PANEL_MIN_HEIGHT}
@@ -642,6 +844,22 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
           setSeparatorYPosition={(yPosition) => handleSeparatorYPositionChange(yPosition)}
         />
       )}
+
+      {isDetailPanelSplit &&
+        queryDetailPanelExpanded &&
+        editorBoxLayout === EditorBoxState.Normal && (
+          <LayoutSeparatorHorizontal
+            panelIndex={1}
+            boxHeightVarKey="queryDetail"
+            applyPreview={(yPosition) =>
+              setBoxHeightVars(getBoxHeights(querySeparatorYPosition, yPosition), "explorerPage")
+            }
+            topPositionMin={QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
+            topPositionMax={contentHeight - QUERY_DETAIL_PANEL_BOX_MIN_HEIGHT}
+            separatorYPosition={detailSeparatorYPosition}
+            setSeparatorYPosition={handleDetailSeparatorYPositionChange}
+          />
+        )}
 
       {isDetailOpen &&
         queryLeftPanelExpanded &&
@@ -657,6 +875,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 layoutWidth - QUERY_RIGHT_PANEL_MIN_WIDTH,
               );
               setPanelWidthVars([resolved, layoutWidth - resolved], "explorerPage");
+              applyHeaderBreakpoints(resolved);
               return resolved;
             }}
             setSeparatorXPosition={(xPosition) => handleSeparatorXPositionChange(xPosition)}
@@ -683,42 +902,77 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               buttons={[
                 <StyledResultExpansionButtons key="result-expansion-toggles">
                   {/* accent colours echo the eq/sub badges on the resulting
-                      entity tags (see StyledExpansionBadge) */}
-                  <Checkbox
-                    label="EQ"
-                    size={13}
-                    color="info"
-                    noFill
-                    value={includeEquivalents}
-                    tooltipLabel="include equivalents"
-                    tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
-                    onChangeFn={handleToggleIncludeEquivalents}
-                  />
-                  <Checkbox
-                    label="SUB"
-                    size={13}
-                    color="warning"
-                    noFill
-                    value={includeSubordinates}
-                    tooltipLabel="include subordinates"
-                    tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
-                    onChangeFn={handleToggleIncludeSubordinates}
-                  />
+                      entity tags (see StyledExpansionBadge). The pill takes the
+                      click as well as the box, and Checkbox stops its own click
+                      from bubbling, so a hit on the box toggles exactly once. */}
+                  <StyledExpansionToggle
+                    $active={includeEquivalents}
+                    $variant="equivalent"
+                    onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
+                  >
+                    <Checkbox
+                      label={compactHeader ? "EQ" : "EQUIVALENTS"}
+                      size={14}
+                      color="info"
+                      value={includeEquivalents}
+                      tooltipLabel="include equivalents"
+                      tooltipContent="Also include entities equivalent (SYN, IDE, AEE) to the query results."
+                      onChangeFn={handleToggleIncludeEquivalents}
+                      disableEnterKey
+                    />
+                    {includeEquivalents &&
+                      !hideExpansionCounts &&
+                      expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="equivalent">
+                          +{expansionCounts.equivalents}
+                        </StyledExpansionCount>
+                      )}
+                  </StyledExpansionToggle>
+                  <StyledExpansionToggle
+                    $active={includeSubordinates}
+                    $variant="subordinate"
+                    onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
+                  >
+                    <Checkbox
+                      label={compactHeader ? "SUB" : "SUBORDINATES"}
+                      size={14}
+                      color="warning"
+                      value={includeSubordinates}
+                      tooltipLabel="include subordinates"
+                      tooltipContent="Also include subordinate entities (subclasses, subordinates, meronyms and child territories, all levels) of the query results."
+                      onChangeFn={handleToggleIncludeSubordinates}
+                      disableEnterKey
+                    />
+                    {includeSubordinates &&
+                      !hideExpansionCounts &&
+                      expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="subordinate">
+                          +{expansionCounts.subordinates}
+                        </StyledExpansionCount>
+                      )}
+                  </StyledExpansionToggle>
                 </StyledResultExpansionButtons>,
                 <Button
                   key="run-search"
                   tooltipLabel="run search (Enter)"
-                  label="run search"
-                  icon={<IcoSearch />}
+                  label={compactHeader ? undefined : "run search"}
+                  icon={<IcoSearch size={13} />}
                   disabled={!isSearchPending}
                   onClick={handleRunSearch}
+                  shape={compactHeader ? "square" : undefined}
                 />,
-                <IconButton
-                  key="toggle-query-left-panel"
-                  tooltipLabel="collapse left panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
-                />,
+                <>
+                  {/* collapsing the left panel only makes sense while the detail
+                      panel is there to take over the freed width */}
+                  {isDetailOpen && (
+                    <IconButton
+                      key="toggle-query-left-panel"
+                      tooltipLabel="collapse left panel"
+                      icon={<RiMenuFoldFill />}
+                      onClick={toggleQueryLeftPanel}
+                    />
+                  )}
+                </>,
               ]}
             >
               <MemoizedQueryBox
@@ -739,6 +993,8 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                   onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                   exploreFilters={exploreState.filters}
                   exploreDispatch={exploreStateDispatch}
+                  tableColumns={tableColumns}
+                  onLoadTableColumns={handleLoadTableColumns}
                 />
               )}
               {!explorerBoxMaximized && (
@@ -832,12 +1088,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                     />
                   )}
                 </>,
-                <IconButton
-                  key="toggle-query-left-panel"
-                  tooltipLabel="collapse left panel"
-                  icon={<RiMenuFoldFill />}
-                  onClick={toggleQueryLeftPanel}
-                />,
+                <>
+                  {isDetailOpen && (
+                    <IconButton
+                      key="toggle-query-left-panel"
+                      tooltipLabel="collapse left panel"
+                      icon={<RiMenuFoldFill />}
+                      onClick={toggleQueryLeftPanel}
+                    />
+                  )}
+                </>,
               ]}
             >
               <MemoizedExplorerBox
@@ -853,6 +1113,10 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 getCachedEntity={getCachedEntity}
                 onOpenEntityInDetail={openEntityInDetail}
                 onOpenEntitiesInDetail={openEntitiesInDetail}
+                includeEquivalents={committedExpansion.equivalents}
+                includeSubordinates={committedExpansion.subordinates}
+                onToggleIncludeEquivalents={handleToggleIncludeEquivalents}
+                onToggleIncludeSubordinates={handleToggleIncludeSubordinates}
                 canBatchEdit={canBatchEdit}
               />
             </Box>
@@ -878,44 +1142,102 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
       </Panel>
       {isDetailOpen && (
         <Panel width={detailPanelWidth} widthVarIndex={1}>
-          <Box
-            label="Detail"
-            borderColor="white"
-            height={contentHeight}
-            disableScroll
-            isExpanded={queryDetailPanelExpanded}
-            onHeaderClick={toggleQueryDetailPanel}
-            buttons={[
-              <>
-                {queryDetailPanelExpanded && (
-                  <IconButton
-                    tooltipLabel="close all tabs"
-                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
-                    onClick={clearAllDetailIds}
-                  />
-                )}
-              </>,
-              <IconButton
-                key="toggle-query-detail-panel"
-                tooltipLabel={
-                  queryDetailPanelExpanded ? "collapse detail box" : "expand detail box"
-                }
-                icon={queryDetailPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
-                onClick={toggleQueryDetailPanel}
-              />,
-            ]}
-          >
-            <MemoizedEntityDetailBox
-              maxTabs={QUERY_DETAIL_MAX_TABS}
-              onTabOpen={() => {
-                if (!queryDetailPanelExpanded) {
-                  toggleQueryDetailPanel();
-                }
-              }}
-            />
-          </Box>
+          {hasDetailTabs && (
+            <Box
+              label="Detail"
+              borderColor="white"
+              height={boxHeights.queryDetail}
+              heightVarKey="queryDetail"
+              disableScroll
+              isExpanded={queryDetailPanelExpanded}
+              onHeaderClick={handleDetailPanelBoxHeaderClick}
+              disableHeaderClick={
+                !queryDetailPanelExpanded || editorBoxLayout !== EditorBoxState.FullHeight
+              }
+              buttons={[
+                <>
+                  {queryDetailPanelExpanded && (
+                    <IconButton
+                      tooltipLabel="close all tabs"
+                      icon={<StyledCloseAllIcon />}
+                      onClick={clearAllDetailIds}
+                    />
+                  )}
+                </>,
+                detailPanelToggleButton,
+              ]}
+            >
+              <MemoizedEntityDetailBox
+                maxTabs={maxTabCount}
+                onTabOpen={() => {
+                  if (!queryDetailPanelExpanded) {
+                    toggleQueryDetailPanel();
+                  }
+                }}
+              />
+            </Box>
+          )}
+          {statementId && (
+            <Box
+              label="Editor"
+              borderColor="white"
+              height={boxHeights.queryEditor}
+              heightVarKey="queryEditor"
+              isExpanded={queryDetailPanelExpanded}
+              onHeaderClick={handleDetailPanelBoxHeaderClick}
+              disableHeaderClick={
+                !queryDetailPanelExpanded || editorBoxLayout !== EditorBoxState.Minimized
+              }
+              buttons={[
+                <>
+                  {queryDetailPanelExpanded && isDetailPanelSplit && (
+                    <IconButton
+                      tooltipLabel={getEditorMaximizeBtnTooltip()}
+                      icon={
+                        editorBoxLayout === EditorBoxState.Normal ? (
+                          <IcoSquareFill />
+                        ) : (
+                          <StyledRestoreBoxIcon />
+                        )
+                      }
+                      onClick={handleMaximizeEditorBox}
+                    />
+                  )}
+                </>,
+                <>
+                  {queryDetailPanelExpanded &&
+                    isDetailPanelSplit &&
+                    editorBoxLayout !== EditorBoxState.Minimized && (
+                      <IconButton
+                        tooltipLabel="minimize editor box"
+                        icon={<IcoHide />}
+                        onClick={() => setEditorBoxState(EditorBoxState.Minimized)}
+                      />
+                    )}
+                </>,
+                <>
+                  {queryDetailPanelExpanded && (
+                    <IconButton
+                      tooltipLabel="close editor box"
+                      icon={<StyledCloseEditorIcon />}
+                      onClick={() => {
+                        setStatementId("");
+                        setEditorBoxState(EditorBoxState.Normal);
+                      }}
+                    />
+                  )}
+                </>,
+                detailPanelToggleButton,
+              ]}
+            >
+              <MemoizedStatementEditorBox
+                isExpanded={queryDetailPanelExpanded}
+                isVisible={queryDetailPanelExpanded && editorBoxLayout !== EditorBoxState.Minimized}
+              />
+            </Box>
+          )}
         </Panel>
       )}
-    </>
+    </DetailPanelRevealProvider>
   );
 };

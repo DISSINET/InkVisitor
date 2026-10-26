@@ -37,7 +37,6 @@ import { EntityEnums, InterfaceEnums, UserEnums } from "@inkvisitor/shared/enums
 import {
   IDocument,
   IEntity,
-  IResponseEntity,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -79,7 +78,7 @@ import { AnnotatorSequentialAnchorPanel } from "./AnnotatorSearchLine/AnnotatorS
 import { AnnotatorToolbar } from "./AnnotatorToolbar/AnnotatorToolbar";
 import { AnnotatorWarningsModal, WarningsChip } from "./AnnotatorWarningsModal";
 import { ANNOTATOR_MENU_PAGE_PADDING, useAnnotatorMenuDrag } from "./hooks/useAnnotatorMenuDrag";
-import { useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
+import { MAX_SEARCH_TERM_LENGTH, useAnnotatorSearch } from "./hooks/useAnnotatorSearch";
 import {
   StyledAnnotatorColumn,
   StyledAnnotatorMenu,
@@ -93,8 +92,15 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./styles";
-import { RATIO, TerritoryCreateModalType, W_SCROLL } from "./types";
+import {
+  ANNOTATOR_OVERLAY_Z,
+  RATIO,
+  TerritoryCreateModalType,
+  W_SCROLL,
+} from "./types";
 import { annotatorHighlight } from "./utils/highlight";
+
+const SEARCH_WRAP_TOAST_ID = "annotator-search-wrap";
 
 interface TextAnnotatorProps {
   width: number;
@@ -129,9 +135,9 @@ interface TextAnnotatorProps {
 
   /**
    * Overrides the annotator's context-menu / settings-overlay stacking layers.
-   * Both overlays are appended to `document.body`; the library defaults suit a
-   * plain page panel (MainPage). A host that mounts the annotator inside a modal
-   * (the Documents page) passes higher values so the overlays sit above it.
+   * Both overlays are appended to `document.body` and default to
+   * {@link ANNOTATOR_OVERLAY_Z}, which clears the app's floating tier. A host
+   * that stacks something even higher over the annotator passes its own values.
    */
   overlayZIndex?: { contextMenu: number; settingsOverlay: number };
 
@@ -143,6 +149,12 @@ interface TextAnnotatorProps {
    * already restricted upstream). The server still enforces the same rule.
    */
   canEditDocument?: boolean;
+  /**
+   * Narrows anchor editing (highlight menu, sequential anchoring) below
+   * canEditDocument, for hosts that allow text edits but not anchoring.
+   * Defaults to canEditDocument.
+   */
+  canEditAnchors?: boolean;
 
   /** When the pointer hovers anchored text, receives the innermost tag id or null (e.g. statement list sync). */
   onStatementAnchorHover?: (statementId: string | null) => void;
@@ -183,7 +195,7 @@ export const TextAnnotator = ({
   documentId = undefined,
   thisTerritoryEntityId = undefined,
 
-  forwardAnnotator = (undefined) => {},
+  forwardAnnotator = () => {},
   storedAnnotatorScrollPosition = null,
   setStoredAnnotatorScrollPosition,
 
@@ -198,6 +210,7 @@ export const TextAnnotator = ({
   disableCreate = false,
   overlayZIndex,
   canEditDocument = true,
+  canEditAnchors = canEditDocument,
   onStatementAnchorHover,
 
   hideWarningChip = false,
@@ -364,6 +377,9 @@ export const TextAnnotator = ({
       toast.info("Document content saved");
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // the statement list Text column renders anchorTexts, derived server-side
+      // from the document content
+      queryClient.invalidateQueries({ queryKey: ["territory", "statement-list"] });
       setSaveRejected(false);
       // The canvas is now what the server holds, so a later refetch that moves
       // dataDocument must not be mistaken for unsaved local typing.
@@ -398,6 +414,9 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["entity"] });
+      // the statement list Text column renders anchorTexts, derived server-side
+      // from the document content
+      queryClient.invalidateQueries({ queryKey: ["territory", "statement-list"] });
       setUserEditedText(false);
       dismissRemoteChange();
     },
@@ -423,7 +442,10 @@ export const TextAnnotator = ({
     },
   });
 
-  const wLineNumbers = displayLineNumbers ? 50 : 0;
+  // Measured by the annotator from the highest paragraph number and the font;
+  // the initial value only holds until the first report.
+  const [gutterWidth, setGutterWidth] = useState<number>(48);
+  const wLineNumbers = displayLineNumbers ? gutterWidth : 0;
   const wTextArea = Math.max(0, width - wLineNumbers - W_SCROLL);
 
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
@@ -445,6 +467,9 @@ export const TextAnnotator = ({
   const [isFindOpen, setIsFindOpen] = useState(false);
   const [isSecondStepOpen, setIsSecondStepOpen] = useState(false);
   const findInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [isGoToParagraphOpen, setIsGoToParagraphOpen] = useState(false);
+  const goToParagraphInputRef = useRef<HTMLInputElement | null>(null);
 
   const annotatorRef = useRef<Annotator | null>(null);
   annotatorRef.current = annotator;
@@ -725,7 +750,7 @@ export const TextAnnotator = ({
     dragOffset: menuDragOffset,
   } = useAnnotatorMenuDrag();
 
-  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and dropdowns so they stay interactive. */
   // const handleMenuPointerDownCapture = useCallback(
   //   (e: React.PointerEvent<HTMLDivElement>) => {
   //     const target = e.target as HTMLElement;
@@ -759,12 +784,12 @@ export const TextAnnotator = ({
 
       const mutation = quiet ? updateDocumentMutationQuiet : updateDocumentMutation;
 
+      // content alone: the server rebuilds anchors and entityIds from it, and
+      // each anchors node repeats its text, so the full document can outgrow
+      // the proxy's request size limit
       await mutation.mutateAsync({
         id: documentId,
-        doc: {
-          ...dataDocument,
-          content: annotator.text.value,
-        },
+        doc: { content: annotator.text.value },
         // A forced save is one the user confirmed after being shown what it
         // overwrites, so the server's staleness check must not veto it.
         baseContent: force ? undefined : dataDocument?.content,
@@ -930,6 +955,12 @@ export const TextAnnotator = ({
       // The block caret paints over the letter; a light background needs a
       // fainter fill than a dark one for the same readability.
       a.blockCaretOpacity = selectedThemeId === InterfaceEnums.Theme.Dark ? 0.45 : 0.3;
+      a.xmlSyntaxColors = {
+        tag: theme.color.xmlTag,
+        attr: theme.color.xmlAttr,
+        quote: theme.color.xmlQuote,
+        value: theme.color.xmlValue,
+      };
       a.menuColors = {
         bg: theme.color.white,
         text: theme.color.black,
@@ -950,7 +981,7 @@ export const TextAnnotator = ({
       // proportional-font picker). The annotator owns the choice + persistence;
       // the app just supplies the candidates, defaulting to the application font.
       a.setFontFamilyOptions([
-        { label: "Roboto (app sans)", value: '"Roboto", sans-serif' },
+        { label: "Roboto (app sans)", value: theme.fontFamily["body"] },
         // System option hidden for now because of inconsistent anchor highlight
         // { label: "System UI (system sans)", value: "system-ui, sans-serif" },
         { label: "Georgia (serif)", value: "Georgia, serif" },
@@ -1040,12 +1071,12 @@ export const TextAnnotator = ({
 
     applyCanvasTheme(newAnnotator);
 
-    // Raise the body-appended overlays above the host modal on the Documents
-    // page; MainPage leaves the lib defaults (which sit under app modals).
-    if (overlayZIndex) {
-      newAnnotator.contextMenu.zIndex = overlayZIndex.contextMenu;
-      newAnnotator.settingsOverlay.zIndex = overlayZIndex.settingsOverlay;
-    }
+    // The library defaults sit below the app's floating tier, so the overlays
+    // are always given the annotator's own layers unless the host overrides.
+    newAnnotator.contextMenu.zIndex =
+      overlayZIndex?.contextMenu ?? ANNOTATOR_OVERLAY_Z.contextMenu;
+    newAnnotator.settingsOverlay.zIndex =
+      overlayZIndex?.settingsOverlay ?? ANNOTATOR_OVERLAY_Z.settingsOverlay;
 
     if (scroller?.current) {
       newAnnotator.addScroller(scroller.current);
@@ -1053,6 +1084,7 @@ export const TextAnnotator = ({
 
     if (displayLineNumbers && lines.current) {
       newAnnotator.addLines(lines.current);
+      newAnnotator.onGutterWidthChange(setGutterWidth);
     }
 
     newAnnotator.onSelectText(({ text, anchors, index }) => {
@@ -1150,7 +1182,7 @@ export const TextAnnotator = ({
     if (annotator && mainCanvas.current) {
       annotator?.resize();
     }
-  }, [width, canvasHeight]);
+  }, [width, canvasHeight, wLineNumbers]);
 
   useEffect(() => {
     if (storedAnnotatorScrollPosition !== null) {
@@ -1339,10 +1371,15 @@ export const TextAnnotator = ({
     annotator.scrollToAsymmetricalAnchor(tagName, position, segmentIndex);
   };
 
-  // When the document is read-only (e.g. an Editor viewing an unassigned
+  // When anchors are read-only (e.g. an Editor viewing an unassigned
   // document) the selection menu still appears, but only as a minimal,
   // view-only variant: clipboard + anchors in selection, no create/edit.
-  const isMenuReadOnly = !canEditNow;
+  const isMenuReadOnly = !canEditNow || !canEditAnchors;
+
+  const clearSelection = () => {
+    setSelectedText("");
+    annotator?.clearSelection();
+  };
 
   const findPanel = resolveFindPanel(annotatorMode, isFindOpen, isSecondStepOpen);
 
@@ -1506,10 +1543,8 @@ export const TextAnnotator = ({
   const [searchActiveOccurence, setSearchActiveOccurence] = useState<number>(0);
 
   // annotate tool
-  // entity to anchor
-  const [entityToAnchor, setEntityToAnchor] = useState<IResponseEntity | null>(null);
-  // does the pre-selected anchor exist in the current selection
-  const [currentAnchorExist, setCurrentAnchorExist] = useState(false);
+  // entities to anchor, applied together so one match can carry several anchors
+  const [entitiesToAnchor, setEntitiesToAnchor] = useState<IEntity[]>([]);
 
   // check if the entity to anchor exists in the current selection
   useEffect(() => {
@@ -1519,15 +1554,10 @@ export const TextAnnotator = ({
     // searchActiveOccurence is in dependencies to call onSelectText on occurence change
   }, [searchActiveOccurence]);
 
-  useEffect(() => {
-    if (!entityToAnchor) {
-      setCurrentAnchorExist(false);
-    } else if (selectedAnchors.some((anchor) => anchor.getTagName() === entityToAnchor?.id)) {
-      setCurrentAnchorExist(true);
-    } else {
-      setCurrentAnchorExist(false);
-    }
-  }, [selectedAnchors, entityToAnchor]);
+  const selectedAnchorTagNames = useMemo(
+    () => selectedAnchors.map((anchor) => anchor.getTagName()),
+    [selectedAnchors]
+  );
 
   // Handle search occurrence selection
   useEffect(() => {
@@ -1569,17 +1599,38 @@ export const TextAnnotator = ({
     return annotator !== undefined && !!dataDocument;
   }, [annotator, dataDocument]);
 
+  // Navigation wraps around the document; a wrap past the last hit lands on one
+  // that "Anchor & next" may already have annotated, so the user is told. One
+  // toast is shared by repeated F3 presses and rewritten when direction flips.
+  const notifySearchWrap = (message: string) => {
+    if (toast.isActive(SEARCH_WRAP_TOAST_ID)) {
+      toast.update(SEARCH_WRAP_TOAST_ID, { render: message });
+    } else {
+      toast.info(message, { toastId: SEARCH_WRAP_TOAST_ID, autoClose: 2500 });
+    }
+  };
+
   const goToNextOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
+    if (searchActiveOccurence + 1 >= searchOccurences.length) {
+      notifySearchWrap("Reached the end of results. Continuing from the beginning.");
+    }
     setSearchActiveOccurence((searchActiveOccurence + 1) % searchOccurences.length);
   }, [searchOccurences, searchActiveOccurence]);
 
   const goToPreviousOccurence = useCallback(() => {
     if (searchOccurences === null || searchOccurences.length === 0) return;
+    if (searchActiveOccurence <= 0) {
+      notifySearchWrap("Reached the beginning of results. Continuing from the end.");
+    }
     setSearchActiveOccurence(
       (searchActiveOccurence - 1 + searchOccurences.length) % searchOccurences.length,
     );
   }, [searchOccurences, searchActiveOccurence]);
+
+  // Bumped on every Ctrl/Cmd+F so the effect below re-runs even when the
+  // keypress leaves both isFindOpen and searchTerm at their current values.
+  const [findFocusRequest, setFindFocusRequest] = useState(0);
 
   // Ctrl/Cmd+F opens the find panel for the current mode, or focuses the input
   // of whichever panel is already open. ctrlKeyCombo is true so it fires
@@ -1588,16 +1639,86 @@ export const TextAnnotator = ({
     "f",
     () => {
       if (!isSearchAllowed) return;
-      if (isFindOpen) {
-        findInputRef.current?.focus();
-        findInputRef.current?.select();
-      } else {
-        setIsFindOpen(true);
+      // A canvas selection wins over what the input holds; with no selection,
+      // or one longer than a search can run, the term stays put. search()
+      // matches within a single line, so the whitespace of a selection spanning
+      // a break is collapsed to keep it findable.
+      const selection = annotator?.getSelectedText().replace(/\s+/g, " ").trim();
+      if (selection && selection.length <= MAX_SEARCH_TERM_LENGTH) {
+        setSearchTerm(selection);
       }
+      setIsFindOpen(true);
+      setFindFocusRequest((request) => request + 1);
     },
-    [isSearchAllowed, isFindOpen],
+    [isSearchAllowed, annotator],
     true,
   );
+
+  // Selecting the input's contents lets the next keystroke replace them. The
+  // effect runs after the render that applied a seeded term, so it selects the
+  // new value rather than the one the keypress saw.
+  useEffect(() => {
+    if (findFocusRequest === 0) return;
+    findInputRef.current?.focus();
+    findInputRef.current?.select();
+  }, [findFocusRequest]);
+
+  // Bumped on every open request, so a Ctrl/Cmd+G while the field is already
+  // open still re-focuses it.
+  const [goToParagraphFocusRequest, setGoToParagraphFocusRequest] = useState(0);
+
+  const openGoToParagraph = () => {
+    setIsGoToParagraphOpen(true);
+    setGoToParagraphFocusRequest((request) => request + 1);
+  };
+
+  // Runs after the render that mounted the field, so the ref is set.
+  useEffect(() => {
+    if (goToParagraphFocusRequest === 0) return;
+    goToParagraphInputRef.current?.focus();
+    goToParagraphInputRef.current?.select();
+  }, [goToParagraphFocusRequest]);
+
+  // Ctrl/Cmd+G opens the field only with a document loaded and while focus is not
+  // in another text field, so the browser keeps its own "find next" otherwise.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "g" || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      if (!isSearchAllowed) return;
+      const target = e.target as HTMLElement | null;
+      const inOtherField =
+        target !== goToParagraphInputRef.current &&
+        (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable);
+      if (inOtherField) return;
+      e.preventDefault();
+      openGoToParagraph();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isSearchAllowed]);
+
+  // A field left open across a document switch would come back unfocused, with
+  // nothing to close it.
+  useEffect(() => {
+    setIsGoToParagraphOpen(false);
+  }, [documentId, isSearchAllowed]);
+
+  const goToParagraph = (input: string) => {
+    if (!annotator) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    if (!/^\d+$/.test(trimmed)) {
+      toast.warning(`"${trimmed}" is not a paragraph number.`);
+      return;
+    }
+    const paragraphNumber = Number(trimmed);
+    if (annotator.scrollToParagraph(paragraphNumber)) {
+      setIsGoToParagraphOpen(false);
+    } else {
+      const last = annotator.text.paragraphCount();
+      toast.warning(`There is no paragraph ${paragraphNumber}. The last one is ${last}.`);
+    }
+  };
 
   useKeypress("F3", () => isSearchAllowed && goToNextOccurence(), [
     isSearchAllowed,
@@ -1650,9 +1771,16 @@ export const TextAnnotator = ({
           setIsExtendToWholeWordMode={setIsExtendToWholeWordMode}
           isRegexMode={isRegexMode}
           setIsRegexMode={setIsRegexMode}
-          entityToAnchor={entityToAnchor}
-          setEntityToAnchor={setEntityToAnchor}
-          currentAnchorExist={currentAnchorExist}
+          entitiesToAnchor={entitiesToAnchor}
+          onPickEntityToAnchor={(entity) =>
+            setEntitiesToAnchor((prevEntities) => [...prevEntities, entity])
+          }
+          onRemoveEntityToAnchor={(entityId) =>
+            setEntitiesToAnchor((prevEntities) =>
+              prevEntities.filter((entity) => entity.id !== entityId)
+            )
+          }
+          selectedAnchorTagNames={selectedAnchorTagNames}
           selectedText={selectedText}
         />
       )}
@@ -1672,7 +1800,6 @@ export const TextAnnotator = ({
           setSearchTerm={setSearchTerm}
           findInputRef={findInputRef}
           searchOccurences={searchOccurences}
-          setSearchOccurences={setSearchOccurences}
           refreshSearch={refreshSearch}
           searchActiveOccurence={searchActiveOccurence}
           setSearchActiveOccurence={setSearchActiveOccurence}
@@ -1720,7 +1847,12 @@ export const TextAnnotator = ({
           }
           // Block editing keys in RAW/SEMI view-only mode (non-editable documents).
           // Intercept in capture phase so the canvas's own onkeydown never fires.
-          if (!canEditNow && annotatorMode !== EditMode.HIGHLIGHT) {
+          // Only keys aimed at the canvas: the toolbar's fields sit in this column too.
+          if (
+            !canEditNow &&
+            annotatorMode !== EditMode.HIGHLIGHT &&
+            e.target === mainCanvas.current
+          ) {
             const isEditingKey =
               (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) ||
               e.key === "Backspace" ||
@@ -1736,9 +1868,11 @@ export const TextAnnotator = ({
           }
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            setSelectedText("");
-            annotator?.clearSelection();
+          // An open highlight menu is the top key layer and handles Escape
+          // itself; clearing the selection here would unmount it before the key
+          // reaches the window, and the modal below would take the key instead.
+          if (e.key === "Escape" && !isMenuDisplayed) {
+            clearSelection();
           }
         }}
       >
@@ -1796,10 +1930,7 @@ export const TextAnnotator = ({
                   {dataDocument && (
                     <TextAnnotatorMenu
                       menuDragHandleProps={menuDragHandleProps}
-                      onEscapePressed={() => {
-                        setSelectedText("");
-                        annotator?.clearSelection();
-                      }}
+                      onEscapePressed={clearSelection}
                       anchors={selectedAnchors}
                       text={selectedText}
                       entities={storedEntities}
@@ -1846,7 +1977,7 @@ export const TextAnnotator = ({
                   position: "fixed",
                   left: xmlMarkupAnchorHover.x - 35,
                   top: xmlMarkupAnchorHover.y + 12,
-                  zIndex: 10050,
+                  zIndex: ANNOTATOR_OVERLAY_Z.anchorHoverPreview,
                   pointerEvents: "auto",
                   maxWidth: 340,
                   borderRadius: 4,
@@ -1922,8 +2053,9 @@ export const TextAnnotator = ({
             <AnnotatorSearchBar
               annotatorMode={annotatorMode}
               onClose={() => setIsFindOpen(false)}
+              onEscape={() => (isMenuDisplayed ? clearSelection() : setIsFindOpen(false))}
               onOpenSecondStep={() => setIsSecondStepOpen(true)}
-              canEdit={canEditNow}
+              canEdit={annotatorMode === EditMode.HIGHLIGHT ? !isMenuReadOnly : canEditNow}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               findInputRef={findInputRef}
@@ -1958,6 +2090,11 @@ export const TextAnnotator = ({
             isSavePending={isSaving || isSavingWithoutRefresh}
             isSearchAllowed={isSearchAllowed}
             onFindClick={() => setIsFindOpen(true)}
+            isGoToParagraphOpen={isGoToParagraphOpen}
+            onGoToParagraphClick={openGoToParagraph}
+            onGoToParagraphClose={() => setIsGoToParagraphOpen(false)}
+            onGoToParagraph={goToParagraph}
+            goToParagraphInputRef={goToParagraphInputRef}
             warningChip={
               !hideWarningChip && asymmetricalAnchors.length > 0 ? (
                 <WarningsChip

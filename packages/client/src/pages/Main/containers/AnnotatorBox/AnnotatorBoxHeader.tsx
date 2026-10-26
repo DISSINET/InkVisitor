@@ -27,7 +27,6 @@ interface AnnotatorBoxHeader {
   selectedDocumentIsFetching: boolean;
   resources: IEntity[];
   onResourcePickerFocus?: () => void;
-  canSelectResource: boolean;
   canEditDocument: boolean;
   /** Name of the user holding the document's edit lock, or null when it is free. */
   lockHolderName?: string | null;
@@ -45,7 +44,6 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
   selectedDocumentIsFetching,
   resources,
   onResourcePickerFocus,
-  canSelectResource,
   canEditDocument,
   lockHolderName = null,
 }) => {
@@ -66,7 +64,6 @@ export const AnnotatorBoxHeader: React.FC<AnnotatorBoxHeader> = ({
                 toast.warning("Resource does not have a document");
               }
             }}
-            isHidden={!canSelectResource}
           />
         </div>
       )}

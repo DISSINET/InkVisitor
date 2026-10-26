@@ -7,7 +7,7 @@ import app from "../../server";
 import { getAuthenticatedAgent } from "@modules/testAuth";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { findEntityById } from "@service/shorthands";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
 import { RelationEnums } from "@inkvisitor/shared/enums";

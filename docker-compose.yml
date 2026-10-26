@@ -10,9 +10,9 @@ x-logging: &logging
       max-file: "2"
 
 services:
-  database:
+  rethinkdb:
     image: rethinkdb
-    container_name: "inkvisitor-database"
+    container_name: "inkvisitor-rethinkdb"
     restart: always
     <<: *logging
     networks:
@@ -20,6 +20,30 @@ services:
     ports:
       - "8080:8080" # dashboard - required only for public access
       - "28015:28015" # driver port - required only for public access
+
+  # PostgreSQL (TimescaleDB image), the alternative storage backend (#3256).
+  # Opt-in: a server uses it only with DB_ADAPTER=postgres, RethinkDB stays
+  # the default. Host port is overridable (PG_PORT=5433 docker compose up -d postgres).
+  postgres:
+    image: timescale/timescaledb:2.30.1-pg17
+    container_name: "inkvisitor-postgres"
+    restart: always
+    <<: *logging
+    environment:
+      POSTGRES_DB: ${PG_NAME:-inkvisitor}
+      POSTGRES_USER: ${PG_USER:-inkvisitor}
+      POSTGRES_PASSWORD: ${PG_PASS:-inkvisitor}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - inkvisitor
+    ports:
+      - "${PG_PORT:-5432}:5432"
 
   inkvisitor:
     build:
@@ -35,15 +59,23 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       # Instance id — session cookie name (inkvisitor.sid.<ENV>). Must match client build mode.
       ENV: ${ENV:-production}
-      DOMAIN: ${DOMAIN:-localhost}
+      DOMAIN: ${DOMAIN:-localhost:3000}
       STATIC_PATH: ${STATIC_PATH:-/}
       PORT: ${PORT:-3000}
       # Database (DB_HOST is fixed to the compose service name)
-      DB_HOST: database
+      DB_HOST: rethinkdb
       DB_PORT: ${DB_PORT:-28015}
       DB_NAME: ${DB_NAME:-inkvisitor}
       DB_AUTH: ${DB_AUTH:-}
       DB_POOL_CONNECTIONS: ${DB_POOL_CONNECTIONS:-10}
+      # Storage backend: rethinkdb (default) or postgres. DB_NAME names the
+      # database on both; PG_HOST/PG_PORT are the compose service and its
+      # in-network port, not the host port mapping.
+      DB_ADAPTER: ${DB_ADAPTER:-rethinkdb}
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: ${PG_USER:-inkvisitor}
+      PG_PASS: ${PG_PASS:-inkvisitor}
       # JWT signing secret — CHANGE THIS before exposing the instance
       SECRET: ${SECRET:-change-me-before-deploying}
       # SMTP (leave empty to disable outgoing mail)
@@ -52,6 +84,9 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_SECRET: ${SMTP_SECRET:-}
       MAILER_SENDER: ${MAILER_SENDER:-}
+      # HGA-Engine behind the Geocoding page (blank = page works without suggestions)
+      HGA_ENGINE_URL: ${HGA_ENGINE_URL:-}
+      HGA_ENGINE_API_KEY: ${HGA_ENGINE_API_KEY:-}
     ports:
       - "3000:3000"
     networks:
@@ -59,3 +94,6 @@ services:
 
 networks:
   inkvisitor:
+
+volumes:
+  postgres-data:

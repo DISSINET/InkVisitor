@@ -105,6 +105,15 @@ export const StyledCharCounter = styled.span`
   padding-right: 0.2rem;
 `;
 
+// sits between the name field and the save button, which stays disabled while
+// the message shows - the field is marked red at the same time, so this only
+// has to carry the reason
+export const StyledNameError = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  color: ${({ theme }) => theme.color["danger"]};
+  padding-left: 0.2rem;
+`;
+
 export const StyledSaveRow = styled.div`
   display: flex;
   flex-direction: column;
@@ -122,9 +131,10 @@ export const StyledSaveFooter = styled.div`
   min-height: 2.6rem;
 `;
 
-// sharing is a property of the query being saved rather than an action on the
-// name field, so it gets a written label under the input
-export const StyledShareRow = styled.div`
+// sharing and including the columns are properties of the query being saved
+// rather than actions on the name field, so each gets a written label under
+// the input
+export const StyledSaveOption = styled.div`
   display: inline-flex;
   align-items: center;
   padding-left: 0.2rem;

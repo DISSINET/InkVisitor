@@ -4,7 +4,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../server";
 import { createEntity } from "@service/shorthands";
-import { Db } from "@service/rethink";
+import { Db } from "@service/storage";
 import Statement, {
   StatementData,
   StatementTerritory,

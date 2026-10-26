@@ -40,6 +40,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
   onReturnToLogin,
 }) => {
   const [error, setError] = useState<string | false>(false);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,6 +48,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
   };
 
   const handlePasswordReset = async () => {
+    setIsRecovering(true);
     try {
       const res = await api.passwordChangeRequest(emailLocal, {
         ignoreErrorToast: true,
@@ -57,6 +59,8 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
       }
     } catch (err) {
       setError(getErrorByCode(err as IErrorSignature).message);
+    } finally {
+      setIsRecovering(false);
     }
   };
 
@@ -108,9 +112,11 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <StyledSubmitWrap>
               <Button
                 fullWidth
-                label="Recover password"
-                color="success"
-                disabled={emailLocal.length === 0}
+                fullHeight
+                label={isRecovering ? "Recovering…" : "Recover password"}
+                color="info"
+                shape="rounded-md"
+                disabled={emailLocal.length === 0 || isRecovering}
                 size={ButtonSize.Large}
               />
             </StyledSubmitWrap>

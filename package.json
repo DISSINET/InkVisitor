@@ -1,8 +1,8 @@
 {
   "name": "inkvisitor-monorepo",
   "private": true,
-  "version": "1.5.4",
-  "packageManager": "pnpm@11.1.2",
+  "version": "1.6.3",
+  "packageManager": "pnpm@11.25.0",
   "engines": {
     "node": "^22.13.1",
     "pnpm": "^11.1.2"
@@ -16,6 +16,8 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
+    "oxlint": "^1.87.0",
+    "prettier": "3.7.4",
     "turbo": "^2.9.14"
   }
 }

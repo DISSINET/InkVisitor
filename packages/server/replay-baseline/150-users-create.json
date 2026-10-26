@@ -1,0 +1,31 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/users",
+    "body": {
+      "active": true,
+      "bookmarks": [],
+      "email": "replay@example.com",
+      "id": "u-replay",
+      "name": "replayuser",
+      "options": {
+        "defaultLanguage": "eng",
+        "defaultTerritory": "",
+        "searchLanguages": [],
+        "workingLanguages": []
+      },
+      "rights": [],
+      "role": "viewer",
+      "storedTerritories": [],
+      "verified": true
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "result": true
+    }
+  }
+}

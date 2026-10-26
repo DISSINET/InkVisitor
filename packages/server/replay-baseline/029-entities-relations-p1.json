@@ -1,0 +1,32 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/p1/relations"
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": [
+      {
+        "entityIds": [
+          "p1",
+          "c2"
+        ],
+        "id": "rel-81",
+        "order": 1,
+        "type": "CLA"
+      },
+      {
+        "certainty": "2",
+        "entityIds": [
+          "p1",
+          "p12"
+        ],
+        "id": "rel-98",
+        "order": 1,
+        "type": "IDE"
+      }
+    ]
+  }
+}

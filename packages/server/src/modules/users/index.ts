@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { Request } from "express";
+import { red } from "cli-color";
 import { UserEnums } from "@inkvisitor/shared/enums";
 import { IUser } from "@inkvisitor/shared/types/user";
 import User from "@models/user/user";
@@ -36,8 +37,28 @@ import mailer, {
   testTemplate,
 } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
-import { invalidateUserSessions } from "@service/rethinkSessionStore";
+import { invalidateUserSessions } from "@service/sessionStore";
 import { IRequest } from "src/custom_typings/request";
+
+/**
+ * Records a rejected credential check. The signin route is public and rate
+ * limited per IP, so the address is what ties repeated failures together into a
+ * recognisable brute-force pattern. The submitted login never reaches the log:
+ * people type their password into the login field by mistake, and raw input
+ * could forge extra log lines. An existing account is named by the id and
+ * name stored for it.
+ */
+function logFailedSignin(request: IRequest, reason: string, user?: User): void {
+  const ip = (request as Request).ip || "unknown";
+  const account = user
+    ? ` user=${user.id} name=${JSON.stringify(user.name)}`
+    : "";
+  console.warn(
+    red(
+      `[${new Date().toUTCString()}] Failed signin:${account} ip=${ip} reason=${reason}`
+    )
+  );
+}
 
 export default Router()
   .get(
@@ -365,6 +386,7 @@ export default Router()
 
       const user = await User.findUserByLogin(request.db, login, false);
       if (!user) {
+        logFailedSignin(request, "unknown login");
         throw new BadCredentialsError("wrong email / username");
       }
 
@@ -380,6 +402,7 @@ export default Router()
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
+        logFailedSignin(request, "wrong password", user);
         throw new BadCredentialsError("wrong password");
       }
 
@@ -574,6 +597,13 @@ export default Router()
           throw new ModelNotValidError("invalid model");
         }
 
+        if (
+          user.hasRole([UserEnums.Role.Owner]) &&
+          !request.getUserOrFail().hasRole([UserEnums.Role.Owner])
+        ) {
+          throw new PermissionDeniedError("only an owner can create an owner");
+        }
+
         await request.db.lock();
 
         if (await User.findUserByLogin(request.db, userData.email, true)) {
@@ -661,8 +691,46 @@ export default Router()
           );
         }
 
-        if (!existingUser.canBeEditedByUser(req.getUserOrFail())) {
+        const editor = req.getUserOrFail();
+
+        if (!existingUser.canBeEditedByUser(editor)) {
           throw new PermissionDeniedError("user cannot be saved");
+        }
+
+        // an owner's name and email are theirs alone to change; an admin still
+        // manages every other field on the account
+        const changesOwnerIdentity =
+          (data.name !== undefined && data.name !== existingUser.name) ||
+          (data.email !== undefined && data.email !== existingUser.email);
+        if (
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          editor.id !== existingUser.id &&
+          changesOwnerIdentity
+        ) {
+          throw new PermissionDeniedError(
+            "only the owner can change their name or email"
+          );
+        }
+
+        if (
+          data.role !== undefined &&
+          data.role !== existingUser.role &&
+          !existingUser.canRoleBeChangedByUser(editor, data.role)
+        ) {
+          throw new PermissionDeniedError("user role cannot be changed");
+        }
+
+        const changesAccess =
+          !!data.password ||
+          (data.active !== undefined && data.active !== existingUser.active);
+        if (
+          changesAccess &&
+          editor.id !== existingUser.id &&
+          !existingUser.canAccessBeChangedByUser(editor)
+        ) {
+          throw new PermissionDeniedError(
+            "only an owner can change an owner's password or active state"
+          );
         }
 
         if (data.password) {
@@ -670,15 +738,10 @@ export default Router()
           await invalidateUserSessions(req.db.connection, existingUser.id);
         }
 
-        if (data.active === false && existingUser.active) {
-          await invalidateUserSessions(req.db.connection, existingUser.id);
-        }
-
         if (
           data.verified !== undefined &&
           data.verified !== existingUser.verified
         ) {
-          const editor = req.getUserOrFail();
           const canSetVerified = editor.hasRole([
             UserEnums.Role.Owner,
             UserEnums.Role.Admin,
@@ -691,6 +754,29 @@ export default Router()
         }
 
         await req.db.lock();
+
+        // counted under the write lock, so two owners demoting or deactivating
+        // each other at once still leave one of them an active owner
+        if (
+          data.role !== undefined &&
+          data.role !== UserEnums.Role.Owner &&
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(req.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last owner cannot give up the owner role");
+        }
+        if (
+          data.active === false &&
+          existingUser.active &&
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(req.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last active owner cannot be deactivated");
+        }
+
+        if (data.active === false && existingUser.active) {
+          await invalidateUserSessions(req.db.connection, existingUser.id);
+        }
 
         if (data.email) {
           const existingEmail = await User.findUserByLogin(
@@ -796,6 +882,21 @@ export default Router()
             `user with id ${userId} does not exist`,
             userId
           );
+        }
+
+        if (!existingUser.canBeDeletedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError("user cannot be deleted");
+        }
+
+        await request.db.lock();
+
+        // counted under the write lock, so two owners deleting each other at
+        // once still leave one of them an active owner
+        if (
+          existingUser.hasRole([UserEnums.Role.Owner]) &&
+          !(await User.hasOtherOwner(request.db.connection, existingUser.id))
+        ) {
+          throw new PermissionDeniedError("the last active owner cannot be deleted");
         }
 
         const result = await existingUser.delete(request.db.connection);
@@ -905,6 +1006,17 @@ export default Router()
 
         if (!user) {
           throw new UserDoesNotExits(`user ${userId} not found`, userId);
+        }
+
+        // the response carries the new password, so this is the same as setting it
+        const requester = request.getUserOrFail();
+        if (
+          user.id !== requester.id &&
+          !user.canAccessBeChangedByUser(requester)
+        ) {
+          throw new PermissionDeniedError(
+            "only an owner can reset an owner's password"
+          );
         }
 
         const rawPassword = user.generatePassword();

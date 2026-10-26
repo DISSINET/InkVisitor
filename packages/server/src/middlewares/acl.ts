@@ -53,7 +53,7 @@ class Acl {
     );
 
     if (!permissions.length) {
-      // if permission does not exist yet, create one that only admin can access
+      // if permission does not exist yet, create one that only admin/owner can access
       const newPermission = new AclPermission({
         controller,
         route,
@@ -152,6 +152,14 @@ class Acl {
       return null;
     }
 
+    // Geocoding (HGA-Engine proxy) is open to any logged-in user: the Geocoding
+    // page sits behind login only and the engine enforces its own quota. No
+    // acl_permissions row is seeded, so this also keeps the auto-created
+    // roles:[] row from denying every non-admin.
+    if (controller === "geocoding") {
+      return null;
+    }
+
     // The entities batch read (POST /entities/batch) is the bulk equivalent of
     // the public GET /entities/:entityId; it backs e.g. fetching the entities
     // behind a document's anchors. Allow it for any logged-in user (it has no
@@ -164,24 +172,29 @@ class Acl {
       return null;
     }
 
-    // The Explorer / Query page query endpoints have no seeded ACL entry either.
-    // Any logged-in user may execute read-only entity queries; mutations are
-    // still governed by the individual entity endpoints.
+    // POST /entities/query backs the Explorer results for everyone and has no
+    // seeded ACL entry. Read-only; mutations are still governed by the
+    // individual entity endpoints.
+    // query-export is deliberately NOT included: bulk TSV export is offered
+    // only to Admin/Owner in the Explorer, and the handler has no role check of
+    // its own, so it is left to its acl_permissions row.
     if (
       controller === "entities" &&
-      (route === "query" || route === "query-export") &&
+      route === "query" &&
       method === HttpMethods.Post
     ) {
       return null;
     }
 
-    // GET /entities/:entityId/tooltip and GET /entities/:entityId/detail have
-    // no seeded ACL entries. Both are read-only companions to the public
-    // GET /entities/:entityId. Any logged-in user may call them; entity-level
-    // access is handled inside each handler.
+    // GET /entities/:entityId/tooltip, /detail and /expansion have no seeded
+    // ACL entries. All are read-only companions to the public
+    // GET /entities/:entityId, so any logged-in user may call them; entity-level
+    // access, where there is any, is handled inside each handler.
     if (
       controller === "entities" &&
-      (route.endsWith("/tooltip") || route.endsWith("/detail")) &&
+      (route.endsWith("/tooltip") ||
+        route.endsWith("/detail") ||
+        route.endsWith("/expansion")) &&
       method === HttpMethods.Get
     ) {
       return null;

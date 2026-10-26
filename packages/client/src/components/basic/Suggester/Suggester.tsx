@@ -1,4 +1,15 @@
-import { FloatingPortal, autoUpdate, flip, offset, useFloating } from "@floating-ui/react";
+import {
+  FloatingPortal,
+  autoUpdate,
+  flip,
+  hide,
+  offset,
+  shift,
+  size,
+  useDismiss,
+  useFloating,
+  useInteractions,
+} from "@floating-ui/react";
 import { dropdownWildCard } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, IUserOptions } from "@inkvisitor/shared/types";
@@ -29,10 +40,19 @@ import {
   StyledRightContentDivider,
   StyledSuggester,
   StyledSuggesterList,
+  StyledSuggesterWrap,
   SuggesterHidden,
 } from "./SuggesterStyles";
 import { SuggestionRowEntityItemData, SuggestionRowEntityRow } from "./SuggestionRow/SuggestionRow";
 import { IcoMinus, IcoPlusBold } from "Theme/icons";
+
+// suggestion labels get at least this much room (tenths of rem, as `inputWidth`)
+// even when the input itself is narrow; the list floats in a portal, so it is
+// free to overhang the input and its container
+const SUGGESTION_LIST_MIN_WIDTH = 320;
+
+// px; the type bar is all that separates the class box from the input
+const TYPE_BAR_WIDTH = 5;
 
 interface Suggester {
   marginTop?: boolean;
@@ -43,8 +63,11 @@ interface Suggester {
   categories: EntitySingleDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
+  // Caps the overall width, in the same tenths-of-rem unit as `inputWidth` -
+  // useful with inputWidth="full", where the suggester follows its container.
+  maxWidth?: number;
   // Explicit width for the suggestions dropdown. When unset the list matches the
-  // measured input width; set it to intentionally show a wider results list.
+  // measured input width, but never goes below SUGGESTION_LIST_MIN_WIDTH.
   suggestionListWidth?: number;
   disableCreate?: boolean;
   disableButtons?: boolean;
@@ -98,6 +121,7 @@ export const Suggester: React.FC<Suggester> = ({
   categories,
   disabled,
   inputWidth = 100,
+  maxWidth,
   suggestionListWidth,
   disableCreate = false,
   disableButtons = false,
@@ -139,6 +163,7 @@ export const Suggester: React.FC<Suggester> = ({
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
 
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(false);
@@ -151,20 +176,24 @@ export const Suggester: React.FC<Suggester> = ({
     [showCreateModal, isFocused],
   );
 
+  const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
+  const textInputRef = useRef<HTMLInputElement>(null);
   const [resultWidth, setResultWidth] = useState<number | undefined>(undefined);
 
-  // measure the input width when focused
+  // measure the input width when focused, in tenths of rem like the other widths
   useEffect(() => {
     if (isFocused && inputRef.current) {
       const width = inputRef.current.getBoundingClientRect().width;
-      setResultWidth(width);
+      const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      setResultWidth((width / remPx) * 10);
     }
   }, [isFocused]);
 
-  // Explicit override wins over the measured input width so the results list can
-  // intentionally be wider than the input.
-  const effectiveResultWidth = suggestionListWidth ?? resultWidth;
+  // suggestionListWidth pins an exact width; otherwise the list follows the input
+  // but keeps SUGGESTION_LIST_MIN_WIDTH, also before the input is measured
+  const effectiveResultWidth =
+    suggestionListWidth ?? Math.max(resultWidth ?? 0, SUGGESTION_LIST_MIN_WIDTH);
 
   const onTypeFn = (newType: string) => {
     setSelected(-1);
@@ -329,11 +358,57 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const { refs, floatingStyles, middlewareData } = useFloating({
+  const { refs, floatingStyles, middlewareData, isPositioned, context } = useFloating({
+    open: isFocused || isHovered,
+    // only the hover half can be dismissed; focus closes the list on blur
+    onOpenChange: (open) => {
+      if (!open) setIsHovered(false);
+    },
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [offset(1), flip({ padding: 10 })],
+    // near the right edge flip first tries bottom-end, aligning the list to the
+    // input's right edge; shift slides it into view when neither alignment
+    // fits, and size caps it to the boundary width
+    middleware: [
+      offset(1),
+      flip({ padding: 10 }),
+      shift({ padding: 10 }),
+      size({
+        padding: 10,
+        apply({ availableWidth, elements }) {
+          elements.floating.style.maxWidth = `${Math.max(0, availableWidth)}px`;
+        },
+      }),
+      // how far the list starts left of the input, after flip and shift
+      {
+        name: "overhang",
+        fn: ({ x, rects }) => ({ data: { left: rects.reference.x - x } }),
+      },
+      hide(),
+    ],
   });
+
+  // a press outside the input and the list closes a list that missed its
+  // mouseleave; Escape is handled by useKeypress
+  const dismiss = useDismiss(context, { escapeKey: false });
+  const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
+
+  // isPositioned drops when the list closes, so data kept from its last open
+  // cannot report the input as hidden before the list is positioned again
+  const isListHidden = isPositioned && !!middlewareData.hide?.referenceHidden;
+
+  // a list moved left past the type bar covers the spot where the class menu
+  // opens, so it gives way while that menu is open
+  const isListOverCategory = (middlewareData.overhang?.left ?? 0) > TYPE_BAR_WIDTH;
+  const isListUnderCategoryMenu = isCategoryMenuOpen && isListOverCategory;
+
+  // an input scrolled out of view closes its list; clicking the input reopens it
+  useEffect(() => {
+    if (!isListHidden) return;
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && wrapRef.current?.contains(focused)) focused.blur();
+    setIsHovered(false);
+  }, [isListHidden]);
 
   const theme = useTheme();
 
@@ -376,16 +451,28 @@ export const Suggester: React.FC<Suggester> = ({
   // choice the user cannot make here
   const categoryIsOffered = dropdownOptions.some((option) => option.value === category);
 
+  // The input draws the slot (and its divider next to the clear button) for any
+  // rightContent it is handed, so the slot is only worth handing over when the
+  // create button, the caller's own content or the fallback button fills it.
+  const hasRightContent = !disableCreate || !!rightContent || !!button;
+
   return (
-    // div is necessary for flex to work and render the clear button properly
-    <div style={{ width: inputWidth === "full" ? "100%" : undefined }}>
+    // the wrap is necessary for flex to work and render the clear button properly
+    <StyledSuggesterWrap
+      ref={wrapRef}
+      $fullWidth={inputWidth === "full"}
+      $maxWidth={maxWidth}
+    >
+      {/* the drop ref covers the warning icon too - a pointer crossing onto it
+          would otherwise leave the target, hide the icon, and land back on the
+          target, flickering for as long as it hovers there */}
       <StyledSuggester
+        ref={dropRef}
         $marginTop={marginTop}
         $fullWidth={inputWidth === "full"}
         $isFocused={isFocused}
       >
         <StyledInputWrapper
-          ref={dropRef}
           $hasButton={!disableCreate}
           $isOver={isOver}
           $isFocused={isFocused}
@@ -396,7 +483,12 @@ export const Suggester: React.FC<Suggester> = ({
             <Dropdown.Single.Entity
               value={category}
               options={dropdownOptions}
-              onChange={onChangeCategory}
+              onChange={(option) => {
+                onChangeCategory(option);
+                // the class dropdown keeps focus after a pick, so typing and the
+                // arrow keys would reach the class menu instead of the suggestions
+                textInputRef.current?.focus();
+              }}
               width={categoryBoxWidth}
               // the control is only wide enough for a single class letter, so a
               // worded fallback would spill over the type bar and the input
@@ -406,6 +498,7 @@ export const Suggester: React.FC<Suggester> = ({
                 setIsFocused(true);
               }}
               onBlur={() => setIsFocused(false)}
+              onMenuOpenChange={setIsCategoryMenuOpen}
               disableTyping
               suggester
               disabled={disabled}
@@ -420,7 +513,7 @@ export const Suggester: React.FC<Suggester> = ({
             entityLetter={category}
             color={categoryIsOffered ? undefined : "grey"}
             noMargin
-            width={5}
+            width={TYPE_BAR_WIDTH}
             dimColor={disabled}
           />
 
@@ -432,8 +525,10 @@ export const Suggester: React.FC<Suggester> = ({
             style={{
               width: "100%",
             }}
+            {...getReferenceProps()}
           >
             <Input
+              inputRef={textInputRef}
               type="text"
               value={typed}
               onChangeFn={(newType: string) => onTypeFn(newType)}
@@ -458,28 +553,30 @@ export const Suggester: React.FC<Suggester> = ({
               fullHeight
               clearable={clearableInput}
               rightContent={
-                <>
-                  {/* rightContent renders alongside the create button (e.g. the
-                      annotator's elvl group); the button fallback only applies
-                      when create is disabled and no rightContent is provided. */}
-                  {rightContent ? rightContent : disableCreate ? button && button : null}
-                  {!disableCreate && (
-                    <>
-                      {rightContent && <StyledRightContentDivider />}
-                      <IconButton
-                        icon={<IcoPlusBold />}
-                        tooltipLabel="create new entity"
-                        color={buttonColorKey}
-                        noBackground
-                        noBorder
-                        onClick={() => {
-                          handleAddBtnClick();
-                        }}
-                        disabled={disabled}
-                      />
-                    </>
-                  )}
-                </>
+                hasRightContent ? (
+                  <>
+                    {/* rightContent renders alongside the create button (e.g. the
+                        annotator's elvl group); the button fallback only applies
+                        when create is disabled and no rightContent is provided. */}
+                    {rightContent ? rightContent : disableCreate ? button && button : null}
+                    {!disableCreate && (
+                      <>
+                        {rightContent && <StyledRightContentDivider />}
+                        <IconButton
+                          icon={<IcoPlusBold />}
+                          tooltipLabel="create new entity"
+                          color={buttonColorKey}
+                          noBackground
+                          noBorder
+                          onClick={() => {
+                            handleAddBtnClick();
+                          }}
+                          disabled={disabled}
+                        />
+                      </>
+                    )}
+                  </>
+                ) : undefined
               }
             />
           </div>
@@ -489,18 +586,24 @@ export const Suggester: React.FC<Suggester> = ({
           <StyledAiOutlineWarning size={22} color={theme.color.warning} />
         )}
 
-        {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (
+        {(isFocused || isHovered) && (
           <FloatingPortal id="page-content">
             <StyledSuggesterList
               ref={refs.setFloating}
+              // under the class menu the list is hidden, not unmounted, so it
+              // keeps its scroll position; an out-of-view input closes it on the
+              // next effect, and this covers the frame before
+              $hidden={isListHidden || isListUnderCategoryMenu}
               data-suggester-portal="true"
-              onMouseDown={(event) => {
-                // Prevent annotator click-away handlers from closing while interacting
-                // with the suggester dropdown rendered in a portal. (e.g. annotator highlight menu)
-                event.stopPropagation();
-              }}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
+              {...getFloatingProps({
+                onMouseDown: (event) => {
+                  // Prevent annotator click-away handlers from closing while interacting
+                  // with the suggester dropdown rendered in a portal. (e.g. annotator highlight menu)
+                  event.stopPropagation();
+                },
+                onMouseEnter: () => setIsHovered(true),
+                onMouseLeave: () => setIsHovered(false),
+              })}
               style={{
                 ...floatingStyles,
               }}
@@ -511,15 +614,18 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  <SuggesterKeyPress
-                    onArrowDown={() => {
-                      if (selected < suggestions.length - 1) setSelected(selected + 1);
-                    }}
-                    onArrowUp={() => {
-                      if (selected > -1) setSelected(selected - 1);
-                    }}
-                    dependencyArr={[selected]}
-                  />
+                  {/* the arrow keys belong to the class menu while it is open */}
+                  {!isCategoryMenuOpen && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < suggestions.length - 1) setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
                 </>
               ) : null}
 
@@ -530,15 +636,18 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  <SuggesterKeyPress
-                    onArrowDown={() => {
-                      if (selected < preSuggestions.length - 1) setSelected(selected + 1);
-                    }}
-                    onArrowUp={() => {
-                      if (selected > -1) setSelected(selected - 1);
-                    }}
-                    dependencyArr={[selected]}
-                  />
+                  {/* the arrow keys belong to the class menu while it is open */}
+                  {!isCategoryMenuOpen && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < preSuggestions.length - 1) setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
                 </>
               ) : null}
             </StyledSuggesterList>
@@ -566,6 +675,6 @@ export const Suggester: React.FC<Suggester> = ({
           }}
         />
       )}
-    </div>
+    </StyledSuggesterWrap>
   );
 };

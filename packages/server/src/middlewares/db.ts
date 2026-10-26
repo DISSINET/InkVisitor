@@ -1,10 +1,9 @@
 import { Response, Request, NextFunction } from "express";
-import { rethinkConfig } from "@service/rethink";
 import { InternalServerError } from "@inkvisitor/shared/types/errors";
-import DbPool from "@service/rethink-pool";
+import { DbPool, poolOptions } from "@service/storage";
 import { DbHandle } from "@service/dbHandle";
 
-export const pool = new DbPool(rethinkConfig);
+export const pool = new DbPool(poolOptions);
 
 // Dedicated pool for the session store. It MUST NOT share `pool`: express-session
 // writes the session inside its res.end wrapper (every request, because rolling is
@@ -13,13 +12,13 @@ export const pool = new DbPool(rethinkConfig);
 // deadlocks the pool the moment the client fires a burst of parallel requests.
 // A separate, smaller pool decouples session I/O from request I/O entirely.
 export const sessionPool = new DbPool({
-  ...rethinkConfig,
+  ...poolOptions,
   max: parseInt(process.env.SESSION_POOL_CONNECTIONS || "", 10) || 5,
 });
 
 // Tests and shutdown tear pools down via `pool.end()`. Drain the session pool from
 // the same call so its evictor timer / idle connections don't keep the process
-// (and Jest) alive - this keeps the existing teardown call sites unchanged.
+// (and Jest) alive, and callers only ever need to end the one pool.
 const endRequestPool = pool.end.bind(pool);
 pool.end = async () => {
   await Promise.all([endRequestPool(), sessionPool.end()]);

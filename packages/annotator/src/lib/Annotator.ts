@@ -1,7 +1,8 @@
 import { drawAnchorMarker } from "./AnchorMarker";
 import { CaretBlink } from "./CaretBlink";
 import {
-  ANCHOR_MARKER_ARM_H_RATIO,
+  ANCHOR_MARKER_ARM_H_EM,
+  ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO,
   ANCHOR_MARKER_ARM_W_RATIO,
   ANCHOR_MARKER_HIT_PAD_PX,
   ANCHOR_MARKER_LINE_WIDTH_PX,
@@ -10,6 +11,7 @@ import {
   DEFAULT_FONT_SIZE,
   EditMode,
   HighlightMode,
+  HIGHLIGHT_HEIGHT_EM,
   HOVER_DEBOUNCE_MS,
   LIGHT_MENU_COLORS,
   DEFAULT_CARET_WIDTH_PX,
@@ -53,6 +55,13 @@ import { SettingControl, SettingsOverlay } from "./SettingsOverlay";
 import Text, { SegmentPosition, Tag } from "./Text";
 import { CanvasMeasurer } from "./TextMeasurer";
 import Viewport from "./Viewport";
+import {
+  XmlSyntaxColors,
+  XmlTokenRun,
+  advanceXmlState,
+  initialXmlTokenizerState,
+  tokenizeXmlLines,
+} from "./XmlSyntax";
 import { AsymmetricalAnchor, WarningData, Warnings } from "./warnings";
 
 // Updated regex to properly handle tags with attributes
@@ -170,6 +179,19 @@ export interface DrawingOptions {
    */
   minFillWidth?: number;
   /**
+   * Height in device px of the band the letters occupy, for the highlights that
+   * wrap text rather than fill a line (SELECT, BACKGROUND). Measured from the
+   * font, so the band holds one height across every line spacing. Omitted by a
+   * caller with no font metrics, which falls back to a share of the line height.
+   */
+  textBandHeight?: number;
+  /**
+   * Device-px shift from the centre of a line box down to the centre of that
+   * text band. Text is painted against the em box, whose descender room a
+   * capital leaves empty, so the letters ride above the middle of the line.
+   */
+  textBandOffset?: number;
+  /**
    * Proportional column→pixel resolver. When present (and the caller
    * passes the absolute visual line), draw uses measured widths instead of
    * `col * charWidth`. Absent on the monospace path.
@@ -214,6 +236,12 @@ export class Annotator {
    * host sets this per theme: a dark background needs a stronger fill than a
    * light one for the same perceived emphasis. */
   blockCaretOpacity: number = 0.45;
+
+  /**
+   * Syntax colours for the XML (RAW) view (#3269); null keeps it one colour.
+   * Set by the host per theme, like {@link blockCaretOpacity}.
+   */
+  xmlSyntaxColors: XmlSyntaxColors | null = null;
 
   private _menuColors: MenuColors = LIGHT_MENU_COLORS;
   get menuColors(): MenuColors {
@@ -407,6 +435,9 @@ export class Annotator {
   onHighlightCb?: (entityId: string) => HighlightSchema | HighlightSchema[] | void;
   onTextChangeCb?: (text: string) => void;
   onScrollCb?: (line: number) => void;
+  onGutterWidthChangeCb?: (width: number) => void;
+  // last width passed to onGutterWidthChangeCb
+  reportedGutterWidth?: number;
   onAnchorHoverCb?: (tags: Tag[]) => void; // Part 2 of #2835
   onAnchorTagHoverCb?: (tag: Tag | null, position: { x: number; y: number } | null) => void;
 
@@ -425,6 +456,9 @@ export class Annotator {
     kind: "start" | "end";
     tag: Tag;
   }[] = [];
+
+  /** Memo for {@link capBandOffsetPx}, keyed on the font string it measured. */
+  private capBandOffsetCache?: { font: string; offset: number };
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -1169,8 +1203,10 @@ export class Annotator {
     const noLinesViewport = this.viewportFullRowCount() + 1;
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const extent = this.scrollExtentLineCount();
-    const positionBeforeRel = extent > 0 ? this.viewport.lineStart / Math.max(1, extent) : 0;
+    // Rows above line 0 (the start buffer) hold no text, so a viewport parked
+    // there keeps its line index; otherwise the text at its top is kept on top.
+    const topOffset =
+      this.viewport.lineStart >= 0 ? this.text.offsetFromVisual(0, this.viewport.lineStart) : -1;
 
     this.viewport.updateLineEnd(noLinesViewport);
     // Keep the proportional wrap budget in sync with the new width
@@ -1191,12 +1227,8 @@ export class Annotator {
       this.refreshHoverHighlightRegions();
     }
 
-    // this function tries to keep the same relative position of the text even its not perfect
-    // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
-    this.viewport.scrollTo(
-      Math.floor(positionBeforeRel * this.scrollExtentLineCount()),
-      this.scrollExtentLineCount()
-    );
+    const topLine = topOffset >= 0 ? this.text.visualFromOffset(topOffset)?.yLine : undefined;
+    this.viewport.scrollTo(topLine ?? this.viewport.lineStart, this.scrollExtentLineCount());
 
     // The track spans startBuffer rows above line 0 too, so the runner's
     // share of it is measured against the full buffered extent.
@@ -1206,7 +1238,7 @@ export class Annotator {
     this.scroller?.setViewportSize(Math.min(100, (this.viewport.noLines / scrollTrackLines) * 100));
 
     if (this.settingsOverlay.isOpen) {
-      this.settingsOverlay.reposition(this.element);
+      this.settingsOverlay.reposition(this.overlayAnchors());
     }
 
     this.draw();
@@ -1246,6 +1278,31 @@ export class Annotator {
 
   onScroll(cb: (line: number) => void) {
     this.onScrollCb = cb;
+  }
+
+  /**
+   * Registers callback receiving the gutter width (CSS px) that fits the
+   * highest paragraph number at the current font. Fires on registration and
+   * whenever that width changes; the host sizes the gutter canvas from it and
+   * calls {@link resize}.
+   */
+  onGutterWidthChange(cb: (width: number) => void) {
+    this.onGutterWidthChangeCb = cb;
+    this.reportedGutterWidth = undefined;
+    this.reportGutterWidth();
+  }
+
+  private reportGutterWidth(): void {
+    if (!this.lines || !this.onGutterWidthChangeCb) {
+      return;
+    }
+    this.lines.font = this.font;
+    this.lines.ratio = this.ratio;
+    const width = this.lines.requiredWidth(this.text.paragraphCount());
+    if (width !== this.reportedGutterWidth) {
+      this.reportedGutterWidth = width;
+      this.onGutterWidthChangeCb(width);
+    }
   }
 
   /**
@@ -2147,6 +2204,7 @@ export class Annotator {
     this.element.removeEventListener("blur", this.boundOnCanvasBlur);
 
     this.onScrollCb = undefined;
+    this.onGutterWidthChangeCb = undefined;
     this.scroller = undefined;
     this.lines = undefined;
   }
@@ -2291,6 +2349,24 @@ export class Annotator {
     this.setShowParagraphMarks(!this.showParagraphMarks);
   }
 
+  /**
+   * The elements the settings overlay spans: the whole editor surface, not just
+   * the text canvas. The line-number and scroller canvases are separate
+   * elements beside it, so covering their union keeps the dimmed backdrop
+   * flush with the editor and gives the settings box the full width to lay out
+   * in (the text canvas alone is narrow enough to clip wide controls).
+   */
+  private overlayAnchors(): HTMLElement[] {
+    const anchors: HTMLElement[] = [this.element];
+    if (this.lines) {
+      anchors.push(this.lines.element);
+    }
+    if (this.scroller) {
+      anchors.push(this.scroller.element);
+    }
+    return anchors;
+  }
+
   /** Open the settings overlay with the current options. */
   openSettings(): void {
     const settings: SettingControl[] = [
@@ -2394,7 +2470,7 @@ export class Annotator {
 
     this.settingsOverlay.open(
       settings,
-      this.element,
+      this.overlayAnchors(),
       [
         {
           label: "Reset to defaults",
@@ -2802,8 +2878,12 @@ export class Annotator {
     // draw() (so it empties even in RAW/SEMI where this method never runs); we
     // only append here.
 
-    const armH = ANCHOR_MARKER_ARM_H_RATIO * this.lineHeight;
+    const armH = Math.min(
+      ANCHOR_MARKER_ARM_H_EM * this.fontSize * this.ratio,
+      ANCHOR_MARKER_ARM_H_MAX_LINE_RATIO * this.lineHeight
+    );
     const armW = ANCHOR_MARKER_ARM_W_RATIO * this.charWidth;
+    const inkOffset = this.capBandOffsetPx();
     const lineWidth = ANCHOR_MARKER_LINE_WIDTH_PX * this.ratio;
     const stackStep = ANCHOR_MARKER_STACK_STEP_PX * this.ratio;
 
@@ -2884,7 +2964,7 @@ export class Annotator {
       // Stacked markers fan out to the right (both arms point right), so a
       // stack never runs off the left margin where boundaries commonly sit.
       const xPx = toPx(p.yLine, p.xLine) + idx * stackStep;
-      const yMid = (relLine + 0.5) * this.lineHeight;
+      const yMid = (relLine + 0.5) * this.lineHeight + inkOffset;
 
       // #2885 — the anchor being resized pulses its corner markers too (not just
       // the span wash), so a Territory (whose only visual is these markers) shows
@@ -2922,6 +3002,53 @@ export class Annotator {
         });
       }
     }
+  }
+
+  /**
+   * Device-px distance from a line's vertical centre down to the centre of the
+   * band capital letters occupy on that line.
+   *
+   * Text is painted with `textBaseline = "middle"`, which centres the em box —
+   * and the em box reserves descender room that a capital never uses, so the
+   * visible letters sit above the line centre by a fixed amount. Anything meant
+   * to read as aligned with the letters (the anchor corner markers) has to be
+   * placed against this band, not against the line box.
+   *
+   * Measured against the live font and cached per font string; a context without
+   * bounding-box metrics (jsdom) reports 0 and the caller falls back to the
+   * line centre.
+   */
+  private capBandOffsetPx(): number {
+    const font = this.font;
+    if (this.capBandOffsetCache?.font === font) {
+      return this.capBandOffsetCache.offset;
+    }
+    this.ctx.font = font;
+    this.ctx.textBaseline = "middle";
+    const m = this.ctx.measureText("H");
+    const ascent = m.actualBoundingBoxAscent;
+    const descent = m.actualBoundingBoxDescent;
+    const offset =
+      Number.isFinite(ascent) && Number.isFinite(descent)
+        ? (descent - ascent) / 2
+        : 0;
+    this.capBandOffsetCache = { font, offset };
+    return offset;
+  }
+
+  /**
+   * Placement of the band the letters occupy, for the visuals that wrap text
+   * instead of filling a line: the selection, the caret and the anchor
+   * background fills. Spread into their {@link DrawingOptions}.
+   */
+  private textBandOptions(): {
+    textBandHeight: number;
+    textBandOffset: number;
+  } {
+    return {
+      textBandHeight: HIGHLIGHT_HEIGHT_EM * this.fontSize * this.ratio,
+      textBandOffset: this.capBandOffsetPx(),
+    };
   }
 
   /**
@@ -3094,6 +3221,62 @@ export class Annotator {
   }
 
   /**
+   * Token runs per viewport line for XML syntax colouring (#3269), or null
+   * when the view is not RAW or no colours are set. The tokenizer is seeded
+   * from the earlier visual lines of the first paragraph in view, so a tag
+   * wrapping onto the top line still colours as a tag.
+   */
+  private xmlSyntaxRuns(textToRender: string[]): XmlTokenRun[][] | null {
+    if (!this.xmlSyntaxColors || this.text.mode !== EditMode.RAW) {
+      return null;
+    }
+    const lineStart = this.viewport.lineStart;
+    let seedStart = lineStart;
+    while (
+      seedStart > 0 &&
+      seedStart - 1 < this.text.noLines &&
+      !this.text.isParagraphEnd(seedStart - 1)
+    ) {
+      seedStart--;
+    }
+    // runs for the seed lines are never drawn, so only the state is carried
+    const seed = initialXmlTokenizerState();
+    for (let l = seedStart; l < lineStart; l++) {
+      advanceXmlState(seed, this.text.getLine(l), this.text.getLine(l + 1));
+    }
+    return tokenizeXmlLines(textToRender, seed).runs;
+  }
+
+  /**
+   * Paint one RAW line run by run in its syntax colour. Each run starts at its
+   * column's x from the same width tables the caret uses, so the pieces land
+   * exactly where the one-shot fillText would have put them.
+   */
+  private drawXmlLine(
+    textLine: string,
+    runs: XmlTokenRun[] | undefined,
+    absLine: number,
+    originPx: number,
+    y: number
+  ): void {
+    const colors = this.xmlSyntaxColors;
+    if (!colors || !runs) {
+      this.ctx.fillText(textLine, originPx, y);
+      return;
+    }
+    for (const run of runs) {
+      const x =
+        originPx +
+        (this.proportional
+          ? this.text.columnToPixelX(absLine, run.start)
+          : run.start * this.charWidth);
+      this.ctx.fillStyle = run.kind === "text" ? this.fontColor : colors[run.kind];
+      this.ctx.fillText(textLine.slice(run.start, run.end), x, y);
+    }
+    this.ctx.fillStyle = this.fontColor;
+  }
+
+  /**
    * draw resets the canvas and redraws the scene anew.
    * First draw lines with text, then allow each component to draw their own logic.
    * TODO - this should be done in conjunction with requestAnimationFrame
@@ -3128,13 +3311,16 @@ export class Annotator {
     this.ctx.textBaseline = "middle";
 
     const textToRender = this.text.getViewportText(this.viewport);
+    const xmlRuns = this.xmlSyntaxRuns(textToRender);
     const renderEndCond = this.viewport.lineEnd - this.viewport.lineStart;
     for (let renderLine = 0; renderLine <= renderEndCond; renderLine++) {
       const textLine = textToRender[renderLine];
       const absLine = this.viewport.lineStart + renderLine;
       const originPx = this.lineXOriginPx(absLine);
       const y = (renderLine + 0.5) * this.lineHeight;
-      if (textLine) {
+      if (textLine && xmlRuns) {
+        this.drawXmlLine(textLine, xmlRuns[renderLine], absLine, originPx, y);
+      } else if (textLine) {
         this.ctx.fillText(textLine, originPx, y);
       }
       if (
@@ -3176,6 +3362,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        ...this.textBandOptions(),
         caretWidth: this.caretWidthDevicePx(),
         caretOpacity: this.caretOpacityValue(),
         caretVisible:
@@ -3208,6 +3395,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           columnToPixelX: this.drawColumnToPixelX(),
           lineXOrigin: this.drawLineXOrigin(),
         });
@@ -3282,36 +3470,52 @@ export class Annotator {
         const hlResult = this.onHighlightCb(tagName);
         const schemas = Array.isArray(hlResult) ? hlResult : hlResult ? [hlResult] : [];
         if (schemas.length) {
+          const occurences: IAbsCoordinates[][] = [];
           let occurence: IAbsCoordinates[];
           let i = 0;
           do {
             occurence = this.text.getTagPosition(tagName, i);
             if (occurence.length > 1) {
-              // The occurrence being resized is drawn separately as an animated
-              // pulse (below), so drop its fill/underline schemas to avoid
-              // double-painting. Its ANCHOR corner markers are kept: for
-              // Territory anchors they are the only visual, and hiding them makes
-              // the anchor look deleted (#2887). Matched by occurrence (opening
-              // position), so sibling anchors of the same entity are unaffected.
-              const isResized =
-                resizeSpan != null &&
-                this.resizeAnchor?.tagName === tagName &&
-                occurence[0].xLine === resizeSpan.start.xLine &&
-                occurence[0].yLine === resizeSpan.start.yLine;
-              const occSchemas = isResized
-                ? schemas.filter((s) => s.mode === HighlightMode.ANCHOR)
-                : schemas;
-              for (const schema of occSchemas) {
-                higlightItems.push({
-                  schema,
-                  start: occurence[0],
-                  end: occurence[1],
-                  tag,
-                });
-              }
+              occurences.push(occurence);
             }
             i++;
           } while (!!occurence.length);
+
+          // Each FOCUS item dims everything outside its own span, so with
+          // several spans of one entity the washes stack over the whole text
+          // and no line reads as "inside". The veil is drawn only for an entity
+          // with exactly one opening and one closing tag, so an entity with an
+          // orphaned tag gets none.
+          const tagCount = this.text.countTags(tagName);
+          const isSingleAnchor = tagCount.opening === 1 && tagCount.closing === 1;
+          const spanSchemas = isSingleAnchor
+            ? schemas
+            : schemas.filter((s) => s.mode !== HighlightMode.FOCUS);
+
+          for (const occ of occurences) {
+            // The occurrence being resized is drawn separately as an animated
+            // pulse (below), so drop its fill/underline schemas to avoid
+            // double-painting. Its ANCHOR corner markers are kept: for
+            // Territory anchors they are the only visual, and hiding them makes
+            // the anchor look deleted (#2887). Matched by occurrence (opening
+            // position), so sibling anchors of the same entity are unaffected.
+            const isResized =
+              resizeSpan != null &&
+              this.resizeAnchor?.tagName === tagName &&
+              occ[0].xLine === resizeSpan.start.xLine &&
+              occ[0].yLine === resizeSpan.start.yLine;
+            const occSchemas = isResized
+              ? spanSchemas.filter((s) => s.mode === HighlightMode.ANCHOR)
+              : spanSchemas;
+            for (const schema of occSchemas) {
+              higlightItems.push({
+                schema,
+                start: occ[0],
+                end: occ[1],
+                tag,
+              });
+            }
+          }
         }
       }
 
@@ -3347,6 +3551,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           columnToPixelX: this.drawColumnToPixelX(),
           lineXOrigin: this.drawLineXOrigin(),
         });
@@ -3399,6 +3604,7 @@ export class Annotator {
               lineHeight: this.lineHeight,
               charWidth: this.charWidth,
               charsAtLine: this.text.charsAtLine,
+              ...this.textBandOptions(),
               columnToPixelX: this.drawColumnToPixelX(),
               lineXOrigin: this.drawLineXOrigin(),
               // Keep newline-only lines of the resized span visible (#2885).
@@ -3419,6 +3625,7 @@ export class Annotator {
           lineHeight: this.lineHeight,
           charWidth: this.charWidth,
           charsAtLine: this.text.charsAtLine,
+          ...this.textBandOptions(),
           caretWidth: this.caretWidthDevicePx(),
           caretOpacity: this.caretOpacityValue(),
           caretVisible: this.canvasFocused && this.caretBlink.isVisible(),
@@ -3458,7 +3665,9 @@ export class Annotator {
     if (this.lines) {
       this.lines.font = this.font;
       this.lines.lineHeight = this.lineHeight;
-      this.lines.draw(this.viewport, this.text.noLines);
+      this.lines.ratio = this.ratio;
+      this.lines.draw(this.viewport, (absLine) => this.text.paragraphNumberStartingAt(absLine));
+      this.reportGutterWidth();
     }
 
     const thisRenderVieportLineStart = this.viewport.lineStart;
@@ -4203,11 +4412,11 @@ export class Annotator {
     }
 
     // Construct the Tag at the start
-    const openTag = new Tag(0, anchor, false, undefined, -1);
+    const openTag = new Tag(0, anchor, false, -1);
     if (attributes) {
       openTag.setAttributes(attributes);
     }
-    const closeTag = new Tag(0, anchor, true, undefined, -1);
+    const closeTag = new Tag(0, anchor, true, -1);
 
     // get bounds of the selection
     let [start, end] = this.cursor.getAbsBounds();
@@ -4262,19 +4471,7 @@ export class Annotator {
       this.text.calculateLines();
 
       // Find the newly added anchor and select it
-      const anchorName = openTag.getTagName();
-      let newOccurrenceIndex = 0;
-      for (const segment of this.text.segments) {
-        for (const open of segment.openingTags) {
-          if (
-            open.getTagName() === anchorName &&
-            open.getAbsoluteTagPosition(this.text.segments) < indexStart
-          ) {
-            newOccurrenceIndex++;
-          }
-        }
-      }
-      const tagPosition = this.text.getTagPosition(anchorName, newOccurrenceIndex);
+      const tagPosition = this.text.getTagPositionAt(openTag.getTagName(), indexStart);
       if (tagPosition && tagPosition.length === 2) {
         this.cursor.selectStart = tagPosition[0];
         this.cursor.selectEnd = tagPosition[1];
@@ -4309,13 +4506,13 @@ export class Annotator {
     }
 
     // Build the original tag string using the tag's current attributes
-    const originalTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    const originalTag = new Tag(0, tag.getTagName(), false, -1);
     originalTag.setAttributes(tag.attributes);
     const originalTagString = originalTag.getTag();
     const originalTagLength = originalTagString.length;
 
     // Build the new tag string with updated attributes
-    const newTag = new Tag(0, tag.getTagName(), false, undefined, -1);
+    const newTag = new Tag(0, tag.getTagName(), false, -1);
     if (attributes) {
       newTag.setAttributes(attributes);
     } else {
@@ -4351,7 +4548,7 @@ export class Annotator {
     let occurrence = 0;
     outer: for (const segment of this.text.segments) {
       for (const open of segment.openingTags) {
-        if (open.getTagName() === tag) {
+        if (open.getTagName() === tag && !open.selfClosing) {
           if (occurrence === index) {
             openingTag = open;
             break outer;
@@ -4378,6 +4575,25 @@ export class Annotator {
   scrollToLine(absLine: number, lineOffset: number = 0) {
     this.viewport.scrollTo(absLine + lineOffset, this.scrollExtentLineCount());
     this.draw();
+  }
+
+  /**
+   * Scrolls paragraph `paragraphNumber` (as numbered in the gutter) to the top,
+   * puts a collapsed caret at its start and focuses the canvas.
+   * Returns false, changing nothing, when the document has no such paragraph.
+   */
+  scrollToParagraph(paragraphNumber: number): boolean {
+    const absLine = this.text.paragraphStartLine(paragraphNumber);
+    if (absLine === undefined) {
+      return false;
+    }
+    this.viewport.scrollTo(absLine, this.scrollExtentLineCount());
+    // moving by offset collapses the selection onto the new caret and drops
+    // the column remembered by earlier up/down moves
+    this.cursor.moveToOffset(this.text, this.text.offsetFromVisual(0, absLine));
+    this.draw();
+    this.element.focus({ preventScroll: true });
+    return true;
   }
 
   /**
@@ -4687,6 +4903,16 @@ export class Annotator {
       return;
     }
     this.restoreSnapshot(target);
+  }
+
+  /**
+   * Text currently covered by the cursor selection, empty string when nothing
+   * is selected. In raw mode the slice includes any tag characters it spans,
+   * matching what the canvas shows in that mode.
+   */
+  getSelectedText(): string {
+    const area = this.cursor.getSelectedArea();
+    return area ? this.text.getRangeText(area[0], area[1]) : "";
   }
 
   onCopyText() {

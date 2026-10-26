@@ -1,0 +1,51 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "POST",
+    "path": "/api/entities",
+    "body": {
+      "class": "C",
+      "data": {
+        "pos": ""
+      },
+      "detail": "",
+      "id": "rp-c2",
+      "labels": [
+        "replay from template"
+      ],
+      "language": "eng",
+      "notes": [],
+      "props": [],
+      "references": [],
+      "status": "1",
+      "usedTemplate": "rp-tpl"
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json",
+    "body": {
+      "data": {
+        "class": "C",
+        "createdAt": "<datetime>",
+        "data": {
+          "pos": ""
+        },
+        "detail": "",
+        "id": "rp-c2",
+        "isTemplate": false,
+        "labels": [
+          "replay from template"
+        ],
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1",
+        "updatedAt": "<datetime>",
+        "usedTemplate": "rp-tpl"
+      },
+      "result": true
+    }
+  }
+}

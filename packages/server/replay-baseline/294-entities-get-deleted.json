@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/entities/rp-e"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "EntityDoesNotExist",
+      "message": "entity rp-e was not found",
+      "result": false
+    }
+  }
+}

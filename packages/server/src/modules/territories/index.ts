@@ -62,14 +62,12 @@ export default Router()
         );
       }
 
-      if (
-        !new Territory({ id: territoryId }).canBeViewedByUser(
-          request.getUserOrFail()
-        )
-      ) {
+      // built from the stored row rather than the id alone - the view rule
+      // reads isTemplate, which templates need to bypass the tree lookup
+      if (!new Territory(territory).canBeViewedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
- 
+
       const response = new ResponseTerritory(territory);
       await response.prepare(request, request.query.preload === "1", request.query.warnings === "1");
 
@@ -95,14 +93,12 @@ export default Router()
         );
       }
 
-      if (
-        !new Territory({ id: territoryId }).canBeViewedByUser(
-          request.getUserOrFail()
-        )
-      ) {
+      // built from the stored row rather than the id alone - the view rule
+      // reads isTemplate, which templates need to bypass the tree lookup
+      if (!new Territory(territory).canBeViewedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(`cannot view entity ${territoryId}`);
       }
- 
+
       const response = new ResponseTerritory(territory);
       const statements = await response.prepareStatements(request, true, true);
 

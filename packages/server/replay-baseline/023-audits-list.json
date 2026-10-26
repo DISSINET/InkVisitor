@@ -1,0 +1,16 @@
+{
+  "request": {
+    "as": "admin",
+    "method": "GET",
+    "path": "/api/audits?from=2019-01-01"
+  },
+  "response": {
+    "status": 400,
+    "contentType": "application/json",
+    "body": {
+      "error": "AuditDoesNotExist",
+      "message": "no audit found",
+      "result": false
+    }
+  }
+}

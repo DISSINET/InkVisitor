@@ -1,21 +1,22 @@
 import * as cron from "node-cron";
-import { Connection } from "rethinkdb-ts";
+import { Conn } from "@service/storage";
 import { StatsAggregator } from "@models/stats/stats-aggregator";
 import { EventType } from "@inkvisitor/shared/types/stats";
-import { reapExpiredSessions } from "@service/rethinkSessionStore";
+import { reapExpiredSessions } from "@service/sessionStore";
 
 export class CronService {
-  private db: Connection;
+  private db: Conn;
   private statsAggregator: StatsAggregator;
   private isRunning = false;
 
-  constructor(db: Connection) {
+  constructor(db: Conn) {
     this.db = db;
     this.statsAggregator = new StatsAggregator(db);
   }
 
   /**
-   * Starts the cron service with midnight job
+   * Starts the cron service with the midnight stats aggregation and the hourly
+   * expired-session reap
    */
   start(): void {
     if (this.isRunning) {
@@ -34,7 +35,7 @@ export class CronService {
     task.start();
 
     // Reap expired sessions hourly so abandoned sessions don't pile up in the
-    // sessions table (active ones are also cleaned lazily on access).
+    // sessions table (the store also deletes an expired session when it is read).
     const sessionReapTask = cron.schedule(
       "0 * * * *",
       async () => {

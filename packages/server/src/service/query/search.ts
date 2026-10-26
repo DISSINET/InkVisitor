@@ -5,8 +5,8 @@ import {
   SearchEdgeTypesInvalid,
 } from "@inkvisitor/shared/types/errors";
 import { Explore, Query } from "@inkvisitor/shared/types/query";
-import { Connection } from "rethinkdb-ts";
-import { Results, SearchEdge, SearchNode } from ".";
+import { Conn, ExplorePlan, storage } from "@service/storage";
+import { Results } from ".";
 import { IResponseQueryEntity } from "@inkvisitor/shared/types/response-query";
 import Entity from "@models/entity/entity";
 import {
@@ -20,13 +20,15 @@ import {
   getSubordinateEntityIds,
 } from "@models/relation/functions";
 import { aggregateAuditStats } from "@models/stats/aggregate";
+import { getNodeExpansionIds } from "./node-expansion";
+import treeCache from "@service/treeCache";
 import { EXPLORE_STATS_ENTITY_LIMIT } from "@inkvisitor/shared/types/stats";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
   static DEFAULT_LIMIT = 10;
 
-  root: SearchNode;
+  root: ExplorePlan;
   explore: Explore.IExplore;
   results: Results<IEntity> | null;
   private readonly queryForCache: Query.INode;
@@ -38,9 +40,24 @@ export default class QuerySearch {
   private equivalentIds = new Set<string>();
   private subordinateIds = new Set<string>();
 
+  /**
+   * Sizes of the provenance sets above - the counts are only final once
+   * expandFilteredResults has run, i.e. after getResults()/getStats().
+   */
+  get expansionCounts(): { equivalents: number; subordinates: number } {
+    return {
+      equivalents: this.equivalentIds.size,
+      subordinates: this.subordinateIds.size,
+    };
+  }
+
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.queryForCache = query;
-    this.root = new SearchNode(query);
+    this.root = storage.explore.plan(query, {
+      expand: getNodeExpansionIds,
+      subordinates: getSubordinateEntityIds,
+      territoryPath: (territoryId) => treeCache.tree.idMap[territoryId]?.path ?? [],
+    });
     this.explore = explore;
 
     if (!this.explore.offset) {
@@ -64,9 +81,9 @@ export default class QuerySearch {
 
   /**
    * Calls the whole search tree with additional validation
-   * @param db Connection
+   * @param db Conn
    */
-  async run(db: Connection): Promise<string[]> {
+  async run(db: Conn): Promise<string[]> {
     if (!this.root.isValid()) {
       throw new SearchEdgeTypesInvalid();
     }
@@ -79,8 +96,9 @@ export default class QuerySearch {
       return this.results.items;
     }
 
-    this.results = await this.root.run(db);
-    const ids = this.results.items || [];
+    this.results = new Results<IEntity>();
+    this.results.items = await this.root.run(db);
+    const ids = this.results.items;
 
     // The cache holds the RAW unexpanded query matches: the explore filters
     // vary per request and the root-level expansion (#2969) depends on the
@@ -105,7 +123,7 @@ export default class QuerySearch {
    * resultsExpanded). With both toggles off this is a no-op and no extra
    * queries run.
    */
-  private async expandFilteredResults(db: Connection): Promise<void> {
+  private async expandFilteredResults(db: Conn): Promise<void> {
     if (this.resultsExpanded) {
       return;
     }
@@ -144,7 +162,7 @@ export default class QuerySearch {
   }
 
   async getResults(
-    db: Connection,
+    db: Conn,
     indices: number[] | false = false
   ): Promise<IResponseQueryEntity[]> {
     if (!this.results) {
@@ -197,6 +215,14 @@ export default class QuerySearch {
         ? this.explore.view.columns
         : [];
 
+    // idsToLoad already honours rowIndices, so `filtered` is exactly the page
+    // being returned - the shared column data covers it in one pass
+    const columnsContext = await this.results.prepareColumnsContext(
+      db,
+      filtered,
+      columns
+    );
+
     const out: IResponseQueryEntity[] = [];
 
     for (const entity of filtered) {
@@ -206,7 +232,12 @@ export default class QuerySearch {
         const row: IResponseQueryEntity = {
           rowI,
           entity,
-          columnData: await this.results!.columns(db, entity, columns),
+          columnData: await this.results!.columns(
+            db,
+            entity,
+            columns,
+            columnsContext
+          ),
         };
         // flags only on rows APPENDED by the expansion - direct matches carry
         // neither field (#2969)
@@ -233,7 +264,7 @@ export default class QuerySearch {
    * caller compares the full result `total` against the limit to warn the user.
    */
   async getStats(
-    db: Connection
+    db: Conn
   ): Promise<Record<string, Record<string, number>>> {
     if (!this.results) {
       return {};
@@ -255,8 +286,4 @@ export default class QuerySearch {
   /**
    * Shorthand for addEdge of root node
    * @param edgeData
-   */
-  addEdge(edgeData: Partial<Query.IEdge>): SearchEdge {
-    return this.root.addEdge(edgeData);
-  }
-}
+   */}
