@@ -239,13 +239,13 @@ function relationTarget(e: SearchEdge, p: Params, type: RelationEnums.Type, inve
 }
 
 /**
- * text[] of the partners of e in relation r: every id that is not e.id, and
- * e.id itself when the row holds it twice, a self loop (relationPartners)
+ * text[] of the partners of `id` in relation r: every id that is not `id`, and
+ * `id` itself when the row holds it twice, a self loop (relationPartners)
  */
-const partners = (selfLoop: boolean): string =>
+const partners = (selfLoop: boolean, id = "e.id"): string =>
   selfLoop
-    ? `(array_remove(r.entity_ids, e.id) || CASE WHEN cardinality(array_positions(r.entity_ids, e.id)) > 1 THEN ARRAY[e.id] ELSE '{}'::text[] END)`
-    : `array_remove(r.entity_ids, e.id)`;
+    ? `(array_remove(r.entity_ids, ${id}) || CASE WHEN cardinality(array_positions(r.entity_ids, ${id})) > 1 THEN ARRAY[${id}] ELSE '{}'::text[] END)`
+    : `array_remove(r.entity_ids, ${id})`;
 
 /** a partner is a target, a partner is of the classes and statuses, or there is a partner at all */
 function partnersMatch(
@@ -264,12 +264,16 @@ function partnersMatch(
   return `cardinality(${partnersSql}) > 0`;
 }
 
-/** relations of `type` holding e.id whose partners meet the target (runHasUnorderedRelationEdge) */
+/**
+ * relations of `type` holding e.id whose partners meet the target (runHasUnorderedRelationEdge);
+ * a semi-join over the members m of every relation of the type, which reads those relations once,
+ * where an EXISTS over the gin index probes it per input row
+ */
 function unorderedRelation(e: SearchEdge, p: Params, type: RelationEnums.Type): string {
   const selfLoop = RelationTypes.RelationRules[type]?.selfLoop ?? false;
   return (
-    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.type = ${p.add(type)}` +
-    ` AND ${partnersMatch(p, partners(selfLoop), e.targetIds(), e.targetClasses(), e.unpinnedTargetStatuses())})`
+    `e.id IN (SELECT m.id FROM ${RELATIONS} r, unnest(r.entity_ids) m(id) WHERE r.type = ${p.add(type)}` +
+    ` AND ${partnersMatch(p, partners(selfLoop, "m.id"), e.targetIds(), e.targetClasses(), e.unpinnedTargetStatuses())})`
   );
 }
 
