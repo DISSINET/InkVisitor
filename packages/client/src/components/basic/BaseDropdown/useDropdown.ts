@@ -94,13 +94,6 @@ export const useDropdown = <O extends DropdownItem>({
     itemsRef.current.length = filtered.length;
   }, [filtered]);
 
-  /* Typing a filter always re-anchors the highlight to the first match */
-  useEffect(() => {
-    if (search) {
-      setActiveIndex(filtered.length > 0 ? 0 : null);
-    }
-  }, [search, filtered.length]);
-
   const disabledIdx = getDisabledIndices(filtered);
 
   const isSelected = (option: O) => value.some((v) => v.value === option.value);
@@ -110,6 +103,17 @@ export const useDropdown = <O extends DropdownItem>({
      re-trigger floating-ui's own seeding effect on every keystroke */
   const firstSelectedIndex = filtered.findIndex(isSelected);
   const selectedIndex = !search && firstSelectedIndex !== -1 ? firstSelectedIndex : null;
+
+  /* Typing a filter always re-anchors the highlight to the first match; an
+     emptied filter goes back to the selected option, or the first one */
+  useEffect(() => {
+    if (search) {
+      setActiveIndex(filtered.length > 0 ? 0 : null);
+    } else if (open) {
+      const firstEnabledIndex = filtered.findIndex((o) => !o.isDisabled);
+      setActiveIndex(selectedIndex ?? (firstEnabledIndex !== -1 ? firstEnabledIndex : null));
+    }
+  }, [search, filtered.length]);
 
   /* the highlight scrolls into view only after a key press or on opening, so
      hovering an option at the menu's edge never jerks the list under the
@@ -148,7 +152,16 @@ export const useDropdown = <O extends DropdownItem>({
   const listNav = useListNavigation(context, {
     listRef: itemsRef,
     activeIndex,
-    onNavigate: setActiveIndex,
+    // the pointer leaving the menu reports null; the last highlight stays, so
+    // Enter still picks the option the pointer was on
+    onNavigate: (index) => {
+      if (index != null) {
+        setActiveIndex(index);
+      }
+    },
+    // with nothing selected, an open menu highlights its first option, ready
+    // for Enter
+    focusItemOnOpen: true,
     virtual: true, // focus stays on the control/input; aria-activedescendant tracks
     loop: true,
     disabledIndices: (index) => index >= filtered.length || disabledIdx.includes(index),
@@ -237,6 +250,11 @@ export const useDropdown = <O extends DropdownItem>({
     } else if (e.key === "Backspace" && multi && !search && value.length > 0) {
       emit(popLastSelection(value));
     } else if (e.key === "Tab") {
+      // a single dropdown takes the highlighted option on Tab; in a multi one
+      // that option may already be selected, and Tab would deselect it
+      if (open && !multi && activeIndex != null && filtered[activeIndex]) {
+        selectOption(filtered[activeIndex]);
+      }
       closeMenu();
     }
   };

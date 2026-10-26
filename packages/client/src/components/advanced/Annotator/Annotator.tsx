@@ -630,7 +630,7 @@ export const TextAnnotator = ({
     dragOffset: menuDragOffset,
   } = useAnnotatorMenuDrag();
 
-  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and react-select (BaseDropdown) so they stay interactive. */
+  /** Keeps keyboard focus on the annotator canvas when using menu controls; skips inputs and dropdowns so they stay interactive. */
   // const handleMenuPointerDownCapture = useCallback(
   //   (e: React.PointerEvent<HTMLDivElement>) => {
   //     const target = e.target as HTMLElement;

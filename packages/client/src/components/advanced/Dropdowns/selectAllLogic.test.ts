@@ -13,7 +13,7 @@ const OPTS = [A, B, C];
 const ANY = allEntities; // value: EntityEnums.Extension.Any
 const E = empty; //         value: EntityEnums.Extension.Empty
 
-describe("resolveEntityMultiChange (parity with pre-rewrite EntityMultiDropdown)", () => {
+describe("resolveEntityMultiChange", () => {
   it("plain select adds the option", () => {
     expect(
       resolveEntityMultiChange({ selected: [B], action: "select", options: OPTS, disableEmpty: false })
@@ -81,21 +81,20 @@ describe("resolveEntityMultiChange (parity with pre-rewrite EntityMultiDropdown)
     ).toEqual([]);
   });
 
-  it("remove-chip of a class while ANY lit retains ANY in values (display recomputes)", () => {
-    // parity quirk: old code's remove-value fell through to the default branch
+  it("remove-chip of a class while ANY lit drops ANY", () => {
     expect(
       resolveEntityMultiChange({ selected: [E, ANY, A, B], action: "remove-chip", options: OPTS, disableEmpty: false })
-    ).toEqual([E.value, ANY.value, "A", "B"]);
+    ).toEqual([E.value, "A", "B"]);
   });
 
-  it("popping (Backspace) while ANY lit falls through unchanged — parity with old pop-value", () => {
+  it("popping (Backspace) a class while ANY lit drops ANY", () => {
     expect(
       resolveEntityMultiChange({ selected: [E, ANY, A, B], action: "pop", options: OPTS, disableEmpty: false })
-    ).toEqual([E.value, ANY.value, "A", "B"]);
+    ).toEqual([E.value, "A", "B"]);
   });
 });
 
-describe("resolveAttributeMultiChange (parity with pre-rewrite AttributeMultiDropdown)", () => {
+describe("resolveAttributeMultiChange", () => {
   it("plain select adds the option", () => {
     expect(
       resolveAttributeMultiChange({ selected: [B], action: "select", options: OPTS })
@@ -121,7 +120,7 @@ describe("resolveAttributeMultiChange (parity with pre-rewrite AttributeMultiDro
   });
 
   it("deselecting one option when all were selected clears everything", () => {
-    // selected still contains all options at decision time (parity with old branch order)
+    // selected still contains all options at decision time
     expect(
       resolveAttributeMultiChange({ selected: [ANY, A, B, C], action: "deselect", options: OPTS })
     ).toEqual([]);
@@ -139,9 +138,15 @@ describe("resolveAttributeMultiChange (parity with pre-rewrite AttributeMultiDro
     ).toEqual([]);
   });
 
-  it("popping (Backspace) while ANY lit falls through unchanged — parity with old pop-value", () => {
+  it("popping (Backspace) while ANY lit drops ANY", () => {
     expect(
       resolveAttributeMultiChange({ selected: [ANY, A, B], action: "pop", options: OPTS })
-    ).toEqual([ANY.value, "A", "B"]);
+    ).toEqual(["A", "B"]);
+  });
+
+  it("popping the only option of a one-option list leaves nothing selected", () => {
+    expect(
+      resolveAttributeMultiChange({ selected: [ANY], action: "pop", options: [A] })
+    ).toEqual([]);
   });
 });

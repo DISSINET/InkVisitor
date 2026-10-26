@@ -177,7 +177,10 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   const renderRemove = (option: O) =>
     disabled ? null : (
       <StyledChipRemove
+        type="button"
         tabIndex={-1}
+        // keeps focus in the control: the cross unmounts with its chip
+        onMouseDown={(e) => e.preventDefault()}
         onClick={(e) => {
           e.stopPropagation();
           dd.removeChip(option);
@@ -389,7 +392,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
         </FloatingPortal>
       )}
 
-      {/* control tooltip — unchanged behavior from the old implementation */}
+      {/* control tooltip */}
       {(tooltipLabel || tooltipContent) && (
         <Tooltip
           disabled={multi && selectedArray.length === 0}

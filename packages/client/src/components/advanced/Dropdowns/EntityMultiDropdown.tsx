@@ -61,8 +61,8 @@ export const EntityMultiDropdown = <T extends string>({
     return value.includes(o.value as T);
   });
 
-  /* chips exclude ANY; when exactly one chip would overflow the limit, show
-     it instead of "+1 more" (pre-rewrite behavior) */
+  /* chips exclude ANY; when exactly one chip would overflow the limit, that
+     chip is shown rather than a "+1 more" summary */
   const chipCount = selectedOptions.filter(
     (o) => o.value !== allEntities.value
   ).length;

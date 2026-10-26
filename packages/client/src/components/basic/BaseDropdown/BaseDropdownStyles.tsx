@@ -96,7 +96,10 @@ export const StyledValueArea = styled.div<StyledValueArea>`
   min-width: 0;
   display: flex;
   align-items: center;
-  flex-wrap: ${({ $nowrap }) => ($nowrap ? "nowrap" : "wrap")};
+  /* a single dropdown is one row: its value is clipped, never pushing the
+     search input onto a second line */
+  flex-wrap: ${({ $nowrap, $single }) => ($nowrap || $single ? "nowrap" : "wrap")};
+  white-space: ${({ $single }) => ($single ? "nowrap" : "normal")};
   overflow: hidden;
   padding: ${({ $density, $single, $suggester }) =>
     $density === "compact" ? "0.2rem" : $single && !$suggester ? "0.4rem 0" : "0"};
@@ -255,7 +258,7 @@ export const StyledChevron = styled.div<StyledChevron>`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
-/* ---- portalled menu (styles co-located; the old ones lived in Theme/global.ts) ---- */
+/* ---- portalled menu ---- */
 
 export const StyledMenu = styled.div`
   /* body-level stacking (portal root makes no context): match the other

@@ -5,10 +5,8 @@ import { ChangeAction } from "components/basic/BaseDropdown/types";
 const values = <T extends string>(items: DropdownItem[]): T[] =>
   items.map((i) => i.value as T);
 
-/* Both resolvers mirror the branch structure of the pre-rewrite onChange
-   interceptors. The "last selected item is ANY" check works because the
-   selection array is built specials-first and toggleSelection appends the
-   clicked option last. */
+/* The "last selected item is ANY" check works because the selection array is
+   built specials-first and toggleSelection appends the clicked option last. */
 
 export const resolveEntityMultiChange = <T extends string>(args: {
   selected: DropdownItem[];
@@ -41,6 +39,11 @@ export const resolveEntityMultiChange = <T extends string>(args: {
       }
       return includesEmpty ? [empty.value as T] : [];
     }
+    // a class removed by its chip or Backspace leaves ANY unlit, like a
+    // deselect; checked before the last-item test, which a pop can leave on ANY
+    if ((action === "pop" || action === "remove-chip") && includesAny && !allClassesSelected) {
+      return values(selected.filter((o) => o.value !== allEntities.value));
+    }
     if (selected[selected.length - 1].value === allEntities.value) {
       return anyEquivalentValues();
     }
@@ -64,6 +67,7 @@ export const resolveAttributeMultiChange = <T extends string>(args: {
   const allWithoutAnySelected = options.every((option) =>
     selected.some((s) => s.value === option.value)
   );
+  const includesAny = selected.some((s) => s.value === allEntities.value);
 
   if (selected.length > 0) {
     if (
@@ -72,16 +76,18 @@ export const resolveAttributeMultiChange = <T extends string>(args: {
     ) {
       return [];
     }
+    // Backspace leaves ANY unlit, like a deselect; checked before the
+    // last-item test, which a pop can leave on ANY
+    if (action === "pop" && includesAny) {
+      return values(selected.filter((o) => o.value !== allEntities.value));
+    }
     if (selected[selected.length - 1].value === allEntities.value) {
       return values([allEntities, ...options]);
     }
     if (allWithoutAnySelected && action === "select") {
       return values([allEntities, ...options]);
     }
-    if (
-      action === "deselect" &&
-      selected.some((s) => s.value === allEntities.value)
-    ) {
+    if (action === "deselect" && includesAny) {
       return values(selected.filter((o) => o.value !== allEntities.value));
     }
   }
