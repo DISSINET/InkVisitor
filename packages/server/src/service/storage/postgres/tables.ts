@@ -357,7 +357,8 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
 
 // ---- stores ---------------------------------------------------------------
 
-const NOT_TRASHED = `NOT (doc ? 'deletedAt')`;
+// a null deletedAt is no deletion, as ReQL hasFields treats a null field as absent
+const NOT_TRASHED = `deleted_at IS NULL`;
 
 export const users: UserStore = {
   ...tableStore<IUser>(TABLE.users),
@@ -365,28 +366,28 @@ export const users: UserStore = {
   async owner(conn) {
     return firstDoc<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND doc->>'role' = $1 ORDER BY id LIMIT 1`, [UserEnums.Role.Owner])
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND role = $1 ORDER BY id LIMIT 1`, [UserEnums.Role.Owner])
     );
   },
 
   async byEmail(conn, email) {
     return firstDoc<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND doc->>'email' = $1 ORDER BY id LIMIT 1`, [email])
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND email = $1 ORDER BY id LIMIT 1`, [email])
     );
   },
 
   async byHash(conn, hash) {
     return firstDoc<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND doc->>'hash' = $1 ORDER BY id LIMIT 1`, [hash])
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} AND hash = $1 ORDER BY id LIMIT 1`, [hash])
     );
   },
 
   async allActive(conn) {
     return docs<IUser>(
       TABLE.users,
-      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} ORDER BY doc->>'role', doc->>'name', id`)
+      await q(conn, `SELECT doc FROM users WHERE ${NOT_TRASHED} ORDER BY role, name, id`)
     );
   },
 
@@ -396,7 +397,7 @@ export const users: UserStore = {
       TABLE.users,
       await q(
         conn,
-        `SELECT doc FROM users WHERE (doc->>'name' = $1 OR doc->>'email' = $1) ${trashed} ORDER BY id LIMIT 1`,
+        `SELECT doc FROM users WHERE (name = $1 OR email = $1) ${trashed} ORDER BY id LIMIT 1`,
         [login]
       )
     );
@@ -430,7 +431,7 @@ export const users: UserStore = {
 
   async deleteAllExceptName(conn, name) {
     // a row without a name is kept, as the ReQL filter skips the row whose field read fails
-    const res = await q(conn, `DELETE FROM users WHERE doc->>'name' <> $1 RETURNING id`, [name]);
+    const res = await q(conn, `DELETE FROM users WHERE name <> $1 RETURNING id`, [name]);
     notifyChanged(TABLE.users, res.rows.map((row: { id: string }) => row.id), "delete");
     return result({ deleted: res.rows.length });
   },
@@ -445,7 +446,7 @@ export const acl: AclStore = {
       await q(
         conn,
         `SELECT doc FROM acl_permissions
-         WHERE doc->>'controller' = $1 AND doc->>'method' = $2 AND doc->>'route' = $3 ORDER BY id`,
+         WHERE controller = $1 AND method = $2 AND route = $3 ORDER BY id`,
         [controller, method, route]
       )
     );
@@ -460,12 +461,12 @@ export const savedQueries: SavedQueryStore = {
   async idsWithName(conn, normalizedName, shared, ownerId) {
     // unindexed scan: one row per saved query, and this runs only on create and on rename
     const folder = shared
-      ? `(doc->>'shared')::boolean`
-      : `NOT (doc->>'shared')::boolean AND doc->>'ownerId' = $2`;
+      ? `shared::boolean`
+      : `NOT shared::boolean AND owner_id = $2`;
     const params = shared ? [normalizedName] : [normalizedName, ownerId];
     const res = await q(
       conn,
-      `SELECT id FROM saved_queries WHERE lower(doc->>'name') = $1 AND ${folder} ORDER BY id`,
+      `SELECT id FROM saved_queries WHERE lower(name) = $1 AND ${folder} ORDER BY id`,
       params
     );
     return res.rows.map((row: { id: string }) => row.id);
@@ -477,8 +478,8 @@ export const savedQueries: SavedQueryStore = {
       await q(
         conn,
         `SELECT doc FROM saved_queries
-         WHERE (doc->>'shared')::boolean OR doc->>'ownerId' = $1
-         ORDER BY doc->>'createdAt' DESC, id`,
+         WHERE shared::boolean OR owner_id = $1
+         ORDER BY created_at DESC, id`,
         [userId]
       )
     );
@@ -513,14 +514,14 @@ export const documents: DocumentStore = {
   async allByCreatedAt(conn) {
     return docs<IDocument>(
       TABLE.documents,
-      await q(conn, `SELECT doc FROM documents ORDER BY doc->>'createdAt', id`)
+      await q(conn, `SELECT doc FROM documents ORDER BY created_at, id`)
     );
   },
 
   async listMeta(conn) {
     return docs<IDocument>(
       TABLE.documents,
-      await q(conn, `SELECT doc - 'content' - 'anchors' AS doc FROM documents ORDER BY doc->>'createdAt', id`)
+      await q(conn, `SELECT doc - 'content' - 'anchors' AS doc FROM documents ORDER BY created_at, id`)
     );
   },
 };
@@ -556,8 +557,6 @@ function bucketSql(timeUnit: TimeUnit): string {
       throw new Error("Invalid time unit");
   }
 }
-
-const auditsRelationEntityIds = pgIndexName(TABLE.audits, DbEnums.Indexes.AuditRelationEntityIds);
 
 const byScopeAndModel = (scope: AuditScope, modelId: string) =>
   indexPredicate(TABLE.audits, DbEnums.Indexes.AuditScopeModelId, [[scope, modelId]]);
@@ -598,7 +597,7 @@ export const audits: AuditStore = {
       await q(
         conn,
         `SELECT doc FROM audits
-         WHERE ${auditsRelationEntityIds}(doc) && $1::text[] AND audit_scope = $2
+         WHERE entity_ids && $1::text[] AND audit_scope = $2
          ORDER BY date DESC, id LIMIT $3`,
         [[entityId], AuditScope.Relation, n]
       )
@@ -698,9 +697,8 @@ export function stats(timeUnit: string): MaterializedStatsStore {
         await q(
           conn,
           `SELECT doc FROM ${t}
-           WHERE doc->>'date' >= $1 AND doc->>'date' < $2
-             AND doc->>'eventType' = ANY($3::text[]) AND doc->>'aggregateBy' = $4
-           ORDER BY doc->>'date', id`,
+           WHERE date >= $1 AND date < $2 AND event_type = ANY($3::text[]) AND aggregate_by = $4
+           ORDER BY date, id`,
           [fromDate, toDate, eventTypes, aggregateBy]
         )
       );
@@ -708,7 +706,7 @@ export function stats(timeUnit: string): MaterializedStatsStore {
 
     async latestUpdate(conn) {
       try {
-        const res = await q(conn, `SELECT max(doc->>'lastUpdated') AS d FROM ${t}`);
+        const res = await q(conn, `SELECT max(last_updated) AS d FROM ${t}`);
         const d = res.rows[0]?.d as string | null;
         return d ? new Date(d) : null;
       } catch {
