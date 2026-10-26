@@ -1011,7 +1011,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         {/* Audits */}
         <StyledEditorSection key="editor-section-audits" $widthTooNarrow={editorWidthTooNarrow}>
           <StyledEditorSectionHeader>
-            <StyledEditorSectionHeading>Audits</StyledEditorSectionHeading>
+            <StyledEditorSectionHeading>Entity audits</StyledEditorSectionHeading>
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent ref={auditSectionRef}>
             {audit && <AuditTable {...audit} />}

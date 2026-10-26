@@ -83,6 +83,9 @@ export const StyledResultsWrapper = styled.div`
   position: relative;
 `;
 export const StyledResultsHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
   font-weight: ${({ theme }) => theme.fontWeight.normal};
   font-size: ${({ theme }) => theme.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.space[4]};
