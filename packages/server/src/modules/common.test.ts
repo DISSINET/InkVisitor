@@ -3,7 +3,7 @@ import "@models/events/register";
 import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import User from "@models/user/user";
-import { Db } from "@service/storage";
+import { Db, storage } from "@service/storage";
 import { DbHandle } from "@service/dbHandle";
 import {
   createEntity,
@@ -231,6 +231,20 @@ export async function createMockStatements(
     await createEntity(db, ter);
   }
   return out;
+}
+
+/**
+ * Seeds acl_permissions rows for a suite. The ACL middleware auto-creates a
+ * roles:[] row for any route a request reaches first, and a route may hold
+ * one row only, so the rows already there for the same routes go first.
+ */
+export async function seedAcl(db: Db, rows: Parameters<typeof storage.acl.insert>[1]): Promise<void> {
+  const list = Array.isArray(rows) ? rows : [rows];
+  const route = (row: { controller: string; method: string; route: string }) => `${row.controller} ${row.method} ${row.route}`;
+  const routes = new Set(list.map(route));
+  const stale = (await storage.acl.all(db.connection)).filter((row) => routes.has(route(row)));
+  await storage.acl.deleteMany(db.connection, stale.map((row) => row.id));
+  await storage.acl.insert(db.connection, list);
 }
 
 export async function clean(db: Db): Promise<void> {

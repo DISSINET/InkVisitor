@@ -97,10 +97,10 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     status: "status",
     language: "language",
     is_template: "isTemplate",
-    used_template: "usedTemplate",
+    used_template: { ref: "usedTemplate" },
     territory_id: { ref: "data.territory.territoryId" },
     parent_id: { ref: "data.parent.territoryId" },
-    document_id: "data.documentId",
+    document_id: { ref: "data.documentId" },
     created_at: "createdAt",
     updated_at: "updatedAt",
     labels: { ids: "labels" },
@@ -144,7 +144,8 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
   },
   relations: { type: "type", entity_ids: { ids: "entityIds" } },
   users: {
-    email: "email",
+    // "" is no email, so users without one do not collide on the unique constraint
+    email: { ref: "email" },
     name: "name",
     role: "role",
     hash: "hash",
@@ -267,48 +268,82 @@ export const EXTRA_INDEXES: { table: string; name: string; expression: string }[
 ];
 
 /**
- * Foreign keys over generated columns, each referencing the `id` of a table.
- * PostgreSQL takes only NO ACTION or RESTRICT on a generated column. Every
- * referenced row is guarded by the models (a territory with children or
- * statements is not deleted, users are soft-deleted), so RESTRICT only backs
- * that up. A loader that inserts rows in an arbitrary order provisions with
- * ddl(false) and adds these after the load.
+ * Constraints over generated columns, each backing up a check the models make
+ * before a save: a foreign key references the `id` of a table whose rows the
+ * models guard (a territory with children or statements is not deleted, users
+ * are soft-deleted), and PostgreSQL takes only NO ACTION or RESTRICT on a
+ * generated column; a unique constraint closes the read-then-write gap of the
+ * model's duplicate check. A loader that inserts rows in an arbitrary order
+ * provisions with ddl(false) and adds these after the load.
  */
-export const FOREIGN_KEYS: { table: string; name: string; column: string; references: string }[] = [
-  { table: "entities", name: "entities_territory_id_fkey", column: "territory_id", references: "entities" },
-  { table: "entities", name: "entities_parent_id_fkey", column: "parent_id", references: "entities" },
-  { table: "audits", name: "audits_user_fkey", column: "user", references: "users" },
-  { table: "saved_queries", name: "saved_queries_owner_id_fkey", column: "owner_id", references: "users" },
+export type Constraint = { table: string; name: string } & (
+  | { kind: "foreign key"; column: string; references: string }
+  | { kind: "unique"; columns: string[] }
+);
+
+export const CONSTRAINTS: Constraint[] = [
+  { table: "entities", name: "entities_territory_id_fkey", kind: "foreign key", column: "territory_id", references: "entities" },
+  { table: "entities", name: "entities_parent_id_fkey", kind: "foreign key", column: "parent_id", references: "entities" },
+  { table: "audits", name: "audits_user_fkey", kind: "foreign key", column: "user", references: "users" },
+  { table: "saved_queries", name: "saved_queries_owner_id_fkey", kind: "foreign key", column: "owner_id", references: "users" },
+  // Relation.beforeSave forbids a second relation over the same two entities;
+  // a SYN relation holds a set of any size, which the model compares as a set
+  // and this constraint only in document order
+  { table: "relations", name: "relations_type_entity_ids_key", kind: "unique", columns: ["type", "entity_ids"] },
+  // User.findByLogin keeps the email unique across trashed users too
+  { table: "users", name: "users_email_key", kind: "unique", columns: ["email"] },
+  { table: "acl_permissions", name: "acl_permissions_route_key", kind: "unique", columns: ["controller", "method", "route"] },
 ];
 
-export type ForeignKey = (typeof FOREIGN_KEYS)[number];
-
 /** the constraint definition, exactly as pg_get_constraintdef prints it back */
-export const foreignKeyDef = (fk: ForeignKey): string =>
-  `FOREIGN KEY (${col(fk.column)}) REFERENCES ${fk.references}(id) ON DELETE RESTRICT`;
+export const constraintDef = (c: Constraint): string =>
+  c.kind === "foreign key"
+    ? `FOREIGN KEY (${col(c.column)}) REFERENCES ${c.references}(id) ON DELETE RESTRICT`
+    : `UNIQUE (${c.columns.map(col).join(", ")})`;
 
-export const foreignKeyDdl = (fk: ForeignKey): string => `ALTER TABLE ${fk.table} ADD CONSTRAINT ${fk.name} ${foreignKeyDef(fk)}`;
-
-/** the id of one row of `fk.table` whose reference has no row, with the missing id; null when there is none */
-export const danglingSql = (fk: ForeignKey): string =>
-  `SELECT c.id, c.${col(fk.column)} AS missing FROM ${fk.table} c ` +
-  `WHERE c.${col(fk.column)} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${fk.references} r WHERE r.id = c.${col(fk.column)}) LIMIT 1`;
+export const constraintDdl = (c: Constraint): string => `ALTER TABLE ${c.table} ADD CONSTRAINT ${c.name} ${constraintDef(c)}`;
 
 /**
- * Adds the foreign keys, failing on the first one with a dangling row, named
+ * One row of `c.table` the constraint would reject, as `id` and the offending
+ * `value`; no row when it holds. A NULL never violates either kind.
+ */
+export const violationSql = (c: Constraint): string => {
+  if (c.kind === "foreign key") {
+    return (
+      `SELECT c.id, c.${col(c.column)} AS value FROM ${c.table} c ` +
+      `WHERE c.${col(c.column)} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${c.references} r WHERE r.id = c.${col(c.column)}) LIMIT 1`
+    );
+  }
+  const columns = c.columns.map(col).join(", ");
+  return (
+    `SELECT min(id) AS id, ROW(${columns})::text AS value FROM ${c.table} ` +
+    `WHERE ${c.columns.map((column) => `${col(column)} IS NOT NULL`).join(" AND ")} ` +
+    `GROUP BY ${columns} HAVING count(*) > 1 LIMIT 1`
+  );
+};
+
+const violationMessage = (c: Constraint, row: { id: string; value: string }): string =>
+  c.kind === "foreign key"
+    ? `cannot add the foreign key ${c.name}: ${c.table} row ${row.id} has ${c.column} = ${row.value}, ` +
+      `which is not an id in ${c.references}. Fix or delete the dangling rows first.`
+    : `cannot add the constraint ${c.name}: ${c.table} row ${row.id} shares (${c.columns.join(", ")}) = ${row.value} ` +
+      `with another row. Fix or delete the duplicate rows first.`;
+
+/**
+ * Adds the constraints, failing on the first one the data violates, named
  * with one offending row so the data can be fixed by hand.
  */
-export async function addForeignKeys(client: { query(sql: string): Promise<{ rows: any[] }> }, fks = FOREIGN_KEYS): Promise<string[]> {
+export async function addConstraints(
+  client: { query(sql: string): Promise<{ rows: any[] }> },
+  constraints = CONSTRAINTS
+): Promise<string[]> {
   const executed: string[] = [];
-  for (const fk of fks) {
-    const { rows } = await client.query(danglingSql(fk));
+  for (const c of constraints) {
+    const { rows } = await client.query(violationSql(c));
     if (rows.length) {
-      throw new Error(
-        `cannot add the foreign key ${fk.name}: ${fk.table} row ${rows[0].id} has ${fk.column} = ${rows[0].missing}, ` +
-          `which is not an id in ${fk.references}. Fix or delete the dangling rows first.`
-      );
+      throw new Error(violationMessage(c, rows[0]));
     }
-    const statement = foreignKeyDdl(fk);
+    const statement = constraintDdl(c);
     await client.query(statement);
     executed.push(statement);
   }
@@ -411,10 +446,10 @@ END $$`,
 
 /**
  * Every statement that turns an empty database into the full schema, in order,
- * on the assumption that nothing is there yet; without the foreign keys when
- * `foreignKeys` is false.
+ * on the assumption that nothing is there yet; without the constraints when
+ * `constraints` is false.
  */
-export function ddl(foreignKeys = true): string[] {
+export function ddl(constraints = true): string[] {
   const statements: string[] = [MERGE_FUNCTION_DDL, TEXT_ARRAY_FUNCTION_DDL];
   for (const [table, indexes] of Object.entries(TABLES)) {
     statements.push(...keyFunctions(table).map(keyFunctionDdl));
@@ -432,7 +467,7 @@ export function ddl(foreignKeys = true): string[] {
   for (const extra of EXTRA_INDEXES) {
     statements.push(`CREATE INDEX ${extra.name} ON ${extra.table} (${extra.expression})`);
   }
-  if (foreignKeys) statements.push(...FOREIGN_KEYS.map(foreignKeyDdl));
+  if (constraints) statements.push(...CONSTRAINTS.map(constraintDdl));
   return statements;
 }
 
@@ -440,9 +475,9 @@ export async function provision(
   client: {
     query(sql: string): Promise<unknown>;
   },
-  foreignKeys = true
+  constraints = true
 ): Promise<void> {
-  for (const statement of ddl(foreignKeys)) {
+  for (const statement of ddl(constraints)) {
     await client.query(statement);
   }
 }

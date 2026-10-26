@@ -421,11 +421,6 @@
   },
   {
     "type": "CLA",
-    "entityIds": ["l1", "c4"],
-    "order": 1
-  },
-  {
-    "type": "CLA",
     "entityIds": ["l2", "c51"],
     "order": 1
   },

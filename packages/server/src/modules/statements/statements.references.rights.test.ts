@@ -1,7 +1,7 @@
 import { Db, storage } from "@service/storage";
 import { apiPath } from "@common/constants";
 import { AuthAgent, createAgentWithUserId } from "@modules/testAuth";
-import { createMockTree } from "@modules/common.test";
+import { createMockTree, seedAcl } from "@modules/common.test";
 import User from "@models/user/user";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { UserEnums } from "@inkvisitor/shared/enums";
@@ -43,7 +43,7 @@ describe("statements/references - editor rights", () => {
     const seeded = (defaultAcl as Array<Record<string, unknown>>).filter(
       (row) => row.controller === "statements" && row.route === "references"
     );
-    await storage.acl.insert(db.connection, seeded);
+    await seedAcl(db, seeded);
 
     await new User({
       id: editorId,
