@@ -31,7 +31,7 @@ import {
 } from "../types";
 import { query } from "./conn";
 import { notifyChanged, notifyCleared } from "./invalidation";
-import { COLUMNS, col, pgIndexName } from "./provision";
+import { COLUMNS, col } from "./provision";
 import { encode, ident, indexPredicate, revive } from "./sql";
 
 const EMPTY: WriteResult = { deleted: 0, errors: 0, inserted: 0, replaced: 0, skipped: 0, unchanged: 0 };
@@ -486,8 +486,6 @@ export const savedQueries: SavedQueryStore = {
   },
 };
 
-const documentsEntityIds = pgIndexName(TABLE.documents, DbEnums.Indexes.DocumentEntityIds);
-
 export const documents: DocumentStore = {
   ...tableStore<IDocument>(TABLE.documents),
 
@@ -505,7 +503,7 @@ export const documents: DocumentStore = {
       TABLE.documents,
       await q(
         conn,
-        `SELECT doc - 'content' AS doc FROM documents WHERE ${documentsEntityIds}(doc) && $1::text[] ORDER BY id`,
+        `SELECT doc - 'content' AS doc FROM documents WHERE entity_ids && $1::text[] ORDER BY id`,
         [entityIds]
       )
     );

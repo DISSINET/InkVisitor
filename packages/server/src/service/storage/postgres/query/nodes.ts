@@ -26,7 +26,7 @@ export function inputWhere(input: Input, p: Params): string {
   }
   // entities carry `labels`, not `label`, so this matches nothing; RethinkDB filters the same field
   if (label) {
-    where.push(`e.doc->>'label' = ${p.add(label)}`);
+    where.push(`e.label = ${p.add(label)}`);
   }
   return where.length ? where.join(" AND ") : "TRUE";
 }

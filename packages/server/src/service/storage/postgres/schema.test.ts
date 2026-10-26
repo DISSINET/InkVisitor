@@ -1,7 +1,7 @@
 import { Conn, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../../test/db";
 import { query } from "./conn";
-import { columnClause, COLUMNS } from "./provision";
+import { columnClause, COLUMNS, keyFunctionDdl, keyFunctions, SESSIONS_DDL } from "./provision";
 import { deparsed, syncSchema } from "./schema";
 
 /**
@@ -21,12 +21,12 @@ describePg("syncSchema", () => {
   });
 
   const exec = (sql: string) => query(conn, sql);
-  const generation = async (column: string): Promise<string | null> => {
+  const generation = async (column: string, table = "audits"): Promise<string | null> => {
     const { rows } = await query(
       conn,
       `SELECT generation_expression FROM information_schema.columns
-       WHERE table_schema = 'public' AND table_name = 'audits' AND column_name = $1`,
-      [column]
+       WHERE table_schema = 'public' AND table_name = $2 AND column_name = $1`,
+      [column, table]
     );
     return rows[0]?.generation_expression ?? null;
   };
@@ -42,6 +42,7 @@ describePg("syncSchema", () => {
     );
     expect(deparsed({ ids: "entityIds" })).toBe("jsonb_text_array((doc -> 'entityIds'::text))");
     expect(deparsed({ ids: "changes.entityIds" })).toBe("jsonb_text_array(((doc -> 'changes'::text) -> 'entityIds'::text))");
+    expect(deparsed({ fn: "documents_entityids", body: "SELECT ARRAY[]::text[]" })).toBe("documents_entityids(doc)");
   });
 
   it("executes nothing on a freshly provisioned database, however often it runs", async () => {
@@ -176,6 +177,59 @@ describePg("syncSchema", () => {
     expect(await syncSchema(conn)).toEqual([]);
   });
 
+  it("moves the entities key-function gin onto the column and keeps the function the column needs", async () => {
+    // takes the gin over prop_entity_ids with it
+    await exec("ALTER TABLE entities DROP COLUMN prop_entity_ids");
+    await exec("CREATE INDEX entities_props_recursive ON entities USING gin (entities_props_recursive(doc))");
+
+    expect(await syncSchema(conn)).toEqual([
+      "ALTER TABLE entities ADD COLUMN prop_entity_ids text[] GENERATED ALWAYS AS (entities_props_recursive(doc)) STORED",
+      "DROP INDEX entities_props_recursive",
+      "CREATE INDEX entities_props_recursive ON entities USING gin (prop_entity_ids)",
+    ]);
+    expect(await generation("prop_entity_ids", "entities")).toBe("entities_props_recursive(doc)");
+    expect(await indexdef("entities_props_recursive")).toBe(
+      "CREATE INDEX entities_props_recursive ON public.entities USING gin (prop_entity_ids)"
+    );
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("recreates a key function whose body changed, then the column and the index computed from it", async () => {
+    const [key] = keyFunctions("documents");
+    // the database of an older ddl(): the function with another body, the
+    // index over the function and the column over the function
+    await exec("DROP FUNCTION documents_entityids(jsonb) CASCADE");
+    await exec(keyFunctionDdl({ ...key, body: "SELECT ARRAY[]::text[]" }));
+    await exec("CREATE INDEX documents_entityids ON documents USING gin (documents_entityids(doc))");
+    await exec("ALTER TABLE documents ADD COLUMN entity_ids text[] GENERATED ALWAYS AS (documents_entityids(doc)) STORED");
+    await exec(`INSERT INTO documents (doc) VALUES ('{"id": "schema-test-doc", "entityIds": ["schema-test-entity"]}')`);
+    try {
+      expect(await syncSchema(conn)).toEqual([
+        "DROP FUNCTION documents_entityids(jsonb) CASCADE",
+        keyFunctionDdl(key),
+        "ALTER TABLE documents ADD COLUMN entity_ids text[] GENERATED ALWAYS AS (documents_entityids(doc)) STORED",
+        "CREATE INDEX documents_entityids ON documents USING gin (entity_ids)",
+      ]);
+      // the stored keys are the ones of the declared body
+      const { rows } = await query(conn, "SELECT entity_ids FROM documents WHERE id = 'schema-test-doc'");
+      expect(rows[0].entity_ids).toEqual(["schema-test-entity"]);
+      expect(await indexdef("documents_entityids")).toBe("CREATE INDEX documents_entityids ON public.documents USING gin (entity_ids)");
+      expect(await syncSchema(conn)).toEqual([]);
+    } finally {
+      await exec("DELETE FROM documents WHERE id = 'schema-test-doc'");
+    }
+  });
+
+  it("resumes after a crash between the dropped function and its recreation", async () => {
+    await exec("DROP FUNCTION documents_entityids(jsonb) CASCADE");
+    expect(await syncSchema(conn)).toEqual([
+      keyFunctionDdl(keyFunctions("documents")[0]),
+      "ALTER TABLE documents ADD COLUMN entity_ids text[] GENERATED ALWAYS AS (documents_entityids(doc)) STORED",
+      "CREATE INDEX documents_entityids ON documents USING gin (entity_ids)",
+    ]);
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
   it("refuses to touch an ordinary column under a declared name", async () => {
     await exec("ALTER TABLE audits DROP COLUMN type");
     await exec("ALTER TABLE audits ADD COLUMN type text");
@@ -186,5 +240,40 @@ describePg("syncSchema", () => {
       await syncSchema(conn);
     }
     expect(await syncSchema(conn)).toEqual([]);
+  });
+});
+
+describePg("SESSIONS_DDL", () => {
+  let conn: Conn;
+  beforeAll(async () => {
+    conn = await openTestDb();
+  });
+  afterAll(async () => {
+    await closeTestDb(conn);
+  });
+
+  it("moves the expression indexes of an older database onto the columns, and is idempotent", async () => {
+    const indexes = async (): Promise<string[]> => {
+      const { rows } = await query(conn, "SELECT indexname FROM pg_indexes WHERE tablename = 'sessions' ORDER BY indexname");
+      return rows.map((row) => row.indexname);
+    };
+    await query(conn, "ALTER TABLE sessions DROP COLUMN user_id, DROP COLUMN expires_at");
+    await query(conn, "CREATE INDEX sessions_userid ON sessions ((doc->>'userId'))");
+    await query(conn, "CREATE INDEX sessions_expiresat ON sessions (((doc->>'expiresAt')::bigint))");
+    await query(conn, `INSERT INTO sessions (doc) VALUES ('{"id": "schema-test-session", "userId": "u1", "expiresAt": 1700000000000}')`);
+    for (let round = 0; round < 2; round++) {
+      for (const statement of SESSIONS_DDL) {
+        await query(conn, statement);
+      }
+      expect(await indexes()).toEqual(["sessions_expires_at", "sessions_pkey", "sessions_user_id"]);
+    }
+    const { rows } = await query(
+      conn,
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'sessions' AND is_generated = 'ALWAYS' ORDER BY column_name"
+    );
+    expect(rows.map((row) => row.column_name)).toEqual(["expires_at", "id", "user_id"]);
+    const { rows: stored } = await query(conn, "SELECT user_id, expires_at FROM sessions WHERE id = 'schema-test-session'");
+    expect(stored).toEqual([{ user_id: "u1", expires_at: "1700000000000" }]);
+    await query(conn, "DELETE FROM sessions WHERE id = 'schema-test-session'");
   });
 });

@@ -162,6 +162,8 @@ describe("entity search", () => {
     // filtered out before the reference predicate reaches it
     expect(await search({ excluded: [C.Territory], haveReferenceTo: "r-1" })).toEqual(["c-1", "s-1"]);
     expect(await search({ excluded: [C.Territory], haveReferenceTo: "r-2" })).toEqual([]);
+    // c-3 is the value side of a reference of c-1, never its resource
+    expect(await search({ excluded: [C.Territory], haveReferenceTo: "c-3" })).toEqual([]);
   });
 
   // RethinkDB raises on t-root's string `references`; PostgreSQL skips the row

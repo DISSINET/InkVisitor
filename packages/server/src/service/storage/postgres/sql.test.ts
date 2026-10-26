@@ -37,9 +37,9 @@ describe("postgres sql helpers", () => {
     });
   });
 
-  it("builds a gin predicate with the key function", () => {
+  it("builds a gin predicate over the generated column", () => {
     expect(indexPredicate("documents", DbEnums.Indexes.DocumentEntityIds, ["e1"])).toEqual({
-      sql: "documents_entityids(doc) && $1::text[]",
+      sql: "entity_ids && $1::text[]",
       params: [["e1"]],
     });
   });
@@ -67,7 +67,7 @@ describe("postgres sql helpers", () => {
 
   it("indexHolds builds the join form for gin and single btree indexes", () => {
     expect(indexHolds("entities", DbEnums.Indexes.StatementEntities, "e.id")).toBe(
-      "entities_statement_entities(doc) @> ARRAY[e.id]"
+      "statement_entity_ids @> ARRAY[e.id]"
     );
     expect(indexHolds("entities", DbEnums.Indexes.StatementTerritory, "e.id")).toBe(
       "territory_id = e.id"
