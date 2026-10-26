@@ -17,6 +17,8 @@ interface UserSingleDropdown {
   placeholder?: string;
   disableTyping?: boolean;
   disabled?: boolean;
+  // adds the clear cross to the control; clearing reports an empty string
+  isClearable?: boolean;
 }
 export const UserSingleDropdown = ({
   width,
@@ -26,12 +28,14 @@ export const UserSingleDropdown = ({
   placeholder,
   disableTyping = false,
   disabled,
+  isClearable = false,
 }: UserSingleDropdown) => {
   return (
     <BaseDropdown
       width={width}
       value={options.find((o) => o.value === value)}
-      onChange={(selected) => onChange(selected[0].value)}
+      clearable={isClearable}
+      onChange={(selected) => onChange(selected[0]?.value ?? "")}
       options={options}
       placeholder={placeholder}
       searchable={!disableTyping}
