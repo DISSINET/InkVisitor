@@ -32,6 +32,16 @@ export function pgIndexName(table: string, index: string): string {
  */
 export const COLUMNS: Record<string, Record<string, string>> = {
   audits: { date: "date", type: "type", user: "user", audit_scope: "auditScope", model_id: "modelId" },
+  entities: {
+    class: "class",
+    status: "status",
+    language: "language",
+    is_template: "isTemplate",
+    used_template: "usedTemplate",
+    territory_id: "data.territory.territoryId",
+    parent_id: "data.parent.territoryId",
+    document_id: "data.documentId",
+  },
 };
 
 /** the SQL expression a generated column is computed from: `doc->'a'->>'b'` for the path `a.b` */
@@ -87,8 +97,8 @@ const entitiesIndexes: PgIndex[] = [
       ...propPaths("$.data.actants[*].props[*]", 3),
     ])
   ),
-  btree(DbEnums.Indexes.Class, "(doc->>'class')"),
-  btree(DbEnums.Indexes.StatementTerritory, "(doc->'data'->'territory'->>'territoryId')"),
+  btree(DbEnums.Indexes.Class, "class"),
+  btree(DbEnums.Indexes.StatementTerritory, "territory_id"),
   gin(
     DbEnums.Indexes.StatementEntities,
     collect([
@@ -98,7 +108,7 @@ const entitiesIndexes: PgIndex[] = [
       "$.data.territory.territoryId",
     ])
   ),
-  btree(DbEnums.Indexes.EntityUsedTemplate, "(doc->>'usedTemplate')"),
+  btree(DbEnums.Indexes.EntityUsedTemplate, "used_template"),
   // a reference row exists before either side is picked; an empty side is no key
   gin(
     DbEnums.Indexes.EntityReferences,
@@ -164,8 +174,10 @@ export const TABLES: Record<string, PgIndex[]> = {
  */
 export const EXTRA_INDEXES: { table: string; name: string; expression: string }[] = [
   { table: "relations", name: "relations_type", expression: "(doc->>'type')" },
-  { table: "entities", name: "entities_territory_parent", expression: "(doc->'data'->'parent'->>'territoryId')" },
-  { table: "entities", name: "entities_resource_document", expression: "(doc->'data'->>'documentId')" },
+  { table: "entities", name: "entities_territory_parent", expression: "parent_id" },
+  { table: "entities", name: "entities_resource_document", expression: "document_id" },
+  // the explore base node and the search filter on class and status together
+  { table: "entities", name: "entities_class_status", expression: "class, status" },
   // the newest audits of one entity are read straight off the index end
   { table: "audits", name: "audits_scope_model_date", expression: "audit_scope, model_id, date" },
   { table: "audits", name: "audits_type_user", expression: `type, ${col("user")}` },
