@@ -4,10 +4,9 @@ import {
   Relation
 } from "@inkvisitor/shared/types";
 import { LetterIcon } from "components";
-import { EntityTag, PaginationControls } from "components/advanced";
+import { CopyUuidsButton, EntityTag, PaginationControls } from "components/advanced";
 import { usePagination } from "hooks/usePagination";
 import React, { useMemo } from "react";
-import { CopyUuidsButton } from "../../CopyUuidsButton/CopyUuidsButton";
 import {
   StyledHeading,
   StyledInverseRelationGroup,

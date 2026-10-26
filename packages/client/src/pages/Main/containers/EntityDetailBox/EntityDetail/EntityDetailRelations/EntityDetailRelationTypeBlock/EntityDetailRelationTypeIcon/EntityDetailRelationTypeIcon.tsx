@@ -1,6 +1,7 @@
 import { RelationEnums } from "@inkvisitor/shared/enums";
 import { Relation } from "@inkvisitor/shared/types";
 import { Button, LetterIcon } from "components";
+import { CopyUuidsButton } from "components/advanced";
 import React from "react";
 import { BiNetworkChart } from "react-icons/bi";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
@@ -15,6 +16,7 @@ interface EntityDetailRelationTypeIcon {
   graphOpen?: boolean;
   handleOpenGraph?: () => void;
   hideLabel?: boolean;
+  copyUuids?: string[];
 }
 export const EntityDetailRelationTypeIcon: React.FC<
   EntityDetailRelationTypeIcon
@@ -23,6 +25,7 @@ export const EntityDetailRelationTypeIcon: React.FC<
   graphOpen = false,
   handleOpenGraph = () => {},
   hideLabel,
+  copyUuids = [],
 }) => {
   const relationRule = Relation.RelationRules[relationType]!;
 
@@ -44,6 +47,7 @@ export const EntityDetailRelationTypeIcon: React.FC<
           inverted={graphOpen}
         />
       )}
+      {copyUuids.length > 0 && <CopyUuidsButton uuids={copyUuids} />}
     </StyledRelationType>
   );
 };
