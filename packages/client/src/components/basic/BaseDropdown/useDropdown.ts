@@ -111,7 +111,18 @@ export const useDropdown = <O extends DropdownItem>({
   const firstSelectedIndex = filtered.findIndex(isSelected);
   const selectedIndex = !search && firstSelectedIndex !== -1 ? firstSelectedIndex : null;
 
+  /* the highlight scrolls into view only after a key press or on opening, so
+     hovering an option at the menu's edge never jerks the list under the
+     pointer */
+  const scrollOnNavRef = useRef(false);
+
+  const openMenu = () => {
+    scrollOnNavRef.current = true;
+    setOpen(true);
+  };
+
   const closeMenu = () => {
+    scrollOnNavRef.current = false;
     setOpen(false);
     setSearch("");
     setActiveIndex(null);
@@ -119,13 +130,19 @@ export const useDropdown = <O extends DropdownItem>({
 
   const { refs, floatingStyles, context } = useFloating({
     open,
-    onOpenChange: (next) => (next ? setOpen(true) : closeMenu()),
+    onOpenChange: (next) => (next ? openMenu() : closeMenu()),
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
     middleware: menuMiddleware,
   });
 
-  const click = useClick(context, { enabled: !disabled, keyboardHandlers: false });
+  // toggle is off so a click in the search input keeps the menu and the typed
+  // filter; the control's own onClick closes the menu on clicks elsewhere
+  const click = useClick(context, {
+    enabled: !disabled,
+    keyboardHandlers: false,
+    toggle: false,
+  });
   const dismiss = useDismiss(context);
   const role = useRole(context, { role: "listbox" });
   const listNav = useListNavigation(context, {
@@ -136,6 +153,10 @@ export const useDropdown = <O extends DropdownItem>({
     loop: true,
     disabledIndices: (index) => index >= filtered.length || disabledIdx.includes(index),
     selectedIndex,
+    // Element.scrollIntoView also scrolls every ancestor, #page-content
+    // included, whose overflow is hidden, so the effect below scrolls the
+    // menu alone
+    scrollItemIntoView: false,
   });
   const typeahead = useTypeahead(context, {
     listRef: labelsRef,
@@ -143,6 +164,26 @@ export const useDropdown = <O extends DropdownItem>({
     onMatch: setActiveIndex,
     enabled: !searchable && open,
   });
+
+  useEffect(() => {
+    if (!open || activeIndex == null || !scrollOnNavRef.current) return;
+    scrollOnNavRef.current = false;
+    // waits a frame for the size middleware to set the menu's max height
+    const frame = requestAnimationFrame(() => {
+      const menu = refs.floating.current;
+      const item = itemsRef.current[activeIndex];
+      if (!menu || !item) return;
+      const menuTop = menu.getBoundingClientRect().top + menu.clientTop;
+      const menuBottom = menuTop + menu.clientHeight;
+      const { top, bottom } = item.getBoundingClientRect();
+      if (top < menuTop) {
+        menu.scrollTop -= menuTop - top;
+      } else if (bottom > menuBottom) {
+        menu.scrollTop += bottom - menuBottom;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open, activeIndex]);
 
   const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
     click,
@@ -176,6 +217,7 @@ export const useDropdown = <O extends DropdownItem>({
   /* Enter/arrow/backspace behavior on the control; the floating-ui hooks
      handle arrow navigation while open, Esc, and outside-click dismissal. */
   const onControlKeyDown = (e: React.KeyboardEvent) => {
+    scrollOnNavRef.current = true;
     if (e.key === "Enter") {
       if (open) {
         // an open menu owns Enter: document-level shortcuts (Explorer's run
@@ -188,10 +230,10 @@ export const useDropdown = <O extends DropdownItem>({
       }
     } else if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !open) {
       e.preventDefault();
-      setOpen(true);
+      openMenu();
     } else if (e.key === " " && !open && !searchable) {
       e.preventDefault();
-      setOpen(true);
+      openMenu();
     } else if (e.key === "Backspace" && multi && !search && value.length > 0) {
       emit(popLastSelection(value));
     } else if (e.key === "Tab") {
@@ -201,7 +243,7 @@ export const useDropdown = <O extends DropdownItem>({
 
   return {
     open,
-    setOpen,
+    openMenu,
     closeMenu,
     search,
     setSearch,

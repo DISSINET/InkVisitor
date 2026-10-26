@@ -214,10 +214,14 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
           onFocus: handleFocus,
           onBlur: handleBlur,
           onKeyDown: dd.onControlKeyDown,
-          onClick: () => {
-            if (!disabled) {
-              inputRef.current?.focus();
+          onClick: (e) => {
+            if (disabled) return;
+            // a click in the search input keeps the menu open, so the caret
+            // can move inside the typed filter
+            if (dd.open && e.target !== inputRef.current) {
+              dd.closeMenu();
             }
+            inputRef.current?.focus();
           },
         })}
       >
@@ -285,7 +289,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
               onChange={(e) => {
                 dd.setSearch(e.target.value);
                 if (!dd.open) {
-                  dd.setOpen(true);
+                  dd.openMenu();
                 }
               }}
             />
@@ -319,9 +323,13 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
             style={dd.floatingStyles}
             {...dd.getFloatingProps({
               // ancestor popovers dismiss on pointerdown; stop both phases so
-              // clicking menu options doesn't collapse a popover hosting this dropdown
+              // clicking menu options doesn't collapse a popover hosting this dropdown.
+              // preventDefault keeps focus on the control through an option click
               onPointerDown: (e) => e.stopPropagation(),
-              onMouseDown: (e) => e.stopPropagation(),
+              onMouseDown: (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              },
             })}
           >
             {dd.filtered.length === 0 && (
@@ -351,7 +359,15 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
                       // aria-activedescendant wiring — do not drop them
                       active: state.highlighted,
                       selected: state.selected,
-                      onClick: () => dd.selectOption(option),
+                      onClick: () => {
+                        dd.selectOption(option);
+                        // in Explorer's run-on-enter panels a mouse pick
+                        // releases focus, so the next Enter runs the search
+                        // rather than picking again in a menu left open
+                        if (wrapperEl?.closest("[data-run-on-enter]")) {
+                          (document.activeElement as HTMLElement | null)?.blur();
+                        }
+                      },
                     })}
                   >
                     {renderOption ? (

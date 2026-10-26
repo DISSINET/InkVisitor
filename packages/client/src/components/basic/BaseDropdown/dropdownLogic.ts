@@ -25,15 +25,21 @@ export const flattenOptions = <O extends DropdownItem>(
   return { items, groupOf };
 };
 
+// case- and accent-insensitive, so "volapuk" finds "Volapük"
+const foldText = (text: string) =>
+  text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+/* matches the label or the value, so a language is found by its ISO code
+   ("ces") as well as by its name */
 export const filterOptions = <O extends DropdownItem>(
   options: O[],
   search: string
 ): O[] => {
-  const needle = search.trim().toLowerCase();
+  const needle = foldText(search.trim());
   if (!needle) {
     return options;
   }
-  return options.filter((o) => o.label.toLowerCase().includes(needle));
+  return options.filter((o) => foldText(`${o.label} ${o.value}`).includes(needle));
 };
 
 export const toggleSelection = <O extends DropdownItem>(

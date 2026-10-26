@@ -24,6 +24,15 @@ describe("filterOptions", () => {
     expect(filterOptions([A, B, C], "cep")).toEqual([C]);
     expect(filterOptions([A, B, C], "ACT")).toEqual([A]);
   });
+  it("matches the value as well as the label", () => {
+    const ces: DropdownItem = { value: "ces", label: "Czech" };
+    expect(filterOptions([A, ces], "ces")).toEqual([ces]);
+  });
+  it("ignores accents on both sides", () => {
+    const vol: DropdownItem = { value: "vol", label: "Volapük" };
+    expect(filterOptions([A, vol], "volapuk")).toEqual([vol]);
+    expect(filterOptions([A, vol], "VOLAPÜK")).toEqual([vol]);
+  });
   it("matches nothing when no label contains the needle", () => {
     expect(filterOptions([A, B], "xyz")).toEqual([]);
   });
