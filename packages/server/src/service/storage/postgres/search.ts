@@ -41,7 +41,7 @@ export function labelPattern(label: string, left: string, right: string): string
 
 /** true when one of the row's labels matches `pattern` */
 export const labelMatch = (p: Params, pattern: string): string =>
-  `EXISTS (SELECT 1 FROM jsonb_array_elements_text(${arr("doc->'labels'")}) l WHERE l ~ ${p.add(pattern)})`;
+  `EXISTS (SELECT 1 FROM unnest(labels) l WHERE l ~ ${p.add(pattern)})`;
 
 const REGEX_CHARS = /[.*+?^${}()|[\]\\]/g;
 
@@ -97,8 +97,10 @@ export function searchWhere(filters: SearchFilters, seedIds: string[] | undefine
     where.push(`id = ANY(${p.add(filters.entityIds)}::text[])`);
   }
   if (filters.haveReferenceTo) {
+    // the column holds resource and value ids both, so the document decides the side
+    const ref = p.add(filters.haveReferenceTo);
     where.push(
-      `EXISTS (SELECT 1 FROM jsonb_array_elements(${arr("doc->'references'")}) ref WHERE ref->>'resource' = ${p.add(filters.haveReferenceTo)})`
+      `(reference_entity_ids && ARRAY[${ref}]::text[] AND EXISTS (SELECT 1 FROM jsonb_array_elements(${arr("doc->'references'")}) ref WHERE ref->>'resource' = ${ref}))`
     );
   }
   return where.length ? where.join(" AND ") : "TRUE";

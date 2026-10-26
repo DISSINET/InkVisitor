@@ -4,8 +4,8 @@ import { SESSIONS_DDL } from "./provision";
 import { encode } from "./sql";
 
 /**
- * Same jsonb layout as every other table, with expression indexes on userId
- * and expiresAt. The DDL is idempotent, so ensure() runs it on every start.
+ * Same jsonb layout as every other table, with generated columns user_id and
+ * expires_at, each indexed. The DDL is idempotent, so ensure() runs it on every start.
  */
 export const sessions: SessionStore = {
   async ensure(conn) {
@@ -32,13 +32,13 @@ export const sessions: SessionStore = {
   },
 
   async deleteByUser(conn, userId) {
-    await query(conn, `DELETE FROM sessions WHERE doc->>'userId' = $1`, [userId]);
+    await query(conn, `DELETE FROM sessions WHERE user_id = $1`, [userId]);
   },
 
   async deleteExpired(conn, now) {
-    // the expiresAt index makes this a bounded range delete rather than a full
+    // the expires_at index makes this a bounded range delete rather than a full
     // table scan (expiresAt is an epoch-ms timestamp)
-    const res = await query(conn, `DELETE FROM sessions WHERE (doc->>'expiresAt')::bigint <= $1`, [now]);
+    const res = await query(conn, `DELETE FROM sessions WHERE expires_at <= $1`, [now]);
     return res.rowCount ?? 0;
   },
 };

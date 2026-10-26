@@ -1,16 +1,18 @@
 import { Conn } from "../types";
 import { query } from "./conn";
-import { COLUMNS, ColumnSpec, EXTRA_INDEXES, TABLES, TEXT_ARRAY_FUNCTION_DDL, col, columnClause, pgIndexName } from "./provision";
+import { COLUMNS, ColumnSpec, EXTRA_INDEXES, TABLES, TEXT_ARRAY_FUNCTION_DDL, col, columnClause, keyFunctionDdl, keyFunctions, pgIndexName } from "./provision";
 
 /**
- * Brings a live database to the generated columns of COLUMNS and the btree
- * indexes over them, so a database provisioned by an older ddl() is upgraded
- * in place at server start. Returns the DDL it executed, empty when the
- * database already matches.
+ * Brings a live database to the key functions and generated columns of
+ * COLUMNS and the indexes over them, so a database provisioned by an older
+ * ddl() is upgraded in place at server start. Returns the DDL it executed,
+ * empty when the database already matches.
  *
- * Only what a table in COLUMNS declares on plain columns is managed here: the
- * key-function gin indexes and the expression indexes of other tables are
- * created by ddl() alone and verified by name through REQUIRED.
+ * Per table, in dependency order: a key function whose body differs goes
+ * first, dropped with everything computed from it (its columns, and the
+ * expression index an older ddl() built over the function) and recreated;
+ * then the columns, which a dropped function leaves missing; then the
+ * indexes, which a dropped column leaves missing.
  *
  * Each statement autocommits on its own, so a sync interrupted by a crash
  * resumes from where it stopped. ADD COLUMN ... STORED rewrites the table
@@ -31,6 +33,9 @@ export async function syncSchema(conn: Conn): Promise<string[]> {
       executed.push(statement);
     };
     for (const table of Object.keys(COLUMNS)) {
+      for (const statement of await functionChanges(conn, table)) {
+        await run(statement);
+      }
       const alter = await columnChanges(conn, table);
       if (alter.length) {
         await run(`ALTER TABLE ${table} ${alter.join(", ")}`);
@@ -57,13 +62,33 @@ const SCHEMA_LOCK_KEY = 33340001;
  * columnExpr(spec): PostgreSQL stores the expression deparsed, with every
  * operator parenthesised and every key cast, e.g. `a.b` becomes
  * `((doc -> 'a'::text) ->> 'b'::text)` and `{ ids: "a" }` becomes
- * `jsonb_text_array((doc -> 'a'::text))`
+ * `jsonb_text_array((doc -> 'a'::text))`; a key function call stays `fn(doc)`
  */
 export function deparsed(spec: ColumnSpec): string {
+  if (typeof spec !== "string" && "fn" in spec) return `${spec.fn}(doc)`;
   const parts = (typeof spec === "string" ? spec : spec.ids).split(".");
   const last = parts.pop();
   const object = parts.reduce((acc, part) => `(${acc} -> '${part}'::text)`, "doc");
   return typeof spec === "string" ? `(${object} ->> '${last}'::text)` : `jsonb_text_array((${object} -> '${last}'::text))`;
+}
+
+/**
+ * CREATE FUNCTION statements for the key functions of `table` that are missing
+ * or whose live body differs from the declared one. pg_proc.prosrc holds a SQL
+ * function body verbatim, so the comparison is on the text. CASCADE takes
+ * everything computed from the function with it, the generated columns and
+ * any index over the function included; the column and index syncs that
+ * follow put the declared ones back.
+ */
+async function functionChanges(conn: Conn, table: string): Promise<string[]> {
+  const statements: string[] = [];
+  for (const key of keyFunctions(table)) {
+    const { rows } = await query<{ prosrc: string }>(conn, "SELECT prosrc FROM pg_proc WHERE oid = to_regprocedure($1)", [`${key.fn}(jsonb)`]);
+    if (rows.length && rows[0].prosrc.trim() === key.body.trim()) continue;
+    if (rows.length) statements.push(`DROP FUNCTION ${key.fn}(jsonb) CASCADE`);
+    statements.push(keyFunctionDdl(key));
+  }
+  return statements;
 }
 
 /** DROP/ADD COLUMN clauses that turn the live columns of `table` into COLUMNS[table] */
@@ -100,7 +125,7 @@ function declaredIndexes(table: string): DeclaredIndex[] {
   for (const index of TABLES[table]) {
     const name = pgIndexName(table, index.name);
     if (index.kind === "btree") declared.push({ name, method: "btree", columns: index.columns });
-    else if ("column" in index) declared.push({ name, method: "gin", columns: [index.column] });
+    else declared.push({ name, method: "gin", columns: [index.column] });
   }
   for (const extra of EXTRA_INDEXES) {
     if (extra.table === table) {
@@ -115,8 +140,8 @@ function declaredIndexes(table: string): DeclaredIndex[] {
  * missing or differ from the declaration. Compared on the catalogue structure,
  * not on indexdef text: a plain index of the declared method on `table` whose
  * key columns are the declared ones, in order. A gin index found over a key
- * function is replaced, and the function, which only that index used, goes
- * with it.
+ * function is replaced; a function that no declared column is computed from
+ * was used by that index alone and goes with it.
  */
 async function indexChanges(conn: Conn, table: string): Promise<string[]> {
   const declared = declaredIndexes(table);
@@ -136,6 +161,7 @@ async function indexChanges(conn: Conn, table: string): Promise<string[]> {
     [declared.map((index) => index.name)]
   );
   const live = new Map(rows.map((row) => [row.name, row]));
+  const keyFns = new Set(keyFunctions(table).map((key) => key.fn));
   const unquote = (name: string) => name.replace(/^"(.*)"$/, "$1");
   const statements: string[] = [];
   for (const index of declared) {
@@ -147,7 +173,7 @@ async function indexChanges(conn: Conn, table: string): Promise<string[]> {
       current.columns.join(",") === index.columns.map(unquote).join(",");
     if (matches) continue;
     if (current) statements.push(`DROP INDEX ${index.name}`);
-    if (current && index.method === "gin") statements.push(`DROP FUNCTION IF EXISTS ${index.name}(jsonb)`);
+    if (current && index.method === "gin" && !keyFns.has(index.name)) statements.push(`DROP FUNCTION IF EXISTS ${index.name}(jsonb)`);
     const using = index.method === "gin" ? "USING gin " : "";
     statements.push(`CREATE INDEX ${index.name} ON ${table} ${using}(${index.columns.join(", ")})`);
   }

@@ -6,16 +6,16 @@ import { DbEnums } from "@inkvisitor/shared/enums";
  * index under the same DbEnums.Indexes name. Bodies are hand-written per
  * backend; ../catalogue.test.ts pins both catalogues to the same names.
  *
- * A multi index is a GIN index over a text[]: an IMMUTABLE function
- * `(doc jsonb) returns text[]` computed per row, or a generated text[] column
- * of COLUMNS, so a lookup is `WHERE keys && ARRAY[...]`. Every other index is
- * a btree over `doc->>'field'` expressions or generated columns. Dates live in
- * the document as ISO-8601 UTC strings, which order correctly as text.
+ * Every index is over generated columns of COLUMNS. A multi index is a GIN
+ * index over a text[] column, so a lookup is `WHERE keys && ARRAY[...]`; the
+ * column of an index with several key paths is computed by an IMMUTABLE
+ * function `(doc jsonb) returns text[]`, since a generation expression cannot
+ * hold a subquery. Every other index is a btree. Dates live in the document as
+ * ISO-8601 UTC strings, which order correctly as text.
  */
 
 export type PgIndex =
   | { name: string; kind: "btree"; columns: string[] }
-  | { name: string; kind: "gin"; body: string }
   | { name: string; kind: "gin"; column: string };
 
 /** SQL identifier shared by an index and, for a multi index, its key function */
@@ -25,18 +25,53 @@ export function pgIndexName(table: string, index: string): string {
 
 /**
  * what a generated column holds: the text of the field at a document path
- * (dot-separated for a nested field), or the text[] of the id array at `ids`
- * in document order, an empty array when the field is not an array
+ * (dot-separated for a nested field), the text[] of the string array at `ids`
+ * in document order (an empty array when the field is not an array), or the
+ * text[] the IMMUTABLE key function `fn(doc jsonb)` with the SQL `body`
+ * returns. A key function exists before its table, and schema.ts drops it
+ * together with the columns computed from it when the body changes.
  */
-export type ColumnSpec = string | { ids: string };
+export type ColumnSpec = string | { ids: string } | KeyFunction;
+
+/** an IMMUTABLE SQL function `fn(doc jsonb) returns text[]` with the body `body` */
+type KeyFunction = { fn: string; body: string };
+
+/**
+ * Distinct text values found at any of `paths` in the document `doc` (an SQL
+ * expression, `doc` for the row's own column). A path runs in lax mode unless
+ * it says `strict`; errors are silenced either way, so a document without the
+ * field contributes no key, like `.default([])` in ReQL.
+ */
+export const collect = (paths: string[], where = "v IS NOT NULL", doc = "doc"): string =>
+  `SELECT ARRAY(SELECT DISTINCT v FROM jsonb_array_elements_text(\n    ` +
+  paths.map((p) => `jsonb_path_query_array(${doc}, '${p}', '{}', true)`).join("\n    || ") +
+  `\n  ) AS v WHERE ${where})`;
+
+/**
+ * value and type entity ids of every prop under `root`, following `children`
+ * `depth` levels down; `kind` keeps one side only
+ */
+export const propPaths = (root: string, depth: number, kind?: "type" | "value"): string[] => {
+  const paths: string[] = [];
+  let level = root;
+  for (let i = 0; i < depth; i++) {
+    if (kind !== "type") paths.push(`${level}.value.entityId`);
+    if (kind !== "value") paths.push(`${level}.type.entityId`);
+    level = `${level}.children[*]`;
+  }
+  return paths;
+};
+
+/** the keys of the multi index `index` of `table`, computed by the function of the same name */
+const keys = (table: string, index: string, body: string): ColumnSpec => ({ fn: pgIndexName(table, index), body });
 
 /**
  * STORED generated columns per table: column name -> what it is derived
  * from. The column is a copy of the field that an index can cover and a query
  * can read without detoasting the document: `doc` stays the only thing
- * written and the only thing read back, the column follows it. A table listed
- * here declares its btree indexes on these column names, never on `doc->>`
- * expressions, and schema.ts brings a live database to this declaration at
+ * written and the only thing read back, the column follows it. A table lists
+ * every column its indexes are declared on, so no index is left over a `doc`
+ * expression, and schema.ts brings a live database to this declaration at
  * every start.
  */
 const MATERIALIZED_STATS_COLUMNS: Record<string, ColumnSpec> = {
@@ -66,6 +101,44 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     document_id: "data.documentId",
     created_at: "createdAt",
     updated_at: "updatedAt",
+    labels: { ids: "labels" },
+    // entities carry `labels`, not `label`; the explore label node filters on
+    // this field all the same, as RethinkDB does
+    label: "label",
+    // props on the entity itself go one level deeper than statement props, as in ReQL
+    prop_entity_ids: keys("entities", DbEnums.Indexes.PropsRecursive, collect(propPaths("$.props[*]", 4))),
+    statement_prop_entity_ids: keys(
+      "entities",
+      DbEnums.Indexes.StatementDataProps,
+      collect([
+        ...propPaths("$.data.actions[*].props[*]", 3),
+        ...propPaths("$.data.actants[*].props[*]", 3),
+      ])
+    ),
+    statement_entity_ids: keys(
+      "entities",
+      DbEnums.Indexes.StatementEntities,
+      collect([
+        "$.data.actions[*].actionId",
+        "$.data.actants[*].entityId",
+        "$.data.tags[*]",
+        "$.data.territory.territoryId",
+      ])
+    ),
+    // a reference row exists before either side is picked; an empty side is no key
+    reference_entity_ids: keys(
+      "entities",
+      DbEnums.Indexes.EntityReferences,
+      collect(["$.references[*].resource", "$.references[*].value"], "v IS NOT NULL AND v <> ''")
+    ),
+    statement_actant_ci_ids: keys(
+      "entities",
+      DbEnums.Indexes.StatementActantsCI,
+      collect([
+        "$.data.actants[*].classifications[*].entityId",
+        "$.data.actants[*].identifications[*].entityId",
+      ])
+    ),
   },
   relations: { type: "type", entity_ids: { ids: "entityIds" } },
   users: {
@@ -80,7 +153,14 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
   acl_permissions: { controller: "controller", method: "method", route: "route" },
   settings: { public: "public" },
   saved_queries: { name: "name", owner_id: "ownerId", shared: "shared", created_at: "createdAt", updated_at: "updatedAt" },
-  documents: { title: "title", created_at: "createdAt", updated_at: "updatedAt" },
+  documents: {
+    title: "title",
+    created_at: "createdAt",
+    updated_at: "updatedAt",
+    // entityIds is either the legacy flat string[] or Record<class, string[]>;
+    // in strict mode the path for the other shape fails, silently
+    entity_ids: keys("documents", DbEnums.Indexes.DocumentEntityIds, collect(["strict $.entityIds[*]", "strict $.entityIds.*[*]"])),
+  },
   stats_materialized_day: MATERIALIZED_STATS_COLUMNS,
   stats_materialized_week: MATERIALIZED_STATS_COLUMNS,
   stats_materialized_month: MATERIALIZED_STATS_COLUMNS,
@@ -96,7 +176,7 @@ const pathExpr = (path: string, text: boolean): string => {
 
 /** the SQL expression a generated column is computed from */
 export const columnExpr = (spec: ColumnSpec): string =>
-  typeof spec === "string" ? pathExpr(spec, true) : `jsonb_text_array(${pathExpr(spec.ids, false)})`;
+  typeof spec === "string" ? pathExpr(spec, true) : "fn" in spec ? `${spec.fn}(doc)` : `jsonb_text_array(${pathExpr(spec.ids, false)})`;
 
 export const columnType = (spec: ColumnSpec): string => (typeof spec === "string" ? "text" : "text[]");
 
@@ -108,89 +188,31 @@ const btree = (name: string, ...columns: string[]): PgIndex => ({
   kind: "btree",
   columns,
 });
-const gin = (name: string, body: string): PgIndex => ({ name, kind: "gin", body });
-const ginColumn = (name: string, column: string): PgIndex => ({ name, kind: "gin", column });
-
-/**
- * Distinct text values found at any of `paths` in the document `doc` (an SQL
- * expression, `doc` for the row's own column). A path runs in lax mode unless
- * it says `strict`; errors are silenced either way, so a document without the
- * field contributes no key, like `.default([])` in ReQL.
- */
-export const collect = (paths: string[], where = "v IS NOT NULL", doc = "doc"): string =>
-  `SELECT ARRAY(SELECT DISTINCT v FROM jsonb_array_elements_text(\n    ` +
-  paths.map((p) => `jsonb_path_query_array(${doc}, '${p}', '{}', true)`).join("\n    || ") +
-  `\n  ) AS v WHERE ${where})`;
-
-/**
- * value and type entity ids of every prop under `root`, following `children`
- * `depth` levels down; `kind` keeps one side only
- */
-export const propPaths = (root: string, depth: number, kind?: "type" | "value"): string[] => {
-  const paths: string[] = [];
-  let level = root;
-  for (let i = 0; i < depth; i++) {
-    if (kind !== "type") paths.push(`${level}.value.entityId`);
-    if (kind !== "value") paths.push(`${level}.type.entityId`);
-    level = `${level}.children[*]`;
-  }
-  return paths;
-};
+const gin = (name: string, column: string): PgIndex => ({ name, kind: "gin", column });
 
 const entitiesIndexes: PgIndex[] = [
-  // props on the entity itself go one level deeper than statement props, as in ReQL
-  gin(DbEnums.Indexes.PropsRecursive, collect(propPaths("$.props[*]", 4))),
-  gin(
-    DbEnums.Indexes.StatementDataProps,
-    collect([
-      ...propPaths("$.data.actions[*].props[*]", 3),
-      ...propPaths("$.data.actants[*].props[*]", 3),
-    ])
-  ),
+  gin(DbEnums.Indexes.PropsRecursive, "prop_entity_ids"),
+  gin(DbEnums.Indexes.StatementDataProps, "statement_prop_entity_ids"),
   btree(DbEnums.Indexes.Class, "class"),
   btree(DbEnums.Indexes.StatementTerritory, "territory_id"),
-  gin(
-    DbEnums.Indexes.StatementEntities,
-    collect([
-      "$.data.actions[*].actionId",
-      "$.data.actants[*].entityId",
-      "$.data.tags[*]",
-      "$.data.territory.territoryId",
-    ])
-  ),
+  gin(DbEnums.Indexes.StatementEntities, "statement_entity_ids"),
   btree(DbEnums.Indexes.EntityUsedTemplate, "used_template"),
-  // a reference row exists before either side is picked; an empty side is no key
-  gin(
-    DbEnums.Indexes.EntityReferences,
-    collect(["$.references[*].resource", "$.references[*].value"], "v IS NOT NULL AND v <> ''")
-  ),
-  gin(
-    DbEnums.Indexes.StatementActantsCI,
-    collect([
-      "$.data.actants[*].classifications[*].entityId",
-      "$.data.actants[*].identifications[*].entityId",
-    ])
-  ),
+  gin(DbEnums.Indexes.EntityReferences, "reference_entity_ids"),
+  gin(DbEnums.Indexes.StatementActantsCI, "statement_actant_ci_ids"),
 ];
 
-// over the generated columns of COLUMNS.audits: the stats aggregation groups
-// on date, type and user and is answered from the index alone
+// the stats aggregation groups on date, type and user and is answered from
+// the index alone
 const auditsIndexes: PgIndex[] = [
   btree(DbEnums.Indexes.AuditScopeModelId, "audit_scope", "model_id"),
   btree(DbEnums.Indexes.AuditDate, "date"),
   btree(DbEnums.Indexes.AuditDateTypeUser, "date", "type", col("user")),
-  ginColumn(DbEnums.Indexes.AuditRelationEntityIds, "entity_ids"),
+  gin(DbEnums.Indexes.AuditRelationEntityIds, "entity_ids"),
 ];
 
-const relationsIndexes: PgIndex[] = [
-  ginColumn(DbEnums.Indexes.RelationsEntityIds, "entity_ids"),
-];
+const relationsIndexes: PgIndex[] = [gin(DbEnums.Indexes.RelationsEntityIds, "entity_ids")];
 
-const documentsIndexes: PgIndex[] = [
-  // entityIds is either the legacy flat string[] or Record<class, string[]>;
-  // in strict mode the path for the other shape fails, silently
-  gin(DbEnums.Indexes.DocumentEntityIds, collect(["strict $.entityIds[*]", "strict $.entityIds.*[*]"])),
-];
+const documentsIndexes: PgIndex[] = [gin(DbEnums.Indexes.DocumentEntityIds, "entity_ids")];
 
 const materializedStatsIndexes: PgIndex[] = [
   btree("date", "date"),
@@ -245,10 +267,24 @@ export function columnClauses(table: string): string[] {
   return Object.entries(COLUMNS[table] ?? {}).map(([name, spec]) => columnClause(name, spec));
 }
 
+/** the key functions the columns of `table` are computed from, in COLUMNS order */
+export function keyFunctions(table: string): KeyFunction[] {
+  return Object.values(COLUMNS[table] ?? {}).filter((spec): spec is KeyFunction => typeof spec !== "string" && "fn" in spec);
+}
+
+/**
+ * CREATE FUNCTION of a key function. A generated column depends on it, so a
+ * changed body is never CREATE OR REPLACEd in place: the stored values would
+ * keep the old keys. schema.ts drops the function with its columns and
+ * recreates both.
+ */
+export const keyFunctionDdl = ({ fn, body }: KeyFunction): string =>
+  `CREATE FUNCTION ${fn}(doc jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$\n  ${body}\n$$`;
+
 /** SQL expression giving a row's key(s) for `index`: text[] for gin, text or text[] for btree */
 export function keysSql(table: string, index: PgIndex): string {
   if (index.kind === "gin") {
-    return "column" in index ? index.column : `${pgIndexName(table, index.name)}(doc)`;
+    return index.column;
   }
   return index.columns.length === 1
     ? index.columns[0]
@@ -289,38 +325,47 @@ export const TEXT_ARRAY_FUNCTION_DDL = `CREATE OR REPLACE FUNCTION jsonb_text_ar
   SELECT ARRAY(SELECT v FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof(x) = 'array' THEN x ELSE '[]'::jsonb END) WITH ORDINALITY AS t(v, i) ORDER BY i)
 $$`;
 
+const SESSION_COLUMNS = [
+  `user_id text GENERATED ALWAYS AS (doc->>'userId') STORED`,
+  // an epoch-ms timestamp
+  `expires_at bigint GENERATED ALWAYS AS ((doc->>'expiresAt')::bigint) STORED`,
+];
+
 /**
  * The session table is outside the catalogue (RethinkDB provisions it at boot,
- * see rethink/sessions.ts). Idempotent, so the PG session store runs it on
- * every start and createDatabase runs it for test databases.
+ * see rethink/sessions.ts), so its columns and indexes are declared here and
+ * not synced by schema.ts. Idempotent, so the PG session store runs it on
+ * every start and createDatabase runs it for test databases. A database from
+ * before the columns has the two indexes over `doc` expressions under the
+ * dropped names. ALTER TABLE locks the table before it checks IF NOT EXISTS,
+ * so the columns are added behind a catalogue lookup.
  */
 export const SESSIONS_DDL = [
-  `CREATE TABLE IF NOT EXISTS sessions (doc jsonb NOT NULL, id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY)`,
-  `CREATE INDEX IF NOT EXISTS sessions_userid ON sessions ((doc->>'userId'))`,
-  `CREATE INDEX IF NOT EXISTS sessions_expiresat ON sessions (((doc->>'expiresAt')::bigint))`,
+  `CREATE TABLE IF NOT EXISTS sessions (doc jsonb NOT NULL, id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY, ${SESSION_COLUMNS.join(", ")})`,
+  `DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'sessions' AND column_name = 'expires_at') THEN
+    ALTER TABLE sessions ${SESSION_COLUMNS.map((column) => `ADD COLUMN ${column}`).join(", ")};
+  END IF;
+END $$`,
+  `DROP INDEX IF EXISTS sessions_userid, sessions_expiresat`,
+  `CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions (user_id)`,
+  `CREATE INDEX IF NOT EXISTS sessions_expires_at ON sessions (expires_at)`,
 ];
 
 /**
  * Every statement that turns an empty database into the full schema, in order,
- * on the assumption that nothing is there yet. An expression index over a
- * user-defined function is not rechecked when the function body is replaced in
- * place, so a changed index function has to be dropped and recreated together
- * with its index, never CREATE OR REPLACEd.
+ * on the assumption that nothing is there yet.
  */
 export function ddl(): string[] {
   const statements: string[] = [MERGE_FUNCTION_DDL, TEXT_ARRAY_FUNCTION_DDL];
   for (const [table, indexes] of Object.entries(TABLES)) {
+    statements.push(...keyFunctions(table).map(keyFunctionDdl));
     const columns = ["doc jsonb NOT NULL", "id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY", ...columnClauses(table)];
     statements.push(`CREATE TABLE ${table} (${columns.join(", ")})`);
     for (const index of indexes) {
       const ident = pgIndexName(table, index.name);
-      if (index.kind === "gin" && "column" in index) {
+      if (index.kind === "gin") {
         statements.push(`CREATE INDEX ${ident} ON ${table} USING gin (${index.column})`);
-      } else if (index.kind === "gin") {
-        statements.push(
-          `CREATE FUNCTION ${ident}(doc jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$\n  ${index.body}\n$$`,
-          `CREATE INDEX ${ident} ON ${table} USING gin (${ident}(doc))`
-        );
       } else {
         statements.push(`CREATE INDEX ${ident} ON ${table} (${index.columns.join(", ")})`);
       }
