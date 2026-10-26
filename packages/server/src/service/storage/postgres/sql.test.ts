@@ -23,7 +23,7 @@ describe("postgres sql helpers", () => {
 
   it("builds a single btree predicate with ANY", () => {
     expect(indexPredicate("entities", DbEnums.Indexes.Class, ["C", "P"])).toEqual({
-      sql: "(doc->>'class') = ANY($1::text[])",
+      sql: "class = ANY($1::text[])",
       params: [["C", "P"]],
     });
   });
@@ -70,7 +70,7 @@ describe("postgres sql helpers", () => {
       "entities_statement_entities(doc) @> ARRAY[e.id]"
     );
     expect(indexHolds("entities", DbEnums.Indexes.StatementTerritory, "e.id")).toBe(
-      "(doc->'data'->'territory'->>'territoryId') = e.id"
+      "territory_id = e.id"
     );
   });
 
@@ -82,7 +82,7 @@ describe("postgres sql helpers", () => {
   it("Params numbers placeholders in order and appends the params of an index predicate", () => {
     const p = new Params();
     expect(p.add("x")).toBe("$1");
-    expect(p.index("entities", DbEnums.Indexes.Class, ["C"])).toBe("(doc->>'class') = ANY($2::text[])");
+    expect(p.index("entities", DbEnums.Indexes.Class, ["C"])).toBe("class = ANY($2::text[])");
     expect(p.add(3)).toBe("$3");
     expect(p.list).toEqual(["x", ["C"], 3]);
   });

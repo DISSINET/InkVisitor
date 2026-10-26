@@ -15,7 +15,7 @@ import { docs, q, tableStore } from "./tables";
  */
 
 /** class values are enum constants, so they are spliced as literals */
-export const ofClass = (cls: EntityEnums.Class): string => `doc->>'class' = '${cls}'`;
+export const ofClass = (cls: EntityEnums.Class): string => `class = '${cls}'`;
 export const STATEMENT = ofClass(EntityEnums.Class.Statement);
 
 async function select<T extends Row>(conn: Conn, table: string, where: string, params: unknown[]): Promise<T[]> {
@@ -42,7 +42,7 @@ export const entities: EntityStore = {
   resourcesByDocumentId(conn, documentId) {
     return selectEntities(
       conn,
-      `${ofClass(EntityEnums.Class.Resource)} AND doc->'data'->>'documentId' = $1`,
+      `${ofClass(EntityEnums.Class.Resource)} AND document_id = $1`,
       [documentId]
     );
   },
@@ -55,7 +55,7 @@ export const entities: EntityStore = {
     // the ReQL `.default("")` makes it
     return selectEntities(
       conn,
-      `${ofClass(EntityEnums.Class.Resource)} AND coalesce(doc->'data'->>'documentId', '') = ANY($1::text[])`,
+      `${ofClass(EntityEnums.Class.Resource)} AND coalesce(document_id, '') = ANY($1::text[])`,
       [documentIds]
     );
   },
@@ -63,9 +63,8 @@ export const entities: EntityStore = {
   territoryChildren(conn, parentId) {
     return selectEntities(
       conn,
-      `${ofClass(EntityEnums.Class.Territory)}
-         AND jsonb_typeof(doc->'data'->'parent') = 'object'
-         AND doc->'data'->'parent'->>'territoryId' = $1`,
+      // the root's `parent: false` has no parent_id, so it never matches
+      `${ofClass(EntityEnums.Class.Territory)} AND parent_id = $1`,
       [parentId]
     );
   },
@@ -78,7 +77,7 @@ export const entities: EntityStore = {
     // is reported once per match, as the ReQL union of passes reports it.
     // `->>` yields NULL for a territory that is missing, null or not an object.
     const blocks = indexes.map(
-      (index) => `SELECT e.id AS "entityId", doc->'data'->'territory'->>'territoryId' AS "territoryId"
+      (index) => `SELECT e.id AS "entityId", territory_id AS "territoryId"
         FROM unnest($1::text[]) AS e(id)
         JOIN ${ident(TABLE.entities)} ON ${indexHolds(TABLE.entities, index, "e.id")}
         WHERE ${STATEMENT}`

@@ -101,9 +101,9 @@ export default class SearchEdge implements Query.IEdge {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const p = new Params();
-    const where = [`e.doc->>'status' = ${anyOf(p, statuses)}`];
+    const where = [`e.status = ${anyOf(p, statuses)}`];
     if (classes.length) {
-      where.push(`e.doc->>'class' = ${anyOf(p, classes)}`);
+      where.push(`e.class = ${anyOf(p, classes)}`);
     }
     const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
     return res.rows.map((row: { id: string }) => row.id);
@@ -181,7 +181,7 @@ const T = EntityEnums.Class.Territory;
 
 const anyOf = (p: Params, values: unknown[]): string => `ANY(${p.add(values)}::text[])`;
 /** the row `x` is of class `cls` */
-const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.doc->>'class' = '${cls}'`;
+const isClass = (x: string, cls: EntityEnums.Class): string => `${x}.class = '${cls}'`;
 /** a filled id read from json (ReQL `.default("").ne("")`) */
 const nonEmpty = (x: string): string => `coalesce(${x}, '') <> ''`;
 
@@ -189,10 +189,10 @@ const nonEmpty = (x: string): string => `coalesce(${x}, '') <> ''`;
 function entityMatches(p: Params, idSql: string, classes: EntityEnums.Class[], statuses: EntityEnums.Status[]): string {
   const parts = [`t.id = ${idSql}`];
   if (classes.length) {
-    parts.push(`t.doc->>'class' = ${anyOf(p, classes)}`);
+    parts.push(`t.class = ${anyOf(p, classes)}`);
   }
   if (statuses.length) {
-    parts.push(`t.doc->>'status' = ${anyOf(p, statuses)}`);
+    parts.push(`t.status = ${anyOf(p, statuses)}`);
   }
   return `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE ${parts.join(" AND ")})`;
 }
@@ -202,7 +202,7 @@ function entityMatches(p: Params, idSql: string, classes: EntityEnums.Class[], s
  * ANY reads a bare parenthesized subquery as a row source; the cast makes it an array expression
  */
 const hasIdOfClasses = (p: Params, idsSql: string, classes: EntityEnums.Class[]): string =>
-  `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE t.id = ANY(${idsSql}::text[]) AND t.doc->>'class' = ${anyOf(p, classes)})`;
+  `EXISTS (SELECT 1 FROM ${ENTITIES} t WHERE t.id = ANY(${idsSql}::text[]) AND t.class = ${anyOf(p, classes)})`;
 
 /** the collected text[] `idsSql` meets a target, holds an entity of the classes, or holds anything */
 function idsMatch(p: Params, idsSql: string, targets: string[] | null, classes: EntityEnums.Class[]): string {
@@ -352,7 +352,7 @@ function targetRows(e: SearchEdge, p: Params): string {
   if (targets) {
     return `s.id = ${anyOf(p, targets)}`;
   }
-  return classes.length ? `s.doc->>'class' = ${anyOf(p, classes)}` : "TRUE";
+  return classes.length ? `s.class = ${anyOf(p, classes)}` : "TRUE";
 }
 
 /** e is a filled `kind` side of a top-level prop of a target entity (runInversePropEdge) */
@@ -511,7 +511,7 @@ const usedInStatements = (cands: string): string =>
 
 // ---- territories ----------------------------------------------------------
 
-const PARENT_ID = (x: string): string => `${x}.doc->'data'->'parent'->>'territoryId'`;
+const PARENT_ID = (x: string): string => `${x}.parent_id`;
 /** the root carries `parent: false`, every other territory an object */
 const HAS_PARENT = (x: string): string => `jsonb_typeof(${x}.doc->'data'->'parent') = 'object'`;
 
@@ -543,12 +543,12 @@ function statementUnderTerritory(e: SearchEdge, p: Params): string {
   if (targets) {
     return `${isClass("e", S)} AND ${p.index(TABLE.entities, DbEnums.Indexes.StatementTerritory, targets)}`;
   }
-  return `${isClass("e", S)} AND ${nonEmpty("e.doc->'data'->'territory'->>'territoryId'")}`;
+  return `${isClass("e", S)} AND ${nonEmpty("e.territory_id")}`;
 }
 
 /** the direct territories of the target statements (EdgeTerritoryHasStatement) */
 const territoryHasStatement = (e: SearchEdge, p: Params): string =>
-  `e.id IN (SELECT s.doc->'data'->'territory'->>'territoryId' FROM ${ENTITIES} s WHERE ${isClass("s", S)} AND ${targetStatements(e, p)})`;
+  `e.id IN (SELECT s.territory_id FROM ${ENTITIES} s WHERE ${isClass("s", S)} AND ${targetStatements(e, p)})`;
 
 /** SQL over alias `e` for each edge type; a type missing here is unknown to the evaluator */
 export const PREDICATES: Record<string, Predicate> = {

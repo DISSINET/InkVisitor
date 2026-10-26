@@ -16,10 +16,10 @@ export function inputWhere(input: Input, p: Params): string {
   const { entityClasses, entityStatuses, entityId, label } = input.params;
   const where: string[] = [];
   if (entityClasses?.length) {
-    where.push(`e.doc->>'class' = ANY(${p.add(entityClasses)}::text[])`);
+    where.push(`e.class = ANY(${p.add(entityClasses)}::text[])`);
   }
   if (entityStatuses?.length) {
-    where.push(`e.doc->>'status' = ANY(${p.add(entityStatuses)}::text[])`);
+    where.push(`e.status = ANY(${p.add(entityStatuses)}::text[])`);
   }
   if (entityId) {
     where.push(`e.id = ${p.add(entityId)}`);
