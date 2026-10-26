@@ -530,7 +530,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** audit document field -> generated column, for the fields a group key may read */
 const AUDIT_COLUMN_OF_FIELD: Record<string, string> = {};
 for (const [column, path] of Object.entries(COLUMNS.audits)) {
-  AUDIT_COLUMN_OF_FIELD[path] = col(column);
+  if (typeof path === "string") AUDIT_COLUMN_OF_FIELD[path] = col(column);
 }
 
 function auditColumn(field: string): string {

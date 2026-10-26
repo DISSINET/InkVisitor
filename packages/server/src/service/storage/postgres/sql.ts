@@ -1,5 +1,5 @@
 import { Row } from "../types";
-import { TABLES, pgIndexName } from "./provision";
+import { TABLES, keysSql } from "./provision";
 
 /** a quoted SQL identifier */
 export const ident = (name: string): string => `"${name.replace(/"/g, '""')}"`;
@@ -66,7 +66,7 @@ export function indexPredicate(table: string, index: string, keys: unknown[], of
     return { sql: "FALSE", params: [] };
   }
   if (def.kind === "gin") {
-    return { sql: `${pgIndexName(table, index)}(doc) && $${offset + 1}::text[]`, params: [keys.map(String)] };
+    return { sql: `${keysSql(table, def)} && $${offset + 1}::text[]`, params: [keys.map(String)] };
   }
   if (def.columns.length === 1) {
     return { sql: `${def.columns[0]} = ANY($${offset + 1}::text[])`, params: [keys.map(String)] };
@@ -100,7 +100,7 @@ export function indexHolds(table: string, index: string, valueSql: string): stri
     throw new Error(`postgres: unknown index ${table}.${index}`);
   }
   if (def.kind === "gin") {
-    return `${pgIndexName(table, index)}(doc) @> ARRAY[${valueSql}]`;
+    return `${keysSql(table, def)} @> ARRAY[${valueSql}]`;
   }
   if (def.columns.length !== 1) {
     throw new Error(`postgres: index ${table}.${index} cannot be joined on one value`);

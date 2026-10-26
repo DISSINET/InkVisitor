@@ -3,7 +3,6 @@ import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { TABLE } from "../names";
 import { Conn, EntityStore, RelationStore, Row } from "../types";
 import { notifyChanged } from "./invalidation";
-import { pgIndexName } from "./provision";
 import { labelMatch, labelPattern, searchWhere } from "./search";
 import { Params, encode, ident, indexHolds, indexPredicate } from "./sql";
 import { docs, q, tableStore } from "./tables";
@@ -147,7 +146,7 @@ export const relations: RelationStore = {
   ...tableStore<RelationTypes.IRelation>(TABLE.relations),
 
   byType(conn, type) {
-    return type ? selectRelations(conn, `doc->>'type' = $1`, [type]) : selectRelations(conn, "TRUE", []);
+    return type ? selectRelations(conn, "type = $1", [type]) : selectRelations(conn, "TRUE", []);
   },
 
   async forEntities(conn, entityIds, type) {
@@ -156,9 +155,9 @@ export const relations: RelationStore = {
     }
     // one row per relation whatever the number of matching ids, which is what
     // the ReQL `.distinct()` after the multi-index getAll produces
-    const touching = `${pgIndexName(TABLE.relations, DbEnums.Indexes.RelationsEntityIds)}(doc) && $1::text[]`;
+    const touching = "entity_ids && $1::text[]";
     return type
-      ? selectRelations(conn, `${touching} AND doc->>'type' = $2`, [entityIds, type])
+      ? selectRelations(conn, `${touching} AND type = $2`, [entityIds, type])
       : selectRelations(conn, touching, [entityIds]);
   },
 };
