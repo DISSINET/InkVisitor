@@ -57,12 +57,13 @@ Import example (this will remove and import the database anew):
 
 ### Migrating a RethinkDB database to PostgreSQL
 
-`pnpm migrate --db=<name> [--pg=<name>] [--out=<dir>] [--drop] [--no-diff] [env]` moves one RethinkDB database into PostgreSQL. The `DB_*` variables of the env file name the source instance, the `PG_*` variables the target instance (`PG_NAME` is replaced by `--pg`, which defaults to the RethinkDB name, the name `DB_ADAPTER=postgres` then expects). Four steps:
+`pnpm migrate --db=<name> [--pg=<name>] [--out=<dir>] [--drop] [--no-diff] [env]` moves one RethinkDB database into PostgreSQL. The `DB_*` variables of the env file name the source instance, the `PG_*` variables the target instance (`PG_NAME` is replaced by `--pg`, which defaults to the RethinkDB name, the name `DB_ADAPTER=postgres` then expects). Five steps:
 
 1. every catalogue table is exported into `datasets/<out>/<table>.json` (`--out` must be a plain name starting with `export-`, default `export-<db>-<date>`; such directories are git-ignored) in the format `rethinkdb export` writes, so it is a raw dataset for `pnpm seed`, for the interactive app and for a restore into RethinkDB with `--target=rethinkdb`;
-2. the PostgreSQL database is created with the schema; an existing one is refused unless `--drop`;
-3. the export is imported through the seeder;
-4. both databases are compared like `storage:diff` does, with index key parity; `--no-diff` skips it.
+2. the export is checked against the PostgreSQL constraints (foreign keys, unique rows); every violating row is listed and the command exits 1 before PostgreSQL is touched, so the rows are fixed in RethinkDB (the `fixDuplicateRowsJob` job of the interactive app covers duplicates and dangling document and template references) and the migration reruns;
+3. the PostgreSQL database is created with the schema; an existing one is refused unless `--drop`;
+4. the export is imported through the seeder, and the constraints are added after it;
+5. both databases are compared like `storage:diff` does, with index key parity; `--no-diff` skips it.
 
 RethinkDB is only read. Sessions are not copied: the server creates its table at boot and users sign in again. RethinkDB tables outside the catalogue are listed and left behind; a catalogue table missing in RethinkDB comes up empty. The command exits 1 when a row was refused or the diff found a difference. The diff evaluates every RethinkDB index function row by row where a page of rows raises, so a malformed document (a string where the function expects an array) is compared as the row the index leaves out, not as a crash. A re-import of an existing export is `pnpm seed --db=<name> --dataset=<out> --target=postgres [env]`.
 
