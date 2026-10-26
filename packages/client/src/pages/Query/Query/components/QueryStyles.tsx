@@ -2,7 +2,6 @@ import { QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "../../constants";
 import styled from "styled-components";
 import {
   StyledControl,
-  StyledSearchInput,
   StyledSingleValue,
 } from "components/basic/BaseDropdown/BaseDropdownStyles";
 
@@ -38,10 +37,6 @@ export const StyledGraphNode = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.space[4]};
-
-  ${StyledSearchInput} {
-    color: ${({ theme }) => theme.color.white};
-  }
 `;
 
 // per-node EQ / SUB expansion checkboxes: a small pill straddling the node's
