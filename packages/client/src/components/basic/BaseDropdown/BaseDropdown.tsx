@@ -174,7 +174,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
   const showPlaceholder = selectedArray.length === 0 && !dd.search;
   const singleValue = !multi && selectedArray.length > 0 ? selectedArray[0] : undefined;
 
-  const renderRemove = (option: O) =>
+  const renderRemove = (onRemove: () => void) =>
     disabled ? null : (
       <StyledChipRemove
         type="button"
@@ -183,7 +183,7 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
         onMouseDown={(e) => e.preventDefault()}
         onClick={(e) => {
           e.stopPropagation();
-          dd.removeChip(option);
+          onRemove();
         }}
       >
         <IcoClose size={14} />
@@ -246,7 +246,8 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
                   <StyledDefaultChipLabel>
                     {chipSummary!(selectedArray.length, items.length)}
                   </StyledDefaultChipLabel>
-                  {renderRemove(selectedArray[selectedArray.length - 1])}
+                  {/* the summary stands for the whole selection, so its cross clears it */}
+                  {renderRemove(dd.clear)}
                 </StyledChipBody>
               </StyledChipShell>
             ) : (
@@ -254,11 +255,11 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
                 {visibleChips.map((o) => (
                   <StyledChipShell key={`${o.label}-${o.value}`} $density={chipDensity}>
                     {renderChip ? (
-                      renderChip(o, renderRemove(o))
+                      renderChip(o, renderRemove(() => dd.removeChip(o)))
                     ) : (
                       <StyledChipBody>
                         <StyledDefaultChipLabel>{o.label}</StyledDefaultChipLabel>
-                        {renderRemove(o)}
+                        {renderRemove(() => dd.removeChip(o))}
                       </StyledChipBody>
                     )}
                   </StyledChipShell>

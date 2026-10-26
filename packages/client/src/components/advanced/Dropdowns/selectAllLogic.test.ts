@@ -113,9 +113,9 @@ describe("resolveAttributeMultiChange", () => {
     ).toEqual([ANY.value, "A", "B", "C"]);
   });
 
-  it("remove-chip (the merged 'N selected' chip) clears everything", () => {
+  it("clear (the 'N selected' summary chip's cross) returns []", () => {
     expect(
-      resolveAttributeMultiChange({ selected: [ANY, A, B], action: "remove-chip", options: OPTS })
+      resolveAttributeMultiChange({ selected: [], action: "clear", options: OPTS })
     ).toEqual([]);
   });
 

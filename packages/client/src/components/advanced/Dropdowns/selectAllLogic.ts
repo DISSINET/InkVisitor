@@ -70,10 +70,7 @@ export const resolveAttributeMultiChange = <T extends string>(args: {
   const includesAny = selected.some((s) => s.value === allEntities.value);
 
   if (selected.length > 0) {
-    if (
-      action === "remove-chip" ||
-      (allWithoutAnySelected && action === "deselect")
-    ) {
+    if (allWithoutAnySelected && action === "deselect") {
       return [];
     }
     // Backspace leaves ANY unlit, like a deselect; checked before the
