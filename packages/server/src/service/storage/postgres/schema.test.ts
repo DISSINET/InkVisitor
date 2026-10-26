@@ -1,11 +1,12 @@
 import { Conn, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../../test/db";
 import { query } from "./conn";
+import { columnClause, COLUMNS } from "./provision";
 import { deparsed, syncSchema } from "./schema";
 
 /**
- * syncSchema against the provisioned test database. Every case alters the
- * audits or relations schema and ends with a sync that restores it, so the
+ * syncSchema against the provisioned test database. Every case alters one
+ * table's schema and ends with a sync that restores it, so the
  * rest of the run sees the shape ddl() provisions.
  */
 const describePg = storage.kind === "postgres" ? describe : describe.skip;
@@ -40,6 +41,7 @@ describePg("syncSchema", () => {
       "(((doc -> 'data'::text) -> 'territory'::text) ->> 'territoryId'::text)"
     );
     expect(deparsed({ ids: "entityIds" })).toBe("jsonb_text_array((doc -> 'entityIds'::text))");
+    expect(deparsed({ ids: "changes.entityIds" })).toBe("jsonb_text_array(((doc -> 'changes'::text) -> 'entityIds'::text))");
   });
 
   it("executes nothing on a freshly provisioned database, however often it runs", async () => {
@@ -126,6 +128,50 @@ describePg("syncSchema", () => {
       "CREATE INDEX relations_entityids ON public.relations USING gin (entity_ids)"
     );
     const { rows } = await query(conn, "SELECT to_regprocedure('relations_entityids(jsonb)') AS fn");
+    expect(rows[0].fn).toBeNull();
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("upgrades the stats expression indexes to columns", async () => {
+    // takes the three btrees over them with it
+    await exec("ALTER TABLE stats_materialized_day DROP COLUMN date, DROP COLUMN event_type, DROP COLUMN aggregate_by, DROP COLUMN last_updated");
+    await exec(`CREATE INDEX stats_materialized_day_date ON stats_materialized_day ((doc->>'date'))`);
+    await exec(`CREATE INDEX stats_materialized_day_lastupdated ON stats_materialized_day ((doc->>'lastUpdated'))`);
+    await exec(
+      `CREATE INDEX stats_materialized_day_date_eventtype_aggregateby ON stats_materialized_day ((doc->>'date'), (doc->>'eventType'), (doc->>'aggregateBy'))`
+    );
+
+    expect(await syncSchema(conn)).toEqual([
+      "ALTER TABLE stats_materialized_day " +
+        Object.entries(COLUMNS.stats_materialized_day)
+          .map(([name, spec]) => `ADD COLUMN ${columnClause(name, spec)}`)
+          .join(", "),
+      "DROP INDEX stats_materialized_day_date",
+      "CREATE INDEX stats_materialized_day_date ON stats_materialized_day (date)",
+      "DROP INDEX stats_materialized_day_lastupdated",
+      "CREATE INDEX stats_materialized_day_lastupdated ON stats_materialized_day (last_updated)",
+      "DROP INDEX stats_materialized_day_date_eventtype_aggregateby",
+      "CREATE INDEX stats_materialized_day_date_eventtype_aggregateby ON stats_materialized_day (date, event_type, aggregate_by)",
+    ]);
+    expect(await indexdef("stats_materialized_day_date_eventtype_aggregateby")).toBe(
+      "CREATE INDEX stats_materialized_day_date_eventtype_aggregateby ON public.stats_materialized_day USING btree (date, event_type, aggregate_by)"
+    );
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("upgrades the audits relation gin from the key function to the entity_ids column", async () => {
+    // takes the gin over entity_ids with it
+    await exec("ALTER TABLE audits DROP COLUMN entity_ids");
+    await exec("CREATE FUNCTION audits_relation_entityids(doc jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$ SELECT ARRAY[]::text[] $$");
+    await exec("CREATE INDEX audits_relation_entityids ON audits USING gin (audits_relation_entityids(doc))");
+
+    expect(await syncSchema(conn)).toEqual([
+      "ALTER TABLE audits ADD COLUMN entity_ids text[] GENERATED ALWAYS AS (jsonb_text_array(doc->'changes'->'entityIds')) STORED",
+      "DROP INDEX audits_relation_entityids",
+      "DROP FUNCTION IF EXISTS audits_relation_entityids(jsonb)",
+      "CREATE INDEX audits_relation_entityids ON audits USING gin (entity_ids)",
+    ]);
+    const { rows } = await query(conn, "SELECT to_regprocedure('audits_relation_entityids(jsonb)') AS fn");
     expect(rows[0].fn).toBeNull();
     expect(await syncSchema(conn)).toEqual([]);
   });

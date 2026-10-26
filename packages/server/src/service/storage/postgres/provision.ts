@@ -39,8 +39,22 @@ export type ColumnSpec = string | { ids: string };
  * expressions, and schema.ts brings a live database to this declaration at
  * every start.
  */
+const MATERIALIZED_STATS_COLUMNS: Record<string, ColumnSpec> = {
+  date: "date",
+  event_type: "eventType",
+  aggregate_by: "aggregateBy",
+  last_updated: "lastUpdated",
+};
+
 export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
-  audits: { date: "date", type: "type", user: "user", audit_scope: "auditScope", model_id: "modelId" },
+  audits: {
+    date: "date",
+    type: "type",
+    user: "user",
+    audit_scope: "auditScope",
+    model_id: "modelId",
+    entity_ids: { ids: "changes.entityIds" },
+  },
   entities: {
     class: "class",
     status: "status",
@@ -50,8 +64,27 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     territory_id: "data.territory.territoryId",
     parent_id: "data.parent.territoryId",
     document_id: "data.documentId",
+    created_at: "createdAt",
+    updated_at: "updatedAt",
   },
   relations: { type: "type", entity_ids: { ids: "entityIds" } },
+  users: {
+    email: "email",
+    name: "name",
+    role: "role",
+    hash: "hash",
+    deleted_at: "deletedAt",
+    active: "active",
+    verified: "verified",
+  },
+  acl_permissions: { controller: "controller", method: "method", route: "route" },
+  settings: { public: "public" },
+  saved_queries: { name: "name", owner_id: "ownerId", shared: "shared", created_at: "createdAt", updated_at: "updatedAt" },
+  documents: { title: "title", created_at: "createdAt", updated_at: "updatedAt" },
+  stats_materialized_day: MATERIALIZED_STATS_COLUMNS,
+  stats_materialized_week: MATERIALIZED_STATS_COLUMNS,
+  stats_materialized_month: MATERIALIZED_STATS_COLUMNS,
+  stats_materialized_year: MATERIALIZED_STATS_COLUMNS,
 };
 
 /** `doc->'a'->'b'` for the path `a.b`, with `->>` as the last step when `text` */
@@ -146,7 +179,7 @@ const auditsIndexes: PgIndex[] = [
   btree(DbEnums.Indexes.AuditScopeModelId, "audit_scope", "model_id"),
   btree(DbEnums.Indexes.AuditDate, "date"),
   btree(DbEnums.Indexes.AuditDateTypeUser, "date", "type", col("user")),
-  gin(DbEnums.Indexes.AuditRelationEntityIds, collect(["$.changes.entityIds[*]"])),
+  ginColumn(DbEnums.Indexes.AuditRelationEntityIds, "entity_ids"),
 ];
 
 const relationsIndexes: PgIndex[] = [
@@ -160,9 +193,9 @@ const documentsIndexes: PgIndex[] = [
 ];
 
 const materializedStatsIndexes: PgIndex[] = [
-  btree("date", "(doc->>'date')"),
-  btree("lastUpdated", "(doc->>'lastUpdated')"),
-  btree("date_eventType_aggregateBy", "(doc->>'date')", "(doc->>'eventType')", "(doc->>'aggregateBy')"),
+  btree("date", "date"),
+  btree("lastUpdated", "last_updated"),
+  btree("date_eventType_aggregateBy", "date", "event_type", "aggregate_by"),
 ];
 
 /** Physical table name -> its indexes. Same keys as the RethinkDB catalogue. */
@@ -198,6 +231,9 @@ export const EXTRA_INDEXES: { table: string; name: string; expression: string }[
   // the newest audits of one entity are read straight off the index end
   { table: "audits", name: "audits_scope_model_date", expression: "audit_scope, model_id, date" },
   { table: "audits", name: "audits_type_user", expression: `type, ${col("user")}` },
+  { table: "users", name: "users_email", expression: "email" },
+  { table: "saved_queries", name: "saved_queries_owner", expression: "owner_id" },
+  { table: "acl_permissions", name: "acl_permissions_route", expression: "controller, method, route" },
 ];
 
 /** the column definition of one generated column, as CREATE TABLE and ADD COLUMN take it */
