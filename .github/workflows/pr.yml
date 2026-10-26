@@ -1,0 +1,46 @@
+name: pr
+on:
+  pull_request:
+    branches:
+      - dev
+      - master
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, typecheck and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm exec turbo run lint --continue
+
+      - name: Typecheck
+        run: pnpm exec turbo run typecheck --continue
+
+      # server integration tests need a running database, so the server runs
+      # only its DB-free unit project below
+      - name: Test
+        run: pnpm exec turbo run test --continue --filter=!inkvisitor-server
+
+      # jest.config.js refuses to start without env/.env.test and a test DB_NAME,
+      # even for the unit project that never connects
+      - name: Server unit tests
+        run: |
+          echo "DB_NAME=inkvisitor_test" > packages/server/env/.env.test
+          pnpm --filter inkvisitor-server test:unit
