@@ -134,6 +134,7 @@ describe("models/statement", function () {
 
     beforeEach(async () => {
       await deleteEntities(db);
+      await new Territory({ id: "T0" }).save(db.connection);
     });
 
     afterAll(async () => {
@@ -144,7 +145,7 @@ describe("models/statement", function () {
       it("should have order = 0", async () => {
         const statement = new Statement({});
         statement.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement.save(db.connection);
 
@@ -160,7 +161,7 @@ describe("models/statement", function () {
       it("should have order = 999 as wanted", async () => {
         const statement = new Statement({});
         statement.data = new StatementData({
-          territory: { territoryId: "any", order: 999 },
+          territory: { territoryId: "T0", order: 999 },
         });
         await statement.save(db.connection);
 
@@ -178,13 +179,13 @@ describe("models/statement", function () {
       it("should have order = 0 and 1 respectively", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement1.save(db.connection);
 
         const statement2 = new Statement({});
         statement2.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement2.save(db.connection);
 
@@ -222,6 +223,7 @@ describe("models/statement", function () {
 
     beforeEach(async () => {
       await deleteEntities(db);
+      await new Territory({ id: "T0" }).save(db.connection);
     });
 
     afterAll(async () => {
@@ -232,7 +234,7 @@ describe("models/statement", function () {
       it("should have order = 0", async () => {
         const statement = new Statement({});
         statement.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement.save(db.connection);
 
@@ -249,13 +251,13 @@ describe("models/statement", function () {
       it("should have order as chosen", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement1.save(db.connection);
 
         const statement2 = new Statement({});
         statement2.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement2.save(db.connection);
 
@@ -273,13 +275,13 @@ describe("models/statement", function () {
       it("should have order as before", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement1.save(db.connection);
 
         const statement2 = new Statement({});
         statement2.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement2.save(db.connection);
 
@@ -307,19 +309,19 @@ describe("models/statement", function () {
       it("should have non conflicting order", async () => {
         const statement1 = new Statement({});
         statement1.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement1.save(db.connection);
 
         const statement2 = new Statement({});
         statement2.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement2.save(db.connection);
 
         const statement3 = new Statement({});
         statement3.data = new StatementData({
-          territory: { territoryId: "any", order: 0 },
+          territory: { territoryId: "T0", order: 0 },
         });
         await statement3.save(db.connection);
 
@@ -429,10 +431,12 @@ describe("models/statement", function () {
       it("should return empty array", async () => {
         const territory = new Territory({ id: `root-${Math.random()}` });
         await territory.save(db.connection);
+        const otherTerritory = new Territory({ id: `root-${Math.random()}` });
+        await otherTerritory.save(db.connection);
 
         const statement = new Statement({
           data: new StatementData({
-            territory: { territoryId: "non existent", order: 1 },
+            territory: { territoryId: otherTerritory.id, order: 1 },
           }),
         });
         await statement.save(db.connection);
@@ -720,6 +724,14 @@ describe("models/statement", function () {
       st2b.data.territory = new StatementTerritory({ territoryId: tId2 });
 
       it("should find the statements successfully", async () => {
+        const root = new Territory({ id: "T0" });
+        await root.save(db.connection);
+        for (const id of [tId1, tId2]) {
+          await new Territory({
+            id,
+            data: { parent: { territoryId: root.id, order: 0 } },
+          }).save(db.connection);
+        }
         await st1a.save(db.connection);
         await st1b.save(db.connection);
         await st2a.save(db.connection);

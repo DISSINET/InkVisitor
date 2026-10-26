@@ -350,6 +350,9 @@ class Importer {
     for (const table of Object.values(this.dataset)) {
       await feedTable(this.targets, table, dataFilePath(this.datasetName, table));
     }
+    for (const target of this.targets) {
+      await target.addConstraints();
+    }
   }
 
   /**
@@ -363,6 +366,9 @@ class Importer {
     }
 
     await this.recreate();
+    for (const target of this.targets) {
+      await target.addConstraints();
+    }
   }
 
   /**

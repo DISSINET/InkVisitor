@@ -143,8 +143,9 @@ describe("models/territory", function () {
 
     describe("save territory with parent", () => {
       it("should have order as expected", async () => {
+        await new Territory({ id: "T0" }).save(db.connection);
         const territory = new Territory({
-          data: { parent: { territoryId: "any", order: 999 } },
+          data: { parent: { territoryId: "T0", order: 999 } },
         });
         await territory.save(db.connection);
 
@@ -159,12 +160,13 @@ describe("models/territory", function () {
 
     describe("save two territories without explicit orders", () => {
       it("should have orders 0 and 1 respectively", async () => {
+        await new Territory({ id: "T0" }).save(db.connection);
         const territory1 = new Territory({
-          data: { parent: { territoryId: "any", order: 0 } },
+          data: { parent: { territoryId: "T0", order: 0 } },
         });
         await territory1.save(db.connection);
         const territory2 = new Territory({
-          data: { parent: { territoryId: "any", order: 0 } },
+          data: { parent: { territoryId: "T0", order: 0 } },
         });
         await territory2.save(db.connection);
 
@@ -187,16 +189,17 @@ describe("models/territory", function () {
 
     describe("save three territories with explicit orders", () => {
       it("should have orders as provided", async () => {
+        await new Territory({ id: "T0" }).save(db.connection);
         const territory1 = new Territory({
-          data: { parent: { territoryId: "any", order: 14 } },
+          data: { parent: { territoryId: "T0", order: 14 } },
         });
         await territory1.save(db.connection);
         const territory2 = new Territory({
-          data: { parent: { territoryId: "any", order: 0 } },
+          data: { parent: { territoryId: "T0", order: 0 } },
         });
         await territory2.save(db.connection);
         const territory3 = new Territory({
-          data: { parent: { territoryId: "any", order: 3 } },
+          data: { parent: { territoryId: "T0", order: 3 } },
         });
         await territory3.save(db.connection);
 
@@ -262,9 +265,10 @@ describe("models/territory", function () {
       it("should have order as expected", async () => {
         const territory = new Territory({ id: "T0" });
         await territory.save(db.connection);
+        await new Territory({ id: "root-new" }).save(db.connection);
         await territory.update(db.connection, {
           data: {
-            parent: { territoryId: "new", order: 0 } as IParentTerritory,
+            parent: { territoryId: "root-new", order: 0 } as IParentTerritory,
           },
         });
 
@@ -273,14 +277,15 @@ describe("models/territory", function () {
         expect((createdData.data.parent as IParentTerritory).order).toEqual(0);
         expect(
           (createdData.data.parent as IParentTerritory).territoryId
-        ).toEqual("new");
+        ).toEqual("root-new");
 
       });
     });
 
     describe("update territory so it is sibling to existing one", () => {
       it("should have order set to wanted value", async () => {
-        const parent = new TerritoryParent({ territoryId: "parent" });
+        await new Territory({ id: "root-parent" }).save(db.connection);
+        const parent = new TerritoryParent({ territoryId: "root-parent" });
         const territory1 = new Territory({});
         territory1.data.parent = parent;
         const territory2 = new Territory({});

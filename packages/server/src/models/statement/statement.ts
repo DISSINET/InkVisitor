@@ -463,7 +463,8 @@ class Statement extends Entity implements IStatement {
   async findTerritorySiblings(
     db: Conn | undefined
   ): Promise<Record<number, IStatement>> {
-    if (this.data.territory) {
+    // an empty territory id is no territory
+    if (this.data.territory?.territoryId) {
       const list = (await storage.entities.byIndex(
         db as Conn,
         DbEnums.Indexes.StatementTerritory,

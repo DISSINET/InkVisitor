@@ -46,6 +46,12 @@ async function main(): Promise<void> {
     totals = totals.map((total, i) => addCounts(total, counts[i]));
   }
   for (const target of targets) {
+    try {
+      await target.addConstraints();
+    } catch (e) {
+      console.log(colors.red(`${target.kind}: ${e instanceof Error ? e.message : e}`));
+      process.exitCode = 1;
+    }
     await target.end();
   }
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
@@ -65,7 +71,7 @@ async function main(): Promise<void> {
     console.log(colors.red(`${line}, rows dropped (${failures.join(", ")})`));
     process.exitCode = 1;
   } else {
-    console.log(colors.green(line));
+    console.log(process.exitCode ? colors.red(line) : colors.green(line));
   }
 }
 

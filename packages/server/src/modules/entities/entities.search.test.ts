@@ -1,9 +1,14 @@
 import { apiPath } from "@common/constants";
 import Document from "@models/document/document";
-import { StatementActant, StatementAction } from "@models/statement/statement";
+import {
+  StatementActant,
+  StatementAction,
+  StatementTerritory,
+} from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/storage";
-import { deleteEntities } from "@service/shorthands";
+import Territory from "@models/territory/territory";
+import { createEntity, deleteEntities } from "@service/shorthands";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { BadParams } from "@inkvisitor/shared/types/errors";
 import { prepareEntity } from "@models/entity/entity.test";
@@ -117,6 +122,17 @@ describe("Entities search (params)", function () {
     beforeAll(async () => {
       db = new Db();
       await db.initDb();
+
+      const territory = new Territory({ id: `root-${Math.random()}` });
+      await createEntity(db, territory);
+      statement.data.territory = new StatementTerritory({
+        territoryId: territory.id,
+        order: 0,
+      });
+      anchoredStatement.data.territory = new StatementTerritory({
+        territoryId: territory.id,
+        order: 1,
+      });
 
       await action.save(db.connection);
 
