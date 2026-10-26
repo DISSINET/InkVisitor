@@ -5,8 +5,8 @@ import { deparsed, syncSchema } from "./schema";
 
 /**
  * syncSchema against the provisioned test database. Every case alters the
- * audits schema and ends with a sync that restores it, so the rest of the run
- * sees the shape ddl() provisions.
+ * audits or relations schema and ends with a sync that restores it, so the
+ * rest of the run sees the shape ddl() provisions.
  */
 const describePg = storage.kind === "postgres" ? describe : describe.skip;
 
@@ -39,6 +39,7 @@ describePg("syncSchema", () => {
     expect(deparsed("data.territory.territoryId")).toBe(
       "(((doc -> 'data'::text) -> 'territory'::text) ->> 'territoryId'::text)"
     );
+    expect(deparsed({ ids: "entityIds" })).toBe("jsonb_text_array((doc -> 'entityIds'::text))");
   });
 
   it("executes nothing on a freshly provisioned database, however often it runs", async () => {
@@ -97,6 +98,35 @@ describePg("syncSchema", () => {
     expect(await indexdef("audits_date_type_user")).toBe(
       `CREATE INDEX audits_date_type_user ON public.audits USING btree (date, type, "user")`
     );
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("upgrades the relations key-function gin and type expression index to columns", async () => {
+    // takes relations_type and the gin over entity_ids with it
+    await exec("ALTER TABLE relations DROP COLUMN type, DROP COLUMN entity_ids");
+    await exec(`CREATE INDEX relations_type ON relations ((doc->>'type'))`);
+    await exec(
+      `CREATE FUNCTION relations_entityids(doc jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$ SELECT ARRAY(SELECT jsonb_array_elements_text(doc->'entityIds')) $$`
+    );
+    await exec("CREATE INDEX relations_entityids ON relations USING gin (relations_entityids(doc))");
+
+    expect(await syncSchema(conn)).toEqual([
+      "ALTER TABLE relations " +
+        [
+          "ADD COLUMN type text GENERATED ALWAYS AS (doc->>'type') STORED",
+          "ADD COLUMN entity_ids text[] GENERATED ALWAYS AS (jsonb_text_array(doc->'entityIds')) STORED",
+        ].join(", "),
+      "DROP INDEX relations_entityids",
+      "DROP FUNCTION IF EXISTS relations_entityids(jsonb)",
+      "CREATE INDEX relations_entityids ON relations USING gin (entity_ids)",
+      "DROP INDEX relations_type",
+      "CREATE INDEX relations_type ON relations (type)",
+    ]);
+    expect(await indexdef("relations_entityids")).toBe(
+      "CREATE INDEX relations_entityids ON public.relations USING gin (entity_ids)"
+    );
+    const { rows } = await query(conn, "SELECT to_regprocedure('relations_entityids(jsonb)') AS fn");
+    expect(rows[0].fn).toBeNull();
     expect(await syncSchema(conn)).toEqual([]);
   });
 

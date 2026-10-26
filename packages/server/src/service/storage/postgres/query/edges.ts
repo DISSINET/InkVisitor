@@ -222,7 +222,7 @@ const collected = (paths: string[], doc: string): string => `(${collect(paths, "
 
 /** relations of `type` with e.id on the source side whose far side meets the target (runRelationTargetEdge) */
 function relationTarget(e: SearchEdge, p: Params, type: RelationEnums.Type, inverse = false): string {
-  const far = `r.doc->'entityIds'->>${inverse ? 0 : 1}`;
+  const far = `r.entity_ids[${inverse ? 1 : 2}]`;
   const targets = e.targetIds();
   const classes = e.targetClasses();
   const statuses = e.unpinnedTargetStatuses();
@@ -233,8 +233,8 @@ function relationTarget(e: SearchEdge, p: Params, type: RelationEnums.Type, inve
     check = entityMatches(p, far, classes, statuses);
   }
   return (
-    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.doc->>'type' = ${p.add(type)}` +
-    ` AND r.doc->'entityIds'->>${inverse ? 1 : 0} = e.id AND ${check})`
+    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.type = ${p.add(type)}` +
+    ` AND r.entity_ids[${inverse ? 2 : 1}] = e.id AND ${check})`
   );
 }
 
@@ -243,9 +243,9 @@ function relationTarget(e: SearchEdge, p: Params, type: RelationEnums.Type, inve
  * e.id itself when the row holds it twice, a self loop (relationPartners)
  */
 const partners = (selfLoop: boolean): string =>
-  `(SELECT coalesce(array_agg(x), '{}') FROM jsonb_array_elements_text(${arr("r.doc->'entityIds'")}) x WHERE x <> e.id` +
-  (selfLoop ? ` OR (SELECT count(*) FROM jsonb_array_elements_text(${arr("r.doc->'entityIds'")}) y WHERE y = e.id) > 1` : "") +
-  `)`;
+  selfLoop
+    ? `(array_remove(r.entity_ids, e.id) || CASE WHEN cardinality(array_positions(r.entity_ids, e.id)) > 1 THEN ARRAY[e.id] ELSE '{}'::text[] END)`
+    : `array_remove(r.entity_ids, e.id)`;
 
 /** a partner is a target, a partner is of the classes and statuses, or there is a partner at all */
 function partnersMatch(
@@ -268,7 +268,7 @@ function partnersMatch(
 function unorderedRelation(e: SearchEdge, p: Params, type: RelationEnums.Type): string {
   const selfLoop = RelationTypes.RelationRules[type]?.selfLoop ?? false;
   return (
-    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.doc->>'type' = ${p.add(type)}` +
+    `EXISTS (SELECT 1 FROM ${RELATIONS} r WHERE ${RELATION_HOLDS_E} AND r.type = ${p.add(type)}` +
     ` AND ${partnersMatch(p, partners(selfLoop), e.targetIds(), e.targetClasses(), e.unpinnedTargetStatuses())})`
   );
 }

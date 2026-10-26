@@ -6,15 +6,17 @@ import { DbEnums } from "@inkvisitor/shared/enums";
  * index under the same DbEnums.Indexes name. Bodies are hand-written per
  * backend; ../catalogue.test.ts pins both catalogues to the same names.
  *
- * A multi index is an IMMUTABLE function `(doc jsonb) returns text[]` with a
- * GIN index on it, so a lookup is `WHERE fn(doc) && ARRAY[...]`. Every other
- * index is a btree over `doc->>'field'` expressions. Dates live in the
- * document as ISO-8601 UTC strings, which order correctly as text.
+ * A multi index is a GIN index over a text[]: an IMMUTABLE function
+ * `(doc jsonb) returns text[]` computed per row, or a generated text[] column
+ * of COLUMNS, so a lookup is `WHERE keys && ARRAY[...]`. Every other index is
+ * a btree over `doc->>'field'` expressions or generated columns. Dates live in
+ * the document as ISO-8601 UTC strings, which order correctly as text.
  */
 
 export type PgIndex =
   | { name: string; kind: "btree"; columns: string[] }
-  | { name: string; kind: "gin"; body: string };
+  | { name: string; kind: "gin"; body: string }
+  | { name: string; kind: "gin"; column: string };
 
 /** SQL identifier shared by an index and, for a multi index, its key function */
 export function pgIndexName(table: string, index: string): string {
@@ -22,15 +24,22 @@ export function pgIndexName(table: string, index: string): string {
 }
 
 /**
- * STORED generated columns per table: column name -> the document path it is
- * derived from (dot-separated for a nested field). The column is a copy of
- * the field that an index can cover and a query can read without detoasting
- * the document: `doc` stays the only thing written and the only thing read
- * back, the column follows it. A table listed here declares its btree
- * indexes on these column names, never on `doc->>` expressions, and
- * schema.ts brings a live database to this declaration at every start.
+ * what a generated column holds: the text of the field at a document path
+ * (dot-separated for a nested field), or the text[] of the id array at `ids`
+ * in document order, an empty array when the field is not an array
  */
-export const COLUMNS: Record<string, Record<string, string>> = {
+export type ColumnSpec = string | { ids: string };
+
+/**
+ * STORED generated columns per table: column name -> what it is derived
+ * from. The column is a copy of the field that an index can cover and a query
+ * can read without detoasting the document: `doc` stays the only thing
+ * written and the only thing read back, the column follows it. A table listed
+ * here declares its btree indexes on these column names, never on `doc->>`
+ * expressions, and schema.ts brings a live database to this declaration at
+ * every start.
+ */
+export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
   audits: { date: "date", type: "type", user: "user", audit_scope: "auditScope", model_id: "modelId" },
   entities: {
     class: "class",
@@ -42,14 +51,21 @@ export const COLUMNS: Record<string, Record<string, string>> = {
     parent_id: "data.parent.territoryId",
     document_id: "data.documentId",
   },
+  relations: { type: "type", entity_ids: { ids: "entityIds" } },
 };
 
-/** the SQL expression a generated column is computed from: `doc->'a'->>'b'` for the path `a.b` */
-export function columnExpr(path: string): string {
+/** `doc->'a'->'b'` for the path `a.b`, with `->>` as the last step when `text` */
+const pathExpr = (path: string, text: boolean): string => {
   const parts = path.split(".");
   const last = parts.pop();
-  return `doc${parts.map((part) => `->'${part}'`).join("")}->>'${last}'`;
-}
+  return `doc${parts.map((part) => `->'${part}'`).join("")}${text ? "->>" : "->"}'${last}'`;
+};
+
+/** the SQL expression a generated column is computed from */
+export const columnExpr = (spec: ColumnSpec): string =>
+  typeof spec === "string" ? pathExpr(spec, true) : `jsonb_text_array(${pathExpr(spec.ids, false)})`;
+
+export const columnType = (spec: ColumnSpec): string => (typeof spec === "string" ? "text" : "text[]");
 
 /** a generated column as a SQL identifier: `user` is a reserved word, the others are plain */
 export const col = (name: string): string => (name === "user" ? `"user"` : name);
@@ -60,6 +76,7 @@ const btree = (name: string, ...columns: string[]): PgIndex => ({
   columns,
 });
 const gin = (name: string, body: string): PgIndex => ({ name, kind: "gin", body });
+const ginColumn = (name: string, column: string): PgIndex => ({ name, kind: "gin", column });
 
 /**
  * Distinct text values found at any of `paths` in the document `doc` (an SQL
@@ -133,7 +150,7 @@ const auditsIndexes: PgIndex[] = [
 ];
 
 const relationsIndexes: PgIndex[] = [
-  gin(DbEnums.Indexes.RelationsEntityIds, collect(["$.entityIds[*]"])),
+  ginColumn(DbEnums.Indexes.RelationsEntityIds, "entity_ids"),
 ];
 
 const documentsIndexes: PgIndex[] = [
@@ -173,7 +190,7 @@ export const TABLES: Record<string, PgIndex[]> = {
  * resource without data simply has no key.
  */
 export const EXTRA_INDEXES: { table: string; name: string; expression: string }[] = [
-  { table: "relations", name: "relations_type", expression: "(doc->>'type')" },
+  { table: "relations", name: "relations_type", expression: "type" },
   { table: "entities", name: "entities_territory_parent", expression: "parent_id" },
   { table: "entities", name: "entities_resource_document", expression: "document_id" },
   // the explore base node and the search filter on class and status together
@@ -184,18 +201,18 @@ export const EXTRA_INDEXES: { table: string; name: string; expression: string }[
 ];
 
 /** the column definition of one generated column, as CREATE TABLE and ADD COLUMN take it */
-export const columnClause = (name: string, path: string): string =>
-  `${col(name)} text GENERATED ALWAYS AS (${columnExpr(path)}) STORED`;
+export const columnClause = (name: string, spec: ColumnSpec): string =>
+  `${col(name)} ${columnType(spec)} GENERATED ALWAYS AS (${columnExpr(spec)}) STORED`;
 
 /** the generated-column clauses of `table`, in COLUMNS order; empty for a table without any */
 export function columnClauses(table: string): string[] {
-  return Object.entries(COLUMNS[table] ?? {}).map(([name, path]) => columnClause(name, path));
+  return Object.entries(COLUMNS[table] ?? {}).map(([name, spec]) => columnClause(name, spec));
 }
 
 /** SQL expression giving a row's key(s) for `index`: text[] for gin, text or text[] for btree */
 export function keysSql(table: string, index: PgIndex): string {
   if (index.kind === "gin") {
-    return `${pgIndexName(table, index.name)}(doc)`;
+    return "column" in index ? index.column : `${pgIndexName(table, index.name)}(doc)`;
   }
   return index.columns.length === 1
     ? index.columns[0]
@@ -227,6 +244,16 @@ BEGIN
 END $$`;
 
 /**
+ * The elements of a JSON array of strings as text[], in order; an empty array
+ * for any other JSON type, as `.default([])` in ReQL. The `ids` columns of
+ * COLUMNS are generated from it, which is what makes it IMMUTABLE and what a
+ * change of its body would not recompute: the body never changes.
+ */
+export const TEXT_ARRAY_FUNCTION_DDL = `CREATE OR REPLACE FUNCTION jsonb_text_array(x jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
+  SELECT ARRAY(SELECT v FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof(x) = 'array' THEN x ELSE '[]'::jsonb END) WITH ORDINALITY AS t(v, i) ORDER BY i)
+$$`;
+
+/**
  * The session table is outside the catalogue (RethinkDB provisions it at boot,
  * see rethink/sessions.ts). Idempotent, so the PG session store runs it on
  * every start and createDatabase runs it for test databases.
@@ -245,13 +272,15 @@ export const SESSIONS_DDL = [
  * with its index, never CREATE OR REPLACEd.
  */
 export function ddl(): string[] {
-  const statements: string[] = [MERGE_FUNCTION_DDL];
+  const statements: string[] = [MERGE_FUNCTION_DDL, TEXT_ARRAY_FUNCTION_DDL];
   for (const [table, indexes] of Object.entries(TABLES)) {
     const columns = ["doc jsonb NOT NULL", "id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY", ...columnClauses(table)];
     statements.push(`CREATE TABLE ${table} (${columns.join(", ")})`);
     for (const index of indexes) {
       const ident = pgIndexName(table, index.name);
-      if (index.kind === "gin") {
+      if (index.kind === "gin" && "column" in index) {
+        statements.push(`CREATE INDEX ${ident} ON ${table} USING gin (${index.column})`);
+      } else if (index.kind === "gin") {
         statements.push(
           `CREATE FUNCTION ${ident}(doc jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$\n  ${index.body}\n$$`,
           `CREATE INDEX ${ident} ON ${table} USING gin (${ident}(doc))`
