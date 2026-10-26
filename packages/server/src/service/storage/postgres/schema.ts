@@ -3,15 +3,15 @@ import { query } from "./conn";
 import {
   COLUMNS,
   ColumnSpec,
+  CONSTRAINTS,
+  Constraint,
   EXTRA_INDEXES,
-  FOREIGN_KEYS,
-  ForeignKey,
   TABLES,
   TEXT_ARRAY_FUNCTION_DDL,
-  addForeignKeys,
+  addConstraints,
   col,
   columnClause,
-  foreignKeyDef,
+  constraintDef,
   keyFunctionDdl,
   keyFunctions,
   pgIndexName,
@@ -19,7 +19,7 @@ import {
 
 /**
  * Brings a live database to the key functions and generated columns of
- * COLUMNS, the indexes over them and the FOREIGN_KEYS over those columns, so
+ * COLUMNS, the indexes over them and the CONSTRAINTS over those columns, so
  * a database provisioned by an older
  * ddl() is upgraded in place at server start. Returns the DDL it executed,
  * empty when the database already matches.
@@ -61,14 +61,14 @@ export async function syncSchema(conn: Conn): Promise<string[]> {
         await run(statement);
       }
     }
-    // after every table: a recreated column has lost the foreign key over it
-    const { drops, missing } = await foreignKeyChanges(conn);
+    // after every table: a recreated column has lost the constraints over it
+    const { drops, missing } = await constraintChanges(conn);
     for (const statement of drops) {
       await run(statement);
     }
     if (missing.length) {
-      console.log("[startup] schema: adding foreign keys " + missing.map((fk) => fk.name).join(", "));
-      executed.push(...(await addForeignKeys({ query: (sql) => query(conn, sql) }, missing)));
+      console.log("[startup] schema: adding constraints " + missing.map((c) => c.name).join(", "));
+      executed.push(...(await addConstraints({ query: (sql) => query(conn, sql) }, missing)));
     }
     if (!executed.length) {
       console.log("[startup] schema in sync");
@@ -80,25 +80,25 @@ export async function syncSchema(conn: Conn): Promise<string[]> {
 }
 
 /**
- * The declared foreign keys that are missing, and DROP CONSTRAINT for those
+ * The declared constraints that are missing, and DROP CONSTRAINT for those
  * whose live definition differs (including one left NOT VALID), which then
  * count as missing too.
  */
-async function foreignKeyChanges(conn: Conn): Promise<{ drops: string[]; missing: ForeignKey[] }> {
+async function constraintChanges(conn: Conn): Promise<{ drops: string[]; missing: Constraint[] }> {
   const { rows } = await query<{ name: string; tablename: string; def: string }>(
     conn,
     `SELECT conname AS name, conrelid::regclass::text AS tablename, pg_get_constraintdef(oid) AS def
      FROM pg_constraint WHERE connamespace = 'public'::regnamespace AND conname = ANY($1)`,
-    [FOREIGN_KEYS.map((fk) => fk.name)]
+    [CONSTRAINTS.map((c) => c.name)]
   );
   const live = new Map(rows.map((row) => [row.name, row]));
   const drops: string[] = [];
-  const missing: ForeignKey[] = [];
-  for (const fk of FOREIGN_KEYS) {
-    const current = live.get(fk.name);
-    if (current?.tablename === fk.table && current.def === foreignKeyDef(fk)) continue;
-    if (current) drops.push(`ALTER TABLE ${current.tablename} DROP CONSTRAINT ${fk.name}`);
-    missing.push(fk);
+  const missing: Constraint[] = [];
+  for (const c of CONSTRAINTS) {
+    const current = live.get(c.name);
+    if (current?.tablename === c.table && current.def === constraintDef(c)) continue;
+    if (current) drops.push(`ALTER TABLE ${current.tablename} DROP CONSTRAINT ${c.name}`);
+    missing.push(c);
   }
   return { drops, missing };
 }

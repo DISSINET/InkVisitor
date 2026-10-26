@@ -2,7 +2,7 @@ import { Client } from "pg";
 import colors from "colors/safe";
 import { getEnv, TableSchema } from "../common";
 import { InsertResult, SeedTarget } from "../target";
-import { addForeignKeys, provision } from "@service/storage/postgres/provision";
+import { addConstraints, provision } from "@service/storage/postgres/provision";
 
 /** a quoted SQL identifier */
 export const ident = (name: string): string => `"${name.replace(/"/g, '""')}"`;
@@ -108,8 +108,8 @@ export class PostgresTarget implements SeedTarget {
    * its own.
    */
   async addConstraints(): Promise<void> {
-    await addForeignKeys(await this.client());
-    console.log(colors.green(`Foreign keys added (postgres)`));
+    await addConstraints(await this.client());
+    console.log(colors.green(`Constraints added (postgres)`));
   }
 
   /**

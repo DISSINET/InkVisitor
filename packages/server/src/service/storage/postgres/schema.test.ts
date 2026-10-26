@@ -1,7 +1,7 @@
 import { Conn, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../../test/db";
 import { query } from "./conn";
-import { columnClause, COLUMNS, FOREIGN_KEYS, foreignKeyDdl, keyFunctionDdl, keyFunctions, SESSIONS_DDL } from "./provision";
+import { columnClause, COLUMNS, CONSTRAINTS, constraintDdl, keyFunctionDdl, keyFunctions, SESSIONS_DDL } from "./provision";
 import { deparsed, syncSchema } from "./schema";
 
 /**
@@ -129,6 +129,8 @@ describePg("syncSchema", () => {
       "CREATE INDEX relations_entityids ON relations USING gin (entity_ids)",
       "DROP INDEX relations_type",
       "CREATE INDEX relations_type ON relations (type)",
+      // dropping the columns took the unique constraint over them
+      "ALTER TABLE relations ADD CONSTRAINT relations_type_entity_ids_key UNIQUE (type, entity_ids)",
     ]);
     expect(await indexdef("relations_entityids")).toBe(
       "CREATE INDEX relations_entityids ON public.relations USING gin (entity_ids)"
@@ -235,11 +237,11 @@ describePg("syncSchema", () => {
     expect(await syncSchema(conn)).toEqual([]);
   });
 
-  const fk = (name: string) => FOREIGN_KEYS.find((key) => key.name === name)!;
+  const constraint = (name: string) => CONSTRAINTS.find((c) => c.name === name)!;
 
   it("restores a dropped foreign key", async () => {
     await exec("ALTER TABLE saved_queries DROP CONSTRAINT saved_queries_owner_id_fkey");
-    expect(await syncSchema(conn)).toEqual([foreignKeyDdl(fk("saved_queries_owner_id_fkey"))]);
+    expect(await syncSchema(conn)).toEqual([constraintDdl(constraint("saved_queries_owner_id_fkey"))]);
     expect(await syncSchema(conn)).toEqual([]);
   });
 
@@ -248,7 +250,7 @@ describePg("syncSchema", () => {
     await exec("ALTER TABLE entities ADD CONSTRAINT entities_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES entities(id)");
     expect(await syncSchema(conn)).toEqual([
       "ALTER TABLE entities DROP CONSTRAINT entities_parent_id_fkey",
-      foreignKeyDdl(fk("entities_parent_id_fkey")),
+      constraintDdl(constraint("entities_parent_id_fkey")),
     ]);
     expect(await syncSchema(conn)).toEqual([]);
   });
@@ -263,16 +265,36 @@ describePg("syncSchema", () => {
     } finally {
       await exec("DELETE FROM entities WHERE id = 'schema-test-orphan'");
     }
-    expect(await syncSchema(conn)).toEqual([foreignKeyDdl(fk("entities_parent_id_fkey"))]);
+    expect(await syncSchema(conn)).toEqual([constraintDdl(constraint("entities_parent_id_fkey"))]);
   });
 
-  it("stores an empty territory id as no reference", async () => {
-    await exec(`INSERT INTO entities (doc) VALUES ('{"id": "schema-test-empty", "data": {"territory": {"territoryId": ""}, "parent": {"territoryId": ""}}}')`);
+  it("fails on duplicate rows, naming the unique constraint and one of the rows", async () => {
+    await exec("ALTER TABLE relations DROP CONSTRAINT relations_type_entity_ids_key");
+    await exec(
+      `INSERT INTO relations (doc) VALUES ('{"id": "schema-test-dup-1", "type": "CLA", "entityIds": ["a", "b"]}'), ('{"id": "schema-test-dup-2", "type": "CLA", "entityIds": ["a", "b"]}')`
+    );
     try {
-      const { rows } = await query(conn, "SELECT territory_id, parent_id FROM entities WHERE id = 'schema-test-empty'");
-      expect(rows).toEqual([{ territory_id: null, parent_id: null }]);
+      await expect(syncSchema(conn)).rejects.toThrow(
+        "relations_type_entity_ids_key: relations row schema-test-dup-1 shares (type, entity_ids) = (CLA,\"{a,b}\") with another row"
+      );
+    } finally {
+      await exec("DELETE FROM relations WHERE id LIKE 'schema-test-dup-%'");
+    }
+    expect(await syncSchema(conn)).toEqual([constraintDdl(constraint("relations_type_entity_ids_key"))]);
+  });
+
+  it("stores an empty reference as no reference", async () => {
+    await exec(
+      `INSERT INTO entities (doc) VALUES ('{"id": "schema-test-empty", "usedTemplate": "", "data": {"territory": {"territoryId": ""}, "parent": {"territoryId": ""}, "documentId": ""}}')`
+    );
+    await exec(`INSERT INTO users (doc) VALUES ('{"id": "schema-test-user-1", "email": ""}'), ('{"id": "schema-test-user-2", "email": ""}')`);
+    try {
+      const { rows } = await query(conn, "SELECT territory_id, parent_id, used_template, document_id FROM entities WHERE id = 'schema-test-empty'");
+      expect(rows).toEqual([{ territory_id: null, parent_id: null, used_template: null, document_id: null }]);
+      expect((await query(conn, "SELECT email FROM users WHERE id LIKE 'schema-test-user-%'")).rows).toEqual([{ email: null }, { email: null }]);
     } finally {
       await exec("DELETE FROM entities WHERE id = 'schema-test-empty'");
+      await exec("DELETE FROM users WHERE id LIKE 'schema-test-user-%'");
     }
   });
 
