@@ -58,8 +58,9 @@ interface UseDropdownArgs<O extends DropdownItem> {
    - spread getReferenceProps({ onKeyDown: onControlKeyDown }) on the control;
    - every option must get getItemProps({ active: i === activeIndex,
      selected: isSelected(option), onClick: () => selectOption(option) })
-     AND ref={(el) => { itemsRef.current[i] = el }} — the active/selected
-     keys drive floating-ui's aria-activedescendant wiring;
+     AND ref={(el) => { itemsRef.current[i] = el }}, the list arrow navigation
+     walks. floating-ui reads active/selected only for option ARIA attributes,
+     which the "listbox" role leaves off;
    - the search input is a child of the control; the control div is the
      floating reference. */
 export const useDropdown = <O extends DropdownItem>({
@@ -162,7 +163,7 @@ export const useDropdown = <O extends DropdownItem>({
     // with nothing selected, an open menu highlights its first option, ready
     // for Enter
     focusItemOnOpen: true,
-    virtual: true, // focus stays on the control/input; aria-activedescendant tracks
+    virtual: true, // focus stays on the control/input while the arrows move the highlight
     loop: true,
     disabledIndices: (index) => index >= filtered.length || disabledIdx.includes(index),
     selectedIndex,

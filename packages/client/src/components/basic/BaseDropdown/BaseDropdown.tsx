@@ -359,8 +359,6 @@ export const BaseDropdown = <O extends BaseDropdownItem = BaseDropdownItem>({
                     $selected={state.selected}
                     $disabled={state.disabled}
                     {...dd.getItemProps({
-                      // active/selected keys drive floating-ui's
-                      // aria-activedescendant wiring — do not drop them
                       active: state.highlighted,
                       selected: state.selected,
                       onClick: () => {
