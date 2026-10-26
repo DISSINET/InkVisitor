@@ -144,7 +144,7 @@ The client is built at **image build time**. Vite reads `packages/client/env/.en
 Copy [`packages/client/env/example.env`](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/env/example.env) to the matching path and fill in:
 
 - `ROOT_URL` — base path the client is served from. Use empty (or `/`) for the root; use `/apps/inkvisitor-sandbox` if you serve it under a sub-path of your domain.
-- `APIURL` — full URL of the server API. **Leave empty** to make the client call back to the same origin it was loaded from (this is what makes the published `latest` image work as-is when the server hosts both the static files and the API). Set explicitly to e.g. `https://dissinet.cz/inkvisitor-server-sandbox` when the API is reached via a separate path on the same host.
+- `APIURL` — full URL of the server API. **Leave empty** to make the client call back to the same origin it was loaded from (this is what makes the published `latest` image work as-is when the server hosts both the static files and the API). An empty value resolves to the origin only, without a path, so when a reverse proxy serves the container under a sub-path set the full public URL including it, e.g. `https://dissinet.cz/apps/inkvisitor-sandbox` (the server keeps `STATIC_PATH=/`; the proxy strips the prefix).
 
 Do **not** set `NODE_ENV` in client env files — Vite sets it automatically (`development` for `pnpm start`, `production` for `pnpm build:*`). The instance identifier (header colour, localStorage scoping) comes from the vite build **mode** (`sandbox`, `staging`, etc.) and is baked into the bundle at build time. An optional `ENV` in the client env file overrides the mode name; normally you can omit it.
 
@@ -225,7 +225,7 @@ For local development you can also skip the build and run `pnpm start`, which us
 
 For production, terminate SSL in a reverse proxy in front of the server — typically [nginx](https://docs.nginx.com/nginx/admin-guide/security-controls/securing-http-traffic-upstream/) — and forward to the API port. This is the recommended setup.
 
-When the proxy serves both the client static files and the API on the same domain over `https://`, you can leave `APIURL` empty in the client `.env` — the client will call back to its own origin (`window.location.origin`), so HTTPS just works. Set `APIURL` explicitly only if the API is hosted on a different domain than the client.
+When the proxy serves both the client static files and the API on the same domain over `https://`, you can leave `APIURL` empty in the client `.env` — the client will call back to its own origin (`window.location.origin`), so HTTPS just works. Set `APIURL` explicitly when the API is hosted on a different domain than the client, or when the proxy serves the container under a sub-path (the full public URL including it, see the client `.env` section above).
 
 The server also has an internal `HTTPS=1` flag — set it via a top-level `.env` or shell env when running compose — that enables TLS using `cert.pem`/`key.pem` from the container's `secret/` directory. The Docker image generates a **self-signed** certificate at build time, so this is suitable for local testing only; use a reverse proxy with a real certificate for anything public.
 
