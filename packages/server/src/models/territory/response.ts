@@ -7,7 +7,7 @@ import {
 } from "@inkvisitor/shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
-import { ResponseStatement } from "@models/statement/response";
+import { ResponseStatement, loadValidationTies } from "@models/statement/response";
 import Document from "@models/document/document";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
@@ -120,6 +120,17 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
       }
 
       if (useWarnings && !this.isTemplate) {
+        // every statement checks its entities against the same lineage, so
+        // the ties of all of them load in one go
+        const ties = lineageTerritories.some((t) =>
+          t.data.validations?.some((v) => v.active !== false)
+        )
+          ? await loadValidationTies(req.db.connection, [
+              ...statements,
+              ...Object.values(preloadedEntities).filter((e): e is IEntity => !!e),
+            ])
+          : undefined;
+
         // Each statement's getWarnings is an independent chain of DB
         // round-trips. Awaiting them one statement at a time serialized the
         // whole territory; the database driver multiplexes concurrent queries over
@@ -133,7 +144,8 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
             responseStatement.warnings = await responseStatement.getWarnings(
               req,
               settings,
-              expansions
+              expansions,
+              ties
             );
           })
         );

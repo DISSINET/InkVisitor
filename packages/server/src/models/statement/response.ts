@@ -15,7 +15,6 @@ import {
 
 import { ActionEntity } from "@models/action/action";
 import Relation from "@models/relation/relation";
-import Classification from "@models/relation/classification";
 import { findEntityById, getEntitiesByIds } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@inkvisitor/shared/enums";
@@ -241,7 +240,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async getTValidationWarnings(
     req: IRequest,
     preloadedSettings?: ISetting[],
-    preloadedExpansions?: ValidationExpansionMap
+    preloadedExpansions?: ValidationExpansionMap,
+    preloadedTies?: ValidationTiesMap
   ): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
@@ -308,64 +308,47 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         : new Map<string, string[]>());
 
     // prepare entities
+    const checkedEntities: IEntity[] = [];
     for (const ei in allEntities) {
       const entityId = allEntities[ei];
       if (entityId) {
         // obtainEntity is kept even when there are no validations: it has the
         // side effect of populating this.entities (notably the statement's own
         // id) which is part of the serialized response. Only the relation /
-        // entity fetches that feed getTBasedWarnings are skipped below.
+        // entity fetches that feed getTBasedWarnings are skipped.
         const entityData = await this.obtainEntity(entityId, req);
 
         if (entityData?.id === entityId) {
-          if (!hasActiveValidations) {
-            continue;
-          }
-
-          // the concrete class, not the base one: a Territory's parent lives in
-          // data, which only its own model keeps, and the SOE condition reads it
-          const entity = getEntityClass(entityData);
-
-          const classificationRels =
-            await Classification.getClassificationForwardConnections(
-              req.db.connection,
-              entityId,
-              entity.class,
-              1,
-              0
-            );
-          const soeRels = await Relation.findForEntities(
-            req.db.connection,
-            [entity.id],
-            RelationEnums.Type.SuperordinateEntity,
-            0
-          );
-
-          const classificationEs: IConcept[] = await getEntitiesByIds<IConcept>(
-            req.db.connection,
-            classificationRels.map((c) => c.entityIds[1])
-          );
-
-          const soeEs = await getEntitiesByIds<IEntity>(
-            req.db.connection,
-            soeRels.map((s) => s.entityIds[1])
-          );
-          const propValueEs = await getEntitiesByIds<IEntity>(
-            req.db.connection,
-            Entity.extractIdsFromProps(entity.props, [PropSpecKind.VALUE])
-          );
-          const eWarnings = entity.getTBasedWarnings(
-            territoryEs,
-            classificationEs,
-            soeEs,
-            propValueEs,
-            settings,
-            expansions
-          );
-          if (eWarnings.length) {
-            warnings = warnings.concat(eWarnings);
-          }
+          checkedEntities.push(entityData);
         }
+      }
+    }
+
+    if (!hasActiveValidations) {
+      return warnings;
+    }
+
+    const missing = checkedEntities.filter((e) => !preloadedTies?.has(e.id));
+    const ties = new Map([
+      ...(preloadedTies ?? []),
+      ...(missing.length ? await loadValidationTies(req.db.connection, missing) : []),
+    ]);
+
+    for (const entityData of checkedEntities) {
+      // the concrete class, not the base one: a Territory's parent lives in
+      // data, which only its own model keeps, and the SOE condition reads it
+      const entity = getEntityClass(entityData);
+      const { classifications, soes, propValues } = ties.get(entity.id)!;
+      const eWarnings = entity.getTBasedWarnings(
+        territoryEs,
+        classifications,
+        soes,
+        propValues,
+        settings,
+        expansions
+      );
+      if (eWarnings.length) {
+        warnings = warnings.concat(eWarnings);
       }
     }
 
@@ -494,7 +477,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async getWarnings(
     req: IRequest,
     preloadedSettings?: ISetting[],
-    preloadedExpansions?: ValidationExpansionMap
+    preloadedExpansions?: ValidationExpansionMap,
+    preloadedTies?: ValidationTiesMap
   ): Promise<IWarning[]> {
     const settings = preloadedSettings ?? await Setting.getSettingsAll(req.db.connection);
 
@@ -506,7 +490,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     const tbasedWarnings = await this.getTValidationWarnings(
       req,
       settings,
-      preloadedExpansions
+      preloadedExpansions,
+      preloadedTies
     );
     warnings = warnings.concat(tbasedWarnings);
 
@@ -529,4 +514,77 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     return warnings;
   }
+}
+
+/** what a territory validation checks an entity against, beyond the entity itself */
+export interface IValidationTies {
+  classifications: IConcept[];
+  soes: IEntity[];
+  propValues: IEntity[];
+}
+
+export type ValidationTiesMap = Map<string, IValidationTies>;
+
+/**
+ * The validation ties of every given entity, keyed by its id: the entities it
+ * is classified as, its superordinate entities and the values of its props,
+ * each list holding the stored entities only. Two relation queries and one
+ * entity query serve any number of entities.
+ */
+export async function loadValidationTies(
+  conn: Conn,
+  entities: IEntity[]
+): Promise<ValidationTiesMap> {
+  const [classificationRels, soeRels] = await Promise.all([
+    Relation.findForEntities(
+      conn,
+      entities
+        .filter((e) => EntityEnums.PLOGESTRBV.includes(e.class))
+        .map((e) => e.id),
+      RelationEnums.Type.Classification,
+      0
+    ),
+    Relation.findForEntities(
+      conn,
+      entities.map((e) => e.id),
+      RelationEnums.Type.SuperordinateEntity,
+      0
+    ),
+  ]);
+
+  // relation targets per source entity, a forward relation holding its
+  // source at entityIds[0]
+  const targetsOf = (rels: { entityIds: string[] }[]) => {
+    const out = new Map<string, string[]>();
+    for (const r of rels) {
+      out.set(r.entityIds[0], [...(out.get(r.entityIds[0]) ?? []), r.entityIds[1]]);
+    }
+    return out;
+  };
+  const classificationIds = targetsOf(classificationRels);
+  const soeIds = targetsOf(soeRels);
+  const propValueIds = new Map(
+    entities.map((e) => [e.id, Entity.extractIdsFromProps(e.props, [PropSpecKind.VALUE])])
+  );
+
+  const wanted = new Set<string>();
+  for (const ids of [classificationIds, soeIds, propValueIds]) {
+    ids.forEach((targets) => targets.forEach((id) => wanted.add(id)));
+  }
+  const stored = new Map(
+    (await getEntitiesByIds<IEntity>(conn, [...wanted])).map((e) => [e.id, e])
+  );
+  const resolve = <T extends IEntity>(ids: string[] = []): T[] =>
+    [...new Set(ids)].filter((id) => stored.has(id)).map((id) => stored.get(id) as T);
+
+  return new Map(
+    entities.map((e) => [
+      e.id,
+      {
+        classifications: resolve<IConcept>(classificationIds.get(e.id)),
+        soes: resolve(soeIds.get(e.id)),
+        propValues: resolve(propValueIds.get(e.id)),
+      },
+    ])
+  );
 }
