@@ -63,7 +63,7 @@ async function writeBatch(
 }
 
 /** feeds `onBatch` with up to BATCH rows at a time from a JSON array file, never loading the whole file */
-function streamFile(
+export function streamFile(
   file: string,
   onBatch: (rows: Record<string, unknown>[]) => Promise<void>
 ): Promise<void> {
