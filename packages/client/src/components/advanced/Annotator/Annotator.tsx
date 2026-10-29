@@ -113,8 +113,6 @@ interface TextAnnotatorProps {
   setStoredAnnotatorScrollPosition?: React.Dispatch<React.SetStateAction<number | null>>;
 
   territory?: IResponseTerritory;
-  // territoryId is from URL params and is used to reset the annotator when the territory changes
-  territoryId?: string;
   dataDocument?: IDocument;
   dataDocumentIsFetching: boolean;
   dataDocumentError: Error | null;
@@ -191,7 +189,6 @@ export const TextAnnotator = ({
   setStoredAnnotatorScrollPosition,
 
   territory,
-  territoryId,
   dataDocument,
   dataDocumentIsFetching = false,
   dataDocumentError,
@@ -270,9 +267,11 @@ export const TextAnnotator = ({
     return resetAnnotator;
   }, []);
 
+  // A newly opened document starts in highlight mode; switching territories
+  // within the same document keeps the user's mode (#3326).
   useEffect(() => {
     setAnnotatorMode(EditMode.HIGHLIGHT);
-  }, [territoryId]);
+  }, [documentId]);
 
   const mergeSavedDocumentIntoCache = useCallback(
     (variables: { id: string; doc: Partial<IDocument> }) => {

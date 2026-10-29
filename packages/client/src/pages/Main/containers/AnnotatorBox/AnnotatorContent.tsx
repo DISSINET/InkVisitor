@@ -241,7 +241,6 @@ export const StatementListTextAnnotator: React.FC<StatementListTextAnnotator> = 
               dataDocumentError={selectedDocumentError}
               userData={userData}
               canEditDocument={canEditDocument}
-              territoryId={territoryId}
               onStatementAnchorHover={onStatementAnchorHover}
               hideWarningChip
               warningsModalOpen={warningsModalOpen}
