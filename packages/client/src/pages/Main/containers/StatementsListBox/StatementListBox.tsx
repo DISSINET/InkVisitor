@@ -450,6 +450,8 @@ export const StatementListBox: React.FC = () => {
     onSuccess: () => {
       // TODO:
       queryClient.invalidateQueries({ queryKey: ["statement"] });
+      const count = selectedRows.length;
+      toast.info(`References replaced in ${count} statement${count > 1 ? "s" : ""}`);
     },
   });
 
@@ -459,6 +461,8 @@ export const StatementListBox: React.FC = () => {
     onSuccess: () => {
       // TODO:
       queryClient.invalidateQueries({ queryKey: ["statement"] });
+      const count = selectedRows.length;
+      toast.info(`Reference appended to ${count} statement${count > 1 ? "s" : ""}`);
     },
   });
 
@@ -496,6 +500,9 @@ export const StatementListBox: React.FC = () => {
         (row) => row.entityId,
       );
 
+      if (deletedIds.length > 0) {
+        toast.info(`${deletedIds.length} statement${deletedIds.length > 1 ? "s" : ""} deleted`);
+      }
       if (deletedIds.length < selectedRows.length) {
         toast.error(
           `Some statements (${selectedRows.length - deletedIds.length}) are not possible to delete`,
