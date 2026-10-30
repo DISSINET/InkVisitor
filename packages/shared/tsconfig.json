@@ -16,6 +16,7 @@
     "types/**/*.ts",
     "enums/**/*.ts",
     "dictionaries/**/*.ts",
+    "utils/**/*.ts",
     "constants/**/*.ts"
   ]
 }
