@@ -313,6 +313,37 @@ function timeBucketFor(timeUnit: TimeUnit): (doc: RDatum) => RDatum {
 const byScopeAndModel = (scope: AuditScope, modelId: string) =>
   r.table(TABLE.audits).getAll([scope, modelId], { index: DbEnums.Indexes.AuditScopeModelId });
 
+/**
+ * The `edge` audit (first or last) of every entity audited within the bounds,
+ * kept when it is itself within them. One `edge` query per entity.
+ */
+async function edgePerEntityInRange(
+  conn: Conn,
+  edge: (modelId: string) => Promise<IAudit | null>,
+  after?: Date,
+  before?: Date
+): Promise<IAudit[]> {
+  let query = r.table(TABLE.audits).filter(r.row("auditScope").eq(AuditScope.Entity));
+  if (after) {
+    query = query.filter(r.row("date").ge(after));
+  }
+  if (before) {
+    query = query.filter(r.row("date").le(before));
+  }
+  const inRange: IAudit[] = await query.run(unwrap(conn));
+  const modelIds = [...new Set(inRange.map((audit) => audit.modelId).filter(Boolean))];
+
+  const out: IAudit[] = [];
+  for (const modelId of modelIds) {
+    const audit = await edge(modelId);
+    const date = audit && new Date(audit.date);
+    if (date && (!after || date >= after) && (!before || date <= before)) {
+      out.push(audit);
+    }
+  }
+  return out;
+}
+
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
@@ -358,15 +389,12 @@ export const audits: AuditStore = {
       .run(unwrap(conn));
   },
 
-  entityScopedInRange(conn, after, before) {
-    let query = r.table(TABLE.audits).filter(r.row("auditScope").eq(AuditScope.Entity));
-    if (after) {
-      query = query.filter(r.row("date").ge(after));
-    }
-    if (before) {
-      query = query.filter(r.row("date").le(before));
-    }
-    return query.run(unwrap(conn));
+  firstPerEntityInRange(conn, after, before) {
+    return edgePerEntityInRange(conn, (modelId) => audits.firstFor(conn, AuditScope.Entity, modelId), after, before);
+  },
+
+  lastPerEntityInRange(conn, after, before) {
+    return edgePerEntityInRange(conn, (modelId) => audits.lastFor(conn, AuditScope.Entity, modelId), after, before);
   },
 
   byTypeAndUser(conn, type, user) {
