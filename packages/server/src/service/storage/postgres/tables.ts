@@ -30,7 +30,6 @@ import {
   WriteResult,
 } from "../types";
 import { query } from "./conn";
-import { notifyChanged, notifyCleared } from "./invalidation";
 import { COLUMNS, col } from "./provision";
 import { encode, ident, indexPredicate, revive } from "./sql";
 
@@ -75,7 +74,6 @@ async function write(conn: Conn, table: string, id: string, merged: string, valu
     return result({ skipped: 1 });
   }
   if (replaced) {
-    notifyChanged(table, [id], "update");
     return result({ replaced: 1 });
   }
   return result({ unchanged: 1 });
@@ -138,7 +136,6 @@ function bulkOutcome(
   opts?: WriteOpts
 ): WriteResult {
   const replacedIds = rows.filter((row) => row.replaced).map((row) => row.id);
-  notifyChanged(table, replacedIds, "update");
   const out = result({ replaced: replacedIds.length, unchanged: rows.length - replacedIds.length, skipped });
   if (opts?.returnChanges) {
     out.changes = rows.map((row) => ({ new_val: revive(table, row.new_doc), old_val: revive(table, row.old_doc) }));
@@ -220,7 +217,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
           const duplicate = rows.find((row) => !done.has(String(row.id))) ?? repeated;
           written.first_error = `Duplicate primary key \`id\`: ${duplicate ? String(duplicate.id) : ""}`;
         }
-        notifyChanged(name, inserted, "insert");
       } else {
         // ON CONFLICT DO UPDATE refuses a batch that touches one row twice;
         // ReQL applies the rows in order, so the last one wins
@@ -246,8 +242,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
           replaced: replaced.length,
           unchanged: unique.length - outcome.length,
         });
-        notifyChanged(name, inserted, "insert");
-        notifyChanged(name, replaced, "update");
       }
       if (generated.length) {
         written.generated_keys = generated;
@@ -332,7 +326,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
     },
     async delete(conn, id) {
       const res = await q(conn, `DELETE FROM ${t} WHERE id = $1 RETURNING id`, [id]);
-      notifyChanged(name, res.rows.map((row: { id: string }) => row.id), "delete");
       return result({ deleted: res.rows.length });
     },
     async deleteMany(conn, ids, opts) {
@@ -340,7 +333,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
         return result({});
       }
       const res = await q(conn, `DELETE FROM ${t} WHERE id = ANY($1::text[]) RETURNING id, doc`, [ids]);
-      notifyChanged(name, res.rows.map((row: { id: string }) => row.id), "delete");
       const out = result({ deleted: res.rows.length });
       if (opts?.returnChanges) {
         out.changes = res.rows.map((row: { doc: Row }) => ({ new_val: null, old_val: revive(name, row.doc) }));
@@ -349,7 +341,6 @@ export function tableStore<T extends Row>(name: string): TableStore<T> {
     },
     async deleteAll(conn) {
       const res = await q(conn, `DELETE FROM ${t}`);
-      notifyCleared(name);
       return result({ deleted: res.rowCount ?? 0 });
     },
   };
@@ -432,7 +423,6 @@ export const users: UserStore = {
   async deleteAllExceptName(conn, name) {
     // a row without a name is kept, as the ReQL filter skips the row whose field read fails
     const res = await q(conn, `DELETE FROM users WHERE name <> $1 RETURNING id`, [name]);
-    notifyChanged(TABLE.users, res.rows.map((row: { id: string }) => row.id), "delete");
     return result({ deleted: res.rows.length });
   },
 };

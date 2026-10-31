@@ -4,7 +4,6 @@ import { closeTestDb, openTestDb } from "../../test/db";
 import { TABLE } from "./names";
 import { EXTRA_INDEXES, TABLES as PG_TABLES } from "./postgres/provision";
 import { q } from "./postgres/tables";
-import { resetWatchers } from "./postgres/invalidation";
 
 /**
  * Behaviour of the storage adapter, the same file on both backends: run with
@@ -332,28 +331,6 @@ describe("dates", () => {
   });
 });
 
-describe("in-process invalidation on postgres", () => {
-  afterEach(() => {
-    if (onPostgres) resetWatchers();
-  });
-
-  itPg("calls the handlers with the written ids and onClear on deleteAll", async () => {
-    const changed: string[] = [];
-    let cleared = 0;
-    storage.watch("test", TABLE.settings, {
-      onClear: () => cleared++,
-      onChange: (newVal, oldVal) => changed.push(newVal?.id ?? oldVal?.id ?? "?"),
-    });
-    await storage.settings.insert(conn, { id: "w1", value: 1 });
-    await storage.settings.update(conn, "w1", { value: 2 });
-    await storage.settings.update(conn, "w1", { value: 2 });
-    await storage.settings.delete(conn, "w1");
-    await storage.settings.deleteAll(conn);
-    expect(changed).toEqual(["w1", "w1", "w1"]);
-    expect(cleared).toBe(1);
-  });
-});
-
 describe("users", () => {
   const trashed = new Date("2024-01-01T00:00:00Z");
   beforeAll(async () => {
@@ -540,10 +517,6 @@ describe("entities", () => {
   afterAll(async () => {
     await storage.entities.deleteAll(conn);
   });
-  afterEach(() => {
-    if (onPostgres) resetWatchers();
-  });
-
   it("get and getMany return nested documents intact", async () => {
     const [c1] = await storage.entities.getMany(conn, ["c-1"]);
     expect(c1.props[0].children[0].type.entityId).toBe("c-2");
@@ -602,20 +575,6 @@ describe("entities", () => {
 
   itPg("statementTerritoryPairs returns nothing for an empty index list", async () => {
     expect(await storage.entities.statementTerritoryPairs(conn, ["c-1"], [])).toEqual([]);
-  });
-
-  itPg("updateStatementTerritoryOrders notifies the watchers of the moved ids only", async () => {
-    const changed: string[] = [];
-    storage.watch("test", TABLE.entities, {
-      onClear: () => undefined,
-      onChange: (newVal) => changed.push(newVal?.id ?? "?"),
-    });
-    await storage.entities.updateStatementTerritoryOrders(
-      conn,
-      [{ id: "s-2", territoryId: "t-child", order: 2 }, { id: "nope", territoryId: "t-child", order: 0 }],
-      new Date()
-    );
-    expect(changed).toEqual(["s-2"]);
   });
 
   // last: it moves s-1 out of t-root

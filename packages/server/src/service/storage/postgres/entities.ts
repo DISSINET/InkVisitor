@@ -2,7 +2,6 @@ import { DbEnums, EntityEnums } from "@inkvisitor/shared/enums";
 import { IEntity, Relation as RelationTypes } from "@inkvisitor/shared/types";
 import { TABLE } from "../names";
 import { Conn, EntityStore, RelationStore, Row } from "../types";
-import { notifyChanged } from "./invalidation";
 import { labelMatch, labelPattern, searchWhere } from "./search";
 import { Params, encode, ident, indexHolds, indexPredicate } from "./sql";
 import { docs, q, tableStore } from "./tables";
@@ -94,15 +93,13 @@ export const entities: EntityStore = {
       patch: { data: { territory: { territoryId: u.territoryId, order: u.order } }, updatedAt },
     }));
     // one atomic statement; an id without a row is skipped, as ReQL skips it
-    const res = await q(
+    await q(
       conn,
       `UPDATE ${ident(TABLE.entities)} e SET doc = jsonb_deep_merge(e.doc, u.patch)
          FROM jsonb_to_recordset($1::jsonb) AS u(id text, patch jsonb)
-        WHERE e.id = u.id
-        RETURNING e.id`,
+        WHERE e.id = u.id`,
       [encode(rows)]
     );
-    notifyChanged(TABLE.entities, res.rows.map((row: { id: string }) => row.id), "update");
   },
 
   async idsMatchingLabel(conn, ids, label, leftWildcard, rightWildcard) {
