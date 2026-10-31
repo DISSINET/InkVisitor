@@ -6,6 +6,8 @@ import {
   CONSTRAINTS,
   Constraint,
   EXTRA_INDEXES,
+  NOTIFY_FUNCTION_DDL,
+  NOTIFY_TABLES,
   TABLES,
   TEXT_ARRAY_FUNCTION_DDL,
   addConstraints,
@@ -14,13 +16,14 @@ import {
   constraintDef,
   keyFunctionDdl,
   keyFunctions,
+  notifyTriggers,
   pgIndexName,
 } from "./provision";
 
 /**
  * Brings a live database to the key functions and generated columns of
- * COLUMNS, the indexes over them and the CONSTRAINTS over those columns, so
- * a database provisioned by an older
+ * COLUMNS, the indexes over them, the CONSTRAINTS over those columns and the
+ * change triggers of NOTIFY_TABLES, so a database provisioned by an older
  * ddl() is upgraded in place at server start. Returns the DDL it executed,
  * empty when the database already matches.
  *
@@ -70,6 +73,11 @@ export async function syncSchema(conn: Conn): Promise<string[]> {
       console.log("[startup] schema: adding constraints " + missing.map((c) => c.name).join(", "));
       executed.push(...(await addConstraints({ query: (sql) => query(conn, sql) }, missing)));
     }
+    // the triggers call it, and CREATE OR REPLACE keeps them attached
+    await query(conn, NOTIFY_FUNCTION_DDL);
+    for (const statement of await triggerChanges(conn)) {
+      await run(statement);
+    }
     if (!executed.length) {
       console.log("[startup] schema in sync");
     }
@@ -101,6 +109,19 @@ async function constraintChanges(conn: Conn): Promise<{ drops: string[]; missing
     missing.push(c);
   }
   return { drops, missing };
+}
+
+/** CREATE TRIGGER for each declared change trigger that is missing */
+async function triggerChanges(conn: Conn): Promise<string[]> {
+  const declared = ([] as { name: string; ddl: string }[]).concat(...NOTIFY_TABLES.map(notifyTriggers));
+  const { rows } = await query<{ name: string }>(
+    conn,
+    `SELECT tgname AS name FROM pg_trigger
+     WHERE NOT tgisinternal AND tgname = ANY($1) AND tgrelid = ANY($2::text[]::regclass[])`,
+    [declared.map((trigger) => trigger.name), NOTIFY_TABLES.map((table) => `public.${table}`)]
+  );
+  const present = new Set(rows.map((row) => row.name));
+  return declared.filter((trigger) => !present.has(trigger.name)).map((trigger) => trigger.ddl);
 }
 
 /** any constant no other code in the database takes an advisory lock on */

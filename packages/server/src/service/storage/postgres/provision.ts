@@ -417,6 +417,43 @@ export const TEXT_ARRAY_FUNCTION_DDL = `CREATE OR REPLACE FUNCTION jsonb_text_ar
   SELECT ARRAY(SELECT v FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof(x) = 'array' THEN x ELSE '[]'::jsonb END) WITH ORDINALITY AS t(v, i) ORDER BY i)
 $$`;
 
+/** the channel the change triggers notify on and invalidation.ts listens to */
+export const CHANGES_CHANNEL = "inkvisitor_changes";
+
+/**
+ * The tables storage.watch follows. A write to one of them, from any session,
+ * sends `table:id` on CHANGES_CHANNEL once its transaction commits, and a
+ * TRUNCATE sends `table`. Every row a write touches pays for a notification,
+ * so a table nothing watches has no trigger.
+ */
+export const NOTIFY_TABLES = ["users", "settings"];
+
+/**
+ * Row-level, so each payload carries one id and stays far under the 8000-byte
+ * NOTIFY limit whatever the size of the write; NOTIFY folds equal payloads of
+ * one transaction into one. coalesce(OLD.id, NEW.id) is the id a cache knows
+ * the row by, and is NULL in the TRUNCATE trigger. pg_notify refuses a payload
+ * of 8000 bytes or more, which would fail the write, so an id that long is
+ * sent as a clear.
+ */
+export const NOTIFY_FUNCTION_DDL = `CREATE OR REPLACE FUNCTION notify_change() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  payload text := TG_TABLE_NAME || coalesce(':' || coalesce(OLD.id, NEW.id), '');
+BEGIN
+  PERFORM pg_notify('${CHANGES_CHANNEL}', CASE WHEN octet_length(payload) < 8000 THEN payload ELSE TG_TABLE_NAME END);
+  RETURN NULL;
+END $$`;
+
+/** the triggers of a NOTIFY_TABLES table, by name; TRUNCATE takes only a statement trigger */
+export const notifyTriggers = (table: string): { name: string; ddl: string }[] =>
+  [
+    { name: `${table}_notify_change`, on: "INSERT OR UPDATE OR DELETE", each: "ROW" },
+    { name: `${table}_notify_truncate`, on: "TRUNCATE", each: "STATEMENT" },
+  ].map(({ name, on, each }) => ({
+    name,
+    ddl: `CREATE TRIGGER ${name} AFTER ${on} ON ${table} FOR EACH ${each} EXECUTE FUNCTION notify_change()`,
+  }));
+
 const SESSION_COLUMNS = [
   `user_id text GENERATED ALWAYS AS (doc->>'userId') STORED`,
   // an epoch-ms timestamp
@@ -450,11 +487,12 @@ END $$`,
  * `constraints` is false.
  */
 export function ddl(constraints = true): string[] {
-  const statements: string[] = [MERGE_FUNCTION_DDL, TEXT_ARRAY_FUNCTION_DDL];
+  const statements: string[] = [MERGE_FUNCTION_DDL, TEXT_ARRAY_FUNCTION_DDL, NOTIFY_FUNCTION_DDL];
   for (const [table, indexes] of Object.entries(TABLES)) {
     statements.push(...keyFunctions(table).map(keyFunctionDdl));
     const columns = ["doc jsonb NOT NULL", "id text GENERATED ALWAYS AS (doc->>'id') STORED PRIMARY KEY", ...columnClauses(table)];
     statements.push(`CREATE TABLE ${table} (${columns.join(", ")})`);
+    if (NOTIFY_TABLES.includes(table)) statements.push(...notifyTriggers(table).map((trigger) => trigger.ddl));
     for (const index of indexes) {
       const ident = pgIndexName(table, index.name);
       if (index.kind === "gin") {

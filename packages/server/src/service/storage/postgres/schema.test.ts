@@ -1,7 +1,16 @@
 import { Conn, storage } from "@service/storage";
 import { closeTestDb, openTestDb } from "../../../test/db";
 import { query } from "./conn";
-import { columnClause, COLUMNS, CONSTRAINTS, constraintDdl, keyFunctionDdl, keyFunctions, SESSIONS_DDL } from "./provision";
+import {
+  columnClause,
+  COLUMNS,
+  CONSTRAINTS,
+  constraintDdl,
+  keyFunctionDdl,
+  keyFunctions,
+  notifyTriggers,
+  SESSIONS_DDL,
+} from "./provision";
 import { deparsed, syncSchema } from "./schema";
 
 /**
@@ -242,6 +251,12 @@ describePg("syncSchema", () => {
   it("restores a dropped foreign key", async () => {
     await exec("ALTER TABLE saved_queries DROP CONSTRAINT saved_queries_owner_id_fkey");
     expect(await syncSchema(conn)).toEqual([constraintDdl(constraint("saved_queries_owner_id_fkey"))]);
+    expect(await syncSchema(conn)).toEqual([]);
+  });
+
+  it("restores the dropped change triggers and the function they call", async () => {
+    await exec("DROP FUNCTION notify_change() CASCADE");
+    expect(await syncSchema(conn)).toEqual([...notifyTriggers("users"), ...notifyTriggers("settings")].map((t) => t.ddl));
     expect(await syncSchema(conn)).toEqual([]);
   });
 
