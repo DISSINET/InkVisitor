@@ -154,7 +154,10 @@ export interface AuditStore extends TableStore<IAudit> {
   earliestDate(conn: Conn): Promise<Date | null>;
   /** audits on the calendar day of `date` */
   onDate(conn: Conn, date: Date): Promise<IAudit[]>;
-  entityScopedInRange(conn: Conn, after?: Date, before?: Date): Promise<IAudit[]>;
+  /** the first entity-scoped audit of each entity, for the entities whose first audit is within the inclusive optional bounds */
+  firstPerEntityInRange(conn: Conn, after?: Date, before?: Date): Promise<IAudit[]>;
+  /** the last entity-scoped audit of each entity, for the entities whose last audit is within the inclusive optional bounds */
+  lastPerEntityInRange(conn: Conn, after?: Date, before?: Date): Promise<IAudit[]>;
   byTypeAndUser(conn: Conn, type: EventType, user: string): Promise<IAudit[]>;
   page(conn: Conn, filter: { skip: number; take: number; from: Date }): Promise<IAudit[]>;
   /** event counts per time bucket and group key; group[0] is the bucket */

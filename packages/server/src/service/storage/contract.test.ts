@@ -728,11 +728,23 @@ describe("audits", () => {
     expect(await storage.audits.onDate(conn, new Date("2024-03-03T00:00:00Z"))).toEqual([]);
   });
 
-  it("entityScopedInRange with inclusive optional bounds", async () => {
-    expect(ids(await storage.audits.entityScopedInRange(conn))).toEqual(["au-1", "au-2", "au-3", "au-4"]);
-    expect(ids(await storage.audits.entityScopedInRange(conn, new Date("2024-03-02T00:00:00Z")))).toEqual(["au-3", "au-4"]);
-    expect(ids(await storage.audits.entityScopedInRange(conn, undefined, new Date("2024-03-01T23:59:59Z")))).toEqual(["au-1", "au-2"]);
-    expect(ids(await storage.audits.entityScopedInRange(conn, new Date("2024-03-01T00:00:00Z"), new Date("2024-03-02T00:00:00Z")))).toEqual(["au-2", "au-3"]);
+  it("firstPerEntityInRange keeps entities first audited within the inclusive optional bounds", async () => {
+    const first = (after?: string, before?: string) =>
+      storage.audits.firstPerEntityInRange(conn, after ? new Date(after) : undefined, before ? new Date(before) : undefined);
+    expect(ids(await first())).toEqual(["au-1", "au-4"]);
+    expect(ids(await first("2024-03-02T00:00:00Z"))).toEqual(["au-4"]);
+    expect(ids(await first(undefined, "2024-03-01T23:59:59Z"))).toEqual(["au-1"]);
+    expect(ids(await first("2024-02-28T10:00:00Z", "2024-03-04T12:00:00Z"))).toEqual(["au-1", "au-4"]);
+    expect(await first("2024-03-01T00:00:00Z", "2024-03-02T00:00:00Z")).toEqual([]);
+  });
+
+  it("lastPerEntityInRange keeps entities last audited within the inclusive optional bounds", async () => {
+    const last = (after?: string, before?: string) =>
+      storage.audits.lastPerEntityInRange(conn, after ? new Date(after) : undefined, before ? new Date(before) : undefined);
+    expect(ids(await last())).toEqual(["au-3", "au-4"]);
+    expect(ids(await last("2024-03-02T00:00:00Z"))).toEqual(["au-3", "au-4"]);
+    expect(await last(undefined, "2024-03-01T23:59:59Z")).toEqual([]);
+    expect(ids(await last("2024-03-01T00:00:00Z", "2024-03-02T00:00:00Z"))).toEqual(["au-3"]);
   });
 
   it("byTypeAndUser", async () => {

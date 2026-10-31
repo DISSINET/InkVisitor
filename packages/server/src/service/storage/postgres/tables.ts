@@ -559,6 +559,26 @@ function bucketSql(timeUnit: TimeUnit): string {
 const byScopeAndModel = (scope: AuditScope, modelId: string) =>
   indexPredicate(TABLE.audits, DbEnums.Indexes.AuditScopeModelId, [[scope, modelId]]);
 
+/**
+ * Entity audits within the bounds that no other audit `b` of the same entity
+ * outranks, `outranks` being that condition in SQL over `b` and `a`. The
+ * anti-join runs on the (audit_scope, model_id, date) index.
+ */
+async function edgePerEntityInRange(conn: Conn, outranks: string, after?: Date, before?: Date): Promise<IAudit[]> {
+  const params: unknown[] = [AuditScope.Entity];
+  let sql = `SELECT a.doc FROM audits a WHERE a.audit_scope = $1 AND a.model_id <> ''`;
+  if (after) {
+    params.push(after.toISOString());
+    sql += ` AND a.date >= $${params.length}`;
+  }
+  if (before) {
+    params.push(before.toISOString());
+    sql += ` AND a.date <= $${params.length}`;
+  }
+  sql += ` AND NOT EXISTS (SELECT 1 FROM audits b WHERE b.audit_scope = $1 AND b.model_id = a.model_id AND (${outranks}))`;
+  return docs<IAudit>(TABLE.audits, await q(conn, `${sql} ORDER BY a.id`, params));
+}
+
 export const audits: AuditStore = {
   ...tableStore<IAudit>(TABLE.audits),
 
@@ -622,18 +642,14 @@ export const audits: AuditStore = {
     );
   },
 
-  async entityScopedInRange(conn, after, before) {
-    const params: unknown[] = [AuditScope.Entity];
-    let sql = `SELECT doc FROM audits WHERE audit_scope = $1`;
-    if (after) {
-      params.push(after.toISOString());
-      sql += ` AND date >= $${params.length}`;
-    }
-    if (before) {
-      params.push(before.toISOString());
-      sql += ` AND date <= $${params.length}`;
-    }
-    return docs<IAudit>(TABLE.audits, await q(conn, `${sql} ORDER BY id`, params));
+  async firstPerEntityInRange(conn, after, before) {
+    // the ordering of firstFor: date, then id
+    return edgePerEntityInRange(conn, `b.date < a.date OR (b.date = a.date AND b.id < a.id)`, after, before);
+  },
+
+  async lastPerEntityInRange(conn, after, before) {
+    // the ordering of lastFor: date descending, then id
+    return edgePerEntityInRange(conn, `b.date > a.date OR (b.date = a.date AND b.id < a.id)`, after, before);
   },
 
   async byTypeAndUser(conn, type: EventType, user) {
