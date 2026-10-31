@@ -16,10 +16,12 @@ Three kinds of generated column:
   computed by an IMMUTABLE key function of the same name as the index
   (`entities_props_recursive(doc)` and so on)
 
-The solid lines below are foreign keys (`FOREIGN_KEYS` in provision.ts, ON
-DELETE RESTRICT); an empty `territoryId` is stored as NULL, so it references
-nothing. The dotted lines are references the application resolves by id;
-nothing in the database enforces them.
+The solid lines below are foreign keys and the `UK` columns form unique
+constraints, both declared in `CONSTRAINTS` in provision.ts (foreign keys ON
+DELETE RESTRICT). An empty `territoryId`, `usedTemplate`, `documentId` or
+`email` is stored as NULL, so it references nothing and never collides. The
+dotted lines are references the application resolves by id; nothing in the
+database enforces them.
 
 ```mermaid
 erDiagram
@@ -30,10 +32,10 @@ erDiagram
     text status "doc.status"
     text language "doc.language"
     text is_template "doc.isTemplate"
-    text used_template FK "doc.usedTemplate, idx"
+    text used_template FK "doc.usedTemplate, '' as NULL, idx"
     text territory_id FK "doc.data.territory.territoryId, '' as NULL (statements), idx"
     text parent_id FK "doc.data.parent.territoryId, '' as NULL (territories), idx"
-    text document_id FK "doc.data.documentId (resources), idx"
+    text document_id FK "doc.data.documentId, '' as NULL (resources), idx"
     text created_at "doc.createdAt"
     text updated_at "doc.updatedAt"
     text[] labels "doc.labels, label search"
@@ -47,8 +49,8 @@ erDiagram
   relations {
     jsonb doc "whole relation"
     text id PK "doc.id"
-    text type "doc.type, idx"
-    text[] entity_ids FK "doc.entityIds in order, [1] source, [2] target, gin"
+    text type UK "doc.type, idx, unique with entity_ids"
+    text[] entity_ids FK, UK "doc.entityIds in order, [1] source, [2] target, gin"
   }
   audits {
     jsonb doc "whole audit incl. changes"
@@ -71,7 +73,7 @@ erDiagram
   users {
     jsonb doc "whole user incl. rights, options, bookmarks"
     text id PK "doc.id"
-    text email "doc.email, idx"
+    text email UK "doc.email, '' as NULL, idx, unique"
     text name "doc.name"
     text role "doc.role"
     text hash "doc.hash"
@@ -97,9 +99,9 @@ erDiagram
   acl_permissions {
     jsonb doc "whole permission"
     text id PK "doc.id"
-    text controller "doc.controller, idx (controller, method, route)"
-    text method "doc.method"
-    text route "doc.route"
+    text controller UK "doc.controller, idx and unique (controller, method, route)"
+    text method UK "doc.method"
+    text route UK "doc.route"
   }
   settings {
     jsonb doc "whole setting"
