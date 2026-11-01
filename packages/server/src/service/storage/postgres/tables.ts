@@ -30,7 +30,7 @@ import {
   WriteResult,
 } from "../types";
 import { query } from "./conn";
-import { COLUMNS, col } from "./provision";
+import { COLUMNS } from "./provision";
 import { encode, ident, indexPredicate, revive } from "./sql";
 
 const EMPTY: WriteResult = { deleted: 0, errors: 0, inserted: 0, replaced: 0, skipped: 0, unchanged: 0 };
@@ -519,7 +519,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** audit document field -> generated column, for the fields a group key may read */
 const AUDIT_COLUMN_OF_FIELD: Record<string, string> = {};
 for (const [column, path] of Object.entries(COLUMNS.audits)) {
-  if (typeof path === "string") AUDIT_COLUMN_OF_FIELD[path] = col(column);
+  if (typeof path === "string") AUDIT_COLUMN_OF_FIELD[path] = column;
 }
 
 function auditColumn(field: string): string {
@@ -645,7 +645,7 @@ export const audits: AuditStore = {
   async byTypeAndUser(conn, type: EventType, user) {
     return docs<IAudit>(
       TABLE.audits,
-      await q(conn, `SELECT doc FROM audits WHERE type = $1 AND "user" = $2 ORDER BY id`, [type, user])
+      await q(conn, `SELECT doc FROM audits WHERE type = $1 AND user_id = $2 ORDER BY id`, [type, user])
     );
   },
 

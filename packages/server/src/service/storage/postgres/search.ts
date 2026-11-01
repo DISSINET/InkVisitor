@@ -68,7 +68,7 @@ export function searchWhere(filters: SearchFilters, seedIds: string[] | undefine
     where.push(`language = ${p.add(filters.language)}`);
   }
   if (filters.onlyTemplates) {
-    where.push(`is_template = 'true'`);
+    where.push("is_template");
   }
   if (filters.resourceHasDocument) {
     // an unqualified `doc` inside a subquery over documents would bind to d.doc,
