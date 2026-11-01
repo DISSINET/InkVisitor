@@ -11,7 +11,6 @@ import {
   TABLES,
   TEXT_ARRAY_FUNCTION_DDL,
   addConstraints,
-  col,
   columnClause,
   constraintDef,
   keyFunctionDdl,
@@ -133,15 +132,19 @@ const SCHEMA_LOCK_KEY = 33340001;
  * operator parenthesised and every key cast, e.g. `a.b` becomes
  * `((doc -> 'a'::text) ->> 'b'::text)` and `{ ids: "a" }` becomes
  * `jsonb_text_array((doc -> 'a'::text))`; `{ ref: "a" }` becomes
- * `NULLIF((doc ->> 'a'::text), ''::text)`; a key function call stays `fn(doc)`
+ * `NULLIF((doc ->> 'a'::text), ''::text)`; `{ bool: "a" }` becomes
+ * `COALESCE(((doc -> 'a'::text) = 'true'::jsonb), false)`; a key function call
+ * stays `fn(doc)`
  */
 export function deparsed(spec: ColumnSpec): string {
   if (typeof spec !== "string" && "fn" in spec) return `${spec.fn}(doc)`;
   if (typeof spec !== "string" && "ref" in spec) return `NULLIF(${deparsed(spec.ref)}, ''::text)`;
-  const parts = (typeof spec === "string" ? spec : spec.ids).split(".");
+  const parts = (typeof spec === "string" ? spec : "bool" in spec ? spec.bool : spec.ids).split(".");
   const last = parts.pop();
   const object = parts.reduce((acc, part) => `(${acc} -> '${part}'::text)`, "doc");
-  return typeof spec === "string" ? `(${object} ->> '${last}'::text)` : `jsonb_text_array((${object} -> '${last}'::text))`;
+  if (typeof spec === "string") return `(${object} ->> '${last}'::text)`;
+  const value = `(${object} -> '${last}'::text)`;
+  return "bool" in spec ? `COALESCE((${value} = 'true'::jsonb), false)` : `jsonb_text_array(${value})`;
 }
 
 /**
@@ -183,7 +186,7 @@ async function columnChanges(conn: Conn, table: string): Promise<string[]> {
       );
     }
     if (current?.generation_expression === deparsed(spec)) continue;
-    if (current) drops.push(`DROP COLUMN ${col(name)}`);
+    if (current) drops.push(`DROP COLUMN ${name}`);
     adds.push(`ADD COLUMN ${columnClause(name, spec)}`);
   }
   return [...drops, ...adds];
@@ -234,7 +237,6 @@ async function indexChanges(conn: Conn, table: string): Promise<string[]> {
   );
   const live = new Map(rows.map((row) => [row.name, row]));
   const keyFns = new Set(keyFunctions(table).map((key) => key.fn));
-  const unquote = (name: string) => name.replace(/^"(.*)"$/, "$1");
   const statements: string[] = [];
   for (const index of declared) {
     const current = live.get(index.name);
@@ -242,7 +244,7 @@ async function indexChanges(conn: Conn, table: string): Promise<string[]> {
       current?.tablename === table &&
       current.method === index.method &&
       current.plain &&
-      current.columns.join(",") === index.columns.map(unquote).join(",");
+      current.columns.join(",") === index.columns.join(",");
     if (matches) continue;
     if (current) statements.push(`DROP INDEX ${index.name}`);
     if (current && index.method === "gin" && !keyFns.has(index.name)) statements.push(`DROP FUNCTION IF EXISTS ${index.name}(jsonb)`);

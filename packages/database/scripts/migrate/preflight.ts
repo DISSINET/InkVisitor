@@ -33,13 +33,14 @@ const textAt = (doc: Record<string, unknown>, path: string): string | null => {
 };
 
 /** the value the generated column `column` of `table` holds for `doc`, as PostgreSQL computes it */
-export function columnValue(table: string, column: string, doc: Record<string, unknown>): string | string[] | null {
+export function columnValue(table: string, column: string, doc: Record<string, unknown>): string | string[] | boolean | null {
   const spec: ColumnSpec | undefined = COLUMNS[table]?.[column];
   if (spec === undefined) {
     throw new Error(`${table}.${column} is not a generated column`);
   }
   if (typeof spec === "string") return textAt(doc, spec);
   if ("ref" in spec) return textAt(doc, spec.ref) || null;
+  if ("bool" in spec) return valueAt(doc, spec.bool) === true;
   if ("ids" in spec) {
     const value = valueAt(doc, spec.ids);
     return Array.isArray(value) ? value.map((item) => (typeof item === "object" ? JSON.stringify(item) : String(item))) : [];

@@ -7,10 +7,12 @@ for indexing and filtering. Every index is over these columns, none over a
 `packages/server/src/service/storage/postgres/provision.ts` (`COLUMNS`) and
 synced to a live database at boot by `schema.ts`.
 
-Three kinds of generated column:
+Four kinds of generated column:
 
 - **text**: the field at a document path, in the `doc ->> 'field'` text form
-  (`is_template = 'true'`, numeric `status` stays `'1'`)
+  (numeric `status` stays `'1'`, `shared` is `'true'` or `'false'`)
+- **boolean**: whether the field at a document path is JSON true, false for
+  any other value (a legacy `""` or `0`) or a missing field
 - **text[] copy**: an id array at a path, in document order
 - **text[] keys**: the distinct entity ids found at several nested paths,
   computed by an IMMUTABLE key function of the same name as the index
@@ -31,13 +33,11 @@ erDiagram
     text class "doc.class, idx (class), (class, status)"
     text status "doc.status"
     text language "doc.language"
-    text is_template "doc.isTemplate"
+    boolean is_template "doc.isTemplate"
     text used_template FK "doc.usedTemplate, '' as NULL, idx"
     text territory_id FK "doc.data.territory.territoryId, '' as NULL (statements), idx"
     text parent_id FK "doc.data.parent.territoryId, '' as NULL (territories), idx"
     text document_id FK "doc.data.documentId, '' as NULL (resources), idx"
-    text created_at "doc.createdAt"
-    text updated_at "doc.updatedAt"
     text[] labels "doc.labels, label search"
     text label "doc.label, explore label node"
     text[] prop_entity_ids FK "keys: prop type and value ids, 4 levels, gin"
@@ -55,9 +55,9 @@ erDiagram
   audits {
     jsonb doc "whole audit incl. changes"
     text id PK "doc.id"
-    text date "doc.date, idx (date), (date, type, user)"
-    text type "doc.type, idx (type, user)"
-    text user FK "doc.user"
+    text date "doc.date, idx (date), (date, type, user_id)"
+    text type "doc.type, idx (type, user_id)"
+    text user_id FK "doc.user"
     text audit_scope "doc.auditScope, idx (audit_scope, model_id, date)"
     text model_id FK "doc.modelId, id of the audited record"
     text[] entity_ids FK "doc.changes.entityIds (relation audits), gin"
@@ -65,9 +65,7 @@ erDiagram
   documents {
     jsonb doc "whole document incl. content"
     text id PK "doc.id"
-    text title "doc.title"
     text created_at "doc.createdAt"
-    text updated_at "doc.updatedAt"
     text[] entity_ids FK "keys: anchored entity ids, flat or per class, gin"
   }
   users {
@@ -78,8 +76,6 @@ erDiagram
     text role "doc.role"
     text hash "doc.hash"
     text deleted_at "doc.deletedAt"
-    text active "doc.active"
-    text verified "doc.verified"
   }
   sessions {
     jsonb doc "whole session"
@@ -94,7 +90,6 @@ erDiagram
     text owner_id FK "doc.ownerId, idx"
     text shared "doc.shared"
     text created_at "doc.createdAt"
-    text updated_at "doc.updatedAt"
   }
   acl_permissions {
     jsonb doc "whole permission"
@@ -106,7 +101,6 @@ erDiagram
   settings {
     jsonb doc "whole setting"
     text id PK "doc.id"
-    text public "doc.public"
   }
   stats_materialized_day {
     jsonb doc "aggregated counts"
@@ -149,7 +143,7 @@ erDiagram
   relations }o..|{ entities : "entity_ids"
   audits }o..o| entities : "model_id when audit_scope = entity"
   audits }o..o| relations : "model_id when audit_scope = relation"
-  audits }o--o| users : "user"
+  audits }o--o| users : "user_id"
   saved_queries }o--|| users : "owner_id"
   sessions }o..o| users : "user_id"
   documents }o..o{ entities : "entity_ids (anchors)"

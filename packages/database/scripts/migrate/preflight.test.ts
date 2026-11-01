@@ -17,6 +17,9 @@ test("columnValue follows the column spec like PostgreSQL does", () => {
   assert.equal(columnValue("entities", "territory_id", { data: { territory: false } }), null);
   assert.equal(columnValue("entities", "status", { status: 1 }), "1");
   assert.equal(columnValue("users", "email", {}), null);
+  assert.equal(columnValue("entities", "is_template", { isTemplate: false }), false);
+  assert.equal(columnValue("entities", "is_template", { isTemplate: true }), true);
+  assert.equal(columnValue("entities", "is_template", { isTemplate: "" }), false);
   assert.deepEqual(columnValue("relations", "entity_ids", { entityIds: ["a", "b"] }), ["a", "b"]);
   assert.deepEqual(columnValue("relations", "entity_ids", { entityIds: "a" }), []);
   assert.throws(() => columnValue("entities", "labels_x", {}), /not a generated column/);
@@ -70,7 +73,7 @@ test("checkConstraints names every dangling reference and every duplicate", asyn
     [
       "entities_territory_id_fkey s1: territory_id = gone is not an id in entities",
       "entities_parent_id_fkey t1: parent_id = gone-too is not an id in entities",
-      "audits_user_fkey a1: user = nobody is not an id in users",
+      "audits_user_id_fkey a1: user_id = nobody is not an id in users",
       "saved_queries_owner_id_fkey q1: owner_id = nobody is not an id in users",
       'relations_type_entity_ids_key r2: (type, entity_ids) = ["CLA",["a","b"]] duplicates row r1',
       'relations_type_entity_ids_key r3: (type, entity_ids) = ["CLA",["a","b"]] duplicates row r1',

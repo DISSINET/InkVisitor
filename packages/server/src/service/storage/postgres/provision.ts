@@ -26,14 +26,15 @@ export function pgIndexName(table: string, index: string): string {
 /**
  * what a generated column holds: the text of the field at a document path
  * (dot-separated for a nested field), the same text at `ref` with "" stored
- * as NULL (an unset reference, which a foreign key skips), the text[] of the
- * string array at `ids`
+ * as NULL (an unset reference, which a foreign key skips), whether the field
+ * at `bool` is JSON true (false for any other value or a missing field), the
+ * text[] of the string array at `ids`
  * in document order (an empty array when the field is not an array), or the
  * text[] the IMMUTABLE key function `fn(doc jsonb)` with the SQL `body`
  * returns. A key function exists before its table, and schema.ts drops it
  * together with the columns computed from it when the body changes.
  */
-export type ColumnSpec = string | { ref: string } | { ids: string } | KeyFunction;
+export type ColumnSpec = string | { ref: string } | { bool: string } | { ids: string } | KeyFunction;
 
 /** an IMMUTABLE SQL function `fn(doc jsonb) returns text[]` with the body `body` */
 type KeyFunction = { fn: string; body: string };
@@ -87,7 +88,7 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
   audits: {
     date: "date",
     type: "type",
-    user: "user",
+    user_id: "user",
     audit_scope: "auditScope",
     model_id: "modelId",
     entity_ids: { ids: "changes.entityIds" },
@@ -96,13 +97,11 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     class: "class",
     status: "status",
     language: "language",
-    is_template: "isTemplate",
+    is_template: { bool: "isTemplate" },
     used_template: { ref: "usedTemplate" },
     territory_id: { ref: "data.territory.territoryId" },
     parent_id: { ref: "data.parent.territoryId" },
     document_id: { ref: "data.documentId" },
-    created_at: "createdAt",
-    updated_at: "updatedAt",
     labels: { ids: "labels" },
     // entities carry `labels`, not `label`; the explore label node filters on
     // this field all the same, as RethinkDB does
@@ -150,16 +149,11 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     role: "role",
     hash: "hash",
     deleted_at: "deletedAt",
-    active: "active",
-    verified: "verified",
   },
   acl_permissions: { controller: "controller", method: "method", route: "route" },
-  settings: { public: "public" },
-  saved_queries: { name: "name", owner_id: "ownerId", shared: "shared", created_at: "createdAt", updated_at: "updatedAt" },
+  saved_queries: { name: "name", owner_id: "ownerId", shared: "shared", created_at: "createdAt" },
   documents: {
-    title: "title",
     created_at: "createdAt",
-    updated_at: "updatedAt",
     // entityIds is either the legacy flat string[] or Record<class, string[]>;
     // in strict mode the path for the other shape fails, silently
     entity_ids: keys("documents", DbEnums.Indexes.DocumentEntityIds, collect(["strict $.entityIds[*]", "strict $.entityIds.*[*]"])),
@@ -183,14 +177,14 @@ export const columnExpr = (spec: ColumnSpec): string =>
     ? pathExpr(spec, true)
     : "ref" in spec
     ? `NULLIF(${pathExpr(spec.ref, true)}, '')`
+    : "bool" in spec
+    ? `COALESCE(${pathExpr(spec.bool, false)} = 'true', false)`
     : "fn" in spec
     ? `${spec.fn}(doc)`
     : `jsonb_text_array(${pathExpr(spec.ids, false)})`;
 
-export const columnType = (spec: ColumnSpec): string => (typeof spec === "string" || "ref" in spec ? "text" : "text[]");
-
-/** a generated column as a SQL identifier: `user` is a reserved word, the others are plain */
-export const col = (name: string): string => (name === "user" ? `"user"` : name);
+export const columnType = (spec: ColumnSpec): string =>
+  typeof spec === "string" || "ref" in spec ? "text" : "bool" in spec ? "boolean" : "text[]";
 
 const btree = (name: string, ...columns: string[]): PgIndex => ({
   name,
@@ -215,7 +209,7 @@ const entitiesIndexes: PgIndex[] = [
 const auditsIndexes: PgIndex[] = [
   btree(DbEnums.Indexes.AuditScopeModelId, "audit_scope", "model_id"),
   btree(DbEnums.Indexes.AuditDate, "date"),
-  btree(DbEnums.Indexes.AuditDateTypeUser, "date", "type", col("user")),
+  btree(DbEnums.Indexes.AuditDateTypeUser, "date", "type", "user_id"),
   gin(DbEnums.Indexes.AuditRelationEntityIds, "entity_ids"),
 ];
 
@@ -261,7 +255,7 @@ export const EXTRA_INDEXES: { table: string; name: string; expression: string }[
   { table: "entities", name: "entities_class_status", expression: "class, status" },
   // the newest audits of one entity are read straight off the index end
   { table: "audits", name: "audits_scope_model_date", expression: "audit_scope, model_id, date" },
-  { table: "audits", name: "audits_type_user", expression: `type, ${col("user")}` },
+  { table: "audits", name: "audits_type_user", expression: "type, user_id" },
   { table: "users", name: "users_email", expression: "email" },
   { table: "saved_queries", name: "saved_queries_owner", expression: "owner_id" },
   { table: "acl_permissions", name: "acl_permissions_route", expression: "controller, method, route" },
@@ -284,7 +278,7 @@ export type Constraint = { table: string; name: string } & (
 export const CONSTRAINTS: Constraint[] = [
   { table: "entities", name: "entities_territory_id_fkey", kind: "foreign key", column: "territory_id", references: "entities" },
   { table: "entities", name: "entities_parent_id_fkey", kind: "foreign key", column: "parent_id", references: "entities" },
-  { table: "audits", name: "audits_user_fkey", kind: "foreign key", column: "user", references: "users" },
+  { table: "audits", name: "audits_user_id_fkey", kind: "foreign key", column: "user_id", references: "users" },
   { table: "saved_queries", name: "saved_queries_owner_id_fkey", kind: "foreign key", column: "owner_id", references: "users" },
   // Relation.beforeSave forbids a second relation over the same two entities;
   // a SYN relation holds a set of any size, which the model compares as a set
@@ -298,8 +292,8 @@ export const CONSTRAINTS: Constraint[] = [
 /** the constraint definition, exactly as pg_get_constraintdef prints it back */
 export const constraintDef = (c: Constraint): string =>
   c.kind === "foreign key"
-    ? `FOREIGN KEY (${col(c.column)}) REFERENCES ${c.references}(id) ON DELETE RESTRICT`
-    : `UNIQUE (${c.columns.map(col).join(", ")})`;
+    ? `FOREIGN KEY (${c.column}) REFERENCES ${c.references}(id) ON DELETE RESTRICT`
+    : `UNIQUE (${c.columns.join(", ")})`;
 
 export const constraintDdl = (c: Constraint): string => `ALTER TABLE ${c.table} ADD CONSTRAINT ${c.name} ${constraintDef(c)}`;
 
@@ -310,14 +304,14 @@ export const constraintDdl = (c: Constraint): string => `ALTER TABLE ${c.table} 
 export const violationSql = (c: Constraint): string => {
   if (c.kind === "foreign key") {
     return (
-      `SELECT c.id, c.${col(c.column)} AS value FROM ${c.table} c ` +
-      `WHERE c.${col(c.column)} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${c.references} r WHERE r.id = c.${col(c.column)}) LIMIT 1`
+      `SELECT c.id, c.${c.column} AS value FROM ${c.table} c ` +
+      `WHERE c.${c.column} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${c.references} r WHERE r.id = c.${c.column}) LIMIT 1`
     );
   }
-  const columns = c.columns.map(col).join(", ");
+  const columns = c.columns.join(", ");
   return (
     `SELECT min(id) AS id, ROW(${columns})::text AS value FROM ${c.table} ` +
-    `WHERE ${c.columns.map((column) => `${col(column)} IS NOT NULL`).join(" AND ")} ` +
+    `WHERE ${c.columns.map((column) => `${column} IS NOT NULL`).join(" AND ")} ` +
     `GROUP BY ${columns} HAVING count(*) > 1 LIMIT 1`
   );
 };
@@ -352,7 +346,7 @@ export async function addConstraints(
 
 /** the column definition of one generated column, as CREATE TABLE and ADD COLUMN take it */
 export const columnClause = (name: string, spec: ColumnSpec): string =>
-  `${col(name)} ${columnType(spec)} GENERATED ALWAYS AS (${columnExpr(spec)}) STORED`;
+  `${name} ${columnType(spec)} GENERATED ALWAYS AS (${columnExpr(spec)}) STORED`;
 
 /** the generated-column clauses of `table`, in COLUMNS order; empty for a table without any */
 export function columnClauses(table: string): string[] {
