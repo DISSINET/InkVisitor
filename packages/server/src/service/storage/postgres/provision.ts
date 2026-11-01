@@ -151,7 +151,7 @@ export const COLUMNS: Record<string, Record<string, ColumnSpec>> = {
     deleted_at: "deletedAt",
   },
   acl_permissions: { controller: "controller", method: "method", route: "route" },
-  saved_queries: { name: "name", owner_id: "ownerId", shared: "shared", created_at: "createdAt" },
+  saved_queries: { name: "name", owner_id: "ownerId", shared: { bool: "shared" }, created_at: "createdAt" },
   documents: {
     created_at: "createdAt",
     // entityIds is either the legacy flat string[] or Record<class, string[]>;
