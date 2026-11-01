@@ -450,9 +450,7 @@ export const savedQueries: SavedQueryStore = {
 
   async idsWithName(conn, normalizedName, shared, ownerId) {
     // unindexed scan: one row per saved query, and this runs only on create and on rename
-    const folder = shared
-      ? `shared::boolean`
-      : `NOT shared::boolean AND owner_id = $2`;
+    const folder = shared ? "shared" : "NOT shared AND owner_id = $2";
     const params = shared ? [normalizedName] : [normalizedName, ownerId];
     const res = await q(
       conn,
@@ -468,7 +466,7 @@ export const savedQueries: SavedQueryStore = {
       await q(
         conn,
         `SELECT doc FROM saved_queries
-         WHERE shared::boolean OR owner_id = $1
+         WHERE shared OR owner_id = $1
          ORDER BY created_at DESC, id`,
         [userId]
       )

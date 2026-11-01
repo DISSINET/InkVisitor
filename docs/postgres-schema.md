@@ -10,7 +10,7 @@ synced to a live database at boot by `schema.ts`.
 Four kinds of generated column:
 
 - **text**: the field at a document path, in the `doc ->> 'field'` text form
-  (numeric `status` stays `'1'`, `shared` is `'true'` or `'false'`)
+  (numeric `status` stays `'1'`)
 - **boolean**: whether the field at a document path is JSON true, false for
   any other value (a legacy `""` or `0`) or a missing field
 - **text[] copy**: an id array at a path, in document order
@@ -88,7 +88,7 @@ erDiagram
     text id PK "doc.id"
     text name "doc.name"
     text owner_id FK "doc.ownerId, idx"
-    text shared "doc.shared"
+    boolean shared "doc.shared"
     text created_at "doc.createdAt"
   }
   acl_permissions {
