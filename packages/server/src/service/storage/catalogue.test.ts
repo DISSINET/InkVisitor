@@ -49,4 +49,17 @@ describe("storage catalogues", () => {
       expect(statements.filter((s) => s.startsWith(`CREATE INDEX ${extra.name} `))).toHaveLength(1);
     }
   });
+
+  it("add no postgres-only index that another btree or a unique constraint leads with", () => {
+    const split = (expression: string) => expression.split(",").map((c) => c.trim());
+    for (const extra of EXTRA_INDEXES) {
+      const columns = split(extra.expression);
+      const others = [
+        ...PG[extra.table].map((i) => (i.kind === "btree" ? [...i.columns, ...(i.trailing ?? [])] : [])),
+        ...EXTRA_INDEXES.filter((i) => i !== extra && i.table === extra.table).map((i) => split(i.expression)),
+        ...CONSTRAINTS.filter((c) => c.table === extra.table).map((c) => (c.kind === "unique" ? c.columns : [])),
+      ];
+      expect(others.map((other) => other.slice(0, columns.length))).not.toContainEqual(columns);
+    }
+  });
 });

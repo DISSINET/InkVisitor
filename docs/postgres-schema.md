@@ -20,17 +20,19 @@ Four kinds of generated column:
 
 The solid lines below are foreign keys and the `UK` columns form unique
 constraints, both declared in `CONSTRAINTS` in provision.ts (foreign keys ON
-DELETE RESTRICT). An empty `territoryId`, `usedTemplate`, `documentId` or
-`email` is stored as NULL, so it references nothing and never collides. The
-dotted lines are references the application resolves by id; nothing in the
-database enforces them.
+DELETE RESTRICT). The index of a unique constraint serves lookups on its
+leading columns, as any btree does, so those columns get no second index. An
+empty `territoryId`, `usedTemplate`, `documentId` or `email` is stored as
+NULL, so it references nothing and never collides. The dotted lines are
+references the application resolves by id; nothing in the database enforces
+them.
 
 ```mermaid
 erDiagram
   entities {
     jsonb doc "whole entity"
     text id PK "doc.id"
-    text class "doc.class, idx (class), (class, status)"
+    text class "doc.class, idx (class, status)"
     text status "doc.status"
     text language "doc.language"
     boolean is_template "doc.isTemplate"
@@ -49,7 +51,7 @@ erDiagram
   relations {
     jsonb doc "whole relation"
     text id PK "doc.id"
-    text type UK "doc.type, idx, unique with entity_ids"
+    text type UK "doc.type, unique with entity_ids"
     text[] entity_ids FK, UK "doc.entityIds in order, [1] source, [2] target, gin"
   }
   audits {
@@ -71,7 +73,7 @@ erDiagram
   users {
     jsonb doc "whole user incl. rights, options, bookmarks"
     text id PK "doc.id"
-    text email UK "doc.email, '' as NULL, idx, unique"
+    text email UK "doc.email, '' as NULL, unique"
     text name "doc.name"
     text role "doc.role"
     text hash "doc.hash"
@@ -94,7 +96,7 @@ erDiagram
   acl_permissions {
     jsonb doc "whole permission"
     text id PK "doc.id"
-    text controller UK "doc.controller, idx and unique (controller, method, route)"
+    text controller UK "doc.controller, unique (controller, method, route)"
     text method UK "doc.method"
     text route UK "doc.route"
   }

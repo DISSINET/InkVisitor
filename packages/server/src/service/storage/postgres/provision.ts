@@ -14,8 +14,13 @@ import { DbEnums } from "@inkvisitor/shared/enums";
  * ISO-8601 UTC strings, which order correctly as text.
  */
 
+/**
+ * `columns` are the key a lookup matches, as the RethinkDB index defines it.
+ * `trailing` columns follow them in the btree to serve a filter or an order
+ * within one key; no lookup names them.
+ */
 export type PgIndex =
-  | { name: string; kind: "btree"; columns: string[] }
+  | { name: string; kind: "btree"; columns: string[]; trailing?: string[] }
   | { name: string; kind: "gin"; column: string };
 
 /** SQL identifier shared by an index and, for a multi index, its key function */
@@ -196,7 +201,8 @@ const gin = (name: string, column: string): PgIndex => ({ name, kind: "gin", col
 const entitiesIndexes: PgIndex[] = [
   gin(DbEnums.Indexes.PropsRecursive, "prop_entity_ids"),
   gin(DbEnums.Indexes.StatementDataProps, "statement_prop_entity_ids"),
-  btree(DbEnums.Indexes.Class, "class"),
+  // the explore base node and the search filter take class and status together
+  { name: DbEnums.Indexes.Class, kind: "btree", columns: ["class"], trailing: ["status"] },
   btree(DbEnums.Indexes.StatementTerritory, "territory_id"),
   gin(DbEnums.Indexes.StatementEntities, "statement_entity_ids"),
   btree(DbEnums.Indexes.EntityUsedTemplate, "used_template"),
@@ -204,11 +210,12 @@ const entitiesIndexes: PgIndex[] = [
   gin(DbEnums.Indexes.StatementActantsCI, "statement_actant_ci_ids"),
 ];
 
-// the stats aggregation groups on date, type and user and is answered from
-// the index alone
 const auditsIndexes: PgIndex[] = [
-  btree(DbEnums.Indexes.AuditScopeModelId, "audit_scope", "model_id"),
+  // the oldest and newest audits of one record are read off either end of its key
+  { name: DbEnums.Indexes.AuditScopeModelId, kind: "btree", columns: ["audit_scope", "model_id"], trailing: ["date"] },
   btree(DbEnums.Indexes.AuditDate, "date"),
+  // the stats aggregation groups on date, type and user and is answered from
+  // the index alone
   btree(DbEnums.Indexes.AuditDateTypeUser, "date", "type", "user_id"),
   gin(DbEnums.Indexes.AuditRelationEntityIds, "entity_ids"),
 ];
@@ -242,23 +249,17 @@ export const TABLES: Record<string, PgIndex[]> = {
 /**
  * PostgreSQL-only btree indexes behind the operations RethinkDB runs as
  * unindexed filters. They live outside TABLES so both catalogues keep the
- * same names; a query uses one by repeating its expression verbatim, and
- * assertRequiredIndexes never looks for them. `->>` on a left side that is
- * not an object yields NULL, so a territory whose parent is `false` or a
- * resource without data simply has no key.
+ * same names, and assertRequiredIndexes never looks for them. A btree serves
+ * any leading run of its columns, and each unique constraint of CONSTRAINTS
+ * has its own index, so a lookup either one covers has no entry here.
+ * `->>` on a left side that is not an object yields NULL, so a territory
+ * whose parent is `false` or a resource without data simply has no key.
  */
 export const EXTRA_INDEXES: { table: string; name: string; expression: string }[] = [
-  { table: "relations", name: "relations_type", expression: "type" },
   { table: "entities", name: "entities_territory_parent", expression: "parent_id" },
   { table: "entities", name: "entities_resource_document", expression: "document_id" },
-  // the explore base node and the search filter on class and status together
-  { table: "entities", name: "entities_class_status", expression: "class, status" },
-  // the newest audits of one entity are read straight off the index end
-  { table: "audits", name: "audits_scope_model_date", expression: "audit_scope, model_id, date" },
   { table: "audits", name: "audits_type_user", expression: "type, user_id" },
-  { table: "users", name: "users_email", expression: "email" },
   { table: "saved_queries", name: "saved_queries_owner", expression: "owner_id" },
-  { table: "acl_permissions", name: "acl_permissions_route", expression: "controller, method, route" },
 ];
 
 /**
@@ -492,7 +493,7 @@ export function ddl(constraints = true): string[] {
       if (index.kind === "gin") {
         statements.push(`CREATE INDEX ${ident} ON ${table} USING gin (${index.column})`);
       } else {
-        statements.push(`CREATE INDEX ${ident} ON ${table} (${index.columns.join(", ")})`);
+        statements.push(`CREATE INDEX ${ident} ON ${table} (${[...index.columns, ...(index.trailing ?? [])].join(", ")})`);
       }
     }
   }

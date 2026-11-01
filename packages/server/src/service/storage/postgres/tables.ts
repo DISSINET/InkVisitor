@@ -552,7 +552,7 @@ const byScopeAndModel = (scope: AuditScope, modelId: string) =>
 /**
  * Entity audits within the bounds that no other audit `b` of the same entity
  * outranks, `outranks` being that condition in SQL over `b` and `a`. The
- * anti-join runs on the (audit_scope, model_id, date) index.
+ * anti-join runs on the AuditScopeModelId index, (audit_scope, model_id, date).
  */
 async function edgePerEntityInRange(conn: Conn, outranks: string, after?: Date, before?: Date): Promise<IAudit[]> {
   const params: unknown[] = [AuditScope.Entity];
