@@ -1,5 +1,8 @@
 -- Prototype: STORED generated columns + trigger-maintained child tables.
 -- doc stays the source of truth; the adapter's write SQL is unchanged.
+-- Record of the experiment in postgres-columns-proposal.md, run against a clone.
+-- The shipped schema differs (index names, user_id, no child tables): see
+-- postgres-schema.md and packages/server/src/service/storage/postgres/provision.ts.
 \timing on
 \set ON_ERROR_STOP on
 SET maintenance_work_mem = '1GB';

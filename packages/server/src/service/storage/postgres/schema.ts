@@ -199,7 +199,7 @@ function declaredIndexes(table: string): DeclaredIndex[] {
   const declared: DeclaredIndex[] = [];
   for (const index of TABLES[table]) {
     const name = pgIndexName(table, index.name);
-    if (index.kind === "btree") declared.push({ name, method: "btree", columns: index.columns });
+    if (index.kind === "btree") declared.push({ name, method: "btree", columns: [...index.columns, ...(index.trailing ?? [])] });
     else declared.push({ name, method: "gin", columns: [index.column] });
   }
   for (const extra of EXTRA_INDEXES) {

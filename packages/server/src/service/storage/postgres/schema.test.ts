@@ -132,12 +132,11 @@ describePg("syncSchema", () => {
           "ADD COLUMN model_id text GENERATED ALWAYS AS (doc->>'modelId') STORED",
         ].join(", "),
       "DROP INDEX audits_auditscope_modelid",
-      "CREATE INDEX audits_auditscope_modelid ON audits (audit_scope, model_id)",
+      "CREATE INDEX audits_auditscope_modelid ON audits (audit_scope, model_id, date)",
       "DROP INDEX audits_date",
       "CREATE INDEX audits_date ON audits (date)",
       "DROP INDEX audits_date_type_user",
       "CREATE INDEX audits_date_type_user ON audits (date, type, user_id)",
-      "CREATE INDEX audits_scope_model_date ON audits (audit_scope, model_id, date)",
       "CREATE INDEX audits_type_user ON audits (type, user_id)",
       // dropping the column took the foreign key over it
       "ALTER TABLE audits ADD CONSTRAINT audits_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT",
@@ -148,10 +147,9 @@ describePg("syncSchema", () => {
     expect(await syncSchema(conn)).toEqual([]);
   });
 
-  it("upgrades the relations key-function gin and type expression index to columns", async () => {
-    // takes relations_type and the gin over entity_ids with it
+  it("upgrades the relations key-function gin to columns", async () => {
+    // takes the gin over entity_ids with it
     await exec("ALTER TABLE relations DROP COLUMN type, DROP COLUMN entity_ids");
-    await exec(`CREATE INDEX relations_type ON relations ((doc->>'type'))`);
     await exec(
       `CREATE FUNCTION relations_entityids(doc jsonb) RETURNS text[] LANGUAGE sql IMMUTABLE AS $$ SELECT ARRAY(SELECT jsonb_array_elements_text(doc->'entityIds')) $$`
     );
@@ -166,8 +164,6 @@ describePg("syncSchema", () => {
       "DROP INDEX relations_entityids",
       "DROP FUNCTION IF EXISTS relations_entityids(jsonb)",
       "CREATE INDEX relations_entityids ON relations USING gin (entity_ids)",
-      "DROP INDEX relations_type",
-      "CREATE INDEX relations_type ON relations (type)",
       // dropping the columns took the unique constraint over them
       "ALTER TABLE relations ADD CONSTRAINT relations_type_entity_ids_key UNIQUE (type, entity_ids)",
     ]);
