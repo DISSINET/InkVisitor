@@ -37,10 +37,10 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
     background: transparent;
   }
   &::-webkit-scrollbar-track:vertical {
-    margin: 10px 0;
+    margin: 5px 0;
   }
   &::-webkit-scrollbar-track:horizontal {
-    margin: 0 10px;
+    margin: 0 5px;
   }
   &::-webkit-scrollbar-thumb {
     background-color: ${({ theme }) => theme.color.gray[500]};
