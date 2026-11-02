@@ -45,16 +45,9 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
   &::-webkit-scrollbar-thumb {
     background-color: ${({ theme }) => theme.color.gray[500]};
     background-clip: padding-box;
-    border: 0 solid transparent;
+    /* on all four sides, so the clipped corners stay circular */
+    border: 2px solid transparent;
     border-radius: ${({ theme }) => theme.borderRadius["full"]};
-  }
-  &::-webkit-scrollbar-thumb:vertical {
-    border-left-width: 2px;
-    border-right-width: 2px;
-  }
-  &::-webkit-scrollbar-thumb:horizontal {
-    border-top-width: 2px;
-    border-bottom-width: 2px;
   }
   &::-webkit-scrollbar-thumb:hover {
     background-color: ${({ theme }) => theme.color.gray[700]};
