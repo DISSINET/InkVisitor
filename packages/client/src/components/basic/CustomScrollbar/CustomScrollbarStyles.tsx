@@ -7,9 +7,11 @@ interface StyledScrollbar {
   $noScrollY: boolean;
 }
 /**
- * Native scrolling with a thin gray thumb on a transparent track. Browsers that
- * know `scrollbar-color` ignore `::-webkit-scrollbar`, so the pseudo-elements
- * only style Safari.
+ * Native scrolling with a thin gray thumb on a transparent track. Styling
+ * `::-webkit-scrollbar` makes Chrome and Safari draw a classic scrollbar that
+ * stays visible on macOS. Chrome drops those pseudo-elements once
+ * `scrollbar-color` or `scrollbar-width` is set, so the standard properties
+ * apply only in Firefox, which keeps the system's overlay behavior.
  */
 export const StyledScrollbar = styled.div<StyledScrollbar>`
   /* scroll targets measure offsetTop against this element */
@@ -19,7 +21,7 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
   overflow-x: ${({ $noScrollX }) => ($noScrollX ? "hidden" : "auto")};
   overflow-y: ${({ $noScrollY }) => ($noScrollY ? "hidden" : "auto")};
 
-  @supports (scrollbar-color: auto) {
+  @supports not selector(::-webkit-scrollbar) {
     scrollbar-width: thin;
     scrollbar-color: ${({ theme }) => theme.color.gray[500]} transparent;
   }
@@ -27,6 +29,9 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
   &::-webkit-scrollbar {
     width: 6px;
     height: 6px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-corner {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
