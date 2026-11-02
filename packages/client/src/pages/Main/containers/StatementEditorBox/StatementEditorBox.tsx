@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
+import { STATEMENT_EDITOR_SCROLLER_ID } from "Theme/constants";
 import React, { useEffect, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -356,7 +357,7 @@ export const StatementEditorBox: React.FC<StatementEditorBox> = ({ isExpanded, i
       {showEditor && (
         <>
           {tempObject && isExpanded ? (
-            <CustomScrollbar>
+            <CustomScrollbar id={STATEMENT_EDITOR_SCROLLER_ID}>
               <div
                 onMouseLeave={() => {
                   if (changesPending && tempObject) {

@@ -54,15 +54,11 @@ export const StyledFilterPopoverClear = styled.button`
   }
 `;
 
-// The scrollbar is sized to its content, and shrinking it below that height is
-// what makes the content scroll once the panel reaches its maxHeight.
 export const StyledFilterPopoverContent = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 0;
-  & > .ScrollbarsCustom {
-    min-height: 0;
-  }
+  overflow-y: auto;
 `;
 
 export const StyledFilterPopoverBody = styled.div`
