@@ -26,11 +26,11 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
     scrollbar-color: ${({ theme }) => theme.color.gray[500]} transparent;
   }
 
-  /* the transparent thumb border is the gap around an 8px thumb, and the track
+  /* the transparent thumb border is the gap around a 7px thumb, and the track
      margin keeps the thumb clear of the box ends */
   &::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
     background: transparent;
   }
   &::-webkit-scrollbar-corner {
