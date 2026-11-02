@@ -49,6 +49,12 @@ export const StyledScrollbar = styled.div<StyledScrollbar>`
     border: 2px solid transparent;
     border-radius: ${({ theme }) => theme.borderRadius["full"]};
   }
+  &::-webkit-scrollbar-thumb:vertical {
+    min-height: 40px;
+  }
+  &::-webkit-scrollbar-thumb:horizontal {
+    min-width: 40px;
+  }
   &::-webkit-scrollbar-thumb:hover {
     background-color: ${({ theme }) => theme.color.gray[700]};
   }
