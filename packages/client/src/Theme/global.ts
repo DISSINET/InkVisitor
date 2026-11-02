@@ -40,7 +40,6 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
   */
   @supports not selector(::-webkit-scrollbar) {
     * {
-      scrollbar-width: thin;
       scrollbar-color: ${({ theme }) => theme.color.gray[500]} transparent;
     }
   }
