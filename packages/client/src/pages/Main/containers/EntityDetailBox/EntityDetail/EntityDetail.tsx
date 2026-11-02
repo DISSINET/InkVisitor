@@ -12,7 +12,7 @@ import { EProtocolTieType, ITerritoryValidation } from "@inkvisitor/shared/types
 import { IWarningPositionSection } from "@inkvisitor/shared/types/warning";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { boxContentId, CustomScrollbar, Loader, Message, Submit, ToastWithLink } from "components";
+import { boxContentId, Loader, Message, Submit, ToastWithLink } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -57,6 +57,7 @@ import {
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailSectionHeading,
+  StyledDetailScroller,
   StyledDetailWarnings,
   StyledDetailWrapper,
   StyledPropGroupWrap,
@@ -545,14 +546,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
     // the parts of Detail that write on their own reach the same writes
     <EntityWritesContext.Provider value={writes}>
       {entity && (
-        <CustomScrollbar
+        <StyledDetailScroller
           id={ENTITY_DETAIL_SCROLL_CONTAINER_ID}
-          customStyle={{
-            // necessary to scroll until the bottom of the page; the Detail box
-            // holds its tab strip in the same height, a host of its own keeps
-            // its tabs outside
-            height: editing.hostElementId ? "100%" : "calc(100% - 2.5rem)",
-          }}
+          $hasOwnHost={!!editing.hostElementId}
         >
           <>
             <EntityDetailHeaderRow
@@ -1034,7 +1030,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId, entity, error, 
               </StyledDetailSection>
             </StyledDetailWrapper>
           </>
-        </CustomScrollbar>
+        </StyledDetailScroller>
       )}
 
       <Submit

@@ -16,7 +16,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import api from "api";
-import { boxContentId, CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
+import { boxContentId, Loader, Submit, ToastWithLink } from "components";
 import { CStatement } from "constructors";
 import { useSearchParams, useWidthBreakpoint } from "hooks";
 import useAnnotator from "hooks/useAnnotator";
@@ -43,6 +43,7 @@ import {
   StyledEmptyState,
   StyledInfoWrapper,
   StyledStatementListBox,
+  StyledTableScroller,
   StyledTableWrapper,
 } from "./StatementListBoxStyles";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -794,11 +795,7 @@ export const StatementListBox: React.FC = () => {
 
             // ref={contentRef}
             >
-              <CustomScrollbar
-                id="Statements-box-table"
-                contentWidth={tableWidth}
-                customStyle={{ flexShrink: 0 }}
-              >
+              <StyledTableScroller id="Statements-box-table" contentWidth={tableWidth}>
                 <StyledTableWrapper $isListMode={displayMode === StatementListDisplayMode.LIST}>
                   {isListNonEmpty && (
                     <StatementListTable
@@ -830,7 +827,7 @@ export const StatementListBox: React.FC = () => {
                     />
                   )}
                 </StyledTableWrapper>
-              </CustomScrollbar>
+              </StyledTableScroller>
 
               {statementListTableIsLoading && enableStatementListLoader && (
                 <Loader show size={50} />

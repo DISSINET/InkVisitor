@@ -5,31 +5,18 @@ interface CustomScrollbar {
   /** id of the scrolling element, for callers that `scrollTo` it */
   id?: string;
   contentWidth?: number;
-  contentHeight?: number;
-  customStyle?: React.CSSProperties;
-
+  /** lets `styled(CustomScrollbar)` add its own rules */
+  className?: string;
   children: React.ReactNode;
-  noScrollX?: boolean;
-  noScrollY?: boolean;
 }
 export const CustomScrollbar: React.FC<CustomScrollbar> = ({
   id,
   contentWidth,
-  contentHeight,
-  customStyle,
+  className,
   children,
-  noScrollX = false,
-  noScrollY = false,
 }) => {
   return (
-    <StyledScrollbar
-      id={id}
-      $width={contentWidth}
-      $height={contentHeight}
-      $noScrollX={noScrollX}
-      $noScrollY={noScrollY}
-      style={customStyle}
-    >
+    <StyledScrollbar id={id} $width={contentWidth} className={className}>
       {children}
     </StyledScrollbar>
   );

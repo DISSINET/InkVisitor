@@ -1,3 +1,5 @@
+// the component file directly, since the components index imports this file back
+import { CustomScrollbar } from "components/basic/CustomScrollbar/CustomScrollbar";
 import styled from "styled-components";
 
 export const StyledStatementListBox = styled.div`
@@ -36,6 +38,10 @@ export const StyledActionLabel = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+export const StyledTableScroller = styled(CustomScrollbar)`
+  flex-shrink: 0;
 `;
 
 interface StyledTableWrapper {
