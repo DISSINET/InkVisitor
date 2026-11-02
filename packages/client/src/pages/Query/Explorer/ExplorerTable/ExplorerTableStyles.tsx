@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { SCROLLBAR_SIZE } from "Theme/constants";
 import { FLOATING_SEARCH_COLLAPSED_SIZE } from "../../FloatingSearchContainer/FloatingSearchContainerStyles";
 
 interface StyledTableWrapper {
@@ -27,6 +28,15 @@ export const StyledHeader = styled.div`
   border-top-left-radius: ${({ theme }) => theme.borderRadius["default"]};
   border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  /* ends where the rows do, short of the list's vertical scrollbar */
+  margin-right: ${SCROLLBAR_SIZE}px;
+
+  /* the cells' right-edge dividers separate columns, so the last one has none,
+     and it shares the header's corner so its hover background does too */
+  & > :last-child {
+    box-shadow: none;
+    border-top-right-radius: ${({ theme }) => theme.borderRadius["default"]};
+  }
 `;
 
 export const StyledHeaderDragHandle = styled.span`
@@ -128,6 +138,11 @@ export const StyledHeaderEntityCell = styled.div`
 export const StyledBody = styled.div`
   flex: 1 1 auto;
   min-height: 0;
+  /* the list keeps its scrollbar's space with few rows too, so the rows
+     always end where the header does */
+  & > * {
+    scrollbar-gutter: stable;
+  }
 `;
 
 export const StyledEmptyMessage = styled.div`
