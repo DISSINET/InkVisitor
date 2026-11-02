@@ -8,11 +8,12 @@ import {
   size,
   useFloating,
 } from "@floating-ui/react";
-import { Button, IconButton } from "components";
+import { Button, CustomScrollbar, IconButton } from "components";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { IcoClose, IcoFilter } from "Theme/icons";
 import { ButtonSize } from "types";
 import {
+  StyledFilterPopoverBody,
   StyledFilterPopoverClear,
   StyledFilterPopoverContent,
   StyledFilterPopoverHeader,
@@ -158,7 +159,11 @@ export const FilterPopover: React.FC<FilterPopover> = ({
                 onClick={() => setIsOpen(false)}
               />
             </StyledFilterPopoverHeader>
-            <StyledFilterPopoverContent>{children}</StyledFilterPopoverContent>
+            <StyledFilterPopoverContent>
+              <CustomScrollbar autoHeight noScrollX>
+                <StyledFilterPopoverBody>{children}</StyledFilterPopoverBody>
+              </CustomScrollbar>
+            </StyledFilterPopoverContent>
           </StyledFilterPopoverPanel>
         </FloatingPortal>
       )}

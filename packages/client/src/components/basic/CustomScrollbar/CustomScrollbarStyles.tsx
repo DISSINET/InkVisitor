@@ -2,11 +2,14 @@ import Scrollbar from "react-scrollbars-custom";
 import styled from "styled-components";
 
 /** Thumb colors only (Annotator-style grays); track stays transparent — no fixed width/radius. */
-export const StyledScrollbar = styled(Scrollbar)`
+export const StyledScrollbar = styled(Scrollbar)<{ $autoHeight: boolean }>`
   .ScrollbarsCustom-Wrapper {
     .ScrollbarsCustom-Scroller {
       .ScrollbarsCustom-Content {
         padding-right: 0.1rem !important;
+        /* the library measures an auto-height content as a shrink-to-fit
+           table-cell, which leaves full-width children at their own size */
+        ${({ $autoHeight }) => $autoHeight && "display: block !important;"}
       }
     }
   }

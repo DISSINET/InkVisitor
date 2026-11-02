@@ -16,7 +16,10 @@ export const StyledFilterPopoverPanel = styled.div<{ $width: string }>`
   width: ${({ $width }) => $width};
   max-width: calc(100vw - 2rem);
   min-height: 0;
+  // the right side splits its padding around the scrollbar track: a thin
+  // gutter outside it here, the rest inside it on the header and the body
   padding: ${({ theme }) => theme.space[3]};
+  padding-right: ${({ theme }) => theme.space[1]};
   background-color: ${({ theme }) => theme.color["white"]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
@@ -28,6 +31,7 @@ export const StyledFilterPopoverHeader = styled.div`
   flex-shrink: 0;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
+  padding-right: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledFilterPopoverTitle = styled.span`
@@ -50,9 +54,17 @@ export const StyledFilterPopoverClear = styled.button`
   }
 `;
 
+// The scrollbar is sized to its content, and shrinking it below that height is
+// what makes the content scroll once the panel reaches its maxHeight.
 export const StyledFilterPopoverContent = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow-y: auto;
+  & > .ScrollbarsCustom {
+    min-height: 0;
+  }
+`;
+
+export const StyledFilterPopoverBody = styled.div`
+  padding-right: ${({ theme }) => theme.space[2]};
 `;
