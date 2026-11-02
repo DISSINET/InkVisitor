@@ -78,13 +78,18 @@ export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
   transform: rotate(270deg);
 `;
 
-// Pinned to the bottom of the Query box, so they stay in reach while a long
-// query scrolls behind them.
+// The query tree scrolls on its own above the search rows, which stay in place
+// at the bottom of the Query Builder box.
+export const StyledQueryScroller = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+`;
+
 export const StyledSearchRows = styled.div`
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  margin-top: auto;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};

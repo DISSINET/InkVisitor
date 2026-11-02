@@ -58,6 +58,7 @@ import {
   StyledExpansionCount,
   StyledExpansionToggle,
   StyledRestoreBoxIcon,
+  StyledQueryScroller,
   StyledResultExpansionButtons,
   StyledSearchRow,
   StyledSearchRowCaption,
@@ -896,6 +897,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
               height={querySeparatorYPosition}
               heightVarKey="queryBuilder"
               label="Query Builder"
+              disableScroll
               disableHeaderClick={!explorerBoxMaximized}
               onHeaderClick={handleMaximizeExplorerBox}
               buttons={[
@@ -913,14 +915,16 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                 </>,
               ]}
             >
-              <MemoizedQueryBox
-                state={queryState}
-                dispatch={queryStateDispatch}
-                isQueryFetching={queryIsFetching}
-                queryError={queryError}
-                queryStateValidity={queryStateValidity}
-                onOpenEntityInDetail={openEntityInDetail}
-              />
+              <StyledQueryScroller>
+                <MemoizedQueryBox
+                  state={queryState}
+                  dispatch={queryStateDispatch}
+                  isQueryFetching={queryIsFetching}
+                  queryError={queryError}
+                  queryStateValidity={queryStateValidity}
+                  onOpenEntityInDetail={openEntityInDetail}
+                />
+              </StyledQueryScroller>
               {/* top to bottom in the order the server applies them: the
                   filters narrow the query matches, then the expansion adds to
                   what is left */}

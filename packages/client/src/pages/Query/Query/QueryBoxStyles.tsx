@@ -15,7 +15,8 @@ export const StyledQueryBox = styled.div<StyledQueryBoxProps>`
   // instead of extending the scrollable area — leaving no trailing room to the
   // right of the last node, and nothing to scroll into
   min-width: max-content;
-  padding-right: 6rem;
+  // no trailing padding: the node rows overflow their columns, past any padding
+  // here, and carry their own trailing room (StyledNodeMainRow)
   padding-bottom: 4rem;
   display: grid;
   grid-template-columns: repeat(
