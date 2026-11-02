@@ -18,6 +18,13 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { FilterPopover } from "../../FilterPopover/FilterPopover";
+import {
+  StyledForm,
+  StyledRow,
+  StyledRowControl,
+  StyledRowHeader,
+} from "../../FloatingSearchContainer/FloatingSearchFormStyles";
 import { expansionCount } from "../nodeExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
 import { QueryAction, QueryActionType } from "../state";
@@ -324,32 +331,52 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               limitSelectedItems={Math.floor((270 - 110) / 37)}
             />
           )}
-          {/* the root node's own status is filtered in the floating search
-              container (Explore status filter), so the picker is offered only
-              on edge targets */}
+          {/* the root node's own status is filtered in the Filters panel of the
+              search rows (Explore status filter), so the node filters are
+              offered only on edge targets */}
           {!isRoot && !node.params.entityId && (
-            <Dropdown.Single.Basic
-              // params.entityStatuses is a list on purpose - the backend
-              // matches any status in it, so the picker can become multi later
-              value={node.params.entityStatuses?.[0] ?? null}
-              placeholder="any status"
-              tooltipLabel="entity status"
-              isClearable
-              width={110}
-              options={entityStatusDict.map((status) => ({
-                value: status.value,
-                label: status.label,
-              }))}
-              onChange={(newValue) => {
+            <FilterPopover
+              label="filters"
+              title="Node filters"
+              count={node.params.entityStatuses?.length ?? 0}
+              tooltipLabel="filters for the entities of this node"
+              width="26rem"
+              onClear={() => {
                 dispatch({
                   type: QueryActionType.updateNodeStatuses,
-                  payload: {
-                    nodeId: node.id,
-                    newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
-                  },
+                  payload: { nodeId: node.id, newEntityStatuses: [] },
                 });
               }}
-            />
+            >
+              <StyledForm>
+                <StyledRow>
+                  <StyledRowHeader>status</StyledRowHeader>
+                  <StyledRowControl>
+                    <Dropdown.Single.Basic
+                      // params.entityStatuses is a list on purpose - the backend
+                      // matches any status in it, so the picker can become multi later
+                      value={node.params.entityStatuses?.[0] ?? null}
+                      placeholder="any status"
+                      isClearable
+                      width="full"
+                      options={entityStatusDict.map((status) => ({
+                        value: status.value,
+                        label: status.label,
+                      }))}
+                      onChange={(newValue) => {
+                        dispatch({
+                          type: QueryActionType.updateNodeStatuses,
+                          payload: {
+                            nodeId: node.id,
+                            newEntityStatuses: newValue ? [newValue as EntityEnums.Status] : [],
+                          },
+                        });
+                      }}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
+              </StyledForm>
+            </FilterPopover>
           )}
           {paramEntityId && (
             <div>

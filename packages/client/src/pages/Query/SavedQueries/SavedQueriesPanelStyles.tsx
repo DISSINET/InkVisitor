@@ -18,8 +18,7 @@ export const StyledSavedQueriesRoot = styled.div`
   position: absolute;
   right: 2rem;
   top: 4.5rem;
-  // above StyledIdsFloatingRoot (161) and StyledCollapsedRoot (162), below the
-  // expanded floating search (164)
+  // below the filter panels (164)
   z-index: 163;
 `;
 

@@ -77,3 +77,41 @@ export const StyledCloseAllIcon = styled(IcoCloseAll)`
 export const StyledRestoreBoxIcon = styled(IcoSquareHalf)`
   transform: rotate(270deg);
 `;
+
+// Pinned to the bottom of the Query box, so they stay in reach while a long
+// query scrolls behind them.
+export const StyledSearchRows = styled.div`
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid ${({ theme }) => theme.color["gray"][300]};
+  background-color: ${({ theme }) => theme.color["gray"][100]};
+`;
+
+export const StyledSearchRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.space[2]};
+  padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
+  & + & {
+    border-top: 1px dashed ${({ theme }) => theme.color["gray"][300]};
+  }
+`;
+
+export const StyledSearchRowCaption = styled.span`
+  flex-shrink: 0;
+  width: 11rem;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: ${({ theme }) => theme.color["gray"][600]};
+`;
+
+export const StyledSearchRowSpacer = styled.div`
+  flex: 1;
+`;

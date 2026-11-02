@@ -8,23 +8,11 @@ import {
   unparsedRemainder,
 } from "pages/Query/utils";
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { IcoSearch } from "Theme/icons";
 import { MdClose } from "react-icons/md";
 import { ExploreAction, ExploreActionType } from "../../state";
 import {
   StyledChipInputBox,
   StyledChipTextInput,
-  StyledClearAllButton,
-  StyledIdsCountBadge,
-  StyledIdsFilterHint,
-  StyledIdsFloatingRoot,
-  StyledIdsPanel,
-  StyledIdsPanelFooter,
-  StyledIdsPanelHeader,
-  StyledIdsPanelTitle,
-  StyledIdsToggleButton,
-  StyledIdsToggleClear,
-  StyledIdsToggleWrapper,
   StyledUuidChip,
   StyledUuidChipRemove,
 } from "../ExplorerTableStyles";
@@ -39,25 +27,18 @@ const getRowIdsFilter = (
 ): Explore.IExploreUuidsFilter | undefined =>
   filters.find((f): f is Explore.IExploreUuidsFilter => f.type === Explore.SearchOption.UUIDs);
 
-// space the panel keeps from the button below it and from the top edge of the
-// positioned ancestor (the explorer area) so it never spills out of the page.
-const PANEL_BOTTOM_GAP = 8;
-const PANEL_TOP_MARGIN = 16;
-const PANEL_MIN_HEIGHT = 200;
-
+/**
+ * The UUID chip editor; it sits in the UUIDs filter panel and lives as long as
+ * the panel is open.
+ */
 const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters, dispatch }) => {
   const rowIdsFilter = getRowIdsFilter(filters);
   const appliedIds = rowIdsFilter?.ids ?? [];
 
   const [draft, setDraft] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const [allSelected, setAllSelected] = useState(false);
-  const [maxPanelHeight, setMaxPanelHeight] = useState<number | undefined>(undefined);
-  const [useSideLayout, setUseSideLayout] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const chipBoxRef = useRef<HTMLDivElement>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLDivElement>(null);
   const scrollToBottomPendingRef = useRef(false);
 
   const showSelected = allSelected && appliedIds.length > 0;
@@ -102,12 +83,6 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     [appliedIds, dispatchFilter],
   );
 
-  const clearAllIds = () => {
-    setAllSelected(false);
-    dispatchFilter([]);
-    setDraft("");
-  };
-
   const removeId = (id: string) => {
     setAllSelected(false);
     dispatchFilter(appliedIds.filter((x) => x.toLowerCase() !== id.toLowerCase()));
@@ -147,9 +122,6 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     } else if (e.key === "Backspace" && draft === "" && appliedIds.length > 0) {
       e.preventDefault();
       dispatchFilter(appliedIds.slice(0, -1));
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      setIsOpen(false);
     }
   };
 
@@ -181,19 +153,20 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
   // so a half-typed UUID stays neutral while junk (e.g. "foo bar") is emphasized.
   const draftInvalid = draft.trim() !== "" && !isViableUuidPrefix(draft.trim());
 
-  // Focus the input as soon as the panel opens.
+  // the panel closes by unmounting this editor, with no blur on the way out, so
+  // a typed UUID still waiting in the draft is committed here
+  const commitRef = useRef(() => commit(draft));
+  commitRef.current = () => commit(draft);
+  useEffect(() => () => commitRef.current(), []);
+
   useEffect(() => {
-    if (!isOpen) {
-      setAllSelected(false);
-      return;
-    }
     const id = window.setTimeout(() => inputRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
-  }, [isOpen]);
+  }, []);
 
   // After paste, chips render on the next frame — scroll the box to the bottom then.
   useLayoutEffect(() => {
-    if (!isOpen || !scrollToBottomPendingRef.current) {
+    if (!scrollToBottomPendingRef.current) {
       return;
     }
     scrollToBottomPendingRef.current = false;
@@ -201,159 +174,43 @@ const ExplorerTableIdsFilter: React.FC<ExplorerTableIdsFilterProps> = ({ filters
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [appliedIds, draft, isOpen]);
-
-  useLayoutEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const measure = () => {
-      const button = buttonRef.current;
-      const parent = (rootRef.current?.offsetParent as HTMLElement | null) ?? null;
-      if (!button || !parent) {
-        return;
-      }
-      const parentHeight = parent.getBoundingClientRect().height;
-      const side = parentHeight < 310;
-      setUseSideLayout(side);
-      if (!side) {
-        const buttonRect = button.getBoundingClientRect();
-        const parentTop = parent.getBoundingClientRect().top;
-        const available = buttonRect.top - parentTop - PANEL_BOTTOM_GAP - PANEL_TOP_MARGIN;
-        setMaxPanelHeight(Math.max(PANEL_MIN_HEIGHT, available));
-      } else {
-        setMaxPanelHeight(undefined);
-      }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [isOpen]);
-
-  // Close (committing any pending draft) when clicking outside the panel.
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const handleOutside = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        commit(draft);
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener("mousedown", handleOutside);
-    return () => window.removeEventListener("mousedown", handleOutside);
-  }, [isOpen, commit, draft]);
+  }, [appliedIds, draft]);
 
   return (
-    <StyledIdsFloatingRoot ref={rootRef}>
-      {isOpen && (
-        <StyledIdsPanel
-          style={
-            useSideLayout
-              ? {
-                  position: "absolute",
-                  top: 0,
-                  right: "100%",
-                  marginRight: "0.5rem",
-                  maxHeight: PANEL_MIN_HEIGHT,
-                }
-              : maxPanelHeight
-                ? { maxHeight: maxPanelHeight }
-                : undefined
-          }
-          data-run-on-enter="true"
-        >
-          <StyledIdsPanelHeader>
-            <StyledIdsPanelTitle>Entity UUIDs</StyledIdsPanelTitle>
-            <StyledUuidChipRemove
-              type="button"
-              aria-label="Close UUID filter"
-              onClick={() => setIsOpen(false)}
-            >
-              <MdClose size={16} />
-            </StyledUuidChipRemove>
-          </StyledIdsPanelHeader>
-
-          <StyledChipInputBox ref={chipBoxRef} onClick={() => inputRef.current?.focus()}>
-            {appliedIds.map((id) => (
-              <StyledUuidChip key={id} title={id} $selected={showSelected}>
-                {shortenUuid(id)}
-                <StyledUuidChipRemove
-                  type="button"
-                  aria-label={`Remove ${id}`}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeId(id);
-                  }}
-                >
-                  <MdClose size={12} />
-                </StyledUuidChipRemove>
-              </StyledUuidChip>
-            ))}
-            <StyledChipTextInput
-              ref={inputRef}
-              value={draft}
-              $invalid={draftInvalid}
-              title={
-                draftInvalid ? "Not a valid UUID — only complete UUIDs are allowed" : undefined
-              }
-              placeholder={
-                appliedIds.length === 0 ? "Add entity UUIDs (paste or type)" : "Add UUID…"
-              }
-              onChange={(e) => {
-                if (allSelected) {
-                  setAllSelected(false);
-                }
-                setDraft(e.target.value);
-              }}
-              onKeyDown={handleKeyDown}
-              onPaste={handlePaste}
-              onBlur={() => commit(draft)}
-            />
-          </StyledChipInputBox>
-
-          {appliedIds.length > 0 && (
-            <StyledIdsPanelFooter>
-              <StyledIdsFilterHint>{`${appliedIds.length} UUID${
-                appliedIds.length === 1 ? "" : "s"
-              }`}</StyledIdsFilterHint>
-              <StyledClearAllButton
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={clearAllIds}
-              >
-                <MdClose size={13} />
-                Clear all
-              </StyledClearAllButton>
-            </StyledIdsPanelFooter>
-          )}
-        </StyledIdsPanel>
-      )}
-
-      <StyledIdsToggleWrapper ref={buttonRef} $isActive={isOpen}>
-        <StyledIdsToggleButton
-          type="button"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((open) => !open)}
-        >
-          {appliedIds.length > 0 ? <IcoSearch size={18} /> : "+ "}
-          UUIDs
-          {appliedIds.length > 0 && <StyledIdsCountBadge>{appliedIds.length}</StyledIdsCountBadge>}
-        </StyledIdsToggleButton>
-        {appliedIds.length > 0 && (
-          <StyledIdsToggleClear
+    <StyledChipInputBox ref={chipBoxRef} onClick={() => inputRef.current?.focus()}>
+      {appliedIds.map((id) => (
+        <StyledUuidChip key={id} title={id} $selected={showSelected}>
+          {shortenUuid(id)}
+          <StyledUuidChipRemove
             type="button"
-            aria-label="Clear all UUIDs"
+            aria-label={`Remove ${id}`}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={clearAllIds}
+            onClick={(e) => {
+              e.stopPropagation();
+              removeId(id);
+            }}
           >
-            <MdClose size={16} />
-          </StyledIdsToggleClear>
-        )}
-      </StyledIdsToggleWrapper>
-    </StyledIdsFloatingRoot>
+            <MdClose size={12} />
+          </StyledUuidChipRemove>
+        </StyledUuidChip>
+      ))}
+      <StyledChipTextInput
+        ref={inputRef}
+        value={draft}
+        $invalid={draftInvalid}
+        title={draftInvalid ? "Not a valid UUID — only complete UUIDs are allowed" : undefined}
+        placeholder={appliedIds.length === 0 ? "Add entity UUIDs (paste or type)" : "Add UUID…"}
+        onChange={(e) => {
+          if (allSelected) {
+            setAllSelected(false);
+          }
+          setDraft(e.target.value);
+        }}
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        onBlur={() => commit(draft)}
+      />
+    </StyledChipInputBox>
   );
 };
 
