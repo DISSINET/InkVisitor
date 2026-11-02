@@ -15,13 +15,16 @@ export function inputWhere(input: Input, p: Params): string {
   if (input.kind === "ids") {
     return `e.id = ANY(${p.add(input.ids)}::text[])`;
   }
-  const { entityClasses, entityStatuses, entityId, label } = input.params;
+  const { entityClasses, entityStatuses, entityLanguages, entityId, label } = input.params;
   const where: string[] = [];
   if (entityClasses?.length) {
     where.push(`e.class = ANY(${p.add(entityClasses)}::text[])`);
   }
   if (entityStatuses?.length) {
     where.push(`e.status = ANY(${p.add(entityStatuses)}::text[])`);
+  }
+  if (entityLanguages?.length) {
+    where.push(`e.language = ANY(${p.add(entityLanguages)}::text[])`);
   }
   if (entityId) {
     where.push(`e.id = ${p.add(entityId)}`);

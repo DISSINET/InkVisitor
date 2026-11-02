@@ -24,14 +24,14 @@ interface NodeFilterMatches {
 /**
  * How many entities the filters of an empty node let through, and which. The
  * server narrows such a target to the same set: the node's classes, else the
- * classes the edge's target can hold, with its status and label.
+ * classes the edge's target can hold, with its status, language and label.
  */
 export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   node,
   edgeType,
   onOpenEntityInDetail,
 }) => {
-  const { entityClasses, entityStatuses, label } = node.params;
+  const { entityClasses, entityStatuses, entityLanguages, label } = node.params;
   const classes = entityClasses?.length
     ? entityClasses
     : (edgeType && Query.EdgeTypeTargetNodeParams[edgeType]?.entityId?.allowedClasses) || [];
@@ -40,15 +40,24 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
   // filters are being edited: the request runs only while the node still
   // carries the filters that were asked for, and a combination asked for
   // before reads from the cache.
-  const filtersSignature = JSON.stringify([classes, entityStatuses ?? [], label?.trim() ?? ""]);
+  const filtersSignature = JSON.stringify([
+    classes,
+    entityStatuses ?? [],
+    entityLanguages ?? [],
+    label?.trim() ?? "",
+  ]);
   const [requestedSignature, setRequestedSignature] = useState<string | null>(null);
 
   const { data, isFetching, isError } = useQuery({
     queryKey: ["node-filter-matches", filtersSignature],
     queryFn: async () => {
-      const [requestedClasses, requestedStatuses, requestedLabel] = JSON.parse(
-        filtersSignature,
-      ) as [EntityEnums.Class[], EntityEnums.Status[], string];
+      const [requestedClasses, requestedStatuses, requestedLanguages, requestedLabel] =
+        JSON.parse(filtersSignature) as [
+          EntityEnums.Class[],
+          EntityEnums.Status[],
+          EntityEnums.Language[],
+          string,
+        ];
       const res = await api.query({
         query: {
           id: "node-filter-matches",
@@ -58,6 +67,7 @@ export const NodeFilterMatches: React.FC<NodeFilterMatches> = ({
           params: {
             entityClasses: requestedClasses,
             entityStatuses: requestedStatuses,
+            entityLanguages: requestedLanguages,
             label: requestedLabel || undefined,
           },
         },

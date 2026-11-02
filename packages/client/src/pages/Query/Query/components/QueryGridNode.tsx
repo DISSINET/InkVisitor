@@ -7,6 +7,7 @@ import { classesAll } from "@inkvisitor/shared/dictionaries/entity";
 import { EntityEnums } from "@inkvisitor/shared/enums";
 import { Query } from "@inkvisitor/shared/types/query";
 import api from "api";
+import { useOrderedLanguageDict } from "hooks/react-query";
 import { Button, Checkbox, IconWithTooltip, Input, SwitchGroup } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 
@@ -18,6 +19,7 @@ import {
   QueryValidityProblem,
 } from "../../types";
 import { getRelationConstrainedCategoryTypes } from "../../utils";
+import { countNodeFilters } from "../utils";
 import { FilterPopover } from "../../FilterPopover/FilterPopover";
 import {
   StyledForm,
@@ -115,6 +117,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
       : "";
 
   const entityId = node.params.entityId;
+  const orderedLanguageDict = useOrderedLanguageDict();
 
   const { data: dataEntity } = useQuery({
     queryKey: ["entity", "query-grid-node", entityId],
@@ -339,15 +342,17 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
             <FilterPopover
               label="filters"
               title="Node filters"
-              count={
-                (node.params.entityStatuses?.length ?? 0) + (node.params.label?.trim() ? 1 : 0)
-              }
+              count={countNodeFilters(node.params)}
               tooltipLabel="filters for the entities of this node"
               width="26rem"
               onClear={() => {
                 dispatch({
                   type: QueryActionType.updateNodeStatuses,
                   payload: { nodeId: node.id, newEntityStatuses: [] },
+                });
+                dispatch({
+                  type: QueryActionType.updateNodeLanguages,
+                  payload: { nodeId: node.id, newEntityLanguages: [] },
                 });
                 dispatch({
                   type: QueryActionType.updateNodeLabel,
@@ -401,18 +406,39 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                     />
                   </StyledRowControl>
                 </StyledRow>
+                <StyledRow>
+                  <StyledRowHeader>language</StyledRowHeader>
+                  <StyledRowControl>
+                    <Dropdown.Single.Basic
+                      value={node.params.entityLanguages?.[0] ?? null}
+                      placeholder="any language"
+                      isClearable
+                      width="full"
+                      options={orderedLanguageDict}
+                      onChange={(newValue) => {
+                        dispatch({
+                          type: QueryActionType.updateNodeLanguages,
+                          payload: {
+                            nodeId: node.id,
+                            newEntityLanguages: newValue
+                              ? [newValue as EntityEnums.Language]
+                              : [],
+                          },
+                        });
+                      }}
+                    />
+                  </StyledRowControl>
+                </StyledRow>
               </StyledForm>
             </FilterPopover>
           )}
-          {!isRoot &&
-            !node.params.entityId &&
-            (!!node.params.entityStatuses?.length || !!node.params.label?.trim()) && (
-              <NodeFilterMatches
-                node={node}
-                edgeType={edgeType}
-                onOpenEntityInDetail={onOpenEntityInDetail}
-              />
-            )}
+          {!isRoot && !node.params.entityId && countNodeFilters(node.params) > 0 && (
+            <NodeFilterMatches
+              node={node}
+              edgeType={edgeType}
+              onOpenEntityInDetail={onOpenEntityInDetail}
+            />
+          )}
           {paramEntityId && (
             <div>
               {isRoot === false &&

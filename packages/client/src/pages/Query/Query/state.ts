@@ -72,6 +72,7 @@ enum QueryActionType {
   updateNodeClass,
   updateNodeStatuses,
   updateNodeLabel,
+  updateNodeLanguages,
   updateNodeEntityId,
   updateNodeOperator,
   updateNodeExpansionToggles,
@@ -110,6 +111,10 @@ type QueryAction =
   | {
       type: QueryActionType.updateNodeLabel;
       payload: { nodeId: string; newLabel: string };
+    }
+  | {
+      type: QueryActionType.updateNodeLanguages;
+      payload: { nodeId: string; newEntityLanguages: EntityEnums.Language[] };
     }
   | {
       type: QueryActionType.updateNodeEntityId;
@@ -225,6 +230,9 @@ const queryReducer = (state: Query.INode, action: QueryAction) => {
     case QueryActionType.updateNodeLabel:
       return updateNodeLabel(state, action.payload.nodeId, action.payload.newLabel);
 
+    case QueryActionType.updateNodeLanguages:
+      return updateNodeLanguages(state, action.payload.nodeId, action.payload.newEntityLanguages);
+
     case QueryActionType.updateNodeEntityId:
       return updateNodeEntityId(state, action.payload.nodeId, action.payload.newEntityId);
 
@@ -328,6 +336,26 @@ const updateNodeLabel = (state: Query.INode, nodeId: string, newLabel: string): 
   return updatedState;
 };
 
+const updateNodeLanguages = (
+  state: Query.INode,
+  nodeId: string,
+  newEntityLanguages: EntityEnums.Language[],
+): Query.INode => {
+  const updatedState = { ...state };
+
+  const nodeToUpdate = getAllNodes(updatedState).find((node) => node.id === nodeId);
+  if (!nodeToUpdate) {
+    return updatedState;
+  }
+  if (newEntityLanguages.length === 0) {
+    delete nodeToUpdate.params.entityLanguages;
+  } else {
+    nodeToUpdate.params.entityLanguages = newEntityLanguages;
+  }
+
+  return updatedState;
+};
+
 const updateNodeEntityId = (
   state: Query.INode,
   nodeId: string,
@@ -344,9 +372,10 @@ const updateNodeEntityId = (
   } else {
     nodeToUpdate.params.entityId = newEntityId;
     nodeToUpdate.params.entityClasses = [];
-    // a pinned entity carries its own status and label, so the node filters
-    // are hidden while one is set
+    // a pinned entity carries its own status, language and label, so the node
+    // filters are hidden while one is set
     delete nodeToUpdate.params.entityStatuses;
+    delete nodeToUpdate.params.entityLanguages;
     delete nodeToUpdate.params.label;
   }
 

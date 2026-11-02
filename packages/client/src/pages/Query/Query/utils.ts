@@ -69,3 +69,9 @@ export const isQueryRequestEmpty = (
 
   return true;
 };
+
+/** how many node filters (status, language, label) a node applies */
+export const countNodeFilters = (params: Query.INodeParams): number =>
+  (params.entityStatuses?.length ? 1 : 0) +
+  (params.entityLanguages?.length ? 1 : 0) +
+  (params.label?.trim() ? 1 : 0);

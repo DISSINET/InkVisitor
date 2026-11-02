@@ -326,6 +326,16 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { label: "star", entityStatuses: [status0] })])).toEqual(["c-1"]);
   });
 
+  it("entityLanguages narrow a node's base and an unpinned target, relation edges included", async () => {
+    const eng = "eng" as EntityEnums.Language;
+    const ces = "ces" as EntityEnums.Language;
+    expect(await explore({ entityClasses: [C.Concept], entityLanguages: [eng] })).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept], entityLanguages: [ces] })).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_R:SCL", { entityLanguages: [eng] })])).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { entityLanguages: [eng] })])).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("I_HP:V", { entityLanguages: [eng] })])).toEqual(["c-3"]);
+  });
+
   // the stats view returns this list unsorted and caps it by position
   it("returns ids in code point order, as ReQL distinct() does", async () => {
     const run = (params: Query.INodeParams, edges: Partial<Query.IEdge>[] = []) =>

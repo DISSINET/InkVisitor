@@ -76,17 +76,23 @@ export default class SearchEdge implements Query.IEdge {
   /** resolves the target set; the node evaluator calls it before run() */
   async prepare(conn: Conn): Promise<void> {
     const entityId = this.node.params.entityId;
-    // status and label narrow an empty target only: a pinned entity is the target itself, whatever its status
-    const statuses = this.node.params.entityStatuses ?? [];
-    const label = nodeLabel(this.node.params.label);
+    // the node filters narrow an empty target only: a pinned entity is the target itself, whatever its status
+    const filters: TargetFilters = {
+      statuses: this.node.params.entityStatuses ?? [],
+      languages: this.node.params.entityLanguages ?? [],
+      label: nodeLabel(this.node.params.label),
+    };
     this.descendantIds = null;
 
     if (!entityId) {
       // resolved into an id set so every predicate applies it through targetIds(); the relation
-      // edges check statuses per relation but have no such check for a label, so a label takes
-      // the statuses into the id set with it
-      const constrained = !!label || (statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun());
-      this.targetEntityIds = constrained ? await this.constrainedTargetIds(conn, statuses, label) : null;
+      // edges check statuses per relation but have no such check for a language or label, so
+      // either takes the statuses into the id set with it
+      const constrained =
+        !!filters.label ||
+        filters.languages.length > 0 ||
+        (filters.statuses.length > 0 && !this.checksUnpinnedTargetStatusInRun());
+      this.targetEntityIds = constrained ? await this.constrainedTargetIds(conn, filters) : null;
       return;
     }
 
@@ -102,20 +108,19 @@ export default class SearchEdge implements Query.IEdge {
   }
 
   /**
-   * ids of entities carrying one of `statuses` (any when empty) and matching `label`, narrowed by
-   * the node's classes, else by the classes the edge's target can hold
+   * ids of entities passing `filters` (an empty list passes any), narrowed by the node's classes,
+   * else by the classes the edge's target can hold
    */
-  private async constrainedTargetIds(
-    conn: Conn,
-    statuses: EntityEnums.Status[],
-    label: [string, string, string] | undefined
-  ): Promise<string[]> {
+  private async constrainedTargetIds(conn: Conn, { statuses, languages, label }: TargetFilters): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
     const p = new Params();
     const where: string[] = [];
     if (statuses.length) {
       where.push(`e.status = ${anyOf(p, statuses)}`);
+    }
+    if (languages.length) {
+      where.push(`e.language = ${anyOf(p, languages)}`);
     }
     if (classes.length) {
       where.push(`e.class = ${anyOf(p, classes)}`);
@@ -186,6 +191,13 @@ export default class SearchEdge implements Query.IEdge {
     return res.rows.map((row: { id: string }) => row.id);
   }
 }
+
+/** an unpinned target node's filters; prepareLabel's parts for the label */
+type TargetFilters = {
+  statuses: EntityEnums.Status[];
+  languages: EntityEnums.Language[];
+  label: [string, string, string] | undefined;
+};
 
 export type Predicate = (edge: SearchEdge, p: Params) => string;
 
