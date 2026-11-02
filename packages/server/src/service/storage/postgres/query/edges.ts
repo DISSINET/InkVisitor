@@ -108,7 +108,7 @@ export default class SearchEdge implements Query.IEdge {
   private async constrainedTargetIds(
     conn: Conn,
     statuses: EntityEnums.Status[],
-    label: string | undefined
+    label: [string, string, string] | undefined
   ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
@@ -121,7 +121,7 @@ export default class SearchEdge implements Query.IEdge {
       where.push(`e.class = ${anyOf(p, classes)}`);
     }
     if (label) {
-      where.push(labelMatch(p, labelPattern(label, "", "")));
+      where.push(labelMatch(p, labelPattern(...label)));
     }
     const res = await q(conn, `SELECT e.id FROM ${ENTITIES} e WHERE ${where.join(" AND ")}`, p.list);
     return res.rows.map((row: { id: string }) => row.id);

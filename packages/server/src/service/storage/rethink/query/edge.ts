@@ -122,7 +122,7 @@ export default class SearchEdge implements Query.IEdge {
   private async constrainedTargetIds(
     db: Connection,
     statuses: EntityEnums.Status[],
-    label: string | undefined
+    label: [string, string, string] | undefined
   ): Promise<string[]> {
     const nodeClasses = this.node.params.entityClasses ?? [];
     const classes = nodeClasses.length ? nodeClasses : this.statusTargetClasses();
@@ -132,7 +132,7 @@ export default class SearchEdge implements Query.IEdge {
 
     let q = statuses.length ? filterStreamByStatus(base, statuses) : base;
     if (label) {
-      q = q.filter((row: RDatum) => searchWordByWord(row, label, "", ""));
+      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
     }
     return q.getField("id").distinct().run(db, QUERY_RUN_OPTIONS) as Promise<string[]>;
   }

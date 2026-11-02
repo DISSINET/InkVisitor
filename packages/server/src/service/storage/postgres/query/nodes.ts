@@ -26,9 +26,9 @@ export function inputWhere(input: Input, p: Params): string {
   if (entityId) {
     where.push(`e.id = ${p.add(entityId)}`);
   }
-  const text = nodeLabel(label);
-  if (text) {
-    where.push(labelMatch(p, labelPattern(text, "", "")));
+  const prepared = nodeLabel(label);
+  if (prepared) {
+    where.push(labelMatch(p, labelPattern(...prepared)));
   }
   return where.length ? where.join(" AND ") : "TRUE";
 }

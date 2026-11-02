@@ -66,7 +66,7 @@ export default class SearchNode implements Query.INode, ExplorePlan {
     }
     const label = nodeLabel(this.params.label);
     if (label) {
-      q = q.filter((row: RDatum) => searchWordByWord(row, label, "", ""));
+      q = q.filter((row: RDatum) => searchWordByWord(row, ...label));
     }
     return q;
   }

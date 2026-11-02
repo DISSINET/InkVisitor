@@ -307,16 +307,19 @@ describe("explore: operators, nesting and target expansion", () => {
     expect(await explore({})).toEqual(ALL);
   });
 
-  it("the label param matches anywhere in any label, like the Explorer label filter", async () => {
+  it("the label param matches from the start of a word, as the main search box does", async () => {
     expect(await explore({ entityClasses: [C.Concept], label: "star" })).toEqual(["c-2", "c-3"]);
     expect(await explore({ entityClasses: [C.Concept], label: " ETOILE " })).toEqual(["c-1"]);
-    expect(await explore({ entityClasses: [C.Concept], label: "*blue*" })).toEqual(["c-2"]);
+    expect(await explore({ entityClasses: [C.Concept], label: "sta" })).toEqual(["c-2", "c-3"]);
+    expect(await explore({ entityClasses: [C.Concept], label: "tar" })).toEqual([]);
+    expect(await explore({ entityClasses: [C.Concept], label: "*bjec" })).toEqual(["c-3", "c-4"]);
     // nothing left to match once the wildcard markers are stripped
     expect(await explore({ entityClasses: [C.Concept], label: "*" })).toEqual(["c-1", "c-2", "c-3", "c-4"]);
   });
 
   it("a label on an unpinned target narrows it on every edge type, statuses included", async () => {
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { label: "shaped" })])).toEqual(["c-1"]);
+    expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { label: "hape" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("HP:V", { label: "nothing" })])).toEqual([]);
     expect(await explore({ entityClasses: [C.Concept] }, [edge("R:SCL", { label: "star" })])).toEqual(["c-1", "c-2"]);
     const status0 = "0" as EntityEnums.Status;

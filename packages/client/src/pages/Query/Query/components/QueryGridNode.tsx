@@ -27,6 +27,7 @@ import {
 } from "../../FloatingSearchContainer/FloatingSearchFormStyles";
 import { expansionCount } from "../nodeExpansion";
 import { NodeExpansionPopover } from "./NodeExpansionPopover";
+import { NodeFilterMatches } from "./NodeFilterMatches";
 import { QueryAction, QueryActionType } from "../state";
 import {
   StyledExpansionCountButton,
@@ -358,8 +359,7 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
                 <StyledRow>
                   <StyledRowHeader>label</StyledRowHeader>
                   <StyledRowControl>
-                    {/* matched anywhere in any of the entity's labels, as the
-                        Explorer label filter matches */}
+                    {/* matched from the start of a word, as the main search box matches */}
                     <Input
                       width="full"
                       value={node.params.label ?? ""}
@@ -404,6 +404,15 @@ export const QueryGridNode: React.FC<QueryGridNodeProps> = ({
               </StyledForm>
             </FilterPopover>
           )}
+          {!isRoot &&
+            !node.params.entityId &&
+            (!!node.params.entityStatuses?.length || !!node.params.label?.trim()) && (
+              <NodeFilterMatches
+                node={node}
+                edgeType={edgeType}
+                onOpenEntityInDetail={onOpenEntityInDetail}
+              />
+            )}
           {paramEntityId && (
             <div>
               {isRoot === false &&
