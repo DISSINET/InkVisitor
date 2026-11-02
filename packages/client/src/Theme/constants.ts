@@ -8,6 +8,8 @@ export const wildCardChar = "*";
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityEnums.Class.Value];
 export const scrollOverscanCount = 10;
+// thickness of every scrollbar the global style draws in Chrome and Safari
+export const SCROLLBAR_SIZE = 11;
 
 // layout
 export const heightHeader = 70;
