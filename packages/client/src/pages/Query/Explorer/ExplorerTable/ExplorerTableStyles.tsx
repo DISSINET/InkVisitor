@@ -274,13 +274,15 @@ export const StyledCounter = styled.div`
   color: ${({ theme }) => theme.color["black"]};
 `;
 
+// takes up to 36rem of the search row and gives way first when the row runs
+// out of width, so the buttons beside it keep their size on one line
 export const StyledLabelFilter = styled.div`
   display: flex;
+  flex: 0 1 36rem;
   align-items: center;
   gap: 0.2rem;
-  width: 100%;
+  min-width: 10rem;
   margin: 0 0.5rem;
-  max-width: 36rem;
 `;
 
 export const StyledLabelFilterCheckboxWrapper = styled.div`

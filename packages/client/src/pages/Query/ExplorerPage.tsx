@@ -759,28 +759,22 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
 
   // Opening the Detail panel takes width from the Query box, and its search
   // rows hold the label filter, the filter buttons, both expansion toggles and
-  // run search. The parts that survive without their text go first: the
-  // expansion counts (the pill still shows the state), then the words - the row
-  // captions, and the run-search icon and the eq/sub marks on the result tags
-  // carry the same meaning, and both keep a tooltip.
+  // run search. A narrow box drops the row captions, the one part the rows
+  // read fine without.
   //
-  // Held as booleans rather than derived from leftPanelWidth so a separator drag
-  // can feed them the width it is writing to the CSS vars, ahead of the drop
+  // Held as a boolean rather than derived from leftPanelWidth so a separator drag
+  // can feed it the width it is writing to the CSS vars, ahead of the drop
   // that lands that width in state. Fed per pointer event, so the ref keeps
-  // React out of every move that stays on one side of a breakpoint.
-  const [hideExpansionCounts, setHideExpansionCounts] = useState(false);
+  // React out of every move that stays on one side of the breakpoint.
   const [compactHeader, setCompactHeader] = useState(false);
-  const headerBreakpointsRef = useRef({ hideCounts: false, compact: false });
+  const compactHeaderRef = useRef(false);
 
   const applyHeaderBreakpoints = useCallback((width: number) => {
-    const hideCounts = width < 900;
-    const compact = width < 660;
-    const current = headerBreakpointsRef.current;
-    if (hideCounts === current.hideCounts && compact === current.compact) {
+    const compact = width < 540;
+    if (compact === compactHeaderRef.current) {
       return;
     }
-    headerBreakpointsRef.current = { hideCounts, compact };
-    setHideExpansionCounts(hideCounts);
+    compactHeaderRef.current = compact;
     setCompactHeader(compact);
   }, []);
 
@@ -978,7 +972,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       onClick={() => handleToggleIncludeEquivalents(!includeEquivalents)}
                     >
                       <Checkbox
-                        label={compactHeader ? "EQ" : "Equivalents"}
+                        label="Equivalents"
                         size={14}
                         color="info"
                         value={includeEquivalents}
@@ -987,13 +981,11 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                         onChangeFn={handleToggleIncludeEquivalents}
                         disableEnterKey
                       />
-                      {includeEquivalents &&
-                        !hideExpansionCounts &&
-                        expansionCounts !== undefined && (
-                          <StyledExpansionCount $variant="equivalent">
-                            +{expansionCounts.equivalents}
-                          </StyledExpansionCount>
-                        )}
+                      {includeEquivalents && expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="equivalent">
+                          +{expansionCounts.equivalents}
+                        </StyledExpansionCount>
+                      )}
                     </StyledExpansionToggle>
                     <StyledExpansionToggle
                       $active={includeSubordinates}
@@ -1001,7 +993,7 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                       onClick={() => handleToggleIncludeSubordinates(!includeSubordinates)}
                     >
                       <Checkbox
-                        label={compactHeader ? "SUB" : "Subordinates"}
+                        label="Subordinates"
                         size={14}
                         color="warning"
                         value={includeSubordinates}
@@ -1010,23 +1002,20 @@ export const ExplorerPage: React.FC<ExplorerPage> = ({}) => {
                         onChangeFn={handleToggleIncludeSubordinates}
                         disableEnterKey
                       />
-                      {includeSubordinates &&
-                        !hideExpansionCounts &&
-                        expansionCounts !== undefined && (
-                          <StyledExpansionCount $variant="subordinate">
-                            +{expansionCounts.subordinates}
-                          </StyledExpansionCount>
-                        )}
+                      {includeSubordinates && expansionCounts !== undefined && (
+                        <StyledExpansionCount $variant="subordinate">
+                          +{expansionCounts.subordinates}
+                        </StyledExpansionCount>
+                      )}
                     </StyledExpansionToggle>
                   </StyledResultExpansionButtons>
                   <StyledSearchRowSpacer />
                   <Button
                     tooltipLabel="run search (Enter)"
-                    label={compactHeader ? undefined : "run search"}
+                    label="run search"
                     icon={<IcoSearch size={13} />}
                     disabled={!isSearchPending}
                     onClick={handleRunSearch}
-                    shape={compactHeader ? "square" : undefined}
                   />
                 </StyledSearchRow>
               </StyledSearchRows>

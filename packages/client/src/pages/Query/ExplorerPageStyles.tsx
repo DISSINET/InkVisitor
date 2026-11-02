@@ -93,7 +93,6 @@ export const StyledSearchRows = styled.div`
 
 export const StyledSearchRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: ${({ theme }) => theme.space[2]};
   padding: ${({ theme }) => theme.space[2]} ${({ theme }) => theme.space[3]};
